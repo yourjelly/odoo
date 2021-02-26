@@ -743,7 +743,12 @@ class MailActivityMixin(models.AbstractModel):
     def _search_activity_date_deadline(self, operator, operand):
         if operator == '=' and not operand:
             return [('activity_ids', '=', False)]
-        return [('activity_ids.date_deadline', operator, operand)]
+        domain = [('date_deadline', operator, operand)]
+        if self.env.context.get('search_user'):
+            domain.append(('user_id', '=', self.env.uid))
+        activity_ids = self.env['mail.activity']._search(domain)
+
+        return [('activity_ids', 'in', activity_ids)]
 
     @api.model
     def _search_activity_user_id(self, operator, operand):
