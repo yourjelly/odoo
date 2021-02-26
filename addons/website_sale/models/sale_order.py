@@ -73,6 +73,14 @@ class SaleOrder(models.Model):
             return abandoned_domain
         return expression.distribute_not(['!'] + abandoned_domain)  # negative domain
 
+    def _cart_find_domain(self, line_id, product_id):
+        domain = [('order_id', '=', self.id), ('product_id', '=', product_id)]
+        if line_id:
+            domain += [('id', '=', line_id)]
+        else:
+            domain += [('product_custom_attribute_value_ids', '=', False)]
+        return domain
+
     def _cart_find_product_line(self, product_id=None, line_id=None, **kwargs):
         """Find the cart line matching the given parameters.
 
@@ -87,13 +95,16 @@ class SaleOrder(models.Model):
         if product and (product.product_tmpl_id.has_dynamic_attributes() or product.product_tmpl_id._has_no_variant_attributes()) and not line_id:
             return self.env['sale.order.line']
 
-        domain = [('order_id', '=', self.id), ('product_id', '=', product_id)]
-        if line_id:
-            domain += [('id', '=', line_id)]
-        else:
-            domain += [('product_custom_attribute_value_ids', '=', False)]
-
+        domain = self._cart_find_domain(line_id, product_id)
         return self.env['sale.order.line'].sudo().search(domain)
+
+    def _product_price(self, order, product, qty):
+        pu = product.price
+        if order.pricelist_id and order.partner_id:
+            order_line = order._cart_find_product_line(product.id)
+            if order_line:
+                pu = self.env['account.tax']._fix_tax_included_price_company(pu, product.taxes_id, order_line[0].tax_id, self.company_id)
+        return pu
 
     def _website_product_id_change(self, order_id, product_id, qty=0):
         order = self.sudo().browse(order_id)
@@ -125,11 +136,7 @@ class SaleOrder(models.Model):
                     discount = 0
                     pu = price
         else:
-            pu = product.price
-            if order.pricelist_id and order.partner_id:
-                order_line = order._cart_find_product_line(product.id)
-                if order_line:
-                    pu = self.env['account.tax']._fix_tax_included_price_company(pu, product.taxes_id, order_line[0].tax_id, self.company_id)
+            pu = self._product_price(order, product, qty)
 
         return {
             'product_id': product_id,
