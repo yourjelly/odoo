@@ -580,8 +580,13 @@ body.editor_enable.editor_has_snippets {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+            #table {
+                grid-column-end: span 2;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
             #link {
-                grid-column-end: span 4;
+                grid-column-end: span 3;
                 display: grid;
                 grid-template-columns: repeat(4, minmax(0, 1fr));
             }
