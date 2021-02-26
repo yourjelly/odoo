@@ -483,6 +483,21 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
         return this._handleAdd($(ev.currentTarget).closest('form'));
     },
     /**
+     * @private
+     * @param {Object} $form
+     * @param {Number} productId
+     */
+    _rootProductParams($form, productId) {
+        this.rootProduct = {
+            product_id: productId,
+            quantity: parseFloat($form.find('input[name="add_qty"]').val() || 1),
+            product_custom_attribute_values: this.getCustomVariantValues($form.find('.js_product')),
+            variant_values: this.getSelectedVariantValues($form.find('.js_product')),
+            no_variant_attribute_values: this.getNoVariantAttributeValues($form.find('.js_product'))
+        };
+    },
+
+    /**
      * Initializes the optional products modal
      * and add handlers to the modal events (confirm, back, ...)
      *
@@ -507,14 +522,7 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
 
         return productReady.then(function (productId) {
             $form.find(productSelector.join(', ')).val(productId);
-
-            self.rootProduct = {
-                product_id: productId,
-                quantity: parseFloat($form.find('input[name="add_qty"]').val() || 1),
-                product_custom_attribute_values: self.getCustomVariantValues($form.find('.js_product')),
-                variant_values: self.getSelectedVariantValues($form.find('.js_product')),
-                no_variant_attribute_values: self.getNoVariantAttributeValues($form.find('.js_product'))
-            };
+            self._rootProductParams($form, productId)
 
             return self._onProductReady();
         });

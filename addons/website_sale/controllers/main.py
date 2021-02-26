@@ -421,6 +421,16 @@ class WebsiteSale(http.Controller):
 
         return request.render("website_sale.cart", values)
 
+    def _order_cart_update(self, sale_order, product_id, line_id, add_qty, set_qty, pcav, nvav, **kw):
+        return sale_order._cart_update(
+            product_id=product_id,
+            line_id=line_id,
+            add_qty=add_qty,
+            set_qty=set_qty,
+            product_custom_attribute_values=pcav,
+            no_variant_attribute_values=nvav
+        )
+
     @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)
     def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
         """This route is called when adding a product to cart (no options)."""
@@ -437,12 +447,15 @@ class WebsiteSale(http.Controller):
         if kw.get('no_variant_attribute_values'):
             no_variant_attribute_values = json_scriptsafe.loads(kw.get('no_variant_attribute_values'))
 
-        sale_order._cart_update(
+        self._order_cart_update(
+            sale_order=sale_order,
             product_id=int(product_id),
+            line_id=None,
             add_qty=add_qty,
             set_qty=set_qty,
-            product_custom_attribute_values=product_custom_attribute_values,
-            no_variant_attribute_values=no_variant_attribute_values
+            pcav=product_custom_attribute_values,
+            nvav=no_variant_attribute_values,
+            **kw
         )
 
         if kw.get('express'):
@@ -468,13 +481,15 @@ class WebsiteSale(http.Controller):
 
         pcav = kw.get('product_custom_attribute_values')
         nvav = kw.get('no_variant_attribute_values')
-        value = order._cart_update(
+        value = self._order_cart_update(
+            sale_order=order,
             product_id=product_id,
             line_id=line_id,
             add_qty=add_qty,
             set_qty=set_qty,
-            product_custom_attribute_values=json_scriptsafe.loads(pcav) if pcav else None,
-            no_variant_attribute_values=json_scriptsafe.loads(nvav) if nvav else None
+            pcav=json_scriptsafe.loads(pcav) if pcav else None,
+            nvav=json_scriptsafe.loads(nvav) if nvav else None,
+            **kw
         )
 
         if not order.cart_quantity:

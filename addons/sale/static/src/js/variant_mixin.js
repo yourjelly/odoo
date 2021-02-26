@@ -48,6 +48,26 @@ var VariantMixin = {
      * @param {Event} ev
      * @returns {Deferred}
      */
+    _getSaleCombinationInfo(ev, productTemplateId,$parent,  combination, qty,parentCombination ) {
+       const self = this;
+       return ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
+            'product_template_id': productTemplateId,
+            'product_id': this._getProductId($parent),
+            'combination': combination,
+            'add_qty': parseInt(qty),
+            'pricelist_id': this.pricelistId || false,
+            'parent_combination': parentCombination,
+        }).then(function (combinationData) {
+            self._onChangeCombination(ev, $parent, combinationData);
+        });
+    },
+    /**
+     * @see onChangeVariant
+     *
+     * @private
+     * @param {Event} ev
+     * @returns {Deferred}
+     */
     _getCombinationInfo: function (ev) {
         var self = this;
 
@@ -62,17 +82,7 @@ var VariantMixin = {
         var productTemplateId = parseInt($parent.find('.product_template_id').val());
 
         self._checkExclusions($parent, combination);
-
-        return ajax.jsonRpc(this._getUri('/sale/get_combination_info'), 'call', {
-            'product_template_id': productTemplateId,
-            'product_id': this._getProductId($parent),
-            'combination': combination,
-            'add_qty': parseInt(qty),
-            'pricelist_id': this.pricelistId || false,
-            'parent_combination': parentCombination,
-        }).then(function (combinationData) {
-            self._onChangeCombination(ev, $parent, combinationData);
-        });
+        return self._getSaleCombinationInfo(ev, productTemplateId,$parent,  combination, qty,parentCombination)
     },
 
     /**
