@@ -129,16 +129,34 @@
                 </div>
             </div>
 
-            <div id="table" class="btn-group dropdown">
-                <button type="button" class="btn dropdown-toggle"
-                    data-toggle="dropdown" title="" tabindex="-1"
-                    data-original-title="Table" aria-expanded="false"
-                    id="tableDropdownButton">
-                    <i class="fa fa-table fa-fw"></i>
-                </button>
-                <div class="dropdown-menu">
-                    <div class="tablepicker"></div>
-                    <div class="tablepicker-size">1x1</div>
+            <div id="table" class="btn-group">
+                <div class="dropdown">
+                    <button type="button" class="btn dropdown-toggle"
+                        data-toggle="dropdown" title="" tabindex="-1"
+                        data-original-title="Table" aria-expanded="false"
+                        id="tableDropdownButton">
+                        <i class="fa fa-table fa-fw"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="tablepicker"></div>
+                        <div class="tablepicker-size">1x1</div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button type="button" class="btn dropdown-toggle"
+                        data-toggle="dropdown" title="" tabindex="-1"
+                        data-original-title="Edit table" aria-expanded="false">
+                        <i class="fa fa-columns fa-fw"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="table-add-column-left">Add a column left</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-add-column-right">Add a column right</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-add-row-above">Add a row above</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-add-row-below">Add a row below</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-remove-column">Remove current column</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-remove-row">Remove current row</a></li>
+                        <li><a class="dropdown-item" href="#" id="table-delete-table">Delete current table</a></li>
+                    </ul>
                 </div>
             </div>
 
