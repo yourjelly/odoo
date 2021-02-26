@@ -99,6 +99,7 @@ odoo.define('web.ControlPanel', function (require) {
      */
     class ControlPanel extends Component {
         constructor() {
+            // debugger
             super(...arguments);
 
             this.additionalContent = getAdditionalContent(this.props);
@@ -135,6 +136,7 @@ odoo.define('web.ControlPanel', function (require) {
         }
 
         async willUpdateProps(nextProps) {
+            debugger
             // Note: action and searchModel are not likely to change during
             // the lifespan of a ControlPanel instance, so we only need to update
             // the view information.
@@ -175,6 +177,7 @@ odoo.define('web.ControlPanel', function (require) {
          * @returns {Object}
          */
         _formatFields(fields) {
+            debugger;
             const formattedFields = {};
             for (const fieldName in fields) {
                 formattedFields[fieldName] = Object.assign({

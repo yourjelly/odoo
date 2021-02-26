@@ -583,6 +583,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {OdooEvent} ev
      */
     _onSwitchView: function (ev) {
+        debugger;
         ev.data.controllerID = this.controllerID;
     },
 });

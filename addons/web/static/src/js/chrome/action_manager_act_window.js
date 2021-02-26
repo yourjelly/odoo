@@ -710,6 +710,7 @@ ActionManager.include({
      *   (only relevant for form views)
      */
     _onSwitchView: function (ev) {
+        debugger;
         ev.stopPropagation();
         const viewType = ev.data.view_type;
         const currentController = this.getCurrentController();

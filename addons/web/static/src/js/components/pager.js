@@ -32,6 +32,7 @@ odoo.define('web.Pager', function (require) {
          *   for x2m widgets
          */
         constructor() {
+            // debugger;
             super(...arguments);
 
             this.state = useState({
@@ -43,6 +44,7 @@ odoo.define('web.Pager', function (require) {
         }
 
         async willUpdateProps() {
+            // debugger
             this.state.editing = false;
             this.state.disabled = false;
         }
@@ -55,6 +57,7 @@ odoo.define('web.Pager', function (require) {
          * @returns {number}
          */
         get maximum() {
+            // debugger
             return Math.min(this.props.currentMinimum + this.props.limit - 1, this.props.size);
         }
 
@@ -62,6 +65,7 @@ odoo.define('web.Pager', function (require) {
          * @returns {boolean} true iff there is only one page
          */
         get singlePage() {
+            // debugger
             return (1 === this.props.currentMinimum) && (this.maximum === this.props.size);
         }
 
@@ -69,6 +73,7 @@ odoo.define('web.Pager', function (require) {
          * @returns {number}
          */
         get value() {
+            // debugger
             return this.props.currentMinimum + (this.props.limit > 1 ? `-${this.maximum}` : '');
         }
 
@@ -82,6 +87,7 @@ odoo.define('web.Pager', function (require) {
          * @param {number} [direction] the action (previous or next) on the pager
          */
         async _changeSelection(direction) {
+            // debugger
             try {
                 await this.props.validate();
             } catch (err) {
@@ -113,6 +119,7 @@ odoo.define('web.Pager', function (require) {
          * @returns {Promise}
          */
         async _saveValue(value) {
+            // debugger
             try {
                 await this.props.validate();
             } catch (err) {
@@ -144,6 +151,7 @@ odoo.define('web.Pager', function (require) {
          * @param {number} limit
          */
         _updateAndDisable(currentMinimum, limit) {
+            // debugger
             if (
                 currentMinimum !== this.props.currentMinimum ||
                 limit !== this.props.limit
@@ -166,6 +174,7 @@ odoo.define('web.Pager', function (require) {
          * @private
          */
         _onEdit() {
+            // debugger
             if (
                 this.props.editable && // editable
                 !this.state.editing && // not already editing
@@ -180,6 +189,7 @@ odoo.define('web.Pager', function (require) {
          * @param {InputEvent} ev
          */
         _onValueChange(ev) {
+            // debugger;
             this._saveValue(ev.currentTarget.value);
             if (!this.state.disabled) {
                 ev.preventDefault();
@@ -191,6 +201,7 @@ odoo.define('web.Pager', function (require) {
          * @param {KeyboardEvent} ev
          */
         _onValueKeydown(ev) {
+            // debugger;
             switch (ev.key) {
                 case 'Enter':
                     ev.preventDefault();
