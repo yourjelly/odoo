@@ -5,21 +5,20 @@
         <field name="model">stock.inventory.conflict</field>
         <field name="mode">primary</field>
         <field name="arch" type="xml">
-        <form>
-            <div>
-                <strong>Some moves were made since your last inventory count. Plese count the inventory quantity again.</strong>
-            </div>
-            <div>
-                <br/>
-                <field name="quant_to_fix_ids" style="margin-top:10px;" context="{'tree_view_ref': 'stock.view_stock_quant_tree_editable'}">
-                </field>
-            </div>
-            </div>
-            <footer>
-                <button name="cancel_button" string="Discard" class="btn-primary" special="cancel"/>
-                <button name="action_validate" string="Confirm" type="object" class="btn-secondary"/>
-            </footer>
-        </form>
+            <form>
+                <div>
+                    <strong>Some moves were made since your last inventory count. Plese count the inventory quantity again.</strong>
+                </div>
+                <div>
+                    <br/>
+                    <field name="quant_to_fix_ids" style="margin-top:10px;" context="{'tree_view_ref': 'stock.view_stock_quant_tree_editable'}">
+                    </field>
+                </div>
+                <footer>
+                    <button name="cancel_button" string="Discard" class="btn-primary" special="cancel"/>
+                    <button name="action_validate" string="Confirm" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
         </field>
     </record>
 </odoo>
