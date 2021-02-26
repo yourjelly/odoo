@@ -241,7 +241,6 @@ class StockQuant(models.Model):
                 'target': 'new',
                 'context': {
                     'default_quant_ids': self.ids,
-                    'default_quant_to_fix_ids': quants_outdated.ids,
                 },
             }
         if quants_tracked_without_lot and not quants_duplicate_sn:
@@ -408,18 +407,18 @@ class StockQuant(models.Model):
     def _apply_inventory(self):
         for quant in self:
             # Create and vaidate a move so that the quant matches its `inventory_quantity`.
-            if quant.inventory_diff_quantity == 0:
-                continue
-            elif quant.inventory_diff_quantity > 0:
+            if quant.inventory_diff_quantity > 0:
                 move_vals = quant._get_inventory_move_values(quant.inventory_diff_quantity, quant.product_id.with_company(
                     quant.company_id).property_stock_inventory, quant.location_id)
-            else:
+            elif quant.inventory_diff_quantity < 0:
                 move_vals = quant._get_inventory_move_values(-quant.inventory_diff_quantity, quant.location_id, quant.product_id.with_company(
                     quant.company_id).property_stock_inventory, out=True)
-            move = quant.env['stock.move'].with_context(
-                inventory_mode=False).create(move_vals)
-            move._action_done()
+            if quant.inventory_diff_quantity != 0:
+                move = quant.env['stock.move'].with_context(
+                    inventory_mode=False).create(move_vals)
+                move._action_done()
             quant.inventory_quantity = 0
+            quant.inventory_diff_quantity = 0
 
     @api.model
     def _update_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, in_date=None):
