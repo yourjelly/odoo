@@ -1775,7 +1775,11 @@ var exportVariable = (function (exports) {
             fillEmpty(clearEmpty(this));
             fillEmpty(splitEl);
 
-            setCursorStart(splitEl);
+            const focusToElement =
+                splitEl.nodeType === Node.ELEMENT_NODE && splitEl.tagName === 'A'
+                    ? clearEmpty(splitEl)
+                    : splitEl;
+            setCursorStart(focusToElement);
         }
         return splitEl;
     };
