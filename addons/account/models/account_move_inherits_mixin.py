@@ -51,7 +51,7 @@ class AccountMoveInheritsMixin(models.AbstractModel):
         in_draft_mode = self != self._origin
         for record in self:
             if in_draft_mode:
-                record.fake_line_ids = [Command.clear()] + record._recompute_preview_from_business_model()
+                record.fake_line_ids = [Command.clear()] + [Command.create(vals) for vals in record._recompute_preview_from_business_model()]
             else:
                 record.fake_line_ids = [Command.set(record.line_ids.ids)]
 
@@ -61,12 +61,8 @@ class AccountMoveInheritsMixin(models.AbstractModel):
 
     @api.onchange('fake_line_ids')
     def _onchange_line_ids(self):
-        warning = self._check_preview_consistency()
-        if warning:
-            return {'warning': {'title': warning}}
-
         if not self.fake_line_ids:
-            return {'warning': {'title': _("For some reason, the preview is unavailable.")}}
+            return {'warning': {'message': _("For some reason, the preview is unavailable.")}}
 
         self._recompute_business_model_from_preview()
 
@@ -94,7 +90,7 @@ class AccountMoveInheritsMixin(models.AbstractModel):
             if not extra_params[i][0]:
                 continue
 
-            record.write({'line_ids': record._recompute_preview_from_business_model(extra_param=extra_params[i][1])})
+            record.write({'line_ids': [Command.create(vals) for vals in record._recompute_preview_from_business_model(extra_param=extra_params[i][1])]})
 
         return records.with_context(skip_account_move_synchronization=False)
 
@@ -119,7 +115,10 @@ class AccountMoveInheritsMixin(models.AbstractModel):
                 # Something triggered the recomputation of 'fake_line_ids' since the values is no longer
                 # into the cache because this is a not stored field.
                 if 'fake_line_ids' not in record._cache:
-                    record.move_id.write({'line_ids': [Command.clear()] + record._recompute_preview_from_business_model(extra_param=extra_param)})
+                    record.move_id.write({'line_ids': [Command.clear()] + [Command.create({
+                        **vals,
+                        'move_id': record.move_id.id,
+                    }) for vals in record._recompute_preview_from_business_model(extra_param=extra_param)]})
 
         return res
 

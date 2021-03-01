@@ -262,7 +262,7 @@
                             <page string="Journal Items">
                                 <field name="fake_line_ids" mode="tree">
                                     <tree string="Journal Items"
-                                          options="{'no_create': True}"
+                                          editable="bottom"
                                           groups="account.group_account_readonly">
                                         <!-- Invisible fields -->
                                         <field name="company_id" invisible="1"/>
