@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import Command, api, fields, models, _
 from odoo.exceptions import UserError
 
 
@@ -32,12 +32,7 @@ class AccountMoveInheritsMixin(models.AbstractModel):
         return None
 
     def _synchronize_from_moves(self, changed_fields):
-        fake_line_ids_field = self._fields['fake_line_ids']
-        line_ids_field = self._fields['line_ids']
-
         for record in self.with_context(skip_account_move_synchronization=True):
-            cache_def = line_ids_field.convert_to_cache(record.line_ids, record, validate=False)
-            self.env.cache.set(record, fake_line_ids_field, cache_def)
             warning = record._check_preview_consistency()
             if warning:
                 raise UserError(warning)
@@ -47,11 +42,18 @@ class AccountMoveInheritsMixin(models.AbstractModel):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('date', 'journal_id', 'company_id')
+    @api.depends(
+        'date', 'journal_id', 'company_id',
+        'line_ids.amount_currency', 'line_ids.partner_id', 'line_ids.currency_id', 'line_ids.account_id',
+    )
     def _compute_fake_line_ids(self):
         # TO BE OVERRIDDEN
+        in_draft_mode = self != self._origin
         for record in self:
-            record.fake_line_ids = [(5, 0)] + [(0, 0, vals) for vals in record._recompute_preview_from_business_model()]
+            if in_draft_mode:
+                record.fake_line_ids = [Command.clear()] + record._recompute_preview_from_business_model()
+            else:
+                record.fake_line_ids = [Command.set(record.line_ids.ids)]
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -71,30 +73,6 @@ class AccountMoveInheritsMixin(models.AbstractModel):
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
-
-    def read(self, fields=None, load='_classic_read'):
-        # OVERRIDE
-        fake_line_ids_in_fields = 'fake_line_ids' in fields if fields else False
-        line_ids_in_fields = 'line_ids' in fields if fields else False
-
-        if fake_line_ids_in_fields:
-            fields = list(fields)
-            fields.remove('fake_line_ids')
-            if not line_ids_in_fields:
-                fields.append('line_ids')
-
-        res = super(AccountMoveInheritsMixin, self).read(fields=fields, load=load)
-
-        if fake_line_ids_in_fields:
-            for vals in res:
-                if line_ids_in_fields:
-                    line_ids = vals['line_ids']
-                else:
-                    line_ids = vals.pop('line_ids')
-
-                vals['fake_line_ids'] = line_ids
-
-        return res
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -116,7 +94,7 @@ class AccountMoveInheritsMixin(models.AbstractModel):
             if not extra_params[i][0]:
                 continue
 
-            record.write({'line_ids': [(0, 0, vals) for vals in record._recompute_preview_from_business_model(extra_param=extra_params[i][1])]})
+            record.write({'line_ids': record._recompute_preview_from_business_model(extra_param=extra_params[i][1])})
 
         return records.with_context(skip_account_move_synchronization=False)
 
@@ -141,10 +119,7 @@ class AccountMoveInheritsMixin(models.AbstractModel):
                 # Something triggered the recomputation of 'fake_line_ids' since the values is no longer
                 # into the cache because this is a not stored field.
                 if 'fake_line_ids' not in record._cache:
-                    record.move_id.write({'line_ids': [(5, 0)] + [(0, 0, {
-                        **vals,
-                        'move_id': record.move_id.id,
-                    }) for vals in record._recompute_preview_from_business_model(extra_param=extra_param)]})
+                    record.move_id.write({'line_ids': [Command.clear()] + record._recompute_preview_from_business_model(extra_param=extra_param)})
 
         return res
 

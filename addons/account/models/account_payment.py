@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import Command, models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -17,7 +17,7 @@ class AccountPaymentMethod(models.Model):
 
 class AccountPayment(models.Model):
     _name = "account.payment"
-    _inherit = ['account.move.inherits.mixin', 'mail.thread', 'mail.activity.mixin']
+    _inherit = ['account.move.inherits.mixin', 'mail.thread']
     _description = "Payments"
     _order = "date desc, name desc"
     _check_company_auto = True
@@ -229,7 +229,7 @@ class AccountPayment(models.Model):
 
         line_vals_list = [
             # Liquidity line.
-            {
+            Command.create({
                 'payment_id': self.id,
                 'name': liquidity_line_name or default_line_name,
                 'amount_currency': -counterpart_amount_currency,
@@ -238,9 +238,9 @@ class AccountPayment(models.Model):
                 'debit': balance < 0.0 and -balance or 0.0,
                 'credit': balance > 0.0 and balance or 0.0,
                 'account_id': self.journal_id.payment_debit_account_id.id if balance < 0.0 else self.journal_id.payment_credit_account_id.id,
-            },
+            }),
             # Receivable / Payable.
-            {
+            Command.create({
                 'payment_id': self.id,
                 'name': default_line_name,
                 'amount_currency': counterpart_amount_currency + write_off_amount_currency if currency_id else 0.0,
@@ -248,11 +248,11 @@ class AccountPayment(models.Model):
                 'debit': balance + write_off_balance > 0.0 and balance + write_off_balance or 0.0,
                 'credit': balance + write_off_balance < 0.0 and -balance - write_off_balance or 0.0,
                 'account_id': self.destination_account_id.id,
-            },
+            }),
         ]
         if write_off_balance:
             # Write-off line.
-            line_vals_list.append({
+            line_vals_list.append(Command.create({
                 'name': write_off_line_vals.get('name') or default_line_name,
                 'amount_currency': -write_off_amount_currency,
                 'currency_id': currency_id,
@@ -260,7 +260,7 @@ class AccountPayment(models.Model):
                 'credit': write_off_balance > 0.0 and write_off_balance or 0.0,
                 'partner_id': self.partner_id.id,
                 'account_id': write_off_line_vals.get('account_id'),
-            })
+            }))
         return line_vals_list
 
     def _recompute_business_model_from_preview(self):
@@ -320,8 +320,7 @@ class AccountPayment(models.Model):
 
         return None
 
-    @api.depends('amount', 'currency_id', 'destination_account_id', 'payment_reference',
-                 'payment_type', 'partner_type')
+    @api.depends('amount', 'currency_id', 'destination_account_id', 'payment_reference', 'payment_type', 'partner_type')
     def _compute_fake_line_ids(self):
         # OVERRIDE to add dependencies.
         return super()._compute_fake_line_ids()
