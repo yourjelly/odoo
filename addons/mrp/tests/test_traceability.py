@@ -24,21 +24,38 @@ class TestTraceability(TestMrpCommon):
         consumed_lot = self._create_product('lot')
         consumed_serial = self._create_product('serial')
         stock_id = self.env.ref('stock.stock_location_stock').id
-        inventory_adjustment = self.env['stock.inventory'].create({
-            'name': 'Initial Inventory',
-            'location_ids': [(4, stock_id)],
-        })
-        inventory_adjustment.action_start()
-        inventory_adjustment.write({
-            'line_ids': [
-                (0,0, {'product_id': consumed_no_track.id, 'product_qty': 3, 'location_id': stock_id}),
-                (0,0, {'product_id': consumed_lot.id, 'product_qty': 3, 'prod_lot_id': self.env['stock.production.lot'].create({'name': 'L1', 'product_id': consumed_lot.id, 'company_id': self.env.company.id}).id, 'location_id': stock_id}),
-                (0,0, {'product_id': consumed_serial.id, 'product_qty': 1, 'prod_lot_id': self.env['stock.production.lot'].create({'name': 'S1', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id, 'location_id': stock_id}),
-                (0,0, {'product_id': consumed_serial.id, 'product_qty': 1, 'prod_lot_id': self.env['stock.production.lot'].create({'name': 'S2', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id, 'location_id': stock_id}),
-                (0,0, {'product_id': consumed_serial.id, 'product_qty': 1, 'prod_lot_id': self.env['stock.production.lot'].create({'name': 'S3', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id, 'location_id': stock_id}),
-            ]
-        })
-        inventory_adjustment.action_validate()
+        Lot = self.env['stock.production.lot']
+        # create inventory
+        self.env['stock.quant'].create({
+            'location_id': stock_id,
+            'product_id': consumed_no_track.id,
+            'inventory_quantity': 3
+        }).action_apply_inventory()
+        self.env['stock.quant'].create({
+            'location_id': stock_id,
+            'product_id': consumed_lot.id,
+            'inventory_quantity': 3,
+            'lot_id': Lot.create({'name': 'L1', 'product_id': consumed_lot.id, 'company_id': self.env.company.id}).id
+        }).action_apply_inventory()
+        self.env['stock.quant'].create({
+            'location_id': stock_id,
+            'product_id': consumed_serial.id,
+            'inventory_quantity': 1,
+            'lot_id': Lot.create({'name': 'S1', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id
+        }).action_apply_inventory()
+        self.env['stock.quant'].create({
+            'location_id': stock_id,
+            'product_id': consumed_serial.id,
+            'inventory_quantity': 1,
+            'lot_id': Lot.create({'name': 'S2', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id
+        }).action_apply_inventory()
+        self.env['stock.quant'].create({
+            'location_id': stock_id,
+            'product_id': consumed_serial.id,
+            'inventory_quantity': 1,
+            'lot_id': Lot.create({'name': 'S3', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id
+        }).action_apply_inventory()
+
         for finished_product in [finished_no_track, finished_lot, finished_serial]:
             bom = self.env['mrp.bom'].create({
                 'product_id': finished_product.id,
