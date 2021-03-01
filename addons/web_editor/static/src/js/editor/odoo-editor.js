@@ -2248,8 +2248,8 @@ var exportVariable = (function (exports) {
             // Wether we should check for unbreakable the next history step.
             this._checkStepUnbreakable = true;
 
-            if (dom.textContent.trim() === '') {
-                dom.innerHTML = '<p></p>';
+            if (dom.innerHTML.trim() === '') {
+                dom.innerHTML = '<p><br></p>';
             }
 
             dom.oid = 1; // convention: root node is ID 1
@@ -3530,6 +3530,10 @@ var exportVariable = (function (exports) {
                 if (fontSizeValue) {
                     fontSizeValue.innerHTML = /\d+/.exec(selectionStartStyle.fontSize).pop();
                 }
+                const table = getInSelection(this.document, 'table');
+                this.toolbar.querySelector('.toolbar-edit-table').style.display = table
+                    ? 'block'
+                    : 'none';
             }
             this.updateColorpickerLabels();
             let block = closestBlock(sel.anchorNode);
