@@ -263,6 +263,11 @@ var KanbanModel = BasicModel.extend({
                 old_group.count--;
                 old_group.res_ids = _.without(old_group.res_ids, resID);
                 self._updateParentResIDs(old_group);
+                //display records which do not match the current filter
+                if(old_group.activeFilter) {
+                    old_group.data.push(recordID);
+                }
+                debugger;
                 break;
             }
         }
