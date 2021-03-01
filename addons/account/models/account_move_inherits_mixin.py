@@ -164,7 +164,10 @@ class AccountMoveLinePreviewMixin(models.AbstractModel):
 
     company_id = fields.Many2one(comodel_name='res.company', required=True)
     date = fields.Date(required=True)
-    company_currency_id = fields.Many2one(comodel_name='res.currency', required=True)
+    company_currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string="Company's currency",
+        required=True)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
