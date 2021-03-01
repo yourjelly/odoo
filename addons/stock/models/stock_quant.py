@@ -101,14 +101,22 @@ class StockQuant(models.Model):
         'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
         readonly=True, digits='Product Unit of Measure', groups='stock.group_stock_manager')
-    inventory_date = fields.Datetime(
-        'Inventory Date', readonly=True, default=fields.Datetime.now,
+    inventory_date = fields.Date(
+        'Inventory Date', compute='_compute_invetory_date', store=True,
         help="Last date at which the On Hand Quantity has been computed.")
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
         for quant in self:
             quant.available_quantity = quant.quantity - quant.reserved_quantity
+
+    @api.depends('location_id')
+    def _compute_invetory_date(self):
+        for quant in self:
+            if not quant.location_id and not quant.next_inventory_date:
+                quant.next_inventory_date = False
+            elif quant.location_id:
+                quant.inventory_date = quant.location_id.next_inventory_date
 
     @api.depends('inventory_quantity')
     def _compute_inventory_diff_quantity(self):
@@ -417,8 +425,11 @@ class StockQuant(models.Model):
                 move = quant.env['stock.move'].with_context(
                     inventory_mode=False).create(move_vals)
                 move._action_done()
-            quant.inventory_quantity = 0
-            quant.inventory_diff_quantity = 0
+        self.location_id.write(
+            {'last_inventory_date': fields.Date.today()
+        })
+        self.write({'inventory_quantity': 0})
+        self.write({'inventory_diff_quantity': 0})
 
     @api.model
     def _update_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, in_date=None):
