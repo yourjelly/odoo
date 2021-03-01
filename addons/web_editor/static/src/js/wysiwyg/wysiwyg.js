@@ -314,6 +314,8 @@ const Wysiwyg = Widget.extend({
         this.trigger_up('ready_to_save', {defs: defs});
         await Promise.all(defs);
 
+        this._cleanForSave();
+
         if (this.snippetsMenu) {
             await this.snippetsMenu.cleanForSave();
         }
@@ -961,6 +963,9 @@ const Wysiwyg = Widget.extend({
                 noContextKeys: 'lang',
             });
         }
+    },
+    _cleanForSave: function () {
+        this.$editable.find('.oe_edited_link').removeClass('oe_edited_link');
     },
 
     //--------------------------------------------------------------------------
