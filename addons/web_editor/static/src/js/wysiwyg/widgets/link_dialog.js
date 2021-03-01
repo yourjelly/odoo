@@ -27,7 +27,7 @@ var LinkDialog = Dialog.extend({
      * @constructor
      * @param {Boolean} linkInfo.isButton - whether if the target is a button element.
      */
-    init: function (parent, options, editable) {
+    init: function (parent, options, editable, data) {
         this.options = options || {};
         this._super(parent, _.extend({
             title: _t("Link to"),
@@ -48,10 +48,10 @@ var LinkDialog = Dialog.extend({
 
         this.editable = editable;
         this.$editable = $(editable);
-        this.data = {};
+        this.data = data || {};
 
-        this.data.className = "";
-        this.data.iniClassName = "";
+        this.data.className = this.data.className || "";
+        this.data.iniClassName = this.data.iniClassName || "";
 
         const selection = editable && editable.ownerDocument.getSelection();
         this.data.range = selection && selection.rangeCount && selection.getRangeAt(0);
