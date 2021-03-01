@@ -1823,9 +1823,6 @@ class AccountMove(models.Model):
         return rslt
 
     def write(self, vals):
-        skip_account_move_synchronization = self._context.get('skip_account_move_synchronization')
-        self = self.with_context(skip_account_move_synchronization=True)
-
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
                 raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
@@ -1876,7 +1873,7 @@ class AccountMove(models.Model):
                 self._check_balanced()
             self.update_lines_tax_exigibility()
 
-        if not skip_account_move_synchronization:
+        if not self._context.get('skip_account_move_synchronization'):
             self._synchronize_business_models(set(vals.keys()))
 
         return res
@@ -3751,9 +3748,6 @@ class AccountMoveLine(models.Model):
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
 
-        skip_account_move_synchronization = self._context.get('skip_account_move_synchronization')
-        self = self.with_context(skip_account_move_synchronization=True)
-
         for vals in vals_list:
             move = self.env['account.move'].browse(vals['move_id'])
             vals.setdefault('company_currency_id', move.company_id.currency_id.id) # important to bypass the ORM limitation where monetary fields are not rounded; more info in the commit message
@@ -3838,7 +3832,7 @@ class AccountMoveLine(models.Model):
         moves._check_fiscalyear_lock_date()
         lines._check_tax_lock_date()
 
-        if not skip_account_move_synchronization:
+        if not self._context.get('skip_account_move_synchronization'):
             moves._synchronize_business_models({'line_ids'})
 
         return lines
@@ -3850,9 +3844,6 @@ class AccountMoveLine(models.Model):
         PROTECTED_FIELDS_TAX_LOCK_DATE = ['debit', 'credit', 'tax_line_id', 'tax_ids', 'tax_tag_ids']
         PROTECTED_FIELDS_LOCK_DATE = PROTECTED_FIELDS_TAX_LOCK_DATE + ['account_id', 'journal_id', 'amount_currency', 'currency_id', 'partner_id']
         PROTECTED_FIELDS_RECONCILIATION = ('account_id', 'date', 'debit', 'credit', 'amount_currency', 'currency_id')
-
-        skip_account_move_synchronization = self._context.get('skip_account_move_synchronization')
-        self = self.with_context(skip_account_move_synchronization=True)
 
         account_to_write = self.env['account.account'].browse(vals['account_id']) if 'account_id' in vals else None
 
@@ -3988,7 +3979,7 @@ class AccountMoveLine(models.Model):
                     msg = self._get_tracking_field_string(tracking_values.get(move.id))
                     move.message_post(body=msg)  # Write for each concerned move the message in the chatter
 
-        if not skip_account_move_synchronization:
+        if not self._context.get('skip_account_move_synchronization'):
             self.mapped('move_id')._synchronize_business_models({'line_ids'})
 
         return result
