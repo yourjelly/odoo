@@ -830,10 +830,6 @@ class Request(object):
         return self._json_response(result, request_id=request_id)
 
     #------------------------------------------------------
-    # JSON-RPC2
-    #------------------------------------------------------
-
-    #------------------------------------------------------
     # Entry point
     #------------------------------------------------------
     def dispatch(self, endpoint, args, auth='none'):
