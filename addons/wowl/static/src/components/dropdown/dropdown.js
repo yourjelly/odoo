@@ -5,20 +5,25 @@ import { scrollTo } from "../../utils/scroll_to";
 import { ParentClosingMode } from "./dropdown_item";
 
 const { Component, core, hooks, useState, QWeb } = owl;
-const { useExternalListener, onMounted, onPatched, onWillStart }  = hooks;
+const { useExternalListener, onMounted, onPatched, onWillStart } = hooks;
 
 export class Dropdown extends Component {
   setup() {
     this.hotkeyService = useService("hotkey");
     this.hotkeyTokens = [];
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
+
     this.ui = useService("ui");
-    // Close on outside click listener
-    useExternalListener(window, "click", this.onWindowClicked);
-    // Listen to all dropdowns state changes
-    useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
+    if (!this.props.manualOnly) {
+      // Close on outside click listener
+      useExternalListener(window, "click", this.onWindowClicked);
+      // Listen to all dropdowns state changes
+      useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
+    }
     useBus(this.ui.bus, "active-element-changed", (activeElement) => {
-      if (activeElement !== this.myActiveEl) this._close();
+      if (activeElement !== this.myActiveEl) {
+        this._close();
+      }
     });
 
     onMounted(() => {
@@ -104,7 +109,7 @@ export class Dropdown extends Component {
         }
       },
       "escape": this._close.bind(this),
-    }
+    };
 
     this.hotkeyTokens = [];
     for (const [hotkey, callback] of Object.entries(subs)) {
@@ -143,7 +148,7 @@ export class Dropdown extends Component {
     const closeSelf =
       dropdownClosingRequest.isFresh &&
       dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
-    if (closeAll || closeSelf) {
+    if (!this.props.manualOnly && (closeAll || closeSelf)) {
       this._close();
     }
     // Mark closing request as started
@@ -211,6 +216,10 @@ export class Dropdown extends Component {
 Dropdown.bus = new core.EventBus();
 Dropdown.props = {
   startOpen: {
+    type: Boolean,
+    optional: true,
+  },
+  manualOnly: {
     type: Boolean,
     optional: true,
   },
