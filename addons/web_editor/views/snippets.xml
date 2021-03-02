@@ -7,7 +7,8 @@
             <button type="button" data-action="redo" class="btn btn-secondary fa fa-repeat" disabled="true"/>
         </div>
         <form class="ml-auto">
-            <button type="button" class="btn btn-secondary" name="mobile" data-action="mobilePreview"><i class="fa fa-mobile"></i></button>
+            <!-- Uncomment the following line when the mobile preview will be available. -->
+            <!-- <button type="button" class="btn btn-secondary" name="mobile" data-action="mobilePreview"><i class="fa fa-mobile"></i></button> -->
             <button type="button" class="btn btn-secondary" data-action="cancel" accesskey="j">Discard</button>
             <button type="button" class="btn btn-primary" data-action="save" accesskey="s">Save</button>
         </form>
