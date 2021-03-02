@@ -469,3 +469,7 @@ img::selection {
         }
     }
 }
+
+[data-oe-xpath], [data-oe-xpath] [contenteditable=true] {
+    outline: none;
+}
