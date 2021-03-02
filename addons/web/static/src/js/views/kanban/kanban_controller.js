@@ -281,6 +281,7 @@ var KanbanController = BasicController.extend({
                         });
                     });
             }).guardedCatch(this.reload.bind(this));
+            debugger;
     },
     /**
      * @private
@@ -392,11 +393,15 @@ var KanbanController = BasicController.extend({
      * @param {Object} ev.data see model.reload options
      */
     async _onLoadColumnRecords(ev) {
+        console.log(ev);
         const column = ev.target;
         const id = column.columnID || column.db_id;
         const options = ev.data;
+        console.log('hello');
         const dbID = await this.model.reload(id, options);
+        console.log('waiting.....');
         const data = this.model.get(dbID);
+        debugger;
         return this.renderer.updateColumn(dbID, data);
     },
     /**

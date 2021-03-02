@@ -193,6 +193,7 @@ var KanbanModel = BasicModel.extend({
                     });
                     loadMoreCount = filteredRecordsTotal - filteredRecords.length;
                     loadMoreOffset = filteredRecords.length;
+                    debugger;
                 }
             }
             result.loadMoreCount = loadMoreCount;
@@ -265,7 +266,7 @@ var KanbanModel = BasicModel.extend({
                 self._updateParentResIDs(old_group);
                 //display records which do not match the current filter
                 if(old_group.activeFilter) {
-                    old_group.data.push(recordID);
+                    // old_group.data.push(recordID);
                 }
                 debugger;
                 break;
