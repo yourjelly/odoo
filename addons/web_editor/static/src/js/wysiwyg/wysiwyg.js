@@ -22,6 +22,10 @@ const rgbToHex = OdooEditorLib.rgbToHex;
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 
+function isImg(node) {
+    return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image)(\s|$)/i))));
+}
+
 const Wysiwyg = Widget.extend({
     xmlDependencies: [
     ],
@@ -581,8 +585,19 @@ const Wysiwyg = Widget.extend({
             Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
         }
 
-        const mediaParams = Object.assign({}, this.options.mediaModalParams, params);
-        const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $(params.node).clone());
+        const $node = $(params.node);
+        const $editable = $(OdooEditorLib.closestElement(range.sc, '.o_editable'));
+        const model = $editable.data('oe-model');
+        const field = $editable.data('oe-field');
+        const type = $editable.data('oe-type');
+
+        const mediaParams = Object.assign({
+            res_model: model,
+            res_id: $editable.data('oe-id'),
+            domain: $editable.data('oe-media-domain'),
+            useMediaLibrary: field && (model === 'ir.ui.view' && field === 'arch' || type === 'html'),
+        }, this.options.mediaModalParams, params);
+        const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $node.clone());
         mediaDialog.open();
 
         mediaDialog.on('save', this, function(element) {
@@ -591,7 +606,13 @@ const Wysiwyg = Widget.extend({
                 element.className += " " + params.htmlClass;
             }
             restoreSelection();
-            this.odooEditor.execCommand('insertHTML', element.outerHTML);
+            if (isImg($node[0])) {
+                $node.replaceWith(element);
+                this.odooEditor.unbreakableStepUnactive();
+                this.odooEditor.historyStep();
+            } else {
+                this.odooEditor.execCommand('insertHTML', element.outerHTML);
+            }
         });
         mediaDialog.on('closed', this,  function() {
             // if the mediaDialog content has been saved
