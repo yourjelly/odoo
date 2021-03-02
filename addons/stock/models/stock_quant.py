@@ -9,6 +9,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero
+from dateutil.relativedelta import relativedelta
 
 _logger = logging.getLogger(__name__)
 
@@ -94,16 +95,20 @@ class StockQuant(models.Model):
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     on_hand = fields.Boolean('On Hand', store=False, search='_search_on_hand')
 
-    # Inventory Field
+    # Inventory Fields
     inventory_quantity = fields.Float(
         'Inventoried Quantity', groups='stock.group_stock_manager')
     inventory_diff_quantity = fields.Float(
         'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
         readonly=True, digits='Product Unit of Measure', groups='stock.group_stock_manager')
-    inventory_date = fields.Datetime(
-        'Inventory Date', readonly=True, default=fields.Datetime.now,
+    inventory_date = fields.Date(
+        'Inventory Date', readonly=True, default=fields.Date.context_today,
         help="Last date at which the On Hand Quantity has been computed.")
+    user_id = fields.Many2one('res.users', 'User', groups='stock.group_stock_manager',
+        default=lambda self: self.env.user)
+    next_inventory_date = fields.Date('Next Inventory Date', compute='_compute_next_inventory_date',
+         readonly=True, help="Next date at which the On Hand Quantity will be computed.")
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
@@ -114,6 +119,12 @@ class StockQuant(models.Model):
     def _compute_inventory_diff_quantity(self):
         for quant in self:
             quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
+
+    @api.depends('inventory_date')
+    @api.onchange('inventory_date')
+    def _compute_next_inventory_date(self):
+        for quant in self:
+            quant.next_inventory_date = (quant.inventory_date + relativedelta(years=1))
 
     def _search_on_hand(self, operator, value):
         """Handle the "on_hand" filter, indirectly calling `_get_domain_locations`."""
