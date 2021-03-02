@@ -25,6 +25,13 @@ export class ViewNotFoundError extends Error {
   }
 }
 
+export class ControllerNotFoundError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "ControllerNotFoundError";
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Action hook
 // -----------------------------------------------------------------------------
@@ -78,16 +85,25 @@ export function useSetupAction(params) {
     if (params.beforeLeave && component.props.__beforeLeave__) {
       component.props.__beforeLeave__(params.beforeLeave);
     }
-  });
-  hooks.onWillUnmount(() => {
     if (component.props.__exportState__) {
-      let state = {};
-      state[scrollSymbol] = getScrollPosition(component);
-      if (params.export) {
-        Object.assign(state, params.export());
-      }
-      component.props.__exportState__(state);
+      component.env.bus.on('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component , (fn) => {
+        let state = {};
+        state[scrollSymbol] = getScrollPosition(component);
+        if (params.export) {
+          Object.assign(state, params.export());
+        }
+        component.props.__exportState__(state);
+        if (fn) {
+          fn(state);
+        }
+      });
     }
+
+  });
+
+  hooks.onWillUnmount(() => {
+   component.env.bus.trigger('ACTION_MANAGER:EXPORT_CONTROLLER_STATE');
+   component.env.bus.off('ACTION_MANAGER:EXPORT_CONTROLLER_STATE', component);
   });
   return {
     scrollTo(offset) {
@@ -139,15 +155,38 @@ export class ActionContainer extends Component {
     this.dialog = {};
     this.render();
   }
-  shouldUpdate(nextProps) {
-    // We should not be updated by a render triggered from our parent
-    // LPE FIXME: except in the case of the HomeMenu
-    return false;
+  _onGenericClick(ev) {
+    //this._domCleaning();
+    const target = ev.target;
+    if (target.tagName.toUpperCase() !== "A") {
+      return;
+    }
+    const disable_anchor = target.attributes.getNamedItem("disable_anchor");
+    if (disable_anchor && disable_anchor.value === "true") {
+      return;
+    }
+    const href = target.attributes.getNamedItem("href");
+    if (href) {
+      if (href.value[0] === "#") {
+        ev.preventDefault();
+        if (href.value.length === 1 || !this.el) {
+          return;
+        }
+        let matchingEl = null;
+        try {
+          matchingEl = this.el.querySelector(`.o_content #${href.value.substr(1)}`);
+        } catch (e) {} // Invalid selector: not an anchor anyway
+        if (matchingEl) {
+          const offset = matchingEl.getBoundingClientRect();
+          setScrollPosition(this, offset);
+        }
+      }
+    }
   }
 }
 ActionContainer.components = { ActionDialog };
 ActionContainer.template = tags.xml`
-    <div t-name="wowl.ActionContainer" class="o_action_manager">
+    <div t-name="wowl.ActionContainer" class="o_action_manager" t-on-click="_onGenericClick">
       <t t-if="main.Component" t-component="main.Component" t-props="main.componentProps" t-key="main.id"/>
       <ActionDialog t-if="dialog.id" t-props="dialog.props" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed"/>
     </div>`;
@@ -179,7 +218,7 @@ function makeActionManager(env) {
    * @param {Context} [context={}]
    * @returns {Promise<Action>}
    */
-  async function _loadAction(actionRequest, context = {}) {
+  async function _loadAction(actionRequest, reload=false, context = {}) {
     let action;
     if (typeof actionRequest === "string" && odoo.actionRegistry.contains(actionRequest)) {
       // actionRequest is a key in the actionRegistry
@@ -191,7 +230,7 @@ function makeActionManager(env) {
     } else if (typeof actionRequest === "string" || typeof actionRequest === "number") {
       // actionRequest is an id or an xmlid
       const key = JSON.stringify(actionRequest);
-      if (!actionCache[key]) {
+      if (!actionCache[key] || reload) {
         actionCache[key] = env.services.rpc("/web/action/load", {
           action_id: actionRequest,
           additional_context: {
@@ -201,7 +240,9 @@ function makeActionManager(env) {
           },
         });
       }
-      action = await keepLast.add(actionCache[key]);
+      action = actionCache[key];
+    } else if (reload && actionRequest.id) {
+      action = _loadAction(actionRequest.id, reload, context);
     } else {
       // actionRequest is an object describing the action
       action = actionRequest;
@@ -224,11 +265,25 @@ function makeActionManager(env) {
     action = JSON.parse(originalAction); // manipulate a deep copy
     action._originalAction = originalAction;
     action.jsId = jsId;
-    if (action.type === "ir.actions.act_window") {
-      action.controllers = {};
-    }
     if (action.type === "ir.actions.act_window" || action.type === "ir.actions.client") {
       action.target = action.target || "current";
+    }
+    if (action.type === "ir.actions.act_window") {
+      action.controllers = {};
+      const target = action.target;
+      if (target !== "inline" && !(target === "new" && action.views[0][1] === "form")) {
+        // FIXME: search view arch is already sent with load_action, so either remove it
+        // from there or load all fieldviews alongside the action for the sake of consistency
+        const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
+        action.views.push([searchViewId, "search"]);
+      }
+    }
+    return action;
+  }
+  async function _loadAndProcessAction(action, reload=false, context={}) {
+    action = await _loadAction(action, reload, context);
+    if (!action.jsId) {
+      return _preprocessAction(action, context);
     }
     return action;
   }
@@ -321,6 +376,45 @@ function makeActionManager(env) {
   }
 
   /**
+   * Computes the position of the controller in the nextStack according to options
+   * @param {Object} options -
+   * @param {boolean} [options.clearBreadcrumbs]
+   * @param {'replaceLast' | 'replaceLastAction'} [options.stackPosition]
+   * @param {number} [options.index]
+   */
+  function _computeStackIndex(options) {
+    let index = null;
+    if (options.clearBreadcrumbs) {
+      index = 0;
+    } else if (options.stackPosition === 'replaceCurrentAction') {
+      const currentController = controllerStack[controllerStack.length-1];
+      if (currentController) {
+        index = controllerStack.findIndex(ct => ct.action.jsId === currentController.action.jsId);
+      }
+    } else if (options.stackPosition === 'replacePreviousAction') {
+      let last;
+      for (let i=controllerStack.length-1; i >= 0; i--) {
+        const action = controllerStack[i].action.jsId;
+        if (!last) {
+          last = action;
+        }
+        if (action !== last) {
+          last = action;
+          break;
+        }
+      }
+      if (last) {
+        index = controllerStack.findIndex(ct => ct.action.jsId === last);
+      }
+    } else if ('index' in options) {
+      index = options.index;
+    } else {
+      index = controllerStack.length;
+    }
+    return index;
+  }
+
+  /**
    * Triggers a re-rendering with respect to the given controller.
    *
    * @private
@@ -363,6 +457,10 @@ function makeActionManager(env) {
       catchError(error) {
         // The above component should truely handle the error
         reject(error);
+        // Re-throw in case it is a programming error
+        if (error && error.name) {
+          throw error;
+        }
       }
       mounted() {
         let mode;
@@ -453,14 +551,7 @@ function makeActionManager(env) {
       });
       return currentActionProm;
     }
-    let index = null;
-    if (options.clearBreadcrumbs) {
-      index = 0;
-    } else if ("index" in options) {
-      index = options.index;
-    } else {
-      index = controllerStack.length + 1;
-    }
+    const index = _computeStackIndex(options);
     const controllerArray = [controller];
     if (options.lazyController) {
       controllerArray.unshift(options.lazyController);
@@ -473,6 +564,7 @@ function makeActionManager(env) {
       id: ++id,
       Component: ControllerComponent,
       componentProps: controller.props,
+      controllerJsId: controller.jsId,
     });
     return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
   }
@@ -527,15 +619,11 @@ function makeActionManager(env) {
     if (!views.length) {
       throw new Error(`No view found for act_window action ${action.id}`);
     }
-    const target = action.target;
-    if (target !== "inline" && !(target === "new" && action.views[0][1] === "form")) {
-      // FIXME: search view arch is already sent with load_action, so either remove it
-      // from there or load all fieldviews alongside the action for the sake of consistency
-      const searchViewId = action.search_view_id ? action.search_view_id[0] : false;
-      action.views.push([searchViewId, "search"]);
-    }
+
     let view = options.viewType && views.find((v) => v.type === options.viewType);
     let lazyController;
+
+    // A specific index is given: do not lazyload anything
     if (view && !view.multiRecord) {
       const lazyView = views[0].multiRecord ? views[0] : undefined;
       if (lazyView) {
@@ -564,10 +652,12 @@ function makeActionManager(env) {
       props: _getViewProps(view, action, views, viewOptions),
     };
     action.controllers[view.type] = controller;
+
     return _updateUI(controller, {
       clearBreadcrumbs: options.clearBreadcrumbs,
       lazyController,
       onClose: options.onClose,
+      stackPosition: options.stackPosition,
     });
   }
 
@@ -585,6 +675,9 @@ function makeActionManager(env) {
   async function _executeClientAction(action, options) {
     const clientAction = odoo.actionRegistry.get(action.tag);
     if (clientAction.prototype instanceof Component) {
+      if (action.target !== 'new' && clientAction.forceFullscreen) {
+        action.target = 'fullscreen';
+      }
       const controller = {
         jsId: `controller_${++id}`,
         Component: clientAction,
@@ -593,6 +686,7 @@ function makeActionManager(env) {
       };
       return _updateUI(controller, {
         clearBreadcrumbs: options.clearBreadcrumbs,
+        stackPosition: options.stackPosition,
         onClose: options.onClose,
       });
     } else {
@@ -782,8 +876,8 @@ function makeActionManager(env) {
    * @returns {Promise<void>}
    */
   async function doAction(actionRequest, options = {}) {
-    let action = await _loadAction(actionRequest, options.additionalContext);
-    action = _preprocessAction(action, options.additionalContext);
+    const actionProm = _loadAndProcessAction(actionRequest, false, options.additionalContext);
+    const action = await keepLast.add(actionProm);
     switch (action.type) {
       case "ir.actions.act_url":
         return _executeActURLAction(action);
@@ -851,7 +945,7 @@ function makeActionManager(env) {
       context.active_id = params.recordId || null;
       context.active_ids = params.recordIds;
       context.active_model = params.model;
-      action = await _loadAction(params.name, context);
+      action = await keepLast.add(_loadAction(params.name, false, context));
     }
     // filter out context keys that are specific to the current action, because:
     //  - wrong default_* and search_default_* values won't give the expected result
@@ -930,9 +1024,15 @@ function makeActionManager(env) {
    * @param {string} jsId
    */
   async function restore(jsId) {
-    const index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    let index;
+    if (!jsId) {
+      index = controllerStack.length - 2;
+    } else {
+      index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    }
     if (index < 0) {
-      throw new Error("invalid controller to restore");
+      const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
+      throw new ControllerNotFoundError(msg);
     }
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {
@@ -1063,6 +1163,14 @@ function makeActionManager(env) {
     switchView,
     restore,
     loadState,
+    loadAction: _loadAndProcessAction,
+    get currentController() {
+      const stack = controllerStack;
+      if (!stack.length) {
+        return null;
+      }
+      return stack[stack.length - 1];
+    }
   };
 }
 

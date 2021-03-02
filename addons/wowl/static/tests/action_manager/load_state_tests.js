@@ -70,7 +70,7 @@ QUnit.module("ActionManager", (hooks) => {
     webClient.destroy();
   });
   QUnit.test("action and menu loading", async (assert) => {
-    assert.expect(2);
+    assert.expect(3);
     const webClient = await createWebClient({ testConfig });
     await loadState(webClient, {
       action: "1001",
@@ -81,6 +81,7 @@ QUnit.module("ActionManager", (hooks) => {
       "ClientAction_Id 1"
     );
     assert.strictEqual(webClient.el.querySelector(".o_menu_brand").textContent, "App2");
+    assert.deepEqual(webClient.env.services.router.current.hash, { action: "1001", menu_id: "2" });
     webClient.destroy();
   });
   QUnit.test("supports action as xmlId", async (assert) => {

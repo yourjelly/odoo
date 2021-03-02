@@ -21,7 +21,6 @@ export class WebClient extends Component {
       this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, (mode) => {
         if (mode !== "new") {
           this.el.classList.toggle("o_fullscreen", mode === "fullscreen");
-          this.replaceRouterState();
         }
       });
       this.loadRouterState();
@@ -80,18 +79,6 @@ export class WebClient extends Component {
     if (firstApp) {
       return this.menuService.selectMenu(firstApp);
     }
-  }
-
-  replaceRouterState() {
-    const currentApp = this.menuService.getCurrentApp();
-    const persistentHash = {
-      menu_id: currentApp && `${currentApp.id}`,
-    };
-    const allowedCompanyIds = this.user.context.allowed_company_ids;
-    if (allowedCompanyIds) {
-      persistentHash.cids = allowedCompanyIds.join(",");
-    }
-    this.router.pushState(persistentHash);
   }
 }
 WebClient.components = { ActionContainer, NavBar };

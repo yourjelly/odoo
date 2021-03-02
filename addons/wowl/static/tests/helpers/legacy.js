@@ -16,9 +16,8 @@ odoo.define("wowl.test_legacy", async (require) => {
       AbstractView: require("web.AbstractView"),
       legacyViewRegistry: require("web.view_registry"),
       FormView: require("web.FormView"),
+      PseudoWebClient: require("wowl.pseudo_web_client"),
     });
-    const CrashManager = require("web.CrashManager");
-    CrashManager.disable();
     resolve(legacyExports);
   });
   function getLegacy() {

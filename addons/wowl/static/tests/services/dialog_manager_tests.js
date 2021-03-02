@@ -137,7 +137,7 @@ QUnit.test("dialog component crashes", async (assert) => {
   pseudoWebClient = await mount(PseudoWebClient, { target, env });
 
   const qunitUnhandledReject = QUnit.onUnhandledRejection;
-  QUnit.onUnhandledRejection = (reason) => {
+  QUnit.onUnhandledRejection = () => {
     assert.step("error");
   };
 
