@@ -323,6 +323,54 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="view_stock_quant_tree_inventory_editable">
+        <field name="name">stock.quant.inventory.tree.editable</field>
+        <field name="model">stock.quant</field>
+        <field eval="10" name="priority"/>
+        <field name="arch" type="xml">
+            <tree editable="bottom" create="1" edit="1" import="0" js_class="singleton_list" sample="1">
+                <field name="id" invisible="1"/>
+                <field name="tracking" invisible="1"/>
+                <field name="product_id" attrs="{'readonly': [('id', '!=', False)]}" invisible="context.get('single_product', False)" readonly="context.get('single_product', False)" force_save="1" options="{'no_create': True}"/>
+                <field name="location_id" attrs="{'readonly': [('id', '!=', False)]}" invisible="context.get('hide_location', False)" options="{'no_create': True}"/>
+                <field name="lot_id" groups="stock.group_production_lot" attrs="{
+                                'readonly': ['|', ('id', '!=', False), ('tracking', 'not in', ['serial', 'lot'])],
+                                'required': [('tracking', '!=', 'none')]
+                        }" invisible="context.get('hide_lot', False)" context="{'default_product_id': product_id, 'default_company_id': company_id}"/>
+                <field name="package_id" groups="stock.group_tracking_lot" attrs="{'readonly': [('id', '!=', False)]}"/>
+                <field name="owner_id" groups="stock.group_tracking_owner" attrs="{'readonly': [('id', '!=', False)]}" options="{'no_create': True}"/>
+                <field name="available_quantity" string="On Hand Quantity" decoration-danger="available_quantity &lt; 0" optional="hidden"/>
+                <field name="inventory_quantity" optional="show"/>
+                <field name="user_id" string="User" optional="hidden"/>
+                <field name="inventory_diff_quantity" string="Difference" optional="show"/>
+                <field name="product_uom_id" groups="uom.group_uom"/>
+                <field name='company_id' groups="base.group_multi_company" optional="show"/>
+                <button name="action_apply_inventory" type="object" special="save" string="Apply" class="btn btn-primary col-sm-6" attrs="{'invisible': [('inventory_quantity', '==', 0)]}"/> <!-- TO Do: create function -->
+                <button name="action_set_inventory_quantity" type="object" string="Set" class="btn btn-secondary col-sm-6" attrs="{'invisible': [('inventory_quantity', '!=', 0)]}"/> <!-- TO Do: create function -->
+                <button name="action_apply_inventory" type="object" icon="fa-history"/> <!-- TO Do: create function -->
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_inventory_tree" model="ir.actions.act_window">
+        <field name="name">Inventory Adjustments</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_id" ref="view_stock_quant_tree_inventory_editable"/>
+        <field name="context">{'inventory_mode': 1}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_barcode_scanner">
+            Want to speed up your inventory counts? Try our Barcode app
+          </p><p>
+            Barcode scanner can be activated via inventory settings.
+            Manual inventory adjustments can also be performed and pre-filled with
+            suggested counted quantity.
+          </p>
+        </field>
+    </record>
+
+    <menuitem action="action_inventory_tree" id="menu_action_inventory_tree" parent="menu_stock_warehouse_mgmt" sequence="30"/>
     <menuitem id="menu_package" name="Packages" parent="menu_stock_inventory_control" action="action_package_view" groups="stock.group_tracking_lot" sequence="102"/>
     <menuitem id="menu_valuation" name="Inventory Report"
               parent="stock.menu_warehouse_report" sequence="100"
