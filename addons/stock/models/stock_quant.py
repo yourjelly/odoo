@@ -94,7 +94,7 @@ class StockQuant(models.Model):
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     on_hand = fields.Boolean('On Hand', store=False, search='_search_on_hand')
 
-    # Inventory Field
+    # Inventory Fields
     inventory_quantity = fields.Float(
         'Inventoried Quantity', groups='stock.group_stock_manager')
     inventory_diff_quantity = fields.Float(
@@ -104,6 +104,9 @@ class StockQuant(models.Model):
     inventory_date = fields.Date(
         'Inventory Date', compute='_compute_invetory_date', store=True,
         help="Last date at which the On Hand Quantity has been computed.")
+    user_id = fields.Many2one(
+        'res.users', 'User', groups='stock.group_stock_manager',
+        default=lambda self: self.env.user)
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
@@ -265,6 +268,10 @@ class StockQuant(models.Model):
                 },
             }
         self._apply_inventory()
+
+    def action_set_inventory_quantity(self):
+        self.ensure_one()
+        self.inventory_quantity = self.quantity
 
     @api.constrains('product_id')
     def check_product_id(self):
@@ -605,19 +612,19 @@ class StockQuant(models.Model):
         "inventory session", meaning a mode where we need to create the stock.move
         record necessary to be consistent with the `inventory_quantity` field.
         """
-        return self.env.context.get('inventory_mode') is True and self.user_has_groups('stock.group_stock_manager')
+        return self.env.context.get('inventory_mode') and self.user_has_groups('stock.group_stock_manager')
 
     @api.model
     def _get_inventory_fields_create(self):
         """ Returns a list of fields user can edit when he want to create a quant in `inventory_mode`.
         """
-        return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id', 'inventory_quantity']
+        return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id'] + self._get_inventory_fields_write()
 
     @api.model
     def _get_inventory_fields_write(self):
         """ Returns a list of fields user can edit when he want to edit a quant in `inventory_mode`.
         """
-        return ['inventory_quantity']
+        return ['inventory_quantity', 'inventory_diff_quantity', 'inventory_date']
 
     def _get_inventory_move_values(self, qty, location_id, location_dest_id, out=False):
         """ Called when user manually set a new quantity (via `inventory_quantity`)
