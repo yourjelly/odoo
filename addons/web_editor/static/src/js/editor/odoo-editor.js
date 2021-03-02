@@ -160,6 +160,17 @@ var exportVariable = (function (exports) {
         return selector && element ? element.closest(selector) : element || node;
     }
 
+    /**
+     * Returns a list of all the ancestors nodes of the provided node.
+     *
+     * @param {Node} node
+     * @returns {HTMLElement[]}
+     */
+    function ancestors(node) {
+        if (!node) return [];
+        return [node.parentElement, ...ancestors(node.parentElement)];
+    }
+
     function closestBlock(node) {
         return findNode(closestPath(node), node => isBlock(node));
     }
@@ -662,7 +673,8 @@ var exportVariable = (function (exports) {
         if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) {
             return true;
         }
-        const isEditableRoot = node.isContentEditable && !node.parentElement.isContentEditable;
+        const isEditableRoot =
+            node.isContentEditable && node.parentElement && !node.parentElement.isContentEditable;
         return isEditableRoot || (node.classList && node.classList.contains('oe_unremovable'));
     }
 
@@ -2422,7 +2434,6 @@ var exportVariable = (function (exports) {
             this._observerTimeoutUnactive.delete(label);
         }
         automaticStepUnactive(label) {
-            clearTimeout(this.observerTimeout);
             this._observerTimeoutUnactive.add(label);
         }
         observerUnactive() {
@@ -2537,6 +2548,9 @@ var exportVariable = (function (exports) {
 
             for (const record of records) {
                 if (record.type === 'attributes') {
+                    // Skip the attributes change on the dom.
+                    if (record.target === this.dom) continue;
+
                     attributeCache.set(record.target, attributeCache.get(record.target) || {});
                     if (
                         typeof attributeCache.get(record.target)[record.attributeName] === 'undefined'
@@ -3732,6 +3746,34 @@ var exportVariable = (function (exports) {
             } else {
                 this._fixFontAwesomeSelection();
             }
+            // When the browser set the selection inside a node that is
+            // contenteditable=false, it breaks the edition upon keystroke. Move the
+            // selection so that it remain in an editable area. An example of this
+            // case happend when the selection goes into a fontawesome node.
+            const startContainer = sel.rangeCount && closestElement(sel.getRangeAt(0).startContainer);
+            const contenteditableFalseNode =
+                startContainer &&
+                !startContainer.isContentEditable &&
+                ancestors(startContainer).includes(this.dom) &&
+                startContainer.closest('[contenteditable=false]');
+            if (contenteditableFalseNode) {
+                sel.removeAllRanges();
+                const range = new Range();
+                if (contenteditableFalseNode.previousSibling) {
+                    range.setStart(
+                        contenteditableFalseNode.previousSibling,
+                        contenteditableFalseNode.previousSibling.length,
+                    );
+                    range.setEnd(
+                        contenteditableFalseNode.previousSibling,
+                        contenteditableFalseNode.previousSibling.length,
+                    );
+                } else {
+                    range.setStart(contenteditableFalseNode.parentElement, 0);
+                    range.setEnd(contenteditableFalseNode.parentElement, 0);
+                }
+                sel.addRange(range);
+            }
         }
 
         _updateMouseState(ev) {
@@ -4115,6 +4157,7 @@ var exportVariable = (function (exports) {
     exports.OdooEditor = OdooEditor;
     exports.UNBREAKABLE_ROLLBACK_CODE = UNBREAKABLE_ROLLBACK_CODE;
     exports.UNREMOVABLE_ROLLBACK_CODE = UNREMOVABLE_ROLLBACK_CODE;
+    exports.ancestors = ancestors;
     exports.boundariesIn = boundariesIn;
     exports.boundariesOut = boundariesOut;
     exports.childNodeIndex = childNodeIndex;
