@@ -470,18 +470,18 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
             'subViewId',
         ];
 
-        var viewIdentifier = parts.reduce(function (identifier, partName) {
-            if (partName in keyParts) {
-                return identifier + ',' + keyParts[partName];
-            }
-            return identifier;
-        }, 'optional_fields');
+        // var viewIdentifier = parts.reduce(function (identifier, partName) {
+        //     if (partName in keyParts) {
+        //         return identifier + ',' + keyParts[partName];
+        //     }
+        //     return identifier;
+        // }, 'optional_fields');
 
-        viewIdentifier =
+        var viewIdentifier =
             keyParts.fields.sort(this._nameSortComparer)
                            .reduce(function (identifier, field) {
                                 return identifier + ',' + field.name;
-                            }, viewIdentifier);
+                            }, 'optional_fields');
 
         return viewIdentifier;
     },
