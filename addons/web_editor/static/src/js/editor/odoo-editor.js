@@ -2292,7 +2292,6 @@ var exportVariable = (function (exports) {
                     }
                 } else {
                     if (isRedo(ev) || isUndo(ev)) {
-                        this.automaticStepUnactive('controlHistoryFromDocument');
                         this.dom.setAttribute('contenteditable', false);
                     }
                 }
@@ -2300,7 +2299,6 @@ var exportVariable = (function (exports) {
             this.document.addEventListener('keyup', ev => {
                 if (!this.options.controlHistoryFromDocument && (isRedo(ev) || isUndo(ev))) {
                     this.dom.setAttribute('contenteditable', true);
-                    this.automaticStepActive('controlHistoryFromDocument');
                 }
             });
 
