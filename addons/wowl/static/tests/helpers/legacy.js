@@ -18,6 +18,8 @@ odoo.define("wowl.test_legacy", async (require) => {
       FormView: require("web.FormView"),
       PseudoWebClient: require("wowl.pseudo_web_client"),
     });
+    const LegacyCrashManager = require('web.CrashManager');
+    LegacyCrashManager.disable();
     resolve(legacyExports);
   });
   function getLegacy() {

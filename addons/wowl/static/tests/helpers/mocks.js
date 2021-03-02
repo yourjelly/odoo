@@ -32,7 +32,6 @@ export function makeFakeUserService(values) {
     is_admin,
     user_companies,
     partner_id,
-    db,
     user_context,
   } = sessionInfo;
   return {
@@ -59,7 +58,15 @@ export function makeFakeUserService(values) {
         },
         lang: user_context.lang,
         tz: "Europe/Brussels",
-        db: db,
+        get db() {
+          const res = {
+            name: sessionInfo.db,
+          };
+          if ('dbuuid' in sessionInfo) {
+            res.uuid = sessionInfo.dbuuid;
+          }
+          return res;
+        },
         showEffect: false,
         setCompanies(mode, companyId) {
           allowedCompanies = setCompanies(mode, companyId);
