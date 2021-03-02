@@ -102,6 +102,7 @@ const Wysiwyg = Widget.extend({
             document: this.options.document,
             autohideToolbar: !!this.options.autohideToolbar,
             setContentEditable: this.options.setContentEditable,
+            controlHistoryFromDocument: this.options.controlHistoryFromDocument,
         });
 
         this._configureToolbar(options);
