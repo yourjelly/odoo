@@ -2322,8 +2322,6 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel.classList.toggle('d-none', tab === this.tabs.BLOCKS);
         // Remove active class of custom button (e.g. mass mailing theme selection).
         this.$('#snippets_menu button').removeClass('active');
-
-        this.textEditorPanelEl.classList.toggle('d-none', tab !== this.tabs.OPTIONS || !!options.forceEmptyTab);
         this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
         this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS);
     },
@@ -2825,37 +2823,6 @@ var SnippetsMenu = Widget.extend({
     /**
      * @private
      */
-    _onSummernoteToolsUpdate(ev) {
-        if (!this._textToolsSwitchingEnabled) {
-            return;
-        }
-        const range = $.summernote.core.range.create();
-        if (!range) {
-            return;
-        }
-        if (range.sc === range.ec && range.sc.nodeType === Node.ELEMENT_NODE
-                && range.sc.classList.contains('oe_structure')
-                && range.sc.children.length === 0) {
-            // Do not switch to text tools if the cursor is in an empty
-            // oe_structure (to encourage using snippets there and actually
-            // avoid breaking tours which suppose the snippet list is visible).
-            return;
-        }
-        // const hasVisibleButtons = !!$(this.textEditorPanelEl).find('.btn:visible').length;
-        // this.textEditorPanelEl.classList.remove('d-block');
-        // if (!hasVisibleButtons) {
-        //     // Ugly way to detect that summernote was updated but there is no
-        //     // visible text tools.
-        //     return;
-        // }
-        // Only switch tab without changing content (_updateLeftPanelContent
-        // make text tools visible only on that specific tab). Also do it with
-        // a slight delay to avoid flickering doing it twice.
-        clearTimeout(this._textToolsSwitchingTimeout);
-        this._textToolsSwitchingTimeout = setTimeout(() => {
-            this._updateLeftPanelContent({tab: this.tabs.OPTIONS});
-        }, 250);
-    },
     /**
      * @private
      * @param {OdooEvent} ev
