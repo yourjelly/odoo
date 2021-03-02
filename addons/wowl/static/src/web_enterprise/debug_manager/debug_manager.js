@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { debugManager } from "../../debug_manager/debug_manager";
+import { debugManager } from "../../debug/debug_manager";
 import { useService } from "../../core/hooks";
 export class EnterpriseDebugManager extends debugManager.Component {
   constructor() {

@@ -8,7 +8,7 @@ class EditMenuItemAdapter extends ComponentAdapter {
   constructor(parent, props) {
     props.Component = MenuItem;
     super(...arguments);
-    this.menus = useService('menus');
+    this.menus = useService('menu');
     this.env = owl.Component.env;
   }
 
@@ -41,7 +41,7 @@ export class EditMenuItem extends owl.Component {
   constructor() {
     super(...arguments);
     this.localId=0;
-    this.menus = useService('menus');
+    this.menus = useService('menu');
     owl.hooks.onWillUpdateProps(() => this.localId++);
     this.editMenuParams = {};
     owl.hooks.onPatched(() => {

@@ -5,7 +5,7 @@ import { useService } from "@wowl/core/hooks";
 export class StudioSystray extends owl.Component {
   constructor() {
     super(...arguments);
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.hm = useService("home_menu");
     this.studio = useService("studio");
     this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, (mode) => {

@@ -9,7 +9,7 @@ import { menuService } from "../../src/services/menu_service";
 import { fakeTitleService } from "../helpers/mocks";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../action_manager/helpers";
 import { getLegacy } from "wowl.test_legacy";
-import { actionRegistry } from "../../src/action_manager/action_registry";
+import { actionRegistry } from "../../src/actions/action_registry";
 import { WebClient } from "../../src/webclient/webclient";
 
 const { Component, tags, core } = owl;

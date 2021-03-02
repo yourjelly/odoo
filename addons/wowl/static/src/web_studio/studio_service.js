@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { serviceRegistry } from "@wowl/services/service_registry";
+import { serviceRegistry } from "@wowl/webclient/service_registry";
 
 const { core } = owl;
 
@@ -21,10 +21,10 @@ export class NotEditableActionError extends Error {
 
 export const studioService = {
   name: "studio",
-  dependencies: ["action_manager", "home_menu", "router"],
+  dependencies: ["action", "home_menu", "router"],
   async deploy(env) {
     function _getCurrentAction() {
-      const currentController = env.services.action_manager.currentController;
+      const currentController = env.services.action.currentController;
       return currentController ? currentController.action : null;
     }
 
@@ -69,7 +69,7 @@ export const studioService = {
         const editedActionId = currentHash[URL_ACTION_KEY];
         if (state.studioMode === EDITOR) {
           if (editedActionId) {
-            state.editedAction = await env.services.action_manager.loadAction(editedActionId);
+            state.editedAction = await env.services.action.loadAction(editedActionId);
           } else {
             state.editedAction = null;
           }
@@ -98,7 +98,7 @@ export const studioService = {
       if (targetMode === EDITOR) {
         if (!action) {
           // systray open
-          const currentController = env.services.action_manager.currentController;
+          const currentController = env.services.action.currentController;
           if (currentController) {
             action = currentController.action;
             viewType = currentController.view.type;
@@ -119,7 +119,7 @@ export const studioService = {
       }
       state.studioMode = targetMode;
       // LPE: we don't manage errors during do action.....
-      return env.services.action_manager.doAction("studio", options);
+      return env.services.action.doAction("studio", options);
     }
 
     async function open(mode = false, actionId = false) {
@@ -131,7 +131,7 @@ export const studioService = {
       }
       let action;
       if (actionId) {
-        action = await env.services.action_manager.loadAction(actionId);
+        action = await env.services.action.loadAction(actionId);
       }
       return _openStudio(mode, action);
     }
@@ -149,8 +149,8 @@ export const studioService = {
       }
       let leaveToAction = state.studioMode === EDITOR ? state.editedAction : "menu";
       state.studioMode = null;
-      leaveToAction = await env.services.action_manager.loadAction(leaveToAction, true);
-      return env.services.action_manager.doAction(leaveToAction, {
+      leaveToAction = await env.services.action.loadAction(leaveToAction, true);
+      return env.services.action.doAction(leaveToAction, {
         stackPosition: "replacePreviousAction", // If target is menu, then replaceCurrent, see comment above why we cannot do this
         viewType: state.editedViewType,
       });

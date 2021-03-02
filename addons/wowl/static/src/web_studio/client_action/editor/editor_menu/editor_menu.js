@@ -1,13 +1,13 @@
 /** @odoo-module */
 import { useService } from '@wowl/core/hooks';
-import { _lt } from '@wowl/services/localization';
+import { _lt } from '@wowl/services/localization_service';
 
 export class EditorMenu extends owl.Component {
   constructor() {
     super(...arguments);
     this.i18n = useService('localization');
     this.studio = useService('studio');
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.rpc = useService('rpc');
   }
 

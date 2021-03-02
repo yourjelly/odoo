@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { ActionContainer, actionManagerService } from "@wowl/action_manager/action_manager";
+import { ActionContainer, actionService } from "@wowl/actions/action_service";
 import { useService } from "@wowl/core/hooks";
 
 const { Component, core, hooks } = owl;
@@ -15,9 +15,9 @@ export class ActionEditor extends Component {
     this.env.services.router = {
       pushState() {},
     };
-    this.env.services.action_manager = actionManagerService.deploy(this.env);
+    this.env.services.action = actionService.deploy(this.env);
 
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.studio = useService("studio");
   }
 

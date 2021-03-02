@@ -36,10 +36,10 @@ export class StudioHomeMenu extends HomeMenu {
   constructor() {
     super(...arguments);
 
-    this.am = useService("action_manager");
+    this.am = useService("action");
     this.user = useService("user");
     this.studio = useService("studio");
-    this.notifications = useService("notifications");
+    this.notifications = useService("notification");
 
     this.state.iconCreatorDialogShown = false;
     this.state.editedAppData = {};

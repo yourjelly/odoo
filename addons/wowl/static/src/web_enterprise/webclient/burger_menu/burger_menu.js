@@ -14,7 +14,7 @@ class BurgerMenu extends owl.Component {
   constructor() {
     super(...arguments);
     this.user = useService("user");
-    this.menuRepo = useService("menus");
+    this.menuRepo = useService("menu");
     this.hm = useService("home_menu");
     this.state = owl.hooks.useState({
       isUserMenuOpened: false,

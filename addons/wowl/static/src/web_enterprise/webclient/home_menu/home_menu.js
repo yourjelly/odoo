@@ -37,7 +37,7 @@ export class HomeMenu extends Component {
    */
   constructor() {
     super(...arguments);
-    this.menus = useService("menus");
+    this.menus = useService("menu");
     this.homeMenuService = useService("home_menu");
 
     this.availableApps = this.props.apps;

@@ -9,9 +9,9 @@ export class StudioNavbar extends EnterpriseNavBar {
   constructor() {
     super(...arguments);
     this.studio = useService("studio");
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.user = useService("user");
-    this.dialogManager = useService('dialog_manager');
+    this.dialogManager = useService('dialog');
     owl.hooks.onMounted(() => {
       this.env.bus.off("HOME-MENU:TOGGLED", this);
       this._updateMenuAppsIcon();

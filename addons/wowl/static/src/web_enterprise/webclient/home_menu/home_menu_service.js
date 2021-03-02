@@ -1,7 +1,7 @@
 /** @odoo-module **/
 const { Component, tags } = owl;
 import { HomeMenu } from "./home_menu";
-import { ControllerNotFoundError } from "@wowl/action_manager/action_manager";
+import { ControllerNotFoundError } from "@wowl/actions/action_service";
 import { useService } from "@wowl/core/hooks";
 import { Mutex } from "@wowl/utils/concurrency";
 
@@ -71,7 +71,7 @@ export function computeHomeMenuProps(menuTree) {
 
 export const homeMenuService = {
   name: "home_menu",
-  dependencies: ["action_manager", "router"],
+  dependencies: ["action", "router"],
   deploy(env) {
     let hasHomeMenu = false; // true iff the HomeMenu is currently displayed
     let hasBackgroundAction = false; // true iff there is an action behind the HomeMenu
@@ -81,7 +81,7 @@ export const homeMenuService = {
       constructor() {
         super(...arguments);
         this.router = useService("router");
-        this.menus = useService("menus");
+        this.menus = useService("menu");
         this.homeMenuProps = computeHomeMenuProps(this.menus.getMenuAsTree("root"));
       }
       async mounted() {
@@ -120,10 +120,10 @@ export const homeMenuService = {
           show = show === undefined ? !hasHomeMenu : Boolean(show);
           if (show !== hasHomeMenu) {
             if (show) {
-              await env.services.action_manager.doAction("menu");
+              await env.services.action.doAction("menu");
             } else {
               try {
-                await env.services.action_manager.restore();
+                await env.services.action.restore();
               } catch (err) {
                 if (!(err instanceof ControllerNotFoundError)) {
                   throw err;

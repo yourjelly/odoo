@@ -1,14 +1,13 @@
 /** @odoo-module **/
 const { hooks } = owl;
-import { NavBar } from "../../../webclient/navbar/navbar";
-import { useService } from "../../../core/hooks";
+import { NavBar } from "@wowl/webclient/navbar/navbar";
+import { useService } from "@wowl/core/hooks";
 
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
   constructor() {
     super(...arguments);
-    this.menus = useService("menus");
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.device = useService("device");
     this.hm = useService("home_menu");
     this.menuAppsRef = useRef("menuApps");

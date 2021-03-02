@@ -1,6 +1,6 @@
  /** @odoo-module **/
-import { ActionContainer, actionManagerService } from "@wowl/action_manager/action_manager";
-import { actionRegistry } from "@wowl/action_manager/action_registry";
+import { ActionContainer, actionService } from "@wowl/actions/action_service";
+import { actionRegistry } from "@wowl/actions/action_registry";
 import { ComponentAdapter } from "web.OwlCompatibility";
 import { computeHomeMenuProps } from "@wowl/web_enterprise/webclient/home_menu/home_menu_service";
 import { useService } from "@wowl/core/hooks";
@@ -18,7 +18,7 @@ const { Component, core, hooks } = owl;
 class StudioClientAction extends Component {
   setup() {
     this.studio = useService("studio");
-    this.menus = useService("menus");
+    this.menus = useService("menu");
     this.homeMenuProps = computeHomeMenuProps(this.menus.getMenuAsTree("root"));
 
     hooks.useSubEnv({
@@ -29,9 +29,9 @@ class StudioClientAction extends Component {
     this.env.services.router = {
       pushState() {},
     };
-    this.env.services.action_manager = actionManagerService.deploy(this.env);
+    this.env.services.action = actionService.deploy(this.env);
 
-    this.actionManager = useService("action_manager");
+    this.actionManager = useService("action");
     this.studio = useService("studio");
 
     this.AppCreatorWrapper = AppCreatorWrapper; // to remove

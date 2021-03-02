@@ -11,12 +11,12 @@ export class HomeMenuCustomizer extends owl.Component {
     this.fileUploader = owl.hooks.useRef("fileUploader");
     this.rpc = useService("rpc");
     this.ui = useService("ui");
-    this.notification = useService("notifications");
+    this.notification = useService("notification");
     this.user = useService("user");
     this.download = useService("download");
-    this.actionManager = useService("action_manager");
-    this.menus = useService("menus");
-    this.dialogManager = useService("dialog_manager");
+    this.actionManager = useService("action");
+    this.menus = useService("menu");
+    this.dialogManager = useService("dialog");
     this.bgImageUploaded = this.bgImageUploaded.bind(this); // is executed as a callback
   }
 
