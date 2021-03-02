@@ -124,6 +124,15 @@ function factory(dependencies) {
                     this.env.models['mail.notification'].convertData(notificationData)
                 )]];
             }
+            if ('partner_ids' in data && data.partner_ids) {
+                const partners = data.partner_ids
+                    .map(partnerId =>
+                        this.env.models['mail.partner'].findFromIdentifyingData({
+                            id: partnerId,
+                        })
+                    );
+                data2.mentionedPartners = [['replace', partners]];
+            }
             if ('starred_partner_ids' in data) {
                 data2.isStarred = data.starred_partner_ids.includes(this.env.messaging.currentPartner.id);
             }
@@ -454,6 +463,16 @@ function factory(dependencies) {
             );
         }
 
+        _computeIsHighlighted() {
+            if (this.mentionedPartners.length === 0) {
+                return false;
+            }
+            if (this.originThread && this.originThread.model === 'mail.channel') {
+                return this.mentionedPartners.includes(this.messagingCurrentPartner);
+            }
+            return false;
+        }
+
         /**
          * @private
          * @returns {boolean}
@@ -661,6 +680,17 @@ function factory(dependencies) {
                 'tracking_value_ids',
             ],
         }),
+        isHighlighted: attr({
+            compute: '_computeIsHighlighted',
+            default: false,
+            dependencies: [
+                'mentionedPartners',
+                'messagingCurrentPartner',
+                'originThread',
+                'originThreadModel',
+            ],
+         }),
+
         isModeratedByCurrentPartner: attr({
             compute: '_computeIsModeratedByCurrentPartner',
             default: false,
@@ -723,6 +753,7 @@ function factory(dependencies) {
             default: false,
         }),
         message_type: attr(),
+        mentionedPartners: many2many('mail.partner'),
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
         }),
@@ -759,6 +790,9 @@ function factory(dependencies) {
         originThreadIsModeratedByCurrentPartner: attr({
             default: false,
             related: 'originThread.isModeratedByCurrentPartner',
+        }),
+        originThreadModel: attr({
+            related: 'originThread.model',
         }),
         /**
          * Serves as compute dependency for isSubjectSimilarToOriginThreadName
