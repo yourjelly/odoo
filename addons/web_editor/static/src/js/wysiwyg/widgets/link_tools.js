@@ -103,14 +103,15 @@ const LinkTools = Widget.extend({
         }
 
         this._updateOptionsUI();
-        this._adaptLink();
+        this._adaptLink(false);
 
         this.$('input:visible:first').focus();
 
         return this._super.apply(this, arguments);
     },
     destroy: function () {
-        this.$link.removeClass('oe_edited_link');
+        this.options.wysiwyg.odooEditor.automaticStepSkipStack();
+        $('.oe_edited_link').removeClass('oe_edited_link');
         if (!this.$link.attr('href') && !this.colorCombinationClass) {
             this.$link.contents().unwrap();
         }
@@ -127,7 +128,7 @@ const LinkTools = Widget.extend({
      *
      * @private
      */
-    _adaptLink: function () {
+    _adaptLink: function (createStep = true) {
         var data = this._getData();
         if (data === null) {
             return;
@@ -137,7 +138,12 @@ const LinkTools = Widget.extend({
             href: data.url,
             class: `${data.classes}`,
         };
+        const $links = $('.oe_edited_link');
+        $links.removeClass('oe_edited_link');
         this.$link.attr(attrs).html((data.label && data.label.length) ? data.label : data.url);
+        if (createStep) this.options.wysiwyg.odooEditor.historyStep();
+        this.options.wysiwyg.odooEditor.automaticStepSkipStack();
+        $links.addClass('oe_edited_link');
     },
     /**
      * Get the link's data (url, label and styles).
@@ -182,12 +188,13 @@ const LinkTools = Widget.extend({
         return {
             label: label,
             url: url,
-            classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, ''),
+            classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, '').replace(/oe_edited_link/, ''),
             isNewWindow: isNewWindow,
             doStripDomain: doStripDomain,
         };
     },
     _getOrCreateLink: function () {
+        this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         const doc = this.editable.ownerDocument;
         const range = getDeepRange(doc, { splitText: true, select: true });
         this.needLabel = false;
