@@ -525,7 +525,7 @@ const Wysiwyg = Widget.extend({
                 this.linkTools = undefined;
             } else {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, {}, this.odooEditor.dom, $btn);
+                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.dom, $btn);
                 this.linkTools.appendTo(this.toolbar.$el);
             }
         } else {
