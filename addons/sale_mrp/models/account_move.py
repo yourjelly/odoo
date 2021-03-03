@@ -6,6 +6,13 @@ from odoo import models
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    def _eligible_for_cogs(self):
+        return super()._eligible_for_cogs() or (
+            self.product_id.valuation == 'real_time'
+            and self.product_id.type == 'consu'
+            and any(bom.type == 'phantom' for bom in self.product_id.bom_ids)
+        )
+
     def _stock_account_get_anglo_saxon_price_unit(self):
         price_unit = super(AccountMoveLine, self)._stock_account_get_anglo_saxon_price_unit()
 
