@@ -136,11 +136,10 @@ const Wysiwyg = Widget.extend({
                 // we trigger the restore before changing the contenteditable
                 // to ensure the main editor contenteditable state is correct.
                 this._restoreMainContentEditable(e.target);
-                this.odooEditor.automaticStepUnactive("linkEditionFix");
+                this.odooEditor.automaticStepSkipStack();
                 this.$currentLinkEdition = $(e.target);
                 this.$currentLinkEdition.attr("contenteditable", "true");
                 this.$editableWrap.removeAttr('contenteditable');
-                this.odooEditor.automaticStepActive("linkEditionFix");
             }
         );
 
@@ -726,11 +725,10 @@ const Wysiwyg = Widget.extend({
      */
     _restoreMainContentEditable(clickTarget) {
         if(this.$currentLinkEdition !== undefined && this.$currentLinkEdition[0] !== clickTarget) {
-            this.odooEditor.automaticStepUnactive("linkEditionFix");
+            this.odooEditor.automaticStepSkipStack();
             this.$editableWrap.attr('contenteditable', 'true');
             this.$currentLinkEdition.removeAttr('contenteditable');
             this.$currentLinkEdition = undefined;
-            this.odooEditor.automaticStepActive("linkEditionFix");
         }
     },
     _createPalette() {

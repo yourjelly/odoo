@@ -270,7 +270,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             records = this.wysiwyg.odooEditor.filterMutationRecords(records);
-            this.wysiwyg.odooEditor.automaticStepUnactive('dirty_mutations');
+            this.wysiwyg.odooEditor.automaticStepSkipStack();
 
             for (const record of records) {
                 const $savable = $(record.target).closest(this.savableSelector);
@@ -282,8 +282,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     }
                 });
             }
-
-            this.wysiwyg.odooEditor.automaticStepActive('dirty_mutations');
         });
 
         this.observer.observe(document.body, {
