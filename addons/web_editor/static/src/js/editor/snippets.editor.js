@@ -2671,8 +2671,12 @@ var SnippetsMenu = Widget.extend({
      */
     _onMouseDown: function () {
         const $blockedArea = $('#wrapwrap'); // TODO should get that element another way
+        this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         $blockedArea.addClass('o_we_no_pointer_events');
-        const reenable = () => $blockedArea.removeClass('o_we_no_pointer_events');
+        const reenable = () => {
+            this.options.wysiwyg.odooEditor.automaticStepSkipStack();
+            $blockedArea.removeClass('o_we_no_pointer_events');
+        };
         // Use a setTimeout fallback to avoid locking the editor if the mouseup
         // is fired over an element which stops propagation for example.
         const enableTimeoutID = setTimeout(() => reenable(), 5000);
