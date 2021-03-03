@@ -597,7 +597,7 @@ const Wysiwyg = Widget.extend({
             domain: $editable.data('oe-media-domain'),
             useMediaLibrary: field && (model === 'ir.ui.view' && field === 'arch' || type === 'html'),
         }, this.options.mediaModalParams, params);
-        const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $node.clone());
+        const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $node);
         mediaDialog.open();
 
         mediaDialog.on('save', this, function(element) {
