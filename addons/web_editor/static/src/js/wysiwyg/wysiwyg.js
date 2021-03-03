@@ -23,7 +23,7 @@ var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
 
 function isImg(node) {
-    return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image)(\s|$)/i))));
+    return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image|fa)(\s|$)/i))));
 }
 
 const Wysiwyg = Widget.extend({
