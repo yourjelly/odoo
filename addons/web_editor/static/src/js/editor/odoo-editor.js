@@ -2248,8 +2248,11 @@ var exportVariable = (function (exports) {
             if (typeof this.options.toSanitize === 'undefined') {
                 this.options.toSanitize = true;
             }
-            if (typeof this.options.setContentEditable === 'undefined') {
-                this.options.setContentEditable = true;
+            if (typeof this.options.isRootEditable === 'undefined') {
+                this.options.isRootEditable = true;
+            }
+            if (typeof this.options.getContentEditableAreas === 'undefined') {
+                this.options.getContentEditableAreas = () => [];
             }
 
             this.document = options.document || document;
@@ -2271,9 +2274,23 @@ var exportVariable = (function (exports) {
             this._observerTimeoutUnactive = new Set();
 
             // set contenteditable before clone as FF updates the content at this point
-            if (this.options.setContentEditable) {
-                dom.setAttribute('contenteditable', this.options.setContentEditable);
-            }
+            this._activateContenteditable();
+
+            // When selecting all the text within a link then triggering delete or
+            // inserting a character, the cursor and insertion is outside the link.
+            // To avoid this problem, we make all editable zone become uneditable
+            // except the link. Then when cliking outside the link, reset the
+            // editable zones.
+            this.dom.addEventListener('mousedown', e => {
+                this.automaticStepSkipStack();
+                const link = closestElement(e.target, 'a');
+                if (link) {
+                    this._stopContenteditable();
+                    link.setAttribute('contenteditable', 'true');
+                } else {
+                    this._activateContenteditable();
+                }
+            });
             this.vdom = dom.cloneNode(true);
             this.vdom.removeAttribute('contenteditable');
             this.idSet(dom, this.vdom);
@@ -3460,6 +3477,26 @@ var exportVariable = (function (exports) {
             }
         }
 
+        _activateContenteditable() {
+            this.dom.setAttribute('contenteditable', this.options.isRootEditable);
+
+            for (const node of this.options.getContentEditableAreas()) {
+                if (!node.isContentEditable) {
+                    node.setAttribute('contenteditable', true);
+                }
+            }
+        }
+        _stopContenteditable() {
+            if (this.options.isRootEditable) {
+                this.dom.setAttribute('contenteditable', !this.options.isRootEditable);
+            }
+            for (const node of this.options.getContentEditableAreas()) {
+                if (node.getAttribute('contenteditable') === 'true') {
+                    node.setAttribute('contenteditable', false);
+                }
+            }
+        }
+
         // HISTORY
         // =======
 
@@ -4128,7 +4165,11 @@ var exportVariable = (function (exports) {
          */
         _fixFontAwesomeSelection() {
             const selection = this.document.defaultView.getSelection();
-            if (selection.isCollapsed) return;
+            if (
+                selection.isCollapsed ||
+                (selection.anchorNode && !ancestors(selection.anchorNode).includes(this.dom))
+            )
+                return;
             let shouldUpdateSelection = false;
             const fixedSelection = {
                 anchorNode: selection.anchorNode,
