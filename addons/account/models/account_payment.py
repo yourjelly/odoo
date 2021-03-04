@@ -94,6 +94,12 @@ class AccountPayment(models.Model):
         compute='_compute_partner_id',
         domain="['|', ('parent_id','=', False), ('is_company','=', True)]",
         check_company=True)
+    outstanding_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string="Outstanding Account",
+        store=True,
+        compute='_compute_outstanding_account_id',
+        check_company=True)
     destination_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Destination Account',
@@ -157,11 +163,7 @@ class AccountPayment(models.Model):
         writeoff_lines = self.env['account.move.line']
 
         for line in self.move_id.line_ids:
-            if line.account_id in (
-                    self.journal_id.default_account_id,
-                    self.journal_id.payment_debit_account_id,
-                    self.journal_id.payment_credit_account_id,
-            ):
+            if line.account_id == self.outstanding_account_id:
                 liquidity_lines += line
             elif line.account_id.internal_type in ('receivable', 'payable') or line.partner_id == line.company_id.partner_id:
                 counterpart_lines += line
@@ -181,7 +183,7 @@ class AccountPayment(models.Model):
         self.ensure_one()
         write_off_line_vals = write_off_line_vals or {}
 
-        if not self.journal_id.payment_debit_account_id or not self.journal_id.payment_credit_account_id:
+        if not self.outstanding_account_id:
             raise UserError(_(
                 "You can't create a new payment without an outstanding payments/receipts account set on the %s journal.",
                 self.journal_id.display_name))
@@ -241,7 +243,7 @@ class AccountPayment(models.Model):
                 'debit': balance < 0.0 and -balance or 0.0,
                 'credit': balance > 0.0 and balance or 0.0,
                 'partner_id': self.partner_id.id,
-                'account_id': self.journal_id.payment_debit_account_id.id if balance < 0.0 else self.journal_id.payment_credit_account_id.id,
+                'account_id': self.outstanding_account_id.id,
             },
             # Receivable / Payable.
             {
@@ -376,6 +378,16 @@ class AccountPayment(models.Model):
             else:
                 pay.partner_id = pay.partner_id
 
+    @api.depends('journal_id', 'payment_type')
+    def _compute_outstanding_account_id(self):
+        for pay in self:
+            if pay.payment_type == 'inbound':
+                pay.outstanding_account_id = pay.journal_id.payment_debit_account_id or pay.journal_id.default_account_id
+            elif pay.payment_type == 'outbound':
+                pay.outstanding_account_id = pay.journal_id.payment_credit_account_id or pay.journal_id.default_account_id
+            else:
+                pay.outstanding_account_id = False
+
     @api.depends('journal_id', 'partner_id', 'partner_type', 'is_internal_transfer')
     def _compute_destination_account_id(self):
         self.destination_account_id = False
@@ -500,7 +512,7 @@ class AccountPayment(models.Model):
                 part.debit_move_id = counterpart_line.id
                 OR
                 part.credit_move_id = counterpart_line.id
-            WHERE (account.id = journal.payment_debit_account_id OR account.id = journal.payment_credit_account_id)
+            WHERE account.id = payment.outstanding_account_id
                 AND payment.id IN %(payment_ids)s
                 AND line.id != counterpart_line.id
                 AND counterpart_line.statement_id IS NOT NULL
