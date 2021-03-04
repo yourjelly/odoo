@@ -532,7 +532,7 @@ const Wysiwyg = Widget.extend({
                     range.insertNode(anchor);
                     anchors.push(anchor);
                 } else {
-                    const anchor = $('a')[0];
+                    const anchor = $('<a>')[0];
                     range.surroundContents(anchor);
                     anchors.push(anchor);
                 }
