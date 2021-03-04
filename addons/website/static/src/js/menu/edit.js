@@ -46,8 +46,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 context = ctx;
             },
         });
-        this.oeStructureSelector = '.oe_structure[data-oe-xpath][data-oe-id]';
-        this.oeFieldSelector = '[data-oe-field]';
+        this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
+        this.oeFieldSelector = '#wrapwrap [data-oe-field]';
         if (options.savableSelector) {
             this.savableSelector = options.savableSelector;
         } else {
@@ -260,10 +260,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // Only make the odoo structure and fields editable.
         this.wysiwyg.odooEditor.observerUnactive();
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
-        $('#wrapwrap').attr('contenteditable', 'false');
-        $('#wrapwrap *').each((key, el) => {delete el.ouid});
-        $(this.savableSelector).not('[data-oe-readonly]').attr('contenteditable', 'true');
-        this.wysiwyg.odooEditor.idSet($('#wrapwrap')[0]);
         this._addEditorMessages(); // Insert editor messages in the DOM without observing.
         this.wysiwyg.odooEditor.observerActive();
 
@@ -292,6 +288,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             characterData: true,
         });
         $('body').addClass('editor_started');
+    },
+
+    _getContentEditableAreas () {
+        return $(this.savableSelector).not('[data-oe-readonly]').toArray();
     },
     /**
      * Call preventDefault of an event.
@@ -358,8 +358,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             saveButton: true,
             devicePreview: true,
             savableSelector: this.savableSelector,
-            setContentEditable: false,
+            isRootEditable: false,
             controlHistoryFromDocument: true,
+            getContentEditableAreas: this._getContentEditableAreas.bind(this),
         };
         return wysiwygLoader.createWysiwyg(this,
             Object.assign(params, this.wysiwygOptions),

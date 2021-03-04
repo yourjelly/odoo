@@ -101,8 +101,9 @@ const Wysiwyg = Widget.extend({
             toolbar: this.toolbar.$el[0],
             document: this.options.document,
             autohideToolbar: !!this.options.autohideToolbar,
-            setContentEditable: this.options.setContentEditable,
+            isRootEditable: this.options.isRootEditable,
             controlHistoryFromDocument: this.options.controlHistoryFromDocument,
+            getContentEditableAreas: this.options.getContentEditableAreas,
         });
 
         this._configureToolbar(options);
@@ -123,23 +124,6 @@ const Wysiwyg = Widget.extend({
                 if ($field.is('[data-oe-many2one-id]')) {
                     $field.attr('contenteditable', false);
                 }
-            }
-        );
-        // when focus in a link `<a>` switch the contenteditable property
-        // from the main editor element to the focused link
-        this.$editableWrap = this.$editable.find('#wrap');
-        this.$editableWrap.on(
-            'mousedown',
-            'a:not([contenteditable=true])',
-            (e) => {
-                // In case we focus from a link directy into another,
-                // we trigger the restore before changing the contenteditable
-                // to ensure the main editor contenteditable state is correct.
-                this._restoreMainContentEditable(e.target);
-                this.odooEditor.automaticStepSkipStack();
-                this.$currentLinkEdition = $(e.target);
-                this.$currentLinkEdition.attr("contenteditable", "true");
-                this.$editableWrap.removeAttr('contenteditable');
             }
         );
 
@@ -714,23 +698,6 @@ const Wysiwyg = Widget.extend({
             this._createPalette();
         }
     },
-    /**
-     * Restore the content editable property on the main editor element
-     *
-     * when leaving the focus of a `<a>` tag,
-     * we need to remove the contenteditable property on the links
-     * and restore it on the #wrap element of the editor
-     *
-     * @param {Node} clickTarget
-     */
-    _restoreMainContentEditable(clickTarget) {
-        if(this.$currentLinkEdition !== undefined && this.$currentLinkEdition[0] !== clickTarget) {
-            this.odooEditor.automaticStepSkipStack();
-            this.$editableWrap.attr('contenteditable', 'true');
-            this.$currentLinkEdition.removeAttr('contenteditable');
-            this.$currentLinkEdition = undefined;
-        }
-    },
     _createPalette() {
         const $dropdownContent = this.toolbar.$el.find('#colorInputButtonGroup .colorPalette');
         // The editor's root widget can be website or web's root widget and cannot be properly retrieved...
@@ -1160,7 +1127,6 @@ const Wysiwyg = Widget.extend({
         return new Promise(function(){});
     },
     _onDocumentMousedown: function (e) {
-        this._restoreMainContentEditable(e.target);
         if (e.target.closest('.oe-toolbar')) {
             this._onToolbar = true;
         } else {
