@@ -27,6 +27,15 @@ class Image(models.AbstractModel):
         :return: src, src_zoom urls
         :rtype: tuple
         """
+        if options.get('qweb_img_raw_data', False):
+            if not record:
+                return False
+            value = record[field_name]
+            if value is False:
+                return False, False
+            else:
+                return self._get_raw_src(value, options=options), ''
+
         max_size = None
         if options.get('resize'):
             max_size = options.get('resize')
@@ -63,14 +72,13 @@ class Image(models.AbstractModel):
             "That is because the image goes into the tag, or it gets the " \
             "hose again."
 
-        if options.get('qweb_img_raw_data', False):
-            return super(Image, self).record_to_html(record, field_name, options)
+        src, src_zoom = self._get_src_urls(record, field_name, options)
+        if not src:
+            return False
 
         aclasses = ['img', 'img-fluid'] if options.get('qweb_img_responsive', True) else ['img']
         aclasses += options.get('class', '').split()
         classes = ' '.join(map(escape, aclasses))
-
-        src, src_zoom = self._get_src_urls(record, field_name, options)
 
         if options.get('alt-field') and getattr(record, options['alt-field'], None):
             alt = escape(record[options['alt-field']])
