@@ -168,7 +168,7 @@ const LinkTools = Widget.extend({
 
         const type = this.$('we-selection-items[name="link_style_color"] we-button.active').data('value') || '';
         const size = this.$('we-selection-items[name="link_style_size"] we-button.active').data('value') || '';
-        const shape = this.$('select[name="link_style_shape"]').val() || '';
+        const shape = this.$('we-selection-items[name="link_style_shape"] we-button.active').data('value') || '';
         const shapes = shape ? shape.split(',') : [];
         const style = ['outline', 'fill'].includes(shapes[0]) ? `${shapes[0]}-` : '';
         const shapeClasses = shapes.slice(style ? 1 : 0).join(' ');
