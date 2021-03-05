@@ -629,7 +629,7 @@ const Wysiwyg = Widget.extend({
             }
         };
         $toolbar.find('#create-link, #media-modal, #media-description').click(openTools);
-        $toolbar.find('#image-shape div').click(e => {
+        $toolbar.find('#image-shape div, #fa-spin').click(e => {
             if (!this.lastMediaClicked) return;
             this.lastMediaClicked.classList.toggle(e.target.id);
             e.target.classList.toggle('active', $(this.lastMediaClicked).hasClass(e.target.id));
@@ -898,7 +898,7 @@ const Wysiwyg = Widget.extend({
                 });
             }
             // Toggle the 'active' class on the active image tool buttons.
-            for (const button of $('#image-shape div')) {
+            for (const button of $('#image-shape div, #fa-spin')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
             }
             for (const button of $('#image-width div')) {
