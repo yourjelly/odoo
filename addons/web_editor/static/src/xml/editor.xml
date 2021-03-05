@@ -202,6 +202,18 @@
                     title="Transform the picture (click twice to reset transformation)"></div>
                 <div id="image-delete" class="btn editor-ignore fa fa-trash-o" title="Remove (DELETE)"></div>
             </div>
+
+            <div id="fa-resize" class="btn-group only_fa">
+                <div class="editor-ignore btn" data-value="1">1x</div>
+                <div class="editor-ignore btn" data-value="1">2x</div>
+                <div class="editor-ignore btn" data-value="1">3x</div>
+                <div class="editor-ignore btn" data-value="1">4x</div>
+                <div class="editor-ignore btn" data-value="1">5x</div>
+            </div>
+
+            <div class="btn-group only_fa">
+                <div id="fa-spin" class="editor-ignore btn fa fa-refresh"></div>
+            </div>
         </div>
     </t>
 
