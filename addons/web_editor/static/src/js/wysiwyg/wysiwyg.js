@@ -21,6 +21,7 @@ const rgbToHex = OdooEditorLib.rgbToHex;
 
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
+const mediaSelector = 'img, .fa, .o_image, .media_iframe_video';
 
 function isImg(node) {
     return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image|fa)(\s|$)/i))));
@@ -97,6 +98,7 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
+        this._configureToolbar(options);
         this.odooEditor = new OdooEditor(this.$editable[0], {
             toolbar: this.toolbar.$el[0],
             document: this.options.document,
@@ -106,7 +108,6 @@ const Wysiwyg = Widget.extend({
             getContentEditableAreas: this.options.getContentEditableAreas,
         });
 
-        this._configureToolbar(options);
         this._observeOdooFieldChanges();
         this.$editable.on(
             'mousedown touchstart',
@@ -128,8 +129,9 @@ const Wysiwyg = Widget.extend({
         );
 
         this.$editable.on('click','.o_image, .media_iframe_video', (e) => e.preventDefault());
-
-        this.$editable.on('dblclick','img, .fa, .o_image, .media_iframe_video', function() {
+        this.showTooltip = true;
+        this.$editable.on('dblclick', mediaSelector, function() {
+            this.showTooltip = false;
             const $el = $(this);
             let params = {node: $el};
             $el.selectElement();
@@ -646,19 +648,23 @@ const Wysiwyg = Widget.extend({
                 (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
             )).addClass(e.target.dataset.class);
         });
-        $toolbar.find('#justify div.btn').on('mousedown', e => {
-            if (!this.lastImageClicked) return;
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            e.preventDefault();
+        $toolbar.on('mousedown', e => {
+            const justifyBtn = e.target.closest('#justify div.btn');
+            if (!justifyBtn || !this.lastImageClicked) return;
+            e.originalEvent.stopImmediatePropagation();
+            e.originalEvent.stopPropagation();
+            e.originalEvent.preventDefault();
+            const mode = justifyBtn.id.replace('justify', '').toLowerCase();
+            const classes = mode === 'center' ? ['d-block', 'mx-auto'] : ['float-' + mode];
+            const doAdd = classes.some(className => !this.lastImageClicked.classList.contains(className));
             this.lastImageClicked.classList.remove('float-left', 'float-right');
             if (this.lastImageClicked.classList.contains('mx-auto')) {
                 this.lastImageClicked.classList.remove('d-block', 'mx-auto');
             }
-            const mode = e.target.parentElement.id.replace('justify', '').toLowerCase();
-            const classes = mode === 'center' ? ['d-block', 'mx-auto'] : ['float-' + mode];
-            this.lastImageClicked.classList.add(...classes);
-            this._updateImageJustifyButton(e.target.parentElement.id);
+            if (doAdd) {
+                this.lastImageClicked.classList.add(...classes);
+            }
+            this._updateMediaJustifyButton(justifyBtn.id);
         });
         $toolbar.find('#image-crop').click(e => {
             if (!this.lastImageClicked) return;
@@ -773,7 +779,7 @@ const Wysiwyg = Widget.extend({
         } else if (!ColorpickerWidget.isCSSColor(color)) {
             color = (eventName === "foreColor" ? 'text-' : 'bg-') + color;
         }
-        this.odooEditor.applyColor(color, eventName === 'foreColor' ? 'color' : 'backgroundColor');
+        this.odooEditor.applyColor(color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastImageClicked);
         const hexColor = this._colorToHex(color);
         this.odooEditor.updateColorpickerLabels({
             [eventName === 'foreColor' ? 'foreColor' : 'hiliteColor']: hexColor,
@@ -800,6 +806,9 @@ const Wysiwyg = Widget.extend({
      * Update any editor UI that is not handled by the editor itself.
      */
     _updateEditorUI: function (e) {
+        const $target = $(e.target);
+        // Restore paragraph dropdown button's default ID.
+        this.toolbar.$el.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
         // Remove the alt tools.
         this.altTools && this.altTools.destroy();
         this.altTools = undefined;
@@ -812,18 +821,24 @@ const Wysiwyg = Widget.extend({
         const $rangeContainer = range && $(range.commonAncestorContainer);
         const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
         this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
-        // Only show the image tools in the toolbar if the current selected
-        // snippet is an image.
-        const isInImage = $(e.target).is('img');
+        // Only show the media tools in the toolbar if the current selected
+        // snippet is a media.
+        const isInMedia = $target.is(mediaSelector);
         this.toolbar.$el.find([
-            '#media-description',
             '#image-shape',
             '#image-width',
             '#image-padding',
             '#image-edit',
-        ].join(',')).toggleClass('d-none', !isInImage);
-        this.lastImageClicked = isInImage && e.target;
-        // Hide the irrelevant text buttons.
+        ].join(',')).toggleClass('d-none', !isInMedia);
+        // Only show the image-transform, image-crop and media-description
+        // buttons if the current selected snippet is an image.
+        this.toolbar.$el.find([
+            '#image-transform',
+            '#image-crop',
+            '#media-description',
+        ].join(',')).toggleClass('d-none', !$target.is('img'));
+        this.lastImageClicked = isInMedia && e.target;
+        // Hide the irrelevant text buttons for media.
         this.toolbar.$el.find([
             '#style',
             '#decoration',
@@ -833,19 +848,36 @@ const Wysiwyg = Widget.extend({
             '#colorInputButtonGroup',
             '#table',
             '#create-link',
-        ].join(',')).toggleClass('d-none', isInImage);
+        ].join(',')).toggleClass('d-none', isInMedia);
+        // Some icons are relevant for icons, that aren't for other media.
+        this.toolbar.$el.find('#colorInputButtonGroup, #create-link').toggleClass('d-none', isInMedia && !$target.is('.fa'));
         // Toggle the toolbar arrow.
-        this.toolbar.$el.toggleClass('noarrow', isInImage);
-        if (isInImage) {
-            // Select the image in the DOM.
+        this.toolbar.$el.toggleClass('noarrow', isInMedia);
+
+        // Unselect all media.
+        this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
+        if (isInMedia) {
+            // Show the media as selected.
+            $target.toggleClass('o_we_selected_image', true);
+            // Handle the media's tooltip.
+            this.showTooltip = true;
+            setTimeout(() => {
+                // Do not show tooltip on double-click and if there is already one
+                if (!this.showTooltip || $target.attr('title') !== undefined) {
+                    return;
+                }
+                $target.tooltip({title: _t('Double-click to edit'), trigger: 'manual', container: 'body'}).tooltip('show');
+                setTimeout(() => $target.tooltip('dispose'), 800);
+            }, 400);
+            // Select the media in the DOM.
             const selection = this.odooEditor.document.getSelection();
             const range = this.odooEditor.document.createRange();
             range.selectNode(this.lastImageClicked);
             selection.removeAllRanges();
             selection.addRange(range);
-            // Always hide the unlink button on images
+            // Always hide the unlink button on media.
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
-            // Show the floatingtoolbar on the topleft of the image.
+            // Show the floatingtoolbar on the topleft of the media.
             if (this.options.autohideToolbar) {
                 const imagePosition = this.lastImageClicked.getBoundingClientRect();
                 this.toolbar.$el.css({
@@ -861,12 +893,16 @@ const Wysiwyg = Widget.extend({
             for (const button of $('#image-width div')) {
                 button.classList.toggle('active', e.target.style.width === button.id);
             }
-            this._updateImageJustifyButton();
+            this._updateMediaJustifyButton();
         }
     },
-    _updateImageJustifyButton: function (commandState) {
+    _updateMediaJustifyButton: function (commandState) {
         if (!this.lastImageClicked) return;
-        const $paragraphDropdownButton = this.toolbar.$el.find('#paragraphDropdownButton');
+        const $paragraphDropdownButton = this.toolbar.$el.find('#paragraphDropdownButton, #mediaParagraphDropdownButton');
+        // Change the ID to prevent OdooEditor from controlling it as this is
+        // custom behavior for media.
+        $paragraphDropdownButton.attr('id', 'mediaParagraphDropdownButton');
+        let resetAlignment = true;
         if (!commandState) {
             const justifyMapping = [
                 ['float-left', 'justifyLeft'],
@@ -876,17 +912,25 @@ const Wysiwyg = Widget.extend({
             commandState = (justifyMapping.find(pair => (
                 this.lastImageClicked.classList.contains(pair[0]))
             ) || [])[1];
+            resetAlignment = !commandState;
         }
         const $buttons = this.toolbar.$el.find('#justify div.btn');
-        for (const button of $buttons) {
-            button.classList.toggle('active', button.id === commandState);
-        }
+        let newClass;
         if (commandState) {
             const direction = commandState.replace('justify', '').toLowerCase();
-            const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
-            $paragraphDropdownButton.removeClass((index, className) => (
-                (className.match(/(^|\s)fa-align-\w+/g) || []).join(' ')
-            )).addClass(newClass);
+            newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
+            resetAlignment = !['float-left', 'mx-auto', 'float-right'].some(className => (
+                this.lastImageClicked.classList.contains(className)
+            ));
+        }
+        for (const button of $buttons) {
+            button.classList.toggle('active', !resetAlignment && button.id === commandState);
+        }
+        $paragraphDropdownButton.removeClass((index, className) => (
+            (className.match(/(^|\s)fa-align-\w+/g) || []).join(' ')
+        ));
+        if (commandState && !resetAlignment) {
+            $paragraphDropdownButton.addClass(newClass);
         }
     },
     _editorOptions: function () {
