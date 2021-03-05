@@ -609,6 +609,11 @@ body.editor_enable.editor_has_snippets {
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
+            #fa-resize {
+                grid-column-end: span 5;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
         }
 
         we-button.o_we_link {
