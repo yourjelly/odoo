@@ -1760,6 +1760,8 @@ options.registry.masonry_display = options.Class.extend({
             websiteId: websiteId,
         }));
 
+        
+
         if (currentTemplate != $template) {
             this.$target.empty().append($template);
         }
