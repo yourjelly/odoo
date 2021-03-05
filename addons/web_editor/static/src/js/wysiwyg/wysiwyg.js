@@ -485,7 +485,7 @@ const Wysiwyg = Widget.extend({
      * @param {Node} [params.node]
      */
     toggleAltTools(params) {
-        const image = (params && params.node) || this.lastImageClicked;
+        const image = (params && params.node) || this.lastMediaClicked;
         if (this.snippetsMenu) {
             if (this.altTools) {
                 this.altTools.destroy();
@@ -630,49 +630,49 @@ const Wysiwyg = Widget.extend({
         };
         $toolbar.find('#create-link, #media-modal, #media-description').click(openTools);
         $toolbar.find('#image-shape div').click(e => {
-            if (!this.lastImageClicked) return;
-            this.lastImageClicked.classList.toggle(e.target.id);
-            e.target.classList.toggle('active', $(this.lastImageClicked).hasClass(e.target.id));
+            if (!this.lastMediaClicked) return;
+            this.lastMediaClicked.classList.toggle(e.target.id);
+            e.target.classList.toggle('active', $(this.lastMediaClicked).hasClass(e.target.id));
         });
         const $imageWidthButtons = $toolbar.find('#image-width div');
         $imageWidthButtons.click(e => {
-            if (!this.lastImageClicked) return;
-            this.lastImageClicked.style.width = e.target.id;
+            if (!this.lastMediaClicked) return;
+            this.lastMediaClicked.style.width = e.target.id;
             for (const button of $imageWidthButtons) {
-                button.classList.toggle('active', this.lastImageClicked.style.width === button.id);
+                button.classList.toggle('active', this.lastMediaClicked.style.width === button.id);
             }
         });
         $toolbar.find('#image-padding .dropdown-item').click(e => {
-            if (!this.lastImageClicked) return;
-            $(this.lastImageClicked).removeClass((index, className) => (
+            if (!this.lastMediaClicked) return;
+            $(this.lastMediaClicked).removeClass((index, className) => (
                 (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
             )).addClass(e.target.dataset.class);
         });
         $toolbar.on('mousedown', e => {
             const justifyBtn = e.target.closest('#justify div.btn');
-            if (!justifyBtn || !this.lastImageClicked) return;
+            if (!justifyBtn || !this.lastMediaClicked) return;
             e.originalEvent.stopImmediatePropagation();
             e.originalEvent.stopPropagation();
             e.originalEvent.preventDefault();
             const mode = justifyBtn.id.replace('justify', '').toLowerCase();
             const classes = mode === 'center' ? ['d-block', 'mx-auto'] : ['float-' + mode];
-            const doAdd = classes.some(className => !this.lastImageClicked.classList.contains(className));
-            this.lastImageClicked.classList.remove('float-left', 'float-right');
-            if (this.lastImageClicked.classList.contains('mx-auto')) {
-                this.lastImageClicked.classList.remove('d-block', 'mx-auto');
+            const doAdd = classes.some(className => !this.lastMediaClicked.classList.contains(className));
+            this.lastMediaClicked.classList.remove('float-left', 'float-right');
+            if (this.lastMediaClicked.classList.contains('mx-auto')) {
+                this.lastMediaClicked.classList.remove('d-block', 'mx-auto');
             }
             if (doAdd) {
-                this.lastImageClicked.classList.add(...classes);
+                this.lastMediaClicked.classList.add(...classes);
             }
             this._updateMediaJustifyButton(justifyBtn.id);
         });
         $toolbar.find('#image-crop').click(e => {
-            if (!this.lastImageClicked) return;
-            new weWidgets.ImageCropWidget(this, this.lastImageClicked).appendTo(this.$editable);
+            if (!this.lastMediaClicked) return;
+            new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.$editable);
         });
         $toolbar.find('#image-transform').click(e => {
-            if (!this.lastImageClicked) return;
-            const $image = $(this.lastImageClicked);
+            if (!this.lastMediaClicked) return;
+            const $image = $(this.lastMediaClicked);
             if ($image.data('transfo-destroy')) {
                 $image.removeData('transfo-destroy');
                 return;
@@ -695,9 +695,9 @@ const Wysiwyg = Widget.extend({
             $(this.odooEditor.document).on('mousedown', mousedown);
         });
         $toolbar.find('#image-delete').click(e => {
-            if (!this.lastImageClicked) return;
-            $(this.lastImageClicked).remove();
-            this.lastImageClicked = undefined;
+            if (!this.lastMediaClicked) return;
+            $(this.lastMediaClicked).remove();
+            this.lastMediaClicked = undefined;
         });
         const $colorpickerGroup = $toolbar.find('#colorInputButtonGroup');
         if ($colorpickerGroup.length) {
@@ -779,7 +779,7 @@ const Wysiwyg = Widget.extend({
         } else if (!ColorpickerWidget.isCSSColor(color)) {
             color = (eventName === "foreColor" ? 'text-' : 'bg-') + color;
         }
-        this.odooEditor.applyColor(color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastImageClicked);
+        this.odooEditor.applyColor(color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
         const hexColor = this._colorToHex(color);
         this.odooEditor.updateColorpickerLabels({
             [eventName === 'foreColor' ? 'foreColor' : 'hiliteColor']: hexColor,
@@ -837,7 +837,7 @@ const Wysiwyg = Widget.extend({
             '#image-crop',
             '#media-description',
         ].join(',')).toggleClass('d-none', !$target.is('img'));
-        this.lastImageClicked = isInMedia && e.target;
+        this.lastMediaClicked = isInMedia && e.target;
         // Hide the irrelevant text buttons for media.
         this.toolbar.$el.find([
             '#style',
@@ -872,14 +872,14 @@ const Wysiwyg = Widget.extend({
             // Select the media in the DOM.
             const selection = this.odooEditor.document.getSelection();
             const range = this.odooEditor.document.createRange();
-            range.selectNode(this.lastImageClicked);
+            range.selectNode(this.lastMediaClicked);
             selection.removeAllRanges();
             selection.addRange(range);
             // Always hide the unlink button on media.
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
             // Show the floatingtoolbar on the topleft of the media.
             if (this.options.autohideToolbar) {
-                const imagePosition = this.lastImageClicked.getBoundingClientRect();
+                const imagePosition = this.lastMediaClicked.getBoundingClientRect();
                 this.toolbar.$el.css({
                     visibility: 'visible',
                     top: imagePosition.top + 10 + 'px',
@@ -897,7 +897,7 @@ const Wysiwyg = Widget.extend({
         }
     },
     _updateMediaJustifyButton: function (commandState) {
-        if (!this.lastImageClicked) return;
+        if (!this.lastMediaClicked) return;
         const $paragraphDropdownButton = this.toolbar.$el.find('#paragraphDropdownButton, #mediaParagraphDropdownButton');
         // Change the ID to prevent OdooEditor from controlling it as this is
         // custom behavior for media.
@@ -910,7 +910,7 @@ const Wysiwyg = Widget.extend({
                 ['float-right', 'justifyRight'],
             ];
             commandState = (justifyMapping.find(pair => (
-                this.lastImageClicked.classList.contains(pair[0]))
+                this.lastMediaClicked.classList.contains(pair[0]))
             ) || [])[1];
             resetAlignment = !commandState;
         }
@@ -920,7 +920,7 @@ const Wysiwyg = Widget.extend({
             const direction = commandState.replace('justify', '').toLowerCase();
             newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
             resetAlignment = !['float-left', 'mx-auto', 'float-right'].some(className => (
-                this.lastImageClicked.classList.contains(className)
+                this.lastMediaClicked.classList.contains(className)
             ));
         }
         for (const button of $buttons) {
