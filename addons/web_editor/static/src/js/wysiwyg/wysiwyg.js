@@ -699,6 +699,16 @@ const Wysiwyg = Widget.extend({
             $(this.lastMediaClicked).remove();
             this.lastMediaClicked = undefined;
         });
+        $toolbar.find('#fa-resize div').click(e => {
+            if (!this.lastMediaClicked) return;
+            const $target = $(this.lastMediaClicked);
+            const sValue = e.target.dataset.value;
+            $target.attr('class', $target.attr('class').replace(/\s*fa-[0-9]+x/g, ''));
+            if (+sValue > 1) {
+                $target.addClass('fa-'+sValue+'x');
+            }
+            this._updateFaResizeButtons();
+        });
         const $colorpickerGroup = $toolbar.find('#colorInputButtonGroup');
         if ($colorpickerGroup.length) {
             this._createPalette();
@@ -851,6 +861,7 @@ const Wysiwyg = Widget.extend({
         ].join(',')).toggleClass('d-none', isInMedia);
         // Some icons are relevant for icons, that aren't for other media.
         this.toolbar.$el.find('#colorInputButtonGroup, #create-link').toggleClass('d-none', isInMedia && !$target.is('.fa'));
+        this.toolbar.$el.find('.only_fa').toggleClass('d-none', !$target.is('.fa'));
         // Toggle the toolbar arrow.
         this.toolbar.$el.toggleClass('noarrow', isInMedia);
 
@@ -894,6 +905,7 @@ const Wysiwyg = Widget.extend({
                 button.classList.toggle('active', e.target.style.width === button.id);
             }
             this._updateMediaJustifyButton();
+            this._updateFaResizeButtons();
         }
     },
     _updateMediaJustifyButton: function (commandState) {
@@ -931,6 +943,15 @@ const Wysiwyg = Widget.extend({
         ));
         if (commandState && !resetAlignment) {
             $paragraphDropdownButton.addClass(newClass);
+        }
+    },
+    _updateFaResizeButtons: function () {
+        if (!this.lastMediaClicked) return;
+        const $buttons = this.toolbar.$el.find('#fa-resize div');
+        const match = this.lastMediaClicked.className.match(/\s*fa-([0-9]+)x/);
+        const value = match && match[1] ? match[1] : '1';
+        for (const button of $buttons) {
+            button.classList.toggle('active', button.dataset.value === value);
         }
     },
     _editorOptions: function () {
