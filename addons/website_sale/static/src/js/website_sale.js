@@ -1,3 +1,16 @@
+odoo.define('website_sale.arg', function (require) {
+"use strict";
+
+var TracksArg = require('website.set_view_track');
+
+TracksArg.TrackPage.include({
+    xmlDependencies: (TracksArg.TrackPage.prototype.xmlDependencies || []).concat(
+        ["/website_sale/static/src/xml/ecom_track_page.xml"]
+    ),
+});
+
+});
+
 odoo.define('website_sale.cart', function (require) {
 'use strict';
 

@@ -86,4 +86,9 @@ CustomizeMenu.include({
     },
 });
 
+
+return {
+    TrackPage: TrackPage,
+};
+
 });
