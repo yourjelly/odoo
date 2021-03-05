@@ -1747,6 +1747,8 @@ options.registry.masonry_display = options.Class.extend({
     ),
 
     editLayout: function (previewMode, widgetValue, params) {
+        let currentTemplate = this.$target.val()
+
         let websiteId;
         this.trigger_up('context_get', {
             callback: function (ctx) {
@@ -1758,70 +1760,18 @@ options.registry.masonry_display = options.Class.extend({
             websiteId: websiteId,
         }));
 
+        if (currentTemplate != $template) {
+            this.$target.empty().append($template);
+        }
+
         // marche find : masonry_display, Masonry, masonry_block, s_masonry_block, masonry_template, 
         // website.s_template_masonry.*, 
-        if(!this.$target.find('website.s_template_masonry.reversed')) {
-            document.write(this.$target.parent())
-        }
 
         //this.$target.parent().empty().append($template);
         //this.$target.find('s_masonry_block').empty().append($template);
-        this.$target.empty().append($template);   // marche mais les colonnes ne marchent plus...
-        //this.$target.find('.modal-content');
+        // ok this.$target.empty().append($template);   // marche mais les colonnes ne marchent plus...
         //this.$target.replaceWith($template);
     },
-
-
-
-
-    /**
-    moveSnippet: function (previewMode, widgetValue, params) {
-        const isNavItem = this.$target[0].classList.contains('nav-item');
-        const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
-        switch (widgetValue) {
-            case 'prev':
-                this.$target.prev().before(this.$target);
-                if (isNavItem) {
-                    $tabPane.prev().before($tabPane);
-                }
-                break;
-            case 'next':
-                this.$target.next().after(this.$target);
-                if (isNavItem) {
-                    $tabPane.next().after($tabPane);
-                }
-                break;
-        }
-        if (params.name === 'move_up_opt' || params.name === 'move_down_opt') {
-            dom.scrollTo(this.$target[0], {
-                extraOffset: 50,
-                easing: 'linear',
-            });
-        }
-    },
-
-    selectCount: async function (previewMode, widgetValue, params) {
-        const previousNbColumns = this.$('> .row').children().length;
-        let $row = this.$('> .row');
-        if (!$row.length) {
-            $row = this.$target.contents().wrapAll($('<div class="row"><div class="col-lg-12"/></div>')).parent().parent();
-        }
-
-        const nbColumns = parseInt(widgetValue);
-        await this._updateColumnCount($row, (nbColumns || 1) - $row.children().length);
-        // Yield UI thread to wait for event to bubble before activate_snippet is called.
-        // In this case this lets the select handle the click event before we switch snippet.
-        // TODO: make this more generic in activate_snippet event handler.
-        await new Promise(resolve => setTimeout(resolve));
-        if (nbColumns === 0) {
-            $row.contents().unwrap().contents().unwrap();
-            this.trigger_up('activate_snippet', {$snippet: this.$target});
-        } else if (previousNbColumns === 0) {
-            this.trigger_up('activate_snippet', {$snippet: this.$('> .row').children().first()});
-        }
-    },
-    **/
-
 });
 
 options.registry.HeaderNavbar = options.Class.extend({
