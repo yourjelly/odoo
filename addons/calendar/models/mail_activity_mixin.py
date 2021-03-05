@@ -16,3 +16,6 @@ class MailActivityMixin(models.AbstractModel):
         It evaluates to false if there is no such event."""
         for record in self:
             record.activity_calendar_event_id = record.activity_ids[:1].calendar_event_id
+
+
+

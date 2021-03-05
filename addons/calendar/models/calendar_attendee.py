@@ -164,3 +164,7 @@ class Attendee(models.Model):
                 body=_("%s has declined invitation") % (attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation")
         return self.write({'state': 'declined'})
+
+    # def _merge_get_fields_specific(self):
+    #     field_info = super(Attendee, self)._merge_get_fields_specific()
+    #     print("field infoooooooooooooooo-----Attendee-----ooooooooooooooo", field_info)

@@ -38,8 +38,14 @@ class Lead(models.Model):
         return action
 
     def _merge_get_fields_specific(self):
+        print("keriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
         fields_info = super(Lead, self)._merge_get_fields_specific()
+        for vis in self.visitor_ids:
+            print("vsitor ids.........................",vis.ids)
+            print("self.visitor_page_count............", vis.visitor_page_count)
         # add all the visitors from all lead to merge
+        fields_info['visitor_ids'] = [(6, 0, self.visitor_ids.ids)]
+        print("visitor info.............................",fields_info['visitor_ids'])
         fields_info['visitor_ids'] = lambda fname, leads: [(6, 0, leads.visitor_ids.ids)]
         return fields_info
 

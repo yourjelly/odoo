@@ -43,3 +43,4 @@ class MailActivity(models.Model):
         res = self.unlink()
         events.unlink()
         return res
+

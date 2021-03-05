@@ -83,3 +83,17 @@ class CrmLead(models.Model):
             action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
             action['res_id'] = orders.id
         return action
+
+    def _merge_get_fields_specific(self):
+        print("keriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii sale_crm")
+        fields_info = super(CrmLead, self)._merge_get_fields_specific()
+        for vis in self.order_ids:
+            print("sale_crm......................", vis)
+            # print("self.ordert............", vis.visitor_page_count)
+        # add all the visitors from all lead to merge
+        # fields_info['order_ids'] = [(6, 0, self.order_ids)]
+        # print("orderrids info.............................", fields_info['order_ids'])
+        fields_info['order_ids'] = lambda fname, leads: [(6, 0, leads.order_ids.ids)]
+        #
+        print("fields_info['order_ids']/////////////////////",fields_info['order_ids'])
+        return fields_info

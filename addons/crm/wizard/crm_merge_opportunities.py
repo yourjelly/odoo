@@ -40,6 +40,12 @@ class MergeOpportunity(models.TransientModel):
 
     def action_merge(self):
         self.ensure_one()
+
+        print("self.opportunity_ids..............",self.opportunity_ids)
+        # test = self.opportunity_ids.merge_opportunity(self.user_id.id, self.team_id.id)
+        # print("test.................",test)
+        # import pdb
+        # pdb.set_trace()
         merge_opportunity = self.opportunity_ids.merge_opportunity(self.user_id.id, self.team_id.id)
         return merge_opportunity.redirect_lead_opportunity_view()
 

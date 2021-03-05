@@ -894,3 +894,15 @@ class Meeting(models.Model):
         if status == 'declined':
             return attendee.do_decline()
         return attendee.do_tentative()
+
+    def _merge_get_fields_specific(self):
+        print("keriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii->>>>>>>>>>>.meeting")
+        fields_info = super(Meeting, self)._merge_get_fields_specific()
+        for vis in self.activity_ids:
+            print("vsitor ids.........................", vis.ids)
+            # print("self.visitor_page_count............", vis.visitor_page_count)
+        # add all the visitors from all lead to merge
+        fields_info['activity_ids'] = [(4, 0, self.activity_ids.ids)]
+        print("visitor info.............................", fields_info['activity_ids'])
+        fields_info['activity_ids'] = lambda fname, leads: [(6, 0, leads.activity_ids.ids)]
+        return fields_info
