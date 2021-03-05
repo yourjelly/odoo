@@ -205,14 +205,10 @@
 
             <div id="fa-resize" class="btn-group only_fa">
                 <div class="editor-ignore btn" data-value="1">1x</div>
-                <div class="editor-ignore btn" data-value="1">2x</div>
-                <div class="editor-ignore btn" data-value="1">3x</div>
-                <div class="editor-ignore btn" data-value="1">4x</div>
-                <div class="editor-ignore btn" data-value="1">5x</div>
-            </div>
-
-            <div class="btn-group only_fa">
-                <div id="fa-spin" class="editor-ignore btn fa fa-refresh"></div>
+                <div class="editor-ignore btn" data-value="2">2x</div>
+                <div class="editor-ignore btn" data-value="3">3x</div>
+                <div class="editor-ignore btn" data-value="4">4x</div>
+                <div class="editor-ignore btn" data-value="5">5x</div>
             </div>
         </div>
     </t>
