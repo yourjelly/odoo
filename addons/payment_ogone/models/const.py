@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 # See https://epayments-support.ingenico.com/en/integration/all-sales-channels/flexcheckout/guide#flexcheckout_integration_guides_sha_out
 FLEXCHECKOUT_KEYS = [
     'ALIAS.ALIASID',

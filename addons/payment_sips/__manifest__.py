@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 # Copyright 2015 Eezee-It
 
 {

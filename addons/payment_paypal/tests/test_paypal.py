@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import fields
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.tests.common import PaymentAcquirerCommon
