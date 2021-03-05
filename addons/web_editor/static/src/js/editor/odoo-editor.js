@@ -289,6 +289,38 @@ var exportVariable = (function (exports) {
             reasons.push(PATH_END_REASONS.NO_NODE);
         };
     }
+    /**
+     * Returns all the previous siblings of the first parameter until the first
+     * sibling that does not satisfy the predicat.
+     * @param {Node} node
+     * @param {Function} predicat A function that receives a node as parameter and
+     * returns true or false
+     */
+    function getAdjacentPreviousSiblings(node, predicat = n => n) {
+        let previous = node.previousSibling;
+        const list = [];
+        while (previous && predicat(previous)) {
+            list.push(previous);
+            previous = previous.previousSibling;
+        }
+        return list;
+    }
+    /**
+     * Returns all the next siblings of the first parameter until the first
+     * sibling that does not satisfy the predicat.
+     * @param {Node} node
+     * @param {Function} predicat A function that receives a node as parameter and
+     * returns true or false
+     */
+    function getAdjacentNextSiblings(node, predicat = n => n) {
+        let next = node.nextSibling;
+        const list = [];
+        while (next && predicat(next)) {
+            list.push(next);
+            next = next.nextSibling;
+        }
+        return list;
+    }
 
     //------------------------------------------------------------------------------
     // Cursor management
@@ -2004,9 +2036,22 @@ var exportVariable = (function (exports) {
         main.append(li);
         const restoreCursor = preserveCursor(this.ownerDocument);
 
-        this.after(main);
-        li.append(this);
-        restoreCursor(new Map([[this, li]]));
+        // if `this` is the root editable
+        if (this.oid === 1) {
+            const callingNode = this.childNodes[offset];
+            const group = [
+                ...getAdjacentPreviousSiblings(callingNode, n => !isBlock(n)),
+                callingNode,
+                ...getAdjacentNextSiblings(callingNode, n => !isBlock(n)),
+            ];
+            callingNode.after(main);
+            li.append(...group);
+            restoreCursor();
+        } else {
+            this.after(main);
+            li.append(this);
+            restoreCursor(new Map([[this, li]]));
+        }
     };
 
     HTMLParagraphElement.prototype.oToggleList = function (offset, mode = 'UL') {
@@ -3042,8 +3087,13 @@ var exportVariable = (function (exports) {
          *
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {string} mode 'color' or 'backgroundColor'
+         * @param {Node} [target]
          */
-        applyColor(color, mode) {
+        applyColor(color, mode, target) {
+            if (target) {
+                this._colorElement(target, color, mode);
+                return;
+            }
             const range = getDeepRange(document, { splitText: true, select: true });
             if (!range) return;
             const restoreCursor = preserveCursor(this.document);
@@ -3142,6 +3192,14 @@ var exportVariable = (function (exports) {
                 this.deleteRange(selection);
             }
             startNode = startNode || this.document.defaultView.getSelection().anchorNode;
+            if (startNode.nodeType === Node.ELEMENT_NODE) {
+                if (selection.anchorOffset === 0) {
+                    startNode.prepend(this.document.createTextNode(''));
+                    startNode = startNode.firstChild;
+                } else {
+                    startNode = startNode.childNodes[selection.anchorOffset - 1];
+                }
+            }
 
             const fakeEl = document.createElement('fake-element');
             fakeEl.innerHTML = html;
@@ -3424,6 +3482,7 @@ var exportVariable = (function (exports) {
                     'setFontSize',
                     'insertFontAwesome',
                     'insertHTML',
+                    'insertTable',
                     'bold',
                     'addColumnLeft',
                     'addColumnRight',
@@ -3600,11 +3659,15 @@ var exportVariable = (function (exports) {
             ]) {
                 const isStateTrue = this.document.queryCommandState(commandState);
                 const button = this.toolbar.querySelector('#' + commandState);
-                button && button.classList.toggle('active', isStateTrue);
-                if (paragraphDropdownButton && commandState.startsWith('justify')) {
-                    const direction = commandState.replace('justify', '').toLowerCase();
-                    const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
-                    paragraphDropdownButton.classList.toggle(newClass, isStateTrue);
+                if (commandState.startsWith('justify')) {
+                    if (paragraphDropdownButton) {
+                        button.classList.toggle('active', isStateTrue);
+                        const direction = commandState.replace('justify', '').toLowerCase();
+                        const newClass = `fa-align-${direction === 'full' ? 'justify' : direction}`;
+                        paragraphDropdownButton.classList.toggle(newClass, isStateTrue);
+                    }
+                } else if (button) {
+                    button.classList.toggle('active', isStateTrue);
                 }
             }
             if (sel.rangeCount) {
@@ -3873,20 +3936,7 @@ var exportVariable = (function (exports) {
         _onPaste(ev) {
             ev.preventDefault();
             const pastedText = (ev.originalEvent || ev).clipboardData.getData('text/plain');
-            const sel = this.document.defaultView.getSelection();
-            if (!sel.isCollapsed) {
-                this.deleteRange(sel);
-            }
-            if (sel.anchorOffset === 0 && childNodeIndex(sel.anchorNode) === 0) {
-                // Prevent text directly in div contenteditable and other weird
-                // manipulations by execCommand.
-                const p = this.document.createElement('p');
-                p.appendChild(document.createElement('br'));
-                const block = closestBlock(sel.anchorNode);
-                block.parentElement.insertBefore(p, block);
-                setCursorStart(p);
-            }
-            this.document.execCommand('insertHTML', false, pastedText.replace(/\n+/g, '<br/>'));
+            this._insertHTML(pastedText.replace(/\n+/g, '<br/>'));
         }
 
         /**
@@ -3918,16 +3968,7 @@ var exportVariable = (function (exports) {
                         const range = this.document.caretRangeFromPoint(ev.clientX, ev.clientY);
                         setCursor(range.startContainer, range.startOffset);
                     }
-                    if (sel.anchorOffset === 0 && childNodeIndex(sel.anchorNode) === 0) {
-                        // Prevent text directly in div contenteditable and other weird
-                        // manipulations by execCommand.
-                        const p = this.document.createElement('p');
-                        p.appendChild(document.createElement('br'));
-                        const block = closestBlock(sel.anchorNode);
-                        block.parentElement.insertBefore(p, block);
-                        setCursorStart(p);
-                    }
-                    this.document.execCommand('insertHTML', false, pastedText.replace(/\n+/g, '<br/>'));
+                    this._insertHTML(pastedText.replace(/\n+/g, '<br/>'));
                 });
             }
         }
@@ -3955,28 +3996,10 @@ var exportVariable = (function (exports) {
             ev.preventDefault();
             this._protect(() => {
                 if (buttonEl.classList.contains('tablepicker-cell')) {
-                    const table = this.document.createElement('table');
-                    table.classList.add('table', 'table-bordered'); // for bootstrap
-                    const tbody = this.document.createElement('tbody');
-                    table.appendChild(tbody);
-                    const rowId = +buttonEl.dataset.rowId;
-                    const colId = +buttonEl.dataset.colId;
-                    for (let rowIndex = 0; rowIndex < rowId; rowIndex++) {
-                        const tr = this.document.createElement('tr');
-                        tbody.appendChild(tr);
-                        for (let colIndex = 0; colIndex < colId; colIndex++) {
-                            const td = this.document.createElement('td');
-                            const br = this.document.createElement('br');
-                            td.appendChild(br);
-                            tr.appendChild(td);
-                        }
-                    }
-                    const sel = this.document.defaultView.getSelection();
-                    if (!sel.isCollapsed) {
-                        this.deleteRange(sel);
-                    }
-                    sel.focusNode.parentNode.insertBefore(table, sel.focusNode);
-                    setCursorStart(table.querySelector('td'));
+                    this.execCommand('insertTable', {
+                        rowCount: +buttonEl.dataset.rowId,
+                        colCount: +buttonEl.dataset.colId,
+                    });
                 } else if (
                     ['italic', 'underline', 'strikeThrough', 'removeFormat'].includes(buttonEl.id)
                 ) {
@@ -4106,6 +4129,26 @@ var exportVariable = (function (exports) {
                 }
                 this.tablePicker.dataset.colCount = colCount - removedColIds.size;
             }
+        }
+        _insertTable({ rowCount = 2, colCount = 2 } = {}) {
+            const tdsHtml = new Array(colCount).fill('<td><br></td>').join('');
+            const trsHtml = new Array(rowCount).fill(`<tr>${tdsHtml}</tr>`).join('');
+            const tableHtml = `<table class="table table-bordered"><tbody>${trsHtml}</tbody></table>`;
+            const sel = this.document.defaultView.getSelection();
+            if (!sel.isCollapsed) {
+                this.deleteRange(sel);
+            }
+            while (!isBlock(sel.anchorNode)) {
+                const anchorNode = sel.anchorNode;
+                const isTextNode = anchorNode.nodeType === Node.TEXT_NODE;
+                const newAnchorNode = isTextNode
+                    ? splitTextNode(anchorNode, sel.anchorOffset, DIRECTIONS.LEFT) + 1 && anchorNode
+                    : splitElement(anchorNode, sel.anchorOffset).shift();
+                const newPosition = rightPos(newAnchorNode);
+                setCursor(...newPosition, ...newPosition, false);
+            }
+            const [table] = this._insertHTML(tableHtml);
+            setCursorStart(table.querySelector('td'));
         }
         _addColumnLeft() {
             this._addColumn('before');
@@ -4251,6 +4294,8 @@ var exportVariable = (function (exports) {
     exports.fillEmpty = fillEmpty;
     exports.findNode = findNode;
     exports.firstChild = firstChild;
+    exports.getAdjacentNextSiblings = getAdjacentNextSiblings;
+    exports.getAdjacentPreviousSiblings = getAdjacentPreviousSiblings;
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
     exports.getDeepRange = getDeepRange;
