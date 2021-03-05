@@ -284,6 +284,9 @@ odoo.define('payment.payment_form_mixin', require => {
          * @return {object} The transaction route params
          */
         _prepareTransactionRouteParams: function (provider, paymentOptionId, flow) {
+            // FIXME ANVFE I don't get why we use the csrf for the transaction route
+            // but not for the payment_test json route...
+            // isn't it added automatically by the js to the rpcs?
             return {
                 'payment_option_id': paymentOptionId,
                 'reference_prefix': this.txContext.referencePrefix,

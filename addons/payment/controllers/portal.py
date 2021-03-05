@@ -95,6 +95,8 @@ class PaymentPortal(portal.CustomerPortal):
         partner_is_different = False
         if logged_in:
             partner_is_different = partner_id and partner_id != user_sudo.partner_id.id
+            # FIXME ANVFE strange to pay with another partner if we are connected with a user
+            # in another company...
             partner_sudo = user_sudo.partner_id
         else:
             partner_sudo = request.env['res.partner'].sudo().browse(partner_id).exists()
@@ -121,7 +123,7 @@ class PaymentPortal(portal.CustomerPortal):
         )  # In sudo mode to read the fields of acquirers and partner (if not logged in)
         payment_tokens = request.env['payment.token'].search(
             [('acquirer_id', 'in', acquirers_sudo.ids), ('partner_id', '=', partner_sudo.id)]
-        ) if logged_in else request.env['payment.token']  #
+        ) if logged_in else request.env['payment.token']
 
         # Compute the fees taken by acquirers supporting the feature
         fees_by_acquirer = {
@@ -270,6 +272,7 @@ class PaymentPortal(portal.CustomerPortal):
                 and tokenization_required_or_requested
             )
         elif flow == 'token':  # Payment by token
+            # FIXME ANVFE how can we be sure this token belongs to the current user ?
             token_sudo = request.env['payment.token'].sudo().browse(payment_option_id)
             acquirer_sudo = token_sudo.acquirer_id
             token_id = payment_option_id
@@ -278,6 +281,8 @@ class PaymentPortal(portal.CustomerPortal):
             raise UserError(
                 _("The payment should either be direct, with redirection, or made by a token.")
             )
+        # FIXME ANVFE raise if acquirer not enabled ?
+        # FIXME ANVFE raise if token not enabled anymore ?
         reference = request.env['payment.transaction']._compute_reference(
             acquirer_sudo.provider,
             prefix=reference_prefix,
@@ -300,6 +305,7 @@ class PaymentPortal(portal.CustomerPortal):
             'tokenize': tokenize,
             'validation_route': validation_route,
             'landing_route': landing_route,
+            # FIXME ANVFE do not allow to overwrite existing values through the custom_create_values.
             **(custom_create_values or {}),  # Overwrite the default values if there are collisions
         })  # In sudo mode to allow writing on callback fields
         # Validation routes require the transaction id

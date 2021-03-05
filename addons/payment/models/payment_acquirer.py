@@ -63,6 +63,7 @@ class PaymentAcquirer(models.Model):
         column1='payment_id', column2='country_id',
         help="The countries for which this payment acquirer is available.\n"
              "If none is set, it is available for all countries.")
+    # TODO ANVFE check_company for journal_id ???
     journal_id = fields.Many2one(
         string="Payment Journal", comodel_name='account.journal',
         help="The journal in which the successful transactions are posted",

@@ -42,6 +42,8 @@ class PaypalForm(PaypalCommon):
 
         return values
 
+    # TODO Test processing_values without IPN (notify_url should be empty)
+
     def test_redirect_form_values(self):
         tx = self.create_transaction(flow='redirect')
         with mute_logger('odoo.addons.payment.models.payment_transaction'):
