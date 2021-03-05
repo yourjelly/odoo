@@ -10,6 +10,7 @@ import { DialogContainer } from "@web/services/dialog_service";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
 import { debugService } from "@web/debug/debug_service";
 import { clearRegistryWithCleanup } from "../helpers/mock_env";
+import { switchView } from "../helpers/control_panel";
 
 let testConfig;
 
@@ -79,12 +80,12 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 3);
     assert.containsOnce(webClient, ".o_list_view", "should display the list view");
     // switch to kanban view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsNone(webClient, ".o_list_view", "should no longer display the list view");
     assert.containsOnce(webClient, ".o_kanban_view", "should display the kanban view");
     // switch back to list view
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_list_view", "should display the list view");
     assert.containsNone(webClient.el, ".o_kanban_view", "should no longer display the kanban view");
@@ -184,7 +185,7 @@ QUnit.module("ActionManager", (hooks) => {
       "breadcrumbs should display the display_name of the action"
     );
     // switch to kanban view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsOnce(
       webClient.el,
@@ -223,7 +224,7 @@ QUnit.module("ActionManager", (hooks) => {
       "breadcrumbs should display the display_name of the action"
     );
     // switch back to list view
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsOnce(
       webClient.el,
@@ -290,7 +291,7 @@ QUnit.module("ActionManager", (hooks) => {
       "list should be the active view"
     );
     // switch to kanban view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsN(
       webClient.el,
@@ -314,7 +315,7 @@ QUnit.module("ActionManager", (hooks) => {
       "kanban should now be the active view"
     );
     // switch back to list view
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsN(
       webClient.el,
@@ -365,7 +366,7 @@ QUnit.module("ActionManager", (hooks) => {
       "limit should be correct for kanban"
     );
     // switch to list view
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.strictEqual(
       $(webClient.el).find(".o_control_panel .o_pager_value").text(),
@@ -404,7 +405,7 @@ QUnit.module("ActionManager", (hooks) => {
       "limit should be correct for list"
     );
     // switch back to kanban view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.strictEqual(
       $(webClient.el).find(".o_control_panel .o_pager_value").text(),
@@ -430,7 +431,7 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_data_row", 2);
     // switch to kanban
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_kanban_record:not(.o_kanban_ghost)", 2);
     // remove the domain
@@ -438,7 +439,7 @@ QUnit.module("ActionManager", (hooks) => {
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_kanban_record:not(.o_kanban_ghost)", 5);
     // switch back to list
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_data_row", 5);
   });
@@ -453,7 +454,7 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 3);
     // switch to kanban view
     def = testUtils.makeTestPromise();
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_list_view", "should still display the list view");
     assert.containsNone(webClient, ".o_kanban_view", "shouldn't display the kanban view yet");
@@ -464,7 +465,7 @@ QUnit.module("ActionManager", (hooks) => {
     assert.containsOnce(webClient, ".o_kanban_view", "should now display the kanban view");
     // switch back to list view
     def = testUtils.makeTestPromise();
-    await cpHelpers.switchView(webClient.el, "list");
+    await switchView(webClient.el, "list");
     await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_kanban_view", "should still display the kanban view");
     assert.containsNone(webClient, ".o_list_view", "shouldn't display the list view yet");
@@ -985,14 +986,14 @@ QUnit.module("ActionManager", (hooks) => {
       "line chart button is now active"
     );
     // switch to kanban and back to graph view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsNone(
       webClient.el,
       ".o_control_panel  .fa-area-chart",
       "graph buttons are no longer in control panel"
     );
-    await cpHelpers.switchView(webClient.el, "graph");
+    await switchView(webClient.el, "graph");
     await legacyExtraNextTick();
     assert.hasClass(
       $(webClient.el).find(".o_control_panel  .fa-area-chart")[0],
@@ -1018,7 +1019,7 @@ QUnit.module("ActionManager", (hooks) => {
       "graph button in control panel is not active"
     );
     // switch to graph view
-    await cpHelpers.switchView(webClient.el, "graph");
+    await switchView(webClient.el, "graph");
     await legacyExtraNextTick();
     assert.doesNotHaveClass(
       $(webClient.el).find(".o_control_panel .o_switch_view.o_list")[0],
@@ -1037,7 +1038,7 @@ QUnit.module("ActionManager", (hooks) => {
     testConfig.serverData.views["partner,false,search"] = `
       <search>
         <group>
-          <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+          <filter name="foo" string="Foo" context="{'group_by': 'foo'}"/>
         </group>
       </search>`;
     const webClient = await createWebClient({ testConfig });
@@ -1047,13 +1048,8 @@ QUnit.module("ActionManager", (hooks) => {
       "o_list_table_grouped",
       "list view is not grouped"
     );
-    // open group by dropdown
-    await testUtils.dom.click(
-      $(webClient.el).find(".o_control_panel .o_cp_bottom_right button:contains(Group By)")
-    );
-    // click on first link
-    await testUtils.dom.click($(webClient.el).find(".o_control_panel .o_group_by_menu a:first"));
-    await legacyExtraNextTick();
+    await cpHelpers.toggleGroupByMenu(webClient.el);
+    await cpHelpers.toggleMenuItem(webClient.el, "Foo");
     assert.hasClass(
       $(webClient.el).find(".o_list_table")[0],
       "o_list_table_grouped",
@@ -1134,7 +1130,7 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 3);
     assert.containsN(webClient, ".o_data_row", 2);
     // switch to kanban view
-    await cpHelpers.switchView(webClient.el, "kanban");
+    await switchView(webClient.el, "kanban");
     await legacyExtraNextTick();
     assert.containsN(webClient, ".o_kanban_record:not(.o_kanban_ghost)", 2);
   });
@@ -1253,12 +1249,9 @@ QUnit.module("ActionManager", (hooks) => {
       2,
       "should be grouped by 'bar' (two groups) at first load"
     );
-    // groupby 'bar' using the searchview
-    await testUtils.dom.click(
-      $(webClient.el).find(".o_control_panel .o_cp_bottom_right button:contains(Group By)")
-    );
-    await testUtils.dom.click($(webClient.el).find(".o_control_panel .o_group_by_menu a:first"));
-    await legacyExtraNextTick();
+    // groupby 'foo' using the searchview
+    await cpHelpers.toggleGroupByMenu(webClient.el);
+    await cpHelpers.toggleMenuItem(webClient.el, "Foo");
     assert.containsN(
       webClient.el,
       ".o_group_header",
@@ -1266,10 +1259,7 @@ QUnit.module("ActionManager", (hooks) => {
       "should be grouped by 'foo' (five groups)"
     );
     // remove the groupby in the searchview
-    await testUtils.dom.click(
-      $(webClient.el).find(".o_control_panel .o_searchview .o_facet_remove")
-    );
-    await legacyExtraNextTick();
+    await cpHelpers.removeFacet(webClient.el);
     assert.containsOnce(webClient, ".o_list_table_grouped", "should still be grouped");
     assert.containsN(
       webClient.el,
@@ -1298,8 +1288,7 @@ QUnit.module("ActionManager", (hooks) => {
     await doAction(webClient, 33);
     assert.containsOnce(webClient, ".o_list_view", "should display the list view");
     // try to open a record in a form view
-    testUtils.dom.click($(webClient.el).find(".o_list_view .o_data_row:first"));
-    await legacyExtraNextTick();
+    await testUtils.dom.click($(webClient.el).find(".o_list_view .o_data_row:first"));
     assert.containsOnce(webClient, ".o_list_view", "should still display the list view");
     assert.containsNone(webClient, ".o_form_view", "should not display the form view");
     assert.verifySteps([
