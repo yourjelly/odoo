@@ -20,13 +20,13 @@
 
     <t t-extend="wysiwyg.widgets.linkTools">
         <t t-jquery="#url_row" t-operation="after">
-            <div style="text-align: center">
+            <div style="text-align: center" t-attf-class="#{widget.isButton ? ' d-none' : ''}">
                 <small>
                     Type '<span class="highlighted-text">/</span>' to search a page.
                     '<span class="highlighted-text">#</span>' to link to an anchor.
                 </small>
             </div>
-            <we-row class="o_link_dialog_page_anchor d-none">
+            <we-row class="o_link_dialog_page_anchor d-none" t-attf-class="#{widget.isButton ? ' d-none' : ''}">
                 <we-select class="o_we_user_value_widget">
                     <we-title>⌙ Page Anchor</we-title>
                     <div>
