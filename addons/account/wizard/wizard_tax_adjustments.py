@@ -22,7 +22,7 @@ class TaxAdjustments(models.TransientModel):
     adjustment_type = fields.Selection([('debit', 'Applied on debit journal item'), ('credit', 'Applied on credit journal item')], string="Adjustment Type", required=True)
     tax_report_line_id = fields.Many2one(string="Report Line", comodel_name='account.tax.report.line', required=True, help="The report line to make an adjustment for.")
     company_currency_id = fields.Many2one('res.currency', readonly=True, default=lambda x: x.env.company.currency_id)
-    report_id = fields.Many2one(string="Report", related='tax_report_line_id.report_id')
+    report_id = fields.Many2one(string="Report", required=True, help="The report for which the adjustment is made for.")
 
 
     def create_move(self):
