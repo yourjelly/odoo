@@ -308,3 +308,23 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
         self.assertIn(
             "odoo.exceptions.ValidationError: The access token is invalid.",
             response.text)
+
+    # def test_pay_wrong_values(self):
+    #     route_values = self._prepare_pay_values()
+
+    #     route_values.update({
+    #         'flow': 'redirect',
+    #         'payment_option_id': self.acquirer.id,
+    #         'tokenization_requested': False,
+    #         'validation_route': '/payment/validation',
+    #         'reference_prefix': route_values['reference'],
+    #         'landing_route': False,
+    #         'custom_create_values': {'state': 'done'},
+    #     })
+
+    #     with mute_logger('odoo.addons.payment.models.payment_transaction'):
+    #         processing_values = self.get_processing_values(**route_values)
+    #     import pudb; pudb.set_trace();
+    #     tx_sudo = self._get_tx(processing_values['reference'])
+    #     # TODO ANVFE FIXME
+    #     self.assertEqual(tx_sudo.state, 'draft')

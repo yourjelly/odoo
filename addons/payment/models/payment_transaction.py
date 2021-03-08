@@ -331,6 +331,8 @@ class PaymentTransaction(models.Model):
             # For instance, the prefix 'example' is a valid match for the existing references
             # 'example', 'example-1' and 'example-ref', in that order. Trusting the order to infer
             # the sequence number would lead to a collision with 'example-1'.
+            # prefix = prefix.replace('*', '\*')
+            # separator = separator.replace('*', '\*')
             search_pattern = re.compile(rf'^{prefix}{separator}(\d+)$')
             max_sequence_number = 0  # If no match is found, start the sequence with this reference
             for existing_reference in same_prefix_references:

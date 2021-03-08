@@ -157,3 +157,9 @@ class TestSalePayment(PaymentInvoicingCommon, PaymentHttpCommon):
         self.assertEqual(tx2_sudo.reference, reference)
         self.assertEqual(self.order.state, 'draft')
         self.assertEqual(self.order.transaction_ids, tx_sudo + tx2_sudo)
+
+    def test_20_so_transaction(self):
+        # TODO ANVFE test full SO payment through /my/orders/<id>/transaction
+        self.order._portal_ensure_token()
+
+        pass
