@@ -543,15 +543,12 @@ var exportVariable = (function (exports) {
         let end = range.endContainer;
         let endOffset = range.endOffset;
 
+        const isBackwards =
+            !range.collapsed && start === sel.focusNode && startOffset === sel.focusOffset;
+
         // Target the deepest descendant of the range nodes.
-        while (start.childNodes.length) {
-            start = start.childNodes[startOffset - 1] || start.firstChild;
-            startOffset = 0;
-        }
-        while (end.childNodes.length) {
-            end = end.childNodes[endOffset - 1] || end.firstChild;
-            endOffset = 0;
-        }
+        [start, startOffset] = getDeepestPosition(start, startOffset);
+        [end, endOffset] = getDeepestPosition(end, endOffset);
 
         // Split text nodes if that was requested.
         if (splitText) {
@@ -582,13 +579,44 @@ var exportVariable = (function (exports) {
             }
         }
 
-        range.setStart(start, startOffset);
-        range.setEnd(end, endOffset);
         if (select) {
+            if (isBackwards) {
+                [start, end, startOffset, endOffset] = [end, start, endOffset, startOffset];
+                range.setEnd(start, startOffset);
+                range.collapse(false);
+            } else {
+                range.setStart(start, startOffset);
+                range.collapse(true);
+            }
             sel.removeAllRanges();
             sel.addRange(range);
+            try {
+                sel.extend(end, endOffset);
+            } catch (e) {
+                // Firefox yells not happy when setting selection on elem with contentEditable=false.
+            }
+            range = sel.getRangeAt(0);
+        } else {
+            range.setStart(start, startOffset);
+            range.setEnd(end, endOffset);
         }
         return range;
+    }
+
+    function getDeepestPosition(node, offset) {
+        while (node.hasChildNodes()) {
+            node = node.childNodes[offset - 1] || node.firstChild;
+            offset = offset === 0 ? 0 : nodeSize(node);
+        }
+        let didMove = false;
+        let reversed = false;
+        while (!isVisible(node) && (node.previousSibling || (!reversed && node.nextSibling))) {
+            reversed = reversed || !node.nextSibling;
+            node = reversed ? node.previousSibling : node.nextSibling;
+            offset = 0;
+            didMove = true;
+        }
+        return didMove ? getDeepestPosition(node, offset) : [node, offset];
     }
 
     function getCursors(document) {
@@ -882,6 +910,9 @@ var exportVariable = (function (exports) {
                 }
             }
         }
+        while (following && /^[\n\t ]*$/.test(following.textContent)) {
+            following = following.nextSibling;
+        }
         // Missing preceding or following: invisible.
         // Preceding or following not in the same block as tested node: invisible.
         if (
@@ -891,8 +922,8 @@ var exportVariable = (function (exports) {
         ) {
             return false;
         }
-        // Preceding ends with a whitespace: invisible
-        return !/^[\n\t ]+$/.test(preceding.textContent);
+        // Preceding is whitespace or following is whitespace: invisible
+        return !/^[\n\t ]*$/.test(preceding.textContent);
     }
 
     function parentsGet(node, root = undefined) {
@@ -2205,6 +2236,7 @@ var exportVariable = (function (exports) {
 
             // Merge identical elements together
             while (areSimilarElements(node, node.previousSibling)) {
+                getDeepRange(this.root.ownerDocument, { select: true });
                 let restoreCursor = preserveCursor(this.root.ownerDocument);
                 let nodeP = node.previousSibling;
                 moveNodes(...endPos(node.previousSibling), node);
@@ -2947,6 +2979,7 @@ var exportVariable = (function (exports) {
                     }
                 }
             }
+            this._activateContenteditable();
             this.historySetCursor(step);
         }
 
@@ -3297,6 +3330,13 @@ var exportVariable = (function (exports) {
 
         _unlink(offset, content) {
             const sel = this.document.defaultView.getSelection();
+            // we need to remove the contentEditable isolation of links
+            // before we apply the unlink, otherwise the command is not performed
+            // because the content editable root is the link
+            const closestEl = closestElement(sel.focusNode);
+            if (closestEl.tagName === 'A' && closestEl.getAttribute('contenteditable') === 'true') {
+                this._activateContenteditable();
+            }
             if (sel.isCollapsed) {
                 const cr = preserveCursor(this.document);
                 const node = closestElement(sel.focusNode, 'a');
@@ -4316,6 +4356,7 @@ var exportVariable = (function (exports) {
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
     exports.getDeepRange = getDeepRange;
+    exports.getDeepestPosition = getDeepestPosition;
     exports.getInSelection = getInSelection;
     exports.getListMode = getListMode;
     exports.getNormalizedCursorPosition = getNormalizedCursorPosition;
