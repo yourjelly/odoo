@@ -573,7 +573,7 @@
                 </div>
             </we-input>
         </we-row>
-        <we-row id="url_row">
+        <we-row id="url_row" t-attf-class="#{widget.isButton ? ' d-none' : ''}">
             <we-input class="o_we_user_value_widget">
                 <we-title class="o_short_title">⌙ </we-title>
                 <div class="o_url_input">
@@ -581,7 +581,7 @@
                 </div>
             </we-input>
         </we-row>
-        <we-row class="o_strip_domain d-none">
+        <we-row class="o_strip_domain d-none" t-attf-class="#{widget.isButton ? ' d-none' : ''}">
             <we-button class="o_we_user_value_widget o_we_checkbox_wrapper active">
                 <we-title class="o_long_title">⌙ Autoconvert to relative link</we-title>
                     <div class="o_switch">
@@ -664,7 +664,7 @@
                 </div>
             </we-select>
         </we-row>
-        <we-row>
+        <we-row  t-if="!widget.isButton &amp;&amp; !widget.options.forceNewWindow">
             <we-button class="o_we_user_value_widget o_we_checkbox_wrapper">
                 <we-title class="o_long_title">⌙ Open in new window</we-title>
                     <div class="o_switch">
