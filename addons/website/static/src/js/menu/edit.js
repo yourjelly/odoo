@@ -38,6 +38,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      */
     init: function (parent, options = {}) {
         this._super.apply(this, arguments);
+        this.options = options;
         this.wysiwygOptions = options.wysiwygOptions || {};
         var context;
         this.trigger_up('context_get', {
@@ -261,6 +262,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this.wysiwyg.odooEditor.observerUnactive();
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
         this._addEditorMessages(); // Insert editor messages in the DOM without observing.
+        if (this.options.beforeEditorActive) this.options.beforeEditorActive() ;
         this.wysiwyg.odooEditor.observerActive();
 
         // Observe changes to mark dirty structures and fields.
