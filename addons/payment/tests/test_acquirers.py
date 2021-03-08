@@ -61,22 +61,30 @@ class TestAcquirers(PaymentMultiCompanyCommon):
         PaymentTransaction = self.env['payment.transaction']
         provider = 'none'
 
+        # No prefix is expected without sale orders / invoices ids specified
         default_prefix = PaymentTransaction._compute_reference_prefix(provider, 'not used')
         self.assertEqual(default_prefix, '')
 
+        # If no prefix is given, the reference should fall back on a singularized prefix
+        # considering the current datetime.
+        with freeze_time("2020-03-01 22:00"):
+            default_reference = PaymentTransaction._compute_reference(provider)
+        self.assertEqual(default_reference, 'tx-20200301220000')
+
+        # Verify the normalization of the reference prefix
+        normalized_ref = PaymentTransaction._compute_reference(provider, "àéèëçöõ€ßðŋœłĸ→", 'whatever')
+        self.assertEqual(normalized_ref, "aeeecoo")
+
         prefixes = [
-            "validation", "SO324", "INV345/34/34533", ".!", #"çaéèêë$", 
+            "validation", "SO324", "INV345/34/34533", ".!",
             "THIS IS A VERY LONG TRANSACTION PREFIX", "!{abcdef}--__--"]
         separators = ["#-_-#", "-abcde-", "x", "{}", "878675765"]
         # unsupported prefixes/separators : "[]", "{-}", "*-_x_-*", "\o/", "?"
-        # TODO Test normalization: "€" removed, éèëç -> eeec
         for prefix in prefixes:
-            print("PREFIX", prefix)
             reference = PaymentTransaction._compute_reference(provider, prefix, 'whatever')
             self.assertEqual(reference, prefix)
             self.create_transaction(flow='direct', reference=prefix) # reference = prefix
             for separator in separators:
-                print("SEPARATOR", separator)
                 reference = PaymentTransaction._compute_reference(provider, prefix, separator)
                 self.assertEqual(reference, f'{prefix}{separator}{1}')
 
@@ -88,15 +96,6 @@ class TestAcquirers(PaymentMultiCompanyCommon):
                 tx2 = self.create_transaction(flow='direct', reference=f'{prefix}{separator}{450}')
                 reference = PaymentTransaction._compute_reference(provider, prefix, separator)
                 self.assertEqual(reference, f'{prefix}{separator}{451}')
-
-        # TODO test creation of conflicting references & reference computation
-        # TODO advanced tests to cover reference generation
-        # based on different prefixes.
-
-        # 1) test various prefixes
-        # 2) test prefixes from values (invoice_ids, sale_order_id, ...)
-        # 3) test singularized prefix
-        pass
 
     def test_acquirers(self):
         # Test access rights ?
