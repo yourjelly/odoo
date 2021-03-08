@@ -33,7 +33,7 @@ var LinkDialog = Dialog.extend({
             title: _t("Link to"),
         }, this.options));
 
-        this.data = linkInfo || {};
+        this.data = data || {};
         this.isButton = this.data.isButton;
         // Using explicit type 'link' to preserve style when the target is <button class="...btn-link"/>.
         this.colorsData = [

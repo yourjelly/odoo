@@ -185,6 +185,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             snippets: this.nodeOptions.snippets,
             value: this.value,
             mediaModalParams: { noVideos: true },
+            linkForceNewWindow: true,
 
             tabsize: 0,
             height: 380,
@@ -468,8 +469,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             top: '+5px',
         });
         this.$el.append($button);
-        $.summernote.eventHandler.modules.linkDialog.options = _.extend({},
-            $.summernote.eventHandler.modules.linkDialog.options, {forceNewWindow: true});
     },
     /**
      * @private
