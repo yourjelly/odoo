@@ -722,7 +722,10 @@ var exportVariable = (function (exports) {
             return true;
         }
         const isEditableRoot =
-            node.isContentEditable && node.parentElement && !node.parentElement.isContentEditable;
+            node.isContentEditable &&
+            node.parentElement &&
+            !node.parentElement.isContentEditable &&
+            node.nodeName !== 'A'; // links can be their own contenteditable but should be removable by default.
         return isEditableRoot || (node.classList && node.classList.contains('oe_unremovable'));
     }
 
@@ -1801,6 +1804,7 @@ var exportVariable = (function (exports) {
      * beginning of the first split node
      */
     HTMLElement.prototype.oEnter = function (offset, firstSplit = true) {
+        let didSplit = false;
         if (isUnbreakable(this)) {
             throw UNBREAKABLE_ROLLBACK_CODE;
         }
@@ -1814,12 +1818,19 @@ var exportVariable = (function (exports) {
         while (offset < this.childNodes.length) {
             splitEl.appendChild(this.childNodes[offset]);
         }
-        this.after(splitEl);
+        if (isBlock(this) || splitEl.hasChildNodes()) {
+            this.after(splitEl);
+            if (isVisible(splitEl)) {
+                didSplit = true;
+            } else {
+                splitEl.remove();
+            }
+        }
 
         // Propagate the split until reaching a block element
         if (!isBlock(this)) {
             if (this.parentElement) {
-                this.parentElement.oEnter(childNodeIndex(this) + 1, false);
+                this.parentElement.oEnter(childNodeIndex(this) + 1, !didSplit);
             } else {
                 // There was no block parent element in the original chain, consider
                 // this unsplittable, like an unbreakable.
@@ -1829,7 +1840,7 @@ var exportVariable = (function (exports) {
 
         // All split have been done, place the cursor at the right position, and
         // fill/remove empty nodes.
-        if (firstSplit) {
+        if (firstSplit && didSplit) {
             restore();
 
             fillEmpty(clearEmpty(this));
@@ -3001,7 +3012,7 @@ var exportVariable = (function (exports) {
                     range.setEndAfter(previous);
                 }
             }
-            const start = range.startContainer;
+            let start = range.startContainer;
             let end = range.endContainer;
             // Let the DOM split and delete the range.
             const doJoin = closestBlock(start) !== closestBlock(range.commonAncestorContainer);
@@ -3047,11 +3058,17 @@ var exportVariable = (function (exports) {
                 end.remove();
                 end = parent;
             }
-            // Ensure empty blocks be given a <br> child.
-            const block = closestBlock(range.endContainer);
-            if (isBlock(block) && !isVisible(block, false)) {
-                block.appendChild(document.createElement('br'));
+            // Same with the start container
+            while (start && start !== this.dom && !isVisible(start)) {
+                const parent = start.parentNode;
+                start.remove();
+                start = parent;
             }
+            // Ensure empty blocks be given a <br> child.
+            if (start) {
+                fillEmpty(closestBlock(start));
+            }
+            fillEmpty(closestBlock(range.endContainer));
             // Ensure trailing space remains visible.
             const joinWith = range.endContainer;
             let oldText = joinWith.textContent;
@@ -3078,8 +3095,8 @@ var exportVariable = (function (exports) {
             // Restore the text we modified in order to preserve trailing space.
             if (doJoin && oldText.endsWith(' ')) {
                 joinWith.textContent = oldText;
+                setCursor(joinWith, nodeSize(joinWith));
             }
-            setCursor(joinWith, nodeSize(joinWith));
         }
 
         /**
