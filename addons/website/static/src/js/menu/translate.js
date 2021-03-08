@@ -12,7 +12,6 @@ var websiteNavbarData = require('website.navbar');
 var _t = core._t;
 
 var localStorageNoDialogKey = 'website_translator_nodialog';
-var reTranslation = /<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/;
 
 var TranslatorInfoDialog = Dialog.extend({
     template: 'website.TranslatorInfoDialog',
@@ -76,7 +75,11 @@ var AttributeTranslateDialog = weDialog.extend({
             $input.on('change keyup', function () {
                 var value = $input.val();
                 $node.html(value).trigger('change', node);
-                $node.data('$node').attr($node.data('attribute'), value).trigger('translate');
+                if ($node.data('attribute')) {
+                    $node.data('$node').attr($node.data('attribute'), value).trigger('translate');
+                } else {
+                    $node.data('$node').val(value).trigger('translate');
+                }
                 $node.trigger('change');
             });
             $group.append($label).append($input);
@@ -89,6 +92,8 @@ const savableSelector = '[data-oe-translation-id], ' +
     '[data-oe-model][data-oe-id][data-oe-field], ' +
     '[placeholder*="data-oe-translation-id="], ' +
     '[title*="data-oe-translation-id="], ' +
+    '[value*="data-oe-translation-id="], ' +
+    'textarea:contains(data-oe-translation-id), ' +
     '[alt*="data-oe-translation-id="]';
 
 var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
@@ -156,7 +161,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @private
      * @returns {Promise}
      */
-    _startTranslateMode: function () {
+    _startTranslateMode: async function () {
         const self = this;
         if (!this._mustEditTranslations) {
             window.location.search += '&edit_translations';
@@ -175,6 +180,66 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 return $(savableSelector)
                     .not('[data-oe-readonly]');
             },
+            beforeEditorActive:  async() => {
+                var attrs = ['placeholder', 'title', 'alt', 'value'];
+                const $editable = self._getEditableArea();
+                const translationRegex = /<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/;
+                let $edited = $();
+                _.each(attrs, function (attr) {
+                    const attrEdit = $editable.filter('[' + attr + '*="data-oe-translation-id="]').filter(':empty, input, select, textarea, img');
+                    attrEdit.each(function () {
+                        var $node = $(this);
+                        var translation = $node.data('translation') || {};
+                        var trans = $node.attr(attr);
+                        var match = trans.match(translationRegex);
+                        var $trans = $(trans).addClass('d-none o_editable o_editable_translatable_attribute').appendTo('body');
+                        $trans.data('$node', $node).data('attribute', attr);
+
+                        translation[attr] = $trans[0];
+                        $node.attr(attr, match[2]);
+
+                        $node.addClass('o_translatable_attribute').data('translation', translation);
+                    });
+                    $edited = $edited.add(attrEdit);
+                });
+                const textEdit = $editable.filter('textarea:contains(data-oe-translation-id)');
+                textEdit.each(function () {
+                    var $node = $(this);
+                    var translation = $node.data('translation') || {};
+                    var trans = $node.text();
+                    var match = trans.match(translationRegex);
+                    var $trans = $(trans).addClass('d-none o_editable o_editable_translatable_text').appendTo('body');
+                    $trans.data('$node', $node);
+
+                    translation['textContent'] = $trans[0];
+                    $node.val(match[2]);
+
+                    $node.addClass('o_translatable_text').data('translation', translation);
+                });
+                $edited = $edited.add(textEdit);
+
+                $edited.each(function () {
+                    var $node = $(this);
+                    var select2 = $node.data('select2');
+                    if (select2) {
+                        select2.blur();
+                        $node.on('translate', function () {
+                            select2.blur();
+                        });
+                        $node = select2.container.find('input');
+                    }
+                });
+
+                self.translations = [];
+                self.$translations = self._getEditableArea().filter('.o_translatable_attribute, .o_translatable_text');
+                self.$editables = $('.o_editable_translatable_attribute, .o_editable_translatable_text');
+
+                self.$editables.on('change', function () {
+                    self.trigger_up('rte_change', {target: this});
+                });
+
+                self._markTranslatableNodes();
+            },
         });
 
         // We don't want the BS dropdown to close
@@ -187,53 +252,12 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             new TranslatorInfoDialog(this.translator).open();
         }
 
-        this.translator.prependTo(document.body).then(() => {
-            // Apply data-oe-readonly on nested data.
-            $(savableSelector)
-                .filter(':has(' + savableSelector + ')')
-                .attr('data-oe-readonly', true);
-            return this.translator._startEditMode();
-        }).then(() => {
-            var attrs = ['placeholder', 'title', 'alt'];
-            _.each(attrs, function (attr) {
-                self._getEditableArea()
-                    .filter('[' + attr + '*="data-oe-translation-id="]')
-                    .filter(':empty, input, select, textarea, img')
-                    .each(function () {
-                        var $node = $(this);
-                        var translationData = $node.data('translation') || {};
-                        var translation = $node.attr(attr);
-                        var match = translation.match(reTranslation);
-                        var $translation = $(translation)
-                            .addClass('d-none o_editable o_editable_translatable_attribute')
-                            .appendTo('body');
-                        $translation.data('$node', $node).data('attribute', attr);
-
-                        translationData[attr] = $translation[0];
-                        $node.attr(attr, match[2]);
-
-                        var select2 = $node.data('select2');
-                        if (select2) {
-                            select2.blur();
-                            $node.on('translate', function () {
-                                select2.blur();
-                            });
-                            $node = select2.container.find('input');
-                        }
-                        $node.addClass('o_translatable_attribute').data('translation', translationData);
-                    });
-            });
-
-            self.translations = [];
-            self.$editables_attr = self._getEditableArea().filter('.o_translatable_attribute');
-            self.$editables_attribute = $('.o_editable_translatable_attribute');
-
-            self.$editables_attribute.on('change', function () {
-                self.trigger_up('rte_change', {target: this});
-            });
-
-            self._markTranslatableNodes();
-        });
+        await this.translator.prependTo(document.body);
+        // Apply data-oe-readonly on nested data.
+        $(savableSelector)
+            .filter(':has(' + savableSelector + ')')
+            .attr('data-oe-readonly', true);
+        await this.translator._startEditMode();
     },
 
     //--------------------------------------------------------------------------
@@ -247,7 +271,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @returns {JQuery}
      */
     _getEditableArea: function () {
-        return this.translator.wysiwyg.$editable.find(':o_editable').add(this.$editables_attribute);
+        return this.translator.wysiwyg.$editable.find(':o_editable').add(this.$editables);
     },
     /**
      * Returns a translation object.
@@ -290,7 +314,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
         // attributes
 
-        this.$editables_attr.each(function () {
+        this.$translations.each(function () {
             var $node = $(this);
             var translation = $node.data('translation');
             _.each(translation, function (node, attr) {
@@ -300,7 +324,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             });
         });
 
-        this.$editables_attr.prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
+        this.$translations.prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
             if (ev.ctrlKey) {
                 return;
             }
