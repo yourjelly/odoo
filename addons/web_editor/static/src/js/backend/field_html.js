@@ -13,7 +13,6 @@ require('web._field_registry');
 var _lt = core._lt;
 var TranslatableFieldMixin = basic_fields.TranslatableFieldMixin;
 var QWeb = core.qweb;
-var assetsLoaded;
 
 var jinjaRegex = /(^|\n)\s*%\s(end|set\s)/;
 
