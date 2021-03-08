@@ -67,6 +67,10 @@ const LinkTools = Widget.extend({
         this.data.className = this.data.iniClassName
             .replace(allBtnClassSuffixes, ' ')
             .replace(allBtnShapes, ' ');
+        // 'o_submit' class will force anchor to be handled as a button in linkdialog.
+        if (/(?:s_website_form_send|o_submit)/.test(this.data.className)) {
+            this.isButton = true;
+        }
     },
     /**
      * @override
@@ -162,7 +166,7 @@ const LinkTools = Widget.extend({
             }
         }
 
-        if ($url.prop('required') && (!url || !$url[0].checkValidity())) {
+        if (!this.isButton && $url.prop('required') && (!url || !$url[0].checkValidity())) {
             return null;
         }
 
