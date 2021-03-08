@@ -515,7 +515,9 @@ const Wysiwyg = Widget.extend({
                 this.linkTools.appendTo(this.toolbar.$el);
             }
         } else {
-            const linkDialog = new weWidgets.LinkDialog(this, {}, this.$editable[0]);
+            const linkDialog = new weWidgets.LinkDialog(this, {
+                forceNewWindow: this.options.linkForceNewWindow,
+            }, this.$editable[0]);
             linkDialog.open();
             linkDialog.on('save', this, (linkInfo) => {
                 const linkUrl = linkInfo.url;
