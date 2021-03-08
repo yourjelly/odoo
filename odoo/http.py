@@ -329,6 +329,7 @@ class Request(object):
     def __init__(self, httprequest):
         self.httprequest = httprequest
         self.httpresponse = None
+
         self.disable_db = False # TODO db remove
         self.auth_method = None
         self._request_type = None
@@ -336,6 +337,19 @@ class Request(object):
         self._uid = None
         self._context = None
         self._env = None
+
+        # Session
+        self.session_sid = None
+        self.session_db = None
+
+
+        # We keep a default one and then we merge headers._list
+        self.response = werkzeug.wrappers.Response(mimetype='text/html')
+        self.response_template = None
+        self.response_qcontext = None
+        #self.response_headers = werkzeug.datastructures.Headers()
+
+
 
         # prevents transaction commit, use when you catch an exception during handling
         self._failed = None
@@ -394,7 +408,7 @@ class Request(object):
         The database linked to this request. Can be ``None``
         if the current request uses the ``none`` authentication.
         """
-        return self.session.db if not self.disable_db else None
+        return self.session_db if not self.disable_db else None
 
     @property
     def registry(self):
@@ -415,13 +429,10 @@ class Request(object):
             self._env = odoo.api.Environment(self.cr, self.uid, self.context)
         return self._env
 
-    @lazy_property
-    def session(self):
-        # TODO makz session lazy
-        """ :class:`OpenERPSession` holding the HTTP session data for the
-        current http session
-        """
-        return self.httprequest.session
+    #@lazy_property
+    #def session(self):
+    #    # TODO makz session lazy
+    #    return self.httprequest.session
 
     def __enter__(self):
         _request_stack.push(self)
@@ -443,6 +454,76 @@ class Request(object):
         # just to be sure no one tries to re-use the request
         self.disable_db = True
         self.uid = None
+
+    #------------------------------------------------------
+    # Session
+    #------------------------------------------------------
+
+    def session_locate_db(self, cookie_dbname):
+        if odoo.tools.config['db_name']:
+            # Production mode --database defined as a comma seperated list of
+            # exposed databases. Beware that existence is not guaranted.
+            dbs = set(db.strip() for db in odoo.tools.config['db_name'].split(','))
+        else:
+            # Development mode where the list of all available dbs is checked
+            # this generate one sql query for every request
+            dbs = odoo.service.db.list_dbs(force)
+            if odoo.tools.config['dbfilter']:
+                host = self.httprequest.environ.get('HTTP_HOST', '').split(':')[0]
+                domain, _, r = host.partition('.')
+                if domain == "www" and r:
+                    domain = r.partition('.')[0]
+                domain, host = re.escape(d), re.escape(host)
+                regex = odoo.tools.config['dbfilter'].replace('%h', host).replace('%d', domain)
+                dbs = [i for i in re.match(regex, i)]
+
+        if cookie_dbname in dbs:
+            self.session_mono = False
+            self.session_db = cookie_dbname
+        else:
+            self.session_mono = len(dbs) == 1
+            if len(dbs):
+                self.session_db = list(dbs)[0]
+            else:
+                self.session_db = None
+        return self.session_db
+
+    def session_pre(self):
+        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV'
+        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb'
+        " Set-Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb; Expires=Sat, 05-Jun-2021 22:04:27 GMT; Max-Age=7776000; HttpOnly; Path=/"
+
+        cookie = self.httprequest.cookies.get('session_id')
+        cookie_dbname = None
+        r = re.match('([0-9a-zA-Z]{40})(_([0-9a-zA-Z_-]{1,64}))?',cookie)
+        if r:
+            self.session_sid = re.group(1)
+            cookie_dbname = re.group(3)
+
+        # Decode session
+        self.session_orig = "{}"
+        self.session = {}
+
+        dbname = session_locate_db(cookie_dbname)
+        if dbname:
+            pass
+            # if selec in db:
+
+    def session_post(self):
+        # TODO delete, rotate
+        dump = json.dump(self.session, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+        if dump != self.session_orig:
+            if not self.session_sid:
+                # 232 bits (30*8*62/64) of urandom entropy should be enough for everyone
+                self.session_sid = base64.b64encode(os.urandom(30)).decode('ascii').replace('/','a').replace('+','l')
+            # SAVE in DB
+
+            # Set reply
+            sid = self.session_sid
+            if not self.session_mono:
+                sid += "_" + self.session_db
+            self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
+            # cookie_samesite="Lax" ?  cookie_path="/" ?
 
     #------------------------------------------------------
     # Common helpers
@@ -609,7 +690,7 @@ class Request(object):
             raise
 
     #------------------------------------------------------
-    # Plain HTTP Helpers and Handler
+    # Plain HTTP
     #------------------------------------------------------
     def render(self, template, qcontext=None, lazy=True, **kw):
         """ Lazy render of a QWeb template.
@@ -951,7 +1032,7 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
         classes += controllers.get(module, [])
     # process the controllers in reverse order of override
     classes.sort(key=lambda c: len(c.__bases__), reverse=True)
-    # ingore inner nodes of the of the controllers inheritance tree,
+    # ingore inner nodes of the of the controllers inheritance tree
     ignore = set()
     for cls in classes:
         o = cls()
