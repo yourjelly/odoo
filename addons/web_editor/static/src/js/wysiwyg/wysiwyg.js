@@ -27,6 +27,18 @@ function isImg(node) {
     return (node && (node.nodeName === "IMG" || (node.className && node.className.match(/(^|\s)(media_iframe_video|o_image|fa)(\s|$)/i))));
 }
 
+function onCreateLink(sLinkUrl) {
+    if (sLinkUrl.indexOf('mailto:') === 0 || sLinkUrl.indexOf('tel:') === 0) {
+      sLinkUrl = sLinkUrl.replace(/^tel:([0-9]+)$/, 'tel://$1');
+    } else if (sLinkUrl.indexOf('@') !== -1 && sLinkUrl.indexOf(':') === -1) {
+      sLinkUrl =  'mailto:' + sLinkUrl;
+    } else if (sLinkUrl.indexOf('://') === -1 && sLinkUrl[0] !== '/'
+               && sLinkUrl[0] !== '#' && sLinkUrl.slice(0, 2) !== '${') {
+      sLinkUrl = 'http://' + sLinkUrl;
+    }
+    return sLinkUrl;
+};
+
 const Wysiwyg = Widget.extend({
     xmlDependencies: [
     ],
@@ -520,7 +532,7 @@ const Wysiwyg = Widget.extend({
             }, this.$editable[0]);
             linkDialog.open();
             linkDialog.on('save', this, (linkInfo) => {
-                const linkUrl = linkInfo.url;
+                const linkUrl = onCreateLink(linkInfo.url);
                 const linkText = linkInfo.text;
                 const isNewWindow = linkInfo.isNewWindow;
 
