@@ -269,9 +269,36 @@ class StockQuant(models.Model):
             }
         self._apply_inventory()
 
-    def action_set_inventory_quantity(self):
+    def action_inventory_history(self):
         self.ensure_one()
-        self.inventory_quantity = self.quantity
+        return {
+            'name': _('History'),
+            'view_type': 'tree',
+            'view_mode': 'list,form',
+            'res_model': 'stock.move.line',
+            'views': [(self.env.ref('stock.view_move_line_tree').id, 'list'), (False, 'form')],
+            'type': 'ir.actions.act_window',
+            'context': {
+                'search_default_inventory': 1,
+                'search_default_done': 1,
+            },
+            'domain': [
+                ('product_id', '=', self.product_id.id),
+                ('company_id', '=', self.company_id.id),
+                '|',
+                    ('location_id', '=', self.location_id.id),
+                    ('location_dest_id', '=', self.location_id.id),
+            ],
+        }
+
+    def action_set_inventory_quantity(self):
+        for quant in self:
+            quant.inventory_quantity = quant.quantity
+
+    def action_set_inventory_quantity_to_zero(self):
+        for quant in self:
+            quant.inventory_quantity = 0
+            quant.inventory_diff_quantity = 0
 
     @api.constrains('product_id')
     def check_product_id(self):
