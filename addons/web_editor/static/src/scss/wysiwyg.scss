@@ -129,6 +129,12 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         max-width: 150px;
     }
 }
+ul.oe-checklist > li:not(.oe-nested):before {
+    top: 3px !important;
+}
+ul.oe-checklist > li.checked:after {
+    top: 1px !important;
+}
 
 .oe_edited_link {
     position: relative;
