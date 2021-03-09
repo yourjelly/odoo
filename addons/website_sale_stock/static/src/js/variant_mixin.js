@@ -6,10 +6,7 @@ var publicWidget = require('web.public.widget');
 var ajax = require('web.ajax');
 var core = require('web.core');
 var QWeb = core.qweb;
-var xml_load = ajax.loadXML(
-    '/website_sale_stock/static/src/xml/website_sale_stock_product_availability.xml',
-    QWeb
-);
+
 
 /**
  * Addition to the variant_mixin._onChangeCombination
@@ -26,6 +23,14 @@ var xml_load = ajax.loadXML(
  * @param {$.Element} $parent
  * @param {Array} combination
  */
+
+let xmlFiles = ['/website_sale_stock/static/src/xml/website_sale_stock_product_availability.xml'];
+VariantMixin.loadXMLs = async () => {
+    const files = xmlFiles.map(f => ajax.loadXML(f, QWeb));
+    return Promise.all(files);
+}
+
+
 VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
     var product_id = 0;
     // needed for list view of variants
@@ -64,7 +69,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
         }
     }
 
-    xml_load.then(function () {
+    VariantMixin.loadXMLs().then(function () {
         $('.oe_website_sale')
             .find('.availability_message_' + combination.product_template)
             .remove();
@@ -88,6 +93,18 @@ publicWidget.registry.WebsiteSale.include({
     }
 });
 
-return VariantMixin;
+return {
+    VariantMixin: VariantMixin,
+    xmlFiles: xmlFiles,
+}
+
+});
+
+
+odoo.define('website_sale_stock_wishlist.VariantMixin', function (require) {
+'use strict';
+
+let xmlFiles = require('website_sale_stock.VariantMixin').xmlFiles;
+xmlFiles.push('/website_sale_stock_wishlist/static/src/xml/add_to_wishlist_advice.xml');
 
 });
