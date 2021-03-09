@@ -341,8 +341,8 @@
                 <field name="owner_id" groups="stock.group_tracking_owner" attrs="{'readonly': [('id', '!=', False)]}" options="{'no_create': True}"/>
                 <field name="next_inventory_date"/> <!-- TO Do: refactor -->
                 <field name="available_quantity" string="On Hand Quantity" decoration-danger="available_quantity &lt; 0" optional="hidden"/>
-                <field name="inventory_quantity" optional="show"/>
                 <field name="user_id" string="User" optional="hidden"/>
+                <field name="inventory_quantity" optional="show"/>
                 <field name="inventory_diff_quantity" string="Difference" optional="show"/>
                 <field name="product_uom_id" groups="uom.group_uom"/>
                 <field name='company_id' groups="base.group_multi_company" optional="show"/>
@@ -351,6 +351,42 @@
                 <button name="action_apply_inventory" type="object" icon="fa-history"/> <!-- TO Do: create function -->
             </tree>
         </field>
+    </record>
+
+    <record id="action_set_all" model="ir.actions.server">
+            <field name="name">Set All</field>
+            <field name="model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+            if records:
+                 records.action_set_inventory_quantity()
+            </field>
+    </record>
+
+    <record id="action_apply_all" model="ir.actions.server">
+            <field name="name">Apply All</field>
+            <field name="model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+            if records:
+                 records.action_apply_inventory()
+            </field>
+    </record>
+
+    <record id="action_request_count" model="ir.actions.server">
+            <field name="name">Request Count</field>
+            <field name="model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_model_id" ref="stock.model_stock_quant"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+            if records:
+                pass
+            </field>
     </record>
 
     <record id="action_inventory_tree" model="ir.actions.act_window">
