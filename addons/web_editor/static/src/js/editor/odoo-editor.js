@@ -200,19 +200,31 @@ var exportVariable = (function (exports) {
         }
         return node;
     }
-    function previousLeaf(node, editable) {
+    function previousLeaf(node, editable, skipInvisible = false) {
         let ancestor = node;
         while (ancestor && !ancestor.previousSibling && ancestor !== editable) {
             ancestor = ancestor.parentElement;
         }
-        return ancestor && ancestor !== editable && latestChild(ancestor.previousSibling);
+        if (ancestor && ancestor !== editable) {
+            if (skipInvisible && ancestor.previousSibling && !isVisible(ancestor.previousSibling)) {
+                return previousLeaf(ancestor.previousSibling);
+            } else {
+                return latestChild(ancestor.previousSibling);
+            }
+        }
     }
-    function nextLeaf(node, editable) {
+    function nextLeaf(node, editable, skipInvisible = false) {
         let ancestor = node;
         while (ancestor && !ancestor.nextSibling && ancestor !== editable) {
             ancestor = ancestor.parentElement;
         }
-        return ancestor && ancestor !== editable && firstChild(ancestor.nextSibling);
+        if (ancestor && ancestor !== editable) {
+            if (skipInvisible && ancestor.nextSibling && !isVisible(ancestor.nextSibling)) {
+                return nextLeaf(ancestor.nextSibling);
+            } else {
+                return firstChild(ancestor.nextSibling);
+            }
+        }
     }
     /**
      * Values which can be returned while browsing the DOM which gives information
@@ -487,11 +499,12 @@ var exportVariable = (function (exports) {
      * Returns an array containing all the nodes traversed when walking the
      * selection.
      *
-     * @param {Document} document
+     * @param {Node} editable
      * @returns {Node[]}
      */
-    function getTraversedNodes(document) {
-        const range = getDeepRange(document);
+    function getTraversedNodes(editable) {
+        const document = editable.ownerDocument;
+        const range = getDeepRange(editable);
         if (!range) return [];
         const iterator = document.createNodeIterator(range.commonAncestorContainer);
         let node;
@@ -508,16 +521,17 @@ var exportVariable = (function (exports) {
     /**
      * Returns an array containing all the nodes fully contained in the selection.
      *
-     * @param {Document} document
+     * @param {Node} editable
      * @returns {Node[]}
      */
-    function getSelectedNodes(document) {
+    function getSelectedNodes(editable) {
+        const document = editable.ownerDocument;
         const sel = document.defaultView.getSelection();
         if (!sel.rangeCount) {
             return [];
         }
         const range = sel.getRangeAt(0);
-        return getTraversedNodes(document).filter(
+        return getTraversedNodes(editable).filter(
             node => range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node)),
         );
     }
@@ -526,16 +540,17 @@ var exportVariable = (function (exports) {
      * Returns the current range (if any), adapted to target the deepest
      * descendants.
      *
-     * @param {Document} document
+     * @param {Node} editable
      * @param {object} [options]
      * @param {Selection} [options.range] the range to use.
      * @param {Selection} [options.sel] the selection to use.
      * @param {boolean} [options.splitText] split the targeted text nodes at offset.
-     * @param {boolean} [options.select] select the new range if it changed (via splitText)
+     * @param {boolean} [options.select] select the new range if it changed (via splitText).
+     * @param {boolean} [options.correctTripleClick] adapt the range if it was a triple click.
      * @returns {Range}
      */
-    function getDeepRange(document, { range, sel, splitText, select } = {}) {
-        sel = sel || document.defaultView.getSelection();
+    function getDeepRange(editable, { range, sel, splitText, select, correctTripleClick } = {}) {
+        sel = sel || editable.ownerDocument.defaultView.getSelection();
         range = range ? range.cloneRange() : sel.rangeCount && sel.getRangeAt(0).cloneRange();
         if (!range) return;
         let start = range.startContainer;
@@ -576,6 +591,15 @@ var exportVariable = (function (exports) {
                 if (isInSingleContainer) {
                     endOffset = start.textContent.length;
                 }
+            }
+        }
+        // A selection spanning multiple nodes and ending at position 0 of a
+        // node, like the one resulting from a triple click, are corrected so
+        // that it ends at the last position of the previous node instead.
+        if (correctTripleClick && !endOffset && !end.previousSibling) {
+            const previous = previousLeaf(end, editable, true);
+            if (previous && closestElement(previous).isContentEditable) {
+                [end, endOffset] = [previous, nodeSize(previous)];
             }
         }
 
@@ -2236,7 +2260,7 @@ var exportVariable = (function (exports) {
 
             // Merge identical elements together
             while (areSimilarElements(node, node.previousSibling)) {
-                getDeepRange(this.root.ownerDocument, { select: true });
+                getDeepRange(this.root, { select: true });
                 let restoreCursor = preserveCursor(this.root.ownerDocument);
                 let nodeP = node.previousSibling;
                 moveNodes(...endPos(node.previousSibling), node);
@@ -3034,17 +3058,13 @@ var exportVariable = (function (exports) {
         // ===============
 
         deleteRange(sel) {
-            let range = getDeepRange(this.document, { sel, splitText: true, select: true });
+            let range = getDeepRange(this.dom, {
+                sel,
+                splitText: true,
+                select: true,
+                correctTripleClick: true,
+            });
             if (!range) return;
-            // A selection spanning multiple nodes and ending at position 0 of a
-            // node, like the one resulting from a triple click, are corrected so
-            // that it ends at the last position of the previous node instead.
-            if (!range.endOffset && !range.endContainer.previousSibling) {
-                const previous = previousLeaf(range.endContainer, this.dom);
-                if (previous) {
-                    range.setEndAfter(previous);
-                }
-            }
             let start = range.startContainer;
             let end = range.endContainer;
             // Let the DOM split and delete the range.
@@ -3053,7 +3073,7 @@ var exportVariable = (function (exports) {
             const splitEndTd = closestElement(end, 'td') && end.nextSibling;
             const contents = range.extractContents();
             setCursor(start, nodeSize(start));
-            range = getDeepRange(this.document, { sel });
+            range = getDeepRange(this.dom, { sel });
             // Restore unremovables removed by extractContents.
             [...contents.querySelectorAll('*')].filter(isUnremovable).forEach(n => {
                 closestBlock(range.endContainer).after(n);
@@ -3144,11 +3164,11 @@ var exportVariable = (function (exports) {
                 this._colorElement(target, color, mode);
                 return;
             }
-            const range = getDeepRange(document, { splitText: true, select: true });
+            const range = getDeepRange(this.dom, { splitText: true, select: true });
             if (!range) return;
             const restoreCursor = preserveCursor(this.document);
             // Get the <font> nodes to color
-            const selectedNodes = getSelectedNodes(this.document);
+            const selectedNodes = getSelectedNodes(this.dom);
             let fonts = selectedNodes.flatMap(node => {
                 let font = closestElement(node, 'font');
                 const children = font && [...font.childNodes];
@@ -3379,7 +3399,7 @@ var exportVariable = (function (exports) {
             let li = new Set();
             let blocks = new Set();
 
-            for (let node of getTraversedNodes(this.document)) {
+            for (let node of getTraversedNodes(this.dom)) {
                 let block = closestBlock(node);
                 if (!['OL', 'UL'].includes(block.tagName)) {
                     let ublock = block.closest('ol, ul');
@@ -3402,7 +3422,7 @@ var exportVariable = (function (exports) {
         _align(mode) {
             const sel = this.document.defaultView.getSelection();
             const visitedBlocks = new Set();
-            const traversedNode = getTraversedNodes(this.document);
+            const traversedNode = getTraversedNodes(this.dom);
             for (const node of traversedNode) {
                 if (isContentTextNode(node) && isVisible(node)) {
                     let block = closestBlock(node);
@@ -3419,7 +3439,7 @@ var exportVariable = (function (exports) {
         _bold() {
             const selection = this.document.getSelection();
             if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
-            const isAlreadyBold = !getTraversedNodes(this.document)
+            const isAlreadyBold = !getTraversedNodes(this.dom)
                 .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length)
                 .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) < 700);
             this._applyInlineStyle(el => {
@@ -3451,7 +3471,7 @@ var exportVariable = (function (exports) {
             const { startContainer, startOffset, endContainer, endOffset } = sel.getRangeAt(0);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
             const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
-            const selectedTextNodes = getTraversedNodes(this.document).filter(node =>
+            const selectedTextNodes = getTraversedNodes(this.dom).filter(node =>
                 isContentTextNode(node),
             );
             for (const textNode of selectedTextNodes) {
@@ -4082,9 +4102,7 @@ var exportVariable = (function (exports) {
                     this.historyRedo();
                 } else {
                     const restoreCursor = preserveCursor(this.document);
-                    const selectedBlocks = [
-                        ...new Set(getTraversedNodes(this.document).map(closestBlock)),
-                    ];
+                    const selectedBlocks = [...new Set(getTraversedNodes(this.dom).map(closestBlock))];
                     for (const selectedBlock of selectedBlocks) {
                         const block = closestBlock(selectedBlock);
                         if (
@@ -4214,7 +4232,7 @@ var exportVariable = (function (exports) {
             this._addColumn('after');
         }
         _addColumn(beforeOrAfter) {
-            getDeepRange(this.document, { select: true }); // Ensure deep range for finding td.
+            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding td.
             const c = getInSelection(this.document, 'td');
             if (!c) return;
             const i = [...closestElement(c, 'tr').querySelectorAll('th, td')].findIndex(td => td === c);
@@ -4228,7 +4246,7 @@ var exportVariable = (function (exports) {
             this._addRow('after');
         }
         _addRow(beforeOrAfter) {
-            getDeepRange(this.document, { select: true }); // Ensure deep range for finding tr.
+            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding tr.
             const row = getInSelection(this.document, 'tr');
             if (!row) return;
             const newRow = document.createElement('tr');
@@ -4237,7 +4255,7 @@ var exportVariable = (function (exports) {
             row[beforeOrAfter](newRow);
         }
         _removeColumn() {
-            getDeepRange(this.document, { select: true }); // Ensure deep range for finding td.
+            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding td.
             const cell = getInSelection(this.document, 'td');
             if (!cell) return;
             const table = closestElement(cell, 'table');
@@ -4248,7 +4266,7 @@ var exportVariable = (function (exports) {
             siblingCell ? setCursor(...startPos(siblingCell)) : this._deleteTable(table);
         }
         _removeRow() {
-            getDeepRange(this.document, { select: true }); // Ensure deep range for finding tr.
+            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding tr.
             const row = getInSelection(this.document, 'tr');
             if (!row) return;
             const table = closestElement(row, 'table');
