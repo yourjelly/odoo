@@ -193,7 +193,6 @@ var KanbanModel = BasicModel.extend({
                     });
                     loadMoreCount = filteredRecordsTotal - filteredRecords.length;
                     loadMoreOffset = filteredRecords.length;
-                    debugger;
                 }
             }
             result.loadMoreCount = loadMoreCount;
@@ -264,11 +263,11 @@ var KanbanModel = BasicModel.extend({
                 old_group.count--;
                 old_group.res_ids = _.without(old_group.res_ids, resID);
                 self._updateParentResIDs(old_group);
-                //display records which do not match the current filter
-                if(old_group.activeFilter) {
-                    // old_group.data.push(recordID);
+                console.log('old_group :',old_group);
+                if(old_group.count == 0) {
+                    delete old_group.activeFilter;
+                    self._getUngroupedListDomain(old_group);
                 }
-                debugger;
                 break;
             }
         }
