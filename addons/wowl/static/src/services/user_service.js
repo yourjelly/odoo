@@ -12,12 +12,13 @@ function computeAllowedCompanyIds(env) {
     cids = cookie.current.cids;
   }
   let allowedCompanies = cids ? cids.split(",").map((id) => parseInt(id, 10)) : [];
-  const allowedCompaniesFromSession = user_companies.allowed_companies.map(([id, name]) => id);
+  const allowedCompaniesFromSession = user_companies.allowed_companies;
   const notReallyAllowedCompanies = allowedCompanies.filter(
-    (id) => !allowedCompaniesFromSession.includes(id)
+    (id) => !(id in allowedCompaniesFromSession)
   );
+
   if (!allowedCompanies.length || notReallyAllowedCompanies.length) {
-    allowedCompanies = [user_companies.current_company[0]];
+    allowedCompanies = [user_companies.current_company];
   }
   return allowedCompanies;
 }
