@@ -576,12 +576,12 @@ const Wysiwyg = Widget.extend({
      * @param {Node} [params.htmlClass] Optionnal
      */
     openMediaDialog(params = {}) {
-        const range = Wysiwyg.getRange();
+        const range = Wysiwyg.getRange(this.odooEditor.document);
         // we loose the current selection inside the content editable
         // when we click on the media dialog button
         // so we need to be able to restore the selection when the modal is closed
         const restoreSelection = function() {
-            if(range.sc === null) return;
+            if (range.sc === null) return;
             Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
         }
 
@@ -1228,15 +1228,15 @@ const Wysiwyg = Widget.extend({
 // Public helper
 //--------------------------------------------------------------------------
 /**
- * @param {Node} node (editable or node inside)
+ * @param {Node} [ownerDocument] (document on which to get the selection)
  * @returns {Object}
  * @returns {Node} sc - start container
  * @returns {Number} so - start offset
  * @returns {Node} ec - end container
  * @returns {Number} eo - end offset
  */
-Wysiwyg.getRange = function () {
-    const selection = document.getSelection();
+Wysiwyg.getRange = function (ownerDocument) {
+    const selection = (ownerDocument || document).getSelection();
     if (selection.rangeCount === 0) {
         return {
             sc: null,
