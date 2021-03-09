@@ -200,7 +200,7 @@ const LinkTools = Widget.extend({
     _getOrCreateLink: function () {
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         const doc = this.editable.ownerDocument;
-        const range = getDeepRange(doc, { splitText: true, select: true });
+        const range = getDeepRange(this.editable, { splitText: true, select: true, correctTripleClick: true });
         this.needLabel = false;
         let link = getInSelection(doc, 'a');
         const $link = $(link);
