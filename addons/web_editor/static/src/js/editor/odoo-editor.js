@@ -2753,8 +2753,8 @@ var exportVariable = (function (exports) {
         historyStep(skipRollback = false) {
             this.observerFlush();
             // check that not two unBreakables modified
-            if (this.torollback && !skipRollback) {
-                this.historyRollback();
+            if (this.torollback) {
+                if (!skipRollback) this.historyRollback();
                 this.torollback = false;
             }
 
