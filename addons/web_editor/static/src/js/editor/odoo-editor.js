@@ -977,13 +977,13 @@ var exportVariable = (function (exports) {
 
     function getListMode(pnode) {
         if (pnode.tagName == 'OL') return 'OL';
-        return pnode.classList.contains('oe-checklist') ? 'CL' : 'UL';
+        return pnode.classList.contains('o_checklist') ? 'CL' : 'UL';
     }
 
     function createList(mode) {
         let node = document.createElement(mode == 'OL' ? 'OL' : 'UL');
         if (mode == 'CL') {
-            node.classList.add('oe-checklist');
+            node.classList.add('o_checklist');
         }
         return node;
     }
@@ -1933,8 +1933,8 @@ var exportVariable = (function (exports) {
         // If not last list item or not empty last item, regular block split
         if (this.nextElementSibling || this.textContent) {
             let node = HTMLElement.prototype.oEnter.call(this, ...arguments);
-            if (node.classList.contains('checked')) {
-                toggleClass(node, 'checked');
+            if (node.classList.contains('o_checked')) {
+                toggleClass(node, 'o_checked');
             }
             return node;
         }
@@ -2143,7 +2143,7 @@ var exportVariable = (function (exports) {
         switch (getListMode(pnode) + mode) {
             case 'OLCL':
             case 'ULCL':
-                pnode.classList.add('oe-checklist');
+                pnode.classList.add('o_checklist');
                 for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
                     if (li.style.listStyle != 'none') {
                         li.style.listStyle = null;
@@ -2154,7 +2154,7 @@ var exportVariable = (function (exports) {
                 break;
             case 'CLOL':
             case 'CLUL':
-                toggleClass(pnode, 'oe-checklist');
+                toggleClass(pnode, 'o_checklist');
             case 'OLUL':
             case 'ULOL':
                 setTagName(pnode, mode);
@@ -4000,8 +4000,7 @@ var exportVariable = (function (exports) {
             // handle checkbox lists
             if (node.tagName == 'LI' && getListMode(node.parentElement) == 'CL') {
                 if (ev.offsetX < 0) {
-                    node.classList.remove('unchecked');
-                    toggleClass(node, 'checked');
+                    toggleClass(node, 'o_checked');
                     ev.preventDefault();
                 }
             }

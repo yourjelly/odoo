@@ -67,13 +67,6 @@
     }
 }
 
-ul.oe-checklist > li:not(.oe-nested):before {
-    top: 4px !important;
-}
-ul.oe-checklist > li.checked:after {
-    top: 0 !important;
-}
-
 // TRANSLATIONS
 .oe_translate_examples li {
     margin: 10px;
