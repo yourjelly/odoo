@@ -33,6 +33,8 @@ class SaleOrder(models.Model):
     def _get_default_require_signature(self):
         return self.env.company.portal_confirmation_sign
 
+    print("Meet Patel")
+
     def _get_default_require_payment(self):
         return self.env.company.portal_confirmation_pay
 
