@@ -3770,9 +3770,8 @@ var BasicModel = AbstractModel.extend({
                 // won't be search_read again. This situation happens
                 // when using kanban quick_create where the record is manually
                 // added to the datapoint before getting here.
-                // propsToKeep.res_ids = list.res_ids;
-                // propsToKeep.count = list.count;
-                // propsToKeep.activeFilter = {};
+                propsToKeep.res_ids = list.res_ids;
+                propsToKeep.count = list.count;
             }
         }
 
