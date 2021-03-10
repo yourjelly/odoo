@@ -2,13 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import os
+import json
 
 from glob import glob
 from logging import getLogger
 
+import odoo
 from odoo.tools import config
 from odoo.tools.func import lazy
-from odoo.addons import __path__ as ADDONS_PATH
 from odoo import api, fields, http, models
 from odoo.modules.module import read_manifest
 
@@ -95,8 +96,9 @@ def get_paths(path_def, extensions=None, manifest_cache=None):
 
 if config['test_enable']:
     def get_all_manifests_cache():
+        _logger.info('LPE getManfifestCache')
         manifest_cache = {}
-        for addons_path in ADDONS_PATH:
+        for addons_path in odoo.addons.__path__:
             for module in sorted(os.listdir(str(addons_path))):
                 if module not in manifest_cache:
                     manifest = read_manifest(addons_path, module)
@@ -104,6 +106,7 @@ if config['test_enable']:
                         continue
                     manifest['addons_path'] = addons_path
                     manifest_cache[module] = manifest
+                    _logger.info(':::::: %s' % json.dumps(manifest))
         return manifest_cache
 
     http.addons_manifest = lazy(get_all_manifests_cache)
