@@ -61,6 +61,30 @@ var SingletonListController = InventoryReportListController.extend({
             return this._super.apply(this, arguments);
         }
     },
+
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onButtonClicked: function (ev) {
+        ev.stopPropagation();
+        var self = this;
+        var def;
+
+        this._disableButtons();
+
+        return self.saveRecord(ev.data.record.id, {
+            stayInEdit: true,
+        }).then(function () {
+            // we need to reget the record to make sure we have changes made
+            // by the basic model, such as the new res_id, if the record is
+            // new.
+            var record = self.model.get(ev.data.record.id);
+            return self._callButtonAction(ev.data.attrs, record);
+        }).then(function () {
+            self._enableButtons();
+        }).guardedCatch(this._enableButtons.bind(this));
+    },
 });
 
 return SingletonListController;

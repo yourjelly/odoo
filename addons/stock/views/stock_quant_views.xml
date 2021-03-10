@@ -346,7 +346,7 @@
                 <field name="inventory_diff_quantity" string="Difference" optional="show"/>
                 <field name="product_uom_id" groups="uom.group_uom"/>
                 <field name='company_id' groups="base.group_multi_company" optional="hide"/>
-                <button name="action_apply_inventory" type="object" special="save" string="Apply" class="btn btn-primary col-sm-6" attrs="{'invisible': [('inventory_quantity', '==', 0)]}"/>
+                <button name="action_apply_inventory" type="object" string="Apply" class="btn btn-primary col-sm-6" attrs="{'invisible': [('inventory_quantity', '==', 0)]}"/>
                 <button name="action_set_inventory_quantity" type="object" string="Set" class="btn btn-secondary col-sm-6" attrs="{'invisible': [('inventory_quantity', '!=', 0)]}"/>
                 <button name="action_set_inventory_quantity_to_zero" type="object" icon="fa-refresh" attrs="{'invisible': [('inventory_quantity', '==', 0)]}"/>
                 <button name="action_inventory_history" type="object" icon="fa-history"/>
