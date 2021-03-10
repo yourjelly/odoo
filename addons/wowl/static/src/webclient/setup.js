@@ -1,8 +1,16 @@
 /** @odoo-module **/
 
 import { serviceRegistry } from "./service_registry";
+
 const { loadFile } = owl.utils;
 
+/**
+ * Deploy all services registered in the service registry, while making sure
+ * each service dependencies are properly fulfilled.
+ *
+ * @param {OdooEnv} env
+ * @returns {Promise<void>}
+ */
 export async function deployServices(env) {
   const toDeploy = new Set();
   let timeoutId;
@@ -25,7 +33,6 @@ export async function deployServices(env) {
 
 async function _deployServices(env, toDeploy, timeoutId) {
   const services = env.services;
-  odoo.serviceRegistry;
   for (const service of odoo.serviceRegistry.getAll()) {
     if (!(service.name in services)) {
       toDeploy.add(service);
@@ -86,6 +93,12 @@ async function _deployServices(env, toDeploy, timeoutId) {
   }
 }
 
+/**
+ * Load all templates from the Odoo server and returns the string. This method
+ * does NOT register the templates into Owl.
+ *
+ * @returns {Promise<string>}
+ */
 export async function loadTemplates() {
   const templatesUrl = `/wowl/templates/${odoo.session_info.qweb}`;
   const templates = await loadFile(templatesUrl);

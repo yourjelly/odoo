@@ -491,17 +491,16 @@ QUnit.test(
   }
 );
 
-QUnit.test("dropdowns keynav",
-  async (assert) => {
-    assert.expect(20)
-    class Parent extends owl.Component {
-      onItemSelected(ev) {
-        const { payload } = ev.detail;
-        assert.step(payload.val.toString());
-      }
+QUnit.test("dropdowns keynav", async (assert) => {
+  assert.expect(20);
+  class Parent extends owl.Component {
+    onItemSelected(ev) {
+      const { payload } = ev.detail;
+      assert.step(payload.val.toString());
     }
-    Parent.components = { Dropdown, DropdownItem };
-    Parent.template = owl.tags.xml`
+  }
+  Parent.components = { Dropdown, DropdownItem };
+  Parent.template = owl.tags.xml`
       <Dropdown hotkey="'m'" t-on-dropdown-item-selected="onItemSelected">
         <t t-set-slot="menu">
           <DropdownItem class="item1" hotkey="'1'" payload="{val:1}" />
@@ -510,59 +509,77 @@ QUnit.test("dropdowns keynav",
         </t>
       </Dropdown>
     `;
-    parent = await mount(Parent, { env });
-    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed at start");
+  parent = await mount(Parent, { env });
+  assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed at start");
 
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+  await nextTick();
+  assert.containsOnce(
+    parent.el,
+    ".o_dropdown_menu",
+    "menu is opened after pressing the toggler hotkey"
+  );
+
+  // Navigate with arrows
+  assert.containsNone(
+    parent.el,
+    ".o_dropdown_menu > .o_dropdown_active",
+    "menu should not have any active items"
+  );
+
+  const scenarioSteps = [
+    { evParams: { key: "arrowdown" }, expected: "item1" },
+    { evParams: { key: "arrowdown" }, expected: "item2" },
+    { evParams: { key: "arrowdown" }, expected: "item3" },
+    { evParams: { key: "arrowdown" }, expected: "item3" },
+    { evParams: { key: "arrowup" }, expected: "item2" },
+    { evParams: { key: "arrowup" }, expected: "item1" },
+    { evParams: { key: "arrowup" }, expected: "item1" },
+    { evParams: { key: "arrowdown", shiftKey: true }, expected: "item3" },
+    { evParams: { key: "arrowup", shiftKey: true }, expected: "item1" },
+  ];
+
+  for (const step of scenarioSteps) {
+    window.dispatchEvent(new KeyboardEvent("keydown", step.evParams));
     await nextTick();
-    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
-
-    // Navigate with arrows
-    assert.containsNone(parent.el, ".o_dropdown_menu > .o_dropdown_active", "menu should not have any active items");
-
-    const scenarioSteps = [
-      { evParams: { key: "arrowdown" }, expected: "item1" },
-      { evParams: { key: "arrowdown" }, expected: "item2" },
-      { evParams: { key: "arrowdown" }, expected: "item3" },
-      { evParams: { key: "arrowdown" }, expected: "item3" },
-      { evParams: { key: "arrowup" }, expected: "item2" },
-      { evParams: { key: "arrowup" }, expected: "item1" },
-      { evParams: { key: "arrowup" }, expected: "item1" },
-      { evParams: { key: "arrowdown", shiftKey: true }, expected: "item3" },
-      { evParams: { key: "arrowup", shiftKey: true }, expected: "item1" },
-    ];
-    
-    for (const step of scenarioSteps) {
-      window.dispatchEvent(new KeyboardEvent("keydown", step.evParams));
-      await nextTick();
-      assert.hasClass(parent.el.querySelector(".o_dropdown_menu > .o_dropdown_active"), step.expected);
-    }
-
-    // Select last one activated in previous scenario (item1)
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "enter" }));
-    await nextTick();
-    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
-
-    // Reopen dropdown
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
-    await nextTick();
-    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
-
-    // Select second item through data-hotkey attribute
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
-    await nextTick();
-    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
-
-    // Reopen dropdown
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
-    await nextTick();
-    assert.containsOnce(parent.el, ".o_dropdown_menu", "menu is opened after pressing the toggler hotkey");
-
-    // Close dropdown with keynav
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "escape" }));
-    await nextTick();
-    assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
-
-    assert.verifySteps(["1", "2"], "items should have been selected in this order");
+    assert.hasClass(
+      parent.el.querySelector(".o_dropdown_menu > .o_dropdown_active"),
+      step.expected
+    );
   }
-);
+
+  // Select last one activated in previous scenario (item1)
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "enter" }));
+  await nextTick();
+  assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+  // Reopen dropdown
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+  await nextTick();
+  assert.containsOnce(
+    parent.el,
+    ".o_dropdown_menu",
+    "menu is opened after pressing the toggler hotkey"
+  );
+
+  // Select second item through data-hotkey attribute
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
+  await nextTick();
+  assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+  // Reopen dropdown
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "m" }));
+  await nextTick();
+  assert.containsOnce(
+    parent.el,
+    ".o_dropdown_menu",
+    "menu is opened after pressing the toggler hotkey"
+  );
+
+  // Close dropdown with keynav
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "escape" }));
+  await nextTick();
+  assert.containsNone(parent.el, ".o_dropdown_menu", "menu is closed after item selection");
+
+  assert.verifySteps(["1", "2"], "items should have been selected in this order");
+});

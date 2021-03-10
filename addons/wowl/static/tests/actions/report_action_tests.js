@@ -2,10 +2,7 @@
 
 import { makeFakeUserService } from "../helpers/index";
 import { notificationService } from "../../src/notifications/notification_service";
-import {
-  makeFakeDownloadService,
-  makeFakeNotificationService,
-} from "../helpers/mocks";
+import { makeFakeDownloadService, makeFakeNotificationService } from "../helpers/mocks";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
@@ -286,11 +283,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
       })
     );
-    testConfig.serviceRegistry.add(
-      "ui",
-      uiService,
-      true
-    );
+    testConfig.serviceRegistry.add("ui", uiService, true);
     const mockRPC = async (route, args) => {
       if (route === "/report/check_wkhtmltopdf") {
         return Promise.resolve("ok");

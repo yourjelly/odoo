@@ -1,8 +1,8 @@
 # Hotkey Service
 
-| Technical name | Dependencies                           |
-| -------------- | -------------------------------------- |
-| `hotkey`       | `ui`                                   |
+| Technical name | Dependencies |
+| -------------- | ------------ |
+| `hotkey`       | `ui`         |
 
 ## Overview
 
@@ -118,6 +118,7 @@ In addition to that, you have access to some development helpers which are **gre
 ## Examples
 
 ### `useHotkey` hook
+
 ```js
 class MyComponent extends Component {
   setup() {
@@ -130,6 +131,7 @@ class MyComponent extends Component {
 ```
 
 ### `[data-hotkey]` attribute
+
 ```js
 class MyComponent extends Component {
   setup() {
@@ -158,6 +160,7 @@ MyComponent.template = xml`
 ```
 
 ### manual usage of the service
+
 ```js
 class MyComponent extends Component {
   setup() {
@@ -166,11 +169,11 @@ class MyComponent extends Component {
   mounted() {
     this.hotkeyToken1 = this.hotkey.subscribe({
       hotkey: "backspace",
-      callback: () => console.log('backspace has been pressed')
+      callback: () => console.log("backspace has been pressed"),
     });
     this.hotkeyToken2 = this.hotkey.subscribe({
       hotkey: "shift",
-      callback: () => console.log('Someone pressed on "shift"!')
+      callback: () => console.log('Someone pressed on "shift"!'),
     });
   }
   willUnmount() {

@@ -325,17 +325,12 @@ QUnit.test("can take UI ownership", async function (assert) {
     }
     mounted() {
       const dialogModalEl = this.dialog.comp.modalRef.el;
-      assert.strictEqual(
-        this.ui.getOwner(),
-        dialogModalEl,
-        "UI owner should be the dialog modal"
-      );
+      assert.strictEqual(this.ui.getOwner(), dialogModalEl, "UI owner should be the dialog modal");
     }
   }
   Parent.components = { Dialog };
   Parent.template = owl.tags.xml`<div><Dialog t-ref="dialogRef"/></div>`;
   parent = await mount(Parent, { env, target });
-
 
   parent.unmount();
   assert.strictEqual(

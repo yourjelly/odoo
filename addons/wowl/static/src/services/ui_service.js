@@ -53,8 +53,8 @@ export const uiService = {
       ownerStack.push(owner);
       return {
         release() {
-          ownerStack = ownerStack.filter(x => x !== owner);
-        }
+          ownerStack = ownerStack.filter((x) => x !== owner);
+        },
       };
     }
     function getOwner() {
@@ -66,11 +66,11 @@ export const uiService = {
       block,
       unblock,
       get isBlocked() {
-        return blockCount > 0
+        return blockCount > 0;
       },
       getOwner,
       takeOwnership,
-    }
+    };
   },
 };
 

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { Registry } from "../../src/core/registry";
-import { hotkeyService, useHotkey, } from "../../src/services/hotkey_service";
+import { hotkeyService, useHotkey } from "../../src/services/hotkey_service";
 import { uiService, useUIOwnership } from "../../src/services/ui_service";
 import { makeTestEnv, mount, nextTick } from "../helpers";
 
@@ -130,9 +130,13 @@ QUnit.test("hotkeys evil 👹", async (assert) => {
   assert.throws(function () {
     hotkey.subscribe({ hotkey: "ctrl-o", callback });
   }, /not whitelisted/);
-  assert.throws(function () {
-    hotkey.subscribe({ hotkey: "Control-O", callback });
-  }, /not whitelisted/, "should throw 'not whitelisted' when other than lowercase chars are used");
+  assert.throws(
+    function () {
+      hotkey.subscribe({ hotkey: "Control-O", callback });
+    },
+    /not whitelisted/,
+    "should throw 'not whitelisted' when other than lowercase chars are used"
+  );
   assert.throws(function () {
     hotkey.subscribe({ hotkey: "control-o" });
   }, /specify a callback/);
@@ -147,10 +151,10 @@ QUnit.test("component can subscribe many hotkeys", async (assert) => {
   class MyComponent extends Component {
     setup() {
       for (const hotkey of ["a", "b", "c"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback:${arg}`) })
+        useHotkey({ hotkey, callback: (arg) => assert.step(`callback:${arg}`) });
       }
       for (const hotkey of ["d", "e", "f"]) {
-        useHotkey({ hotkey, callback: (arg) => assert.step(`callback2:${arg}`) })
+        useHotkey({ hotkey, callback: (arg) => assert.step(`callback2:${arg}`) });
       }
     }
     onClick() {
@@ -193,7 +197,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   class MyComponent1 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp1:${arg}`) })
+        useHotkey({ hotkey, callback: (arg) => result.push(`comp1:${arg}`) });
       }
     }
     onClick() {
@@ -209,7 +213,7 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
   class MyComponent2 extends Component {
     setup() {
       for (const hotkey of hotkeys) {
-        useHotkey({ hotkey, callback: (arg) => result.push(`comp2:${arg}`) })
+        useHotkey({ hotkey, callback: (arg) => result.push(`comp2:${arg}`) });
       }
     }
     onClick() {
@@ -249,7 +253,9 @@ QUnit.test("subscriptions and elements belong to the correct UI owner", async (a
     setup() {
       useHotkey({ hotkey: "a", callback: () => assert.step("MyComponent1 subscription") });
     }
-    onClick() { assert.step("MyComponent1 [data-hotkey]") }
+    onClick() {
+      assert.step("MyComponent1 [data-hotkey]");
+    }
   }
   MyComponent1.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
 
@@ -258,7 +264,9 @@ QUnit.test("subscriptions and elements belong to the correct UI owner", async (a
       useHotkey({ hotkey: "a", callback: () => assert.step("MyComponent2 subscription") });
       useUIOwnership();
     }
-    onClick() { assert.step("MyComponent2 [data-hotkey]") }
+    onClick() {
+      assert.step("MyComponent2 [data-hotkey]");
+    }
   }
   MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
 

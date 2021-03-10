@@ -23,10 +23,18 @@ export function useHotkey(subscription) {
 
 const ALPHANUM_KEYS = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 const NAV_KEYS = [
-  "arrowleft", "arrowright", "arrowup", "arrowdown",
-  "pageup", "pagedown", "home", "end",
-  "backspace", "enter", "escape",
-]
+  "arrowleft",
+  "arrowright",
+  "arrowup",
+  "arrowdown",
+  "pageup",
+  "pagedown",
+  "home",
+  "end",
+  "backspace",
+  "enter",
+  "escape",
+];
 const MODIFIERS = new Set(["control", "shift"]);
 const AUTHORIZED_KEYS = new Set([...ALPHANUM_KEYS, ...NAV_KEYS]);
 
@@ -78,8 +86,7 @@ export const hotkeyService = {
 
       // Is the active element editable ?
       const inEditableElement =
-        event.target.isContentEditable ||
-        ["input", "textarea"].includes(event.target.nodeName);
+        event.target.isContentEditable || ["input", "textarea"].includes(event.target.nodeName);
       const isAltCombo = hotkey !== "alt" && event.altKey;
       if (inEditableElement && !isAltCombo) {
         return false;
@@ -168,11 +175,11 @@ export const hotkeyService = {
       const { hotkey, callback } = sub;
       // Validate some informations
       if (!hotkey || hotkey.length === 0) {
-        throw new Error('You must specify an hotkey when registering a subscription.');
+        throw new Error("You must specify an hotkey when registering a subscription.");
       }
 
       if (!callback || typeof callback !== "function") {
-        throw new Error('You must specify a callback function when registering a subscription.');
+        throw new Error("You must specify a callback function when registering a subscription.");
       }
 
       /**
@@ -183,7 +190,7 @@ export const hotkeyService = {
        */
       const keys = hotkey.split("-").filter((k) => !MODIFIERS.has(k));
 
-      if (keys.some(k => !AUTHORIZED_KEYS.has(k))) {
+      if (keys.some((k) => !AUTHORIZED_KEYS.has(k))) {
         throw new Error(
           `You are trying to subscribe for an hotkey ('${hotkey}')
             that contains parts not whitelisted: ${keys.join(", ")}`

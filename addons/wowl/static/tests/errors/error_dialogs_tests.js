@@ -173,7 +173,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
       },
     },
   };
-  env = await makeTestEnv({...baseConfig, browser});
+  env = await makeTestEnv({ ...baseConfig, browser });
   class Parent extends Component {
     constructor() {
       super(...arguments);

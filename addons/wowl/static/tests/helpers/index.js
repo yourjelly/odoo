@@ -27,13 +27,13 @@ export async function setupTests() {
     window.addEventListener = function (eventName, callback) {
       windowListeners.push({ eventName, callback });
       originalWindowAddEventListener(...arguments);
-    }
+    };
   });
   QUnit.testDone(() => {
     odoo = originalOdoo;
 
     // Cleanup the listeners added on window in the current test.
-    windowListeners.forEach(listener => {
+    windowListeners.forEach((listener) => {
       window.removeEventListener(listener.eventName, listener.callback);
     });
     window.addEventListener = originalWindowAddEventListener;

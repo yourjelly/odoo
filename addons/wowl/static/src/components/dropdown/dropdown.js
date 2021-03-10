@@ -52,18 +52,25 @@ export class Dropdown extends Component {
   }
 
   /**
-  * @param {"PREV"|"NEXT"|"FIRST"|"LAST"} direction
-  */
+   * @param {"PREV"|"NEXT"|"FIRST"|"LAST"} direction
+   */
   _setActiveItem(direction) {
     const items = [...this.el.querySelectorAll(":scope > ul.o_dropdown_menu > .o_dropdown_item")];
-    const prevActiveIndex = items.findIndex(item => [...item.classList].includes("o_dropdown_active"));
+    const prevActiveIndex = items.findIndex((item) =>
+      [...item.classList].includes("o_dropdown_active")
+    );
     const nextActiveIndex =
-      direction === "NEXT" ? Math.min(prevActiveIndex + 1, items.length - 1) :
-        direction === "PREV" ? Math.max(0, prevActiveIndex - 1) :
-          direction === "LAST" ? items.length - 1 :
-            direction === "FIRST" ? 0 : undefined;
+      direction === "NEXT"
+        ? Math.min(prevActiveIndex + 1, items.length - 1)
+        : direction === "PREV"
+        ? Math.max(0, prevActiveIndex - 1)
+        : direction === "LAST"
+        ? items.length - 1
+        : direction === "FIRST"
+        ? 0
+        : undefined;
     if (nextActiveIndex !== undefined) {
-      items.forEach(item => item.classList.remove("o_dropdown_active"));
+      items.forEach((item) => item.classList.remove("o_dropdown_active"));
       items[nextActiveIndex].classList.add("o_dropdown_active");
     }
   }
@@ -77,43 +84,46 @@ export class Dropdown extends Component {
       {
         hotkey: "arrowup",
         hint: this.env._t("select the item above"),
-        callback: () => this._setActiveItem("PREV")
+        callback: () => this._setActiveItem("PREV"),
       },
       {
         hotkey: "arrowdown",
         hint: "select the item below",
-        callback: () => this._setActiveItem("NEXT")
+        callback: () => this._setActiveItem("NEXT"),
       },
       {
         hotkey: "shift-arrowup",
         hint: "select the first item",
-        callback: () => this._setActiveItem("FIRST")
+        callback: () => this._setActiveItem("FIRST"),
       },
       {
         hotkey: "shift-arrowdown",
         hint: "select the last item",
-        callback: () => this._setActiveItem("LAST")
+        callback: () => this._setActiveItem("LAST"),
       },
       {
         hotkey: "enter",
         hint: "click on the selected menu",
         callback: () => {
-          const activeItem = this.el.querySelector(":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active");
+          const activeItem = this.el.querySelector(
+            ":scope > ul.o_dropdown_menu > .o_dropdown_item.o_dropdown_active"
+          );
           if (activeItem) {
             activeItem.click();
           }
-        }
+        },
       },
       {
         hotkey: "escape",
         hint: "close the dropdown",
-        callback: this._close.bind(this)
-      }];
-    this.hotkeyTokens = subs.map(sub => this.hotkeyService.subscribe(sub));
+        callback: this._close.bind(this),
+      },
+    ];
+    this.hotkeyTokens = subs.map((sub) => this.hotkeyService.subscribe(sub));
   }
 
   unsubscribeKeynav() {
-    this.hotkeyTokens.forEach(tokenId => this.hotkeyService.unsubscribe(tokenId));
+    this.hotkeyTokens.forEach((tokenId) => this.hotkeyService.unsubscribe(tokenId));
     this.hotkeyTokens = [];
   }
 
@@ -226,6 +236,6 @@ Dropdown.props = {
   hotkey: {
     type: String,
     optional: true,
-  }
+  },
 };
 Dropdown.template = "wowl.Dropdown";
