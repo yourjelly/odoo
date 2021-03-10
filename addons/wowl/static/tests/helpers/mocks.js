@@ -123,8 +123,8 @@ export function makeTestOdoo(config = {}) {
       is_admin: true,
       partner_id: 7,
       user_companies: {
-        allowed_companies: [[1, "Hermit"]],
-        current_company: [1, "Hermit"],
+        allowed_companies: { 1: { id: 1, name: "Hermit" } },
+        current_company: { id: 1, name: "Hermit" },
       },
       db: "test",
       server_version: "1.0",
