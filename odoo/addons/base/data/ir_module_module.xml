@@ -198,9 +198,23 @@
             <field name="website">https://www.odoo.com/page/crm?utm_source=db&amp;utm_medium=module</field>
         </record>
 
+        <record model="ir.module.module" id="base.module_portal_calendar">
+            <field name="name">portal_calendar</field>
+            <field name="shortdesc">Appointments</field>
+            <field name="sequence">215</field>
+            <field name="category_id" ref="base.module_category_sales_sales"/>
+            <field name="application" eval="True"/>
+            <field name="summary">Online appointments scheduler</field>
+            <field name="license">OEEL-1</field>
+            <field name="author">Odoo S.A.</field>
+            <field name="to_buy" eval="True"/>
+            <field name="icon">/base/static/img/icons/website_calendar.png</field>
+            <field name="website">https://www.odoo.com/page/appointments?utm_source=db&amp;utm_medium=module</field>
+        </record>
+
         <record model="ir.module.module" id="base.module_website_calendar">
             <field name="name">website_calendar</field>
-            <field name="shortdesc">Appointments</field>
+            <field name="shortdesc">Website Calendar: Appointments</field>
             <field name="sequence">215</field>
             <field name="category_id" ref="base.module_category_sales_sales"/>
             <field name="application" eval="True"/>
