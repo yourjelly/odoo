@@ -57,4 +57,11 @@ export async function setupTests() {
 
 export { makeFakeUserService, makeFakeRPCService, makeMockXHR, makeMockFetch } from "./mocks";
 
-export { getFixture, makeTestEnv, nextTick, makeDeferred, click } from "./utility";
+export {
+  click,
+  getFixture,
+  makeDeferred,
+  makeTestEnv,
+  nextTick,
+  patchDate,
+} from "./utility";

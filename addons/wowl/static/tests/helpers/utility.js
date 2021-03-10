@@ -5,6 +5,19 @@ import { makeEnv } from "../../src/env";
 import { makeFakeDeviceService, makeFakeLocalizationService, makeTestOdoo, mocks } from "./mocks";
 import { makeMockServer } from "./mock_server";
 
+const { Settings } = luxon;
+
+function unpatchDate() {
+  Settings.resetCaches();
+}
+export function patchDate(year, month, day, hours, minutes, seconds) {
+  const actualDate = new Date();
+  const fakeDate = new Date(year, month, day, hours, minutes, seconds);
+  const timeInterval = actualDate.getTime() - fakeDate.getTime();
+  Settings.now = () => Date.now() - timeInterval;
+  return unpatchDate;
+}
+
 function makeTestConfig(config = {}) {
   const serviceRegistry = config.serviceRegistry || new Registry();
   if (!serviceRegistry.contains("device")) {
