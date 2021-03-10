@@ -167,8 +167,8 @@ const Wysiwyg = Widget.extend({
             await this._insertSnippetMenu();
         }
 
-        $(this.odooEditor.dom).on('click', this._updateEditorUI.bind(this));
-        $(this.odooEditor.dom).on('keydown', this._updateEditorUI.bind(this));
+        $(this.odooEditor.editable).on('click', this._updateEditorUI.bind(this));
+        $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
 
         return _super.apply(this, arguments).then(() => {
             $(document.body).append(this.toolbar.$el);
@@ -523,7 +523,7 @@ const Wysiwyg = Widget.extend({
                 this.linkTools = undefined;
             } else {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.dom, $btn);
+                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.editable, $btn);
                 this.linkTools.appendTo(this.toolbar.$el);
             }
         } else {
@@ -758,7 +758,7 @@ const Wysiwyg = Widget.extend({
                         : targetNode && targetNode.parentNode;
                     colorpicker = new ColorPaletteWidget(parent, {
                         excluded: ['transparent_grayscale'],
-                        $editable: $(this.odooEditor.dom), // Our parent is the root widget, we can't retrieve the editable section from it...
+                        $editable: $(this.odooEditor.editable), // Our parent is the root widget, we can't retrieve the editable section from it...
                         selectedColor: $(targetElement).css(eventName === "foreColor" ? 'color' : 'backgroundColor'),
                     });
                     colorpicker.on('custom_color_picked color_picked', null, ev => {
