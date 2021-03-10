@@ -132,7 +132,7 @@ class StockLandedCost(models.Model):
             move_vals = {
                 'journal_id': cost.account_journal_id.id,
                 'date': cost.date,
-                'ref': cost.name,
+                'account_move_reference': cost.name,
                 'line_ids': [],
                 'move_type': 'entry',
             }

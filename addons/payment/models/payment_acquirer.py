@@ -687,7 +687,7 @@ class PaymentTransaction(models.Model):
             'payment_method_id': self.env.ref('payment.account_payment_method_electronic_in').id,
             'payment_token_id': self.payment_token_id and self.payment_token_id.id or None,
             'payment_transaction_id': self.id,
-            'ref': self.reference,
+            'account_move_reference': self.reference,
             **add_payment_vals,
         }
         payment = self.env['account.payment'].create(payment_vals)

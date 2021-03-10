@@ -19,8 +19,8 @@ class AccountMove(models.Model):
     def _get_invoice_reference(self):
         self.ensure_one()
         vendor_refs = [ref for ref in set(self.line_ids.mapped('purchase_line_id.order_id.partner_ref')) if ref]
-        if self.ref:
-            return [ref for ref in self.ref.split(', ') if ref and ref not in vendor_refs] + vendor_refs
+        if self.account_move_reference:
+            return [ref for ref in self.account_move_reference.split(', ') if ref and ref not in vendor_refs] + vendor_refs
         return vendor_refs
 
     @api.onchange('purchase_vendor_bill_id', 'purchase_id')
@@ -45,7 +45,7 @@ class AccountMove(models.Model):
 
         # Copy data from PO
         invoice_vals = self.purchase_id.with_company(self.purchase_id.company_id)._prepare_invoice()
-        del invoice_vals['ref']
+        del invoice_vals['account_move_reference']
         self.update(invoice_vals)
 
         # Copy purchase lines.
@@ -62,9 +62,9 @@ class AccountMove(models.Model):
         origins = set(self.line_ids.mapped('purchase_line_id.order_id.name'))
         self.invoice_origin = ','.join(list(origins))
 
-        # Compute ref.
+        # Compute account_move_reference.
         refs = self._get_invoice_reference()
-        self.ref = ', '.join(refs)
+        self.account_move_reference = ', '.join(refs)
 
         # Compute payment_reference.
         if len(refs) == 1:

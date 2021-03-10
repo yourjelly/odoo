@@ -444,7 +444,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
             'journal_id': journal.id,
             'company_id': self.sheet_id.company_id.id,
             'date': account_date,
-            'ref': self.sheet_id.name,
+            'account_move_reference': self.sheet_id.name,
             # force the name to the default value, to avoid an eventual 'default_name' in the context
             # to set it to '' which cause no number to be given to the account.move when posted.
             'name': '/',
@@ -624,7 +624,7 @@ Or send your receipts at <a href="mailto:%(email)s?subject=Lunch%%20with%%20cust
                     'date': expense.date,
                     'currency_id': expense.currency_id.id if different_currency else journal_currency.id,
                     'amount': abs(total_amount_currency) if different_currency else abs(total_amount),
-                    'ref': expense.name,
+                    'account_move_reference': expense.name,
                 })
 
             # link move lines to move, and move to expense sheet

@@ -208,7 +208,7 @@
                                     <field name="partner_id"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"
                                            domain="['|', ('parent_id','=', False), ('is_company','=',True)]"/>
-                                    <field name="ref" optional="hidden"/>
+                                    <field name="account_move_reference" optional="hidden"/>
                                     <field name="transaction_type" optional="hidden"/>
                                     <field name="narration" string="Notes" optional="hidden"/>
                                     <field name="amount"
@@ -309,7 +309,7 @@
                             <field name="statement_id"/>
                             <field name="date"/>
                             <field name="payment_ref"/>
-                            <field name="ref"/>
+                            <field name="account_move_reference"/>
                             <field name="partner_id"/>
                             <field name="amount"/>
                             <field name="sequence"/>
@@ -341,7 +341,7 @@
                     <field name="move_id"/>
                     <field name="date"/>
                     <field name="payment_ref"/>
-                    <field name="ref" groups="base.group_no_one"/>
+                    <field name="account_move_reference" groups="base.group_no_one"/>
                     <field name="partner_id"/>
                     <field name="amount"/>
                     <field name="amount_currency" optional="hidden" groups="base.group_multi_currency"/>

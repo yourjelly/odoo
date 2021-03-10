@@ -1184,7 +1184,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'invoice_payment_term_id': None,
             'date': move_reversal.date,
             'state': 'draft',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'not_paid',
         })
 
@@ -1235,7 +1235,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'invoice_payment_term_id': None,
             'date': move_reversal.date,
             'state': 'posted',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'paid',
         })
 
@@ -1304,7 +1304,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'currency_id': self.currency_data['currency'].id,
             'date': move_reversal.date,
             'state': 'draft',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'not_paid',
         })
 
@@ -1361,7 +1361,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'currency_id': self.currency_data['currency'].id,
             'date': move_reversal.date,
             'state': 'posted',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'paid',
         })
 
@@ -1471,11 +1471,11 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
     def test_in_invoice_duplicate_supplier_reference(self):
         ''' Ensure two vendor bills can't share the same vendor reference. '''
-        self.invoice.ref = 'a supplier reference'
+        self.invoice.account_move_reference = 'a supplier reference'
         invoice2 = self.invoice.copy(default={'invoice_date': self.invoice.invoice_date})
 
         with self.assertRaises(ValidationError):
-            invoice2.ref = 'a supplier reference'
+            invoice2.account_move_reference = 'a supplier reference'
 
     def test_in_invoice_switch_in_refund_1(self):
         # Test creating an account_move with an in_invoice_type and switch it in an in_refund.

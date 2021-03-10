@@ -519,7 +519,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertTrue(inv.state == 'posted', 'The invoice should be open again')
         self.assertFalse(exchange_reconcile.exists())
 
-        reverted_exchange_move = self.env['account.move'].search([('journal_id', '=', exchange_move.journal_id.id), ('ref', 'ilike', exchange_move.name)], limit=1)
+        reverted_exchange_move = self.env['account.move'].search([('journal_id', '=', exchange_move.journal_id.id), ('account_move_reference', 'ilike', exchange_move.name)], limit=1)
         _move_revert_test_pair(payment_move, reverted_payment_move)
         _move_revert_test_pair(exchange_move, reverted_exchange_move)
 

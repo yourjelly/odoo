@@ -342,7 +342,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         # === Tax in debit ===
 
         move_form = Form(self.env['account.move'], view='account.view_move_form')
-        move_form.ref = 'azerty'
+        move_form.account_move_reference = 'azerty'
 
         # Debit base tax line.
         with move_form.line_ids.new() as credit_line:
@@ -371,7 +371,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         # === Tax in credit ===
 
         move_form = Form(self.env['account.move'], view='account.view_move_form')
-        move_form.ref = 'azerty'
+        move_form.account_move_reference = 'azerty'
 
         # Debit base tax line.
         with move_form.line_ids.new() as credit_line:
@@ -435,7 +435,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         # === Tax in debit ===
 
         move_form = Form(self.env['account.move'])
-        move_form.ref = 'azerty'
+        move_form.account_move_reference = 'azerty'
 
         # Debit base tax line.
         with move_form.line_ids.new() as credit_line:
@@ -464,7 +464,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         # === Tax in credit ===
 
         move_form = Form(self.env['account.move'])
-        move_form.ref = 'azerty'
+        move_form.account_move_reference = 'azerty'
 
         # Debit base tax line.
         with move_form.line_ids.new() as credit_line:

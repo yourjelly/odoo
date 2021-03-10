@@ -734,9 +734,9 @@ Reason(s) of this behavior could be:
                         ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
                     origins.add(invoice_vals['invoice_origin'])
                     payment_refs.add(invoice_vals['payment_reference'])
-                    refs.add(invoice_vals['ref'])
+                    refs.add(invoice_vals['account_move_reference'])
                 ref_invoice_vals.update({
-                    'ref': ', '.join(refs)[:2000],
+                    'account_move_reference': ', '.join(refs)[:2000],
                     'invoice_origin': ', '.join(origins),
                     'payment_reference': len(payment_refs) == 1 and payment_refs.pop() or False,
                 })

@@ -57,7 +57,7 @@ class AccountEdiFormat(models.Model):
             # Reference
             elements = tree.xpath('//cbc:ID', namespaces=namespaces)
             if elements:
-                invoice_form.ref = elements[0].text
+                invoice_form.account_move_reference = elements[0].text
             elements = tree.xpath('//cbc:InstructionID', namespaces=namespaces)
             if elements:
                 invoice_form.payment_reference = elements[0].text

@@ -149,7 +149,7 @@ class AccountMove(models.Model):
         copy=False,
         default=fields.Date.context_today
     )
-    ref = fields.Char(string='Reference', copy=False, tracking=True)
+    account_move_reference = fields.Char(string='Reference', copy=False, tracking=True)
     narration = fields.Text(string='Terms and Conditions')
     state = fields.Selection(selection=[
             ('draft', 'Draft'),
@@ -1085,7 +1085,7 @@ class AccountMove(models.Model):
                 }
             )
         )
-        self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
+        self = self.sorted(lambda m: (m.date, m.account_move_reference or '', m.id))
         highest_name = self[0]._get_last_sequence() if self else False
 
         # Group the moves by journal and month
@@ -1448,7 +1448,7 @@ class AccountMove(models.Model):
                     continue
 
                 payments_widget_vals['content'].append({
-                    'journal_name': line.ref or line.move_id.name,
+                    'journal_name': line.account_move_reference or line.move_id.name,
                     'amount': amount,
                     'currency': move.currency_id.symbol,
                     'id': line.id,
@@ -1469,8 +1469,8 @@ class AccountMove(models.Model):
 
         reconciled_vals = []
         for partial, amount, counterpart_line in self._get_reconciled_invoices_partials():
-            if counterpart_line.move_id.ref:
-                reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
+            if counterpart_line.move_id.account_move_reference:
+                reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.account_move_reference)
             else:
                 reconciliation_ref = counterpart_line.move_id.name
 
@@ -1487,7 +1487,7 @@ class AccountMove(models.Model):
                 'account_payment_id': counterpart_line.payment_id.id,
                 'payment_method_name': counterpart_line.payment_id.payment_method_id.name if counterpart_line.journal_id.type == 'bank' else None,
                 'move_id': counterpart_line.move_id.id,
-                'ref': reconciliation_ref,
+                'account_move_reference': reconciliation_ref,
             })
         return reconciled_vals
 
@@ -1624,14 +1624,14 @@ class AccountMove(models.Model):
             raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
                                     'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
 
-    @api.constrains('ref', 'move_type', 'partner_id', 'journal_id', 'invoice_date')
+    @api.constrains('account_move_reference', 'move_type', 'partner_id', 'journal_id', 'invoice_date')
     def _check_duplicate_supplier_reference(self):
-        moves = self.filtered(lambda move: move.is_purchase_document() and move.ref)
+        moves = self.filtered(lambda move: move.is_purchase_document() and move.account_move_reference)
         if not moves:
             return
 
         self.env["account.move"].flush([
-            "ref", "move_type", "invoice_date", "journal_id",
+            "account_move_reference", "move_type", "invoice_date", "journal_id",
             "company_id", "partner_id", "commercial_partner_id",
         ])
         self.env["account.journal"].flush(["company_id"])
@@ -1644,7 +1644,7 @@ class AccountMove(models.Model):
             JOIN account_journal journal ON journal.id = move.journal_id
             JOIN res_partner partner ON partner.id = move.partner_id
             INNER JOIN account_move move2 ON
-                move2.ref = move.ref
+                move2.account_move_reference = move.account_move_reference
                 AND move2.company_id = journal.company_id
                 AND move2.commercial_partner_id = partner.commercial_partner_id
                 AND move2.move_type = move.move_type
@@ -1655,7 +1655,7 @@ class AccountMove(models.Model):
         duplicated_moves = self.browse([r[0] for r in self._cr.fetchall()])
         if duplicated_moves:
             raise ValidationError(_('Duplicated vendor reference detected. You probably encoded twice the same vendor bill/credit note:\n%s') % "\n".join(
-                duplicated_moves.mapped(lambda m: "%(partner)s - %(ref)s - %(date)s" % {'ref': m.ref, 'partner': m.partner_id.display_name, 'date': format_date(self.env, m.date)})
+                duplicated_moves.mapped(lambda m: "%(partner)s - %(account_move_reference)s - %(date)s" % {'account_move_reference': m.account_move_reference, 'partner': m.partner_id.display_name, 'date': format_date(self.env, m.date)})
             ))
 
     def _check_balanced(self):
@@ -1880,7 +1880,7 @@ class AccountMove(models.Model):
             self.mapped('line_ids')._check_tax_lock_date()
 
         if ('state' in vals and vals.get('state') == 'posted'):
-            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)).sorted(lambda m: (m.date, m.ref or '', m.id)):
+            for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)).sorted(lambda m: (m.date, m.account_move_reference or '', m.id)):
                 new_number = move.journal_id.secure_sequence_id.next_by_id()
                 vals_hashing = {'secure_sequence_number': new_number,
                                 'inalterable_hash': move._get_new_hash(new_number)}
@@ -1911,8 +1911,8 @@ class AccountMove(models.Model):
         for move in self:
             if self._context.get('name_groupby'):
                 name = '**%s**, %s' % (format_date(self.env, move.date), move._get_move_display_name())
-                if move.ref:
-                    name += '     (%s)' % move.ref
+                if move.account_move_reference:
+                    name += '     (%s)' % move.account_move_reference
                 if move.partner_id.name:
                     name += ' - %s' % move.partner_id.name
             else:
@@ -2146,7 +2146,7 @@ class AccountMove(models.Model):
                 draft_name += ' (* %s)' % str(self.id)
             else:
                 draft_name += ' ' + self.name
-        return (draft_name or self.name) + (show_ref and self.ref and ' (%s%s)' % (self.ref[:50], '...' if len(self.ref) > 50 else '') or '')
+        return (draft_name or self.name) + (show_ref and self.account_move_reference and ' (%s%s)' % (self.account_move_reference[:50], '...' if len(self.account_move_reference) > 50 else '') or '')
 
     def _get_invoice_delivery_partner_id(self):
         ''' Hook allowing to retrieve the right delivery address depending of installed modules.
@@ -2879,7 +2879,7 @@ class AccountMove(models.Model):
     @api.model
     def _move_dict_to_preview_vals(self, move_vals, currency_id=None):
         preview_vals = {
-            'group_name': "%s, %s" % (format_date(self.env, move_vals['date']) or _('[Not set]'), move_vals['ref']),
+            'group_name': "%s, %s" % (format_date(self.env, move_vals['date']) or _('[Not set]'), move_vals['account_move_reference']),
             'items_vals': move_vals['line_ids'],
         }
         for line in preview_vals['items_vals']:
@@ -2920,7 +2920,7 @@ class AccountMove(models.Model):
             # No eligible method could be found; we can't generate the QR-code
             return None
 
-        unstruct_ref = self.ref if self.ref else self.name
+        unstruct_ref = self.account_move_reference if self.account_move_reference else self.name
         rslt = self.partner_bank_id.build_qr_code_url(self.amount_residual, unstruct_ref, self.payment_reference, self.currency_id, self.partner_id, qr_code_method, silent_errors=False)
 
         # We only set qr_code_method after generating the url; otherwise, it
@@ -2992,7 +2992,7 @@ class AccountMoveLine(models.Model):
         help="The move of this entry line.")
     move_name = fields.Char(string='Number', related='move_id.name', store=True, index=True)
     date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False, group_operator='min')
-    ref = fields.Char(related='move_id.ref', store=True, copy=False, index=True, readonly=False)
+    account_move_reference = fields.Char(related='move_id.account_move_reference', store=True, copy=False, index=True, readonly=False)
     parent_state = fields.Selection(related='move_id.state', store=True, readonly=True)
     journal_id = fields.Many2one(related='move_id.journal_id', store=True, index=True, copy=False)
     company_id = fields.Many2one(related='move_id.company_id', store=True, readonly=True, default=lambda self: self.env.company)
@@ -3827,15 +3827,15 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
 
     def init(self):
-        """ change index on partner_id to a multi-column index on (partner_id, ref), the new index will behave in the
+        """ change index on partner_id to a multi-column index on (partner_id, account_move_reference), the new index will behave in the
             same way when we search on partner_id, with the addition of being optimal when having a query that will
-            search on partner_id and ref at the same time (which is the case when we open the bank reconciliation widget)
+            search on partner_id and account_move_reference at the same time (which is the case when we open the bank reconciliation widget)
         """
         cr = self._cr
         cr.execute('DROP INDEX IF EXISTS account_move_line_partner_id_index')
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('account_move_line_partner_id_ref_idx',))
         if not cr.fetchone():
-            cr.execute('CREATE INDEX account_move_line_partner_id_ref_idx ON account_move_line (partner_id, ref)')
+            cr.execute('CREATE INDEX account_move_line_partner_id_ref_idx ON account_move_line (partner_id, account_move_reference)')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -4145,13 +4145,13 @@ class AccountMoveLine(models.Model):
             values.pop('account_id', None)
         return values
 
-    @api.depends('ref', 'move_id')
+    @api.depends('account_move_reference', 'move_id')
     def name_get(self):
         result = []
         for line in self:
             name = line.move_id.name or ''
-            if line.ref:
-                name += " (%s)" % line.ref
+            if line.account_move_reference:
+                name += " (%s)" % line.account_move_reference
             name += (line.name or line.product_id.display_name) and (' ' + (line.name or line.product_id.display_name)) or ''
             result.append((line.id, name))
         return result
@@ -4788,7 +4788,7 @@ class AccountMoveLine(models.Model):
         result = []
         for move_line in self:
             amount = (move_line.credit or 0.0) - (move_line.debit or 0.0)
-            default_name = move_line.name or (move_line.ref or '/' + ' -- ' + (move_line.partner_id and move_line.partner_id.name or '/'))
+            default_name = move_line.name or (move_line.account_move_reference or '/' + ' -- ' + (move_line.partner_id and move_line.partner_id.name or '/'))
             result.append({
                 'name': default_name,
                 'date': move_line.date,
@@ -4800,7 +4800,7 @@ class AccountMoveLine(models.Model):
                 'product_uom_id': move_line.product_uom_id and move_line.product_uom_id.id or False,
                 'amount': amount,
                 'general_account_id': move_line.account_id.id,
-                'ref': move_line.ref,
+                'ref': move_line.account_move_reference,
                 'move_id': move_line.id,
                 'user_id': move_line.move_id.invoice_user_id.id or self._uid,
                 'partner_id': move_line.partner_id.id,
@@ -4814,7 +4814,7 @@ class AccountMoveLine(models.Model):
         """
         self.ensure_one()
         amount = -self.balance * distribution.percentage / 100.0
-        default_name = self.name or (self.ref or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
+        default_name = self.name or (self.account_move_reference or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
         return {
             'name': default_name,
             'date': self.date,
@@ -4826,7 +4826,7 @@ class AccountMoveLine(models.Model):
             'product_uom_id': self.product_uom_id and self.product_uom_id.id or False,
             'amount': amount,
             'general_account_id': self.account_id.id,
-            'ref': self.ref,
+            'ref': self.account_move_reference,
             'move_id': self.id,
             'user_id': self.move_id.invoice_user_id.id or self._uid,
             'company_id': distribution.account_id.company_id.id or self.env.company.id,

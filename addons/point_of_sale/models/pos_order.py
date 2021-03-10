@@ -396,7 +396,7 @@ class PosOrder(models.Model):
             'invoice_origin': self.name,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
             'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
-            'ref': self.name,
+            'account_move_reference': self.name,
             'partner_id': self.partner_id.id,
             'narration': self.note or '',
             # considering partner's sale pricelist's currency

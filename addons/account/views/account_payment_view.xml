@@ -86,7 +86,7 @@
             <field name="arch" type="xml">
                 <search string="Payments">
                     <field name="name" string="Payment"
-                        filter_domain="['|', '|', ('name', 'ilike', self), ('partner_id', 'ilike', self), ('ref', 'ilike', self)]"/>
+                        filter_domain="['|', '|', ('name', 'ilike', self), ('partner_id', 'ilike', self), ('account_move_reference', 'ilike', self)]"/>
                     <field name="partner_id" string="Customer/Vendor"/>
                     <field name="journal_id"/>
                     <field name="is_internal_transfer"/>
@@ -248,7 +248,7 @@
                                 </div>
                                 <field name="date"
                                        attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                                <field name="ref" string="Memo"/>
+                                <field name="account_move_reference" string="Memo"/>
                             </group>
 
                             <group>

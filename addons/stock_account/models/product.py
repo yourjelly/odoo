@@ -265,7 +265,7 @@ class ProductProduct(models.Model):
             move_vals = {
                 'journal_id': product_accounts[product.id]['stock_journal'].id,
                 'company_id': company_id.id,
-                'ref': product.default_code,
+                'account_move_reference': product.default_code,
                 'stock_valuation_layer_ids': [(6, None, [stock_valuation_layer.id])],
                 'move_type': 'entry',
                 'line_ids': [(0, 0, {
@@ -502,7 +502,7 @@ class ProductProduct(models.Model):
             'journal_id': accounts['stock_journal'].id,
             'line_ids': move_lines,
             'date': self._context.get('force_period_date', fields.Date.context_today(self)),
-            'ref': description,
+            'account_move_reference': description,
             'stock_move_id': vacuum_svl.stock_move_id.id,
             'move_type': 'entry',
         })
@@ -573,7 +573,7 @@ class ProductProduct(models.Model):
             move_vals = {
                 'journal_id': product_accounts[product.id]['stock_journal'].id,
                 'company_id': self.env.company.id,
-                'ref': product.default_code,
+                'account_move_reference': product.default_code,
                 'stock_valuation_layer_ids': [(6, None, [out_stock_valuation_layer.id])],
                 'line_ids': [(0, 0, {
                     'name': out_stock_valuation_layer.description,
@@ -609,7 +609,7 @@ class ProductProduct(models.Model):
             move_vals = {
                 'journal_id': product_accounts[product.id]['stock_journal'].id,
                 'company_id': self.env.company.id,
-                'ref': product.default_code,
+                'account_move_reference': product.default_code,
                 'stock_valuation_layer_ids': [(6, None, [out_stock_valuation_layer.id])],
                 'line_ids': [(0, 0, {
                     'name': out_stock_valuation_layer.description,

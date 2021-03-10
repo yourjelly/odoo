@@ -189,7 +189,7 @@ class AccountEdiFormat(models.Model):
             # Reference.
             elements = tree.xpath('//rsm:ExchangedDocument/ram:ID', namespaces=tree.nsmap)
             if elements:
-                invoice_form.ref = elements[0].text
+                invoice_form.account_move_reference = elements[0].text
 
             # Name.
             elements = tree.xpath('//ram:BuyerOrderReferencedDocument/ram:IssuerAssignedID', namespaces=tree.nsmap)

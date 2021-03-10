@@ -204,9 +204,9 @@
                         <span t-field="o.invoice_origin"/>
                     </t>
 
-                    <t t-if="o.ref">
+                    <t t-if="o.account_move_reference">
                         <br/><strong>Reference:</strong>
-                        <span t-field="o.ref"/>
+                        <span t-field="o.account_move_reference"/>
                     </t>
 
                     <!-- (18) REMITOS -->

@@ -105,10 +105,10 @@ class TestSwissQR(AccountTestInvoicingCommon):
         if ref_type == 'QRR':
             self.assertTrue(invoice.payment_reference)
             struct_ref = invoice.payment_reference
-            unstr_msg = invoice.ref or invoice.name or ''
+            unstr_msg = invoice.account_move_reference or invoice.name or ''
         else:
             struct_ref = ''
-            unstr_msg = invoice.payment_reference or invoice.ref or invoice.name or ''
+            unstr_msg = invoice.payment_reference or invoice.account_move_reference or invoice.name or ''
         unstr_msg = (unstr_msg or invoice.number).replace('/', '%2F')
 
         payload = (

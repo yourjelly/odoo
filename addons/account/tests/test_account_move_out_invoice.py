@@ -1688,7 +1688,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'name': 'RINV/2019/02/0001',
             'date': move_reversal.date,
             'state': 'draft',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'not_paid',
         })
 
@@ -1739,7 +1739,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'invoice_payment_term_id': None,
             'date': move_reversal.date,
             'state': 'posted',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'paid',
         })
 
@@ -1808,7 +1808,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'currency_id': self.currency_data['currency'].id,
             'date': move_reversal.date,
             'state': 'draft',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'not_paid',
         })
 
@@ -1865,7 +1865,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'currency_id': self.currency_data['currency'].id,
             'date': move_reversal.date,
             'state': 'posted',
-            'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
+            'account_move_reference': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
             'payment_state': 'paid',
         })
 

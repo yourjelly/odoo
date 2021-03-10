@@ -9,7 +9,7 @@
             <form>
                 <field name="l10n_latam_internal_type" invisible="1"/>
             </form>
-            <field name="ref" position="attributes">
+            <field name="account_move_reference" position="attributes">
                 <attribute name="attrs">{'invisible': [('move_type', '=', 'out_invoice'), ('l10n_latam_internal_type', '!=', 'debit_note')], 'required': [('l10n_latam_internal_type', '=', 'debit_note')]}</attribute>
             </field>
         </field>

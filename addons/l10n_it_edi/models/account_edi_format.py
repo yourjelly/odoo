@@ -179,7 +179,7 @@ class AccountEdiFormat(models.Model):
 
                 elements = body_tree.xpath('.//DatiGeneraliDocumento//Numero')
                 if elements:
-                    invoice_form.ref = elements[0].text
+                    invoice_form.account_move_reference = elements[0].text
 
                 # Currency. <2.1.1.2>
                 elements = body_tree.xpath('.//DatiGeneraliDocumento/Divisa')

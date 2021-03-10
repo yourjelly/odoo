@@ -82,7 +82,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         cls.invoice_line_3 = cls._create_invoice_line(300, cls.partner_1, 'in_refund', name="RBILL/2019/09/0013")
         cls.invoice_line_4 = cls._create_invoice_line(1000, cls.partner_2, 'in_invoice')
         cls.invoice_line_5 = cls._create_invoice_line(600, cls.partner_3, 'out_invoice')
-        cls.invoice_line_6 = cls._create_invoice_line(600, cls.partner_3, 'out_invoice', ref="RF12 3456")
+        cls.invoice_line_6 = cls._create_invoice_line(600, cls.partner_3, 'out_invoice', account_move_reference="RF12 3456")
         cls.invoice_line_7 = cls._create_invoice_line(200, cls.partner_3, 'out_invoice', pay_reference="RF12 3456")
 
         ####################
@@ -132,7 +132,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
                     (0, 0, {
                         'date': '2020-01-01',
                         'payment_ref': 'baaaaah',
-                        'ref': 'RF12 3456',
+                        'account_move_reference': 'RF12 3456',
                         'partner_id': cls.partner_3.id,
                         'amount': 600,
                         'sequence': 2,
@@ -159,7 +159,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         cls._post_statements(cls)
 
     @classmethod
-    def _create_invoice_line(cls, amount, partner, type, currency=None, pay_reference=None, ref=None, name=None):
+    def _create_invoice_line(cls, amount, partner, type, currency=None, pay_reference=None, account_move_reference=None, name=None):
         ''' Create an invoice on the fly.'''
         invoice_form = Form(cls.env['account.move'].with_context(default_move_type=type, default_invoice_date='2019-09-01', default_date='2019-09-01'))
         invoice_form.partner_id = partner
@@ -167,8 +167,8 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             invoice_form.currency_id = currency
         if pay_reference:
             invoice_form.payment_reference = pay_reference
-        if ref:
-            invoice_form.ref = ref
+        if account_move_reference:
+            invoice_form.account_move_reference = account_move_reference
         if name:
             invoice_form.name = name
         with invoice_form.invoice_line_ids.new() as invoice_line_form:

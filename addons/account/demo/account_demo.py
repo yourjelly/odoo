@@ -90,7 +90,7 @@ class AccountChartTemplate(models.Model):
             },
             f'{cid}_demo_invoice_equipment_purchase': {
                 'move_type': 'in_invoice',
-                'ref': 'INV/2018/0057',
+                'account_move_reference': 'INV/2018/0057',
                 'partner_id': ref('base.res_partner_12').id,
                 'invoice_user_id': False,
                 'invoice_date': '2018-09-17',

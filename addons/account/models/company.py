@@ -346,7 +346,7 @@ class ResCompany(models.Model):
             opening_date = self.account_opening_date - timedelta(days=1)
 
             self.account_opening_move_id = self.env['account.move'].create({
-                'ref': _('Opening Journal Entry'),
+                'account_move_reference': _('Opening Journal Entry'),
                 'company_id': self.id,
                 'journal_id': default_journal.id,
                 'date': opening_date,

@@ -185,7 +185,7 @@ class AccountPayment(models.Model):
             'state': self.state,
             'amount': formatLang(self.env, self.amount, currency_obj=self.currency_id) if i == 0 else 'VOID',
             'amount_in_word': self._check_fill_line(self.check_amount_in_words) if i == 0 else 'VOID',
-            'memo': self.ref,
+            'memo': self.account_move_reference,
             'stub_cropped': not multi_stub and len(self.move_id._get_reconciled_invoices()) > INV_LINES_PER_STUB,
             # If the payment does not reference an invoice, there is no stub line to display
             'stub_lines': p,
@@ -261,7 +261,7 @@ class AccountPayment(models.Model):
 
         return {
             'due_date': format_date(self.env, invoice.invoice_date_due),
-            'number': invoice.ref and invoice.name + ' - ' + invoice.ref or invoice.name,
+            'number': invoice.account_move_reference and invoice.name + ' - ' + invoice.account_move_reference or invoice.name,
             'amount_total': formatLang(self.env, invoice_sign * invoice.amount_total, currency_obj=invoice.currency_id),
             'amount_residual': formatLang(self.env, amount_residual, currency_obj=invoice.currency_id) if amount_residual * 10**4 != 0 else '-',
             'amount_paid': formatLang(self.env, invoice_sign * amount_paid, currency_obj=self.currency_id),

@@ -83,7 +83,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         lines = self.test_move.line_ids.sorted('debit')
 
         # Editing the reference should be allowed.
-        self.test_move.ref = 'whatever'
+        self.test_move.account_move_reference = 'whatever'
 
         # Try to edit a line into a locked fiscal year.
         with self.assertRaises(UserError), self.cr.savepoint():

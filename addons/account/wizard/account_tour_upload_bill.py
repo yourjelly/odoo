@@ -69,7 +69,7 @@ class AccountTourUploadBill(models.TransientModel):
             if self.selection == 'sample':
                 bill.write({
                     'partner_id': self.env.ref('base.main_partner').id,
-                    'ref': 'INV/2020/0011'
+                    'account_move_reference': 'INV/2020/0011'
                 })
             return self._action_list_view_bill(bill.ids)
         else:

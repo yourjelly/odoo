@@ -22,7 +22,7 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
             <data>
-                 <xpath expr="//field[@name='ref']" position="after">
+                 <xpath expr="//field[@name='account_move_reference']" position="after">
                     <field name="siret" attrs="{'invisible': [('is_company', '=', False)]}"/>
                  </xpath>
             </data>

@@ -51,7 +51,7 @@ class MrpProduction(models.Model):
             'name': wc_line.name + ' (H)',
             'amount': -value,
             'account_id': account,
-            'ref': wc.code,
+            'account_move_reference': wc.code,
             'unit_amount': hours,
             'company_id': self.company_id.id,
         }

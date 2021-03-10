@@ -51,7 +51,7 @@ class AccountPayment(models.Model):
         self.ensure_one()
         return {
             'amount': self.amount,
-            'reference': self.ref,
+            'reference': self.account_move_reference,
             'currency_id': self.currency_id.id,
             'partner_id': self.partner_id.id,
             'partner_country_id': self.partner_id.country_id.id,

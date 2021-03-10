@@ -48,7 +48,7 @@ class AccountDebitNote(models.TransientModel):
         else:
             type = move.move_type
         default_values = {
-                'ref': '%s, %s' % (move.name, self.reason) if self.reason else move.name,
+                'account_move_reference': '%s, %s' % (move.name, self.reason) if self.reason else move.name,
                 'date': self.date or move.date,
                 'invoice_date': move.is_invoice(include_receipts=True) and (self.date or move.date) or False,
                 'journal_id': self.journal_id and self.journal_id.id or move.journal_id.id,

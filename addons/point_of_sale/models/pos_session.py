@@ -429,7 +429,7 @@ class PosSession(models.Model):
         account_move = self.env['account.move'].with_context(default_journal_id=journal.id).create({
             'journal_id': journal.id,
             'date': fields.Date.context_today(self),
-            'ref': self.name,
+            'account_move_reference': self.name,
         })
         self.write({'move_id': account_move.id})
 

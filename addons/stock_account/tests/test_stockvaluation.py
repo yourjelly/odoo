@@ -168,7 +168,7 @@ class TestStockValuation(TransactionCase):
         stock_aml, price_change_aml = self._get_stock_valuation_move_lines()
         self.assertEqual(stock_aml.debit, 50)
         self.assertEqual(price_change_aml.debit, 10)
-        self.assertEqual(price_change_aml.ref, 'prda')
+        self.assertEqual(price_change_aml.account_move_reference, 'prda')
         self.assertEqual(price_change_aml.product_id, self.product1)
 
     def test_fifo_perpetual_1(self):

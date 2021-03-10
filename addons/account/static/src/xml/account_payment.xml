@@ -64,7 +64,7 @@
                     <td><strong>Memo: </strong></td>
                     <td>
                         <div style="width: 200px; word-wrap: break-word">
-                            <t t-esc="ref"/>
+                            <t t-esc="account_move_reference"/>
                         </div>
                     </td>
                 </tr>

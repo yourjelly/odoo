@@ -31,5 +31,5 @@ class PosBoxOut(PosBox):
         active_model = self.env.context.get('active_model', False)
         active_ids = self.env.context.get('active_ids', [])
         if active_model == 'pos.session' and active_ids:
-            values['ref'] = self.env[active_model].browse(active_ids)[0].name
+            values['account_move_reference'] = self.env[active_model].browse(active_ids)[0].name
         return values

@@ -158,7 +158,7 @@ class AutomaticEntryWizard(models.TransientModel):
             'move_type': 'entry',
             'journal_id': self.journal_id.id,
             'date': fields.Date.to_string(self.date),
-            'ref': self.destination_account_id.display_name and _("Transfer entry to %s", self.destination_account_id.display_name or ''),
+            'account_move_reference': self.destination_account_id.display_name and _("Transfer entry to %s", self.destination_account_id.display_name or ''),
             'line_ids': [(0, 0, line) for line in line_vals],
         }]
 
@@ -170,7 +170,7 @@ class AutomaticEntryWizard(models.TransientModel):
             'currency_id': self.journal_id.currency_id.id or self.journal_id.company_id.currency_id.id,
             'move_type': 'entry',
             'line_ids': [],
-            'ref': _('Adjusting Entry'),
+            'account_move_reference': _('Adjusting Entry'),
             'date': fields.Date.to_string(self.date),
             'journal_id': self.journal_id.id,
         }}
@@ -182,7 +182,7 @@ class AutomaticEntryWizard(models.TransientModel):
                 'currency_id': self.journal_id.currency_id.id or self.journal_id.company_id.currency_id.id,
                 'move_type': 'entry',
                 'line_ids': [],
-                'ref': self._format_strings(_('Adjusting Entry of {date} ({percent:f}% recognized on {new_date})'), grouped_lines[0].move_id, amount),
+                'account_move_reference': self._format_strings(_('Adjusting Entry of {date} ({percent:f}% recognized on {new_date})'), grouped_lines[0].move_id, amount),
                 'date': fields.Date.to_string(date),
                 'journal_id': self.journal_id.id,
             }

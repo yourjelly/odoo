@@ -41,7 +41,7 @@ class account_journal(models.Model):
                     act_type.category as activity_category,
                     act.date_deadline,
                     m.date,
-                    m.ref,
+                    m.account_move_reference,
                     CASE WHEN act.date_deadline < CURRENT_DATE THEN 'late' ELSE 'future' END as status
                 FROM account_move m
                     LEFT JOIN mail_activity act ON act.res_id = m.id
@@ -61,7 +61,7 @@ class account_journal(models.Model):
                     'date': odoo_format_date(self.env, activity.get('date_deadline'))
                 }
                 if activity.get('activity_category') == 'tax_report' and activity.get('res_model') == 'account.move':
-                    act['name'] = activity.get('ref')
+                    act['name'] = activity.get('account_move_reference')
 
                 activities.append(act)
             journal.json_activity_data = json.dumps({'activities': activities})

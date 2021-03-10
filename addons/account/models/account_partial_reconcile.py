@@ -112,7 +112,7 @@ class AccountPartialReconcile(models.Model):
         today = fields.Date.context_today(self)
         default_values_list = [{
             'date': move.date if move.date > (move.company_id.period_lock_date or date.min) else today,
-            'ref': _('Reversal of: %s') % move.name,
+            'account_move_reference': _('Reversal of: %s') % move.name,
         } for move in moves_to_reverse]
         moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
@@ -481,7 +481,7 @@ class AccountPartialReconcile(models.Model):
                 move_vals = {
                     'move_type': 'entry',
                     'date': partial.max_date,
-                    'ref': move.name,
+                    'account_move_reference': move.name,
                     'journal_id': partial.company_id.tax_cash_basis_journal_id.id,
                     'line_ids': [],
                     'tax_cash_basis_rec_id': partial.id,

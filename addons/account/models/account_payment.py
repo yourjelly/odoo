@@ -401,7 +401,7 @@ class AccountPayment(models.Model):
                         ('internal_type', '=', 'payable'),
                     ], limit=1)
 
-    @api.depends('partner_bank_id', 'amount', 'ref', 'currency_id', 'journal_id', 'move_id.state',
+    @api.depends('partner_bank_id', 'amount', 'account_move_reference', 'currency_id', 'journal_id', 'move_id.state',
                  'payment_method_id', 'payment_type')
     def _compute_qr_code(self):
         for pay in self:
@@ -412,7 +412,7 @@ class AccountPayment(models.Model):
                 and pay.currency_id:
 
                 if pay.partner_bank_id:
-                    qr_code = pay.partner_bank_id.build_qr_code_url(pay.amount, pay.ref, pay.ref, pay.currency_id, pay.partner_id)
+                    qr_code = pay.partner_bank_id.build_qr_code_url(pay.amount, pay.account_move_reference, pay.account_move_reference, pay.currency_id, pay.partner_id)
                 else:
                     qr_code = None
 

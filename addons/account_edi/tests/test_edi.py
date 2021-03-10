@@ -131,19 +131,19 @@ class TestAccountEdi(AccountEdiTestCommon):
 
     def test_edi_flow_two_step_cancel_with_call_off_request(self):
         def _mock_cancel(edi_format, invoices, test_mode):
-            invoices_no_ref = invoices.filtered(lambda i: not i.ref)
+            invoices_no_ref = invoices.filtered(lambda i: not i.account_move_reference)
             if len(invoices_no_ref) == len(invoices):  # first step
-                invoices_no_ref.ref = 'test_ref_cancel'
+                invoices_no_ref.account_move_reference = 'test_ref_cancel'
                 return {invoice: {} for invoice in invoices}
             elif len(invoices_no_ref) == 0:  # second step
                 for invoice in invoices:
-                    invoice.ref = None
+                    invoice.account_move_reference = None
                 return {invoice: {'success': True} for invoice in invoices}
             else:
                 raise ValueError('wrong use of "_mocked_post_two_steps"')
 
         def _is_needed_for_invoice(edi_format, invoice):
-            return not bool(invoice.ref)
+            return not bool(invoice.account_move_reference)
 
         with self.mock_edi(_needs_web_services_method=_generate_mocked_needs_web_services(True),
                            _is_required_for_invoice_method=_is_needed_for_invoice,
@@ -171,7 +171,7 @@ class TestAccountEdi(AccountEdiTestCommon):
 
     def test_batches(self):
         def _get_batch_key_method(edi_format, move, state):
-            return (move.ref)
+            return (move.account_move_reference)
 
         with self.mock_edi(_get_batch_key_method=_get_batch_key_method,
                            _support_batching_method=_generate_mocked_support_batching(True)):
@@ -186,13 +186,13 @@ class TestAccountEdi(AccountEdiTestCommon):
             to_process = edi_docs._prepare_jobs()
             self.assertEqual(len(to_process), 1)
 
-            doc1.move_id.ref = 'batch1'
-            doc2.move_id.ref = 'batch2'
-            doc3.move_id.ref = 'batch3'
+            doc1.move_id.account_move_reference = 'batch1'
+            doc2.move_id.account_move_reference = 'batch2'
+            doc3.move_id.account_move_reference = 'batch3'
 
             to_process = edi_docs._prepare_jobs()
             self.assertEqual(len(to_process), 3)
 
-            doc2.move_id.ref = 'batch1'
+            doc2.move_id.account_move_reference = 'batch1'
             to_process = edi_docs._prepare_jobs()
             self.assertEqual(len(to_process), 2)

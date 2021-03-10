@@ -261,12 +261,12 @@ class AccountMove(models.Model):
         21 00000 00003 13947 14300 09017
         """
         self.ensure_one()
-        ref = self.payment_reference or self.ref
-        if not ref:
+        account_move_reference = self.payment_reference or self.account_move_reference
+        if not account_move_reference:
             return False
-        ref = ref.replace(' ', '')
-        if re.match(r'^(\d{2,27})$', ref):
-            return ref == mod10r(ref[:-1])
+        account_move_reference = account_move_reference.replace(' ', '')
+        if re.match(r'^(\d{2,27})$', account_move_reference):
+            return account_move_reference == mod10r(account_move_reference[:-1])
         return False
 
     def split_total_amount(self):

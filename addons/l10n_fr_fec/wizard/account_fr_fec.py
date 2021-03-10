@@ -322,9 +322,9 @@ class AccountFrFec(models.TransientModel):
             THEN COALESCE(replace(replace(rp.name, '|', '/'), '\t', ''), '')
             ELSE ''
             END AS CompAuxLib,
-            CASE WHEN am.ref IS null OR am.ref = ''
+            CASE WHEN am.account_move_reference IS null OR am.account_move_reference = ''
             THEN '-'
-            ELSE replace(replace(am.ref, '|', '/'), '\t', '')
+            ELSE replace(replace(am.account_move_reference, '|', '/'), '\t', '')
             END
             AS PieceRef,
             TO_CHAR(am.date, 'YYYYMMDD') AS PieceDate,

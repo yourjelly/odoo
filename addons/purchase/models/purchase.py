@@ -500,9 +500,9 @@ class PurchaseOrder(models.Model):
                     ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
                 origins.add(invoice_vals['invoice_origin'])
                 payment_refs.add(invoice_vals['payment_reference'])
-                refs.add(invoice_vals['ref'])
+                refs.add(invoice_vals['account_move_reference'])
             ref_invoice_vals.update({
-                'ref': ', '.join(refs)[:2000],
+                'account_move_reference': ', '.join(refs)[:2000],
                 'invoice_origin': ', '.join(origins),
                 'payment_reference': len(payment_refs) == 1 and payment_refs.pop() or False,
             })
@@ -533,7 +533,7 @@ class PurchaseOrder(models.Model):
 
         partner_invoice_id = self.partner_id.address_get(['invoice'])['invoice']
         invoice_vals = {
-            'ref': self.partner_ref or '',
+            'account_move_reference': self.partner_ref or '',
             'move_type': move_type,
             'narration': self.notes,
             'currency_id': self.currency_id.id,

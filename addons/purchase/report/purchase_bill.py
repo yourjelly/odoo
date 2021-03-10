@@ -25,7 +25,7 @@ class PurchaseBillUnion(models.Model):
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW purchase_bill_union AS (
                 SELECT
-                    id, name, ref as reference, partner_id, date, amount_untaxed as amount, currency_id, company_id,
+                    id, name, account_move_reference as reference, partner_id, date, amount_untaxed as amount, currency_id, company_id,
                     id as vendor_bill_id, NULL as purchase_order_id
                 FROM account_move
                 WHERE

@@ -72,7 +72,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
     def _prepare_invoice_values(self, order, name, amount, so_line):
         invoice_vals = {
-            'ref': order.client_order_ref,
+            'account_move_reference': order.client_order_ref,
             'move_type': 'out_invoice',
             'invoice_origin': order.name,
             'invoice_user_id': order.user_id.id,
@@ -191,4 +191,3 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'taxes_id': [(6, 0, self.deposit_taxes_id.ids)],
             'company_id': False,
         }
-

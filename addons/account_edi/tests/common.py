@@ -43,12 +43,12 @@ def _mocked_post(edi_format, invoices, test_mode):
 
 
 def _mocked_post_two_steps(edi_format, invoices, test_mode):
-    # For this test, we use the field ref to know if the first step is already done or not.
+    # For this test, we use the field account_move_reference to know if the first step is already done or not.
     # Typically, a technical field for the reference of the upload to the web-service will
     # be saved on the invoice.
-    invoices_no_ref = invoices.filtered(lambda i: not i.ref)
+    invoices_no_ref = invoices.filtered(lambda i: not i.account_move_reference)
     if len(invoices_no_ref) == len(invoices):  # first step
-        invoices_no_ref.ref = 'test_ref'
+        invoices_no_ref.account_move_reference = 'test_ref'
         return {invoice: {} for invoice in invoices}
     elif len(invoices_no_ref) == 0:  # second step
         res = {}

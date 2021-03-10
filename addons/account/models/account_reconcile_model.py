@@ -678,14 +678,14 @@ class AccountReconcileModel(models.Model):
 
     def _get_select_communication_flag(self):
         self.ensure_one()
-        # Determine a matching or not with the statement line communication using the aml.name, move.name or move.ref.
+        # Determine a matching or not with the statement line communication using the aml.name, move.name or move.account_move_reference.
         st_ref_list = []
         if self.match_text_location_label:
             st_ref_list += ['st_line.payment_ref']
         if self.match_text_location_note:
             st_ref_list += ['st_line_move.narration']
         if self.match_text_location_reference:
-            st_ref_list += ['st_line_move.ref']
+            st_ref_list += ['st_line_move.account_move_reference']
 
         st_ref = " || ' ' || ".join(
             "COALESCE(%s, '')" % st_ref_name
@@ -703,7 +703,7 @@ class AccountReconcileModel(models.Model):
             )"""
         return " OR ".join(
             statement_compare.format(move_field=field, st_ref=st_ref)
-            for field in ['aml.name', 'move.name', 'move.ref']
+            for field in ['aml.name', 'move.name', 'move.account_move_reference']
         )
 
     def _get_select_payment_reference_flag(self):
@@ -714,7 +714,7 @@ class AccountReconcileModel(models.Model):
         if self.match_text_location_note:
             st_ref_list += ['st_line_move.narration']
         if self.match_text_location_reference:
-            st_ref_list += ['st_line_move.ref']
+            st_ref_list += ['st_line_move.account_move_reference']
         if not st_ref_list:
             return "FALSE"
         return r'''(move.payment_reference IS NOT NULL AND ({}))'''.format(
@@ -907,13 +907,13 @@ class AccountReconcileModel(models.Model):
 
         2: Same as 1, but the candidates have already been proposed for a previous statement line
 
-        3: communication_flag is true, so either the move's ref, move's name or
+        3: communication_flag is true, so either the move's account_move_reference, move's name or
            aml's name match the statement line's payment reference.
 
         4: Same as 3, but the candidates have already been proposed for a previous statement line
 
         5: candidates proposed by the query, but no match with the statement
-           line's payment ref could be found.
+           line's payment account_move_reference could be found.
 
         6: Same as 5, but the candidates have already been proposed for a previous statement line
         """
