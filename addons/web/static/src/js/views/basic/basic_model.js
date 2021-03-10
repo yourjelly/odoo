@@ -3312,6 +3312,7 @@ var BasicModel = AbstractModel.extend({
             if (parent.parentID && parent.relationField) {
                 var parentRecord = this.localData[parent.parentID];
                 data[parent.relationField] = this._generateOnChangeData(parentRecord);
+                // data[parent.relationField] = this._generateOnChangeData(parentRecord, options);
             }
         }
 
@@ -3334,6 +3335,7 @@ var BasicModel = AbstractModel.extend({
     _generateX2ManyCommands: function (record, options) {
         var self = this;
         options = options || {};
+        options.changesOnly = 'changesOnly' in options ? !!options.changesOnly : true;
         var fields = record.fields;
         if (options.fieldNames) {
             fields = _.pick(fields, options.fieldNames);
@@ -3422,7 +3424,11 @@ var BasicModel = AbstractModel.extend({
                                 commands[fieldName].push(x2ManyCommands.link_to(list.res_ids[i]));
                                 continue;
                             }
-                            changes = this._generateChanges(relRecord, _.extend({}, options, {changesOnly: true}));
+                            let opt = Object.assign({}, options);
+                            if (!this.isNew(relRecord.id)) {
+                                opt.changesOnly = true;
+                            }
+                            changes = this._generateChanges(relRecord, opt);
                             if (!this.isNew(relRecord.id)) {
                                 // the subrecord already exists in db
                                 commands[fieldName].push(x2ManyCommands.link_to(relRecord.res_id));
@@ -3456,6 +3462,10 @@ var BasicModel = AbstractModel.extend({
                         // ids and no removed ids, so we can safely ignore the
                         // last changes
                         commands[fieldName] = [];
+                    }
+                    if (!options.changesOnly && list._changes && list._changes.length === 1 && list._changes[0].operation === 'REMOVE_ALL') {
+                        debugger
+                        commands[fieldName] = [[5]];
                     }
                     // add delete commands
                     for (i = 0; i < removedIds.length; i++) {
