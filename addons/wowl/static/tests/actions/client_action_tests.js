@@ -83,23 +83,24 @@ QUnit.module("ActionManager", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.test("can display client actions in Dialog, then as main destroys Dialog", async function (
-    assert
-  ) {
-    assert.expect(4);
-    const webClient = await createWebClient({ testConfig });
-    await doAction(webClient, {
-      target: "new",
-      tag: "__test__client__action__",
-      type: "ir.actions.client",
-    });
-    assert.containsOnce(webClient, ".test_client_action");
-    assert.containsOnce(webClient, ".modal .test_client_action");
-    await doAction(webClient, "__test__client__action__");
-    assert.containsOnce(webClient, ".test_client_action");
-    assert.containsNone(webClient, ".modal .test_client_action");
-    webClient.destroy();
-  });
+  QUnit.test(
+    "can display client actions in Dialog, then as main destroys Dialog",
+    async function (assert) {
+      assert.expect(4);
+      const webClient = await createWebClient({ testConfig });
+      await doAction(webClient, {
+        target: "new",
+        tag: "__test__client__action__",
+        type: "ir.actions.client",
+      });
+      assert.containsOnce(webClient, ".test_client_action");
+      assert.containsOnce(webClient, ".modal .test_client_action");
+      await doAction(webClient, "__test__client__action__");
+      assert.containsOnce(webClient, ".test_client_action");
+      assert.containsNone(webClient, ".modal .test_client_action");
+      webClient.destroy();
+    }
+  );
 
   QUnit.test("can execute client actions from tag name (legacy)", async function (assert) {
     // remove this test as soon as legacy Widgets are no longer supported
