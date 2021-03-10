@@ -9,7 +9,7 @@ import { serviceRegistry } from "../webclient/service_registry";
  * @typedef {string} ViewType // to define
  */
 
- /**
+/**
  * @typedef {Object} Toolbar // to precise
  * @property {?} print
  * @property {?} action

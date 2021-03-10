@@ -32,8 +32,8 @@ export class ControlPanel extends SearchComponent {
       },
       this.props.display
     );
-    display.top = display['top-left'] || display['top-right'];
-    display.bottom = display["bottom-left"] || display['bottom-right'];
+    display.top = display["top-left"] || display["top-right"];
+    display.bottom = display["bottom-left"] || display["bottom-right"];
     return display;
   }
 
@@ -42,10 +42,11 @@ export class ControlPanel extends SearchComponent {
    */
   get searchMenus() {
     const searchMenus = [];
-    for (const key of this.env.searchModel.searchMenuTypes) { // look in config instead
+    for (const key of this.env.searchModel.searchMenuTypes) {
+      // look in config instead
       if (
         key === "comparison" &&
-        this.env.searchModel.getSearchItems(i => i.type === 'comparison').length === 0
+        this.env.searchModel.getSearchItems((i) => i.type === "comparison").length === 0
       ) {
         continue;
       }

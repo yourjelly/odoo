@@ -10,6 +10,7 @@ import { sprintf } from "../utils/strings";
 import { viewRegistry } from "../views/view_registry";
 import { serviceRegistry } from "../webclient/service_registry";
 import { actionRegistry } from "./action_registry";
+import { View } from "../views/view_utils/view/view";
 
 const { Component, hooks, tags } = owl;
 
@@ -339,7 +340,7 @@ function makeActionManager(env) {
   /**
    * @param {BaseView} view
    * @param {ActWindowAction} action
-   * @param {BaseView[]} views
+   * @param {View[]} views
    * @returns {ViewProps}
    */
   function _getViewProps(view, action, views, options = {}) {
@@ -347,39 +348,88 @@ function makeActionManager(env) {
     const viewSwitcherEntries = views
       .filter((v) => v.multiRecord === view.multiRecord)
       .map((v) => {
-        return {
-          // FIXME: missing accesskey
+        const viewSwitcherEntry = {
           icon: v.icon,
-          name: v.display_name,
-          type: v.type,
-          multiRecord: v.multiRecord,
-        };
+          name: v.display_name.toString(),
+          type: v.type, // prefere jsID like in breadcrumbs and call array switcherEntries?
+          multiRecord: v.multiRecord, // remove?
+        }
+        if (view.type === v.type) {
+          viewSwitcherEntry.active = true;
+        }
+        return viewSwitcherEntry;
       });
-    const props = Object.assign({}, _getActionProps(action), {
+
+    const props = Object.assign({}, {
+      actionId: action.id || false,
       context: action.context,
+      displayName: action.display_name || action.name,
       domain: action.domain || [],
-      model: action.res_model,
+      groupBy: action.context.group_by || [],
+      loadActionMenus: target !== "new" && target !== "inline",
+      loadFavorites: action.views.some((v) => v[1] === "search"),
+      modelName: action.res_model,
       type: view.type,
       views: action.views,
       viewSwitcherEntries,
-      withActionMenus: target !== "new" && target !== "inline",
-      withFilters: action.views.some((v) => v[1] === "search"),
     });
-    if (action.res_id) {
-      props.recordId = action.res_id;
+
+    if (target === "inline") {
+      props.searchMenuTypes = [];
     }
-    if ("recordId" in options) {
-      props.recordId = options.recordId;
+
+    if ("help" in action) {
+      props.noContentHelp = action.help;
     }
-    if (options.recordIds) {
-      props.recordIds = options.recordIds;
+
+    if ("useSampleModel" in action) {
+      props.useSampleModel = action.useSampleModel;
     }
+
+    if (
+      action.context.active_id ||
+      action.context.active_ids ||
+      action.context.search_disable_custom_filters
+    ) {
+      props.activateDefaultFavorite = false; // not sure --> check logic
+    }
+
+    props.display = {
+      mode: target === "new" ? "inDialog" : target,
+    };
+
+    // state SearchModel/SearchPanel
     if (options.searchModel) {
       props.searchModel = options.searchModel;
     }
     if (options.searchPanel) {
       props.searchPanel = options.searchPanel;
     }
+
+    // view specific
+    if (action.res_id) {
+      props.recordId = action.res_id;
+    }
+    if ("recordId" in options) {
+      props.recordId = options.recordId;
+    }
+
+    if (options.recordIds) {
+      props.recordIds = options.recordIds;
+    }
+    if ("limit" in action) {
+      props.limit = action.limit;
+    }
+    if ("count" in action) {
+      props.count = action.count;
+    }
+
+    // LEGACY CODE COMPATIBILITY: remove when all views will be written in owl
+    if (view.isLegacy) {
+      Object.assign(props, _getActionProps(action), { View: view });
+    }
+    // END LEGACY CODE COMPATIBILITY
+
     return props;
   }
 
@@ -496,7 +546,10 @@ function makeActionManager(env) {
             if (!nextStackActionIds.includes(c.action.jsId)) {
               if (c.action.type === "ir.actions.act_window") {
                 for (const viewType in c.action.controllers) {
-                  toDestroy.add(c.action.controllers[viewType]);
+                  const controller = c.action.controllers[viewType];
+                  if (controller.Component.isLegacy) {
+                    toDestroy.add(controller);
+                  }
                 }
               } else {
                 toDestroy.add(c);
@@ -663,7 +716,7 @@ function makeActionManager(env) {
     }
     const controller = {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: view.isLegacy ? view : View,
       action,
       view,
       views,
@@ -680,7 +733,7 @@ function makeActionManager(env) {
     if (lazyView) {
       updateUIOptions.lazyController = {
         jsId: `controller_${++id}`,
-        Component: lazyView,
+        Component: lazyView.isLegacy ? lazyView : View,
         action,
         view: lazyView,
         views,
@@ -1037,7 +1090,7 @@ function makeActionManager(env) {
     }
     const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: view.isLegacy ? view : View,
       action: controller.action,
       views: controller.views,
       view,
@@ -1149,7 +1202,7 @@ function makeActionManager(env) {
     }
     if (action.type === "ir.actions.act_window") {
       const props = controller.props;
-      newState.model = props.model;
+      newState.model = props.modelName;
       newState.view_type = props.type;
       newState.id = props.recordId ? `${props.recordId}` : undefined;
     }
