@@ -413,46 +413,46 @@
 
     <div data-js="masonry_display"
         data-selector=".s_masonry_block">
-        <we-select string="Template">      <!-- data-variable="masonry-template" data-no-preview="true" -->
+        <we-select string="Template">
             <we-button title="Default"
                        data-edit-layout="default"
-                      
+                       data-variable="default"
                        data-img="/website/static/src/img/snippets_options/masonry_template_default.svg"/>
             <we-button title="Default Reversed"
                        data-edit-layout="reversed"
-                       
+                       data-variable="reversed"
                        data-img="/website/static/src/img/snippets_options/masonry_template_reversed.svg"/>
             <we-button title="Images"
                        data-edit-layout="images"
-  
+                       data-variable="images"
                        data-img="/website/static/src/img/snippets_options/masonry_template_images.svg"/>
             <we-button title="Image Text Image"
                        data-edit-layout="image_texts_image"
-             
+                       data-variable="image_texts_image"
                        data-img="/website/static/src/img/snippets_options/masonry_template_image_texts_image.svg"/>
             <we-button title="Mosaic"
                        data-edit-layout="mosaic"
-  
+                       data-variable="mosaic"
                        data-img="/website/static/src/img/snippets_options/masonry_template_mosaic.svg"/>
             <we-button title="Text Image Text"
                        data-edit-layout="texts_image_texts"
-             
+                       data-variable="texts_image_texts"
                        data-img="/website/static/src/img/snippets_options/masonry_template_texts_image_texts.svg"/>
             <we-button title="Alternate Text"
                        data-edit-layout="alternation_text"
-            
+                       data-variable="alternation_text"
                        data-img="/website/static/src/img/snippets_options/masonry_template_alternate_texts.svg"/>
             <we-button title="Alternate Text Image"
                        data-edit-layout="alternation_text_image"
-                  
+                       data-variable="alternation_text_image"
                        data-img="/website/static/src/img/snippets_options/masonry_template_alternate_text_image.svg"/>
             <we-button title="Alternate Image Text"
                        data-edit-layout="alternation_image_text"
-                  
+                       data-variable="alternation_image_text"
                        data-img="/website/static/src/img/snippets_options/masonry_template_alternate_image_text.svg"/>
             <we-button title="Alternate Text Image Text"
                        data-edit-layout="alternation_text_image_text"
-                       
+                       data-variable="alternation_text_image_text"
                        data-img="/website/static/src/img/snippets_options/masonry_template_alternate_text_image_text.svg"/>
         </we-select>
     </div>

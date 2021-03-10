@@ -1746,9 +1746,22 @@ options.registry.masonry_display = options.Class.extend({
         ['/website/static/src/snippets/s_masonry_block/s_masonry_block.xml']
     ),
 
-    editLayout: function (previewMode, widgetValue, params) {
-        let currentTemplate = this.$target.val()
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        if(methodName === 'editLayout') {
+            return params.variable || "default";
+        }
+        return this._super(...arguments);
+    },
 
+    /**
+     * Change the masonry snippet layout with templates.
+     *
+     * @see this.selectClass for parameters
+     */
+    editLayout: function (previewMode, widgetValue, params) {
         let websiteId;
         this.trigger_up('context_get', {
             callback: function (ctx) {
@@ -1760,19 +1773,15 @@ options.registry.masonry_display = options.Class.extend({
             websiteId: websiteId,
         }));
 
-        
-
-        if (currentTemplate != $template) {
+        if (previewMode === true) {
+            this.$currentView = this.$target.children().clone();
             this.$target.empty().append($template);
+        } else if (previewMode === 'reset') {
+            this.$target.empty().append(this.$currentView);
+        } else { 
+            this.$target.empty().append($template);
+            this.$currentView = this.$target.children().clone();
         }
-
-        // marche find : masonry_display, Masonry, masonry_block, s_masonry_block, masonry_template, 
-        // website.s_template_masonry.*, 
-
-        //this.$target.parent().empty().append($template);
-        //this.$target.find('s_masonry_block').empty().append($template);
-        // ok this.$target.empty().append($template);   // marche mais les colonnes ne marchent plus...
-        //this.$target.replaceWith($template);
     },
 });
 
