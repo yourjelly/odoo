@@ -3553,9 +3553,9 @@ class AccountMoveLine(models.Model):
                 line_detail = line._prepare_tax_details()[0]
 
                 # Arbitrary precision rounding to mimic the round_globally behavior.
-                # TODO: check if it's ok
-                pd1 = line.company_currency_id.decimal_places + 5
-                pd2 = line.currency_id.decimal_places + 5
+                extra_dp = 5 if line.company_id.tax_calculation_rounding_method == 'round_globally' else 0
+                pd1 = line.company_currency_id.decimal_places + extra_dp
+                pd2 = line.currency_id.decimal_places + extra_dp
 
                 if line.tax_ids:
                     for tax_detail_vals in line_detail['tax_details']:
