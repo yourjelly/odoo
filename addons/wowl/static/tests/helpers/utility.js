@@ -5,14 +5,6 @@ import { makeEnv } from "../../src/env";
 import { makeFakeDeviceService, makeFakeLocalizationService, makeTestOdoo, mocks } from "./mocks";
 import { makeMockServer } from "./mock_server";
 
-export async function mount(C, params) {
-  C.env = params.env;
-  const component = new C(null);
-  const target = params.target || getFixture();
-  await component.mount(target, { position: "first-child" });
-  return component;
-}
-
 function makeTestConfig(config = {}) {
   const serviceRegistry = config.serviceRegistry || new Registry();
   if (!serviceRegistry.contains("device")) {

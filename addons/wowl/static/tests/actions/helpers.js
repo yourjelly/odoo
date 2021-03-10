@@ -2,7 +2,7 @@
 import { WebClient } from "../../src/webclient/webclient";
 import { Registry } from "../../src/core/registry";
 import { makeFakeUserService, nextTick } from "../helpers/index";
-import { legacyExtraNextTick, makeTestEnv, mount } from "../helpers/utility";
+import { getFixture, legacyExtraNextTick, makeTestEnv } from "../helpers/utility";
 import { notificationService } from "../../src/notifications/notification_service";
 import { dialogService } from "../../src/services/dialog_service";
 import { menuService } from "../../src/services/menu_service";
@@ -19,7 +19,7 @@ import { uiService } from "../../src/services/ui_service";
 import { effectService } from "../../src/effects/effect_service";
 import { hotkeyService } from "../../src/services/hotkey_service";
 
-const { Component, tags } = owl;
+const { Component, mount, tags } = owl;
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -51,7 +51,8 @@ export async function createWebClient(params) {
     ...params.testConfig,
     mockRPC,
   });
-  const wc = await mount(WebClient, { env });
+  const target = getFixture();
+  const wc = await mount(WebClient, { env, target });
   const _destroy = wc.destroy;
   wc.destroy = () => {
     _destroy.call(wc);

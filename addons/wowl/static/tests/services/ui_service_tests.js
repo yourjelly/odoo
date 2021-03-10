@@ -2,8 +2,10 @@
 
 import { uiService, useUIOwnership } from "../../src/services/ui_service";
 import { Registry } from "../../src/core/registry";
-import { getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
+import { getFixture, makeTestEnv, nextTick } from "../helpers";
 import { BlockUI } from "../../src/webclient/block_ui/block_ui";
+
+const { mount } = owl;
 
 let target;
 let serviceRegistry;
@@ -11,7 +13,7 @@ let browser;
 let baseConfig;
 
 QUnit.module("UI", {
-  async beforeEach() {
+  async beforeEach() {  
     target = getFixture();
     serviceRegistry = new Registry();
     serviceRegistry.add(uiService.name, uiService);
@@ -71,7 +73,7 @@ QUnit.test("a component can take ownership", async (assert) => {
   const ui = env.services.ui;
   assert.deepEqual(ui.getOwner(), document);
 
-  const comp = await mount(MyComponent, { env });
+  const comp = await mount(MyComponent, { env, target });
   assert.deepEqual(ui.getOwner(), comp.el);
 
   comp.unmount();
@@ -96,7 +98,7 @@ QUnit.test("a component can take ownership: with t-ref delegation", async (asser
   const ui = env.services.ui;
   assert.deepEqual(ui.getOwner(), document);
 
-  const comp = await mount(MyComponent, { env });
+  const comp = await mount(MyComponent, { env, target });
   assert.deepEqual(ui.getOwner(), comp.el.querySelector("div#owner"));
 
   comp.unmount();

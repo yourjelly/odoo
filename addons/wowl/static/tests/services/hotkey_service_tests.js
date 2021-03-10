@@ -2,12 +2,13 @@
 import { Registry } from "../../src/core/registry";
 import { hotkeyService, useHotkey } from "../../src/services/hotkey_service";
 import { uiService, useUIOwnership } from "../../src/services/ui_service";
-import { makeTestEnv, mount, nextTick } from "../helpers";
+import { getFixture, makeTestEnv, nextTick } from "../helpers";
 
-const { Component, tags } = owl;
+const { Component, mount, tags } = owl;
 const { xml } = tags;
 
 let env;
+let target;
 
 QUnit.module("Hotkey Service", {
   async beforeEach() {
@@ -15,6 +16,7 @@ QUnit.module("Hotkey Service", {
     serviceRegistry.add(hotkeyService.name, hotkeyService);
     serviceRegistry.add(uiService.name, uiService);
     env = await makeTestEnv({ serviceRegistry });
+    target = getFixture();
   },
 });
 
@@ -62,7 +64,7 @@ QUnit.test("data-hotkey", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  const comp = await mount(MyComponent, { env });
+  const comp = await mount(MyComponent, { env, target });
 
   keydown = new KeyboardEvent("keydown", { key });
   window.dispatchEvent(keydown);
@@ -91,7 +93,7 @@ QUnit.test("hook", async (assert) => {
   window.dispatchEvent(keydown);
   await nextTick();
 
-  const comp = await mount(TestComponent, { env });
+  const comp = await mount(TestComponent, { env, target });
 
   keydown = new KeyboardEvent("keydown", { key });
   window.dispatchEvent(keydown);
@@ -167,7 +169,7 @@ QUnit.test("component can subscribe many hotkeys", async (assert) => {
     </div>
   `;
 
-  const comp = await mount(MyComponent, { env });
+  const comp = await mount(MyComponent, { env, target });
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "c" }));
@@ -226,8 +228,8 @@ QUnit.test("many components can subscribe same hotkeys", async (assert) => {
     </div>
   `;
 
-  const comp1 = await mount(MyComponent1, { env });
-  const comp2 = await mount(MyComponent2, { env });
+  const comp1 = await mount(MyComponent1, { env, target });
+  const comp2 = await mount(MyComponent2, { env, target });
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "c" }));
@@ -270,12 +272,12 @@ QUnit.test("subscriptions and elements belong to the correct UI owner", async (a
   }
   MyComponent2.template = xml`<div><button data-hotkey="b" t-on-click="onClick()"/></div>`;
 
-  const comp1 = await mount(MyComponent1, { env });
+  const comp1 = await mount(MyComponent1, { env, target });
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
   await nextTick();
 
-  const comp2 = await mount(MyComponent2, { env });
+  const comp2 = await mount(MyComponent2, { env, target });
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
   window.dispatchEvent(new KeyboardEvent("keydown", { key: "b" }));
   await nextTick();
