@@ -160,7 +160,11 @@ var LinkDialog = Dialog.extend({
         }
         this.data.isNewWindow = data.isNewWindow;
         this.final_data = this.data;
-        return this._super.apply(this, arguments);
+        const returnValue = this._super.apply(this, arguments);
+        if (this.insertedAnchors && this.insertedAnchors.length) {
+            $(this.insertedAnchors[this.insertedAnchors.length - 1]).focus();
+        }
+        return returnValue;
     },
 
     //--------------------------------------------------------------------------
