@@ -328,7 +328,7 @@
         <field name="model">stock.quant</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
-            <tree editable="bottom" create="1" edit="1" import="0" js_class="singleton_list" sample="1">
+            <tree editable="bottom" multi_edit="1" create="1" edit="1" import="0" js_class="singleton_list" sample="1">
                 <field name="id" invisible="1"/>
                 <field name="tracking" invisible="1"/>
                 <field name="product_id" attrs="{'readonly': [('id', '!=', False)]}" invisible="context.get('single_product', False)" readonly="context.get('single_product', False)" force_save="1" options="{'no_create': True}"/>
@@ -360,7 +360,7 @@
         <field name="res_model">stock.quant</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="view_stock_quant_tree_inventory_editable"/>
-        <field name="context">{'inventory_mode': 1}</field>
+        <field name="context">{'inventory_mode': 1, 'no_at_date': 1}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_barcode_scanner">
             Want to speed up your inventory counts? Try our Barcode app

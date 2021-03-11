@@ -71,8 +71,6 @@ var SingletonListController = InventoryReportListController.extend({
         var self = this;
         var def;
 
-        this._disableButtons();
-
         return self.saveRecord(ev.data.record.id, {
             stayInEdit: true,
         }).then(function () {

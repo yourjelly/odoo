@@ -511,7 +511,7 @@ class StockMoveLine(models.Model):
                         ml_ids_tracked_without_lot.add(ml.id)
             elif qty_done_float_compared < 0:
                 raise UserError(_('No negative quantities allowed'))
-            else:
+            elif not ml.is_inventory:
                 ml_ids_to_delete.add(ml.id)
 
         if ml_ids_tracked_without_lot:

@@ -9,6 +9,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero
+from odoo.tools.misc import OrderedSet
 
 _logger = logging.getLogger(__name__)
 
@@ -105,8 +106,7 @@ class StockQuant(models.Model):
         'Inventory Date', compute='_compute_invetory_date', store=True,
         help="Last date at which the On Hand Quantity has been computed.")
     user_id = fields.Many2one(
-        'res.users', 'User', groups='stock.group_stock_manager',
-        default=lambda self: self.env.user)
+        'res.users', 'User', groups='stock.group_stock_manager')
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
@@ -116,8 +116,8 @@ class StockQuant(models.Model):
     @api.depends('location_id')
     def _compute_invetory_date(self):
         for quant in self:
-            if not quant.location_id and not quant.next_inventory_date:
-                quant.next_inventory_date = False
+            if not quant.location_id and not quant.inventory_date:
+                quant.inventory_date = False
             elif quant.location_id:
                 quant.inventory_date = quant.location_id.next_inventory_date
 
@@ -271,7 +271,7 @@ class StockQuant(models.Model):
 
     def action_inventory_history(self):
         self.ensure_one()
-        return {
+        action = {
             'name': _('History'),
             'view_type': 'tree',
             'view_mode': 'list,form',
@@ -290,6 +290,14 @@ class StockQuant(models.Model):
                     ('location_dest_id', '=', self.location_id.id),
             ],
         }
+        if self.lot_id:
+            action['context']['search_default_lot_id'] = self.lot_id.id
+        if self.package_id:
+            action['context']['search_default_package_id'] = self.package_id.id
+            action['context']['search_default_result_package_id'] = self.package_id.id
+        if self.owner_id:
+            action['context']['search_default_owner_id'] = self.owner_id.id
+        return action
 
     def action_set_inventory_quantity(self):
         for quant in self:
@@ -447,18 +455,18 @@ class StockQuant(models.Model):
                 return {'warning': {'title': _('Warning'), 'message': message}}
 
     def _apply_inventory(self):
+        moves = OrderedSet()
         for quant in self:
             # Create and vaidate a move so that the quant matches its `inventory_quantity`.
             if quant.inventory_diff_quantity > 0:
                 move_vals = quant._get_inventory_move_values(quant.inventory_diff_quantity, quant.product_id.with_company(
                     quant.company_id).property_stock_inventory, quant.location_id)
-            elif quant.inventory_diff_quantity < 0:
+            else:
                 move_vals = quant._get_inventory_move_values(-quant.inventory_diff_quantity, quant.location_id, quant.product_id.with_company(
                     quant.company_id).property_stock_inventory, out=True)
-            if quant.inventory_diff_quantity != 0:
-                move = quant.env['stock.move'].with_context(
-                    inventory_mode=False).create(move_vals)
-                move._action_done()
+            moves.add(quant.env['stock.move'].with_context(
+                inventory_mode=False).create(move_vals).id)
+        self.env['stock.move'].browse(moves)._action_done()
         self.location_id.write(
             {'last_inventory_date': fields.Date.today()
         })
@@ -651,7 +659,7 @@ class StockQuant(models.Model):
     def _get_inventory_fields_write(self):
         """ Returns a list of fields user can edit when he want to edit a quant in `inventory_mode`.
         """
-        return ['inventory_quantity', 'inventory_diff_quantity', 'inventory_date']
+        return ['inventory_quantity', 'inventory_diff_quantity', 'inventory_date', 'user_id']
 
     def _get_inventory_move_values(self, qty, location_id, location_dest_id, out=False):
         """ Called when user manually set a new quantity (via `inventory_quantity`)

@@ -1518,13 +1518,13 @@ class StockMove(models.Model):
         # Cancel moves where necessary ; we should do it before creating the extra moves because
         # this operation could trigger a merge of moves.
         for move in moves:
-            if move.quantity_done <= 0:
+            if move.quantity_done <= 0 and not move.is_inventory:
                 if float_compare(move.product_uom_qty, 0.0, precision_rounding=move.product_uom.rounding) == 0 or cancel_backorder:
                     move._action_cancel()
 
         # Create extra moves where necessary
         for move in moves:
-            if move.state == 'cancel' or move.quantity_done <= 0:
+            if move.state == 'cancel' or (move.quantity_done <= 0 and not move.is_inventory):
                 continue
 
             moves_ids_todo |= move._create_extra_move().ids
