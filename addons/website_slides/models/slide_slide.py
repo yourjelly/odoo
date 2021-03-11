@@ -232,6 +232,7 @@ class Slide(models.Model):
     @api.depends('slide_partner_ids.vote')
     @api.depends_context('uid')
     def _compute_user_info(self):
+        import pudb;pu.db
         slide_data = dict.fromkeys(self.ids, dict({'likes': 0, 'dislikes': 0, 'user_vote': False}))
         slide_partners = self.env['slide.slide.partner'].sudo().search([
             ('slide_id', 'in', self.ids)

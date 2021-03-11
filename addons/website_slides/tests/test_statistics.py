@@ -7,7 +7,7 @@ import math
 from odoo.addons.website_slides.tests import common
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
-from odoo.tests.common import users
+from odoo.tests.common import users, Form
 from odoo.tools import mute_logger, float_compare
 
 
@@ -159,3 +159,45 @@ class TestSlideStatistics(common.SlidesCase):
         self.assertEqual(category.total_slides, 1, 'The first category should contain 1 slide')
         self.assertEqual(other_category.total_slides, 1, 'The other category should contain 1 slide')
         self.assertEqual(self.channel.total_slides, 3, 'The channel should still contain 3 slides')
+
+    def test_slide_channel_slides_onchange(self):
+        view = self.env['ir.ui.view'].create({
+            'type': 'form',
+            'model': 'slide.channel',
+            'arch': """
+                <form>
+                    <field name="display_name" />
+                    <field name="total_slides" />
+                    <field name="members_count" />
+                    <field name="slide_ids">
+                        <form>
+                            <field name="is_category" />
+                            <field name="is_published" />
+                            <field name="name" />
+                            <field name="likes" />
+                        </form>
+                    </field>
+                </form>
+            """
+        })
+
+        slide_channel = self.env['slide.channel'].create({
+            'name': 'lara espin',
+        })
+        slide = self.env['slide.slide'].create({
+            'name': 'dolores',
+            'channel_id': slide_channel.id,
+            'is_published': True
+        })
+        slide_partner = self.env['slide.slide.partner'].create({
+            'partner_id': self.env.user.partner_id.id,
+            'slide_id': slide.id,
+            'channel_id': slide_channel.id,
+        })
+        with Form(slide_channel, view) as sc:
+            with sc.slide_ids.new() as slide:
+                slide.is_category = True
+                slide.name = "maeve"
+                #slide.channel_id = slide_channel
+
+        import pudb;pu.db
