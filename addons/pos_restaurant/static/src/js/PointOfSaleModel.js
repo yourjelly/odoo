@@ -163,6 +163,11 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             receipt.customer_count = order.customer_count;
             return receipt;
         },
+        async _chooseActiveOrder(draftOrders) {
+            if (!this.ifaceFloorplan) {
+                await this._super(...arguments);
+            }
+        },
 
         _setKitchenPrinters() {
             const restaurantPrinters = this.getRecords('restaurant.printer');

@@ -210,7 +210,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * This is called after call to `loadPosData` succeeded.
          */
         async afterLoadPosData() {
-            this._loadPersistedOrders();
+            await this._loadPersistedOrders();
             if (this.getUseProxy()) {
                 await this.actionHandler({ name: 'actionConnectToProxy' });
             }
@@ -375,13 +375,16 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 this.data.derived.fiscalPositionTaxMaps[fiscalPosition.id] = taxMapping;
             }
         }
-        _loadPersistedOrders() {
+        async _loadPersistedOrders() {
             this.recoverPersistedOrders();
             const orders = this.getDraftOrders().sort((order1, order2) =>
                 order1.date_order > order2.date_order ? -1 : 1
             );
-            if (orders.length) {
-                this.actionSelectOrder(orders[0]);
+            await this._chooseActiveOrder(orders);
+        }
+        async _chooseActiveOrder(draftOrders) {
+            if (draftOrders.length) {
+                await this.actionSelectOrder(draftOrders[0]);
             } else {
                 const order = this._createDefaultOrder();
                 this._setActiveOrderId(order.id);
