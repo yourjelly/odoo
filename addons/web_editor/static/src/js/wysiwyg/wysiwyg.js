@@ -171,7 +171,9 @@ const Wysiwyg = Widget.extend({
         $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
 
         return _super.apply(this, arguments).then(() => {
-            $(document.body).append(this.toolbar.$el);
+            if (this.options.autohideToolbar) {
+                $(document.body).append(this.toolbar.$el);
+            }
         });
     },
     /**
