@@ -252,7 +252,6 @@ var KanbanModel = BasicModel.extend({
         // save as it might need to perform a read group in some cases so those
         // updated data might be overridden again.
         var record = self.localData[recordID];
-        console.log('record :',record);
         var resID = record.res_id;
         // Remove record from its current group
         var old_group;
@@ -264,26 +263,6 @@ var KanbanModel = BasicModel.extend({
                 old_group.count--;
                 old_group.res_ids = _.without(old_group.res_ids, resID);
                 self._updateParentResIDs(old_group);
-                console.log('old_group :',old_group);
-                if(old_group.count==0) {
-                    // delete old_group.activeFilter;
-                    // self._getUngroupedListDomain(old_group);
-                    // old_group.data.push(recordID);
-                    // old_group.res_ids.push(resID);
-                    // old_group.count++;
-                    // old_group.activeFilter.domain = [[old_group.progressBarValues.field,'=','normal'] && [old_group.progressBarValues.field,'=','blocked']];
-                    // delete old_group.activeFilter.domain;
-                    // delete old_group.activeFilter.value;
-                    // old_group.activeFilter.value = 'normal' && 'blocked';
-                    // old_group.count = old_group.progressBarValues.counts['normal'];
-                    // if(old_group.activeFilter.value == 'normal') {
-                    //     old_group.activeFilter.domain = [];
-                    //     old_group.activeFilter.value = false;
-                    // }
-                    // self._updateParentResIDs(old_group);
-                    // delete old_group.activeFilter;
-
-                }
                 break;
             }
         }
