@@ -16,6 +16,7 @@ const weWidgets = require('wysiwyg.widgets');
 var _t = core._t;
 
 const OdooEditor = OdooEditorLib.OdooEditor;
+const getDeepRange = OdooEditorLib.getDeepRange;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
 
@@ -554,6 +555,7 @@ const Wysiwyg = Widget.extend({
                     range.surroundContents(anchor);
                     anchors.push(anchor);
                 }
+                linkDialog.insertedAnchors = [...anchors];
                 for (const anchor of anchors) {
                     $(anchor).attr('href', linkUrl);
                     $(anchor).attr('class', linkInfo.className || null);
@@ -564,7 +566,9 @@ const Wysiwyg = Widget.extend({
                         $(anchor).removeAttr('target');
                     }
                     range.selectNode(anchor);
+                    range.collapse();
                 };
+                getDeepRange(this.odooEditor.dom, { range, select: true });
             });
         }
     },
