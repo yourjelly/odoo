@@ -8031,6 +8031,7 @@ $.extend(Datepicker.prototype, {
 
 	/* Update the input field with the selected date. */
 	_selectDate: function(id, dateStr) {
+		// debugger
 		var onSelect,
 			target = $(id),
 			inst = this._getInst(target[0]);
@@ -8049,6 +8050,7 @@ $.extend(Datepicker.prototype, {
 		}
 
 		if (inst.inline){
+			// debugger
 			this._updateDatepicker(inst);
 		} else {
 			this._hideDatepicker();
