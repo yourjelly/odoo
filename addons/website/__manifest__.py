@@ -102,4 +102,16 @@
     'application': True,
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
+
+    # TODO: merge with other assets:
+
+    # 'website.test_bundle': [
+    #     '/web/static/lib/qweb/qweb2.js',
+    #     'http://test.external.link/javascript1.js',
+    #     '/web/static/lib/jquery.ui/jquery-ui.css',
+    #     'http://test.external.link/style1.css',
+    #     '/web/static/src/js/boot.js',
+    #     'http://test.external.link/javascript2.js',
+    #     'http://test.external.link/style2.css',
+    # ],
 }
