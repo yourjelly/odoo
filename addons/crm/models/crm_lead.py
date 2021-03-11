@@ -1141,95 +1141,58 @@ class Lead(models.Model):
             :param fields: list of fields to process
             :return dict data: contains the merged values of the new opportunity
         """
-        print("merge_data().........................")
-        # import pdb; pdb.set_trace()
         if fnames is None:
             fnames = self._merge_get_fields()
-            print("fanames.............",fnames)
-            print("\n\n\n\n")
         fcallables = self._merge_get_fields_specific()
-        print("fcallables......................",fcallables)
-        print("\n\n\n\n")
+
         # helpers
         def _get_first_not_null(attr, opportunities):
-            # anjali
-            # import pdb;pdb.set_trace()
-            # print("attr%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attr)
-            # print("oppurtunities%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", opportunities)
             value = False
-            print("inside _get_first_not_null.... .........")
-            # print("attr inside _get_first_not_null", attr)
-            visted=[]
             for opp in opportunities:
-                print("opprtunities.",opportunities)
-                print("opp>>>>>>>>", opp)
                 if opp[attr]:
-                #     print("opp[attr]:::::::::::::::::::", opp[attr])
-                #     # if isinstance(opp[attr], models.BaseModel):
-                #     #     print("isinstance(opp[attr], models.BaseModel;;;;;;;;;;;;;;;;;;",
-                #     #           isinstance(opp[attr], models.BaseModel))
-                #     #     print("opp[attr].id;;;;;;;;;;;;;;;;;;;;;;;;;;;;", opp[attr].id)
-                #     # else:
-                #     #     print("opp[attr ];;;;;;;;;;;;;;;;;;", opp[attr])
-                #     visted = attr.type
-                #     print("visited type............",visted)
                     value = opp[attr].id if isinstance(opp[attr], models.BaseModel) else opp[attr]
-                    print("visoted..........",visted)
-                    vals = self.many2one_override(opportunities,field_name)
-                    print("valssssssssssssssssssssssssss",vals)
-                    print("opp[attr]->value.........................","->" , value)
-                    # [(6, 0, leads.order_ids.ids)]
-                    # [(record.id, record.name) for record in self]
-                    # break
+                    break
             return value
 
         # process the field's values
         data = {}
-        # print("///////////////////////////////////fnames.....",fnames)
+
         for field_name in fnames:
-            print("indide for->>>>>>>>>.\n\nfield_name",field_name)
+
             field = self._fields.get(field_name)
-            print("field",field)
+
             if field is None:
                 continue
 
             fcallable = fcallables.get(field_name)
-            print("fcallable..........",fcallable)
-            print('\n\n')
+
+
             if fcallable and callable(fcallable):
-                print("if fcallable and callable(fcallable) keriii")
                 data[field_name] = fcallable(field_name, self)
-                print("data[field_name]",data[field_name])
-                print("\n\n")
+
             elif not fcallable and field.type in ('many2many', 'one2many'):
-                print("elif not fcallable and field.type in ('many2many', 'one2many'):\n\n")
+
                 continue
             else:
-                print("else@@@\n\n")
                 if field.type in ('many2one'):
-                    print("*************************************************************************field is many2one***********************************************************************")
-
-                # fmany2one = _get_first_not_null(field_name, self)
-                data[field_name] = _get_first_not_null(field_name, self)  # take the first not null
-                print("\n\ndata[field_name]......",data[field_name])
-            print("\n\nreturning data ...........",data)
+                    data[field_name] = _get_first_not_null(field_name, self)  # take the first not null
         return data
 
 
-    def many2one_override(self,opportunities,field_name):
-        print("opportunities,field_name<<<<<<<<<<<<<<<",opportunities,field_name)
-        vals = {}
-        for opp in opportunities:
-            if 'activity_calendar_event_id' in field_name:
-                print(opp.activity_calendar_event_id)
-                # vals['activity_calendar_event_id'].update[opp.activity_calendar_event_id]
-                vals.update(
-                    {
-                        'activity_calendar_event_id':  opp.activity_calendar_event_id,
-                    }
-                )
-        print("vals>><<<<",vals)
-        return vals
+    # def many2one_override(self,opportunities,field_name):
+    #     print("opportunities,field_name<<<<<<<<<<<<<<<",opportunities,field_name)
+    #     vals = {}
+    #     for opp in opportunities:
+    #         if 'activity_calendar_event_id' in field_name:
+    #             print(opp.activity_calendar_event_id)
+    #             # vals['activity_calendar_event_id'].update[opp.activity_calendar_event_id]
+    #             vals.update(
+    #                 {
+    #                     'activity_calendar_event_id':  opp.activity_calendar_event_id,
+    #                 }
+    #             )
+    #     print("vals>><<<<",vals)
+    #     return vals
 
 
 
@@ -1367,21 +1330,14 @@ class Lead(models.Model):
             raise UserError(_("To prevent data loss, Leads and Opportunities can only be merged by groups of %s.",max_length))
 
         opportunities = self._sort_by_confidence_level(reverse=True)
-        print("back to _merge_opportunity().........")
-        print("opprtunitis,,,,,,,,,,,,,,,,,,,",opportunities)
+
         # get SORTED recordset of head and tail, and complete list
         opportunities_head = opportunities[0]
         opportunities_tail = opportunities[1:]
-        print("opportunities_head......",opportunities_head)
-        print("opportunities_tail.........\n\n",opportunities_tail)
-        for data in opportunities_head:
-            print("data__________________",data.id)
-            print("data__________________",data.name)
-            print("data__________________",data.meeting_count)
+
         # merge all the sorted opportunity. This means the value of
         # the first (head opp) will be a priority.
         merged_data = opportunities._merge_data(self._merge_get_fields())
-        print("merged_data........",merged_data)
 
 
         # force value for saleperson and Sales Team
@@ -1394,22 +1350,15 @@ class Lead(models.Model):
         opportunities_head._merge_notify(opportunities_tail)
         # merge other data (mail.message, attachments, ...) from tail into head
         opportunities_head._merge_dependences(opportunities_tail)
-
-        ###########################################################################
-
-        # print("merged data::::::::::after ameetig count::::::::::;",merged_data)
-        ###################################################################################
         # check if the stage is in the stages of the Sales Team. If not, assign the stage with the lowest sequence
         if merged_data.get('team_id'):
             team_stage_ids = self.env['crm.stage'].search(['|', ('team_id', '=', merged_data['team_id']), ('team_id', '=', False)], order='sequence')
             if merged_data.get('stage_id') not in team_stage_ids.ids:
                 merged_data['stage_id'] = team_stage_ids[0].id if team_stage_ids else False
 
-        # print("merged data just before write ......",merged_data)
         # write merged data into first opportunity
         opportunities_head.write(merged_data)
-        print("oppurtuntties.head>>>>\n\n\n,",opportunities_head)
-        print("oppurtunities.tail>>>>>>>>>",opportunities_tail)
+
         # delete tail opportunities
         # we use the SUPERUSER to avoid access rights issues because as the user had the rights to see the records it should be safe to do so
         if auto_unlink:
@@ -1425,7 +1374,6 @@ class Lead(models.Model):
         }
 
     def _merge_get_fields(self):
-        print("list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys())...",list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys()))
         return list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys())
 
     def _convert_opportunity_data(self, customer, team_id=False):
@@ -1542,7 +1490,7 @@ class Lead(models.Model):
         The confidence level increases with the stage sequence
         An Opportunity always has higher confidence level than a lead
         """
-        print(" inside _sort_by_confidence_level()")
+
         def opps_key(opportunity):
             return opportunity.type == 'opportunity', opportunity.stage_id.sequence, -opportunity._origin.id
 
