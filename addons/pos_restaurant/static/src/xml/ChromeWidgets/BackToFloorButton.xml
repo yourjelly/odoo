@@ -4,7 +4,7 @@
     <t t-name="BackToFloorButton" owl="1">
         <t t-set="_table" t-value="env.model.getActiveTable()" />
         <t t-set="_floor" t-value="env.model.getActiveFloor()" />
-        <span t-if="_table" class="order-button floor-button" t-on-click="onClick(_table, _floor)">
+        <span t-if="_table" class="order-button floor-button" t-on-click="onClick(_table)">
             <i class="fa fa-angle-double-left" role="img" aria-label="Back to floor" title="Back to floor" />
             <span> </span>
             <span t-esc="_floor.name" />
