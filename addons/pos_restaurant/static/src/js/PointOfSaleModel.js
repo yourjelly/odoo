@@ -697,7 +697,9 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
          */
         async _saveDraftOrders(orders) {
             try {
-                await this._pushOrders(orders, true);
+                if (orders.length) {
+                    await this._pushOrders(orders, true);
+                }
             } catch (error) {
                 if (error instanceof Error) throw error;
                 if (error?.message.code < 0) {
@@ -715,8 +717,10 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             this._deleteOrderIdsToRemove(deletedOrderIds);
         },
         async _syncToServer(table) {
-            const orders = this.getDraftOrders().filter((order) => order.table_id === table.id);
-            await this._saveDraftOrders(orders);
+            const ordersToSave = this.getDraftOrders().filter(
+                (order) => order.table_id === table.id && order.lines.length
+            );
+            await this._saveDraftOrders(ordersToSave);
             await this._removeDeletedOrders(this._getOrderIdsToRemove());
         },
         /**
@@ -729,7 +733,11 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 method: 'get_table_draft_orders',
                 args: [table.id],
             });
-            for (const order of this.getTableOrders(table).filter((order) => !order._extras.validationDate)) {
+            // Delete the orders that are unvalidated and not-empty.
+            const ordersToDelete = this.getTableOrders(table).filter(
+                (order) => !order._extras.validationDate && order.lines.length
+            );
+            for (const order of ordersToDelete) {
                 this.deleteOrder(order.id);
             }
             this._loadOrders(data);
