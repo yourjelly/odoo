@@ -3422,12 +3422,12 @@ var BasicModel = AbstractModel.extend({
                                 commands[fieldName].push(x2ManyCommands.link_to(list.res_ids[i]));
                                 continue;
                             }
-                            changes = this._generateChanges(relRecord, _.extend({}, options, {}));
+                            changes = this._generateChanges(relRecord, options);
                             if (!this.isNew(relRecord.id)) {
                                 // the subrecord already exists in db
                                 commands[fieldName].push(x2ManyCommands.link_to(relRecord.res_id));
-                                delete changes.id;
-                                if (!_.isEmpty(changes)) {
+                                if (this.isDirty(relRecord.id)) {
+                                    delete changes.id;
                                     commands[fieldName].push(x2ManyCommands.update(relRecord.res_id, changes));
                                 }
                             } else {

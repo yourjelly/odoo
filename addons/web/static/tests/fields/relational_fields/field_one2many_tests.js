@@ -9688,7 +9688,7 @@ QUnit.module('fields', {}, function () {
             testUtils.unpatch(FieldOne2Many);
         });
 
-        QUnit.only('las case', async function (assert) {
+        QUnit.skip('las case', async function (assert) {
             assert.expect(1);
 
             this.data.turtle.fields.tax_detail_ids = {
