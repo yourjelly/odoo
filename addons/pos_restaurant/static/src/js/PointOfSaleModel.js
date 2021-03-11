@@ -105,9 +105,9 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                     this.data.uiState.activeTableId = order.table_id;
                     this.data.uiState.activeFloorId = table.floor_id;
                 }
-
-                if(order.lines)
+                if (order.lines.length) {
                     this.actionSelectOrderline(order, order.lines[order.lines.length - 1]);
+                }
             }
         },
         actionUpdateOrderline(orderline, vals) {
