@@ -9687,6 +9687,55 @@ QUnit.module('fields', {}, function () {
             form.destroy();
             testUtils.unpatch(FieldOne2Many);
         });
+
+        QUnit.only('las case', async function (assert) {
+            assert.expect(1);
+
+            this.data.turtle.fields.tax_detail_ids = {
+                string: "tax_detail_ids", type: "one2many", relation: 'partner', relation_field: 'trululu',
+            };
+            this.data.turtle.fields.turtle_bar.default = true;
+            this.data.partner.onchanges.turtles = function (obj) {};
+            this.data.turtle.onchanges.turtle_bar = function (obj) {
+                if (obj.turtle_bar) {
+                    obj.tax_detail_ids = [[5], [0, false, { display_name: "default" }]];
+                } else {
+                    obj.tax_detail_ids = [[5]];
+                }
+            };
+
+            let checkOnchange = false;
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `<form>
+                        <field name="turtles">
+                            <tree editable="bottom">
+                                <field name="tax_detail_ids"/>
+                                <field name="turtle_bar"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                mockRPC(route, args) {
+                    if (checkOnchange && args.method === 'onchange' && args.model === 'partner') {
+                        assert.deepEqual(args.args[1].turtles[0][2], {
+                            turtle_bar: false,
+                            tax_detail_ids: [],
+                        });
+                    }
+                    return this._super(...arguments);
+                },
+                // debug: 1,
+            });
+
+            await testUtils.dom.click(form.$('.o_field_x2many_list .o_field_x2many_list_row_add a'));
+            checkOnchange = true;
+            debugger
+            await testUtils.dom.click(form.$('.o_data_row .o_field_boolean input'));
+
+            form.destroy();
+        });
     });
 });
 });
