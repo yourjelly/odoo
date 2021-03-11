@@ -93,19 +93,21 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         async actionSelectOrder(order) {
             await this._super(...arguments);
-            const activeTable = this.getActiveTable();
-            const orderTable = this.getRecord('restaurant.table', order.table_id);
-            if (activeTable && orderTable !== activeTable) {
-                await this._syncToServer(activeTable);
-                await this._syncFromServer(orderTable);
-            }
-            if (!activeTable) {
-                await this._syncFromServer(orderTable);
-            }
-            if (!this.data.uiState.OrderManagementScreen.managementOrderIds.has(order.id) && order.table_id) {
-                const table = this.getRecord('restaurant.table', order.table_id);
-                this.data.uiState.activeTableId = order.table_id;
-                this.data.uiState.activeFloorId = table.floor_id;
+            if (this.ifaceFloorplan) {
+                const activeTable = this.getActiveTable();
+                const orderTable = this.getRecord('restaurant.table', order.table_id);
+                if (activeTable && orderTable !== activeTable) {
+                    await this._syncToServer(activeTable);
+                    await this._syncFromServer(orderTable);
+                }
+                if (!activeTable) {
+                    await this._syncFromServer(orderTable);
+                }
+                if (!this.data.uiState.OrderManagementScreen.managementOrderIds.has(order.id) && order.table_id) {
+                    const table = this.getRecord('restaurant.table', order.table_id);
+                    this.data.uiState.activeTableId = order.table_id;
+                    this.data.uiState.activeFloorId = table.floor_id;
+                }
             }
         },
         actionUpdateOrderline(orderline, vals) {
