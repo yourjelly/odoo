@@ -66,10 +66,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         async actionOrderDone(order, nextScreen) {
             await this._super(...arguments);
             if (nextScreen === 'FloorScreen') {
-                const activeTable = this.getActiveTable();
-                const activeFloor = this.getActiveFloor();
-                await this.onExitTable(activeTable.id);
-                await this.actionSetFloor(activeFloor);
+                await this.actionExitTable(this.getActiveTable());
             }
         },
         _createDefaultOrder() {
@@ -96,6 +93,15 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         async actionSelectOrder(order) {
             await this._super(...arguments);
+            const activeTable = this.getActiveTable();
+            const orderTable = this.getRecord('restaurant.table', order.table_id);
+            if (activeTable && orderTable !== activeTable) {
+                await this._syncToServer(activeTable);
+                await this._syncFromServer(orderTable);
+            }
+            if (!activeTable) {
+                await this._syncFromServer(orderTable);
+            }
             if (!this.data.uiState.OrderManagementScreen.managementOrderIds.has(order.id) && order.table_id) {
                 const table = this.getRecord('restaurant.table', order.table_id);
                 this.data.uiState.activeTableId = order.table_id;
@@ -399,7 +405,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 this.data.uiState.FloorScreen.selectedTableId = table.id;
             } else {
                 this.data.uiState.activeTableId = table.id;
-                await this.onEnterTable(table.id);
+                await this._syncFromServer(table);
                 if (this.data.uiState.orderIdToTransfer) {
                     const orderToTransfer = this.getRecord('pos.order', this.data.uiState.orderIdToTransfer);
                     this.updateRecord('pos.order', orderToTransfer.id, { table_id: table.id });
@@ -420,11 +426,9 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         async actionTransferOrder(order) {
             const table = this.getRecord('restaurant.table', order.table_id);
-            const floor = this.getRecord('restaurant.floor', table.floor_id);
             this.updateRecord('pos.order', order.id, { table_id: false });
-            await this.onExitTable(table.id);
+            await this.actionExitTable(table);
             this.data.uiState.orderIdToTransfer = order.id;
-            await this.actionSetFloor(floor);
         },
         actionSetCustomerCount(order, count) {
             this.updateRecord('pos.order', order.id, { customer_count: count });
@@ -657,6 +661,15 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             this._super(...arguments);
             this._setOrderIdsToRemove([order]);
         },
+        async actionExitTable(table) {
+            if (table) {
+                const floor = this.getRecord('restaurant.table', table.floor_id);
+                await this._syncToServer(table);
+                await this.actionSetFloor(floor);
+            } else {
+                await this.actionShowScreen('FloorScreen');
+            }
+        },
         _setOrderIdsToRemove(orders) {
             for (const order of orders) {
                 if (!order._extras.server_id) continue;
@@ -694,8 +707,8 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             });
             this._deleteOrderIdsToRemove(deletedOrderIds);
         },
-        async onExitTable(tableId) {
-            const orders = this.getDraftOrders().filter((order) => order.table_id === tableId);
+        async _syncToServer(table) {
+            const orders = this.getDraftOrders().filter((order) => order.table_id === table.id);
             await this._saveDraftOrders(orders);
             await this._removeDeletedOrders(this._getOrderIdsToRemove());
         },
@@ -703,13 +716,12 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
          * Get from server the updated orders of the given table.
          * @param {number} tableId
          */
-        async onEnterTable(tableId) {
+        async _syncFromServer(table) {
             const { data } = await this._rpc({
                 model: 'pos.order',
                 method: 'get_table_draft_orders',
-                args: [tableId],
+                args: [table.id],
             });
-            const table = this.getRecord('restaurant.table', tableId);
             for (const order of this.getTableOrders(table).filter((order) => !order._extras.validationDate)) {
                 this.deleteOrder(order.id);
             }
@@ -887,7 +899,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             if (this._shouldResetIdleTimer()) {
                 clearTimeout(this.idleTimer);
                 this.idleTimer = setTimeout(async () => {
-                    await this.actionHandler({ name: 'actionShowScreen', args: ['FloorScreen'] });
+                    await this.actionHandler({ name: 'actionExitTable', args: [this.getActiveTable()] });
                 }, 60000);
             }
         },
