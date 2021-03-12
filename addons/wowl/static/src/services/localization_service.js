@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import * as dates from "../utils/dates";
 import * as numbers from "../utils/numbers";
 import { escapeRegExp, sprintf } from "../utils/strings";
@@ -168,7 +169,8 @@ export const localizationService = {
       if (lang) {
         url += `?lang=${lang}`;
       }
-      const res = await odoo.browser.fetch(url);
+
+      const res = await browser.fetch(url);
       if (!res.ok) {
         throw new Error("Error while fetching translations");
       }

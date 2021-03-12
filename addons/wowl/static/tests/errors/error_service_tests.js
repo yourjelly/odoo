@@ -11,6 +11,8 @@ import { nextTick } from "../helpers/utility";
 import { makeTestEnv } from "../helpers/index";
 import { errorHandlerRegistry } from "../../src/errors/error_handler_registry";
 import OdooError from "../../src/errors/odoo_error";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { Component, tags } = owl;
 
@@ -110,12 +112,12 @@ QUnit.test(
 );
 
 QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
-  const mockBrowser = {
+  patch(browser, "mock.settimeout", {
     setTimeout: (callback, delay) => {
       assert.step(`set timeout (${delay === 2000 ? delay : ">2000"})`);
       callback();
     },
-  };
+  });
   const mockCreate = (message) => {
     assert.step(`create (${message})`);
     return 1234;
@@ -136,7 +138,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
       }
     }
   };
-  await makeTestEnv({ serviceRegistry, mockRPC, browser: mockBrowser });
+  await makeTestEnv({ serviceRegistry, mockRPC });
   const error = new ConnectionLostError();
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
@@ -150,6 +152,7 @@ QUnit.test("handle CONNECTION_LOST_ERROR", async (assert) => {
     "close (1234)",
     "create (Connection restored. You are back online.)",
   ]);
+  unpatch(browser, "mock.settimeout");
 });
 
 QUnit.test("will let handlers from the registry handle errors first", async (assert) => {

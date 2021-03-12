@@ -10,10 +10,11 @@ import {
   nextTick,
 } from "../helpers/index";
 import { legacyExtraNextTick } from "../helpers/utility";
-import { makeRAMLocalStorage } from "../../src/env";
 import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "../../src/legacy/utils";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser, makeRAMLocalStorage } from "../../src/core/browser";
 
 const { Component, mount, tags } = owl;
 
@@ -152,13 +153,30 @@ export async function loadState(env, state) {
   await legacyExtraNextTick();
 }
 
+let isBrowserPatched = false;
+
+QUnit.testDone(() => {
+  if (isBrowserPatched) {
+    isBrowserPatched = false;
+    unpatch(browser, "actionmanager.config.patch");
+  }
+});
+
 export function getActionManagerTestConfig() {
-  const browser = {
-    setTimeout: window.setTimeout.bind(window),
-    clearTimeout: window.clearTimeout.bind(window),
-    localStorage: makeRAMLocalStorage(),
-    sessionStorage: makeRAMLocalStorage(),
-  };
+  if (!isBrowserPatched) {
+    patch(
+      browser,
+      "actionmanager.config.patch",
+      {
+        setTimeout: window.setTimeout.bind(window),
+        clearTimeout: window.clearTimeout.bind(window),
+        localStorage: makeRAMLocalStorage(),
+        sessionStorage: makeRAMLocalStorage(),
+      },
+      { pure: true }
+    );
+    isBrowserPatched = true;
+  }
   const serviceRegistry = makeTestServiceRegistry();
   // build the action registry: copy the real action registry, and add an
   // additional basic client action

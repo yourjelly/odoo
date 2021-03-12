@@ -1,29 +1,30 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import { routeToUrl } from "../services/router_service";
 
 // Backend Debug Manager Items
 export function runJSTestsItem(env) {
-  const runTestsURL = odoo.browser.location.origin + "/wowl/tests?mod=*";
+  const runTestsURL = browser.location.origin + "/wowl/tests?mod=*";
   return {
     type: "item",
     description: env._t("Run JS Tests"),
     href: runTestsURL,
     callback: () => {
-      odoo.browser.open(runTestsURL);
+      browser.open(runTestsURL);
     },
     sequence: 10,
   };
 }
 
 export function runJSTestsMobileItem(env) {
-  const runTestsMobileURL = odoo.browser.location.origin + "/wowl/tests/mobile?mod=*";
+  const runTestsMobileURL = browser.location.origin + "/wowl/tests/mobile?mod=*";
   return {
     type: "item",
     description: env._t("Run JS Mobile Tests"),
     href: runTestsMobileURL,
     callback: () => {
-      odoo.browser.open(runTestsMobileURL);
+      browser.open(runTestsMobileURL);
     },
     sequence: 20,
   };
@@ -69,7 +70,7 @@ export function activateAssetsDebugging(env) {
     type: "item",
     description: env._t("Activate Assets Debugging"),
     callback: () => {
-      odoo.browser.location.search = "?debug=assets";
+      browser.location.search = "?debug=assets";
     },
     sequence: 410,
   };
@@ -80,7 +81,7 @@ export function activateTestsAssetsDebugging(env) {
     type: "item",
     description: env._t("Activate Tests Assets Debugging"),
     callback: () => {
-      odoo.browser.location.search = "?debug=assets,tests";
+      browser.location.search = "?debug=assets,tests";
     },
     sequence: 420,
   };
@@ -100,14 +101,14 @@ export function regenerateAssets(env) {
       ];
       const ids = await env.services.model("ir.attachment").search(domain);
       await env.services.model("ir.attachment").unlink(ids);
-      odoo.browser.location.reload();
+      browser.location.reload();
     },
     sequence: 430,
   };
 }
 
 export function becomeSuperuser(env) {
-  const becomeSuperuserULR = odoo.browser.location.origin + "/wowl/become";
+  const becomeSuperuserULR = browser.location.origin + "/wowl/become";
   return {
     type: "item",
     description: env._t("Become Superuser"),
@@ -115,7 +116,7 @@ export function becomeSuperuser(env) {
     href: becomeSuperuserULR,
     callback: () => {
       //TODO  add /wowl/become
-      odoo.browser.open(becomeSuperuserULR, "_self");
+      browser.open(becomeSuperuserULR, "_self");
     },
     sequence: 440,
   };
@@ -128,7 +129,7 @@ export function leaveDebugMode(env) {
     callback: () => {
       const route = env.services.router.current;
       route.search.debug = "";
-      odoo.browser.location.href = odoo.browser.location.origin + routeToUrl(route);
+      browser.location.href = browser.location.origin + routeToUrl(route);
     },
     sequence: 450,
   };

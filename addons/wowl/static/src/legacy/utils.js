@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
+
 export function mapDoActionOptionAPI(legacyOptions) {
   legacyOptions = Object.assign(legacyOptions || {});
   // use camelCase instead of snake_case for some keys
@@ -88,8 +90,9 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
       },
     });
   }
-  legacyEnv.services.local_storage = mapStorage(odoo.browser.localStorage);
-  legacyEnv.services.session_storage = mapStorage(odoo.browser.sessionStorage);
+
+  legacyEnv.services.local_storage = mapStorage(browser.localStorage);
+  legacyEnv.services.session_storage = mapStorage(browser.sessionStorage);
   // map WebClientReady
   wowlEnv.bus.on("WEB_CLIENT_READY", null, () => {
     legacyEnv.bus.trigger("web_client_ready");

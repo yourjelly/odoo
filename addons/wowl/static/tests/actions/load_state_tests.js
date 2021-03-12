@@ -6,6 +6,8 @@ import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/actions/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { Component, tags } = owl;
 
@@ -616,15 +618,14 @@ QUnit.module("ActionManager", (hooks) => {
 
   QUnit.test("load a window action without id (in a multi-record view)", async function (assert) {
     assert.expect(14);
-    const sessionStorage = testConfig.browser.sessionStorage;
-    testConfig.browser.sessionStorage = Object.assign(Object.create(sessionStorage), {
+    patch(browser.sessionStorage, "mock.sessionstorage", {
       getItem(k) {
         assert.step(`getItem session ${k}`);
-        return sessionStorage.getItem(k);
+        return this._super(k);
       },
       setItem(k, v) {
         assert.step(`setItem session ${k}`);
-        return sessionStorage.setItem(k, v);
+        return this._super(k, v);
       },
     });
     const mockRPC = async (route, args) => {
@@ -660,6 +661,7 @@ QUnit.module("ActionManager", (hooks) => {
       "setItem session current_action",
     ]);
     webClient.destroy();
+    unpatch(browser.sessionStorage, "mock.sessionstorage");
   });
 
   QUnit.test("load state supports being given menu_id alone", async function (assert) {

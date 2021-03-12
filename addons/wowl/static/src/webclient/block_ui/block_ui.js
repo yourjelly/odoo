@@ -1,4 +1,5 @@
 /** @odoo-module **/
+import { browser } from "../../core/browser";
 import { useService } from "../../core/hooks";
 import { mainComponentRegistry } from "../main_component_registry";
 
@@ -42,7 +43,7 @@ export class BlockUI extends Component {
     this.state.line1 = message.l1;
     this.state.line2 = message.l2 || "";
     if (message.time !== null) {
-      this.msgTimer = odoo.browser.setTimeout(() => {
+      this.msgTimer = browser.setTimeout(() => {
         this.replaceMessage(index + 1);
       }, message.time * 1000);
     }

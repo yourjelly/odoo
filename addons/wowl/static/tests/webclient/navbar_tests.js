@@ -9,6 +9,8 @@ import { hotkeyService } from "../../src/services/hotkey_service";
 import { menuService } from "./../../src/services/menu_service";
 import { notificationService } from "../../src/notifications/notification_service";
 import { uiService } from "../../src/services/ui_service";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { Component, mount, tags } = owl;
 const { xml } = tags;
@@ -32,11 +34,14 @@ QUnit.module("Navbar", {
     const serverData = { menus };
     const systrayRegistry = new Registry();
     systrayRegistry.add("addon.myitem", MySystrayItem);
-    const browser = {
+    patch(browser, "mock.navbar_tests", {
       setTimeout: (handler, delay, ...args) => handler(...args),
       clearTimeout: () => {},
-    };
-    baseConfig = { browser, serviceRegistry, serverData, systrayRegistry };
+    });
+    baseConfig = { serviceRegistry, serverData, systrayRegistry };
+  },
+  afterEach() {
+    unpatch(browser, "mock.navbar_tests");
   },
 });
 

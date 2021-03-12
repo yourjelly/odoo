@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import OdooError from "../errors/odoo_error";
 import { serviceRegistry } from "../webclient/service_registry";
 
@@ -43,7 +44,7 @@ function makeErrorFromResponse(reponse) {
 let rpcId = 0;
 function jsonrpc(env, url, params, rpcId, settings = {}) {
   const bus = env.bus;
-  const XHR = odoo.browser.XMLHttpRequest;
+  const XHR = browser.XMLHttpRequest;
   const data = {
     id: rpcId,
     jsonrpc: "2.0",
