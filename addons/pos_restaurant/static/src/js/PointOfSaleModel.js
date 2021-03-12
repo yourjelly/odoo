@@ -72,7 +72,6 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 this.data.uiState.activeTableId = false;
                 this.data.uiState.activeFloorId = floor.id;
                 this.data.uiState.FloorScreen.isEditMode = false;
-                this._setActivityListeners();
             }
             await this._super();
         },
@@ -935,32 +934,16 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
 
         //#region AUTO_BACK_TO_FLOORSCREEN
 
-        _setActivityListeners() {
-            const nonIdleEvents = [
-                'mousemove',
-                'mousedown',
-                'touchstart',
-                'touchend',
-                'touchmove',
-                'click',
-                'scroll',
-                'keypress',
-            ];
-            for (const event of nonIdleEvents) {
-                window.addEventListener(event, () => this._setIdleTimer());
-            }
+        async _onAfterIdleCallback() {
+            await this._super(...arguments);
+            await this.actionHandler({ name: 'actionExitTable', args: [this.getActiveTable()] });
         },
-        _setIdleTimer() {
-            if (this._shouldResetIdleTimer()) {
-                clearTimeout(this.idleTimer);
-                this.idleTimer = setTimeout(async () => {
-                    await this.actionHandler({ name: 'actionExitTable', args: [this.getActiveTable()] });
-                }, 60000);
-            }
+        _shouldTriggerAfterIdleCallback() {
+            return this._super(...arguments) && this.ifaceFloorplan && this.getActiveScreen() !== 'FloorScreen';
         },
-        _shouldResetIdleTimer() {
-            return this.ifaceFloorplan && this.getActiveScreen() !== 'FloorScreen';
-        },
+        _shouldActivateActivityListeners() {
+            return this.ifaceFloorplan ? true : this._super(...arguments);
+        }
 
         //#endregion
     });

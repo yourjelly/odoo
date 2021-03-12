@@ -1586,6 +1586,56 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         _getDefaultScreen() {
             return 'ProductScreen';
         }
+        /**
+         * Activate this feature by overriding `_shouldActivateActivityListeners` to return true.
+         *
+         * If this feature is active, the `_onAfterIdleCallback` is called whenever none of the
+         * `_getNonIdleEvents()` is not triggered during `_getIdleDuration()`. But the callback is only
+         * called when `_shouldTriggerAfterIdleCallback()` returns true.
+         * Basically, when the ui is inactive (idle) for a certain duration, it triggers the `_onAfterIdleCallback`.
+         *
+         * NOTE: This method is in the core module because it affects multiple modules that are supposed to be
+         * inpedendent, e.g. pos_hr and pos_restaurant.
+         */
+        _setActivityListeners() {
+            if (!this._shouldActivateActivityListeners()) return;
+            for (const event of this._getNonIdleEvents()) {
+                window.addEventListener(event, () => {
+                    clearTimeout(this.idleTimer);
+                    this.idleTimer = setTimeout(async () => {
+                        if (this._shouldTriggerAfterIdleCallback()) {
+                            await this._onAfterIdleCallback();
+                        }
+                    }, this._getIdleDuration());
+                });
+            }
+        }
+        _getNonIdleEvents() {
+            return ['mousemove', 'mousedown', 'touchstart', 'touchend', 'touchmove', 'click', 'scroll', 'keypress'];
+        }
+        /**
+         * Override this method to return true in order to activate the activity listener feature.
+         */
+        _shouldActivateActivityListeners() {
+            return false;
+        }
+        /**
+         * Override this method to conditionally trigger the `_onAfterIdleCallback`.
+         */
+        _shouldTriggerAfterIdleCallback() {
+            return true;
+        }
+        /**
+         * This method is called when the UI is idle for a duration of `_getIdleDuration()`.
+         */
+        async _onAfterIdleCallback() {}
+        /**
+         * Returns the idle duration (in ms) before `_onAfterIdleCallback` is called.
+         * Override this to change the default duration of 60s.
+         */
+        _getIdleDuration() {
+            return 60000;
+        }
 
         //#endregion UTILITY
 
@@ -1699,6 +1749,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         async actionDoneLoading() {
             this.data.uiState.loading.state = 'READY';
             const startScreen = this.getStartScreen();
+            this._setActivityListeners();
             await this.actionShowScreen(startScreen);
         }
         actionSetActiveCategoryId(categoryId) {

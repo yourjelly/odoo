@@ -163,6 +163,13 @@ odoo.define('pos_hr.employees', function (require) {
         getActiveCashier() {
             return this.getRecord('hr.employee', this.data.uiState.activeEmployeeId);
         },
+        _shouldTriggerAfterIdleCallback() {
+            if (this.getActiveScreen() === 'LoginScreen') {
+                return false;
+            } else {
+                return this._super(...arguments);
+            }
+        }
     });
 
     unpatch.PointOfSaleUIPrototype = patch(PointOfSaleUI.prototype, 'pos_hr', {
