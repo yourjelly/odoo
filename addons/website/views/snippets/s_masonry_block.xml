@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_template_masonry_default" name="Masonry">
+<template id="s_masonry_block" name="Masonry">
     <section class="s_masonry_block" data-vcss="001">
         <div class="container-fluid">
             <div class="row">
