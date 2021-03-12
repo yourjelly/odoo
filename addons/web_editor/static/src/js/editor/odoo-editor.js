@@ -653,7 +653,9 @@ var exportVariable = (function (exports) {
 
     function getDeepestPosition(node, offset) {
         while (node.hasChildNodes()) {
-            node = node.childNodes[offset - 1] || node.firstChild;
+            const newNode = node.childNodes[offset - 1] || node.firstChild;
+            if (isEmptyBlock(newNode)) break;
+            node = newNode;
             offset = offset === 0 ? 0 : nodeSize(node);
         }
         let didMove = false;
@@ -3150,7 +3152,7 @@ var exportVariable = (function (exports) {
                 doJoin &&
                 next &&
                 !(next.previousSibling && next.previousSibling === joinWith) &&
-                this.dom.contains(next)
+                this.editable.contains(next)
             ) {
                 const restore = preserveCursor(this.document);
                 this.observerFlush();
@@ -3909,6 +3911,14 @@ var exportVariable = (function (exports) {
                     }
                     this.sanitize();
                     this.historyStep();
+                } else if (ev.inputType === 'insertParagraph') {
+                    this.historyRollback();
+                    ev.preventDefault();
+                    if (this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
+                        this._applyCommand('oShiftEnter');
+                    }
+                } else if (ev.inputType === 'insertLineBreak') {
+                    this._applyCommand('oShiftEnter');
                 } else {
                     this.sanitize();
                     this.historyStep();
@@ -3932,13 +3942,7 @@ var exportVariable = (function (exports) {
                     this.deleteRange(selection);
                 }
             }
-            if (ev.key === 'Enter') {
-                // Enter
-                ev.preventDefault();
-                if (ev.shiftKey || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
-                    this._applyCommand('oShiftEnter');
-                }
-            } else if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
+            if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
                 // backspace
                 // We need to hijack it because firefox doesn't trigger a
                 // deleteBackward input event with a collapsed cursor in front of a
