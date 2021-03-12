@@ -1571,6 +1571,21 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 await this.actionSendPaymentCancel(order, waitingPayment);
             }
         }
+        /**
+         * Create an array of starting screens with priority number. The priority
+         * number is used for sorting the screens. The one with lowest priority value
+         * will be prioritized as the starting screen. @see getStartScreen
+         */
+        _getStartScreens(activeOrder) {
+            const result = [];
+            if (activeOrder) {
+                result.push([this.getOrderScreen(activeOrder), 100]);
+            }
+            return result;
+        }
+        _getDefaultScreen() {
+            return 'ProductScreen';
+        }
 
         //#endregion UTILITY
 
@@ -1777,7 +1792,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 } else {
                     mergeWith.qty += line.qty;
                 }
-                this.actionSelectOrderline(order, mergeWith.id)
+                this.actionSelectOrderline(order, mergeWith.id);
                 return mergeWith;
             } else {
                 if (product.tracking === 'serial' || product.tracking === 'lot') {
@@ -2360,6 +2375,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * @return {string}
          */
         getOrderScreen(order) {
+            if (!order) return this._getDefaultScreen();
             return order._extras.activeScreen || 'ProductScreen';
         }
         getActiveOrder() {
@@ -2863,8 +2879,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             return userGroupIds.includes(this.config.group_pos_manager_id);
         }
         getStartScreen() {
-            const activeOrder = this.getActiveOrder();
-            return this.getOrderScreen(activeOrder);
+            const startScreens = this._getStartScreens(this.getActiveOrder());
+            startScreens.sort((a, b) => a[1] - b[1]);
+            return startScreens[0][0];
         }
         getUseProxy() {
             return (
@@ -2884,8 +2901,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          */
         getOrderInfo(order) {
             const orderlines = this.getOrderlines(order).map((line) => this._getOrderlineInfo(line));
-            const payments = this
-                .getPayments(order)
+            const payments = this.getPayments(order)
                 .filter((payment) => !payment.is_change)
                 .map((payment) => this._getPaymentInfo(payment));
             const changePayment = this.getPayments(order).find((payment) => payment.is_change);
@@ -2970,10 +2986,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const pricelist = this.getOrderPricelist(line.order_id);
             const prices = this.getOrderlinePrices(line);
             const unitPrice = this.getOrderlineUnitPrice(line);
-            const taxes = this.getFiscalPositionTaxes(
-                this.getOrderlineTaxes(line),
-                order.fiscal_position_id
-            );
+            const taxes = this.getFiscalPositionTaxes(this.getOrderlineTaxes(line), order.fiscal_position_id);
             const [noTaxUnitPrice, withTaxUnitPrice] = this.getUnitPrices(unitPrice, taxes);
             let price, price_display;
             if (this.config.iface_tax_included === 'total') {

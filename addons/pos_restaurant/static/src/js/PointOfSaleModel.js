@@ -52,16 +52,29 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 return firstTableId;
             }
         },
-        getStartScreen() {
-            if (this.ifaceFloorplan) return 'FloorScreen';
-            return this._super();
+        _getStartScreens(activeOrder) {
+            const result = this._super(...arguments);
+            if (this.ifaceFloorplan) {
+                result.push(['FloorScreen', 50]);
+            }
+            return result;
+        },
+        _getDefaultScreen() {
+            if (this.ifaceFloorplan) {
+                return 'FloorScreen';
+            } else {
+                return this._super(...arguments);
+            }
         },
         async actionDoneLoading() {
-            await this._super();
             if (this.ifaceFloorplan) {
-                this.actionSetFloor(this.data.derived.sortedFloors[0]);
+                const floor = this.data.derived.sortedFloors[0];
+                this.data.uiState.activeTableId = false;
+                this.data.uiState.activeFloorId = floor.id;
+                this.data.uiState.FloorScreen.isEditMode = false;
                 this._setActivityListeners();
             }
+            await this._super();
         },
         async actionOrderDone(order, nextScreen) {
             await this._super(...arguments);

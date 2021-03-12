@@ -57,6 +57,13 @@ odoo.define('pos_hr.employees', function (require) {
             newOrder.employee_id = this.data.uiState.activeEmployeeId;
             return newOrder;
         },
+        _getStartScreens(activeOrder) {
+            const result = this._super(...arguments);
+            if (this.config.module_pos_hr) {
+                result.push(['LoginScreen', 0]);
+            }
+            return result;
+        },
         /**
          * This override augments the method to identify if the active cashier is a manager.
          */
@@ -66,16 +73,6 @@ odoo.define('pos_hr.employees', function (require) {
                 return this._super(...arguments);
             }
             return cashier.user_id === this.user.id && this._super(...arguments);
-        },
-        /**
-         * Start screen should be the LoginScreen.
-         */
-        getStartScreen() {
-            if (this.config.module_pos_hr) {
-                return 'LoginScreen';
-            } else {
-                return this._super(...arguments);
-            }
         },
         /**
          * When this module is installed, a cashier is represented by an employee.
