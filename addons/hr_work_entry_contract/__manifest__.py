@@ -26,10 +26,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            # after script[last()]
-            'hr_work_entry_contract/static/src/js/work_entries_controller_mixin.js',
-            # after script[last()]
-            'hr_work_entry_contract/static/src/js/work_entries_calendar.js',
+            'hr_work_entry_contract/static/src/**/*',
         ],
     }
 }

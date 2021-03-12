@@ -25,16 +25,13 @@
     'auto_install': ['hr_recruitment', 'website_mail'],
     'assets': {
         'web.assets_frontend': [
-            # after //link[last()]
-            'website_hr_recruitment/static/src/scss/website_hr_recruitment.scss',
+            'website_hr_recruitment/static/src/scss/**/*',
         ],
         'website.assets_editor': [
-            # inside .
-            'website_hr_recruitment/static/src/js/website_hr_recruitment_editor.js',
+            'website_hr_recruitment/static/src/js/**/*',
         ],
         'web.assets_tests': [
-            # inside .
-            'website_hr_recruitment/static/tests/tours/website_hr_recruitment.js',
+            'website_hr_recruitment/static/tests/**/*',
         ],
     }
 }

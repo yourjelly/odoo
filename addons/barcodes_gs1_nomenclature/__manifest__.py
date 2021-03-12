@@ -14,12 +14,10 @@
     'auto_install': False,
     'assets': {
         'web.assets_backend': [
-            # inside .
             'barcodes_gs1_nomenclature/static/src/js/barcode_parser.js',
         ],
         'web.qunit_suite_tests': [
-            # inside .
-            'barcodes_gs1_nomenclature/static/src/js/tests/barcode_parser_tests.js',
+            'barcodes_gs1_nomenclature/static/src/js/tests/**/*',
         ],
     }
 }

@@ -49,10 +49,7 @@ Main Features
     'application': True,
     'assets': {
         'web.assets_backend': [
-            # after script[last()]
-            'fleet/static/src/js/fleet_form.js',
-            # after script[last()]
-            'fleet/static/src/js/fleet_kanban.js',
+            'fleet/static/src/**/*',
         ],
     }
 }

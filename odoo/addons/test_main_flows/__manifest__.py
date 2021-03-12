@@ -14,7 +14,6 @@ It will install some main apps and will try to execute the most important action
     'post_init_hook': '_auto_install_enterprise_dependencies',
     'assets': {
         'web.assets_tests': [
-            # inside .
             'test_main_flows/static/tests/tours/main_flow.js',
         ],
     }

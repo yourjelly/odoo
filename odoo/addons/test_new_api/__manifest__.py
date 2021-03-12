@@ -19,9 +19,7 @@
     ],
     'assets': {
         'web.assets_tests': [
-            # inside .
             'test_new_api/static/tests/tours/constraint.js',
-            # inside .
             'test_new_api/static/tests/tours/x2many.js',
         ],
     }

@@ -7,7 +7,6 @@
     
     'assets': {
         'web.assets_tests': [
-            # inside .
             'test_apikeys/static/tests/apikey_flow.js',
         ],
     }
