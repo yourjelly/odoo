@@ -5,9 +5,18 @@ var AbstractField = require('web.AbstractField');
 var core = require('web.core');
 var field_registry = require('web.field_registry');
 var field_utils = require('web.field_utils');
-
+var CrashManager = require('web.CrashManager').CrashManager;
 var QWeb = core.qweb;
 var _t = core._t;
+var _lt = core._lt;
+
+CrashManager.include({
+    init() {
+        this._super(...arguments);
+        this.odooExceptionTitleMap['odoo.addons.account.models.account_move.ImbalanceJournalEntryError'] = _lt('UserError');
+    },
+})
+
 
 var ShowPaymentLineWidget = AbstractField.extend({
     events: _.extend({
