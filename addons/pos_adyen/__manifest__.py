@@ -20,8 +20,5 @@
         'point_of_sale.assets': [
             'pos_adyen/static/**/*',
         ],
-        'web.assets_qweb': [
-            'pos_adyen/static/src/xml/pos.xml',
-        ],
     }
 }
