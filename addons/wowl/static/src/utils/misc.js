@@ -1,18 +1,11 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
+
 /**
  * This file contains various utility functions that do not have a well defined
  * category.
  */
-
-// -----------------------------------------------------------------------------
-
-/**
- * @returns {boolean} true for the browser base on Chromium (Google Chrome, Opera, Edge)
- */
-export function isBrowserChromium() {
-  return navigator.userAgent.includes("Chrome");
-}
 
 // -----------------------------------------------------------------------------
 
@@ -39,8 +32,8 @@ export function debounce(func, wait, immediate) {
       }
     }
     const callNow = immediate && !timeout;
-    odoo.browser.clearTimeout(timeout);
-    timeout = odoo.browser.setTimeout(later, wait);
+    browser.clearTimeout(timeout);
+    timeout = browser.setTimeout(later, wait);
     if (callNow) {
       func.apply(context, args);
     }

@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
+
 const { Component, hooks } = owl;
 
 /**
@@ -28,7 +30,7 @@ export class RainbowMan extends Component {
     this.delay = typeof delay === "number" ? delay : false;
     hooks.onMounted(() => {
       if (this.delay !== false) {
-        this.env.browser.setTimeout(() => {
+        browser.setTimeout(() => {
           if (!this.__owl__.status === 5 /* DESTROYED */) {
             this.el.classList.add("o_reward_fading");
           }

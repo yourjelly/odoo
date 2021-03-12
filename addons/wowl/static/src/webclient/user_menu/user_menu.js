@@ -3,14 +3,14 @@ import { useService } from "../../core/hooks";
 import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { Dropdown } from "../../components/dropdown/dropdown";
 import { systrayRegistry } from "../systray_registry";
+import { browser } from "../../core/browser";
 
 const { Component } = owl;
 
 export class UserMenu extends Component {
-  constructor() {
-    super(...arguments);
+  setup() {
     this.user = useService("user");
-    const { origin } = odoo.browser.location;
+    const { origin } = browser.location;
     const { userId } = this.user;
     this.source = `${origin}/web/image?model=res.users&field=image_128&id=${userId}`;
   }

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "../../core/browser";
 import { useService } from "../../core/hooks";
 
 const { Component, useState } = owl;
@@ -30,7 +31,7 @@ export class LoadingIndicator extends Component {
   requestCall(rpcId) {
     if (this.state.count === 0) {
       this.state.show = true;
-      this.blockUITimer = odoo.browser.setTimeout(this.uiService.block, 3000);
+      this.blockUITimer = browser.setTimeout(this.uiService.block, 3000);
     }
     this.rpcIds.add(rpcId);
     this.state.count++;

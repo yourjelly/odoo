@@ -105,7 +105,7 @@ export function makeFakeRPCService(mockRPC) {
 
 export function makeTestOdoo(config = {}) {
   return Object.assign({}, odoo, {
-    browser: config.browser || {},
+    browser: {},
     debug: config.debug,
     session_info: {
       cache_hashes: {
@@ -268,8 +268,6 @@ export function makeFakeDeviceService() {
     deploy() {
       return {
         isSmall: false,
-        isMobileOS: false,
-        hasTouch: false,
         size: SIZES.LG,
         SIZES,
       };

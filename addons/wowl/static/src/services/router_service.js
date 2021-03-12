@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import { serviceRegistry } from "../webclient/service_registry";
 
 function parseString(str) {
@@ -34,7 +35,6 @@ export function routeToUrl(route) {
 }
 
 export function redirect(env, url, wait) {
-  const browser = odoo.browser;
   const load = () => browser.location.assign(url);
   if (wait) {
     const wait_server = function () {

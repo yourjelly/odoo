@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { serviceRegistry } from "../webclient/service_registry";
-import { isBrowserChromium } from "../utils/misc";
 import OdooError from "./odoo_error";
 import { errorHandlerRegistry } from "./error_handler_registry";
+import { isBrowserChrome } from "../core/browser";
 
 export const errorService = {
   name: "error",
@@ -37,7 +37,7 @@ export const errorService = {
           return;
         }
         let stack = eventError ? eventError.stack : "";
-        if (!isBrowserChromium()) {
+        if (!isBrowserChrome) {
           // transforms the stack into a chromium stack
           // Chromium stack example:
           // Error: Mock: Can't write value

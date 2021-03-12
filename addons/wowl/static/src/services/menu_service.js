@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import { serviceRegistry } from "../webclient/service_registry";
 
 const loadMenusUrl = `/wowl/load_menus`;
 
 async function fetchLoadMenus(url) {
-  const res = await odoo.browser.fetch(url);
+  const res = await browser.fetch(url);
   if (!res.ok) {
     throw new Error("Error while fetching menus");
   }

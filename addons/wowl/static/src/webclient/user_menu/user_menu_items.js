@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Dialog } from "../../components/dialog/dialog";
+import { browser } from "../../core/browser";
 
 const { Component } = owl;
 
@@ -11,7 +12,7 @@ export function documentationItem(env) {
     description: env._t("Documentation"),
     href: documentationURL,
     callback: () => {
-      odoo.browser.open(documentationURL, "_blank");
+      browser.open(documentationURL, "_blank");
     },
     sequence: 10,
   };
@@ -24,7 +25,7 @@ export function supportItem(env) {
     description: env._t("Support"),
     href: buyEnterpriseURL,
     callback: () => {
-      odoo.browser.open(buyEnterpriseURL, "_blank");
+      browser.open(buyEnterpriseURL, "_blank");
     },
     sequence: 20,
   };
@@ -74,10 +75,10 @@ export function odooAccountItem(env) {
       env.services
         .rpc("/web/session/account")
         .then((url) => {
-          odoo.browser.location.href = url;
+          browser.location.href = url;
         })
         .catch(() => {
-          odoo.browser.location.href = "https://accounts.odoo.com/account";
+          browser.location.href = "https://accounts.odoo.com/account";
         });
     },
     sequence: 60,
@@ -89,9 +90,9 @@ export function logOutItem(env) {
   return {
     type: "item",
     description: env._t("Log out"),
-    href: `${odoo.browser.location.origin}${route}`,
+    href: `${browser.location.origin}${route}`,
     callback: () => {
-      odoo.browser.location.href = route;
+      browser.location.href = route;
     },
     sequence: 70,
   };

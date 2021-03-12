@@ -1,11 +1,13 @@
 /** @odoo-module **/
 
+import { browser } from "../../src/core/browser";
 import {
   parseHash,
   parseSearchQuery,
   redirect,
   routeToUrl,
 } from "../../src/services/router_service";
+import { patch, unpatch } from "../../src/utils/patch";
 import { makeTestEnv, nextTick } from "../helpers/index";
 
 QUnit.module("Router");
@@ -80,7 +82,7 @@ QUnit.test("routeToUrl encodes URI compatible strings", (assert) => {
 });
 
 QUnit.test("can redirect an URL", async (assert) => {
-  const browser = {
+  patch(browser, "test.location", {
     location: {
       assign(url) {
         assert.step(url);
@@ -90,7 +92,7 @@ QUnit.test("can redirect an URL", async (assert) => {
       handler();
       assert.step(String(delay));
     },
-  };
+  });
   let firstCheckServer = true;
   const env = await makeTestEnv({
     browser,
@@ -109,4 +111,5 @@ QUnit.test("can redirect an URL", async (assert) => {
   redirect(env, "/my/test/url/2", true);
   await nextTick();
   assert.verifySteps(["1000", "250", "/my/test/url/2"]);
+  unpatch(browser, "test.location");
 });

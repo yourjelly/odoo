@@ -5,6 +5,7 @@ import { makeContext } from "../core/context";
 import { KeepLast } from "../utils/concurrency";
 import { sprintf } from "../utils/strings";
 import { serviceRegistry } from "../webclient/service_registry";
+import { browser } from "../core/browser";
 
 const { Component, hooks, tags } = owl;
 
@@ -268,7 +269,7 @@ function makeActionManager(env) {
           if (controllerStack.some((c) => c.action.target === "fullscreen")) {
             mode = "fullscreen";
           }
-          odoo.browser.sessionStorage.setItem("current_action", action._originalAction);
+          browser.sessionStorage.setItem("current_action", action._originalAction);
         } else {
           dialogCloseProm = new Promise((_r) => {
             dialogCloseResolve = _r;
@@ -364,7 +365,7 @@ function makeActionManager(env) {
     if (action.target === "self") {
       env.services.router.redirect(action.url);
     } else {
-      const w = odoo.browser.open(action.url, "_blank");
+      const w = browser.open(action.url, "_blank");
       if (!w || w.closed || typeof w.closed === "undefined") {
         const msg = env._t(
           "A popup window has been blocked. You may need to change your " +
@@ -706,7 +707,7 @@ function makeActionManager(env) {
           // maybe we should force escaping in xml or do a better parse of the args array
           additionalArgs = JSON.parse(params.args.replace(/'/g, '"'));
         } catch (e) {
-          odoo.browser.console.error("Could not JSON.parse arguments", params.args);
+          browser.console.error("Could not JSON.parse arguments", params.args);
         }
         args = args.concat(additionalArgs);
       }
@@ -888,7 +889,7 @@ function makeActionManager(env) {
       } else if (state.view_type) {
         // this is a window action on a multi-record view, so restore it
         // from the session storage
-        const storedAction = odoo.browser.sessionStorage.getItem("current_action");
+        const storedAction = browser.sessionStorage.getItem("current_action");
         const lastAction = JSON.parse(storedAction || "{}");
         if (lastAction.res_model === state.model) {
           action = lastAction;

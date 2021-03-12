@@ -4,6 +4,7 @@ import { Dialog } from "../components/dialog/dialog";
 import { useService } from "../core/hooks";
 import { capitalize } from "../utils/strings";
 import { _lt } from "../services/localization_service";
+import { browser } from "../core/browser";
 
 const { Component, hooks } = owl;
 const { useState } = hooks;
@@ -28,7 +29,7 @@ export class ErrorDialog extends Component {
     });
   }
   onClickClipboard() {
-    odoo.browser.navigator.clipboard.writeText(
+    browser.navigator.clipboard.writeText(
       `${this.props.name}\n${this.props.message}\n${this.props.traceback}`
     );
   }
@@ -103,7 +104,7 @@ export class RPCErrorDialog extends Component {
     }
   }
   onClickClipboard() {
-    odoo.browser.navigator.clipboard.writeText(
+    browser.navigator.clipboard.writeText(
       `${this.props.name}\n${this.props.message}\n${this.traceback}`
     );
   }
@@ -181,7 +182,7 @@ export class SessionExpiredDialog extends Component {
     this.title = this.env._t("Odoo Session Expired");
   }
   onClick() {
-    odoo.browser.location.reload();
+    browser.location.reload();
   }
 }
 SessionExpiredDialog.template = "wowl.SessionExpiredDialog";

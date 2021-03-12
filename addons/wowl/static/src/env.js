@@ -26,7 +26,6 @@ import { deployServices } from "./webclient/setup";
  */
 export async function makeEnv(debug) {
   const env = {
-    browser: owl.browser,
     qweb: new owl.QWeb(),
     bus: new owl.core.EventBus(),
     services: {},
@@ -59,36 +58,4 @@ export async function makeEnv(debug) {
   });
   await deployServices(env);
   return env;
-}
-
-// -----------------------------------------------------------------------------
-// makeRAMLocalStorage
-// why is it here?
-// -----------------------------------------------------------------------------
-
-/**
- * @returns {typeof window["localStorage"]}
- */
-export function makeRAMLocalStorage() {
-  let store = {};
-  return {
-    setItem(key, value) {
-      store[key] = value;
-    },
-    getItem(key) {
-      return store[key];
-    },
-    clear() {
-      store = {};
-    },
-    removeItem(key) {
-      delete store[key];
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key() {
-      return "";
-    },
-  };
 }

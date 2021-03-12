@@ -5,6 +5,8 @@ import { makeFakeRPCService, makeMockFetch } from "./mocks";
 import { Registry } from "../../src/core/registry";
 import { evaluateExpr } from "../../src/py_js/py";
 import { combineDomains, Domain } from "../../src/core/domain";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { DateTime } = luxon;
 
@@ -1022,6 +1024,16 @@ class MockServer {
 // -----------------------------------------------------------------------------
 // MockServer deployment helper
 // -----------------------------------------------------------------------------
+
+let isMocked = false;
+
+QUnit.testDone(() => {
+  if (isMocked) {
+    unpatch(browser, "mockserver.fetch");
+    isMocked = false;
+  }
+});
+
 export function makeMockServer(config, serverData, mockRPC) {
   serverData = serverData || {};
   const mockServer = new MockServer(serverData, {
@@ -1038,8 +1050,13 @@ export function makeMockServer(config, serverData, mockRPC) {
     return res;
   };
   const rpcService = makeFakeRPCService(_mockRPC);
-  config.browser = config.browser || {};
-  config.browser.fetch = makeMockFetch(_mockRPC);
+  if (isMocked) {
+    throw new Error("can't have two mocked server at same time");
+  }
+  isMocked = true;
+  patch(browser, "mockserver.fetch", {
+    fetch: makeMockFetch(_mockRPC),
+  });
   config.serviceRegistry = config.serviceRegistry || new Registry();
   config.serviceRegistry.add("rpc", rpcService);
 }

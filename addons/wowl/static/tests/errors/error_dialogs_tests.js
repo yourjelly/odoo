@@ -12,6 +12,8 @@ import {
 import { Registry } from "../../src/core/registry";
 import OdooError from "../../src/errors/odoo_error";
 import { uiService } from "../../src/services/ui_service";
+import { patch, unpatch } from "../../src/utils/patch";
+import { browser } from "../../src/core/browser";
 
 const { Component, mount, tags } = owl;
 let target;
@@ -164,7 +166,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
   const error = new OdooError("ERROR_NAME");
   error.message = "This is the message";
   error.traceback = "This is a traceback";
-  const browser = {
+  patch(browser, "test.navigator", {
     navigator: {
       clipboard: {
         writeText: (value) => {
@@ -172,8 +174,8 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
         },
       },
     },
-  };
-  env = await makeTestEnv({ ...baseConfig, browser });
+  });
+  env = await makeTestEnv({ ...baseConfig });
   class Parent extends Component {
     constructor() {
       super(...arguments);
@@ -188,6 +190,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
   const clipboardButton = target.querySelector(".fa-clipboard");
   click(clipboardButton);
   await nextTick();
+  unpatch(browser, "test.navigator");
 });
 
 QUnit.test("WarningDialog", async (assert) => {
@@ -310,14 +313,14 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
   class Parent extends Component {}
   Parent.components = { SessionExpiredDialog };
   Parent.template = tags.xml`<SessionExpiredDialog/>`;
-  const browser = {
+  patch(browser, "test.location", {
     location: {
       reload() {
         assert.step("location reload");
       },
     },
-  };
-  env = await makeTestEnv({ ...baseConfig, browser });
+  });
+  env = await makeTestEnv({ ...baseConfig });
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
@@ -335,4 +338,5 @@ QUnit.test("SessionExpiredDialog", async (assert) => {
   assert.strictEqual(footerButton.textContent, "Ok");
   click(footerButton);
   assert.verifySteps(["location reload"]);
+  unpatch(browser, "test.location");
 });

@@ -17,22 +17,10 @@ export const deviceService = {
       window.matchMedia("(min-width: 1200px) and (max-width: 1533px)"),
       window.matchMedia("(min-width: 1534px)"),
     ];
-    const isMobileOS = Boolean(
-      odoo.browser.navigator.userAgent.match(/Android/i) ||
-        odoo.browser.navigator.userAgent.match(/webOS/i) ||
-        odoo.browser.navigator.userAgent.match(/iPhone/i) ||
-        odoo.browser.navigator.userAgent.match(/iPad/i) ||
-        odoo.browser.navigator.userAgent.match(/iPod/i) ||
-        odoo.browser.navigator.userAgent.match(/BlackBerry/i) ||
-        odoo.browser.navigator.userAgent.match(/Windows Phone/i)
-    );
-    const hasTouch = "ontouchstart" in window || "onmsgesturechange" in window;
     function getSize() {
       return MEDIAS.findIndex((media) => media.matches);
     }
     const device = {
-      isMobileOS,
-      hasTouch,
       size: getSize(),
       SIZES,
     };

@@ -8,6 +8,7 @@ import {
   RPCErrorDialog,
 } from "./error_dialogs";
 import { errorHandlerRegistry } from "./error_handler_registry";
+import { browser } from "../core/browser";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
@@ -142,7 +143,7 @@ function lostConnectionHandler(env) {
         { sticky: true }
       );
       let delay = 2000;
-      odoo.browser.setTimeout(function checkConnection() {
+      browser.setTimeout(function checkConnection() {
         env.services
           .rpc("/web/webclient/version_info", {})
           .then(function () {
@@ -155,7 +156,7 @@ function lostConnectionHandler(env) {
           .catch((e) => {
             // exponential backoff, with some jitter
             delay = delay * 1.5 + 500 * Math.random();
-            odoo.browser.setTimeout(checkConnection, delay);
+            browser.setTimeout(checkConnection, delay);
           });
       }, delay);
       return true;

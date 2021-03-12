@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { browser } from "../core/browser";
 import { serviceRegistry } from "../webclient/service_registry";
 
 const { EventBus } = owl.core;
@@ -30,7 +31,7 @@ export const notificationService = {
       notifications.push(notif);
       bus.trigger("UPDATE", notifications);
       if (!sticky) {
-        odoo.browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
+        browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
       }
       return notif.id;
     }

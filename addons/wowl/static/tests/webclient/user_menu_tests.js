@@ -1,7 +1,9 @@
 /** @odoo-module **/
 
+import { browser } from "../../src/core/browser";
 import { hotkeyService } from "../../src/services/hotkey_service";
 import { uiService } from "../../src/services/ui_service";
+import { patch, unpatch } from "../../src/utils/patch";
 import { UserMenu } from "../../src/webclient/user_menu/user_menu";
 import { click, getFixture, makeFakeUserService, makeTestEnv } from "../helpers";
 import { Registry } from "./../../src/core/registry";
@@ -21,15 +23,16 @@ QUnit.module("UserMenu", {
     serviceRegistry.add(hotkeyService.name, hotkeyService);
     serviceRegistry.add(uiService.name, uiService);
     target = getFixture();
-    const browser = {
+    patch(browser, "usermenutest", {
       location: {
         origin: "http://lordofthering",
       },
-    };
-    baseConfig = { browser, serviceRegistry };
+    });
+    baseConfig = { serviceRegistry };
   },
   afterEach() {
     userMenu.unmount();
+    unpatch(browser, "usermenutest");
   },
 });
 
