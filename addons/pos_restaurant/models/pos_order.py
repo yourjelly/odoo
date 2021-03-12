@@ -3,6 +3,7 @@
 from functools import partial
 
 from odoo import api, fields, models
+from re import search
 
 
 class PosOrderLine(models.Model):
@@ -22,8 +23,29 @@ class PosOrder(models.Model):
 
     @api.model
     def get_table_draft_orders(self, table_id):
+        """Returns order data of the given table.
+        We also compute the uid for each order and assigned it as order_id and pos_order_id
+        for the orderlines and payments, respectively. This is to make sure that the returned
+        orders are compatible with the orders in the frontend.
+        """
         orders = self.search([('state', '=', 'draft'), ('table_id', '=', table_id)])
-        return orders.export_for_ui()
+        data = orders.export_for_ui()['data']
+        order_uid_map = {}
+        for order in data['pos.order']:
+            order_uid = search(r"\d{5,}-\d{3,}-\d{4,}", order['pos_reference']).group(0)
+            order_uid_map[order['id']] = order_uid
+            order['server_id'] = order['id']
+            order['id'] = order_uid
+
+        for orderline in data['pos.order.line']:
+            original_order_id = orderline['order_id']
+            orderline['order_id'] = order_uid_map[original_order_id]
+
+        for payment in data['pos.payment']:
+            original_order_id = payment['pos_order_id']
+            payment['pos_order_id'] = order_uid_map[original_order_id]
+
+        return data
 
     def set_tip(self, tip_line_vals):
         """Set tip to `self` based on values in `tip_line_vals`."""

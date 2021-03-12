@@ -25,6 +25,7 @@
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/TableWidget.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/EditableTable.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/TicketScreen.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/AbstractOrderManagementScreen.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/ChromeWidgets/BackToFloorButton.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/ChromeWidgets/TicketButton.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js"></script>

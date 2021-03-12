@@ -16,6 +16,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 this.env.actionHandler({ name: 'actionSetTicketScreenSearchDetails', args: [searchDetails] })
             );
         }
+        async onClickOrder(order) {
+            await this.env.actionHandler({ name: 'actionSelectOrder', args: [order] })
+        }
         async onDeleteOrder(order) {
             const orderlines = this.env.model.getOrderlines(order);
             if (['ProductScreen', 'PaymentScreen'].includes(order._extras.activeScreen) && orderlines.length > 0) {
