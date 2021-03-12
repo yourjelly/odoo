@@ -181,11 +181,11 @@
                     <span class="fa fa-plus-square-o"></span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" data-class="">None</a></li>
-                    <li><a class="dropdown-item" href="#" data-class="padding-small">Small</a></li>
-                    <li><a class="dropdown-item" href="#" data-class="padding-medium">Medium</a></li>
-                    <li><a class="dropdown-item" href="#" data-class="padding-large">Large</a></li>
-                    <li><a class="dropdown-item" href="#" data-class="padding-xl">XL</a></li>
+                    <li><a class="dropdown-item editor-ignore" href="#" data-class="">None</a></li>
+                    <li><a class="dropdown-item editor-ignore" href="#" data-class="padding-small">Small</a></li>
+                    <li><a class="dropdown-item editor-ignore" href="#" data-class="padding-medium">Medium</a></li>
+                    <li><a class="dropdown-item editor-ignore" href="#" data-class="padding-large">Large</a></li>
+                    <li><a class="dropdown-item editor-ignore" href="#" data-class="padding-xl">XL</a></li>
                 </ul>
             </div>
 
