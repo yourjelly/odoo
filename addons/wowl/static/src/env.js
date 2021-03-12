@@ -34,10 +34,10 @@ export async function makeEnv(debug) {
   // define shortcut properties coming from some services
   Object.defineProperty(env, "isSmall", {
     get() {
-      if (!env.services.device) {
-        throw new Error("Device service not initialized!");
+      if (!env.services.ui) {
+        throw new Error("UI service not initialized!");
       }
-      return env.services.device.isSmall;
+      return env.services.ui.isSmall;
     },
   });
   Object.defineProperty(env, "_t", {

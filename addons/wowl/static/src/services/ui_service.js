@@ -1,10 +1,13 @@
 /** @odoo-module **/
 import { useService } from "../core/hooks";
+import { debounce } from "../utils/misc";
 import { serviceRegistry } from "../webclient/service_registry";
 
 const { Component, core, hooks } = owl;
 const { EventBus } = core;
 const { onMounted, onWillUnmount, useRef } = hooks;
+
+export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
 /**
  * This hook will set the UI ownership
@@ -32,6 +35,9 @@ export function useUIOwnership(refName) {
 export const uiService = {
   name: "ui",
   deploy(env) {
+    let ui = {};
+
+    // block/unblock code
     const bus = new EventBus();
 
     let blockCount = 0;
@@ -48,6 +54,16 @@ export const uiService = {
       }
     }
 
+    Object.assign(ui, {
+      bus,
+      block,
+      unblock,
+      get isBlocked() {
+        return blockCount > 0;
+      },
+    });
+
+    // UI ownership code
     let ownerStack = [document];
     function takeOwnership(owner) {
       ownerStack.push(owner);
@@ -61,16 +77,39 @@ export const uiService = {
       return ownerStack[ownerStack.length - 1];
     }
 
-    return {
-      bus,
-      block,
-      unblock,
-      get isBlocked() {
-        return blockCount > 0;
-      },
+    Object.assign(ui, {
       getOwner,
       takeOwnership,
-    };
+    });
+
+    // window size handling
+    const MEDIAS = [
+      window.matchMedia("(max-width: 474px)"),
+      window.matchMedia("(min-width: 475px) and (max-width: 575px)"),
+      window.matchMedia("(min-width: 576px) and (max-width: 767px)"),
+      window.matchMedia("(min-width: 768px) and (max-width: 991px)"),
+      window.matchMedia("(min-width: 992px) and (max-width: 1199px)"),
+      window.matchMedia("(min-width: 1200px) and (max-width: 1533px)"),
+      window.matchMedia("(min-width: 1534px)"),
+    ];
+    function getSize() {
+      return MEDIAS.findIndex((media) => media.matches);
+    }
+
+    // listen to media query status changes
+    function updateSize() {
+      ui.size = getSize();
+    }
+    MEDIAS.forEach((media) => media.addEventListener("change", debounce(updateSize, 100)));
+
+    Object.assign(ui, {
+      size: getSize(),
+      get isSmall() {
+        return ui.size <= SIZES.SM;
+      },
+    });
+
+    return ui;
   },
 };
 

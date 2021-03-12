@@ -2,7 +2,7 @@
 
 import { effectService } from "../../src/effects/effect_service";
 import { makePushState, routeToUrl } from "../../src/services/router_service";
-import { SIZES } from "../../src/services/device_service";
+import { SIZES } from "../../src/services/ui_service";
 import { makeLocalization } from "../../src/services/localization_service";
 
 const { Component } = owl;
@@ -262,9 +262,9 @@ export function makeFakeRouterService(params) {
   };
 }
 
-export function makeFakeDeviceService() {
+export function makeFakeUIService() {
   return {
-    name: "device",
+    name: "ui",
     deploy() {
       return {
         isSmall: false,
