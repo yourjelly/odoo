@@ -94,7 +94,6 @@ QUnit.test("two patches on same base class", async function (assert) {
   });
 
   new BaseClass().fn();
-
   assert.verifySteps([
     "base.setup",
     "patch1.setup",
@@ -137,7 +136,6 @@ QUnit.test("unpatch", async function (assert) {
   new BaseClass().fn();
 
   assert.verifySteps(["base.setup", "patch.setup", "base.fn", "patch.fn"]);
-
   unpatch(BaseClass.prototype, "patch");
 
   new BaseClass().fn();
@@ -1070,4 +1068,18 @@ QUnit.test("patch an object", async function (assert) {
 
   obj.fn();
   assert.verifySteps(["obj"]);
+});
+
+QUnit.module("patch 'pure' option");
+
+QUnit.test("function objects are preserved with 'pure' patch", async function (assert) {
+  const obj1 = { a: () => {} };
+  const obj2 = { a: () => {} };
+  function someValue() {}
+
+  patch(obj1, "patch1", { a: someValue });
+  assert.notStrictEqual(obj1.a, someValue);
+
+  patch(obj2, "patch2", { a: someValue }, { pure: true });
+  assert.strictEqual(obj2.a, someValue);
 });

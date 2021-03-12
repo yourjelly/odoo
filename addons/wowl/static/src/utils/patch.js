@@ -11,8 +11,10 @@ const patchMap = new WeakMap();
  * @param {Object} obj Object to patch
  * @param {string} patchName
  * @param {Object} patch
+ * @param {{pure?: boolean}} [options]
  */
-export function patch(obj, patchName, patch) {
+export function patch(obj, patchName, patch, options = {}) {
+  const pure = Boolean(options.pure);
   if (!patchMap.has(obj)) {
     patchMap.set(obj, {
       original: {},
@@ -26,6 +28,7 @@ export function patch(obj, patchName, patch) {
   objDesc.patches.push({
     name: patchName,
     patch,
+    pure,
   });
 
   for (const k in patch) {
@@ -69,15 +72,19 @@ export function patch(obj, patchName, patch) {
   function makeIntermediateFunction(key, prevDesc, newDesc, patchedFnName) {
     const _superFn = prevDesc[key];
     const patchFn = newDesc[key];
-    newDesc[key] = {
-      [patchedFnName](...args) {
-        const prevSuper = this._super;
-        this._super = _superFn.bind(this);
-        const result = patchFn.call(this, ...args);
-        this._super = prevSuper;
-        return result;
-      },
-    }[patchedFnName];
+    if (pure) {
+      newDesc[key] = patchFn;
+    } else {
+      newDesc[key] = {
+        [patchedFnName](...args) {
+          const prevSuper = this._super;
+          this._super = _superFn.bind(this);
+          const result = patchFn.call(this, ...args);
+          this._super = prevSuper;
+          return result;
+        },
+      }[patchedFnName];
+    }
   }
 }
 
@@ -107,7 +114,7 @@ export function unpatch(obj, patchName) {
   // Re-apply the patches except the one to remove.
   for (const patchDesc of objDesc.patches) {
     if (patchDesc.name !== patchName) {
-      patch(obj, patchDesc.name, patchDesc.patch);
+      patch(obj, patchDesc.name, patchDesc.patch, { pure: patchDesc.pure });
     }
   }
 }
