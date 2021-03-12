@@ -135,7 +135,14 @@ var exportVariable = (function (exports) {
         true,
     );
 
-    function findNode(domPath, findCallback = node => true, stopCallback = node => false) {
+    /**
+     * Find a node.
+     * @param {findCallback} findCallback - This callback check if this function
+     *      should return `node`.
+     * @param {findCallback} stopCallback - This callback check if this function
+     *      should stop when it receive `node`.
+     */
+    function findNode(domPath, findCallback = () => true, stopCallback = () => false) {
         for (const node of domPath) {
             if (findCallback(node)) {
                 return node;
@@ -146,6 +153,17 @@ var exportVariable = (function (exports) {
         }
         return null;
     }
+    /**
+     * This callback check if findNode should return `node`.
+     * @callback findCallback
+     * @param {Node} node
+     * @return {Boolean}
+     */
+    /**
+     * This callback check if findNode should stop when it receive `node`.
+     * @callback stopCallback
+     * @param {Node} node
+     */
 
     /**
      * Returns the closest HTMLElement of the provided Node
@@ -646,11 +664,11 @@ var exportVariable = (function (exports) {
             offset = 0;
             didMove = true;
         }
-        return didMove ? getDeepestPosition(node, offset) : [node, offset];
+        return didMove && isVisible(node) ? getDeepestPosition(node, offset) : [node, offset];
     }
 
     function getCursors(document) {
-        let sel = document.defaultView.getSelection();
+        const sel = document.defaultView.getSelection();
         if (
             getCursorDirection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset) ===
             DIRECTIONS.LEFT
@@ -667,7 +685,7 @@ var exportVariable = (function (exports) {
 
     function preserveCursor(document) {
         const sel = document.defaultView.getSelection();
-        let cursorPos = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
+        const cursorPos = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
         return replace => {
             replace = replace || new Map();
             cursorPos[0] = replace.get(cursorPos[0]) || cursorPos[0];
@@ -853,7 +871,7 @@ var exportVariable = (function (exports) {
      * @returns {boolean}
      */
     function isInPre(node) {
-        let element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        const element = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
         return (
             !!element &&
             (!!element.closest('pre') ||
@@ -957,7 +975,7 @@ var exportVariable = (function (exports) {
     }
 
     function parentsGet(node, root = undefined) {
-        let parents = [];
+        const parents = [];
         while (node) {
             parents.unshift(node);
             if (node === root) {
@@ -972,8 +990,8 @@ var exportVariable = (function (exports) {
         if (!node1 || !node2) {
             return null;
         }
-        let n1p = parentsGet(node1, root);
-        let n2p = parentsGet(node2, root);
+        const n1p = parentsGet(node1, root);
+        const n2p = parentsGet(node2, root);
         while (n1p.length > 1 && n1p[1] === n2p[1]) {
             n1p.shift();
             n2p.shift();
@@ -987,7 +1005,7 @@ var exportVariable = (function (exports) {
     }
 
     function createList(mode) {
-        let node = document.createElement(mode == 'OL' ? 'OL' : 'UL');
+        const node = document.createElement(mode == 'OL' ? 'OL' : 'UL');
         if (mode == 'CL') {
             node.classList.add('o_checklist');
         }
@@ -1128,7 +1146,7 @@ var exportVariable = (function (exports) {
 
     function insertText(sel, content) {
         if (sel.anchorNode.nodeType == Node.TEXT_NODE) {
-            let pos = [sel.anchorNode.parentElement, splitTextNode(sel.anchorNode, sel.anchorOffset)];
+            const pos = [sel.anchorNode.parentElement, splitTextNode(sel.anchorNode, sel.anchorOffset)];
             setCursor(...pos, ...pos, false);
         }
         const txt = document.createTextNode(content || '#');
@@ -1269,11 +1287,12 @@ var exportVariable = (function (exports) {
      *     that case, the positions should be given in the document node order.
      * @returns {function}
      */
-    function prepareUpdate(el, offset, ...args) {
-        const positions = [...arguments];
+    function prepareUpdate(...args) {
+        const positions = [...args];
 
         // Check the state in each direction starting from each position.
         const restoreData = [];
+        let el, offset;
         while (positions.length) {
             // Note: important to get the positions in reverse order to restore
             // right side before left side.
@@ -1665,7 +1684,7 @@ var exportVariable = (function (exports) {
         // First, split around the character where the backspace occurs
         const firstSplitOffset = splitTextNode(this, offset - 1);
         const secondSplitOffset = splitTextNode(parentNode.childNodes[firstSplitOffset], 1);
-        let middleNode = parentNode.childNodes[firstSplitOffset];
+        const middleNode = parentNode.childNodes[firstSplitOffset];
 
         // Do remove the character, then restore the state of the surrounding parts.
         const restore = prepareUpdate(parentNode, firstSplitOffset, parentNode, secondSplitOffset);
@@ -1813,7 +1832,7 @@ var exportVariable = (function (exports) {
     };
 
     HTMLBRElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false) {
-        let parentOffset = childNodeIndex(this);
+        const parentOffset = childNodeIndex(this);
         const rightState = getState(this.parentElement, parentOffset + 1, DIRECTIONS.RIGHT).cType;
         if (rightState & CTYPES.BLOCK_INSIDE) {
             this.parentElement.oDeleteBackward(parentOffset, alreadyMoved);
@@ -1932,7 +1951,7 @@ var exportVariable = (function (exports) {
     HTMLHeadingElement.prototype.oEnter = function () {
         const newEl = HTMLElement.prototype.oEnter.call(this, ...arguments);
         if (!newEl.textContent) {
-            let node = setTagName(newEl, 'P');
+            const node = setTagName(newEl, 'P');
             setCursorStart(node);
         }
     };
@@ -1943,10 +1962,10 @@ var exportVariable = (function (exports) {
     /**
      * Specific behavior for list items: deletion and unindentation in some cases.
      */
-    HTMLLIElement.prototype.oEnter = function (offset, firstSplit = true) {
+    HTMLLIElement.prototype.oEnter = function () {
         // If not last list item or not empty last item, regular block split
         if (this.nextElementSibling || this.textContent) {
-            let node = HTMLElement.prototype.oEnter.call(this, ...arguments);
+            const node = HTMLElement.prototype.oEnter.call(this, ...arguments);
             if (node.classList.contains('o_checked')) {
                 toggleClass(node, 'o_checked');
             }
@@ -1957,13 +1976,13 @@ var exportVariable = (function (exports) {
     /**
      * Specific behavior for pre: insert newline (\n) in text or insert p at end.
      */
-    HTMLPreElement.prototype.oEnter = function (offset, firstSplit = true) {
+    HTMLPreElement.prototype.oEnter = function (offset) {
         if (offset < this.childNodes.length) {
             const lineBreak = document.createElement('br');
             this.insertBefore(lineBreak, this.childNodes[offset]);
             setCursorEnd(lineBreak);
         } else {
-            let node = document.createElement('p');
+            const node = document.createElement('p');
             this.parentNode.insertBefore(node, this.nextSibling);
             fillEmpty(node);
             setCursorStart(node);
@@ -2000,7 +2019,7 @@ var exportVariable = (function (exports) {
         }
     };
 
-    Text.prototype.oShiftTab = function (offset) {
+    Text.prototype.oShiftTab = function () {
         return this.parentElement.oShiftTab(0);
     };
 
@@ -2012,15 +2031,15 @@ var exportVariable = (function (exports) {
     };
 
     // returns: is still in a <LI> nested list
-    HTMLLIElement.prototype.oShiftTab = function (offset) {
-        let li = this;
+    HTMLLIElement.prototype.oShiftTab = function () {
+        const li = this;
         if (li.nextElementSibling) {
-            let ul = li.parentElement.cloneNode(false);
+            const ul = li.parentElement.cloneNode(false);
             while (li.nextSibling) {
                 ul.append(li.nextSibling);
             }
             if (li.parentNode.parentNode.tagName === 'LI') {
-                let lip = document.createElement('li');
+                const lip = document.createElement('li');
                 toggleClass(lip, 'oe-nested');
                 lip.append(ul);
                 li.parentNode.parentNode.after(lip);
@@ -2047,7 +2066,7 @@ var exportVariable = (function (exports) {
             restoreCursor();
             return li;
         } else {
-            let ul = li.parentNode;
+            const ul = li.parentNode;
             let p;
             while (li.firstChild) {
                 if (isBlock(li.firstChild)) {
@@ -2069,7 +2088,7 @@ var exportVariable = (function (exports) {
         return false;
     };
 
-    Text.prototype.oTab = function (offset) {
+    Text.prototype.oTab = function () {
         return this.parentElement.oTab(0);
     };
 
@@ -2080,14 +2099,14 @@ var exportVariable = (function (exports) {
         return false;
     };
 
-    HTMLLIElement.prototype.oTab = function (offset) {
-        let lip = document.createElement('li');
-        let destul =
+    HTMLLIElement.prototype.oTab = function () {
+        const lip = document.createElement('li');
+        const destul =
             (this.previousElementSibling && this.previousElementSibling.querySelector('ol, ul')) ||
             (this.nextElementSibling && this.nextElementSibling.querySelector('ol, ul')) ||
             this.closest('ul, ol');
 
-        let ul = createList(getListMode(destul));
+        const ul = createList(getListMode(destul));
         lip.append(ul);
 
         const cr = preserveCursor(this.ownerDocument);
@@ -2106,7 +2125,7 @@ var exportVariable = (function (exports) {
         if (!isBlock(this)) {
             return this.parentElement.oToggleList(childNodeIndex(this));
         }
-        let inLI = this.closest('li');
+        const inLI = this.closest('li');
         if (inLI) {
             return inLI.oToggleList(0, mode);
         }
@@ -2133,35 +2152,32 @@ var exportVariable = (function (exports) {
     };
 
     HTMLLIElement.prototype.oToggleList = function (offset, mode) {
-        let pnode = this.closest('ul, ol');
+        const pnode = this.closest('ul, ol');
         if (!pnode) return;
         const restoreCursor = preserveCursor(this.ownerDocument);
-        switch (getListMode(pnode) + mode) {
-            case 'OLCL':
-            case 'ULCL':
-                pnode.classList.add('o_checklist');
-                for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
-                    if (li.style.listStyle != 'none') {
-                        li.style.listStyle = null;
-                        if (!li.style.all) li.removeAttribute('style');
-                    }
+        const listMode = getListMode(pnode) + mode;
+        if (['OLCL', 'ULCL'].includes(listMode)) {
+            pnode.classList.add('o_checklist');
+            for (let li = pnode.firstElementChild; li !== null; li = li.nextElementSibling) {
+                if (li.style.listStyle != 'none') {
+                    li.style.listStyle = null;
+                    if (!li.style.all) li.removeAttribute('style');
                 }
-                setTagName(pnode, 'UL');
-                break;
-            case 'CLOL':
-            case 'CLUL':
-                toggleClass(pnode, 'o_checklist');
-            case 'OLUL':
-            case 'ULOL':
-                setTagName(pnode, mode);
-                break;
-            default:
-                // toggle => remove list
-                let node = this;
-                while (node) {
-                    node = node.oShiftTab(offset);
-                }
+            }
+            setTagName(pnode, 'UL');
+        } else if (['CLOL', 'CLUL'].includes(listMode)) {
+            toggleClass(pnode, 'o_checklist');
+            setTagName(pnode, mode);
+        } else if (['OLUL', 'ULOL'].includes(listMode)) {
+            setTagName(pnode, mode);
+        } else {
+            // toggle => remove list
+            let node = this;
+            while (node) {
+                node = node.oShiftTab(offset);
+            }
         }
+
         restoreCursor();
         return false;
     };
@@ -2265,8 +2281,8 @@ var exportVariable = (function (exports) {
             // Merge identical elements together
             while (areSimilarElements(node, node.previousSibling)) {
                 getDeepRange(this.root, { select: true });
-                let restoreCursor = preserveCursor(this.root.ownerDocument);
-                let nodeP = node.previousSibling;
+                const restoreCursor = preserveCursor(this.root.ownerDocument);
+                const nodeP = node.previousSibling;
                 moveNodes(...endPos(node.previousSibling), node);
                 restoreCursor();
                 node = nodeP;
@@ -2274,10 +2290,10 @@ var exportVariable = (function (exports) {
 
             // Remove empty blocks in <li>
             if (node.nodeName == 'P' && node.parentElement.tagName == 'LI') {
-                let next = node.nextSibling;
-                let pnode = node.parentElement;
+                const next = node.nextSibling;
+                const pnode = node.parentElement;
                 if (isEmptyBlock(node)) {
-                    let restoreCursor = preserveCursor(this.root.ownerDocument);
+                    const restoreCursor = preserveCursor(this.root.ownerDocument);
                     node.remove();
                     fillEmpty(pnode);
                     this._parse(next);
@@ -2346,7 +2362,7 @@ var exportVariable = (function (exports) {
             result = document.createTextNode(obj.textValue);
         } else if (obj.nodeType === Node.ELEMENT_NODE) {
             result = document.createElement(obj.tagName);
-            for (let key in obj.attributes) {
+            for (const key in obj.attributes) {
                 result.setAttribute(key, obj.attributes[key]);
             }
             obj.children.forEach(child => result.append(objectToNode(child)));
@@ -2357,8 +2373,8 @@ var exportVariable = (function (exports) {
         return result;
     }
 
-    const UNBREAKABLE_ROLLBACK_CODE = 100;
-    const UNREMOVABLE_ROLLBACK_CODE = 110;
+    const UNBREAKABLE_ROLLBACK_CODE = 'UNBREAKABLE';
+    const UNREMOVABLE_ROLLBACK_CODE = 'UNREMOVABLE';
     const BACKSPACE_ONLY_COMMANDS = ['oDeleteBackward', 'oDeleteForward'];
     const BACKSPACE_FIRST_COMMANDS = BACKSPACE_ONLY_COMMANDS.concat(['oEnter', 'oShiftEnter']);
 
@@ -2372,115 +2388,100 @@ var exportVariable = (function (exports) {
 
     const isUndo = ev => ev.key === 'z' && (ev.ctrlKey || ev.metaKey);
     const isRedo = ev => ev.key === 'y' && (ev.ctrlKey || ev.metaKey);
-    class OdooEditor extends EventTarget {
-        constructor(dom, options = { controlHistoryFromDocument: false }) {
-            super();
-            this.options = options;
 
-            if (typeof this.options.toSanitize === 'undefined') {
-                this.options.toSanitize = true;
+    function defaultOptions(defaultObject, object) {
+        const newObject = Object.assign({}, defaultObject, object);
+        for (const [key, value] of Object.entries(object)) {
+            if (typeof value === 'undefined') {
+                newObject[key] = defaultObject[key];
             }
-            if (typeof this.options.isRootEditable === 'undefined') {
-                this.options.isRootEditable = true;
-            }
-            if (typeof this.options.getContentEditableAreas === 'undefined') {
-                this.options.getContentEditableAreas = () => [];
-            }
+        }
+        return newObject;
+    }
+
+    class OdooEditor extends EventTarget {
+        constructor(editable, options = {}) {
+            super();
+
+            this.options = defaultOptions(
+                {
+                    controlHistoryFromDocument: false,
+                    toSanitize: true,
+                    isRootEditable: true,
+                    getContentEditableAreas: () => [],
+                },
+                options,
+            );
+
+            // --------------
+            // Set properties
+            // --------------
 
             this.document = options.document || document;
 
-            // keyboard type detection, happens only at the first keydown event
+            // Keyboard type detection, happens only at the first keydown event.
             this.keyboardType = KEYBOARD_TYPES.UNKNOWN;
 
             // Wether we should check for unbreakable the next history step.
             this._checkStepUnbreakable = true;
 
-            if (dom.innerHTML.trim() === '') {
-                dom.innerHTML = '<p><br></p>';
-            }
+            // All dom listeners currently active.
+            this._domListeners = [];
 
-            dom.oid = 1; // convention: root node is ID 1
-            this.dom = this.options.toSanitize ? sanitize(dom) : dom;
             this.resetHistory();
-            this.undos = new Map();
+
+            // Set of labels that which prevent the automatic step mechanism if
+            // it contains at least one element.
             this._observerTimeoutUnactive = new Set();
 
-            // set contenteditable before clone as FF updates the content at this point
+            // The state of the dom.
+            this._currentMouseState = 'mouseup';
+
+            this._onKeyupResetContenteditableNodes = [];
+
+            this._isCollaborativeActive = false;
+            this._collaborativeLastSynchronisedId = null;
+
+            // Track if we need to rollback mutations in case unbreakable or unremovable are being added or removed.
+            this._toRollback = false;
+
+            // -------------------
+            // Alter the editable
+            // -------------------
+
+            if (editable.innerHTML.trim() === '') {
+                editable.innerHTML = '<p><br></p>';
+            }
+
+            // Convention: root node is ID 1.
+            editable.oid = 1;
+            this.editable = this.options.toSanitize ? sanitize(editable) : editable;
+
+            // Set contenteditable before clone as FF updates the content at this point.
             this._activateContenteditable();
 
-            // When selecting all the text within a link then triggering delete or
-            // inserting a character, the cursor and insertion is outside the link.
-            // To avoid this problem, we make all editable zone become uneditable
-            // except the link. Then when cliking outside the link, reset the
-            // editable zones.
-            this.dom.addEventListener('mousedown', e => {
-                this.automaticStepSkipStack();
-                const link = closestElement(e.target, 'a');
-                if (link) {
-                    this._stopContenteditable();
-                    link.setAttribute('contenteditable', 'true');
-                } else {
-                    this._activateContenteditable();
-                }
-            });
-            this.vdom = dom.cloneNode(true);
-            this.vdom.removeAttribute('contenteditable');
-            this.idSet(dom, this.vdom);
+            this.idSet(editable);
+
+            // -----------
+            // Bind events
+            // -----------
 
             this.observerActive();
 
-            this.dom.addEventListener('keydown', this._onKeyDown.bind(this));
-            this.dom.addEventListener('input', this._onInput.bind(this));
-            this.dom.addEventListener('mousedown', this._onClick.bind(this));
-            this.dom.addEventListener('paste', this._onPaste.bind(this));
-            this.dom.addEventListener('drop', this._onDrop.bind(this));
+            this.addDomListener(this.editable, 'keydown', this._onKeyDown);
+            this.addDomListener(this.editable, 'input', this._onInput);
+            this.addDomListener(this.editable, 'mousedown', this._onMouseDown);
+            this.addDomListener(this.editable, 'mouseup', this._onMouseup);
+            this.addDomListener(this.editable, 'paste', this._onPaste);
+            this.addDomListener(this.editable, 'drop', this._onDrop);
 
-            this.document.onselectionchange = this._onSelectionChange.bind(this);
+            this.addDomListener(this.document, 'selectionchange', this._onSelectionChange);
+            this.addDomListener(this.document, 'keydown', this._onDocumentKeydown);
+            this.addDomListener(this.document, 'keyup', this._onDocumentKeyup);
 
-            this._currentMouseState = 'mouseup';
-            this.selectionChanged = true;
-            this.dom.addEventListener('mousedown', this._updateMouseState.bind(this));
-            this.dom.addEventListener('mouseup', this._updateMouseState.bind(this));
-
-            this._onKeyupResetContenteditableNodes = [];
-            this.document.addEventListener('keydown', ev => {
-                const canUndoRedo = !['INPUT', 'TEXTAREA'].includes(
-                    this.document.activeElement.tagName,
-                );
-
-                if (this.options.controlHistoryFromDocument && canUndoRedo) {
-                    if (isUndo(ev) && canUndoRedo) {
-                        ev.preventDefault();
-                        this.historyUndo();
-                    } else if (isRedo(ev) && canUndoRedo) {
-                        ev.preventDefault();
-                        this.historyRedo();
-                    }
-                } else {
-                    if (isRedo(ev) || isUndo(ev)) {
-                        this._onKeyupResetContenteditableNodes.push(
-                            ...this.dom.querySelectorAll('[contenteditable=true]'),
-                        );
-                        if (this.dom.getAttribute('contenteditable') === 'true') {
-                            this._onKeyupResetContenteditableNodes.push(this.dom);
-                        }
-
-                        for (const node of this._onKeyupResetContenteditableNodes) {
-                            this.automaticStepSkipStack();
-                            node.setAttribute('contenteditable', false);
-                        }
-                    }
-                }
-            });
-            this.document.addEventListener('keyup', ev => {
-                if (this._onKeyupResetContenteditableNodes.length) {
-                    for (const node of this._onKeyupResetContenteditableNodes) {
-                        this.automaticStepSkipStack();
-                        node.setAttribute('contenteditable', true);
-                    }
-                    this._onKeyupResetContenteditableNodes = [];
-                }
-            });
+            // -------
+            // Toolbar
+            // -------
 
             if (this.options.toolbar) {
                 this.toolbar = this.options.toolbar;
@@ -2512,12 +2513,6 @@ var exportVariable = (function (exports) {
                     });
                 }
             }
-
-            this.collaborate = false;
-            this.collaborate_last = null;
-
-            // used to check if we have to rollback an operation as an unbreakable is
-            this.torollback = false; // unbreakable removed or added
         }
         /**
          * Releases anything that was initialized.
@@ -2526,65 +2521,69 @@ var exportVariable = (function (exports) {
          */
         destroy() {
             this.observerUnactive();
+            this._removeDomListener();
         }
 
         sanitize() {
             this.observerFlush();
 
             // find common ancestror in this.history[-1]
-            let step = this.history[this.history.length - 1];
-            let ca, record;
-            for (record of step.dom) {
-                let node = this.idFind(this.dom, record.parentId || record.id) || this.dom;
-                ca = ca ? commonParentGet(ca, node, this.dom) : node;
+            const step = this._historySteps[this._historySteps.length - 1];
+            let commonAncestor, record;
+            for (record of step.mutations) {
+                const node = this.idFind(this.editable, record.parentId || record.id) || this.editable;
+                commonAncestor = commonAncestor
+                    ? commonParentGet(commonAncestor, node, this.editable)
+                    : node;
             }
-            if (!ca) {
+            if (!commonAncestor) {
                 return false;
             }
 
             // sanitize and mark current position as sanitized
-            sanitize(ca);
+            sanitize(commonAncestor);
+        }
+
+        addDomListener(element, eventName, callback) {
+            const boundCallback = callback.bind(this);
+            this._domListeners.push([element, eventName, boundCallback]);
+            element.addEventListener(eventName, boundCallback);
         }
 
         // Assign IDs to src, and dest if defined
-        idSet(src, dest = undefined, testunbreak = false) {
-            if (!src.oid) {
-                src.oid = (Math.random() * 2 ** 31) | 0; // TODO: uuid4 or higher number
+        idSet(node, testunbreak = false) {
+            if (!node.oid) {
+                node.oid = (Math.random() * 2 ** 31) | 0; // TODO: uuid4 or higher number
             }
-            // Rollback if src.ouid changed. This ensures that nodes never change
+            // Rollback if node.ouid changed. This ensures that nodes never change
             // unbreakable ancestors.
-            src.ouid = src.ouid || getOuid(src, true);
+            node.ouid = node.ouid || getOuid(node, true);
             if (testunbreak) {
-                const ouid = getOuid(src);
-                if (!this.torollback && ouid && ouid !== src.ouid) {
-                    this.torollback = UNBREAKABLE_ROLLBACK_CODE;
+                const ouid = getOuid(node);
+                if (!this._toRollback && ouid && ouid !== node.ouid) {
+                    this._toRollback = UNBREAKABLE_ROLLBACK_CODE;
                 }
             }
 
-            if (dest && !dest.oid) {
-                dest.oid = src.oid;
-            }
-            let childsrc = src.firstChild;
-            let childdest = dest ? dest.firstChild : undefined;
-            while (childsrc) {
-                this.idSet(childsrc, childdest, testunbreak);
-                childsrc = childsrc.nextSibling;
-                childdest = dest ? childdest.nextSibling : undefined;
+            let childNode = node.firstChild;
+            while (childNode) {
+                this.idSet(childNode, testunbreak);
+                childNode = childNode.nextSibling;
             }
         }
 
         // TODO: improve to avoid traversing the whole DOM just to find a node of an ID
-        idFind(dom, id, parentid) {
-            if (dom.oid === id && (!parentid || dom.parentNode.oid === parentid)) {
-                return dom;
+        idFind(node, id, parentId) {
+            if (node.oid === id && (!parentId || node.parentNode.oid === parentId)) {
+                return node;
             }
-            let cur = dom.firstChild;
-            while (cur) {
-                let result = this.idFind(cur, id, parentid);
+            let childNode = node.firstChild;
+            while (childNode) {
+                const result = this.idFind(childNode, id, parentId);
                 if (result) {
                     return result;
                 }
-                cur = cur.nextSibling;
+                childNode = childNode.nextSibling;
             }
         }
 
@@ -2592,10 +2591,10 @@ var exportVariable = (function (exports) {
 
         // if not in collaboration mode, no need to serialize / unserialize
         serialize(node) {
-            return this.collaborate ? nodeToObject(node) : node;
+            return this._isCollaborativeActive ? nodeToObject(node) : node;
         }
         unserialize(obj) {
-            return this.collaborate ? objectToNode(obj) : obj;
+            return this._isCollaborativeActive ? objectToNode(obj) : obj;
         }
 
         automaticStepActive(label) {
@@ -2614,8 +2613,7 @@ var exportVariable = (function (exports) {
             this.observerFlush();
         }
         observerFlush() {
-            let records = this.observer.takeRecords();
-            this.observerApply(this.vdom, records);
+            this.observerApply(this.observer.takeRecords());
         }
         observerActive() {
             if (!this.observer) {
@@ -2626,10 +2624,10 @@ var exportVariable = (function (exports) {
                             this.historyStep();
                         }, 100);
                     }
-                    this.observerApply(this.vdom, records);
+                    this.observerApply(records);
                 });
             }
-            this.observer.observe(this.dom, {
+            this.observer.observe(this.editable, {
                 childList: true,
                 subtree: true,
                 attributes: true,
@@ -2639,12 +2637,12 @@ var exportVariable = (function (exports) {
             });
         }
 
-        observerApply(destel, records) {
+        observerApply(records) {
             records = this.filterMutationRecords(records);
-            for (let record of records) {
+            for (const record of records) {
                 switch (record.type) {
                     case 'characterData': {
-                        this.history[this.history.length - 1].dom.push({
+                        this._historySteps[this._historySteps.length - 1].mutations.push({
                             'type': 'characterData',
                             'id': record.target.oid,
                             'text': record.target.textContent,
@@ -2653,7 +2651,7 @@ var exportVariable = (function (exports) {
                         break;
                     }
                     case 'attributes': {
-                        this.history[this.history.length - 1].dom.push({
+                        this._historySteps[this._historySteps.length - 1].mutations.push({
                             'type': 'attributes',
                             'id': record.target.oid,
                             'attributeName': record.attributeName,
@@ -2664,33 +2662,33 @@ var exportVariable = (function (exports) {
                     }
                     case 'childList': {
                         record.addedNodes.forEach(added => {
-                            this.torollback =
-                                this.torollback ||
+                            this._toRollback =
+                                this._toRollback ||
                                 (containsUnremovable(added) && UNREMOVABLE_ROLLBACK_CODE);
-                            let action = {
+                            const mutation = {
                                 'type': 'add',
                             };
                             if (!record.nextSibling && record.target.oid) {
-                                action.append = record.target.oid;
+                                mutation.append = record.target.oid;
                             } else if (record.nextSibling.oid) {
-                                action.before = record.nextSibling.oid;
+                                mutation.before = record.nextSibling.oid;
                             } else if (!record.previousSibling && record.target.oid) {
-                                action.prepend = record.target.oid;
+                                mutation.prepend = record.target.oid;
                             } else if (record.previousSibling.oid) {
-                                action.after = record.previousSibling.oid;
+                                mutation.after = record.previousSibling.oid;
                             } else {
                                 return false;
                             }
-                            this.idSet(added, undefined, this._checkStepUnbreakable);
-                            action.id = added.oid;
-                            action.node = this.serialize(added);
-                            this.history[this.history.length - 1].dom.push(action);
+                            this.idSet(added, this._checkStepUnbreakable);
+                            mutation.id = added.oid;
+                            mutation.node = this.serialize(added);
+                            this._historySteps[this._historySteps.length - 1].mutations.push(mutation);
                         });
-                        record.removedNodes.forEach((removed, index) => {
-                            if (!this.torollback && containsUnremovable(removed)) {
-                                this.torollback = UNREMOVABLE_ROLLBACK_CODE;
+                        record.removedNodes.forEach(removed => {
+                            if (!this._toRollback && containsUnremovable(removed)) {
+                                this._toRollback = UNREMOVABLE_ROLLBACK_CODE;
                             }
-                            this.history[this.history.length - 1].dom.push({
+                            this._historySteps[this._historySteps.length - 1].mutations.push({
                                 'type': 'remove',
                                 'id': removed.oid,
                                 'parentId': record.target.oid,
@@ -2715,7 +2713,7 @@ var exportVariable = (function (exports) {
             for (const record of records) {
                 if (record.type === 'attributes') {
                     // Skip the attributes change on the dom.
-                    if (record.target === this.dom) continue;
+                    if (record.target === this.editable) continue;
 
                     attributeCache.set(record.target, attributeCache.get(record.target) || {});
                     if (
@@ -2735,7 +2733,7 @@ var exportVariable = (function (exports) {
         }
 
         resetHistory() {
-            this.history = [
+            this._historySteps = [
                 {
                     cursor: {
                         // cursor at beginning of step
@@ -2744,10 +2742,11 @@ var exportVariable = (function (exports) {
                         focusNode: undefined,
                         focusOffset: undefined,
                     },
-                    dom: [],
+                    mutations: [],
                     id: undefined,
                 },
             ];
+            this._historyStepsStates = new Map();
         }
         //
         // History
@@ -2757,23 +2756,22 @@ var exportVariable = (function (exports) {
         historyStep(skipRollback = false) {
             this.observerFlush();
             // check that not two unBreakables modified
-            if (this.torollback) {
+            if (this._toRollback) {
                 if (!skipRollback) this.historyRollback();
-                this.torollback = false;
+                this._toRollback = false;
             }
 
             // push history
-            let latest = this.history[this.history.length - 1];
-            if (!latest.dom.length) {
+            const latest = this._historySteps[this._historySteps.length - 1];
+            if (!latest.mutations.length) {
                 return false;
             }
 
             latest.id = (Math.random() * 2 ** 31) | 0; // TODO: replace by uuid4 generator
-            this.historyApply(this.vdom, latest.dom);
             this.historySend(latest);
-            this.history.push({
+            this._historySteps.push({
                 cursor: {},
-                dom: [],
+                mutations: [],
             });
             this._checkStepUnbreakable = true;
             this._recordHistoryCursor();
@@ -2781,40 +2779,40 @@ var exportVariable = (function (exports) {
         }
 
         // apply changes according to some records
-        historyApply(destel, records) {
-            for (let record of records) {
+        historyApply(records) {
+            for (const record of records) {
                 if (record.type === 'characterData') {
-                    let node = this.idFind(destel, record.id);
+                    const node = this.idFind(this.editable, record.id);
                     if (node) {
                         node.textContent = record.text;
                     }
                 } else if (record.type === 'attributes') {
-                    let node = this.idFind(destel, record.id);
+                    const node = this.idFind(this.editable, record.id);
                     if (node) {
                         node.setAttribute(record.attributeName, record.value);
                     }
                 } else if (record.type === 'remove') {
-                    let toremove = this.idFind(destel, record.id, record.parentId);
+                    const toremove = this.idFind(this.editable, record.id, record.parentId);
                     if (toremove) {
                         toremove.remove();
                     }
                 } else if (record.type === 'add') {
-                    let node = this.unserialize(record.node);
-                    let newnode = node.cloneNode(1);
+                    const node = this.unserialize(record.node);
+                    const newnode = node.cloneNode(1);
                     // preserve oid after the clone
                     this.idSet(node, newnode);
 
-                    let destnode = this.idFind(destel, record.node.oid);
+                    const destnode = this.idFind(this.editable, record.node.oid);
                     if (destnode && record.node.parentNode.oid === destnode.parentNode.oid) {
                         // TODO: optimization: remove record from the history to reduce collaboration bandwidth
                         continue;
                     }
-                    if (record.append && this.idFind(destel, record.append)) {
-                        this.idFind(destel, record.append).append(newnode);
-                    } else if (record.before && this.idFind(destel, record.before)) {
-                        this.idFind(destel, record.before).before(newnode);
-                    } else if (record.after && this.idFind(destel, record.after)) {
-                        this.idFind(destel, record.after).after(newnode);
+                    if (record.append && this.idFind(this.editable, record.append)) {
+                        this.idFind(this.editable, record.append).append(newnode);
+                    } else if (record.before && this.idFind(this.editable, record.before)) {
+                        this.idFind(this.editable, record.before).before(newnode);
+                    } else if (record.after && this.idFind(this.editable, record.after)) {
+                        this.idFind(this.editable, record.after).after(newnode);
                     } else {
                         continue;
                     }
@@ -2824,11 +2822,11 @@ var exportVariable = (function (exports) {
 
         // send changes to server
         historyFetch() {
-            if (!this.collaborate) {
+            if (!this._isCollaborativeActive) {
                 return;
             }
             window
-                .fetch(`/history-get/${this.collaborate_last || 0}`, {
+                .fetch(`/history-get/${this._collaborativeLastSynchronisedId || 0}`, {
                     headers: { 'Content-Type': 'application/json;charset=utf-8' },
                     method: 'GET',
                 })
@@ -2844,55 +2842,59 @@ var exportVariable = (function (exports) {
                     }
                     this.observerUnactive();
 
-                    let index = this.history.length;
+                    let index = this._historySteps.length;
                     let updated = false;
-                    while (index && this.history[index - 1].id !== this.collaborate_last) {
+                    while (
+                        index &&
+                        this._historySteps[index - 1].id !== this._collaborativeLastSynchronisedId
+                    ) {
                         index--;
                     }
 
                     for (let residx = 0; residx < result.length; residx++) {
-                        let record = result[residx];
-                        this.collaborate_last = record.id;
-                        if (index < this.history.length && record.id === this.history[index].id) {
+                        const record = result[residx];
+                        this._collaborativeLastSynchronisedId = record.id;
+                        if (
+                            index < this._historySteps.length &&
+                            record.id === this._historySteps[index].id
+                        ) {
                             index++;
                             continue;
                         }
                         updated = true;
 
                         // we are not synched with the server anymore, rollback and replay
-                        while (this.history.length > index) {
+                        while (this._historySteps.length > index) {
                             this.historyRollback();
-                            this.history.pop();
+                            this._historySteps.pop();
                         }
 
                         if (record.id === 1) {
-                            this.dom.innerHTML = '';
-                            this.vdom.innerHTML = '';
+                            this.editable.innerHTML = '';
                         }
-                        this.historyApply(this.dom, record.dom);
-                        this.historyApply(this.vdom, record.dom);
+                        this.historyApply(record.mutations);
 
-                        record.dom = record.id === 1 ? [] : record.dom;
-                        this.history.push(record);
+                        record.mutations = record.id === 1 ? [] : record.mutations;
+                        this._historySteps.push(record);
                         index++;
                     }
                     if (updated) {
-                        this.history.push({
+                        this._historySteps.push({
                             cursor: {},
-                            dom: [],
+                            mutations: [],
                         });
                     }
                     this.observerActive();
                     this.historyFetch();
                 })
-                .catch(err => {
+                .catch(() => {
                     // TODO: change that. currently: if error on fetch, fault back to non collaborative mode.
-                    this.collaborate = false;
+                    this._isCollaborativeActive = false;
                 });
         }
 
         historySend(item) {
-            if (!this.collaborate) {
+            if (!this._isCollaborativeActive) {
                 return;
             }
             window
@@ -2907,18 +2909,18 @@ var exportVariable = (function (exports) {
         }
 
         historyRollback(until = 0) {
-            const hist = this.history[this.history.length - 1];
+            const step = this._historySteps[this._historySteps.length - 1];
             this.observerFlush();
-            this.historyRevert(hist, until);
+            this.historyRevert(step, until);
             this.observerFlush();
-            hist.dom = hist.dom.slice(0, until);
-            this.torollback = false;
+            step.mutations = step.mutations.slice(0, until);
+            this._toRollback = false;
         }
 
         /**
          * Undo a step of the history.
          *
-         * this.undos is a map from it's location (index) in this.history to a state.
+         * this._historyStepsState is a map from it's location (index) in this.history to a state.
          * The state can be on of:
          * undefined: the position has never been undo or redo.
          * 0: The position is considered as a redo of another.
@@ -2927,14 +2929,14 @@ var exportVariable = (function (exports) {
          */
         historyUndo() {
             // The last step is considered an uncommited draft so always revert it.
-            this.historyRevert(this.history[this.history.length - 1]);
+            this.historyRevert(this._historySteps[this._historySteps.length - 1]);
             const pos = this._getNextUndoIndex();
             if (pos >= 0) {
                 // Consider the position consumed.
-                this.undos.set(pos, 2);
-                this.historyRevert(this.history[pos]);
+                this._historyStepsStates.set(pos, 2);
+                this.historyRevert(this._historySteps[pos]);
                 // Consider the last position of the history as an undo.
-                this.undos.set(this.history.length - 1, 1);
+                this._historyStepsStates.set(this._historySteps.length - 1, 1);
                 this.historyStep(true);
                 this.dispatchEvent(new Event('historyUndo'));
             }
@@ -2948,10 +2950,10 @@ var exportVariable = (function (exports) {
         historyRedo() {
             const pos = this._getNextRedoIndex();
             if (pos >= 0) {
-                this.undos.set(pos, 2);
-                this.historyRevert(this.history[pos]);
-                this.undos.set(this.history.length - 1, 0);
-                this.historySetCursor(this.history[pos]);
+                this._historyStepsStates.set(pos, 2);
+                this.historyRevert(this._historySteps[pos]);
+                this._historyStepsStates.set(this._historySteps.length - 1, 0);
+                this.historySetCursor(this._historySteps[pos]);
                 this.historyStep(true);
                 this.dispatchEvent(new Event('historyRedo'));
             }
@@ -2971,38 +2973,41 @@ var exportVariable = (function (exports) {
 
         historyRevert(step, until = 0) {
             // apply dom changes by reverting history steps
-            for (let i = step.dom.length - 1; i >= until; i--) {
-                let action = step.dom[i];
-                if (!action) {
+            for (let i = step.mutations.length - 1; i >= until; i--) {
+                const mutation = step.mutations[i];
+                if (!mutation) {
                     break;
                 }
-                switch (action.type) {
+                switch (mutation.type) {
                     case 'characterData': {
-                        this.idFind(this.dom, action.id).textContent = action.oldValue;
+                        this.idFind(this.editable, mutation.id).textContent = mutation.oldValue;
                         break;
                     }
                     case 'attributes': {
-                        this.idFind(this.dom, action.id).setAttribute(
-                            action.attributeName,
-                            action.oldValue,
+                        this.idFind(this.editable, mutation.id).setAttribute(
+                            mutation.attributeName,
+                            mutation.oldValue,
                         );
                         break;
                     }
                     case 'remove': {
-                        let node = this.unserialize(action.node);
-                        if (action.nextId && this.idFind(this.dom, action.nextId)) {
-                            this.idFind(this.dom, action.nextId).before(node);
-                        } else if (action.previousId && this.idFind(this.dom, action.previousId)) {
-                            this.idFind(this.dom, action.previousId).after(node);
+                        const node = this.unserialize(mutation.node);
+                        if (mutation.nextId && this.idFind(this.editable, mutation.nextId)) {
+                            this.idFind(this.editable, mutation.nextId).before(node);
+                        } else if (
+                            mutation.previousId &&
+                            this.idFind(this.editable, mutation.previousId)
+                        ) {
+                            this.idFind(this.editable, mutation.previousId).after(node);
                         } else {
-                            this.idFind(this.dom, action.parentId).append(node);
+                            this.idFind(this.editable, mutation.parentId).append(node);
                         }
                         break;
                     }
                     case 'add': {
-                        let el = this.idFind(this.dom, action.id);
-                        if (el) {
-                            el.remove();
+                        const node = this.idFind(this.editable, mutation.id);
+                        if (node) {
+                            node.remove();
                         }
                     }
                 }
@@ -3013,9 +3018,9 @@ var exportVariable = (function (exports) {
 
         historySetCursor(step) {
             if (step.cursor && step.cursor.anchorNode) {
-                const anchorNode = this.idFind(this.dom, step.cursor.anchorNode);
+                const anchorNode = this.idFind(this.editable, step.cursor.anchorNode);
                 const focusNode = step.cursor.focusNode
-                    ? this.idFind(this.dom, step.cursor.focusNode)
+                    ? this.idFind(this.editable, step.cursor.focusNode)
                     : anchorNode;
                 if (anchorNode) {
                     setCursor(
@@ -3031,7 +3036,8 @@ var exportVariable = (function (exports) {
             }
         }
         unbreakableStepUnactive() {
-            this.torollback = this.torollback === UNBREAKABLE_ROLLBACK_CODE ? false : this.torollback;
+            this._toRollback =
+                this._toRollback === UNBREAKABLE_ROLLBACK_CODE ? false : this._toRollback;
             this._checkStepUnbreakable = false;
         }
 
@@ -3049,20 +3055,27 @@ var exportVariable = (function (exports) {
          * @param {string} method
          * @returns {?}
          */
-        execCommand(method) {
+        execCommand(...args) {
             this._computeHistoryCursor();
-            return this._applyCommand(...arguments);
+            return this._applyCommand(...args);
         }
 
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
 
+        _removeDomListener() {
+            for (const [element, eventName, boundCallback] of this._domListeners) {
+                element.removeEventListener(eventName, boundCallback);
+            }
+            this._domListeners = [];
+        }
+
         // EDITOR COMMANDS
         // ===============
 
         deleteRange(sel) {
-            let range = getDeepRange(this.dom, {
+            let range = getDeepRange(this.editable, {
                 sel,
                 splitText: true,
                 select: true,
@@ -3073,11 +3086,11 @@ var exportVariable = (function (exports) {
             let end = range.endContainer;
             // Let the DOM split and delete the range.
             const doJoin = closestBlock(start) !== closestBlock(range.commonAncestorContainer);
-            let next = nextLeaf(end, this.dom);
+            let next = nextLeaf(end, this.editable);
             const splitEndTd = closestElement(end, 'td') && end.nextSibling;
             const contents = range.extractContents();
             setCursor(start, nodeSize(start));
-            range = getDeepRange(this.dom, { sel });
+            range = getDeepRange(this.editable, { sel });
             // Restore unremovables removed by extractContents.
             [...contents.querySelectorAll('*')].filter(isUnremovable).forEach(n => {
                 closestBlock(range.endContainer).after(n);
@@ -3086,7 +3099,7 @@ var exportVariable = (function (exports) {
             // Restore table contents removed by extractContents.
             const tds = [...contents.querySelectorAll('td')].filter(n => !closestElement(n, 'table'));
             let currentFragmentTr, currentTr;
-            let currentTd = closestElement(range.endContainer, 'td');
+            const currentTd = closestElement(range.endContainer, 'td');
             tds.forEach((td, i) => {
                 const parentFragmentTr = closestElement(td, 'tr');
                 // Skip the first and the last partially selected TD.
@@ -3102,12 +3115,12 @@ var exportVariable = (function (exports) {
                 td.textContent = '';
             });
             this.observerFlush();
-            this.torollback = false; // Errors caught with observerFlush were already handled.
+            this._toRollback = false; // Errors caught with observerFlush were already handled.
             // If the end container was fully selected, extractContents may have
             // emptied it without removing it. Ensure it's gone.
             while (
                 end &&
-                end !== this.dom &&
+                end !== this.editable &&
                 !end.contains(range.endContainer) &&
                 !isVisible(end, false)
             ) {
@@ -3116,7 +3129,7 @@ var exportVariable = (function (exports) {
                 end = parent;
             }
             // Same with the start container
-            while (start && start !== this.dom && !isVisible(start)) {
+            while (start && start !== this.editable && !isVisible(start)) {
                 const parent = start.parentNode;
                 start.remove();
                 start = parent;
@@ -3128,7 +3141,7 @@ var exportVariable = (function (exports) {
             fillEmpty(closestBlock(range.endContainer));
             // Ensure trailing space remains visible.
             const joinWith = range.endContainer;
-            let oldText = joinWith.textContent;
+            const oldText = joinWith.textContent;
             if (doJoin && oldText.endsWith(' ')) {
                 joinWith.textContent = oldText.replace(/ $/, '\u00A0');
             }
@@ -3143,12 +3156,12 @@ var exportVariable = (function (exports) {
                 this.observerFlush();
                 const res = this._protect(() => {
                     next.oDeleteBackward();
-                    if (!this.dom.contains(joinWith)) {
-                        this.torollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
+                    if (!this.editable.contains(joinWith)) {
+                        this._toRollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
                     } else {
                         next = firstChild(next);
                     }
-                }, this.history[this.history.length - 1].dom.length);
+                }, this._historySteps[this._historySteps.length - 1].mutations.length);
                 if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
                     restore();
                     break;
@@ -3166,19 +3179,19 @@ var exportVariable = (function (exports) {
          *
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {string} mode 'color' or 'backgroundColor'
-         * @param {Node} [target]
+         * @param {Element} [element]
          */
-        applyColor(color, mode, target) {
-            if (target) {
-                this._colorElement(target, color, mode);
+        applyColor(color, mode, element) {
+            if (element) {
+                this._colorElement(element, color, mode);
                 return;
             }
-            const range = getDeepRange(this.dom, { splitText: true, select: true });
+            const range = getDeepRange(this.editable, { splitText: true, select: true });
             if (!range) return;
             const restoreCursor = preserveCursor(this.document);
             // Get the <font> nodes to color
-            const selectedNodes = getSelectedNodes(this.dom);
-            let fonts = selectedNodes.flatMap(node => {
+            const selectedNodes = getSelectedNodes(this.editable);
+            const fonts = selectedNodes.flatMap(node => {
                 let font = closestElement(node, 'font');
                 const children = font && [...font.childNodes];
                 if (font && font.nodeName === 'FONT') {
@@ -3228,7 +3241,7 @@ var exportVariable = (function (exports) {
         }
 
         updateColorpickerLabels(params = {}) {
-            let foreColor = params.foreColor || rgbToHex(document.queryCommandValue('foreColor'));
+            const foreColor = params.foreColor || rgbToHex(document.queryCommandValue('foreColor'));
             this.toolbar.style.setProperty('--fore-color', foreColor);
             const foreColorInput = this.toolbar.querySelector('#foreColor input');
             if (foreColorInput) {
@@ -3302,7 +3315,7 @@ var exportVariable = (function (exports) {
          * Applies a css or class color (fore- or background-) to an element.
          * Replace the color that was already there if any.
          *
-         * @param {Node} element
+         * @param {Element} element
          * @param {string} color hexadecimal or bg-name/text-name class
          * @param {string} mode 'color' or 'backgroundColor'
          */
@@ -3323,7 +3336,7 @@ var exportVariable = (function (exports) {
          * Returns true if the given element has a visible color (fore- or
          * -background depending on the given mode).
          *
-         * @param {Node} element
+         * @param {Element} element
          * @param {string} mode 'color' or 'backgroundColor'
          * @returns {boolean}
          */
@@ -3352,12 +3365,12 @@ var exportVariable = (function (exports) {
             if (res) {
                 setCursor(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
                 const node = findNode(closestPath(sel.focusNode), node => node.tagName === 'A');
-                let pos = [node.parentElement, childNodeIndex(node) + 1];
+                const pos = [node.parentElement, childNodeIndex(node) + 1];
                 setCursor(...pos, ...pos, false);
             }
         }
 
-        _unlink(offset, content) {
+        _unlink() {
             const sel = this.document.defaultView.getSelection();
             // we need to remove the contentEditable isolation of links
             // before we apply the unlink, otherwise the command is not performed
@@ -3379,11 +3392,11 @@ var exportVariable = (function (exports) {
         }
 
         _indentList(mode = 'indent') {
-            let [pos1, pos2] = getCursors(this.document);
-            let end = leftDeepFirstPath(...pos1).next().value;
-            let li = new Set();
-            for (let node of leftDeepFirstPath(...pos2)) {
-                let cli = closestBlock(node);
+            const [pos1, pos2] = getCursors(this.document);
+            const end = leftDeepFirstPath(...pos1).next().value;
+            const li = new Set();
+            for (const node of leftDeepFirstPath(...pos2)) {
+                const cli = closestBlock(node);
                 if (
                     cli &&
                     cli.tagName == 'LI' &&
@@ -3394,7 +3407,7 @@ var exportVariable = (function (exports) {
                 }
                 if (node == end) break;
             }
-            for (let node of li) {
+            for (const node of li) {
                 if (mode == 'indent') {
                     node.oTab(0);
                 } else {
@@ -3405,20 +3418,20 @@ var exportVariable = (function (exports) {
         }
 
         _toggleList(mode) {
-            let li = new Set();
-            let blocks = new Set();
+            const li = new Set();
+            const blocks = new Set();
 
-            for (let node of getTraversedNodes(this.dom)) {
-                let block = closestBlock(node);
+            for (const node of getTraversedNodes(this.editable)) {
+                const block = closestBlock(node);
                 if (!['OL', 'UL'].includes(block.tagName)) {
-                    let ublock = block.closest('ol, ul');
+                    const ublock = block.closest('ol, ul');
                     ublock && getListMode(ublock) == mode ? li.add(block) : blocks.add(block);
                 }
             }
 
             let target = [...(blocks.size ? blocks : li)];
             while (target.length) {
-                let node = target.pop();
+                const node = target.pop();
                 // only apply one li per ul
                 if (!node.oToggleList(0, mode)) {
                     target = target.filter(
@@ -3431,10 +3444,10 @@ var exportVariable = (function (exports) {
         _align(mode) {
             const sel = this.document.defaultView.getSelection();
             const visitedBlocks = new Set();
-            const traversedNode = getTraversedNodes(this.dom);
+            const traversedNode = getTraversedNodes(this.editable);
             for (const node of traversedNode) {
                 if (isContentTextNode(node) && isVisible(node)) {
-                    let block = closestBlock(node);
+                    const block = closestBlock(node);
                     if (!visitedBlocks.has(block)) {
                         const hasModifier = getComputedStyle(block).textAlign === mode;
                         if (!hasModifier && block.isContentEditable) {
@@ -3448,7 +3461,7 @@ var exportVariable = (function (exports) {
         _bold() {
             const selection = this.document.getSelection();
             if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
-            const isAlreadyBold = !getTraversedNodes(this.dom)
+            const isAlreadyBold = !getTraversedNodes(this.editable)
                 .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length)
                 .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) < 700);
             this._applyInlineStyle(el => {
@@ -3480,7 +3493,7 @@ var exportVariable = (function (exports) {
             const { startContainer, startOffset, endContainer, endOffset } = sel.getRangeAt(0);
             const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
             const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
-            const selectedTextNodes = getTraversedNodes(this.dom).filter(node =>
+            const selectedTextNodes = getTraversedNodes(this.editable).filter(node =>
                 isContentTextNode(node),
             );
             for (const textNode of selectedTextNodes) {
@@ -3545,7 +3558,7 @@ var exportVariable = (function (exports) {
          * @returns {?}
          */
         _applyRawCommand(method, ...args) {
-            let sel = this.document.defaultView.getSelection();
+            const sel = this.document.defaultView.getSelection();
             if (!sel.isCollapsed && BACKSPACE_FIRST_COMMANDS.includes(method)) {
                 this.deleteRange(sel);
                 if (BACKSPACE_ONLY_COMMANDS.includes(method)) {
@@ -3596,9 +3609,9 @@ var exportVariable = (function (exports) {
          * @param {string} method
          * @returns {?}
          */
-        _applyCommand(method) {
+        _applyCommand(...args) {
             this._recordHistoryCursor(true);
-            const result = this._protect(() => this._applyRawCommand(...arguments));
+            const result = this._protect(() => this._applyRawCommand(...args));
             this.sanitize();
             this.historyStep();
             return result;
@@ -3611,10 +3624,10 @@ var exportVariable = (function (exports) {
          */
         _protect(callback, rollbackCounter) {
             try {
-                let result = callback.call(this);
+                const result = callback.call(this);
                 this.observerFlush();
-                if (this.torollback) {
-                    const torollbackCode = this.torollback;
+                if (this._toRollback) {
+                    const torollbackCode = this._toRollback;
                     this.historyRollback(rollbackCounter);
                     return torollbackCode; // UNBREAKABLE_ROLLBACK_CODE || UNREMOVABLE_ROLLBACK_CODE
                 } else {
@@ -3631,7 +3644,7 @@ var exportVariable = (function (exports) {
         }
 
         _activateContenteditable() {
-            this.dom.setAttribute('contenteditable', this.options.isRootEditable);
+            this.editable.setAttribute('contenteditable', this.options.isRootEditable);
 
             for (const node of this.options.getContentEditableAreas()) {
                 if (!node.isContentEditable) {
@@ -3641,7 +3654,7 @@ var exportVariable = (function (exports) {
         }
         _stopContenteditable() {
             if (this.options.isRootEditable) {
-                this.dom.setAttribute('contenteditable', !this.options.isRootEditable);
+                this.editable.setAttribute('contenteditable', !this.options.isRootEditable);
             }
             for (const node of this.options.getContentEditableAreas()) {
                 if (node.getAttribute('contenteditable') === 'true') {
@@ -3675,7 +3688,7 @@ var exportVariable = (function (exports) {
          * @param {boolean} [useCache=false]
          */
         _recordHistoryCursor(useCache = false) {
-            const latest = this.history[this.history.length - 1];
+            const latest = this._historySteps[this._historySteps.length - 1];
             latest.cursor =
                 (useCache ? this._latestComputedCursor : this._computeHistoryCursor()) || {};
         }
@@ -3684,9 +3697,9 @@ var exportVariable = (function (exports) {
          * Return -1 if no undo index can be found.
          */
         _getNextUndoIndex() {
-            let index = this.history.length - 2;
+            let index = this._historySteps.length - 2;
             // go back to first step that can be undoed (0 or undefined)
-            while (this.undos.get(index)) {
+            while (this._historyStepsStates.get(index)) {
                 index--;
             }
             return index;
@@ -3696,16 +3709,16 @@ var exportVariable = (function (exports) {
          * Return -1 if no redo index can be found.
          */
         _getNextRedoIndex() {
-            let pos = this.history.length - 2;
+            let pos = this._historySteps.length - 2;
             // We cannot redo more than what is consumed.
             // Check if we have no more 2 than 0 until we get to a 1
             let totalConsumed = 0;
-            while (this.undos.has(pos) && this.undos.get(pos) !== 1) {
-                // here this.undos.get(pos) can only be 2 (consumed) or 0 (undoed).
-                totalConsumed += this.undos.get(pos) === 2 ? 1 : -1;
+            while (this._historyStepsStates.has(pos) && this._historyStepsStates.get(pos) !== 1) {
+                // here ._historyStepsState.get(pos) can only be 2 (consumed) or 0 (undoed).
+                totalConsumed += this._historyStepsStates.get(pos) === 2 ? 1 : -1;
                 pos--;
             }
-            const canRedo = this.undos.get(pos) === 1 && totalConsumed <= 0;
+            const canRedo = this._historyStepsStates.get(pos) === 1 && totalConsumed <= 0;
             return canRedo ? pos : -1;
         }
 
@@ -3722,7 +3735,7 @@ var exportVariable = (function (exports) {
                 this.toolbar.style.visibility = 'visible';
             }
 
-            let sel = this.document.defaultView.getSelection();
+            const sel = this.document.defaultView.getSelection();
             if (!sel.anchorNode) {
                 show = false;
             }
@@ -3733,7 +3746,7 @@ var exportVariable = (function (exports) {
                 return;
             }
             const paragraphDropdownButton = this.toolbar.querySelector('#paragraphDropdownButton');
-            for (let commandState of [
+            for (const commandState of [
                 'bold',
                 'italic',
                 'underline',
@@ -3769,7 +3782,7 @@ var exportVariable = (function (exports) {
                     : 'none';
             }
             this.updateColorpickerLabels();
-            let block = closestBlock(sel.anchorNode);
+            const block = closestBlock(sel.anchorNode);
             for (const [style, tag, isList] of [
                 ['paragraph', 'P', false],
                 ['heading1', 'H1', false],
@@ -3807,7 +3820,7 @@ var exportVariable = (function (exports) {
             const OFFSET = 10;
             let isBottom = false;
             this.toolbar.classList.toggle('toolbar-bottom', false);
-            this.toolbar.style.maxWidth = this.dom.offsetWidth - OFFSET * 2 + 'px';
+            this.toolbar.style.maxWidth = this.editable.offsetWidth - OFFSET * 2 + 'px';
             const sel = this.document.defaultView.getSelection();
             const range = sel.getRangeAt(0);
             const isSelForward =
@@ -3815,7 +3828,7 @@ var exportVariable = (function (exports) {
             const selRect = range.getBoundingClientRect();
             const toolbarWidth = this.toolbar.offsetWidth;
             const toolbarHeight = this.toolbar.offsetHeight;
-            const editorRect = this.dom.getBoundingClientRect();
+            const editorRect = this.editable.getBoundingClientRect();
             const editorLeftPos = Math.max(0, editorRect.left);
             const editorTopPos = Math.max(0, editorRect.top);
             const scrollX = this.document.defaultView.window.scrollX;
@@ -3826,7 +3839,7 @@ var exportVariable = (function (exports) {
             // Ensure the toolbar doesn't overflow the editor on the left.
             left = Math.max(editorLeftPos + OFFSET, left);
             // Ensure the toolbar doesn't overflow the editor on the right.
-            left = Math.min(editorLeftPos + this.dom.offsetWidth - OFFSET - toolbarWidth, left);
+            left = Math.min(editorLeftPos + this.editable.offsetWidth - OFFSET - toolbarWidth, left);
             this.toolbar.style.left = scrollX + left + 'px';
 
             // Get top position.
@@ -3838,7 +3851,7 @@ var exportVariable = (function (exports) {
                 isBottom = true;
             }
             // Ensure the toolbar doesn't overflow the editor on the bottom.
-            top = Math.min(editorTopPos + this.dom.offsetHeight - OFFSET - toolbarHeight, top);
+            top = Math.min(editorTopPos + this.editable.offsetHeight - OFFSET - toolbarHeight, top);
             this.toolbar.style.top = scrollY + top + 'px';
 
             // Position the arrow.
@@ -3870,7 +3883,7 @@ var exportVariable = (function (exports) {
             // Record the cursor position that was computed on keydown or before
             // contentEditable execCommand (whatever preceded the 'input' event)
             this._recordHistoryCursor(true);
-            const cursor = this.history[this.history.length - 1].cursor;
+            const cursor = this._historySteps[this._historySteps.length - 1].cursor;
             const { focusOffset, focusNode, anchorNode, anchorOffset } = cursor || {};
             const wasCollapsed = !cursor || (focusNode === anchorNode && focusOffset === anchorOffset);
             if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
@@ -3919,13 +3932,13 @@ var exportVariable = (function (exports) {
                     this.deleteRange(selection);
                 }
             }
-            if (ev.keyCode === 13) {
+            if (ev.key === 'Enter') {
                 // Enter
                 ev.preventDefault();
                 if (ev.shiftKey || this._applyCommand('oEnter') === UNBREAKABLE_ROLLBACK_CODE) {
                     this._applyCommand('oShiftEnter');
                 }
-            } else if (ev.keyCode === 8 && !ev.ctrlKey && !ev.metaKey) {
+            } else if (ev.key === 'Backspace' && !ev.ctrlKey && !ev.metaKey) {
                 // backspace
                 // We need to hijack it because firefox doesn't trigger a
                 // deleteBackward input event with a collapsed cursor in front of a
@@ -3935,7 +3948,7 @@ var exportVariable = (function (exports) {
                     ev.preventDefault();
                     this._applyCommand('oDeleteBackward');
                 }
-            } else if (ev.keyCode === 9) {
+            } else if (ev.key === 'Tab') {
                 // Tab
                 const sel = this.document.getSelection();
                 const closestTag = (closestElement(sel.anchorNode, 'li, table') || {}).tagName;
@@ -3966,26 +3979,27 @@ var exportVariable = (function (exports) {
             // Compute the current cursor on selectionchange but do not record it. Leave
             // that to the command execution or the 'input' event handler.
             this._computeHistoryCursor();
-            const sel = this.document.defaultView.getSelection();
-            this._updateToolbar(!sel.isCollapsed);
-            if (this._currentMouseState === 'mousedown') {
-                // _fixFontAwesomeSelection will be called when the mouseUp event is triggered
-                this.selectionChanged = true;
-            } else {
+
+            const selection = this.document.defaultView.getSelection();
+            this._updateToolbar(!selection.isCollapsed);
+
+            if (this._currentMouseState === 'mouseup') {
                 this._fixFontAwesomeSelection();
             }
+
             // When the browser set the selection inside a node that is
             // contenteditable=false, it breaks the edition upon keystroke. Move the
             // selection so that it remain in an editable area. An example of this
             // case happend when the selection goes into a fontawesome node.
-            const startContainer = sel.rangeCount && closestElement(sel.getRangeAt(0).startContainer);
+            const startContainer =
+                selection.rangeCount && closestElement(selection.getRangeAt(0).startContainer);
             const contenteditableFalseNode =
                 startContainer &&
                 !startContainer.isContentEditable &&
-                ancestors(startContainer).includes(this.dom) &&
+                ancestors(startContainer).includes(this.editable) &&
                 startContainer.closest('[contenteditable=false]');
             if (contenteditableFalseNode) {
-                sel.removeAllRanges();
+                selection.removeAllRanges();
                 const range = new Range();
                 if (contenteditableFalseNode.previousSibling) {
                     range.setStart(
@@ -4000,25 +4014,78 @@ var exportVariable = (function (exports) {
                     range.setStart(contenteditableFalseNode.parentElement, 0);
                     range.setEnd(contenteditableFalseNode.parentElement, 0);
                 }
-                sel.addRange(range);
+                selection.addRange(range);
             }
         }
 
-        _updateMouseState(ev) {
+        _onMouseup(ev) {
             this._currentMouseState = ev.type;
-            if (ev.type === 'mouseup' && this.selectionChanged) {
-                this._fixFontAwesomeSelection();
-            }
+
+            this._fixFontAwesomeSelection();
         }
 
-        _onClick(ev) {
-            let node = ev.target;
+        _onMouseDown(ev) {
+            this._currentMouseState = ev.type;
+
+            // When selecting all the text within a link then triggering delete or
+            // inserting a character, the cursor and insertion is outside the link.
+            // To avoid this problem, we make all editable zone become uneditable
+            // except the link. Then when cliking outside the link, reset the
+            // editable zones.
+            this.automaticStepSkipStack();
+            const link = closestElement(ev.target, 'a');
+            if (link) {
+                this._stopContenteditable();
+                link.setAttribute('contenteditable', 'true');
+            } else {
+                this._activateContenteditable();
+            }
+
+            const node = ev.target;
             // handle checkbox lists
             if (node.tagName == 'LI' && getListMode(node.parentElement) == 'CL') {
                 if (ev.offsetX < 0) {
                     toggleClass(node, 'o_checked');
                     ev.preventDefault();
                 }
+            }
+        }
+
+        _onDocumentKeydown(ev) {
+            const canUndoRedo = !['INPUT', 'TEXTAREA'].includes(this.document.activeElement.tagName);
+
+            if (this.options.controlHistoryFromDocument && canUndoRedo) {
+                if (isUndo(ev) && canUndoRedo) {
+                    ev.preventDefault();
+                    this.historyUndo();
+                } else if (isRedo(ev) && canUndoRedo) {
+                    ev.preventDefault();
+                    this.historyRedo();
+                }
+            } else {
+                if (isRedo(ev) || isUndo(ev)) {
+                    this._onKeyupResetContenteditableNodes.push(
+                        ...this.editable.querySelectorAll('[contenteditable=true]'),
+                    );
+                    if (this.editable.getAttribute('contenteditable') === 'true') {
+                        this._onKeyupResetContenteditableNodes.push(this.editable);
+                    }
+
+                    for (const node of this._onKeyupResetContenteditableNodes) {
+                        this.automaticStepSkipStack();
+                        node.setAttribute('contenteditable', false);
+                    }
+                }
+            }
+        }
+
+        _onDocumentKeyup() {
+            if (this._onKeyupResetContenteditableNodes.length) {
+                for (const node of this._onKeyupResetContenteditableNodes) {
+                    this.automaticStepSkipStack();
+                    node.setAttribute('contenteditable', true);
+                }
+                this._onKeyupResetContenteditableNodes = [];
             }
         }
 
@@ -4040,7 +4107,7 @@ var exportVariable = (function (exports) {
             let isInEditor = false;
             let ancestor = sel.anchorNode;
             while (ancestor && !isInEditor) {
-                if (ancestor === this.dom) {
+                if (ancestor === this.editable) {
                     isInEditor = true;
                 }
                 ancestor = ancestor.parentNode;
@@ -4117,7 +4184,9 @@ var exportVariable = (function (exports) {
                     this.historyRedo();
                 } else {
                     const restoreCursor = preserveCursor(this.document);
-                    const selectedBlocks = [...new Set(getTraversedNodes(this.dom).map(closestBlock))];
+                    const selectedBlocks = [
+                        ...new Set(getTraversedNodes(this.editable).map(closestBlock)),
+                    ];
                     for (const selectedBlock of selectedBlocks) {
                         const block = closestBlock(selectedBlock);
                         if (
@@ -4247,7 +4316,7 @@ var exportVariable = (function (exports) {
             this._addColumn('after');
         }
         _addColumn(beforeOrAfter) {
-            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding td.
+            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
             const c = getInSelection(this.document, 'td');
             if (!c) return;
             const i = [...closestElement(c, 'tr').querySelectorAll('th, td')].findIndex(td => td === c);
@@ -4261,7 +4330,7 @@ var exportVariable = (function (exports) {
             this._addRow('after');
         }
         _addRow(beforeOrAfter) {
-            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding tr.
+            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
             const row = getInSelection(this.document, 'tr');
             if (!row) return;
             const newRow = document.createElement('tr');
@@ -4270,7 +4339,7 @@ var exportVariable = (function (exports) {
             row[beforeOrAfter](newRow);
         }
         _removeColumn() {
-            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding td.
+            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding td.
             const cell = getInSelection(this.document, 'td');
             if (!cell) return;
             const table = closestElement(cell, 'table');
@@ -4281,7 +4350,7 @@ var exportVariable = (function (exports) {
             siblingCell ? setCursor(...startPos(siblingCell)) : this._deleteTable(table);
         }
         _removeRow() {
-            getDeepRange(this.dom, { select: true }); // Ensure deep range for finding tr.
+            getDeepRange(this.editable, { select: true }); // Ensure deep range for finding tr.
             const row = getInSelection(this.document, 'tr');
             if (!row) return;
             const table = closestElement(row, 'table');
@@ -4326,7 +4395,7 @@ var exportVariable = (function (exports) {
             const selection = this.document.defaultView.getSelection();
             if (
                 selection.isCollapsed ||
-                (selection.anchorNode && !ancestors(selection.anchorNode).includes(this.dom))
+                (selection.anchorNode && !ancestors(selection.anchorNode).includes(this.editable))
             )
                 return;
             let shouldUpdateSelection = false;
