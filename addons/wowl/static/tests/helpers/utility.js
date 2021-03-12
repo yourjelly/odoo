@@ -13,7 +13,7 @@ import { viewService } from "../../src/views/view_service";
 import { viewRegistry } from "../../src/views/view_registry";
 import {
   fakeTitleService,
-  makeFakeDeviceService,
+  makeFakeUIService,
   makeFakeLocalizationService,
   makeFakeRouterService,
   makeFakeUserService,
@@ -70,8 +70,8 @@ export function makeTestViewRegistry() {
 
 function makeTestConfig(config = {}) {
   const serviceRegistry = config.serviceRegistry || new Registry();
-  if (!serviceRegistry.contains("device")) {
-    serviceRegistry.add("device", makeFakeDeviceService());
+  if (!serviceRegistry.contains("ui")) {
+    serviceRegistry.add("ui", makeFakeUIService());
   }
   if (!serviceRegistry.contains("localization")) {
     serviceRegistry.add("localization", makeFakeLocalizationService());
