@@ -37,7 +37,8 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         this.consumed_tours = (consumed_tours || []).filter(tourName => {
             return !local_storage.getItem(get_debugging_key(tourName));
         });
-        this.disabled = disabled;
+        // this.disabled = disabled;
+        this.disabled = false;
         this.running_tour = local_storage.getItem(get_running_key());
         this.running_step_delay = parseInt(local_storage.getItem(get_running_delay_key()), 10) || 0;
         this.edition = (_.last(session.server_version_info) === 'e') ? 'enterprise' : 'community';
