@@ -1315,6 +1315,9 @@ var SnippetsMenu = Widget.extend({
                     $redoButton.attr('disabled', !this.options.wysiwyg.odooEditor.historyCanRedo());
                 };
                 this.options.wysiwyg.odooEditor.addEventListener('historyStep', updateHistoryButtons);
+                this.options.wysiwyg.odooEditor.addEventListener('observerApply', () => {
+                    $(this.options.wysiwyg.odooEditor.editable).trigger('content_changed');
+                });
             }
 
             this.$('[data-title]').tooltip({
