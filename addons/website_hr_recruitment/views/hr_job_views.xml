@@ -26,7 +26,7 @@
         </field>
     </record>
 
-    <record id="view_hr_job_kanban_referal_extends" model="ir.ui.view"> 
+    <record id="view_hr_job_kanban_referal_extends" model="ir.ui.view">
         <field name="model">hr.job</field>
         <field name="name">hr.job.view.kanban</field>
         <field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
