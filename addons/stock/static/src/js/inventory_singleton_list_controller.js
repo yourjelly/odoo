@@ -17,6 +17,28 @@ var _t = core._t;
  */
 
 var SingletonListController = InventoryReportListController.extend({
+    buttons_template: 'StockQuant.Buttons',
+
+    // -------------------------------------------------------------------------
+    // Public
+    // -------------------------------------------------------------------------
+    /**
+     * @override
+     */
+    renderButtons: function ($node) {
+        this._super.apply(this, arguments);
+        if (this.context.no_inventory_buttons) {
+            this.$buttons.find('button.o_button_apply_inventory').hide();
+            this.$buttons.find('button.o_button_request_count_inventory').hide();
+        }
+        this.$buttons.on('click', '.o_button_apply_inventory', this._onApplyInventory.bind(this));
+        this.$buttons.on('click', '.o_button_request_count_inventory', this._onRequestCountInventory.bind(this));
+    },
+
+    // -------------------------------------------------------------------------
+    // Private
+    // -------------------------------------------------------------------------
+
     /**
      * @override
      * @return {Promise} rejected when update the list because we don't want
@@ -62,7 +84,34 @@ var SingletonListController = InventoryReportListController.extend({
         }
     },
 
+    // -------------------------------------------------------------------------
+    // Handlers
+    // -------------------------------------------------------------------------
+
+    _onApplyInventory: function (ev) {
+        var self = this;
+        var ids = this.getSelectedIds();
+        if (! ids.length) {
+            var modified_records = this.initialState.data.filter(record => record.data.inventory_diff_quantity != 0)
+            ids = modified_records.map(record => record.data.id)
+        }
+        if (ids.length) {
+            return this._rpc({
+                model: 'stock.quant',
+                method: 'action_apply_inventory',
+                args: [ids],
+                context: this.context,
+            }).then((result) => {
+                if (! result) {
+                    return self.do_action('stock.action_inventory_tree');
+                }
+                return self.do_action(result);
+            })
+        }
+    },
+
     /**
+     * 
      * @private
      * @param {OdooEvent} ev
      */
@@ -82,6 +131,21 @@ var SingletonListController = InventoryReportListController.extend({
         }).then(function () {
             self._enableButtons();
         }).guardedCatch(this._enableButtons.bind(this));
+    },
+
+    _onRequestCountInventory: function (ev) {
+        var ids = this.getSelectedIds();
+        var self = this;
+        if ( ids.length ) {
+            return this._rpc({
+                model: 'stock.quant',
+                method: 'write',
+                args: [ids, { inventory_date: new moment().utc().format() }],
+                context: this.context,
+            }).then((result) => {
+                return self.do_action('stock.action_inventory_tree');
+            })
+        }
     },
 });
 
