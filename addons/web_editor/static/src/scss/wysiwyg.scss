@@ -31,7 +31,7 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 .oe-toolbar {
     padding-bottom: 0;
     border-bottom: $o-we-border-width solid $o-we-border-color;
-    background-color: transparent;
+    background-color: $o-we-bg;
     color: $o-we-color;
     font-family: $o-we-font-family;
 
