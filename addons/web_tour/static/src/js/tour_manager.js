@@ -199,6 +199,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         local_storage.setItem(get_running_key(), this.running_tour);
         local_storage.setItem(get_running_delay_key(), this.running_step_delay);
 
+        debugger
         this._deactivate_tip(this.active_tooltips[tour_name]);
 
         tour.current_step = 0;
@@ -264,6 +265,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * @returns {boolean} true if a tip was found and activated/updated
      */
     _check_for_tooltip: function (tip, tour_name) {
+        console.warn('_check_for_tooltip', tip, tour_name)
         if (tip === undefined) {
             return true;
         }
@@ -350,6 +352,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
      * @private
      */
     _activate_tip: function(tip, tour_name, $anchor, $alt_trigger) {
+        console.warn('activate_tip', tip, tour_name, $anchor)
         var tour = this.tours[tour_name];
         var tip_info = tip;
         if (tour.skip_link) {
@@ -369,7 +372,9 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         tip.widget.attach_to($anchor, $alt_trigger).then(this._to_next_running_step.bind(this, tip, tour_name));
     },
     _deactivate_tip: function(tip) {
+        console.warn('deactivate_tip');
         if (tip && tip.widget) {
+            console.warn('deactivate_tip, in if');
             tip.widget.destroy();
             delete tip.widget;
         }
