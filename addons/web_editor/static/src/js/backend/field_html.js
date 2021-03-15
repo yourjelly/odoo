@@ -53,7 +53,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }
         if (this.nodeOptions.cssEdit || this.nodeOptions['style-inline']) {
-            this.needShadow = true;
             this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit || 'web_editor.assets_edit_html_field');
         }
     },
