@@ -161,7 +161,7 @@
             </div>
 
             <div id="link" class="btn-group">
-                <div id="media-modal" title="Insert or edit media" class="fa fa-file-image-o fa-fw btn editor-ignore"></div>
+                <div id="media-insert" title="Insert media" class="fa fa-file-image-o fa-fw btn editor-ignore"></div>
                 <div id="create-link" title="Insert or edit link" class="fa fa-link fa-fw btn editor-ignore"></div>
                 <div id="unlink" title="Remove link" class="fa fa-unlink fa-fw btn"></div>
                 <a id="media-description" href="#" title="Edit media description" class="btn editor-ignore">Description</a>
@@ -200,6 +200,7 @@
                 <div id="image-crop" title="Crop Image" class="btn fa fa-crop editor-ignore"></div>
                 <div id="image-transform" class="btn editor-ignore fa fa-object-ungroup"
                     title="Transform the picture (click twice to reset transformation)"></div>
+                <div id="media-replace" title="Replace media" class="btn editor-ignore">Replace</div>
                 <div id="image-delete" class="btn editor-ignore fa fa-trash-o" title="Remove (DELETE)"></div>
             </div>
 
