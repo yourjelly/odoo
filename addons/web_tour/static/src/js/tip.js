@@ -131,8 +131,12 @@ var Tip = Widget.extend({
                 $el.removeClass("o_tooltip_parent");
             }
         };
-        _removeParentClass(this.$ideal_location);
-        _removeParentClass(this.$furtherIdealLocation);
+        if (this.$el && this.$ideal_location) {
+            _removeParentClass(this.$ideal_location);
+        }
+        if (this.$el && this.$furtherIdealLocation) {
+            _removeParentClass(this.$furtherIdealLocation);
+        }
 
         return this._super.apply(this, arguments);
     },
