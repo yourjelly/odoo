@@ -608,6 +608,10 @@ body.editor_enable.editor_has_snippets {
                 grid-column-end: span 3;
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));
+
+                #media-replace {
+                    grid-column-end: span 2;
+                }
             }
             #fa-resize {
                 grid-column-end: span 5;
