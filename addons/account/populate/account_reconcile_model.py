@@ -15,7 +15,7 @@ class AccountReconcileModel(models.Model):
 
     _populate_sizes = {
         'small': 5,
-        'medium': 100,
+        'medium': 10,
         'large': 1000,
     }
 
@@ -44,7 +44,7 @@ class AccountReconcileModelLine(models.Model):
 
     _populate_sizes = {
         'small': 10,
-        'medium': 200,
+        'medium': 20,
         'large': 2000,
     }
 
