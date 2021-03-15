@@ -8,7 +8,7 @@
                     <div class="buttons">
                         <button t-if="showNewTicketButton" class="highlight"
                             t-on-click="env.actionHandler({ name: 'actionCreateNewOrder' })">New Order</button>
-                        <button class="discard" t-on-click="env.actionHandler({ name: 'actionToggleScreen', args: ['TicketScreen'] })">Discard</button>
+                        <button class="discard" t-on-click="onClickDiscard">Discard</button>
                     </div>
                     <t t-set="placeholder">Search Tickets...</t>
                     <SearchBar config="searchBarConfig" placeholder="placeholder" />

@@ -38,6 +38,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
             }
         }
+        async onClickDiscard() {
+            await this.env.actionHandler({ name: 'actionToggleScreen', args: ['TicketScreen'] });
+        }
         /**
          * Override to conditionally show the new ticket button.
          */

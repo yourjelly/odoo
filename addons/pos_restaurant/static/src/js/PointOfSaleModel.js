@@ -741,7 +741,11 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 }
             }
         },
-        async _removeDeletedOrders(orderIds) {
+        /**
+         * Removes from server the deleted orders.
+         */
+        async removeDeletedOrders() {
+            const orderIds = this._getOrderIdsToRemove();
             if (!orderIds.length) return;
             const deletedOrderIds = await this._rpc({
                 model: 'pos.order',
@@ -760,7 +764,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 (order) => order.table_id === table.id && order.lines.length
             );
             await this._saveDraftOrders(ordersToSave);
-            await this._removeDeletedOrders(this._getOrderIdsToRemove());
+            await this.removeDeletedOrders();
         },
         /**
          * Get from the backend the updated orders of the given table.
