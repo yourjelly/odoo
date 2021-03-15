@@ -182,7 +182,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         window.location.href = window.location.origin + (tour.url || '/web');
     },
     run: function (tour_name, step_delay) {
-        console.log(_.str.sprintf("Preparing tour %s", tour_name));
+        console.log(_.str.sprintf("Preparing tour %s", tour_name), this.running_tour);
         if (this.running_tour) {
             this._deactivate_tip(this.active_tooltips[this.running_tour]);
             this._consume_tour(this.running_tour, _.str.sprintf("Killing tour %s", this.running_tour));
