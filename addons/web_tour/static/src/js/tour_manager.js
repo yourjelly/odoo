@@ -37,8 +37,8 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
         this.consumed_tours = (consumed_tours || []).filter(tourName => {
             return !local_storage.getItem(get_debugging_key(tourName));
         });
+        this.disabled = disabled;
         this.running_tour = local_storage.getItem(get_running_key());
-        this.disabled = !this.running_tour && disabled;
         this.running_step_delay = parseInt(local_storage.getItem(get_running_delay_key()), 10) || 0;
         this.edition = (_.last(session.server_version_info) === 'e') ? 'enterprise' : 'community';
         this._log = [];
@@ -100,9 +100,6 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             };
         }
         this.tours[tour.name] = tour;
-        if (this.disabled) {
-            this.consumed_tours.push(tour.name);
-        }
     },
     /**
      * Returns a promise which is resolved once the tour can be started. This
@@ -131,12 +128,10 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             })).then(() => self.update());
         });
     },
-    _register: function (do_update, tour, name) {
-        if (tour.ready) return Promise.resolve();
-
-        const tour_is_consumed = this._isTourConsumed(name);
-
-        return tour.wait_for.then((function () {
+    _register: async function (do_update, tour, name) {
+        if (!tour.ready) {
+            const tour_is_consumed = this._isTourConsumed(name);
+            await tour.wait_for;
             tour.current_step = parseInt(local_storage.getItem(get_step_key(name))) || 0;
             tour.steps = _.filter(tour.steps, (function (step) {
                 return (!step.edition || step.edition === this.edition) &&
@@ -156,7 +151,10 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
                               (!this.running_tour && !tour.test && !tour_is_consumed)))) {
                 this._to_next_step(name, 0);
             }
-        }).bind(this));
+        }
+        if (this.disabled && !this.running_tour && !local_storage.getItem(get_debugging_key(name))) {
+            this.consumed_tours.push(name);
+        }
     },
     /**
      * Resets the given tour to its initial step, and prevent it from being

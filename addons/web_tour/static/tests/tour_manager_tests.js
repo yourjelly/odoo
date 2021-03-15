@@ -192,5 +192,26 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
             kanban.destroy();
             tourManager.destroy();
         });
+
+        QUnit.test("Automatic tour disabling", async function (assert) {
+            assert.expect(2);
+
+            const options = {
+                template: `<button class="btn anchor">Anchor</button>`,
+                tours: [{ name: "Tour", options: {}, steps: [{ trigger: '.anchor' }] }],
+            };
+
+            const enabledTM = await createTourManager({ disabled: false, ...options });
+
+            assert.containsOnce(document.body, '.o_tooltip:visible');
+
+            enabledTM.destroy();
+
+            const disabledTM = await createTourManager({ disabled: true, ...options });
+
+            assert.containsNone(document.body, '.o_tooltip:visible');
+
+            disabledTM.destroy();
+        });
     });
 });
