@@ -52,16 +52,28 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 return firstTableId;
             }
         },
-        getStartScreen() {
-            if (this.ifaceFloorplan) return 'FloorScreen';
-            return this._super();
+        _getStartScreens(activeOrder) {
+            const result = this._super(...arguments);
+            if (this.ifaceFloorplan) {
+                result.push(['FloorScreen', 50]);
+            }
+            return result;
+        },
+        _getDefaultScreen() {
+            if (this.ifaceFloorplan) {
+                return 'FloorScreen';
+            } else {
+                return this._super(...arguments);
+            }
         },
         async actionDoneLoading() {
-            await this._super();
             if (this.ifaceFloorplan) {
-                this.actionSetFloor(this.data.derived.sortedFloors[0]);
-                this._setActivityListeners();
+                const floor = this.data.derived.sortedFloors[0];
+                this.data.uiState.activeTableId = false;
+                this.data.uiState.activeFloorId = floor.id;
+                this.data.uiState.FloorScreen.isEditMode = false;
             }
+            await this._super();
         },
         async actionOrderDone(order, nextScreen) {
             await this._super(...arguments);
@@ -70,7 +82,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             }
         },
         _createDefaultOrder() {
-            const result = this._super();
+            const result = this._super(...arguments);
             if (this.ifaceFloorplan) {
                 result.table_id = this.data.uiState.activeTableId || this._getDefaultTableId();
             }
@@ -94,20 +106,14 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         async actionSelectOrder(order) {
             await this._super(...arguments);
             if (this.ifaceFloorplan) {
-                const activeTable = this.getActiveTable();
-                const orderTable = this.getRecord('restaurant.table', order.table_id);
-                if (activeTable && orderTable !== activeTable) {
-                    await this._syncToServer(activeTable);
-                    await this._syncFromServer(orderTable);
-                }
                 if (!this.data.uiState.OrderManagementScreen.managementOrderIds.has(order.id) && order.table_id) {
                     const table = this.getRecord('restaurant.table', order.table_id);
                     this.data.uiState.activeTableId = order.table_id;
                     this.data.uiState.activeFloorId = table.floor_id;
                 }
-
-                if(order.lines)
+                if (order.lines.length && !this.getActiveOrderline(order)) {
                     this.actionSelectOrderline(order, order.lines[order.lines.length - 1]);
+                }
             }
         },
         actionUpdateOrderline(orderline, vals) {
@@ -407,24 +413,52 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             this.data.uiState.FloorScreen.isEditMode = false;
             await this.actionShowScreen('FloorScreen');
         },
-        async actionSetTable(table) {
+        /**
+         * Set the given `table` as active, and optionally select the given `orderToSelectId`.
+         * @param {'restaurant.table'} table
+         * @param {'string' | undefined} orderToSelectId
+         */
+        async actionSetTable(table, orderToSelectId) {
             if (this.data.uiState.FloorScreen.isEditMode) {
                 this.data.uiState.FloorScreen.selectedTableId = table.id;
+            } else if (this.exists('pos.order', orderToSelectId)) {
+                // This is reached when selecting an order from the TicketScreen and
+                // OrderManagementScreen.
+                await this._setTableWithOrder(table, orderToSelectId);
             } else {
-                this.data.uiState.activeTableId = table.id;
-                await this._syncFromServer(table);
-                if (this.data.uiState.orderIdToTransfer) {
-                    const orderToTransfer = this.getRecord('pos.order', this.data.uiState.orderIdToTransfer);
-                    this.updateRecord('pos.order', orderToTransfer.id, { table_id: table.id });
-                    this.data.uiState.orderIdToTransfer = false;
-                    await this.actionSelectOrder(orderToTransfer);
+                // This is reached when clicking a table from the floorscreen.
+                await this._setTableOnly(table);
+            }
+        },
+        async _setTableWithOrder(table, orderToSelectId) {
+            const orderToSelect = this.getRecord('pos.order', orderToSelectId);
+            if (orderToSelect.table_id !== table.id) {
+                throw new Error("Can't select order that doesn't belong to the table.");
+            }
+            const currentlyActiveTable = this.getActiveTable();
+            if (!currentlyActiveTable) {
+                await this._fetchTableOrdersFromServer(table);
+            } else if (table !== currentlyActiveTable) {
+                await this._saveTableOrdersToServer(currentlyActiveTable);
+                await this._fetchTableOrdersFromServer(table);
+            }
+            this.data.uiState.activeTableId = table.id;
+            await this.actionSelectOrder(this.getRecord('pos.order', orderToSelectId));
+        },
+        async _setTableOnly(table) {
+            this.data.uiState.activeTableId = table.id;
+            await this._fetchTableOrdersFromServer(table);
+            if (this.data.uiState.orderIdToTransfer) {
+                const orderToTransfer = this.getRecord('pos.order', this.data.uiState.orderIdToTransfer);
+                this.updateRecord('pos.order', orderToTransfer.id, { table_id: table.id });
+                this.data.uiState.orderIdToTransfer = false;
+                await this.actionSelectOrder(orderToTransfer);
+            } else {
+                const tableOrders = this.getTableOrders(table);
+                if (tableOrders.length) {
+                    await this.actionSelectOrder(tableOrders[0]);
                 } else {
-                    const tableOrders = this.getTableOrders(table);
-                    if (tableOrders.length) {
-                        await this.actionSelectOrder(tableOrders[0]);
-                    } else {
-                        await this.actionCreateNewOrder();
-                    }
+                    await this.actionCreateNewOrder();
                 }
             }
         },
@@ -671,7 +705,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         async actionExitTable(table) {
             if (table) {
                 const floor = this.getRecord('restaurant.table', table.floor_id);
-                await this._syncToServer(table);
+                await this._saveTableOrdersToServer(table);
                 await this.actionSetFloor(floor);
             } else {
                 await this.actionShowScreen('FloorScreen');
@@ -707,7 +741,11 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 }
             }
         },
-        async _removeDeletedOrders(orderIds) {
+        /**
+         * Removes from server the deleted orders.
+         */
+        async removeDeletedOrders() {
+            const orderIds = this._getOrderIdsToRemove();
             if (!orderIds.length) return;
             const deletedOrderIds = await this._rpc({
                 model: 'pos.order',
@@ -716,19 +754,25 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             });
             this._deleteOrderIdsToRemove(deletedOrderIds);
         },
-        async _syncToServer(table) {
+        /**
+         * Saves the orders of the given table to the backend.
+         * @related _fetchTableOrdersFromServer
+         * @param {'restaurant.table'} table
+         */
+        async _saveTableOrdersToServer(table) {
             const ordersToSave = this.getDraftOrders().filter(
                 (order) => order.table_id === table.id && order.lines.length
             );
             await this._saveDraftOrders(ordersToSave);
-            await this._removeDeletedOrders(this._getOrderIdsToRemove());
+            await this.removeDeletedOrders();
         },
         /**
-         * Get from server the updated orders of the given table.
-         * @param {number} tableId
+         * Get from the backend the updated orders of the given table.
+         * @related _saveTableOrdersToServer
+         * @param {'restaurant.table'} table
          */
-        async _syncFromServer(table) {
-            const { data } = await this._rpc({
+        async _fetchTableOrdersFromServer(table) {
+            const data = await this._rpc({
                 model: 'pos.order',
                 method: 'get_table_draft_orders',
                 args: [table.id],
@@ -747,9 +791,8 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             for (const model in data) {
                 for (const record of data[model]) {
                     if (model === 'pos.order') {
-                        const uid = record.pos_reference.match(/\d{5,}-\d{3,}-\d{4,}/);
-                        extras = this._defaultOrderExtras(uid ? uid[0] : record.id);
-                        extras.server_id = record.id;
+                        extras = this._defaultOrderExtras(record.id);
+                        extras.server_id = record.server_id;
                     }
                     this.setRecord(model, record.id, record, extras);
                     extras = {};
@@ -895,32 +938,16 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
 
         //#region AUTO_BACK_TO_FLOORSCREEN
 
-        _setActivityListeners() {
-            const nonIdleEvents = [
-                'mousemove',
-                'mousedown',
-                'touchstart',
-                'touchend',
-                'touchmove',
-                'click',
-                'scroll',
-                'keypress',
-            ];
-            for (const event of nonIdleEvents) {
-                window.addEventListener(event, () => this._setIdleTimer());
-            }
+        async _onAfterIdleCallback() {
+            await this._super(...arguments);
+            await this.actionHandler({ name: 'actionExitTable', args: [this.getActiveTable()] });
         },
-        _setIdleTimer() {
-            if (this._shouldResetIdleTimer()) {
-                clearTimeout(this.idleTimer);
-                this.idleTimer = setTimeout(async () => {
-                    await this.actionHandler({ name: 'actionExitTable', args: [this.getActiveTable()] });
-                }, 60000);
-            }
+        _shouldTriggerAfterIdleCallback() {
+            return this._super(...arguments) && this.ifaceFloorplan && this.getActiveScreen() !== 'FloorScreen';
         },
-        _shouldResetIdleTimer() {
-            return this.ifaceFloorplan && this.getActiveScreen() !== 'FloorScreen';
-        },
+        _shouldActivateActivityListeners() {
+            return this.ifaceFloorplan ? true : this._super(...arguments);
+        }
 
         //#endregion
     });

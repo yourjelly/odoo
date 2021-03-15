@@ -11,6 +11,20 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     const unpatch = {};
 
     unpatch.TicketScreenProto = patch(TicketScreen.prototype, 'pos_restaurant', {
+        async onClickOrder(order) {
+            if (this.env.model.ifaceFloorplan && order.table_id) {
+                const table = this.env.model.getRecord('restaurant.table', order.table_id);
+                await this.env.actionHandler({ name: 'actionSetTable', args: [table, order.id] });
+            } else {
+                await this._super(...arguments);
+            }
+        },
+        async onClickDiscard() {
+            await this._super(...arguments);
+            if (!this.env.model.getActiveTable()) {
+                await this.env.model.removeDeletedOrders();
+            }
+        },
         get filteredOrderList() {
             const orders = this._super();
             const activeTable = this.env.model.getActiveTable();

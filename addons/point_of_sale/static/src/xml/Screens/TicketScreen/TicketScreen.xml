@@ -8,7 +8,7 @@
                     <div class="buttons">
                         <button t-if="showNewTicketButton" class="highlight"
                             t-on-click="env.actionHandler({ name: 'actionCreateNewOrder' })">New Order</button>
-                        <button class="discard" t-on-click="env.actionHandler({ name: 'actionToggleScreen', args: ['TicketScreen'] })">Discard</button>
+                        <button class="discard" t-on-click="onClickDiscard">Discard</button>
                     </div>
                     <t t-set="placeholder">Search Tickets...</t>
                     <SearchBar config="searchBarConfig" placeholder="placeholder" />
@@ -26,7 +26,7 @@
                     </div>
                     <t t-foreach="filteredOrderList" t-as="order" t-key="order.id">
                         <div class="order-row pointer"
-                            t-on-click="env.actionHandler({ name: 'actionSelectOrder', args: [order] })">
+                            t-on-click="onClickOrder(order)">
                             <div class="col start wide">
                                 <t t-esc="getDate(order)"></t>
                             </div>
