@@ -119,6 +119,7 @@ var Tip = Widget.extend({
     },
     destroy: function () {
         console.log('destroy');
+        console.trace();
         this._unbind_anchor_events();
         clearTimeout(this.timerIn);
         clearTimeout(this.timerOut);
