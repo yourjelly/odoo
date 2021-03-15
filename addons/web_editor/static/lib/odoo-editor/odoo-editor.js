@@ -2724,6 +2724,7 @@ var exportVariable = (function (exports) {
                     }
                 }
             }
+            this.dispatchEvent(new Event('observerApply'));
         }
         filterMutationRecords(records) {
             // Save the first attribute in a cache to compare only the first
