@@ -118,6 +118,7 @@ var Tip = Widget.extend({
         return this._super.apply(this, arguments);
     },
     destroy: function () {
+        console.log('destroy');
         this._unbind_anchor_events();
         clearTimeout(this.timerIn);
         clearTimeout(this.timerOut);
@@ -347,14 +348,18 @@ var Tip = Widget.extend({
         this.$el.addClass("o_animated");
     },
     _bind_anchor_events: function () {
+        console.log('bindanchroevents');
         // The consume_event taken for RunningTourActionHelper is the one of $anchor and not $altAnchor.
         this.consume_event = this.info.consumeEvent || Tip.getConsumeEventType(this.$anchor, this.info.run);
         this.$consumeEventAnchors = this._getAnchorAndCreateEvent(this.consume_event, this.$anchor);
+        console.log('cea', this.$consumeEventAnchors);
         if (this.$altAnchor.length) {
+            console.log('ininf');
             const consumeEvent  = this.info.consumeEvent || Tip.getConsumeEventType(this.$altAnchor, this.info.run);
             this.$consumeEventAnchors = this.$consumeEventAnchors.add(
                 this._getAnchorAndCreateEvent(consumeEvent, this.$altAnchor)
-            );
+                );
+            console.log('cea', this.$consumeEventAnchors);
         }
         this.$anchor.on('mouseenter.anchor', () => this._to_info_mode());
         this.$anchor.on('mouseleave.anchor', () => this._to_bubble_mode());
