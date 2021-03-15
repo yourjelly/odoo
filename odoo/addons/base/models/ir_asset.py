@@ -19,7 +19,17 @@ SCRIPT_EXTENSIONS = ['js']
 STYLE_EXTENSIONS = ['css', 'scss', 'sass', 'less']
 TEMPLATE_EXTENSIONS = ['xml']
 DEFAULT_SEQUENCE = 16
-DIRECTIVES_WITH_TARGET = ['after', 'before', 'replace']
+
+# Directives are stored in variables for ease of use and syntax checks.
+APPEND_DIRECTIVE = 'append'
+PREPEND_DIRECTIVE = 'prepend'
+AFTER_DIRECTIVE = 'after'
+BEFORE_DIRECTIVE = 'before'
+REMOVE_DIRECTIVE = 'remove'
+REPLACE_DIRECTIVE = 'replace'
+INCLUDE_DIRECTIVE = 'include'
+# Those are the directives used with a 'target' argument/field.
+DIRECTIVES_WITH_TARGET = [AFTER_DIRECTIVE, BEFORE_DIRECTIVE, REPLACE_DIRECTIVE]
 
 
 def fs2web(path):
@@ -70,13 +80,13 @@ class IrAsset(models.Model):
     name = fields.Char(string='Name', required=True)
     bundle = fields.Char(string='Bundle name', required=True)
     directive = fields.Selection(string='Directive', selection=[
-        ('append', 'Append'),
-        ('prepend', 'Prepend'),
-        ('after', 'After'),
-        ('before', 'Before'),
-        ('remove', 'Remove'),
-        ('replace', 'Replace'),
-        ('include', 'Include')], default='append')
+        (APPEND_DIRECTIVE, 'Append'),
+        (PREPEND_DIRECTIVE, 'Prepend'),
+        (AFTER_DIRECTIVE, 'After'),
+        (BEFORE_DIRECTIVE, 'Before'),
+        (REMOVE_DIRECTIVE, 'Remove'),
+        (REPLACE_DIRECTIVE, 'Replace'),
+        (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
     glob = fields.Char(string='Path', required=True)
     target = fields.Char(string='Target')
     active = fields.Boolean(string='active', default=True)
@@ -157,8 +167,8 @@ class IrAsset(models.Model):
             :param target: string or None or False
             :param path_def: string
             """
-            if directive == 'include':
-                # recursively call this function for each 'include' directive.
+            if directive == INCLUDE_DIRECTIVE:
+                # recursively call this function for each INCLUDE_DIRECTIVE directive.
                 self._fill_asset_paths(path_def, addons, css, js, xml, asset_paths, seen + [bundle])
                 return
 
@@ -172,17 +182,17 @@ class IrAsset(models.Model):
                     return
                 target_index = asset_paths.index(target_paths[0], addon, bundle)
 
-            if directive == 'append':
+            if directive == APPEND_DIRECTIVE:
                 asset_paths.append(paths, addon, bundle)
-            elif directive == 'prepend':
+            elif directive == PREPEND_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, bundle_start_index)
-            elif directive == 'after':
+            elif directive == AFTER_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index + 1)
-            elif directive == 'before':
+            elif directive == BEFORE_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index)
-            elif directive == 'remove':
+            elif directive == REMOVE_DIRECTIVE:
                 asset_paths.remove(paths, addon, bundle)
-            elif directive == 'replace':
+            elif directive == REPLACE_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index)
                 asset_paths.remove(target_paths, addon, bundle)
             else:
@@ -203,7 +213,7 @@ class IrAsset(models.Model):
             for command in manifest_assets.get(bundle, []):
                 if isinstance(command, str):
                     # Default directive: append
-                    directive, target, path_def = 'append', None, command
+                    directive, target, path_def = APPEND_DIRECTIVE, None, command
                 elif command[0] in DIRECTIVES_WITH_TARGET:
                     directive, target, path_def = command
                 else:
