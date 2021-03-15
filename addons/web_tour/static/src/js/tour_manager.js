@@ -128,10 +128,17 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
             })).then(() => self.update());
         });
     },
-    _register: async function (do_update, tour, name) {
-        if (!tour.ready) {
-            const tour_is_consumed = this._isTourConsumed(name);
-            await tour.wait_for;
+    _register: function (do_update, tour, name) {
+        const debuggingTour = local_storage.getItem(get_debugging_key(name));
+        if (this.disabled && !this.running_tour && !debuggingTour) {
+            this.consumed_tours.push(name);
+        }
+
+        if (tour.ready) return Promise.resolve();
+
+        const tour_is_consumed = this._isTourConsumed(name);
+
+        return tour.wait_for.then((function () {
             tour.current_step = parseInt(local_storage.getItem(get_step_key(name))) || 0;
             tour.steps = _.filter(tour.steps, (function (step) {
                 return (!step.edition || step.edition === this.edition) &&
@@ -145,16 +152,12 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
 
             tour.ready = true;
 
-            const debuggingTour = local_storage.getItem(get_debugging_key(name));
             if (debuggingTour ||
                 (do_update && (this.running_tour === name ||
                               (!this.running_tour && !tour.test && !tour_is_consumed)))) {
                 this._to_next_step(name, 0);
             }
-        }
-        if (this.disabled && !this.running_tour && !local_storage.getItem(get_debugging_key(name))) {
-            this.consumed_tours.push(name);
-        }
+        }).bind(this));
     },
     /**
      * Resets the given tour to its initial step, and prevent it from being
