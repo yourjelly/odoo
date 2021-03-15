@@ -1138,6 +1138,7 @@ var SnippetsMenu = Widget.extend({
 
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
+        this._addToolbar();
 
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.

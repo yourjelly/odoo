@@ -111,7 +111,6 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
-        this._configureToolbar(options);
         this.odooEditor = new OdooEditor(this.$editable[0], {
             toolbar: this.toolbar.$el[0],
             document: this.options.document,
@@ -167,6 +166,11 @@ const Wysiwyg = Widget.extend({
             }, options));
             await this._insertSnippetMenu();
         }
+        // The toolbar must be configured after the snippetMenu is loaded
+        // because if snippetMenu is loaded in an iframe, binding of the color
+        // buttons must use the jquery loaded in that iframe. See
+        // _createPalette.
+        this._configureToolbar(options);
 
         $(this.odooEditor.editable).on('click', this._updateEditorUI.bind(this));
         $(this.odooEditor.editable).on('keydown', this._updateEditorUI.bind(this));
@@ -742,6 +746,10 @@ const Wysiwyg = Widget.extend({
             const eventName = elem.dataset.eventName;
             let colorpicker = null;
             const mutex = new concurrency.MutexedDropPrevious();
+            // If the element is within an iframe, access the jquery loaded in
+            // the iframe because it is the one who will trigger the dropdown
+            // events (i.e hide.bs.dropdown and show.bs.dropdown).
+            const $ = elem.ownerDocument.defaultView.$;
             const $dropdown = $(elem).closest('.colorpicker-group , .dropdown');
             let manualOpening = false;
             // Prevent dropdown closing on colorpicker click
