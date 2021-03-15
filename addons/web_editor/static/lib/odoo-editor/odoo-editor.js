@@ -103,7 +103,7 @@ var exportVariable = (function (exports) {
     }
 
     //------------------------------------------------------------------------------
-    // DOM Path and node research functions
+    // DOM Path and node search functions
     //------------------------------------------------------------------------------
 
     const closestPath = function* (node) {
@@ -134,6 +134,81 @@ var exportVariable = (function (exports) {
         true,
         true,
     );
+    /**
+     * Values which can be returned while browsing the DOM which gives information
+     * to why the path ended.
+     */
+    const PATH_END_REASONS = {
+        NO_NODE: 0,
+        BLOCK_OUT: 1,
+        BLOCK_HIT: 2,
+        OUT_OF_SCOPE: 3,
+    };
+    /**
+     * Creates a generator function according to the given parameters. Pre-made
+     * generators to traverse the DOM are made using this function:
+     *
+     * @see leftDeepFirstPath
+     * @see leftDeepOnlyPath
+     * @see leftDeepFirstInlinePath
+     * @see leftDeepOnlyInlinePath
+     *
+     * @see rightDeepFirstPath
+     * @see rightDeepOnlyPath
+     * @see rightDeepFirstInlinePath
+     * @see rightDeepOnlyInlinePath
+     *
+     * @param {number} direction
+     * @param {boolean} deepOnly
+     * @param {boolean} inline
+     */
+    function createDOMPathGenerator(direction, deepOnly, inline, inScope = false) {
+        const nextDeepest =
+            direction === DIRECTIONS.LEFT
+                ? node => lastLeaf(node.previousSibling, inline)
+                : node => firstLeaf(node.nextSibling, inline);
+
+        const firstNode =
+            direction === DIRECTIONS.LEFT
+                ? (node, offset) => lastLeaf(node.childNodes[offset - 1], inline)
+                : (node, offset) => firstLeaf(node.childNodes[offset], inline);
+
+        // Note "reasons" is a way for the caller to be able to know why the
+        // generator ended yielding values.
+        return function* (node, offset, reasons = []) {
+            let movedUp = false;
+
+            let currentNode = firstNode(node, offset);
+            if (!currentNode) {
+                movedUp = true;
+                currentNode = node;
+            }
+
+            while (currentNode) {
+                if (inline && isBlock(currentNode)) {
+                    reasons.push(movedUp ? PATH_END_REASONS.BLOCK_OUT : PATH_END_REASONS.BLOCK_HIT);
+                    break;
+                }
+                if (inScope && currentNode === node) {
+                    reasons.push(PATH_END_REASONS.OUT_OF_SCOPE);
+                    break;
+                }
+                if (!deepOnly || !movedUp) {
+                    yield currentNode;
+                }
+
+                movedUp = false;
+                let nextNode = nextDeepest(currentNode);
+                if (!nextNode) {
+                    movedUp = true;
+                    nextNode = currentNode.parentNode;
+                }
+                currentNode = nextNode;
+            }
+
+            reasons.push(PATH_END_REASONS.NO_NODE);
+        };
+    }
 
     /**
      * Find a node.
@@ -184,9 +259,9 @@ var exportVariable = (function (exports) {
      * @param {Node} node
      * @returns {HTMLElement[]}
      */
-    function ancestors(node) {
-        if (!node) return [];
-        return [node.parentElement, ...ancestors(node.parentElement)];
+    function ancestors(node, editable) {
+        if (!node || !node.parentElement || node === editable) return [];
+        return [node.parentElement, ...ancestors(node.parentElement, editable)];
     }
 
     function closestBlock(node) {
@@ -196,11 +271,11 @@ var exportVariable = (function (exports) {
      * Returns the deepest child in last position.
      *
      * @param {Node} node
-     * @param {boolean} [inline=false]
+     * @param {boolean} [stopAtBlock=false]
      * @returns {Node}
      */
-    function latestChild(node, inline = false) {
-        while (node && node.lastChild && (!inline || !isBlock(node))) {
+    function lastLeaf(node, stopAtBlock = false) {
+        while (node && node.lastChild && !(stopAtBlock && isBlock(node))) {
             node = node.lastChild;
         }
         return node;
@@ -209,11 +284,11 @@ var exportVariable = (function (exports) {
      * Returns the deepest child in first position.
      *
      * @param {Node} node
-     * @param {boolean} [inline=false]
+     * @param {boolean} [stopAtBlock=false]
      * @returns {Node}
      */
-    function firstChild(node, inline = false) {
-        while (node && node.firstChild && (!inline || !isBlock(node))) {
+    function firstLeaf(node, stopAtBlock = false) {
+        while (node && node.firstChild && !(stopAtBlock && isBlock(node))) {
             node = node.firstChild;
         }
         return node;
@@ -224,10 +299,15 @@ var exportVariable = (function (exports) {
             ancestor = ancestor.parentElement;
         }
         if (ancestor && ancestor !== editable) {
-            if (skipInvisible && ancestor.previousSibling && !isVisible(ancestor.previousSibling)) {
-                return previousLeaf(ancestor.previousSibling);
+            if (skipInvisible && !isVisible(ancestor.previousSibling)) {
+                return previousLeaf(ancestor.previousSibling, editable, skipInvisible);
             } else {
-                return latestChild(ancestor.previousSibling);
+                const last = lastLeaf(ancestor.previousSibling);
+                if (skipInvisible && !isVisible(last)) {
+                    return previousLeaf(last, editable, skipInvisible);
+                } else {
+                    return last;
+                }
             }
         }
     }
@@ -238,124 +318,63 @@ var exportVariable = (function (exports) {
         }
         if (ancestor && ancestor !== editable) {
             if (skipInvisible && ancestor.nextSibling && !isVisible(ancestor.nextSibling)) {
-                return nextLeaf(ancestor.nextSibling);
+                return nextLeaf(ancestor.nextSibling, editable, skipInvisible);
             } else {
-                return firstChild(ancestor.nextSibling);
+                const first = firstLeaf(ancestor.nextSibling);
+                if (skipInvisible && !isVisible(first)) {
+                    return nextLeaf(first, editable, skipInvisible);
+                } else {
+                    return first;
+                }
             }
         }
     }
     /**
-     * Values which can be returned while browsing the DOM which gives information
-     * to why the path ended.
-     */
-    const PATH_END_REASONS = {
-        NO_NODE: 0,
-        BLOCK_OUT: 1,
-        BLOCK_HIT: 2,
-        OUT_OF_SCOPE: 3,
-    };
-    /**
-     * Creates a generator function according to the given parameters. Pre-made
-     * generators to traverse the DOM are made using this function:
+     * Returns all the previous siblings of the given node until the first
+     * sibling that does not satisfy the predicate, in lookup order.
      *
-     * @see leftDeepFirstPath
-     * @see leftDeepOnlyPath
-     * @see leftDeepFirstInlinePath
-     * @see leftDeepOnlyInlinePath
-     *
-     * @see rightDeepFirstPath
-     * @see rightDeepOnlyPath
-     * @see rightDeepFirstInlinePath
-     * @see rightDeepOnlyInlinePath
-     *
-     * @param {number} direction
-     * @param {boolean} deepOnly
-     * @param {boolean} inline
-     */
-    function createDOMPathGenerator(direction, deepOnly, inline, inScope = false) {
-        const nextDeepest =
-            direction === DIRECTIONS.LEFT
-                ? node => latestChild(node.previousSibling, inline)
-                : node => firstChild(node.nextSibling, inline);
-
-        const firstNode =
-            direction === DIRECTIONS.LEFT
-                ? (node, offset) => latestChild(node.childNodes[offset - 1], inline)
-                : (node, offset) => firstChild(node.childNodes[offset], inline);
-
-        // Note "reasons" is a way for the caller to be able to know why the
-        // generator ended yielding values.
-        return function* (node, offset, reasons = []) {
-            let movedUp = false;
-
-            let currentNode = firstNode(node, offset);
-            if (!currentNode) {
-                movedUp = true;
-                currentNode = node;
-            }
-
-            while (currentNode) {
-                if (inline && isBlock(currentNode)) {
-                    reasons.push(movedUp ? PATH_END_REASONS.BLOCK_OUT : PATH_END_REASONS.BLOCK_HIT);
-                    break;
-                }
-                if (inScope && currentNode === node) {
-                    reasons.push(PATH_END_REASONS.OUT_OF_SCOPE);
-                    break;
-                }
-                if (!deepOnly || !movedUp) {
-                    yield currentNode;
-                }
-
-                movedUp = false;
-                let nextNode = nextDeepest(currentNode);
-                if (!nextNode) {
-                    movedUp = true;
-                    nextNode = currentNode.parentNode;
-                }
-                currentNode = nextNode;
-            }
-
-            reasons.push(PATH_END_REASONS.NO_NODE);
-        };
-    }
-    /**
-     * Returns all the previous siblings of the first parameter until the first
-     * sibling that does not satisfy the predicat.
      * @param {Node} node
-     * @param {Function} predicat A function that receives a node as parameter and
-     * returns true or false
+     * @param {Function} [predicate] (node: Node) => boolean
      */
-    function getAdjacentPreviousSiblings(node, predicat = n => n) {
+    function getAdjacentPreviousSiblings(node, predicate = n => !!n) {
         let previous = node.previousSibling;
         const list = [];
-        while (previous && predicat(previous)) {
+        while (previous && predicate(previous)) {
             list.push(previous);
             previous = previous.previousSibling;
         }
         return list;
     }
     /**
-     * Returns all the next siblings of the first parameter until the first
-     * sibling that does not satisfy the predicat.
+     * Returns all the next siblings of the given node until the first
+     * sibling that does not satisfy the predicate, in lookup order.
+     *
      * @param {Node} node
-     * @param {Function} predicat A function that receives a node as parameter and
-     * returns true or false
+     * @param {Function} [predicate] (node: Node) => boolean
      */
-    function getAdjacentNextSiblings(node, predicat = n => n) {
+    function getAdjacentNextSiblings(node, predicate = n => !!n) {
         let next = node.nextSibling;
         const list = [];
-        while (next && predicat(next)) {
+        while (next && predicate(next)) {
             list.push(next);
             next = next.nextSibling;
         }
         return list;
     }
-
-    function getAdjacents(node, predicat = n => n, includeSelf = true) {
-        const previous = getAdjacentPreviousSiblings(node, predicat);
-        const next = getAdjacentNextSiblings(node, predicat);
-        return includeSelf ? [...previous, node, ...next] : [...previous, ...next];
+    /**
+     * Returns all the adjacent siblings of the given node until the first sibling
+     * (in both directions) that does not satisfy the predicate, in index order.
+     *
+     * @param {Node} node
+     * @param {Function} [predicate] (node: Node) => boolean
+     * @param {boolean} [includeSelf] default true
+     */
+    function getAdjacents(node, predicate = n => !!n, includeSelf = true) {
+        const previous = getAdjacentPreviousSiblings(node, predicate);
+        const next = getAdjacentNextSiblings(node, predicate);
+        return includeSelf && predicate(node)
+            ? [...previous.reverse(), node, ...next]
+            : [...previous.reverse(), ...next];
     }
 
     //------------------------------------------------------------------------------
@@ -3161,7 +3180,7 @@ var exportVariable = (function (exports) {
                     if (!this.editable.contains(joinWith)) {
                         this._toRollback = UNREMOVABLE_ROLLBACK_CODE; // tried to delete too far -> roll it back.
                     } else {
-                        next = firstChild(next);
+                        next = firstLeaf(next);
                     }
                 }, this._historySteps[this._historySteps.length - 1].mutations.length);
                 if ([UNBREAKABLE_ROLLBACK_CODE, UNREMOVABLE_ROLLBACK_CODE].includes(res)) {
@@ -4000,7 +4019,7 @@ var exportVariable = (function (exports) {
             const contenteditableFalseNode =
                 startContainer &&
                 !startContainer.isContentEditable &&
-                ancestors(startContainer).includes(this.editable) &&
+                ancestors(startContainer, this.editable).includes(this.editable) &&
                 startContainer.closest('[contenteditable=false]');
             if (contenteditableFalseNode) {
                 selection.removeAllRanges();
@@ -4401,7 +4420,8 @@ var exportVariable = (function (exports) {
             const selection = this.document.defaultView.getSelection();
             if (
                 selection.isCollapsed ||
-                (selection.anchorNode && !ancestors(selection.anchorNode).includes(this.editable))
+                (selection.anchorNode &&
+                    !ancestors(selection.anchorNode, this.editable).includes(this.editable))
             )
                 return;
             let shouldUpdateSelection = false;
@@ -4476,7 +4496,7 @@ var exportVariable = (function (exports) {
     exports.enforceWhitespace = enforceWhitespace;
     exports.fillEmpty = fillEmpty;
     exports.findNode = findNode;
-    exports.firstChild = firstChild;
+    exports.firstLeaf = firstLeaf;
     exports.getAdjacentNextSiblings = getAdjacentNextSiblings;
     exports.getAdjacentPreviousSiblings = getAdjacentPreviousSiblings;
     exports.getAdjacents = getAdjacents;
@@ -4506,7 +4526,7 @@ var exportVariable = (function (exports) {
     exports.isVisible = isVisible;
     exports.isVisibleEmpty = isVisibleEmpty;
     exports.isVisibleStr = isVisibleStr;
-    exports.latestChild = latestChild;
+    exports.lastLeaf = lastLeaf;
     exports.leftDeepFirstInlinePath = leftDeepFirstInlinePath;
     exports.leftDeepFirstPath = leftDeepFirstPath;
     exports.leftDeepOnlyInlineInScopePath = leftDeepOnlyInlineInScopePath;
