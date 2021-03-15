@@ -43,7 +43,10 @@ class TestMailResend(TestMailCommon):
 
         # three more failure sent on bus, one for each mail in failure and one for resend
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 3):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data * 3):
             wizard.resend_mail_action()
         done_msgs, done_notifs = self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -56,7 +59,10 @@ class TestMailResend(TestMailCommon):
 
         # two more failure update sent on bus, one for failed mail and one for resend
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data * 2):
             self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({}).resend_mail_action()
         done_msgs, done_notifs = self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -69,7 +75,10 @@ class TestMailResend(TestMailCommon):
 
         # A success update should be sent on bus once the email has no more failure
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)]):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data):
             self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({}).resend_mail_action()
         self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -80,7 +89,10 @@ class TestMailResend(TestMailCommon):
     def test_remove_mail_become_canceled(self):
         # two failure sent on bus, one for each mail
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data * 2):
             message = self.test_record.with_user(self.user_admin).message_post(partner_ids=self.partners.ids, subtype_xmlid='mail.mt_comment', message_type='notification')
 
         self.assertMailNotifications(message, [
@@ -103,13 +115,19 @@ class TestMailResend(TestMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_cancel_all(self):
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data * 2):
             message = self.test_record.with_user(self.user_admin).message_post(partner_ids=self.partners.ids, subtype_xmlid='mail.mt_comment', message_type='notification')
 
         wizard = self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({})
         # one update for cancell
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 1):
+        data = [(self.cr.dbname, 'res.partner', self.partner_admin.id)]
+        for partner in self.partners.ids:
+            data.append((self.cr.dbname, 'res.partner', partner))
+        with self.mock_mail_gateway(), self.assertBus(data * 1):
             wizard.cancel_mail_action()
 
         self.assertMailNotifications(message, [
