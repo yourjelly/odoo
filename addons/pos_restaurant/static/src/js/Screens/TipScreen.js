@@ -44,8 +44,6 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
         }
         get nextScreen() {
             if (this.env.model.ifaceFloorplan) {
-                // TODO jcb: perhaps we need to specify the floor to show?
-                // const table = this.env.pos.table;
                 return 'FloorScreen';
             } else {
                 return 'ProductScreen';

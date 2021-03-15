@@ -684,12 +684,10 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             } catch (error) {
                 if (error instanceof Error) throw error;
                 if (error.message.code < 0) {
-                    this.ui.showNotification(_t('Unable to save changes to the server.'));
-                    // TODO jcb: is showing toast notification better than showing error?
-                    // await this.ui.askUser('OfflineErrorPopup', {
-                    //     title: _t('Offline'),
-                    //     body: _t('Unable to save changes to the server.'),
-                    // });
+                    await this.ui.askUser('OfflineErrorPopup', {
+                        title: _t('Offline'),
+                        body: _t('Unable to save changes to the server.'),
+                    });
                 }
             }
         },
@@ -801,6 +799,8 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
 
         //#endregion ORDER SYNCING
+
+        //#region TIPPING
 
         canBeAdjusted(payment) {
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
@@ -936,6 +936,8 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             }
         },
 
+        //#endregion TIPPING
+
         //#region AUTO_BACK_TO_FLOORSCREEN
 
         async _onAfterIdleCallback() {
@@ -949,6 +951,6 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             return this.ifaceFloorplan ? true : this._super(...arguments);
         }
 
-        //#endregion
+        //#endregion AUTO_BACK_TO_FLOORSCREEN
     });
 });

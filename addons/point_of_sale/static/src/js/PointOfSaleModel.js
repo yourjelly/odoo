@@ -1575,6 +1575,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * Create an array of starting screens with priority number. The priority
          * number is used for sorting the screens. The one with lowest priority value
          * will be prioritized as the starting screen. @see getStartScreen
+         *
+         * @returns {[string, number][]}
          */
         _getStartScreens(activeOrder) {
             const result = [];
@@ -2929,6 +2931,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const userGroupIds = this.user?.groups_id || [];
             return userGroupIds.includes(this.config.group_pos_manager_id);
         }
+        /**
+         * Returns the screen with lowest value attached to it from the list of screens
+         * returned by `_getStartScreens`.
+         */
         getStartScreen() {
             const startScreens = this._getStartScreens(this.getActiveOrder());
             startScreens.sort((a, b) => a[1] - b[1]);
