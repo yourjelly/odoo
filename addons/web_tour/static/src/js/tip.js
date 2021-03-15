@@ -396,6 +396,7 @@ var Tip = Widget.extend({
         return $consumeEventAnchors;
     },
     _unbind_anchor_events: function () {
+        console.warn('unbindacnroevents')
         if (this.$anchor) {
             this.$anchor.off(".anchor");
         }
