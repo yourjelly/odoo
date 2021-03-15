@@ -97,18 +97,6 @@
     'application': True,
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
-
-    # TODO: merge with other assets:
-
-    # 'website.test_bundle': [
-    #     '/web/static/lib/qweb/qweb2.js',
-    #     'http://test.external.link/javascript1.js',
-    #     '/web/static/lib/jquery.ui/jquery-ui.css',
-    #     'http://test.external.link/style1.css',
-    #     '/web/static/src/js/boot.js',
-    #     'http://test.external.link/javascript2.js',
-    #     'http://test.external.link/style2.css',
-    # ],
     'assets': {
         'web.assets_frontend': [
             'website/static/src/snippets/s_media_list/001.scss',
@@ -253,6 +241,15 @@
             'website/static/src/xml/website.backend.xml',
             'website/static/src/xml/website_widget.xml',
             'website/static/src/xml/theme_preview.xml',
+        ],
+        'website.test_bundle': [
+            '/web/static/lib/qweb/qweb2.js',
+            'http://test.external.link/javascript1.js',
+            '/web/static/lib/jquery.ui/jquery-ui.css',
+            'http://test.external.link/style1.css',
+            '/web/static/src/js/boot.js',
+            'http://test.external.link/javascript2.js',
+            'http://test.external.link/style2.css',
         ],
     }
 }
