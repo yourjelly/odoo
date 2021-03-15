@@ -317,7 +317,7 @@ QUnit.module('web_editor', {}, function () {
 
             await new Promise((resolve) => setTimeout(resolve));
 
-            await testUtils.dom.click($('#toolbar #media-modal'));
+            await testUtils.dom.click($('#toolbar #media-insert'));
 
             // load static xml file (dialog, media dialog, unsplash image widget)
             await defMediaDialog;
@@ -369,7 +369,7 @@ QUnit.module('web_editor', {}, function () {
             var pText = $field.find('.note-editable p').first().contents()[0];
             Wysiwyg.setRange(pText, 1, pText, 2);
 
-            await testUtils.dom.click($('#toolbar #media-modal'));
+            await testUtils.dom.click($('#toolbar #media-insert'));
 
             // load static xml file (dialog, media dialog, unsplash image widget)
             await defMediaDialog;

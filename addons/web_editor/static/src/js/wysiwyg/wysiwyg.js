@@ -640,7 +640,8 @@ const Wysiwyg = Widget.extend({
                 case 'create-link':
                     this.toggleLinkTools();
                     break;
-                case 'media-modal':
+                case 'media-insert':
+                case 'media-replace':
                     this.openMediaDialog();
                     break;
                 case 'media-description':
@@ -648,7 +649,7 @@ const Wysiwyg = Widget.extend({
                     break;
             }
         };
-        $toolbar.find('#create-link, #media-modal, #media-description').click(openTools);
+        $toolbar.find('#create-link, #media-insert, #media-replace, #media-description').click(openTools);
         $toolbar.find('#image-shape div, #fa-spin').click(e => {
             if (!this.lastMediaClicked) return;
             this.lastMediaClicked.classList.toggle(e.target.id);
@@ -859,7 +860,13 @@ const Wysiwyg = Widget.extend({
             '#image-width',
             '#image-padding',
             '#image-edit',
+            '#media-replace',
         ].join(',')).toggleClass('d-none', !isInMedia);
+        // The image replace button is in the image options when the sidebar
+        // exists.
+        if (this.snippetsMenu && $target.is('img')) {
+            this.toolbar.$el.find('#media-replace').toggleClass('d-none', true);
+        }
         // Only show the image-transform, image-crop and media-description
         // buttons if the current selected snippet is an image.
         this.toolbar.$el.find([
@@ -878,6 +885,7 @@ const Wysiwyg = Widget.extend({
             '#colorInputButtonGroup',
             '#table',
             '#create-link',
+            '#media-insert', // "Insert media" should be replaced with "Replace media".
         ].join(',')).toggleClass('d-none', isInMedia);
         // Some icons are relevant for icons, that aren't for other media.
         this.toolbar.$el.find('#colorInputButtonGroup, #create-link').toggleClass('d-none', isInMedia && !$target.is('.fa'));
