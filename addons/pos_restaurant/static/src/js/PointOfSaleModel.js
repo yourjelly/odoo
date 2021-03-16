@@ -944,7 +944,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         _shouldActivateActivityListeners() {
             return this.ifaceFloorplan ? true : this._super(...arguments);
-        }
+        },
 
         //#endregion AUTO_BACK_TO_FLOORSCREEN
     });

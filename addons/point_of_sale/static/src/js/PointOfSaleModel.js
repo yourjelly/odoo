@@ -1527,16 +1527,6 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.data.uiState.activeOrderId = orderId;
         }
         /**
-         * The active order can be deleted in an action and needs to be replaced. Use
-         * this method to properly create new order or select an existing one.
-         */
-        _setActiveOrderAutomatically() {
-            const orders = this.getDraftOrders();
-            // IMPROVEMENT: perhaps select the order next to the deleted one instead of the first order
-            const orderToSet = orders.length ? orders[0] : this._createDefaultOrder();
-            this._setActiveOrderId(orderToSet.id);
-        }
-        /**
          * Loads the given order data to ram.
          * @param {object} orderData
          * @param {'pos.order'} orderData.order
@@ -1937,8 +1927,14 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             }
         }
         actionDeleteOrder(order) {
+            const activeOrderIsDeleted = this.getActiveOrder().id === order.id;
             this._tryDeleteOrder(order);
-            this._setActiveOrderAutomatically();
+            if (activeOrderIsDeleted) {
+                const orders = this.getDraftOrders();
+                if (orders.length) {
+                    this._setActiveOrderId(orders[0].id);
+                }
+            }
         }
         actionCreateNewOrder() {
             const newOrder = this._createDefaultOrder();
@@ -2266,7 +2262,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             }
             // If the active order is also deleted, we make sure to set a new one.
             if (!this.getActiveOrder()) {
-                this._setActiveOrderAutomatically();
+                const orders = this.getDraftOrders();
+                // IMPROVEMENT: perhaps select the order next to the deleted one instead of the first order
+                const orderToSet = orders.length ? orders[0] : this._createDefaultOrder();
+                this._setActiveOrderId(orderToSet.id);
                 await this.actionShowScreen(this.getOrderScreen(this.getActiveOrder()));
             }
         }

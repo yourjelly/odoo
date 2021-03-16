@@ -32,14 +32,20 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     body: message,
                 });
                 if (confirmed) {
-                    this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
+                    await this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
                 }
             } else {
-                this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
+                await this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
             }
         }
         async onClickDiscard() {
-            await this.env.actionHandler({ name: 'actionToggleScreen', args: ['TicketScreen'] });
+            const previousScreen = this.env.model.getPreviousScreen();
+            const draftOrders = this.env.model.getDraftOrders();
+            if (!draftOrders.length && this.env.model._shouldSetScreenToOrder(previousScreen)) {
+                await this.env.actionHandler({ name: 'actionCreateNewOrder' });
+            } else {
+                await this.env.actionHandler({ name: 'actionToggleScreen', args: ['TicketScreen'] });
+            }
         }
         /**
          * Override to conditionally show the new ticket button.
