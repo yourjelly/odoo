@@ -52,7 +52,7 @@ class StockRule(models.Model):
     company_id = fields.Many2one('res.company', 'Company',
         default=lambda self: self.env.company,
         domain="[('id', '=?', route_company_id)]")
-    location_id = fields.Many2one('stock.location', 'Destination Location', required=True, check_company=True)
+    location_dest_id = fields.Many2one('stock.location', 'Destination Location', required=True, check_company=True)
     location_src_id = fields.Many2one('stock.location', 'Source Location', check_company=True)
     route_id = fields.Many2one('stock.location.route', 'Route', required=True, ondelete='cascade')
     route_company_id = fields.Many2one(related='route_id.company_id', string='Route Company')
@@ -437,7 +437,58 @@ class ProcurementGroup(models.Model):
             raise_exception(procurement_errors)
         return True
 
+    # domain can contain:
+    # FROM _get_rule-_get_rule_domain:
+    # ['&', ('location_id', '=', location.id), ('action', '!=', 'push')]
+    # ['|', ('company_id', '=', False), ('company_id', 'child_of', values['company_id'].ids)]
+    # for dropshing : [('location_id', '=', location.id), ('action', '!=', 'push'), ('company_id', '=', values['company_id'].id)]
+
+    # push_apply : [('location_src_id', '=', move.location_dest_id.id), ('action', 'in', ('push', 'pull_push'))]
+    # _adjust_procure_method : [('location_src_id', '=', move.location_id.id), ('location_id', '=', move.location_dest_id.id), ('action', '!=', 'push')]
+
+    # domain = 
+    # action: pull or push
+    # location_dest_id : 
+    # location_src_id: 
+    # companies_id: 
+
     @api.model
+    def _search_rule_domain(self, action, warehouse=False, companies=False, location_src=False, location_dest=False):
+        if action == 'pull':
+            domain = [(action, '!=', 'push')]
+        else:
+            domain = [(action, 'in', (action, 'pull_push'))]
+        if warehouse:
+            expression.AND([domain, ['|', ('warehouse_id', '=', warehouse.id), ('warehouse_id', '=', False)]])
+        if companies and self.env.su:
+            expression.AND([domain, ['|', ('company_id', '=', False), ('company_id', 'child_of', companies.ids)]])
+        if location_src:
+            expression.AND([domain, [('location_src_id', '=', location_src.id)]])
+        if location_dest:
+            expression.AND([domain, [('location_dest_id', '=', location_dest.id)]])
+        return domain
+
+    @api.model
+    def _new_search_rule(self, product_id, action, preferred_route_ids=False, warehouse_id=False, companies=False, location_src_id=False, location_dest_id=False):
+        """ First find a rule among the ones defined on the procurement
+        group, then try on the routes defined for the product, finally fallback
+        on the default behavior
+        """
+        domain = self._search_rule_domain()
+        Rule = self.env['stock.rule']
+        res = self.env['stock.rule']
+        if preferred_route_ids:
+            res = Rule.search(expression.AND([[('route_id', 'in', preferred_route_ids.ids)], domain]), order='route_sequence, sequence, id', limit=1)
+        if not res:
+            product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
+            if product_routes:
+                res = Rule.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence, id', limit=1)
+        if not res and warehouse_id:
+            warehouse_routes = warehouse_id.route_ids
+            if warehouse_routes:
+                res = Rule.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence, id', limit=1)
+        return res
+
     def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
         """ First find a rule among the ones defined on the procurement
         group, then try on the routes defined for the product, finally fallback
@@ -448,19 +499,19 @@ class ProcurementGroup(models.Model):
         Rule = self.env['stock.rule']
         res = self.env['stock.rule']
         if route_ids:
-            res = Rule.search(expression.AND([[('route_id', 'in', route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
+            res = Rule.search(expression.AND([[('route_id', 'in', route_ids.ids)], domain]), order='route_sequence, sequence, id', limit=1)
         if not res and packaging_id:
             packaging_routes = packaging_id.route_ids
             if packaging_routes:
-                res = Rule.search(expression.AND([[('route_id', 'in', packaging_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Rule.search(expression.AND([[('route_id', 'in', packaging_routes.ids)], domain]), order='route_sequence, sequence, id', limit=1)
         if not res:
             product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
             if product_routes:
-                res = Rule.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Rule.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence, id', limit=1)
         if not res and warehouse_id:
             warehouse_routes = warehouse_id.route_ids
             if warehouse_routes:
-                res = Rule.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Rule.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence, id', limit=1)
         return res
 
     @api.model
