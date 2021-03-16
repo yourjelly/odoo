@@ -29,8 +29,5 @@ This module includes contact phone and mobile numbers validation.""",
         'web.assets_tests': [
             'website_crm/static/tests/**/*',
         ],
-        'web.assets_qweb': [
-            'website_crm/static/src/xml/*.xml',
-        ],
     }
 }

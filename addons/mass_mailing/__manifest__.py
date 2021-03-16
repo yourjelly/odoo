@@ -73,9 +73,6 @@
             'mass_mailing/static/src/js/mass_mailing_snippets.js',
             'mass_mailing/static/tests/mass_mailing_html_tests.js',
         ],
-        'mass_mailing.mass_mailing_mail_style': [
-            
-        ],
         'web.assets_qweb': [
             'mass_mailing/static/src/xml/*.xml',
         ],
