@@ -316,8 +316,6 @@ const Wysiwyg = Widget.extend({
 
         await this.saveModifiedImages();
         await this._saveViewBlocks();
-        // await this._saveCoverPropertiesBlocks();
-        // await this._saveMegaMenuClasses();
 
         this.trigger_up('edition_was_stopped');
         window.onbeforeunload = null;
