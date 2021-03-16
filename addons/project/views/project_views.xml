@@ -692,7 +692,8 @@
                         <page name="description_page" string="Description">
                             <field name="description" type="html"/>
                         </page>
-                        <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
+                        <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False), ('child_ids_length', '=', '0')]}">
+                            <field name="child_ids_length" invisible="1"/>
                             <field name="child_ids" context="{'default_project_id': False, 'default_stage_id': stage_id}">
                                 <tree editable="bottom" class="o_visible_btn_onhover">
                                     <field name="is_closed" invisible="1"/>
@@ -857,7 +858,6 @@
                     <field name="rating_last_value"/>
                     <field name="rating_ids"/>
                     <field name="allow_subtasks"/>
-                    <field name="child_ids" />
                     <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger", "normal": "muted"}'/>
                     <templates>
                     <t t-name="kanban-box">
@@ -865,7 +865,8 @@
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_top">
                                     <div class="o_kanban_record_headings">
-                                        <strong class="o_kanban_record_title"><field name="name" widget="name_with_subtask_count"/></strong>
+                                        <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                        <span class="text-muted"><field name="child_text" attrs="{'invisible': ['|', ('allow_subtasks', '=', False), ('child_text', '=', False)]}"/></span>
                                         <span  invisible="context.get('default_project_id', False) or context.get('fsm_mode', False)"><br/><field name="project_id" required="1"/></span>
                                         <br />
                                         <t t-if="record.partner_id.value">
@@ -940,7 +941,7 @@
                     <field name="allow_subtasks" invisible="1" />
                     <field name="sequence" invisible="1" readonly="1"/>
                     <field name="name" widget="name_with_subtask_count"/>
-                    <field name="child_ids" invisible="1"/>
+                    <field name="child_text" invisible="1"/>
                     <field name="project_id" optional="show" readonly="1"/>
                     <field name="partner_id" optional="hide"/>
                     <field name="parent_id" optional="hide" attrs="{'invisible': [('allow_subtasks', '=', False)]}" groups="base.group_no_one"/>

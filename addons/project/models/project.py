@@ -629,6 +629,8 @@ class Task(models.Model):
     is_closed = fields.Boolean(related="stage_id.is_closed", string="Closing Stage", readonly=True, related_sudo=False)
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
+    child_text = fields.Char(compute="_compute_child_text")
+    child_ids_length = fields.Char(compute="_compute_child_ids_length")
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related='effective_project_id.allow_subtasks', readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index=True,
@@ -938,6 +940,16 @@ class Task(models.Model):
     def _compute_subtask_planned_hours(self):
         for task in self:
             task.subtask_planned_hours = sum(child_task.planned_hours + child_task.subtask_planned_hours for child_task in task.child_ids)
+
+    @api.depends('child_ids')
+    def _compute_child_text(self):
+        for task in self:
+            task.child_text = _("(+ %(child_count)s task%(plural)s)", child_count=len(task.child_ids), plural="s" if len(task.child_ids) > 1 else "") if len(task.child_ids) else False
+
+    @api.depends('child_ids')
+    def _compute_child_ids_length(self):
+        for task in self:
+            task.child_ids_length = len(task.child_ids)
 
     @api.depends('child_ids')
     def _compute_subtask_count(self):
