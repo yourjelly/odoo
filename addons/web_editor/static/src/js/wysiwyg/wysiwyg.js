@@ -1000,7 +1000,7 @@ const Wysiwyg = Widget.extend({
         return options;
     },
     _insertSnippetMenu: function() {
-        return this.snippetsMenu.insertAfter(this.$el);
+        return this.snippetsMenu.insertBefore(this.$el);
     },
     /**
      * If the element holds a translation, saves it. Otherwise, fallback to the
