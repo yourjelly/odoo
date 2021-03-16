@@ -55,7 +55,7 @@
             <field name="name">Tasks</field>
             <field name="res_model">project.task</field>
             <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
-            <field name="domain">[('project_id', '=', active_id)]</field>
+            <field name="domain">[('informal_project_id', '=', active_id)]</field>
             <field name="context">{
                 'pivot_row_groupby': ['user_id'],
                 'default_project_id': active_id,
@@ -664,7 +664,7 @@
                     <group>
                         <group>
                             <field name="project_id" attrs="{'required': [('parent_id', '=', False)], 'invisible': [('parent_id', '!=', False)]}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
-                            <field name="informal_project_id" string="Project" attrs="{'invisible': [('parent_id', '!=', False)]}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                            <field name="informal_project_id" string="Project" attrs="{'invisible': [('parent_id', '=', False)]}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
                             <field name="user_id"
                                 class="o_task_user_field"
                                 options="{'no_open': True}"

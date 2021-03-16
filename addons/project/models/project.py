@@ -937,6 +937,19 @@ class Task(models.Model):
             task.access_warning = _(
                 "The task cannot be shared with the recipient(s) because the privacy of the project is too restricted. Set the privacy of the project to 'Visible by following customers' in order to make it accessible by the recipient(s).")
 
+    @api.depends('parent_id.project_id', 'project_id')
+    def _compute_informal_project_id(self):
+        for task in self:
+            if task.project_id == task.parent_id.project_id:
+                task.informal_project_id = False
+            else:
+                task.informal_project_id = task.project_id
+
+    def _inverse_informal_project_id(self):
+        for task in self:
+            if task.informal_project_id:
+                task.project_id = task.informal_project_id
+
     @api.depends('child_ids.planned_hours')
     def _compute_subtask_planned_hours(self):
         for task in self:
