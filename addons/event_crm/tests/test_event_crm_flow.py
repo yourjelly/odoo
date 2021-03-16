@@ -145,3 +145,55 @@ class TestEventCrmFlow(TestEventCrmCommon):
         })
         self.assertEqual(len(self.event_0.registration_ids), 4)
         self.assertLeadConvertion(self.test_rule_attendee, registration, partner=None)
+
+    def test_event_crm_lead_merge(self):
+       """ lead rule are based on
+                1.Per attendee [attendee]
+                2.Per Order [order]
+        leads are triggered on following conditions
+            1. Attendees are created [create]
+            2. Attendees are confirmed [confirm]
+            3.Attendees are atttended [done]
+            """
+
+        #case based on 'per attendee' and 'create'
+
+       #creating rule and adding a template
+
+       print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+       print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+       print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+       print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+       registration = self.env['event.registration'].create({
+           'partner_id': self.event_customer.id,
+           'event_id': self.event_0.id,
+       })
+
+       print("reg id..........",registration)
+
+       lead1 = self.env['crm.lead'].create({
+           'name' : 'event per attendee - TestEvent',
+           'email_from' : 'testattendee@example.com',
+           'registration_ids' : [4,registration.id]
+       })
+       # print("lead 11111111111",lead1)
+       lead2 = self.env['crm.lead'].create({
+           'name' : 'Test lead',
+           'email_from' : 'testlead@example.com',
+       })
+       leads = lead1 | lead2
+       print("leads,,,,,,,,,,,,,,,",leads)
+
+       leads = self.env['crm.lead'].browse(leads.ids)._sort_by_confidence_level(reverse=True)
+       print("\n\nleads sorted")
+       for i in leads:
+           print(i.name)
+       result = leads._merge_opportunity(auto_unlink=False, max_length=None)
+       print("result...",result.registration_ids)
+
+       with self.assertLeadMerged(lead1, leads,
+                                  name='event per attendee - TestEvent'
+                                  ):
+            abc = leads._merge_opportunity(auto_unlink=False, max_length=None)
+
+            print("merge ................",abc)

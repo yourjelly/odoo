@@ -363,6 +363,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         # save opportunity value before being modified by merge process
         fields_all = self.FIELDS_FIRST_SET + ['description', 'type', 'priority']
         # ensure tests are synchronized with crm code
+
         self.assertTrue(all(field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE + list(self.env['crm.lead']._merge_get_fields_specific().keys())))
         original_opp_values = dict(
             (fname, opportunity[fname])
@@ -396,6 +397,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         finally:
             # support specific values caller may want to check in addition to generic tests
             for fname, expected in expected.items():
+                # print("fname>>>>>>>>>>>>>>>>>>>>>",fname)
                 self.assertEqual(opportunity[fname], expected)
 
             # classic fields: first not void wins or specific computation

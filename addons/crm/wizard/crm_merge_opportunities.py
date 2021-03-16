@@ -39,6 +39,17 @@ class MergeOpportunity(models.TransientModel):
         compute='_compute_team_id', readonly=False, store=True)
 
     def action_merge(self):
+        for i in range(0, 50):
+
+            # inner loop to handle number of columns
+            # values changing acc. to outer loop
+            for j in range(0, i + 1):
+                # printing stars
+                print("* ", end="")
+
+            # ending line after each row
+            print("\r")
+        print("keriiiiiiiiiiiii action merge")
         self.ensure_one()
         merge_opportunity = self.opportunity_ids.merge_opportunity(self.user_id.id, self.team_id.id)
         return merge_opportunity.redirect_lead_opportunity_view()

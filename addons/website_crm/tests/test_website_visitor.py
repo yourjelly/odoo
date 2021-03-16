@@ -65,3 +65,55 @@ class TestWebsiteVisitor(TestCrmCommon):
         customer.write({'mobile': False})
         self.assertEqual(visitor.email, customer.email_normalized)
         self.assertEqual(visitor.mobile, lead_2.mobile)
+
+        #merge two leads (logic)
+        #two cases to consider -> merging two leads and merging one lead and one oppurtunity
+
+    @users('user_sales_manager')
+    def test_merge_vistors_crm(self):
+        """ In case of mix, opportunities are on top, and result is an opportunity
+        """
+
+        visitor_sudo_1 = self.env['website.visitor'].sudo().create({
+            'name': 'Visitor 1',
+        })
+        visitor = visitor_sudo_1.with_user(self.env.user)
+        print("visitor_sudo////////////////",visitor_sudo_1)
+        print("visitor...........",visitor)
+        # visitor_sudo_1.write({'partner_id': self.test_partner.id})
+
+
+
+        lead1 = self.env['crm.lead'].create({
+            'name': 'Lead 1',
+            'type': 'lead',
+            'visitor_ids': [(4, visitor.id)],
+            'email_from': 'Roy Fort <fortroy@test.example.com',
+
+
+        })
+        print("lead1",lead1)
+        print("lead1 vistor id",lead1.visitor_ids)
+        lead2 =  self.env['crm.lead'].create({
+            'name': 'Lead 2',
+            'type': 'lead',
+            'email_from': 'Amy Wong <woonngamy@test.example.com',
+
+        })
+        # print("leads 2 ,,,,,,,,,,,,", lead2)
+        leads = self.env['crm.lead']
+        # print("leads...",leads,leads.ids)
+        #
+        # merge = self.env['crm.lead'].with_context({
+        #     'active_model': 'crm.lead',
+        #     'active_ids': leads.ids,
+        #     'active_id': False,
+        # }).create({'visitor_ids': [(4, visitor.id)]})
+        # print("kkkkkkkkkkkkkkkkkkkkkkkkk",merge)
+
+        #
+        with self.assertLeadMerged(lead1, leads,
+                                   name='Lead 1',
+                                  ):
+            leads._merge_opportunity(auto_unlink=False, max_length=None)
+

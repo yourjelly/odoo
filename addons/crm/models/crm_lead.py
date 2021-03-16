@@ -1027,6 +1027,7 @@ class Lead(models.Model):
             :return dict: dictionary value for created Meeting view
         """
         self.ensure_one()
+        print("keriiiiiiiiiiiiii")
         action = self.env["ir.actions.actions"]._for_xml_id("calendar.action_calendar_event")
         partner_ids = self.env.user.partner_id.ids
         if self.partner_id:
@@ -1272,6 +1273,35 @@ class Lead(models.Model):
                 attachment.write(values)
         return True
 
+    def _merge_opportunity_activity(self, opportunities):
+        """ Move mail.activity from the given opportunities to the current one. `self` is the
+            crm.lead record destination for activity of `opportunities`.
+
+        :param opportunities: see ``merge_dependences``
+        """
+        self.ensure_one()
+        # print("////////////////////////////_merge_opportunity_activity//////////////////////////")
+        for opportunity in opportunities:
+            for activity in opportunity.activity_ids:
+                activity.write({
+                    'res_id': self.id,
+                })
+        return True
+
+    def _merge_opportunity_calender_event(self, opportunities):
+        """ Move calender.event from the given opportunities to the current one. `self` is the
+            crm.lead record destination for event of `opportunities`.
+
+        :param opportunities: see ``merge_dependences``
+        """
+        # print("MERGE CALENDER EVENT")
+        self.ensure_one()
+        meeting_data = self.env['calendar.event'].sudo().search([('opportunity_id', 'in', opportunities.ids)])
+        meeting_data.write({'res_id': self.id,
+                            'opportunity_id': self.id,
+                            })
+        return True
+
     def _merge_dependences(self, opportunities):
         """ Merge dependences (messages, attachments, ...). These dependences will be
             transfered to `self`, the most important lead.
@@ -1279,9 +1309,12 @@ class Lead(models.Model):
         :param opportunities : recordset of opportunities to transfer. Does not
           include `self` which is the target crm.lead being the result of the merge.
         """
+        # print("***************************************_merge_dependences****************************************************")
         self.ensure_one()
         self._merge_opportunity_history(opportunities)
         self._merge_opportunity_attachments(opportunities)
+        self._merge_opportunity_calender_event(opportunities)
+        self._merge_opportunity_activity(opportunities)
 
     def merge_opportunity(self, user_id=False, team_id=False, auto_unlink=True):
         """ Merge opportunities in one. Different cases of merge:
@@ -1303,6 +1336,18 @@ class Lead(models.Model):
         This should not be called by action buttons.
 
         See ``merge_opportunity`` for more details. """
+
+        # print("from test merge method")
+        # for i in range(0, 50):
+        #
+        #     # inner loop to handle number of columns
+        #     # values changing acc. to outer loop
+        #     for j in range(0, i + 1):
+        #         # printing stars
+        #         print("* ", end="")
+        #
+        #     # ending line after each row
+        #     print("\r")
         if len(self.ids) <= 1:
             raise UserError(_('Please select more than one element (lead or opportunity) from the list view.'))
 
@@ -1310,15 +1355,15 @@ class Lead(models.Model):
             raise UserError(_("To prevent data loss, Leads and Opportunities can only be merged by groups of %(max_length)s."))
 
         opportunities = self._sort_by_confidence_level(reverse=True)
-
+        # print("oppr........................",opportunities)
         # get SORTED recordset of head and tail, and complete list
         opportunities_head = opportunities[0]
         opportunities_tail = opportunities[1:]
-
+        # print("head..............",opportunities_head)
         # merge all the sorted opportunity. This means the value of
         # the first (head opp) will be a priority.
         merged_data = opportunities._merge_data(self._merge_get_fields())
-
+        # print("merged data.............",merged_data)
         # force value for saleperson and Sales Team
         if user_id:
             merged_data['user_id'] = user_id
@@ -1347,6 +1392,7 @@ class Lead(models.Model):
         return opportunities_head
 
     def _merge_get_fields_specific(self):
+        # print("_merge_get_fields_specific in crm")
         return {
             'description': lambda fname, leads: '\n\n'.join(desc for desc in leads.mapped('description') if desc),
             'type': lambda fname, leads: 'opportunity' if any(lead.type == 'opportunity' for lead in leads) else 'lead',
@@ -1354,6 +1400,7 @@ class Lead(models.Model):
         }
 
     def _merge_get_fields(self):
+        print("_merge_get_fields",list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys()))
         return list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys())
 
     def _convert_opportunity_data(self, customer, team_id=False):

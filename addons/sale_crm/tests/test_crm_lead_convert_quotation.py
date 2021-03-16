@@ -3,6 +3,7 @@
 
 
 from odoo.addons.crm.tests import common as crm_common
+from odoo.addons.sale import TestSaleCommon
 from odoo.tests.common import tagged, users
 
 
@@ -98,3 +99,4 @@ class TestLeadConvertToTicket(crm_common.TestCrmCommon):
         self.assertEqual(new_partner, self.env['res.partner'])
         self.assertEqual(lead.partner_id, self.env['res.partner'])
         self.assertEqual(action['context']['default_partner_id'], False)
+

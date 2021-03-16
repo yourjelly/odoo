@@ -68,3 +68,4 @@ class TestEventNotifications(TransactionCase):
         self.assertNotIn(self.partner, self.event.attendee_ids.partner_id, "It should have removed the attendee")
         self.assertNotIn(self.partner, self.event.message_follower_ids.partner_id, "It should have unsubscribed the partner")
         self.assertIn(partner_bis, self.event.attendee_ids.partner_id, "It should have left the attendee")
+   
