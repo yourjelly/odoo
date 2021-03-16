@@ -205,7 +205,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             $target: this._targetForEdition(),
         });
         if (this.$welcomeMessage) {
-            this.$welcomeMessage.detach(); // detach from the readonly rendering before the clone by summernote
+            this.$welcomeMessage.detach(); // detach from the readonly rendering before the clone by wysiwyg.
         }
         this.editModeEnable = true;
 
@@ -218,9 +218,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 onFailure: reject,
             });
         });
-        // Trigger a mousedown on the main edition area to focus it,
-        // which is required for Summernote to activate.
-        this.$editorMessageElements.mousedown();
 
         const $loader = $('div.o_theme_install_loader_container');
         if ($loader) {
