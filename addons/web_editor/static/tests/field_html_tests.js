@@ -204,12 +204,6 @@ QUnit.module('web_editor', {}, function () {
                 debug: 1,
             });
 
-            // Summernote needs a RootWidget to set as parent of the ColorPaletteWidget. In the
-            // tests, there is no RootWidget, so we set it here to the parent of the form view, which
-            // can act as RootWidget, as it will honor rpc requests correctly (to the MockServer).
-            const rootWidget = odoo.__DEBUG__.services['root.widget'];
-            odoo.__DEBUG__.services['root.widget'] = form.getParent();
-
             await testUtils.form.clickEdit(form);
             var $field = form.$('.oe_form_field[name="body"]');
 
@@ -267,7 +261,6 @@ QUnit.module('web_editor', {}, function () {
                 '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font style="" class="bg-o-color-3">oto&nbsp;</font><font class="bg-o-color-3" style="">to</font>to</p><p>tata</p>',
                 "should have rendered the field correctly in edit");
 
-            odoo.__DEBUG__.services['root.widget'] = rootWidget;
             form.destroy();
         });
 
