@@ -346,6 +346,8 @@ class Partner(models.Model):
                 def convert(value):
                     return value.id if isinstance(value, models.BaseModel) else value
                 result['value'] = {key: convert(self.parent_id[key]) for key in address_fields}
+        if self.parent_id and self.lang != self.parent_id.lang :
+            self.lang = self.parent_id.lang
         return result
 
     @api.onchange('country_id')
