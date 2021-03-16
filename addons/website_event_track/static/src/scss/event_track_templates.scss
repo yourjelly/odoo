@@ -135,7 +135,7 @@
                     padding: 0.3em;
                 }
                 // For unpublished tracks, opacity is already reduced
-                [data-publish='off'] .o_weagenda_track_badges > .badge {
+                [data-publish='off'] .o_weagenda_track_badges > .o_wevent_online_badge_unpublished {
                     opacity: unset;
                 }
 
