@@ -469,48 +469,31 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         actionSetCustomerCount(order, count) {
             this.updateRecord('pos.order', order.id, { customer_count: count });
         },
-        async actionSplitOrder(originalOrder, newOrder, splitlines, noDecrease) {
-            if (this._isFullPayOrder(originalOrder, splitlines)) {
-                this.actionDeleteOrder(newOrder);
-            } else {
-                for (const lineId in splitlines) {
-                    const split = splitlines[lineId];
-                    if (this.floatCompare(split.quantity, 0, 5) > 0) {
-                        const line = this.getRecord('pos.order.line', lineId);
-                        if (!noDecrease) {
-                            this.updateRecord('pos.order.line', line.id, { qty: line.qty - split.quantity });
-                            if (this.floatCompare(line.qty, 0, 5) === 0) {
-                                this.actionDeleteOrderline(originalOrder, line);
-                            }
-                        } else {
-                            const decreaseLine = this.cloneRecord('pos.order.line', line, {
-                                id: this._getNextId(),
-                                qty: -split.quantity,
-                            });
-                            this.addOrderline(originalOrder, decreaseLine);
-                        }
+        async actionSplitOrder(originalOrder, splitlines, noDecrease) {
+            if (!this._isFullPayOrder(originalOrder, splitlines)) {
+                let newOrder = await this._createDefaultOrder();
+
+                for(let splitID in splitlines) {
+                    const split = splitlines[splitID];
+                    let originalOrderLine = this.getRecord('pos.order.line', splitID)
+
+                    const line = this.cloneRecord('pos.order.line', originalOrderLine, {
+                        id: this._getNextId(),
+                        qty: split.quantity,
+                    });
+
+                    this.addOrderline(newOrder, line);
+
+                    let newQuantity = originalOrderLine.qty - line.qty;
+                    if(this.floatCompare(newQuantity, 0) === 0) {
+                        this.actionDeleteOrderline(originalOrder, originalOrderLine);
+                    } else {
+                        this.actionUpdateOrderline(originalOrderLine, { qty: newQuantity });
                     }
                 }
-                // for the kitchen printer we assume that everything
-                // has already been sent to the kitchen before splitting
-                // the bill. So we save all changes both for the old
-                // order and for the new one. This is not entirely correct
-                // but avoids flooding the kitchen with unnecessary orders.
-                // Not sure what to do in this case.
-                // TODO jcb
-                // if (newOrder._saveResumeChanges) {
-                //     this.currentOrder._saveResumeChanges();
-                //     newOrder._saveResumeChanges();
-                // }
-                this.actionSetCustomerCount(newOrder, 1);
-                const newCustomerCount =
-                    this.floatCompare(originalOrder.customer_count - 1, 0, 5) === 0
-                        ? 1
-                        : originalOrder.customer_count - 1;
-                this.actionSetCustomerCount(originalOrder, newCustomerCount);
-                await this.actionSelectOrder(newOrder);
+
+                this._setActiveOrderId(newOrder.id);
             }
-            delete newOrder._extras.temporary;
             await this.actionShowScreen('PaymentScreen');
         },
         async actionPrintResumeChanges(order) {

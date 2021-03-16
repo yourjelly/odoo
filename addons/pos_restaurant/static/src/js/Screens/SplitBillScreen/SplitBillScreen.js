@@ -12,17 +12,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function (require) {
             super(...arguments);
             useListener('click-line', this._onClickLine);
             this.splitlines = useState(this._initSplitLines(this.props.activeOrder));
-            this.newOrder = this.env.model.cloneRecord('pos.order', this.props.activeOrder, {
-                id: this.env.model._getNextId(),
-                lines: [],
-            });
-            this.newOrder._extras.temporary = true;
-            this._newOrderlines = {};
-        }
-        willUnmount() {
-            if (this.newOrder && this.newOrder._extras.temporary) {
-                this.env.actionHandler({ name: 'actionDeleteOrder', args: [this.newOrder] });
-            }
         }
         async onProceed() {
             if (this._hasEmptySplit()) {
@@ -30,14 +19,12 @@ odoo.define('pos_restaurant.SplitBillScreen', function (require) {
             } else {
                 await this.env.actionHandler({
                     name: 'actionSplitOrder',
-                    args: [this.props.activeOrder, this.newOrder, this.splitlines, this.props.disallow],
+                    args: [this.props.activeOrder, this.splitlines, this.props.disallow],
                 });
             }
         }
         _onClickLine(event) {
-            const line = event.detail;
-            this._splitQuantity(line);
-            this._updateNewOrder(line);
+            this._splitQuantity(event.detail);
         }
         /**
          * @param {models.Order} order
@@ -78,23 +65,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function (require) {
                         split.quantity = 0;
                     }
                 }
-            }
-        }
-        _updateNewOrder(line) {
-            const split = this.splitlines[line.id];
-            let orderline = this._newOrderlines[line.id];
-            if (this.env.model.floatCompare(split.quantity, 0) > 0) {
-                if (!orderline) {
-                    orderline = this.env.model.cloneRecord('pos.order.line', line, {
-                        id: this.env.model._getNextId(),
-                    });
-                    this._newOrderlines[line.id] = orderline;
-                    this.env.model.addOrderline(this.newOrder, orderline);
-                }
-                this.env.model.updateRecord('pos.order.line', orderline.id, { qty: split.quantity });
-            } else if (orderline) {
-                this.env.model.actionDeleteOrderline(this.newOrder, orderline);
-                this._newOrderlines[line.id] = null;
             }
         }
         _hasEmptySplit() {
