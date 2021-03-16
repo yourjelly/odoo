@@ -261,7 +261,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                     task_form.name = 'Test Task 2 becomes child of Task 1 (other company)'
                 task = task_form.save()
 
-                self.assertEqual(task.company_id, task.effective_project_id.company_id, "The company of the orphan subtask should be the one from its project.")
+                self.assertEqual(task.company_id, task.project_id.company_id, "The company of the orphan subtask should be the one from its project.")
 
     def test_cross_subtask_project(self):
         # set up default subtask project
@@ -274,8 +274,8 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
 
                 task = task_form.save()
 
-                self.assertEqual(task.effective_project_id, self.task_1.project_id, "The default project of a subtask should be the default subtask project of the project from the mother task")
-                self.assertEqual(task.company_id, task.effective_project_id.company_id, "The company of the orphan subtask should be the one from its project.")
+                self.assertEqual(task.project_id, self.task_1.project_id, "The default project of a subtask should be the default subtask project of the project from the mother task")
+                self.assertEqual(task.company_id, task.project_id.company_id, "The company of the orphan subtask should be the one from its project.")
                 self.assertEqual(self.task_1.child_ids.ids, [task.id])
 
         with self.sudo('employee-a'):
