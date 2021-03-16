@@ -590,6 +590,9 @@ class Task(models.Model):
         readonly=True)
     project_id = fields.Many2one('project.project', string='Project', store=True, readonly=False,
         index=True, tracking=True, check_company=True, change_default=True)
+    informal_project_id = fields.Many2one('project.project',
+        compute='_compute_informal_project_id', inverse='_inverse_informal_project_id', readonly=False,
+        store=True, index=True, check_company=True, change_default=True)
     planned_hours = fields.Float("Initially Planned Hours", help='Time planned to achieve this task (including its sub-tasks).', tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
@@ -952,7 +955,7 @@ class Task(models.Model):
     @api.depends('child_ids')
     def _compute_subtask_count(self):
         for task in self:
-            task.subtask_count = len(task._get_all_subtasks().filtered(lambda t: t.project_id))
+            task.subtask_count = len(task._get_all_subtasks().filtered(lambda t: t.informal_project_id))
 
     @api.onchange('company_id')
     def _onchange_task_company(self):

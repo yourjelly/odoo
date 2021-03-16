@@ -21,7 +21,7 @@
                     <field name="user_id"/>
                     <field name="partner_id" operator="child_of"/>
                     <field name="stage_id"/>
-                    <field name="project_id"/>
+                    <field string="Project" name="informal_project_id"/>
                     <filter string="My Tasks" name="my_tasks" domain="[('user_id', '=', uid)]"/>
                     <filter string="Followed Tasks" name="my_followed_tasks" domain="[('message_is_follower', '=', True)]" />
                     <filter string="Unassigned" name="unassigned" domain="[('user_id', '=', False)]"/>
@@ -663,7 +663,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="project_id" required="1" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                            <field name="project_id" attrs="{'required': [('parent_id', '=', False)], 'invisible': [('parent_id', '!=', False)]}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                            <field name="informal_project_id" string="Project" attrs="{'invisible': [('parent_id', '!=', False)]}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
                             <field name="user_id"
                                 class="o_task_user_field"
                                 options="{'no_open': True}"
@@ -1034,7 +1035,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
             <field name="context">{'search_default_my_tasks': 1}</field>
-            <field name="domain">[('project_id', '!=', False)]</field>
+            <field name="domain">[('informal_project_id', '!=', False)]</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -1051,7 +1052,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
             <field name="context">{'search_default_my_tasks': 1, 'all_task': 0}</field>
-            <field name="domain">[('project_id', '!=', False)]</field>
+            <field name="domain">[('informal_project_id', '!=', False)]</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -1088,7 +1089,7 @@
             <field name="name">Overpassed Tasks</field>
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,form,calendar,graph,kanban</field>
-            <field name="domain">[('is_closed', '=', False), ('date_deadline','&lt;',time.strftime('%Y-%m-%d')), ('project_id', '!=', False)]</field>
+            <field name="domain">[('is_closed', '=', False), ('date_deadline','&lt;',time.strftime('%Y-%m-%d')), ('informal_project_id', '!=', False)]</field>
             <field name="filter" eval="True"/>
             <field name="search_view_id" ref="view_task_search_form"/>
         </record>
@@ -1116,7 +1117,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="context">{'search_default_user_id': [active_id], 'default_user_id': active_id}</field>
-            <field name="domain">[('project_id', '!=', False)]</field>
+            <field name="domain">[('informal_project_id', '!=', False)]</field>
             <field name="binding_model_id" ref="base.model_res_users"/>
             <field name="binding_view_types">form</field>
         </record>

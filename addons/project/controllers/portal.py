@@ -21,7 +21,7 @@ class CustomerPortal(portal.CustomerPortal):
         if 'project_count' in counters:
             values['project_count'] = request.env['project.project'].search_count([])
         if 'task_count' in counters:
-            values['task_count'] = request.env['project.task'].search_count([('project_id', '!=', False)])
+            values['task_count'] = request.env['project.task'].search_count([('informal_project_id', '!=', False)])
         return values
 
     # ------------------------------------------------------------
