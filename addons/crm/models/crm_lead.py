@@ -1261,6 +1261,33 @@ class Lead(models.Model):
                 attachment.write(values)
         return True
 
+    def _merge_opportunity_activity(self, opportunities):
+        """ Move mail.activity from the given opportunities to the current one. `self` is the
+            crm.lead record destination for activity of `opportunities`.
+
+        :param opportunities: see ``merge_dependences``
+        """
+        self.ensure_one()
+        for opportunity in opportunities:
+            for activity in opportunity.activity_ids:
+                activity.write({
+                    'res_id': self.id,
+                })
+        return True
+
+    def _merge_opportunity_calender_event(self, opportunities):
+        """ Move calender.event from the given opportunities to the current one. `self` is the
+            crm.lead record destination for event of `opportunities`.
+
+        :param opportunities: see ``merge_dependences``
+        """
+        self.ensure_one()
+        meeting_data = self.env['calendar.event'].sudo().search([('opportunity_id', 'in', opportunities.ids)])
+        meeting_data.write({'res_id': self.id,
+                            'opportunity_id': self.id,
+                            })
+        return True
+
     def _merge_dependences(self, opportunities):
         """ Merge dependences (messages, attachments, ...). These dependences will be
             transfered to `self`, the most important lead.
@@ -1271,6 +1298,8 @@ class Lead(models.Model):
         self.ensure_one()
         self._merge_opportunity_history(opportunities)
         self._merge_opportunity_attachments(opportunities)
+        self._merge_opportunity_activity(opportunities)
+        self._merge_opportunity_calender_event(opportunities)
 
     def merge_opportunity(self, user_id=False, team_id=False, auto_unlink=True):
         """ Merge opportunities in one. Different cases of merge:

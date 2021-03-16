@@ -22,3 +22,9 @@ class Lead(models.Model):
     def _compute_registration_count(self):
         for record in self:
             record.registration_count = len(record.registration_ids)
+
+    def _merge_get_fields_specific(self):
+        fields_info = super(Lead, self)._merge_get_fields_specific()
+        # add all the attendees from all lead to merge
+        fields_info['registration_ids_ids'] = lambda fname, leads: [(6, 0, leads.registration_ids.ids)]
+        return fields_info
