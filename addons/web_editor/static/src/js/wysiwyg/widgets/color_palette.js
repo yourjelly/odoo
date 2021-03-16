@@ -38,7 +38,6 @@ const ColorPaletteWidget = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.summernoteCustomColorsArray = [].concat(...customColors);
         this.style = window.getComputedStyle(document.documentElement);
         this.options = _.extend({
             selectedColor: false,
@@ -91,7 +90,7 @@ const ColorPaletteWidget = Widget.extend({
             const $commonColorSection = this.$('[data-name="common"]');
             customColors.forEach((colorRow, i) => {
                 if (i === 0) {
-                    return; // Ignore the summernote gray palette and use ours
+                    return; // Ignore the wysiwyg gray palette and use ours
                 }
                 const $div = $('<div/>', {class: 'clearfix'}).appendTo($commonColorSection);
                 colorRow.forEach(color => {
@@ -176,9 +175,9 @@ const ColorPaletteWidget = Widget.extend({
             return;
         }
         this.el.querySelectorAll('.o_custom_color').forEach(el => el.remove());
-        const existingColors = new Set(this.summernoteCustomColorsArray.concat(
+        const existingColors = new Set(...customColors).concat(
             Object.keys(this.colorToColorNames)
-        ));
+        );
         this.trigger_up('get_custom_colors', {
             onSuccess: (colors) => {
                 colors.forEach(color => {
@@ -384,7 +383,7 @@ ColorPaletteWidget.loadDependencies = async function (rpcCapableObj) {
     const proms = [ajax.loadXML('/web_editor/static/src/xml/snippets.xml', qweb)];
 
     // Public user using the editor may have a colorpalette but with
-    // the default summernote ones.
+    // the default wysiwyg ones.
     if (!session.is_website_user) {
         // We can call the colorPalette multiple times but only need 1 rpc
         if (!colorpickerTemplateProm && !colorpickerArch) {
