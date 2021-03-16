@@ -2337,7 +2337,7 @@ var SnippetsMenu = Widget.extend({
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
-            if (tab === this.tabs.OPTIONS) {
+            if (tab === this.tabs.OPTIONS && !options.forceEmptyTab) {
                 this._addToolbar();
             }
         }
