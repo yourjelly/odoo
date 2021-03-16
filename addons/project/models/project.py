@@ -59,8 +59,8 @@ class ProjectTaskType(models.Model):
         self = self.with_context(active_test=False)
         # retrieves all the projects with a least 1 task in that stage
         # a task can be in a stage even if the project is not assigned to the stage
-        readgroup = self.with_context(active_test=False).env['project.task'].read_group([('stage_id', 'in', self.ids)], ['effective_project_id'], ['effective_project_id'])
-        project_ids = list(set([result['effective_project_id'][0] for result in readgroup] + self.project_ids.ids))
+        readgroup = self.with_context(active_test=False).env['project.task'].read_group([('stage_id', 'in', self.ids)], ['project_id'], ['project_id'])
+        project_ids = list(set([result['project_id'][0] for result in readgroup] + self.project_ids.ids))
 
         wizard = self.with_context(project_ids=project_ids).env['project.task.type.delete.wizard'].create({
             'project_ids': project_ids,
@@ -571,7 +571,7 @@ class Task(models.Model):
     stage_id = fields.Many2one('project.task.type', string='Stage', compute='_compute_stage_id',
         store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
         default=_get_default_stage_id, group_expand='_read_group_stage_ids',
-        domain="[('project_ids', '=', effective_project_id)]", copy=False)
+        domain="[('project_ids', '=', project_id)]", copy=False)
     tag_ids = fields.Many2many('project.tags', string='Tags')
     kanban_state = fields.Selection([
         ('normal', 'In Progress'),
@@ -590,8 +590,6 @@ class Task(models.Model):
         readonly=True)
     project_id = fields.Many2one('project.project', string='Project', store=True, readonly=False,
         index=True, tracking=True, check_company=True, change_default=True)
-    effective_project_id = fields.Many2one('project.project',
-        compute='_compute_effective_project_id', store=True, index=True, check_company=True, change_default=True)
     planned_hours = fields.Float("Initially Planned Hours", help='Time planned to achieve this task (including its sub-tasks).', tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
@@ -613,7 +611,7 @@ class Task(models.Model):
         string="Phone", readonly=False, store=True, copy=False)
     ribbon_message = fields.Char('Ribbon Message', compute='_compute_ribbon_message')
     partner_city = fields.Char(related='partner_id.city', readonly=False)
-    manager_id = fields.Many2one('res.users', string='Project Manager', related='effective_project_id.user_id', readonly=True)
+    manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True)
     company_id = fields.Many2one(
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False,
         required=True, copy=True, default=_default_company_id)
@@ -631,12 +629,12 @@ class Task(models.Model):
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
     child_text = fields.Char(compute="_compute_child_text")
     child_ids_length = fields.Char(compute="_compute_child_ids_length")
-    allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related='effective_project_id.allow_subtasks', readonly=True)
+    allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related='project_id.allow_subtasks', readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index=True,
         compute='_compute_email_from', store="True", readonly=False)
     allowed_user_ids = fields.Many2many('res.users', string="Visible to", groups='project.group_project_manager', compute='_compute_allowed_user_ids', store=True, readonly=False, copy=False)
-    project_privacy_visibility = fields.Selection(related='effective_project_id.privacy_visibility', string="Project Visibility")
+    project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
     # Computed field about working time elapsed between record creation and assignation/closing.
     working_hours_open = fields.Float(compute='_compute_elapsed', string='Working Hours to Assign', store=True, group_operator="avg")
     working_hours_close = fields.Float(compute='_compute_elapsed', string='Working Hours to Close', store=True, group_operator="avg")
@@ -646,7 +644,7 @@ class Task(models.Model):
     website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment'])])
 
     # recurrence fields
-    allow_recurring_tasks = fields.Boolean(related='effective_project_id.allow_recurring_tasks')
+    allow_recurring_tasks = fields.Boolean(related='project_id.allow_recurring_tasks')
     recurring_task = fields.Boolean(string="Recurrent")
     recurring_count = fields.Integer(string="Tasks in Recurrence", compute='_compute_recurring_count')
     recurrence_id = fields.Many2one('project.task.recurrence', copy=False)
@@ -859,7 +857,7 @@ class Task(models.Model):
 
     @api.constrains('allowed_user_ids')
     def _check_no_portal_allowed(self):
-        for task in self.filtered(lambda t: t.effective_project_id.privacy_visibility != 'portal'):
+        for task in self.filtered(lambda t: t.project_id.privacy_visibility != 'portal'):
             portal_users = task.allowed_user_ids.filtered('share')
             if portal_users:
                 user_names = ', '.join(portal_users[:10].mapped('name'))
@@ -871,32 +869,32 @@ class Task(models.Model):
             message_attachment_ids = task.mapped('message_ids.attachment_ids').ids  # from mail_thread
             task.attachment_ids = [(6, 0, list(set(attachment_ids) - set(message_attachment_ids)))]
 
-    @api.depends('effective_project_id.allowed_user_ids', 'effective_project_id.privacy_visibility')
+    @api.depends('project_id.allowed_user_ids', 'project_id.privacy_visibility')
     def _compute_allowed_user_ids(self):
         for task in self:
             portal_users = task.allowed_user_ids.filtered('share')
             internal_users = task.allowed_user_ids - portal_users
-            if task.effective_project_id.privacy_visibility == 'followers':
-                task.allowed_user_ids |= task.effective_project_id.allowed_internal_user_ids
+            if task.project_id.privacy_visibility == 'followers':
+                task.allowed_user_ids |= task.project_id.allowed_internal_user_ids
                 task.allowed_user_ids -= portal_users
-            elif task.effective_project_id.privacy_visibility == 'portal':
-                task.allowed_user_ids |= task.effective_project_id.allowed_portal_user_ids
-            if task.effective_project_id.privacy_visibility != 'portal':
+            elif task.project_id.privacy_visibility == 'portal':
+                task.allowed_user_ids |= task.project_id.allowed_portal_user_ids
+            if task.project_id.privacy_visibility != 'portal':
                 task.allowed_user_ids -= portal_users
-            elif task.effective_project_id.privacy_visibility != 'followers':
+            elif task.project_id.privacy_visibility != 'followers':
                 task.allowed_user_ids -= internal_users
 
     @api.depends('create_date', 'date_end', 'date_assign')
     def _compute_elapsed(self):
         task_linked_to_calendar = self.filtered(
-            lambda task: task.effective_project_id.resource_calendar_id and task.create_date
+            lambda task: task.project_id.resource_calendar_id and task.create_date
         )
         for task in task_linked_to_calendar:
             dt_create_date = fields.Datetime.from_string(task.create_date)
 
             if task.date_assign:
                 dt_date_assign = fields.Datetime.from_string(task.date_assign)
-                duration_data = task.effective_project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_assign, compute_leaves=True)
+                duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_assign, compute_leaves=True)
                 task.working_hours_open = duration_data['hours']
                 task.working_days_open = duration_data['days']
             else:
@@ -905,7 +903,7 @@ class Task(models.Model):
 
             if task.date_end:
                 dt_date_end = fields.Datetime.from_string(task.date_end)
-                duration_data = task.effective_project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_end, compute_leaves=True)
+                duration_data = task.project_id.resource_calendar_id.get_work_duration_data(dt_create_date, dt_date_end, compute_leaves=True)
                 task.working_hours_close = duration_data['hours']
                 task.working_days_close = duration_data['days']
             else:
@@ -932,7 +930,7 @@ class Task(models.Model):
 
     def _compute_access_warning(self):
         super(Task, self)._compute_access_warning()
-        for task in self.filtered(lambda x: x.effective_project_id.privacy_visibility != 'portal'):
+        for task in self.filtered(lambda x: x.project_id.privacy_visibility != 'portal'):
             task.access_warning = _(
                 "The task cannot be shared with the recipient(s) because the privacy of the project is too restricted. Set the privacy of the project to 'Visible by following customers' in order to make it accessible by the recipient(s).")
 
@@ -958,13 +956,13 @@ class Task(models.Model):
 
     @api.onchange('company_id')
     def _onchange_task_company(self):
-        if self.effective_project_id.company_id != self.company_id:
-            self.effective_project_id = False
+        if self.project_id.company_id != self.company_id:
+            self.project_id = False
 
-    @api.depends('effective_project_id.company_id')
+    @api.depends('project_id.company_id')
     def _compute_company_id(self):
-        for task in self.filtered(lambda task: task.effective_project_id):
-            task.company_id = task.effective_project_id.company_id
+        for task in self.filtered(lambda task: task.project_id):
+            task.company_id = task.project_id.company_id
 
     @api.depends('project_id', 'parent_id.stage_id')
     def _compute_stage_id(self):
@@ -1020,7 +1018,7 @@ class Task(models.Model):
         res = super(Task, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
         if partner_ids:
             new_allowed_users = self.env['res.partner'].browse(partner_ids).user_ids.filtered('share')
-            tasks = self.filtered(lambda task: task.effective_project_id.privacy_visibility == 'portal')
+            tasks = self.filtered(lambda task: task.project_id.privacy_visibility == 'portal')
             tasks.sudo().write({'allowed_user_ids': [(4, user.id) for user in new_allowed_users]})
         return res
 
@@ -1113,7 +1111,7 @@ class Task(models.Model):
                 vals['recurrence_id'] = recurrence.id
         tasks = super().create(vals_list)
         for task in tasks:
-            if task.effective_project_id.privacy_visibility == 'portal':
+            if task.project_id.privacy_visibility == 'portal':
                 task._portal_ensure_token()
         return tasks
 
@@ -1164,7 +1162,7 @@ class Task(models.Model):
         result = super(Task, tasks).write(vals)
         # rating on stage
         if 'stage_id' in vals and vals.get('stage_id'):
-            self.filtered(lambda x: x.effective_project_id.rating_active and x.effective_project_id.rating_status == 'stage')._send_task_rating_mail(force_send=True)
+            self.filtered(lambda x: x.project_id.rating_active and x.project_id.rating_status == 'stage')._send_task_rating_mail(force_send=True)
         return result
 
     def update_date_end(self, stage_id):
@@ -1188,7 +1186,7 @@ class Task(models.Model):
         for task in self.filtered(lambda t: not t.user_id):
             task.user_id = task.parent_id.user_id
 
-    @api.depends('parent_id.partner_id', 'effective_project_id.partner_id')
+    @api.depends('parent_id.partner_id', 'project_id.partner_id')
     def _compute_partner_id(self):
         """
         If a task has no partner_id, use the project partner_id if any, or else the parent task partner_id.
@@ -1198,23 +1196,15 @@ class Task(models.Model):
         """
         for task in self:
             if task.partner_id:
-                if task.effective_project_id.partner_id:
-                    task.partner_id = task.effective_project_id.partner_id
+                if task.project_id.partner_id:
+                    task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.effective_project_id.partner_id or task.parent_id.partner_id
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
         for task in self:
             task.email_from = task.partner_id.email or ((task.partner_id or task.parent_id) and task.email_from) or task.parent_id.email_from
-
-    @api.depends('parent_id.effective_project_id', 'project_id')
-    def _compute_effective_project_id(self):
-        for task in self:
-            if not task.project_id:
-                task.effective_project_id = task.parent_id.effective_project_id
-            else:
-                task.effective_project_id = task.project_id
 
     # ---------------------------------------------------
     # Mail gateway
@@ -1257,7 +1247,7 @@ class Task(models.Model):
 
         group_func = lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups']
         if self.project_privacy_visibility == 'followers':
-            allowed_user_ids = self.effective_project_id.allowed_internal_user_ids.partner_id.ids
+            allowed_user_ids = self.project_id.allowed_internal_user_ids.partner_id.ids
             group_func = lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'] and pdata['id'] in allowed_user_ids
         new_group = ('group_project_user', group_func, {})
 
@@ -1268,8 +1258,8 @@ class Task(models.Model):
 
         groups = [new_group] + groups
 
-        if self.effective_project_id.privacy_visibility == 'portal':
-            allowed_user_ids = self.effective_project_id.allowed_portal_user_ids.partner_id.ids
+        if self.project_id.privacy_visibility == 'portal':
+            allowed_user_ids = self.project_id.allowed_portal_user_ids.partner_id.ids
             groups.insert(0, (
                 'allowed_portal_users',
                 lambda pdata: pdata['type'] == 'portal' and pdata['id'] in allowed_user_ids,

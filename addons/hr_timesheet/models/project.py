@@ -104,7 +104,7 @@ class Task(models.Model):
     _inherit = "project.task"
 
     analytic_account_active = fields.Boolean("Active Analytic Account", compute='_compute_analytic_account_active')
-    allow_timesheets = fields.Boolean("Allow timesheets", related='effective_project_id.allow_timesheets', help="Timesheets can be logged on this task.", readonly=True)
+    allow_timesheets = fields.Boolean("Allow timesheets", related='project_id.allow_timesheets', help="Timesheets can be logged on this task.", readonly=True)
     remaining_hours = fields.Float("Remaining Hours", compute='_compute_remaining_hours', store=True, readonly=True, help="Total remaining time, can be re-estimated periodically by the assignee of the task.")
     effective_hours = fields.Float("Hours Spent", compute='_compute_effective_hours', compute_sudo=True, store=True, help="Time spent on this task, excluding its sub-tasks.")
     total_hours_spent = fields.Float("Total Hours", compute='_compute_total_hours_spent', store=True, help="Time spent on this task, including its sub-tasks.")
