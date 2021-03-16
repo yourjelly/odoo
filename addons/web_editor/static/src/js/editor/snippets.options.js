@@ -1661,7 +1661,7 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
             widgetParent: 'body',
 
             // Open the datetimepicker on focus not on click. This allows to
-            // take care of a bug which is due to the summernote editor:
+            // take care of a bug which is due to the wysiwyg editor:
             // sometimes, the datetimepicker loses the focus then get it back
             // in the same execution flow. This was making the datepicker close
             // for no apparent reason. Now, it only closes then reopens directly
@@ -5721,8 +5721,8 @@ registry.many2one = SnippetOptionWidget.extend({
         // Rerender this same field in other places in the page (with different
         // contact-options). Many2ones with the same contact options will just
         // copy the HTML of the current m2o on content_changed. Not sure why we
-        // only do this for contacts, or why we do this here instead of in
-        // rte.summernote.js like we do for replacing text on content_changed
+        // only do this for contacts, or why we do this here instead of in the
+        // wysiwyg like we do for replacing text on content_changed
         const selector = [
             `[data-oe-model="${this.$target.data('oe-model')}"]`,
             `[data-oe-id="${this.$target.data('oe-id')}"]`,
