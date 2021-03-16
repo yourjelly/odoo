@@ -335,7 +335,7 @@ const Wysiwyg = Widget.extend({
     cancel: function (reload) {
         var self = this;
         return new Promise((resolve, reject) => {
-            if (!this.odooEditor.history.length) {
+            if (!this.odooEditor.historySize().length) {
                 resolve();
             } else {
                 var confirm = Dialog.confirm(this, _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."), {
