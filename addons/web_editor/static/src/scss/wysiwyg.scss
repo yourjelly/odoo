@@ -83,7 +83,7 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     .dropdown-menu.show { // To overcome .note-XXX .dropdown-menu rules
         min-width: 0;
     }
-    .dropdown-item { // To overcome summernote rules breaking this in iframes
+    .dropdown-item { // To overcome wysiwyg rules breaking this in iframes
         display: block;
         max-width: none;
         overflow: visible;

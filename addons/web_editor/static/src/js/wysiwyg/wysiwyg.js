@@ -63,21 +63,6 @@ const Wysiwyg = Widget.extend({
             context: {},
         },
     },
-    /**
-     * @options {Object} options
-     * @options {Object} options.recordInfo
-     * @options {Object} options.recordInfo.context
-     * @options {String} [options.recordInfo.context]
-     * @options {integer} [options.recordInfo.res_id]
-     * @options {String} [options.recordInfo.data_res_model]
-     * @options {integer} [options.recordInfo.data_res_id]
-     *   @see _getAttachmentsDomain in /wysiwyg/widgets/media.js
-     * @options {Object} options.attachments
-     *   @see _getAttachmentsDomain in /wysiwyg/widgets/media.js (for attachmentIDs)
-     * @options {function} options.generateOptions
-     *   called with the summernote configuration object used before sending to summernote
-     *   @see _editorOptions
-     **/
     init: function (parent, options) {
         this._super.apply(this, arguments);
         this.id = ++id;
