@@ -150,7 +150,7 @@ var RunningTourActionHelper = core.Class.extend({
 
         let toCenter = calculateCenter();
         values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
-        // recalculate the center as the mousemove might have made the element bigger.
+        // Recalculate the center as the mousemove might have made the element bigger.
         toCenter = calculateCenter();
         values.$element.trigger($.Event("mouseup", {which: 1, pageX: toCenter.left, pageY: toCenter.top}));
      },
