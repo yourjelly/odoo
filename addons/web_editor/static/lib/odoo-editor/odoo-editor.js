@@ -672,8 +672,11 @@ var exportVariable = (function (exports) {
 
     function getDeepestPosition(node, offset) {
         while (node.hasChildNodes()) {
-            const newNode = node.childNodes[offset - 1] || node.firstChild;
-            if (isEmptyBlock(newNode)) break;
+            let newNode = node.childNodes[offset - 1] || node.firstChild;
+            while (newNode && !isVisible(newNode)) {
+                newNode = newNode.nextSibling;
+            }
+            if (!newNode || isEmptyBlock(newNode)) break;
             node = newNode;
             offset = offset === 0 ? 0 : nodeSize(node);
         }
@@ -1072,6 +1075,9 @@ var exportVariable = (function (exports) {
      * @returns {boolean}
      */
     function isEmptyBlock(blockEl) {
+        if (blockEl.nodeType !== Node.ELEMENT_NODE) {
+            return false;
+        }
         if (isVisibleStr(blockEl.textContent)) {
             return false;
         }
@@ -2992,6 +2998,9 @@ var exportVariable = (function (exports) {
         historyCanRedo() {
             return this._getNextRedoIndex() >= 0;
         }
+        historySize() {
+            return this._historySteps.length;
+        }
 
         historyRevert(step, until = 0) {
             // apply dom changes by reverting history steps
@@ -4058,7 +4067,7 @@ var exportVariable = (function (exports) {
             // editable zones.
             this.automaticStepSkipStack();
             const link = closestElement(ev.target, 'a');
-            if (link) {
+            if (link && !link.querySelector('div')) {
                 this._stopContenteditable();
                 link.setAttribute('contenteditable', 'true');
             } else {
