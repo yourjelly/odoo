@@ -265,6 +265,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             records = this.wysiwyg.odooEditor.filterMutationRecords(records);
+            // Skip the step for this stack because if the editor undo the first
+            // step that has a dirty element, the following code would have
+            // generated a new stack and break the "redo" of the editor.
             this.wysiwyg.odooEditor.automaticStepSkipStack();
 
             for (const record of records) {
