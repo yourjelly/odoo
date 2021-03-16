@@ -191,7 +191,7 @@ var SnippetEditor = Widget.extend({
                     },
                     start: this._onDragAndDropStart.bind(this),
                     stop: (...args) => {
-                        // Delay our stop handler so that some summernote handlers
+                        // Delay our stop handler so that some wysiwyg handlers
                         // which occur on mouseup (and are themself delayed) are
                         // executed first (this prevents the library to crash
                         // because our stop handler may change the DOM).
