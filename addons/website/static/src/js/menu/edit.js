@@ -270,6 +270,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             for (const record of records) {
                 const $savable = $(record.target).closest(this.savableSelector);
 
+                if (record.attributeName === 'contenteditable') continue;
                 $savable.not('.o_dirty').each(function() {
                     const $el = $(this);
                     if (!$el.closest('[data-oe-readonly]').length) {
