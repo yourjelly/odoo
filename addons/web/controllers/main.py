@@ -40,7 +40,7 @@ from odoo.tools.translate import _
 from odoo.tools.misc import str2bool, xlsxwriter, file_open
 from odoo.tools.safe_eval import safe_eval, time
 from odoo import http, tools
-from odoo.http import content_disposition, dispatch_rpc, module_boot, module_installed, request, serialize_exception as _serialize_exception, Response
+from odoo.http import content_disposition, dispatch_rpc, module_boot, module_installed, request, serialize_exception as _serialize_exception
 from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
 from odoo.service import db, security

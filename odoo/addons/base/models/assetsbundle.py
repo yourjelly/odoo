@@ -344,7 +344,7 @@ class AssetsBundle(object):
             channel = (self.env.registry.db_name, 'bundle_changed')
             message = (self.name, self.version)
             self.env['bus.bus'].sendone(channel, message)
-            _logger.debug('Asset Changed: bundle: %s -- version: %s' % message)
+            _logger.debug('Asset Changed: bundle: %s -- version: %s', message, message)
 
         return attachment
 

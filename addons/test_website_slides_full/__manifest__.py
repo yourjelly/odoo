@@ -19,7 +19,6 @@ certification flow including purchase, certification, failure and success.
     'demo': [
         'data/product_demo.xml',
     ],
-    
     'installable': True,
     'assets': {
         'web.assets_tests': [

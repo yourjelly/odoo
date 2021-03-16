@@ -4,7 +4,6 @@
     'name': 'Tests flow of API keys',
     'category': 'Tools',
     'depends': ['web_tour'],
-    
     'assets': {
         'web.assets_tests': [
             # inside .
