@@ -1843,7 +1843,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     const { cancelled } = await this.actionSetOrderlineLots(mergeWith);
                     if (cancelled) return;
                 } else {
-                    mergeWith.qty += line.qty;
+                    this.actionUpdateOrderline(mergeWith, { qty: mergeWith.qty + line.qty });
                 }
                 this.actionSelectOrderline(order, mergeWith.id);
                 return mergeWith;

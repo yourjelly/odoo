@@ -12,6 +12,7 @@ class PosOrderLine(models.Model):
     note = fields.Char('Note added by the waiter.')
     mp_skip = fields.Boolean('Skip line when sending ticket to kitchen printers.')
     mp_dirty = fields.Boolean()
+    mp_hash = fields.Char(string='Multiprint ID', help='Used for the multiprint feature. To aid the proper computation of changes in the order.')
 
 
 class PosOrder(models.Model):

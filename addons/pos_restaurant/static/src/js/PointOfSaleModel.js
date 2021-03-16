@@ -93,7 +93,10 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             const result = this._super(...arguments);
             result.table_id = order.table_id;
             result.customer_count = order.customer_count;
-            result.multiprint_resume = order.multiprint_resume;
+            result.multiprint_resume =
+                typeof order.multiprint_resume === 'string'
+                    ? order.multiprint_resume
+                    : JSON.stringify(order.multiprint_resume);
             return result;
         },
         getOrderlineJSON(orderline) {
@@ -101,6 +104,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             result.mp_dirty = orderline.mp_dirty;
             result.mp_skip = orderline.mp_skip;
             result.note = orderline.note;
+            result.mp_hash = orderline.mp_hash;
             return result;
         },
         async actionSelectOrder(order) {
@@ -125,6 +129,8 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 ) {
                     vals.mp_dirty = true;
                 }
+            } else if ('note' in vals) {
+                vals.mp_dirty = true;
             } else if ('mp_skip' in vals) {
                 if (orderline.mp_dirty && vals.mp_skip && !orderline.mp_skip) {
                     vals.mp_skip = true;
@@ -150,6 +156,9 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             }
             if (!('note' in vals)) {
                 vals.note = '';
+            }
+            if (!('mp_hash' in vals)) {
+                vals.mp_hash = this._getNextId();
             }
             return this._super(...arguments);
         },
@@ -226,11 +235,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             return false;
         },
         _getLineDiffHash(orderline) {
-            if (orderline.note) {
-                return orderline.id + '|' + orderline.note;
-            } else {
-                return '' + orderline.id;
-            }
+            return `${orderline.mp_hash}` + (orderline.note ? `|${orderline.note}` : '');
         },
         _buildOrderResume(order) {
             const resume = {};
@@ -258,22 +263,18 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         _computeResumeChanges(order, categories) {
             const current_res = this._buildOrderResume(order);
-            const old_res = order.multiprint_resume || {};
+            const old_res = order.multiprint_resume
+                ? typeof order.multiprint_resume === 'string'
+                    ? JSON.parse(order.multiprint_resume)
+                    : order.multiprint_resume
+                : {};
             let add = [];
             let rem = [];
 
             for (const line_hash in current_res) {
                 const curr = current_res[line_hash];
-                let old = {};
-                let found = false;
-                for (const id in old_res) {
-                    if (old_res[id].product_id === curr.product_id) {
-                        found = true;
-                        old = old_res[id];
-                        break;
-                    }
-                }
-                if (!found) {
+                const old = old_res[line_hash];
+                if (!old) {
                     add.push({
                         id: curr.product_id,
                         name: this.getRecord('product.product', curr.product_id).display_name,
@@ -301,13 +302,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             }
 
             for (const line_hash in old_res) {
-                let found = false;
-                for (const id in current_res) {
-                    if (current_res[id].product_id === old_res[line_hash].product_id) {
-                        found = true;
-                    }
-                }
-                if (!found) {
+                if (!current_res[line_hash]) {
                     const old = old_res[line_hash];
                     rem.push({
                         id: old.product_id,
