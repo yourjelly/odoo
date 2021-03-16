@@ -4,7 +4,7 @@ odoo.define('website_blog.options', function (require) {
 require('web.dom_ready');
 const {qweb, _t} = require('web.core');
 const options = require('web_editor.snippets.options');
-require('website.snippets.options');
+require('website.editor.snippets.options');
 
 if (!$('.website_blog').length) {
     return Promise.reject("DOM doesn't contain '.website_blog'");
