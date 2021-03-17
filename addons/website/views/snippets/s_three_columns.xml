@@ -37,4 +37,14 @@
     </section>
 </template>
 
+<record id="assets_snippet_s_three_columns_css_000_05" model="ir.asset">
+    <field name="name">assets snippet s three columns css 000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="directive">append</field>
+    <field name="glob">website/static/src/snippets/s_three_columns/000.scss</field>
+    <field name="target" eval="None"></field>
+    <field name="active" eval="False"></field>
+    <field name="sequence" eval="16"></field>
+</record>
+
 </odoo>

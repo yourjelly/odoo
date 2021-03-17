@@ -94,4 +94,14 @@
     </xpath>
 </template>
 
+<record id="assets_snippet_s_popup_css_000_56" model="ir.asset">
+    <field name="name">assets snippet s popup css 000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="directive">append</field>
+    <field name="glob">website/static/src/snippets/s_popup/000.scss</field>
+    <field name="target" eval="None"></field>
+    <field name="active" eval="False"></field>
+    <field name="sequence" eval="16"></field>
+</record>
+
 </odoo>

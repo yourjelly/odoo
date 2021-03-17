@@ -36,4 +36,24 @@
 </template>
 
 <!-- Assets -->
+<record id="_assets_snippet_s_masonry_block_css_000_variables_b5" model="ir.asset">
+    <field name="name"> assets snippet s masonry block css 000 variables</field>
+    <field name="bundle">web._assets_primary_variables</field>
+    <field name="directive">append</field>
+    <field name="glob">website/static/src/snippets/s_masonry_block/000_variables.scss</field>
+    <field name="target" eval="None"></field>
+    <field name="active" eval="False"></field>
+    <field name="sequence" eval="16"></field>
+</record>
+
+<record id="assets_snippet_s_masonry_block_css_000_e0" model="ir.asset">
+    <field name="name">assets snippet s masonry block css 000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="directive">append</field>
+    <field name="glob">website/static/src/snippets/s_masonry_block/000.scss</field>
+    <field name="target" eval="None"></field>
+    <field name="active" eval="False"></field>
+    <field name="sequence" eval="16"></field>
+</record>
+
 </odoo>
