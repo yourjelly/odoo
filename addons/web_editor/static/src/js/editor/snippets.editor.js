@@ -247,7 +247,7 @@ var SnippetEditor = Widget.extend({
         // Before actually destroying a snippet editor, notify the parent
         // about it so that it can update its list of alived snippet editors.
         this.trigger_up('snippet_editor_destroyed');
-
+        if (this.$optionsSection) this.$optionsSection.remove();
         this._super(...arguments);
         this.$target.removeData('snippet-editor');
         this.$target.off('.snippet_editor');
@@ -628,6 +628,7 @@ var SnippetEditor = Widget.extend({
                 node.parentNode.removeChild(node);
             }
         });
+        this.$optionsSection = $optionsSection;
         $optionsSection.on('mouseenter', this._onOptionsSectionMouseEnter.bind(this));
         $optionsSection.on('mouseleave', this._onOptionsSectionMouseLeave.bind(this));
         $optionsSection.on('click', 'we-title > span', this._onOptionsSectionClick.bind(this));
@@ -1404,8 +1405,19 @@ var SnippetsMenu = Widget.extend({
             }
             // Destroy options whose $target are not in the DOM anymore but
             // only do it once all options executions are done.
-            this._mutex.exec(() => snippetEditor.destroy());
+            this._mutex.exec(() => {
+                snippetEditor.destroy();
+                const index = this.snippetEditors.indexOf(snippetEditor);
+                if (index !== -1) {
+                    this.snippetEditors.splice(index, 1);
+                }
+            });
         }
+        this._mutex.exec(() => {
+            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
+                this._activeEmptyOptionsTab();
+            }
+        });
     },
     activateCustomTab: function (content) {
         this._updateLeftPanelContent({content: content, tab: this.tabs.CUSTOM});
@@ -2319,25 +2331,25 @@ var SnippetsMenu = Widget.extend({
         clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
-        tab = tab || this.tabs.BLOCKS;
+        this._currentTab = tab || this.tabs.BLOCKS;
 
         if (content) {
             while (this.customizePanel.firstChild) {
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
-            if (tab === this.tabs.OPTIONS && !options.forceEmptyTab) {
+            if (this._currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
                 this._addToolbar();
             }
         }
 
-        this.$('.o_snippet_search_filter').toggleClass('d-none', tab !== this.tabs.BLOCKS);
-        this.$('#o_scroll').toggleClass('d-none', tab !== this.tabs.BLOCKS);
-        this.customizePanel.classList.toggle('d-none', tab === this.tabs.BLOCKS);
+        this.$('.o_snippet_search_filter').toggleClass('d-none', this._currentTab !== this.tabs.BLOCKS);
+        this.$('#o_scroll').toggleClass('d-none', this._currentTab !== this.tabs.BLOCKS);
+        this.customizePanel.classList.toggle('d-none', this._currentTab === this.tabs.BLOCKS);
         // Remove active class of custom button (e.g. mass mailing theme selection).
         this.$('#snippets_menu button').removeClass('active');
-        this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
-        this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS);
+        this.$('.o_we_add_snippet_btn').toggleClass('active', this._currentTab === this.tabs.BLOCKS);
+        this.$('.o_we_customize_snippet_btn').toggleClass('active', this._currentTab === this.tabs.OPTIONS);
     },
     /**
      * Scrolls to given snippet.
@@ -2418,6 +2430,18 @@ var SnippetsMenu = Widget.extend({
             });
         }
         return mutexExecResult;
+    },
+    /**
+     * Update the options pannel as being empty.
+     *
+     * @private
+     */
+    _activeEmptyOptionsTab() {
+        this._updateLeftPanelContent({
+            content: this.emptyOptionsTabContent,
+            tab: this.tabs.OPTIONS,
+            forceEmptyTab: true,
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -2594,11 +2618,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onOptionsTabClick: function (ev) {
         if (!ev.currentTarget.classList.contains('active')) {
-            this._updateLeftPanelContent({
-                content: this.emptyOptionsTabContent,
-                tab: this.tabs.OPTIONS,
-                forceEmptyTab: true,
-            });
+            this._activeEmptyOptionsTab();
         }
     },
     /**
