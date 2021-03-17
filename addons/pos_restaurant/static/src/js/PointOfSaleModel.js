@@ -89,6 +89,11 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             result.customer_count = 1;
             return result;
         },
+        _manageOrderWhenOrderDone() {
+            if(!this.ifaceFloorplan) {
+                this._super();
+            }
+        },
         getOrderJSON(order) {
             const result = this._super(...arguments);
             result.table_id = order.table_id;

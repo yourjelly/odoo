@@ -1629,6 +1629,16 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             return 60000;
         }
 
+        _manageOrderWhenOrderDone() {
+            const draftOrderList = this.getDraftOrders().filter(currentOrder => currentOrder !== this.getActiveOrder());
+            if(!draftOrderList.length){
+                const newOrder = this._createDefaultOrder();
+                this._setActiveOrderId(newOrder.id);
+            } else {
+                this._setActiveOrderId(draftOrderList[0].id);
+            }
+        }
+
         //#endregion UTILITY
 
         //#region LIFECYLE HOOKS
@@ -2060,9 +2070,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * @param {string} nextScreen name of screen to render
          */
         async actionOrderDone(order, nextScreen) {
-            const newOrder = this._createDefaultOrder();
+            this._manageOrderWhenOrderDone();
+
             this._tryDeleteOrder(order);
-            this._setActiveOrderId(newOrder.id);
             await this.actionShowScreen(nextScreen);
         }
         /**
