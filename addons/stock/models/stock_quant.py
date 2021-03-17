@@ -706,6 +706,7 @@ class StockQuant(models.Model):
         """
         self._quant_tasks()
         ctx = dict(self.env.context or {})
+        ctx['no_inventory_buttons'] = True
         ctx.pop('group_by', None)
         action = {
             'name': _('Stock On Hand'),

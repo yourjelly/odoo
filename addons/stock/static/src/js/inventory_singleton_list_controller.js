@@ -27,10 +27,6 @@ var SingletonListController = InventoryReportListController.extend({
      */
     renderButtons: function ($node) {
         this._super.apply(this, arguments);
-        if (this.context.no_inventory_buttons) {
-            this.$buttons.find('button.o_button_apply_inventory').hide();
-            this.$buttons.find('button.o_button_request_count_inventory').hide();
-        }
         this.$buttons.on('click', '.o_button_apply_inventory', this._onApplyInventory.bind(this));
         this.$buttons.on('click', '.o_button_request_count_inventory', this._onRequestCountInventory.bind(this));
     },
@@ -84,6 +80,18 @@ var SingletonListController = InventoryReportListController.extend({
         }
     },
 
+    _updateControlPanel: function () {
+        this._super.apply(this, arguments);
+
+        if (this.selectedRecords.length > 0 && ! this.context.no_inventory_buttons) {
+            $('.o_button_apply_inventory').removeClass('d-none');
+            $('.o_button_request_count_inventory').removeClass('d-none');
+        } else {
+            $('.o_button_apply_inventory').addClass('d-none');
+            $('.o_button_request_count_inventory').addClass('d-none');
+        }
+    },
+
     // -------------------------------------------------------------------------
     // Handlers
     // -------------------------------------------------------------------------
@@ -103,7 +111,7 @@ var SingletonListController = InventoryReportListController.extend({
                 context: this.context,
             }).then((result) => {
                 if (! result) {
-                    return self.do_action('stock.action_inventory_tree');
+                    return self.trigger_up('reload');
                 }
                 return self.do_action(result);
             })
@@ -137,14 +145,13 @@ var SingletonListController = InventoryReportListController.extend({
         var ids = this.getSelectedIds();
         var self = this;
         if ( ids.length ) {
-            return this._rpc({
-                model: 'stock.quant',
-                method: 'write',
-                args: [ids, { inventory_date: new moment().utc().format() }],
-                context: this.context,
-            }).then((result) => {
-                return self.do_action('stock.action_inventory_tree');
-            })
+            return this.do_action('stock.action_stock_request_count',
+            {
+                additional_context: {
+                        default_quant_ids: ids,
+                },
+                on_close: () => this.reload(),
+            });
         }
     },
 });
