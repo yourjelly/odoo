@@ -140,7 +140,7 @@
                 <we-button data-select-class="s_website_form_field_hidden">Hidden</we-button>
                 <we-button data-select-class="s_website_form_field_hidden_if">Visible only if</we-button>
             </we-select>
-            <we-row string="">
+            <we-row data-name="hidden_opt" string="">
                 <we-select data-name="hidden_condition_opt" data-no-preview="false">
                     <!-- Load every existing form input -->
                 </we-select>
