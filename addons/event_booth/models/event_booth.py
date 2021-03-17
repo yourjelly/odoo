@@ -69,3 +69,7 @@ class EventBooth(models.Model):
         if slots_list:
             self.env['event.booth.slot'].create(slots_list)
         return booths
+
+    def action_create_new_registration(self):
+        available_slot_ids = self.booth_slot_ids.filtered(lambda slot: slot.state == 'available')
+        return available_slot_ids.action_create_new_registration()

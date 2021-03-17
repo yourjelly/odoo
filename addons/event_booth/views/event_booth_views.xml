@@ -64,15 +64,11 @@
         <field name="arch" type="xml">
             <form string="Booths">
                 <header>
+                    <button name="action_create_new_registration" type="object" class="btn-primary"
+                            string="New Registration" states="available" groups="event.group_event_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button name="%(event_booth_slot_action)d" type="action" class="oe_stat_button"
-                                icon="fa-users" attrs="{'invisible': [('booth_slot_count', '=', 0)]}">
-                            <field name="booth_slot_count" widget="statinfo" string="Slots"/>
-                        </button>
-                    </div>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only" string="Name"/>
                         <h1><field name="name" placeholder="e.g. First Booth Alley 1"/></h1>
@@ -81,30 +77,7 @@
                         <field name="is_multi_slots" invisible="1"/>
                         <field name="event_id" readonly="1"/>
                         <field name="booth_category_id" options="{'no_create': True}" context="{'default_event_id': event_id}"/>
-                        <field name="booth_slot_ids" attrs="{'invisible': [('is_multi_slots', '=', False), ('id', '=', False)]}">
-                            <tree string="Slots" editable="bottom">
-                                <field name="event_booth_id" invisible="1"/>
-                                <field name="event_date_begin" invisible="1"/>
-                                <field name="event_date_end" invisible="1"/>
-                                <!-- Using startDate option from web/static/lib/daterangepicker/daterangepicker.js lib -->
-                                <field name="booking_from" widget="daterange" options="{
-                                    'related_end_date': 'booking_to',
-                                    'picker_options': {
-                                        'default_start': 'event_date_begin',
-                                        'default_end': 'event_date_end',
-                                    }}" string="Start"/>
-                                <field name="booking_to" widget="daterange" options="{
-                                    'related_start_date': 'booking_from',
-                                    'picker_options': {
-                                        'default_start': 'event_date_begin',
-                                        'default_end': 'event_date_end',
-                                    }}" string="End"/>
-                                <field name="registration_count" class="oe_read_only"/>
-                                <!--TODO: widget="badge" fucks up the daterange widget... it doesn't close-->
-                                <field name="state" class="oe_read_only" widget="badge" decoration-success="state == 'available'"
-                                       decoration-danger="state == 'unavailable'" decoration-warning="state == 'reserved'"/>
-                            </tree>
-                        </field>
+                        <field name="booth_slot_ids" attrs="{'invisible': [('is_multi_slots', '=', False), ('id', '=', False)]}"/>
                     </group>
                 </sheet>
                 <div class="oe_chatter">
