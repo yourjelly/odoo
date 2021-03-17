@@ -363,18 +363,16 @@ var exportVariable = (function (exports) {
     }
     /**
      * Returns all the adjacent siblings of the given node until the first sibling
-     * (in both directions) that does not satisfy the predicate, in index order.
+     * (in both directions) that does not satisfy the predicate, in index order. If
+     * the given node does not satisfy the predicate, an empty array is returned.
      *
      * @param {Node} node
      * @param {Function} [predicate] (node: Node) => boolean
-     * @param {boolean} [includeSelf] default true
      */
-    function getAdjacents(node, predicate = n => !!n, includeSelf = true) {
+    function getAdjacents(node, predicate = n => !!n) {
         const previous = getAdjacentPreviousSiblings(node, predicate);
         const next = getAdjacentNextSiblings(node, predicate);
-        return includeSelf && predicate(node)
-            ? [...previous.reverse(), node, ...next]
-            : [...previous.reverse(), ...next];
+        return predicate(node) ? [...previous.reverse(), node, ...next] : [];
     }
 
     //------------------------------------------------------------------------------
@@ -1020,7 +1018,8 @@ var exportVariable = (function (exports) {
             n1p.shift();
             n2p.shift();
         }
-        return n1p[0];
+        // Check  in case at least one of them is not in the DOM.
+        return n1p[0] === n2p[0] ? n1p[0] : null;
     }
 
     function getListMode(pnode) {
@@ -2472,6 +2471,9 @@ var exportVariable = (function (exports) {
             // Track if we need to rollback mutations in case unbreakable or unremovable are being added or removed.
             this._toRollback = false;
 
+            // Map that from an node id to the dom node.
+            this._idToNodeMap = new Map();
+
             // -------------------
             // Alter the editable
             // -------------------
@@ -2482,6 +2484,7 @@ var exportVariable = (function (exports) {
 
             // Convention: root node is ID 1.
             editable.oid = 1;
+            this._idToNodeMap.set(1, editable);
             this.editable = this.options.toSanitize ? sanitize(editable) : editable;
 
             // Set contenteditable before clone as FF updates the content at this point.
@@ -2558,7 +2561,7 @@ var exportVariable = (function (exports) {
             const step = this._historySteps[this._historySteps.length - 1];
             let commonAncestor, record;
             for (record of step.mutations) {
-                const node = this.idFind(this.editable, record.parentId || record.id) || this.editable;
+                const node = this.idFind(record.parentId || record.id) || this.editable;
                 commonAncestor = commonAncestor
                     ? commonParentGet(commonAncestor, node, this.editable)
                     : node;
@@ -2581,6 +2584,7 @@ var exportVariable = (function (exports) {
         idSet(node, testunbreak = false) {
             if (!node.oid) {
                 node.oid = (Math.random() * 2 ** 31) | 0; // TODO: uuid4 or higher number
+                this._idToNodeMap.set(node.oid, node);
             }
             // Rollback if node.ouid changed. This ensures that nodes never change
             // unbreakable ancestors.
@@ -2599,19 +2603,8 @@ var exportVariable = (function (exports) {
             }
         }
 
-        // TODO: improve to avoid traversing the whole DOM just to find a node of an ID
-        idFind(node, id, parentId) {
-            if (node.oid === id && (!parentId || node.parentNode.oid === parentId)) {
-                return node;
-            }
-            let childNode = node.firstChild;
-            while (childNode) {
-                const result = this.idFind(childNode, id, parentId);
-                if (result) {
-                    return result;
-                }
-                childNode = childNode.nextSibling;
-            }
+        idFind(id) {
+            return this._idToNodeMap.get(id);
         }
 
         // Observer that syncs doms
@@ -2645,6 +2638,8 @@ var exportVariable = (function (exports) {
         observerActive() {
             if (!this.observer) {
                 this.observer = new MutationObserver(records => {
+                    records = this.filterMutationRecords(records);
+                    if (!records.length) return;
                     clearTimeout(this.observerTimeout);
                     if (this._observerTimeoutUnactive.size === 0) {
                         this.observerTimeout = setTimeout(() => {
@@ -2665,7 +2660,6 @@ var exportVariable = (function (exports) {
         }
 
         observerApply(records) {
-            records = this.filterMutationRecords(records);
             for (const record of records) {
                 switch (record.type) {
                     case 'characterData': {
@@ -2810,17 +2804,17 @@ var exportVariable = (function (exports) {
         historyApply(records) {
             for (const record of records) {
                 if (record.type === 'characterData') {
-                    const node = this.idFind(this.editable, record.id);
+                    const node = this.idFind(record.id);
                     if (node) {
                         node.textContent = record.text;
                     }
                 } else if (record.type === 'attributes') {
-                    const node = this.idFind(this.editable, record.id);
+                    const node = this.idFind(record.id);
                     if (node) {
                         node.setAttribute(record.attributeName, record.value);
                     }
                 } else if (record.type === 'remove') {
-                    const toremove = this.idFind(this.editable, record.id, record.parentId);
+                    const toremove = this.idFind(record.id);
                     if (toremove) {
                         toremove.remove();
                     }
@@ -2830,17 +2824,17 @@ var exportVariable = (function (exports) {
                     // preserve oid after the clone
                     this.idSet(node, newnode);
 
-                    const destnode = this.idFind(this.editable, record.node.oid);
+                    const destnode = this.idFind(record.node.oid);
                     if (destnode && record.node.parentNode.oid === destnode.parentNode.oid) {
                         // TODO: optimization: remove record from the history to reduce collaboration bandwidth
                         continue;
                     }
-                    if (record.append && this.idFind(this.editable, record.append)) {
-                        this.idFind(this.editable, record.append).append(newnode);
-                    } else if (record.before && this.idFind(this.editable, record.before)) {
-                        this.idFind(this.editable, record.before).before(newnode);
-                    } else if (record.after && this.idFind(this.editable, record.after)) {
-                        this.idFind(this.editable, record.after).after(newnode);
+                    if (record.append && this.idFind(record.append)) {
+                        this.idFind(record.append).append(newnode);
+                    } else if (record.before && this.idFind(record.before)) {
+                        this.idFind(record.before).before(newnode);
+                    } else if (record.after && this.idFind(record.after)) {
+                        this.idFind(record.after).after(newnode);
                     } else {
                         continue;
                     }
@@ -3011,11 +3005,11 @@ var exportVariable = (function (exports) {
                 }
                 switch (mutation.type) {
                     case 'characterData': {
-                        this.idFind(this.editable, mutation.id).textContent = mutation.oldValue;
+                        this.idFind(mutation.id).textContent = mutation.oldValue;
                         break;
                     }
                     case 'attributes': {
-                        this.idFind(this.editable, mutation.id).setAttribute(
+                        this.idFind(mutation.id).setAttribute(
                             mutation.attributeName,
                             mutation.oldValue,
                         );
@@ -3023,20 +3017,17 @@ var exportVariable = (function (exports) {
                     }
                     case 'remove': {
                         const node = this.unserialize(mutation.node);
-                        if (mutation.nextId && this.idFind(this.editable, mutation.nextId)) {
-                            this.idFind(this.editable, mutation.nextId).before(node);
-                        } else if (
-                            mutation.previousId &&
-                            this.idFind(this.editable, mutation.previousId)
-                        ) {
-                            this.idFind(this.editable, mutation.previousId).after(node);
+                        if (mutation.nextId && this.idFind(mutation.nextId)) {
+                            this.idFind(mutation.nextId).before(node);
+                        } else if (mutation.previousId && this.idFind(mutation.previousId)) {
+                            this.idFind(mutation.previousId).after(node);
                         } else {
-                            this.idFind(this.editable, mutation.parentId).append(node);
+                            this.idFind(mutation.parentId).append(node);
                         }
                         break;
                     }
                     case 'add': {
-                        const node = this.idFind(this.editable, mutation.id);
+                        const node = this.idFind(mutation.id);
                         if (node) {
                             node.remove();
                         }
@@ -3049,9 +3040,9 @@ var exportVariable = (function (exports) {
 
         historySetCursor(step) {
             if (step.cursor && step.cursor.anchorNode) {
-                const anchorNode = this.idFind(this.editable, step.cursor.anchorNode);
+                const anchorNode = this.idFind(step.cursor.anchorNode);
                 const focusNode = step.cursor.focusNode
-                    ? this.idFind(this.editable, step.cursor.focusNode)
+                    ? this.idFind(step.cursor.focusNode)
                     : anchorNode;
                 if (anchorNode) {
                     setCursor(
