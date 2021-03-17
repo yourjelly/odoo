@@ -1246,11 +1246,17 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             } else {
                 if (amountIsZero) return;
                 const tipProduct = this.getRecord('product.product', this.config.tip_product_id);
-                return await this.actionAddProduct(order, tipProduct, {
+                const tipLine =  await this.actionAddProduct(order, tipProduct, {
                     qty: 1,
                     price_unit: amount,
                     price_manually_set: true,
                 });
+                const { priceWithTax } = this.getOrderlinePrices(tipLine);
+                this.updateRecord('pos.order', order.id, {
+                    is_tipped: true,
+                    tip_amount: priceWithTax,
+                });
+                return tipLine;
             }
         }
         /**

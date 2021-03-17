@@ -3,7 +3,7 @@
 
     <t t-name="TableWidget" owl="1">
         <div t-if="!props.isSelected" class="table" t-on-click.stop="trigger('select-table', props.table)">
-            <t t-set="_orderCount" t-value="env.model.getOrderCount(props.table)" />
+            <t t-set="_orderCount" t-value="getTableOrderCount(props.table)" />
             <span class="table-cover" t-att-class="{ full: fill >= 1 }"></span>
             <span t-att-class="orderCountClass" t-att-hidden="_orderCount === 0">
                 <t t-esc="_orderCount" />

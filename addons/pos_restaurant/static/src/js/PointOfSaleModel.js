@@ -27,6 +27,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             result.FloorScreen = {
                 selectedTableId: false,
                 isEditMode: false,
+                tableBackendOrdersCount: {},
             };
             return result;
         },
@@ -674,6 +675,28 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 }
             }
         },
+        async actionUpdateTableOrderCounts() {
+            try {
+                const result = await this._rpc({
+                    model: 'pos.config',
+                    method: 'get_tables_order_count',
+                    args: [this.config.id],
+                });
+                const tableBackendOrdersCount = this.data.uiState.FloorScreen.tableBackendOrdersCount;
+                for (const { id, orders } of result) {
+                    tableBackendOrdersCount[id] = orders;
+                }
+            } catch (error) {
+                if (error.message.code < 0) {
+                    await this.ui.askUser('OfflineErrorPopup', {
+                        title: _t('Offline'),
+                        body: _t('Unable to get orders count'),
+                    });
+                } else {
+                    throw error;
+                }
+            }
+        },
 
         //#endregion FloorScreen
 
@@ -685,7 +708,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
         },
         async actionExitTable(table) {
             if (table) {
-                const floor = this.getRecord('restaurant.table', table.floor_id);
+                const floor = this.getRecord('restaurant.floor', table.floor_id);
                 await this._saveTableOrdersToServer(table);
                 await this.actionSetFloor(floor);
             } else {

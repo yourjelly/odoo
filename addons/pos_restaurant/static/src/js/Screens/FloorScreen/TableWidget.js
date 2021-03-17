@@ -44,6 +44,13 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
             const nCustomers = this.env.model.getTotalNumberCustomers(this.props.table);
             return `${nCustomers}/${this.props.table.seats}`;
         }
+        getTableOrderCount(table) {
+            if (table.id in this.env.model.data.uiState.FloorScreen.tableBackendOrdersCount) {
+                return this.env.model.data.uiState.FloorScreen.tableBackendOrdersCount[table.id];
+            } else {
+                return this.env.model.getOrderCount(table);
+            }
+        }
         _getNotifications() {
             // const orders = this.env.pos.get_table_orders(this.props.table);
 
