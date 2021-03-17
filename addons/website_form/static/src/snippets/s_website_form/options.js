@@ -123,7 +123,9 @@ const FormEditor = options.Class.extend({
      * @returns {Promise<HTMLElement>}
      */
     _renderField: function (field) {
-        field.id = Math.random().toString(36).substring(2, 15); // Big unique ID
+        const currentId = this.$target[0].querySelector('.s_website_form_input') ?
+        this.$target[0].querySelector('.s_website_form_input').id : undefined;
+        field.id = currentId ? currentId : Math.random().toString(36).substring(2, 15); // Big unique ID
         const template = document.createElement('template');
         template.innerHTML = qweb.render("website_form.field_" + field.type, {field: field}).trim();
         if (field.description && field.description !== true) {
@@ -279,6 +281,58 @@ const FieldEditor = FormEditor.extend({
         field.hidden = classList.contains('s_website_form_field_hidden');
         field.formatInfo = this._getFieldFormat();
     },
+        /**
+     *  TODO set the condition on the field refered in data-visibility-dependencies attribute
+     *
+     * @private
+     * @param {string} value
+     */
+    _visibilityCondition: function (value) {
+        if (!value) {
+            return;
+        }
+        const currentinput = this.$target[0].querySelector('.s_website_form_input');
+        if (!currentinput) {
+            return;
+        }
+        const inputOfDependency = this._getDependency();
+        if (!inputOfDependency) {
+            return;
+        }
+        let dataVisibilityCondition = inputOfDependency.getAttribute('data-visibility-condition');
+        if (dataVisibilityCondition) {
+            //read it and update it
+            let updated = false;
+            dataVisibilityCondition = JSON.parse(dataVisibilityCondition);
+            dataVisibilityCondition.elements.map((element) => {
+                if (element.id === currentinput.id && element.option === currentinput.getAttribute('data-visibility-dependencies')) {
+                    element.value = value;
+                    updated = true;
+                } else if (!document.getElementById(element.id)) {//check if the element is consistent
+                    dataVisibilityCondition.elements = dataVisibilityCondition.elements.filter((e)=>e.id !== element.id);
+                }
+            });
+            if (!updated) {
+                dataVisibilityCondition.elements = dataVisibilityCondition.elements.filter((element)=>element.id !== currentinput.id);
+                dataVisibilityCondition.elements.push({
+                    id: currentinput.id,
+                    value,
+                    option: currentinput.getAttribute('data-visibility-dependencies')
+                    });
+            }
+
+        } else {
+            //create it
+            dataVisibilityCondition = {elements:
+                [{
+                        id: currentinput.id,
+                        value,
+                        option: currentinput.getAttribute('data-visibility-dependencies')
+                    }]};
+        }
+        inputOfDependency.setAttribute('data-visibility-condition', JSON.stringify(dataVisibilityCondition));
+        console.log('inputOfDependency after function=>', inputOfDependency);
+    },
 });
 
 options.registry.WebsiteFormEditor = FormEditor.extend({
@@ -408,6 +462,13 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
             field.formatInfo.optionalMark = this._isOptionalMark();
             field.formatInfo.mark = this._getMark();
             const htmlField = this._renderField(field);
+            if (document.getElementById(htmlField.querySelector('.s_website_form_input').id) &&
+            htmlField.querySelector('.s_website_form_input').id === document.getElementById(htmlField.querySelector('.s_website_form_input').id).id) {
+                //avoid 2 times the same id
+                const newID = Math.random().toString(36).substring(2, 15);
+                htmlField.querySelector('.s_website_form_input').id = newID;
+                htmlField.querySelector('label').setAttribute('for', newID);
+            }
             data.$target.after(htmlField);
             this.trigger_up('activate_snippet', {
                 $snippet: $(htmlField),
@@ -787,6 +848,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @override
      */
     onFocus: function () {
+        this._updateAvailableVisibilityDependencies();
         // Other fields type might have change to an existing type.
         // We need to reload the existing type list.
         this.rerender = true;
@@ -906,11 +968,99 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         field.records = valueList.map(val => params.records.find(rec => rec.id === val));
         await this._replaceField(field);
     },
+        /**
+   * todo
+   */
+  visibilityCondition: function (previewMode, value, params) {
+    value = value ? value : '';
+    this._visibilityCondition(value);
+},
+/**
+ * todo 
+ */
+visibilityDependencies: function (previewMode, value, params) {
+    if (!value) {
+        return;
+    }
+
+    const dependency = value.indexOf('#') === -1 ?
+    document.getElementById(value) : document.getElementById(value.substring(0, value.indexOf('#')));
+    if (!dependency) {
+        return;
+    }
+    //check if a field already have a data-condition with the current input id, if yes remove it
+    const currentInput = this.$target[0].querySelector('.s_website_form_input');
+    const currentVisibilityDependency = currentInput.getAttribute('data-visibility-dependencies');
+    if (currentVisibilityDependency) {
+        //remove the data-condition
+        this._removeElementFromDataCondition(currentInput.id);
+    }
+    currentInput.setAttribute('data-visibility-dependencies', value);       
+},
 
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
 
+    _updateAvailableVisibilityDependencies: function () {
+        const selectFormField = document.querySelector('we-select[data-name="hidden_condition_opt"]');
+        while (selectFormField.lastElementChild) {
+            selectFormField.removeChild(selectFormField.lastElementChild);
+        }
+        const formInputs = document.querySelectorAll('.s_website_form_input');
+        formInputs.forEach((field) => {
+            if (field.type !== 'hidden' && field.type !== 'file' && this.$target[0].querySelector('.s_website_form_input') &&
+            field.id !== this.$target[0].querySelector('.s_website_form_input').id && field.id !== 'editable_select') {
+                if (field.nodeName === 'SELECT') {
+                    const options = field.querySelectorAll('option');
+                    for (let i = 0; i < options.length; i++) {
+                        const button = document.createElement('we-button');
+                        button.textContent = field.name + ' : ' + options[i].value;
+                        button.setAttribute('data-visibility-dependencies', field.id + '#' + i);
+                        selectFormField.appendChild(button);
+                    }
+                } else {
+                    const button = document.createElement('we-button');
+                    button.textContent = field.type === 'radio' ? 'Radio : ' + field.value :
+                    field.nodeName === 'OPTION' ? field.parentElement.name + ' : ' + field.value :
+                    field.type === 'checkbox' ? field.name + ': ' + field.value : field.name;
+                    button.setAttribute('data-visibility-dependencies', field.id);
+                    selectFormField.appendChild(button);
+                }
+            }
+        });
+    },
+    _removeElementFromDataCondition: function (idToRemove) {
+        const dependencyInput = this._getDependency();
+        if (!dependencyInput || !dependencyInput.getAttribute('data-visibility-condition')) {
+            return;
+        }
+        let visibilityCondition = JSON.parse(dependencyInput.getAttribute('data-visibility-condition'));
+        if (!visibilityCondition) {
+            return;
+        }
+        visibilityCondition.elements = visibilityCondition.elements.filter((e) => e.id !== idToRemove);
+        if (visibilityCondition.elements.length > 0) {
+            dependencyInput.setAttribute('data-visibility-condition', JSON.stringify(visibilityCondition));
+        } else {
+            dependencyInput.removeAttribute('data-visibility-condition');
+        }
+    },
+    /**
+     * TODO 
+     * 
+     */
+    _getDependency: function () {
+        if (!this.$target[0].querySelector('.s_website_form_input')) {
+            return;
+        }
+        const dependencyId = this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies');
+        if (!dependencyId) {
+            return;
+        }
+        return dependencyId.indexOf('#') === -1 ? document.getElementById(dependencyId) :
+        document.getElementById(dependencyId.substring(0, dependencyId.indexOf('#')));
+    },
     /**
      * @override
      */
@@ -944,6 +1094,38 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 const values = this._getListItems().map(el => el.id);
                 return JSON.stringify(values);
             }
+            case 'visibilityCondition': {
+                try {
+                    const dependency = this._getDependency();
+                    const visibilityCondition = JSON.parse(dependency.getAttribute('data-visibility-condition'));
+                    let value = '';
+                    if (!this.$target[0].querySelector('.s_website_form_input')) {
+                        return;
+                    }
+                    if (!this.$target[0].classList.contains('s_website_form_field_hidden_if')) {
+                        //remove the dependency and the condition
+                        this._removeElementFromDataCondition(this.$target[0].querySelector('.s_website_form_input').id);
+                        this.$target[0].querySelector('.s_website_form_input').removeAttribute('data-visibility-dependencies');
+                        return;
+                    }
+                    visibilityCondition.elements.map((element) => {
+                        if (element.id === this.$target[0].querySelector('.s_website_form_input').id &&
+                        element.option === this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies')) {
+                            value = element.value;
+                        }
+                    });
+                    return value;
+                } catch (e) {
+                    return '';
+                }
+            }
+            case 'visibilityDependencies': {
+                try {
+                    return this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies');
+                } catch (e) {
+                    return '';
+                }
+            }
         }
         return this._super(...arguments);
     },
@@ -952,6 +1134,39 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      */
     _computeWidgetVisibility: function (widgetName, params) {
         switch (widgetName) {
+            case 'hidden_condition_text_opt':
+                if (!this.$target[0].classList.contains('s_website_form_field_hidden_if')) {
+                    return false;
+                }
+                if (this._getDependency() &&
+                (['checkbox', 'radio'].includes(this._getDependency().type) || this._getDependency().nodeName === 'SELECT')) {
+                    return false;
+                }
+                if (!this._getDependency() || this._getDependency().getAttribute('data-target') === null) {
+                    return true;
+                }
+                if (this._getDependency().getAttribute('data-target').includes('#date')) {
+                    return false;
+                }
+                return (['text', 'number', 'email', 'tel', 'url', 'search', 'range', 'password', 'color'].includes(this._getDependency().type) ||
+                        this._getDependency().nodeName === 'textarea');
+            case 'hidden_condition_noText_opt':
+                if (!this._getDependency()) {
+                    return false;
+                }
+                return this._getDependency() && (this._getDependency().type === 'checkbox' ||
+                this._getDependency().type === 'radio' || this._getDependency().nodeName === 'SELECT');
+            case 'hidden_condition_date_opt':
+                if (!this._getDependency()) {
+                    return false;
+                }
+                return this._getDependency().getAttribute('data-target') &&
+                this._getDependency().getAttribute('data-target').includes('#datepicker');
+            case 'hidden_condition_datetime_opt':
+                return this._getDependency() && this._getDependency().getAttribute('data-target') &&
+                this._getDependency().getAttribute('data-target').includes('#datetimepicker');
+            case 'hidden_condition_opt':
+                return this.$target[0].classList.contains('s_website_form_field_hidden_if');
             case 'char_input_type_opt':
                 return !this.$target[0].classList.contains('s_website_form_custom') && ['char', 'email', 'tel', 'url'].includes(this.$target[0].dataset.type);
             case 'multi_check_display_opt':
@@ -1014,6 +1229,9 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @returns {Promise}
      */
     _replaceField: async function (field) {
+        const dataDependency = this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-dependencies');
+        const dataCondition = this.$target[0].querySelector('.s_website_form_input').getAttribute('data-visibility-condition');
+        const haveToAddHiddenIf = this.$target[0].classList.contains('s_website_form_field_hidden_if');
         await this._fetchFieldRecords(field);
         const activeField = this._getActiveField();
         if (activeField.type !== field.type) {
@@ -1025,6 +1243,15 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         [...htmlField.attributes].forEach(el => this.$target[0].removeAttribute(el.nodeName));
         [...htmlField.attributes].forEach(el => this.$target[0].setAttribute(el.nodeName, el.nodeValue));
         this.$target[0].querySelectorAll('input.datetimepicker-input').forEach(el => el.value = field.propertyValue);
+        if (dataCondition && this.$target[0].querySelector('.s_website_form_input')) {
+            this.$target[0].querySelector('.s_website_form_input').setAttribute('data-visibility-condition', dataCondition);
+        }
+        if (dataDependency && this.$target[0].querySelector('.s_website_form_input')) {
+            this.$target[0].querySelector('.s_website_form_input').setAttribute('data-visibility-dependencies', dataDependency);
+        }
+        if (haveToAddHiddenIf) {
+            this.$target[0].classList.add('s_website_form_field_hidden_if');
+        }
     },
     /**
      * @private

@@ -135,6 +135,24 @@
                 data-toggle-required="s_website_form_required"/>
             <we-checkbox string="Hidden" data-name="hidden_opt" data-no-preview="true"
                 data-select-class="s_website_form_field_hidden"/>
+            <we-select string="Visibility" data-no-preview="true">
+                <we-button data-select-class="">Visible</we-button>
+                <we-button data-select-class="s_website_form_field_hidden">Hidden</we-button>
+                <we-button data-select-class="s_website_form_field_hidden_if">Visible only if</we-button>
+            </we-select>
+            <we-row string="">
+                <we-select data-name="hidden_condition_opt" data-no-preview="false">
+                    <!-- Load every existing form input -->
+                </we-select>
+                <we-title data-name="hidden_condition_text_opt">contains</we-title>
+                <we-select data-name="hidden_condition_noText_opt" data-no-preview="false">
+                    <we-button data-visibility-condition="selected">Selected</we-button>
+                    <we-button data-visibility-condition="notSelected">Not selected</we-button>
+                </we-select>
+                <we-input class="o_we_large_input" data-name="hidden_condition_text_opt" data-visibility-condition="" />
+                <we-datetimepicker data-name="hidden_condition_datetime_opt" data-visibility-condition="" />
+                <we-datepicker data-name="hidden_condition_date_opt" data-visibility-condition="" />
+            </we-row>
         </div>
 
         <div data-js="WebsiteFormSubmit" data-selector=".s_website_form_submit" data-exclude=".s_website_form_no_submit_options">

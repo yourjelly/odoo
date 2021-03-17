@@ -4,6 +4,11 @@
         display: block;
         opacity: 0.5;
     }
+    .s_website_form_field_hidden_if {
+        display: block;
+        opacity: 0.5;
+        background-color:lightblue;
+    }
     // Select inputs do not trigger the default browser behavior
     // Since we use a custom editable element
     .s_website_form_field select {
@@ -67,5 +72,14 @@ body:not(.editor_enable) .s_website_form[data-vcss="001"] {
                 color: transparent;
             }
         }
+    }
+    .hidden.s_website_form_field_hidden_if {
+        display: none;
+    }
+    .visible {
+        display: block;
+    }
+    .s_website_form_field_hidden_if:not(.visible) {
+        display: none;
     }
 }

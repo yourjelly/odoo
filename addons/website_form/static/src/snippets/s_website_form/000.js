@@ -39,6 +39,7 @@ odoo.define('website_form.s_website_form', function (require) {
         xmlDependencies: ['/website_form/static/src/xml/website_form.xml'],
         events: {
             'click .s_website_form_send, .o_website_form_send': 'send', // !compatibility
+            'input .s_website_form_field': 'onChangeVisibilityDependencyInput',
         },
 
         /**
@@ -51,6 +52,9 @@ odoo.define('website_form.s_website_form', function (require) {
         },
         willStart: function () {
             const res = this._super(...arguments);
+            this.$target[0].querySelectorAll('[data-visibility-condition]').forEach((input) => {
+                this.manageVisibility(input.getAttribute('data-visibility-condition'), input);
+            });
             if (!this.$target[0].classList.contains('s_website_form_no_recaptcha')) {
                 this._recaptchaLoaded = true;
                 this._recaptcha.loadLibs();
@@ -62,7 +66,7 @@ odoo.define('website_form.s_website_form', function (require) {
 
             // Initialize datetimepickers
             var datepickers_options = {
-                minDate: moment({ y: 1000 }),
+                minDate: moment({y: 1000}),
                 maxDate: moment({y: 9999, M: 11, d: 31}),
                 calendarWeeks: true,
                 icons: {
@@ -143,12 +147,92 @@ odoo.define('website_form.s_website_form', function (require) {
             // Reinitialize dates
             this.$allDates.removeClass('s_website_form_datepicker_initialized');
         },
-
+        onChangeVisibilityDependencyInput: function (event) {
+            const inputs = event.currentTarget.querySelectorAll('.s_website_form_input');
+            inputs.forEach((input)=>{
+                if (input.getAttribute('data-visibility-condition')) {
+                    this.manageVisibility(input.getAttribute('data-visibility-condition'), input);
+                }
+            });
+        },
+        manageVisibility: function (keyValue, input) {//Todo clean this function
+            let currentValue = '';
+            if (input.value && input.getAttribute('data-target') && input.getAttribute('data-target').includes('datepicker')) {
+                if (input.value.includes('/')) {
+                    const day = input.value.split('/')[1];
+                    const month = input.value.split('/')[0] - 1;
+                    const year = input.value.split('/')[2];
+                    currentValue = (parseInt(new Date(year, month, day).getTime()) / 1000).toString();
+                } else {
+                    currentValue = input.value;
+                }
+            } else if (input.value && input.getAttribute('data-target') && input.getAttribute('data-target').includes('datetimepicker')) {
+                if (input.value.includes('/')) {
+                    const date = input.value.split(' ')[0];
+                    const day = date.split('/')[1];
+                    const month = date.split('/')[0] - 1;
+                    const year = date.split('/')[2];
+                    const time = input.value.split(' ')[1];
+                    const hour = time.split(':')[0];
+                    const minute = time.split(':')[1];
+                    const second = time.split(':')[2];
+                    if (date && time) {
+                        currentValue = (parseInt(new Date(year, month, day, hour, minute, second).getTime()) / 1000).toString();
+                    } else {
+                        currentValue = input.value;
+                    }
+                }
+            } else {
+                currentValue = input.type === 'checkbox' || input.type === 'radio' ? input.checked : input.value;
+            }
+            keyValue = JSON.parse(keyValue);
+            keyValue.elements.map((element) => {
+                const elementToHideOrToShow = document.getElementById(element.id);
+                    if (elementToHideOrToShow) {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        if ((currentValue && element.value !== 'notSelected') || (!currentValue && element.value === 'notSelected')) {
+                            this._showField(elementToHideOrToShow);
+                        } else {
+                            this._hideField(elementToHideOrToShow);
+                        }
+                    } else if (input.nodeName === 'SELECT') {
+                        const index = element.option.split('#')[1];
+                        const keyOption = input.querySelectorAll('option')[index];
+                        if ((keyOption.value === currentValue && element.value === 'selected') ||
+                            (keyOption.value !== currentValue && element.value !== 'selected')) {
+                            this._showField(elementToHideOrToShow);
+                        } else {
+                            this._hideField(elementToHideOrToShow);
+                        }
+                    } else {
+                        if (currentValue.toLowerCase().includes(element.value.toLowerCase())) {
+                            this._showField(elementToHideOrToShow);
+                        } else {
+                            this._hideField(elementToHideOrToShow);
+                        }
+                    }
+                }
+            });
+        },
+        _showField(field) {
+            while (!field.classList.contains('s_website_form_field')) {
+                field = field.parentElement;
+            }
+            field.classList.add('visible');
+            field.classList.remove('hidden');
+        },
+        _hideField(field) {
+            while (!field.classList.contains('s_website_form_field')) {
+                field = field.parentElement;
+            }
+            field.classList.add('hidden');
+            field.classList.remove('visible');
+        },
         send: async function (e) {
             e.preventDefault(); // Prevent the default submit behavior
              // Prevent users from crazy clicking
             this.$target.find('.s_website_form_send, .o_website_form_send')
-                .addClass('disabled')    // !compatibility
+                .addClass('disabled') // !compatibility
                 .attr('disabled', 'disabled');
 
             var self = this;
