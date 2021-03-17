@@ -32,17 +32,14 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
             this.floorMapRef.el.style.background = this.props.activeFloor.background_color;
         }
         mounted() {
-            // if (this.env.pos.table) {
-            //     this.env.pos.set_table(null);
-            // }
             this.floorMapRef.el.style.background = this.props.activeFloor.background_color;
-            // this._tableLongpolling();
-            // this.tableLongpolling = setInterval(this._tableLongpolling.bind(this), 5000);
+            this._tableLongpolling();
+            this.tableLongpolling = setInterval(this._tableLongpolling.bind(this), 5000);
         }
         willUnmount() {
             this.env.model.data.uiState.FloorScreen.isEditMode = false;
             this.env.model.data.uiState.FloorScreen.selectedTableId = false;
-            // clearInterval(this.tableLongpolling);
+            clearInterval(this.tableLongpolling);
         }
         getActiveTables() {
             if (!this.props.activeFloor) return [];
@@ -113,41 +110,12 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
         async _onSelectTable(event) {
             await this.env.actionHandler({ name: 'actionSetTable', args: [event.detail] });
         }
-        // async _tableLongpolling() {
-        //     if (this.state.isEditMode) {
-        //         return;
-        //     }
-        //     try {
-        //         const result = await this.env.model._rpc({
-        //             model: 'pos.config',
-        //             method: 'get_tables_order_count',
-        //             args: [this.env.pos.config.id],
-        //         });
-        //         result.forEach((table) => {
-        //             const table_obj = this.env.pos.tables_by_id[table.id];
-        //             const unsynced_orders = this.env.pos
-        //                 .get_table_orders(table_obj)
-        //                 .filter(
-        //                     (o) =>
-        //                         o.server_id === undefined &&
-        //                         (o.orderlines.length !== 0 || o.paymentlines.length !== 0) &&
-        //                         // do not count the orders that are already finalized
-        //                         !o.finalized
-        //                 ).length;
-        //             table_obj.order_count = table.orders + unsynced_orders;
-        //         });
-        //         this.render();
-        //     } catch (error) {
-        //         if (error.message.code < 0) {
-        //             await this.env.ui.askUser('OfflineErrorPopup', {
-        //                 title: 'Offline',
-        //                 body: 'Unable to get orders count',
-        //             });
-        //         } else {
-        //             throw error;
-        //         }
-        //     }
-        // }
+        async _tableLongpolling() {
+            if (this.state.isEditMode) {
+                return;
+            }
+            await this.env.actionHandler({ name: 'actionUpdateTableOrderCounts' });
+        }
     }
     FloorScreen.template = 'FloorScreen';
     FloorScreen.hideOrderSelector = true;
