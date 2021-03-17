@@ -3924,7 +3924,7 @@ var exportVariable = (function (exports) {
                     // since it is the only text insertion case that may cause problems.
                     if (anchorNode !== focusNode || anchorOffset !== focusOffset) {
                         ev.preventDefault();
-                        this._applyCommand('oDeleteBackward');
+                        this._applyRawCommand('oDeleteBackward');
                         insertText(selection, ev.data);
                         const range = selection.getRangeAt(0);
                         setCursor(range.endContainer, range.endOffset);
