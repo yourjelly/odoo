@@ -474,6 +474,7 @@ var SnippetEditor = Widget.extend({
         // according to it. While waiting for a better way to handle that this
         // window trigger will handle most cases.
         $(window).trigger('resize');
+        this.options.wysiwyg.odooEditor.historyStep();
     },
     /**
      * Displays/Hides the editor overlay.
