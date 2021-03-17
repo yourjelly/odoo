@@ -175,9 +175,9 @@ const ColorPaletteWidget = Widget.extend({
             return;
         }
         this.el.querySelectorAll('.o_custom_color').forEach(el => el.remove());
-        const existingColors = new Set(...customColors).concat(
+        const existingColors = new Set(customColors.concat(
             Object.keys(this.colorToColorNames)
-        );
+        ));
         this.trigger_up('get_custom_colors', {
             onSuccess: (colors) => {
                 colors.forEach(color => {
