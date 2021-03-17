@@ -14,9 +14,9 @@
     </template>
     <template id="pos_coupon.assets_tests" name="POS Coupon Test Assets" inherit_id="web.assets_tests">
         <xpath expr="." position="inside">
-            <script type="text/javascript" src="/pos_coupon/static/src/js/tours/PosCouponTourMethods.js"></script>
-            <script type="text/javascript" src="/pos_coupon/static/src/js/tours/PosCoupon1.tour.js"></script>
-            <script type="text/javascript" src="/pos_coupon/static/src/js/tours/PosCoupon2.tour.js"></script>
+            <script type="text/javascript" src="/pos_coupon/static/tests/tours/PosCouponTourMethods.js"></script>
+            <script type="text/javascript" src="/pos_coupon/static/tests/tours/PosCoupon1.tour.js"></script>
+            <script type="text/javascript" src="/pos_coupon/static/tests/tours/PosCoupon2.tour.js"></script>
         </xpath>
     </template>
 </odoo>
