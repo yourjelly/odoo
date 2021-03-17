@@ -78,7 +78,8 @@
 .o_Composer_coreMain {
     grid-area: core-main;
     min-width: 0;
-    display: flex;
+    // display: flex;
+    display: inline-table;
     flex-wrap: nowrap;
     align-items: flex-start;
     flex: 1 1 auto;
