@@ -126,7 +126,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                 }
             }
         },
-        actionUpdateOrderline(orderline, vals) {
+        async actionUpdateOrderline(orderline, vals) {
             if ('qty' in vals) {
                 if (
                     this.ifacePrinters &&
@@ -399,15 +399,6 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             }
             return full;
         },
-        /**
-         * @param {'pos.order'} order
-         * @param {'pos.order.line'} line
-         */
-        addOrderline(order, line) {
-            this.updateRecord('pos.order.line', line.id, { order_id: order.id });
-            this.updateRecord('pos.order', order.id, { lines: [...order.lines, line.id] });
-            order._extras.activeOrderlineId = line.id;
-        },
         async actionSetFloor(floor) {
             this.data.uiState.activeTableId = false;
             this.data.uiState.activeFloorId = floor.id;
@@ -488,13 +479,13 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                         qty: split.quantity,
                     });
 
-                    this.addOrderline(newOrder, line);
+                    await this.addOrderline(newOrder, line);
 
                     let newQuantity = originalOrderLine.qty - line.qty;
                     if(this.floatCompare(newQuantity, 0) === 0) {
-                        this.actionDeleteOrderline(originalOrder, originalOrderLine);
+                        await this.actionDeleteOrderline(originalOrder, originalOrderLine);
                     } else {
-                        this.actionUpdateOrderline(originalOrderLine, { qty: newQuantity });
+                        await this.actionUpdateOrderline(originalOrderLine, { qty: newQuantity });
                     }
                 }
 

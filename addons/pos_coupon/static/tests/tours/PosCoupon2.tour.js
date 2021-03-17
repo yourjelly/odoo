@@ -81,6 +81,7 @@ odoo.define('pos_coupon.tour.pos_coupon2', function (require) {
     ProductScreen.exec.addOrderline('Desk Organizer', '6'); // 5.1 per item
     PosCoupon.check.hasRewardLine('on cheapest product', '-4.59');
     PosCoupon.exec.removeRewardLine('90.0% discount on cheapest product');
+    ProductScreen.check.selectedOrderlineHas('Desk Organizer', '6.0', '30.60');
     PosCoupon.do.enterCode('promocode');
     PosCoupon.check.hasRewardLine('50.0% discount on products', '-15.30');
     PosCoupon.do.enterCode('1357');
@@ -95,12 +96,14 @@ odoo.define('pos_coupon.tour.pos_coupon2', function (require) {
     // Applied programs:
     //   - cheapest product
     PosCoupon.do.enterCode('2468');
-    PosCoupon.do.enterCode('098765');
     ProductScreen.exec.addOrderline('Monitor Stand', '6'); // 3.19 per item
     PosCoupon.check.hasRewardLine('90.0% discount on cheapest product', '-2.87');
     PosCoupon.check.orderTotalIs('16.27');
     PosCoupon.exec.removeRewardLine('90.0% discount on cheapest product');
+    PosCoupon.check.orderTotalIs('19.14');
+    PosCoupon.do.enterCode('098765');
     PosCoupon.check.hasRewardLine('10.0% discount on total amount', '-1.91');
+    PosCoupon.check.orderTotalIs('17.23');
     PosCoupon.do.resetActivePrograms();
     PosCoupon.check.hasRewardLine('90.0% discount on cheapest product', '-2.87');
     PosCoupon.check.orderTotalIs('16.27');

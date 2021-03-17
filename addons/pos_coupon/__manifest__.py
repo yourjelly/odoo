@@ -25,6 +25,7 @@
     "qweb": [
         "static/src/xml/ControlButtons/PromoCodeButton.xml",
         "static/src/xml/ControlButtons/ResetProgramsButton.xml",
+        "static/src/xml/ProductScreen.xml",
         "static/src/xml/ActivePrograms.xml",
         "static/src/xml/OrderReceipt.xml",
         "static/src/xml/OrderWidget.xml",

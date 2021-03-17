@@ -3,9 +3,7 @@
     <template id="assets" inherit_id="point_of_sale.assets">
         <xpath expr="." position="inside">
             <link rel="stylesheet" href="/pos_coupon/static/src/css/coupon.css"/>
-            <script type="text/javascript" src="/pos_coupon/static/src/js/coupon.js"></script>
-            <script type="text/javascript" src="/pos_coupon/static/src/js/Orderline.js"></script>
-            <script type="text/javascript" src="/pos_coupon/static/src/js/PaymentScreen.js"></script>
+            <script type="text/javascript" src="/pos_coupon/static/src/js/PointOfSaleModel.js"></script>
             <script type="text/javascript" src="/pos_coupon/static/src/js/ProductScreen.js"></script>
             <script type="text/javascript" src="/pos_coupon/static/src/js/ActivePrograms.js"></script>
             <script type="text/javascript" src="/pos_coupon/static/src/js/ControlButtons/PromoCodeButton.js"></script>

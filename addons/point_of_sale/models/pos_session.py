@@ -1463,6 +1463,12 @@ class PosSession(models.Model):
     )
     def _load_product_product(self, lcontext):
         order = "sequence,default_code,name"
+        domain = self._get_product_product_domain(lcontext)
+        records = self.env[lcontext.model].with_context(display_default_code=False).search(domain, order=order).read(lcontext.fields, load=False)
+        for record in records:
+            lcontext.contents[record["id"]] = record
+
+    def _get_product_product_domain(self, lcontext):
         domain = ["&", "&", ("sale_ok", "=", True), ("available_in_pos", "=", True), "|", ("company_id", "=", self.config_id.company_id.id), ("company_id", "=", False)]
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
             domain = AND(
@@ -1473,9 +1479,7 @@ class PosSession(models.Model):
             )
         if self.config_id.iface_tipproduct:
             domain = OR([domain, [("id", "=", self.config_id.tip_product_id.id)]])
-        records = self.env[lcontext.model].with_context(display_default_code=False).search(domain, order=order).read(lcontext.fields, load=False)
-        for record in records:
-            lcontext.contents[record["id"]] = record
+        return domain
 
     @loader("product.attribute", ["name", "display_type"])
     def _load_product_attribute(self, lcontext):

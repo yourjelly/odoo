@@ -1237,7 +1237,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const amountIsZero = this.floatCompare(amount, 0) === 0;
             if (tipLine) {
                 if (amountIsZero) {
-                    this.actionDeleteOrderline(order, tipLine);
+                    await this.actionDeleteOrderline(order, tipLine);
                     return;
                 } else {
                     this.updateRecord('pos.order.line', tipLine.id, { price_unit: amount, qty: 1 });
@@ -1246,7 +1246,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             } else {
                 if (amountIsZero) return;
                 const tipProduct = this.getRecord('product.product', this.config.tip_product_id);
-                const tipLine =  await this.actionAddProduct(order, tipProduct, {
+                const tipLine = await this.actionAddProduct(order, tipProduct, {
                     qty: 1,
                     price_unit: amount,
                     price_manually_set: true,
@@ -1446,6 +1446,18 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.deleteRecord('pos.order', orderId);
             this.removePersistedOrder(order);
         }
+        /**
+         * @param {'pos.order'} order
+         * @param {'pos.order.line'} line
+         * @param {boolean} [select = true]
+         */
+        async addOrderline(order, line, select = true) {
+            this.updateRecord('pos.order.line', line.id, { order_id: order.id });
+            this.updateRecord('pos.order', order.id, { lines: [...order.lines, line.id] });
+            if (select) {
+                order._extras.activeOrderlineId = line.id;
+            }
+        }
         async _rpc() {
             try {
                 this.ui && this.ui.setSyncStatus('connecting');
@@ -1636,13 +1648,22 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
 
         _manageOrderWhenOrderDone() {
-            const draftOrderList = this.getDraftOrders().filter(currentOrder => currentOrder !== this.getActiveOrder());
-            if(!draftOrderList.length){
+            const draftOrderList = this.getDraftOrders().filter(
+                (currentOrder) => currentOrder !== this.getActiveOrder()
+            );
+            if (!draftOrderList.length) {
                 const newOrder = this._createDefaultOrder();
                 this._setActiveOrderId(newOrder.id);
             } else {
                 this._setActiveOrderId(draftOrderList[0].id);
             }
+        }
+        _deleteOrderline(order, orderline) {
+            this.updateRecord('pos.order', order.id, { lines: order.lines.filter((id) => id !== orderline.id) });
+            for (const lotId of orderline.pack_lot_ids) {
+                this.deleteRecord('pos.pack.operation.lot', lotId);
+            }
+            this.deleteRecord('pos.order.line', orderline.id);
         }
 
         //#endregion UTILITY
@@ -1849,7 +1870,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     const { cancelled } = await this.actionSetOrderlineLots(mergeWith);
                     if (cancelled) return;
                 } else {
-                    this.actionUpdateOrderline(mergeWith, { qty: mergeWith.qty + line.qty });
+                    await this.actionUpdateOrderline(mergeWith, { qty: mergeWith.qty + line.qty });
                 }
                 this.actionSelectOrderline(order, mergeWith.id);
                 return mergeWith;
@@ -1861,29 +1882,27 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                         return;
                     }
                 }
-                order.lines.push(line.id);
-                this.actionSelectOrderline(order, line.id);
+                await this.addOrderline(order, line);
                 return line;
             }
         }
         actionSelectOrderline(order, lineID) {
             order._extras.activeOrderlineId = lineID;
         }
-        actionUpdateOrderline(orderline, vals) {
+        async actionUpdateOrderline(orderline, vals) {
             if ('price_unit' in vals) {
                 vals['price_manually_set'] = true;
             }
             this.updateRecord('pos.order.line', orderline.id, vals);
         }
-        actionDeleteOrderline(order, orderline) {
+        async actionDeleteOrderline(order, orderline) {
+            // Do not set new active orderline if the line being deleted is not
+            // the active orderline.
+            const isActiveOrderline = this.getActiveOrderline(order) === orderline;
             // needed to set the new active orderline
             const indexOfDeleted = order.lines.indexOf(orderline.id);
-            order.lines = order.lines.filter((id) => id !== orderline.id);
-            for (const lotId of orderline.pack_lot_ids) {
-                this.deleteRecord('pos.pack.operation.lot', lotId);
-            }
-            this.deleteRecord('pos.order.line', orderline.id);
-            if (order.lines.length) {
+            this._deleteOrderline(order, orderline);
+            if (order.lines.length && isActiveOrderline) {
                 // set as active the orderline with the same index as the deleted
                 if (indexOfDeleted === order.lines.length) {
                     this.actionSelectOrderline(order, order.lines[order.lines.length - 1]);

@@ -39,7 +39,6 @@ odoo.define('pos_coupon.tour.pos_coupon1', function (require) {
     PosCoupon.check.hasRewardLine('on cheapest product', '-4.59');
     PosCoupon.exec.removeRewardLine('90.0% discount on cheapest product');
     PosCoupon.check.orderTotalIs('45.90');
-    PosCoupon.do.enterCode('invalid_code');
     PosCoupon.do.enterCode('1234');
     PosCoupon.check.hasRewardLine('Free Product - Desk Organizer', '-15.30');
     PosCoupon.exec.finalizeOrder('Cash', '50');
