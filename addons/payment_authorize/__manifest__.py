@@ -17,4 +17,9 @@
     'application': True,
     'post_init_hook': 'create_missing_journal_for_acquirers',
     'uninstall_hook': 'uninstall_hook',
+    'assets': {
+        'web.assets_frontend': [
+            'payment_authorize/static/src/js/**/*',
+        ],
+    }
 }

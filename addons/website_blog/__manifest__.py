@@ -11,6 +11,7 @@
     'description': "",
     'depends': ['website_mail', 'website_partner'],
     'data': [
+        'data/ir_asset.xml',
         'data/mail_data.xml',
         'data/mail_templates.xml',
         'data/website_blog_data.xml',
@@ -28,8 +29,22 @@
     ],
     'test': [
     ],
-    'qweb': [
-    ],
     'installable': True,
     'application': True,
+    'assets': {
+        'website.assets_wysiwyg': [
+            'website_blog/static/src/snippets/s_latest_posts/options.js',
+        ],
+        'website.assets_editor': [
+            'website_blog/static/src/js/website_blog.editor.js',
+            'website_blog/static/src/js/tours/website_blog.js',
+        ],
+        'web.assets_frontend': [
+            'website_blog/static/src/scss/website_blog.scss',
+            'website_blog/static/src/js/contentshare.js',
+            'website_blog/static/src/js/website_blog.js',
+            'website_blog/static/src/snippets/s_latest_posts/001.scss',
+            'website_blog/static/src/snippets/s_latest_posts/000.js',
+        ],
+    }
 }

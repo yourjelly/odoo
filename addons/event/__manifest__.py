@@ -43,4 +43,12 @@ Key Features
     ],
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'web.assets_backend': [
+            'event/static/src/scss/**/*',
+        ],
+        'web.assets_common': [
+            'event/static/src/js/**/*',
+        ],
+    }
 }
