@@ -816,6 +816,7 @@ const Wysiwyg = Widget.extend({
      * Update any editor UI that is not handled by the editor itself.
      */
     _updateEditorUI: function (e) {
+        this.odooEditor.automaticStepSkipStack();
         const $target = $(e.target);
         // Restore paragraph dropdown button's default ID.
         this.toolbar.$el.find('#mediaParagraphDropdownButton').attr('id', 'paragraphDropdownButton');
@@ -880,7 +881,7 @@ const Wysiwyg = Widget.extend({
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
         if (isInMedia) {
             // Show the media as selected.
-            $target.toggleClass('o_we_selected_image', true);
+            this.odooEditor.automaticStepSkipStack();
             // Handle the media's tooltip.
             this.showTooltip = true;
             setTimeout(() => {
