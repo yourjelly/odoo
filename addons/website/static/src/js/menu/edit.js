@@ -2,6 +2,7 @@ odoo.define('website.editMenu', function (require) {
 'use strict';
 
 var core = require('web.core');
+var dom = require('web.dom');
 var wysiwygLoader = require('web_editor.loader');
 var websiteNavbarData = require('website.navbar');
 var Dialog = require('web.Dialog');
@@ -496,7 +497,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      */
     _onSnippetRequestSave: function (ev) {
         ev.stopPropagation();
-        this.save(ev.data.reload).then(ev.data.onSuccess, ev.data.onFailure);
+        const restore = dom.addButtonLoadingEffect($('button[data-action=save]')[0]);
+        this.save(ev.data.reload).then(ev.data.onSuccess, ev.data.onFailure).then(restore).guardedCatch(restore);
     },
     _onSnippetRequestCancel: function (ev) {
         ev.stopPropagation();
