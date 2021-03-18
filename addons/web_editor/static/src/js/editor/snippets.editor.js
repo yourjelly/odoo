@@ -748,6 +748,7 @@ var SnippetEditor = Widget.extend({
      * @private
      */
     _onDragAndDropStart: function () {
+        this.trigger_up('drag_and_drop_start');
         this.options.wysiwyg.odooEditor.automaticStepUnactive();
         var self = this;
         this.dropped = false;
@@ -1066,7 +1067,8 @@ var SnippetsMenu = Widget.extend({
         'clone_snippet': '_onCloneSnippet',
         'cover_update': '_onOverlaysCoverUpdate',
         'deactivate_snippet': '_onDeactivateSnippet',
-        'drag_and_drop_stop': '_onDragAndDropStop',
+        'drag_and_drop_stop': '_onSnippetDragAndDropStop',
+        'drag_and_drop_start': '_onSnippetDragAndDropStart',
         'get_snippet_versions': '_onGetSnippetVersions',
         'remove_snippet': '_onRemoveSnippet',
         'snippet_edition_request': '_onSnippetEditionRequest',
@@ -1427,6 +1429,7 @@ var SnippetsMenu = Widget.extend({
      * Updates the cover dimensions of the current snippet editor.
      */
     updateCurrentSnippetEditorOverlay: function () {
+        if (this.snippetEditorDragging) return;
         for (const snippetEditor of this.snippetEditors) {
             if (snippetEditor.$target.closest('body').length) {
                 snippetEditor.cover();
@@ -2540,12 +2543,21 @@ var SnippetsMenu = Widget.extend({
         this._activateSnippet(false);
     },
     /**
+    * Called when a snippet will move in the page.
+    *
+    * @private
+    */
+   _onSnippetDragAndDropStart: function () {
+        this.snippetEditorDragging = true;
+    },
+    /**
      * Called when a snippet has moved in the page.
      *
      * @private
      * @param {OdooEvent} ev
      */
-    _onDragAndDropStop: async function (ev) {
+    _onSnippetDragAndDropStop: async function (ev) {
+        this.snippetEditorDragging = false;
         const $modal = ev.data.$snippet.closest('.modal');
         // If the snippet is in a modal, destroy editors only in that modal.
         // This to prevent the modal from closing because of the cleanForSave
