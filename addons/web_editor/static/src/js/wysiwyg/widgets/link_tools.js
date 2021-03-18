@@ -7,6 +7,8 @@ const Widget = require('web.Widget');
 
 const getInSelection = OdooEditorLib.getInSelection;
 const getDeepRange = OdooEditorLib.getDeepRange;
+const setCursor = OdooEditorLib.setCursor;
+const nodeSize = OdooEditorLib.nodeSize;
 
 const _t = core._t;
 
@@ -121,10 +123,14 @@ const LinkTools = Widget.extend({
     destroy: function () {
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         $('.oe_edited_link').removeClass('oe_edited_link');
+        const $contents = this.$link.contents();
         if (!this.$link.attr('href') && !this.colorCombinationClass) {
-            this.$link.contents().unwrap();
+            $contents.unwrap();
         }
         this.$button.removeClass('active');
+        const start = $contents[0] || this.$link[0];
+        const end = $contents[$contents.length - 1] || this.$link[0];
+        setCursor(start, 0, end, nodeSize(end));
         this._super(...arguments);
     },
 
