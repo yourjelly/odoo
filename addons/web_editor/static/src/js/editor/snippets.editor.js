@@ -748,8 +748,13 @@ var SnippetEditor = Widget.extend({
      * @private
      */
     _onDragAndDropStart: function () {
+        this.options.wysiwyg.odooEditor.automaticStepUnactive();
         var self = this;
         this.dropped = false;
+        this._dropSiblings = {
+            prev: self.$target.prev()[0],
+            next: self.$target.next()[0],
+        }
         self.size = {
             width: self.$target.width(),
             height: self.$target.height()
@@ -821,6 +826,9 @@ var SnippetEditor = Widget.extend({
      * @param {Object} ui
      */
     _onDragAndDropStop: function (ev, ui) {
+        this.options.wysiwyg.odooEditor.automaticStepActive();
+        this.options.wysiwyg.odooEditor.automaticStepSkipStack();
+
         // TODO lot of this is duplicated code of the d&d feature of snippets
         if (!this.dropped) {
             var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
@@ -872,6 +880,10 @@ var SnippetEditor = Widget.extend({
             $snippet: this.$target,
         });
         this.draggableComponent.$scrollTarget.off('scroll.scrolling_element');
+        const samePositionAsStart = this._dropSiblings.prev === this.$target.prev()[0] && this._dropSiblings.next === this.$target.next()[0];
+        if (!samePositionAsStart) {
+            this.options.wysiwyg.odooEditor.historyStep();
+        }
     },
     /**
      * @private
