@@ -3144,14 +3144,15 @@ var exportVariable = (function (exports) {
                 end &&
                 end !== this.editable &&
                 !end.contains(range.endContainer) &&
-                !isVisible(end, false)
+                !isVisible(end, false) &&
+                end.nodeName !== 'A'
             ) {
                 const parent = end.parentNode;
                 end.remove();
                 end = parent;
             }
             // Same with the start container
-            while (start && start !== this.editable && !isVisible(start)) {
+            while (start && start !== this.editable && !isVisible(start) && start.nodeName !== 'A') {
                 const parent = start.parentNode;
                 start.remove();
                 start = parent;
@@ -3164,8 +3165,9 @@ var exportVariable = (function (exports) {
             // Ensure trailing space remains visible.
             const joinWith = range.endContainer;
             const oldText = joinWith.textContent;
-            if (doJoin && oldText.endsWith(' ')) {
+            if (joinWith && oldText.endsWith(' ')) {
                 joinWith.textContent = oldText.replace(/ $/, '\u00A0');
+                setCursor(joinWith, nodeSize(joinWith));
             }
             // Rejoin blocks that extractContents may have split in two.
             while (
@@ -3189,8 +3191,13 @@ var exportVariable = (function (exports) {
                     break;
                 }
             }
-            // Restore the text we modified in order to preserve trailing space.
-            if (doJoin && oldText.endsWith(' ')) {
+            next = joinWith && joinWith.nextSibling;
+            if (
+                joinWith &&
+                oldText.endsWith(' ') &&
+                !(next && next.nodeType === Node.TEXT_NODE && next.textContent.startsWith(' '))
+            ) {
+                // Restore the text we modified in order to preserve trailing space.
                 joinWith.textContent = oldText;
                 setCursor(joinWith, nodeSize(joinWith));
             }
