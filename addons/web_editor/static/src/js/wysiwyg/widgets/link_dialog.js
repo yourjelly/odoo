@@ -231,7 +231,7 @@ var LinkDialog = Dialog.extend({
         var allStartAndEndSpace = /^\s+|\s+$/gi;
         return {
             label: label,
-            url: url,
+            url: this._correctLink(url),
             classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, ''),
             isNewWindow: isNewWindow,
         };
@@ -257,6 +257,20 @@ var LinkDialog = Dialog.extend({
         } catch (ignored) {
             return true;
         }
+    },
+    /**
+     * @private
+     */
+    _correctLink: function (url) {
+        if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
+            url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
+        } else if (url.indexOf('@') !== -1 && url.indexOf(':') === -1) {
+            url =  'mailto:' + url;
+        } else if (url.indexOf('://') === -1 && url[0] !== '/'
+                    && url[0] !== '#' && url.slice(0, 2) !== '${') {
+            url = 'http://' + url;
+        }
+        return url;
     },
 
     //--------------------------------------------------------------------------
