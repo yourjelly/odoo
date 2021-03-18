@@ -12,14 +12,7 @@ class StockInventoryConflict(models.TransientModel):
     quant_ids = fields.Many2many(
         'stock.quant', 'stock_conflict_quant_rel', string='Quants')
     quant_to_fix_ids = fields.Many2many(
-        'stock.quant', compute='_compute_quant_to_fix_ids', string='Conflicts')
-
-    @api.depends('quant_ids')
-    def _compute_quant_to_fix_ids(self):
-        for conflict in self:
-            conflict.quant_to_fix_ids = conflict.quant_ids.filtered(
-                lambda quant: (quant.inventory_quantity - quant.inventory_diff_quantity) != quant.quantity
-            )
+        'stock.quant', string='Conflicts')
 
     def action_validate(self):
         for conflict in self:

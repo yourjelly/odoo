@@ -232,8 +232,11 @@ class StockQuant(models.Model):
         quants_outdated = self.env['stock.quant']
         quants_tracked_without_lot = self.env['stock.quant']
         quants_duplicate_sn = self.env['stock.quant']
+        quants_to_process = self.env['stock.quant']
         for quant in self:
             # TODO float_compare
+            if quant.inventory_diff_quantity == 0 and quant.inventory_quantity == 0 and quant.quantity != 0:
+                continue
             if (quant.inventory_quantity - quant.inventory_diff_quantity) != quant.quantity:
                 quants_outdated |= self
             if quant.product_id.tracking in ['lot', 'serial'] and\
@@ -242,6 +245,7 @@ class StockQuant(models.Model):
             if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and\
                     quant.product_id.tracking == 'serial' and quant.lot_id:
                 quants_duplicate_sn |= self
+            quants_to_process |= self
         if quants_outdated:
             return {
                 'name': _('Conflict in Inventory Adjustment'),
@@ -251,7 +255,8 @@ class StockQuant(models.Model):
                 'res_model': 'stock.inventory.conflict',
                 'target': 'new',
                 'context': {
-                    'default_quant_ids': self.ids,
+                    'default_quant_to_fix_ids': quants_outdated.ids,
+                    'default_quant_ids': quants_to_process.ids,
                 },
             }
         if quants_tracked_without_lot and not quants_duplicate_sn:
@@ -263,11 +268,11 @@ class StockQuant(models.Model):
                 'res_model': 'stock.track.confirmation',
                 'target': 'new',
                 'context': {
-                    'default_quant_ids': self.ids,
+                    'default_quant_ids': quants_to_process.ids,
                     'default_product_ids': quants_tracked_without_lot.mapped('product_id').ids,
                 },
             }
-        self._apply_inventory()
+        quants_to_process._apply_inventory()
 
     def action_inventory_history(self):
         self.ensure_one()

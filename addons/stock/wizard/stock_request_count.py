@@ -13,7 +13,7 @@ class StockRequestCount(models.TransientModel):
         help="Choose a date to get the inventory at that date",
         default=fields.Datetime.now)
     user_id = fields.Many2one(
-        'res.users', string="User", required=True)
+        'res.users', string="User")
     quant_ids = fields.Many2many('stock.quant')
 
     def action_request_count(self):
@@ -22,7 +22,9 @@ class StockRequestCount(models.TransientModel):
                 count_request._get_values_to_write())
 
     def _get_values_to_write(self):
-        return {
+        values = {
             'inventory_date': self.inventory_date,
-            'user_id': self.user_id,
         }
+        if self.user_id:
+            values['user_id'] = self.user_id.id,
+        return values
