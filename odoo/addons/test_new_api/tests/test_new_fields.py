@@ -3339,12 +3339,12 @@ class TestDomainField(common.TransactionCase):
 
     def test_domain_validation(self):
         # test that when assigning a domain field the domain is valid for the target model
-        with self.assertRaises(ValueError):
-            self.Model.create({'domain_foo': "[('non_existing_field', '=', 42)]"})
-
         rec = self.Model.create({})
         with self.assertRaises(ValueError):
             rec.domain_foo = [('non_existing_field', '=', 42)]
+
+        with self.assertRaises(ValueError):
+            self.Model.create({'domain_foo': "[('non_existing_field', '=', 42)]"})
 
     def test_domain_explicit_model(self):
         rec1 = self.CoModel.create({'foo': 1})
@@ -3365,11 +3365,39 @@ class TestDomainField(common.TransactionCase):
     def test_domain_implicit_model(self):
         # by default, if no model or model_field are given in the field's declaration, the ORM
         # will automatically assume it's for the model it's declared in
-        self.assertEqual(self.Model._fields['domain_bar'].model, self.Model._name)
+        self.assertEqual(self.Model._fields['domain_bar'].model, self.Model)
+
+    def test_domain_single_relation(self):
+        # test that a domain field with a model_field set to a single relational field works
+        domain = self.Model.create({'domain_baz': [('name', '=', 'foo')]})
+        category = self.env['test_new_api.category'].create({'name': 'foo'})
+        _category = self.env['test_new_api.category'].search(domain.domain_baz)
+        self.assertEqual(category.id, _category.id)
+
+        with self.assertRaises(ValueError):
+            domain.domain_baz = [('fane_the_eternal', '=', 420)]
+
+    def test_domain_multi_relation(self):
+        # test that a domain field with a model_field set to multiple relational fields works
+        domain = self.Model.create({'domain_quux': [('name', '=', "Queen Justinia's orders")]})
+        discussion = self.env['test_new_api.discussion'].create({'name': "Queen Justinia's orders"})
+        _discussion = self.env['test_new_api.discussion'].search(domain.domain_quux)
+        self.assertEqual(discussion.id, _discussion.id)
+
+        domain.domain_quux += [('message_concat', '=', 'poop')]
+        _discussion = self.env['test_new_api.discussion'].search(domain.domain_quux)
+        self.assertNotEqual(discussion.id, _discussion.id)
+
+        with self.assertRaises(ValueError):
+            # valid for test_new_api.message but not for test_new_api.discussion
+            domain.domain_quux = [('body', '=', 'the god king sucks')]
 
 
 @common.tagged('test_domain_field_advanced')
 class TestDomainFieldSetup(common.TransactionCase):
+    # TODO: put the boilerplate into a new test class? something like ORMCase
+    # note: these kind of tests must be self-contained into a class, normal tests and these tests
+    # don't play along nicely.
     def test_model_validation(self):
         # test that the model or model_field given in the Domain field declaration is valid
         self.addCleanup(self.registry.model_cache.clear)
@@ -3386,3 +3414,19 @@ class TestDomainFieldSetup(common.TransactionCase):
         with self.assertRaises(ValueError):
             self.registry.setup_models(self.env.cr)
 
+    def test_wrong_model_field_relation(self):
+        # test that every relation of the model_field attribute is correct
+        self.addCleanup(self.registry.model_cache.clear)
+
+        class Foo(models.Model):
+            _module = None
+            _name = _description = 'test_new_api.domain_field_model_field_validation'
+
+            category_id = fields.Many2one('test_new_api.category')
+            domain = fields.Domain(model_field='category_id.other_thing_id')
+
+        Foo._build_model(self.registry, self.env.cr)
+        self.addCleanup(self.registry.__delitem__, Foo._name)
+
+        with self.assertRaises(ValueError):
+            self.registry.setup_models(self.env.cr)

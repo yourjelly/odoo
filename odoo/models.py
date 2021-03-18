@@ -3822,6 +3822,8 @@ Fields:
                 field = self._fields.get(key)
                 if not field:
                     raise ValueError("Invalid field %r on model %r" % (key, self._name))
+                if field.type == 'domain':
+                    field._check_domain(field.convert_to_write(val, self))
                 if field.company_dependent:
                     irprop_def = self.env['ir.property']._get(key, self._name)
                     cached_def = field.convert_to_cache(irprop_def, self)

@@ -1295,6 +1295,10 @@ class DomainField(models.Model):
     is_in_domain = fields.Boolean(compute='_compute_is_in_domain')
     domain_bar = fields.Domain()
     bar_qty = fields.Integer(compute='_compute_bar_qty')
+    category_id = fields.Many2one('test_new_api.category')
+    domain_baz = fields.Domain(model_field='category_id')
+    message_id = fields.Many2one('test_new_api.message')
+    domain_quux = fields.Domain(model_field='message_id.discussion')
 
     @api.depends('domain_foo')
     def _compute_is_in_domain(self):

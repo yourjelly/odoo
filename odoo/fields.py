@@ -1675,16 +1675,36 @@ class Domain(Char):
 
     def _setup_attrs(self, model, name):
         super()._setup_attrs(model, name)
-        for field in reversed(resolve_mro(model, name, self._can_setup_from)):
-            if 'model' in field.args:
-                domain_model = field.args['model']
-                if domain_model not in model.env:
+        if self.model and self.model not in model.env:
+            raise ValueError(
+                f"Wrong value for attribute 'model' of field {model._name}.{name}: {self.model}"
+            )
+        # set the field's model to point to the actual model object for easier and streamlined
+        # usage down the stack
+        if self.model:
+            self.model = model.env[self.model]
+        else:
+            # model_field is set, resolve the path and set self.model to the corresponding model
+            for fname in self.model_field.split('.'):
+                field = model._fields.get(fname)
+                if field is None:
                     raise ValueError(
-                        f"Field {name} defined in model {model._name} contains a wrong value for "
-                        f"the model attribute: {self.model}, {self.model} is not a valid model "
-                        f"name.\nMake sure that {self.model} exists and that the module that "
-                        f"implements it is installed."
+                        f"Wrong value for attribute 'model_field' of field "
+                        f"{self.model_name}.{name}: {self.model_field}, relation {fname} of "
+                        f"model {model._name} does not exist"
                     )
+                model = model[fname]
+            self.model = model
+
+    def _check_domain(self, domain):
+        try:
+            self.model.filtered_domain(domain)
+        except Exception as e:
+            raise ValueError(f"Malformed domain: {domain}") from e
+
+    def write(self, records, value):
+        self._check_domain(value)
+        return super().write(records, value)
 
     def convert_to_record(self, value, record):
         return ast.literal_eval(value or "[]")
