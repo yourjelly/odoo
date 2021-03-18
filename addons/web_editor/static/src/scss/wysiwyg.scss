@@ -132,6 +132,7 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 
 .oe_edited_link {
     position: relative;
+    display: inline-block;
     &::before {
         content: '';
         border: dashed 3px #01bad2;
