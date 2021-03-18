@@ -335,6 +335,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             this._onSnippetsLoaded(this.snippetsLoaded);
         }
         this._super();
+        this.wysiwyg.odooEditor.observerFlush();
+        this.wysiwyg.odooEditor.resetHistory();
     },
     /**
      * @private
