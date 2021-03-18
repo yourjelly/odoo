@@ -103,7 +103,7 @@ class StockQuant(models.Model):
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
         readonly=True, digits='Product Unit of Measure', groups='stock.group_stock_manager')
     inventory_date = fields.Date(
-        'Inventory Date', compute='_compute_invetory_date', store=True,
+        'Inventory Date', compute='_compute_invetory_date', store=True, readonly=False,
         help="Last date at which the On Hand Quantity has been computed.")
     user_id = fields.Many2one(
         'res.users', 'User', groups='stock.group_stock_manager')
