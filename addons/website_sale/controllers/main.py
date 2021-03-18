@@ -248,11 +248,47 @@ class WebsiteSale(http.Controller):
 
         Product = request.env['product.template'].with_context(bin_size=True)
 
-        search_product = Product.search(domain, order=self._get_search_order(post))
         website_domain = request.website.website_domain()
         categs_domain = [('parent_id', '=', False)] + website_domain
         if search:
-            search_categories = Category.search([('product_tmpl_ids', 'in', search_product.ids)] + website_domain).parents_and_self
+            query = Product._where_calc(domain)
+            # TODO: delete
+            ## request.env['product.public.category']._fields['product_tmpl_ids'].relation
+            #relation = 'product_public_category_product_template_rel'
+            #relation_alias = query.left_join(
+            #    Product._table, 'id',
+            #    relation, 'product_template_id',
+            #    'product',
+            #)
+            #category_alias = query.left_join(
+            #    relation_alias, 'product_public_category_id',
+            #    Category._table, 'id',
+            #    'product_public_category_id',
+            #)
+            ## apply domain to query
+            #expression.expression(website_domain, Category, category_alias, query)
+            #query_str, params = query.select(f'"{category_alias}".id AS id')
+            #request._cr.execute(query_str, params)
+            #search_categories = Category.browse([row[0] for row in request._cr.fetchall()])
+
+            query = Category._where_calc(website_domain)
+            relation = Category._fields['product_tmpl_ids'].relation
+            relation_alias = query.left_join(
+                Category._table, 'id',
+                relation, 'product_public_category_id',
+                'category',
+            )
+            product_alias = query.left_join(
+                relation_alias, 'product_template_id',
+                Product._table, 'id',
+                'product_template_id',
+            )
+            # apply domain to query
+            expression.expression(domain, Product, product_alias, query)
+            # To understand this magic, check __iter__ method in odoo/osv/query.py
+            search_categories = Category.browse(query)
+
+            search_categories = search_categories.parents_and_self
             categs_domain.append(('id', 'in', search_categories.ids))
         else:
             search_categories = Category
@@ -261,15 +297,29 @@ class WebsiteSale(http.Controller):
         if category:
             url = "/shop/category/%s" % slug(category)
 
+        # fetching all ids is faster than making two queries 1) SELECT count(*) ... 2) SELECT ... OFFSET ... LIMIT ...
+        search_product = Product.search(domain, order=self._get_search_order(post))
         product_count = len(search_product)
+        #product_count = Product.search_count(domain)
         pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
         offset = pager['offset']
         products = search_product[offset: offset + ppg]
+        #products = Product.search(domain, order=self._get_search_order(post), offset=offset, limit=ppg)
 
         ProductAttribute = request.env['product.attribute']
         if products:
             # get all products without limit
-            attributes = ProductAttribute.search([('product_tmpl_ids', 'in', search_product.ids)])
+            query = Product._where_calc(domain)
+            relation = ProductAttribute._fields['product_tmpl_ids'].relation
+            relation_alias = query.left_join(
+                Product._table, 'id',
+                relation, 'product_template_id',
+                'product',
+            )
+            query_str, params = query.select(f'"{relation_alias}".product_attribute_id AS id')
+            request._cr.execute(query_str, params)
+            attributes_ids = [row[0] for row in request._cr.fetchall()]
+            attributes = ProductAttribute.browse(attributes_ids)
         else:
             attributes = ProductAttribute.browse(attributes_ids)
 
