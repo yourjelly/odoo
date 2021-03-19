@@ -98,6 +98,8 @@
         'static/src/xml/Popups/OrderImportPopup.xml',
         'static/src/xml/Popups/ProductConfiguratorPopup.xml',
         'static/src/xml/Popups/CashOpeningPopup.xml',
+        'static/src/xml/Popups/TextAreaPopup.xml',
+        'static/src/xml/Popups/TextInputPopup.xml',
         'static/src/xml/Screens/ProductScreen/ControlButtons/SetPricelistButton.xml',
         'static/src/xml/Screens/ProductScreen/ControlButtons/SetFiscalPositionButton.xml',
         'static/src/xml/ChromeWidgets/ClientScreenButton.xml',

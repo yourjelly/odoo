@@ -52,8 +52,6 @@ This module adds several features to the Point of Sale that are specific to rest
         'static/src/xml/ChromeWidgets/BackToFloorButton.xml',
         'static/src/xml/multiprint.xml',
         'static/src/xml/TipReceipt.xml',
-        'static/src/xml/Popups/TextAreaPopup.xml',
-        'static/src/xml/Popups/TextInputPopup.xml',
     ],
     'demo': [
         'data/pos_restaurant_demo.xml',
