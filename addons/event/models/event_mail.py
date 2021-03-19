@@ -87,7 +87,7 @@ class EventMailScheduler(models.Model):
     mail_sent = fields.Boolean('Mail Sent on Event', copy=False)
     done = fields.Boolean('Sent', compute='_compute_done', store=True)
 
-    @api.depends('mail_sent', 'interval_type', 'event_id.registration_ids', 'mail_registration_ids')
+    @api.depends('mail_sent', 'interval_type', 'event_id.registration_ids', 'mail_registration_ids.mail_sent')
     def _compute_done(self):
         for mail in self:
             if mail.interval_type in ['before_event', 'after_event']:
