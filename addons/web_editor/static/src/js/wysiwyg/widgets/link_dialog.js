@@ -27,7 +27,7 @@ var LinkDialog = Dialog.extend({
      * @constructor
      * @param {Boolean} linkInfo.isButton - whether if the target is a button element.
      */
-    init: function (parent, options, editable, data) {
+    init: function (parent, options, editable, data, link) {
         this.options = options || {};
         this._super(parent, _.extend({
             title: _t("Link to"),
@@ -53,13 +53,24 @@ var LinkDialog = Dialog.extend({
         this.data.className = this.data.className || "";
         this.data.iniClassName = this.data.iniClassName || "";
 
-        const selection = editable && editable.ownerDocument.getSelection();
-        this.data.range = selection && selection.rangeCount && selection.getRangeAt(0);
+        if (link) {
+            const range = document.createRange();
+            range.selectNodeContents(link);
+            this.data.range = range;
+        } else {
+            const selection = editable && editable.ownerDocument.getSelection();
+            this.data.range = selection && selection.rangeCount && selection.getRangeAt(0);
+        }
 
         if (this.data.range) {
-            this.needLabel = selection.isCollapsed;
-            const firstLinkInSelection = OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a');
-            const $link = $(firstLinkInSelection);
+            this.needLabel = this.data.range.collapsed;
+            let $link;
+            if (link) {
+                $link = $(link);
+            } else {
+                const firstLinkInSelection = OdooEditorLib.getInSelection(this.editable.ownerDocument, 'a');
+                $link = $(firstLinkInSelection);
+            }
             this.data.iniClassName = $link.attr("class") || "";
             this.colorCombinationClass = false;
             let $node = $link;
@@ -74,12 +85,16 @@ var LinkDialog = Dialog.extend({
             }
             this.data.className = this.data.iniClassName.replace(/(^|\s+)btn(-[a-z0-9_-]*)?/gi, ' ');
 
-            const startLink = $(this.data.range.startContainer).closest('a')[0];
-            const endLink = $(this.data.range.endContainer).closest('a')[0];
-            const isLink = startLink && (startLink === endLink);
+            if (link) {
+                this.data.text = link.textContent.replace(/[ \t\r\n]+/g, ' ');
+            } else {
+                const startLink = $(this.data.range.startContainer).closest('a')[0];
+                const endLink = $(this.data.range.endContainer).closest('a')[0];
+                const isLink = startLink && (startLink === endLink);
+                this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
+                    .replace(/[ \t\r\n]+/g, ' ');
+            }
             this.data.url = $link.attr('href') || '';
-            this.data.text = (isLink ? startLink.textContent : this.data.range.toString())
-                .replace(/[ \t\r\n]+/g, ' ');
         } else {
             this.data.text = this.data.text ? this.data.text.replace(/[ \t\r\n]+/g, ' ') : '';
             this.needLabel = true;
