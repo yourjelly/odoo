@@ -17,6 +17,7 @@ var _t = core._t;
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const getDeepRange = OdooEditorLib.getDeepRange;
+const getInSelection = OdooEditorLib.getInSelection;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
 
@@ -113,10 +114,10 @@ const Wysiwyg = Widget.extend({
             }
         );
 
-        this.$editable.on('click','.o_image, .media_iframe_video', (e) => e.preventDefault());
+        this.$editable.on('click','.o_image, .media_iframe_video', e => e.preventDefault());
         this.showTooltip = true;
         this.$editable.on('dblclick', mediaSelector, function() {
-            this.showTooltip = false;
+            self.showTooltip = false;
             const $el = $(this);
             let params = {node: $el};
             $el.selectElement();
@@ -129,6 +130,10 @@ const Wysiwyg = Widget.extend({
             }
 
             self.openMediaDialog(params);
+        });
+        this.$editable.on('dblclick', 'a', function() {
+            self.showTooltip = false;
+            self.toggleLinkTools(true, this);
         });
 
         if (options.snippets) {
@@ -494,21 +499,26 @@ const Wysiwyg = Widget.extend({
     /**
      * Toggle the Link tools/dialog to edit links. If a snippet menu is present,
      * use the link tools, otherwise use the dialog.
+     *
+     * @param {boolean} [forceOpen] default: false
+     * @param {Node} [link] The link to edit if it is known.
      */
-    toggleLinkTools() {
+    toggleLinkTools(forceOpen = false, link) {
         if (this.snippetsMenu) {
             if (this.linkTools) {
                 this.linkTools.destroy();
-                this.linkTools = undefined;
-            } else {
+            }
+            if (forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.editable, $btn);
+                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.editable, $btn, link);
                 this.linkTools.appendTo(this.toolbar.$el);
+            } else {
+                this.linkTools = undefined;
             }
         } else {
             const linkDialog = new weWidgets.LinkDialog(this, {
                 forceNewWindow: this.options.linkForceNewWindow,
-            }, this.$editable[0]);
+            }, this.$editable[0], undefined, link);
             linkDialog.open();
             linkDialog.on('save', this, (linkInfo) => {
                 const linkUrl = linkInfo.url;
@@ -881,18 +891,7 @@ const Wysiwyg = Widget.extend({
         // Unselect all media.
         this.$editable.find('.o_we_selected_image').removeClass('o_we_selected_image');
         if (isInMedia) {
-            // Show the media as selected.
             this.odooEditor.automaticStepSkipStack();
-            // Handle the media's tooltip.
-            this.showTooltip = true;
-            setTimeout(() => {
-                // Do not show tooltip on double-click and if there is already one
-                if (!this.showTooltip || $target.attr('title') !== undefined) {
-                    return;
-                }
-                $target.tooltip({title: _t('Double-click to edit'), trigger: 'manual', container: 'body'}).tooltip('show');
-                setTimeout(() => $target.tooltip('dispose'), 800);
-            }, 400);
             // Select the media in the DOM.
             const selection = this.odooEditor.document.getSelection();
             const range = this.odooEditor.document.createRange();
@@ -919,6 +918,19 @@ const Wysiwyg = Widget.extend({
             }
             this._updateMediaJustifyButton();
             this._updateFaResizeButtons();
+        }
+        const link = getInSelection(this.odooEditor.document, 'a');
+        if (link || isInMedia) {
+            // Handle the media/link's tooltip.
+            this.showTooltip = true;
+            setTimeout(() => {
+                // Do not show tooltip on double-click and if there is already one
+                if (!this.showTooltip || $target.attr('title') !== undefined) {
+                    return;
+                }
+                $target.tooltip({title: _t('Double-click to edit'), trigger: 'manual', container: 'body'}).tooltip('show');
+                setTimeout(() => $target.tooltip('dispose'), 800);
+            }, 400);
         }
     },
     _updateMediaJustifyButton: function (commandState) {
