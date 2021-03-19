@@ -2236,6 +2236,7 @@ var exportVariable = (function (exports) {
         }
     };
 
+    const NOT_A_NUMBER = /[^\d]/g;
     function areSimilarElements(node, node2) {
         if (
             !node ||
@@ -2278,10 +2279,19 @@ var exportVariable = (function (exports) {
                 getListMode(node.lastElementChild) == getListMode(node2.firstElementChild)
             );
         }
+        if (['UL', 'OL'].includes(node.tagName)) {
+            return !isVisibleEmpty(node) && !isVisibleEmpty(node2);
+        }
+        if (isBlock(node) || isVisibleEmpty(node) || isVisibleEmpty(node2)) {
+            return false;
+        }
+        const nodeStyle = getComputedStyle(node);
+        const node2Style = getComputedStyle(node2);
         return (
-            (['UL', 'OL'].includes(node.tagName) || !isBlock(node)) &&
-            !isVisibleEmpty(node) &&
-            !isVisibleEmpty(node2)
+            !+nodeStyle.padding.replace(NOT_A_NUMBER, '') &&
+            !+node2Style.padding.replace(NOT_A_NUMBER, '') &&
+            !+nodeStyle.margin.replace(NOT_A_NUMBER, '') &&
+            !+node2Style.margin.replace(NOT_A_NUMBER, '')
         );
     }
 
@@ -3490,7 +3500,8 @@ var exportVariable = (function (exports) {
         _bold() {
             const selection = this.document.getSelection();
             if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
-            const isAlreadyBold = !getTraversedNodes(this.editable)
+            getDeepRange(this.editable, { splitText: true, select: true, correctTripleClick: true });
+            const isAlreadyBold = !getSelectedNodes(this.editable)
                 .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length)
                 .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) < 700);
             this._applyInlineStyle(el => {
