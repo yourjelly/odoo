@@ -1421,6 +1421,7 @@ var ListRenderer = BasicRenderer.extend({
      * @param {MouseEvent} ev
      */
     _onSelectRecord: function (ev) {
+        console.log('_onSelectRecord')
         ev.stopPropagation();
         this._updateSelection();
     },

@@ -167,6 +167,90 @@ QUnit.module('fields', {}, function () {
     }, function () {
         QUnit.module('FieldOne2Many');
 
+        QUnit.only('Editable list field widget call on_attach_callback on update', async function (assert) {
+            assert.expect(5);
+
+            let count = 0;
+            const MyField = AbstractField.extend({
+                init() {
+                    this._super(...arguments);
+                    count++;
+                    // assert.step('init');
+                },
+                destroy() {
+                    this._super(...arguments);
+                    count--;
+                    // assert.step('destroy');
+                }
+            });
+            fieldRegistry.add('myfield', MyField);
+
+            this.data.partner.records[0].p = [1, 2];
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="int_field"/>
+                                <field name="foo" widget="myfield"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                res_id: 1,
+            });
+
+            assert.containsN(form, '.o_data_row', 2);
+            assert.strictEqual(count, 2);
+
+            await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+            assert.strictEqual(count, 2);
+
+            await testUtils.fields.editInput(form.$('.o_selected_row .o_field_integer'), '44');
+            assert.strictEqual(count, 2);
+
+            form.destroy();
+            delete fieldRegistry.map.my_field;
+
+            assert.strictEqual(count, 0);
+        });
+
+        QUnit.test('Editable list field widget call on_attach_callback on update', async function (assert) {
+            assert.expect(3);
+
+            this.data.partner.records[0].p = [1, 2];
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="int_field"/>
+                                <field name="color" widget="badge" decoration-warning="int_field == 9"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                res_id: 1,
+            });
+
+            assert.containsN(form, '.o_data_row', 2);
+            assert.hasClass(form.$('.o_data_row:nth(1) .o_field_badge'), 'bg-warning-light');
+
+            await testUtils.dom.click(form.$('.o_data_row .o_data_cell:first'));
+            await testUtils.owlCompatibilityExtraNextTick();
+            await testUtils.fields.editInput(form.$('.o_selected_row .o_field_integer'), '44');
+            await testUtils.owlCompatibilityExtraNextTick();
+
+            assert.hasClass(form.$('.o_data_row:nth(1) .o_field_badge'), 'bg-warning-light');
+
+            form.destroy();
+            delete fieldRegistry.map.my_field;
+        });
+
         QUnit.test('New record with a o2m also with 2 new records, ordered, and resequenced', async function (assert) {
             assert.expect(2);
 

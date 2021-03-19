@@ -21,10 +21,10 @@ odoo.define('web.basic_fields_owl', function (require) {
             return `bg-${decoration.split('-')[1]}-light`;
         }
     }
+
     FieldBadge.description = _lt("Badge");
     FieldBadge.supportedFieldTypes = ['selection', 'many2one', 'char'];
     FieldBadge.template = 'web.FieldBadge';
-
 
     class FieldBoolean extends AbstractField {
         patched() {

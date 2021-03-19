@@ -34,7 +34,7 @@ class EventBoothSlot(models.Model):
         ('available', 'Available'),
         ('reserved', 'Reserved'),
         ('unavailable', 'Unavailable'),
-    ], string='Status', default='available', required=True)
+    ], string='Status', default='available', readonly=True, required=True)
     # Contact Information
     partner_id = fields.Many2one('res.partner', string='Rented By')
     topic = fields.Char(string='Topic')

@@ -99,8 +99,8 @@
                                         'default_start': 'event_date_begin',
                                         'default_end': 'event_date_end',
                                     }}" string="End"/>
-                                <field name="registration_count" class="oe_read_only"/>
-                                <field name="state" class="oe_read_only" widget="badge" decoration-success="state == 'available'"
+                                <field name="registration_count" />
+                                <field name="state" widget="badge" decoration-success="state == 'available'"
                                        decoration-danger="state == 'unavailable'" decoration-warning="state == 'reserved'"/>
                             </tree>
                         </field>

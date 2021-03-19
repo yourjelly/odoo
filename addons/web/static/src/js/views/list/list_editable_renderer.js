@@ -209,6 +209,8 @@ ListRenderer.include({
      */
     confirmUpdate: function (state, id, fields, ev) {
         var self = this;
+        
+        debugger;
 
         var oldData = this.state.data;
         this._setState(state);
@@ -221,19 +223,32 @@ ListRenderer.include({
                 return;
             }
 
+            // Destroy all field widgets except the the ones on the current row (they are going to be recreated)
             _.each(oldData, function (rec) {
                 if (rec.id !== id) {
                     self._destroyFieldWidgets(rec.id);
                 }
             });
-
+            
+            // Keep ref of the current row's widgets 
+            const tmpRefFieldWidget = self.allFieldWidgets[id];
+            // Remove it from the list just for a clean start for generating the new content (avoid later memory leak)
+            delete self.allFieldWidgets[id];
+            
             // re-render whole body (outside the dom)
             self.defs = [];
             var $newBody = self._renderBody();
             var defs = self.defs;
             delete self.defs;
 
+
             return Promise.all(defs).then(function () {
+                // All the field widgets have now be recreated, but we don't want the current column ones.
+                // We destroy it and get it back from our reference. 
+                // This manipulation avoids a memory leak, where field widgets in the current column wouldn't be destroyed and were kept in memory.
+                self._destroyFieldWidgets(id);
+                self.allFieldWidgets[id] = tmpRefFieldWidget;
+
                 // update registered modifiers to edit 'mode' because the call to
                 // _renderBody set baseModeByRecord as 'readonly'
                 _.each(self.columns, function (node) {
@@ -269,6 +284,20 @@ ListRenderer.include({
                 $newRow.nextAll('.o_data_row').get().reverse().forEach(function (row) {
                     $(row).insertAfter($editedRow);
                 });
+
+                // Call on_attach_callback methods on widgets that implement it
+                if (self._isInDom) {
+                    for (const handle in self.allFieldWidgets) {
+                        if (handle !== id) {
+                            self.allFieldWidgets[handle].forEach(widget => {
+                                if (widget.on_attach_callback) {
+                                    widget.on_attach_callback();
+                                }
+                            });
+                        }
+                    }
+                }
+
 
                 if (self.currentRow !== null) {
                     var newRowIndex = $editedRow.prop('rowIndex') - 1;

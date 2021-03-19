@@ -46,6 +46,10 @@ QUnit.module('Views', {
                     datetime: {string: "Datetime Field", type: 'datetime'},
                     reference: {string: "Reference Field", type: 'reference', selection: [
                         ["bar", "Bar"], ["res_currency", "Currency"], ["event", "Event"]]},
+                    selection: {string: "Selection Field", type: 'selection', selection: [
+                            ["first", "First"], ["second", "Second"], ["third", "Third"]], default:"first"},
+                    range_to: {string: "End Range Date", type: "date"},
+                    range_from: {string: "Start Range Date", type: "date"},
                 },
                 records: [
                     {
