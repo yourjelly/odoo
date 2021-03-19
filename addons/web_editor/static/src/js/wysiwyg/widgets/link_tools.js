@@ -29,7 +29,7 @@ const LinkTools = Widget.extend({
     /**
      * @constructor
      */
-    init: function (parent, options, editable, $button) {
+    init: function (parent, options, editable, $button, link) {
         this.options = options || {};
         this._super(parent, _.extend({
             title: _t("Link to"),
@@ -55,7 +55,7 @@ const LinkTools = Widget.extend({
 
         this.data.range = editable.ownerDocument.getSelection().getRangeAt(0);
 
-        this.$link = this._getOrCreateLink();
+        this.$link = this._getOrCreateLink(link);
         this.data.iniClassName = this.$link.attr("class") || "";
         this.colorCombinationClass = '';
 
@@ -208,14 +208,14 @@ const LinkTools = Widget.extend({
             doStripDomain: doStripDomain,
         };
     },
-    _getOrCreateLink: function () {
+    _getOrCreateLink: function (linkToEdit) {
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         const doc = this.editable.ownerDocument;
         const range = getDeepRange(this.editable, { splitText: true, select: true, correctTripleClick: true });
         this.needLabel = false;
-        let link = getInSelection(doc, 'a');
+        let link = linkToEdit || getInSelection(doc, 'a');
         const $link = $(link);
-        if (link && (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)) {
+        if (link && !linkToEdit && (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)) {
             // Expand the current link to include the whole selection.
             let before = link.previousSibling;
             while (before !== null && range.intersectsNode(before)) {
