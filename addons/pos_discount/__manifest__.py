@@ -21,6 +21,7 @@ discount to a customer.
     ],
     'qweb': [
         'static/src/xml/DiscountButton.xml',
+        'static/src/xml/ProductScreen.xml',
     ],
     'installable': True,
 }
