@@ -495,9 +495,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
             });
             selectedTheme = this._getSelectedTheme(themesParams);
         }
-
-        // $dropdown.insertAfter($snippets_menu);
-        // $themeSelector.appendTo(this.wysiwyg.$iframeBody);
     },
     /**
      * @override
