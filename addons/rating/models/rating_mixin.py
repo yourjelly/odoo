@@ -20,6 +20,16 @@ class RatingParentMixin(models.AbstractModel):
         "Rating Satisfaction",
         compute="_compute_rating_percentage_satisfaction", compute_sudo=True,
         store=False, help="Percentage of happy ratings")
+    rating_length = fields.Integer(
+        "Rating Length",
+        compute="_compute_rating_length", compute_sudo=True,
+        store=False, help="length of rating")
+
+    @api.depends('rating_ids', 'rating_ids.rating', 'rating_ids.consumed')
+    def _compute_rating_length(self):
+        for record in self:
+            ratings = self.env['rating.rating'].search([('res_model', '=', self._name), ('res_id', '=', record.id), ('consumed', '=', True)], limit=1)
+            record.rating_length = length(ratings.rating_ids) and 1 or 0
 
     @api.depends('rating_ids.rating', 'rating_ids.consumed')
     def _compute_rating_percentage_satisfaction(self):
