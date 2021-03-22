@@ -829,6 +829,7 @@ var SnippetEditor = Widget.extend({
     _onDragAndDropStop: function (ev, ui) {
         this.options.wysiwyg.odooEditor.automaticStepActive();
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
+        this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
 
         // TODO lot of this is duplicated code of the d&d feature of snippets
         if (!this.dropped) {
