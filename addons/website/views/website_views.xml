@@ -25,6 +25,9 @@
             <field name="model">website</field>
             <field name="arch" type="xml">
                 <form string="Website Settings">
+                    <header>
+                        <button name="action_bw_check_assets" type="object" string="Check for old assets"/>
+                    </header>
                     <sheet>
                         <div name="domain">
                             <group name="domain">
