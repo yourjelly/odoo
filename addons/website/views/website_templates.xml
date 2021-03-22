@@ -1962,24 +1962,18 @@
 </template>
 
 <!-- Effect options -->
-<record id="option_ripple_effect_0" model="ir.asset">
-    <field name="name">option_ripple_effect</field>
+<record id="option_ripple_effect_css" model="ir.asset">
+    <field name="name">website.option_ripple_effect_css</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">/website/static/src/scss/options/ripple_effect.scss</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
 </record>
 
-<record id="option_ripple_effect_1" model="ir.asset">
-    <field name="name">option_ripple_effect</field>
+<record id="option_ripple_effect_js" model="ir.asset">
+    <field name="name">website.option_ripple_effect_js</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">/website/static/src/js/content/ripple_effect.js</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
 </record>
 
 <!-- Error and special pages -->

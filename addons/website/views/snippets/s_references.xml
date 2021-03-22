@@ -30,4 +30,10 @@
     </section>
 </template>
 
+<record id="website.assets_frontend_s_references_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_references_000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_references/000.scss</field>
+</record>
+
 </odoo>

@@ -50,4 +50,10 @@
     </xpath>
 </template>
 
+<record id="website.assets_frontend_s_blockquote_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_blockquote_000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_blockquote/000.scss</field>
+</record>
+
 </odoo>

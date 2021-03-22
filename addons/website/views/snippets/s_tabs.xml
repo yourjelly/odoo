@@ -117,4 +117,10 @@
     </xpath>
 </template>
 
+<record id="website.assets_frontend_s_tabs_001" model="ir.asset">
+    <field name="name">website.assets_frontend.s_tabs_001</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_tabs/001.scss</field>
+</record>
+
 </odoo>

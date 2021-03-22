@@ -123,14 +123,17 @@
     </xpath>
 </template>
 
-<record id="assets_snippet_s_media_list_css_000_25" model="ir.asset">
-    <field name="name">assets snippet s media list css 000</field>
+<record id="website.assets_frontend_s_media_list_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_media_list_000</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">website/static/src/snippets/s_media_list/000.scss</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
+</record>
+
+<record id="website.assets_frontend_s_media_list_001" model="ir.asset">
+    <field name="name">website.assets_frontend.s_media_list_001</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_media_list/001.scss</field>
 </record>
 
 </odoo>

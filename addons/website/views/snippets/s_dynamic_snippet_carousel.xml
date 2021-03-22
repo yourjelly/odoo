@@ -24,4 +24,17 @@
             </t>
         </xpath>
     </template>
-    </odoo>
+
+<record id="website.assets_frontend_s_dynamic_snippet_carousel_000_css" model="ir.asset">
+    <field name="name">website.assets_frontend.s_dynamic_snippet_carousel_000_css</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_dynamic_snippet_carousel/000.scss</field>
+</record>
+
+<record id="website.assets_frontend_s_dynamic_snippet_carousel_000_js" model="ir.asset">
+    <field name="name">website.assets_frontend.s_dynamic_snippet_carousel_000_js</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_dynamic_snippet_carousel/000.js</field>
+</record>
+
+</odoo>

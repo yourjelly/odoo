@@ -36,24 +36,24 @@
 </template>
 
 <!-- Assets -->
-<record id="_assets_snippet_s_masonry_block_css_000_variables_b5" model="ir.asset">
-    <field name="name"> assets snippet s masonry block css 000 variables</field>
-    <field name="bundle">web._assets_primary_variables</field>
-    <field name="directive">append</field>
-    <field name="glob">website/static/src/snippets/s_masonry_block/000_variables.scss</field>
-    <field name="target" eval="None"></field>
+<record id="website.assets_frontend_s_masonry_block_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_masonry_block_000</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_masonry_block/000.scss</field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
 </record>
 
-<record id="assets_snippet_s_masonry_block_css_000_e0" model="ir.asset">
-    <field name="name">assets snippet s masonry block css 000</field>
+<record id="website.assets_frontend_s_masonry_block_001" model="ir.asset">
+    <field name="name">website.assets_frontend.s_masonry_block_001</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
-    <field name="glob">website/static/src/snippets/s_masonry_block/000.scss</field>
-    <field name="target" eval="None"></field>
+    <field name="glob">website/static/src/snippets/s_masonry_block/001.scss</field>
+</record>
+
+<record id="website._assets_primary_variables_s_masonry_block_000_variables" model="ir.asset">
+    <field name="name">website._assets_primary_variables.s_masonry_block_000_variables</field>
+    <field name="bundle">web._assets_primary_variables</field>
+    <field name="glob">website/static/src/snippets/s_masonry_block/000_variables.scss</field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
 </record>
 
 </odoo>

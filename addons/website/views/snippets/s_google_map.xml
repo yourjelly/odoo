@@ -54,4 +54,16 @@
     </xpath>
 </template>
 
+<record id="website.assets_frontend_s_google_map_000_css" model="ir.asset">
+    <field name="name">website.assets_frontend.s_google_map_000_css</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_google_map/000.scss</field>
+</record>
+
+<record id="website.assets_frontend_s_google_map_000_js" model="ir.asset">
+    <field name="name">website.assets_frontend.s_google_map_000_js</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_google_map/000.js</field>
+</record>
+
 </odoo>

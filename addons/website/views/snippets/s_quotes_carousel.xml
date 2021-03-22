@@ -71,14 +71,17 @@
     </section>
 </template>
 
-<record id="assets_snippet_s_quotes_carousel_css_000_0e" model="ir.asset">
-    <field name="name">assets snippet s quotes carousel css 000</field>
+<record id="website.assets_frontend_s_quotes_carousel_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_quotes_carousel_000</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">website/static/src/snippets/s_quotes_carousel/000.scss</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
+</record>
+
+<record id="website.assets_frontend_s_quotes_carousel_001" model="ir.asset">
+    <field name="name">website.assets_frontend.s_quotes_carousel_001</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_quotes_carousel/001.scss</field>
 </record>
 
 </odoo>

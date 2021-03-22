@@ -62,24 +62,24 @@
 </template>
 
 <!-- Assets -->
-<record id="assets_snippet_s_showcase_css_000_cc" model="ir.asset">
-    <field name="name">assets snippet s showcase css 000</field>
+<record id="website.assets_frontend_s_showcase_000" model="ir.asset">
+    <field name="name">website.assets_frontend.s_showcase_000</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">website/static/src/snippets/s_showcase/000.scss</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
 </record>
 
-<record id="assets_snippet_s_showcase_css_001_33" model="ir.asset">
-    <field name="name">assets snippet s showcase css 001</field>
+<record id="website.assets_frontend_s_showcase_001" model="ir.asset">
+    <field name="name">website.assets_frontend.s_showcase_001</field>
     <field name="bundle">web.assets_frontend</field>
-    <field name="directive">append</field>
     <field name="glob">website/static/src/snippets/s_showcase/001.scss</field>
-    <field name="target" eval="None"></field>
     <field name="active" eval="False"></field>
-    <field name="sequence" eval="16"></field>
+</record>
+
+<record id="website.assets_frontend_s_showcase_002" model="ir.asset">
+    <field name="name">website.assets_frontend.s_showcase_002</field>
+    <field name="bundle">web.assets_frontend</field>
+    <field name="glob">website/static/src/snippets/s_showcase/002.scss</field>
 </record>
 
 </odoo>
