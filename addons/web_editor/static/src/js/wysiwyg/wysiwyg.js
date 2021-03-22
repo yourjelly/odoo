@@ -133,8 +133,10 @@ const Wysiwyg = Widget.extend({
             self.openMediaDialog(params);
         });
         this.$editable.on('dblclick', 'a', function() {
-            self.showTooltip = false;
-            self.toggleLinkTools(true, this);
+            if (!this.getAttribute('data-oe-model')) {
+                self.showTooltip = false;
+                self.toggleLinkTools(true, this);
+            }
         });
 
         if (options.snippets) {
