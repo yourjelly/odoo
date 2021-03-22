@@ -1022,23 +1022,26 @@ class Website(models.Model):
         """Looks up the DB to see which of the website's snippets use versioned assets."""
         tables = self._get_bw_table_column_list()
         res = []
+        specific_website = False
 
         for t in tables:
             query = '''
                 WITH snippet_tags AS (
                     SELECT
+                        website_id,
                         name AS page,
                         REGEXP_MATCHES({column}, '(<[^>]+\\sdata-snippet="(\\w+?)"[^>]+>)', 'g') AS matches
                     FROM
                         {table}
-                    WHERE type='qweb' AND website_id='{id}'
+                    WHERE type='qweb' {restrict}
                 ) -- detect snippets, retrieves their opening tag and their type in a text array
                 SELECT
+                    website_id,
                     page,
                     matches[2] AS snippet_type,
                     REGEXP_MATCHES(matches[1], 'data-v(...)="(\\w+?)"') AS res_and_version
                 FROM snippet_tags;
-            '''.format(table=t[0], column=t[1], id=self.id)  # Assuming only one column for now
+            '''.format(table=t[0], column=t[1], restrict='AND website_id' + self.id if specific_website else '')  # Assuming only one column for now
             self.env.cr.execute(query)
             res.append(self.env.cr.fetchall())
         print(res)
