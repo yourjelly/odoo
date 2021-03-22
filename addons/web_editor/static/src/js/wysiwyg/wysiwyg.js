@@ -580,7 +580,7 @@ const Wysiwyg = Widget.extend({
         const restoreSelection = () => setCursor(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
 
         const $node = $(params.node);
-        const $editable = $(OdooEditorLib.closestElement(range.sc, '.o_editable'));
+        const $editable = $(OdooEditorLib.closestElement(range.startContainer, '.o_editable'));
         const model = $editable.data('oe-model');
         const field = $editable.data('oe-field');
         const type = $editable.data('oe-type');
