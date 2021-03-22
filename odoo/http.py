@@ -446,15 +446,26 @@ class Request(object):
 
         # Session
         self.session_sid = None
+
+        self.session_mono = None
+
+
+        # TODO remove
         self.session_db = None
         self.db = None
-        self.session_mono = None
+
+        self.cr = None
+
+        self.env = None
+
+
 
         # We keep a default one and then we merge headers._list
         self.response = werkzeug.wrappers.Response(mimetype='text/html')
         self.response_template = None
         self.response_qcontext = None
         #self.response_headers = werkzeug.datastructures.Headers()
+
 
         # To check
         self.auth_method = None
@@ -512,15 +523,6 @@ class Request(object):
 
     @property
     def registry(self):
-        """
-        The registry to the database linked to this request. Can be ``None``
-        if the current request uses the ``none`` authentication.
-
-        .. deprecated:: 8.0
-
-            use :attr:`.env`
-        """
-        return odoo.registry(self.db)
 
     @property
     def env(self):
@@ -700,6 +702,10 @@ class Request(object):
                 self.session_db = None
         self.session_mono = len(dbs) == 1
         return self.session_db
+
+    def session_env(self):
+        return odoo.registry(self.db)
+        pass
 
     def session_pre(self):
 
@@ -943,6 +949,7 @@ class Request(object):
                 sid += "_" + self.session_db
             self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
             # cookie_samesite="Lax" ?  cookie_path="/" ?
+
 
     #------------------------------------------------------
     # HTTP Controllers
