@@ -499,10 +499,23 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         const restore = dom.addButtonLoadingEffect($('button[data-action=save]')[0]);
         this.save(ev.data.reload).then(ev.data.onSuccess, ev.data.onFailure).then(restore).guardedCatch(restore);
     },
+    /**
+     * Asks the user if they really wants to discard their changes (if any),
+     * then simply reloads the page if they want to.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onSnippetRequestCancel: function (ev) {
         ev.stopPropagation();
         this.cancel();
     },
+    /**
+     * Add class that inform the SnippetMenu biend loaded.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
     _onSnippetLoaded: function (ev) {
         $('body.editor_enable').addClass('editor_has_snippets');
     },
