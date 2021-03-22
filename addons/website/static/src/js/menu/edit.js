@@ -164,7 +164,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             }
         });
     },
-    // todo: understand what is the different compared to the method `editable()` of wysiwyg
     /**
      * Returns the editable areas on the page.
      *
