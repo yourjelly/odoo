@@ -20,6 +20,7 @@ const getDeepRange = OdooEditorLib.getDeepRange;
 const getInSelection = OdooEditorLib.getInSelection;
 const isBlock = OdooEditorLib.isBlock;
 const rgbToHex = OdooEditorLib.rgbToHex;
+const setCursor = OdooEditorLib.setCursor;
 
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
@@ -570,14 +571,13 @@ const Wysiwyg = Widget.extend({
      * @param {Node} [params.htmlClass] Optionnal
      */
     openMediaDialog(params = {}) {
-        const range = Wysiwyg.getRange(this.odooEditor.document);
-        // we loose the current selection inside the content editable
-        // when we click on the media dialog button
-        // so we need to be able to restore the selection when the modal is closed
-        const restoreSelection = function() {
-            if (range.sc === null) return;
-            Wysiwyg.setRange(range.sc, range.so, range.ec, range.eo);
-        }
+        const sel = this.odooEditor.document.getSelection();
+        if (!sel.rangeCount) return;
+        const range = sel.getRangeAt(0);
+        // We lose the current selection inside the content editable when we
+        // click the media dialog button so we need to be able to restore the
+        // selection when the modal is closed.
+        const restoreSelection = () => setCursor(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
 
         const $node = $(params.node);
         const $editable = $(OdooEditorLib.closestElement(range.sc, '.o_editable'));
