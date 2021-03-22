@@ -62,6 +62,7 @@ const LinkTools = Widget.extend({
         const allBtnClassSuffixes = /(^|\s+)btn(-[a-z0-9_-]*)?/gi;
         this.data.className = this.data.iniClassName.replace(allBtnClassSuffixes, ' ');
         this.data.text = this.$link.text().replace(/[ \t\r\n]+/g, ' ');
+        this.data.oldAttributes = this.$link.getAttributes();
         this.data.url = this.$link.attr('href');
         this.data.isNewWindow = this.$link.attr('target') === '_blank';
 
@@ -148,14 +149,18 @@ const LinkTools = Widget.extend({
         if (data === null) {
             return;
         }
-        const attrs = {
+        const attrs = Object.assign({}, this.data.oldAttributes, {
             target: data.isNewWindow ? '_blank' : '',
             href: data.url,
             class: `${data.classes}`,
-        };
+        });
         const $links = $('.oe_edited_link');
         $links.removeClass('oe_edited_link');
-        this.$link.attr(attrs).html((data.label && data.label.length) ? data.label : data.url);
+        this.$link.attr(attrs);
+        if (data.label !== this.data.text || data.url !== this.data.url) {
+            const label = (data.label && data.label.length) ? data.label : data.url;
+            this.$link.html(label);
+        }
         if (createStep) this.options.wysiwyg.odooEditor.historyStep();
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         $links.addClass('oe_edited_link');
@@ -204,6 +209,7 @@ const LinkTools = Widget.extend({
             label: label,
             url: this._correctLink(url),
             classes: classes.replace(allWhitespace, ' ').replace(allStartAndEndSpace, '').replace(/oe_edited_link/, ''),
+            oldAttributes: this.data.oldAttributes,
             isNewWindow: isNewWindow,
             doStripDomain: doStripDomain,
         };
