@@ -107,14 +107,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Returns true if must force the user to choose a theme.
-     *
-     * @private
-     * @returns {Boolean}
-     */
-    _checkIfMustForceThemeChoice: function () {
-    },
-    /**
      * Returns true if the editable area is empty.
      *
      * @private
