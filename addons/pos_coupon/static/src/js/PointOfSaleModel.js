@@ -3,11 +3,11 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
 
     const PointOfSaleModel = require('point_of_sale.PointOfSaleModel');
     const session = require('web.session');
-    const { MutexedDropPrevious } = require('web.concurrency');
+    const { Mutex } = require('web.concurrency');
     const { patch } = require('web.utils');
     const { _t } = require('web.core');
 
-    const mutexdp = new MutexedDropPrevious();
+    const mutex = new Mutex();
 
     class Reward {
         static createKey(program_id, coupon_id) {
@@ -250,9 +250,7 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
             const couponId = orderline.coupon_id;
             const programId = orderline.program_id;
             await this._super(...arguments);
-            if (!orderline.is_program_reward) {
-                await this._updateRewards(order);
-            } else {
+            if (this.config.use_coupon_programs) {
                 if (couponId) {
                     const codeStr = Object.values(order._extras.bookedCouponCodes).find(
                         (couponCode) => couponCode.coupon_id === couponId
@@ -260,8 +258,7 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
                     delete order._extras.bookedCouponCodes[codeStr];
                     await this._resetCoupons([couponId]);
                     this.ui.showNotification(_.str.sprintf(_t('Coupon (%s) has been deactivated.'), codeStr));
-                }
-                if (programId) {
+                } else if (programId) {
                     const index = order._extras.activePromoProgramIds.indexOf(programId);
                     order._extras.activePromoProgramIds.splice(index, 1);
                     this.ui.showNotification(
@@ -277,6 +274,7 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
                 for (const line of orderlinesToDelete) {
                     this._deleteOrderline(order, line);
                 }
+                await this._updateRewards(order);
             }
         },
         setRewardsContainer(orderId, rewardsContainer) {
@@ -905,7 +903,7 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
             return this.getOrderlines(order).filter((line) => line.is_program_reward);
         },
         async _updateRewards(order) {
-            mutexdp.exec(() => this.actionHandler({ name: 'actionUpdateRewards', args: [order] }));
+            mutex.exec(() => this.actionHandler({ name: 'actionUpdateRewards', args: [order] }));
         },
         async _resetCoupons(couponIds) {
             await this._rpc(
