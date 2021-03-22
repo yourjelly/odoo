@@ -299,7 +299,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 }).parent().addClass('o_default_snippet_text');
 
             if (themeParams.name == 'basic') {
-                this.$content.focusin();
+                this.$content[0].focus();
             }
         }
         this.wysiwyg.trigger('reload_snippet_dropzones');
