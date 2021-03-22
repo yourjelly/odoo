@@ -1015,6 +1015,31 @@ class Website(models.Model):
         # => (table, column, [more columns])
         return [('ir.ui.view', 'arch_db')]
 
+    def action_bw_check_assets(self):
+        """Looks up the DB to see which of the website's snippets use versioned assets."""
+        tables = self._get_bw_table_column_list()
+        res = []
+
+        for t in tables:
+            query = '''
+                WITH snippet_tags AS (
+                    SELECT
+                        name AS page,
+                        REGEXP_MATCHES({column}, '(<[^>]+\\sdata-snippet="(\\w+?)"[^>]+>)', 'g') AS matches
+                    FROM
+                        {table}
+                    WHERE type='qweb' AND website_id='{id}'
+                ) -- detect snippets, retrieves their opening tag and their type in a text array
+                SELECT
+                    page,
+                    matches[2] AS snippet_type,
+                    REGEXP_MATCHES(matches[1], 'data-v(...)="(\\w+?)"') AS res_and_version
+                FROM snippet_tags;
+            '''.format(table=t[0], column=t[1], id=self.id)  # Assuming only one column for now
+            self.env.cr.execute(query)
+            res.append(self.env.cr.fetchall())
+        print(res)
+
 
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
