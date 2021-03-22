@@ -1009,6 +1009,12 @@ class Website(models.Model):
     def _get_cached(self, field):
         return self._get_cached_values()[field]
 
+    def _get_bw_table_column_list(self):
+        # Returns tables (and their corresponding columns) that
+        # should be check for assets backwards compatibility as a list of tuples
+        # => (table, column, [more columns])
+        return [('ir.ui.view', 'arch_db')]
+
 
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
