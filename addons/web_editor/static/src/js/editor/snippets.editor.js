@@ -2951,6 +2951,7 @@ var SnippetsMenu = Widget.extend({
         customizeBlock.append($title);
         customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append(customizeBlock);
+        this._checkEditorToolbarVisibility();
     },
     /**
      * Update editor UI visibility based on the current range.
@@ -2958,13 +2959,13 @@ var SnippetsMenu = Widget.extend({
     _checkEditorToolbarVisibility: function (e) {
         const toolbarContainer = $('#o_we_editor_toolbar_container');
         // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
-        if($(e.target).parents('#toolbar').length) {
+        if (e && $(e.target).parents('#toolbar').length) {
             return;
         }
 
         const selection = this.options.wysiwyg.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
-        if(range && $(range.commonAncestorContainer).parents('#wrap').length === 0) {
+        if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
             toolbarContainer.hide();
         } else {
             toolbarContainer.show();
