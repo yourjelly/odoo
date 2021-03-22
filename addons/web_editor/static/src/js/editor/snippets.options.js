@@ -3412,6 +3412,9 @@ const SnippetOptionWidget = Widget.extend({
 
         // Ask a mutexed snippet update according to the widget value change
         const shouldRecordUndo = (!previewMode && !ev.data.isSimulatedEvent);
+        if (shouldRecordUndo) {
+            this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
+        }
         this.trigger_up('snippet_edition_request', {exec: async () => {
             // If some previous snippet edition in the mutex removed the target from
             // the DOM, the widget can be destroyed, in that case the edition request
@@ -3452,7 +3455,6 @@ const SnippetOptionWidget = Widget.extend({
             // If it is not preview mode, the user selected the option for good
             // (so record the action)
             if (shouldRecordUndo) {
-                this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
                 this.options.wysiwyg.odooEditor.historyStep();
             }
 
