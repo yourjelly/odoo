@@ -3,11 +3,8 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
 
     const PointOfSaleModel = require('point_of_sale.PointOfSaleModel');
     const session = require('web.session');
-    const { Mutex } = require('web.concurrency');
     const { patch } = require('web.utils');
     const { _t } = require('web.core');
-
-    const mutex = new Mutex();
 
     class Reward {
         static createKey(program_id, coupon_id) {
@@ -902,9 +899,6 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
         _getRewardOrderlines(order) {
             return this.getOrderlines(order).filter((line) => line.is_program_reward);
         },
-        async _updateRewards(order) {
-            mutex.exec(() => this.actionHandler({ name: 'actionUpdateRewards', args: [order] }));
-        },
         async _resetCoupons(couponIds) {
             await this._rpc(
                 {
@@ -916,7 +910,7 @@ odoo.define('pos_coupon.PointOfSaleModel', function (require) {
                 {}
             );
         },
-        async actionUpdateRewards(order) {
+        async _updateRewards(order) {
             if (!this.config.use_coupon_programs) return;
             const rewardLines = this._getRewardOrderlines(order);
             for (const rewardLine of rewardLines) {

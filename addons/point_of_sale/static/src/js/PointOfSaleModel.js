@@ -10,6 +10,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
     const devices = require('point_of_sale.devices');
     const time = require('web.time');
     const { _t, qweb } = require('web.core');
+    const { Mutex } = require('web.concurrency');
     const { format, parse } = require('web.field_utils');
     const { round_decimals, round_precision, float_is_zero, unaccent, is_email } = require('web.utils');
     const { cloneDeep, uuidv4, sum, maxDateString, generateWrappedName } = require('point_of_sale.utils');
@@ -35,6 +36,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 uiState: this._initDataUiState(),
                 fields: {},
             };
+            this.mutex = new Mutex();
             this.searchLimit = searchLimit;
             this.webClient = webClient;
             this.barcodeReader = new BarcodeReader({ model: this });
@@ -69,11 +71,16 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             });
         }
         /**
+         * Use this to dispatch an action. We use mutex to serialize the execution of action.
+         * This means that the succeeding actions won't be executed until the previous action has resolved.
          * @param {Object} action
          * @param {string} action.name
          * @param {any[]} action.args args needed by the action
          */
-        async actionHandler(action) {
+        actionHandler(action) {
+            this.mutex.exec(() => this._actionHandler(action));
+        }
+        async _actionHandler(action) {
             try {
                 const handler = this[action.name];
                 if (!handler) throw new Error(`Action '${action.name}' is not defined.`);

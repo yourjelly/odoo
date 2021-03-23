@@ -164,10 +164,7 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         async importOrders(event) {
             const file = event.target.files[0];
             if (file) {
-                const report = await this.env.actionHandler({
-                    name: 'actionImportOrders',
-                    args: [await getFileAsText(file)],
-                });
+                const report = await this.env.model.actionImportOrders(await getFileAsText(file));
                 // No need to wait for the user's response on the import popup
                 // before dispatching `actionSyncOrders`.
                 this.env.ui.askUser('OrderImportPopup', { report });

@@ -146,7 +146,7 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
                     vals.mp_skip = false;
                 }
             }
-            this._super(...arguments);
+            await this._super(...arguments);
         },
         _canBeMergedWith(existingLine, line2merge) {
             return (
