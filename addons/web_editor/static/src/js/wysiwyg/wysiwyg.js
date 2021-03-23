@@ -133,7 +133,7 @@ const Wysiwyg = Widget.extend({
             self.openMediaDialog(params);
         });
         this.$editable.on('dblclick', 'a', function() {
-            if (!this.getAttribute('data-oe-model')) {
+            if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
                 self.showTooltip = false;
                 self.toggleLinkTools(true, this);
             }
