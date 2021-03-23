@@ -784,6 +784,15 @@ var exportVariable = (function (exports) {
         if (tagName.startsWith('JW-') || tagName === 'T') {
             return true;
         }
+        if (tagName === 'BR') {
+            // A <br> is always inline but getComputedStyle(br).display mistakenly
+            // returns 'block' if its parent is display:flex (at least on Chrome and
+            // Firefox (Linux)). Browsers normally support setting a <br>'s display
+            // property to 'none' but any other change is not supported. Therefore
+            // it is safe to simply declare that a <br> is never supposed to be a
+            // block.
+            return false;
+        }
         // The node might not be in the DOM, in which case it has no CSS values.
         if (window.document !== node.ownerDocument) {
             return blockTagNames.includes(tagName);
@@ -2417,8 +2426,8 @@ var exportVariable = (function (exports) {
     const TABLEPICKER_ROW_COUNT = 3;
     const TABLEPICKER_COL_COUNT = 3;
 
-    const TEXT_CLASSES_REGEX = /\btext-.*\b/g;
-    const BG_CLASSES_REGEX = /\bbg-.*\b/g;
+    const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
+    const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/g;
 
     const KEYBOARD_TYPES = { VIRTUAL: 'VIRTUAL', PHYSICAL: 'PHYSICAL', UNKNOWN: 'UKNOWN' };
 
@@ -2879,7 +2888,7 @@ var exportVariable = (function (exports) {
                     while (
                         index &&
                         this._historySteps[index - 1].id !== this._collaborativeLastSynchronisedId
-                    ) {
+                        ) {
                         index--;
                     }
 
@@ -3156,7 +3165,7 @@ var exportVariable = (function (exports) {
                 !end.contains(range.endContainer) &&
                 !isVisible(end, false) &&
                 end.nodeName !== 'A'
-            ) {
+                ) {
                 const parent = end.parentNode;
                 end.remove();
                 end = parent;
@@ -3185,7 +3194,7 @@ var exportVariable = (function (exports) {
                 next &&
                 !(next.previousSibling && next.previousSibling === joinWith) &&
                 this.editable.contains(next)
-            ) {
+                ) {
                 const restore = preserveCursor(this.document);
                 this.observerFlush();
                 const res = this._protect(() => {
@@ -3956,6 +3965,8 @@ var exportVariable = (function (exports) {
                         this._applyCommand('oShiftEnter');
                     }
                 } else if (ev.inputType === 'insertLineBreak') {
+                    this.historyRollback();
+                    ev.preventDefault();
                     this._applyCommand('oShiftEnter');
                 } else {
                     this.sanitize();
