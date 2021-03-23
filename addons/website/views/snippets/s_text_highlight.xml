@@ -10,8 +10,8 @@
     </div>
 </template>
 
-<record id="website.assets_frontend_s_text_highlight_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_text_highlight_000</field>
+<record id="website.s_text_highlight_000_scss" model="ir.asset">
+    <field name="name">Text highlight 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_text_highlight/000.scss</field>
 </record>

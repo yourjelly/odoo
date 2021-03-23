@@ -54,8 +54,8 @@
     </section>
 </template>
 
-<record id="website.assets_frontend_s_process_steps_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_process_steps_000</field>
+<record id="website.s_process_steps_000_scss" model="ir.asset">
+    <field name="name">Process steps 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_process_steps/000.scss</field>
 </record>

@@ -29,8 +29,8 @@
     </xpath>
 </template>
 
-<record id="website.assets_frontend_s_hr_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_hr_000</field>
+<record id="website.s_hr_000_scss" model="ir.asset">
+    <field name="name">Hr 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_hr/000.scss</field>
 </record>

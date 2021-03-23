@@ -50,14 +50,14 @@
     </xpath>
 </template>
 
-<record id="website.assets_frontend_s_share_000_css" model="ir.asset">
-    <field name="name">website.assets_frontend.s_share_000_css</field>
+<record id="website.s_share_000_scss" model="ir.asset">
+    <field name="name">Share 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_share/000.scss</field>
 </record>
 
-<record id="website.assets_frontend_s_share_000_js" model="ir.asset">
-    <field name="name">website.assets_frontend.s_share_000_js</field>
+<record id="website.s_share_000_js" model="ir.asset">
+    <field name="name">Share 000 JS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_share/000.js</field>
 </record>

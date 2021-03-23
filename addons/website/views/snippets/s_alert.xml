@@ -31,16 +31,13 @@
                 <we-button data-select-class="s_alert_md">Medium</we-button>
                 <we-button data-select-class="s_alert_lg">Large</we-button>
             </we-select>
-            <we-colorpicker string="Color" data-name="alert_colorpicker_opt"
-                data-select-style="true"
-                data-css-property="background-color"
-                data-color-prefix="alert-"/>
+            <we-colorpicker string="Color" data-name="alert_colorpicker_opt" data-select-style="true" data-css-property="background-color" data-color-prefix="alert-"/>
         </div>
     </xpath>
 </template>
 
-<record id="website.assets_frontend_s_alert_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_alert_000</field>
+<record id="website.s_alert_000_scss" model="ir.asset">
+    <field name="name">Alert 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_alert/000.scss</field>
 </record>

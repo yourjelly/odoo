@@ -64,8 +64,8 @@
     </xpath>
 </template>
 
-<record id="website.assets_frontend_s_timeline_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_timeline_000</field>
+<record id="website.s_timeline_000_scss" model="ir.asset">
+    <field name="name">Timeline 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_timeline/000.scss</field>
 </record>

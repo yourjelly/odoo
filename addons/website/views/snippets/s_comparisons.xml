@@ -79,8 +79,8 @@
     </section>
 </template>
 
-<record id="website.assets_frontend_s_comparisons_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_comparisons_000</field>
+<record id="website.s_comparisons_000_scss" model="ir.asset">
+    <field name="name">Comparisons 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_comparisons/000.scss</field>
 </record>

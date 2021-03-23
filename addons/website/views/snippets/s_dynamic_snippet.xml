@@ -41,14 +41,14 @@
                 <we-button data-select-data-attribute="16">16</we-button>
             </we-select>
             <we-title class="mt-2"><t t-esc="grouping_message"/></we-title>
-            <we-select string="⌙ Normal devices" data-name="number_of_elements_opt" data-attribute-name="numberOfElements" data-no-preview="true"><!-- &emsp; -->
+            <we-select string="&#8985; Normal devices" data-name="number_of_elements_opt" data-attribute-name="numberOfElements" data-no-preview="true"><!-- &emsp; -->
                 <we-button data-select-data-attribute="1">1</we-button>
                 <we-button data-select-data-attribute="2">2</we-button>
                 <we-button data-select-data-attribute="3">3</we-button>
                 <we-button data-select-data-attribute="4">4</we-button>
                 <we-button data-select-data-attribute="6">6</we-button>
             </we-select>
-            <we-select string="⌙ Small devices" data-name="number_of_elements_small_devices_opt" data-attribute-name="numberOfElementsSmallDevices" data-no-preview="true"><!-- &emsp; -->
+            <we-select string="&#8985; Small devices" data-name="number_of_elements_small_devices_opt" data-attribute-name="numberOfElementsSmallDevices" data-no-preview="true"><!-- &emsp; -->
                 <we-button data-select-data-attribute="1">1</we-button>
                 <we-button data-select-data-attribute="2">2</we-button>
                 <we-button data-select-data-attribute="3">3</we-button>
@@ -66,14 +66,14 @@
         </xpath>
     </template>
 
-<record id="website.assets_frontend_s_dynamic_snippet_000_css" model="ir.asset">
-    <field name="name">website.assets_frontend.s_dynamic_snippet_000</field>
+<record id="website.s_dynamic_snippet_000_scss" model="ir.asset">
+    <field name="name">Dynamic snippet 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_dynamic_snippet/000.scss</field>
 </record>
 
-<record id="website.assets_frontend_s_dynamic_snippet_000_js" model="ir.asset">
-    <field name="name">website.assets_frontend.s_dynamic_snippet_000</field>
+<record id="website.s_dynamic_snippet_000_js" model="ir.asset">
+    <field name="name">Dynamic snippet 000 JS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_dynamic_snippet/000.js</field>
 </record>

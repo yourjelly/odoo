@@ -2,16 +2,12 @@
 <odoo>
     <data>
     
-            <record id="assets_snippet_s_latest_posts_css_000" model="ir.asset">
-                <field name="name">assets snippet s latest posts css 000</field>
+            <record id="website_blog.s_latest_posts_000_scss" model="ir.asset">
+                <field name="name">Latest posts 000 SCSS</field>
                 <field name="bundle">web.assets_frontend</field>
-                <field name="directive">append</field>
                 <field name="glob">website_blog/static/src/snippets/s_latest_posts/000.scss</field>
-                <field name="target" eval="None"></field>
-                <field name="active" eval="False"></field>
-                <field name="sequence" eval="16"></field>
-            </record>
+                <field name="active" eval="False"/>
+                </record>
 
     </data>
 </odoo>
-    

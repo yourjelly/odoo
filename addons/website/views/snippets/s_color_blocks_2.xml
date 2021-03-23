@@ -22,8 +22,8 @@
     </section>
 </template>
 
-<record id="website.assets_frontend_s_color_blocks_2_000" model="ir.asset">
-    <field name="name">website.assets_frontend.s_color_blocks_2_000</field>
+<record id="website.s_color_blocks_2_000_scss" model="ir.asset">
+    <field name="name">Color blocks 2 000 SCSS</field>
     <field name="bundle">web.assets_frontend</field>
     <field name="glob">website/static/src/snippets/s_color_blocks_2/000.scss</field>
 </record>
