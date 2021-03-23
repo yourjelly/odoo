@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_task_burndown_chart_report_view_search" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.search</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="arch" type="xml">
+            <search string="Burndown Chart">
+                <field name="project_id" string="Project" filter_domain="[('project_id', 'ilike', self)]" />
+                <field name="stage_id" string="Stage" filter_domain="[('stage_id', 'ilike', self)]" />
+                <field name="user_id" string="Assigne To" filter_domain="[('user_id', 'ilike', self)]" />
+                <filter name="filter_date" date="date" string="Date" />
+                <group expand="0" string="Group By">
+                    <filter string="Date" name="date" context="{'group_by': 'date'}" />
+                    <filter string="Stage" name="stage_id" context="{'group_by': 'stage_id'}" />
+                    <filter string="Project" name="project_id" context="{'group_by': 'project_id'}" />
+                    <filter string="Assigne To" name="user_id" context="{'group_by': 'user_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="project_task_burndown_chart_report_view_graph" model="ir.ui.view">
+        <field name="name">project.task.burndown.chart.report.view.graph</field>
+        <field name="model">project.task.burndown.chart.report</field>
+        <field name="arch" type="xml">
+            <graph string="Burndown Chart" type="line" sample="1" disable_linking="1" js_class="burndown_chart">
+                <field name="date" string="Date" interval="month" type="row"/>
+                <field name="stage_id"/>
+                <field name="nb_tasks" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_project_task_burndown_chart_report" model="ir.actions.act_window">
+        <field name="name">Burndown Chart</field>
+        <field name="res_model">project.task.burndown.chart.report</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="project.project_task_burndown_chart_report_view_search"/>
+        <field name="context">{}</field>
+        <field name="help">
+        </field>
+    </record>
+
+</odoo>
