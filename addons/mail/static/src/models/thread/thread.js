@@ -1198,6 +1198,14 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
+        _computeIsDisabled() {
+            return false;
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
         _computeIsCurrentPartnerFollowing() {
             return this.followers.some(follower =>
                 follower.partner && follower.partner === this.env.messaging.currentPartner
@@ -2247,6 +2255,13 @@ function factory(dependencies) {
             ]
         }),
         uuid: attr(),
+        /**
+         * Disable the thread if thread closed.
+         */
+        isDisabled: attr({
+            compute: '_computeIsDisabled',
+            dependencies: []
+        }),
     };
 
     Thread.modelName = 'mail.thread';
