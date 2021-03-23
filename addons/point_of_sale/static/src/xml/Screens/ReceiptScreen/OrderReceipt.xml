@@ -70,19 +70,11 @@
                             <span t-esc="env.model.formatCurrencyNoSymbol(line.price_display)"
                                 class="price_display pos-receipt-right-align" />
                         </div>
-                        <span>
-                            <t t-foreach="line.product_name_wrapped.slice(1)" t-as="wrapped_line">
-                                <t t-esc="wrapped_line" />
-                            </t>
-                        </span>
+                        <WrappedProductNameLines line="line" receipt="_receipt" />
                     </t>
                     <t t-else="">
                         <div t-esc="line.product_name_wrapped[0]" />
-                        <span>
-                            <t t-foreach="line.product_name_wrapped.slice(1)" t-as="wrapped_line">
-                                <t t-esc="wrapped_line" />
-                            </t>
-                        </span>
+                        <WrappedProductNameLines line="line" receipt="_receipt" />
                         <t t-if="line.display_discount_policy == 'without_discount' and line.price != line.price_lst">
                             <div class="pos-receipt-left-padding">
                                 <t t-esc="env.model.formatCurrencyNoSymbol(line.price_lst)" />

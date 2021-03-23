@@ -50,6 +50,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.session = {};
             this.config = {};
             this.company = {};
+            this.country = {};
             this.currency = {};
             this.cashRounding = {};
             this.companyCurrency = {};
@@ -246,6 +247,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.session = this.getRecord('pos.session', odoo.pos_session_id);
             this.config = this.getRecord('pos.config', this.session.config_id);
             this.company = this.getRecord('res.company', this.config.company_id);
+            this.country = this.getRecord('res.country', this.company.country_id);
             this.currency = this.getRecord('res.currency', this.config.currency_id);
             this.cashRounding = this.getRecord('account.cash.rounding', this.config.rounding_method);
             this.companyCurrency = this.getRecord('res.currency', this.company.currency_id);
@@ -3042,6 +3044,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 change: changePayment ? Math.abs(changePayment.amount) : this.getOrderChange(order),
                 name: this.getOrderName(order),
                 cashier: this.getCashierName(),
+                client: this.getCustomer(order),
                 date: {
                     localestring: format.datetime(moment(order._extras.validationDate), {}, { timezone: false }),
                 },
@@ -3056,6 +3059,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     phone: company.phone,
                     logo: this.data.derived.companyLogoBase64,
                 },
+                country: this.country,
             };
 
             if (is_html(this.config.receipt_header)) {

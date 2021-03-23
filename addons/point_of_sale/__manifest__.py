@@ -70,6 +70,7 @@
         'static/src/xml/Screens/ProductScreen/NumpadWidget.xml',
         'static/src/xml/Screens/ProductScreen/ActionpadWidget.xml',
         'static/src/xml/Screens/ReceiptScreen/OrderReceipt.xml',
+        'static/src/xml/Screens/ReceiptScreen/WrappedProductNameLines.xml',
         'static/src/xml/Screens/ReceiptScreen/ReceiptScreen.xml',
         'static/src/xml/Screens/ScaleScreen/ScaleScreen.xml',
         'static/src/xml/ChromeWidgets/CashierName.xml',
