@@ -390,12 +390,10 @@ actual arch.
                     continue
                 view_doc = etree.fromstring(view_arch_utf8)
             except ValueError as e:
-                err = ValidationError(_(
+                raise ValidationError(_(
                     "Error while validating view:\n\n%(error)s",
                     error=tools.ustr(e),
-                )).with_traceback(e.__traceback__)
-                err.context = None
-                raise err from None
+                )).with_traceback(e.__traceback__) from None
 
             try:
                 # verify that all fields used are valid, etc.
