@@ -90,7 +90,8 @@ msgstr ""
 #: code:addons/web/static/src/js/views/basic/basic_model.js:0
 #, python-format
 msgid ""
-"'%s' is unsynchronized with '%s'."
+"'${referenceFieldName}' is unsynchronized\n"
+"                                     with '${modelFieldName}'."
 msgstr ""
 
 #. module: web
@@ -2075,7 +2076,9 @@ msgstr ""
 #: code:addons/web/static/src/js/views/basic/basic_model.js:0
 #, python-format
 msgid ""
-"If you change %s or %s, the synchronization will be reapplied and the data will be modified."
+"If you change ${modelFieldName} or\n"
+"                                     ${referenceFieldName}, the synchronization\n"
+"                                     will be reapplied and the data will be modified."
 msgstr ""
 
 #. module: web
