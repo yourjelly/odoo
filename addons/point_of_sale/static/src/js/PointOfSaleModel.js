@@ -10,6 +10,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
     const devices = require('point_of_sale.devices');
     const time = require('web.time');
     const { _t, qweb } = require('web.core');
+    const { Mutex } = require('web.concurrency');
     const { format, parse } = require('web.field_utils');
     const { round_decimals, round_precision, float_is_zero, unaccent, is_email } = require('web.utils');
     const { cloneDeep, uuidv4, sum, maxDateString, generateWrappedName } = require('point_of_sale.utils');
@@ -35,6 +36,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 uiState: this._initDataUiState(),
                 fields: {},
             };
+            this.mutex = new Mutex();
             this.searchLimit = searchLimit;
             this.webClient = webClient;
             this.barcodeReader = new BarcodeReader({ model: this });
@@ -48,6 +50,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.session = {};
             this.config = {};
             this.company = {};
+            this.country = {};
             this.currency = {};
             this.cashRounding = {};
             this.companyCurrency = {};
@@ -69,11 +72,23 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             });
         }
         /**
+         * Use this to dispatch an action. We use mutex to serialize the execution of action.
+         * This means that the succeeding actions won't be executed until the previous action has resolved.
          * @param {Object} action
          * @param {string} action.name
          * @param {any[]} action.args args needed by the action
+         * @param {Object} mutex the mutex to use to execute the action. If not provided, a default mutex is used.
+         *      Allowing the use of other mutex aside from the default that is created in this file is
+         *      practically an extension point. This is useful when we don't want to block an action
+         *      from being executed when another action is not yet done.
          */
-        async actionHandler(action) {
+        actionHandler(action, mutex) {
+            if (!mutex) {
+                mutex = this.mutex;
+            }
+            mutex.exec(() => this._actionHandler(action));
+        }
+        async _actionHandler(action) {
             try {
                 const handler = this[action.name];
                 if (!handler) throw new Error(`Action '${action.name}' is not defined.`);
@@ -239,6 +254,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.session = this.getRecord('pos.session', odoo.pos_session_id);
             this.config = this.getRecord('pos.config', this.session.config_id);
             this.company = this.getRecord('res.company', this.config.company_id);
+            this.country = this.getRecord('res.country', this.company.country_id);
             this.currency = this.getRecord('res.currency', this.config.currency_id);
             this.cashRounding = this.getRecord('account.cash.rounding', this.config.rounding_method);
             this.companyCurrency = this.getRecord('res.currency', this.company.currency_id);
@@ -264,9 +280,12 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          */
         _setupProducts() {
             this._processCategories();
-            this._setProductByBarcode();
-            this._setProductSearchStrings();
+            this._addProducts(this.getRecords('product.product'));
             this._setProductAttributes();
+        }
+        _addProducts(products) {
+            this._setProductByBarcode(products);
+            this._setProductSearchStrings(products);
         }
         _processCategories() {
             this.setRecord('pos.category', 0, {
@@ -304,10 +323,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 ? this.config.iface_start_categ_id
                 : 0;
         }
-        _setProductSearchStrings() {
+        _setProductSearchStrings(products) {
             const productsByCategoryId = this.data.derived.productsByCategoryId;
             const categorySearchStrings = this.data.derived.categorySearchStrings;
-            for (const product of this.getRecords('product.product')) {
+            for (const product of products) {
                 if (!product.available_in_pos) continue;
                 const searchString = unaccent(this._getProductSearchString(product));
                 const categoryId = product.pos_categ_id ? product.pos_categ_id : 0;
@@ -336,8 +355,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * based on other fields. E.g. the products and partners are indexed
          * by barcode here. pos.order can also be indexed by it's name.
          */
-        _setProductByBarcode() {
-            for (const product of this.getRecords('product.product')) {
+        _setProductByBarcode(products) {
+            for (const product of products) {
                 if (!product.barcode) continue;
                 if (product.barcode in this.data.derived.productByBarcode) {
                     console.warn(
@@ -518,6 +537,29 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 }
                 paymentTerminals[terminalName] = new Implementation(this, paymentMethod);
             }
+        }
+        getImageUrl(model, record, imgField = 'image_128') {
+            return `/web/image?model=${model}&field=${imgField}&id=${record.id}&write_date=${record.write_date}&unique=1`;
+        }
+        loadImages(urls) {
+            return Promise.all(urls.map((url) => this._loadImage(url)));
+        }
+        /**
+         * This resolves when the given src of image has properly loaded.
+         * Rejects when it failed to load.
+         * @param {string} src
+         */
+        _loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.src = src;
+                image.onload = () => {
+                    resolve();
+                };
+                image.onerror = () => {
+                    reject(new Error(`Image with src='${src}' is not loaded.`));
+                };
+            });
         }
 
         //#endregion LOADING
@@ -1237,7 +1279,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const amountIsZero = this.floatCompare(amount, 0) === 0;
             if (tipLine) {
                 if (amountIsZero) {
-                    this.actionDeleteOrderline(order, tipLine);
+                    await this.actionDeleteOrderline(order, tipLine);
                     return;
                 } else {
                     this.updateRecord('pos.order.line', tipLine.id, { price_unit: amount, qty: 1 });
@@ -1246,7 +1288,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             } else {
                 if (amountIsZero) return;
                 const tipProduct = this.getRecord('product.product', this.config.tip_product_id);
-                const tipLine =  await this.actionAddProduct(order, tipProduct, {
+                const tipLine = await this.actionAddProduct(order, tipProduct, {
                     qty: 1,
                     price_unit: amount,
                     price_manually_set: true,
@@ -1446,6 +1488,18 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             this.deleteRecord('pos.order', orderId);
             this.removePersistedOrder(order);
         }
+        /**
+         * @param {'pos.order'} order
+         * @param {'pos.order.line'} line
+         * @param {boolean} [select = true]
+         */
+        async addOrderline(order, line, select = true) {
+            this.updateRecord('pos.order.line', line.id, { order_id: order.id });
+            this.updateRecord('pos.order', order.id, { lines: [...order.lines, line.id] });
+            if (select) {
+                order._extras.activeOrderlineId = line.id;
+            }
+        }
         async _rpc() {
             try {
                 this.ui && this.ui.setSyncStatus('connecting');
@@ -1636,13 +1690,22 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
 
         _manageOrderWhenOrderDone() {
-            const draftOrderList = this.getDraftOrders().filter(currentOrder => currentOrder !== this.getActiveOrder());
-            if(!draftOrderList.length){
+            const draftOrderList = this.getDraftOrders().filter(
+                (currentOrder) => currentOrder !== this.getActiveOrder()
+            );
+            if (!draftOrderList.length) {
                 const newOrder = this._createDefaultOrder();
                 this._setActiveOrderId(newOrder.id);
             } else {
                 this._setActiveOrderId(draftOrderList[0].id);
             }
+        }
+        _deleteOrderline(order, orderline) {
+            this.updateRecord('pos.order', order.id, { lines: order.lines.filter((id) => id !== orderline.id) });
+            for (const lotId of orderline.pack_lot_ids) {
+                this.deleteRecord('pos.pack.operation.lot', lotId);
+            }
+            this.deleteRecord('pos.order.line', orderline.id);
         }
 
         //#endregion UTILITY
@@ -1849,7 +1912,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     const { cancelled } = await this.actionSetOrderlineLots(mergeWith);
                     if (cancelled) return;
                 } else {
-                    this.actionUpdateOrderline(mergeWith, { qty: mergeWith.qty + line.qty });
+                    await this.actionUpdateOrderline(mergeWith, { qty: mergeWith.qty + line.qty });
                 }
                 this.actionSelectOrderline(order, mergeWith.id);
                 return mergeWith;
@@ -1861,29 +1924,27 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                         return;
                     }
                 }
-                order.lines.push(line.id);
-                this.actionSelectOrderline(order, line.id);
+                await this.addOrderline(order, line);
                 return line;
             }
         }
         actionSelectOrderline(order, lineID) {
             order._extras.activeOrderlineId = lineID;
         }
-        actionUpdateOrderline(orderline, vals) {
+        async actionUpdateOrderline(orderline, vals) {
             if ('price_unit' in vals) {
                 vals['price_manually_set'] = true;
             }
             this.updateRecord('pos.order.line', orderline.id, vals);
         }
-        actionDeleteOrderline(order, orderline) {
+        async actionDeleteOrderline(order, orderline) {
+            // Do not set new active orderline if the line being deleted is not
+            // the active orderline.
+            const isActiveOrderline = this.getActiveOrderline(order) === orderline;
             // needed to set the new active orderline
             const indexOfDeleted = order.lines.indexOf(orderline.id);
-            order.lines = order.lines.filter((id) => id !== orderline.id);
-            for (const lotId of orderline.pack_lot_ids) {
-                this.deleteRecord('pos.pack.operation.lot', lotId);
-            }
-            this.deleteRecord('pos.order.line', orderline.id);
-            if (order.lines.length) {
+            this._deleteOrderline(order, orderline);
+            if (order.lines.length && isActiveOrderline) {
                 // set as active the orderline with the same index as the deleted
                 if (indexOfDeleted === order.lines.length) {
                     this.actionSelectOrderline(order, order.lines[order.lines.length - 1]);
@@ -3016,6 +3077,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 change: changePayment ? Math.abs(changePayment.amount) : this.getOrderChange(order),
                 name: this.getOrderName(order),
                 cashier: this.getCashierName(),
+                client: this.getCustomer(order),
                 date: {
                     localestring: format.datetime(moment(order._extras.validationDate), {}, { timezone: false }),
                 },
@@ -3030,6 +3092,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     phone: company.phone,
                     logo: this.data.derived.companyLogoBase64,
                 },
+                country: this.country,
             };
 
             if (is_html(this.config.receipt_header)) {

@@ -267,7 +267,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
         }
         getProductsToDisplay() {
             const categoryId = this.getActiveCategoryId();
-            return this.env.model.getProducts(categoryId, this.state.searchTerm);
+            return this.env.model.getProducts(categoryId, this.state.searchTerm).slice(0, this.env.model.searchLimit);
         }
         getCategoryChildrenIds(categoryId) {
             return this.env.model.data.derived.categoryChildren[categoryId] || [];

@@ -1,7 +1,7 @@
-odoo.define('pos_restaurant.TextInputPopup', function(require) {
+odoo.define('point_of_sale.TextInputPopup', function(require) {
     'use strict';
 
-    const TextAreaPopup = require('pos_restaurant.TextAreaPopup');
+    const TextAreaPopup = require('point_of_sale.TextAreaPopup');
 
     class TextInputPopup extends TextAreaPopup {}
     TextInputPopup.template = 'TextInputPopup';

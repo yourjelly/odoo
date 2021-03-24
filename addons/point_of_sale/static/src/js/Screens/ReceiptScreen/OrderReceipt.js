@@ -2,14 +2,13 @@ odoo.define('point_of_sale.OrderReceipt', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
+    const WrappedProductNameLines = require('point_of_sale.WrappedProductNameLines');
     const { float_is_zero } = require('web.utils');
 
     class OrderReceipt extends PosComponent {
+        static components = { WrappedProductNameLines };
         _isTaxIncluded(receipt) {
-            return float_is_zero(
-                receipt.subtotal - receipt.total_with_tax,
-                this.env.model.currency.decimal_places
-            );
+            return float_is_zero(receipt.subtotal - receipt.total_with_tax, this.env.model.currency.decimal_places);
         }
         _isSimple(line) {
             return (

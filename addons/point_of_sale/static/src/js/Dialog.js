@@ -11,6 +11,8 @@ odoo.define('point_of_sale.Dialog', function (require) {
     const OfflineErrorPopup = require('point_of_sale.OfflineErrorPopup');
     const OrderImportPopup = require('point_of_sale.OrderImportPopup');
     const CashOpeningPopup = require('point_of_sale.CashOpeningPopup');
+    const TextAreaPopup = require('point_of_sale.TextAreaPopup');
+    const TextInputPopup = require('point_of_sale.TextInputPopup');
     const { ProductConfiguratorPopup } = require('point_of_sale.ProductConfiguratorPopup');
 
     /**
@@ -49,6 +51,8 @@ odoo.define('point_of_sale.Dialog', function (require) {
             SelectionPopup,
             OrderImportPopup,
             CashOpeningPopup,
+            TextAreaPopup,
+            TextInputPopup,
         };
         static template = owl.tags.xml/* html */ `
             <div class="popups">
