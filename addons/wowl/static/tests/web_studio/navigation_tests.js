@@ -605,4 +605,41 @@ QUnit.module("Studio", (hooks) => {
       webClient.destroy();
     }
   );
+
+  QUnit.module('Report Editor', (hooks) => {
+    QUnit.skip('LPE DUMMY', async () => {
+
+
+      testConfig.serverData.models['ir.actions.report'] = {
+        fields: {},
+        records: [{
+          id: 1,
+          display_name: 'report1',
+        }]
+      };
+
+      Object.assign(testConfig.serverData.views, {
+        "ir.actions.report,false,kanban": `<kanban>
+            <field name="display_name"/>
+            <templates>
+              <t t-name="kanban-box">
+                <t t-esc="record.display_name.value" />
+              </t>
+            </templates>
+         </kanban>
+        `,
+
+        "ir.actions.report,false,form": `<form><field name="display_name" /></form>`,
+        "ir.actions.report,false,search": `<search><field name="display_name" /></search>`,
+      });
+
+      const mockRPC = () => {};
+      const webClient = await createEnterpriseWebClient({ testConfig, mockRPC });
+      await legacyExtraNextTick();
+
+      await openStudio(webClient);
+
+      await new Promise(() => {});
+    });
+  });
 });
