@@ -86,9 +86,8 @@ odoo.define('point_of_sale.PointOfSaleUI', function (require) {
             this._buildChrome();
             this._disableBackspaceBack();
             this._replaceCrashmanager();
-            this._loadPos().then(async () => {
-                this._preloadImages();
-                this._loadFonts();
+            this._loadPos().then(() => {
+                this._afterLoadPos();
             });
         }
         willUnmount() {
@@ -165,26 +164,13 @@ odoo.define('point_of_sale.PointOfSaleUI', function (require) {
                 });
             }
         }
+        async _afterLoadPos() {
+            this._preloadImages();
+            this._loadFonts();
+        }
 
         //#region MISC
 
-        /**
-         * This resolves when the given src of image has properly loaded.
-         * Rejects when it failed to load.
-         * @param {string} src
-         */
-        _loadImage(src) {
-            return new Promise((resolve, reject) => {
-                const image = new Image();
-                image.src = src;
-                image.onload = () => {
-                    resolve();
-                };
-                image.onerror = () => {
-                    reject(new Error(`Image with src='${src}' is not loaded.`));
-                };
-            });
-        }
         /**
          * /!\ ATTENTION: This works as long as you are in production mode. In dev mode,
          * different js files are asking for the images (this file and the owl.js file).
@@ -194,37 +180,18 @@ odoo.define('point_of_sale.PointOfSaleUI', function (require) {
          * this is a bug or a feature of chrome.
          */
         async _preloadImages() {
-            this.env.ui.setSyncStatus('connecting');
-            const allProducts = this.env.model.getProducts(0);
-            if (allProducts.length === 0) return;
-            const loadProducts = [];
-            const loadCategories = [];
-            const loadOthers = [];
-            for (const product of allProducts) {
-                loadProducts.push(
-                    this._loadImage(
-                        `/web/image?model=product.product&field=image_128&id=${product.id}&write_date=${product.write_date}&unique=1`
-                    )
-                );
+            const imageUrls = [];
+            for (const product of this.env.model.getProducts(0)) {
+                imageUrls.push(this.env.model.getImageUrl('product.product', product));
             }
             for (const category of this.env.model.getRecords('pos.category')) {
                 if (category.id == 0) continue;
-                loadCategories.push(
-                    this._loadImage(
-                        `/web/image?model=pos.category&field=image_128&id=${category.id}&write_date=${category.write_date}&unique=1`
-                    )
-                );
+                imageUrls.push(this.env.model.getImageUrl('pos.category', category));
             }
-            const staticImages = ['backspace.png', 'bc-arrow-big.png'];
-            for (const imageName of staticImages) {
-                loadOthers.push(this._loadImage(`/point_of_sale/static/src/img/${imageName}`));
+            for (const imageName of ['backspace.png', 'bc-arrow-big.png']) {
+                imageUrls.push(`/point_of_sale/static/src/img/${imageName}`);
             }
-            const products = Promise.all(loadProducts);
-            const categories = Promise.all(loadCategories);
-            const others = Promise.all(loadOthers);
-            await Promise.all([products, categories, others]);
-            this.env.ui.showNotification(this.env._t('All images are loaded.'));
-            this.env.ui.setSyncStatus('connected');
+            await this.env.model.loadImages(imageUrls);
         }
         _loadFonts() {
             return new Promise(function (resolve, reject) {

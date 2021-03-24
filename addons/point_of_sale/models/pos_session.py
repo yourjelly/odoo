@@ -1463,12 +1463,12 @@ class PosSession(models.Model):
     )
     def _load_product_product(self, lcontext):
         order = "sequence,default_code,name"
-        domain = self._get_product_product_domain(lcontext)
+        domain = self._get_product_product_domain()
         records = self.env[lcontext.model].with_context(display_default_code=False).search(domain, order=order).read(lcontext.fields, load=False)
         for record in records:
             lcontext.contents[record["id"]] = record
 
-    def _get_product_product_domain(self, lcontext):
+    def _get_product_product_domain(self):
         domain = ["&", "&", ("sale_ok", "=", True), ("available_in_pos", "=", True), "|", ("company_id", "=", self.config_id.company_id.id), ("company_id", "=", False)]
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
             domain = AND(

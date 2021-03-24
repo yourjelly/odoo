@@ -77,9 +77,16 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * @param {Object} action
          * @param {string} action.name
          * @param {any[]} action.args args needed by the action
+         * @param {Object} mutex the mutex to use to execute the action. If not provided, a default mutex is used.
+         *      Allowing the use of other mutex aside from the default that is created in this file is
+         *      practically an extension point. This is useful when we don't want to block an action
+         *      from being executed when another action is not yet done.
          */
-        actionHandler(action) {
-            this.mutex.exec(() => this._actionHandler(action));
+        actionHandler(action, mutex) {
+            if (!mutex) {
+                mutex = this.mutex;
+            }
+            mutex.exec(() => this._actionHandler(action));
         }
         async _actionHandler(action) {
             try {
@@ -273,9 +280,12 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          */
         _setupProducts() {
             this._processCategories();
-            this._setProductByBarcode();
-            this._setProductSearchStrings();
+            this._addProducts(this.getRecords('product.product'));
             this._setProductAttributes();
+        }
+        _addProducts(products) {
+            this._setProductByBarcode(products);
+            this._setProductSearchStrings(products);
         }
         _processCategories() {
             this.setRecord('pos.category', 0, {
@@ -313,10 +323,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 ? this.config.iface_start_categ_id
                 : 0;
         }
-        _setProductSearchStrings() {
+        _setProductSearchStrings(products) {
             const productsByCategoryId = this.data.derived.productsByCategoryId;
             const categorySearchStrings = this.data.derived.categorySearchStrings;
-            for (const product of this.getRecords('product.product')) {
+            for (const product of products) {
                 if (!product.available_in_pos) continue;
                 const searchString = unaccent(this._getProductSearchString(product));
                 const categoryId = product.pos_categ_id ? product.pos_categ_id : 0;
@@ -345,8 +355,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
          * based on other fields. E.g. the products and partners are indexed
          * by barcode here. pos.order can also be indexed by it's name.
          */
-        _setProductByBarcode() {
-            for (const product of this.getRecords('product.product')) {
+        _setProductByBarcode(products) {
+            for (const product of products) {
                 if (!product.barcode) continue;
                 if (product.barcode in this.data.derived.productByBarcode) {
                     console.warn(
@@ -527,6 +537,29 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 }
                 paymentTerminals[terminalName] = new Implementation(this, paymentMethod);
             }
+        }
+        getImageUrl(model, record, imgField = 'image_128') {
+            return `/web/image?model=${model}&field=${imgField}&id=${record.id}&write_date=${record.write_date}&unique=1`;
+        }
+        loadImages(urls) {
+            return Promise.all(urls.map((url) => this._loadImage(url)));
+        }
+        /**
+         * This resolves when the given src of image has properly loaded.
+         * Rejects when it failed to load.
+         * @param {string} src
+         */
+        _loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.src = src;
+                image.onload = () => {
+                    resolve();
+                };
+                image.onerror = () => {
+                    reject(new Error(`Image with src='${src}' is not loaded.`));
+                };
+            });
         }
 
         //#endregion LOADING

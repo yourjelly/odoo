@@ -17,8 +17,8 @@ class PosSession(models.Model):
         for record in records:
             lcontext.contents[record['id']] = record
 
-    def _get_product_product_domain(self, lcontext):
-        result = super(PosSession, self)._get_product_product_domain(lcontext)
+    def _get_product_product_domain(self):
+        result = super(PosSession, self)._get_product_product_domain()
         if not self.config_id.program_ids:
             return result
         discount_product_ids = self.config_id.program_ids.mapped(lambda program: program.discount_line_product_id.id)
