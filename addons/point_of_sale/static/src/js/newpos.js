@@ -10,7 +10,7 @@ odoo.define('web.web_client', function (require) {
     owl.config.mode = env.isDebug() ? 'dev' : 'prod';
     owl.Component.env = env;
 
-    const SEARCH_LIMIT = 100;
+    const SEARCH_LIMIT = 1000;
 
     async function setup(webClient) {
         // Publish a singleton posmodel
