@@ -67,7 +67,7 @@ class Assets(models.AbstractModel):
         """
         website = self.env['website'].get_current_website()
         res = super(Assets, self)._get_custom_asset(custom_url)
-        return res.with_context(website_id=website.id).filtered(lambda x: not x.website_id or x.website_id == website)
+        return res.with_context(website_id=website.id).filter_duplicate()
 
     def _save_asset_hook(self):
         """

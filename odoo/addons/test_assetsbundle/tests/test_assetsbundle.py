@@ -21,6 +21,7 @@ from odoo.modules.module import get_resource_path, read_manifest
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 from odoo.addons.base.models.qweb import QWebException
+from odoo.tools import mute_logger
 
 
 GETMTINE = os.path.getmtime
@@ -800,7 +801,7 @@ class TestAssetsBundleWithIRAMock(FileTouchable):
             self._bundle(self._get_asset(), False, False)
 
 
-@tagged('-standard', 'assets')
+@tagged('assets_manifest')
 class TestAssetsManifest(AddonManifestPatched):
 
     def make_asset_view(self, asset_key, t_call_assets_attrs=None):
@@ -1049,15 +1050,20 @@ class TestAssetsManifest(AddonManifestPatched):
             '''
         )
 
-    def test_08_remove_error(self):
-        view = self.make_asset_view('test_assetsbundle.manifest5')
+    def test_08_remove_inexistent_file(self):
         self.env['ir.asset'].create({
             'name': 'test_jsfile4',
-            'bundle': 'test_assetsbundle.manifest5',
+            'bundle': 'test_assetsbundle.remove_error',
+            'glob': '/test_assetsbundle/static/src/js/test_jsfile1.js',
+        })
+
+        view = self.make_asset_view('test_assetsbundle.remove_error')
+        self.env['ir.asset'].create({
+            'name': 'test_jsfile4',
+            'bundle': 'test_assetsbundle.remove_error',
             'directive': 'remove',
             'glob': 'test_assetsbundle/static/src/js/test_doesntexist.js',
         })
-        # LPE Fixme: find an exception type
         with self.assertRaises(Exception) as cm:
             view._render()
         self.assertTrue(
@@ -1145,7 +1151,7 @@ class TestAssetsManifest(AddonManifestPatched):
             'bundle': 'test_assetsbundle.irasset_include2',
             'glob': 'test_assetsbundle.irasset_include1',
         })
-        # LPE Fixme: find an exception type
+
         with self.assertRaises(QWebException) as cm:
             view._render()
         self.assertTrue(cm.exception.error)
@@ -1662,16 +1668,21 @@ class TestAssetsManifest(AddonManifestPatched):
     def test_28_js_after_js_in_irasset_wrong_path(self):
         self.env['ir.asset'].create({
             'name': '1',
-            'bundle': 'test_assetsbundle.bundle4',
+            'bundle': 'test_assetsbundle.wrong_path',
             'glob': '/test_assetsbundle/static/src/js/test_jsfile4.js',
+        })
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.wrong_path',
+            'glob': '/test_assetsbundle/static/src/js/test_jsfile1.js',
             'target': '/test_assetsbundle/static/src/js/doesnt_exist.js',
             'directive': 'after',
         })
-        view = self.make_asset_view('test_assetsbundle.bundle4')
+        view = self.make_asset_view('test_assetsbundle.wrong_path')
         with self.assertRaises(Exception) as cm:
             view._render()
         self.assertTrue(
-            "File /test_assetsbundle/static/src/js/doesnt_exist.js not found" in cm.exception.message
+            "test_assetsbundle/static/src/js/doesnt_exist.js not found" in cm.exception.message
         )
 
     def test_29_js_after_js_in_irasset_glob(self):
@@ -1730,4 +1741,129 @@ class TestAssetsManifest(AddonManifestPatched):
             /* /test_assetsbundle/static/src/js/test_jsfile3.js defined in bundle 'test_assetsbundle.manifest4' */
             var c=3;
             '''
+        )
+
+    @mute_logger('odoo.addons.base.models.ir_asset')
+    def test_31(self):
+        path_to_dummy = '../../tests/dummy.js'
+        me = pathlib.Path(__file__).parent.absolute()
+        file_path = me.joinpath("..", path_to_dummy)  # assuming me = test_assetsbundle/tests
+        self.assertTrue(os.path.isfile(file_path))
+
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/test_assetsbundle/%s' % path_to_dummy,
+        })
+        view = self.make_asset_view('test_assetsbundle.irassetsec')
+        view._render()
+        attach = self.env['ir.attachment'].search([('name', 'ilike', 'test_assetsbundle.irassetsec')], order='create_date DESC', limit=1)
+        self.assertFalse(attach.exists())
+
+    @mute_logger('odoo.addons.base.models.ir_asset')
+    def test_32(self):
+        path_to_dummy = '../../tests/dummy.xml'
+        me = pathlib.Path(__file__).parent.absolute()
+        file_path = me.joinpath("..", path_to_dummy)  # assuming me = test_assetsbundle/tests
+        self.assertTrue(os.path.isfile(file_path))
+
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/test_assetsbundle/%s' % path_to_dummy,
+        })
+
+        files = self.env['ir.asset']._get_asset_paths('test_assetsbundle.irassetsec', addons=self.installed_modules, xml=False)
+        self.assertFalse(files)
+
+    def test_33(self):
+        self.manifests['notinstalled_module'] = {
+            'name': 'notinstalled_module',
+            'addons_path': pathlib.Path(__file__).resolve().parent,
+        }
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/notinstalled_module/somejsfile.js',
+        })
+        view = self.make_asset_view('test_assetsbundle.irassetsec')
+        with self.assertRaises(QWebException) as cm:
+            view._render()
+
+        self.assertTrue('Unallowed to fetch files from addon notinstalled_module' in cm.exception.message)
+
+    def test_33bis_notinstalled_not_in_manifests(self):
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/notinstalled_module/somejsfile.js',
+        })
+        self.make_asset_view('test_assetsbundle.irassetsec')
+        attach = self.env['ir.attachment'].search([('name', 'ilike', 'test_assetsbundle.irassetsec')], order='create_date DESC', limit=1)
+        self.assertFalse(attach.exists())
+
+    @mute_logger('odoo.addons.base.models.ir_asset')
+    def test_34(self):
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/test_assetsbundle/__manifest__.py',
+        })
+        view = self.make_asset_view('test_assetsbundle.irassetsec')
+        view._render()
+        attach = self.env['ir.attachment'].search([('name', 'ilike', 'test_assetsbundle.irassetsec')], order='create_date DESC', limit=1)
+        self.assertFalse(attach.exists())
+
+    @mute_logger('odoo.addons.base.models.ir_asset')
+    def test_35(self):
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/test_assetsbundle/data/ir_asset.xml',
+        })
+        files = self.env['ir.asset']._get_asset_paths('test_assetsbundle.irassetsec', addons=self.installed_modules, xml=False)
+        self.assertFalse(files)
+
+    def test_36(self):
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irassetsec',
+            'glob': '/test_assetsbundle/static/accessible.xml',
+        })
+        files = self.env['ir.asset']._get_asset_paths('test_assetsbundle.irassetsec', addons=self.installed_modules, xml=False)
+        self.assertEqual(len(files), 1)
+        self.assertTrue('test_assetsbundle/static/accessible.xml' in files[0][0])
+
+    def test_37_path_can_be_an_attachment(self):
+        scss_code = base64.b64encode(b"""
+            .my_div {
+                &.subdiv {
+                    color: blue;
+                }
+            }
+        """)
+        self.env['ir.attachment'].create({
+            'name': 'my custom scss',
+            'mimetype': 'text/scss',
+            'type': 'binary',
+            'url': 'test_assetsbundle/my_style_attach.scss',
+            'datas': scss_code
+        })
+
+        self.env['ir.asset'].create({
+            'name': '1',
+            'bundle': 'test_assetsbundle.irasset_custom_attach',
+            'glob': 'test_assetsbundle/my_style_attach.scss',
+        })
+        view = self.make_asset_view('test_assetsbundle.irasset_custom_attach', {'t-css': True})
+        view._render()
+        attach = self.env['ir.attachment'].search([('name', 'ilike', 'test_assetsbundle.irasset_custom_attach')], order='create_date DESC', limit=1)
+        content = attach.raw.decode()
+        # The scss should be compiled
+        self.assertStringEqual(
+            content,
+            """
+            /* test_assetsbundle/my_style_attach.scss defined in bundle 'test_assetsbundle.irasset_custom_attach' */
+             .my_div.subdiv{color: blue;}
+            """
         )

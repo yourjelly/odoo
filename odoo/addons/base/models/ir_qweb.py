@@ -9,7 +9,6 @@ from time import time
 
 from lxml import html
 from lxml import etree
-from werkzeug import urls
 
 from odoo import api, models, tools
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, _SAFE_OPCODES
@@ -19,14 +18,9 @@ from odoo.modules.module import get_resource_path
 
 from odoo.addons.base.models.qweb import QWeb, Contextifier
 from odoo.addons.base.models.assetsbundle import AssetsBundle
-from odoo.addons.base.models.ir_asset import STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
+from odoo.addons.base.models.ir_asset import can_aggregate, STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
 
 _logger = logging.getLogger(__name__)
-
-
-def can_aggregate(url):
-    parsed = urls.url_parse(url)
-    return not parsed.scheme and not parsed.netloc and not url.startswith('/web/content')
 
 
 class IrQWeb(models.AbstractModel, QWeb):
@@ -333,7 +327,7 @@ class IrQWeb(models.AbstractModel, QWeb):
 
         options['website_id'] = self.env.context.get('website_id')
 
-        asset_paths = self.env['ir.asset'].get_asset_paths(bundle=bundle, css=True, js=True)
+        asset_paths = self.env['ir.asset']._get_asset_paths(bundle=bundle, css=True, js=True)
 
         files = []
         remains = []

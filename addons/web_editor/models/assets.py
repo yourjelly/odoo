@@ -198,7 +198,7 @@ class Assets(models.AbstractModel):
             else:
                 path_parts = '/'.join(os.path.split(custom_url)).split('/')
                 new_asset['name'] = '%s: replace %s' % (bundle, path_parts[-1])
-                new_asset['bundle'] = IrAsset.get_related_bundle(url, bundle)
+                new_asset['bundle'] = IrAsset._get_related_bundle(url, bundle)
             IrAsset.create(new_asset)
 
         self.env["ir.qweb"].clear_caches()

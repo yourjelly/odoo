@@ -4,9 +4,8 @@ import hashlib
 import json
 
 from odoo import api, models
-from odoo.http import module_boot, request
+from odoo.http import request
 from odoo.tools import ustr
-from odoo.tools.json import scriptsafe as json_scriptsafe
 
 from odoo.addons.web.controllers.main import HomeStaticTemplateHelpers
 
@@ -18,7 +17,6 @@ class Http(models.AbstractModel):
 
     def webclient_rendering_context(self):
         return {
-            'get_modules_order': lambda: json_scriptsafe.dumps(module_boot()),
             'menu_data': request.env['ir.ui.menu'].load_menus(request.session.debug),
             'session_info': self.session_info(),
         }
@@ -50,7 +48,7 @@ class Http(models.AbstractModel):
             # but is still included in some other calls (e.g. '/web/session/authenticate')
             # to avoid access errors and unnecessary information, it is only included for users
             # with access to the backend ('internal'-type users)
-            mods = module_boot()
+            mods = self.env.registry.modules
             qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=mods, debug=request.session.debug)
             lang = user_context.get("lang")
             translation_hash = request.env['ir.translation'].get_web_translations_hash(mods, lang)

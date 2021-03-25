@@ -417,6 +417,61 @@ def get_modules_with_version():
             continue
     return res
 
+
+def module_boot(db=None):
+    """
+    Determines all the odoo modules that are available.
+    It handles all the serving modes of Odoo:
+    multi-db (standard SaaS), mono-db (standard dev) or no db at all (posbox/iotbox)
+    :param  db: the dbname
+    :type db: str
+    :return: list of module names, topologically sorted
+    :rtype list(str):
+        """
+    from odoo.http import addons_manifest, db_monodb
+    server_wide_modules = odoo.conf.server_wide_modules or []
+    serverside = ['base', 'web']
+    dbside = []
+    for i in server_wide_modules:
+        if i in addons_manifest and i not in serverside:
+            serverside.append(i)
+    monodb = db or db_monodb()
+    if monodb:
+        dbside = module_installed_bypass_session(monodb)
+        dbside = [i for i in dbside if i not in serverside]
+    addons = serverside + dbside
+    return addons
+
+
+def module_installed(environment):
+    """
+    Retrieves database installed modules
+    :param  environment: odoo env
+    :type db: odoo.api.Environment
+    :return: list of module names, topologically sorted
+    :rtype list(str):
+    """
+    return environment['ir.module.module']._installed_sorted()
+
+
+def module_installed_bypass_session(dbname):
+    """
+    Retrieves database installed modules, in sudo mode
+    :param  dbname:
+    :type db: str
+    :return: list of module names, topologically sorted
+    :rtype list(str):
+    """
+    try:
+        registry = odoo.registry(dbname)
+        with registry.cursor() as cr:
+            return module_installed(
+                environment=odoo.api.Environment(cr, odoo.SUPERUSER_ID, {}))
+    except Exception:
+        pass
+    return []
+
+
 def adapt_version(version):
     serie = release.major_version
     if version == serie or not version.startswith(serie + '.'):

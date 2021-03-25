@@ -6,15 +6,17 @@
             <form string="Assets">
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="active"/>
-                        <field name="bundle"/>
-                        <field name="directive"/>
-                        <field name="sequence"/>
-                    </group>
-                    <group>
-                        <field name="target" attrs="{ 'invisible': [('directive', '!=', 'replace')] }"/>
-                        <field name="glob"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="bundle"/>
+                            <field name="directive"/>
+                            <field name="sequence"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="target" attrs="{ 'invisible': [('directive', '!=', 'replace')] }"/>
+                            <field name="glob"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
@@ -52,6 +54,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ir.asset</field>
         <field name="view_id" ref="asset_view_tree"/>
+        <field name="context">{'search_default_active': 1}</field>
     </record>
 
     <menuitem action="action_asset" id="menu_action_asset" parent="base.next_id_9"/>

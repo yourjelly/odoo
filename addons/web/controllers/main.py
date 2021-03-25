@@ -40,7 +40,8 @@ from odoo.tools.translate import _
 from odoo.tools.misc import str2bool, xlsxwriter, file_open
 from odoo.tools.safe_eval import safe_eval, time
 from odoo import http, tools
-from odoo.http import content_disposition, dispatch_rpc, module_boot, module_installed, request, serialize_exception as _serialize_exception
+from odoo.modules.module import module_boot, module_installed
+from odoo.http import content_disposition, dispatch_rpc, request, serialize_exception as _serialize_exception
 from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
 from odoo.service import db, security
@@ -549,7 +550,7 @@ class HomeStaticTemplateHelpers(object):
         :param str file_path:
         :returns: str
         """
-        with open(file_path, 'rb') as fp:
+        with file_open(file_path, 'rb') as fp:
             contents = fp.read()
         return contents
 
@@ -584,10 +585,10 @@ class HomeStaticTemplateHelpers(object):
         return etree.tostring(root, encoding='utf-8') if root is not None else b'', checksum.hexdigest()[:64]
 
     def _get_asset_paths(self):
-        """Proxy for ir_asset.get_asset_paths
+        """Proxy for ir_asset._get_asset_paths
         Useful to make 'self' testable.
         """
-        return request.env['ir.asset'].get_asset_paths(addons=self.addons, bundle='web.assets_qweb', xml=True)
+        return request.env['ir.asset']._get_asset_paths(addons=self.addons, bundle='web.assets_qweb', xml=True)
 
     def _get_qweb_templates(self):
         """One and only entry point that gets and evaluates static qweb templates
