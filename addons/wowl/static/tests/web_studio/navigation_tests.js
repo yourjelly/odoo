@@ -611,19 +611,30 @@ QUnit.module("Studio", (hooks) => {
 
 
       testConfig.serverData.models['ir.actions.report'] = {
-        fields: {},
+        fields: {
+          model: { type: 'char', string: 'Model' },
+        },
         records: [{
           id: 1,
           display_name: 'report1',
+          model: 'partner',
         }]
       };
 
+      testConfig.serverData.models['ir.model'] = {
+        fields: {},
+        records: [],
+      };
+
       Object.assign(testConfig.serverData.views, {
-        "ir.actions.report,false,kanban": `<kanban>
+        "ir.actions.report,false,kanban": `
+          <kanban class="o_web_studio_report_kanban" js_class="studio_report_kanban">
             <field name="display_name"/>
             <templates>
               <t t-name="kanban-box">
-                <t t-esc="record.display_name.value" />
+                <div class="oe_kanban_global_click">
+                  <t t-esc="record.display_name.value" />
+                </div>
               </t>
             </templates>
          </kanban>
@@ -633,13 +644,50 @@ QUnit.module("Studio", (hooks) => {
         "ir.actions.report,false,search": `<search><field name="display_name" /></search>`,
       });
 
-      const mockRPC = () => {};
+      const mockRPC = (route, args) => {
+        if (route === "/web_studio/get_studio_action") {
+          // #1 : assert action_name is "report"
+        }
+        if (route === "/web/dataset/call_kw/ir.actions.report/search_read" ||
+           (args.model === "ir.actions.report" && args.method === "search_read") ||
+           (route === "/web/dataset/search_read" && args.model === 'ir.actions.report')
+         ) {
+          assert.step('ir.actions.report search_read');
+          // assert all args are correct, in particular context.studio and domain
+        }
+        if (route === "/web/dataset/call_kw/ir.actions.report/read") {
+          // assert all args are correct, in particular context.studio
+        }
+        if (route === "/web/dataset/call_kw/ir.model/search_read") {
+          // assert all args are correct, in particular context.studio
+        }
+
+        if (route === "/web/dataset/call_kw/partner/search") { // LPE fill in report model
+          // assert all args are correct, in particular context.studio
+        }
+        // '/web_studio/get_widgets_available_options'
+        // /web_studio/get_report_views'
+        // '/web_studio/read_paperformat'
+
+      };
       const webClient = await createEnterpriseWebClient({ testConfig, mockRPC });
       await legacyExtraNextTick();
-
       await openStudio(webClient);
+      await testUtils.dom.click(webClient.el.querySelector('.o_studio .o_app.o_menuitem'));
+      await testUtils.dom.click(webClient.el.querySelectorAll('.o_studio .o_menu_sections .o_web_studio_menu_item')[1]); // the 2nd should be record
+      await legacyExtraNextTick();
+      assert.verifySteps(['ir.actions.report search_read']);
+      // assert step get_studio_action with report ; step actions.report.search_read (kanban open ONCE !)
+      // asset kanban report is present
+      // assert one record present
+      await testUtils.dom.click(webClient.el.querySelector('.o_studio .o_kanban_record'));
+      // steps actions.report.read() ; irmodel.search_read() ; [report_model].search ; available_options ; report_views ; PaperFormat
+      // assert report_editor in DOM
+      // assert iframe loaded
+      // assert studio breadcrumb
+      assert.verifySteps([]);
 
-      await new Promise(() => {});
+      //await new Promise(() => {});
     });
   });
 });
