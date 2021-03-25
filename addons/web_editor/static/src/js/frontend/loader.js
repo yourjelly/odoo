@@ -16,7 +16,7 @@ const exports = {};
 exports.createWysiwyg = async (parent, options, additionnalAssets = []) => {
     if (!wysiwygPromise) {
         wysiwygPromise = new Promise(async (resolve) => {
-            await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
+            await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]}, undefined, '/web_editor/public_render_template');
             // Wait the loading of the service and his dependencies (use string to
             // avoid parsing of require function).
             const stringFunction = `return new Promise(resolve => {
