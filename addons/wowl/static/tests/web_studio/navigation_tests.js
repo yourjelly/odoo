@@ -643,7 +643,7 @@ QUnit.module("Studio", (hooks) => {
       });
     });
 
-    QUnit.debug('LPE DUMMY', async (assert) => {
+    QUnit.skip('LPE DUMMY', async (assert) => {
       const mockRPC = (route, args) => {
         if (route === "/web_studio/get_studio_action") {
           // #1 : assert action_name is "report"
