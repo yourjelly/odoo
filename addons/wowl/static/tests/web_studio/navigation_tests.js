@@ -607,9 +607,7 @@ QUnit.module("Studio", (hooks) => {
   );
 
   QUnit.module('Report Editor', (hooks) => {
-    QUnit.skip('LPE DUMMY', async (assert) => {
-
-
+    hooks.beforeEach(() => {
       testConfig.serverData.models['ir.actions.report'] = {
         fields: {
           model: { type: 'char', string: 'Model' },
@@ -643,7 +641,9 @@ QUnit.module("Studio", (hooks) => {
         "ir.actions.report,false,form": `<form><field name="display_name" /></form>`,
         "ir.actions.report,false,search": `<search><field name="display_name" /></search>`,
       });
+    });
 
+    QUnit.debug('LPE DUMMY', async (assert) => {
       const mockRPC = (route, args) => {
         if (route === "/web_studio/get_studio_action") {
           // #1 : assert action_name is "report"
@@ -668,6 +668,7 @@ QUnit.module("Studio", (hooks) => {
         // '/web_studio/get_widgets_available_options'
         // /web_studio/get_report_views'
         // '/web_studio/read_paperformat'
+        // /web_studio/create_new_report not in this test though
 
       };
       const webClient = await createEnterpriseWebClient({ testConfig, mockRPC });
