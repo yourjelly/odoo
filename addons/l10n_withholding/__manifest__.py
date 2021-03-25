@@ -14,7 +14,8 @@ by the
         "account",
     ],
     "data": [
-        "views/account_tax_views.xml"
+        "views/account_tax_views.xml",
+        "views/account_move_views.xml",
     ],
 
 }
