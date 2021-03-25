@@ -21,6 +21,9 @@ weSnippetEditor.SnippetsMenu.include({
     tabs: _.extend({}, weSnippetEditor.SnippetsMenu.prototype.tabs, {
         THEME: 'theme',
     }),
+    tabClasses: _.extend({}, weSnippetEditor.SnippetsMenu.prototype.tabClasses, {
+        'o_we_customize_theme_btn': 'THEME',
+    }),
     optionsTabStructure: [
         ['theme-colors', _lt("Theme Colors")],
         ['theme-options', _lt("Theme Options")],
@@ -122,13 +125,6 @@ weSnippetEditor.SnippetsMenu.include({
             editableMode: true,
             onSuccess: key => ev.data.onSuccess(key),
         });
-    },
-    /**
-     * @override
-     */
-    _updateRightPanelContent: function ({content, tab}) {
-        this._super(...arguments);
-        this.$('.o_we_customize_theme_btn').toggleClass('active', tab === this.tabs.THEME);
     },
 
     //--------------------------------------------------------------------------

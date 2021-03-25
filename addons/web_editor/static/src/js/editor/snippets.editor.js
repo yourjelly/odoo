@@ -1034,8 +1034,7 @@ var SnippetsMenu = Widget.extend({
     events: {
         'click .oe_snippet': '_onSnippetClick',
         'click .o_install_btn': '_onInstallBtnClick',
-        'click .o_we_add_snippet_btn': '_onBlocksTabClick',
-        'click .o_we_customize_snippet_btn': '_onOptionsTabClick',
+        'click #snippets_menu button': '_onMenuTabClick',
         'click .o_we_invisible_entry': '_onInvisibleEntryClick',
         'click #snippet_custom .o_rename_btn': '_onRenameBtnClick',
         'click #snippet_custom .o_delete_btn': '_onDeleteBtnClick',
@@ -1080,6 +1079,10 @@ var SnippetsMenu = Widget.extend({
         BLOCKS: 'blocks',
         OPTIONS: 'options',
         CUSTOM: 'custom',
+    },
+    tabClasses: {
+        'o_we_add_snippet_btn': 'BLOCKS',
+        'o_we_customize_snippet_btn': 'OPTIONS',
     },
 
     /**
@@ -1149,8 +1152,8 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
         this._addToolbar();
-        this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this)
-        $(document.body).on('click', this._checkEditorToolbarVisibilityCallback);
+        this._updateRightPanelContentCallback = this._updateRightPanelContent.bind(this)
+        this.options.wysiwyg.$editable.on('click', this._updateRightPanelContentCallback);
 
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
@@ -1190,7 +1193,7 @@ var SnippetsMenu = Widget.extend({
             id: 'oe_manipulators',
         }).insertAfter(this.$el);
 
-        // Active snippet editor on click in the page
+        // Activate snippet editor on click in the page
         var lastElement;
         this.$document.on('click.snippets_menu', '*', ev => {
             var srcElement = ev.target || (ev.originalEvent && (ev.originalEvent.target || ev.originalEvent.originalTarget)) || ev.srcElement;
@@ -1367,7 +1370,7 @@ var SnippetsMenu = Widget.extend({
             this.$scrollingElement && this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
-        $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
+        this.options.wysiwyg.$editable.off('click', this._updateRightPanelContentCallback);
         delete this.cacheSnippetTemplate[this.options.snippets];
     },
 
@@ -1441,11 +1444,6 @@ var SnippetsMenu = Widget.extend({
                 }
             });
         }
-        this._mutex.exec(() => {
-            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
-                this._activateEmptyOptionsTab();
-            }
-        });
     },
     activateCustomTab: function (content) {
         this._updateRightPanelContent({content: content, tab: this.tabs.CUSTOM});
@@ -2355,20 +2353,24 @@ var SnippetsMenu = Widget.extend({
      * the new content of the customizePanel
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
-    _updateRightPanelContent: function ({content, tab, ...options}) {
+    _updateRightPanelContent: function ({content, tab}) {
         clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
-        this._currentTab = tab || this.tabs.BLOCKS;
+        const shouldAddToolbar = this._checkEditorToolbarVisibility();
+        this._currentTab = tab || (shouldAddToolbar ? this.tabs.OPTIONS : this.tabs.BLOCKS);
 
         if (content) {
             while (this.customizePanel.firstChild) {
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
-            if (this._currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
+            if (shouldAddToolbar && this._currentTab === this.tabs.OPTIONS) {
                 this._addToolbar();
             }
+        }
+        if (this._currentTab === this.tabs.OPTIONS && !this.customizePanel.firstChild) {
+            $(this.customizePanel).append(this.emptyOptionsTabContent);
         }
 
         this.$('.o_snippet_search_filter').toggleClass('d-none', this._currentTab !== this.tabs.BLOCKS);
@@ -2376,8 +2378,10 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel.classList.toggle('d-none', this._currentTab === this.tabs.BLOCKS);
         // Remove active class of custom button (e.g. mass mailing theme selection).
         this.$('#snippets_menu button').removeClass('active');
-        this.$('.o_we_add_snippet_btn').toggleClass('active', this._currentTab === this.tabs.BLOCKS);
-        this.$('.o_we_customize_snippet_btn').toggleClass('active', this._currentTab === this.tabs.OPTIONS);
+        const currentTabClass = Object.keys(this.tabClasses).find(className => (
+            this.tabs[this.tabClasses[className]] === this._currentTab
+        ));
+        this.$('.' + currentTabClass).addClass('active');
     },
     /**
      * Scrolls to given snippet.
@@ -2458,18 +2462,6 @@ var SnippetsMenu = Widget.extend({
             });
         }
         return mutexExecResult;
-    },
-    /**
-     * Update the options pannel as being empty.
-     *
-     * @private
-     */
-    _activateEmptyOptionsTab() {
-        this._updateRightPanelContent({
-            content: this.emptyOptionsTabContent,
-            tab: this.tabs.OPTIONS,
-            forceEmptyTab: true,
-        });
     },
 
     //--------------------------------------------------------------------------
@@ -2642,20 +2634,14 @@ var SnippetsMenu = Widget.extend({
     /**
      * @private
      */
-    _onBlocksTabClick: function (ev) {
-        this._activateSnippet(false).then(() => {
-            this._updateRightPanelContent({
-                content: [],
-                tab: this.tabs.BLOCKS,
-            });
-        });
-    },
-    /**
-     * @private
-     */
-    _onOptionsTabClick: function (ev) {
-        if (!ev.currentTarget.classList.contains('active')) {
-            this._activateEmptyOptionsTab();
+    _onMenuTabClick: function (ev) {
+        const tabClass = Object.keys(this.tabClasses).find(className => ev.currentTarget.classList.contains(className));
+        const tab = this.tabs[this.tabClasses[tabClass]];
+        const params = { content: [], tab };
+        if (tab === this.tabs.BLOCKS) {
+            this._activateSnippet(false).then(() => this._updateRightPanelContent(params));
+        } else {
+            this._updateRightPanelContent(params);
         }
     },
     /**
@@ -2962,20 +2948,26 @@ var SnippetsMenu = Widget.extend({
     },
     /**
      * Update editor UI visibility based on the current range.
+     *
+     * @returns {boolean} True if the toolbar will be shown, false otherwise.
      */
     _checkEditorToolbarVisibility: function (e) {
         const $toolbarContainer = $('#o_we_editor_toolbar_container');
-        // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
+        // Make sure the toolbar is not visiblz if the target is inside the
+        // toolbar ( eg. during link edition).
         if (e && $(e.target).parents('#toolbar').length) {
-            return;
+            $toolbarContainer.hide();
+            return false;
         }
 
         const selection = this.options.wysiwyg.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
             $toolbarContainer.hide();
+            return false;
         } else {
             $toolbarContainer.show();
+            return true;
         }
     },
     /**
