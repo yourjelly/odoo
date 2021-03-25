@@ -607,7 +607,7 @@ QUnit.module("Studio", (hooks) => {
   );
 
   QUnit.module('Report Editor', (hooks) => {
-    QUnit.skip('LPE DUMMY', async () => {
+    QUnit.skip('LPE DUMMY', async (assert) => {
 
 
       testConfig.serverData.models['ir.actions.report'] = {

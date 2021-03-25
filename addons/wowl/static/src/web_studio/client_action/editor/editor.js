@@ -24,6 +24,7 @@ const actionServiceStudio = {
     function doAction(actionRequest, options) {
       if (actionRequest === "web_studio.action_edit_report") {
         env.services.studio.setParams({ editorTab: 'reports', editedReport: options.report });
+        env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "MAIN" });
         return;
       }
       return _doAction(...arguments);

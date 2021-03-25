@@ -144,7 +144,7 @@ class ReportEditorAdapter extends ComponentAdapter {
      */
     async _getReportViews() {
         this.reportViews = {
-            'report_html': "",
+            'report_html': "<html><head><head/><body><div>prout</div></body></html>",
             'main_view_id': false,
             'views': {},
         };
