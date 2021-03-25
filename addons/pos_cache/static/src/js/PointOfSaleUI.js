@@ -16,14 +16,18 @@ odoo.define('pos_cache.PointOfSaleUI', function (require) {
     return patch(PointOfSaleUI.prototype, 'pos_cache', {
         async _afterLoadPos() {
             await this._super(...arguments);
+            const nInitiallyLoaded = this.env.model.getProducts(0).length;
             const totalProductsCount = await this._getTotalProductsCount();
-            const nRemaining = totalProductsCount - this.env.model.getProducts(0).length;
+            const nRemaining = totalProductsCount - nInitiallyLoaded;
             if (!(nRemaining > 0)) return;
-            const multiple = this.env.model.searchLimit;
+            const multiple = 50000;
             const nLoops = roundUpDiv(nRemaining, multiple);
-            for (let i = 1; i <= nLoops; i++) {
+            for (let i = 0; i < nLoops; i++) {
                 this.env.actionHandler(
-                    { name: 'actionLoadProducts', args: [i * multiple, (i + 1) * multiple] },
+                    {
+                        name: 'actionLoadProducts',
+                        args: [i * multiple + nInitiallyLoaded, (i + 1) * multiple + nInitiallyLoaded],
+                    },
                     backgroundMutex
                 );
             }
