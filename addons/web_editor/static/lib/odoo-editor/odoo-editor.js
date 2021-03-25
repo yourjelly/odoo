@@ -3516,11 +3516,11 @@ var exportVariable = (function (exports) {
             const selection = this.document.getSelection();
             if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
             getDeepRange(this.editable, { splitText: true, select: true, correctTripleClick: true });
-            const isAlreadyBold = !getSelectedNodes(this.editable)
+            const isAlreadyBold = getSelectedNodes(this.editable)
                 .filter(n => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim().length)
-                .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) < 700);
+                .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) > 500);
             this._applyInlineStyle(el => {
-                el.style.fontWeight = isAlreadyBold ? 'normal' : 'bold';
+                el.style.fontWeight = isAlreadyBold ? 'normal' : 'bolder';
             });
         }
 
@@ -3802,7 +3802,6 @@ var exportVariable = (function (exports) {
             }
             const paragraphDropdownButton = this.toolbar.querySelector('#paragraphDropdownButton');
             for (const commandState of [
-                'bold',
                 'italic',
                 'underline',
                 'strikeThrough',
@@ -3827,6 +3826,12 @@ var exportVariable = (function (exports) {
             if (sel.rangeCount) {
                 const closestsStartContainer = closestElement(sel.getRangeAt(0).startContainer, '*');
                 const selectionStartStyle = getComputedStyle(closestsStartContainer);
+
+                // queryCommandState('bold') does not take stylesheets into account
+                const isBold = Number.parseInt(selectionStartStyle.fontWeight) > 500;
+                const button = this.toolbar.querySelector('#bold');
+                button.classList.toggle('active', isBold);
+
                 const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
                 if (fontSizeValue) {
                     fontSizeValue.innerHTML = /\d+/.exec(selectionStartStyle.fontSize).pop();
