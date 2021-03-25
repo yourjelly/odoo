@@ -1461,7 +1461,7 @@ var SnippetsMenu = Widget.extend({
         });
     },
     activateCustomTab: function (content) {
-        this._updateRightPanelContent({content: content, tab: this.tabs.CUSTOM});
+        this._updateLeftPanelContent({content: content, tab: this.tabs.CUSTOM});
     },
 
     //--------------------------------------------------------------------------
@@ -2368,7 +2368,7 @@ var SnippetsMenu = Widget.extend({
      * the new content of the customizePanel
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
-    _updateRightPanelContent: function ({content, tab, ...options}) {
+    _updateLeftPanelContent: function ({content, tab, ...options}) {
         clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
@@ -2478,7 +2478,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _activateEmptyOptionsTab() {
-        this._updateRightPanelContent({
+        this._updateLeftPanelContent({
             content: this.emptyOptionsTabContent,
             tab: this.tabs.OPTIONS,
             forceEmptyTab: true,
@@ -2657,7 +2657,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onBlocksTabClick: function (ev) {
         this._activateSnippet(false).then(() => {
-            this._updateRightPanelContent({
+            this._updateLeftPanelContent({
                 content: [],
                 tab: this.tabs.BLOCKS,
             });
@@ -2924,7 +2924,7 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onUpdateCustomizeElements: function (ev) {
-        this._updateRightPanelContent({
+        this._updateLeftPanelContent({
             content: ev.data.customize$Elements,
             tab: ev.data.customize$Elements.length ? this.tabs.OPTIONS : this.tabs.BLOCKS,
         });
@@ -3002,13 +3002,13 @@ var SnippetsMenu = Widget.extend({
         const range = selection.rangeCount && selection.getRangeAt(0);
         if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
             $toolbarContainer.hide();
-            this._updateRightPanelContent({
+            this._updateLeftPanelContent({
                 content: this._customize$Elements || [],
                 toolbarVisible: false,
             });
         } else {
             $toolbarContainer.show();
-            this._updateRightPanelContent({
+            this._updateLeftPanelContent({
                 content: this._customize$Elements || [],
                 tab: this.tabs.OPTIONS,
                 toolbarVisible: true,
