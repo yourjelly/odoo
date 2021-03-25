@@ -1442,7 +1442,9 @@ var SnippetsMenu = Widget.extend({
             });
         }
         this._mutex.exec(() => {
-            this._checkEditorToolbarVisibility();
+            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
+                this._activateEmptyOptionsTab();
+            }
         });
     },
     activateCustomTab: function (content) {
@@ -2365,7 +2367,7 @@ var SnippetsMenu = Widget.extend({
             }
             $(this.customizePanel).append(content);
             if (this._currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
-                this._addToolbar(undefined, options.toolbarVisible);
+                this._addToolbar();
             }
         }
 
@@ -2937,7 +2939,7 @@ var SnippetsMenu = Widget.extend({
     _onSnippetSearchResetClick: function () {
         this._filterSnippets('');
     },
-    _addToolbar(toolbarMode = "text", show) {
+    _addToolbar(toolbarMode = "text") {
         let titleText = _t("Inline Text");
         switch (toolbarMode) {
             case "image":
@@ -2957,21 +2959,14 @@ var SnippetsMenu = Widget.extend({
         $customizeBlock.append($title);
         $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append($customizeBlock);
-        if (show === true) {
-            $customizeBlock.show();
-        } else if (show === false) {
-            $customizeBlock.hide();
-        } else {
-            this._checkEditorToolbarVisibility();
-        }
     },
     /**
      * Update editor UI visibility based on the current range.
      */
     _checkEditorToolbarVisibility: function (e) {
         const $toolbarContainer = $('#o_we_editor_toolbar_container');
-        // Do not  toggle visibility if the target is inside the sidebar ( eg. during link edition).
-        if (e && $(e.target).parents('#oe_snippets').length) {
+        // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
+        if (e && $(e.target).parents('#toolbar').length) {
             return;
         }
 
@@ -2979,17 +2974,8 @@ var SnippetsMenu = Widget.extend({
         const range = selection.rangeCount && selection.getRangeAt(0);
         if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
             $toolbarContainer.hide();
-            this._updateLeftPanelContent({
-                content: this._customize$Elements || [],
-                toolbarVisible: false,
-            });
         } else {
             $toolbarContainer.show();
-            this._updateLeftPanelContent({
-                content: this._customize$Elements || [],
-                tab: this.tabs.OPTIONS,
-                toolbarVisible: true,
-            });
         }
     },
     /**
