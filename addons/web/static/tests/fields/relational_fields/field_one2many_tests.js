@@ -167,7 +167,7 @@ QUnit.module('fields', {}, function () {
     }, function () {
         QUnit.module('FieldOne2Many');
 
-        QUnit.only('Editable list field widget call on_attach_callback on update', async function (assert) {
+        QUnit.test('Editable list field widget call on_attach_callback on update', async function (assert) {
             assert.expect(5);
 
             let count = 0;
@@ -175,12 +175,10 @@ QUnit.module('fields', {}, function () {
                 init() {
                     this._super(...arguments);
                     count++;
-                    // assert.step('init');
                 },
                 destroy() {
                     this._super(...arguments);
                     count--;
-                    // assert.step('destroy');
                 }
             });
             fieldRegistry.add('myfield', MyField);
