@@ -2359,12 +2359,9 @@ var SnippetsMenu = Widget.extend({
 
         this._currentTab = tab || this.tabs.BLOCKS;
 
-        if (content || options.keepContents) {
-            const $toolbarContainer = $('#o_we_editor_toolbar_container');
-            for (const child of this.customizePanel.childNodes) {
-                if (!options.keepContents || $toolbarContainer.is(child)) {
-                    this.customizePanel.removeChild(child);
-                }
+        if (content) {
+            while (this.customizePanel.firstChild) {
+                this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
             if (this._currentTab === this.tabs.OPTIONS && !options.forceEmptyTab) {
@@ -2983,13 +2980,13 @@ var SnippetsMenu = Widget.extend({
         if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
             $toolbarContainer.hide();
             this._updateRightPanelContent({
-                keepContents: true,
+                content: this._customize$Elements || [],
                 toolbarVisible: false,
             });
         } else {
             $toolbarContainer.show();
             this._updateRightPanelContent({
-                keepContents: true,
+                content: this._customize$Elements || [],
                 tab: this.tabs.OPTIONS,
                 toolbarVisible: true,
             });
