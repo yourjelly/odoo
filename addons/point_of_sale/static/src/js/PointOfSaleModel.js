@@ -1447,6 +1447,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 throw error;
             }
         }
+        _cannotRemoveOrderLine() {
+            return false;
+        }
         /**
          * @param {{
          *  'pos.order': object[],
@@ -1935,6 +1938,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             if ('price_unit' in vals) {
                 vals['price_manually_set'] = true;
             }
+            if ('discount' in vals) {
+                if(vals['discount'] > 100)
+                    vals['discount'] = 100;
+            }
             this.updateRecord('pos.order.line', orderline.id, vals);
         }
         async actionDeleteOrderline(order, orderline) {
@@ -2004,6 +2011,13 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             }
         }
         actionDeleteOrder(order) {
+            if(this.getOrderlines(order).length && this._cannotRemoveOrderLine()) {
+                this.ui.askUser('ErrorPopup', {
+                    'title': _t("POS Error"),
+                    'body':  _t("Deleting orders is not allowed."),
+                });
+                return;
+            }
             const activeOrderIsDeleted = this.getActiveOrder().id === order.id;
             this._tryDeleteOrder(order);
             if (activeOrderIsDeleted) {
