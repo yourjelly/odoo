@@ -81,7 +81,9 @@ export class Editor extends Component {
         // empty the action container
         this.env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "MAIN" });
     } else {
-        await this._executeAction(tab);
+        // LPE: in same tick, to avoid
+        // the wild reload of the controller
+        this._executeAction(tab);
         this.studio.setParams({ editorTab: tab });
     }
   }
