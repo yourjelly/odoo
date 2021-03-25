@@ -3,7 +3,7 @@
 
     <div t-name="wowl.LoadingIndicator" class="o_loading_indicator" owl="1">
         <span t-if="state.show" class="o_loading" t-transition="fade">
-            Loading <t t-if="debugMode" t-esc="'(' + state.count + ')'" />
+            <t>Loading<t t-if="env.debug" t-esc="' (' + state.count + ')'" /></t>
         </span>
     </div>
 

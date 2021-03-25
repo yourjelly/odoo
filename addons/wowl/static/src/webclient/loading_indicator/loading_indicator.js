@@ -22,7 +22,6 @@ export class LoadingIndicator extends Component {
       show: false,
     });
     this.rpcIds = new Set();
-    this.debugMode = true;
     this.env.bus.on("RPC:REQUEST", this, this.requestCall);
     this.env.bus.on("RPC:RESPONSE", this, this.responseCall);
     this.uiService = useService("ui");
