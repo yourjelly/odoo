@@ -32,7 +32,6 @@
                 'login_number': login_number,
                 'debug': debug,
             })"/>;
-            odoo._modules = <t t-raw="json.dumps(request.env.registry.modules)"/>;
         </script>
 
         <t t-call="point_of_sale.assets_common"/>

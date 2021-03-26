@@ -230,7 +230,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
             module._update_translations(overwrite=overwrite)
 
         if package.name is not None:
-            registry._init_modules.add(package.name)
+            registry._init_modules.append(package.name)
 
         if needs_update:
             if new_install:

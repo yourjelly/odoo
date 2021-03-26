@@ -202,9 +202,6 @@
             <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
             <t t-set="title">Web Tests</t>
             <t t-set="head">
-                <script>
-                    odoo._modules = <t t-raw="json.dumps(request.env.registry.modules)"/>;
-                </script>
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
@@ -226,9 +223,6 @@
             <t t-set="title">Web Mobile Tests</t>
             <t t-set="head">
                 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-                <script>
-                    odoo._modules = <t t-raw="json.dumps(request.env.registry.modules)"/>;
-                </script>
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
@@ -251,9 +245,6 @@
             <t t-set="head">
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/lodash.js"></script>
                 <script type="text/javascript" src="/web/static/lib/benchmarkjs/benchmark.js"></script>
-                <script>
-                    odoo._modules = <t t-raw="json.dumps(request.env.registry.modules)"/>;
-                </script>
 
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
@@ -298,7 +289,6 @@
                     odoo.session_info = <t t-raw="json.dumps(session_info)"/>;
                     odoo.reloadMenus = () => fetch(`/web/webclient/load_menus/${odoo.session_info.cache_hashes.load_menus}`).then(res => res.json());
                     odoo.loadMenusPromise = odoo.reloadMenus();
-                    odoo._modules = <t t-raw="json.dumps(request.env.registry.modules)"/>;
                 </script>
                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>

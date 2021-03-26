@@ -255,7 +255,7 @@ class Http(models.AbstractModel):
     @classmethod
     def _get_translation_frontend_modules_name(cls):
         mods = super(Http, cls)._get_translation_frontend_modules_name()
-        installed = request.registry._init_modules | set(odoo.conf.server_wide_modules)
+        installed = request.registry._init_modules + (odoo.conf.server_wide_modules or [])
         return mods + [mod for mod in installed if mod.startswith('website')]
 
     @classmethod

@@ -1303,20 +1303,22 @@ class Root(object):
         controllers and configure them.  """
         # TODO should we move this to ir.http so that only configured modules are served ?
         statics = {}
+        manifests = addons_manifest
         for addons_path in odoo.addons.__path__:
             for module in sorted(os.listdir(str(addons_path))):
-                static_key = '/%s/static' % module
-                if module not in addons_manifest or static_key not in statics:
+                if module not in manifests:
+                    # Deal with the manifest first
                     mod_path = opj(addons_path, module)
+                    manifest = read_manifest(addons_path, module)
+                    if not manifest or (not manifest.get('installable', True) and 'assets' not in manifest):
+                        continue
+                    manifest['addons_path'] = addons_path
+                    manifests[module] = manifest
+                    # Then deal with the statics
                     path_static = opj(addons_path, module, 'static')
                     if os.path.isdir(path_static):
-                        manifest = addons_manifest.get(module) or read_manifest(addons_path, module)
-                        if not manifest or not manifest.get('installable', True):
-                            continue
-                        manifest['addons_path'] = addons_path
                         _logger.debug("Loading %s", module)
-                        addons_manifest[module] = manifest
-                        statics[static_key] = path_static
+                        statics['/%s/static' % module] = path_static
 
         if statics:
             _logger.info("HTTP Configuring static files")
