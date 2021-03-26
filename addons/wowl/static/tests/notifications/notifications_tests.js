@@ -33,7 +33,7 @@ QUnit.test("can display a basic notification", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_notification");
   const notif = target.querySelector(".o_notification");
-  assert.strictEqual(notif.innerText, "I'm a basic notification");
+  assert.strictEqual(notif.textContent, "I'm a basic notification");
   assert.hasClass(notif, "bg-warning");
 });
 
@@ -46,7 +46,7 @@ QUnit.test("can display a notification of type danger", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_notification");
   const notif = target.querySelector(".o_notification");
-  assert.strictEqual(notif.innerText, "I'm a danger notification");
+  assert.strictEqual(notif.textContent, "I'm a danger notification");
   assert.hasClass(notif, "bg-danger");
 });
 
@@ -59,9 +59,9 @@ QUnit.test("can display a danger notification with a title", async (assert) => {
   await nextTick();
   assert.containsOnce(target, ".o_notification");
   const notif = target.querySelector(".o_notification");
-  assert.strictEqual(notif.querySelector(".o_notification_header").innerText, "Some title");
+  assert.strictEqual(notif.querySelector(".o_notification_header").textContent, "Some title");
   assert.strictEqual(
-    notif.querySelector(".o_notification_body").innerText,
+    notif.querySelector(".o_notification_body").textContent,
     "I'm a danger notification"
   );
   assert.hasClass(notif, "bg-danger");
