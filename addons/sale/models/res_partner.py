@@ -10,7 +10,7 @@ class ResPartner(models.Model):
 
     sale_order_count = fields.Integer(compute='_compute_sale_order_count', string='Sale Order Count')
     sale_order_ids = fields.One2many('sale.order', 'partner_id', 'Sales Order')
-    sale_warn = fields.Selection(WARNING_MESSAGE, 'Sales Warnings', default='no-message', help=WARNING_HELP)
+    sale_warn = fields.Selection(WARNING_MESSAGE, 'Sales Warnings', default='no-message', help=WARNING_HELP, required=True)
     sale_warn_msg = fields.Text('Message for Sales Order')
 
     def _compute_sale_order_count(self):
