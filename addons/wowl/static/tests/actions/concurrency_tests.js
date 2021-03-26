@@ -365,6 +365,7 @@ QUnit.module("ActionManager", (hooks) => {
     );
     // execute another action meanwhile (and unlock the RPC)
     doAction(webClient, 4);
+    await testUtils.nextTick();
     def.resolve();
     await testUtils.nextTick();
     await legacyExtraNextTick();

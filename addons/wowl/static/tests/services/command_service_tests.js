@@ -104,7 +104,7 @@ QUnit.test("useCommand hook", async (assert) => {
   await nextTick();
 
   assert.containsOnce(target, ".o_command");
-  assert.deepEqual(target.querySelector(".o_command").innerText, "Take the throne");
+  assert.deepEqual(target.querySelector(".o_command").textContent, "Take the throne");
 
   await click(target, ".o_command");
   testComponent.unmount();
@@ -157,7 +157,7 @@ QUnit.test("aria-keyshortcuts added to command palette", async (assert) => {
 
   assert.containsN(target, ".o_command", 2, "must contains two commands");
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command span")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command span")].map(el => el.textContent),
     ["Aria Stark", "Bran Stark"]
   );
 
@@ -218,7 +218,7 @@ QUnit.test("can be searched", async (assert) => {
   );
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
     names,
     "all commands are present"
   );
@@ -230,7 +230,7 @@ QUnit.test("can be searched", async (assert) => {
   await nextTick();
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
     ["Jaime Lannister"],
     "only search matches are present"
   );
@@ -241,7 +241,7 @@ QUnit.test("can be searched", async (assert) => {
   await nextTick();
 
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command")].map(el => el.textContent),
     names,
     "all commands are again present"
   );
@@ -265,7 +265,7 @@ QUnit.test("command categories", async (assert) => {
 
   assert.containsN(target, ".o_command", 4);
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command_category > span")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command_category > span")].map(el => el.textContent),
     [
       "a",
       "Custom",
@@ -304,7 +304,7 @@ QUnit.test("data-command-category", async (assert) => {
 
   assert.containsN(target, ".o_command", 4);
   assert.deepEqual(
-    [...target.querySelectorAll(".o_command_category_label, .o_command > span")].map(el => el.innerText),
+    [...target.querySelectorAll(".o_command_category_label, .o_command > span")].map(el => el.textContent),
     [
       "Custom",
       "Robert Baratheon",
