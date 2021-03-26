@@ -15,7 +15,7 @@
                     <div class="form-group">
                         <label for="totp_token">Authentication Code (6 digits)</label>
                         <input id="totp_token" name="totp_token" class="form-control mb-2"
-                               autofocus="autofocus" required="required"/>
+                            autocomplete="one-time-code" inputmode="numeric" autofocus="autofocus" required="required"/>
                     </div>
                     <p class="alert alert-danger" t-if="error" role="alert">
                         <t t-esc="error"/>
