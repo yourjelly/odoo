@@ -384,8 +384,7 @@ actual arch.
                 # verify the view is valid xml and that the inheritance resolves
                 view_arch = etree.fromstring(view.arch.encode('utf-8'))
                 view._valid_inheritance(view_arch)
-                view_def = view.read_combined(['arch'])
-                view_arch_utf8 = view_def['arch']
+                view_arch_utf8 = view.get_arch()
                 if view.type == 'qweb':
                     continue
                 view_doc = etree.fromstring(view_arch_utf8)
@@ -574,7 +573,7 @@ actual arch.
                   WHERE res_id IN %(res_ids)s AND model = 'ir.ui.view' AND module IN %(modules)s
                """
 
-    def get_inheriting_views_arch(self, model):
+    def get_inheriting_views_arch(self):
         """Retrieves the sets of views that should currently be used in the
            system in the right order. During the module upgrade phase it
            may happen that a view is present in the database but the fields it relies on are not
@@ -585,35 +584,37 @@ actual arch.
            :param str model: model identifier of the inheriting views.
            :return: list of ir.ui.view
         """
-        self.ensure_one()
-        self.check_access_rights('read')
-
         # retrieve all the views transitively inheriting from view_id
-        domain = self._get_inheriting_views_arch_domain(model)
-        e = expression(domain, self.env['ir.ui.view'])
-        from_clause, where_clause, where_params = e.query.get_sql()
-        assert from_clause == '"ir_ui_view"'
         self.flush(['active'])
+
         query = """
-            WITH RECURSIVE ir_ui_view_inherits AS (
-                SELECT id, inherit_id, priority
-                FROM ir_ui_view
-                WHERE inherit_id = %s AND {where_clause}
-            UNION
-                SELECT iuv.id, iuv.inherit_id, iuv.priority
-                FROM ir_ui_view iuv
-                INNER JOIN ir_ui_view_inherits iuvi ON iuvi.id = iuv.inherit_id
-                WHERE {sub_where_clause}
-            )
-            SELECT id
-            FROM ir_ui_view_inherits
-            ORDER BY priority, id;
-        """.format(
-            where_clause=where_clause,
-            sub_where_clause=where_clause.replace('ir_ui_view', 'iuv'),
-        )
-        self.env.cr.execute(query, [self.id] + where_params + where_params)
-        view_ids = [r[0] for r in self.env.cr.fetchall()]
+WITH RECURSIVE ir_ui_view_inherits AS (
+    SELECT id, inherit_id, priority, model
+    FROM ir_ui_view
+    WHERE id=%s AND active=true AND mode='primary'
+UNION
+    SELECT iuv.id, iuv.inherit_id, iuv.priority, iuv.model
+    FROM ir_ui_view iuv
+    INNER JOIN ir_ui_view_inherits iuvi ON iuvi.id = iuv.inherit_id
+    WHERE iuv.model=iuvi.model AND iuv.active=true AND mode='extension'
+)
+SELECT
+    v.id, v.inherit_id,
+    ARRAY(SELECT r.group_id FROM ir_ui_view_group_rel r WHERE r.view_id=v.id)
+FROM ir_ui_view_inherits v
+ORDER BY v.priority, v.id
+"""
+        self.env.cr.execute(query, [self.id])
+
+        results = self.env.cr.fetchall()
+        user_groups = set(self.env.user.groups_id.ids)
+        results = list(filter(lambda x: not x[2] or (set(x[2]) & user_groups), results))
+
+        views = {}
+        view_ids = {r[0]: [] for r in results}
+        for r in results:
+            if r[1]:
+                view_ids[r[1]].append(r[0])
 
         if self.pool._init and not self._context.get('load_all_views'):
             # check that all found ids have a corresponding xml_id in a loaded module
@@ -624,12 +625,11 @@ actual arch.
                 query = self._get_filter_xmlid_query()
                 self.env.cr.execute(query, {'res_ids': tuple(ids_to_check), 'modules': loaded_modules})
                 valid_view_ids = [r[0] for r in self.env.cr.fetchall()] + check_view_ids
-                view_ids = [vid for vid in view_ids if vid in valid_view_ids]
+                for key in view_ids:
+                    if key not in valid_view_ids:
+                        del view_ids[key]
 
-        def accessible(view):
-            return not view.groups_id or (view.groups_id & self.env.user.groups_id)
-
-        return self.browse(view_ids).sudo().filtered(accessible)
+        return view_ids
 
     def _check_view_access(self):
         """ Verify that a view is accessible by the current user based on the
@@ -740,80 +740,39 @@ actual arch.
             self.handle_view_error(str(e), specs_tree)
         return source
 
-    def apply_view_inheritance(self, source, model):
-        """ Apply all the (directly and indirectly) inheriting views.
+    def _get_node(self, views):
+        node = etree.fromstring(self.arch)
+        if self._context.get('inherit_branding'):
+            node.attrib.update({
+                'data-oe-model': 'ir.ui.view',
+                'data-oe-id': str(self.id),
+                'data-oe-field': 'arch',
+            })
 
-        :param source: a parent architecture to modify (with parent modifications already applied)
-        :param model: the original model for which we create a view (not
-            necessarily the same as the source's model); only the inheriting
-            views with that specific model will be applied.
-        :return: a modified source where all the modifying architecture are applied
+        for view in self.browse(views[self.id]):
+            node2 = view._get_node(views)
+            node = apply_inheritance_specs(node, node2, inherit_branding=self._context.get('inherit_branding'))
+        return node
+
+    def _get_arch(self):
         """
-        inherit_tree = collections.defaultdict(list)
-        for view in self.get_inheriting_views_arch(model):
-            inherit_tree[view.inherit_id].append(view)
-        return self._apply_view_inheritance(source, inherit_tree)
-
-    def _apply_view_inheritance(self, source, inherit_tree):
-        # recursively apply inheritance following the given inheritance tree
-        for view in inherit_tree[self]:
-            arch_tree = etree.fromstring(view.arch.encode('utf-8'))
-            if self._context.get('inherit_branding'):
-                view.inherit_branding(arch_tree)
-            source = view.apply_inheritance_specs(source, arch_tree)
-            source = view._apply_view_inheritance(source, inherit_tree)
-        return source
-
-    def read_combined(self, fields=None):
+        Utility function to get a view combined with its inherited views, returns an etree node.
         """
-        Utility function to get a view combined with its inherited views.
-
-        * Gets the top of the view tree if a sub-view is requested
-        * Applies all inherited archs on the root view
-        * Returns the view with all requested fields
-          .. note:: ``arch`` is always added to the fields list even if not
-                    requested (similar to ``id``)
-        """
-        # introduce check_view_ids in context
-        if 'check_view_ids' not in self._context:
-            self = self.with_context(check_view_ids=[])
-
-        check_view_ids = self._context['check_view_ids']
-
-        # if view_id is not a root view, climb back to the top.
         root = self
-        while root.mode != 'primary':
-            # Add inherited views to the list of loading forced views
-            # Otherwise, inherited views could not find elements created in their direct parents if that parent is defined in the same module
-            check_view_ids.append(root.id)
-            root = root.inherit_id
+        # while root.mode != 'primary':
+        #     root = root.inherit_id
 
-        # arch and model fields are always returned
-        if fields:
-            fields = list({'arch', 'model'}.union(fields))
+        # prefetch for performance
+        views = self.get_inheriting_views_arch()
+        self.browse(views.keys())._read(['arch','mode','inherit_id','model','arch_db'])
+        return self.browse(root.id)._get_node(views)
 
-        # read the view arch
-        [view_data] = root.read(fields=fields)
-        view_arch = etree.fromstring(view_data['arch'].encode('utf-8'))
-        if not root.inherit_id:
-            if self._context.get('inherit_branding'):
-                view_arch.attrib.update({
-                    'data-oe-model': 'ir.ui.view',
-                    'data-oe-id': str(root.id),
-                    'data-oe-field': 'arch',
-                })
-            arch_tree = view_arch
-        else:
-            if self._context.get('inherit_branding'):
-                root.inherit_branding(view_arch)
-            parent_view = root.inherit_id.read_combined(fields=fields)
-            arch_tree = etree.fromstring(parent_view['arch'])
-            arch_tree = self.browse(parent_view['id']).apply_inheritance_specs(arch_tree, view_arch)
+    def get_arch(self):
+        """
+        Utility function to get a view combined with its inherited views, returns a string.
+        """
+        return etree.tostring(self._get_arch())
 
-        # and apply inheritance
-        arch = root.apply_view_inheritance(arch_tree, self.model)
-
-        return dict(view_data, arch=etree.tostring(arch, encoding='unicode'))
 
     def _apply_groups(self, node, name_manager, node_info):
         #pylint: disable=unused-argument
@@ -1584,7 +1543,7 @@ actual arch.
                        'tuple(self._context.get(k) for k in self._read_template_keys())'),
     )
     def _read_template(self, view_id):
-        arch = self.browse(view_id).read_combined(['arch'])['arch']
+        arch = self.browse(view_id).get_arch()
         arch_tree = etree.fromstring(arch)
         self.distribute_branding(arch_tree)
         arch = etree.tostring(arch_tree, encoding='unicode')
