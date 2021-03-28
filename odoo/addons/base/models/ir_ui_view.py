@@ -380,50 +380,24 @@ actual arch.
         # Sanity checks: the view should not break anything upon rendering!
         # Any exception raised below will cause a transaction rollback.
         for view in self:
-            try:
-                # verify the view is valid xml and that the inheritance resolves
-                view_arch = etree.fromstring(view.arch.encode('utf-8'))
+            # verify the view is valid xml and that the inheritance resolves
+            if view.inherit_id:
+                view_arch = etree.fromstring(view.arch)
                 view._valid_inheritance(view_arch)
-                view_arch_utf8 = view.get_arch()
-                if view.type == 'qweb':
-                    continue
-                view_doc = etree.fromstring(view_arch_utf8)
-            except ValueError as e:
-                err = ValidationError(_(
-                    "Error while validating view:\n\n%(error)s",
-                    error=tools.ustr(e),
-                )).with_traceback(e.__traceback__)
-                err.context = None
-                raise err from None
+            view_doc = view._get_arch()
+            if view.type == 'qweb':
+                continue
 
-            try:
-                # verify that all fields used are valid, etc.
-                view.postprocess_and_fields(view_doc, validate=True)
-                # RNG-based validation is not possible anymore with 7.0 forms
-                view_docs = [view_doc]
-                if view_docs[0].tag == 'data':
-                    # A <data> element is a wrapper for multiple root nodes
-                    view_docs = view_docs[0]
-                for view_arch in view_docs:
-                    check = valid_view(view_arch, env=self.env, model=view.model)
-                    view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
-                    if not check:
-                        raise ValidationError(_(
-                            'Invalid view %(name)s definition in %(file)s',
-                            name=view_name, file=view.arch_fs
-                        ))
-                    if check == "Warning":
-                        _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
-            except ValueError as e:
-                lines = view_arch_utf8.splitlines(keepends=True)
-                fivelines = "".join(lines[max(0, e.context["line"]-3):e.context["line"]+2])
-                err = ValidationError(_(
-                    "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
-                    fivelines=fivelines, error=tools.ustr(e),
+            view.postprocess_and_fields(view_doc, validate=True)
+            check = valid_view(view_doc, env=self.env, model=view.model)
+            view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
+            if not check:
+                raise ValidationError(_(
+                    'Invalid view %(name)s definition in %(file)s',
+                    name=view_name, file=view.arch_fs
                 ))
-                err.context = e.context
-                raise err.with_traceback(e.__traceback__) from None
-
+            if check == "Warning":
+                _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
         return True
 
     @api.constrains('type', 'groups_id', 'inherit_id')
@@ -761,11 +735,13 @@ ORDER BY v.priority, v.id
         Utility function to get a view combined with its inherited views, returns an etree node.
         """
         root = self
-        # while root.mode != 'primary':
-        #     root = root.inherit_id
+        while True:
+            root._read(['inherit_id', 'mode'])
+            if root.mode == 'primary': break
+            root = root.inherit_id
 
         # prefetch for performance
-        views = self.get_inheriting_views_arch()
+        views = root.get_inheriting_views_arch()
         self.browse(views.keys())._read(['arch','mode','inherit_id','model','arch_db'])
         return self.browse(root.id)._get_node(views)
 
@@ -809,33 +785,15 @@ ORDER BY v.priority, v.id
             string and fields is the description of all the fields.
 
         """
-
-        if self:
-            self.ensure_one()
+        self.ensure_one()
         model = model or self.model
 
         arch, name_manager = self._postprocess_view(node, model, validate=validate)
         # name_manager.final_check()
         return arch, name_manager.available_fields
 
-    def _postprocess_view(self, node, model, validate=True, editable=True):
-
-        if model not in self.env:
-            self.handle_view_error(_('Model not found: %(model)s', model=model), node)
-
-        self._postprocess_on_change(model, node)
-
-        name_manager = NameManager(validate, self.env[model])
-        self.postprocess(node, [], editable, name_manager)
-
-        name_manager.check_view_fields(self)
-        name_manager.update_view_fields()
-
-        self._postprocess_access_rights(model, node)
-
-        return etree.tostring(node, encoding="unicode").replace('\t', ''), name_manager
-
-    def _postprocess_on_change(self, model_name, arch):
+    @api.model
+    def _get_fields(self, model_name, arch):
         """ Add attribute on_change="1" on fields that are dependencies of
             computed fields on the same view.
         """
@@ -846,6 +804,9 @@ ORDER BY v.priority, v.id
             if node.tag == 'field':
                 field = model._fields.get(node.get('name'))
                 if field:
+                    if field.groups and not self.user_has_groups(groups=field.groups):
+                        node.getparent().remove(node)
+                        return
                     field_nodes[field].append(node)
                     if field.relational:
                         model = self.env[field.comodel_name]
@@ -862,6 +823,23 @@ ORDER BY v.priority, v.id
                 for node in nodes:
                     if not node.get('on_change'):
                         node.set('on_change', '1')
+        return field_nodes.keys()
+
+
+    def _postprocess_view(self, node, model, validate=True, editable=True):
+
+        if model not in self.env:
+            self.handle_view_error(_('Model not found: %(model)s', model=model), node)
+
+        name_manager = NameManager(validate, self.env[model])
+        self.postprocess(node, [], editable, name_manager)
+
+        name_manager.check_view_fields(self)
+        name_manager.update_view_fields()
+
+        self._postprocess_access_rights(model, node)
+
+        return etree.tostring(node, encoding="unicode").replace('\t', ''), name_manager
 
     def _postprocess_access_rights(self, model, node):
         """ Compute and set on node access rights based on view type. Specific

@@ -304,14 +304,14 @@ class View(models.Model):
             domain = [leaf for leaf in domain if 'active' not in leaf]
         return expression.AND([website_views_domain, domain])
 
-    @api.model
-    def get_inheriting_views_arch(self):
-        if not self._context.get('website_id'):
-            return super(View, self).get_inheriting_views_arch()
+    # @api.model
+    # def get_inheriting_views_arch(self):
+    #     if not self._context.get('website_id'):
+    #         return super(View, self).get_inheriting_views_arch()
 
-        views = super(View, self.with_context(active_test=False)).get_inheriting_views_arch()
-        # prefer inactive website-specific views over active generic ones
-        return views.filter_duplicate().filtered('active')
+    #     views = super(View, self.with_context(active_test=False)).get_inheriting_views_arch()
+    #     # prefer inactive website-specific views over active generic ones
+    #     return views.filter_duplicate().filtered('active')
 
     @api.model
     def _get_filter_xmlid_query(self):
