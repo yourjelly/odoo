@@ -558,10 +558,8 @@ actual arch.
     # Inheritance mecanism
     #------------------------------------------------------
     @api.model
-    def _get_inheriting_views_arch_domain(self, model):
+    def _get_inheriting_views_arch_domain(self):
         return [
-            ['model', '=', model],
-            ['mode', '=', 'extension'],
             ['active', '=', True],
         ]
 
@@ -587,24 +585,28 @@ actual arch.
         # retrieve all the views transitively inheriting from view_id
         self.flush(['active'])
 
+        domain = self._get_inheriting_views_arch_domain()
+        e = expression(domain, self.env['ir.ui.view'])
+        from_clause, where_clause, where_params = e.query.get_sql()
+
         query = """
 WITH RECURSIVE ir_ui_view_inherits AS (
     SELECT id, inherit_id, priority, model
     FROM ir_ui_view
-    WHERE id=%s AND active=true AND mode='primary'
+    WHERE id=%s AND mode='primary' AND {where_clause}
 UNION
     SELECT iuv.id, iuv.inherit_id, iuv.priority, iuv.model
     FROM ir_ui_view iuv
     INNER JOIN ir_ui_view_inherits iuvi ON iuvi.id = iuv.inherit_id
-    WHERE iuv.model=iuvi.model AND iuv.active=true AND mode='extension'
+    WHERE iuv.model=iuvi.model AND mode='extension' AND {sub_where_clause}
 )
 SELECT
     v.id, v.inherit_id,
     ARRAY(SELECT r.group_id FROM ir_ui_view_group_rel r WHERE r.view_id=v.id)
 FROM ir_ui_view_inherits v
 ORDER BY v.priority, v.id
-"""
-        self.env.cr.execute(query, [self.id])
+""".format(where_clause=where_clause, sub_where_clause=where_clause.replace('ir_ui_view', 'iuv'))
+        self.env.cr.execute(query, [self.id] + where_params + where_params)
 
         results = self.env.cr.fetchall()
         user_groups = set(self.env.user.groups_id.ids)

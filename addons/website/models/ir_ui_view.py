@@ -294,8 +294,8 @@ class View(models.Model):
             return view_id if view_id._name == 'ir.ui.view' else self.env['ir.ui.view']
 
     @api.model
-    def _get_inheriting_views_arch_domain(self, model):
-        domain = super(View, self)._get_inheriting_views_arch_domain(model)
+    def _get_inheriting_views_arch_domain(self):
+        domain = super(View, self)._get_inheriting_views_arch_domain()
         current_website = self.env['website'].browse(self._context.get('website_id'))
         website_views_domain = current_website.website_domain()
         # when rendering for the website we have to include inactive views
