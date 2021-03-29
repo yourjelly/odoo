@@ -1965,9 +1965,9 @@ QUnit.module("ActionManager", (hooks) => {
       assert.expect(5);
       let writeCalls = 0;
       const mockRPC = async (route, { method }) => {
-        if (method === "write") {
-          writeCalls += 1;
-        }
+          if (method === 'write') {
+              writeCalls += 1;
+          }
       };
       const webClient = await createWebClient({ testConfig, mockRPC });
       // execute an action and edit existing record

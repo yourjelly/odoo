@@ -400,6 +400,7 @@ function makeActionManager(env) {
       id: ++id,
       Component: ControllerComponent,
       componentProps: controller.props,
+      controllerJsId: controller.jsId,
     });
     return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
   }

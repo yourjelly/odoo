@@ -18,7 +18,19 @@ Odoo Web core module written in Owl.
     'auto_install': True,
     'data': [
         'views/templates.xml',
+        'views/ent_templates.xml',
+        'views/studio_templates.xml',
     ],
+
+    'qweb': [
+        'static/src/web_studio/legacy/edit_menu/edit_menu.xml',
+        'static/src/web_studio/legacy/xml/*',
+        'static/src/web_studio/client_action/app_creator/app_creator.xml',
+        'static/src/web_studio/client_action/icon_creator/icon_creator.xml',
+        'static/src/web_studio/client_action/model_configurator/model_configurator.xml',
+        'static/src/components/file_input/file_input.xml',
+    ],
+
     'assets': {
         'js': [
             'static/src/**/*',
@@ -42,6 +54,9 @@ Odoo Web core module written in Owl.
             'static/src/webclient/**/*',
             'static/src/env.js',
             'static/tests/**/*',
+
+            'static/src/web_enterprise/**/*',
+            'static/src/web_studio/**/*',
         ],
         'owl_qweb': [
             'static/src/components/**/*',
@@ -53,6 +68,9 @@ Odoo Web core module written in Owl.
             'static/src/webclient/**/*',
             'static/src/errors/**/*',
             'static/src/views/**/*',
+            'static/src/web_enterprise/webclient/navbar/*',
+            'static/src/web_enterprise/**/*',
+            'static/src/web_studio/**/*',
         ],
         'style': [
             'static/src/utils/**/*',
@@ -66,6 +84,11 @@ Odoo Web core module written in Owl.
             'static/src/views/**/*',
             'static/src/errors/**/*',
             'static/src/services/**/*',
+            'static/src/web_enterprise/webclient/burger_menu/**/*',
+
+            'static/src/web_studio/client_action/variables.scss',
+            'static/src/web_studio/client_action/mixins.scss',
+            'static/src/web_studio/**/*',
         ]
     },
 }
