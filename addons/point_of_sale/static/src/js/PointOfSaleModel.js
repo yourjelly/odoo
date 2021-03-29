@@ -174,6 +174,11 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     activeOrderId: false,
                     searchTerm: '',
                 },
+                DebugWidget: {
+                    successfulRequest: true,
+                    successfulCancel: true,
+                    successfulReverse: true,
+                },
             };
         }
         /**

@@ -20,6 +20,7 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
                 isUnpaidOrdersReady: false,
                 buffer: NumberBuffer.get(),
             });
+            this.hasDummyTerminal = this.env.model.data.derived.paymentMethods.find(pm => pm.use_payment_terminal === 'dummy') && true || false;
             // NOTE: Perhaps this can still be improved.
             // What we do here is loop thru the `event` elements
             // then we assign animation that happens when the event is triggered
@@ -179,6 +180,18 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         }
         get bufferRepr() {
             return `"${this.state.buffer}"`;
+        }
+        _onToggleSuccessfulRequest() {
+            this.env.model.data.uiState.DebugWidget.successfulRequest = !this.env.model.data.uiState.DebugWidget.successfulRequest;
+            this.render();
+        }
+        _onToggleSuccessfulCancel() {
+            this.env.model.data.uiState.DebugWidget.successfulCancel = !this.env.model.data.uiState.DebugWidget.successfulCancel;
+            this.render();
+        }
+        _onToggleSuccessfulReverse() {
+            this.env.model.data.uiState.DebugWidget.successfulReverse = !this.env.model.data.uiState.DebugWidget.successfulReverse;
+            this.render();
         }
     }
     DebugWidget.template = 'DebugWidget';
