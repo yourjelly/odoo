@@ -2982,7 +2982,6 @@ var SnippetsMenu = Widget.extend({
         $customizeBlock.append($title);
         $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append($customizeBlock);
-        checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document);
     },
     /**
      * Update editor UI visibility based on the current range.
@@ -3000,7 +2999,10 @@ var SnippetsMenu = Widget.extend({
 
         const selection = this.options.wysiwyg.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
-        if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
+        if (!range ||
+            !$(range.commonAncestorContainer).parents('#wrapwrap').length ||
+            $(range.commonAncestorContainer).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length
+        ) {
             $toolbarContainer.hide();
         } else {
             $toolbarContainer.show();
