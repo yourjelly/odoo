@@ -2,7 +2,7 @@ odoo.define('website_blog.options', function (require) {
 'use strict';
 
 require('web.dom_ready');
-const {qweb, _t} = require('web.core');
+const {_t} = require('web.core');
 const options = require('web_editor.snippets.options');
 require('website.editor.snippets.options');
 
@@ -25,14 +25,16 @@ options.registry.many2one.include({
         var self = this;
         this._super.apply(this, arguments);
         if (this.$target.data('oe-field') === 'author_id') {
-            var $nodes = $('[data-oe-model="blog.post"][data-oe-id="'+this.$target.data('oe-id')+'"][data-oe-field="author_avatar"]');
+            var $nodes = $('[data-oe-model="blog.post"][data-oe-id="' + this.$target.data('oe-id') + '"][data-oe-field="author_avatar"]');
             $nodes.each(function () {
                 var $img = $(this).find('img');
                 var css = window.getComputedStyle($img[0]);
-                $img.css({ width: css.width, height: css.height });
-                $img.attr('src', '/web/image/res.partner/'+self.ID+'/image_1024');
+                $img.css({width: css.width, height: css.height});
+                $img.attr('src', '/web/image/res.partner/' + self.ID + '/image_1024');
             });
-            setTimeout(function () { $nodes.removeClass('o_dirty'); },0);
+            setTimeout(function () {
+                $nodes.removeClass('o_dirty');
+            }, 0);
         }
     }
 });

@@ -152,7 +152,7 @@ Wysiwyg.include({
         return def;
     },
 
-    _insertSnippetMenu: function() {
+    _insertSnippetMenu: function () {
         if (this.options.inIframe) {
             return this.snippetsMenu.appendTo(this.$utilsZone);
         } else {

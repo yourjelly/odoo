@@ -3,7 +3,6 @@ odoo.define('website.tour.public_user_editor_dep_widget', function (require) {
 
 const publicWidget = require('web.public.widget');
 const wysiwygLoader = require('web_editor.loader');
-const ajax = require('web.ajax');
 
 publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({
     selector: 'textarea.o_public_user_editor_test_textarea',

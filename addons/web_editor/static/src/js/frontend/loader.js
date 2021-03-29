@@ -32,7 +32,7 @@ exports.createWysiwyg = async (parent, options, additionnalAssets = []) => {
     await wysiwygPromise;
     const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
     return new Wysiwyg(parent, options);
-}
+};
 
 exports.loadFromTextarea = async (parent, textarea, options) => {
     var loading = textarea.nextElementSibling;
@@ -70,7 +70,7 @@ exports.loadFromTextarea = async (parent, textarea, options) => {
     });
 
     return wysiwyg;
-}
+};
 
 return exports;
 });

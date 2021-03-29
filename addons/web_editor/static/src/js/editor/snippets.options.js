@@ -3572,7 +3572,9 @@ const SnippetOptionWidget = Widget.extend({
     _select: async function (previewMode, widget) {
         let $applyTo = null;
 
-        if (previewMode === true) this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+        if (previewMode === true) {
+            this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+        }
 
         // Call each option method sequentially
         for (const methodName of widget.getMethodsNames()) {
@@ -3593,7 +3595,9 @@ const SnippetOptionWidget = Widget.extend({
             }
         }
 
-        if (previewMode === 'reset' || previewMode === false) this.options.wysiwyg.odooEditor.automaticStepActive('preview_option');
+        if (previewMode === 'reset' || previewMode === false) {
+            this.options.wysiwyg.odooEditor.automaticStepActive('preview_option');
+        }
 
         // We trigger the event on elements targeted by apply-to if any as
         // this.$target could not be in an editable element while the elements

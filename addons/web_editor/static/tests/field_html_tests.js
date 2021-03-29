@@ -652,7 +652,7 @@ QUnit.module('web_editor', {}, function () {
             await testUtils.form.clickEdit(form);
 
             $field = form.$('.oe_form_field[name="body"]');
-            assert.strictEqual($field.find('#iframe_target').length, 0);;
+            assert.strictEqual($field.find('#iframe_target').length, 0);
 
             form.destroy();
         });

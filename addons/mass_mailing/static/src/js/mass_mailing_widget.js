@@ -9,6 +9,7 @@ var convertInline = require('web_editor.convertInline');
 
 var _t = core._t;
 
+
 var MassMailingFieldHtml = FieldHtml.extend({
     xmlDependencies: (FieldHtml.prototype.xmlDependencies || []).concat(["/mass_mailing/static/src/xml/mass_mailing.xml"]),
     jsLibs: [
@@ -68,10 +69,10 @@ var MassMailingFieldHtml = FieldHtml.extend({
             convertInline.classToStyle($editable);
 
             // fix outlook image rendering bug
-            _.each(['width', 'height'], function(attribute) {
-                $editable.find('img[style*="width"], img[style*="height"]').attr(attribute, function(){
+            _.each(['width', 'height'], function (attribute) {
+                $editable.find('img[style*="width"], img[style*="height"]').attr(attribute, function () {
                     return $(this)[attribute]();
-                }).css(attribute, function(){
+                }).css(attribute, function () {
                     return $(this).get(0).style[attribute] || 'auto';
                 });
             });
@@ -139,7 +140,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (!this.value) {
             this.value = this.recordData[this.nodeOptions['inline-field']];
         }
-        return this._super.apply(this, arguments);;
+        return this._super.apply(this, arguments);
     },
     /**
      * @override

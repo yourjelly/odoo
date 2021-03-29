@@ -118,8 +118,8 @@ var RunningTourActionHelper = core.Class.extend({
         var $to;
         var elementCenter = values.
         $element.offset();
-        elementCenter.left += values.$element.outerWidth()/2;
-        elementCenter.top += values.$element.outerHeight()/2;
+        elementCenter.left += values.$element.outerWidth() / 2;
+        elementCenter.top += values.$element.outerHeight() / 2;
         if (to) {
             $to = get_jquery_element_from_selector(to);
         } else {
@@ -134,8 +134,8 @@ var RunningTourActionHelper = core.Class.extend({
                 toCenter.left += iFrameOffset.left;
                 toCenter.top += iFrameOffset.top;
             }
-            toCenter.left += $to.outerWidth()/2;
-            toCenter.top += $to.outerHeight()/2;
+            toCenter.left += $to.outerWidth() / 2;
+            toCenter.top += $to.outerHeight() / 2;
             return toCenter;
         };
 

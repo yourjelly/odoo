@@ -90,7 +90,7 @@ const LinkTools = Widget.extend({
                 'we-selection-items[name="link_style_color"] > we-button',
                 'we-selection-items[name="link_style_size"] > we-button',
                 'we-selection-items[name="link_style_shape"] > we-button',
-            ]
+            ];
             for (const option of this.$(options.join(','))) {
                 const $option = $(option);
                 const value = $option.data('value');
@@ -106,8 +106,8 @@ const LinkTools = Widget.extend({
                 } else {
                     active = !this.data.iniClassName.includes('btn-');
                 }
-                this._setSelectOption($option, active)
-            };
+                this._setSelectOption($option, active);
+            }
         }
         if (this.data.url) {
             var match = /mailto:(.+)/.exec(this.data.url);
@@ -165,7 +165,9 @@ const LinkTools = Widget.extend({
             const label = (data.label && data.label.length) ? data.label : data.url;
             this.$link.html(label);
         }
-        if (createStep) this.options.wysiwyg.odooEditor.historyStep();
+        if (createStep) {
+            this.options.wysiwyg.odooEditor.historyStep();
+        }
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         $links.addClass('oe_edited_link');
     },
@@ -219,7 +221,7 @@ const LinkTools = Widget.extend({
     _getOrCreateLink: function (linkToEdit) {
         this.options.wysiwyg.odooEditor.automaticStepSkipStack();
         const doc = this.editable.ownerDocument;
-        const range = getDeepRange(this.editable, { splitText: true, select: true, correctTripleClick: true });
+        const range = getDeepRange(this.editable, {splitText: true, select: true, correctTripleClick: true});
         this.needLabel = false;
         let link = linkToEdit || getInSelection(doc, 'a');
         const $link = $(link);
@@ -274,7 +276,7 @@ const LinkTools = Widget.extend({
         if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
             url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
         } else if (url.indexOf('@') !== -1 && url.indexOf(':') === -1) {
-            url =  'mailto:' + url;
+            url = 'mailto:' + url;
         } else if (url.indexOf('://') === -1 && url[0] !== '/'
                     && url[0] !== '#' && url.slice(0, 2) !== '${') {
             url = 'http://' + url;

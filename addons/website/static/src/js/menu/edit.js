@@ -110,7 +110,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             self.trigger_up('edition_was_stopped');
             self.destroy();
         };
-        if (!this.wysiwyg.isDirty()) return destroy();
+        if (!this.wysiwyg.isDirty()) {
+            return destroy();
+        }
         return this.wysiwyg.saveContent(false).then((result) => {
             var $wrapwrap = $('#wrapwrap');
             self.editableFromEditorMenu($wrapwrap).removeClass('o_editable');
@@ -259,7 +261,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this.wysiwyg.odooEditor.observerUnactive();
         $('#wrapwrap').on('click.odoo-website-editor', '*', this, this._preventDefault);
         this._addEditorMessages(); // Insert editor messages in the DOM without observing.
-        if (this.options.beforeEditorActive) this.options.beforeEditorActive() ;
+        if (this.options.beforeEditorActive) {
+            this.options.beforeEditorActive();
+        }
         this.wysiwyg.odooEditor.observerActive();
 
         // Observe changes to mark dirty structures and fields.
@@ -273,8 +277,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             for (const record of records) {
                 const $savable = $(record.target).closest(this.savableSelector);
 
-                if (record.attributeName === 'contenteditable') continue;
-                $savable.not('.o_dirty').each(function() {
+                if (record.attributeName === 'contenteditable') {
+                    continue;
+                }
+                $savable.not('.o_dirty').each(function () {
                     const $el = $(this);
                     if (!$el.closest('[data-oe-readonly]').length) {
                         $el.addClass('o_dirty');

@@ -180,7 +180,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 return $(savableSelector)
                     .not('[data-oe-readonly]');
             },
-            beforeEditorActive:  async() => {
+            beforeEditorActive: async () => {
                 var attrs = ['placeholder', 'title', 'alt', 'value'];
                 const $editable = self._getEditableArea();
                 const translationRegex = /<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/;
@@ -284,7 +284,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         var $node = $(node);
         var id = +$node.data('oe-translation-id');
         if (!id) {
-            id = $node.data('oe-model')+','+$node.data('oe-id')+','+$node.data('oe-field');
+            id = $node.data('oe-model') + ',' + $node.data('oe-id') + ',' + $node.data('oe-field');
         }
         var trans = _.find(this.translations, function (trans) {
             return trans.id === id;
@@ -302,7 +302,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         this._getEditableArea().each(function () {
             var $node = $(this);
             var trans = self._getTranlationObject(this);
-            trans.value = (trans.value ? trans.value : $node.html() ).replace(/[ \t\n\r]+/, ' ');
+            trans.value = (trans.value ? trans.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
         });
         this._getEditableArea().prependEvent('click.translator', function (ev) {
             if (ev.ctrlKey || !$(ev.target).is(':o_editable')) {
@@ -319,7 +319,7 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             var translation = $node.data('translation');
             _.each(translation, function (node, attr) {
                 var trans = self._getTranlationObject(node);
-                trans.value = (trans.value ? trans.value : $node.html() ).replace(/[ \t\n\r]+/, ' ');
+                trans.value = (trans.value ? trans.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
                 $node.attr('data-oe-translation-state', (trans.state || 'to_translate'));
             });
         });

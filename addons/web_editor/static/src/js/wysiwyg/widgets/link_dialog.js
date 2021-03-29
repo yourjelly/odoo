@@ -280,7 +280,7 @@ var LinkDialog = Dialog.extend({
         if (url.indexOf('mailto:') === 0 || url.indexOf('tel:') === 0) {
             url = url.replace(/^tel:([0-9]+)$/, 'tel://$1');
         } else if (url.indexOf('@') !== -1 && url.indexOf(':') === -1) {
-            url =  'mailto:' + url;
+            url = 'mailto:' + url;
         } else if (url.indexOf('://') === -1 && url[0] !== '/'
                     && url[0] !== '#' && url.slice(0, 2) !== '${') {
             url = 'http://' + url;

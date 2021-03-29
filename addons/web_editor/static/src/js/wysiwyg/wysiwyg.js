@@ -96,7 +96,7 @@ const Wysiwyg = Widget.extend({
         this.$editable.on(
             'mousedown touchstart',
             '[data-oe-field]',
-            function(e) {
+            function () {
                 const $field = $(this);
                 if (($field.data('oe-type') === "datetime" || $field.data('oe-type') === "date") && !$field.hasClass('o_editable_date_field_format_changed')) {
                     $field.html($field.data('oe-original-with-format'));
@@ -112,15 +112,15 @@ const Wysiwyg = Widget.extend({
             }
         );
 
-        this.$editable.on('click','.o_image, .media_iframe_video', e => e.preventDefault());
+        this.$editable.on('click', '.o_image, .media_iframe_video', e => e.preventDefault());
         this.showTooltip = true;
-        this.$editable.on('dblclick', mediaSelector, function() {
+        this.$editable.on('dblclick', mediaSelector, function () {
             self.showTooltip = false;
             const $el = $(this);
             let params = {node: $el};
             $el.selectElement();
 
-            if( $el.is('.fa')) {
+            if ($el.is('.fa')) {
                 // save layouting classes from icons to not break the page if you edit an icon
                 params.htmlClass = [...$el[0].classList].filter((className) => {
                     return !className.startsWith('fa') || faZoomClassRegex.test(className);
@@ -129,7 +129,7 @@ const Wysiwyg = Widget.extend({
 
             self.openMediaDialog(params);
         });
-        this.$editable.on('dblclick', 'a', function() {
+        this.$editable.on('dblclick', 'a', function () {
             if (!this.getAttribute('data-oe-model') && self.toolbar.$el.is(':visible')) {
                 self.showTooltip = false;
                 self.toggleLinkTools(true, this);
@@ -144,7 +144,7 @@ const Wysiwyg = Widget.extend({
             }, options));
             await this._insertSnippetMenu();
         }
-        if(this.options.getContentEditableAreas) {
+        if (this.options.getContentEditableAreas) {
             $(this.options.getContentEditableAreas()).find('*').off('mousedown mouseup click');
         }
         // The toolbar must be configured after the snippetMenu is loaded
@@ -178,7 +178,7 @@ const Wysiwyg = Widget.extend({
     /**
      * @override
      */
-    renderElement: function() {
+    renderElement: function () {
         this.$editable = this.options.editable || $('<div class="note-editable">');
 
         if (this.options.resizable) {
@@ -210,7 +210,9 @@ const Wysiwyg = Widget.extend({
             this.resizerMousemove = (e) => {
                 const offsetTop = e.pageY - startOffsetTop;
                 let height = startHeight + offsetTop;
-                if (height < minHeight) height = minHeight;
+                if (height < minHeight) {
+                    height = minHeight;
+                }
                 this.$editable.height(height);
             };
             this.resizerMouseup = () => {
@@ -240,12 +242,6 @@ const Wysiwyg = Widget.extend({
      */
     isDirty: function () {
         return this._value !== (this.$editable.html() || this.$editable.val());
-    },
-    /**
-     * Set the focus on the element.
-     */
-    focus: function () {
-        console.log('focus');
     },
     /**
      * Get the value of the editable element.
@@ -414,8 +410,8 @@ const Wysiwyg = Widget.extend({
      * Necessary to keep all copies of a given field at the same value throughout the page.
      */
     _observeOdooFieldChanges: function () {
-        const observerOptions = { characterData:true, subtree: true, childList: true };
-        if(this.odooFieldObservers) {
+        const observerOptions = {characterData: true, subtree: true, childList: true};
+        if (this.odooFieldObservers) {
             for (let observerData of this.odooFieldObservers) {
                 observerData.observer.observe(observerData.field, observerOptions);
             }
@@ -426,47 +422,62 @@ const Wysiwyg = Widget.extend({
 
             $odooFields.each((i, field) => {
                 const observer = new MutationObserver(() => {
-                    let $node = $(field)
-                    let $nodes = $odooFields.filter(function () { return this !== field;});
+                    let $node = $(field);
+                    let $nodes = $odooFields.filter(function () {
+                        return this !== field;
+                    });
                     if ($node.data('oe-model')) {
-                        $nodes = $nodes.filter('[data-oe-model="'+$node.data('oe-model')+'"]')
-                            .filter('[data-oe-id="'+$node.data('oe-id')+'"]')
-                            .filter('[data-oe-field="'+$node.data('oe-field')+'"]');
+                        $nodes = $nodes.filter('[data-oe-model="' + $node.data('oe-model') + '"]')
+                            .filter('[data-oe-id="' + $node.data('oe-id') + '"]')
+                            .filter('[data-oe-field="' + $node.data('oe-field') + '"]');
                     }
 
-                    if ($node.data('oe-translation-id')) $nodes = $nodes.filter('[data-oe-translation-id="'+$node.data('oe-translation-id')+'"]');
-                    if ($node.data('oe-type')) $nodes = $nodes.filter('[data-oe-type="'+$node.data('oe-type')+'"]');
-                    if ($node.data('oe-expression')) $nodes = $nodes.filter('[data-oe-expression="'+$node.data('oe-expression')+'"]');
-                    else if ($node.data('oe-xpath')) $nodes = $nodes.filter('[data-oe-xpath="'+$node.data('oe-xpath')+'"]');
-                    if ($node.data('oe-contact-options')) $nodes = $nodes.filter("[data-oe-contact-options='"+$node[0].dataset.oeContactOptions+"']");
+                    if ($node.data('oe-translation-id')) {
+                        $nodes = $nodes.filter('[data-oe-translation-id="' + $node.data('oe-translation-id') + '"]');
+                    }
+                    if ($node.data('oe-type')) {
+                        $nodes = $nodes.filter('[data-oe-type="' + $node.data('oe-type') + '"]');
+                    }
+                    if ($node.data('oe-expression')) {
+                        $nodes = $nodes.filter('[data-oe-expression="' + $node.data('oe-expression') + '"]');
+                    } else if ($node.data('oe-xpath')) {
+                        $nodes = $nodes.filter('[data-oe-xpath="' + $node.data('oe-xpath') + '"]');
+                    }
+                    if ($node.data('oe-contact-options')) {
+                        $nodes = $nodes.filter("[data-oe-contact-options='" + $node[0].dataset.oeContactOptions + "']");
+                    }
 
                     let nodes = $node.get();
 
                     if ($node.data('oe-type') === "many2one") {
                         $nodes = $nodes.add($('[data-oe-model]')
-                            .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
-                            .filter('[data-oe-many2one-model="'+$node.data('oe-many2one-model')+'"]')
-                            .filter('[data-oe-many2one-id="'+$node.data('oe-many2one-id')+'"]')
+                            .filter(function () {
+                                return this !== $node[0] && nodes.indexOf(this) === -1;
+                            })
+                            .filter('[data-oe-many2one-model="' + $node.data('oe-many2one-model') + '"]')
+                            .filter('[data-oe-many2one-id="' + $node.data('oe-many2one-id') + '"]')
                             .filter('[data-oe-type="many2one"]'));
 
                         $nodes = $nodes.add($('[data-oe-model]')
-                            .filter(function () { return this !== $node[0] && nodes.indexOf(this) === -1; })
-                            .filter('[data-oe-model="'+$node.data('oe-many2one-model')+'"]')
-                            .filter('[data-oe-id="'+$node.data('oe-many2one-id')+'"]')
+                            .filter(function () {
+                                return this !== $node[0] && nodes.indexOf(this) === -1;
+                            })
+                            .filter('[data-oe-model="' + $node.data('oe-many2one-model') + '"]')
+                            .filter('[data-oe-id="' + $node.data('oe-many2one-id') + '"]')
                             .filter('[data-oe-field="name"]'));
                     }
 
                     this._pauseOdooFieldObservers();
                     // Tag the date fields to only replace the value
                     // with the original date value once (see mouseDown event)
-                    if($node.hasClass('o_editable_date_field_format_changed')) {
+                    if ($node.hasClass('o_editable_date_field_format_changed')) {
                         $nodes.addClass('o_editable_date_field_format_changed');
                     }
                     $nodes.html($node.html());
                     this._observeOdooFieldChanges();
                 });
                 observer.observe(field, observerOptions);
-                this.odooFieldObservers.push({ field: field, observer: observer });
+                this.odooFieldObservers.push({field: field, observer: observer});
             });
         }
     },
@@ -514,7 +525,7 @@ const Wysiwyg = Widget.extend({
             }
             if (forceOpen || !this.linkTools) {
                 const $btn = this.toolbar.$el.find('#create-link');
-                this.linkTools = new weWidgets.LinkTools(this, { wysiwyg: this }, this.odooEditor.editable, $btn, link);
+                this.linkTools = new weWidgets.LinkTools(this, {wysiwyg: this}, this.odooEditor.editable, $btn, link);
                 this.linkTools.appendTo(this.toolbar.$el);
             } else {
                 this.linkTools = undefined;
@@ -558,8 +569,8 @@ const Wysiwyg = Widget.extend({
                     }
                     range.selectNode(anchor);
                     range.collapse();
-                };
-                getDeepRange(this.odooEditor.editable, { range, select: true });
+                }
+                getDeepRange(this.odooEditor.editable, {range, select: true});
             });
         }
     },
@@ -574,7 +585,9 @@ const Wysiwyg = Widget.extend({
      */
     openMediaDialog(params = {}) {
         const sel = this.odooEditor.document.getSelection();
-        if (!sel.rangeCount) return;
+        if (!sel.rangeCount) {
+            return;
+        }
         const range = sel.getRangeAt(0);
         // We lose the current selection inside the content editable when we
         // click the media dialog button so we need to be able to restore the
@@ -596,7 +609,7 @@ const Wysiwyg = Widget.extend({
         const mediaDialog = new weWidgets.MediaDialog(this, mediaParams, $node);
         mediaDialog.open();
 
-        mediaDialog.on('save', this, function(element) {
+        mediaDialog.on('save', this, function (element) {
             // restore saved html classes
             if (params.htmlClass) {
                 element.className += " " + params.htmlClass;
@@ -610,10 +623,12 @@ const Wysiwyg = Widget.extend({
                 this.odooEditor.execCommand('insertHTML', element.outerHTML);
             }
         });
-        mediaDialog.on('closed', this,  function() {
+        mediaDialog.on('closed', this, function () {
             // if the mediaDialog content has been saved
             // the previous selection in not relevant anymore
-            if (mediaDialog.destroyAction !== 'save') {restoreSelection();}
+            if (mediaDialog.destroyAction !== 'save') {
+                restoreSelection();
+            }
         });
     },
     //--------------------------------------------------------------------------
@@ -641,27 +656,35 @@ const Wysiwyg = Widget.extend({
         };
         $toolbar.find('#create-link, #media-insert, #media-replace, #media-description').click(openTools);
         $toolbar.find('#image-shape div, #fa-spin').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             this.lastMediaClicked.classList.toggle(e.target.id);
             e.target.classList.toggle('active', $(this.lastMediaClicked).hasClass(e.target.id));
         });
         const $imageWidthButtons = $toolbar.find('#image-width div');
         $imageWidthButtons.click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             this.lastMediaClicked.style.width = e.target.id;
             for (const button of $imageWidthButtons) {
                 button.classList.toggle('active', this.lastMediaClicked.style.width === button.id);
             }
         });
         $toolbar.find('#image-padding .dropdown-item').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             $(this.lastMediaClicked).removeClass((index, className) => (
                 (className.match(/(^|\s)padding-\w+/g) || []).join(' ')
             )).addClass(e.target.dataset.class);
         });
         $toolbar.on('mousedown', e => {
             const justifyBtn = e.target.closest('#justify div.btn');
-            if (!justifyBtn || !this.lastMediaClicked) return;
+            if (!justifyBtn || !this.lastMediaClicked) {
+                return;
+            }
             e.originalEvent.stopImmediatePropagation();
             e.originalEvent.stopPropagation();
             e.originalEvent.preventDefault();
@@ -678,11 +701,15 @@ const Wysiwyg = Widget.extend({
             this._updateMediaJustifyButton(justifyBtn.id);
         });
         $toolbar.find('#image-crop').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             new weWidgets.ImageCropWidget(this, this.lastMediaClicked).appendTo(this.$editable);
         });
         $toolbar.find('#image-transform').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             const $image = $(this.lastMediaClicked);
             if ($image.data('transfo-destroy')) {
                 $image.removeData('transfo-destroy');
@@ -706,17 +733,21 @@ const Wysiwyg = Widget.extend({
             $(this.odooEditor.document).on('mousedown', mousedown);
         });
         $toolbar.find('#image-delete').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             $(this.lastMediaClicked).remove();
             this.lastMediaClicked = undefined;
         });
         $toolbar.find('#fa-resize div').click(e => {
-            if (!this.lastMediaClicked) return;
+            if (!this.lastMediaClicked) {
+                return;
+            }
             const $target = $(this.lastMediaClicked);
             const sValue = e.target.dataset.value;
             $target.attr('class', $target.attr('class').replace(/\s*fa-[0-9]+x/g, ''));
             if (+sValue > 1) {
-                $target.addClass('fa-'+sValue+'x');
+                $target.addClass('fa-' + sValue + 'x');
             }
             this._updateFaResizeButtons();
         });
@@ -796,7 +827,7 @@ const Wysiwyg = Widget.extend({
                 });
                 return false;
             });
-        };
+        }
     },
     _processAndApplyColor: function (eventName, color) {
         if (!color) {
@@ -818,7 +849,7 @@ const Wysiwyg = Widget.extend({
             if (color.startsWith('rgb')) {
                 rgbColor = color;
             } else {
-                const $font = $(`<font class="${color}"/>`)
+                const $font = $(`<font class="${color}"/>`);
                 $(document.body).append($font);
                 const propertyName = color.startsWith('text') ? 'color' : 'backgroundColor';
                 rgbColor = $font.css(propertyName);
@@ -845,7 +876,7 @@ const Wysiwyg = Widget.extend({
         const selection = this.odooEditor.document.getSelection();
         const range = selection.rangeCount && selection.getRangeAt(0);
         const $rangeContainer = range && $(range.commonAncestorContainer);
-        const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length
+        const spansBlocks = range && !!$rangeContainer.contents().filter((i, node) => isBlock(node)).length;
         this.toolbar.$el.find('#create-link').toggleClass('d-none', !range || spansBlocks);
         // Only show the media tools in the toolbar if the current selected
         // snippet is a media.
@@ -938,7 +969,9 @@ const Wysiwyg = Widget.extend({
         }
     },
     _updateMediaJustifyButton: function (commandState) {
-        if (!this.lastMediaClicked) return;
+        if (!this.lastMediaClicked) {
+            return;
+        }
         const $paragraphDropdownButton = this.toolbar.$el.find('#paragraphDropdownButton, #mediaParagraphDropdownButton');
         // Change the ID to prevent OdooEditor from controlling it as this is
         // custom behavior for media.
@@ -975,7 +1008,9 @@ const Wysiwyg = Widget.extend({
         }
     },
     _updateFaResizeButtons: function () {
-        if (!this.lastMediaClicked) return;
+        if (!this.lastMediaClicked) {
+            return;
+        }
         const $buttons = this.toolbar.$el.find('#fa-resize div');
         const match = this.lastMediaClicked.className.match(/\s*fa-([0-9]+)x/);
         const value = match && match[1] ? match[1] : '1';
@@ -985,7 +1020,7 @@ const Wysiwyg = Widget.extend({
     },
     _editorOptions: function () {
         var self = this;
-        var options = Object.assign({},  this.defaultOptions, this.options);
+        var options = Object.assign({}, this.defaultOptions, this.options);
         if (this.options.generateOptions) {
             options = this.options.generateOptions(options);
         }
@@ -1005,7 +1040,7 @@ const Wysiwyg = Widget.extend({
         };
         return options;
     },
-    _insertSnippetMenu: function() {
+    _insertSnippetMenu: function () {
         return this.snippetsMenu.insertBefore(this.$el);
     },
     /**
@@ -1127,7 +1162,6 @@ const Wysiwyg = Widget.extend({
         return Promise.all(defs).then(function () {
             window.onbeforeunload = null;
         }).guardedCatch((failed) => {
-            console.log(failed)
             // If there were errors, re-enable edition
             this.cancel();
             this.start();
@@ -1140,7 +1174,7 @@ const Wysiwyg = Widget.extend({
                 selector: '[data-oe-readonly]',
                 container: 'body',
                 trigger: 'hover',
-                delay: { 'show': 1000, 'hide': 100 },
+                delay: {'show': 1000, 'hide': 100},
                 placement: 'bottom',
                 title: _t("Readonly field")
             })
@@ -1210,7 +1244,7 @@ const Wysiwyg = Widget.extend({
         } else {
             window.location.reload(true);
         }
-        return new Promise(function(){});
+        return new Promise(function () {});
     },
     _onDocumentMousedown: function (e) {
         if (e.target.closest('.oe-toolbar')) {
@@ -1250,7 +1284,7 @@ Wysiwyg.getRange = function (ownerDocument) {
             so: 0,
             ec: null,
             eo: 0,
-        }
+        };
     }
     const range = selection.getRangeAt(0);
 

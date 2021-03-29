@@ -8,7 +8,7 @@ function getIntermediateNodes(rootNode) {
     const nodes = [];
     for (const node of rootNode.childNodes) {
         nodes.push(node);
-        nodes.push(...getIntermediateNodes(node))
+        nodes.push(...getIntermediateNodes(node));
     }
     return nodes;
 }

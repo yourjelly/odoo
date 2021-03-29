@@ -3,7 +3,6 @@ odoo.define('web_editor.field.html', function (require) {
 
 var ajax = require('web.ajax');
 var basic_fields = require('web.basic_fields');
-var config = require('web.config');
 var core = require('web.core');
 var wysiwygLoader = require('web_editor.loader');
 var field_registry = require('web.field_registry');
@@ -156,7 +155,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {$.Promise}
      */
     _createWysiwygIntance: async function () {
-        if (this.cssReadonly) return;
+        if (this.cssReadonly) {
+            return;
+        }
         this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
         this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
         return this.wysiwyg.appendTo(this.$el).then(() => {
@@ -183,7 +184,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             iframeCssAssets: this.nodeOptions.cssEdit,
             snippets: this.nodeOptions.snippets,
             value: this.value,
-            mediaModalParams: { noVideos: true },
+            mediaModalParams: {noVideos: true},
             linkForceNewWindow: true,
 
             tabsize: 0,
