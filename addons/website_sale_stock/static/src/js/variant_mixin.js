@@ -6,10 +6,11 @@ var publicWidget = require('web.public.widget');
 var ajax = require('web.ajax');
 var core = require('web.core');
 var QWeb = core.qweb;
-var xml_load = ajax.loadXML(
-    '/website_sale_stock/static/src/xml/website_sale_stock_product_availability.xml',
-    QWeb
-);
+
+const loadXml = async () => {
+    return ajax.loadXML('/website_sale_stock/static/src/xml/website_sale_stock_product_availability.xml', QWeb);
+};
+
 require('website_sale.website_sale');
 
 /**
@@ -63,7 +64,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
         }
     }
 
-    xml_load.then(function () {
+    loadXml().then(function (result) {
         $('.oe_website_sale')
             .find('.availability_message_' + combination.product_template)
             .remove();
