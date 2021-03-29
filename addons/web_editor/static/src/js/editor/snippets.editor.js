@@ -515,13 +515,15 @@ var SnippetEditor = Widget.extend({
      * @param {boolean} show
      */
     toggleOptions: function (show) {
-        const makeToolbarVisible = checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document);
-        if (!makeToolbarVisible && (!this.$el || this.areOptionsShown() === show)) {
+        if (!this.$el) {
+            return;
+        }
+
+        if (this.areOptionsShown() === show) {
             return;
         }
         this.trigger_up('update_customize_elements', {
             customize$Elements: show ? this._customize$Elements : [],
-            tab: makeToolbarVisible ? 'options' : undefined,
         });
         this._customize$Elements.forEach(($el, i) => {
             const editor = $el.data('editor');
@@ -1037,38 +1039,6 @@ var SnippetEditor = Widget.extend({
     },
 });
 
-
-/**
- * Update editor UI visibility based on the current range.
- *
- * @param {Document} doc
- * @param {Event} [e]
- */
-function checkEditorToolbarVisibility (doc, e) {
-    const $toolbarContainer = $('#o_we_editor_toolbar_container');
-    const docSelection = document.getSelection();
-    const $currentSelectionTarget = docSelection.rangeCount > 0 ? $(docSelection.getRangeAt(0).commonAncestorContainer) : $();
-    // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
-    if ($currentSelectionTarget.parents('#toolbar').length ||
-        (e && $(e.target).parents('#toolbar').length)
-    ) {
-        return false;
-    }
-
-    const selection = doc.getSelection();
-    const range = selection.rangeCount && selection.getRangeAt(0);
-    if (!range ||
-        !$(range.commonAncestorContainer).parents('#wrapwrap').length ||
-        $(range.commonAncestorContainer).parent('[data-oe-model]:not([data-oe-type="html"]):not([data-oe-field="arch"])').length
-    ) {
-        $toolbarContainer.hide();
-        return false;
-    } else {
-        $toolbarContainer.show();
-        return true;
-    }
-}
-
 /**
  * Management of drag&drop menu and snippet related behaviors in the page.
  */
@@ -1194,6 +1164,8 @@ var SnippetsMenu = Widget.extend({
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
         this._addToolbar();
+        this._checkEditorToolbarVisibilityCallback = this._checkEditorToolbarVisibility.bind(this)
+        $(document.body).on('click', this._checkEditorToolbarVisibilityCallback);
 
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
@@ -1237,7 +1209,7 @@ var SnippetsMenu = Widget.extend({
         var lastElement;
         this.$document.on('click.snippets_menu', '*', ev => {
             var srcElement = ev.target || (ev.originalEvent && (ev.originalEvent.target || ev.originalEvent.originalTarget)) || ev.srcElement;
-            if (!srcElement || lastElement === srcElement && !checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document, ev)) {
+            if (!srcElement || lastElement === srcElement) {
                 return;
             }
             lastElement = srcElement;
@@ -1410,6 +1382,7 @@ var SnippetsMenu = Widget.extend({
             this.$scrollingElement && this.$scrollingElement[0].removeEventListener('scroll', this._onScrollingElementScroll, {capture: true});
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
+        $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
         delete this.cacheSnippetTemplate[this.options.snippets];
     },
 
@@ -1484,8 +1457,7 @@ var SnippetsMenu = Widget.extend({
             });
         }
         this._mutex.exec(() => {
-            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length &&
-                !checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document)) {
+            if (this._currentTab === this.tabs.OPTIONS && !this.snippetEditors.length) {
                 this._activateEmptyOptionsTab();
             }
         });
@@ -1769,9 +1741,6 @@ var SnippetsMenu = Widget.extend({
                 }
 
                 this._enabledEditorHierarchy = editorToEnableHierarchy;
-                if (!editorToEnable && checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document)) {
-                    this._updateRightPanelContent({ content: [], tab: this.tabs.OPTIONS });
-                }
                 return editorToEnable;
             });
         });
@@ -2951,12 +2920,15 @@ var SnippetsMenu = Widget.extend({
     },
     /**
      * @private
+     */
+    /**
+     * @private
      * @param {OdooEvent} ev
      */
     _onUpdateCustomizeElements: function (ev) {
         this._updateRightPanelContent({
             content: ev.data.customize$Elements,
-            tab: ev.data.tab || ev.data.customize$Elements.length ? this.tabs.OPTIONS : this.tabs.BLOCKS,
+            tab: ev.data.customize$Elements.length ? this.tabs.OPTIONS : this.tabs.BLOCKS,
         });
     },
     /**
@@ -3011,6 +2983,28 @@ var SnippetsMenu = Widget.extend({
         $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append($customizeBlock);
         checkEditorToolbarVisibility(this.options.wysiwyg.odooEditor.document);
+    },
+    /**
+     * Update editor UI visibility based on the current range.
+     */
+    _checkEditorToolbarVisibility: function (e) {
+        const $toolbarContainer = $('#o_we_editor_toolbar_container');
+        const docSelection = document.getSelection();
+        const $currentSelectionTarget = docSelection.rangeCount > 0 ? $(docSelection.getRangeAt(0).commonAncestorContainer) : $();
+        // Do not  toggle visibility if the target is inside the toolbar ( eg. during link edition).
+        if ($currentSelectionTarget.parents('#toolbar').length ||
+            (e && $(e.target).parents('#toolbar').length)
+        ) {
+            return;
+        }
+
+        const selection = this.options.wysiwyg.odooEditor.document.getSelection();
+        const range = selection.rangeCount && selection.getRangeAt(0);
+        if (!range || !$(range.commonAncestorContainer).parents('#wrap').length) {
+            $toolbarContainer.hide();
+        } else {
+            $toolbarContainer.show();
+        }
     },
     /**
      * On click on discard button.
