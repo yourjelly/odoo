@@ -43,10 +43,12 @@ MOVABLE_BRANDING = ['data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-xpa
 def transfer_field_to_modifiers(field, modifiers):
     default_values = {}
     state_exceptions = {}
+
     for attr in ('invisible', 'readonly', 'required'):
         state_exceptions[attr] = []
-        default_values[attr] = bool(field.get(attr))
-    for state, modifs in field.get("states", {}).items():
+        default_values[attr] = bool(getattr(field, attr))
+
+    for state, modifs in (field.states or {}).items():
         for modif in modifs:
             if default_values[modif[0]] != modif[1]:
                 state_exceptions[modif[0]].append(state)
@@ -54,11 +56,11 @@ def transfer_field_to_modifiers(field, modifiers):
     for attr, default_value in default_values.items():
         if state_exceptions[attr]:
             modifiers[attr] = [("state", "not in" if default_value else "in", state_exceptions[attr])]
-        else:
+        elif default_value:
             modifiers[attr] = default_value
 
 
-def transfer_node_to_modifiers(node, modifiers, context=None, current_node_path=None):
+def transfer_node_to_modifiers(node, modifiers, context=None):
     # Don't deal with groups, it is done by check_group().
     # Need the context to evaluate the invisible attribute on tree views.
     # For non-tree views, the context shouldn't be given.
@@ -76,12 +78,7 @@ def transfer_node_to_modifiers(node, modifiers, context=None, current_node_path=
     for a in ('invisible', 'readonly', 'required'):
         if node.get(a):
             v = bool(safe_eval.safe_eval(node.get(a), {'context': context or {}}))
-            node_path = current_node_path or ()
-            if 'tree' in node_path and 'header' not in node_path and a == 'invisible':
-                # Invisible in a tree view has a specific meaning, make it a
-                # new key in the modifiers attribute.
-                modifiers['column_invisible'] = v
-            elif v or (a not in modifiers or not isinstance(modifiers[a], list)):
+            if v or (a not in modifiers or not isinstance(modifiers[a], list)):
                 # Don't set the attribute to False if a dynamic value was
                 # provided (i.e. a domain from attrs or states).
                 modifiers[a] = v
@@ -818,12 +815,12 @@ ORDER BY v.priority, v.id
                 node.getparent().remove(node)
                 return
 
-            # node_info['editable'] = node_info['editable'] and field.is_editable() and (
-            #     node.get('readonly') not in ('1', 'True')
-            #     or get_dict_asts(node.get('attrs') or "{}")
-            # )
+            modifiers = {}
+            transfer_field_to_modifiers(field, modifiers)
+            if modifiers:
+                transfer_node_to_modifiers(node, modifiers, self._context)
+                transfer_modifiers_to_node(modifiers, node)
 
-            
             if field.comodel_name:
                 model = self.env[field.comodel_name]
 
@@ -834,7 +831,6 @@ ORDER BY v.priority, v.id
                 node.set('can_create', 'true' if can_create else 'false')
                 node.set('can_write', 'true' if can_write else 'false')
 
-            # transfer_field_to_modifiers(field, node_info['modifiers'])
             for child in node:
                 _parse(model, child)
 
@@ -868,8 +864,6 @@ ORDER BY v.priority, v.id
                     if not node.get('on_change'):
                         node.set('on_change', '1')
 
-        # transfer_node_to_modifiers(node, node_info['modifiers'], self._context, current_node_path)
-        # transfer_modifiers_to_node(node_info['modifiers'], node)
         return fields
 
 
