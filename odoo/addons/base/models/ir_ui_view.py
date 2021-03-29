@@ -823,7 +823,7 @@ ORDER BY v.priority, v.id
                 for node in nodes:
                     if not node.get('on_change'):
                         node.set('on_change', '1')
-        return field_nodes.keys()
+        return {field.name: {} for field in field_nodes if field.model_name==model_name}
 
 
     def _postprocess_view(self, node, model, validate=True, editable=True):
