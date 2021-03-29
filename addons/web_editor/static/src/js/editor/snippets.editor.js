@@ -2982,6 +2982,7 @@ var SnippetsMenu = Widget.extend({
         $customizeBlock.append($title);
         $customizeBlock.append(this.options.wysiwyg.toolbar.$el);
         $(this.customizePanel).append($customizeBlock);
+        this._checkEditorToolbarVisibility();
     },
     /**
      * Update editor UI visibility based on the current range.
