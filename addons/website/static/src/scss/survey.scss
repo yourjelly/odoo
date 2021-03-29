@@ -10,8 +10,11 @@
         }
 
         @keyframes theme_screenshot_scroll {
-            from { background-position: center top}
-            to   { background-position: center bottom}
+            to { transform: translate3d(0, -24%, 0)}
+        }
+
+        @keyframes theme_screenshot_scroll_small {
+            to { transform: translate3d(0, -31.5%, 0)}
         }
 
         // ==== General Components
@@ -37,7 +40,7 @@
 
             @include media-breakpoint-up(xl) {
                 font-size: 40px;
-            }   
+            }
         }
 
         @for $i from 1 through 6 {
@@ -154,7 +157,7 @@
                             color: $dropdown-link-color;
                         }
                     }
-                }   
+                }
             }
         }
 
@@ -217,8 +220,14 @@
         }
 
         &.o_theme_selection_screen{
-            .theme_screenshot, .button_area {
+            .button_area, .theme_svg_container {
                 @include o-position-absolute(0, 0, 0, 0);
+            }
+
+            .theme_svg_container svg {
+                width: 100%;
+                height: auto;
+                transform: translate3d(0,0,0);
             }
 
             .button_area {
@@ -231,37 +240,41 @@
             }
 
             .theme_preview {
+                padding-top: 65%;
                 box-shadow: $box-shadow-sm;
                 transform: translate3d(0,0,0);
                 transition: all .3s ease 0s;
 
                 @include media-breakpoint-up(lg) {
+                    padding-top: 200%;
 
                     &:hover {
                         transform: translateY(-10px);
                     }
 
-                }
-
-                .theme_screenshot {
-                    background-size: cover;
-                    background-position: center top;
+                    &.small {
+                        padding-top: 180%;
+                    }
                 }
 
                 &:hover {
                     box-shadow: $box-shadow;
 
-                    .theme_screenshot {
-                        animation: theme_screenshot_scroll 4s cubic-bezier(0.455, 0.030, 0.515, 0.955) 0s infinite alternate;
+                    .theme_svg_container svg {
+                        animation: theme_screenshot_scroll 4s cubic-bezier(0.455, 0.030, 0.515, 0.955) .1s infinite alternate;
+                    }
+
+                    &.small .theme_svg_container svg {
+                        animation-name: theme_screenshot_scroll_small;
+                        animation-duration: 5s;
                     }
 
                     .button_area {
-                        @extend .o_survey_show;
+                        @extend .o_survey_show_fast;
                         animation-fill-mode: forwards;
                     }
                 }
             }
-
         }
     }
 }
