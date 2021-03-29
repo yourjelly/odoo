@@ -793,37 +793,86 @@ ORDER BY v.priority, v.id
         return arch, name_manager.available_fields
 
     @api.model
-    def _get_fields(self, model_name, arch):
-        """ Add attribute on_change="1" on fields that are dependencies of
-            computed fields on the same view.
-        """
-        # map each field object to its corresponding nodes in arch
+    def _view_process(self, model, node):
         field_nodes = collections.defaultdict(list)
+        fields = {}
 
-        def collect(node, model):
-            if node.tag == 'field':
-                field = model._fields.get(node.get('name'))
-                if field:
-                    if field.groups and not self.user_has_groups(groups=field.groups):
-                        node.getparent().remove(node)
-                        return
-                    field_nodes[field].append(node)
-                    if field.relational:
-                        model = self.env[field.comodel_name]
+        def _tag_form(model, node):
+            title = model.view_header_get(False, 'form')
+            if title:
+                node.set('string', title)
+
+        def _tag_label(model, node):
+            field = model._fields.get(node.get('for'))
+            if field and field.groups and not self.user_has_groups(groups=field.groups):
+                node.getparent().remove(node)
+
+        def _tag_field(model, node):
+            attrs = {key: node.get(key) for key in ('id', 'select') if node.get(key)}
+            fields[node.get('name')] = attrs
+            field = model._fields.get(node.get('name'))
+            field_nodes[field].append(node)
+
+            # if a group is set on a field, remove it from the view if user has no rights
+            if field.groups and not self.user_has_groups(groups=field.groups):
+                node.getparent().remove(node)
+                return
+
+            # node_info['editable'] = node_info['editable'] and field.is_editable() and (
+            #     node.get('readonly') not in ('1', 'True')
+            #     or get_dict_asts(node.get('attrs') or "{}")
+            # )
+
+            
+            if field.comodel_name:
+                model = self.env[field.comodel_name]
+
+            # node_info['attr_model'] = comodel
+            if field.type in ('many2one', 'many2many'):
+                can_create = model.check_access_rights('create', raise_exception=False)
+                can_write = model.check_access_rights('write', raise_exception=False)
+                node.set('can_create', 'true' if can_create else 'false')
+                node.set('can_write', 'true' if can_write else 'false')
+
+            # transfer_field_to_modifiers(field, node_info['modifiers'])
             for child in node:
-                collect(child, model)
+                _parse(model, child)
 
-        collect(arch, self.env[model_name])
 
+        def _parse(model, node):
+            tag = node.tag
+            if node.get('groups'):
+                if not self.user_has_groups(groups=node.get('groups')):
+                    node.set('invisible', '1')
+                    if 'attrs' in node.attrib:
+                        del node.attrib['attrs']
+                del node.attrib['groups']
+            if tag == 'form':
+                _tag_form(model, node)
+
+            if tag == 'label' and node.get('for'):
+                _tag_label(model, node)
+            if tag == 'field' and node.get('name'):
+                _tag_field(model, node)
+            else:
+                for child in node:
+                    _parse(model, child)
+
+        _parse(model, node)
+
+        # Apply on change on nodes referring to fields
         for field, nodes in field_nodes.items():
-            # if field should trigger an onchange, add on_change="1" on the
-            # nodes referring to field
             model = self.env[field.model_name]
             if model._has_onchange(field, field_nodes):
                 for node in nodes:
                     if not node.get('on_change'):
                         node.set('on_change', '1')
-        return {field.name: {} for field in field_nodes if field.model_name==model_name}
+
+        # transfer_node_to_modifiers(node, node_info['modifiers'], self._context, current_node_path)
+        # transfer_modifiers_to_node(node_info['modifiers'], node)
+        return fields
+
+
 
 
     def _postprocess_view(self, node, model, validate=True, editable=True):

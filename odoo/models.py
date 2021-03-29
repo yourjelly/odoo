@@ -1631,7 +1631,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 view_id = self.env['ir.ui.view'].default_view(self._name, view_type)
 
         node = self._fields_view_get(view_id, view_type)
-        fields = self.env['ir.ui.view']._get_fields(self._name, node)
+        fields = self.env['ir.ui.view']._view_process(self, node)
         view = self.env['ir.ui.view'].sudo().browse(view_id)
 
         # Get the view arch and all other attributes describing the composition of the view
