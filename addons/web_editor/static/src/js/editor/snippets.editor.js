@@ -1689,7 +1689,12 @@ var SnippetsMenu = Widget.extend({
         // It is important to do that before the mutex exec call to compute it
         // before potential ancestor removal.
         if ($snippet && $snippet.length) {
-            $snippet = globalSelector.closest($snippet);
+            const $globalSnippet = globalSelector.closest($snippet);
+            if (!$globalSnippet.length) {
+                $snippet = $snippet.closest('[data-oe-model="ir.ui.view"]:not([data-oe-type]):not(.oe_structure), [data-oe-type="html"]:not(.oe_structure)');
+            } else {
+                $snippet = $globalSnippet;
+            }
         }
         const exec = previewMode
             ? action => this._mutex.exec(action)
