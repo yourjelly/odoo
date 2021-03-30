@@ -50,7 +50,7 @@ class Http(models.AbstractModel):
             # with access to the backend ('internal'-type users)
             mods = odoo.conf.server_wide_modules or []
             if request.db:
-                mods = request.registry._init_modules + mods
+                mods = request.registry._init_modules | set(mods)
             qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(debug=request.session.debug)
             lang = user_context.get("lang")
             translation_hash = request.env['ir.translation'].get_web_translations_hash(mods, lang)

@@ -97,12 +97,12 @@ class AddonManifestPatched(TransactionCase):
     def setUp(self):
         super().setUp()
         self.__genuine_registry_modules = self.env.registry._init_modules
-        self.env.registry._init_modules = func.lazy(lambda: self.installed_modules)
+        self.env.registry._init_modules = func.lazy(lambda: set(self.installed_modules))
 
         self.__genuine_addons_manifest = http.addons_manifest
         http.addons_manifest = func.lazy(lambda: self.manifests)
 
-        self.installed_modules = ['test_assetsbundle']
+        self.installed_modules = ['base', 'test_assetsbundle']
         self.manifests = {
             'test_assetsbundle': self.test_assetsbundle_manifest,
         }

@@ -951,7 +951,7 @@ class WebClient(http.Controller):
         if mods is None:
             mods = odoo.conf.server_wide_modules or []
             if request.db:
-                mods = request.env.registry._init_modules + mods
+                mods = request.env.registry._init_modules | set(mods)
 
         translations_per_module = {}
         for addon_name in mods:
@@ -981,7 +981,7 @@ class WebClient(http.Controller):
         if mods:
             mods = mods.split(',')
         elif mods is None:
-            mods = request.env.registry._init_modules + (odoo.conf.server_wide_modules or [])
+            mods = request.env.registry._init_modules | set(odoo.conf.server_wide_modules or [])
 
         translations_per_module, lang_params = request.env["ir.translation"].get_translations_for_webclient(mods, lang)
 
@@ -1211,7 +1211,7 @@ class Session(http.Controller):
     @http.route('/web/session/modules', type='json', auth="user")
     def modules(self):
         # return all installed modules. Web client is smart enough to not load a module twice
-        return self.env.registry._init_modules + ([module.current_test] if module.current_test else [])
+        return self.env.registry._init_modules | set([module.current_test] if module.current_test else [])
 
     @http.route('/web/session/save_session_action', type='json', auth="user")
     def save_session_action(self, the_action):

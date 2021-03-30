@@ -264,7 +264,6 @@ class IrAsset(models.Model):
 
     @ormcache('addons_tuple')
     def _topological_sort(self, addons_tuple):
-        print('LPE PRRRRROOOUTTT')
         mods = {}
         for m in addons_tuple:
             if m in mods:
@@ -286,8 +285,7 @@ class IrAsset(models.Model):
         # Main source: the current registry list
         # Second source of modules: server wide modules
         # Third source: the currently loading module from the context (similar to ir_ui_view)
-        modules = self.env.registry._init_modules + (odoo.conf.server_wide_modules or []) + self.env.context.get('install_module', [])
-        return modules
+        return self.env.registry._init_modules | set(odoo.conf.server_wide_modules or []) | set(self.env.context.get('install_module', []))
 
     def _get_paths(self, path_def, installed, extensions=None):
         """
