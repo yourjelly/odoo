@@ -13,7 +13,7 @@
     ],
     'qweb': [
         'static/src/xml/BalanceButton.xml',
-        'static/src/xml/Chrome.xml',
+        'static/src/xml/PointOfSaleUI.xml',
     ],
     'depends': ['point_of_sale'],
     'installable': True,

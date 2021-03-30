@@ -77,16 +77,22 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
         }
         async _onSendPaymentRequest({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentRequest', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({
+                name: 'actionSendPaymentRequest',
+                args: [this.props.activeOrder, payment],
+            });
         }
         async _onSendPaymentCancel({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentCancel', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({ name: 'actionSendPaymentCancel', args: [this.props.activeOrder, payment] });
         }
         async _onSendPaymentReverse({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentReverse', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({
+                name: 'actionSendPaymentReverse',
+                args: [this.props.activeOrder, payment],
+            });
         }
         async _onSendForceDone({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendForceDone', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
         }
         get previousScreen() {
             return 'ProductScreen';
