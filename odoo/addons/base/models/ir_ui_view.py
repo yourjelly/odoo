@@ -815,6 +815,9 @@ ORDER BY v.priority, v.id
                 node.getparent().remove(node)
                 return
 
+            # TODO: optimize: no need to "node2mod" & "mod2node" if field doesn't define the attribute)
+            # TODO: optimize: probably don't need simplify_modifiers anymore as it's simplified at source
+            # TODO: cleanup API: remove fields.states and use modifiers only
             modifiers = {}
             transfer_field_to_modifiers(field, modifiers)
             if modifiers:
