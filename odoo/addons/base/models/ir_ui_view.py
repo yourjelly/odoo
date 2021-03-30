@@ -84,16 +84,8 @@ def transfer_node_to_modifiers(node, modifiers, context=None):
                 modifiers[a] = v
 
 
-def simplify_modifiers(modifiers):
-    for a in ('invisible', 'readonly', 'required'):
-        if a in modifiers and not modifiers[a]:
-            del modifiers[a]
-
-
 def transfer_modifiers_to_node(modifiers, node):
-    if modifiers:
-        simplify_modifiers(modifiers)
-        node.set('modifiers', json.dumps(modifiers))
+    node.set('modifiers', json.dumps(modifiers))
 
 
 def keep_query(*keep_params, **additional_params):
@@ -816,7 +808,6 @@ ORDER BY v.priority, v.id
                 return
 
             # TODO: optimize: no need to "node2mod" & "mod2node" if field doesn't define the attribute)
-            # TODO: optimize: probably don't need simplify_modifiers anymore as it's simplified at source
             # TODO: cleanup API: remove fields.states and use modifiers only
             modifiers = {}
             transfer_field_to_modifiers(field, modifiers)
