@@ -97,6 +97,7 @@ const Wysiwyg = Widget.extend({
             'mousedown touchstart',
             '[data-oe-field]',
             function () {
+                self.odooEditor.observerUnactive();
                 const $field = $(this);
                 if (($field.data('oe-type') === "datetime" || $field.data('oe-type') === "date") && !$field.hasClass('o_editable_date_field_format_changed')) {
                     $field.html($field.data('oe-original-with-format'));
@@ -109,6 +110,7 @@ const Wysiwyg = Widget.extend({
                 if ($field.is('[data-oe-many2one-id]')) {
                     $field.attr('contenteditable', false);
                 }
+                self.odooEditor.observerActive();
             }
         );
 

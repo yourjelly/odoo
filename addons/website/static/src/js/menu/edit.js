@@ -300,7 +300,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     },
 
     _getContentEditableAreas () {
-        return $(this.savableSelector).not('[data-oe-readonly]').toArray();
+        return $(this.savableSelector).not('[data-oe-readonly],[data-oe-type="monetary"],[data-oe-many2one-id]').toArray();
     },
     /**
      * Call preventDefault of an event.
