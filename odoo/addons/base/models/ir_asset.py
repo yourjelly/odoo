@@ -8,7 +8,7 @@ from logging import getLogger
 from werkzeug import urls
 
 import odoo
-from odoo.tools import misc, ormcache_context
+from odoo.tools import misc, ormcache_context, ormcache
 from odoo.addons import __path__ as ADDONS_PATH
 from odoo import api, fields, http, models
 
@@ -202,7 +202,7 @@ class IrAsset(models.Model):
             process_path(asset.directive, asset.target, asset.glob)
 
         # 2. Process all addons' manifests.
-        for addon in addons:
+        for addon in self._topological_sort(tuple(addons)):
             manifest = manifest_cache.get(addon)
             if not manifest:
                 continue
@@ -262,6 +262,20 @@ class IrAsset(models.Model):
         """Can be overridden to filter the returned list of active modules."""
         return self._get_installed_addons_list()
 
+    @ormcache('addons_tuple')
+    def _topological_sort(self, addons_tuple):
+        print('LPE PRRRRROOOUTTT')
+        mods = {}
+        for m in addons_tuple:
+            if m in mods:
+                continue
+            mod = http.addons_manifest.get(m)
+            if mod:
+                mods[m] = mod.get('depends', ['base'])
+            else:
+                mods[m] = ['base']
+        return misc.topological_sort(mods)
+
     @ormcache_context(keys='install_module')
     def _get_installed_addons_list(self):
         """
@@ -273,16 +287,7 @@ class IrAsset(models.Model):
         # Second source of modules: server wide modules
         # Third source: the currently loading module from the context (similar to ir_ui_view)
         modules = self.env.registry._init_modules + (odoo.conf.server_wide_modules or []) + self.env.context.get('install_module', [])
-        mods = {}
-        for m in modules:
-            if m in mods:
-                continue
-            mod = http.addons_manifest.get(m)
-            if mod:
-                mods[m] = mod.get('depends', ['base'])
-            else:
-                mods[m] = ['base']
-        return misc.topological_sort(mods)
+        return modules
 
     def _get_paths(self, path_def, installed, extensions=None):
         """
