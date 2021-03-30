@@ -389,7 +389,11 @@ class Website(models.Model):
         suggested_controllers.append((_('eCommerce'), url_for('/shop'), 'website_sale'))
         return suggested_controllers
 
-
+    def _get_bw_table_column_list(self):
+        return super()._get_bw_table_column_list() + [
+            ('product_public_category', 'website_description'),
+            ('product_template', 'website_description'),
+        ]
 class WebsiteSaleExtraField(models.Model):
     _name = 'website.sale.extra.field'
     _description = 'E-Commerce Extra Info Shown on product page'
