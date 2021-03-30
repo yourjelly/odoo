@@ -186,31 +186,28 @@
             <img class="ml-lg-5" style="height: 31px; width: 99px;" src="/website/static/src/img/odoo_logo.svg" title="Odoo Logo"/>
         </div>
         <div class="o_survey_screen_content d-flex flex-column justify-content-lg-around h-100">
-            <div class="o_survey_typing_text text-center mt-4">Choose your favorite <b>Style</b>
+            <div class="o_survey_typing_text text-center mt-4">Choose your favorite <b>Theme</b>
             </div>
             <div class="container">
                 <div class="row py-4">
                     <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
                         <div class="theme_preview border rounded position-relative w-100 small">
                             <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview2"/>
-                            <div class="button_area rounded d-flex align-items-center justify-content-center">
-                                <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(state.themes[1].id)">Use this theme</button>
+                            <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[1].id)">
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
                         <div class="theme_preview border rounded position-relative w-100">
                             <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview1"/>
-                            <div class="button_area rounded d-flex align-items-center justify-content-center">
-                                <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(state.themes[0].id)">Use this theme</button>
+                            <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[0].id)">
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-lg-4 d-flex align-items-end">
                         <div class="theme_preview border rounded position-relative w-100 small">
                             <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview3"/>
-                            <div class="button_area rounded d-flex align-items-center justify-content-center">
-                                <button class="btn btn-primary px-5" href="#" t-on-click="chooseTheme(state.themes[2].id)">Use this theme</button>
+                            <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[2].id)">
                             </div>
                         </div>
                     </div>
