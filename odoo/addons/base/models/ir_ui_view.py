@@ -802,6 +802,7 @@ ORDER BY v.priority, v.id
             field = model._fields.get(node.get('name'))
             field_nodes[field].append(node)
 
+            # TODO: this is also tested by fields_get, optimization possible here?
             # if a group is set on a field, remove it from the view if user has no rights
             if field.groups and not self.user_has_groups(groups=field.groups):
                 node.getparent().remove(node)
@@ -828,9 +829,6 @@ ORDER BY v.priority, v.id
                 can_write = model.check_access_rights('write', raise_exception=False)
                 node.set('can_create', 'true' if can_create else 'false')
                 node.set('can_write', 'true' if can_write else 'false')
-
-            for child in node:
-                _parse(model, child)
 
             for child in node:
                 if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
@@ -867,7 +865,10 @@ ORDER BY v.priority, v.id
                     if not node.get('on_change'):
                         node.set('on_change', '1')
 
-        return fields
+        fdata = model.fields_get(fields.keys())
+        for f in fdata:
+            fdata[f].update(fields[f])
+        return fdata
 
 
 
