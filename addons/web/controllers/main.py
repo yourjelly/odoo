@@ -981,7 +981,7 @@ class WebClient(http.Controller):
         if mods:
             mods = mods.split(',')
         elif mods is None:
-            mods = request.env.registry._init_modules | set(odoo.conf.server_wide_modules or [])
+            mods = list(request.env.registry._init_modules) + (odoo.conf.server_wide_modules or [])
 
         translations_per_module, lang_params = request.env["ir.translation"].get_translations_for_webclient(mods, lang)
 

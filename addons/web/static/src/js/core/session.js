@@ -78,11 +78,7 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
         var self = this;
         var prom = this.session_reload();
 
-        if (!window.odoo.session_info) {
-            return prom;
-        }
-
-        if (this.is_frontend) {
+        if (this.is_frontend || this.is_report) {
             return prom.then(function () {
                 return self.load_translations();
             });

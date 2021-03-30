@@ -15,6 +15,10 @@
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
                 <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <script type="text/javascript">
+                    window.odoo = {};
+                    window.odoo.session_info = {is_report: true};
+                </script>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <t t-call-assets="web.report_assets_common" t-css="false"/>
             </head>
