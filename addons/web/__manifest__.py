@@ -21,20 +21,19 @@ This module provides the core of the Odoo Web Client.
         'data/report_layout.xml',
     ],
     'assets': {
-        # ---------------------------------------------------------------------
+        #----------------------------------------------------------------------
         # MAIN BUNDLES
-        # ---------------------------------------------------------------------
+        #----------------------------------------------------------------------
         # These are the bundles meant to be called via "t-call-assets" in
         # regular XML templates.
         #
         # The convention to name bundles is as following:
-        # 1) the name of the first module defining the bundle
-        # 2) the prefix "assets_"
-        # 3) an arbitrary name, relevant to the content of the bundle.
+        # 1) the prefix "assets"
+        # 2) an arbitrary name, relevant to the content of the bundle.
         #
         # Exemples:
-        #   > web.assets_common = assets common to both frontend and backend clients.
-        #   > web_editor.assets_wysiwyg = assets needed by components defined in the "web_editor" module.
+        #   > assets_common = assets common to both frontend and backend clients.
+        #   > assets_wysiwyg = assets needed by components defined in the "web_editor" module.
 
         'web.assets_qweb': [
             'web/static/src/xml/base.xml',
@@ -51,7 +50,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/xml/search_panel.xml',
             'web/static/src/xml/web_calendar.xml',
             'web/static/src/xml/graph.xml',
-            'web/static/src/xml/week_days.xml',
         ],
         'web.assets_common_minimal': [
             'web/static/lib/es6-promise/es6-promise-polyfill.js',
@@ -194,7 +192,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/js/widgets/switch_company_menu.js',
             'web/static/src/js/widgets/pie_chart.js',
             'web/static/src/js/widgets/ribbon.js',
-            'web/static/src/js/widgets/week_days.js',
             'web/static/src/js/widgets/signature.js',
             'web/static/src/js/widgets/attach_document.js',
             'web/static/src/js/apps.js',
@@ -262,9 +259,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/css/**/*',
         ],
 
-        # ---------------------------------------------------------------------
+        #----------------------------------------------------------------------
         # SUB BUNDLES
-        # ---------------------------------------------------------------------
+        #----------------------------------------------------------------------
         # These bundles can be used by main bundles but are not supposed to be
         # called directly from XML templates.
         #
@@ -273,7 +270,11 @@ This module provides the core of the Odoo Web Client.
         # aspect.
         #
         # Exemples:
-        #   > web._assets_helpers = define assets needed in most main bundles
+        #   > _assets_helpers = define assets needed in most main bundles
+        #
+        # Note for backward compatibility:
+        #   As for main bundles, the "assets_" prefix have been removed on all
+        #   sub-bundles names.
 
         'web._assets_primary_variables': [
             'web/static/src/scss/primary_variables.scss',
@@ -413,9 +414,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/js/widgets/translation_dialog.js',
         ],
 
-        # ---------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # TESTS BUNDLES
-        # ---------------------------------------------------------------------
+        # ----------------------------------------------------------------------
 
         'web.assets_tests': [
             'web/static/tests/helpers/test_utils_file.js',
