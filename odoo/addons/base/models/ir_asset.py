@@ -8,7 +8,8 @@ from logging import getLogger
 from werkzeug import urls
 
 import odoo
-from odoo.tools import misc, ormcache_context, ormcache
+from odoo.tools import misc
+from odoo import tools
 from odoo.addons import __path__ as ADDONS_PATH
 from odoo import api, fields, http, models
 
@@ -262,7 +263,8 @@ class IrAsset(models.Model):
         """Can be overridden to filter the returned list of active modules."""
         return self._get_installed_addons_list()
 
-    @ormcache('addons_tuple')
+    @api.model
+    @tools.ormcache('addons_tuple')
     def _topological_sort(self, addons_tuple):
         mods = {}
         for m in addons_tuple:
@@ -275,7 +277,8 @@ class IrAsset(models.Model):
                 mods[m] = ['base']
         return misc.topological_sort(mods)
 
-    @ormcache_context(keys='install_module')
+    @api.model
+    @tools.ormcache_context(keys='install_module')
     def _get_installed_addons_list(self):
         """
         Returns the list of all installed addons.

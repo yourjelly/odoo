@@ -1208,6 +1208,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_other.mockmanifest1': [
@@ -1231,6 +1232,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.manifest4': [
@@ -1257,6 +1259,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.manifest4': [
@@ -1283,6 +1286,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.manifest4': [
@@ -1306,6 +1310,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.manifest4': [
@@ -1330,6 +1335,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.manifest4': [
@@ -1428,6 +1434,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_other.bundle4': [
@@ -1457,6 +1464,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.bundle4': [
@@ -1490,6 +1498,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_other.bundle4': [
@@ -1519,6 +1528,7 @@ class TestAssetsManifest(AddonManifestPatched):
         self.installed_modules.append('test_other')
         self.manifests['test_other'] = {
             'name': 'test_other',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
             'assets': {
                 'test_assetsbundle.bundle4': [
@@ -1781,6 +1791,7 @@ class TestAssetsManifest(AddonManifestPatched):
     def test_33(self):
         self.manifests['notinstalled_module'] = {
             'name': 'notinstalled_module',
+            'depends': ['test_assetsbundle'],
             'addons_path': pathlib.Path(__file__).resolve().parent,
         }
         self.env['ir.asset'].create({
