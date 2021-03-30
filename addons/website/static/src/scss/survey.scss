@@ -245,9 +245,7 @@
             }
 
             .button_area {
-                background: rgba(black, 0.2);
                 cursor: pointer;
-                @extend .o_survey_hide;
             }
 
             .theme_preview {
@@ -267,6 +265,7 @@
                 }
 
                 &:hover {
+                    border-color: theme-color(primary)!important;
                     box-shadow: $box-shadow;
 
                     .theme_preview_tip {
@@ -280,11 +279,6 @@
                     &.small .theme_svg_container svg {
                         animation-name: theme_screenshot_scroll_small;
                         animation-duration: 5s;
-                    }
-
-                    .button_area {
-                        @extend .o_survey_show_fast;
-                        animation-fill-mode: forwards;
                     }
                 }
             }
