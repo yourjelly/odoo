@@ -193,6 +193,7 @@
                     <div class="row pb-4 pt-5">
                         <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
                             <div class="theme_preview border rounded position-relative w-100 small">
+                                <h6 class="theme_preview_tip text-center text-muted">Click to select</h6>
                                 <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview2"/>
                                 <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[1].id)">
                                 </div>
@@ -200,6 +201,7 @@
                         </div>
                         <div class="col-12 col-lg-4 d-flex align-items-end mb-4 mb-lg-0">
                             <div class="theme_preview border rounded position-relative w-100">
+                                <h6 class="theme_preview_tip text-center text-muted">Click to select</h6>
                                 <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview1"/>
                                 <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[0].id)">
                                 </div>
@@ -207,6 +209,7 @@
                         </div>
                         <div class="col-12 col-lg-4 d-flex align-items-end">
                             <div class="theme_preview border rounded position-relative w-100 small">
+                                <h6 class="theme_preview_tip text-center text-muted">Click to select</h6>
                                 <div class="theme_svg_container rounded overflow-hidden" t-ref="ThemePreview3"/>
                                 <div class="button_area rounded d-flex align-items-center justify-content-center" t-on-click="chooseTheme(state.themes[2].id)">
                                 </div>
