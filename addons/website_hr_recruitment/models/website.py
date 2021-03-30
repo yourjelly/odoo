@@ -12,3 +12,8 @@ class Website(models.Model):
         suggested_controllers = super(Website, self).get_suggested_controllers()
         suggested_controllers.append((_('Jobs'), url_for('/jobs'), 'website_hr_recruitment'))
         return suggested_controllers
+
+    def _get_bw_table_column_list(self):
+        return super()._get_bw_table_column_list() + [
+            ('hr_job', 'website_description'),
+        ]
