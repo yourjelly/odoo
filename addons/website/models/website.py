@@ -1022,30 +1022,34 @@ class Website(models.Model):
         """Looks up the DB to see which of the website's snippets use versioned assets."""
         tables = self._get_bw_table_column_list()
         res = []
-        specific_website = False
 
         for t in tables:
-            query = '''
+            subquery_snippet_tags = '''
                 WITH snippet_tags AS (
                     SELECT
-                        website_id,
-                        name AS page,
-                        REGEXP_MATCHES({column}, '(<[^>]+\\sdata-snippet="(\\w+?)"[^>]+>)', 'g') AS matches
+                        name AS item,
+                        REGEXP_MATCHES({column}, '(<[^>]*?data-snippet="(\\w+?)"[^>]*?>)', 'g') AS matches
                     FROM
                         {table}
-                    WHERE type='qweb' {restrict}
-                ) -- detect snippets, retrieves their opening tag and their type in a text array
+                    )  -- detect snippets, retrieves their opening tag and their type in a text array
+                '''.format(table=t[0], column=t[1])
+            query_type_version = '''
                 SELECT
-                    website_id,
-                    page,
+                    item,
                     matches[2] AS snippet_type,
                     REGEXP_MATCHES(matches[1], 'data-v(...)="(\\w+?)"') AS res_and_version
                 FROM snippet_tags;
-            '''.format(table=t[0], column=t[1], restrict='AND website_id' + self.id if specific_website else '')  # Assuming only one column for now
-            self.env.cr.execute(query)
-            res.append(self.env.cr.fetchall())
-        print(res)
+            '''
+            self.env.cr.execute(subquery_snippet_tags + query_type_version)
+            res.append([t[0]] + self.env.cr.fetchall())
 
+        def pretty_print_res_item(r):
+            print("\t" + str(r[0]) + " : " + str(r[1:]))
+
+        for module_data in res:
+            print("Response data for " + module_data[0] + (" (empty)" if len(module_data) < 2 else ''))
+            for r in module_data[1:]:
+                pretty_print_res_item(r)
 
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
