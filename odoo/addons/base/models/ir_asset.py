@@ -266,23 +266,31 @@ class IrAsset(models.Model):
     @api.model
     @tools.ormcache('addons_tuple')
     def _topological_sort(self, addons_tuple):
-        mods = {}
-        for m in addons_tuple:
-            if m in mods:
-                continue
-            mod = http.addons_manifest.get(m)
-            if mod:
-                mods[m] = mod.get('depends', ['base'])
-            else:
-                mods[m] = ['base']
-        return misc.topological_sort(mods)
+        """Returns a list of sorted modules name accord to the spec in ir.module.module
+        that is, application desc, sequence, name then topologically sorted"""
+        IrModule = self.env['ir.module.module']
+
+        def mapper(addon):
+            manif = http.addons_manifest.get(addon, {})
+            from_terp = IrModule.get_values_from_terp(manif)
+            from_terp['name'] = addon
+            from_terp['depends'] = manif.get('depends', ['base'])
+            return from_terp
+
+        manifs = map(mapper, addons_tuple)
+
+        def sort_key(manif):
+            return (not manif['application'], int(manif['sequence']), manif['name'])
+
+        manifs = sorted(manifs, key=sort_key)
+
+        return misc.topological_sort({manif['name']: manif['depends'] for manif in manifs})
 
     @api.model
     @tools.ormcache_context(keys='install_module')
     def _get_installed_addons_list(self):
         """
         Returns the list of all installed addons.
-        !! This list should be topologically sorted !!
         :returns: string[]: list of module names
         """
         # Main source: the current registry list
