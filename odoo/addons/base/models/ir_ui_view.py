@@ -814,6 +814,10 @@ ORDER BY v.priority, v.id
             if modifiers:
                 transfer_node_to_modifiers(node, modifiers, self._context)
                 transfer_modifiers_to_node(modifiers, node)
+            elif node.get('attrs'):
+                node.set('modifiers', node.get('attrs'))
+                # TODO: check if we can uncomment this
+                # del node.attrib['attrs']
 
             if field.comodel_name:
                 model = self.env[field.comodel_name]
@@ -828,6 +832,11 @@ ORDER BY v.priority, v.id
             for child in node:
                 _parse(model, child)
 
+            for child in node:
+                if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
+                    node.remove(child)
+                    attrs['fields'] = self._view_process(model, child)
+                    attrs['arch'] = etree.tostring(child)
 
         def _parse(model, node):
             tag = node.tag
