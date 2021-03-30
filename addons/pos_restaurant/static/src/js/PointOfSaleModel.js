@@ -481,11 +481,19 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
 
                     await this.addOrderline(newOrder, line);
 
-                    let newQuantity = originalOrderLine.qty - line.qty;
-                    if(this.floatCompare(newQuantity, 0) === 0) {
-                        await this.actionDeleteOrderline(originalOrder, originalOrderLine);
+                    if(!this.getDisallowLineQuantityChange()) {
+                        let newQuantity = originalOrderLine.qty - line.qty;
+                        if(this.floatCompare(newQuantity, 0) === 0) {
+                            await this.actionDeleteOrderline(originalOrder, originalOrderLine);
+                        } else {
+                            await this.actionUpdateOrderline(originalOrderLine, { qty: newQuantity });
+                        }
                     } else {
-                        await this.actionUpdateOrderline(originalOrderLine, { qty: newQuantity });
+                        const removedLine = this.cloneRecord('pos.order.line', originalOrderLine, {
+                            id: this._getNextId(),
+                            qty: - split.quantity,
+                        });
+                        await this.addOrderline(originalOrder, removedLine);
                     }
                 }
 

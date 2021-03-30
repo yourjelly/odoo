@@ -1965,6 +1965,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const [confirm, inputNumber] = await this.ui.askUser('NumberPopup', {
                 startingValue: orderline.qty,
                 title: _t('Set the new quantity'),
+                isInputSelected: true,
             });
             if (!confirm || (confirm && inputNumber === '')) return;
             const currentQuantity = orderline.qty;
