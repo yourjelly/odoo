@@ -33,14 +33,13 @@ import unicodedata
 import odoo
 import odoo.modules.registry
 from odoo.api import call_kw, Environment
-from odoo.modules import get_module_path, get_resource_path
+from odoo.modules import get_module_path, get_resource_path, module
 from odoo.tools import image_process, html_escape, pycompat, ustr, apply_inheritance_specs, lazy_property, float_repr, osutil
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.translate import _
 from odoo.tools.misc import str2bool, xlsxwriter, file_open
 from odoo.tools.safe_eval import safe_eval, time
 from odoo import http, tools
-from odoo.modules.module import module_boot, module_installed
 from odoo.http import content_disposition, dispatch_rpc, request, serialize_exception as _serialize_exception
 from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
@@ -187,39 +186,6 @@ def ensure_db(redirect='/web/database/selector'):
 def fs2web(path):
     """convert FS path into web path"""
     return '/'.join(path.split(os.path.sep))
-
-def manifest_glob(extension, addons=None, db=None, include_remotes=False):
-    if addons is None:
-        addons = module_boot(db=db)
-
-    r = []
-    for addon in addons:
-        manifest = http.addons_manifest.get(addon, None)
-        if not manifest:
-            continue
-        # ensure does not ends with /
-        addons_path = os.path.join(manifest['addons_path'], '')[:-1]
-        globlist = manifest.get(extension, [])
-        for pattern in globlist:
-            if pattern.startswith(('http://', 'https://', '//')):
-                if include_remotes:
-                    r.append((None, pattern, addon))
-            else:
-                for path in glob.glob(os.path.normpath(os.path.join(addons_path, addon, pattern))):
-                    r.append((path, fs2web(path[len(addons_path):]), addon))
-    return r
-
-
-def manifest_list(extension, mods=None, db=None, debug=None):
-    """ list resources to load specifying either:
-    mods: a comma separated string listing modules
-    db: a database name (return all installed modules in that database)
-    """
-    if debug is not None:
-        _logger.warning("odoo.addons.web.main.manifest_list(): debug parameter is deprecated")
-    mods = mods.split(',')
-    files = manifest_glob(extension, addons=mods, db=db, include_remotes=True)
-    return [wp for _fp, wp, addon in files]
 
 def get_last_modified(files):
     """ Returns the modification time of the most recently modified
@@ -576,7 +542,7 @@ class HomeStaticTemplateHelpers(object):
                     xml = self._compute_xml_tree(addon, fname, contents)
 
                     if root is None:
-                        root = etree.Element(xml.tag)
+                        root = etree.Element('templates')
 
         for addon in self.template_dict.values():
             for template in addon.values():
@@ -607,11 +573,11 @@ class HomeStaticTemplateHelpers(object):
         return content, checksum
 
     @classmethod
-    def get_qweb_templates_checksum(cls, addons, db=None, debug=False):
+    def get_qweb_templates_checksum(cls, addons=None, db=None, debug=False):
         return cls(addons, db, checksum_only=True, debug=debug)._get_qweb_templates()[1]
 
     @classmethod
-    def get_qweb_templates(cls, addons, db=None, debug=False):
+    def get_qweb_templates(cls, addons=None, db=None, debug=False):
         return cls(addons, db, debug=debug)._get_qweb_templates()[0]
 
 
@@ -934,14 +900,6 @@ class Home(http.Controller):
 
 class WebClient(http.Controller):
 
-    @http.route('/web/webclient/csslist', type='json', auth="none")
-    def csslist(self, mods=None):
-        return manifest_list('css', mods=mods)
-
-    @http.route('/web/webclient/jslist', type='json', auth="none")
-    def jslist(self, mods=None):
-        return manifest_list('js', mods=mods)
-
     @http.route('/web/webclient/locale/<string:lang>', type='http', auth="none")
     def load_locale(self, lang):
         magic_file_finding = [lang.replace("_", '-').lower(), lang.split('_')[0]]
@@ -966,6 +924,10 @@ class WebClient(http.Controller):
 
     @http.route('/web/webclient/qweb/<string:unique>', type='http', auth="none", cors="*")
     def qweb(self, unique, mods=None, db=None):
+
+        if not request.db and mods is None:
+            mods = odoo.conf.server_wide_modules or []
+
         content = HomeStaticTemplateHelpers.get_qweb_templates(mods, db, debug=request.session.debug)
 
         return request.make_response(content, [
@@ -974,7 +936,7 @@ class WebClient(http.Controller):
             ])
 
     @http.route('/web/webclient/bootstrap_translations', type='json', auth="none")
-    def bootstrap_translations(self, mods):
+    def bootstrap_translations(self, mods=None):
         """ Load local translations from *.po files, as a temporary solution
             until we have established a valid session. This is meant only
             for translating the login page and db management chrome, using
@@ -986,9 +948,15 @@ class WebClient(http.Controller):
         request.session._fix_lang(context)
         lang = context['lang'].split('_')[0]
 
+        if mods is None:
+            mods = odoo.conf.server_wide_modules or []
+            if request.db:
+                mods = request.env.registry._init_modules + mods
+
         translations_per_module = {}
         for addon_name in mods:
-            if http.addons_manifest[addon_name].get('bootstrap'):
+            manifest = http.addons_manifest.get(addon_name)
+            if manifest and manifest.get('bootstrap'):
                 addons_path = http.addons_manifest[addon_name]['addons_path']
                 f_name = os.path.join(addons_path, addon_name, "i18n", lang + ".po")
                 if not os.path.exists(f_name):
@@ -1012,6 +980,9 @@ class WebClient(http.Controller):
 
         if mods:
             mods = mods.split(',')
+        elif mods is None:
+            mods = request.env.registry._init_modules + (odoo.conf.server_wide_modules or [])
+
         translations_per_module, lang_params = request.env["ir.translation"].get_translations_for_webclient(mods, lang)
 
         body = json.dumps({
@@ -1240,7 +1211,7 @@ class Session(http.Controller):
     @http.route('/web/session/modules', type='json', auth="user")
     def modules(self):
         # return all installed modules. Web client is smart enough to not load a module twice
-        return module_installed(environment=request.env(user=odoo.SUPERUSER_ID))
+        return self.env.registry._init_modules + ([module.current_test] if module.current_test else [])
 
     @http.route('/web/session/save_session_action', type='json', auth="user")
     def save_session_action(self, the_action):

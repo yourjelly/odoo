@@ -12,7 +12,7 @@ import pathlib
 import lxml
 import base64
 
-from odoo import api
+from odoo import api, http
 from odoo.addons import __path__ as ADDONS_PATH
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.base.models.ir_asset import AssetPaths
@@ -21,7 +21,7 @@ from odoo.modules.module import get_resource_path, read_manifest
 from odoo.tests import HttpCase, tagged
 from odoo.tests.common import TransactionCase
 from odoo.addons.base.models.qweb import QWebException
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, func
 
 
 GETMTINE = os.path.getmtime
@@ -87,23 +87,25 @@ class AddonManifestPatched(TransactionCase):
         if manifest:
             manifest['addons_path'] = path
             test_assetsbundle_manifest = manifest
+            break
+
+    def tearDown(self):
+        super().tearDown()
+        self.env.registry._init_modules = self.__genuine_registry_modules
+        http.addons_manifest = self.__genuine_addons_manifest
 
     def setUp(self):
         super().setUp()
+        self.__genuine_registry_modules = self.env.registry._init_modules
+        self.env.registry._init_modules = func.lazy(lambda: self.installed_modules)
+
+        self.__genuine_addons_manifest = http.addons_manifest
+        http.addons_manifest = func.lazy(lambda: self.manifests)
+
         self.installed_modules = ['test_assetsbundle']
         self.manifests = {
             'test_assetsbundle': self.test_assetsbundle_manifest,
         }
-
-        def patched_list_modules(model):
-            return self.installed_modules
-
-        self.patch(type(self.env['ir.module.module']), '_installed_sorted', patched_list_modules)
-
-        def patched_manifest_cache(asset):
-            return self.manifests
-
-        self.patch(type(self.env['ir.asset']), '_get_manifest_cache', patched_manifest_cache)
 
 
 class FileTouchable(AddonManifestPatched):

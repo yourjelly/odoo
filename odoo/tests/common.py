@@ -153,6 +153,13 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
 # ------------------------------------------------------------
 class OdooSuite(unittest.suite.TestSuite):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from odoo.http import root
+        if not root._loaded:
+            root.load_addons()
+            root._loaded = True
+
     if sys.version_info < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
 
@@ -261,7 +268,17 @@ class MetaCase(type):
             cls.test_sequence = 0
 
 
-def _transform_arch_for_assert(arch_string, parser_method="xml"):
+def _normalize_arch_for_assert(arch_string, parser_method="xml"):
+    """Takes some xml and normalize it to make it comparable to other xml
+    in particular, blank text is removed, and the output is pretty-printed
+    :param arch_string: the string representing an XML arch
+    :type arch_string: str
+    :param parser_method: an string representing which lxml.Parser class to use
+        when normalizing both archs. Takes either "xml" or "html"
+    :type parser_method: str
+    :return: the normalized arch
+    :rtype str:
+    """
     Parser = None
     if parser_method == 'xml':
         Parser = etree.XMLParser
@@ -598,10 +615,19 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
             self.assertTreesEqual(c1, c2, msg)
 
     def _assertXMLEqual(self, original, expected, parser="xml"):
+        """Asserts that two xmls archs are equal
+        :param original: the xml arch to test
+        :type original: str
+        :param expected: the xml arch of reference
+        :type expected: str
+        :param parser: an string representing which lxml.Parser class to use
+            when normalizing both archs. Takes either "xml" or "html"
+        :type parser: str
+        """
         if original:
-            original = _transform_arch_for_assert(original, parser)
+            original = _normalize_arch_for_assert(original, parser)
         if expected:
-            expected = _transform_arch_for_assert(expected, parser)
+            expected = _normalize_arch_for_assert(expected, parser)
         self.assertEqual(original, expected)
 
     def assertXMLEqual(self, original, expected):

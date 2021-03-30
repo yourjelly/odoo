@@ -7,30 +7,10 @@ from glob import glob
 from logging import getLogger
 from werkzeug import urls
 
-from odoo.tools import config, misc
-from odoo.tools.func import lazy
+import odoo
+from odoo.tools import misc, ormcache_context, ormcache
 from odoo.addons import __path__ as ADDONS_PATH
 from odoo import api, fields, http, models
-from odoo.modules.module import read_manifest
-
-##########################
-# Overrides for test     #
-# do not rely on http.py #
-##########################
-if config['test_enable']:
-    def get_all_manifests_cache():
-        manifest_cache = {}
-        for addons_path in ADDONS_PATH:
-            for module in sorted(os.listdir(str(addons_path))):
-                if module not in manifest_cache:
-                    manifest = read_manifest(addons_path, module)
-                    if not manifest or not manifest.get('installable', True):
-                        continue
-                    manifest['addons_path'] = addons_path
-                    manifest_cache[module] = manifest
-        return manifest_cache
-
-    http.addons_manifest = lazy(get_all_manifests_cache)
 
 _logger = getLogger(__name__)
 
@@ -157,7 +137,7 @@ class IrAsset(models.Model):
         if bundle in seen:
             raise Exception("Circular assets bundle declaration: %s" % " > ".join(seen + [bundle]))
 
-        manifest_cache = self._get_manifest_cache()
+        manifest_cache = http.addons_manifest
         exts = []
         if js:
             exts += SCRIPT_EXTENSIONS
@@ -222,7 +202,7 @@ class IrAsset(models.Model):
             process_path(asset.directive, asset.target, asset.glob)
 
         # 2. Process all addons' manifests.
-        for addon in addons:
+        for addon in self._topological_sort(tuple(addons)):
             manifest = manifest_cache.get(addon)
             if not manifest:
                 continue
@@ -282,16 +262,32 @@ class IrAsset(models.Model):
         """Can be overridden to filter the returned list of active modules."""
         return self._get_installed_addons_list()
 
+    @ormcache('addons_tuple')
+    def _topological_sort(self, addons_tuple):
+        print('LPE PRRRRROOOUTTT')
+        mods = {}
+        for m in addons_tuple:
+            if m in mods:
+                continue
+            mod = http.addons_manifest.get(m)
+            if mod:
+                mods[m] = mod.get('depends', ['base'])
+            else:
+                mods[m] = ['base']
+        return misc.topological_sort(mods)
+
+    @ormcache_context(keys='install_module')
     def _get_installed_addons_list(self):
         """
         Returns the list of all installed addons.
+        !! This list should be topologically sorted !!
         :returns: string[]: list of module names
         """
-        return self.env.registry.modules
-
-    def _get_manifest_cache(self):
-        """Proxy to the http addons manifest, used for test overrides."""
-        return http.addons_manifest
+        # Main source: the current registry list
+        # Second source of modules: server wide modules
+        # Third source: the currently loading module from the context (similar to ir_ui_view)
+        modules = self.env.registry._init_modules + (odoo.conf.server_wide_modules or []) + self.env.context.get('install_module', [])
+        return modules
 
     def _get_paths(self, path_def, installed, extensions=None):
         """
@@ -311,7 +307,7 @@ class IrAsset(models.Model):
         path_url = fs2web(path_def)
         path_parts = [part for part in path_url.split('/') if part]
         addon = path_parts[0]
-        addon_manifest = self._get_manifest_cache().get(addon)
+        addon_manifest = http.addons_manifest.get(addon)
 
         safe_path = True
         if addon_manifest:

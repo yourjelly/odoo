@@ -144,7 +144,6 @@ class Registry(Mapping):
         self.registry_invalidated = False
         self.cache_invalidated = False
 
-        self._modules_list = None
         with closing(self.cursor()) as cr:
             self.has_unaccent = odoo.modules.db.has_unaccent(cr)
 
@@ -344,14 +343,6 @@ class Registry(Mapping):
 
         return triggers
 
-    @property
-    def modules(self):
-        """a list of modules names, topologically sorted"""
-        if self._modules_list is None:
-            from .module import module_boot
-            self._modules_list = module_boot(self.db_name)
-        return self._modules_list
-
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """
         self._post_init_queue.append(partial(func, *args, **kwargs))
@@ -537,7 +528,6 @@ class Registry(Mapping):
     def _clear_cache(self):
         """ Clear the cache and mark it as invalidated. """
         self.__cache.clear()
-        self._modules_list = None
         self.cache_invalidated = True
 
     def clear_caches(self):
