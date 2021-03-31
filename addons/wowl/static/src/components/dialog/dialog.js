@@ -51,13 +51,7 @@ export class Dialog extends Component {
    * @param {KeyboardEvent} ev
    */
   _onKeydown(ev) {
-    var _a;
-    if (
-      ev.key === "Escape" &&
-      !((_a = this.modalRef.el) === null || _a === void 0
-        ? void 0
-        : _a.classList.contains("o_inactive_modal"))
-    ) {
+    if (ev.key === "Escape" && !this.modalRef.el.classList.contains("o_inactive_modal")) {
       this._close();
     }
   }
