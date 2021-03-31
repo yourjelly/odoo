@@ -59,70 +59,85 @@ function getRoute() {
  * @param {function} getCurrent function that returns the current route
  * @returns {function} function to compute the next hash
  */
-export function makePreProcessQuery(getCurrent) {
-  const lockedKeys = new Set();
-  return (hash) => {
-    const newHash = {};
-    Object.keys(hash).forEach((key) => {
-      if (lockedKeys.has(key)) {
+function applyLocking(lockedKeys, hash, currentRoute) {
+  const newHash = {};
+  Object.keys(hash).forEach((key) => {
+    if (lockedKeys.has(key)) {
+      return;
+    }
+    const k = key.split(" ");
+    let value;
+    if (k.length === 2) {
+      value = hash[key];
+      key = k[1];
+      if (k[0] === "lock") {
+        lockedKeys.add(key);
+      } else if (k[0] === "unlock") {
+        lockedKeys.delete(key);
+      } else {
         return;
       }
-      const k = key.split(" ");
-      let value;
-      if (k.length === 2) {
-        value = hash[key];
-        key = k[1];
-        if (k[0] === "lock") {
-          lockedKeys.add(key);
-        } else if (k[0] === "unlock") {
-          lockedKeys.delete(key);
-        } else {
-          return;
-        }
-      }
-      newHash[key] = value || hash[key];
-    });
-    const current = getCurrent();
-    Object.keys(current.hash).forEach((key) => {
-      if (lockedKeys.has(key) && !(key in newHash)) {
-        newHash[key] = current.hash[key];
-      }
-    });
-    return newHash;
-  };
-}
-
-function makeRouter(env) {
-  let bus = env.bus;
-  let current = getRoute();
-  window.addEventListener("hashchange", () => {
-    current = getRoute();
-    bus.trigger("ROUTE_CHANGE");
+    }
+    newHash[key] = value || hash[key];
   });
 
-  function doPush(mode = "push", route) {
-    if (!shallowEqual(route.hash, current.hash)) {
-      const url = location.origin + routeToUrl(route);
-      if (mode === "push") {
-        window.history.pushState({}, url, url);
-      } else {
-        window.history.replaceState({}, url, url);
-      }
+  Object.keys(currentRoute.hash).forEach((key) => {
+    if (lockedKeys.has(key) && !(key in newHash)) {
+      newHash[key] = currentRoute.hash[key];
     }
+  });
+  return newHash;
+}
+
+function routerSkeleton(env, privateBus, getRoute, historyObj) {
+  let bus = env.bus;
+  let current = getRoute();
+  const lockedKeys = new Set();
+
+  privateBus.on('hashchange', null, () => {
     current = getRoute();
+    bus.trigger('ROUTE_CHANGE');
+  });
+
+  function accumulatePushs(acc={}, hash, replace) {
+    hash = applyLocking(lockedKeys, hash, current);
+    replace = acc.replace || replace;
+    hash = Object.assign(acc.hash || {}, hash);
+    return { hash, replace };
   }
 
-  function getCurrent() {
-    return current;
+  function computeNewRoute(hash, replace, currentRoute) {
+    hash = sanitizeHash(hash);
+    if (!replace) {
+      hash = Object.assign({}, currentRoute.hash, hash);
+    }
+    const newRoute = Object.assign({}, currentRoute, { hash });
+    if (!shallowEqual(newRoute.hash, currentRoute.hash)) {
+      return newRoute;
+    }
+    return false;
   }
 
-  const preProcessQuery = makePreProcessQuery(getCurrent);
   return {
+    pushState: accumulatingFunctionTimeout(accumulatePushs, (acc) => {
+      const newRoute = computeNewRoute(acc.hash, acc.replace, current);
+      if (newRoute) {
+        const url = routeToUrl(newRoute);
+        historyObj.pushState({}, url, url);
+      }
+      current  = getRoute();
+    }),
+    replaceState: accumulatingFunctionTimeout(accumulatePushs, (acc) => {
+      const newRoute = computeNewRoute(acc.hash, acc.replace, current);
+      if (newRoute) {
+        const url = routeToUrl(newRoute);
+        historyObj.replaceState({}, url, url);
+      }
+      current  = getRoute();
+    }),
     get current() {
-      return getCurrent();
+      return current;
     },
-    pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
-    replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
     redirect: (url, wait) => redirect(env, url, wait),
   };
 }
@@ -141,30 +156,11 @@ function accumulatingFunctionTimeout(accumulate, execute) {
   };
 }
 
-export function makePushState(getCurrent, doPush, preProcessQuery) {
-  function accumulatePushs(acc={}, hash, replace) {
-    hash = preProcessQuery(hash);
-    replace = acc.replace || replace;
-    hash = Object.assign(acc.hash || {}, hash);
-    return { hash, replace };
-  }
-
-  function executePush(data) {
-    let { hash , replace } = data;
-    hash = sanitizeHash(hash);
-    const current = getCurrent();
-    if (!replace) {
-      hash = Object.assign({}, current.hash, hash);
-    }
-    const route = Object.assign({}, current, { hash });
-    doPush(route);
-  }
-  return accumulatingFunctionTimeout(accumulatePushs, executePush);
-}
-
 export const routerService = {
   deploy(env) {
-    return makeRouter(env);
+    const privateBus = new owl.core.EventBus();
+    window.addEventListener("hashchange", () => privateBus.trigger("hashchange"));
+    return routerSkeleton(env, privateBus, getRoute, window.history);
   },
 };
 
