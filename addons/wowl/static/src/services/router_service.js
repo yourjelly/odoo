@@ -107,24 +107,27 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     return false;
   }
 
-  const cumulativePush = cumulativeFunction(accumulatePushs);
+  function pushState(hash, options) {
+    const newRoute = computeNewRoute(hash, options.replace, current);
+    if (newRoute) {
+      const url = routeToUrl(newRoute);
+      historyObj.pushState({}, url, url);
+    }
+    current  = getRoute();
+  }
+
+  function replaceState(hash, options) {
+    const newRoute = computeNewRoute(hash, options.replace, current);
+    if (newRoute) {
+      const url = routeToUrl(newRoute);
+      historyObj.pushState({}, url, url);
+    }
+    current  = getRoute();
+  }
+
   return {
-    pushState: cumulativePush((hash, options) => {
-      const newRoute = computeNewRoute(hash, options.replace, current);
-      if (newRoute) {
-        const url = routeToUrl(newRoute);
-        historyObj.pushState({}, url, url);
-      }
-      current  = getRoute();
-    }),
-    replaceState: cumulativePush((hash, options) => {
-      const newRoute = computeNewRoute(hash, options.replace, current);
-      if (newRoute) {
-        const url = routeToUrl(newRoute);
-        historyObj.replaceState({}, url, url);
-      }
-      current  = getRoute();
-    }),
+    pushState: cumulativeCallable({accumulator: accumulatePushs, callable: pushState}),
+    replaceState: cumulativeCallable({accumulator: accumulatePushs, callable: replaceState}),
     get current() {
       return current;
     },
@@ -151,14 +154,17 @@ function cumulativeFunction(accumulator) {
   return cumulativeExecutable;
 }
 
-function accumulatingFunctionTimeout(accumulate, execute) {
+function cumulativeCallable({accumulator, callable}) {
+  if (!accumulator) {
+    accumulator = (prevArgs, currentArgs) => currentArgs;
+  }
   let timeoutId;
   let acc = [];
   return (...args) => {
     clearTimeout(timeoutId);
-    acc = accumulate(acc, args);
+    acc = accumulator(acc, args);
     timeoutId = setTimeout(() => {
-      execute(...acc);
+      callable(...acc);
       acc = [];
       timeoutId = undefined;
     });
