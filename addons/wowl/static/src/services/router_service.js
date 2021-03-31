@@ -127,28 +127,39 @@ function makeRouter(env) {
   };
 }
 
-export function makePushState(getCurrent, doPush, preProcessQuery) {
-  let _replace = false;
+function accumulatingFunctionTimeout(accumulate, execute) {
   let timeoutId;
-  let tempHash;
-  return (hash, replace = false) => {
+  let acc = undefined;
+  return (...args) => {
     clearTimeout(timeoutId);
-    hash = preProcessQuery(hash);
-    _replace = _replace || replace;
-    tempHash = Object.assign(tempHash || {}, hash);
+    acc = accumulate(acc, ...args);
     timeoutId = setTimeout(() => {
-      tempHash = sanitizeHash(tempHash);
-      const current = getCurrent();
-      if (!_replace) {
-        tempHash = Object.assign({}, current.hash, tempHash);
-      }
-      const route = Object.assign({}, current, { hash: tempHash });
-      doPush(route);
-      tempHash = undefined;
+      execute(acc);
+      acc = undefined;
       timeoutId = undefined;
-      _replace = false;
     });
   };
+}
+
+export function makePushState(getCurrent, doPush, preProcessQuery) {
+  function accumulatePushs(acc={}, hash, replace) {
+    hash = preProcessQuery(hash);
+    replace = acc.replace || replace;
+    hash = Object.assign(acc.hash || {}, hash);
+    return { hash, replace };
+  }
+
+  function executePush(data) {
+    let { hash , replace } = data;
+    hash = sanitizeHash(hash);
+    const current = getCurrent();
+    if (!replace) {
+      hash = Object.assign({}, current.hash, hash);
+    }
+    const route = Object.assign({}, current, { hash });
+    doPush(route);
+  }
+  return accumulatingFunctionTimeout(accumulatePushs, executePush);
 }
 
 export const routerService = {
