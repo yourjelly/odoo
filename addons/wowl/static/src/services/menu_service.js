@@ -61,8 +61,8 @@ function makeMenus(env, menusData, fetchLoadMenus) {
         // FIXME: lock API: maybe do something like
         // pushState({menu_id: ...}, { lock: true}); ?
         env.services.router.pushState({
-          "lock menu_id": `${menu.id}`,
-        });
+          menu_id: `${menu.id}`,
+        }, {lock: 'on'});
       }
     },
     async reload() {

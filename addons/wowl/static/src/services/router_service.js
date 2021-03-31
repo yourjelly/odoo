@@ -55,30 +55,18 @@ function getRoute() {
   return { pathname, search: searchQuery, hash: hashQuery };
 }
 
-/**
- * @param {function} getCurrent function that returns the current route
- * @returns {function} function to compute the next hash
- */
-function applyLocking(lockedKeys, hash, currentRoute) {
+function applyLocking(lockedKeys, hash, currentRoute, lock=false) {
   const newHash = {};
   Object.keys(hash).forEach((key) => {
-    if (lockedKeys.has(key)) {
+    if (!lock && lockedKeys.has(key)){ // forbid implicit override of key
       return;
     }
-    const k = key.split(" ");
-    let value;
-    if (k.length === 2) {
-      value = hash[key];
-      key = k[1];
-      if (k[0] === "lock") {
-        lockedKeys.add(key);
-      } else if (k[0] === "unlock") {
-        lockedKeys.delete(key);
-      } else {
-        return;
-      }
+    if (lock === 'on') {
+      lockedKeys.add(key);
+    } else if (lock === 'off') {
+      lockedKeys.delete(key);
     }
-    newHash[key] = value || hash[key];
+    newHash[key] = hash[key];
   });
 
   Object.keys(currentRoute.hash).forEach((key) => {
@@ -99,11 +87,13 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     bus.trigger('ROUTE_CHANGE');
   });
 
-  function accumulatePushs(acc={}, hash, replace) {
-    hash = applyLocking(lockedKeys, hash, current);
-    replace = acc.replace || replace;
-    hash = Object.assign(acc.hash || {}, hash);
-    return { hash, replace };
+  function accumulatePushs(accumulatedArgs, currentArgs) {
+    const [prevHash, prevOptions={}] = accumulatedArgs;
+    let [hash, options={}] = currentArgs;
+    hash = applyLocking(lockedKeys, hash, current, options.lock);
+    const replace = prevOptions.replace || options.replace;
+    hash = Object.assign(prevHash || {}, hash);
+    return [hash, {replace}];
   }
 
   function computeNewRoute(hash, replace, currentRoute) {
@@ -111,24 +101,23 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     if (!replace) {
       hash = Object.assign({}, currentRoute.hash, hash);
     }
-    const newRoute = Object.assign({}, currentRoute, { hash });
-    if (!shallowEqual(newRoute.hash, currentRoute.hash)) {
-      return newRoute;
+    if (!shallowEqual(hash, currentRoute.hash)) {
+      return Object.assign({}, currentRoute, { hash });
     }
     return false;
   }
 
   return {
-    pushState: accumulatingFunctionTimeout(accumulatePushs, (acc) => {
-      const newRoute = computeNewRoute(acc.hash, acc.replace, current);
+    pushState: accumulatingFunctionTimeout(accumulatePushs, (hash, options) => {
+      const newRoute = computeNewRoute(hash, options.replace, current);
       if (newRoute) {
         const url = routeToUrl(newRoute);
         historyObj.pushState({}, url, url);
       }
       current  = getRoute();
     }),
-    replaceState: accumulatingFunctionTimeout(accumulatePushs, (acc) => {
-      const newRoute = computeNewRoute(acc.hash, acc.replace, current);
+    replaceState: accumulatingFunctionTimeout(accumulatePushs, (hash, options) => {
+      const newRoute = computeNewRoute(hash, options.replace, current);
       if (newRoute) {
         const url = routeToUrl(newRoute);
         historyObj.replaceState({}, url, url);
@@ -144,13 +133,13 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
 
 function accumulatingFunctionTimeout(accumulate, execute) {
   let timeoutId;
-  let acc = undefined;
+  let acc = [];
   return (...args) => {
     clearTimeout(timeoutId);
-    acc = accumulate(acc, ...args);
+    acc = accumulate(acc, args);
     timeoutId = setTimeout(() => {
-      execute(acc);
-      acc = undefined;
+      execute(...acc);
+      acc = [];
       timeoutId = undefined;
     });
   };
