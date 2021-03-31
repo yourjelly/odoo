@@ -255,6 +255,14 @@ class MrpBom(models.Model):
             recStack[v] = False
             return False
 
+        def get_products_boms(products):
+            return {
+                product: bom
+                for product, bom in zip(products_to_search, self._get_product2bom(
+                    products=products, picking_type=picking_type or self.picking_type_id,
+                    company_id=self.env.get('company_id'), bom_type='phantom'))
+            }
+
         boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
         lines_done = []
         V |= set([product.product_tmpl_id.id])
@@ -278,7 +286,7 @@ class MrpBom(models.Model):
 
             line_quantity = current_qty * current_line.product_qty
             if not current_line.product_id in product_boms:
-                product_boms.update(self._get_product2bom(products_to_search, bom_type='phantom', picking_type=picking_type or self.picking_type_id))
+                product_boms.update(get_products_boms(products_to_search))
                 products_to_search = self.env['product.product']
             bom = product_boms.get(current_line.product_id)
             if bom:
