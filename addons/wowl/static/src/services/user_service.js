@@ -41,7 +41,7 @@ export function makeSetCompanies(getAllowedCompanyIds) {
       }
       nextCompanyIds.unshift(companyId);
     }
-    return nextCompanyIds;
+    return nextCompanyIds.length ? nextCompanyIds : [companyId];
   };
 }
 
