@@ -192,13 +192,17 @@ class MrpBom(models.Model):
         return self.search(domain, order='sequence, product_id', limit=1)
 
     @api.model
-    def _get_product2bom(self, products, bom_type=False):
+    def _get_product2bom(self, products, bom_type=False, picking_type=False):
         """Optimized variant of _bom_find to work with recordset"""
-        products = products.filtered(lambda product: product.type != 'service')
+        stockable_products = products.filtered(lambda p: p.type != 'service')
         if not products:
             return {}
-        product_templates = products.mapped('product_tmpl_id')
-        domain = ['|', ('product_id', 'in', products.ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', product_templates.ids)]
+        if not stockable_products:
+            return {}.fromkeys(products, False)
+        product_templates = stockable_products.mapped('product_tmpl_id')
+        domain = ['|', ('product_id', 'in', stockable_products.ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', product_templates.ids)]
+        if picking_type:
+            domain += ['|', ('picking_type_id', '=', picking_type.id), ('picking_type_id', '=', False)]
         if self.env.context.get('company_id'):
             domain = domain + ['|', ('company_id', '=', False), ('company_id', '=', self.env.context.get('company_id'))]
         if bom_type:
@@ -207,19 +211,25 @@ class MrpBom(models.Model):
         boms = self.search(domain, order='sequence, product_id')
         template2bom = {}
         variant2bom = {}
+        # Cannot use bom.sequence as unset sequence values are set to 0.
+        # Use counter to maintain the order of self.search above.
+        psql_sequence = 0
         for bom in boms:
             # Use "setdefault" to take only first bom if we have few ones for
             # the same product
             if bom.product_id:
-                variant2bom.setdefault(bom.product_id, bom)
+                variant2bom.setdefault(bom.product_id, {'bom': bom, 'sequence': psql_sequence})
             else:
-                template2bom.setdefault(bom.product_tmpl_id, bom)
-
+                template2bom.setdefault(bom.product_tmpl_id, {'bom': bom, 'sequence': psql_sequence})
+            psql_sequence = psql_sequence + 1
         result = {}
         for p in products:
-            bom = variant2bom.get(p) or template2bom.get(p.product_tmpl_id)
-            if bom:
-                result[p] = bom
+            if p.type == 'service':
+                result[p] = False
+            elif template2bom.get(p.product_tmpl_id, {'sequence': float('inf')})['sequence'] < variant2bom.get(p, {'sequence':float('inf')})['sequence']:
+                result[p] = template2bom.get(p.product_tmpl_id, {}).get('bom')
+            else:
+                result[p] = variant2bom.get(p, {}).get('bom') or template2bom.get(p.product_tmpl_id, {}).get('bom')
         return result
 
     def explode(self, product, quantity, picking_type=False):
@@ -249,10 +259,16 @@ class MrpBom(models.Model):
         lines_done = []
         V |= set([product.product_tmpl_id.id])
 
-        bom_lines = [(bom_line, product, quantity, False) for bom_line in self.bom_line_ids]
+        bom_lines = []
+        products_to_search = self.env['product.product']
         for bom_line in self.bom_line_ids:
-            V |= set([bom_line.product_id.product_tmpl_id.id])
-            graph[product.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
+            product_id = bom_line.product_id
+            V |= set([product_id.product_tmpl_id.id])
+            graph[product.product_tmpl_id.id].append(product_id.product_tmpl_id.id)
+            bom_lines.append((bom_line, product, quantity, False))
+            products_to_search |= product_id
+        product_boms = self._get_product2bom(products_to_search, bom_type='phantom', picking_type=picking_type or self.picking_type_id)
+        products_to_search = self.env['product.product']
         while bom_lines:
             current_line, current_product, current_qty, parent_line = bom_lines[0]
             bom_lines = bom_lines[1:]
@@ -261,15 +277,20 @@ class MrpBom(models.Model):
                 continue
 
             line_quantity = current_qty * current_line.product_qty
-            bom = self._bom_find(product=current_line.product_id, picking_type=picking_type or self.picking_type_id, company_id=self.company_id.id, bom_type='phantom')
+            if not current_line.product_id in product_boms:
+                product_boms.update(self._get_product2bom(products_to_search, bom_type='phantom', picking_type=picking_type or self.picking_type_id))
+                products_to_search = self.env['product.product']
+            bom = product_boms.get(current_line.product_id)
             if bom:
                 converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
-                bom_lines = [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids] + bom_lines
+                bom_lines = bom_lines + [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
                 for bom_line in bom.bom_line_ids:
                     graph[current_line.product_id.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
                     if bom_line.product_id.product_tmpl_id.id in V and check_cycle(bom_line.product_id.product_tmpl_id.id, {key: False for  key in V}, {key: False for  key in V}, graph):
                         raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
                     V |= set([bom_line.product_id.product_tmpl_id.id])
+                    if not bom_line.product_id in product_boms:
+                        products_to_search |= bom_line.product_id
                 boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
             else:
                 # We round up here because the user expects that if he has to consume a little more, the whole UOM unit
