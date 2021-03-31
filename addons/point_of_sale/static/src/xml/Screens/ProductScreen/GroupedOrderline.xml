@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="GroupedOrderline" owl="1">
+        <li t-on-click="onClickGroupedOrderline()" class="orderline"
+            t-att-class="props.additionalClasses">
+            <span class="product-name">
+                <t t-esc="getFullProductName()" />
+                <span> </span>
+            </span>
+            <span class="price">
+                <t t-esc="env.model.formatCurrency(getGroupedDisplayPrice())" />
+            </span>
+            <ul class="info-list">
+                <t t-if="getGroupedQuantityStr() !== '1' or _orderline.id === props.activeOrderlineId">
+                    <li class="info">
+                        <em>
+                            <t t-esc="getGroupedQuantityStr()" />
+                        </em>
+                        <span> </span>
+                        <t t-esc="getGroupedOrderlineUnit().name" />
+                        at
+                        <t t-if="showListPrice()">
+                            <s>
+                                <t t-esc="getFormattedProductLstPrice()" />
+                            </s>
+                            <t t-esc="getFormattedDisplayUnitPrice()" />
+                        </t>
+                        <t t-else="">
+                            <t t-esc="getFormattedDisplayUnitPrice()" />
+                        </t>
+                        /
+                        <t t-esc="getOrderlineUnit().name" />
+                    </li>
+                </t>
+            </ul>
+        </li>
+    </t>
+
+</templates>

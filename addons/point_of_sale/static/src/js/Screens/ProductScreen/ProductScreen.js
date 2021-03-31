@@ -5,7 +5,9 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const SetPricelistButton = require('point_of_sale.SetPricelistButton');
     const SetFiscalPositionButton = require('point_of_sale.SetFiscalPositionButton');
+    const SwitchViewButton = require('point_of_sale.SwitchViewButton');
     const Orderline = require('point_of_sale.Orderline');
+    const GroupedOrderline = require('point_of_sale.GroupedOrderline');
     const OrderSummary = require('point_of_sale.OrderSummary');
     const ActionpadWidget = require('point_of_sale.ActionpadWidget');
     const NumpadWidget = require('point_of_sale.NumpadWidget');
@@ -20,11 +22,13 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
         static components = {
             SetPricelistButton,
             SetFiscalPositionButton,
+            SwitchViewButton,
             Orderline,
             OrderSummary,
             ActionpadWidget,
             NumpadWidget,
             MobileOrderWidget,
+            GroupedOrderline,
         };
         constructor() {
             super(...arguments);
@@ -249,6 +253,9 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             return (
                 this.env.model.config.use_pricelist && this.env.model.getRecords('product.pricelist').length > 1
             );
+        }
+        showSwitchViewButton() {
+            return this.env.model.getDisallowLineQuantityChange();
         }
         showSetFiscalPositionButton() {
             return this.env.model.getRecords('account.fiscal.position').length > 0;

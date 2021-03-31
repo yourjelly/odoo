@@ -169,6 +169,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     filter: undefined,
                     searchDetails: {},
                 },
+                ProductScreen: {
+                    switchMode: 'default',
+                },
                 OrderManagementScreen: {
                     managementOrderIds: new Set([]),
                     activeOrderId: false,
@@ -2496,7 +2499,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 }
             }
         }
-
+        actionSwitchView() {
+            this.data.uiState.ProductScreen.switchMode = this.getSwitchMode() === "default"? "details" : "default";
+        }
         //#endregion ACTIONS
 
         //#region GETTERS
@@ -2509,6 +2514,9 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
         getActiveScreen() {
             return this.data.uiState.activeScreen;
+        }
+        getSwitchMode() {
+            return this.data.uiState.ProductScreen.switchMode;
         }
         getActiveScreenProps() {
             return Object.assign({}, this.data.uiState.activeScreenProps, { activeOrder: this.getActiveOrder() });
@@ -2827,6 +2835,13 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 noTaxUnitPrice,
                 withTaxUnitPrice,
             };
+        }
+        getOrderlinesDisplay(order) {
+            let lines = this.getOrderlines(order);
+            if(this.getSwitchMode() === "default") {
+                return Object.values(_.groupBy(lines, (line) => line.product_id));
+            }
+            return lines;
         }
         getActivePayment(order) {
             return this.getRecord('pos.payment', order._extras.activePaymentId);

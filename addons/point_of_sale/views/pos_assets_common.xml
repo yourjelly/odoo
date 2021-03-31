@@ -40,6 +40,7 @@
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/PaymentScreen/PaymentScreenStatus.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/PaymentScreen/PaymentScreen.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/Orderline.js"></script>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/GroupedOrderline.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/OrderSummary.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/NumpadWidget.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/ActionpadWidget.js"></script>
@@ -77,6 +78,7 @@
     <script type="text/javascript" src="/point_of_sale/static/src/js/Dialog.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/ControlButtons/SetPricelistButton.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/ControlButtons/SetFiscalPositionButton.js"></script>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/ProductScreen/ControlButtons/SwitchViewButton.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/ChromeWidgets/ClientScreenButton.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Misc/NumberBuffer.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Misc/MobileOrderWidget.js"></script>
