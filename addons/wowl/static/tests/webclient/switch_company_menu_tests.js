@@ -20,6 +20,7 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
         allowed_companies: {
           1: { id: 1, name: "Hermit" },
           2: { id: 2, name: "Herman's" },
+          3: { id: 3, name: "Heroes TM" },
         },
         current_company: 1,
       },
@@ -43,10 +44,10 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
     assert.strictEqual(scMenu.el.textContent, "Hermit");
 
     await click(scMenu.el.querySelector(".o_dropdown_toggler"));
-    assert.containsN(scMenu, ".toggle_company", 2);
-    assert.containsN(scMenu, ".log_into", 2);
+    assert.containsN(scMenu, ".toggle_company", 3);
+    assert.containsN(scMenu, ".log_into", 3);
     assert.containsOnce(scMenu.el, ".fa-check-square");
-    assert.containsOnce(scMenu.el, ".fa-square-o");
+    assert.containsN(scMenu.el, ".fa-square-o", 2);
     assert.strictEqual(
       scMenu.el.querySelector(".fa-check-square").closest(".o_dropdown_item").textContent,
       "Hermit"
@@ -55,46 +56,114 @@ QUnit.module("SwitchCompanyMenu", (hooks) => {
       scMenu.el.querySelector(".fa-square-o").closest(".o_dropdown_item").textContent,
       "Herman's"
     );
-    assert.strictEqual(scMenu.el.querySelector(".o_dropdown_menu").textContent, "HermitHerman's");
+    assert.strictEqual(scMenu.el.querySelector(".o_dropdown_menu").textContent, "HermitHerman'sHeroes TM");
   });
 
-  QUnit.test("toggle company", async (assert) => {
-    assert.expect(3);
+  QUnit.test("companies can be toggled and logged in", async (assert) => {
+    assert.expect(20);
 
     const env = await makeTestEnv(testConfig);
     const target = getFixture();
     const scMenu = await mount(SwitchCompanyMenu, { env, target });
     registerCleanup(() => scMenu.destroy());
 
+    /**
+     *   [x] **Company 1**          
+     *   [ ] Company 2     
+     *   [ ] Company 3          
+     */
     assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
 
     await click(scMenu.el.querySelector(".o_dropdown_toggler"));
-    const secondCompanyToggler = scMenu.el.querySelectorAll(".toggle_company")[1];
-    await click(secondCompanyToggler);
+    await click(scMenu.el.querySelectorAll(".toggle_company")[1]);
+    /**
+     *   [x] **Company 1**          
+     *   [x] Company 2      -> toggle
+     *   [ ] Company 3          
+     */
     assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1, 2]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
 
     await click(scMenu.el.querySelector(".o_dropdown_toggler"));
     await click(scMenu.el.querySelectorAll(".toggle_company")[0]);
+    /**
+     *   [ ] Company 1       -> toggle
+     *   [x] **Company 2**     
+     *   [ ] Company 3          
+     */
     assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2]);
-  });
-
-  QUnit.test("log into company", async (assert) => {
-    assert.expect(3);
-
-    const env = await makeTestEnv(testConfig);
-    const target = getFixture();
-    const scMenu = await mount(SwitchCompanyMenu, { env, target });
-    registerCleanup(() => scMenu.destroy());
-
-    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
 
     await click(scMenu.el.querySelector(".o_dropdown_toggler"));
-    const secondCompanyLoginto = scMenu.el.querySelectorAll(".log_into")[1];
-    await click(secondCompanyLoginto);
-    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2, 1]);
+    await click(scMenu.el.querySelectorAll(".toggle_company")[1]);
+    /**
+     *   [ ] Company 1       
+     *   [x] **Company 2**  -> tried to toggle  
+     *   [ ] Company 3          
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
+
+    await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+    await click(scMenu.el.querySelectorAll(".toggle_company")[2]);
+    /**
+     *   [ ] Company 1       
+     *   [x] **Company 2** 
+     *   [x] Company 3      -> toggle
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2,3]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
+
+    await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+    await click(scMenu.el.querySelectorAll(".toggle_company")[0]);
+    /**
+     *   [x] Company 1      -> toggle
+     *   [x] **Company 2** 
+     *   [x] Company 3      
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2, 3, 1]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
 
     await click(scMenu.el.querySelector(".o_dropdown_toggler"));
     await click(scMenu.el.querySelectorAll(".log_into")[0]);
-    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1, 2]);
+     /**
+     *   [x] **Company 1**      -> click label
+     *   [x] Company 2 
+     *   [x] Company 3      
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1,2,3]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
+
+    await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+    await click(scMenu.el.querySelectorAll(".log_into")[0]);
+     /**
+     *   [x] **Company 1**      -> tried to click label
+     *   [x] Company 2 
+     *   [x] Company 3      
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1,2,3]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
+
+    await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+    await click(scMenu.el.querySelectorAll(".toggle_company")[0]);
+     /**
+     *   [ ] Company 1      -> toggle
+     *   [x] **Company 2** 
+     *   [x] Company 3      
+     */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [2,3]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 2);
+
+    await click(scMenu.el.querySelector(".o_dropdown_toggler"));
+    await click(scMenu.el.querySelectorAll(".log_into")[0]);
+    /**
+    *   [x] **Company 1**      -> click label
+    *   [x] Company 2 
+    *   [x] Company 3      
+    */
+    assert.deepEqual(scMenu.env.services.user.context.allowed_company_ids, [1, 2,3]);
+    assert.strictEqual(scMenu.env.services.user.current_company.id, 1);
   });
+
 });
