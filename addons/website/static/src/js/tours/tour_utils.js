@@ -94,7 +94,7 @@ function changeIcon(snippet, index = 0, position = "bottom") {
 
 function changeImage(snippet, position = "bottom") {
     return {
-        trigger: `#wrapwrap .${snippet.id} img`,
+        trigger: snippet.id ? `#wrapwrap .${snippet.id} img` : snippet,
         content: _t("<b>Double click on an image</b> to change it with one of your choice."),
         position: position,
         run: "dblclick",
@@ -160,7 +160,7 @@ function clickOnEdit(position = "bottom") {
  */
 function clickOnSnippet(snippet, position = "bottom") {
     return {
-        trigger: `#wrapwrap .${snippet.id}`,
+        trigger: snippet.id ? `#wrapwrap .${snippet.id}` : snippet,
         content: _t("<b>Click on a snippet</b> to access its options menu."),
         position: position,
         run: "click",
@@ -184,7 +184,7 @@ function clickOnSave(position = "bottom") {
  */
 function clickOnText(snippet, element, position = "bottom") {
     return {
-        trigger: `#wrapwrap .${snippet.id} ${element}`,
+        trigger: snippet.id ? `#wrapwrap .${snippet.id} ${element}` : snippet,
         content: _t("<b>Click on a text</b> to start editing it."),
         position: position,
         run: "text",

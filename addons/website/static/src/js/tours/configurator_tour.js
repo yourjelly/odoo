@@ -4,28 +4,35 @@ odoo.define("website.configurator.tour", function (require) {
 const wTourUtils = require("website.tour_utils");
 const core = require("web.core");
 const _t = core._t;
-const snippets = require('tour_configurator.snippets');
 
-const imageStep = snippets.title.snippet.id === 's_text_image' ?
-    wTourUtils.changeImage(snippets.title.snippet) : wTourUtils.changeBackground();
+let titleSelector = '#wrap > section:first-child';
+let title = $(titleSelector).find('h1, h2').first();
+if (!title.length)
+    titleSelector = titleSelector.replace('section:first-child', 'section:nth-child(2)');
+title = $(titleSelector).find('h1, h2').first();
+let isTitleTextImage = $(titleSelector).hasClass('s_text_image');
+titleSelector = titleSelector.concat(` ${title.is('h1') ? 'h1' : 'h2'}`);
+
+const shapeSelector = '#wrap > section[data-oe-shape-data]';
+const backgroundSelector = '#wrap > section:nth-child(2)';
+
+const imageStep = isTitleTextImage ?
+    wTourUtils.changeImage(titleSelector.replace('h2', 'img')) : wTourUtils.changeBackground();
 
 const backgroundColorStep = [wTourUtils.changeBackgroundColor()];
-if (snippets.background) {
-    backgroundColorStep.unshift(wTourUtils.clickOnSnippet(snippets.background));
+if (!isTitleTextImage)
+    backgroundColorStep.unshift(wTourUtils.clickOnSnippet(backgroundSelector));
 
-}
 const shapeStep = [];
-if (snippets.shape) {
-    const previousID = snippets.background ? snippets.background.id : snippets.title.snippet.id;
-    if (snippets.shape.id !== previousID) {
-        shapeStep.push(wTourUtils.clickOnSnippet(snippets.shape));
-    }
+if ($(shapeSelector).first().length) {
+    if (!$(backgroundSelector).is($(shapeSelector)))
+        shapeStep.push(wTourUtils.clickOnSnippet(shapeSelector));
     shapeStep.push(wTourUtils.changeOption('BackgroundShape', 'we-toggler', _t('Background Shape')));
-    shapeStep.push(wTourUtils.selectNested('we-select-page', 'BackgroundShape', ':not(.o_we_pager_controls', _t('Background Shape'))); 
+    shapeStep.push(wTourUtils.selectNested('we-select-page', 'BackgroundShape', ':not(.o_we_pager_controls', _t('Background Shape')));
 }
 
 const steps = [
-    wTourUtils.clickOnText(snippets.title.snippet, snippets.title.element),
+    wTourUtils.clickOnText(titleSelector),
     imageStep,
     ...backgroundColorStep,
     ...shapeStep,
