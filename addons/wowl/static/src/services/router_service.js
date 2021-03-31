@@ -107,8 +107,9 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     return false;
   }
 
+  const cumulativePush = cumulativeFunction(accumulatePushs);
   return {
-    pushState: accumulatingFunctionTimeout(accumulatePushs, (hash, options) => {
+    pushState: cumulativePush((hash, options) => {
       const newRoute = computeNewRoute(hash, options.replace, current);
       if (newRoute) {
         const url = routeToUrl(newRoute);
@@ -116,7 +117,7 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
       }
       current  = getRoute();
     }),
-    replaceState: accumulatingFunctionTimeout(accumulatePushs, (hash, options) => {
+    replaceState: cumulativePush((hash, options) => {
       const newRoute = computeNewRoute(hash, options.replace, current);
       if (newRoute) {
         const url = routeToUrl(newRoute);
@@ -129,6 +130,25 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     },
     redirect: (url, wait) => redirect(env, url, wait),
   };
+}
+
+function cumulativeFunction(accumulator) {
+  accumulator = accumulator || ((prevArgs, currentArgs) => {return currentArgs;});
+
+  function cumulativeExecutable(executeCallback) {
+    let timeoutId;
+    let acc = [];
+    return (...args) => {
+      clearTimeout(timeoutId);
+      acc = accumulator(acc, args);
+      timeoutId = setTimeout(() => {
+        executeCallback(...acc);
+        acc = [];
+        timeoutId = undefined;
+      });
+    };
+  }
+  return cumulativeExecutable;
 }
 
 function accumulatingFunctionTimeout(accumulate, execute) {
