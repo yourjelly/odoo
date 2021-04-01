@@ -77,7 +77,7 @@ function applyLocking(lockedKeys, hash, currentRoute, lock=false) {
   return newHash;
 }
 
-function routerSkeleton(env, privateBus, getRoute, historyObj) {
+export function routerSkeleton(env, privateBus, getRoute, historyObj) {
   let bus = env.bus;
   let current = getRoute();
   const lockedKeys = new Set();
@@ -86,15 +86,6 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
     current = getRoute();
     bus.trigger('ROUTE_CHANGE');
   });
-
-  function accumulatePushs(accumulatedArgs, currentArgs) {
-    const [prevHash, prevOptions={}] = accumulatedArgs;
-    let [hash, options={}] = currentArgs;
-    hash = applyLocking(lockedKeys, hash, current, options.lock);
-    const replace = prevOptions.replace || options.replace;
-    hash = Object.assign(prevHash || {}, hash);
-    return [hash, {replace}];
-  }
 
   function computeNewRoute(hash, replace, currentRoute) {
     hash = sanitizeHash(hash);
@@ -105,6 +96,16 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
       return Object.assign({}, currentRoute, { hash });
     }
     return false;
+  }
+
+  function replayPushes(allCallsArgs) {
+    let finalHash, finalOptions={};
+    allCallsArgs.forEach(([hash, options={}]) => {
+      hash = applyLocking(lockedKeys, hash, current, options.lock);
+      finalOptions.replace = finalOptions.replace || options.replace;
+      finalHash = Object.assign(finalHash || {}, hash);
+    });
+    return [finalHash, finalOptions];
   }
 
   function pushState(hash, options) {
@@ -126,8 +127,14 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
   }
 
   return {
-    pushState: cumulativeCallable({accumulator: accumulatePushs, callable: pushState}),
-    replaceState: cumulativeCallable({accumulator: accumulatePushs, callable: replaceState}),
+    pushState: cumulativeCallable((allPushes) => {
+      const [hash, options] = replayPushes(allPushes);
+      pushState(hash, options);
+    }),
+    replaceState: cumulativeCallable((allPushes) => {
+      const [hash, options] = replayPushes(allPushes);
+      replaceState(hash, options);
+    }),
     get current() {
       return current;
     },
@@ -135,39 +142,22 @@ function routerSkeleton(env, privateBus, getRoute, historyObj) {
   };
 }
 
-function cumulativeFunction(accumulator) {
-  accumulator = accumulator || ((prevArgs, currentArgs) => {return currentArgs;});
-
-  function cumulativeExecutable(executeCallback) {
-    let timeoutId;
-    let acc = [];
-    return (...args) => {
-      clearTimeout(timeoutId);
-      acc = accumulator(acc, args);
-      timeoutId = setTimeout(() => {
-        executeCallback(...acc);
-        acc = [];
-        timeoutId = undefined;
-      });
-    };
-  }
-  return cumulativeExecutable;
-}
-
-function cumulativeCallable({accumulator, callable}) {
-  if (!accumulator) {
-    accumulator = (prevArgs, currentArgs) => currentArgs;
-  }
-  let timeoutId;
-  let acc = [];
+function cumulativeCallable(callable, timeout) {
+  let timeoutId, acc = [], prom, resolve;
   return (...args) => {
     clearTimeout(timeoutId);
-    acc = accumulator(acc, args);
+    if (!prom) {
+      prom = new Promise((_r) => {resolve = _r;});
+    }
+    acc.push(args);
     timeoutId = setTimeout(() => {
-      callable(...acc);
+      resolve(callable(acc));
       acc = [];
       timeoutId = undefined;
-    });
+      prom = undefined;
+      resolve = undefined;
+    }, timeout);
+    return prom;
   };
 }
 
