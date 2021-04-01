@@ -20,6 +20,7 @@
 }
 
 .o_Message_authorName {
+    color: $o-strong-color;
     margin-inline-end: map-get($spacers, 2);
 }
 
