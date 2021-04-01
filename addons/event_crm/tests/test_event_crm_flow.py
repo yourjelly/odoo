@@ -196,4 +196,4 @@ class TestEventCrmFlow(TestEventCrmCommon):
                                   ):
             abc = leads._merge_opportunity(auto_unlink=False, max_length=None)
 
-            print("merge ................",abc)
+            print("merge ................",abc.registration_ids)

@@ -17,6 +17,7 @@ from odoo.tools.translate import _
 from odoo.tools import date_utils, email_re, email_split, is_html_empty
 
 from . import crm_stage
+# from odoo.addons.crm.models.crm_lead import CRM_LEAD_FIELDS_TO_MERGE
 
 _logger = logging.getLogger(__name__)
 
@@ -675,11 +676,9 @@ class Lead(models.Model):
             if vals.get('website'):
                 vals['website'] = self.env['res.partner']._clean_website(vals['website'])
         leads = super(Lead, self).create(vals_list)
-
         for lead, values in zip(leads, vals_list):
             if any(field in ['active', 'stage_id'] for field in values):
                 lead._handle_won_lost(values)
-
         return leads
 
     def write(self, vals):
@@ -1400,7 +1399,7 @@ class Lead(models.Model):
         }
 
     def _merge_get_fields(self):
-        print("_merge_get_fields",list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys()))
+        # print("_merge_get_fields",list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys()))
         return list(CRM_LEAD_FIELDS_TO_MERGE) + list(self._merge_get_fields_specific().keys())
 
     def _convert_opportunity_data(self, customer, team_id=False):

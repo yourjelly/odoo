@@ -365,15 +365,20 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         # ensure tests are synchronized with crm code
         self.assertTrue(all(field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE))
         self.assertTrue(all(list(self.env['crm.lead']._merge_get_fields_specific().keys())))
-
+        print("fields_all",fields_all)
         for field in CRM_LEAD_FIELDS_TO_MERGE:
             print("field in fields_all",field in fields_all)
 
         for field in list(self.env['crm.lead']._merge_get_fields_specific().keys()):
-            print("next field..", all(field))
+            print("next field..", field,all(field))
 
 
-        self.assertTrue(all(field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE + list(self.env['crm.lead']._merge_get_fields_specific().keys())))
+        self.assertTrue((field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE + list(self.env['crm.lead']._merge_get_fields_specific().keys())))
+        print("field all.", fields_all)
+        for fname in fields_all:
+
+            print("fname-- opportunity[fname]",fname)
+            print("--", opportunity[fname])
         original_opp_values = dict(
             (fname, opportunity[fname])
             for fname in fields_all

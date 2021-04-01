@@ -3,8 +3,9 @@
 
 
 from odoo.addons.crm.tests import common as crm_common
-from odoo.addons.sale import TestSaleCommon
 from odoo.tests.common import tagged, users
+
+
 
 
 @tagged('lead_manage')
@@ -100,3 +101,40 @@ class TestLeadConvertToTicket(crm_common.TestCrmCommon):
         self.assertEqual(lead.partner_id, self.env['res.partner'])
         self.assertEqual(action['context']['default_partner_id'], False)
 
+
+    def test_leads_merge_orders(self):
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+        # print("so",sale_order)
+
+        # order = self.env['sale.order']
+        print("==================test sale crm=================!!!!!!!!!")
+        lead1 = self.env['crm.lead'].create({
+            'name': 'Lead1',
+            'type': 'opportunity',
+            'email_from': 'testattendee@example.com',
+        })
+        order_id = self.env['sale.order'].sudo.create({
+            'partner_id': lead1.id,
+            # 'order_line': [(0, 0, {'name': prod_gap.name, 'product_id': prod_gap.id, 'product_uom_qty': 2, 'product_uom': prod_gap.uom_id.id, 'price_unit': prod_gap.list_price})],
+
+        })
+        # so.action_confirm()
+        print("order_id '''''''''''",order_id)
+        lead2 = self.env['crm.lead'].create({
+            'name': 'Lead2',
+            'email_from': 'testlead@example.com',
+        })
+        leads = lead1 | lead2
+        # print("leads,,,,,,,,,,,,,,,", leads)
+        merge = self.env['crm.merge.opportunity'].with_context({
+            'active_model': 'crm.lead',
+            'active_ids': self.leads.ids,
+            'active_id': False,
+        }).create({
+            'team_id': self.sales_team_convert.id,
+            'user_id': False,
+        })
