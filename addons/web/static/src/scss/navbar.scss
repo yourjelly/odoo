@@ -21,7 +21,6 @@ body.o_is_superuser .o_menu_systray {
 .o_main_navbar {
     position: relative;
     height: $o-navbar-height;
-    border-bottom: 1px solid $o-navbar-inverse-link-hover-bg;
     background-color: $o-brand-odoo;
     color: white;
 
