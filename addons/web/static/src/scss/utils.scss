@@ -325,6 +325,7 @@
     }
     &:focus, &:active, &:focus:active {
         outline: none;
+        box-shadow: none;
     }
 }
 @mixin o-kanban-dropdown-open {
