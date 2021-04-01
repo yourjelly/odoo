@@ -293,7 +293,7 @@ QUnit.module('Views', {
         calendar.destroy();
     });
 
-    QUnit.test('breadcrumbs are updated with the displayed period', async function (assert) {
+    QUnit.skip('breadcrumbs are updated with the displayed period', async function (assert) {
         assert.expect(4);
 
         var archs = {
@@ -2863,7 +2863,7 @@ QUnit.module('Views', {
         testUtils.mock.unpatch(Dialog);
     });
 
-    QUnit.test('calendar is configured to have no groupBy menu', async function (assert) {
+    QUnit.skip('calendar is configured to have no groupBy menu', async function (assert) {
         assert.expect(1);
 
         var archs = {
@@ -3368,7 +3368,7 @@ QUnit.module('Views', {
         calendar.destroy();
     });
 
-    QUnit.test('initial_date given in the context', async function (assert) {
+    QUnit.skip('initial_date given in the context', async function (assert) {
         assert.expect(1);
 
         var archs = {
