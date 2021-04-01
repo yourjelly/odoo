@@ -73,17 +73,10 @@ class TestWebsiteVisitor(TestCrmCommon):
     def test_merge_vistors_crm(self):
         """ In case of mix, opportunities are on top, and result is an opportunity
         """
-
         visitor_sudo_1 = self.env['website.visitor'].sudo().create({
             'name': 'Visitor 1',
         })
         visitor = visitor_sudo_1.with_user(self.env.user)
-        print("visitor_sudo////////////////",visitor_sudo_1)
-        print("visitor...........",visitor)
-        # visitor_sudo_1.write({'partner_id': self.test_partner.id})
-
-
-
         lead1 = self.env['crm.lead'].create({
             'name': 'Lead 1',
             'type': 'lead',
@@ -100,18 +93,9 @@ class TestWebsiteVisitor(TestCrmCommon):
             'email_from': 'Amy Wong <woonngamy@test.example.com',
 
         })
-        # print("leads 2 ,,,,,,,,,,,,", lead2)
-        leads = self.env['crm.lead']
-        # print("leads...",leads,leads.ids)
-        #
-        # merge = self.env['crm.lead'].with_context({
-        #     'active_model': 'crm.lead',
-        #     'active_ids': leads.ids,
-        #     'active_id': False,
-        # }).create({'visitor_ids': [(4, visitor.id)]})
-        # print("kkkkkkkkkkkkkkkkkkkkkkkkk",merge)
-
-        #
+        leads = lead1|lead2
+        leads = self.env['crm.lead'].browse(leads.ids)._sort_by_confidence_level(reverse=True)
+        result = leads._merge_opportunity(auto_unlink=False, max_length=None)
         with self.assertLeadMerged(lead1, leads,
                                    name='Lead 1',
                                   ):

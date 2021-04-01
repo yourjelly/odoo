@@ -27,5 +27,6 @@ class Lead(models.Model):
         fields_info = super(Lead, self)._merge_get_fields_specific()
         # add all the attendees from all lead to merge
         fields_info['registration_ids'] = lambda fname, leads: [(6, 0, leads.registration_ids.ids)]
-        print("fields info in event crm............",fields_info)
+
+        print("fields info in event crm............",fields_info['registration_ids'])
         return fields_info

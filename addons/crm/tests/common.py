@@ -363,6 +363,15 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         # save opportunity value before being modified by merge process
         fields_all = self.FIELDS_FIRST_SET + ['description', 'type', 'priority']
         # ensure tests are synchronized with crm code
+        self.assertTrue(all(field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE))
+        self.assertTrue(all(list(self.env['crm.lead']._merge_get_fields_specific().keys())))
+
+        for field in CRM_LEAD_FIELDS_TO_MERGE:
+            print("field in fields_all",field in fields_all)
+
+        for field in list(self.env['crm.lead']._merge_get_fields_specific().keys()):
+            print("next field..", all(field))
+
 
         self.assertTrue(all(field in fields_all for field in CRM_LEAD_FIELDS_TO_MERGE + list(self.env['crm.lead']._merge_get_fields_specific().keys())))
         original_opp_values = dict(

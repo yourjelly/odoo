@@ -154,11 +154,10 @@ class TestEventCrmFlow(TestEventCrmCommon):
             1. Attendees are created [create]
             2. Attendees are confirmed [confirm]
             3.Attendees are atttended [done]
-            """
+        """
 
         #case based on 'per attendee' and 'create'
 
-       #creating rule and adding a template
 
        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
        print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
@@ -176,7 +175,6 @@ class TestEventCrmFlow(TestEventCrmCommon):
            'email_from' : 'testattendee@example.com',
            'registration_ids' : [4,registration.id]
        })
-       # print("lead 11111111111",lead1)
        lead2 = self.env['crm.lead'].create({
            'name' : 'Test lead',
            'email_from' : 'testlead@example.com',
@@ -189,6 +187,8 @@ class TestEventCrmFlow(TestEventCrmCommon):
        for i in leads:
            print(i.name)
        result = leads._merge_opportunity(auto_unlink=False, max_length=None)
+
+       print("result oppr...",result)
        print("result...",result.registration_ids)
 
        with self.assertLeadMerged(lead1, leads,
