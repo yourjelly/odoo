@@ -9,6 +9,10 @@
     direction: ltr;
     position: relative; // normally useless but required by bootstrap-datepicker
     background-color: $o-webclient-background-color;
+
+    .o_content {
+        background-color: $o-webclient-overlay;
+    }
 }
 
 // ------------------------------------------------------------------
