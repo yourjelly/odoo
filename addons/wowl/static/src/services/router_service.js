@@ -77,12 +77,12 @@ function applyLocking(lockedKeys, hash, currentRoute, lock=false) {
   return newHash;
 }
 
-export function routerSkeleton(env, privateBus, getRoute, historyObj) {
+export function routerSkeleton(env, {getRoute, historyPush, historyReplace, redirect}) {
   let bus = env.bus;
   let current = getRoute();
   const lockedKeys = new Set();
 
-  privateBus.on('hashchange', null, () => {
+  bus.on('hashchange', null, () => {
     current = getRoute();
     bus.trigger('ROUTE_CHANGE');
   });
@@ -111,8 +111,7 @@ export function routerSkeleton(env, privateBus, getRoute, historyObj) {
   function pushState(hash, options) {
     const newRoute = computeNewRoute(hash, options.replace, current);
     if (newRoute) {
-      const url = routeToUrl(newRoute);
-      historyObj.pushState({}, url, url);
+      historyPush(newRoute);
     }
     current  = getRoute();
   }
@@ -120,25 +119,22 @@ export function routerSkeleton(env, privateBus, getRoute, historyObj) {
   function replaceState(hash, options) {
     const newRoute = computeNewRoute(hash, options.replace, current);
     if (newRoute) {
-      const url = routeToUrl(newRoute);
-      historyObj.pushState({}, url, url);
+      historyReplace(newRoute);
     }
     current  = getRoute();
   }
 
   return {
-    pushState: cumulativeCallable((allPushes) => {
-      const [hash, options] = replayPushes(allPushes);
-      pushState(hash, options);
-    }),
-    replaceState: cumulativeCallable((allPushes) => {
-      const [hash, options] = replayPushes(allPushes);
-      replaceState(hash, options);
-    }),
+    pushState: cumulativeCallable((allPushes) =>
+      pushState(...replayPushes(allPushes))
+    ),
+    replaceState: cumulativeCallable((allPushes) =>
+      replaceState(...replayPushes(allPushes))
+    ),
     get current() {
       return current;
     },
-    redirect: (url, wait) => redirect(env, url, wait),
+    redirect,
   };
 }
 
@@ -163,9 +159,21 @@ function cumulativeCallable(callable, timeout) {
 
 export const routerService = {
   deploy(env) {
-    const privateBus = new owl.core.EventBus();
-    window.addEventListener("hashchange", () => privateBus.trigger("hashchange"));
-    return routerSkeleton(env, privateBus, getRoute, window.history);
+    window.addEventListener("hashchange", () => env.bus.trigger("hashchange"));
+
+    function historyPush(route) {
+      const url = routeToUrl(route);
+      window.history.pushState({}, url, url);
+    }
+
+    function historyReplace(route) {
+      const url = routeToUrl(route);
+      window.history.replaceState({}, url, url);
+    }
+
+    const redirect =  (url, wait) => redirect(env, url, wait);
+
+    return routerSkeleton(env, {getRoute, historyPush, historyReplace, redirect});
   },
 };
 
