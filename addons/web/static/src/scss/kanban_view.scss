@@ -10,8 +10,7 @@
 
     .o_kanban_record, .o_kanban_quick_create {
         padding: $o-kanban-inside-vgutter $o-kanban-inside-hgutter;
-        border: 1px solid gray('300');
-        background-color: white;
+        background-color: $o-view-background-color;
 
         @include media-breakpoint-down(sm) {
             padding: $o-kanban-inside-vgutter $o-kanban-inside-hgutter-mobile;
@@ -23,9 +22,8 @@
     }
 
     .o_kanban_quick_create {
-        box-shadow: 0 0 20px -10px;
-        margin: 0 $o-kanban-record-margin -1px $o-kanban-record-margin;
-        margin-bottom: 8px;
+        box-shadow: $box-shadow;
+        margin: 0 $o-kanban-record-margin ($o-kanban-record-margin * 2);
 
         .o_form_view {
             padding: 0;
@@ -42,12 +40,6 @@
             pointer-events: none;
             opacity: 0.7;
         }
-
-        &:focus, &:focus-within {
-            -webkit-box-shadow: 1px 1px 1px 0px gray('600');
-            -moz-box-shadow: 1px 1px 1px 0px gray('600');
-            box-shadow: 1px 1px 1px 0px gray('600');
-        }
     }
 
     .o_kanban_record {
@@ -55,13 +47,12 @@
         display: inline-block; // Force the creation of a block formatting context to clear float items
         border-color: gray('400');
         min-width: 150px;
-        margin: 0 0 -1px;
 
         // ------- Kanban Record, v11 Layout -------
         // Records colours
         &::after {
             content: "";
-            @include o-position-absolute(0, auto, 0, -1px);
+            @include o-position-absolute(0, auto, 0, 0);
             width: $o-kanban-color-border-width;
         }
 
@@ -323,9 +314,9 @@
         &.oe_kanban_global_click, &.oe_kanban_global_click_edit {
             cursor: pointer;
             &:focus, &:focus-within {
-                -webkit-box-shadow: 1px 1px 1px 0px gray('600');
-                -moz-box-shadow: 1px 1px 1px 0px gray('600');
-                box-shadow: 1px 1px 1px 0px gray('600');
+                outline: thin solid mix(theme-color('primary'), gray('400'));
+                outline-offset: -1px;
+                border-top-color: transparent;
             }
         }
 
@@ -421,12 +412,15 @@
     &.o_kanban_grouped {
         min-height: 100%;
         padding: 0;
-        background-color: desaturate($gray-100, 100%);
 
         .o_kanban_record, .o_kanban_quick_create {
             width: 100%;
             margin-left: 0;
             margin-right: 0;
+
+            + .o_kanban_record, + .o_kanban_quick_create {
+                border-top: $border-width solid $border-color;
+            }
         }
 
         &.o_kanban_small_column .o_kanban_group:not(.o_column_folded) {
@@ -504,8 +498,8 @@
     // Kanban Grouped Layout - Column Folded
     .o_kanban_group.o_column_folded {
         @include o-kanban-slim-col;
-        background-color: #f0f0f0;
-        background-color: desaturate($gray-200, 100%);
+        background-color: $o-view-background-color;
+        box-shadow: inset 0 1px 0 $border-color;
 
         & + .o_kanban_group.o_column_folded {
             margin-left: 1px;
@@ -540,29 +534,24 @@
             cursor: pointer;
             padding: 12px 16px;
             white-space: nowrap;
-            color: $text-muted;
-            opacity: 0.6;
-            &:hover {
-                opacity: 1;
-            }
+            font-weight: $font-weight-bold;
+            @include o-hover-opacity(.7);
+            @include o-hover-text-color($text-muted, $body-color);
 
             .o_kanban_add_column {
+                margin-right: $o-kanban-inside-hgutter;
                 display: inline-block;
                 padding: 10px 14px;
-                background-color: gray('300');
-            }
-            .o_kanban_title {
-                margin-left: 10px;
+                background-color: rgba($text-muted, .1);
             }
         }
 
         .o_quick_create_unfolded {
+            margin: $border-width ($o-kanban-inside-hgutter * .5) 0;
             padding: $o-kanban-inside-vgutter $o-kanban-inside-hgutter;
             width: $o-kanban-small-record-width;
             height: 100%;
-            border: none;
-            box-shadow: 0 0 20px -10px;
-            background-color: theme-color('light');
+            background-color: $o-view-background-color;
 
             .o_kanban_header {
                 height: 50px;
@@ -601,7 +590,7 @@
             margin: ($o-kanban-record-margin * 0.5) $o-kanban-record-margin;
 
             @include media-breakpoint-down(sm) {
-                margin: 0 0 -1px 0;
+                margin: 0;
                 flex: 1 0 100%;
             }
 

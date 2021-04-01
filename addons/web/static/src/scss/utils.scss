@@ -279,6 +279,7 @@
         // Note: the first color is not defined as it is the 'no color' for kanban
         .oe_kanban_color_#{$size - 1}::after {
             background-color: nth($o-colors, $size);
+            box-shadow: 0 1px 0 rgba(nth($o-colors, $size), .4);
         }
     }
 }
@@ -315,8 +316,8 @@
 }
 @mixin o-kanban-dropdown($padding-base: $o-kanban-inside-vgutter) {
     padding: $padding-base/2 $padding-base;
-    border: none;
-    border-left: 1px solid transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
     vertical-align: top;
     color: $body-color;
 
@@ -335,7 +336,7 @@
     z-index: $zindex-dropdown + 1;
 }
 @mixin o-kanban-dropdown-menu {
-    @include o-position-absolute($right: -1px);
+    @include o-position-absolute($right: 0);
     margin-top: -1px;
     border-color: $border-color;
     border-top-right-radius: 0;
