@@ -2,7 +2,7 @@ $o-webclient-background-color: desaturate($o-gray-100, 100%) !default;
 $o-webclient-overlay: rgba(#000, 0.03) !default;
 $o-control-panel-background-color: $o-view-background-color !default;
 
-$o-list-footer-color: $o-main-text-color !default;
+$o-list-footer-color: null !default
 $o-list-group-header-color: lighten($o-brand-lightsecondary, 10%) !default;
 
 // UI custom colors for tags, kanban records' colors, ...)
