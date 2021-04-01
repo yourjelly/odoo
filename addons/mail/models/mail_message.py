@@ -1022,7 +1022,12 @@ class Message(models.Model):
                 'tracking_value_ids': tracking_value_ids,
                 'record_name': record_name,
             })
-
+            notifications = []
+            for msg in message.sorted('author_id'):
+                data = {'type': 'message_notification_update', 'elements': msg._message_notification_format()}
+                for partner in message.mapped('notified_partner_ids'):
+                    notifications.append([(self._cr.dbname, 'res.partner', partner.id), data])
+            self.env['bus.bus'].sendmany(notifications)
         return vals_list
 
     def message_fetch_failed(self):

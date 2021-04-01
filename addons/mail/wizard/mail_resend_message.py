@@ -83,6 +83,7 @@ class MailResendMessage(models.TransientModel):
             for notif in wizard.notification_ids:
                 notif.filtered(lambda notif: notif.notification_type == 'email' and notif.notification_status in ('exception', 'bounce')).sudo().write({'notification_status': 'canceled'})
             wizard.mail_message_id._notify_message_notification_update()
+            wizard.mail_message_id.message_format()
         return {'type': 'ir.actions.act_window_close'}
 
 
