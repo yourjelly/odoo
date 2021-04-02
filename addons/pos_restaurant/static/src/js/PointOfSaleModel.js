@@ -816,13 +816,13 @@ odoo.define('pos_restaurant.PointOfSaleModel', function (require) {
             // if amountDiff is zero, do nothing.
             if (this.floatCompare(amountDiff, 0, 5) == 0) return;
             this.actionUpdatePayment(payment, { amount: previousAmount + amountDiff });
-            await this.actionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waiting'] });
+            await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waiting'] });
             const paymentTerminal = this.getPaymentTerminal(paymentMethod.id);
             const isAdjustSuccessful = await paymentTerminal.send_payment_adjust(payment.id);
             if (!isAdjustSuccessful) {
                 this.actionUpdatePayment(payment, { amount: previousAmount });
             }
-            this.actionSetPaymentStatus(payment, 'done');
+            await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done']});
         },
         _defaultOrderExtras(uid) {
             const result = this._super(...arguments);

@@ -61,7 +61,10 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
         useModel() {
             const component = Component.current;
-            useSubEnv({ actionHandler: this.actionHandler.bind(this) });
+            useSubEnv({
+                actionHandler: this.actionHandler.bind(this),
+                noMutexActionHandler: this.noMutexActionHandler.bind(this),
+            });
             onMounted(() => {
                 this.on('ACTION_DONE', this, () => {
                     component.render();
@@ -72,8 +75,16 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             });
         }
         /**
-         * Use this to dispatch an action. We use mutex to serialize the execution of action.
-         * This means that the succeeding actions won't be executed until the previous action has resolved.
+         * Use this with caution. It doesn't use mutex so if multiple actions are triggered simultaneously,
+         * race condition issues may happen.
+         */
+        noMutexActionHandler(action) {
+            return this._actionHandler(action);
+        }
+        /**
+         * Use this to dispatch an action. We use mutex to `sequentialize` the execution of actions.
+         * This means that the succeeding actions won't be executed until the previous action has resolved
+         * (or rejected).
          * @param {Object} action
          * @param {string} action.name
          * @param {any[]} action.args args needed by the action
@@ -86,7 +97,15 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             if (!mutex) {
                 mutex = this.mutex;
             }
-            mutex.exec(() => this._actionHandler(action));
+            return new Promise((resolve, reject) => {
+                mutex.exec(async () => {
+                    try {
+                        resolve(await this._actionHandler(action));
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
         }
         async _actionHandler(action) {
             try {
@@ -173,6 +192,11 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                     managementOrderIds: new Set([]),
                     activeOrderId: false,
                     searchTerm: '',
+                },
+                DebugWidget: {
+                    successfulRequest: true,
+                    successfulCancel: true,
+                    successfulReverse: true,
                 },
             };
         }
@@ -1690,14 +1714,14 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
 
         _manageOrderWhenOrderDone() {
-            const draftOrderList = this.getDraftOrders().filter(
-                (currentOrder) => currentOrder !== this.getActiveOrder()
-            );
-            if (!draftOrderList.length) {
+            const ongoingOrders = this.getDraftOrders().filter((order) => {
+                return order !== this.getActiveOrder() && order._extras.activeScreen == 'ProductScreen';
+            });
+            if (!ongoingOrders.length) {
                 const newOrder = this._createDefaultOrder();
                 this._setActiveOrderId(newOrder.id);
             } else {
-                this._setActiveOrderId(draftOrderList[0].id);
+                this._setActiveOrderId(ongoingOrders[0].id);
             }
         }
         _deleteOrderline(order, orderline) {
@@ -2121,7 +2145,17 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             // the terminal should get a cancel request.
             if (['waiting', 'waitingCard', 'timeout'].includes(payment.payment_status)) {
                 const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
-                await paymentTerminal.send_payment_cancel(order, payment.id);
+                try {
+                    await paymentTerminal.send_payment_cancel(order, payment.id);
+                } catch (error) {
+                    const confirmed = await this.ui.askUser('ConfirmPopup', {
+                        title: _t('Force payment deletion'),
+                        body: _t(
+                            'Failed to cancel terminal payment. Do you wish to force the deletion of the payment?'
+                        ),
+                    });
+                    if (!confirmed) return;
+                }
             }
             this.updateRecord('pos.order', order.id, {
                 payment_ids: order.payment_ids.filter((paymentId) => paymentId !== payment.id),
@@ -2190,45 +2224,42 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
         async actionSendPaymentRequest(order, payment) {
             for (const _payment of this.getPayments(order)) {
-                // Other payment lines can not be reversed anymore
-                _payment._extras.can_be_reversed = false;
+                if (_payment !== payment) {
+                    // Other payments can not be reversed anymore.
+                    _payment._extras.can_be_reversed = false;
+                }
             }
+            await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waiting'] });
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
-            // We are calling the method using the actionHandler because we want the ui
-            // to reflect the change we made with the payment status.
-            // We basically want the ui to rerender before the parent action call is done.
-            await this.actionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waiting'] });
             const isPaymentSuccessful = await paymentTerminal.send_payment_request(payment.id);
             if (isPaymentSuccessful) {
-                this.actionSetPaymentStatus(payment, 'done');
                 payment._extras.can_be_reversed = paymentTerminal.supports_reversals;
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
             } else {
-                this.actionSetPaymentStatus(payment, 'retry');
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'retry'] });
             }
         }
         async actionSendPaymentCancel(order, payment) {
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
-            await this.actionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waitingCancel'] });
+            const prevPaymentStatus = payment.payment_status;
+            await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waitingCancel'] });
             try {
                 await paymentTerminal.send_payment_cancel(order, payment.id);
-            } finally {
-                this.actionSetPaymentStatus(payment, 'retry');
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'retry'] });
+            } catch (error) {
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, prevPaymentStatus] });
             }
         }
         async actionSendPaymentReverse(order, payment) {
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
-            await this.actionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'reversing'] });
+            await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'reversing'] });
             const isReversalSuccessful = await paymentTerminal.send_payment_reversal(payment.id);
             if (isReversalSuccessful) {
                 payment.amount = 0;
-                this.actionSetPaymentStatus(payment, 'reversed');
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'reversed'] });
             } else {
-                payment._extras.can_be_reversed = false;
-                this.actionSetPaymentStatus(payment, 'done');
+                await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
             }
-        }
-        async actionSendForceDone(order, payment) {
-            this.actionSetPaymentStatus(payment, 'done');
         }
         actionSetPaymentStatus(payment, status) {
             payment.payment_status = status;
@@ -2431,8 +2462,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const confirmed = await this.ui.askUser('ConfirmPopup', {
                 title: _t('You do not have any products'),
                 body: _t('Would you like to load demo data?'),
-                confirmText: this.env._t('Yes'),
-                cancelText: this.env._t('No'),
+                confirmText: _t('Yes'),
+                cancelText: _t('No'),
             });
             if (confirmed) {
                 await this._rpc({
@@ -2938,6 +2969,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 card_type: payment.card_type,
                 cardholder_name: payment.cardholder_name,
                 transaction_id: payment.transaction_id,
+                cashier_receipt: payment.cashier_receipt,
             };
         }
         /**

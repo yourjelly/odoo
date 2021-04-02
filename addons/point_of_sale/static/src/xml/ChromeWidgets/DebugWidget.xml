@@ -84,6 +84,20 @@
                             <t t-esc="bufferRepr" />
                         </li>
                     </ul>
+                    <t t-if="hasDummyTerminal">
+                        <p class="category">Dummy Terminal</p>
+                        <ul>
+                            <li class="button" t-on-click="_onToggleSuccessfulRequest">
+                                Request should <t t-esc="env.model.data.uiState.DebugWidget.successfulRequest ? 'succeed' : 'fail'"></t>
+                            </li>
+                            <li class="button" t-on-click="_onToggleSuccessfulCancel">
+                                Cancel should <t t-esc="env.model.data.uiState.DebugWidget.successfulCancel ? 'succeed' : 'fail'"></t>
+                            </li>
+                            <li class="button" t-on-click="_onToggleSuccessfulReverse">
+                                Reverse should <t t-esc="env.model.data.uiState.DebugWidget.successfulReverse ? 'succeed' : 'fail'"></t>
+                            </li>
+                        </ul>
+                    </t>
                 </div>
             </div>
         </Draggable>

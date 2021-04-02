@@ -77,16 +77,22 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
         }
         async _onSendPaymentRequest({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentRequest', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({
+                name: 'actionSendPaymentRequest',
+                args: [this.props.activeOrder, payment],
+            });
         }
         async _onSendPaymentCancel({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentCancel', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({ name: 'actionSendPaymentCancel', args: [this.props.activeOrder, payment] });
         }
         async _onSendPaymentReverse({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentReverse', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({
+                name: 'actionSendPaymentReverse',
+                args: [this.props.activeOrder, payment],
+            });
         }
         async _onSendForceDone({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendForceDone', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
         }
         get previousScreen() {
             return 'ProductScreen';
@@ -145,7 +151,10 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
 
             const customer = this.env.model.getCustomer(order);
-            if (order.to_ship && !(customer && customer.name && customer.street && customer.city && customer.country_id)) {
+            if (
+                order.to_ship &&
+                !(customer && customer.name && customer.street && customer.city && customer.country_id)
+            ) {
                 this.env.ui.askUser('ErrorPopup', {
                     title: this.env._t('Incorrect address for shipping'),
                     body: this.env._t('The selected customer needs an address.'),
@@ -167,7 +176,10 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             }
             // The exact amount must be paid if there is no cash payment method defined.
             const isChangeZero = this.env.model.floatCompare(this.env.model.getOrderChange(order), 0) === 0;
-            const hasCashPaymentMethod = _.some(this.env.model.data.derived.paymentMethods, (method) => method.is_cash_count);
+            const hasCashPaymentMethod = _.some(
+                this.env.model.data.derived.paymentMethods,
+                (method) => method.is_cash_count
+            );
             if (!isChangeZero && !hasCashPaymentMethod) {
                 this.env.ui.askUser('ErrorPopup', {
                     title: this.env._t('Cannot return change without a cash payment method'),

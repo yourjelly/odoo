@@ -11,7 +11,7 @@ odoo.define('pos_restaurant.PosResPaymentScreen', function (require) {
             useListener('send-payment-adjust', this._onSendPaymentAdjust);
         },
         _onSendPaymentAdjust({ detail: payment }) {
-            this.env.actionHandler({ name: 'actionSendPaymentAdjust', args: [this.props.activeOrder, payment] });
+            this.env.noMutexActionHandler({ name: 'actionSendPaymentAdjust', args: [this.props.activeOrder, payment] });
         },
         get nextScreen() {
             const order = this.props.activeOrder;

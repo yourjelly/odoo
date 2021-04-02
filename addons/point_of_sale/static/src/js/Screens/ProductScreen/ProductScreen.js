@@ -106,7 +106,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             const product = event.detail;
             const [proceed, options] = await this._beforeAddProduct(product);
             if (!proceed) return;
-            this.env.actionHandler({ name: 'actionAddProduct', args: [this.props.activeOrder, product, options] });
+            await this.env.actionHandler({ name: 'actionAddProduct', args: [this.props.activeOrder, product, options] });
             this.state.numpadMode = 'quantity';
             NumberBuffer.reset();
         }

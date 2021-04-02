@@ -108,5 +108,83 @@ function getImplementation(terminalName) {
     return Implementations[terminalName];
 }
 
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const DummyPaymentInterface = PaymentInterface.extend({
+    init() {
+        this._super(...arguments);
+        this.enable_reversals();
+    },
+    async send_payment_request(paymentId) {
+        const payment = this.model.getRecord('pos.payment', paymentId);
+        await wait(getRndInteger(1000, 2000));
+        await this.model.actionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waitingCard']});
+        const [forceDone, promise] = await this._send_payment(payment);
+        this.forceDone = forceDone;
+        return await promise;
+    },
+    send_payment_cancel(order, paymentId) {
+        return new Promise(async (resolve, reject) => {
+            await wait(getRndInteger(500, 1500));
+            if (this.model.data.uiState.DebugWidget.successfulCancel) {
+                this.forceDone();
+                resolve();
+            } else {
+                this.model.ui.askUser('ErrorPopup', {
+                    title: core._t('Failed to cancel'),
+                    body: core._t('Failed to cancel payment. It continued to be processed.'),
+                })
+                reject();
+            }
+        })
+    },
+    send_payment_reversal(paymentId) {
+        const payment = this.model.getRecord('pos.payment', paymentId);
+        return this._send_reversal(payment);
+    },
+    async _send_payment(payment) {
+        let timeout;
+        let resolver;
+        const promise = new Promise(resolve => {
+            resolver = resolve
+            timeout = setTimeout(() => {
+                if (!this.model.data.uiState.DebugWidget.successfulRequest) {
+                    this.model.ui.askUser('ErrorPopup', {
+                        title: core._t('Payment terminal failed'),
+                        body: core._t('Payment terminal failed. Try again.')
+                    })
+                }
+                resolve(this.model.data.uiState.DebugWidget.successfulRequest);
+            }, getRndInteger(3000, 5000))
+        })
+        const forceDone = () => {
+            clearTimeout(timeout);
+            resolver(false);
+        }
+        return [forceDone, promise];
+    },
+    _send_reversal(payment) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                if (!this.model.data.uiState.DebugWidget.successfulReverse) {
+                    this.model.ui.askUser('ErrorPopup', {
+                        title: core._t('Payment reverse failed'),
+                        body: core._t('Unable to reverse the payment.')
+                    })
+                }
+                resolve(this.model.data.uiState.DebugWidget.successfulReverse);
+            }, getRndInteger(500, 3500))
+        })
+    }
+})
+
+registerImplementation('dummy', DummyPaymentInterface);
+
 return { PaymentInterface, registerImplementation, getImplementation };
 });
