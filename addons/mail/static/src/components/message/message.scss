@@ -20,7 +20,7 @@
 }
 
 .o_Message_authorName {
-    color: $o-strong-color;
+    color: $headings-color;
     margin-inline-end: map-get($spacers, 2);
 }
 
@@ -217,8 +217,12 @@
     }
 
     &.o-not-discussion {
-        background-color: lighten(gray('300'), 5%);
-        border-bottom: 1px solid darken(gray('300'), 5%);
+        background-color: gray('200');
+        border: 1px solid $border-color;
+
+        + .o-not-discussion {
+            margin-top: 2px;
+        }
 
         .o_Message_partnerImStatusIcon {
             color: lighten(gray('300'), 5%);
