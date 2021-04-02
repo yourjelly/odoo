@@ -13,6 +13,23 @@ import { actionRegistry } from "./action_registry";
 
 const { Component, hooks, tags } = owl;
 
+/** @typedef {number} ActionId */
+/** @typedef {string} ActionXMLId  */
+/** @typedef {string} ActionTag  */
+/** @typedef {any} ActionDescription  */
+/** @typedef {ActionId|ActionXMLId|ActionTag|ActionDescription} ActionRequest  */
+/** @typedef {Object} Context review this  */
+/** @typedef {Function} CallableFunction review this  */
+
+/**
+ * @typedef {Object} ActionOptions
+ * @property {Context} [additionalContext]
+ * @property {boolean} [clearBreadcrumbs]
+ * @property {ViewType} [viewType]
+ * @property {number} [resId]
+ * @property {CallableFunction} [onClose]
+ */
+
 export function clearUncommittedChanges(env) {
   const callbacks = [];
   env.bus.trigger("CLEAR-UNCOMMITTED-CHANGES", callbacks);
