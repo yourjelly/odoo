@@ -30,6 +30,7 @@ class PosPayment(models.Model):
     transaction_id = fields.Char('Payment Transaction ID')
     payment_status = fields.Char('Payment Status')
     ticket = fields.Char('Payment Receipt Info')
+    cashier_receipt = fields.Char('Cashier Receipt Info')
     is_change = fields.Boolean(string='Is this payment change?', default=False)
 
     @api.model

@@ -2969,6 +2969,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 card_type: payment.card_type,
                 cardholder_name: payment.cardholder_name,
                 transaction_id: payment.transaction_id,
+                cashier_receipt: payment.cashier_receipt,
             };
         }
         /**
