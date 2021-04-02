@@ -233,7 +233,7 @@ $o-form-label-margin-right: 0px;
             > .o_arrow_button {
                 min-height: $o-statusbar-height;
                 font-size: 11px;
-                font-weight: bold;
+                font-weight: $font-weight-bold;
                 position: relative;
                 padding-left: $o-statusbar-arrow-width*2;
                 color: gray('700');
@@ -407,7 +407,7 @@ $o-form-label-margin-right: 0px;
             > .o_stat_info, > span { // contains the value and text
                 display: inline-block;
                 vertical-align: middle;
-                font-weight: 500;
+                font-weight: $font-weight-normal;
 
                 max-width: 70%;
                 padding-right: $o-statbutton-spacing;
@@ -418,7 +418,7 @@ $o-form-label-margin-right: 0px;
                 }
 
                 .o_stat_value {
-                    font-weight: 700;
+                    font-weight: $font-weight-bold;
                     color: $o-brand-odoo;
                     line-height: 1.2;
                 }
@@ -571,7 +571,7 @@ $o-form-label-margin-right: 0px;
         }
 
         .o_form_label {
-            font-weight: normal;
+            font-weight: $font-weight-normal;
         }
 
         .o_field_widget {
@@ -601,7 +601,7 @@ $o-form-label-margin-right: 0px;
         }
 
         .o_td_label .o_form_label {
-            font-weight: bold;
+            font-weight: $font-weight-bold;
             margin-right: $o-form-label-margin-right;
         }
     }
@@ -617,7 +617,7 @@ $o-form-label-margin-right: 0px;
         > .o_form_label {
             @include o-td-label-style;
             margin-right: $o-form-label-margin-right;
-            font-weight: bold;
+            font-weight: $font-weight-bold;
         }
     }
 
@@ -746,7 +746,7 @@ $o-form-label-margin-right: 0px;
             width: 100%;
             text-align: right;
             border-top: 1px solid gray('300');
-            font-weight: bold;
+            font-weight: $font-weight-bold;
             font-size: 1.3em;
         }
     }
@@ -1039,7 +1039,7 @@ $o-form-label-margin-right: 0px;
     flex-flow: row wrap;
 
     .o_form_label.o_light_label, .o_light_label .o_form_label {
-        font-weight: normal;
+        font-weight: $font-weight-normal;
     }
     .o_setting_box:visible:nth-child(odd) {
         clear: left;
