@@ -47,6 +47,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/errors/**/*.xml',
             'web/static/src/notifications/**/*.xml',
             'web/static/src/webclient/**/*.xml',
+            'web/static/src/views/**/*.xml',
             'web/static/src/webclient/switch_company_menu/switch_company_menu.xml',
 
             'web/static/src/legacy/xml/base.xml',
@@ -551,6 +552,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/tests/py_js/**/*.js',
             'web/static/tests/services/**/*.js',
             'web/static/tests/utils/**/*.js',
+            'web/static/tests/views/**/*.js',
             'web/static/tests/webclient/**/*.js',
 
             ('include', 'web.frontend_legacy_tests'),
