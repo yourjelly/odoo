@@ -22,19 +22,19 @@ class ResPartner(models.Model):
 
     @api.model
     def _replace_location_code_by_id(self, record):
-        print('function1','_______________________')
+        # print('function1','_______________________')
         record['country_id'], record['state_id'] = self._find_country_data(
             state_code=record.pop('state_code', False),
             state_name=record.pop('state_name', False),
             country_code=record.pop('country_code', False),
             country_name=record.pop('country_name', False)
         )
-        print(record,'record-------func1')
+        # print(record,'record-------func1')
         return record
 
     @api.model
     def _format_data_company(self, company):
-        print('function2','----------------------')
+        # print('function2','----------------------')
         self._replace_location_code_by_id(company)
 
         if company.get('child_ids'):
@@ -42,16 +42,16 @@ class ResPartner(models.Model):
             for child in company.get('child_ids'):
                 child_ids.append(self._replace_location_code_by_id(child))
             company['child_ids'] = child_ids
-            print(child_ids,'child ids-func2')
+            # print(child_ids,'child ids-func2')
 
         if company.get('additional_info'):
             company['additional_info'] = json.dumps(company['additional_info'])
-        print(company,'company-funct2')
+        # print(company,'company-funct2')
         return company
 
     @api.model
     def _find_country_data(self, state_code, state_name, country_code, country_name):
-        print('function3','funct3------------------------------')
+        # print('function3','funct3------------------------------')
         country = self.env['res.country'].search([['code', '=ilike', country_code]])
         if not country:
             country = self.env['res.country'].search([['name', '=ilike', country_name]])
@@ -78,20 +78,20 @@ class ResPartner(models.Model):
                     }
         else:
             _logger.info('Country code not found: %s', country_code)
-        print(country_id,state_id,'country,stateid func3')
+        # print(country_id,state_id,'country,stateid func3')
         return country_id, state_id
 
     @api.model
     def get_endpoint(self):
-        print('function4','funct4------------------------------')
+        # print('function4','funct4------------------------------')
         url = self.env['ir.config_parameter'].sudo().get_param('iap.partner_autocomplete.endpoint', DEFAULT_ENDPOINT)
         url += '/iap/partner_autocomplete'
-        print(url,'url-func4')
+        # print(url,'url-func4')
         return url
 
     @api.model
     def _rpc_remote_api(self, action, params, timeout=15):
-        print('function5','funct5------------------------------')
+        # print('function5','funct5------------------------------')
 
         if self.env.registry.in_test_mode() :
             return False, 'Insufficient Credit'
@@ -105,7 +105,7 @@ class ResPartner(models.Model):
             'country_code': self.env.company.country_id.code,
             'zip': self.env.company.zip,
         })
-        print(params,'params-func5')
+        # print(params,'params-func5')
         try:
             return iap_tools.iap_jsonrpc(url=url, params=params, timeout=timeout), False
         except (ConnectionError, HTTPError, exceptions.AccessError, exceptions.UserError) as exception:
@@ -117,8 +117,8 @@ class ResPartner(models.Model):
 
     @api.model
     def autocomplete(self, query):
-        print('function6','funct6------------------------------')
-
+        # print('function6','funct6------------------------------')
+        # print(self._rpc_remote_api('search', {'query': str(query) or len(query)}),'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@22')
         suggestions, error = self._rpc_remote_api('search', {
             'query': query,
         })
@@ -126,10 +126,10 @@ class ResPartner(models.Model):
         if suggestions:
             results = []
             for suggestion in suggestions:
-                print(suggestion['name'], 'suggestion loop-func6')
-                if suggestion['name']==query:
-                    results.append(self._format_data_company(suggestion))
-                    print(results,'=====================results-func6')
+                # print(suggestion['name'], 'suggestion loop-func6')
+                # if suggestion['name']==query:
+                results.append(self._format_data_company(suggestion))
+                # print(results,'=====================results-func6')
             return results
         else:
             return []
@@ -137,13 +137,15 @@ class ResPartner(models.Model):
     @api.model
     def enrich_company(self, company_domain, partner_gid, vat):
         print('function7','funct7------------------------------')
+        print(company_domain, partner_gid, vat)
+        # print(self._rpc_remote_api,'###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 
         response, error = self._rpc_remote_api('enrich', {
             'domain': company_domain,
             'partner_gid': partner_gid,
             'vat': vat,
         })
-        print(response,'response--func7')
+        # print(response,'response--func7')
         if response and response.get('company_data'):
             result = self._format_data_company(response.get('company_data'))
         else:
@@ -159,17 +161,17 @@ class ResPartner(models.Model):
                 'error': True,
                 'error_message': error
             })
-        print(result,'result-func-7')
+        # print(result,'result-func-7')
         return result
 
     @api.model
     def read_by_vat(self, vat):
-        print('function8','funct8------------------------------')
+        # print('function8','funct8------------------------------')
 
         vies_vat_data, error = self._rpc_remote_api('search_vat', {
             'vat': vat,
         })
-        print(vies_vat_data,'vies vat data-func8')
+        # print(vies_vat_data,'vies vat data-func8')
         if vies_vat_data:
             return [self._format_data_company(vies_vat_data)]
         else:
@@ -177,7 +179,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _is_company_in_europe(self, country_code):
-        print('function9','funct9------------------------------')
+        # print('function9','funct9------------------------------')
 
         country = self.env['res.country'].search([('code', '=ilike', country_code)])
         if country:
@@ -190,32 +192,33 @@ class ResPartner(models.Model):
         return True
 
     def _is_vat_syncable(self, vat):
-        print('function10','funct10------------------------------')
+        # print('function10','funct10------------------------------')
 
         vat_country_code = vat[:2]
         partner_country_code = self.country_id.code if self.country_id else ''
-        print(vat_country_code,'vatcountry code-func10')
-        print(partner_country_code,'partner_country_code code-func10')
+        # print(vat_country_code,'vatcountry code-func10')
+        # print(partner_country_code,'partner_country_code code-func10')
 
         return self._is_company_in_europe(vat_country_code) and (partner_country_code == vat_country_code or not partner_country_code)
 
     def _is_synchable(self):
-        print('function11','funct11------------------------------')
+        # print('function11','funct11------------------------------')
 
         already_synched = self.env['res.partner.autocomplete.sync'].search([('partner_id', '=', self.id), ('synched', '=', True)])
-        print(already_synched,'already synched-func11')
+        # print(already_synched,'already synched-func11')
         return self.is_company and self.partner_gid and not already_synched
 
     def _update_autocomplete_data(self, vat):
-        print('function12','funct12------------------------------')
+        # print('function12','funct12------------------------------')
 
         self.ensure_one()
         if vat and self._is_synchable() and self._is_vat_syncable(vat):
+            print(vat)
             self.env['res.partner.autocomplete.sync'].sudo().add_to_queue(self.id)
 
     @api.model_create_multi
     def create(self, vals_list):
-        print('function13','funct13------------------------------')
+        # print('function13','funct13------------------------------')
 
         partners = super(ResPartner, self).create(vals_list)
         if len(vals_list) == 1:
@@ -229,15 +232,15 @@ class ResPartner(models.Model):
                     subtype_id=self.env.ref('mail.mt_note').id,
                 )
                 partners.write({'additional_info': False})
-        print(partners,'partners-func13')
+        # print(partners,'partners-func13')
         return partners
 
     def write(self, values):
-        print('function14','funct14------------------------------')
+        # print('function14','funct14------------------------------')
 
         res = super(ResPartner, self).write(values)
         if len(self) == 1:
             self._update_autocomplete_data(values.get('vat', False))
-        print(res,'res-funct 14')
+        # print(res,'res-funct 14')
         return res
 

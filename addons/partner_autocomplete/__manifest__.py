@@ -22,6 +22,7 @@
         'views/res_company_views.xml',
         'views/res_config_settings_views.xml',
         'data/cron.xml',
+        'data/ir_action.xml',
     ],
     'qweb': [
         'static/src/xml/partner_autocomplete.xml',

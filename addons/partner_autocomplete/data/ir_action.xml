@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="action_enrich_mail" model="ir.actions.server" >
+            <field name="name">Partner Auto</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="binding_model_id" ref="base.model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">
+           if records:
+              query=record.name
+              company_domain=''
+              partner_gid=''
+              vat=record.vat
+<!--              records.autocomplete(query)-->
+<!--              records.enrich_company(company_domain, partner_gid, vat)-->
+              records.read_by_vat(vat)
+            </field>
+        </record>
+
+    </data>
+</odoo>
