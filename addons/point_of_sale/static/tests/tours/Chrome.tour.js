@@ -76,9 +76,9 @@ odoo.define('point_of_sale.tour.Chrome', function (require) {
     // click next screen on order 3
     // then delete the new empty order
     ReceiptScreen.do.clickNextOrder();
+    ProductScreen.check.isShown();
     Chrome.do.clickTicketButton();
     TicketScreen.do.deleteOrder('-0001');
-    Chrome.do.confirmPopup();
 
     // After deleting order 1 above, order 2 became
     // the 2nd-row order and it has payment status

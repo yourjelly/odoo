@@ -1714,14 +1714,14 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
         }
 
         _manageOrderWhenOrderDone() {
-            const draftOrderList = this.getDraftOrders().filter(
-                (currentOrder) => currentOrder !== this.getActiveOrder()
-            );
-            if (!draftOrderList.length) {
+            const ongoingOrders = this.getDraftOrders().filter((order) => {
+                return order !== this.getActiveOrder() && order._extras.activeScreen == 'ProductScreen';
+            });
+            if (!ongoingOrders.length) {
                 const newOrder = this._createDefaultOrder();
                 this._setActiveOrderId(newOrder.id);
             } else {
-                this._setActiveOrderId(draftOrderList[0].id);
+                this._setActiveOrderId(ongoingOrders[0].id);
             }
         }
         _deleteOrderline(order, orderline) {
@@ -2462,8 +2462,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             const confirmed = await this.ui.askUser('ConfirmPopup', {
                 title: _t('You do not have any products'),
                 body: _t('Would you like to load demo data?'),
-                confirmText: this.env._t('Yes'),
-                cancelText: this.env._t('No'),
+                confirmText: _t('Yes'),
+                cancelText: _t('No'),
             });
             if (confirmed) {
                 await this._rpc({
