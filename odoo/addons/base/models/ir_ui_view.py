@@ -791,10 +791,46 @@ ORDER BY v.priority, v.id
             if title:
                 node.set('string', title)
 
+        def _tag_calendar(model, node):
+            for additional_field in ('date_start', 'date_delay', 'date_stop', 'color', 'all_day'):
+                if node.get(additional_field):
+                    fieldname = node.get(additional_field).split('.', 1)[0]
+                    fields[fieldname] = {}
+                    field = model._fields.get(fieldname)
+                    field_nodes[field].append(node)
+
+        def _tag_tree(model, node):
+            title = model.view_header_get(False, 'form')
+            if title:
+                node.set('string', title)
+
         def _tag_label(model, node):
             field = model._fields.get(node.get('for'))
             if field and field.groups and not self.user_has_groups(groups=field.groups):
                 node.getparent().remove(node)
+
+        def _tag_filter(model, node):
+            attrs = {key: node.get(key) for key in ('id', 'select') if node.get(key)}
+            fields[node.get('name')] = attrs
+            field = model._fields.get(node.get('name'))
+            field_nodes[field].append(node)
+
+        def _tag_groupby(model, node):
+            # groupby nodes should be considered as nested view because they may
+            # contain fields on the comodel
+            field = model._fields.get(node.get('name'))
+            if not field or not field.comodel_name:
+                return
+            # move all children nodes into a new node <groupby>
+            groupby_node = E.groupby()
+            for child in node:
+                groupby_node.append(child)
+
+            fields[node.get('name')] = {
+                'fields': self._view_process(model, groupby_node),
+                'arch': etree.tostring(groupby_node)
+            }
+            field_nodes[field].append(node)
 
         def _tag_field(model, node):
             attrs = {key: node.get(key) for key in ('id', 'select') if node.get(key)}
@@ -844,12 +880,18 @@ ORDER BY v.priority, v.id
                     if 'attrs' in node.attrib:
                         del node.attrib['attrs']
                 del node.attrib['groups']
+
             if tag == 'form':
                 _tag_form(model, node)
+            elif tag == 'tree':
+                _tag_tree(model, node)
 
+            # These tags handle the loop on children on their own
             if tag == 'label' and node.get('for'):
                 _tag_label(model, node)
-            if tag == 'field' and node.get('name'):
+            elif tag == 'field' and node.get('name'):
+                _tag_field(model, node)
+            elif tag == 'groupby':
                 _tag_field(model, node)
             else:
                 for child in node:
