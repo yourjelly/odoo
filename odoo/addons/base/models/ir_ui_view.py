@@ -735,7 +735,7 @@ ORDER BY v.priority, v.id
         views = root.get_inheriting_views_arch(ids)
 
         # useful to prefetch
-        self.browse(views.keys()).mode
+        self.browse(views.keys())[0].mode
         return self.browse(root.id)._get_node(views)
 
     def get_arch(self):
