@@ -217,7 +217,7 @@ class View(models.Model):
                                                           Useful to (hard) reset broken views or to read arch from file in dev-xml mode.""")
     arch_updated = fields.Boolean(string='Modified Architecture')
     arch_prev = fields.Text(string='Previous View Architecture', help="""This field will save the current `arch_db` before writing on it.
-                                                                         Useful to (soft) reset a broken view.""")
+                                                                         Useful to (soft) reset a broken view.""", prefetch=False)
     inherit_id = fields.Many2one('ir.ui.view', string='Inherited View', ondelete='restrict', index=True)
     inherit_children_ids = fields.One2many('ir.ui.view', 'inherit_id', string='Views which inherit from this one')
     field_parent = fields.Char(string='Child Field')
@@ -726,7 +726,6 @@ ORDER BY v.priority, v.id
         node = self
         root = self
         while node:
-            node._read(['arch','mode','inherit_id','model','arch_db'])
             if node.mode == 'primary':
                 ids.append(node.id)
                 root = node
@@ -734,7 +733,9 @@ ORDER BY v.priority, v.id
 
         # prefetch for performance
         views = root.get_inheriting_views_arch(ids)
-        self.browse(views.keys())._read(['arch','mode','inherit_id','model','arch_db'])
+
+        # useful to prefetch
+        self.browse(views.keys()).mode
         return self.browse(root.id)._get_node(views)
 
     def get_arch(self):
