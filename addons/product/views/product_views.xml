@@ -358,6 +358,9 @@
                     <field name="product_template_attribute_value_ids" widget="many2many_tags" readonly="1"
                         groups="product.group_product_variant"/>
                 </xpath>
+                <!-- Hooks -->
+                <div name="button_box" position="inside"></div>
+                <group name="description" position="after"></div>
             </field>
         </record>
 
