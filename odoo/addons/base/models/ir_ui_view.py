@@ -907,7 +907,7 @@ ORDER BY v.priority, v.id
                     if not node.get('on_change'):
                         node.set('on_change', '1')
 
-        fdata = model.fields_get(fields.keys())
+        fdata = fields and model.fields_get(fields.keys()) or []
         for f in fdata:
             fdata[f].update(fields[f])
         return fdata
