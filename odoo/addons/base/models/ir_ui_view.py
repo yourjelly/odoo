@@ -715,7 +715,6 @@ ORDER BY v.priority, v.id
 
         for view in self.browse(views[self.id]):
             node2 = view._get_node(views)
-            print(self.id, view.id)
             node = apply_inheritance_specs(node, node2, inherit_branding=self._context.get('inherit_branding'))
         return node
 
