@@ -231,7 +231,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
             ])
             tag = "<%s%s>" % (spec.tag, attrs)
             raise ValueError(
-                _("Element '%s' cannot be located in parent view", tag)
+                _("Element '%s' cannot be located in parent view:\n%s", tag, etree.tostring(source).decode('utf-8'))
             )
 
     return source

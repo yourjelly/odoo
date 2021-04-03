@@ -534,7 +534,7 @@ actual arch.
                   WHERE res_id IN %(res_ids)s AND model = 'ir.ui.view' AND module IN %(modules)s
                """
 
-    def get_inheriting_views_arch(self):
+    def get_inheriting_views_arch(self, ids):
         """Retrieves the sets of views that should currently be used in the
            system in the right order. During the module upgrade phase it
            may happen that a view is present in the database but the fields it relies on are not
@@ -556,7 +556,7 @@ actual arch.
 WITH RECURSIVE ir_ui_view_inherits AS (
     SELECT id, inherit_id, priority, model
     FROM ir_ui_view
-    WHERE id=%s AND mode='primary' AND {where_clause}
+    WHERE id in %s AND mode='primary' AND {where_clause}
 UNION
     SELECT iuv.id, iuv.inherit_id, iuv.priority, iuv.model
     FROM ir_ui_view iuv
@@ -569,8 +569,7 @@ SELECT
 FROM ir_ui_view_inherits v
 ORDER BY v.priority, v.id
 """.format(where_clause=where_clause, sub_where_clause=where_clause.replace('ir_ui_view', 'iuv'))
-        self.env.cr.execute(query, [self.id] + where_params + where_params)
-
+        self.env.cr.execute(query, [tuple(ids)] + where_params + where_params)
         results = self.env.cr.fetchall()
         user_groups = set(self.env.user.groups_id.ids)
         results = list(filter(lambda x: not x[2] or (set(x[2]) & user_groups), results))
@@ -716,6 +715,7 @@ ORDER BY v.priority, v.id
 
         for view in self.browse(views[self.id]):
             node2 = view._get_node(views)
+            print(self.id, view.id)
             node = apply_inheritance_specs(node, node2, inherit_branding=self._context.get('inherit_branding'))
         return node
 
@@ -723,14 +723,18 @@ ORDER BY v.priority, v.id
         """
         Utility function to get a view combined with its inherited views, returns an etree node.
         """
+        ids = []
+        node = self
         root = self
-        while True:
-            root._read(['inherit_id', 'mode'])
-            if root.mode == 'primary': break
-            root = root.inherit_id
+        while node:
+            node._read(['inherit_id', 'mode'])
+            if node.mode == 'primary':
+                ids.append(node.id)
+                root = node
+            node = node.inherit_id
 
         # prefetch for performance
-        views = root.get_inheriting_views_arch()
+        views = root.get_inheriting_views_arch(ids)
         self.browse(views.keys())._read(['arch','mode','inherit_id','model','arch_db'])
         return self.browse(root.id)._get_node(views)
 
