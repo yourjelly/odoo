@@ -360,7 +360,7 @@
                 </xpath>
                 <!-- Hooks -->
                 <div name="button_box" position="inside"></div>
-                <group name="description" position="after"></div>
+                <group name="description" position="after"></group>
             </field>
         </record>
 
