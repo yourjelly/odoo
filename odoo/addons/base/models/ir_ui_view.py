@@ -726,7 +726,7 @@ ORDER BY v.priority, v.id
         node = self
         root = self
         while node:
-            node._read(['inherit_id', 'mode'])
+            node._read(['arch','mode','inherit_id','model','arch_db'])
             if node.mode == 'primary':
                 ids.append(node.id)
                 root = node
