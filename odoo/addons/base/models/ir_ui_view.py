@@ -372,7 +372,7 @@ actual arch.
             tocheck = node
             if view.inherit_id:
                 view._check_xml_inheritance(node)
-                tocheck = [y for x in node for y in x]
+                tocheck = [y for x in node for y in x if x.attrib.get('position') != 'attributes']
             if view.type == 'qweb':
                 continue
 
@@ -385,7 +385,7 @@ actual arch.
 
             # TODO: improve to get untransalted arch only for perf issues
             self.browse(views.keys()).mapped('arch_db')
-            root = self.browse(root.id)._get_node(views)
+            root = root._get_node(views, {view.id: node})
 
             # the inherited node are now embeded in the view, we can validate those nodes only
             for node_check in tocheck:
@@ -733,8 +733,8 @@ ORDER BY v.priority, v.id
             self._handle_view_error(str(e), specs_tree)
         return source
 
-    def _get_node(self, views):
-        node = etree.fromstring(self.arch)
+    def _get_node(self, views, nodes={}):
+        node = nodes.get(self.id, etree.fromstring(self.arch))
         if self._context.get('inherit_branding'):
             node.attrib.update({
                 'data-oe-model': 'ir.ui.view',
@@ -743,7 +743,7 @@ ORDER BY v.priority, v.id
             })
 
         for view in self.browse(views[self.id]):
-            node2 = view._get_node(views)
+            node2 = view._get_node(views, nodes)
             node = apply_inheritance_specs(node, node2, inherit_branding=self._context.get('inherit_branding'))
         return node
 
