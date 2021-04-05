@@ -1587,6 +1587,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 # result['name'] = 'default'
             except AttributeError:
                 raise UserError(_("No default view of type '%s' could be found !", view_type))
+        View._postprocess_access_rights(self._name, node)
         return node
 
     @api.model

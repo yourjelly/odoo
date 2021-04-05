@@ -768,9 +768,6 @@ ORDER BY v.priority, v.id
         self.browse(views.keys()).mapped('arch_db')
         node = self.browse(root.id)._get_node(views)
 
-        print(self.model, node, self, self.type)
-        if self.type != 'qweb':
-            self._postprocess_access_rights(self.model, node)
         return node
 
     def get_arch(self):
