@@ -400,27 +400,6 @@ actual arch.
                     model = self.env[model._fields.get(field).comodel_name]
                 self._check_node(node_check, model)
 
-
-            #     name_manager = NameManager(True, self.env[view.model])
-            #     self.postprocess(node, [], True, name_manager)
-
-            #     name_manager.check_view_fields(view)
-            #     name_manager.update_view_fields()
-
-            #     view._postprocess_access_rights(view.model, node)
-
-            #     check = valid_view(node, env=self.env, model=view.model)
-
-            # if not check:
-            #     view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
-            #     raise ValidationError(_(
-            #         'Invalid view %(name)s definition in %(file)s',
-            #         name=view_name, file=view.arch_fs
-            #     ))
-            # if check == "Warning":
-            #     view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
-            #     _logger.warning('Invalid view %s definition in %s \n%s', view_name, view.arch_fs, view.arch)
-
         return True
 
     @api.constrains('type', 'groups_id', 'inherit_id')
@@ -794,28 +773,6 @@ ORDER BY v.priority, v.id
     #------------------------------------------------------
     # Postprocessing: translation, groups and modifiers
     #------------------------------------------------------
-    # TODO: remove group processing from ir_qweb
-    #------------------------------------------------------
-    # def postprocess_and_fields(self, node, model=None, validate=False):
-    #     """ Return an architecture and a description of all the fields.
-
-    #     The field description combines the result of fields_get() and
-    #     postprocess().
-
-    #     :param self: the view to postprocess
-    #     :param node: the architecture as an etree
-    #     :param model: the view's reference model
-    #     :param validate: whether the view must be validated
-    #     :return: a tuple (arch, fields) where arch is the given node as a
-    #         string and fields is the description of all the fields.
-
-    #     """
-    #     self.ensure_one()
-    #     model = model or self.model
-
-    #     arch, name_manager = self._postprocess_view(node, model, validate=validate)
-    #     # name_manager.final_check()
-    #     return arch, name_manager.available_fields
 
     @api.model
     def _view_process(self, model, node):
@@ -948,21 +905,6 @@ ORDER BY v.priority, v.id
             fdata[f].update(fields[f])
         return fdata
 
-    # def _postprocess_view(self, node, model, validate=True, editable=True):
-
-    #     if model not in self.env:
-    #         self._handle_view_error(_('Model not found: %(model)s', model=model), node)
-
-    #     name_manager = NameManager(validate, self.env[model])
-    #     self.postprocess(node, [], editable, name_manager)
-
-    #     name_manager.check_view_fields(self)
-    #     name_manager.update_view_fields()
-
-    #     self._postprocess_access_rights(model, node)
-
-    #     return etree.tostring(node, encoding="unicode").replace('\t', ''), name_manager
-
     def _postprocess_access_rights(self, model, node):
         """ Compute and set on node access rights based on view type. Specific
         views can add additional specific rights like creating columns for
@@ -989,15 +931,26 @@ ORDER BY v.priority, v.id
                             not self._context.get(action, True) and is_base_model):
                         node.set(action, 'false')
 
+    def _has_fields(self, model, fields):
+        model_fields = None
+        for name in fields:
+            field = model._fields.get(name)
+            if not field:
+                model_fields = model_fields or model.fields_get(fields)
+                field = model_fields.get(name)
+            if not field:
+                msg = _(
+                    'Field "%(field_name)s" does not exist in model "%(model_name)s"',
+                    field_name=name, model_name=model._name,
+                )
+                self._handle_view_error(msg, node)
+
     def _check_node(self, node, model):
         def _check_tag_field(self, node, model):
             name = node.get('name')
             if not name:
                 self._handle_view_error(_("Field tag must have a \"name\" attribute defined"), node)
             field = model._fields.get(name) or model.fields_get([name])[name]
-            # TODO: check what's the difference with name_manager.fields_get?
-            # if not field and name in name_manager.fields_get:
-            #     return
             if not field:
                 msg = _(
                     'Field "%(field_name)s" does not exist in model "%(model_name)s"',
@@ -1197,6 +1150,7 @@ ORDER BY v.priority, v.id
         elif tag == 'graph':
             _check_tag_graph(self, node)
 
+        self._validate_attrs(node, model)
 
         newmodel = model
         if node.tag in ('field', 'groupby'):
@@ -1206,344 +1160,6 @@ ORDER BY v.priority, v.id
                 newmodel = self.env[field.comodel_name]
         for child in node:
             self._check_node(child, newmodel)
-
-
-    def postprocess(self, node, current_node_path, editable, name_manager):
-        """ Process the given arch node, which may be the complete arch or some
-        subnode, and fill in the name manager with field information.
-        """
-        # compute default
-        tag = node.tag
-        parent = node.getparent()
-        node_info = dict(
-            modifiers={},
-            attr_model=name_manager.Model,
-            editable=editable,
-        )
-        current_node_path = current_node_path + [tag]
-
-        # postprocessor = getattr(self, '_postprocess_tag_%s' % tag, False)
-        # if postprocessor:
-        #     postprocessor(node, name_manager, node_info)
-        #     if node.getparent() is not parent:
-        #         # the node has been removed, stop processing here
-        #         return
-
-        # elif tag in {item[0] for item in type(self.env['ir.ui.view']).type.selection}:
-        #     node_info['editable'] = False
-
-        # if name_manager.validate:
-        # structure validation
-        validator = getattr(self, '_validate_tag_%s' % tag, False)
-        if validator:
-            validator(node, name_manager, node_info)
-        self._validate_attrs(node, name_manager, node_info)
-
-        # self._apply_groups(node, name_manager, node_info)
-        # transfer_node_to_modifiers(node, node_info['modifiers'], self._context, current_node_path)
-        # transfer_modifiers_to_node(node_info['modifiers'], node)
-
-        # if present, iterate on node_info['children'] instead of node
-        for child in node_info.get('children', node):
-            self.postprocess(child, current_node_path, node_info['editable'], name_manager)
-
-    #------------------------------------------------------
-    # Specific node postprocessors
-    #------------------------------------------------------
-    # def _postprocess_tag_calendar(self, node, name_manager, node_info):
-    #     for additional_field in ('date_start', 'date_delay', 'date_stop', 'color', 'all_day'):
-    #         if node.get(additional_field):
-    #             name_manager.has_field(node.get(additional_field).split('.', 1)[0], {})
-    #     for f in node:
-    #         if f.tag == 'filter':
-    #             name_manager.has_field(f.get('name'))
-    #     node_info['editable'] = False
-
-    # def _postprocess_tag_field(self, node, name_manager, node_info):
-    #     if node.get('name'):
-    #         attrs = {'id': node.get('id'), 'select': node.get('select')}
-    #         field = name_manager.Model._fields.get(node.get('name'))
-    #         if field:
-    #             # apply groups (no tested)
-    #             if field.groups and not self.user_has_groups(groups=field.groups):
-    #                 node.getparent().remove(node)
-    #                 # no point processing view-level ``groups`` anymore, return
-    #                 return
-    #             node_info['editable'] = node_info['editable'] and field.is_editable() and (
-    #                 node.get('readonly') not in ('1', 'True')
-    #                 or get_dict_asts(node.get('attrs') or "{}")
-    #             )
-    #             if name_manager.validate:
-    #                 name_manager.must_have_fields(
-    #                     self._get_field_domain_variables(node, field, node_info['editable'])
-    #                 )
-    #             views = {}
-    #             for child in node:
-    #                 if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
-    #                     node.remove(child)
-    #                     xarch, sub_name_manager = self.with_context(
-    #                         base_model_name=name_manager.Model._name,
-    #                     )._postprocess_view(
-    #                         child, field.comodel_name, name_manager.validate,
-    #                         editable=node_info['editable'],
-    #                     )
-    #                     name_manager.must_have_fields(sub_name_manager.mandatory_parent_fields)
-    #                     views[child.tag] = {
-    #                         'arch': xarch,
-    #                         'fields': sub_name_manager.available_fields,
-    #                     }
-    #             attrs['views'] = views
-    #             if field.comodel_name in self.env:
-    #                 Comodel = self.env[field.comodel_name].sudo(False)
-    #                 node_info['attr_model'] = Comodel
-    #                 if field.type in ('many2one', 'many2many'):
-    #                     can_create = Comodel.check_access_rights('create', raise_exception=False)
-    #                     can_write = Comodel.check_access_rights('write', raise_exception=False)
-    #                     node.set('can_create', 'true' if can_create else 'false')
-    #                     node.set('can_write', 'true' if can_write else 'false')
-
-    #         name_manager.has_field(node.get('name'), attrs)
-    #         field = name_manager.fields_get.get(node.get('name'))
-    #         if field:
-    #             transfer_field_to_modifiers(field, node_info['modifiers'])
-
-    # def _postprocess_tag_form(self, node, name_manager, node_info):
-    #     result = name_manager.Model.view_header_get(False, node.tag)
-    #     if result:
-    #         node.set('string', result)
-
-    # def _postprocess_tag_groupby(self, node, name_manager, node_info):
-    #     # groupby nodes should be considered as nested view because they may
-    #     # contain fields on the comodel
-    #     name = node.get('name')
-    #     field = name_manager.Model._fields.get(name)
-    #     if not field or not field.comodel_name:
-    #         return
-    #     # move all children nodes into a new node <groupby>
-    #     groupby_node = E.groupby()
-    #     for child in list(node):
-    #         node.remove(child)
-    #         groupby_node.append(child)
-    #     # validate the new node as a nested view, and associate it to the field
-    #     xarch, sub_name_manager = self.with_context(
-    #         base_model_name=name_manager.Model._name,
-    #     )._postprocess_view(groupby_node, field.comodel_name, name_manager.validate, editable=False)
-    #     name_manager.has_field(name, {'views': {
-    #         'groupby': {
-    #             'arch': xarch,
-    #             'fields': sub_name_manager.available_fields,
-    #         }
-    #     }})
-    #     name_manager.must_have_fields(sub_name_manager.mandatory_parent_fields)
-
-    # def _postprocess_tag_label(self, node, name_manager, node_info):
-    #     if node.get('for'):
-    #         field = name_manager.Model._fields.get(node.get('for'))
-    #         if field and field.groups and not self.user_has_groups(groups=field.groups):
-    #             node.getparent().remove(node)
-
-    # def _postprocess_tag_search(self, node, name_manager, node_info):
-    #     searchpanel = [child for child in node if child.tag == 'searchpanel']
-    #     if searchpanel:
-    #         self.with_context(
-    #             base_model_name=name_manager.Model._name,
-    #         )._postprocess_view(
-    #             searchpanel[0], name_manager.Model._name, name_manager.validate, editable=False,
-    #         )
-    #         node_info['children'] = [child for child in node if child.tag != 'searchpanel']
-    #     node_info['editable'] = False
-
-    # def _postprocess_tag_tree(self, node, name_manager, node_info):
-    #     self._postprocess_tag_form(node, name_manager, node_info)
-    #     node_info['editable'] = node_info['editable'] and node.get('editable')
-
-    #------------------------------------------------------
-    # Node validator
-    #------------------------------------------------------
-    def _validate_tag_field(self, node, name_manager, node_info):
-        name = node.get('name')
-        if not name:
-            self._handle_view_error(_("Field tag must have a \"name\" attribute defined"), node)
-        field = name_manager.Model._fields.get(name)
-        if not field and name in name_manager.fields_get:
-            return
-        if not field:
-            msg = _(
-                'Field "%(field_name)s" does not exist in model "%(model_name)s"',
-                field_name=name, model_name=name_manager.Model._name,
-            )
-            self._handle_view_error(msg, node)
-        if node.get('domain') and field.comodel_name not in self.env:
-            msg = _(
-                'Domain on non-relational field "%(name)s" makes no sense (domain:%(domain)s)',
-                name=name, domain=node.get('domain'),
-            )
-            self._handle_view_error(msg, node)
-
-        for attribute in ('invisible', 'readonly', 'required'):
-            val = node.get(attribute)
-            if val:
-                res = safe_eval.safe_eval(val, {'context': self._context})
-                if res not in (1, 0, True, False, None):
-                    msg = _(
-                        'Attribute %(attribute)s evaluation expects a boolean, got %(value)s',
-                        attribute=attribute, value=val,
-                    )
-                    self._handle_view_error(msg, node)
-
-    def _validate_tag_button(self, node, name_manager, node_info):
-        name = node.get('name')
-        special = node.get('special')
-        type_ = node.get('type')
-        if special:
-            if special not in ('cancel', 'save', 'add'):
-                self._handle_view_error(_("Invalid special '%(value)s' in button", value=special), node)
-        elif type_:
-            if type_ == 'edit': # list_renderer, used in kanban view
-                return
-            elif not name:
-                self._handle_view_error(_("Button must have a name"), node)
-            elif type_ == 'object':
-                func = getattr(type(name_manager.Model), name, None)
-                if not func:
-                    msg = _(
-                        "%(action_name)s is not a valid action on %(model_name)s",
-                        action_name=name, model_name=name_manager.Model._name,
-                    )
-                    self._handle_view_error(msg, node)
-                try:
-                    check_method_name(name)
-                except AccessError:
-                    msg = _(
-                        "%(method)s on %(model)s is private and cannot be called from a button",
-                        method=name, model=name_manager.Model._name,
-                    )
-                    self._handle_view_error(msg, node)
-                try:
-                    inspect.signature(func).bind(self=name_manager.Model)
-                except TypeError:
-                    msg = "%s on %s has parameters and cannot be called from a button"
-                    self._handle_view_error(msg % (name, name_manager.Model._name), node)
-            elif type_ == 'action':
-                # logic mimics /web/action/load behaviour
-                action = False
-                try:
-                    action_id = int(name)
-                except ValueError:
-                    model, action_id = self.env['ir.model.data'].xmlid_to_res_model_res_id(name, raise_if_not_found=False)
-                    if not action_id:
-                        msg = _("Invalid xmlid %(xmlid)s for button of type action.", xmlid=name)
-                        self._handle_view_error(msg, node)
-                    if not issubclass(self.pool[model], self.pool['ir.actions.actions']):
-                        msg = _(
-                            "%(xmlid)s is of type %(xmlid_model)s, expected a subclass of ir.actions.actions",
-                            xmlid=name, xmlid_model=model,
-                        )
-                        self._handle_view_error(msg, node)
-                action = self.env['ir.actions.actions'].browse(action_id).exists()
-                if not action:
-                    msg = _(
-                        "Action %(action_reference)s (id: %(action_id)s) does not exist for button of type action.",
-                        action_reference=name, action_id=action_id,
-                    )
-                    self._handle_view_error(msg, node)
-
-            name_manager.has_action(name)
-        elif node.get('icon'):
-            description = 'A button with icon attribute (%s)' % node.get('icon')
-            self._validate_fa_class_accessibility(node, description)
-
-    def _validate_tag_graph(self, node, name_manager, node_info):
-        for child in node.iterchildren(tag=etree.Element):
-            if child.tag != 'field' and not isinstance(child, etree._Comment):
-                msg = _('A <graph> can only contains <field> nodes, found a <%s>', child.tag)
-                self._handle_view_error(msg, child)
-
-    def _validate_tag_groupby(self, node, name_manager, node_info):
-        # groupby nodes should be considered as nested view because they may
-        # contain fields on the comodel
-        name = node.get('name')
-        if name:
-            field = name_manager.Model._fields.get(name)
-            if field:
-                if field.type != 'many2one':
-                    msg = _(
-                        "Field '%(name)s' found in 'groupby' node can only be of type many2one, found %(type)s",
-                        name=field.name, type=field.type,
-                    )
-                    self._handle_view_error(msg, node)
-                name_manager.must_have_fields(
-                    self._get_field_domain_variables(node, field, node_info['editable'])
-                )
-            else:
-                msg = _(
-                    "Field '%(field)s' found in 'groupby' node does not exist in model %(model)s",
-                    field=name, model=name_manager.Model._name,
-                )
-                self._handle_view_error(msg, node)
-
-    def _validate_tag_tree(self, node, name_manager, node_info):
-        allowed_tags = ('field', 'button', 'control', 'groupby', 'widget', 'header')
-        for child in node.iterchildren(tag=etree.Element):
-            if child.tag not in allowed_tags and not isinstance(child, etree._Comment):
-                msg = _(
-                    'Tree child can only have one of %(tags)s tag (not %(wrong_tag)s)',
-                    tags=', '.join(allowed_tags), wrong_tag=child.tag,
-                )
-                self._handle_view_error(msg, child)
-
-    def _validate_tag_search(self, node, name_manager, node_info):
-        if len([c for c in node if c.tag == 'searchpanel']) > 1:
-            self._handle_view_error(_('Search tag can only contain one search panel'), node)
-        if not list(node.iterdescendants(tag="field")):
-            # the field of the search view may be within a group node, which is why we must check
-            # for all descendants containing a node with a field tag, if this is not the case
-            # then a search is not possible.
-            self._handle_view_error(
-                'Search tag requires at least one field element',
-                failed_node=node
-            )
-
-    def _validate_tag_searchpanel(self, node, name_manager, node_info):
-        for child in node.iterchildren(tag=etree.Element):
-            if child.get('domain') and child.get('select') != 'multi':
-                msg = _('Searchpanel item with select multi cannot have a domain.')
-                self._handle_view_error(msg, child)
-
-    def _validate_tag_label(self, node, name_manager, node_info):
-        # replace return not arch.xpath('//label[not(@for) and not(descendant::input)]')
-        for_ = node.get('for')
-        if not for_:
-            msg = _('Label tag must contain a "for". To match label style '
-                    'without corresponding field or button, use \'class="o_form_label"\'.')
-            self._handle_view_error(msg, node)
-        else:
-            name_manager.must_have_name_or_id(for_, 'label for') # this could be done in check_attr
-
-    def _validate_tag_page(self, node, name_manager, node_info):
-        if node.getparent() is None or node.getparent().tag != 'notebook':
-            self._handle_view_error(_('Page direct ancestor must be notebook'), node)
-
-    def _validate_tag_img(self, node, name_manager, node_info):
-        if not any(node.get(alt) for alt in self._att_list('alt')):
-            self._handle_view_error(
-                '<img> tag must contain an alt attribute',
-                failed_node=node
-            )
-
-    def _validate_tag_a(self, node, name_manager, node_info):
-        #('calendar', 'form', 'graph', 'kanban', 'pivot', 'search', 'tree', 'activity')
-        if any('btn' in node.get(cl, '') for cl in self._att_list('class')):
-            if node.get('role') != 'button':
-                msg = '"<a>" tag with "btn" class must have "button" role'
-                self._handle_view_error(msg, node)
-
-    def _validate_tag_ul(self, node, name_manager, node_info):
-        self._check_dropdown_menu(node) # was applied to all node, but in practice, only used on div and ul
-
-    def _validate_tag_div(self, node, name_manager, node_info):
-        self._check_dropdown_menu(node)
-        self._check_progress_bar(node)
 
     #------------------------------------------------------
     # Validation tools
@@ -1574,18 +1190,16 @@ ORDER BY v.priority, v.id
     def _att_list(self, name):
         return [name, 't-att-%s' % name, 't-attf-%s' % name]
 
-    def _validate_attrs(self, node, name_manager, node_info):
+    def _validate_attrs(self, node, model):
         """ Generic validation of node attrs. """
-        Model = node_info['attr_model']
-
         for attr, expr in node.items():
             if attr == 'domain':
-                fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), Model)
-                name_manager.must_have_fields(fields)
+                fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model)
+                self._has_fields(model, fields)
 
             elif attr.startswith('decoration-'):
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
-                name_manager.must_have_fields(fields)
+                self._has_fields(model, fields)
 
             elif attr in ('attrs', 'context'):
                 for key, val_ast in get_dict_asts(expr).items():
@@ -1594,7 +1208,7 @@ ORDER BY v.priority, v.id
                         # and thus are only executed client side
                         desc = '%s.%s' % (attr, key)
                         fields = self._get_client_domain_variables(node, val_ast, desc, expr)
-                        name_manager.must_have_fields(fields)
+                        self._has_fields(model, fields)
 
                     elif key == 'group_by':  # only in context
                         if not isinstance(val_ast, ast.Str):
@@ -1605,7 +1219,7 @@ ORDER BY v.priority, v.id
                             self._handle_view_error(msg, node)
                         group_by = val_ast.s
                         fname = group_by.split(':')[0]
-                        if not fname in Model._fields:
+                        if not fname in model._fields:
                             msg = _(
                                 'Unknown field "%(field)s" in "group_by" value in %(attribute)s=%(value)r',
                                 field=fname, attribute=attr, value=expr,
@@ -1614,7 +1228,7 @@ ORDER BY v.priority, v.id
                     else:
                         use = '%s.%s (%s)' % (attr, key, expr)
                         fields = dict.fromkeys(get_variable_names(val_ast), use)
-                        name_manager.must_have_fields(fields)
+                        self._has_fields(model, fields)
 
             elif attr in ('col', 'colspan'):
                 # col check is mainly there for the tag 'group', but previous
@@ -1801,7 +1415,8 @@ ORDER BY v.priority, v.id
                             field=fname, model=model, field_path=name_seq, attribute=key, value=domain,
                         )
                         self._handle_view_error(msg, node)
-                    field = model._fields[fname]
+                    field = model._fields.get(fname) or model.fields_get([fname])
+                    print(field)
                     if not field._description_searchable:
                         msg = _(
                             'Unsearchable field "%(field)s" in path %(field_path)r in %(attribute)s=%(value)r',
@@ -1850,7 +1465,8 @@ ORDER BY v.priority, v.id
     )
     def _read_template(self, view_id):
         node = self.browse(view_id)._get_arch()
-        # TODO: something's wrong here; why do we do that in postprocessing?
+        # TODO: why do we do that in postprocessing?
+        # TODO: speed improvement: if no distribute branding, we should not reparse the whole tree
         self.distribute_branding(node)
         arch = etree.tostring(node, encoding='unicode')
         return arch
@@ -2193,90 +1809,3 @@ class ResetViewArchWizard(models.TransientModel):
             self.view_id.reset_arch(self.reset_mode)
         return {'type': 'ir.actions.act_window_close'}
 
-
-# class NameManager:
-#     """ An object that manages all the named elements in a view. """
-# 
-#     def __init__(self, validate, Model):
-#         self.available_fields = dict()
-#         self.mandatory_fields = dict()
-#         self.mandatory_parent_fields = dict()
-#         self.available_actions = set()
-#         self.mandatory_names_or_ids = dict()
-#         self.available_names_or_ids = set()
-#         self.validate = validate
-#         self.Model = Model
-#         self.fields_get = self.Model.fields_get()
-# 
-#     def has_field(self, name, info=()):
-#         self.available_fields.setdefault(name, {}).update(info)
-#         self.available_names_or_ids.add(info.get('id') or name)
-# 
-#     def has_action(self, name):
-#         self.available_actions.add(name)
-# 
-#     def must_have_field(self, name, use):
-#         if name.startswith('parent.'):
-#             self.mandatory_parent_fields[name[7:]] = use
-#         else:
-#             self.mandatory_fields[name] = use
-# 
-#     def must_have_fields(self, name_uses):
-#         for name, use in name_uses.items():
-#             self.must_have_field(name, use)
-# 
-#     def must_have_name_or_id(self, name, use):
-#         self.mandatory_names_or_ids[name] = use
-# 
-#     def final_check(self):
-#         if self.mandatory_fields:
-#             msg = []
-#             for field in self.mandatory_fields:
-#                 msg.append(str(field))
-#             _logger.error("All parent.field should have been consummed at root level. \n %s", '\n'.join(msg))
-# 
-#     def check_view_fields(self, view):
-#         if not self.validate:
-#             return
-# 
-#         for action, use in self.mandatory_names_or_ids.items():
-#             if action not in self.available_actions and action not in self.available_names_or_ids:
-#                 msg = _(
-#                     "Name or id '%(name_or_id)s' used in '%(use)s' must be present in view but is missing.",
-#                     name_or_id=action, use=use,
-#                 )
-#                 view._handle_view_error(msg, None)
-# 
-#         for field_name in self.available_fields:
-#             if field_name not in self.fields_get:
-#                 message = _("Field `%(name)s` does not exist", name=field_name)
-#                 view._handle_view_error(message, None)
-# 
-#         for field, use in self.mandatory_fields.items():
-#             if field == 'id':  # always available
-#                 continue
-#             if "." in field:
-#                 msg = _(
-#                     "Invalid composed field %(definition)s in %(use)s",
-#                     definition=field, use=use,
-#                 )
-#                 view._handle_view_error(msg, None)
-#             corresponding_field = self.available_fields.get(str(field))
-#             if corresponding_field is None:
-#                 msg = _(
-#                     "Field %(name)s used in %(use)s must be present in view but is missing.",
-#                     name=field, use=use,
-#                 )
-#                 view._handle_view_error(msg, None)
-#             if corresponding_field.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
-#                 msg = _(
-#                     "Field %(name)s used in %(use)s is present in view but is in select multi.",
-#                     name=field, use=use,
-#                 )
-#                 view._handle_view_error(msg, None)
-# 
-#     def update_view_fields(self):
-#         for field_name, field_infos in self.available_fields.items():
-#             model_field_infos = self.fields_get.get(field_name)
-#             if model_field_infos:
-#                 field_infos.update(model_field_infos)
