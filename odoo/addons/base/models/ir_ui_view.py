@@ -380,7 +380,7 @@ actual arch.
             views = {view.id: []}
             root = view
             while root.inherit_id:
-                view[root.inherit_id] = [root.id]
+                views[root.inherit_id.id] = [root.id]
                 root = root.inherit_id
 
             # TODO: improve to get untransalted arch only for perf issues
@@ -390,7 +390,8 @@ actual arch.
             # the inherited moves have been moved to the original view, we can validate those only
             for node_check in tocheck:
                 # TODO: could be different, move up to the parent
-                self._check_node(node_check, self.env[self.model])
+                model = self.env[self.model]
+                self._check_node(node_check, model)
 
 
             #     name_manager = NameManager(True, self.env[view.model])
@@ -1190,7 +1191,8 @@ ORDER BY v.priority, v.id
         if node.tag=='field':
             _check_tag_field(self, node, model)
             field = model._fields.get(node.attrib.get('name'))
-            newmodel = field.comodel_name and self.env[field.comodel_name] or model
+            if field.comodel_name:
+                newmodel = self.env[field.comodel_name]
         for child in node:
             self._check_node(child, newmodel)
 
