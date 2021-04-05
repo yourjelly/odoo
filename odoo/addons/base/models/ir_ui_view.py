@@ -931,7 +931,7 @@ ORDER BY v.priority, v.id
                             not self._context.get(action, True) and is_base_model):
                         node.set(action, 'false')
 
-    def _has_fields(self, model, fields):
+    def _has_fields(self, model, fields, node):
         model_fields = None
         for name in fields:
             field = model._fields.get(name)
@@ -1150,7 +1150,8 @@ ORDER BY v.priority, v.id
         elif tag == 'graph':
             _check_tag_graph(self, node)
 
-        self._validate_attrs(node, model)
+        # TODO: uncomment this WIP
+        # self._validate_attrs(node, model)
 
         newmodel = model
         if node.tag in ('field', 'groupby'):
@@ -1195,11 +1196,11 @@ ORDER BY v.priority, v.id
         for attr, expr in node.items():
             if attr == 'domain':
                 fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model)
-                self._has_fields(model, fields)
+                self._has_fields(model, list(fields.keys()), node)
 
             elif attr.startswith('decoration-'):
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
-                self._has_fields(model, fields)
+                self._has_fields(model, fields, node)
 
             elif attr in ('attrs', 'context'):
                 for key, val_ast in get_dict_asts(expr).items():
@@ -1208,7 +1209,7 @@ ORDER BY v.priority, v.id
                         # and thus are only executed client side
                         desc = '%s.%s' % (attr, key)
                         fields = self._get_client_domain_variables(node, val_ast, desc, expr)
-                        self._has_fields(model, fields)
+                        self._has_fields(model, fields, node)
 
                     elif key == 'group_by':  # only in context
                         if not isinstance(val_ast, ast.Str):
@@ -1228,7 +1229,7 @@ ORDER BY v.priority, v.id
                     else:
                         use = '%s.%s (%s)' % (attr, key, expr)
                         fields = dict.fromkeys(get_variable_names(val_ast), use)
-                        self._has_fields(model, fields)
+                        self._has_fields(model, fields, node)
 
             elif attr in ('col', 'colspan'):
                 # col check is mainly there for the tag 'group', but previous
@@ -1406,7 +1407,7 @@ ORDER BY v.priority, v.id
         # checking field names
         for name_seq in field_names:
             fnames = name_seq.split('.')
-            model = Model
+            model = self.env[Model._fields[node.get('name')].comodel_name]
             try:
                 for fname in fnames:
                     if not isinstance(model, models.BaseModel):
@@ -1416,7 +1417,6 @@ ORDER BY v.priority, v.id
                         )
                         self._handle_view_error(msg, node)
                     field = model._fields.get(fname) or model.fields_get([fname])
-                    print(field)
                     if not field._description_searchable:
                         msg = _(
                             'Unsearchable field "%(field)s" in path %(field_path)r in %(attribute)s=%(value)r',
