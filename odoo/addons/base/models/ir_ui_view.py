@@ -387,10 +387,16 @@ actual arch.
             self.browse(views.keys()).mapped('arch_db')
             root = self.browse(root.id)._get_node(views)
 
-            # the inherited moves have been moved to the original view, we can validate those only
+            # the inherited node are now embeded in the view, we can validate those nodes only
             for node_check in tocheck:
-                # TODO: could be different, move up to the parent
+                # find the model of the node, by tracing field ancestors
                 model = self.env[self.model]
+                parents = []
+                for field in node_check.iterancestors(tag='field'):
+                    parents.append(field.attrib.get('name'))
+                while len(parents):
+                    field = parents.pop(0)
+                    model = self.env[model._fields.get(field).comodel_name]
                 self._check_node(node_check, model)
 
 
@@ -759,7 +765,10 @@ ORDER BY v.priority, v.id
 
         # useful to prefetch
         self.browse(views.keys()).mapped('arch_db')
-        return self.browse(root.id)._get_node(views)
+        node = self.browse(root.id)._get_node(views)
+
+        self._postprocess_access_rights(self.model, node)
+        return node
 
     def get_arch(self):
         """
