@@ -1025,7 +1025,7 @@ ORDER BY v.priority, v.id
                 elif not name:
                     self._handle_view_error(_("Button must have a name"), node)
                 elif type_ == 'object':
-                    func = getattr(model, name, None)
+                    func = getattr(type(model), name, None)
                     if not func:
                         msg = _(
                             "%(action_name)s is not a valid action on %(model_name)s",
@@ -1040,8 +1040,6 @@ ORDER BY v.priority, v.id
                             method=name, model=model._name,
                         )
                         self._handle_view_error(msg, node)
-                    import pudb
-                    pudb.set_trace()
                     try:
                         inspect.signature(func).bind(self=model)
                     except TypeError:
