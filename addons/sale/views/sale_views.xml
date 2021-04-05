@@ -1155,7 +1155,7 @@
                         </div>
                     </button>
                 </div>
-                <group name="description" position="after">
+                <group name="description" position="inside">
                     <group string="Warning when Selling this Product" groups="sale.group_warning_sale">
                         <field name="sale_line_warn" nolabel="1"/>
                         <field name="sale_line_warn_msg" colspan="3" nolabel="1"
@@ -1172,7 +1172,7 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='sales']//group[@name='sale']" position="inside">
-                    <group string="Invoicing" name="invoicing" invisible="1">
+                    <group string="Invoicing" name="invoicing">
                         <field name="invoice_policy" widget="radio"/>
                         <field name="service_type" widget="radio" invisible="True"/>
                         <field name="visible_expense_policy" invisible="1"/>

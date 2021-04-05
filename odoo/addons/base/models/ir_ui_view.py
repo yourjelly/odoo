@@ -768,7 +768,9 @@ ORDER BY v.priority, v.id
         self.browse(views.keys()).mapped('arch_db')
         node = self.browse(root.id)._get_node(views)
 
-        self._postprocess_access_rights(self.model, node)
+        print(self.model, node, self, self.type)
+        if self.type != 'qweb':
+            self._postprocess_access_rights(self.model, node)
         return node
 
     def get_arch(self):
@@ -1850,10 +1852,10 @@ ORDER BY v.priority, v.id
                        'tuple(self._context.get(k) for k in self._read_template_keys())'),
     )
     def _read_template(self, view_id):
-        arch = self.browse(view_id).get_arch()
-        arch_tree = etree.fromstring(arch)
-        self.distribute_branding(arch_tree)
-        arch = etree.tostring(arch_tree, encoding='unicode')
+        node = self.browse(view_id)._get_arch()
+        # TODO: something's wrong here; why do we do that in postprocessing?
+        self.distribute_branding(node)
+        arch = etree.tostring(node, encoding='unicode')
         return arch
 
     @api.model
