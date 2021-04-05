@@ -392,8 +392,9 @@ actual arch.
                 # find the model of the node, by tracing field ancestors
                 model = self.env[self.model]
                 parents = []
-                for field in node_check.iterancestors(tag='field'):
-                    parents.append(field.attrib.get('name'))
+                for field in node_check.iterancestors():
+                    if field.tag in ('field','groupby'):
+                        parents.append(field.attrib.get('name'))
                 while len(parents):
                     field = parents.pop(0)
                     model = self.env[model._fields.get(field).comodel_name]
@@ -1170,7 +1171,9 @@ ORDER BY v.priority, v.id
             self._check_progress_bar(node)
 
         tag = node.tag
-        if tag == 'div':
+        if tag=='field':
+            _check_tag_field(self, node, model)
+        elif tag == 'div':
             _check_tag_div(self, node)
         elif tag == 'ul':
             _check_tag_ul(self, node)
@@ -1197,8 +1200,7 @@ ORDER BY v.priority, v.id
 
 
         newmodel = model
-        if node.tag=='field':
-            _check_tag_field(self, node, model)
+        if node.tag in ('field', 'groupby'):
             name = node.attrib.get('name')
             field = model._fields.get(name)
             if field and field.comodel_name:
