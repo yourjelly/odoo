@@ -994,7 +994,7 @@ ORDER BY v.priority, v.id
             name = node.get('name')
             if not name:
                 self._handle_view_error(_("Field tag must have a \"name\" attribute defined"), node)
-            field = model._fields.get(name)
+            field = model._fields.get(name) or model.fields_get([name])[name]
             # TODO: check what's the difference with name_manager.fields_get?
             # if not field and name in name_manager.fields_get:
             #     return
@@ -1199,8 +1199,9 @@ ORDER BY v.priority, v.id
         newmodel = model
         if node.tag=='field':
             _check_tag_field(self, node, model)
-            field = model._fields.get(node.attrib.get('name'))
-            if field.comodel_name:
+            name = node.attrib.get('name')
+            field = model._fields.get(name)
+            if field and field.comodel_name:
                 newmodel = self.env[field.comodel_name]
         for child in node:
             self._check_node(child, newmodel)
