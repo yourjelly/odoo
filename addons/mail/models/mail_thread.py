@@ -2115,6 +2115,21 @@ class MailThread(models.AbstractModel):
             self.env['mail.notification'].sudo().create(notif_create_values)
 
             message_format_values = message.message_format()[0]
+            follower_recs = self.env['mail.followers'].sudo().search([
+                        ('res_model', '=', message.model),
+                        ('res_id', '=', message.res_id)
+                        ])
+            followers = []
+            for follower in follower_recs:
+                followers.append({
+                    'id': follower.id,
+                    'partner_id': follower.partner_id.id,
+                    'name': follower.name,
+                    'email': follower.email,
+                    'is_active': follower.is_active,
+                    'is_editable': True
+                })
+            message_format_values['followers'] = followers
             for partner_id in inbox_pids:
                 bus_notifications.append([(self._cr.dbname, 'ir.needaction', partner_id), dict(message_format_values)])
 
