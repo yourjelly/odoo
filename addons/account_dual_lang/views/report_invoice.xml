@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+        <t t-set="o" position="replace">
+            <t t-set="o" t-value="o.with_context(lang=o.company_id.base_lang)"/>
+            <t t-set="dual_lang" t-value="o.company_id.dual_lang"/>
+        </t>
+        <td name="account_invoice_line_name" position="inside">
+            <span t-esc="line.with_context(lang=dual_lang).name" t-options="{'widget': 'text'}"/>
+        </td>
+    </template>
+
+
+    <!-- FIXME: Temp fix to allow fetching invoice_documemt in Studio Reports with localisation -->
+    <template id="report_invoice" inherit_id="account.report_invoice">
+        <xpath expr='//t[@t-call="account.report_invoice_document"]' position="after">
+            <t t-if="o._get_name_invoice_report() == 'account_dual_lang.report_invoice_document'"
+                t-call="account_dual_lang.report_invoice_document"/>
+        </xpath>
+    </template>
+</odoo>
