@@ -1,12 +1,9 @@
 .ui-autocomplete .ui-menu-item {
-    > a.ui-state-active {
-        background-color: $o-brand-odoo;
-        color: white;
-    }
     &.o_m2o_dropdown_option > a {
         color: $o-brand-odoo;
+
         &.ui-state-active {
-            color: white;
+            color: darken($o-brand-odoo, 10%);
         }
     }
     &.o_m2o_start_typing > a.ui-state-active {

@@ -330,13 +330,14 @@
 @mixin o-kanban-dropdown-open {
     position: relative;
     background: white;
-    border-color: gray('400');
+    border-color: $border-color;
     z-index: $zindex-dropdown + 1;
 }
 @mixin o-kanban-dropdown-menu {
     @include o-position-absolute($right: -1px);
     margin-top: -1px;
-    border-color: gray('400');
+    border-color: $border-color;
+    border-top-right-radius: 0;
 }
 @mixin o-kanban-colorpicker {
     max-width: 150px;

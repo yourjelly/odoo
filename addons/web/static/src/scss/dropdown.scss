@@ -1,35 +1,30 @@
-%dropdown-li-a-padding {
-    padding: 3px $o-dropdown-hpadding;
-}
-
-.ui-autocomplete { // Copy style of bootstrap dropdown
-    background-image: none;
-    background-color: $dropdown-bg;
-    border: $dropdown-border-width solid $dropdown-border-color;
-    font-size: $font-size-base;
-    padding: 5px 0px;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.176);
+.ui-widget.ui-autocomplete { // Copy style of bootstrap dropdown
+    @extend .dropdown-menu;
+    top: 0; // Necessary to correctly compute the initial position
 
     .ui-menu-item {
         padding: 0;
-        > a {
-            display: block;
-            color: $dropdown-link-color;
 
-            @extend %dropdown-li-a-padding;
+        > a {
+            @extend .dropdown-item;
 
             &.ui-state-active {
-                border: none;
-                font-weight: normal;
                 margin: 0;
+                border: none;
+                font-weight: $font-weight-normal;
+                color: $dropdown-link-hover-color;
+                background-color: $dropdown-link-hover-bg;
             }
         }
+
         &.o_m2o_dropdown_option, &.o_m2o_start_typing {
-            text-indent: 20px
+            text-indent: $o-dropdown-hpadding * .5;
         }
+
         &.o_m2o_start_typing {
             font-style: italic;
             cursor: default;
+
             a.ui-menu-item-wrapper, a.ui-state-active, a.ui-state-active:hover {
                 background: none;
             }
@@ -38,7 +33,7 @@
 }
 
 .dropdown-menu {
-    box-shadow: 0 6px 12px -4px rgba(black, 0.25);
+    box-shadow: $box-shadow;
 
     .o_inline_dropdown {
         position: relative;
@@ -53,35 +48,25 @@
     }
 }
 
-@mixin dropdown-menu-mixin {
-    .show .dropdown-menu {
-        > * {
-            position: relative; // to allow absolute positionning inside the items
-        }
+.show .dropdown-menu, .navbar-nav .show .dropdown-menu {
+    > * {
+        position: relative; // to allow absolute positionning inside the items
+    }
 
-        .dropdown-item {
-            &:focus, &:active, &:focus:active {
-                outline: none;
-            }
-
-            @extend %dropdown-li-a-padding;
-        }
-
-        .dropdown-header {
-            @extend %dropdown-li-a-padding;
-            color: $o-main-text-color;
-
-            @include media-breakpoint-down(sm) {
-                color: white;
-                text-decoration: underline;
-            }
+    .dropdown-item {
+        &:focus, &:active, &:focus:active {
+            outline: none;
         }
     }
-}
 
-@include dropdown-menu-mixin;
-.navbar-nav {
-    @include dropdown-menu-mixin;
+    .dropdown-header {
+        font-weight: $font-weight-bold;
+
+        @include media-breakpoint-down(sm) {
+            color: white;
+            text-decoration: underline;
+        }
+    }
 }
 
 .o_rtl {
