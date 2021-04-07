@@ -14,8 +14,7 @@ class AccountEdiFormat(models.Model):
 
     def _get_efff_values(self, invoice):
         return {
-            **self._get_ubl_values(invoice),
-            'ubl_version': 2.0,
+            **self._get_ubl_2_0_values(invoice),
         }
 
     def _export_efff(self, invoice):
