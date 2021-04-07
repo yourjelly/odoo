@@ -219,18 +219,22 @@ class AccountMoveLine(models.Model):
 
     is_anglo_saxon_line = fields.Boolean(help="Technical field used to retrieve the anglo-saxon lines.")
 
-    def _get_computed_account(self):
+    def _get_default_product_account(self):
         # OVERRIDE to use the stock input account by default on vendor bills when dealing
         # with anglo-saxon accounting.
-        self.ensure_one()
-        if self.product_id.type == 'product' \
-            and self.move_id.company_id.anglo_saxon_accounting \
-            and self.move_id.is_purchase_document():
-            fiscal_position = self.move_id.fiscal_position_id
-            accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
+        self = self.with_company(self.company_id)
+
+        product = self.product_id
+        fiscal_position = self.move_id.fiscal_position_id
+
+        if product.type == 'product' \
+            and self.company_id.anglo_saxon_accounting \
+            and self.move_id.is_purchase_document(include_receipts=True):
+            accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
             if accounts['stock_input']:
                 return accounts['stock_input']
-        return super(AccountMoveLine, self)._get_computed_account()
+
+        return super()._get_default_product_account()
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()

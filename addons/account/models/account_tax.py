@@ -691,3 +691,11 @@ class AccountTaxRepartitionLine(models.Model):
     def _onchange_repartition_type(self):
         if self.repartition_type == 'base':
             self.account_id = None
+
+    def _get_business_account(self):
+        ''' Helper to get the default tax account to be set on tax line. '''
+        self.ensure_one()
+        if self.tax_id.tax_exigibility == 'on_payment':
+            return self.tax_id.cash_basis_transition_account_id
+        else:
+            return self.account_id

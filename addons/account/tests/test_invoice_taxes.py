@@ -155,9 +155,9 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         Expected:
         Tax         | Taxes     | Base      | Amount
         --------------------------------------------
-        21% incl    | /         | 100       | 21
-        12%         | 21% incl  | 121       | 14.52
         12%         | /         | 100       | 12
+        12%         | /         | 121       | 14.52
+        21% incl    | 12%       | 100       | 21
         '''
         invoice = self._create_invoice([
             (121, self.group_tax),
@@ -165,8 +165,9 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         ])
         invoice.action_post()
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted(lambda x: x.price_unit), [
-            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'price_unit': 21,      'tax_ids': [self.percent_tax_2.id]},
-            {'name': self.percent_tax_2.name,           'tax_base_amount': 221, 'price_unit': 26.52,   'tax_ids': []},
+            {'name': self.percent_tax_2.name,           'tax_base_amount': 100, 'price_unit': 12,       'tax_ids': []},
+            {'name': self.percent_tax_2.name,           'tax_base_amount': 121, 'price_unit': 14.52,    'tax_ids': []},
+            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'price_unit': 21,       'tax_ids': [self.percent_tax_2.id]},
         ])
 
     def _create_tax_tag(self, tag_name):
@@ -667,3 +668,24 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             (50, self.percent_tax_3_incl),
         ], currency_id=self.currency_data['currency'], invoice_payment_term_id=self.pay_terms_a)
         invoice.action_post()
+
+    def test_taxes_round_globally(self):
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+
+        tax_10_1 = self.env['account.tax'].create({
+            'name': 'tax_10_1',
+            'amount_type': 'percent',
+            'amount': 10,
+        })
+        tax_10_2 = self.env['account.tax'].create({
+            'name': 'tax_10_2',
+            'amount_type': 'percent',
+            'amount': 10,
+        })
+
+        invoice = self._create_invoice([(0.05, tax_10_1 + tax_10_2)])
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': 0.05,
+            'amount_tax': 0.02,
+            'amount_total': 0.07,
+        }])

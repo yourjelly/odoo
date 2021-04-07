@@ -99,7 +99,7 @@ class AccountChartTemplate(models.Model):
     tax_template_ids = fields.One2many('account.tax.template', 'chart_template_id', string='Tax Template List',
         help='List of all the taxes that have to be installed by the wizard')
     bank_account_code_prefix = fields.Char(string='Prefix of the bank accounts', required=True)
-    cash_account_code_prefix = fields.Char(string='Prefix of the main cash accounts', required=True)
+    cash_account_code_prefix = fields.Char(string='Prerfix of the main cash accounts', required=True)
     transfer_account_code_prefix = fields.Char(string='Prefix of the main transfer accounts', required=True)
     income_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])

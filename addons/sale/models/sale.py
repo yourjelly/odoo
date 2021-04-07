@@ -35,21 +35,17 @@ class SaleOrder(models.Model):
     def _get_default_require_payment(self):
         return self.env.company.portal_confirmation_pay
 
-    @api.depends('order_line.price_total')
+    @api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.price_total')
     def _amount_all(self):
         """
         Compute the total amounts of the SO.
         """
         for order in self:
-            amount_untaxed = amount_tax = 0.0
-            for line in order.order_line:
-                amount_untaxed += line.price_subtotal
-                amount_tax += line.price_tax
-            order.update({
-                'amount_untaxed': amount_untaxed,
-                'amount_tax': amount_tax,
-                'amount_total': amount_untaxed + amount_tax,
-            })
+            order_lines = order.order_line.filtered(lambda x: not x.display_type)
+            res = order_lines._prepare_diff_tax_lines()
+            order.amount_untaxed = res['amount_untaxed']
+            order.amount_tax = res['amount_tax']
+            order.amount_total = res['amount_untaxed'] + res['amount_tax']
 
     @api.depends('order_line.invoice_lines')
     def _get_invoiced(self):
@@ -1073,6 +1069,7 @@ Reason(s) of this behavior could be:
 
 class SaleOrderLine(models.Model):
     _name = 'sale.order.line'
+    _inherit = 'account.business.line.mixin'
     _description = 'Sales Order Line'
     _order = 'order_id, sequence, id'
     _check_company_auto = True
@@ -1363,6 +1360,74 @@ class SaleOrderLine(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+
+    # -------------------------------------------------------------------------
+    # INHERIT account.business.line.mixin
+    # -------------------------------------------------------------------------
+
+    def _get_product(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_id
+
+    def _get_product_uom(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_uom
+
+    def _get_taxes(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.tax_id
+
+    def _get_price_unit(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.price_unit
+
+    def _get_quantity(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_uom_qty
+
+    def _get_discount(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.discount
+
+    def _get_partner(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.partner_id
+
+    def _get_company(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.company_id or super()._get_company()
+
+    def _get_currency(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.currency_id or super()._get_currency()
+
+    def _get_date(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.date_order or super()._get_date()
+
+    def _get_fiscal_position(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.fiscal_position_id
+
+    def _get_document_type(self):
+        # OVERRIDE
+        self.ensure_one()
+        return 'sale'
+
+    # -------------------------------------------------------------------------
+    # MISC
+    # -------------------------------------------------------------------------
 
     @api.depends('state')
     def _compute_product_uom_readonly(self):

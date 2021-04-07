@@ -51,20 +51,18 @@ class AccountMove(models.Model):
         return partner.state_id
 
 
-    @api.model
-    def _get_tax_grouping_key_from_tax_line(self, tax_line):
+    def _get_tax_base_line_grouping_key(self, tax_vals):
         # OVERRIDE to group taxes also by product.
-        res = super()._get_tax_grouping_key_from_tax_line(tax_line)
-        if tax_line.move_id.journal_id.company_id.account_fiscal_country_id.code == 'IN':
-            res['product_id'] = tax_line.product_id.id
+        res = super()._get_tax_base_line_grouping_key(tax_vals)
+        if self.move_id.journal_id.company_id.account_fiscal_country_id.code == 'IN':
+            res['product_id'] = self.product_id.id
         return res
 
-    @api.model
-    def _get_tax_grouping_key_from_base_line(self, base_line, tax_vals):
+    def _get_tax_line_grouping_key(self):
         # OVERRIDE to group taxes also by product.
-        res = super()._get_tax_grouping_key_from_base_line(base_line, tax_vals)
-        if base_line.move_id.journal_id.company_id.account_fiscal_country_id.code == 'IN':
-            res['product_id'] = base_line.product_id.id
+        res = super()._get_tax_line_grouping_key()
+        if self.move_id.journal_id.company_id.account_fiscal_country_id.code == 'IN':
+            res['product_id'] = self.product_id.id
         return res
 
     @api.model
