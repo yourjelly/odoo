@@ -1,10 +1,6 @@
 odoo.define('mail/static/src/widgets/messaging_menu/messaging_menu.js', function (require) {
 'use strict';
 
-// LPE: remove file ?
-// This is now handled by components/messaging_menu directly
-return;
-
 const components = {
     MessagingMenu: require('mail/static/src/components/messaging_menu/messaging_menu.js'),
 };
@@ -12,6 +8,9 @@ const components = {
 const SystrayMenu = require('web.SystrayMenu');
 const Widget = require('web.Widget');
 
+
+// LPE: FIXME: this widget is only used in tests, and because we'all lazy asses
+// tests were not adapted
 /**
  * Odoo Widget, necessary to instantiate component.
  */
@@ -43,17 +42,20 @@ const MessagingMenu = Widget.extend({
     },
 });
 
+// LPE: pushing in SystrayItems is not necessary as we don't need to wrap it in a legacyWidget anylonger
+
 // Systray menu items display order matches order in the list
 // lower index comes first, and display is from right to left.
 // For messagin menu, it should come before activity menu, if any
 // otherwise, it is the next systray item.
-const activityMenuIndex = SystrayMenu.Items.findIndex(SystrayMenuItem =>
-    SystrayMenuItem.prototype.name === 'activity_menu');
-if (activityMenuIndex > 0) {
-    SystrayMenu.Items.splice(activityMenuIndex, 0, MessagingMenu);
-} else {
-    SystrayMenu.Items.push(MessagingMenu);
-}
+
+// const activityMenuIndex = SystrayMenu.Items.findIndex(SystrayMenuItem =>
+//     SystrayMenuItem.prototype.name === 'activity_menu');
+// if (activityMenuIndex > 0) {
+//     SystrayMenu.Items.splice(activityMenuIndex, 0, MessagingMenu);
+// } else {
+//     SystrayMenu.Items.push(MessagingMenu);
+// }
 
 return MessagingMenu;
 
