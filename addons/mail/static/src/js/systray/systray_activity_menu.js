@@ -191,9 +191,6 @@ var ActivityMenu = Widget.extend({
     },
 });
 
-// LPE: this is to give the WOWL systray registry the right sequence
-ActivityMenu.prototype.sequence = 11;
-
 SystrayMenu.Items.push(ActivityMenu);
 
 export default ActivityMenu;
