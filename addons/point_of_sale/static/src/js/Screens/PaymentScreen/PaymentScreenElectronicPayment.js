@@ -4,12 +4,20 @@ odoo.define('point_of_sale.PaymentScreenElectronicPayment', function (require) {
     const PosComponent = require('point_of_sale.PosComponent');
 
     /**
-     * @emits 'send-payment-request' @payload {'pos.payment'}
-     * @emits 'send-payment-cancel' @payload {'pos.payment'}
-     * @emits 'send-payment-reverse' @payload {'pos.payment'}
-     * @emits 'send-force-done' @payload {'pos.payment'}
+     * @prop {{ line: 'pos.payment' }}
+     * @emits 'send-payment-request' @payload {['pos.payment', ...otherArgs]}
+     * @emits 'send-payment-cancel' @payload {['pos.payment', ...otherArgs]}
+     * @emits 'send-payment-reverse' @payload {['pos.payment', ...otherArgs]}
+     * @emits 'send-force-done' @payload {['pos.payment', ...otherArgs]}
      */
-    class PaymentScreenElectronicPayment extends PosComponent {}
+    class PaymentScreenElectronicPayment extends PosComponent {
+        getPendingMessage(payment) {
+            return this.env._t('Payment request pending');
+        }
+        getCancelledMessage(payment) {
+            return this.env._t('Transaction cancelled');
+        }
+    }
     PaymentScreenElectronicPayment.template = 'PaymentScreenElectronicPayment';
 
     return PaymentScreenElectronicPayment;

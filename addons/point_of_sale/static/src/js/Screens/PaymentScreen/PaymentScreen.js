@@ -76,22 +76,25 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                 });
             }
         }
-        async _onSendPaymentRequest({ detail: payment }) {
+        async _onSendPaymentRequest({ detail: [payment, ...otherArgs] }) {
             this.env.noMutexActionHandler({
                 name: 'actionSendPaymentRequest',
-                args: [this.props.activeOrder, payment],
+                args: [this.props.activeOrder, payment, ...otherArgs],
             });
         }
-        async _onSendPaymentCancel({ detail: payment }) {
-            this.env.noMutexActionHandler({ name: 'actionSendPaymentCancel', args: [this.props.activeOrder, payment] });
+        async _onSendPaymentCancel({ detail: [payment, ...otherArgs] }) {
+            this.env.noMutexActionHandler({
+                name: 'actionSendPaymentCancel',
+                args: [this.props.activeOrder, payment, ...otherArgs],
+            });
         }
-        async _onSendPaymentReverse({ detail: payment }) {
+        async _onSendPaymentReverse({ detail: [payment, ...otherArgs] }) {
             this.env.noMutexActionHandler({
                 name: 'actionSendPaymentReverse',
-                args: [this.props.activeOrder, payment],
+                args: [this.props.activeOrder, payment, ...otherArgs],
             });
         }
-        async _onSendForceDone({ detail: payment }) {
+        async _onSendForceDone({ detail: [payment] }) {
             this.env.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
         }
         get previousScreen() {
