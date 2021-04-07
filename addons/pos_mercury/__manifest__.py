@@ -35,7 +35,7 @@ following:
     ],
     'qweb': [
         'static/src/xml/OrderReceipt.xml',
-        'static/src/xml/PaymentScreenPaymentLines.xml',
+        'static/src/xml/PaymentScreenElectronicPayment.xml',
         'static/src/xml/PaymentTransactionPopup.xml',
     ],
     'installable': True,

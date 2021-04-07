@@ -2162,8 +2162,8 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             });
             this.deleteRecord('pos.payment', payment.id);
         }
-        actionUpdatePayment(payment, vals) {
-            this.updateRecord('pos.payment', payment.id, vals);
+        actionUpdatePayment(payment, vals, extras) {
+            this.updateRecord('pos.payment', payment.id, vals, extras);
         }
         /**
          * Render the next screen when done with the currently active order.
@@ -2222,7 +2222,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 await this._setTip(order, amount);
             }
         }
-        async actionSendPaymentRequest(order, payment) {
+        async actionSendPaymentRequest(order, payment, ...otherArgs) {
             for (const _payment of this.getPayments(order)) {
                 if (_payment !== payment) {
                     // Other payments can not be reversed anymore.
@@ -2231,7 +2231,7 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
             }
             await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waiting'] });
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
-            const isPaymentSuccessful = await paymentTerminal.send_payment_request(payment.id);
+            const isPaymentSuccessful = await paymentTerminal.send_payment_request(payment.id, ...otherArgs);
             if (isPaymentSuccessful) {
                 payment._extras.can_be_reversed = paymentTerminal.supports_reversals;
                 await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'done'] });
@@ -2239,21 +2239,21 @@ odoo.define('point_of_sale.PointOfSaleModel', function (require) {
                 await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'retry'] });
             }
         }
-        async actionSendPaymentCancel(order, payment) {
+        async actionSendPaymentCancel(order, payment, ...otherArgs) {
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
             const prevPaymentStatus = payment.payment_status;
             await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'waitingCancel'] });
             try {
-                await paymentTerminal.send_payment_cancel(order, payment.id);
+                await paymentTerminal.send_payment_cancel(order, payment.id, ...otherArgs);
                 await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'retry'] });
             } catch (error) {
                 await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, prevPaymentStatus] });
             }
         }
-        async actionSendPaymentReverse(order, payment) {
+        async actionSendPaymentReverse(order, payment, ...otherArgs) {
             const paymentTerminal = this.getPaymentTerminal(payment.payment_method_id);
             await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'reversing'] });
-            const isReversalSuccessful = await paymentTerminal.send_payment_reversal(payment.id);
+            const isReversalSuccessful = await paymentTerminal.send_payment_reversal(payment.id, ...otherArgs);
             if (isReversalSuccessful) {
                 payment.amount = 0;
                 await this.noMutexActionHandler({ name: 'actionSetPaymentStatus', args: [payment, 'reversed'] });
