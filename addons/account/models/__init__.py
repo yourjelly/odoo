@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from . import account_business_line_mixin
 from . import partner
 from . import account
 from . import account_reconcile_model
