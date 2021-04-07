@@ -20,7 +20,10 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
                 isUnpaidOrdersReady: false,
                 buffer: NumberBuffer.get(),
             });
-            this.hasDummyTerminal = this.env.model.data.derived.paymentMethods.find(pm => pm.use_payment_terminal === 'dummy') && true || false;
+            this.hasDummyTerminal =
+                (this.env.model.data.derived.paymentMethods.find((pm) => pm.use_payment_terminal === 'dummy') &&
+                    true) ||
+                false;
             // NOTE: Perhaps this can still be improved.
             // What we do here is loop thru the `event` elements
             // then we assign animation that happens when the event is triggered
@@ -181,16 +184,30 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         get bufferRepr() {
             return `"${this.state.buffer}"`;
         }
+        get isDummyTerminalActive() {
+            const activeOrder = this.env.model.getActiveOrder();
+            const activePayment = this.env.model.getActivePayment(activeOrder);
+            if (!activePayment) {
+                return false;
+            }
+            const paymentMethod = this.env.model.getRecord('pos.payment.method', activePayment.payment_method_id);
+            return (
+                this.env.model.getActiveScreen() === 'PaymentScreen' && paymentMethod.use_payment_terminal === 'dummy'
+            );
+        }
         _onToggleSuccessfulRequest() {
-            this.env.model.data.uiState.DebugWidget.successfulRequest = !this.env.model.data.uiState.DebugWidget.successfulRequest;
+            this.env.model.data.uiState.DebugWidget.successfulRequest = !this.env.model.data.uiState.DebugWidget
+                .successfulRequest;
             this.render();
         }
         _onToggleSuccessfulCancel() {
-            this.env.model.data.uiState.DebugWidget.successfulCancel = !this.env.model.data.uiState.DebugWidget.successfulCancel;
+            this.env.model.data.uiState.DebugWidget.successfulCancel = !this.env.model.data.uiState.DebugWidget
+                .successfulCancel;
             this.render();
         }
         _onToggleSuccessfulReverse() {
-            this.env.model.data.uiState.DebugWidget.successfulReverse = !this.env.model.data.uiState.DebugWidget.successfulReverse;
+            this.env.model.data.uiState.DebugWidget.successfulReverse = !this.env.model.data.uiState.DebugWidget
+                .successfulReverse;
             this.render();
         }
     }

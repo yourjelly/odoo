@@ -84,7 +84,7 @@
                             <t t-esc="bufferRepr" />
                         </li>
                     </ul>
-                    <t t-if="hasDummyTerminal">
+                    <t t-if="isDummyTerminalActive">
                         <p class="category">Dummy Terminal</p>
                         <ul>
                             <li class="button" t-on-click="_onToggleSuccessfulRequest">
