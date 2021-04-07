@@ -1,33 +1,45 @@
-odoo.define('mail.DebugManager.Backend', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var core = require('web.core');
-var DebugManager = require('web.DebugManager.Backend');
+import { patch } from 'web.utils';
+import { useDebugManager } from "@web/debug/debug_manager";
+import { ViewAdapter } from "@web/legacy/action_adapters";
 
-var _t = core._t;
-/**
- * adds a new method available for the debug manager, called by the "Manage Messages" button.
- *
- */
-DebugManager.include({
-    getMailMessages: function () {
-        var selectedIDs = this._controller.getSelectedIds();
-        if (!selectedIDs.length) {
-            console.warn(_t("No message available"));
-            return;
-        }
-        this.do_action({
-            res_model: 'mail.message',
-            name: _t('Manage Messages'),
-            views: [[false, 'list'], [false, 'form']],
-            type: 'ir.actions.act_window',
-            domain: [['res_id', '=', selectedIDs[0]], ['model', '=', this._controller.modelName]],
-            context: {
-                default_res_model: this._controller.modelName,
-                default_res_id: selectedIDs[0],
+patch(ViewAdapter.prototype, 'mail.view_adapter', {
+    setup() {
+        const envWowl = this.env;
+        useDebugManager((accessRights) =>
+            setupDebugMailMessage(envWowl, this, this.props.viewParams.action)
+        );
+        this._super(...arguments);
+    }
+});
+
+export function setupDebugMailMessage(env, component, action) {
+    const result = [];
+    if (component.widget.getSelectedIds().length) {
+        result.push({
+            type: "item",
+            description: env._t("Manage Messages"),
+            callback: async () => {
+                const selectedIDs = component.widget.getSelectedIds();
+                if (!selectedIDs.length) {
+                    console.warn(env._t("No message available"));
+                    return;
+                }
+                await env.services.action.doAction({
+                    res_model: 'mail.message',
+                    name: env._t('Manage Messages'),
+                    views: [[false, 'list'], [false, 'form']],
+                    type: 'ir.actions.act_window',
+                    domain: [['res_id', '=', selectedIDs[0]], ['model', '=', action.res_model]],
+                    context: {
+                        default_res_model: action.res_model,
+                        default_res_id: selectedIDs[0],
+                    },
+                });
             },
+            sequence: 32,
         });
-    },
-});
-
-});
+    }
+    return result;
+}
