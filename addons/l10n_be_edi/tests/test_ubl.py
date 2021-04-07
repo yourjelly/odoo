@@ -77,6 +77,7 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                 <IssueDate>2017-01-01</IssueDate>
                 <InvoiceTypeCode>380</InvoiceTypeCode>
                 <DocumentCurrencyCode>Gol</DocumentCurrencyCode>
+                <LineCountNumeric>1</LineCountNumeric>
                 <AccountingSupplierParty>
                     <Party>
                         <PartyName>
@@ -112,6 +113,11 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                 </PaymentMeans>
                 <TaxTotal>
                     <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <Percent>20.0</Percent>
+                    </TaxSubtotal>
                 </TaxTotal>
                 <LegalMonetaryTotal>
                     <LineExtensionAmount currencyID="Gol">1100.000</LineExtensionAmount>
@@ -127,6 +133,11 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                     <LineExtensionAmount currencyID="Gol">1100.000</LineExtensionAmount>
                     <TaxTotal>
                         <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <TaxSubtotal>
+                            <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                            <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                            <Percent>20.0</Percent>
+                        </TaxSubtotal>
                     </TaxTotal>
                     <Item>
                         <Description>product_a</Description>
@@ -167,10 +178,12 @@ class TestL10nBeEdi(AccountEdiTestCommon):
             </xpath>
             <xpath expr="//InvoiceLine/TaxTotal" position="replace">
                 <TaxTotal>
-                    <TaxAmount currencyID="Gol">100.000</TaxAmount>
-                </TaxTotal>
-                <TaxTotal>
                     <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <Percent>20.0</Percent>
+                    </TaxSubtotal>
                 </TaxTotal>
             </xpath>
         '''

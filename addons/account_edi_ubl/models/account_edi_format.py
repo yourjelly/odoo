@@ -12,6 +12,33 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+class RequiredValue:
+    def __init__(self, value, error):
+        self.value = value
+        self.error = error
+
+    def is_valid(self):
+        return bool(self.value)
+
+    def error_message(self):
+        return self.error
+
+    def __str__(self):
+        return str(self.value)
+
+
+class RequiredRecordValue(RequiredValue):
+    def __init__(self, record, fieldname):
+        super().__init__(
+            record[fieldname],
+            _(
+                "The field '%s' is required on %s.",
+                record.fields_get([fieldname])[fieldname]['string'],
+                record.display_name,
+            ),
+        )
+
+
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
@@ -178,7 +205,72 @@ class AccountEdiFormat(models.Model):
     # Export
     ####################################################
 
-    def _get_ubl_values(self, invoice):
+    def _get_ubl_2_0_values_partner(self, invoice, partner):
+        return {
+            'partner': partner,
+
+            'WebsiteURI': partner.website,
+            'PartyName_list': [{'Name': partner.name}],
+            'Language': {'LocaleCode': partner.lang} if partner.lang else {},
+            'PostalAddress': {
+                'StreetName': partner.street,
+                'AdditionalStreetName': partner.street2,
+                'CityName': partner.city,
+                'PostalZone': partner.zip,
+                'CountrySubentity': partner.state_id.name,
+                'CountrySubentityCode': partner.state_id.code,
+                'Country': {
+                    'IdentificationCode': partner.country_id.code,
+                    'Name': partner.country_id.name,
+                } if partner.country_id else {},
+            },
+            'PartyTaxScheme_list': [{
+                'RegistrationName': partner.name,
+                'CompanyID': partner.vat,
+            }] if partner.vat else [],
+            'Contact': {
+                'Name': partner.name,
+                'Telephone': partner.phone,
+                'ElectronicMail': partner.email,
+            },
+        }
+
+    def _get_ubl_2_0_values_tax(self, invoice, tax_detail_vals_list):
+        return [{
+            'TaxAmount': sum(tax_vals['tax_amount_currency'] for tax_vals in tax_detail_vals_list),
+            'TaxSubtotal_list': [{
+                'tax': tax_vals['tax'],
+
+                'TaxableAmount': tax_vals['tax_base_amount_currency'],
+                'TaxAmount': tax_vals['tax_amount_currency'],
+                'Percent': tax_vals['tax'].amount if tax_vals['tax'].amount_type == 'percent' else None,
+            } for tax_vals in tax_detail_vals_list],
+        }]
+
+    def _get_ubl_2_0_values_invoice_line(self, invoice, invoice_line_vals):
+        line = invoice_line_vals['line']
+
+        return {
+            'line': line,
+
+            'ID': line.id,
+            'Note': _("Discount (%s %%)", line.discount) if line.discount else None,
+            'InvoicedQuantity': line.quantity,
+            'LineExtensionAmount': line.price_subtotal,
+            'TaxTotal_list': self._get_ubl_2_0_values_tax(invoice, invoice_line_vals['tax_detail_vals_list']),
+            'Item': {
+                'Description': line.name.replace('\n', ', ') if line.name else None,
+                'Name': line.product_id.name,
+                'SellersItemIdentification': {
+                    'ID': line.product_id.default_code,
+                } if line.product_id.default_code else {},
+            },
+            'Price': {
+                'PriceAmount': line.price_unit,
+            },
+        }
+
+    def _get_ubl_2_0_values(self, invoice):
         ''' Get the necessary values to generate the XML. These values will be used in the qweb template when
         rendering. Needed values differ depending on the implementation of the UBL, as (sub)template can be overriden
         or called dynamically.
@@ -188,22 +280,73 @@ class AccountEdiFormat(models.Model):
             # Format the monetary values to avoid trailing decimals (e.g. 90.85000000000001).
             return float_repr(amount, invoice.currency_id.decimal_places)
 
+        invoice_vals = invoice._prepare_edi_vals_to_export()
+
         return {
-            **invoice._prepare_edi_vals_to_export(),
-            'ubl_version': 2.1,
-            'type_code': 380 if invoice.move_type == 'out_invoice' else 381,
-            'payment_means_code': 42 if invoice.journal_id.bank_account_id else 31,
-            'bank_account': invoice.partner_bank_id,
+            **invoice_vals,
+
+            'check_partner_id': RequiredRecordValue(invoice, 'partner_id'),
+
+            'UBLVersionID': 2.0,
+            'CustomizationID': None,
+            'ProfileID': None,
+            'ID': RequiredRecordValue(invoice, 'name'),
+            'IssueDate': RequiredRecordValue(invoice, 'invoice_date'),
+            'InvoiceTypeCode': 380 if invoice.move_type == 'out_invoice' else 381,
+            'Note_list': [invoice.narration] if invoice.narration else [],
+            'DocumentCurrencyCode': invoice.currency_id.name,
+            'TaxCurrencyCode': None,
+            'LineCountNumeric': len(invoice_vals['invoice_line_vals_list']),
+            'OrderReference': {'ID': invoice.invoice_origin} if invoice.invoice_origin else {},
+            'AccountingSupplierParty': self._get_ubl_2_0_values_partner(invoice, invoice.company_id.partner_id.commercial_partner_id),
+            'AccountingCustomerParty': self._get_ubl_2_0_values_partner(invoice, invoice.commercial_partner_id),
+            'PaymentMeans_list': [{
+                'PaymentMeansCode': 42 if invoice.journal_id.bank_account_id else 31,
+                'PaymentDueDate': invoice.invoice_date_due,
+                'PayeeFinancialAccount': {
+                    'ID': invoice.journal_id.bank_account_id.acc_number,
+                    'FinancialInstitutionBranch': {
+                        'ID': invoice.journal_id.bank_account_id.bank_bic,
+                    } if invoice.journal_id.bank_account_id.bank_bic else {},
+                } if invoice.journal_id.bank_account_id else {},
+            }],
+            'PaymentTerms_list': [{
+                'Note_list': [{'Note': invoice.invoice_payment_term_id.name}],
+            }] if invoice.invoice_payment_term_id else [],
+            'TaxTotal_list': self._get_ubl_2_0_values_tax(invoice, invoice_vals['tax_detail_vals_list']),
+            'LegalMonetaryTotal': {
+                'LineExtensionAmount': invoice.amount_untaxed,
+                'TaxExclusiveAmount': invoice.amount_untaxed,
+                'TaxInclusiveAmount': invoice.amount_total,
+                'PrepaidAmount': invoice.amount_total - invoice.amount_residual,
+                'PayableAmount': invoice.amount_residual,
+            },
+            'InvoiceLine_list': [self._get_ubl_2_0_values_invoice_line(invoice, line_vals)
+                                 for line_vals in invoice_vals['invoice_line_vals_list']],
+
+            'template_partner': 'account_edi_ubl.export_invoice_ubl_2_0_partner',
+            'template_taxes': 'account_edi_ubl.export_invoice_ubl_2_0_taxes',
+
             'format_monetary': format_monetary,
-            'customer_vals': {'partner': invoice.commercial_partner_id},
-            'supplier_vals': {'partner': invoice.company_id.partner_id.commercial_partner_id},
+        }
+
+    def _get_ubl_values(self, invoice):
+        ''' Get the necessary values to generate the XML. These values will be used in the qweb template when
+        rendering. Needed values differ depending on the implementation of the UBL, as (sub)template can be overriden
+        or called dynamically.
+        :returns:   a dictionary with the value used in the template has key and the value as value.
+        '''
+        return {
+            **self._get_ubl_2_0_values(invoice),
+            'UBLVersionID': 2.1,
+            'BuyerReference': invoice.commercial_partner_id.name,
         }
 
     def _export_ubl(self, invoice):
         self.ensure_one()
         # Create file content.
         xml_content = b"<?xml version='1.0' encoding='UTF-8'?>"
-        xml_content += self.env.ref('account_edi_ubl.export_ubl_invoice')._render(self._get_ubl_values(invoice))
+        xml_content += self.env.ref('account_edi_ubl.export_invoice_ubl_2_1')._render(self._get_ubl_values(invoice))
         xml_name = '%s_ubl_2_1.xml' % (invoice.name.replace('/', '_'))
         return self.env['ir.attachment'].create({
             'name': xml_name,

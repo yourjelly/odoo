@@ -61,8 +61,8 @@ class AccountEdiFormat(models.Model):
     def _get_bis3_values(self, invoice):
         values = super()._get_ubl_values(invoice)
         values.update({
-            'customization_id': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
-            'profile_id': 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0',
+            'CustomizationID': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
+            'ProfileID': 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0',
         })
 
         all_tax_detail_per_tax = {}

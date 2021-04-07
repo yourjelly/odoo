@@ -43,7 +43,7 @@ class AccountEdiFormat(models.Model):
     def _get_nlcius_values(self, invoice):
         values = super()._get_bis3_values(invoice)
         values.update({
-            'customization_id': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0',
+            'CustomizationID': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0',
             'payment_means_code': 30,
         })
 

@@ -4,173 +4,185 @@
         <!--
         Render a res.partner record to be added to the UBL xml document.
         -->
-        <template id="export_ubl_invoice_partner">
+        <template id="export_invoice_ubl_2_0_partner">
             <cac:Party
                 xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                <t t-set="partner" t-value="partner_vals['partner']"/>
-                <cbc:WebsiteURI
-                    t-if="partner.website"
-                    t-esc="partner.website"/>
-                <cac:PartyName>
-                    <cbc:Name t-esc="partner.name"/>
-                </cac:PartyName>
-                <cac:Language t-if="partner.lang">
-                    <cbc:LocaleCode t-esc="partner.lang"/>
+                <cbc:WebsiteURI t-esc="WebsiteURI"/>
+                <t id="PartyName_list" t-foreach="vals['PartyName_list']" t-as="PartyName">
+                    <cac:PartyName>
+                        <cbc:Name t-esc="PartyName['Name']"/>
+                    </cac:PartyName>
+                </t>
+                <cac:Language t-if="vals['Language']">
+                    <cbc:LocaleCode t-esc="vals['Language']['LocaleCode']"/>
                 </cac:Language>
                 <cac:PostalAddress>
-                    <cbc:StreetName
-                        t-if="partner.street"
-                        t-esc="partner.street"/>
-                    <cbc:AdditionalStreetName
-                        t-if="partner.street2"
-                        t-esc="partner.street2"/>
-                    <cbc:CityName
-                        t-if="partner.city"
-                        t-esc="partner.city"/>
-                    <cbc:PostalZone
-                        t-if="partner.zip"
-                        t-esc="partner.zip"/>
-                    <cbc:CountrySubentity
-                        t-if="partner.state_id"
-                        t-esc="partner.state_id.name"/>
-                    <cbc:CountrySubentityCode
-                        t-if="partner.state_id"
-                        t-esc="partner.state_id.code"/>
-                    <cac:Country
-                        t-if="partner.country_id">
-                        <cbc:IdentificationCode t-esc="partner.country_id.code"/>
-                        <cbc:Name t-esc="partner.country_id.name"/>
+                    <cbc:StreetName t-esc="vals['PostalAddress']['StreetName']"/>
+                    <cbc:AdditionalStreetName t-esc="vals['PostalAddress']['AdditionalStreetName']"/>
+                    <cbc:CityName t-esc="vals['PostalAddress']['CityName']"/>
+                    <cbc:PostalZone t-esc="vals['PostalAddress']['PostalZone']"/>
+                    <cbc:CountrySubentity t-esc="vals['PostalAddress']['CountrySubentity']"/>
+                    <cbc:CountrySubentityCode t-esc="vals['PostalAddress']['CountrySubentityCode']"/>
+                    <cac:Country t-if="vals['PostalAddress']['Country']">
+                        <cbc:IdentificationCode t-esc="vals['PostalAddress']['Country']['IdentificationCode']"/>
+                        <cbc:Name t-esc="vals['PostalAddress']['Country']['Name']"/>
                     </cac:Country>
                 </cac:PostalAddress>
-                <cac:PartyTaxScheme t-if="partner.vat">
-                    <cbc:RegistrationName t-esc="partner.name"/>
-                    <cbc:CompanyID t-esc="partner.vat"/>
-                    <cac:TaxScheme>
-                        <cbc:ID
-                            schemeID="UN/ECE 5153"
-                            schemeAgencyID="6"
-                            >VAT</cbc:ID>
-                    </cac:TaxScheme>
-                </cac:PartyTaxScheme>
+                <t id="PartyTaxScheme_list" t-foreach="vals['PartyTaxScheme_list']" t-as="PartyTaxScheme">
+                    <cac:PartyTaxScheme>
+                        <cbc:RegistrationName t-esc="PartyTaxScheme['RegistrationName']"/>
+                        <cbc:CompanyID t-esc="PartyTaxScheme['CompanyID']"/>
+                        <cac:TaxScheme>
+                            <cbc:ID
+                                schemeID="UN/ECE 5153"
+                                schemeAgencyID="6"
+                                >VAT</cbc:ID>
+                        </cac:TaxScheme>
+                    </cac:PartyTaxScheme>
+                </t>
                 <cac:Contact>
-                    <cbc:Name t-esc="partner.name"/>
-                    <cbc:Telephone
-                        t-if="partner.phone"
-                        t-esc="partner.phone"/>
-                    <cbc:ElectronicMail
-                        t-if="partner.email"
-                        t-esc="partner.email"/>
+                    <cbc:Name t-esc="vals['Contact']['Name']"/>
+                    <cbc:Telephone t-esc="vals['Contact']['Telephone']"/>
+                    <cbc:ElectronicMail t-esc="vals['Contact']['ElectronicMail']"/>
                 </cac:Contact>
             </cac:Party>
         </template>
 
-        <!--
-        Render an invoice's line to be added to the UBL xml document.
-        -->
-        <template id="export_ubl_invoice_line">
-            <cac:InvoiceLine
-                xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                <t t-set="line" t-value="line_vals['line']"/>
-                <cbc:ID t-esc="line.id"/>
-                <cbc:Note t-if="line.discount">Discount (<t t-esc='line.discount'/> %)</cbc:Note>
-                <cbc:InvoicedQuantity t-esc="line.quantity"/>
-                <cbc:LineExtensionAmount
-                    t-att-currencyID="line.currency_id.name"
-                    t-esc="format_monetary(line.price_subtotal)"/>
-                <cac:TaxTotal
-                    t-foreach="line_vals['tax_detail_vals_list']"
-                    t-as="tax_detail_vals">
-                    <cbc:TaxAmount
-                        t-att-currencyID="line.currency_id.name"
-                        t-esc="format_monetary(tax_detail_vals['tax_amount_currency'])"/>
-                </cac:TaxTotal>
-                <cac:Item>
-                    <cbc:Description t-if="line.name" t-esc="line.name.replace('\n', ', ')"/>
-                    <cbc:Name t-esc="line.product_id.name"/>
-                    <cac:SellersItemIdentification t-if="line.product_id.default_code">
-                        <cbc:ID t-esc="line.product_id.default_code"/>
-                    </cac:SellersItemIdentification>
-                </cac:Item>
-                <cac:Price>
-                    <cbc:PriceAmount
-                        t-att-currencyID="line.currency_id.name"
-                        t-esc="format_monetary(line.price_unit)"/>
-                </cac:Price>
-            </cac:InvoiceLine>
+        <template id="export_invoice_ubl_2_0_taxes">
+            <t xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+               xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+               xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                <t id="TaxTotal_list" t-foreach="TaxTotal_list" t-as="TaxTotal">
+                    <cac:TaxTotal>
+                        <cbc:TaxAmount
+                            t-att-currencyID="DocumentCurrencyCode"
+                            t-esc="format_monetary(TaxTotal['TaxAmount'])"/>
+                        <t id="TaxSubtotal_list" t-foreach="TaxTotal['TaxSubtotal_list']" t-as="TaxSubtotal">
+                            <cbc:TaxSubtotal>
+                                <cbc:TaxableAmount
+                                    t-att-currencyID="DocumentCurrencyCode"
+                                    t-esc="format_monetary(TaxSubtotal['TaxableAmount'])"/>
+                                <cbc:TaxAmount
+                                    t-att-currencyID="DocumentCurrencyCode"
+                                    t-esc="format_monetary(TaxSubtotal['TaxAmount'])"/>
+                                <cbc:Percent t-esc="TaxSubtotal['Percent']"/>
+                            </cbc:TaxSubtotal>
+                        </t>
+                    </cac:TaxTotal>
+                </t>
+            </t>
         </template>
 
         <!--
         Render an invoice to be added to the UBL xml document.
         -->
-        <template id="export_ubl_invoice">
+        <template id="export_invoice_ubl_2_0">
             <Invoice
                 xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
                 xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
                 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-                <cbc:CustomizationID t-if="customization_id" t-esc="customization_id"/>
-                <cbc:ProfileID t-if="profile_id" t-esc="profile_id"/>
-                <cbc:UBLVersionID t-if="ubl_version" t-esc="ubl_version"/>
-                <cbc:ID t-esc="record.name"/>
-                <cbc:IssueDate t-esc="record.invoice_date"/>
-                <cbc:InvoiceTypeCode t-esc="type_code"/>
-                <cbc:Note t-esc="record.narration"/>
-                <cbc:DocumentCurrencyCode t-esc="record.currency_id.name"/>
-                <cbc:BuyerReference t-esc="record.commercial_partner_id.name"/>
-                <cac:OrderReference t-if="record.invoice_origin">
-                    <cbc:ID t-esc="record.invoice_origin"/>
+                <cbc:UBLVersionID t-esc="UBLVersionID"/>
+                <cbc:CustomizationID t-esc="CustomizationID"/>
+                <cbc:ProfileID t-esc="ProfileID"/>
+                <cbc:ID t-esc="ID"/>
+                <cbc:IssueDate t-esc="IssueDate"/>
+                <cbc:InvoiceTypeCode t-esc="InvoiceTypeCode"/>
+                <t id="Note_list" t-foreach="Note_list" t-as="Note">
+                    <cbc:Note t-esc="Note"/>
+                </t>
+                <cbc:DocumentCurrencyCode t-esc="DocumentCurrencyCode"/>
+                <cbc:TaxCurrencyCode t-esc="TaxCurrencyCode"/>
+                <cbc:LineCountNumeric t-esc="LineCountNumeric"/>
+                <cac:OrderReference t-if="OrderReference">
+                    <cbc:ID t-esc="OrderReference['ID']"/>
                 </cac:OrderReference>
-                <cac:AccountingSupplierParty t-call="account_edi_ubl.export_ubl_invoice_partner">
-                    <t t-set="partner_vals" t-value="supplier_vals"/>
+                <cac:AccountingSupplierParty t-call="{{template_partner}}">
+                    <t t-set="vals" t-value="AccountingSupplierParty"/>
                 </cac:AccountingSupplierParty>
-                <cac:AccountingCustomerParty t-call="account_edi_ubl.export_ubl_invoice_partner">
-                    <t t-set="partner_vals" t-value="customer_vals"/>
+                <cac:AccountingCustomerParty t-call="{{template_partner}}">
+                    <t t-set="vals" t-value="AccountingCustomerParty"/>
                 </cac:AccountingCustomerParty>
-                <cac:PaymentMeans>
-                    <cbc:PaymentMeansCode listID="UN/ECE 4461" t-esc="payment_means_code"/>
-                    <cbc:InstructionID t-esc="record.payment_reference"/>
-                    <cbc:PaymentDueDate t-esc="record.invoice_date_due"/>
-                    <cac:PayeeFinancialAccount t-if="record.journal_id.bank_account_id">
-                        <cbc:ID schemeName="IBAN" t-esc="record.journal_id.bank_account_id.acc_number"/>
-                        <cac:FinancialInstitutionBranch t-if="record.journal_id.bank_account_id.bank_bic">
-                            <cac:FinancialInstitution>
-                                <cbc:ID schemeName="BIC" t-esc="record.journal_id.bank_account_id.bank_bic"/>
-                            </cac:FinancialInstitution>
-                        </cac:FinancialInstitutionBranch>
-                    </cac:PayeeFinancialAccount>
-                </cac:PaymentMeans>
-                <cac:PaymentTerms t-if="record.invoice_payment_term_id">
-                    <cbc:Note t-esc="record.invoice_payment_term_id.name"/>
-                </cac:PaymentTerms>
-                <cac:TaxTotal>
-                    <cbc:TaxAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_tax)"/>
-                </cac:TaxTotal>
+                <t id="PaymentMeans_list" t-foreach="PaymentMeans_list" t-as="PaymentMeans">
+                    <cac:PaymentMeans>
+                        <cbc:PaymentMeansCode listID="UN/ECE 4461" t-esc="PaymentMeans['PaymentMeansCode']"/>
+                        <cbc:InstructionID t-esc="PaymentMeans['PaymentReference']"/>
+                        <cbc:PaymentDueDate t-esc="PaymentMeans['PaymentDueDate']"/>
+                        <cac:PayeeFinancialAccount t-if="PaymentMeans['PayeeFinancialAccount']">
+                            <cbc:ID schemeName="IBAN" t-esc="PaymentMeans['PayeeFinancialAccount']['ID']"/>
+                            <cac:FinancialInstitutionBranch
+                                    t-if="PaymentMeans['PayeeFinancialAccount']['FinancialInstitutionBranch']">
+                                <cac:FinancialInstitution>
+                                    <cbc:ID schemeName="BIC"
+                                            t-esc="PaymentMeans['PayeeFinancialAccount']['FinancialInstitutionBranch']['ID']"/>
+                                </cac:FinancialInstitution>
+                            </cac:FinancialInstitutionBranch>
+                        </cac:PayeeFinancialAccount>
+                    </cac:PaymentMeans>
+                </t>
+                <t id="PaymentTerms_list" t-foreach="PaymentTerms_list" t-as="PaymentTerms">
+                    <cac:PaymentTerms>
+                        <t id="Note_list" t-foreach="Note_list" t-as="Note">
+                            <cbc:Note t-esc="Note['Note']"/>
+                        </t>
+                    </cac:PaymentTerms>
+                </t>
+                <t t-call="{{template_taxes}}"/>
                 <cac:LegalMonetaryTotal>
                     <cbc:LineExtensionAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_untaxed)"/>
+                        t-att-currencyID="DocumentCurrencyCode"
+                        t-esc="format_monetary(LegalMonetaryTotal['LineExtensionAmount'])"/>
                     <cbc:TaxExclusiveAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_untaxed)"/>
+                        t-att-currencyID="DocumentCurrencyCode"
+                        t-esc="format_monetary(LegalMonetaryTotal['TaxExclusiveAmount'])"/>
                     <cbc:TaxInclusiveAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_total)"/>
+                        t-att-currencyID="DocumentCurrencyCode"
+                        t-esc="format_monetary(LegalMonetaryTotal['TaxInclusiveAmount'])"/>
                     <cbc:PrepaidAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_total - record.amount_residual)"/>
+                        t-att-currencyID="DocumentCurrencyCode"
+                        t-esc="format_monetary(LegalMonetaryTotal['PrepaidAmount'])"/>
                     <cbc:PayableAmount
-                        t-att-currencyID="record.currency_id.name"
-                        t-esc="format_monetary(record.amount_residual)"/>
+                        t-att-currencyID="DocumentCurrencyCode"
+                        t-esc="format_monetary(LegalMonetaryTotal['PayableAmount'])"/>
                 </cac:LegalMonetaryTotal>
-                <t t-foreach="invoice_line_vals_list" t-as="line_vals">
-                    <t t-call="account_edi_ubl.export_ubl_invoice_line"/>
+                <t id="InvoiceLine_list" t-foreach="InvoiceLine_list" t-as="InvoiceLine">
+                    <cac:InvoiceLine>
+                        <cbc:ID t-esc="InvoiceLine['ID']"/>
+                        <cbc:Note t-esc="InvoiceLine['Note']"/>
+                        <cbc:InvoicedQuantity t-esc="InvoiceLine['InvoicedQuantity']"/>
+                        <cbc:LineExtensionAmount
+                            t-att-currencyID="DocumentCurrencyCode"
+                            t-esc="format_monetary(InvoiceLine['LineExtensionAmount'])"/>
+                        <t t-call="{{template_taxes}}">
+                            <t t-set="TaxTotal_list" t-value="InvoiceLine['TaxTotal_list']"/>
+                        </t>
+                        <cac:Item>
+                            <cbc:Description t-esc="InvoiceLine['Item']['Description']"/>
+                            <cbc:Name t-esc="InvoiceLine['Item']['Name']"/>
+                            <cac:SellersItemIdentification t-if="InvoiceLine['Item']['SellersItemIdentification']">
+                                <cbc:ID t-esc="InvoiceLine['Item']['SellersItemIdentification']['ID']"/>
+                            </cac:SellersItemIdentification>
+                        </cac:Item>
+                        <cac:Price>
+                            <cbc:PriceAmount
+                                t-att-currencyID="DocumentCurrencyCode"
+                                t-esc="format_monetary(InvoiceLine['Price']['PriceAmount'])"/>
+                        </cac:Price>
+                    </cac:InvoiceLine>
                 </t>
             </Invoice>
         </template>
+
+        <template id="export_invoice_ubl_2_1"
+                  inherit_id="account_edi_ubl.export_invoice_ubl_2_0"
+                  primary="True">
+            <xpath xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                   expr="//*[local-name()='LineCountNumeric']"
+                   position="after">
+                <cbc:BuyerReference t-esc="BuyerReference"/>
+            </xpath>
+        </template>
+
     </data>
 </odoo>
