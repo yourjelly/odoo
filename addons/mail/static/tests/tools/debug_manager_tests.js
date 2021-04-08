@@ -1,12 +1,35 @@
-odoo.define('mail.debugManagerTests', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var testUtils = require('web.test_utils');
+import testUtils from "web.test_utils";
 
-var createDebugManager = testUtils.createDebugManager;
+import { Registry } from "@web/core/registry";
+import { DebugManager } from "@web/debug/debug_manager";
+import { debugService } from "@web/debug/debug_service";
+import { hotkeyService } from "@web/hotkey/hotkey_service";
+import { ormService } from "@web/services/orm_service";
+import { uiService } from "@web/services/ui_service";
+import { click, getFixture, makeTestEnv } from "@web/../tests/helpers/index";
 
-QUnit.module('Mail DebugManager', {}, function () {
+const { mount } = owl;
+const createDebugManager = testUtils.createDebugManager;
 
+let target;
+let testConfig;
+QUnit.module("Mail DebugManager", (hooks) => {
+    hooks.beforeEach(async () => {
+        target = getFixture();
+        const serviceRegistry = new Registry();
+        serviceRegistry.add("hotkey", hotkeyService);
+        serviceRegistry.add("ui", uiService);
+        serviceRegistry.add("orm", ormService);
+        serviceRegistry.add("debug", debugService);
+        const mockRPC = async (route, args) => {
+            if (args.method === "check_access_rights") {
+                return Promise.resolve(true);
+            }
+        };
+        testConfig = { serviceRegistry, mockRPC };
+    });
     QUnit.skip("Manage Messages", async function (assert) {
         assert.expect(3);
 
@@ -14,10 +37,10 @@ QUnit.module('Mail DebugManager', {}, function () {
             intercepts: {
                 do_action: function (event) {
                     assert.deepEqual(event.data.action, {
-                      context: {
-                        default_res_model: "testModel",
-                        default_res_id: 5,
-                      },
+                        context: {
+                            default_res_model: "testModel",
+                            default_res_id: 5,
+                        },
                         res_model: 'mail.message',
                         name: "Manage Messages",
                         views: [[false, 'list'], [false, 'form']],
@@ -60,5 +83,4 @@ QUnit.module('Mail DebugManager', {}, function () {
 
         debugManager.destroy();
     });
-});
 });
