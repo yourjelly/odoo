@@ -20,8 +20,9 @@ $o-brand-secondary: #f0eeee;
 $o-brand-lightsecondary: #e2e2e0;
 $o-gray-100: #f8f9fa; // This is BS default
 
-$o-main-color-muted: #a8a8a8;
 $o-main-text-color: #4c4c4c;
+$o-main-color-muted: rgba($o-main-text-color, .7);
+$o-main-headings-color: #212529;
 
 $o-view-background-color: white;
 $o-shadow-color: #303030;
