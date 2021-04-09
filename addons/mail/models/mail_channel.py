@@ -4,6 +4,8 @@
 import base64
 import logging
 import re
+import threading
+
 from uuid import uuid4
 
 from odoo import _, api, fields, models, modules, tools, Command
@@ -897,6 +899,9 @@ class Channel(models.Model):
             partners_to.append(self.env.user.partner_id.id)
         # determine type according to the number of partner in the channel
         self.flush()
+        # self.pool._lock.acquire()
+        # self.env.registry._lock.acquire()
+        # self.env.cr._Cursor__pool._lock.acquire()
         self.env.cr.execute("""
             SELECT P.channel_id
             FROM mail_channel C, mail_channel_partner P
@@ -923,6 +928,9 @@ class Channel(models.Model):
                 self.env['mail.channel.partner'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)]).write({'is_pinned': True})
             channel._broadcast(self.env.user.partner_id.ids)
         else:
+            self.pool._lock.acquire()
+            self.env.registry._lock.acquire()
+            self.env.cr._Cursor__pool._lock.acquire()
             # create a new one
             channel = self.create({
                 'channel_partner_ids': [Command.link(partner_id) for partner_id in partners_to],
@@ -932,6 +940,12 @@ class Channel(models.Model):
                 'name': ', '.join(self.env['res.partner'].sudo().browse(partners_to).mapped('name')),
             })
             channel._broadcast(partners_to)
+            self.pool._lock.release()
+            self.env.registry._lock.release()
+            self.env.cr._Cursor__pool._lock.release()
+        # self.pool._lock.release()
+        # self.env.registry._lock.release()
+        # self.env.cr._Cursor__pool._lock.release()
         return channel.channel_info()[0]
 
     @api.model
