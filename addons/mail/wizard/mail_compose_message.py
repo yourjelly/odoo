@@ -471,8 +471,8 @@ class MailComposer(models.TransientModel):
             multi_mode = False
             res_ids = [res_ids]
 
-        subjects = self.render_template(self.subject, self.model, res_ids) if not self.template_id else False
-        bodies = self.render_template(self.body, self.model, res_ids, post_process=True) if not self.template_id else False
+        subjects = self.env['mail.template']._render_template(self.subject, self.model, res_ids)
+        bodies = self.env['mail.template']._render_template(self.body, self.model, res_ids, post_process=True)
         emails_from = self.env['mail.template']._render_template(self.email_from, self.model, res_ids)
         replies_to = self.env['mail.template']._render_template(self.reply_to, self.model, res_ids)
         default_recipients = {}
