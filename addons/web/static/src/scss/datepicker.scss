@@ -35,50 +35,65 @@
 
 // The 'div.dropdown-menu' part is needed to override default bootstrap rule as
 // this file is unfortunately placed in common assets.
-div.dropdown-menu.bootstrap-datetimepicker-widget{
+div.dropdown-menu.bottom.bootstrap-datetimepicker-widget{
+    padding: 0;
+    border-top: 0;
+
+    &:before, &:after {
+        transform: translateY(1px);
+    }
+
     // Need to put datetimepicker widget above everything else
     z-index: $zindex-modal + 1;
 
     // Also fix the dropdown width
-    width: 19rem;
+    width: 22rem;
 }
 
-.datepicker {
-    .table-sm {
-        > thead {
-            color: white;
-            background-color: $o-brand-odoo;
+.bootstrap-datetimepicker-widget .datepicker {
+    table {
+        color: $o-main-headings-color;
 
-            > tr {
-                &:first-child {
-                    th:hover {
-                        color: white;
-                        background-color: darken($o-brand-odoo, 10%);
-                    }
-                }
+        th, td {
+            width: percentage(1/8);
+            height: 30px;
+            line-height: 30px;
+            border-radius: 0;
 
-                &:last-child {
-                    color: $o-datepicker-week-color;
-                    background-color: $o-datepicker-week-bg-color;
-                }
-                > th {
-                    border-radius: 0;
-                }
+            &.prev, &.next, &.old, &.new {
+                @include o-hover-opacity(.5);
             }
         }
 
-        > tbody {
-            > tr {
-                > td {
-                    &.active, .active {
-                        background-color: $o-brand-primary;
-                        border-radius: 100px;
-                    }
+        th {
+            border-bottom-width: $border-width;
 
-                    &.today:before {
-                        border-bottom-color: $o-brand-primary;
-                    }
-                }
+            &.picker-switch {
+                font-size: 1.2em;
+            }
+        }
+
+        tr:nth-child(2) th {
+            height: 20px;
+            line-height: 20px;
+        }
+
+        tr:nth-child(2) th, td.cw {
+            background-color: $gray-100;
+            font-size: .8em;
+            font-weight: 500;
+            color: $o-main-text-color;
+        }
+
+        td {
+            font-size: .9em;
+
+            &.today:before {
+                border-bottom-color: $o-brand-primary;
+            }
+
+            &.active.today:before {
+                border-bottom-color: $bs-datetimepicker-active-color;
             }
         }
     }
