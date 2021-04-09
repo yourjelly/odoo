@@ -106,6 +106,10 @@ class SaleOrder(models.Model):
                 pu = self.env['account.tax']._fix_tax_included_price_company(pu, product.taxes_id, order_line[0].tax_id, self.company_id)
         return pu
 
+    def _product_rules_price(self, product, price):
+        # In e-rental the rules is price dynamic
+        return price
+
     def _website_product_id_change(self, order_id, product_id, qty=0):
         order = self.sudo().browse(order_id)
         product_context = dict(self.env.context)
@@ -123,6 +127,7 @@ class SaleOrder(models.Model):
             # This part is pretty much a copy-paste of the method '_onchange_discount' of
             # 'sale.order.line'.
             price, rule_id = order.pricelist_id.with_context(product_context).get_product_price_rule(product, qty or 1.0, order.partner_id)
+            price = self._product_rules_price(product, price)
             pu, currency = request.env['sale.order.line'].with_context(product_context)._get_real_price_currency(product, rule_id, qty, product.uom_id, order.pricelist_id.id)
             if pu != 0:
                 if order.pricelist_id.currency_id != currency:
