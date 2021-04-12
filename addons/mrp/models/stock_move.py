@@ -109,6 +109,19 @@ class StockMove(models.Model):
         help='Technical Field to order moves')
     order_finished_lot_ids = fields.Many2many('stock.production.lot', string="Finished Lot/Serial Number", compute='_compute_order_finished_lot_ids')
     should_consume_qty = fields.Float('Quantity To Consume', compute='_compute_should_consume_qty', digits='Product Unit of Measure')
+    description_bom_line = fields.Char(
+        'Kit', compute='_compute_description_bom_line')
+
+    @api.depends('bom_line_id')
+    def _compute_description_bom_line(self):
+        for move in self:
+            if not move.bom_line_id or move.bom_line_id.bom_id.type != 'phantom':
+                move.description_bom_line = False
+            else:
+                bom = move.bom_line_id.bom_id
+                bom_line = move.bom_line_id
+                index = bom.bom_line_ids.ids.index(bom_line.id)
+                move.description_bom_line = '%s - %d/%d' % (bom.display_name, index + 1, len(bom.bom_line_ids))
 
     @api.depends('raw_material_production_id.priority')
     def _compute_priority(self):
