@@ -154,6 +154,10 @@ class TestL10nBeEdi(AccountEdiTestCommon):
     # Test export
     ####################################################
 
+    def test_turlututu(self):
+        builder = self.env['account.edi.format']._get_ubl_2_1_builder(self.invoice)
+        print(builder.build())
+
     def test_efff_simple_case(self):
         ''' Test the generated Facturx Edi attachment without any modification of the invoice. '''
         self.assert_generated_file_equal(self.invoice, self.expected_invoice_efff_values)
@@ -164,8 +168,20 @@ class TestL10nBeEdi(AccountEdiTestCommon):
         })
 
         applied_xpath = '''
-            <xpath expr="//TaxTotal/TaxAmount" position="replace">
-                <TaxAmount currencyID="Gol">320.000</TaxAmount>
+            <xpath expr="//TaxTotal" position="replace">
+                <TaxTotal>
+                    <TaxAmount currencyID="Gol">320.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">100.000</TaxAmount>
+                        <Percent>10.0</Percent>
+                    </TaxSubtotal>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <Percent>20.0</Percent>
+                    </TaxSubtotal>
+                </TaxTotal>
             </xpath>
             <xpath expr="//LegalMonetaryTotal/LineExtensionAmount" position="replace">
                 <LineExtensionAmount currencyID="Gol">1000.000</LineExtensionAmount>
@@ -178,7 +194,12 @@ class TestL10nBeEdi(AccountEdiTestCommon):
             </xpath>
             <xpath expr="//InvoiceLine/TaxTotal" position="replace">
                 <TaxTotal>
-                    <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                    <TaxAmount currencyID="Gol">320.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">100.000</TaxAmount>
+                        <Percent>10.0</Percent>
+                    </TaxSubtotal>
                     <TaxSubtotal>
                         <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
                         <TaxAmount currencyID="Gol">220.000</TaxAmount>
