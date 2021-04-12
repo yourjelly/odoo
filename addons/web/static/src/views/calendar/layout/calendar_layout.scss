@@ -1,0 +1,39 @@
+.o_calendar_layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  > .o_calendar_info_panel {
+    display: flex;
+  }
+
+  > .o_calendar_main_panel {
+    display: flex;
+    flex: 1 1 auto;
+    height: 100%;
+
+    > .o_calendar_content {
+      flex-grow: 1;
+      height: 100%;
+      background-color: #f8f9fa;
+      background: linear-gradient(-45deg, #f8f9fa, white);
+    }
+
+    > .o_calendar_search_panel_container {
+      flex-shrink: 0;
+      position: relative;
+      padding: 8px 16px 0 16px;
+      background-color: white;
+      overflow-y: auto;
+
+      > .o_calendar_search_panel {
+        width: 250px;
+        font-size: 14px;
+      }
+    }
+
+    > *:not(:first-child) {
+      border-left: 1px solid #cccccc;
+    }
+  }
+}

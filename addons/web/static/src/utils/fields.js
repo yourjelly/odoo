@@ -32,3 +32,7 @@ export function formatMany2one(value, field, options) {
   }
   return value;
 }
+
+export const formats = {
+  many2one: formatMany2one,
+};

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarLayout" owl="1">
+        <div class="o_calendar_layout">
+            <div class="o_calendar_info_panel"> <!-- @todo [mcm] TO RENAME -->
+                <t t-slot="info" />
+            </div>
+            <div class="o_calendar_main_panel">
+                <div class="o_calendar_content">
+                    <t t-slot="default" />
+                </div>
+                <div class="o_calendar_search_panel_container">
+                    <div class="o_calendar_search_panel">
+                        <t t-slot="search" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+
+    <t t-name="calendar-mobile-layout" owl="1">
+        <div class="o_calendar_layout">
+            <button t-on-click="openSearchPanel">Search</button>
+            <div class="o_calendar_main_panel">
+                <t t-if="state.displayedPart === 'calendar'">
+                    <div class="o_calendar_content">
+                        <t t-slot="default" />
+                    </div>
+                </t>
+                <t t-elif="state.displayedPart === 'search'">
+                    <div class="o_calendar_search_panel_container">
+                        <button t-on-click="openCalendar">Close</button>
+                        <div class="o_calendar_search_panel">
+                            <t t-slot="search" />
+                        </div>
+                    </div>
+                </t>
+                <t t-elif="state.displayedPart === 'popover'">
+                    <button t-on-click="openCalendar">Close</button>
+                    <t t-component="state.component" />
+                </t>
+                <t t-elif="state.displayedPart === 'quickCreate'">
+                    <button t-on-click="openCalendar">Close</button>
+                    <t t-component="state.component" />
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

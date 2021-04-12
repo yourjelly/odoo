@@ -26,7 +26,10 @@ export class KeyNotFoundError extends Error {
 
 export class PopoverManager extends Component {
   setup() {
-    this.popovers = useState({});
+    this.state = useState({
+      rev: 0,
+    });
+    this.popovers = {};
     this.nextId = 0;
 
     useBus(bus, "ADD", this.addPopover);
@@ -41,6 +44,9 @@ export class PopoverManager extends Component {
    * @param {Object}    [params.props]
    * @param {Function}  [params.onClose]
    * @param {boolean}   [params.keepOnClose=false]
+    ////////////////////////////////////////////////////////////////////////////
+   * @param {Object}   [params.handlers]
+    ////////////////////////////////////////////////////////////////////////////
    */
   addPopover(params) {
     const key = params.key || this.nextId;
@@ -49,7 +55,15 @@ export class PopoverManager extends Component {
     }
 
     this.popovers[key] = Object.assign({ key }, params);
+
+    ////////////////////////////////////////////////////////////////////////////
+    for (const [evType, handler] of Object.entries(params.handlers || {})) {
+      this.el.addEventListener(evType, handler);
+    }
+    ////////////////////////////////////////////////////////////////////////////
+
     this.nextId += 1;
+    this.state.rev += 1;
   }
   /**
    * @param {string | number} key
@@ -59,13 +73,27 @@ export class PopoverManager extends Component {
       throw new KeyNotFoundError(key);
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    const handlers = this.popovers[key].handlers || {};
+    for (const [evType, handler] of Object.entries(handlers)) {
+      this.el.removeEventListener(evType, handler);
+    }
+    ////////////////////////////////////////////////////////////////////////////
+
     delete this.popovers[key];
+
+    this.state.rev += 1;
   }
 
   /**
    * @param {string | number} key
    */
   onPopoverClosed(key) {
+    if (!this.popovers[key]) {
+      // It can happen that the popover was removed just before this call.
+      return;
+    }
+ 
     if (this.popovers[key].onClose) {
       this.popovers[key].onClose();
     }

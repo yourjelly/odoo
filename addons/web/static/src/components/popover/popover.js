@@ -2,7 +2,7 @@
 
 import { debounce, throttle } from "../../utils/timing";
 
-const { Component } = owl;
+const { Component, QWeb } = owl;
 const { Portal } = owl.misc;
 const { useRef, useState } = owl.hooks;
 
@@ -347,5 +347,5 @@ Popover.computePositioningData = function (popoverElement, targetElement, margin
 };
 
 /** @todo remove this when we have a single implemtation of Popover */
-// delete QWeb.components.Popover;
-// QWeb.registerComponent("Popover", Popover);
+delete QWeb.components.Popover;
+QWeb.registerComponent("Popover", Popover);

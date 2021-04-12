@@ -1,0 +1,33 @@
+.o_calendar_popover {
+  display: flex;
+  flex-direction: column;
+  min-width: 256px;
+  max-width: 328px;
+  font-size: $font-size-base;
+
+  > .o_calendar_popover_header {
+    font-size: 1.05em;
+    font-weight: 500;
+    line-height: 1;
+  
+    > h4 {
+      font-size: 1.05em;
+      line-height: 1;
+    }
+
+    .o_calendar_popover_close > i {
+      cursor: pointer;
+    }
+  }
+
+  > .o_calendar_popover_body {
+    .list-group-item {
+      padding: 0.5rem 1rem;
+      border: none;
+    }
+  }
+
+  > .o_calendar_popover_footer {
+    background: none;
+  }
+}

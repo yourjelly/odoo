@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarQuickCreate" owl="1">
+        <Dialog title="props.title" size="'modal-sm'">
+            <t t-set-slot="buttons">
+                <button type="button" class="btn btn-primary" t-on-click="onCreateBtnClick">Create</button>
+                <button type="button" class="btn btn-secondary" t-on-click="onEditBtnClick">Edit</button>
+                <button type="button" class="btn btn-secondary" t-on-click="onCancelBtnClick">Cancel</button>
+            </t>
+            <div class="o_calendar_quick_create">
+            </div>
+        </Dialog>
+    </t>
+
+</templates>

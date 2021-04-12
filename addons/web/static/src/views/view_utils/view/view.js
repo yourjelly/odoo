@@ -25,6 +25,8 @@ export class View extends Component {
     // determine view type
     let ViewClass;
     let { jsClass, type } = this.props;
+    jsClass = undefined;
+
     if (jsClass) {
       ViewClass = viewRegistry.get(jsClass);
       type = ViewClass.type;
@@ -118,7 +120,7 @@ export class View extends Component {
     // determine ViewClass to instantiate (if not already done)
     if (!jsClass) {
       if (rootAttrs.js_class) {
-        jsClass = rootAttrs.js_class
+        // jsClass = rootAttrs.js_class
       }
     }
     if (jsClass && !ViewClass) {

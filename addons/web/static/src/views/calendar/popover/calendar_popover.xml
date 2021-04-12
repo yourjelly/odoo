@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarPopover" owl="1">
+        <Popover
+            target="target"
+            trigger="'none'"
+            position="'right'"
+            popoverClass="'o_calendar_popover card popover'"
+        >
+            <t t-set-slot="content">
+                <t t-if="props.isMulti">
+                </t>
+                <t t-else="">
+                    <div class="o_calendar_popover_header card-header d-flex justify-content-between py-2 pr-2">
+                        <h4 class="border-0 p-0 pt-1" t-esc="title" />
+                        <div class="ml-4">
+                            <span class="o_calendar_popover_close" t-on-click="trigger('popover-closed')">
+                                <i class="fa fa-close small m-1" />
+                            </span>
+                        </div>
+                    </div>
+                    <div class="o_calendar_popover_body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="fa fa-fw fa-calendar-o" />
+                                <b class="text-capitalize" t-esc="dateRange" />
+                            </li>
+                        </ul>
+                        <ul class="o_calendar_popover_fields list-group list-group-flush">
+                            <li class="list-group-item">
+                                A field's name: its value
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="o_calendar_popover_footer card-footer border-top">
+                        <button class="o_calendar_popover_edit btn btn-primary"
+                            t-on-click="onEditBtnClick"
+                        >
+                            Edit
+                        </button>
+                        <t t-if="props.canDelete">
+                            <button class="o_calendar_popover_delete btn btn-primary ml-2"
+                                t-on-click="onDeleteBtnClick"
+                            >
+                                Delete
+                            </button>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </Popover>
+    </t>
+
+</templates>

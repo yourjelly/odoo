@@ -7,7 +7,7 @@ import { registerCleanup } from "./cleanup";
 const { Settings } = luxon;
 
 /**
- * Patch the native Date object
+ * Patch the native Date and luxon DateTime objects
  *
  * Note that it will be automatically unpatched at the end of the test
  *
@@ -19,9 +19,83 @@ const { Settings } = luxon;
  * @param {number} [seconds]
  */
 export function patchDate(year, month, day, hours, minutes, seconds) {
-  const actualDate = new Date();
+  patchJsDate(...arguments);
+  patchLuxonDateTime(...arguments);
+}
+/**
+ * Patch the native Date object
+ *
+ * Note that it will be automatically unpatched at the end of the test
+ *
+ * @param {number} [year]
+ * @param {number} [month]
+ * @param {number} [day]
+ * @param {number} [hours]
+ * @param {number} [minutes]
+ * @param {number} [seconds]
+ */
+function patchJsDate(year, month, day, hours, minutes, seconds) {
+  const RealDate = window.Date;
+  const currentDate = new RealDate();
+  const fakeDate = new RealDate(year, month, day, hours, minutes, seconds);
+  const timeInterval = currentDate.getTime() - fakeDate.getTime();
+
+  window.Date = (function (NativeDate) {
+    function Date() {
+      if (arguments.length) {
+        const firstArg = arguments[0];
+        const date =
+          arguments.length === 1 && String(firstArg) === firstArg
+            ? new NativeDate(Date.parse(firstArg))
+            : new NativeDate(...arguments);
+        // Prevent mixups with unfixed Date object
+        date.constructor = Date;
+        return date;
+      } else {
+        const date = new NativeDate();
+        date.setTime(date.getTime() - timeInterval);
+        return date;
+      }
+    }
+
+    // Copy any custom methods a 3rd party library may have added
+    for (const key in NativeDate) {
+      Date[key] = NativeDate[key];
+    }
+
+    // Copy "native" methods explicitly; they may be non-enumerable
+    // exception: 'now' uses fake date as reference
+    Date.now = function () {
+      const date = new NativeDate();
+      return date.getTime() - timeInterval;
+    };
+    Date.UTC = NativeDate.UTC;
+    Date.prototype = NativeDate.prototype;
+    Date.prototype.constructor = Date;
+
+    // Upgrade Date.parse to handle simplified ISO 8601 strings
+    Date.parse = NativeDate.parse;
+    return Date;
+  })(Date);
+
+  registerCleanup(() => (window.Date = RealDate));
+}
+/**
+ * Patch the luxon DateTime object
+ *
+ * Note that it will be automatically unpatched at the end of the test
+ *
+ * @param {number} [year]
+ * @param {number} [month]
+ * @param {number} [day]
+ * @param {number} [hours]
+ * @param {number} [minutes]
+ * @param {number} [seconds]
+ */
+function patchLuxonDateTime(year, month, day, hours, minutes, seconds) {
+  const currentDate = new Date();
   const fakeDate = new Date(year, month, day, hours, minutes, seconds);
-  const timeInterval = actualDate.getTime() - fakeDate.getTime();
+  const timeInterval = currentDate.getTime() - fakeDate.getTime();
   Settings.now = () => Date.now() - timeInterval;
   registerCleanup(() => Settings.resetCaches());
 }

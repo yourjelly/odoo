@@ -1,0 +1,88 @@
+
+$o-cw-filter-avatar-size: 20px;
+
+.o_calendar_view {
+  .o_calendar_filter_section {
+    font-size: 0.9em;
+    padding: 2em 0 1em;
+
+    > .o_calendar_filter_section_title {
+      display: flex;
+
+      &.o_calendar_filter_section_foldable {
+        justify-content: space-between;
+        align-items: center;
+
+        i {
+          @include o-hover-opacity();
+          transition: all 0.3s ease;
+          font-size: 0.7em;
+        }
+
+        &.o_calendar_filter_section_folded i {
+          transform: rotate(90deg);
+          opacity: 1;
+        }
+      }
+    }
+
+    > .o_calendar_filter_items {
+      .o_calendar_filter_item {
+        cursor: pointer;
+        overflow: hidden;
+        width: 100%;
+        position: relative;
+        margin-bottom: 0.5rem;
+
+        input {
+          position: absolute;
+          z-index: -1;
+          opacity: 0;
+        }
+        label {
+          display: flex;
+          align-items: center;
+          margin: 0;
+
+          > .o_calendar_filter_item_input {
+            @include size(1.3em);
+            border: 2px solid;
+            border-radius: 1px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            justify-content: center;
+            position: relative;
+            margin-right: 0.25rem;
+
+            @for $i from 1 through length($o-colors-complete) {
+              $color: nth($o-colors-complete, $i);
+
+              &.o_calendar_filter_item_input_color_#{$i - 1} {
+                border-color: $color;
+                background: $color;
+                color: color-yiq($color);
+              }
+            }
+          }
+
+          > .o_calendar_filter_item_avatar {
+            @include size($o-cw-filter-avatar-size);
+            border-radius: 2px;
+          }
+
+          > .o_calendar_filter_item_title {
+            flex-grow: 1;
+          }
+        }
+        input:not(:checked) + label .o_calendar_filter_item_input {
+          background: transparent !important;
+          i {
+              visibility: hidden;
+          }
+        }
+      }
+    }
+  }
+}

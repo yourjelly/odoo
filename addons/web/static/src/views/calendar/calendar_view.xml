@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarView" owl="1"> <!-- @todo [MCM] rename -->
+        <div class="o_calendar_view">
+            <ControlPanel t-props="controlPanelConfig">
+                <t t-set-slot="control-panel-bottom-left">
+                    <t t-call="wowl.CalendarView.controlButtons"/>
+                </t>
+            </ControlPanel>
+            <t t-call="wowl.CalendarView.content" />
+        </div>
+    </t>
+
+    <t t-name="wowl.CalendarView.content" owl="1">
+        <CalendarLayout t-ref="layout">
+            <t t-set-slot="info">
+                <t t-foreach="componentRegistries.info.getEntries()" t-as="entry" t-key="entry[0]">
+                    <t t-component="entry[1]" t-props="props" desc="desc" />
+                </t>
+            </t>
+            <t t-set-slot="search">
+                <CalendarDatePicker
+                    t-on-date-picked="onDatePicked"
+                    date="model.date"
+                />
+
+                <t t-foreach="componentRegistries.search.getEntries()" t-as="entry" t-key="entry[0]">
+                    <t t-component="entry[1]" t-props="props" desc="desc" />
+                </t>
+
+                <t t-call="wowl.CalendarView.filterSections"/>
+            </t>
+            <CalendarAdapter t-props="calendarOptions" />
+        </CalendarLayout>
+    </t>
+
+    <!-- Control panel -->
+
+    <t t-name="wowl.CalendarView.controlButtons" owl="1">
+        <div class="o_cp_buttons" role="toolbar">
+            <div class="o_calendar_buttons">
+                <span class="o_calendar_navigation_buttons">
+                    <button class="btn btn-primary" title="Previous"
+                        t-on-click.stop="model.setPreviousDate()"
+                    >
+                        <i class="fa fa-arrow-left"/>
+                    </button>
+                    <button class="btn btn-primary"
+                        t-on-click.stop="model.setToday()"
+                    >
+                        Today
+                    </button>
+                    <button class="btn btn-primary"
+                        t-on-click.stop="model.setNextDate()"
+                    >
+                        <i class="fa fa-arrow-right" title="Next"/>
+                    </button>
+                </span>
+                <span class="o_calendar_scale_buttons">
+                    <div class="btn-group">
+                        <t t-foreach="desc.scales" t-as="scale" t-key="scale">
+                            <button class="btn btn-secondary"
+                                t-att-class="{active: model.scale === scale}"
+                                t-attf-class="o_calendar_button_{{ scale }}"
+                                t-on-click.stop="model.setScale(scale)"
+                            >
+                                <t t-esc="scaleLabels[scale]"/>
+                            </button>
+                        </t>
+                    </div>
+                </span>
+            </div>
+        </div>
+    </t>
+
+    <!-- Filters -->
+
+    <t t-name="wowl.CalendarView.filterSections" owl="1">
+        <t t-foreach="model.filterSections" t-as="section" t-key="section.fieldName">
+            <t t-if="section.filters.length">
+                <div class="o_calendar_filter_section">
+                    <t t-set="canFold" t-value="section.filters.length > 2 and section.title" />
+                    <t t-if="canFold">
+                        <h5 type="button"
+                            class="o_calendar_filter_section_title o_calendar_filter_section_foldable"
+                            data-toggle="collapse"
+                            t-attf-data-target="#o_calendar_filter_section_folded_{{section.fieldName}}"
+                        >
+                            <t t-esc="section.title" />
+                            <i class="fa fa-chevron-down" />
+                        </h5>
+                    </t>
+                    <t t-elif="section.title">
+                        <h5 class="o_calendar_filter_section_title" t-esc="section.title" />
+                    </t>
+        
+                    <div class="o_calendar_filter_items"
+                        aria-expanded="true"
+                        t-att-class="{
+                            collapse: canFold,
+                            show: canFold
+                        }"
+                        t-attf-id="o_calendar_filter_section_folded_{{section.fieldName}}"
+                    >
+                        <t t-foreach="section.filters" t-as="filter" t-key="filter.value">
+                            <t t-if="filter.display == null or filter.display">
+
+                                <t t-if="section.avatarField and filter.value !== 'all'">
+                                    <!-- @todo [MCM] little trick while there is the bug with scope -->
+                                    <t t-set="_s" t-value="section" />
+
+                                    <Popover position="'top'" trigger="'hover'">
+                                        <t t-call="wowl.CalendarView.filter">
+                                            <!-- @todo [MCM] little trick while there is the bug with scope -->
+                                            <t t-set="section" t-value="_s" />
+                                            <t t-set="filterId" t-value="_s.fieldName + '_' + filter.value" />
+                                        </t>
+                                        <t t-set-slot="content">
+                                            <img t-attf-src="/web/image/{{ _s.avatarModel }}/{{ filter.value }}/{{ _s.avatarField }}" />
+                                        </t>
+                                    </Popover>
+                                </t>
+                                <t t-else="">
+                                    <t t-call="wowl.CalendarView.filter">
+                                        <t t-set="filterId" t-value="section.fieldName + '_' + filter.value"/>
+                                    </t>
+                                </t>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </t>
+
+    <t t-name="wowl.CalendarView.filter" owl="1">
+        <div class="o_calendar_filter_item">
+            <input type="checkbox"
+                name="selection"
+                t-att-id="filterId"
+                t-att-checked="filter.active"
+                t-on-click="model.setFilterActive(section.fieldName, filter.value, !filter.active)"
+            />
+            <label t-att-for="filterId">
+                <span class="o_calendar_filter_item_input"
+                    t-attf-class="{{ filter.colorIndex ? 'o_calendar_filter_item_input_color_' + filter.colorIndex : '' }}"
+                >
+                    <i class="fa fa-check position-relative" />
+                </span>
+                <t t-if="filter.value === 'all'">
+                    <i class="o_calendar_filter_item_avatar fa fa-users fa-fw flex-shrink-0 mr-1" role="img" aria-label="Avatar" title="Avatar" />
+                </t>
+                <t t-elif="section.avatarField and filter.value">
+                    <img
+                        class="o_calendar_filter_item_avatar flex-shrink-0 mr-1" alt="Avatar"
+                        t-attf-src="/web/image/{{ section.avatarModel }}/{{ filter.value }}/{{ section.avatarField }}"
+                    />
+                </t>
+                <span class="o_calendar_filter_item_title text-truncate"
+                    t-esc="filter.label"
+                    t-attf-title="{{ ['all', false].includes(filter.value) or !section.avatarField ? filter.label : '' }}"
+                />
+            </label>
+        </div>
+    </t>
+
+    <!-- Events -->
+
+    <t t-name="wowl.CalendarView.event" owl="1">
+        <div class="o_calendar_event_content">
+            <span t-if="!desc.hideTime and event.extendedProps.showTime" class="fc-time">
+                18:00:00
+            </span>
+            <div class="o_event_title" t-esc="event.title"/>
+        </div>
+    </t>
+
+</templates>

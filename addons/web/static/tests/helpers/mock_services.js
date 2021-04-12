@@ -28,7 +28,7 @@ export const defaultLocalization = {
 };
 
 export function makeFakeLocalizationService(config) {
-  patchWithCleanup(localization, defaultLocalization);
+  patchWithCleanup(localization, Object.assign({}, defaultLocalization, config));
 
   return {
     name: "localization",
