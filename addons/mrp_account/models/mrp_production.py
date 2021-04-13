@@ -77,7 +77,7 @@ class MrpProduction(models.Model):
 
     def button_mark_done(self):
         res = super(MrpProduction, self).button_mark_done()
-        for order in self:
+        for order in self.filtered(lambda mo: mo.state == "done"):
             order._costs_generate()
         return res
 
