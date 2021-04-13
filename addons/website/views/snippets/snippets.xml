@@ -424,9 +424,48 @@
         </we-row>
     </div>
 
+    <div data-js="MasonryLayout"
+         data-selector=".s_masonry_block">
+        <we-select string="Template"
+                   data-attribute-name="masonryTemplate"
+                   data-attribute-default-value="website.s_masonry_block_default_template">
+            <we-button title="Default"
+                       data-select-data-attribute="website.s_masonry_block_default_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_default.svg"/>
+            <we-button title="Default Reversed"
+                       data-select-data-attribute="website.s_masonry_block_reversed_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_reversed.svg"/>
+            <we-button title="Images"
+                       data-select-data-attribute="website.s_masonry_block_images_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_images.svg"/>
+            <we-button title="Image Text Image"
+                       data-select-data-attribute="website.s_masonry_block_image_texts_image_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_image_texts_image.svg"/>
+            <we-button title="Mosaic"
+                       data-select-data-attribute="website.s_masonry_block_mosaic_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_mosaic.svg"/>
+            <we-button title="Text Image Text"
+                       data-select-data-attribute="website.s_masonry_block_texts_image_texts_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_texts_image_texts.svg"/>
+            <we-button title="Alternate Text"
+                       data-select-data-attribute="website.s_masonry_block_alternation_text_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_alternate_texts.svg"/>
+            <we-button title="Alternate Text Image"
+                       data-select-data-attribute="website.s_masonry_block_alternation_text_image_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_alternate_text_image.svg"/>
+            <we-button title="Alternate Image Text"
+                       data-select-data-attribute="website.s_masonry_block_alternation_image_text_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_alternate_image_text.svg"/>
+            <we-button title="Alternate Text Image Text"
+                       data-select-data-attribute="website.s_masonry_block_alternation_text_image_text_template"
+                       data-img="/website/static/src/img/snippets_options/masonry_template_alternate_text_image_text.svg"/>
+        </we-select>
+    </div>
+
     <div data-js="layout_column"
         data-selector="section"
-        data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns">
+        data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns"
+        data-exclude=".s_masonry_block">
         <we-select string="Columns" data-no-preview="true">
             <we-button data-select-count="0" data-name="zero_cols_opt">None</we-button>
             <we-button data-select-count="1">1</we-button>
@@ -460,7 +499,7 @@
     <t t-set="only_bg_image_exclude" t-value="''"/>
 
     <t t-set="both_bg_color_image_selector" t-value="'section, .carousel-item, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .parallax'"/>
-    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map, .s_map, [data-snippet] .row > div *'"/>
+    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map, .s_map, [data-snippet] .row > div *, .s_masonry_block, .s_masonry_block .s_col_no_resize'"/>
 
     <t t-call="web_editor.snippet_options_background_options">
         <t t-set="selector" t-value="both_bg_color_image_selector"/>
@@ -488,27 +527,27 @@
     <!-- Border | Columns -->
     <div data-js="Box"
          data-selector="section .row > div"
-         data-exclude=".s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_image_gallery .row > div">
+         data-exclude=".s_col_no_bgcolor, .s_col_no_bgcolor.row > div, .s_image_gallery .row > div, .s_masonry_block .s_col_no_resize">
         <t t-call="website.snippet_options_border_widgets"/>
         <t t-call="website.snippet_options_shadow_widgets"/>
     </div>
 
     <!-- Mobile display options -->
     <div data-js="MobileVisibility" data-selector="section, section .row > div"
-         data-exclude=".s_col_no_resize.row > div">
+         data-exclude=".s_col_no_resize.row > div, .s_masonry_block .s_col_no_resize">
         <we-button class="o_we_link o_we_mobile" data-show-on-mobile="true" data-no-preview="true"
-                   data-img="/website/static/src/img/snippets_options/mobile_invisible.svg"
-                   data-active-img="/website/static/src/img/snippets_options/mobile_visible.svg"/>
+                  data-img="/website/static/src/img/snippets_options/mobile_invisible.svg"
+                  data-active-img="/website/static/src/img/snippets_options/mobile_visible.svg"/>
     </div>
 
     <div data-js="sizing_y"
         data-selector="section, .row > div, .parallax, .s_hr, .carousel-item, .s_rating"
-        data-exclude="section:has(> .carousel), .s_image_gallery .carousel-item, .s_col_no_resize.row > div"/>
+        data-exclude="section:has(> .carousel), .s_image_gallery .carousel-item, .s_col_no_resize.row > div, .s_col_no_resize"/>
 
     <div data-js="sizing_x"
         data-selector=".row > div"
         data-drop-near=".row:not(.s_col_no_resize) > div"
-        data-exclude=".s_col_no_resize.row > div"/>
+        data-exclude=".s_col_no_resize.row > div, .s_col_no_resize"/>
 
     <t t-set="so_snippet_addition_selector" t-translation="off">section, .parallax, .s_popup</t>
     <div id="so_snippet_addition"
@@ -1015,7 +1054,7 @@
     </div>
 
     <!-- Scroll to next section button (only for full height) -->
-    <div data-js="ScrollButton" data-selector="section" data-exclude="[data-snippet] .row > div *">
+    <div data-js="ScrollButton" data-selector="section" data-exclude="[data-snippet] .row > div *, .s_masonry_block">
         <!-- Min height of section -->
         <we-button-group string="Height" data-show-scroll-button="">
             <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>
@@ -1023,11 +1062,6 @@
             <we-button data-select-class="o_full_screen_height" title="Full screen" data-name="full_height_opt" data-show-scroll-button="true">100%</we-button>
         </we-button-group>
 
-        <we-checkbox string="⌙ Scroll down button"
-                     data-toggle-button="true"
-                     data-no-preview="true"
-                     data-dependencies="full_height_opt"
-                     data-name="scroll_button_opt"/>
         <!-- &emsp; -->
         <we-row string=" ⌙ Colors">
             <we-colorpicker

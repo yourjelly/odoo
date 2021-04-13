@@ -1944,6 +1944,48 @@ options.registry.collapse = options.Class.extend({
     },
 });
 
+options.registry.MasonryLayout = options.Class.extend({
+
+    /**
+     * @constructor
+     */
+     init: function () {
+        this._super.apply(this, arguments);
+        this.$container = this.$('>.container, >.container-fluid, >.o_container_small');
+        this.$currentView = this.$container.children();
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Change the masonry snippet layout with templates.
+     */
+    async selectDataAttribute(previewMode, widgetValue, params) {
+        await this._super(...arguments);
+        if (previewMode === 'reset') {
+            this.$container.empty().append(this.$currentView);
+        } else {
+            let layoutPreview = this.$currentView;
+            if (widgetValue !== params.activeValue) {
+                layoutPreview = await this._rpc({
+                    model: 'ir.ui.view',
+                    method: 'render_public_asset',
+                    args: [`${widgetValue}`, {}],
+                    kwargs: {
+                        context: this.options.context,
+                    },
+                });
+            }
+            this.$container.empty().append(layoutPreview);
+            if (previewMode === false) {
+                this.$currentView = this.$container.children();
+            }
+        }
+    },
+});
+
 options.registry.HeaderNavbar = options.Class.extend({
     /**
      * Particular case: we want the option to be associated on the header navbar

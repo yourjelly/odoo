@@ -1,37 +1,263 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<!-- Template -->
+<!-- Template to fill with the chosen view -->
 <template id="s_masonry_block" name="Masonry">
     <section class="s_masonry_block" data-vcss="001">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-6 oe_img_bg o_bg_img_center text-center pb224 pt224" data-name="Block" style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
-                    <p><br/></p>
-                </div>
-                <div class="col-lg-6">
-                    <div class="row h-100">
-                        <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
-                            <h3>A great title</h3>
-                            <p>And a great subtitle</p>
-                        </div>
-                        <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
-                            <h3>A great title</h3>
-                            <p>And a great subtitle</p>
-                        </div>
-                        <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
-                            <h3>A great title</h3>
-                            <p>And a great subtitle</p>
-                        </div>
-                        <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
-                            <h3>A great title</h3>
-                            <p>And a great subtitle</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <t t-call="website.s_masonry_block_default_template"/>
         </div>
     </section>
+</template>
+
+<template id="s_masonry_block_default_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-6 oe_img_bg text-center pb224 pt224" data-name="Block"
+           style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-6 s_col_no_resize">
+          <div class="row h-100">
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_reversed_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-6 s_col_no_resize">
+          <div class="row h-100">
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-6 oe_img_bg text-center pb224 pt224" data-name="Block"
+           style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_images_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-6 oe_img_bg text-center pb224 pt224" data-name="Block"
+           style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-6 oe_img_bg text-center pb224 pt224" data-name="Block"
+           style="background-image: url(/web/image/website.s_cover_default_image);">
+          <p><br/></p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_image_texts_image_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_cover_default_image);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 s_col_no_resize">
+          <div class="row h-100">
+              <div class="col-lg-12 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-12 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-6 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_mosaic_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-6 s_col_no_resize">
+          <div class="row">
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-lg-12 oe_img_bg text-center pt224 pb224" data-name="Block"
+                  style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+                  <p><br/></p>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-6 s_col_no_resize">
+          <div class="row">
+              <div class="col-lg-12 oe_img_bg text-center pt224 pb224" data-name="Block"
+                  style="background-image: url(/web/image/website.s_cover_default_image);">
+                  <p><br/></p>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-lg-6 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-6 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_texts_image_texts_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 s_col_no_resize">
+          <div class="row h-100">
+              <div class="col-lg-12 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-12 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-lg-6 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 s_col_no_resize">
+          <div class="row h-100">
+              <div class="col-lg-12 pt24 pb8 text-center bg-200" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+              <div class="col-lg-12 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+                  <h3>A great title</h3>
+                  <p>And a great subtitle</p>
+              </div>
+          </div>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_alternation_text_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_alternation_text_image_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_cover_default_image);">
+          <p><br/></p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_alternation_image_text_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-3 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_cover_default_image);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+  </div>
+</template>
+
+<template id="s_masonry_block_alternation_text_image_text_template" groups="base.group_user">
+  <div class="row">
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+      <div class="col-lg-6 oe_img_bg text-center pt224 pb224" data-name="Block"
+          style="background-image: url(/web/image/website.s_masonry_block_default_image_1);">
+          <p><br/></p>
+      </div>
+      <div class="col-lg-3 pt24 pb8 text-center bg-200" data-name="Block">
+          <h3>A great title</h3>
+          <p>And a great subtitle</p>
+      </div>
+  </div>
 </template>
 
 <!-- Assets -->
