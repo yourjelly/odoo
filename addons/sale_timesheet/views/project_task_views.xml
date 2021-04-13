@@ -197,10 +197,10 @@
             </field>
         </record>
 
-        <record id="project_timesheet_action_client_timesheet_plan" model="ir.actions.act_window">
+        <record id="project_timesheet_action_client_timesheet_plan" model="ir.actions.client">
             <field name="name">Overview</field>
-            <field name="res_model">project.project</field>
-            <field name="view_mode">qweb</field>
+            <field name="tag">project_overview</field>
+            <field name="context" eval="{'model': 'project.project'}" />
         </record>
 
 </odoo>

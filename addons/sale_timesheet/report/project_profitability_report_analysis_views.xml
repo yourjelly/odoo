@@ -81,4 +81,10 @@
         name="Project Costs and Revenues"
         sequence="50"/>
 
+    <menuitem id="menu_project_overview"
+            name="Project Overview"
+            action="project_timesheet_action_client_timesheet_plan"
+            parent="project.menu_project_report"
+            sequence="11"/>
+
 </odoo>

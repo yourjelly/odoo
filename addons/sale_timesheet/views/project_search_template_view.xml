@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="project_search_template_analytic_accounts">
+            <div groups="analytic.group_analytic_accounting">
+                <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_analytic_filter" data-toggle="dropdown">
+                    <span class="fa fa-folder-open"/> Analytic Accounts
+                </button>
+                <ul class="dropdown-menu o_filter_menu" role="menu">
+                    <li class="o_project_report_search js_project_analytic_m2m"/>
+                </ul>
+            </div>
+        </template>
+
+        <template id="project_search_template_customers">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_partner_filter" data-toggle="dropdown">
+                <span class="fa fa-users"/> Customers
+            </button>
+            <ul class="dropdown-menu o_filter_menu" role="menu">
+                <li class="o_project_report_search js_project_customer_m2m"/>
+            </ul>
+        </template>
+
+        <template id="project_search_template_favorite_projects">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_favorite_filter" data-toggle="dropdown">
+                <span class="fa fa-puzzle-piece"/> Projects
+            </button>
+            <ul class="dropdown-menu o_filter_menu" role="menu">
+                <li class="o_project_report_search js_projects_m2m"/>
+            </ul>
+        </template>
+
+        <template id="project_search_template_managers">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_manager_filter" data-toggle="dropdown">
+                <span class="fa fa-users"/> Project Managers
+            </button>
+            <ul class="dropdown-menu o_filter_menu" role="menu">
+                <li class="o_project_report_search js_project_manager_m2m"/>
+            </ul>
+        </template>
+
+        <template id="project_search_template_employees">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_employee_filter" data-toggle="dropdown">
+                <span class="fa fa-users"/> Employees
+            </button>
+            <ul class="dropdown-menu o_filter_menu" role="menu">
+                <li class="o_project_report_search js_project_employee_m2m"/>
+            </ul>
+        </template>
+
+        <template id="project_search_template_soi">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle project_so_item_filter" data-toggle="dropdown">
+                <span class="fa fa-dollar"/> Sale Order Items
+            </button>
+            <ul class="dropdown-menu o_filter_menu" role="menu">
+                <li class="o_project_report_search js_project_so_item_m2m"/>
+            </ul>
+        </template>
+
+        <template id="project_search_template_time_ranges">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+                <span class="fa fa-calendar" title="Dates" role="img" aria-label="Dates"/>
+                <t t-if="options['date'].get('string') and options['date'].get('filter') != 'custom'"><t t-esc="options['date']['string']"/></t>
+                <t t-if="options['date'].get('filter') == 'custom'">
+                    <t t-if="options['date']['mode'] == 'single'">Date: <span class="js_format_date"><t t-esc="options['date']['date_to']"/></span></t>
+                    <t t-if="options['date']['mode'] == 'range'">From: <span class="js_format_date"><t t-esc="options['date']['date_from']"/></span> <br/><span class="o_reports_date_to">to: <span class="js_format_date"><t t-esc="options['date']['date_to']"/></span></span></t>
+                </t>
+            </button>
+            <div class="dropdown-menu o_filter_menu" role="menu">
+                <t t-if="options['date']['mode'] == 'range'">
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="This Month" data-filter="this_month">This Month</a>
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="This Quarter" data-filter="this_quarter">This Quarter</a>
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="This Financial Year" data-filter="this_year">This Year</a>
+                    <div role="separator" class="dropdown-divider"></div>
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="Last Month" data-filter="last_month">Last Month</a>
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="Last Quarter" data-filter="last_quarter">Last Quarter</a>
+                    <a role="menuitem" class="dropdown-item js_project_report_date_filter" title="Last Financial Year" data-filter="last_year">Last Year</a>
+                </t>
+                <div role="separator" class="dropdown-divider"></div>
+                <a role="menuitem" class="dropdown-item js_foldable_trigger o_closed_menu" data-filter='custom_filter_date'>Custom</a>
+                <div class="o_foldable_menu o_closed_menu o_project_report_search" data-filter='custom_filter_date'>
+                    <t t-if="options['date']['mode'] == 'range'">
+                        <label class="custom-date" for="date_from">Start Date :</label>
+                        <div class="form-group custom-date">
+                            <div class='o_datepicker js_account_reports_datetimepicker' t-att-data-default-value="options['date']['date_from']">
+                                <input type='text' class="o_datepicker_input" name="date_from" />
+                                <span class="o_datepicker_button"/>
+                            </div>
+                        </div>
+                    </t>
+                    <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'single'">End Date :</label>
+                    <label class="custom-date" for="date_to" t-if="options['date']['mode'] == 'range'">Date :</label>
+                    <div class="form-group custom-date">
+                        <div class='o_datepicker js_account_reports_datetimepicker' t-att-data-default-value="options['date']['date_to']">
+                            <input type='text' class="o_datepicker_input" name="date_to" />
+                            <span class="o_datepicker_button"/>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary js_project_report_date_filter" data-filter="custom">Apply</button>
+                </div>
+            </div>
+        </template>
+
+        <template id="project_search_template">
+            <div class="btn-group o_dropdown o_project_reports_filter_time_range">
+                <t t-call="sale_timesheet.project_search_template_time_ranges"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_favorite">
+                <t t-call="sale_timesheet.project_search_template_favorite_projects"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_analytic">
+                <t t-call="sale_timesheet.project_search_template_analytic_accounts"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_customer">
+                <t t-call="sale_timesheet.project_search_template_customers"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_soi">
+                <t t-call="sale_timesheet.project_search_template_soi"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_manager">
+                <t t-call="sale_timesheet.project_search_template_managers"/>
+            </div>
+            <div class="btn-group o_dropdown o_project_reports_filter_employee">
+                <t t-call="sale_timesheet.project_search_template_employees"/>
+            </div>
+        </template>
+
+    </data>
+</odoo>

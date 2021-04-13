@@ -87,8 +87,9 @@ class TestSaleProject(TestReporting):
            'product_id': self.product_expense.id,
            'product_uom_id': self.product_expense.uom_id.id,
         })
-        view_id = self.env.ref('sale_timesheet.project_timesheet_action_client_timesheet_plan').id
-        vals = self.env['project.project']._qweb_prepare_qcontext(view_id, [['id', '=', project_so.id]])
+        domain = {'proj_ids': (self.env['project.project']._get_options_project_domain({'project_ids': [project_so.id]}))}
+        vals = self.env['project.project']._plan_prepare_values(domain)
+        vals['actions'] = self.env['project.project']._plan_prepare_actions(vals)
 
         dashboard_value = timesheet2.unit_amount + timesheet3.unit_amount + timesheet4.unit_amount + timesheet5.unit_amount + timesheet1.unit_amount
         project_so_timesheet_sold_unit = timesheet3.unit_amount + timesheet4.unit_amount

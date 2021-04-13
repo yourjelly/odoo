@@ -6,11 +6,274 @@ from collections import defaultdict
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError
+from odoo.tools import date_utils, get_lang
+from odoo.tools.misc import format_date
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+from babel.dates import get_quarter_names
 
 
 # YTI PLEASE SPLIT ME
 class Project(models.Model):
     _inherit = 'project.project'
+
+    filter_date = {'mode': 'range', 'filter': 'this_month'}
+
+    def _get_templates(self):
+        return {
+            'timesheet_plan': 'sale_timesheet.timesheet_plan',
+            'project_search_template': 'sale_timesheet.project_search_template',
+        }
+
+    def _prepare_domain(self, options):
+        return {
+            'proj_ids': (self._get_options_project_domain(options)) or False,
+            'partner_id': (self._get_options_partner_domain(options)) or False,
+            'employee_id': (self._get_options_employee_domain(options)) or False,
+            'sale_line_id': (self._get_options_so_line_domain(options)) or False,
+            'manager_id': (self._get_options_manager_domain(options)) or False,
+            'analytic_accounts_id': (self._get_options_analytic_accounts_domain(options)) or False,
+            'date_range': (self._get_options_date_domain(options)) or False
+        }
+
+    @api.model
+    def _get_dates_period(self, options, date_from, date_to, mode, period_type=None, strict_range=False):
+        '''Compute some information about the period:
+        * The name to display on the report.
+        * The period type (e.g. quarter) if not specified explicitly.
+        :param date_from:   The starting date of the period.
+        :param date_to:     The ending date of the period.
+        :param period_type: The type of the interval date_from -> date_to.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type * mode *
+        '''
+        def match(dt_from, dt_to):
+            return (dt_from, dt_to) == (date_from, date_to)
+
+        string = None
+        # If no date_from or not date_to, we are unable to determine a period
+        if not period_type or period_type == 'custom':
+            date = date_to or date_from
+            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
+            if match(company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to']):
+                period_type = 'fiscalyear'
+                if company_fiscalyear_dates.get('record'):
+                    string = company_fiscalyear_dates['record'].name
+            elif match(*date_utils.get_month(date)):
+                period_type = 'month'
+            elif match(*date_utils.get_quarter(date)):
+                period_type = 'quarter'
+            elif match(*date_utils.get_fiscal_year(date)):
+                period_type = 'year'
+            elif match(date_utils.get_month(date)[0], fields.Date.today()):
+                period_type = 'today'
+            else:
+                period_type = 'custom'
+        elif period_type == 'fiscalyear':
+            date = date_to or date_from
+            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date)
+            record = company_fiscalyear_dates.get('record')
+            string = record and record.name
+
+        if not string:
+            fy_day = self.env.company.fiscalyear_last_day
+            fy_month = int(self.env.company.fiscalyear_last_month)
+            if mode == 'single':
+                string = _('As of %s') % (format_date(self.env, fields.Date.to_string(date_to)))
+            elif period_type == 'year' or (
+                    period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to)):
+                string = date_to.strftime('%Y')
+            elif period_type == 'fiscalyear' and (date_from, date_to) == date_utils.get_fiscal_year(date_to, day=fy_day, month=fy_month):
+                string = '%s - %s' % (date_to.year - 1, date_to.year)
+            elif period_type == 'month':
+                string = format_date(self.env, fields.Date.to_string(date_to), date_format='MMM yyyy')
+            elif period_type == 'quarter':
+                quarter_names = get_quarter_names('abbreviated', locale=get_lang(self.env).code)
+                string = u'%s\N{NO-BREAK SPACE}%s' % (
+                    quarter_names[date_utils.get_quarter_number(date_to)], date_to.year)
+            else:
+                dt_from_str = format_date(self.env, fields.Date.to_string(date_from))
+                dt_to_str = format_date(self.env, fields.Date.to_string(date_to))
+                string = _('From %s\nto  %s') % (dt_from_str, dt_to_str)
+
+        return {
+            'string': string,
+            'period_type': period_type,
+            'mode': mode,
+            'strict_range': strict_range,
+            'date_from': date_from and fields.Date.to_string(date_from) or False,
+            'date_to': fields.Date.to_string(date_to),
+        }
+
+    @api.model
+    def _get_dates_previous_period(self, options, period_vals):
+        '''Shift the period to the previous one.
+        :param period_vals: A dictionary generated by the _get_dates_period method.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type *
+        '''
+        period_type = period_vals['period_type']
+        mode = period_vals['mode']
+        strict_range = period_vals.get('strict_range', False)
+        date_from = fields.Date.from_string(period_vals['date_from'])
+        date_to = date_from - timedelta(days=1)
+
+        if period_type == 'fiscalyear':
+            # Don't pass the period_type to _get_dates_period to be able to retrieve the account.fiscal.year record if
+            # necessary.
+            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(date_to)
+            return self._get_dates_period(options, company_fiscalyear_dates['date_from'], company_fiscalyear_dates['date_to'], mode, strict_range=strict_range)
+        if period_type in ('month', 'today', 'custom'):
+            return self._get_dates_period(options, *date_utils.get_month(date_to), mode, period_type='month', strict_range=strict_range)
+        if period_type == 'quarter':
+            return self._get_dates_period(options, *date_utils.get_quarter(date_to), mode, period_type='quarter', strict_range=strict_range)
+        if period_type == 'year':
+            return self._get_dates_period(options, *date_utils.get_fiscal_year(date_to), mode, period_type='year', strict_range=strict_range)
+        return None
+
+    @api.model
+    def _get_dates_previous_year(self, options, period_vals):
+        '''Shift the period to the previous year.
+        :param options:     The report options.
+        :param period_vals: A dictionary generated by the _get_dates_period method.
+        :return:            A dictionary containing:
+            * date_from * date_to * string * period_type *
+        '''
+        period_type = period_vals['period_type']
+        mode = period_vals['mode']
+        strict_range = period_vals.get('strict_range', False)
+        date_from = fields.Date.from_string(period_vals['date_from'])
+        date_from = date_from - relativedelta(years=1)
+        date_to = fields.Date.from_string(period_vals['date_to'])
+        date_to = date_to - relativedelta(years=1)
+
+        if period_type == 'month':
+            date_from, date_to = date_utils.get_month(date_to)
+        return self._get_dates_period(options, date_from, date_to, mode, period_type=period_type, strict_range=strict_range)
+
+    def _init_filter_date(self, options):
+        if self.filter_date is None:
+            return
+
+        previous_date = (options or {}).get('date', {})
+
+        # Default values.
+        mode = previous_date.get('mode') or self.filter_date.get('mode', 'range')
+        options_filter = previous_date.get('filter') or self.filter_date.get('filter') or ('today' if mode == 'single' else 'fiscalyear')
+        date_from = fields.Date.to_date(previous_date.get('date_from') or self.filter_date.get('date_from'))
+        date_to = fields.Date.to_date(previous_date.get('date_to') or self.filter_date.get('date_to'))
+        strict_range = previous_date.get('strict_range', False)
+
+        # Create date option for each company.
+        period_type = False
+        if 'today' in options_filter:
+            date_to = fields.Date.context_today(self)
+            date_from = date_utils.get_month(date_to)[0]
+        elif 'month' in options_filter:
+            date_from, date_to = date_utils.get_month(fields.Date.context_today(self))
+            period_type = 'month'
+        elif 'quarter' in options_filter:
+            date_from, date_to = date_utils.get_quarter(fields.Date.context_today(self))
+            period_type = 'quarter'
+        elif 'year' in options_filter:
+            company_fiscalyear_dates = self.env.company.compute_fiscalyear_dates(fields.Date.context_today(self))
+            date_from = company_fiscalyear_dates['date_from']
+            date_to = company_fiscalyear_dates['date_to']
+        elif not date_from:
+            # options_filter == 'custom' && mode == 'single'
+            date_from = date_utils.get_month(date_to)[0]
+
+        options['date'] = self._get_dates_period(options, date_from, date_to, mode, period_type=period_type, strict_range=strict_range)
+        if 'last' in options_filter:
+            options['date'] = self._get_dates_previous_period(options, options['date'])
+        options['date']['filter'] = 'options_filter'
+
+    def _get_options(self, options=None):
+        self._init_filter_date(options)
+        options['partner_ids'] = options and options.get('partner_ids') or []
+        options['project_ids'] = options and options.get('project_ids') or []
+        options['manager_ids'] = options and options.get('manager_ids') or []
+        options['employee_ids'] = options and options.get('employee_ids') or []
+        options['so_item_ids'] = options and options.get('so_item_ids') or []
+        if self.user_has_groups('analytic.group_analytic_accounting'):
+            options['analytic_account_ids'] = options and options.get('analytic_account_ids') or []
+
+    @api.model
+    def _get_options_partner_domain(self, options):
+        domain = []
+        if options.get('partner_ids'):
+            partner_ids = [int(partner) for partner in options['partner_ids']]
+            domain.append(('partner_id', 'in', partner_ids))
+        return domain
+
+    @api.model
+    def _get_options_employee_domain(self, options):
+        domain = []
+        if options.get('employee_ids'):
+            employee_ids = [int(employee) for employee in options['employee_ids']]
+            domain.append(('employee_id', 'in', employee_ids))
+        return domain
+
+    @api.model
+    def _get_options_project_domain(self, options):
+        domain = []
+        if options.get('project_ids'):
+            project_ids = [int(project) for project in options['project_ids']]
+            domain.append(('project_id', 'in', project_ids))
+        return domain
+
+    @api.model
+    def _get_options_manager_domain(self, options):
+        domain = []
+        if options.get('manager_ids'):
+            manager_ids = [int(manager_id) for manager_id in options['manager_ids']]
+            domain.append(('user_id', 'in', manager_ids))
+        return domain
+
+    @api.model
+    def _get_options_date_domain(self, options):
+        domain = []
+        if options.get('date'):
+            date_domain = [("create_date", ">=", options.get('date')['date_from']), ("create_date", "<=", options.get('date')['date_to'])]
+            domain.append(date_domain)
+        return domain
+
+    @api.model
+    def _get_options_so_line_domain(self, options):
+        domain = []
+        if options.get('so_item_ids'):
+            domain += [('sale_line_id', 'in', options['so_item_ids'])]
+        return domain
+
+    @api.model
+    def _get_options_analytic_accounts_domain(self, options):
+        domain = []
+        if options.get('analytic_account_ids'):
+            domain += [('analytic_account_id', 'in', options['analytic_account_ids'])]
+        return domain
+
+    @api.model
+    def get_search_template(self, options):
+
+        options = options or {}
+        self._get_options(options)
+
+        info = {
+            'options': options,
+            'searchview_html': self.env['ir.ui.view']._render_template(self._get_templates().get('project_search_template', 'sale_timesheet.project_search_template'), values={'options': options}),
+        }
+        self = self.with_context(active_ids=options.get('project_ids'))
+        domain = self._prepare_domain(options)
+        project_domain = self._project_domain(domain)
+        projects = self.search(project_domain)
+        if not projects:
+            projects = self.search([])
+        form_data = projects._plan_prepare_values(domain)
+        form_data['actions'] = projects._plan_prepare_actions(form_data)
+        info.update({
+            'main_html': self.env['ir.ui.view']._render_template(self._get_templates().get('timesheet_plan', 'sale_timesheet.main_view'), values=form_data),
+        })
+        return info
 
     @api.model
     def default_get(self, fields):

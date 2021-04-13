@@ -19,30 +19,101 @@ DEFAULT_MONTH_RANGE = 3
 class Project(models.Model):
     _inherit = 'project.project'
 
+    def _project_domain(self, domain):
+        proj_domain = [('id', 'in', self.ids)]
+        if not domain:
+            return proj_domain
+        if domain.get('proj_ids'):
+            proj_domain = [("id", "in", domain.get('proj_ids')[0][2])]
+        if domain.get('manager_id'):
+            proj_domain += domain.get('manager_id')
+        if domain.get('analytic_accounts_id'):
+            proj_domain += domain.get('analytic_accounts_id')
+        if domain.get('employee_id'):
+            proj_domain += [('timesheet_ids.employee_id', 'in', domain.get('employee_id')[0][2])]
+        if domain.get('partner_id'):
+            proj_domain += [('task_ids.partner_id', 'in', domain.get('partner_id')[0][2])]
+        if domain.get('sale_line_id'):
+            proj_domain += [('task_ids.sale_line_id', 'in', domain.get('sale_line_id')[0][2])]
+        if domain.get('date_range'):
+            start_date = domain.get('date_range')[0][0][2]
+            end_date = domain.get('date_range')[0][1][2]
+            proj_domain += [("create_date", ">=", start_date), ("create_date", "<=", end_date)]
+        return proj_domain
 
-    def _qweb_prepare_qcontext(self, view_id, domain):
-        values = super()._qweb_prepare_qcontext(view_id, domain)
-        project_ids = self.env.context.get('active_ids')
-        if project_ids:
-            domain = expression.AND([[('id', 'in', project_ids)], domain])
-        projects = self.search(domain)
-        values.update(projects._plan_prepare_values())
-        values['actions'] = projects._plan_prepare_actions(values)
+    def _prepare_analytic_line_domain(self, domain):
+        line_domain = [('project_id', 'in', self.ids)]
+        if not domain:
+            return line_domain
+        if domain.get('proj_ids'):
+            line_domain = [("project_id", "in", domain.get('proj_ids')[0][2])]
+        if domain.get('manager_id'):
+            line_domain += [('project_id.user_id', 'in', domain.get('manager_id')[0][2])]
+        if domain.get('employee_id'):
+            line_domain += domain.get('employee_id')
+        else:
+            line_domain += [('employee_id', '!=', False)]
+        if domain.get('analytic_accounts_id'):
+            line_domain += [('account_id', 'in', domain.get('analytic_accounts_id')[0][2])]
+        if domain.get('partner_id'):
+            line_domain += domain.get('partner_id')
+        else:
+            line_domain += [('partner_id', '!=', False)]
+        if domain.get('sale_line_id'):
+            line_domain += [('so_line', 'in', domain.get('sale_line_id')[0][2])]
+        if domain.get('date_range'):
+            line_domain += domain.get('date_range')[0]
+        return line_domain
 
-        return values
+    def _prepare_task_domain(self, domain):
+        task_domain = [('project_id', 'in', self.ids)]
+        if not domain:
+            return task_domain
+        if domain.get('proj_ids'):
+            task_domain = [("project_id", "in", domain.get('proj_ids')[0][2])]
+        if domain.get('manager_id'):
+            task_domain += [('manager_id', 'in', domain.get('manager_id')[0][2])]
+        if domain.get('partner_id'):
+            task_domain += domain.get('partner_id')
+        if domain.get('sale_line_id'):
+            task_domain += domain.get('sale_line_id')
+        if domain.get('analytic_accounts_id'):
+            task_domain += domain.get('analytic_accounts_id')
+        if domain.get('date_range'):
+            task_domain += domain.get('date_range')[0]
+        if domain.get('employee_id'):
+            task_domain += [('timesheet_ids.employee_id', 'in', domain.get('employee_id')[0][2])]
+        return task_domain
 
-    def _plan_get_employee_ids(self):
-        user_ids = self.env['project.task'].sudo().read_group([('project_id', 'in', self.ids), ('user_id', '!=', False)], ['user_id'], ['user_id'])
+    def _prepare_profitability_domain(self, domain):
+        profit = [('project_id', 'in', self.ids)]
+        if not domain:
+            return profit
+        if domain.get('proj_ids'):
+            profit = [("project_id", "in", domain.get('proj_ids')[0][2])]
+        if domain.get('partner_id'):
+            profit += domain.get('partner_id')
+        if domain.get('analytic_accounts_id'):
+            profit += domain.get('analytic_accounts_id')
+        if domain.get('sale_line_id'):
+            profit += domain.get('sale_line_id')
+        return profit
+
+    def _plan_get_employee_ids(self, domain):
+        line_domain = self._prepare_analytic_line_domain(domain)
+        task_domain = self._prepare_task_domain(domain) + [('user_id', '!=', False)]
+        user_ids = self.env['project.task'].sudo().read_group(task_domain, ['user_id'], ['user_id'])
         user_ids = [user_id['user_id'][0] for user_id in user_ids]
         employee_ids = self.env['res.users'].sudo().search_read([('id', 'in', user_ids)], ['employee_ids'])
         # flatten the list of list
         employee_ids = list(itertools.chain.from_iterable([employee_id['employee_ids'] for employee_id in employee_ids]))
 
-        aal_employee_ids = self.env['account.analytic.line'].read_group([('project_id', 'in', self.ids), ('employee_id', '!=', False)], ['employee_id'], ['employee_id'])
+        aal_employee_ids = self.env['account.analytic.line'].read_group(line_domain, ['employee_id'], ['employee_id'])
         employee_ids.extend(list(map(lambda x: x['employee_id'][0], aal_employee_ids)))
         return employee_ids
 
-    def _plan_prepare_values(self):
+    def _plan_prepare_values(self, domain):
+        line_domain = self._prepare_analytic_line_domain(domain)
         currency = self.env.company.currency_id
         uom_hour = self.env.ref('uom.product_uom_hour')
         company_uom = self.env.company.timesheet_encode_uom_id
@@ -50,12 +121,14 @@ class Project(models.Model):
         hour_rounding = uom_hour.rounding
         billable_types = ['non_billable', 'non_billable_project', 'billable_time', 'non_billable_timesheet', 'billable_fixed']
 
+        project_domain = self._project_domain(domain)
+        project_ids = self.search(project_domain).ids
         values = {
             'projects': self,
             'currency': currency,
-            'timesheet_domain': [('project_id', 'in', self.ids)],
-            'profitability_domain': [('project_id', 'in', self.ids)],
-            'stat_buttons': self._plan_get_stat_button(),
+            'timesheet_domain': [('project_id', 'in', project_ids)],
+            'profitability_domain': [('project_id', 'in', project_ids)],
+            'stat_buttons': self._plan_get_stat_button(domain),
             'is_uom_day': is_uom_day,
         }
 
@@ -74,7 +147,7 @@ class Project(models.Model):
         }
 
         # hours from non-invoiced timesheets that are linked to canceled so
-        canceled_hours_domain = [('project_id', 'in', self.ids), ('timesheet_invoice_type', '!=', False), ('so_line.state', '=', 'cancel')]
+        canceled_hours_domain = [('project_id', 'in', project_ids), ('timesheet_invoice_type', '!=', False), ('so_line.state', '=', 'cancel')]
         total_canceled_hours = sum(self.env['account.analytic.line'].search(canceled_hours_domain).mapped('unit_amount'))
         canceled_hours = float_round(total_canceled_hours, precision_rounding=hour_rounding)
         if is_uom_day:
@@ -84,7 +157,7 @@ class Project(models.Model):
         dashboard_values['time']['total'] += canceled_hours
 
         # hours (from timesheet) and rates (by billable type)
-        dashboard_domain = [('project_id', 'in', self.ids), ('timesheet_invoice_type', '!=', False), '|', ('so_line', '=', False), ('so_line.state', '!=', 'cancel')]  # force billable type
+        dashboard_domain = line_domain + [('timesheet_invoice_type', '!=', False), '|', ('so_line', '=', False), ('so_line.state', '!=', 'cancel')]  # force billable type
         dashboard_data = self.env['account.analytic.line'].read_group(dashboard_domain, ['unit_amount', 'timesheet_invoice_type'], ['timesheet_invoice_type'])
         dashboard_total_hours = sum([data['unit_amount'] for data in dashboard_data]) + total_canceled_hours
         for data in dashboard_data:
@@ -113,7 +186,8 @@ class Project(models.Model):
             'other_revenues': 'other_revenues'
             }
         profit = dict.fromkeys(list(field_map.values()) + ['other_revenues', 'total'], 0.0)
-        profitability_raw_data = self.env['project.profitability.report'].read_group([('project_id', 'in', self.ids)], ['project_id'] + list(field_map), ['project_id'])
+        profit_domain = self._prepare_profitability_domain(domain)
+        profitability_raw_data = self.env['project.profitability.report'].read_group(profit_domain, ['project_id'] + list(field_map), ['project_id'])
         for data in profitability_raw_data:
             company_id = self.env['project.project'].browse(data.get('project_id')[0]).company_id
             from_currency = company_id.currency_id
@@ -130,12 +204,12 @@ class Project(models.Model):
         #
         # Time Repartition (per employee per billable types)
         #
-        employee_ids = self._plan_get_employee_ids()
+        employee_ids = self._plan_get_employee_ids(domain)
         employee_ids = list(set(employee_ids))
         # Retrieve the employees for which the current user can see theirs timesheets
         employee_domain = expression.AND([[('company_id', 'in', self.env.companies.ids)], self.env['account.analytic.line']._domain_employee_id()])
         employees = self.env['hr.employee'].sudo().browse(employee_ids).filtered_domain(employee_domain)
-        repartition_domain = [('project_id', 'in', self.ids), ('employee_id', '!=', False), ('timesheet_invoice_type', '!=', False)]  # force billable type
+        repartition_domain = line_domain + [('timesheet_invoice_type', '!=', False)]  # force billable type
         # repartition data, without timesheet on cancelled so
         repartition_data = self.env['account.analytic.line'].read_group(repartition_domain + ['|', ('so_line', '=', False), ('so_line.state', '!=', 'cancel')], ['employee_id', 'timesheet_invoice_type', 'unit_amount'], ['employee_id', 'timesheet_invoice_type'], lazy=False)
         # read timesheet on cancelled so
@@ -185,12 +259,12 @@ class Project(models.Model):
         #
         # Table grouped by SO / SOL / Employees
         #
-        timesheet_forecast_table_rows = self._table_get_line_values(employees)
+        timesheet_forecast_table_rows = self._table_get_line_values(domain, employees)
         if timesheet_forecast_table_rows:
             values['timesheet_forecast_table'] = timesheet_forecast_table_rows
         return values
 
-    def _table_get_line_values(self, employees=None):
+    def _table_get_line_values(self, domain, employees=None):
         """ return the header and the rows informations of the table """
         if not self:
             return False
@@ -200,13 +274,13 @@ class Project(models.Model):
         is_uom_day = company_uom and company_uom == self.env.ref('uom.product_uom_day')
 
         # build SQL query and fetch raw data
-        query, query_params = self._table_rows_sql_query()
+        query, query_params = self._table_rows_sql_query(domain)
         self.env.cr.execute(query, query_params)
         raw_data = self.env.cr.dictfetchall()
         rows_employee = self._table_rows_get_employee_lines(raw_data)
         default_row_vals = self._table_row_default()
 
-        empty_line_ids, empty_order_ids = self._table_get_empty_so_lines()
+        empty_line_ids, empty_order_ids = self._table_get_empty_so_lines(domain)
 
         # extract row labels
         sale_line_ids = set()
@@ -316,7 +390,7 @@ class Project(models.Model):
         lenght = len(self._table_header())
         return [0.0] * (lenght - 1)  # before, M1, M2, M3, Done, Sold, Remaining
 
-    def _table_rows_sql_query(self):
+    def _table_rows_sql_query(self, domain):
         initial_date = fields.Date.from_string(fields.Date.today())
         ts_months = sorted([fields.Date.to_string(initial_date - relativedelta(months=i, day=1)) for i in range(0, DEFAULT_MONTH_RANGE)])  # M1, M2, M3
         # build query
@@ -334,11 +408,27 @@ class Project(models.Model):
             WHERE A.project_id IS NOT NULL
                 AND A.project_id IN %s
                 AND A.date < %s
+                AND S.order_partner_id IN %s
+                AND A.so_line IN %s
+                AND A.account_id IN %s
             GROUP BY date_trunc('month', date)::date, S.order_id, A.so_line, E.id
         """
 
         last_ts_month = fields.Date.to_string(fields.Date.from_string(ts_months[-1]) + relativedelta(months=1))
-        query_params = (tuple(self.ids), last_ts_month)
+        project_domain = self._project_domain(domain)
+        project_ids = self.search(project_domain).ids or self.ids
+        partner_ids = self.env['res.partner'].search([]).ids
+        # if so_line_ids is empty, you can add one item [0]
+        so_line_ids = self.env['sale.order.line'].search([]).ids or [0]
+        account_ids = self.env['account.analytic.account'].search([]).ids
+        if domain:
+            if domain.get('partner_id'):
+                partner_ids = domain.get('partner_id')[0][2]
+            if domain.get('sale_line_id'):
+                so_line_ids = domain.get('sale_line_id')[0][2]
+            if domain.get('analytic_accounts_id'):
+                account_ids = domain.get('analytic_accounts_id')[0][2]
+        query_params = (tuple(project_ids), last_ts_month, tuple(partner_ids), tuple(so_line_ids), tuple(account_ids))
         return query, query_params
 
     def _table_rows_get_employee_lines(self, data_from_db):
@@ -380,11 +470,13 @@ class Project(models.Model):
                 rows_employee[row_key][5] += data['number_hours']
         return rows_employee
 
-    def _table_get_empty_so_lines(self):
+    def _table_get_empty_so_lines(self, domain):
         """ get the Sale Order Lines having no timesheet but having generated a task or a project """
         so_lines = self.sudo().mapped('sale_line_id.order_id.order_line').filtered(lambda sol: sol.is_service and not sol.is_expense and not sol.is_downpayment)
         # include the service SO line of SO sharing the same project
-        sale_order = self.env['sale.order'].search([('project_id', 'in', self.ids)])
+        project_domain = self._project_domain(domain)
+        project_ids = self.search(project_domain).ids
+        sale_order = self.env['sale.order'].search([('project_id', 'in', project_ids)])
         return set(so_lines.ids) | set(sale_order.mapped('order_line').filtered(lambda sol: sol.is_service and not sol.is_expense).ids), set(so_lines.mapped('order_id').ids) | set(sale_order.ids)
 
     # --------------------------------------------------
@@ -433,15 +525,18 @@ class Project(models.Model):
                         })
         return actions
 
-    def _plan_get_stat_button(self):
+    def _plan_get_stat_button(self, domain):
         stat_buttons = []
-        num_projects = len(self)
+        proj_domain = self._project_domain(domain)
+        proj = self.search(proj_domain)
+        num_projects = len(proj.ids)
+        task_domain = self._prepare_task_domain(domain)
         if num_projects == 1:
-            action_data = _to_action_data('project.project', res_id=self.id,
+            action_data = _to_action_data('project.project', res_id=proj.id,
                                           views=[[self.env.ref('project.edit_project').id, 'form']])
         else:
             action_data = _to_action_data(action=self.env.ref('project.open_view_project_all_config').sudo(),
-                                          domain=[('id', 'in', self.ids)])
+                                          domain=proj_domain)
 
         stat_buttons.append({
             'name': _('Project') if num_projects == 1 else _('Projects'),
@@ -451,27 +546,27 @@ class Project(models.Model):
         })
 
         # if only one project, add it in the context as default value
-        tasks_domain = [('project_id', 'in', self.ids)]
         tasks_context = self.env.context.copy()
         tasks_context.pop('search_default_name', False)
-        late_tasks_domain = [('project_id', 'in', self.ids), ('date_deadline', '<', fields.Date.to_string(fields.Date.today())), ('date_end', '=', False)]
-        overtime_tasks_domain = [('project_id', 'in', self.ids), ('overtime', '>', 0), ('planned_hours', '>', 0)]
+        late_tasks_domain = [task_domain[0], ('date_deadline', '<', fields.Date.to_string(fields.Date.today())), ('date_end', '=', False)]
+        overtime_tasks_domain = [task_domain[0], ('overtime', '>', 0), ('planned_hours', '>', 0)]
 
         if len(self) == 1:
             tasks_context = {**tasks_context, 'default_project_id': self.id}
         elif len(self):
-            task_projects_ids = self.env['project.task'].read_group([('project_id', 'in', self.ids)], ['project_id'], ['project_id'])
+            task_projects_ids = self.env['project.task'].read_group([('project_id', 'in', proj.ids)], ['project_id'], ['project_id'])
             task_projects_ids = [p['project_id'][0] for p in task_projects_ids]
             if len(task_projects_ids) == 1:
                 tasks_context = {**tasks_context, 'default_project_id': task_projects_ids[0]}
+        task_count = self.env['project.task'].search_count(task_domain)
 
         stat_buttons.append({
             'name': _('Tasks'),
-            'count': sum(self.mapped('task_count')),
+            'count': task_count,
             'icon': 'fa fa-tasks',
             'action': _to_action_data(
                 action=self.env.ref('project.action_view_task').sudo(),
-                domain=tasks_domain,
+                domain=task_domain,
                 context=tasks_context
             )
         })
@@ -498,12 +593,11 @@ class Project(models.Model):
 
         if self.env.user.has_group('sales_team.group_sale_salesman_all_leads'):
             # read all the sale orders linked to the projects' tasks
-            task_so_ids = self.env['project.task'].search_read([
-                ('project_id', 'in', self.ids), ('sale_order_id', '!=', False)
-            ], ['sale_order_id'])
+            so_domain = task_domain + [('sale_order_id', '!=', False)]
+            task_so_ids = self.env['project.task'].search_read(so_domain, ['sale_order_id'])
             task_so_ids = [o['sale_order_id'][0] for o in task_so_ids]
 
-            sale_orders = self.mapped('sale_line_id.order_id') | self.env['sale.order'].browse(task_so_ids)
+            sale_orders = self.env['sale.order'].search([('id', 'in', task_so_ids)])
             if sale_orders:
                 so_action = dict(
                     context={'create': False, 'edit': False, 'delete': False},
@@ -553,13 +647,35 @@ class Project(models.Model):
         if len(self) == 1:
             default_project_ctx = {'default_project_id': self.id}
 
+        total_t = 0.0
+        timesheets_domain = []
+        if domain:
+            if domain.get('employee_id'):
+                timesheets_domain += domain.get('employee_id')
+            if domain.get('partner_id'):
+                timesheets_domain += domain.get('partner_id')
+            if domain.get('analytic_accounts_id'):
+                timesheets_domain += [('account_id', 'in', domain.get('analytic_accounts_id')[0][2])]
+        for project in self:
+            total_time = 0.0
+            timesheets = project.timesheet_ids.search([('project_id', '=', project.id), timesheets_domain[0]]) if timesheets_domain else project.timesheet_ids
+            for timesheet in timesheets:
+                total_time += timesheet.unit_amount * timesheet.product_uom_id.factor_inv
+            # Now convert to the proper unit of measure set in the settings
+            total_time *= project.timesheet_encode_uom_id.factor
+
+            total_t += int(round(total_time))
+
+        timesheet_domain = [('project_id', 'in', self.ids)]
+        if timesheets_domain:
+            timesheet_domain += timesheets_domain
         stat_buttons.append({
             'name': timesheet_label,
-            'count': sum(self.mapped('total_timesheet_time')),
+            'count': total_t,
             'icon': 'fa fa-calendar',
             'action': _to_action_data(
                 'account.analytic.line',
-                domain=[('project_id', 'in', self.ids)],
+                domain=timesheet_domain,
                 views=[(ts_tree.id, 'list'), (ts_form.id, 'form')],
                 context=default_project_ctx,
             )

@@ -5,4 +5,17 @@
         Create Sales Order
     </button>
 
+    <div t-name='m2mWidgetTable' class="o_form_view">
+        <table class="o_group o_inner_group">
+            <tr t-foreach="fields" t-as="field">
+                <td class="o_td_label">
+                    <label class="o_form_label mx-2" t-esc="fields[field].label"/>
+                </td>
+                <td>
+                    <label t-att-id="field + '_field'" style="min-width:150px;"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+
 </templates>

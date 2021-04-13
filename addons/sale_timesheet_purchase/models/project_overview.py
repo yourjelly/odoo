@@ -6,8 +6,8 @@ from odoo.addons.sale_timesheet.models.project_overview import _to_action_data
 class Project(models.Model):
     _inherit = 'project.project'
 
-    def _plan_get_stat_button(self):
-        stat_buttons = super(Project, self)._plan_get_stat_button()
+    def _plan_get_stat_button(self, domain):
+        stat_buttons = super(Project, self)._plan_get_stat_button(domain)
         if self.env.user.has_group('purchase.group_purchase_user'):
             accounts = self.mapped('analytic_account_id.id')
             purchase_order_lines = self.env['purchase.order.line'].search([('account_analytic_id', 'in', accounts)])

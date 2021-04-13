@@ -1,5 +1,14 @@
 $canceled-color: gray;
 
+.o_foldable_menu {
+    &.o_closed_menu {
+        display: none;
+    }
+}
+.o_project_report_search {
+    margin-left: 10px;
+    margin-right: 10px;
+}
 
 .o_timesheet_plan_sale_timesheet {
 
@@ -157,10 +166,6 @@ $canceled-color: gray;
             td:first-child {
                 padding-left: 30px;
             }
-        }
-
-        .o_timesheet_plan_redirect {
-            cursor: pointer;
         }
 
         .o_canceled_tag {

@@ -7,7 +7,7 @@
         <field name="model">project.project</field>
         <field name="arch" type="xml">
         <qweb js_class="project_overview">
-        <nav class="o_qweb_cp_buttons" t-if="actions">
+       <!--  <nav class="o_qweb_cp_buttons" t-if="actions">
             <button t-foreach="actions" t-as="action"
                     type="action" class="btn btn-primary"
                     t-att-name="action['action_id']"
@@ -15,17 +15,17 @@
             >
                 <t t-esc="action['label']"/>
             </button>
-        </nav>
-        <div class="o_form_view o_form_readonly o_project_plan">
-            <div class="o_form_sheet_bg">
+        </nav> -->
+        <div class="o_form_view o_form_nosheet o_form_readonly o_project_plan">
                 <div class="o_form_sheet o_timesheet_plan_content">
                     <div class="o_timesheet_plan_sale_timesheet">
                         <div class="o_timesheet_plan_sale_timesheet_dashboard">
-
                             <div class="o_timesheet_plan_stat_buttons oe_button_box o_not_full d-flex justify-content-end flex-row flex-wrap">
                                 <t t-foreach="stat_buttons" t-as="stat_button">
-                                    <a class="btn oe_stat_button"
+
+                                    <a class="btn oe_stat_button o_report_action"
                                        type="action"
+                                       t-att-name="stat_button['name'][1] if isinstance(stat_button['name'], list) else stat_button['name']"
                                        t-att="stat_button['action']"
                                     >
                                         <div t-attf-class="fa fa-fw o_button_icon #{stat_button['icon']}" role="img" aria-label="Statistics" title="Statistics"></div>
@@ -68,7 +68,7 @@
                                         <table class="table" name="table_hours_recorded">
                                             <tbody>
                                                 <th>
-                                                    <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain)"
+                                                    <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain)"
                                                        data-context='{"pivot_row_groupby": ["date:month"],"pivot_column_groupby": ["timesheet_invoice_type"], "pivot_measures": ["unit_amount"]}'
                                                        data-views='[[0, "pivot"], [0, "list"]]' tabindex="-1">
                                                         <span t-if="is_uom_day">Days recorded</span>
@@ -121,6 +121,7 @@
                                                     </td>
                                                     <td>
                                                         <a type="action"
+                                                            class="o_report_action"
                                                             data-model="project.task"
                                                             data-views='[[false, "list"], [false, "form"]]'
                                                             t-att-data-domain="json.dumps([['project_id', 'in', projects.ids], ['sale_line_id', '=', False]])"
@@ -185,7 +186,7 @@
                                         <table class="table" name="table_profitability">
                                             <tbody>
                                                 <th>
-                                                    <a type="action" data-model="project.profitability.report" t-att-data-domain="json.dumps(profitability_domain)" data-context="{'group_by_no_leaf':1, 'group_by':[], 'sale_show_order_product_name': 1}" data-views='[[0, "pivot"], [0, "graph"]]' tabindex="-1">Profitability</a>
+                                                    <a type="action" class="o_report_action" data-model="project.profitability.report" t-att-data-domain="json.dumps(profitability_domain)" data-context="{'group_by_no_leaf':1, 'group_by':[], 'sale_show_order_product_name': 1}" data-views='[[0, "pivot"], [0, "graph"]]' tabindex="-1">Profitability</a>
                                                 </th>
                                                 <tr name="row_invoiced">
                                                     <td class="o_timesheet_plan_dashboard_cell">
@@ -268,24 +269,24 @@
                                                 <td>
                                                     <div class="float-right o_timesheet_plan_badge">
                                                         <span class="badge badge-pill o_progress_billable_time">
-                                                            <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','billable_time')])" tabindex="-1">Billed on Timesheets</a>
+                                                            <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','billable_time')])" tabindex="-1">Billed on Timesheets</a>
                                                         </span>
                                                         <span class="badge badge-pill o_progress_billable_fixed">
-                                                            <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','billable_fixed')])" tabindex="-1">Billed at a Fixed price</a>
+                                                            <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','billable_fixed')])" tabindex="-1">Billed at a Fixed price</a>
                                                         </span>
                                                         <span t-if="dashboard['time']['non_billable_project'] != 0" class="badge badge-pill o_progress_non_billable_project">
-                                                            <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable_project')])" tabindex="-1">No task found</a>
+                                                            <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable_project')])" tabindex="-1">No task found</a>
                                                         </span>
                                                         <span t-if="dashboard['time']['non_billable_timesheet'] != 0" class="badge badge-pill o_progress_non_billable_timesheet">
-                                                            <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable_timesheet')])" tabindex="-1">Non billable timesheets</a>
+                                                            <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable_timesheet')])" tabindex="-1">Non billable timesheets</a>
                                                         </span>
                                                         <span class="badge badge-pill o_progress_non_billable">
-                                                            <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable')])" tabindex="-1">Non billable tasks</a>
+                                                            <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('timesheet_invoice_type','=','non_billable')])" tabindex="-1">Non billable tasks</a>
                                                         </span>
                                                         <!-- only show the canceled pill if there were timesheets on canceled so -->
                                                         <t t-if="sum([employee.get('canceled', 0.0) for employee in repartition_employee.values()]) > 0">
                                                             <span class="badge badge-pill o_progress_canceled">
-                                                                <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('so_line.state', '=', 'cancel')])" tabindex="-1">Cancelled</a>
+                                                                <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain + [('so_line.state', '=', 'cancel')])" tabindex="-1">Cancelled</a>
                                                             </span>
                                                         </t>
                                                     </div>
@@ -300,7 +301,7 @@
                                                         <img class="img rounded-circle mr-2 mb-2" t-attf-src="/web/image?model=hr.employee&amp;field=image_128&amp;id=#{employee['employee_id']}" t-att-title="employee['employee_name']" t-att-alt="employee['employee_name']" width="25" height="25"/>
                                                     </td>
                                                     <td style="width: 15%; vertical-align: middle;" >
-                                                        <a type="action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain)" t-att-data-context="json.dumps({'search_default_employee_id': employee_id})" data-views="[[0, &quot;list&quot;]]" tabindex="-1">
+                                                        <a type="action" class="o_report_action" data-model="account.analytic.line" t-att-data-domain="json.dumps(timesheet_domain)" t-att-data-context="json.dumps({'search_default_employee_id': employee_id})" data-views="[[0, &quot;list&quot;]]" tabindex="-1">
                                                             <t t-esc="employee['employee_name']"/>
                                                         </a>
                                                     </td>
@@ -310,7 +311,7 @@
                                                     </td>
                                                     <td style="vertical-align:middle">
                                                         <div class="border rounded">
-                                                            <div t-if="repartition_employee_max" class="progress" t-attf-style="width: {{max(0, employee['total'] / repartition_employee_max * 100)}}%; margin-bottom: 0em;">
+                                                            <div t-if="repartition_employee_max" class="progress o_report_action" t-attf-style="width: {{max(0, employee['total'] / repartition_employee_max * 100)}}%; margin-bottom: 0em;">
 
                                                                 <t t-set="total" t-value="employee['total'] or 1.0" />
                                                                 <t t-call="sale_timesheet.progressbar">
@@ -397,7 +398,7 @@
                                                                       style="cursor: pointer;" t-att-data-model="row[0].get('res_model')" t-att-data-res-id="row[0].get('res_id')"/>
                                                                 <t t-if="row_type == 'sale_order'">
                                                                     <t t-if="env.user.has_group('sales_team.group_sale_salesman')">
-                                                                        <a type="action" t-att-data-model="row_value['res_model']" t-att-data-res-id="row_value['res_id']" t-att-class="'o_timesheet_plan_redirect' if row_value['res_id'] else ''">
+                                                                        <a type="action" t-att-data-model="row_value['res_model']" t-att-data-res-id="row_value['res_id']" t-att-class="'btn btn-link o_report_action' if row_value['res_id'] else ''">
                                                                            <t t-esc="row_value.get('label')"/>
                                                                         </a>
                                                                     </t>
@@ -459,7 +460,6 @@
 
                     </div>
                 </div>
-            </div>
         </div>
         </qweb>
         </field>
@@ -471,7 +471,7 @@
             <t t-set="title">
                 <t t-esc="label"/>: <t t-if="is_uom_day" t-esc="amount" t-options="{'widget': 'timesheet_uom'}"/><t t-else="" t-esc="amount" t-options="{'widget': 'float_time'}"/>
             </t>
-            <a t-attf-class="progress-bar o_progress_{{key}}"
+            <a t-attf-class="o_report_action progress-bar o_progress_{{key}}"
                t-attf-style="width: {{amount / total * 100}}%"
                type="action" data-model="account.analytic.line"
                t-att-data-domain="employee['__domain_' + key]"
