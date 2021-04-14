@@ -507,6 +507,18 @@ class Project(models.Model):
         action_context['search_default_project_id'] = self.id
         return dict(action, context=action_context)
 
+    # ---------------------------------------------
+    #  PROJECT UPDATES
+    # ---------------------------------------------
+
+    def get_last_update_or_default(self):
+        self.ensure_one()
+        status = self.last_update_status_id or self.env['project.update.status'].search([('project_ids', '=', self.id)], limit=1)
+        return {
+            'status': status.name,
+            'color': status.color
+        }
+
     # ---------------------------------------------------
     #  Business Methods
     # ---------------------------------------------------

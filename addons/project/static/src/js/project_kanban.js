@@ -6,6 +6,7 @@ var KanbanView = require('web.KanbanView');
 var KanbanColumn = require('web.KanbanColumn');
 var view_registry = require('web.view_registry');
 var KanbanRecord = require('web.KanbanRecord');
+const { ProjectControlPanel } = require("@project/js/project_control_panel");
 
 KanbanRecord.include({
     //--------------------------------------------------------------------------
@@ -50,7 +51,8 @@ var ProjectKanbanController = KanbanController.extend({
 
 var ProjectKanbanView = KanbanView.extend({
     config: _.extend({}, KanbanView.prototype.config, {
-        Controller: ProjectKanbanController
+        Controller: ProjectKanbanController,
+        ControlPanel: ProjectControlPanel,
     }),
 });
 

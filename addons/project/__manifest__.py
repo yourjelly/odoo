@@ -52,9 +52,13 @@
     'assets': {
         'web.assets_backend': [
             'project/static/src/css/project.css',
+            'project/static/src/js/project_activity.js',
+            'project/static/src/js/project_control_panel.js',
             'project/static/src/js/project_form.js',
+            'project/static/src/js/project_graph.js',
             'project/static/src/js/project_kanban.js',
             'project/static/src/js/project_list.js',
+            'project/static/src/js/project_pivot.js',
             'project/static/src/js/project_rating_reporting.js',
             'project/static/src/js/project_name_with_subtask_count_widget.js',
             'project/static/src/js/project_task_kanban_examples.js',

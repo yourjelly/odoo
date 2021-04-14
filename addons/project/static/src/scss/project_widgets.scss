@@ -14,3 +14,41 @@
     @include o-background-color;
 }
 
+.o_pupdate_kanban {
+    overflow: auto !important;
+    &.o_kanban_ungrouped {
+        padding:0px;
+        .o_pupdate_kanban_card {
+            width: 100%;
+            margin: 0px;
+            border-right: 0px !important;
+            border-top: 0px !important;
+            &:first-child {
+                border-bottom: 1px solid #dee2e6 !important;
+            }
+            .o_kanban_detail_ungrouped {
+                .o_pupdate_kanban_image {
+                    width: 56px;
+                    height: 56px;
+                    top: 0px;
+                    position: absolute;
+                }
+                .o_pupdate_name {
+                    padding-left: 72px;
+                }
+                .o_pupdate_kanban_actions_ungrouped {
+                    button {
+                        float: right;
+                        margin: 4px;
+                    }
+                }
+                .o_country_flag {
+                    margin-right: 8px;
+                }
+            }
+            .oe_kanban_details {
+                display:none !important;
+            }
+        }
+    }
+}

@@ -59,6 +59,7 @@
             <field name="context">{
                 'pivot_row_groupby': ['user_id'],
                 'default_project_id': active_id,
+                'show_project_update': True,
             }</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
@@ -258,6 +259,12 @@
                             <span class="o_stat_text">
                                 Burndown Chart
                             </span>
+                        </button>
+                        <button class="oe_stat_button" name="%(project.project_update_all_action)d" type="action">
+                            <div class="pl-4">
+                                <field name="last_update_color" invisible="1"/>
+                                <field name="last_update_status_id" widget="status_with_color" options="{'no_open': 1, 'color_field': 'last_update_color'}"/>
+                            </div>
                         </button>
                         <button class="oe_stat_button" name="%(project.project_milestone_all)d" type="action" icon="fa-check-square-o">
                             <div class="o_field_widget o_stat_info">
@@ -1036,7 +1043,7 @@
             <field name="name">project.task.pivot</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <pivot string="Project Tasks" sample="1">
+                <pivot string="Project Tasks" sample="1" js_class="project_pivot">
                     <field name="project_id" type="row"/>
                     <field name="stage_id" type="col"/>
                     <field name="color" invisible="1"/>
@@ -1048,7 +1055,7 @@
             <field name="name">project.task.graph</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <graph string="Project Tasks" sample="1">
+                <graph string="Project Tasks" sample="1" js_class="project_graph">
                     <field name="project_id"/>
                     <field name="stage_id"/>
                 </graph>
@@ -1059,7 +1066,7 @@
             <field name="name">project.task.activity</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <activity string="Project Tasks">
+                <activity string="Project Tasks" js_class="project_activity">
                     <field name="user_id"/>
                     <templates>
                         <div t-name="activity-box">

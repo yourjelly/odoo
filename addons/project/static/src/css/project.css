@@ -107,3 +107,7 @@
 .o_btn_onhover {
     margin-left: -1rem;
 }
+.o_project_updates_breadcrumb {
+    margin-left: 1rem;
+    cursor: pointer;
+}
