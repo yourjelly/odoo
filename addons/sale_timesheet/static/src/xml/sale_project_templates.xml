@@ -5,4 +5,34 @@
         Create Sales Order
     </button>
 
+    <t t-inherit="project.ProjectRightPanel" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_rightpanel_section')][1]" position="attributes">
+            <attribute name="class" add="o_rightpanel_separator" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_rightpanel_section')][1]" position="before">
+            <t t-set="profitabilities" t-value="state.data.profitabilities"/>
+            <div class="o_rightpanel_section">
+                <div class="o_rightpanel_header">
+                    <div class="o_rightpanel_title">
+                        Profitability
+                    </div>
+                    <span class="o_rightpanel_button">
+                        <a t-on-click="onProjectActionClick"
+                           t-att-data-action="profitabilities.action"
+                           type="object">
+                           See Overview
+                        </a>
+                    </span>
+                </div>
+
+                <div class="o_rightpanel_data">
+                    <div t-foreach="profitabilities.data" t-as="profitability" t-key="profitability.name" class="o_rightpanel_data_row">
+                        <span class="o_rightpanel_left_col o_rightpanel_left_text"><t t-esc="profitability.name"/></span>
+                        <span class="o_rightpanel_right_col"><t t-esc="profitability.value"/></span>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
 </templates>

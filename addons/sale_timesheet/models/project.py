@@ -6,6 +6,7 @@ from collections import defaultdict
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import ValidationError, UserError
+from odoo.tools import format_amount
 
 
 # YTI PLEASE SPLIT ME
@@ -251,6 +252,74 @@ class Project(models.Model):
         }
         return action_window
 
+    # ----------------------------
+    #  Project Updates
+    # ----------------------------
+
+    def get_panel_data(self):
+        panel_data = super(Project, self).get_panel_data()
+        return {
+            **panel_data,
+            'profitabilities': self._get_profitabilities()
+        }
+
+    def _get_profitabilities(self):
+        profitability = self.env['project.profitability.report'].read_group(
+            [('project_id', '=', self.id)],
+            ['project_id',
+             'timesheet_unit_amount',
+             'amount_untaxed_to_invoice',
+             'amount_untaxed_invoiced',
+             'expense_amount_untaxed_to_invoice',
+             'expense_amount_untaxed_invoiced',
+             'other_revenues',
+             'expense_cost',
+             'timesheet_cost',
+             'margin'],
+            ['project_id'])
+        timesheet_billable = 0.0
+        timesheet_total = 0.0
+        timesheet_groups = self.env['account.analytic.line'].read_group([('project_id', '=', self.id)], ['unit_amount', 'timesheet_invoice_type'], ['timesheet_invoice_type'])
+        for timesheet_group in timesheet_groups:
+            timesheet_total += timesheet_group['unit_amount']
+            if timesheet_group['timesheet_invoice_type'] not in ('non_billable_timesheet', 'non_billable_project', 'non_billable'):
+                timesheet_billable += timesheet_group['unit_amount']
+        data = [{
+            'name': _("Timesheets"),
+            'value': self.env.ref('sale_timesheet.project_profitability_timesheet_panel')._render({
+                'timesheet_unit_amount': profitability[0]['timesheet_unit_amount'] or 0.0,
+                'timesheet_uom': self.env.company._timesheet_uom_text(),
+                'is_timesheet_uom_hour': self.env.company._is_timesheet_hour_uom(),
+                'percentage_billable': timesheet_total > 0 and timesheet_billable / timesheet_total * 100 or 0.0,
+            }, engine='ir.qweb'),
+        }, {
+            'name': _("Revenues"),
+            'value': format_amount(
+                self.env,
+                (profitability[0]['amount_untaxed_invoiced'] + profitability[0]['amount_untaxed_to_invoice'] +
+                 profitability[0]['expense_amount_untaxed_invoiced'] + profitability[0]['expense_amount_untaxed_to_invoice'] +
+                 profitability[0]['other_revenues']),
+                self.env.company.currency_id
+            )
+        }, {
+            'name': _("Costs"),
+            'value': format_amount(
+                self.env,
+                profitability[0]['timesheet_cost'] + profitability[0]['expense_cost'],
+                self.env.company.currency_id
+            )
+        }, {
+            'name': _("Margin"),
+            'value': format_amount(
+                self.env,
+                profitability[0]['margin'],
+                self.env.company.currency_id
+            )
+        }]
+        return {
+            'action': "action_view_timesheet",
+            'data': data,
+        }
 
 class ProjectTask(models.Model):
     _inherit = "project.task"
