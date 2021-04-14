@@ -1,0 +1,16 @@
+@mixin o-background-color {
+    @for $size from 2 through length($o-colors) {
+        // Note: the first color is supposed to be invisible so it's ignored
+        &.o_color_bubble_#{$size - 1} {
+            background-color: nth($o-colors, $size);
+        }
+    }
+}
+
+.o_status_bubble {
+    @extend .o_status;
+    margin-right: 0.5rem;
+    border-radius: 50%;
+    @include o-background-color;
+}
+

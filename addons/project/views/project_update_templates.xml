@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<odoo>
+    <!-- Should be in data rather than views ? -->
+    <template id="project_update_default_description" name="Project Update Description">
+        <div name="tasks">
+            <h1>Tasks</h1>
+
+            <a t-att-href="tasks['action']"><t t-esc="tasks['open_tasks']"/> tasks are open</a>, out of <t t-esc="tasks['total_tasks']"/>.
+            In the last 30 days,
+            <ul>
+                <li><t t-esc="tasks['created_tasks']"/> were created</li>
+                <li><t t-esc="tasks['closed_tasks']"/> were closed (folded stage)</li>
+            </ul>
+        </div>
+
+        <hr t-if="milestones['show_section']"/>
+
+        <div name="milestone">
+            <t t-if="milestones['show_section']">
+                <h1>Milestone</h1>
+
+                <ul class="fa-ul" t-if="milestones['list']">
+                    <t t-foreach="milestones['list']" t-as="milestone" t-key="milestone['id']">
+                        <t t-set="iconClass" t-value="milestone['is_done'] and 'fa-check-square' or 'fa-square-o'"/>
+                        <li><span class="fa-li"><i t-att-class="'fa ' + iconClass"></i></span>
+                            <t t-esc="milestone['name']"/>
+                            <span t-if="milestone['is_date_deadline_future']">
+                                <font style="color: rgb(190, 190, 190);">
+                                    (due on <t t-esc="milestone['date_deadline']"/><t t-if="not milestone['is_done'] or not milestone['reached_date']">)</t>
+                                    <t t-else="">
+                                        - reached on <t t-esc="milestone['reached_date']"/>)
+                                    </t>
+                                </font>
+                            </span>
+                            <span t-else="">
+                                (due on <t t-esc="milestone['date_deadline']"/><t t-if="not milestone['is_done'] or not milestone['reached_date']">)</t>
+                                <t t-else="">
+                                    - reached on <t t-esc="milestone['reached_date']"/>)
+                                </t>
+                            </span>
+                        </li>
+                    </t>
+                </ul>
+
+                <t t-if="milestones['updated']">
+                    Over the last 30 days, the deadline of the following milestones have been updated:
+                    <ul>
+                        <t t-foreach="milestones['updated']" t-as="milestone" t-key="milestone['id']">
+                            <li>
+                                <t t-esc="milestone['name']"/>
+                                (<t t-esc="milestone['old_value']"/> => <t t-esc="milestone['new_value']"/>)
+                            </li>
+                        </t>
+                    </ul>
+                </t>
+
+                <t t-if="milestones['updated']">
+                    The following milestones have been added:
+                    <ul>
+                        <t t-foreach="milestones['created']" t-as="milestone" t-key="milestone['id']">
+                            <li>
+                                <t t-esc="milestone['name']"/>
+                                <span t-if="milestone['is_date_deadline_future']">
+                                    <font style="color: rgb(190, 190, 190);">
+                                        (due on <t t-esc="milestone['date_deadline']"/><t t-if="not milestone['is_done'] or not milestone['reached_date']">)</t>
+                                        <t t-else="">
+                                            - reached on <t t-esc="milestone['reached_date']"/>)
+                                        </t>
+                                    </font>
+                                </span>
+                                <span t-else="">
+                                    (due on <t t-esc="milestone['date_deadline']"/><t t-if="not milestone['is_done'] or not milestone['reached_date']">)</t>
+                                    <t t-else="">
+                                        - reached on <t t-esc="milestone['reached_date']"/>)
+                                    </t>
+                                </span>
+                            </li>
+                        </t>
+                    </ul>
+                </t>
+            </t>
+        </div>
+    </template>
+
+</odoo>

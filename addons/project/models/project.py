@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import timedelta, datetime
 from random import randint
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
+from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, AccessError, ValidationError, RedirectWarning
 from odoo.tools.misc import format_date, get_lang
 from odoo.osv.expression import OR
@@ -166,6 +166,10 @@ class Project(models.Model):
     def _get_default_favorite_user_ids(self):
         return [(6, 0, [self.env.uid])]
 
+    def _get_default_update_states(self):
+        default_states = ['project_update_status_on_track', 'project_update_status_on_hold', 'project_update_status_off_track', 'project_update_status_at_risk']
+        return [Command.link(id) for id in map(lambda s: self.env.ref('project.' + s, raise_if_not_found=False).id, default_states)]
+
     name = fields.Char("Name", index=True, required=True, tracking=True)
     description = fields.Html()
     active = fields.Boolean(default=True,
@@ -247,6 +251,15 @@ class Project(models.Model):
         ('quarterly', 'Quarterly'),
         ('yearly', 'Yearly')], 'Rating Frequency', required=True, default='monthly')
 
+    update_status_ids = fields.Many2many('project.update.status', 'project_update_status_rel', 'project_id', 'update_status_id', string='Allowed Project States',
+                                         default=_get_default_update_states)
+    update_ids = fields.One2many('project.update', 'project_id')
+    last_update_id = fields.Many2one('project.update', string='Last Update', compute='_compute_last_update')
+    last_update_color = fields.Integer(compute='_compute_last_update')
+    last_update_status_id = fields.Many2one('project.update.status', compute='_compute_last_update')
+    milestone_ids = fields.One2many('project.milestone', 'project_id')
+    milestone_count = fields.Integer(compute='_compute_milestone_count')
+
     _sql_constraints = [
         ('project_date_greater', 'check(date >= date_start)', 'Error! Project start date must be before project end date.')
     ]
@@ -298,6 +311,26 @@ class Project(models.Model):
         periods = {'daily': 1, 'weekly': 7, 'bimonthly': 15, 'monthly': 30, 'quarterly': 90, 'yearly': 365}
         for project in self:
             project.rating_request_deadline = fields.datetime.now() + timedelta(days=periods.get(project.rating_status_period, 0))
+
+    @api.depends('update_ids')
+    def _compute_last_update(self):
+        # I didn't find a way to achieve it in a single query
+        for project in self:
+            project.last_update_id = self.env['project.update'].search([
+                ("project_id", "=", project.id)
+            ], limit=1)
+            if project.last_update_id:
+                project.last_update_status_id = project.last_update_id.status_id
+            else:
+                project.last_update_status_id = self.env['project.update.status'].search([('project_ids', '=', project.id)], limit=1)
+            project.last_update_color = project.last_update_status_id.color
+
+    @api.depends('milestone_ids')
+    def _compute_milestone_count(self):
+        read_group = self.env['project.milestone'].read_group([('project_id', 'in', self.ids)], ['project_id'], ['project_id'])
+        mapped_count = {group['project_id'][0]: group['project_id_count'] for group in read_group}
+        for project in self:
+            project.milestone_count = mapped_count.get(project.id, 0)
 
     @api.model
     def _map_tasks_default_valeus(self, task, project):
