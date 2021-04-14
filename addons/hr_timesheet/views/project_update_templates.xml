@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<odoo>
+    <!-- Should be in data rather than views ? -->
+    <template id="project_update_default_description" inherit_id="project.project_update_default_description">
+        <xpath expr="//div[@name='milestone']" position="after">
+            <hr/>
+            <div name="people">
+                <h1>People</h1>
+
+                <t t-if="not people['activities']">
+                    No timesheeted activity in this project for the last year.
+                </t>
+                <t t-else="">
+                    Activities of the past 30 days:
+                    <ul>
+                        <t t-foreach="people['activities']" t-as="activity">
+                            <li><span class="fa-li"><i class="fa" t-att-class="{'fa-check-square': activity['worked'], 'fa-square-o': not activity['worked']}"></i></span>
+                                <t t-if="activity['worked']">
+                                    <t t-esc="activity['name']"/> :
+                                    <t t-if="people['is_uom_hour']" t-esc="activity['unit_amount']" t-options='{"widget": "float_time"}'/>
+                                    <t t-else="" t-esc="activity['unit_amount']" />
+                                    <t t-esc="people['uom']"/>
+                                    <span t-if="activity['new']" class="text-success">
+                                        <font style="color: rgb(0, 128, 0);">
+                                            (new this month)
+                                        </font>
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <s><t t-esc="activity['name']"/></s> <span class="text-muted"><font style="color: rgb(128, 128, 128);">(no activity in past 30 days)</font></span>
+                                </t>
+                            </li>
+                        </t>
+                    </ul>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
