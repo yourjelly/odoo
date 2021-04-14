@@ -8,7 +8,6 @@ from random import randint
 
 from odoo import api, Command, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, AccessError, ValidationError, RedirectWarning
-from odoo.tools.misc import format_date, get_lang
 from odoo.osv.expression import OR
 
 from .project_task_recurrence import DAYS, WEEKS
@@ -517,6 +516,41 @@ class Project(models.Model):
         return {
             'status': status.name,
             'color': status.color
+        }
+
+    def get_panel_data(self):
+        self.ensure_one()
+        return {
+            'tasks_analysis': self._get_tasks_analysis(),
+            'milestones': self._get_milestones(),
+        }
+
+    def _get_tasks_analysis(self):
+        self.ensure_one()
+        older_last_update = fields.Datetime.now() + timedelta(days=-30)
+        data = [{
+            'name': _("Open Tasks"),
+            'action': {
+                'action': "project.action_project_task_user_tree",
+                'additional_context': '{"search_default_project_id": %s, "active_id": %s, "search_default_open_tasks": 1}' % (self.id, self.id),
+            },
+            'value': self.env['project.task'].search_count([('display_project_id', '=', self.id), ('stage_id.fold', '=', False), ('stage_id.is_closed', '=', False)])
+        }, {
+            'name': _("Updated (Last 30 Days)"),
+            'action': {
+                'action': "project.action_project_task_burndown_chart_report",
+                'additional_context': '{"search_default_project_id": %s, "active_id": %s, "search_default_last_month": 1}' % (self.id, self.id),
+            },
+            'value': self.env['project.task'].search_count([('display_project_id', '=', self.id), ('write_date', '>', older_last_update)])
+        }]
+        return {
+            'data': data,
+        }
+
+    def _get_milestones(self):
+        self.ensure_one()
+        return {
+            'data': self.milestone_ids._get_data_list(),
         }
 
     # ---------------------------------------------------

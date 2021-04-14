@@ -26,4 +26,98 @@
 
     <span t-name="project.statusWithColor" t-att-class="'o_status_bubble o_color_bubble_' + (color)"></span>
 
+    <t t-name="project.ProjectRightPanel" owl="1">
+        <div class="o_rightpanel">
+            <t t-set="tasksAnalysis" t-value="state.data.tasks_analysis"/>
+            <div class="o_rightpanel_section">
+                <div class="o_rightpanel_header">
+                    <div class="o_rightpanel_title">
+                        Tasks Analysis
+                    </div>
+                </div>
+
+                <div class="o_rightpanel_data">
+                    <div t-foreach="tasksAnalysis.data" t-as="analysis" t-key="analysis.name" class="o_rightpanel_data_row">
+                        <a class="btn btn-link o_rightpanel_left_col o_rightpanel_left_button" t-on-click="onProjectActionClick"
+                           t-att-data-action="analysis.action.action"
+                           t-att-data-additional_context="analysis.action.additional_context"
+                           data-type="action">
+                           <t t-esc="analysis.name"/>
+                        </a>
+                        <span class="o_rightpanel_right_col"><t t-esc="analysis.value"/></span>
+                    </div>
+                </div>
+            </div>
+            <t t-set="milestones" t-value="state.data.milestones"/>
+            <div class="o_rightpanel_section o_rightpanel_separator">
+                <div class="o_rightpanel_header">
+                    <div class="o_rightpanel_title">
+                        Milestones
+                    </div>
+                    <span class="o_rightpanel_button">
+                        <AddMilestone context="context"/>
+                    </span>
+                </div>
+                <div class="o_rightpanel_data">
+                    <div t-foreach="milestones.data" t-as="milestone" t-key="milestone.id" class="o_rightpanel_data_row">
+                        <OpenMilestone context="context" milestone="milestone" t-key="milestone.id"/>
+                    </div>
+                    <span class="text-muted">
+                        Track major progress points that must be reached to achieve success.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="project.AddMilestone" owl="1">
+        <div class="o_add_milestone">
+            <a t-on-click="onAddMilestoneClick">Add Milestone</a>
+            <span t-if="state.openDialog" class="o_rightpanel_hidden">
+                <FormViewDialogComponentAdapter
+                    Component="FormViewDialog"
+                    params="{
+                        context: context,
+                        on_saved: _onDialogSaved,
+                        res_id: false,
+                        res_model: 'project.milestone',
+                        title: NEW_PROJECT_MILESTONE,
+                        disable_multiple_selection: true,
+                    }"
+                    t-ref="dialog"
+                />
+            </span>
+        </div>
+    </t>
+
+    <t t-name="project.OpenMilestone" owl="1">
+        <div class="o_open_milestone" t-att-class="state.colorClass">
+            <span class="o_milestone_checkbox" t-on-click="onMilestoneClick">
+                <i class="fa" t-att-class="state.checkboxIcon"></i>
+            </span>
+            <span class="o_milestone_detail">
+                <span t-on-click="onOpenMilestone"><t t-esc="milestone.name"/></span>
+                <span class="o_rightpanel_right_col">
+                    <span t-on-click="onOpenMilestone"><t t-if="milestone.date_deadline" t-esc="milestone.date_deadline"/></span>
+                    <a class="o_delete_icon" t-on-click="onDeleteMilestone" title="Delete Milestone"><i class="fa fa-trash"></i></a>
+                </span>
+            </span>
+            <span t-if="state.openDialog" class="o_rightpanel_hidden">
+                <FormViewDialogComponentAdapter
+                    Component="FormViewDialog"
+                    params="{
+                        context: context,
+                        on_saved: _onDialogSaved,
+                        res_id: milestone.id,
+                        res_model: 'project.milestone',
+                        title: OPEN_PROJECT_MILESTONE,
+                        disable_multiple_selection: true,
+                        deletable: true
+                    }"
+                    t-ref="dialog"
+                />
+            </span>
+        </div>
+    </t>
+
 </templates>
