@@ -3036,6 +3036,9 @@ exports.Order = Backbone.Model.extend({
             this.is_tipped = true;
             this.tip_amount = options.price;
         }
+        if (options.tax_ids) {
+            orderline.tax_ids = options.tax_ids;
+        }
     },
     get_selected_orderline: function(){
         return this.selected_orderline;
@@ -3456,6 +3459,21 @@ exports.Order = Backbone.Model.extend({
     is_to_ship: function(){
         return this.to_ship;
     },
+    getAmountsToDiscount(orderlines) {
+        const amountsToDiscount = {};
+        for (const line of orderlines) {
+            const groupKey = line
+                .get_taxes()
+                .map((tax) => tax.id)
+                .join(',');
+            if (!(groupKey in amountsToDiscount)) {
+                amountsToDiscount[groupKey] = line.get_quantity() * line.get_lst_price();
+            } else {
+                amountsToDiscount[groupKey] += line.get_quantity() * line.get_lst_price();
+            }
+        }
+        return amountsToDiscount;
+    }
 });
 
 var OrderCollection = Backbone.Collection.extend({

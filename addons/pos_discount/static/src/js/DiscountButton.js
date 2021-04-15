@@ -1,6 +1,7 @@
 odoo.define('pos_discount.DiscountButton', function(require) {
     'use strict';
 
+    const models = require('point_of_sale.models');
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
@@ -46,25 +47,17 @@ odoo.define('pos_discount.DiscountButton', function(require) {
                 }
             }
 
-            // Add discount
-            // We add the price as manually set to avoid recomputation when changing customer.
-            var base_to_discount = order.get_total_without_tax();
-            if (product.taxes_id.length){
-                var first_tax = this.env.pos.taxes_by_id[product.taxes_id[0]];
-                if (first_tax.price_include) {
-                    base_to_discount = order.get_total_with_tax();
-                }
-            }
-            var discount = - pc / 100.0 * base_to_discount;
-
-            if( discount < 0 ){
-                order.add_product(product, {
-                    price: discount,
-                    lst_price: discount,
-                    extras: {
-                        price_manually_set: true,
-                    },
-                });
+            const amountsToDiscount = order.getAmountsToDiscount(order.get_orderlines());
+            for (const [taxKeys, amount] of Object.entries(amountsToDiscount)) {
+                const options = {
+                    quantity: 1,
+                    price: (-amount * pc) / 100,
+                    lst_price: (-amount * pc) / 100,
+                    tax_ids: taxKeys !== '' ? taxKeys.split(',').map((val) => parseInt(val, 10)) : [],
+                    extras: { price_manually_set: true },
+                    merge: false,
+                };
+                order.add_product(product, options);
             }
         }
     }
