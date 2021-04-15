@@ -96,10 +96,6 @@ class SaleOrder(models.Model):
         return super().create(vals)
 
     def write(self, values):
-        if values.get('order_line') and self.state == 'sale':
-            for order in self:
-                pre_order_line_qty = {order_line: order_line.product_uom_qty for order_line in order.mapped('order_line') if not order_line.is_expense}
-
         if values.get('partner_shipping_id'):
             new_partner = self.env['res.partner'].browse(values.get('partner_shipping_id'))
             for record in self:
@@ -115,18 +111,7 @@ class SaleOrder(models.Model):
             # TODO: Log a note on each down document
             self.order_line.move_ids.date_deadline = fields.Datetime.to_datetime(values.get('commitment_date'))
 
-        res = super(SaleOrder, self).write(values)
-        if values.get('order_line') and self.state == 'sale':
-            for order in self:
-                to_log = {}
-                for order_line in order.order_line:
-                    if float_compare(order_line.product_uom_qty, pre_order_line_qty.get(order_line, 0.0), order_line.product_uom.rounding) < 0:
-                        to_log[order_line] = (order_line.product_uom_qty, pre_order_line_qty.get(order_line, 0.0))
-                if to_log:
-                    documents = self.env['stock.picking']._log_activity_get_documents(to_log, 'move_ids', 'UP')
-                    documents = {k:v for k, v in documents.items() if k[0].state != 'cancel'}
-                    order._log_decrease_ordered_quantity(documents)
-        return res
+        return super().write(values)
 
     def _compute_json_popover(self):
         for order in self:
@@ -421,9 +406,10 @@ class SaleOrderLine(models.Model):
     def write(self, values):
         lines = self.env['sale.order.line']
         if 'product_uom_qty' in values:
-            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            lines = self.filtered(
-                lambda r: r.state == 'sale' and not r.is_expense and float_compare(r.product_uom_qty, values['product_uom_qty'], precision_digits=precision) == -1)
+            for line in self:
+                if line.state == 'sale' and not line.is_expense:
+                    lines |= line
+
         previous_product_uom_qty = {line.id: line.product_uom_qty for line in lines}
         res = super(SaleOrderLine, self).write(values)
         if lines:
@@ -465,27 +451,6 @@ class SaleOrderLine(models.Model):
     def _onchange_product_packaging(self):
         if self.product_packaging:
             return self._check_package()
-
-    @api.onchange('product_uom_qty')
-    def _onchange_product_uom_qty(self):
-        # When modifying a one2many, _origin doesn't guarantee that its values will be the ones
-        # in database. Hence, we need to explicitly read them from there.
-        if self._origin:
-            product_uom_qty_origin = self._origin.read(["product_uom_qty"])[0]["product_uom_qty"]
-        else:
-            product_uom_qty_origin = 0
-
-        if self.state == 'sale' and self.product_id.type in ['product', 'consu'] and self.product_uom_qty < product_uom_qty_origin:
-            # Do not display this warning if the new quantity is below the delivered
-            # one; the `write` will raise an `UserError` anyway.
-            if self.product_uom_qty < self.qty_delivered:
-                return {}
-            warning_mess = {
-                'title': _('Ordered quantity decreased!'),
-                'message' : _('You are decreasing the ordered quantity! Do not forget to manually update the delivery order if needed.'),
-            }
-            return {'warning': warning_mess}
-        return {}
 
     def _prepare_procurement_values(self, group_id=False):
         """ Prepare specific key for moves or other components that will be created from a stock rule
@@ -557,7 +522,7 @@ class SaleOrderLine(models.Model):
             if line.state != 'sale' or not line.product_id.type in ('consu','product'):
                 continue
             qty = line._get_qty_procurement(previous_product_uom_qty)
-            if float_compare(qty, line.product_uom_qty, precision_digits=precision) >= 0:
+            if float_compare(qty, line.product_uom_qty, precision_digits=precision) == 0:
                 continue
 
             group_id = line._get_procurement_group()
