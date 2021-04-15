@@ -64,12 +64,16 @@ class TestWebsiteSaleStockProductWarehouse(TestWebsiteSaleProductAttributeValueC
 
         product = product_1.with_context(website_id=current_website.id)
         combination_info = product.product_tmpl_id.with_context(website_sale_stock_get_quantity=True)._get_combination_info()
+        ribbon = product.product_tmpl_id._get_website_ribbon()
 
         # Check available quantity of product is according to warehouse
         self.assertEqual(combination_info['free_qty'], 10, "10 units of Product A should be available in warehouse 1.")
+        self.assertNotEqual(ribbon.html, "Sold out", "Product A should not display the sold out ribbon")
 
         product = product_2.with_context(website_id=current_website.id)
         combination_info = product.product_tmpl_id.with_context(website_sale_stock_get_quantity=True)._get_combination_info()
+        ribbon = product.product_tmpl_id._get_website_ribbon()
 
         # Check available quantity of product is according to warehouse
         self.assertEqual(combination_info['free_qty'], 0, "Product B should not be available in warehouse 1.")
+        self.assertEqual(ribbon.html, "Sold out", "Product B should display the sold out ribbon")

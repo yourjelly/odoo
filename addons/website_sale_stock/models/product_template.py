@@ -52,3 +52,12 @@ class ProductTemplate(models.Model):
             })
 
         return combination_info
+
+    def _is_sold_out(self):
+        combination_info = self.with_context(website_sale_stock_get_quantity=True)._get_combination_info()
+        return combination_info['product_type'] == 'product' and combination_info['free_qty'] <= 0
+
+    def _get_website_ribbon(self):
+        if self._is_sold_out():
+            return self.env.ref('website_sale.sold_out_ribbon')
+        return super()._get_website_ribbon()

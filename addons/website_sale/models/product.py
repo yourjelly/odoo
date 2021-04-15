@@ -413,6 +413,9 @@ class ProductTemplate(models.Model):
             if product.id:
                 product.website_url = "/shop/%s" % slug(product)
 
+    def _get_website_ribbon(self):
+        return self.website_ribbon_id
+
     # ---------------------------------------------------------
     # Rating Mixin API
     # ---------------------------------------------------------
