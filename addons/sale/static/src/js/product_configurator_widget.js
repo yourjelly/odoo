@@ -1,11 +1,15 @@
 odoo.define('sale.product_configurator', function (require) {
-var relationalFields = require('web.relational_fields');
 var FieldsRegistry = require('web.field_registry');
 var core = require('web.core');
 var _t = core._t;
 
+if (odoo.__DEBUG__.services["web_mobile.barcode_fields"]) {
+    require("web_mobile.barcode_fields");
+}
+var FieldMany2OneBarcode = odoo.__DEBUG__.services["web.field_registry"].get('many2one_barcode');
+
 /**
- * The sale.product_configurator widget is a simple widget extending FieldMany2One
+ * The sale.product_configurator widget is a simple widget extending Many2oneBarcode
  * It allows the development of configuration strategies in other modules through
  * widget extensions.
  *
@@ -15,8 +19,8 @@ var _t = core._t;
  * This widget is only designed for sale_order_line creation/updates.
  * !!! It should only be used on a product_product or product_template field !!!
  */
-var ProductConfiguratorWidget = relationalFields.FieldMany2One.extend({
-    events: _.extend({}, relationalFields.FieldMany2One.prototype.events, {
+var ProductConfiguratorWidget = FieldMany2OneBarcode.extend({
+    events: _.extend({}, FieldMany2OneBarcode.prototype.events, {
         'click .o_edit_product_configuration': '_onEditConfiguration'
     }),
 
