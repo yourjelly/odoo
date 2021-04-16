@@ -1171,11 +1171,26 @@ class Message(models.Model):
                     continue
                 else:
                     messages |= message
-        updates = [[
-            (self._cr.dbname, 'res.partner', author.id),
-            {'type': 'message_notification_update', 'elements': self.env['mail.message'].concat(*author_messages)._message_notification_format()}
-        ] for author, author_messages in groupby(messages.sorted('author_id'), itemgetter('author_id'))]
-        self.env['bus.bus'].sendmany(updates)
+
+        # notifications = []
+        data_dict = {}
+        for message in messages.sorted('author_id'):
+        #     for partner in messages.notified_partner_ids:
+        #         log_partner = self.env['res.users.log'].search([('create_uid', 'in', partner.user_ids.ids)], limit=1)
+        #         if log_partner:
+        #             data_dict[partner.id] = message
+            partner = self.env.user.partner_id
+            author = message.author_id
+            if partner.id not in data_dict:
+                data_dict[partner.id] = message
+            if author.id not in data_dict:
+                data_dict[author.id] = message
+        for partner, message in data_dict.items():
+            # notifications.append([(self._cr.dbname, 'res.partner', partner), {'type': 'message_notification_update', 'elements': message._message_notification_format()}])
+            self.env['bus.bus'].sendmany([[
+                (self._cr.dbname, 'res.partner', partner),
+                {'type': 'message_notification_update', 'elements': message._message_notification_format()}
+                ]])
 
     # ------------------------------------------------------
     # TOOLS
