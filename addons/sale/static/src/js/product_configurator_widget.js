@@ -1,5 +1,6 @@
 odoo.define('sale.product_configurator', function (require) {
 var FieldsRegistry = require('web.field_registry');
+require('web._field_registry');
 var core = require('web.core');
 var _t = core._t;
 
