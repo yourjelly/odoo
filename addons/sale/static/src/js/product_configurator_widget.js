@@ -3,9 +3,10 @@ var FieldsRegistry = require('web.field_registry');
 var core = require('web.core');
 var _t = core._t;
 
+/*
 if (odoo.__DEBUG__.services["web_mobile.barcode_fields"]) {
     require("web_mobile.barcode_fields");
-}
+}*/
 var FieldMany2OneBarcode = odoo.__DEBUG__.services["web.field_registry"].get('many2one_barcode');
 
 /**
