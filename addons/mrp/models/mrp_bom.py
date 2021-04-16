@@ -238,10 +238,11 @@ class MrpBom(models.Model):
             Quantity describes the number of times you need the BoM: so the quantity divided by the number created by the BoM
             and converted into its UoM
         """
-        from collections import defaultdict
+        return self._get_product2explode({product: self}, quantity, picking_type=picking_type)[product]
 
-        graph = defaultdict(list)
-        V = set()
+    def _get_product2explode(self, product2bom, quantity, picking_type=False):
+        products = sum(product2bom.keys(), self.env['product.product'])
+        from collections import defaultdict
 
         def check_cycle(v, visited, recStack, graph):
             visited[v] = True
@@ -255,59 +256,68 @@ class MrpBom(models.Model):
             recStack[v] = False
             return False
 
-        def get_products_boms(products):
+        # product -> (boms_done, lines_done)
+        result = dict(
+            (product, (
+                [(bom, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})],
+                []
+            )) for product, bom in product2bom.items()
+        )
+
+        product2bom_search = self._get_product2bom(
+            products=products, bom_type='phantom', picking_type=picking_type)
+
+        def get_products_boms(products, bom_picking_type):
             return {
                 product: bom
-                for product, bom in zip(products_to_search, self._get_product2bom(
-                    products=products, picking_type=picking_type or self.picking_type_id,
-                    company_id=self.env.get('company_id'), bom_type='phantom'))
+                for product, bom in product2bom_search.items()
+                if (picking_type or (bom and bom.picking_type_id)) == bom_picking_type
             }
 
-        boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
-        lines_done = []
-        V |= set([product.product_tmpl_id.id])
+        for product, p_bom in product2bom.items():
+            graph = defaultdict(list)
+            V = set() | set([product.product_tmpl_id.id])
+            bom_lines = []
+            products_to_search = self.env['product.product']
+            for bom_line in p_bom.bom_line_ids:
+                product_id = bom_line.product_id
+                V |= set([product_id.product_tmpl_id.id])
+                graph[product.product_tmpl_id.id].append(product_id.product_tmpl_id.id)
+                bom_lines.append((bom_line, product, quantity, False))
+                products_to_search |= product_id
+            product_boms = self._get_product2bom(products_to_search)
+            products_to_search = self.env['product.product']
+            while bom_lines:
+                current_line, current_product, current_qty, parent_line = bom_lines[0]
+                bom_lines = bom_lines[1:]
 
-        bom_lines = []
-        products_to_search = self.env['product.product']
-        for bom_line in self.bom_line_ids:
-            product_id = bom_line.product_id
-            V |= set([product_id.product_tmpl_id.id])
-            graph[product.product_tmpl_id.id].append(product_id.product_tmpl_id.id)
-            bom_lines.append((bom_line, product, quantity, False))
-            products_to_search |= product_id
-        product_boms = self._get_product2bom(products_to_search, bom_type='phantom', picking_type=picking_type or self.picking_type_id)
-        products_to_search = self.env['product.product']
-        while bom_lines:
-            current_line, current_product, current_qty, parent_line = bom_lines[0]
-            bom_lines = bom_lines[1:]
+                if current_line._skip_bom_line(current_product):
+                    continue
 
-            if current_line._skip_bom_line(current_product):
-                continue
+                line_quantity = current_qty * current_line.product_qty
+                if current_line.product_id not in product_boms:
+                    product_boms.update(get_products_boms(products_to_search, p_bom.picking_type_id))
+                    products_to_search = self.env['product.product']
+                bom = product_boms.get(current_line.product_id)
+                if bom:
+                    converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
+                    bom_lines = bom_lines + [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
+                    for bom_line in bom.bom_line_ids:
+                        graph[current_line.product_id.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
+                        if bom_line.product_id.product_tmpl_id.id in V and check_cycle(bom_line.product_id.product_tmpl_id.id, {key: False for  key in V}, {key: False for  key in V}, graph):
+                            raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
+                        V |= set([bom_line.product_id.product_tmpl_id.id])
+                        if not bom_line.product_id in product_boms:
+                            products_to_search |= bom_line.product_id
+                    result[product][0].append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
+                else:
+                    # We round up here because the user expects that if he has to consume a little more, the whole UOM unit
+                    # should be consumed.
+                    rounding = current_line.product_uom_id.rounding
+                    line_quantity = float_round(line_quantity, precision_rounding=rounding, rounding_method='UP')
+                    result[product][1].append((current_line, {'qty': line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': parent_line}))
 
-            line_quantity = current_qty * current_line.product_qty
-            if not current_line.product_id in product_boms:
-                product_boms.update(get_products_boms(products_to_search))
-                products_to_search = self.env['product.product']
-            bom = product_boms.get(current_line.product_id)
-            if bom:
-                converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
-                bom_lines = bom_lines + [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids]
-                for bom_line in bom.bom_line_ids:
-                    graph[current_line.product_id.product_tmpl_id.id].append(bom_line.product_id.product_tmpl_id.id)
-                    if bom_line.product_id.product_tmpl_id.id in V and check_cycle(bom_line.product_id.product_tmpl_id.id, {key: False for  key in V}, {key: False for  key in V}, graph):
-                        raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
-                    V |= set([bom_line.product_id.product_tmpl_id.id])
-                    if not bom_line.product_id in product_boms:
-                        products_to_search |= bom_line.product_id
-                boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
-            else:
-                # We round up here because the user expects that if he has to consume a little more, the whole UOM unit
-                # should be consumed.
-                rounding = current_line.product_uom_id.rounding
-                line_quantity = float_round(line_quantity, precision_rounding=rounding, rounding_method='UP')
-                lines_done.append((current_line, {'qty': line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': parent_line}))
-
-        return boms_done, lines_done
+        return result
 
     @api.model
     def get_import_templates(self):

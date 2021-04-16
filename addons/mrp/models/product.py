@@ -112,9 +112,10 @@ class ProductProduct(models.Model):
         products = self.filtered(lambda p: p.type  != 'service')
         bom_kits = {k:v for (k,v) in self.env['mrp.bom']._get_product2bom(products, bom_type='phantom').items() if v}
         kits = self.filtered(lambda p: bom_kits.get(p))
+        bom_explode = self.env['mrp.bom']._get_product2explode(bom_kits, 1)
         res = super(ProductProduct, self - kits)._compute_quantities_dict(lot_id, owner_id, package_id, from_date=from_date, to_date=to_date)
         for product in bom_kits:
-            boms, bom_sub_lines = bom_kits[product].explode(product, 1)
+            boms, bom_sub_lines = bom_explode[product]
             ratios_virtual_available = []
             ratios_qty_available = []
             ratios_incoming_qty = []
