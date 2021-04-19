@@ -73,8 +73,43 @@ models.Order = models.Order.extend({
         }
         return 0;
     },
+    check_paymentlines_rounding: function() {
+        if(this.pos.config.cash_rounding) {
+            var cash_rounding = this.pos.cash_rounding[0].rounding;
+            var default_rounding = this.pos.currency.rounding;
+            for(var id in this.get_paymentlines()) {
+                var line = this.get_paymentlines()[id];
+                var diff = round_pr(round_pr(line.amount, cash_rounding) - round_pr(line.amount, default_rounding), default_rounding);
+                if(diff && line.payment_method.is_cash_count) {
+                    return false;
+                } else if(!this.pos.config.only_round_cash_method && diff) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return true;
+    },
     get_total_balance: function() {
         return this.get_total_with_tax() - this.get_total_paid() + this.get_rounding_applied();
     },
+    is_paid: function() {
+        var is_paid = _super_order.is_paid.apply(this, arguments);
+        return this.pos.config.cash_rounding ? is_paid && this.check_paymentlines_rounding() : is_paid;
+    }
 });
+    screens.PaymentScreenWidget.include({
+        validate_order: function(force_validation) {
+            if(this.pos.config.cash_rounding) {
+                if(!this.pos.get_order().check_paymentlines_rounding()) {
+                    this.pos.gui.show_popup('error', {
+                        'title': _t("Rounding error in payment lines"),
+                        'body': _t("The amount of your payment lines must be rounded to validate the transaction."),
+                    });
+                    return;
+                }
+            }
+            this._super(event);
+        },
+    });
 });
