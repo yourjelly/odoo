@@ -31,7 +31,29 @@ class L10nInProductHsnReport(models.Model):
     l10n_in_uom_code = fields.Char(string="UQC")
 
     def _select(self):
-        select_str = """SELECT aml.id AS id,
+        select_str = """SELECT max(id) as id,
+            account_move_id,
+            partner_id,
+            product_id,
+            max(uom_id) as uom_id,
+            date,
+            journal_id,
+            company_id,
+            hsn_code,
+            hsn_description,
+            max(l10n_in_uom_code) as l10n_in_uom_code,
+            sum(quantity) AS quantity,
+            sum(igst_amount) AS igst_amount,
+            sum(cgst_amount) AS cgst_amount,
+            sum(sgst_amount) AS sgst_amount,
+            sum(cess_amount) AS cess_amount,
+            sum(price_total) AS price_total,
+            sum(total) AS total
+        """
+        return select_str
+
+    def _sub_select(self):
+        sub_select_str = """SELECT aml.id AS id,
             aml.move_id AS account_move_id,
             aml.partner_id AS partner_id,
             aml.product_id,
@@ -42,10 +64,9 @@ class L10nInProductHsnReport(models.Model):
             CASE WHEN pt.l10n_in_hsn_code IS NULL THEN '' ELSE pt.l10n_in_hsn_code END AS hsn_code,
             CASE WHEN pt.l10n_in_hsn_description IS NULL THEN '' ELSE pt.l10n_in_hsn_description END AS hsn_description,
             CASE WHEN uom.l10n_in_code IS NULL THEN '' ELSE uom.l10n_in_code END AS l10n_in_uom_code,
-            CASE WHEN tag_rep_ln.account_tax_report_line_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='tax_report_line_sgst') OR at.l10n_in_reverse_charge = True
-                THEN 0
-                ELSE aml.quantity
+            CASE WHEN aml.tax_line_id IS NULL
+                THEN aml.quantity
+                ELSE 0
                 END AS quantity,
             CASE WHEN tag_rep_ln.account_tax_report_line_id IN
                 (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='tax_report_line_igst')
@@ -67,18 +88,13 @@ class L10nInProductHsnReport(models.Model):
                 THEN aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END)
                 ELSE 0
                 END AS cess_amount,
-            CASE WHEN tag_rep_ln.account_tax_report_line_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='tax_report_line_sgst')
-                THEN 0
-                ELSE (CASE WHEN aml.tax_line_id IS NOT NULL THEN aml.tax_base_amount ELSE aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END) END)
+            CASE WHEN aml.tax_line_id IS NULL
+                THEN (aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END))
+                ELSE 0
                 END AS price_total,
-            (CASE WHEN tag_rep_ln.account_tax_report_line_id IN
-                (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name='tax_report_line_sgst')
-                THEN 0
-                ELSE (CASE WHEN aml.tax_line_id IS NOT NULL THEN aml.tax_base_amount ELSE 1 END)
-                END) + (aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END))  AS total
+            (aml.balance * (CASE WHEN aj.type = 'sale' THEN -1 ELSE 1 END))  AS total
         """
-        return select_str
+        return sub_select_str
 
     def _from(self):
         from_str = """FROM account_move_line aml
@@ -91,13 +107,28 @@ class L10nInProductHsnReport(models.Model):
             LEFT JOIN account_account_tag_account_move_line_rel aat_aml_rel ON aat_aml_rel.account_move_line_id = aml.id
             LEFT JOIN account_account_tag aat ON aat.id = aat_aml_rel.account_account_tag_id
             LEFT JOIN account_tax_report_line_tags_rel tag_rep_ln ON aat.id = tag_rep_ln.account_account_tag_id
-            LEFT JOIN account_move_line_account_tax_rel mt ON mt.account_move_line_id = aml.id
             LEFT JOIN uom_uom uom ON uom.id = aml.product_uom_id
-            WHERE aa.internal_type = 'other' AND (aml.tax_line_id IS NOT NULL OR mt.account_tax_id IS NULL)
+           WHERE aml.product_id IS NOT NULL
         """
         return from_str
 
+    def _group_by(sefl):
+        group_by_str = """GROUP BY account_move_id,
+            partner_id,
+            product_id,
+            date,
+            journal_id,
+            company_id,
+            hsn_code,
+            hsn_description
+        """
+        return group_by_str
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE OR REPLACE VIEW %s AS (%s %s)""" % (
-            self._table, self._select(), self._from()))
+        self.env.cr.execute("""CREATE or REPLACE VIEW %s AS (
+            %s
+            FROM (
+                %s %s
+            ) AS sub %s)""" % (self._table, self._select(), self._sub_select(),
+                self._from(), self._group_by()))
