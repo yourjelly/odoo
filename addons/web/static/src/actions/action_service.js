@@ -712,6 +712,13 @@ function makeActionManager(env) {
   async function doAction(actionRequest, options = {}) {
     const actionProm = _loadAction(actionRequest, options.additionalContext);
     let action = await keepLast.add(actionProm);
+    if (!action) {
+      env.services.notification.create(`The action with id ${actionRequest} does not exit.`, {
+        type: "danger",
+        title: "Invalid Action",
+      })
+      return;
+    }
     action = _preprocessAction(action, options.additionalContext);
     switch (action.type) {
       case "ir.actions.act_url":
