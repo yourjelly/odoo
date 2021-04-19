@@ -32,6 +32,13 @@ models.Order = models.Order.extend({
       due += this.get_rounding_applied();
       return round_pr(due, this.pos.currency.rounding);
     },
+    add_paymentline: function(payment_method){
+        _super_order.add_paymentline.apply(this, arguments);
+        if(this.pos.config.cash_rounding && (!payment_method.is_cash_count || this.pos.config.iface_precompute_cash)){
+          this.selected_paymentline.set_amount(0);
+          this.selected_paymentline.set_amount(this.get_due());
+        }
+    },
     get_change_value: function(paymentline) {
       var change  = _super_order.get_change_value.apply(this, arguments);
       change -= this.get_rounding_applied();
@@ -40,12 +47,13 @@ models.Order = models.Order.extend({
     get_rounding_applied: function() {
         if(this.pos.config.cash_rounding) {
             const only_cash = this.pos.config.only_round_cash_method;
-            const has_cash = _.some(this.get_paymentlines(), function(pl) { return pl.payment_method.is_cash_count == true;});
+            const has_cash = this.selected_paymentline ? this.selected_paymentline.payment_method.is_cash_count == true: false;
             if (!only_cash || (only_cash && has_cash)) {
-                var total = round_pr(this.get_total_with_tax(), this.pos.cash_rounding[0].rounding);
+                var remaining = this.get_total_with_tax() - this.get_total_paid();
+                var total = round_pr(remaining, this.pos.cash_rounding[0].rounding);
                 var sign = total > 0 ? 1.0 : -1.0;
 
-                var rounding_applied = total - this.get_total_with_tax();
+                var rounding_applied = total - remaining;
                 rounding_applied *= sign;
                 // because floor and ceil doesn't include decimals in calculation, we reuse the value of the half-up and adapt it.
                 if (utils.float_is_zero(rounding_applied, this.pos.currency.decimals)){
