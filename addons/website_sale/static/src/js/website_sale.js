@@ -179,6 +179,7 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
         'change .js_main_product [data-attribute_exclusions]': 'onChangeVariant',
         'change oe_optional_products_modal [data-attribute_exclusions]': 'onChangeVariant',
         'click .o_product_page_reviews_link': '_onClickReviewsLink',
+        'change select[name="search_category"]': '_onSearchCategory',
     }),
 
     /**
@@ -746,6 +747,15 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, car
      */
     _onClickReviewsLink: function () {
         $('#o_product_page_reviews_content').collapse('show');
+    },
+    /**
+     * @private
+     */
+     _onSearchCategory: function (ev) {
+        const $searchbarForm = this.$target.find('.o_wsale_products_searchbar_form');
+        const value = ev.currentTarget.value;
+        const url = '/shop' + (value ? '/category/' + value : '');
+        $searchbarForm.attr('action', url);
     },
 });
 

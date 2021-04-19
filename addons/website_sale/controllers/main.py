@@ -252,6 +252,7 @@ class WebsiteSale(http.Controller):
         search_product = Product.search(domain, order=self._get_search_order(post))
         website_domain = request.website.website_domain()
         categs_domain = [('parent_id', '=', False)] + website_domain
+        categories_list = Category.search(categs_domain)
         if search:
             search_categories = Category.search([('product_tmpl_ids', 'in', search_product.ids)] + website_domain).parents_and_self
             categs_domain.append(('id', 'in', search_categories.ids))
@@ -299,6 +300,7 @@ class WebsiteSale(http.Controller):
             'keep': keep,
             'search_categories_ids': search_categories.ids,
             'layout_mode': layout_mode,
+            'categories_list': categories_list,
         }
         if category:
             values['main_object'] = category
@@ -330,7 +332,9 @@ class WebsiteSale(http.Controller):
 
         keep = QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
 
-        categs = ProductCategory.search([('parent_id', '=', False)])
+        website_domain = request.website.website_domain()
+        categs_domain = [('parent_id', '=', False)] + website_domain
+        categs = ProductCategory.search(categs_domain)
 
         pricelist = request.website.get_current_pricelist()
 
