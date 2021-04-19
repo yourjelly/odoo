@@ -22,3 +22,27 @@
     opacity: 0;
   }
 }
+
+/*
+  Reveal by scaling the Y axe with t-transition
+  Only on entry
+  Usage:
+    scss: @include owl-reveal-only-in(0.5s, 'o-notification')
+    xml: <tag t-transition="o-notification-reveal" />
+ */
+ @mixin owl-reveal-only-in($time, $name) {
+
+  .#{$name}-reveal-enter-active {
+    transition: all $time;
+    transition-timing-function: ease-out;
+  }
+
+  .#{$name}-reveal-enter {
+    transform:scaleY(0)
+  }
+
+  .#{$name}-reveal-leave-to {
+    transform: scaleY(0);
+  }
+
+}

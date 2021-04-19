@@ -58,13 +58,15 @@
 
 
         <button class="btn btn-link" t-on-click="state.showTraceback = !state.showTraceback">See details</button>
-        <div t-if="state.showTraceback and (props.name or props.message)" class="alert clearfix" style="background-color:#ececec;" role="alert">
-          <code t-if="props.name" t-esc="props.name"></code>
-          <p t-if="props.message" t-esc="props.message"></p>
-        </div>
-        <div t-if="state.showTraceback" class="alert alert-danger o_error_detail" role="alert">
-            <pre t-esc="props.traceback"/>
-        </div>
+        <div t-transition="o-error-dialog-reveal" t-if="state.showTraceback">
+          <div t-if="props.name or props.message" class="alert clearfix" style="background-color:#ececec;" role="alert">
+            <code t-if="props.name" t-esc="props.name"></code>
+            <p t-if="props.message" t-esc="props.message"></p>
+          </div>
+          <div class="alert alert-danger o_error_detail" role="alert">
+              <pre t-esc="props.traceback"/>
+          </div>
+      </div>
       </Dialog>
     </t>
 
