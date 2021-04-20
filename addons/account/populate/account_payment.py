@@ -61,10 +61,14 @@ class AccountPayment(models.Model):
             """
             need_bank_account = self._get_method_codes_needing_bank_account()
             other_blacklist = ['sdd']
-            return self.env['account.payment.method'].search([
+            rslt = self.env['account.payment.method'].search([
                 ('payment_type', '=', type),
                 ('code', 'not in', need_bank_account + other_blacklist),
-            ]).ids
+            ])
+
+            _logger.warning("TEST OCO#1 - payment methods returned for populate (%s): %s" % (type, str(rslt.mapped('name'))))
+
+            return rslt.ids
 
         def get_partner(random, values, **kwargs):
             """Get a random partner depending on the company and the partner_type.
