@@ -22,7 +22,7 @@ function makeTestConfig(config = {}) {
     systrayRegistry: config.systrayRegistry || new Registry(),
     errorDialogRegistry: config.errorDialogRegistry || new Registry(),
     userMenuRegistry: config.userMenuRegistry || new Registry(),
-    debugRegistry: config.debugRegistry || new Registry(),
+    globalDebugRegistry: config.globalDebugRegistry || new Registry(),
     viewRegistry: config.viewRegistry || new Registry(),
   });
 }
@@ -108,7 +108,7 @@ export function makeTestOdoo(config = {}) {
     systrayRegistry: config.systrayRegistry,
     errorDialogRegistry: config.errorDialogRegistry,
     userMenuRegistry: config.userMenuRegistry,
-    debugRegistry: config.debugRegistry,
+    globalDebugRegistry: config.globalDebugRegistry,
     viewRegistry: config.viewRegistry,
     commandCategoryRegistry: config.commandCategoryRegistry,
   });

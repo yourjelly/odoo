@@ -230,6 +230,11 @@ export class ViewAdapter extends ActionAdapter {
         setupDebugViewForm(envWowl, this, this.props.viewParams.action)
       );
     }
+    for (const item of viewDebugRegistry.getAll()) {
+      useDebugManager((accessRights) => 
+        item(accessRights, envWowl, this, this.props.viewParams.action)
+      );
+    }
     if (!envWowl.inDialog) {
       hooks.onMounted(() => {
         envWowl.bus.on("ACTION_MANAGER:UPDATE", this, (info) => {

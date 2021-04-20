@@ -32,8 +32,8 @@ QUnit.module("DebugManager", (hooks) => {
     testConfig = { serviceRegistry, mockRPC };
   });
   QUnit.test("can be rendered", async (assert) => {
-    testConfig.debugRegistry = new Registry();
-    testConfig.debugRegistry.add("item_1", () => {
+    testConfig.globalDebugRegistry = new Registry();
+    testConfig.globalDebugRegistry.add("item_1", () => {
       return {
         type: "item",
         description: "Item 1",
@@ -43,7 +43,7 @@ QUnit.module("DebugManager", (hooks) => {
         sequence: 10,
       };
     });
-    testConfig.debugRegistry.add("item_2", () => {
+    testConfig.globalDebugRegistry.add("item_2", () => {
       return {
         type: "item",
         description: "Item 2",
@@ -53,7 +53,7 @@ QUnit.module("DebugManager", (hooks) => {
         sequence: 5,
       };
     });
-    testConfig.debugRegistry.add("item_3", () => {
+    testConfig.globalDebugRegistry.add("item_3", () => {
       return {
         type: "item",
         description: "Item 3",
@@ -62,20 +62,20 @@ QUnit.module("DebugManager", (hooks) => {
         },
       };
     });
-    testConfig.debugRegistry.add("separator", () => {
+    testConfig.globalDebugRegistry.add("separator", () => {
       return {
         type: "separator",
         sequence: 20,
       };
     });
-    testConfig.debugRegistry.add("separator_2", () => {
+    testConfig.globalDebugRegistry.add("separator_2", () => {
       return {
         type: "separator",
         sequence: 7,
         hide: true,
       };
     });
-    testConfig.debugRegistry.add("item_4", () => {
+    testConfig.globalDebugRegistry.add("item_4", () => {
       return {
         type: "item",
         description: "Item 4",
@@ -129,8 +129,8 @@ QUnit.module("DebugManager", (hooks) => {
       const dialogContainer = document.createElement("div");
       dialogContainer.classList.add("o_dialog_container");
       target.append(dialogContainer);
-      testConfig.debugRegistry = new Registry();
-      testConfig.debugRegistry.add("global", () => {
+      testConfig.globalDebugRegistry = new Registry();
+      testConfig.globalDebugRegistry.add("global", () => {
         return {
           type: "item",
           description: "Global 1",

@@ -3,7 +3,7 @@
 import startClickEverywhere from "@web/tools/test_menus_loader";
 import { browser } from "../core/browser";
 import { routeToUrl } from "../services/router_service";
-import { debugRegistry } from "./debug_registry";
+import { globalDebugRegistry } from "./debug_registry";
 
 // Backend Debug Manager Items
 export function runJSTestsItem(env) {
@@ -143,7 +143,7 @@ const backendDebugManagerItems = [
 ];
 
 for (let item of backendDebugManagerItems) {
-  debugRegistry.add(item.name, item);
+  globalDebugRegistry.add(item.name, item);
 }
 
 const globalDebugManagerItems = [
@@ -156,5 +156,5 @@ const globalDebugManagerItems = [
 ];
 
 for (let item of globalDebugManagerItems) {
-  debugRegistry.add(item.name, item);
+  globalDebugRegistry.add(item.name, item);
 }

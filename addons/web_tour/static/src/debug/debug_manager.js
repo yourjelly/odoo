@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { debugRegistry } from "@web/debug/debug_registry";
+import { globalDebugRegistry } from "@web/debug/debug_registry";
 import ToursDialog from "@web_tour/debug/tour_dialog_component";
 import utils from "web_tour.utils";
 
@@ -41,5 +41,5 @@ function debugStartTourItem(env) {
   };
 }
 
-debugRegistry.add("web_tour.start_tour", debugStartTourItem);
-debugRegistry.add("web_tour.disable_tour", debugDisableTourItem);
+globalDebugRegistry.add("web_tour.start_tour", debugStartTourItem);
+globalDebugRegistry.add("web_tour.disable_tour", debugDisableTourItem);
