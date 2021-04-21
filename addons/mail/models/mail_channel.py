@@ -56,7 +56,7 @@ class Channel(models.Model):
         groups='base.group_user')
     channel_last_seen_partner_ids = fields.One2many(
         'mail.channel.partner', 'channel_id', string='Last Seen',
-        groups='base.group_user')
+        groups='base.group_user', compute='_commpute_partner_email', store=True, readonly=False)
     is_member = fields.Boolean('Is Member', compute='_compute_is_member', compute_sudo=True)
     group_ids = fields.Many2many(
         'res.groups', string='Auto Subscription',
@@ -89,6 +89,10 @@ class Channel(models.Model):
     moderation_guidelines_msg = fields.Text(string="Guidelines")
 
     # COMPUTE / INVERSE
+    
+    @api.depends('channel_last_seen_partner_ids.partner_id.email')
+    def _commpute_partner_email(self):
+        self.channel_last_seen_partner_ids = self.env['mail.channel.partner'].search([('channel_id', '=', self.id)])
 
     @api.depends('channel_type')
     def _compute_is_chat(self):
