@@ -1647,7 +1647,7 @@
 <t t-name="Throbber">
     <div>
         <div class="oe_blockui_spin" style="height: 50px">
-            <img src="/web/static/src/img/spin.png" style="animation: fa-spin 1s infinite steps(12);" alt="Loading..."/>
+            <img src="/web/static/img/spin.png" style="animation: fa-spin 1s infinite steps(12);" alt="Loading..."/>
         </div>
         <br />
         <div class="oe_throbber_message" style="color:white"></div>
@@ -1719,7 +1719,7 @@
             </ul>
         </div>
         <div class="col-6">
-            <img class="img-fluid" t-att-src='_s + "/web/static/src/img/enterprise_upgrade.jpg"' draggable="false" alt="Upgrade to enterprise"/>
+            <img class="img-fluid" t-att-src='_s + "/web/static/img/enterprise_upgrade.jpg"' draggable="false" alt="Upgrade to enterprise"/>
         </div>
     </div>
 </t>

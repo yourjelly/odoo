@@ -35,7 +35,7 @@ export const effectService = {
         type = options.type || type;
       }
       if (type === "rainbow_man") {
-        effect = Object.assign({ imgUrl: "/web/static/src/img/smile.svg" }, options, {
+        effect = Object.assign({ imgUrl: "/web/static/img/smile.svg" }, options, {
           id: ++effectId,
           message,
         });
