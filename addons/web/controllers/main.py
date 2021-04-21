@@ -1641,8 +1641,8 @@ class Binary(http.Controller):
         fonts = []
         if fontname:
             module_path = get_module_path('web')
-            fonts_folder_path = os.path.join(module_path, 'static/src/fonts/sign/')
-            module_resource_path = get_resource_path('web', 'static/src/fonts/sign/' + fontname)
+            fonts_folder_path = os.path.join(module_path, 'static/fonts/sign/')
+            module_resource_path = get_resource_path('web', 'static/fonts/sign/' + fontname)
             if fonts_folder_path and module_resource_path:
                 fonts_folder_path = os.path.join(os.path.normpath(fonts_folder_path), '')
                 module_resource_path = os.path.normpath(module_resource_path)
