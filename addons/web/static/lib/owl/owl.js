@@ -2636,8 +2636,8 @@
         const durations = (styles.transitionDuration || "").split(", ");
         const timeout = getTimeout(delays, durations);
         if (timeout > 0) {
-            // Simulate the situation where `transitionend` event is not (never) triggered.
-            // elm.addEventListener("transitionend", cb, { once: true });
+            elm.addEventListener("transitionend", cb, { once: true });
+            setTimeout(() => elm.dispatchEvent(new Event("transitionend")), timeout + 1);
         }
         else {
             cb();
