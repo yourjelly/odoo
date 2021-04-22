@@ -191,3 +191,17 @@ export function breadcrumbsToLegacy(breadcrumbs) {
     return { title: bc.name, controllerID: bc.jsId };
   });
 }
+
+const reBSTooltip = /^bs-.*$/;
+
+export function cleanDomFromBootstrap() {
+  const body = document.body;
+  // multiple bodies in tests
+  // Bootstrap tooltips
+  const tooltips = body.querySelectorAll("body .tooltip");
+  for (const tt of tooltips) {
+    if (Array.from(tt.classList).find((cls) => reBSTooltip.test(cls))) {
+      tt.parentNode.removeChild(tt);
+    }
+  }
+}
