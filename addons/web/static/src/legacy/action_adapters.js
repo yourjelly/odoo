@@ -7,22 +7,9 @@ import { objectToQuery } from "../services/router_service";
 import { ComponentAdapter } from "web.OwlCompatibility";
 import { mapDoActionOptionAPI } from "./utils";
 import { setupDebugAction, setupDebugViewForm, setupDebugView } from "./debug_manager";
+import { cleanDomFromBootstrap } from '@web/legacy/utils';
 
 const { Component, hooks, tags } = owl;
-
-const reBSTooltip = /^bs-.*$/;
-
-function cleanDomFromBootstrap() {
-  const body = document.body;
-  // multiple bodies in tests
-  // Bootstrap tooltips
-  const tooltips = body.querySelectorAll("body .tooltip");
-  for (const tt of tooltips) {
-    if (Array.from(tt.classList).find((cls) => reBSTooltip.test(cls))) {
-      tt.parentNode.removeChild(tt);
-    }
-  }
-}
 
 class ActionAdapter extends ComponentAdapter {
   setup() {
