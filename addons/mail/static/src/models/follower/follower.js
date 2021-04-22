@@ -36,6 +36,7 @@ function factory(dependencies) {
                         email: data.email,
                         id: data.partner_id,
                         name: data.name,
+                        display_name: data.display_name
                     };
                     data2.partner = insert(partnerData);
                 }
@@ -172,6 +173,9 @@ function factory(dependencies) {
         }),
         name: attr({
             related: 'partner.name',
+        }),
+        display_name: attr({
+            related: 'partner.display_name'
         }),
         partner: many2one('mail.partner', {
             required: true,

@@ -143,6 +143,7 @@ class MailController(http.Controller):
                 'partner_id': follower.partner_id.id,
                 'name': follower.name,
                 'email': follower.email,
+                'display_name': follower.display_name,
                 'is_active': follower.is_active,
                 # When editing the followers, the "pencil" icon that leads to the edition of subtypes
                 # should be always be displayed and not only when "debug" mode is activated.
