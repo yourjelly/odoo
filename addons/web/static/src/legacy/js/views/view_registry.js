@@ -26,7 +26,6 @@ odoo.define('web._view_registry', function (require) {
  */
 
 var FormView = require('web.FormView');
-var GraphView = require('web.GraphView');
 var KanbanView = require('web.KanbanView');
 var ListView = require('web.ListView');
 var PivotView = require('web.PivotView');
@@ -37,7 +36,6 @@ view_registry
     .add('form', FormView)
     .add('list', ListView)
     .add('kanban', KanbanView)
-    .add('graph', GraphView)
     .add('pivot', PivotView)
     .add('calendar', CalendarView);
 

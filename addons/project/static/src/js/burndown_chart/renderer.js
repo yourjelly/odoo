@@ -1,9 +1,7 @@
 /** @odoo-module alias=project.BurndownChartRenderer **/
 import * as GraphRenderer from 'web/static/src/js/views/graph/graph_renderer';
 
-const {
-    hexToRGBA,
-} = require("web/static/src/js/views/graph/graph_utils");
+import { hexToRGBA } from '@web/views/graph/graph_utils';
 
 export class BurndownChartRenderer extends GraphRenderer {
     /**

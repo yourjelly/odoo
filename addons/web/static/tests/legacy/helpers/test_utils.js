@@ -20,7 +20,6 @@ odoo.define('web.test_utils', async function (require) {
     const testUtilsFields = require('web.test_utils_fields');
     const testUtilsFile = require('web.test_utils_file');
     const testUtilsForm = require('web.test_utils_form');
-    const testUtilsGraph = require('web.test_utils_graph');
     const testUtilsKanban = require('web.test_utils_kanban');
     const testUtilsMock = require('web.test_utils_mock');
     const testUtilsModal = require('web.test_utils_modal');
@@ -211,9 +210,6 @@ odoo.define('web.test_utils', async function (require) {
             clickCreate: testUtilsForm.clickCreate,
             clickDiscard: testUtilsForm.clickDiscard,
             reload: testUtilsForm.reload,
-        },
-        graph: {
-            reload: testUtilsGraph.reload,
         },
         kanban: {
             reload: testUtilsKanban.reload,

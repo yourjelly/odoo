@@ -89,7 +89,6 @@
     'assets': {
         'web.report_assets_common': [
             'web/static/src/legacy/scss/views.scss',
-            'web/static/src/legacy/scss/graph_view.scss',
             'stock/static/src/scss/report_stock_forecasted.scss',
             'stock/static/src/scss/report_stock_rule.scss',
         ],

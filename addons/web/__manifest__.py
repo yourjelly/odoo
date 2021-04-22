@@ -60,7 +60,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/xml/report.xml',
             'web/static/src/legacy/xml/search_panel.xml',
             'web/static/src/legacy/xml/web_calendar.xml',
-            'web/static/src/legacy/xml/graph.xml',
             'web/static/src/legacy/xml/week_days.xml',
         ],
         'web.assets_common_minimal': [
@@ -108,7 +107,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/scss/file_upload.scss',
             'web/static/src/legacy/scss/views.scss',
             'web/static/src/legacy/scss/pivot_view.scss',
-            'web/static/src/legacy/scss/graph_view.scss',
             'web/static/src/legacy/scss/form_view.scss',
             'web/static/src/legacy/scss/list_view.scss',
             'web/static/src/legacy/scss/kanban_dashboard.scss',
@@ -523,7 +521,6 @@ This module provides the core of the Odoo Web Client.
             'web/static/tests/legacy/views/basic_model_tests.js',
             'web/static/tests/legacy/views/calendar_tests.js',
             'web/static/tests/legacy/views/form_tests.js',
-            'web/static/tests/legacy/views/graph_tests.js',
             'web/static/tests/legacy/views/kanban_model_tests.js',
             'web/static/tests/legacy/views/kanban_tests.js',
             'web/static/tests/legacy/views/list_tests.js',
