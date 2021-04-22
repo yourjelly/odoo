@@ -3,6 +3,7 @@
 import { browser } from "../core/browser";
 import AbstractStorageService from "web.AbstractStorageService";
 import { RPCError } from "../services/rpc_service";
+import legacyConfig  from "web.config";
 
 export function mapDoActionOptionAPI(legacyOptions) {
   legacyOptions = Object.assign(legacyOptions || {});
@@ -174,6 +175,12 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
   wowlEnv.bus.on("WEB_CLIENT_READY", null, () => {
     legacyEnv.bus.trigger("web_client_ready");
   });
+
+  legacyEnv.bus.on("clear_cache", null, () => {
+    wowlEnv.bus.trigger("CLEAR-CACHES");
+  });
+
+  legacyConfig.isDebug = () => wowlEnv.debug;
 }
 
 export function breadcrumbsToLegacy(breadcrumbs) {
