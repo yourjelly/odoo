@@ -9,6 +9,12 @@ import { serviceRegistry } from "../webclient/service_registry";
  * @typedef {string} ViewType // to define
  */
 
+ /**
+ * @typedef {Object} Toolbar // to precise
+ * @property {?} print
+ * @property {?} action
+ */
+
 /**
  * @typedef {Object} IrFilter
  * @property {[number, string] | false} user_id
@@ -25,10 +31,13 @@ import { serviceRegistry } from "../webclient/service_registry";
 /**
  * @typedef {Object} ViewDescription
  * @property {string} arch
- * @property {Fields} fields
+ * @property {Fields} [fields]
+ * @property {string} model
+ * @property {string} [name] is returned by the server ("default" or real name)
  * @property {ViewType} type
- * @property {number} view_id
- * @property {IrFilter[]} [irFilters]
+ * @property {number} [viewId]
+ * @property {Object} [toolbar] // for views other than search
+ * @property {IrFilter[]} [irFilters] // for search view
  */
 
 /**
@@ -79,8 +88,16 @@ export const viewService = {
         const viewDescriptions = result; // for legacy purpose, keys in result are left in viewDescriptions
 
         for (const [_, viewType] of params.views) {
-          const viewDescription = result.fields_views[viewType];
+          const viewDescription = JSON.parse(JSON.stringify(result.fields_views[viewType]));
+          viewDescription.viewId = viewDescription.view_id;
+          delete viewDescription.view_id;
+          if (viewDescription.toolbar) {
+            viewDescription.actionMenus = viewDescription.toolbar;
+            delete viewDescription.toolbar;
+          }
           viewDescription.fields = Object.assign({}, result.fields, viewDescription.fields); // before a deep freeze was done.
+          delete viewDescription.base_model; // unused
+          delete viewDescription.field_parent; // unused
           if (viewType === "search" && options.withFilters) {
             viewDescription.irFilters = result.filters;
           }
