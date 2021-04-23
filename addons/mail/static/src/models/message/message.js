@@ -87,7 +87,7 @@ function factory(dependencies) {
                     id: data.res_id,
                     model: data.model,
                 };
-                if ('followers' in data) {
+                if ('followers' in data && data.followers) {
                     originThreadData.followers = insertAndReplace(data.followers.map(followerData =>
                         this.env.models['mail.follower'].convertData(followerData)
                     ));
@@ -201,13 +201,14 @@ function factory(dependencies) {
          * @param {Object} [context]
          * @returns {mail.message[]}
          */
-        static async performRpcMessageFetch(domain, limit, moderated_channel_ids, context) {
+        static async performRpcMessageFetch(domain, fetchFollowers, limit, moderated_channel_ids, context) {
             const messagesData = await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',
                 kwargs: {
                     context,
                     domain,
+                    fetch_followers: fetchFollowers,
                     limit,
                     moderated_channel_ids,
                 },

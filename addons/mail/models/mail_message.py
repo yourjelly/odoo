@@ -955,7 +955,7 @@ class Message(models.Model):
     # MESSAGE READ / FETCH / FAILURE API
     # ------------------------------------------------------
 
-    def _message_format(self, fnames):
+    def _message_format(self, fetch_followers, fnames):
         """Reads values from messages and formats them for the web client."""
         self.check_access_rule('read')
         vals_list = self._read_format(fnames)
@@ -1007,11 +1007,22 @@ class Message(models.Model):
                     })
 
             if message_sudo.model and message_sudo.res_id:
-                record_name = self.env[message_sudo.model] \
+                record = self.env[message_sudo.model] \
                     .browse(message_sudo.res_id) \
                     .sudo() \
-                    .with_prefetch(thread_ids_by_model_name[message_sudo.model]) \
-                    .display_name
+                    .with_prefetch(thread_ids_by_model_name[message_sudo.model])
+                record_name = record.display_name
+
+                if fetch_followers:
+                    followers = [{
+                        'email': follower.email,
+                        'id': follower.id,
+                        'is_active': follower.is_active,
+                        'is_editable': True,
+                        'name': follower.name,
+                        'partner_id': follower.partner_id.id,
+                    } for follower in record.message_follower_ids]
+                    vals['followers'] = followers
             else:
                 record_name = False
 
@@ -1038,7 +1049,7 @@ class Message(models.Model):
         return messages._message_notification_format()
 
     @api.model
-    def message_fetch(self, domain, limit=20, moderated_channel_ids=None):
+    def message_fetch(self, domain, fetch_followers=False, limit=20, moderated_channel_ids=None):
         """ Get a limited amount of formatted messages with provided domain.
             :param domain: the domain to filter messages;
             :param limit: the maximum amount of messages to get;
@@ -1063,9 +1074,9 @@ class Message(models.Model):
             messages |= self.search(moderated_messages_dom, limit=limit)
             # Truncate the results to `limit`
             messages = messages.sorted(key='id', reverse=True)[:limit]
-        return messages.message_format()
+        return messages.message_format(fetch_followers)
 
-    def message_format(self):
+    def message_format(self, fetch_followers=False):
         """ Get the message values in the format for web client. Since message values can be broadcasted,
             computed fields MUST NOT BE READ and broadcasted.
             :returns list(dict).
@@ -1106,25 +1117,13 @@ class Message(models.Model):
                     'moderation_status': 'pending_moderation'
                 }
         """
-        vals_list = self._message_format(self._get_message_format_fields())
+        vals_list = self._message_format(fetch_followers, self._get_message_format_fields())
 
         com_id = self.env['ir.model.data'].xmlid_to_res_id('mail.mt_comment')
         note_id = self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note')
 
         for vals in vals_list:
             message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
-            follower_recs = self.env['mail.followers'].sudo().search([
-                ('res_model', '=', message_sudo.model),
-                ('res_id', '=', message_sudo.res_id)
-            ])
-            followers = [{
-                'email': follower.email,
-                'id': follower.id,
-                'is_active': follower.is_active,
-                'is_editable': True,
-                'name': follower.name,
-                'partner_id': follower.partner_id.id,
-            } for follower in follower_recs]
             notifs = message_sudo.notification_ids.filtered(lambda n: n.res_partner_id)
             vals.update({
                 'needaction_partner_ids': notifs.filtered(lambda n: not n.is_read).res_partner_id.ids,
@@ -1133,7 +1132,6 @@ class Message(models.Model):
                 'is_discussion': message_sudo.subtype_id.id == com_id,
                 'subtype_description': message_sudo.subtype_id.description,
                 'is_notification': vals['message_type'] == 'user_notification',
-                'followers': followers,
             })
             if vals['model'] and self.env[vals['model']]._original_module:
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)

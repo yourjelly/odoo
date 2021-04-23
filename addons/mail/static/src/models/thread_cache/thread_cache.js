@@ -296,11 +296,13 @@ function factory(dependencies) {
             const moderated_channel_ids = this.thread.moderation
                 ? [this.thread.id]
                 : undefined;
+            const fetchFollowers = (this.thread === this.env.messaging.inbox);
             let messages;
             try {
                 messages = await this.async(() =>
                     this.env.models['mail.message'].performRpcMessageFetch(
                         domain,
+                        fetchFollowers,
                         limit,
                         moderated_channel_ids,
                         context,

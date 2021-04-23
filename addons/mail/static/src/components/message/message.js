@@ -691,6 +691,7 @@ Object.assign(Message, {
         hasCheckbox: false,
         hasMarkAsReadIcon: false,
         hasReplyIcon: false,
+        hasUnfollowIcon: false,
         isSquashed: false,
     },
     props: {
@@ -702,10 +703,7 @@ Object.assign(Message, {
         hasCheckbox: Boolean,
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
-        hasUnfollowIcon: {
-            type: Boolean,
-            optional: true,
-        },
+        hasUnfollowIcon: Boolean,
         isSquashed: Boolean,
         messageLocalId: String,
         threadViewLocalId: {

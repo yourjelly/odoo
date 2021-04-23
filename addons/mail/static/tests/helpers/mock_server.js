@@ -1212,14 +1212,14 @@ MockServer.include({
             });
             const follower_recs = this._getRecords('mail.followers', [['res_id', '=', message.res_id], ['res_model', '=', message.model]]);
             const followers = follower_recs.map(follower => {
-                return Object.assign({
+                return {
                     'email': follower.email,
                     'id': follower.id,
                     'is_active': follower.is_active,
                     'is_editable': follower.is_editable,
                     'name': follower.name,
                     'partner_id': follower.partner_id,
-                });
+                };
             });
             const allNotifications = this._getRecords('mail.notification', [
                 ['mail_message_id', '=', message.id],
