@@ -128,9 +128,9 @@ class AccountReconcileModel(models.Model):
         default=lambda self: self.env.company)
 
     rule_type = fields.Selection(selection=[
-        ('writeoff_button', 'Manually create a write-off on clicked button'),
-        ('writeoff_suggestion', 'Suggest counterpart values'),
-        ('invoice_matching', 'Match existing invoices/bills'),
+        ('writeoff_button', 'Button to generate given counterpart entry.'),
+        ('writeoff_suggestion', 'Rule to suggest counterpart entry.'),
+        ('invoice_matching', 'Rule to match invoices/bills.'),
     ], string='Type', default='writeoff_button', required=True)
     auto_reconcile = fields.Boolean(string='Auto-validate',
         help='Validate the statement line automatically (reconciliation based on your rule).')
@@ -157,7 +157,7 @@ class AccountReconcileModel(models.Model):
         default=False,
         help="Search in the Statement's Reference to find the Invoice/Payment's reference",
     )
-    match_journal_ids = fields.Many2many('account.journal', string='Journals',
+    match_journal_ids = fields.Many2many('account.journal', string='Journal availability',
         domain="[('type', 'in', ('bank', 'cash')), ('company_id', '=', company_id)]",
         check_company=True,
         help='The reconciliation model will only be available from the selected journals.')
@@ -165,7 +165,7 @@ class AccountReconcileModel(models.Model):
         ('amount_received', 'Amount Received'),
         ('amount_paid', 'Amount Paid'),
         ('both', 'Amount Paid/Received')
-    ], string='Amount Nature', required=True, default='both',
+    ], string='Amount Type', required=True, default='both',
         help='''The reconciliation model will only be applied to the selected transaction type:
         * Amount Received: Only applied when receiving an amount.
         * Amount Paid: Only applied when paying an amount.
@@ -174,7 +174,7 @@ class AccountReconcileModel(models.Model):
         ('lower', 'Is Lower Than'),
         ('greater', 'Is Greater Than'),
         ('between', 'Is Between'),
-    ], string='Amount',
+    ], string='Amount Conditions',
         help='The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).')
     match_amount_min = fields.Float(string='Amount Min Parameter')
     match_amount_max = fields.Float(string='Amount Max Parameter')
@@ -205,17 +205,17 @@ class AccountReconcileModel(models.Model):
         * Not Contains: Negation of "Contains".
         * Match Regex: Define your own regular expression.''')
     match_transaction_type_param = fields.Char(string='Transaction Type Parameter')
-    match_same_currency = fields.Boolean(string='Same Currency Matching', default=True,
+    match_same_currency = fields.Boolean(string='Same Currency', default=True,
         help='Restrict to propositions having the same currency as the statement line.')
-    match_total_amount = fields.Boolean(string='Amount Matching', default=True,
+    match_total_amount = fields.Boolean(string='Allow Payment Gap', default=True,
         help='The sum of total residual amount propositions matches the statement line amount.')
     match_total_amount_param = fields.Float(string='Amount Matching %', default=100,
         help='The sum of total residual amount propositions matches the statement line amount under this percentage.')
-    match_partner = fields.Boolean(string='Partner Is Set',
+    match_partner = fields.Boolean(string='Partner Should be Set',
         help='The reconciliation model will only be applied when a customer/vendor is set.')
-    match_partner_ids = fields.Many2many('res.partner', string='Restrict Partners to',
+    match_partner_ids = fields.Many2many('res.partner', string="Only this partner's",
         help='The reconciliation model will only be applied to the selected customers/vendors.')
-    match_partner_category_ids = fields.Many2many('res.partner.category', string='Restrict Partner Categories to',
+    match_partner_category_ids = fields.Many2many('res.partner.category', string="Only this partner's category",
         help='The reconciliation model will only be applied to the selected customer/vendor categories.')
 
     line_ids = fields.One2many('account.reconcile.model.line', 'model_id')
@@ -227,7 +227,7 @@ class AccountReconcileModel(models.Model):
                                                     "- To Match the text anywhere (in label or notes), put your text between .*\n"
                                                     "  e.g: .*N°48748 abc123.*")
 
-    past_months_limit = fields.Integer(string="Past Months Limit", default=18, help="Number of months in the past to consider entries from when applying this model.")
+    past_months_limit = fields.Integer(string="Search Months Limit", default=18, help="Number of months in the past to consider entries from when applying this model.")
 
     decimal_separator = fields.Char(default=lambda self: self.env['res.lang']._lang_get(self.env.user.lang).decimal_point, help="Every character that is nor a digit nor this separator will be removed from the matching string")
     show_decimal_separator = fields.Boolean(compute='_compute_show_decimal_separator', help="Technical field to decide if we should show the decimal separator for the regex matching field.")
