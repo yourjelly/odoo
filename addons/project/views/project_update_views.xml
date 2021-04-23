@@ -83,11 +83,25 @@
         </field>
     </record>
 
+    <record id="project_update_view_tree" model="ir.ui.view">
+        <field name="name">project.update.view.tree</field>
+        <field name="model">project.update</field>
+        <field name="arch" type="xml">
+            <tree sample="1" js_class="project_update_list">
+                <field name="name"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="status_id" widget="status_with_color" options="{'no_open': 1, 'color_field': 'color'}"/>
+                <field name="progress_percentage" string="Progress" widget="percentage"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="project_update_all_action" model="ir.actions.act_window">
         <field name="name">Project Updates</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">project.update</field>
-        <field name="view_mode">kanban,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field name="context">{'search_default_project_id': active_id}</field>
         <field name="domain">[('project_id', '=', active_id)]</field>
         <field name="search_view_id" ref="project_update_view_search"/>

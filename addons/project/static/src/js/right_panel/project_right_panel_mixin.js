@@ -1,13 +1,8 @@
 /** @odoo-module **/
 
-import KanbanController from 'web.KanbanController';
-import KanbanRenderer from 'web.KanbanRenderer';
-import KanbanView from 'web.KanbanView';
 import { ComponentWrapper } from 'web.OwlCompatibility';
-import viewRegistry from 'web.view_registry';
-import ProjectRightSidePanel from '@project/js/components/project_right_panel';
 
-const ProjectUpdateKanbanRenderer = KanbanRenderer.extend({
+export const RightPanelRendererMixin = {
     /**
      * The rendering is asynchronous. The start
      * method simply makes sure that we render the view.
@@ -18,9 +13,9 @@ const ProjectUpdateKanbanRenderer = KanbanRenderer.extend({
         this.$el.addClass('o_renderer_with_rightpanel');
         await Promise.all([this._render(), this._super()]);
     },
-});
+};
 
-const ProjectUpdateKanbanController = KanbanController.extend({
+export const RightPanelControllerMixin = {
     init: function (parent, model, renderer, params) {
         this._super.apply(this, arguments);
         this.rightSidePanel = params.rightSidePanel;
@@ -40,15 +35,10 @@ const ProjectUpdateKanbanController = KanbanController.extend({
         this._rightPanelWrapper.update(this.rightSidePanel.props);
         await this._super.apply(this, arguments);
     }
-});
+};
 
-export const ProjectUpdateKanbanView = KanbanView.extend({
+export const RightPanelViewMixin = {
     searchMenuTypes: ['filter', 'favorite'],
-    config: _.extend({}, KanbanView.prototype.config, {
-        Controller: ProjectUpdateKanbanController,
-        Renderer: ProjectUpdateKanbanRenderer,
-        RightSidePanel: ProjectRightSidePanel,
-    }),
     _createSearchModel: function (params) {
         const result = this._super.apply(this, arguments);
         const props = {
@@ -60,6 +50,4 @@ export const ProjectUpdateKanbanView = KanbanView.extend({
         };
         return result;
     }
-});
-
-viewRegistry.add('project_update_kanban', ProjectUpdateKanbanView);
+};

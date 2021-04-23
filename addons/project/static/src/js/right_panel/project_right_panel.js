@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { AddMilestone, OpenMilestone } from '@project/js/components/project_utils';
+import { AddMilestone, OpenMilestone } from '@project/js/right_panel/project_utils';
 const { useState } = owl.hooks;
 
 export default class ProjectRightPanel extends owl.Component {
