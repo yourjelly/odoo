@@ -29,7 +29,7 @@
                             <field name="user_id" readonly="1"/>
                             <field name="status_id" widget="status_with_color" domain="[('project_ids','=', project_id)]"
                                    context="{'default_project_id': project_id}" options="{'no_open': 1, 'no_create': 1, 'color_field': 'color'}"/>
-                            <field name="progress" widget="progressbar" options="{'current_value': 'progress', 'max_value': '100', 'editable': true}"/>
+                            <field name="progress" widget="basic_progressbar" options="{'drag_and_drop': 1}"/>
                         </group>
                         <group>
                             <field name="date"/>
@@ -68,7 +68,7 @@
                                     <b><field name="status_id" widget="status_with_color" options="{'no_open': 1, 'color_field': 'color'}"/></b>
                                 </div>
                                 <div class="col-lg-2 mx-2">
-                                    <b><field name="progress_percentage" widget="percentage"/></b>
+                                    <b><field name="progress" widget="basic_progressbar" options="{'drag_and_drop': 1}"/></b>
                                     <div>Progress</div>
                                 </div>
                                 <div class="col-lg-2 mx-2">
@@ -91,7 +91,7 @@
                 <field name="name"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="status_id" widget="status_with_color" options="{'no_open': 1, 'color_field': 'color'}"/>
-                <field name="progress_percentage" string="Progress" widget="percentage"/>
+                <field name="progress" string="Progress" widget="basic_progressbar" options="{'drag_and_drop': 1}"/>
                 <field name="date"/>
             </tree>
         </field>
