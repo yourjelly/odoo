@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
+from odoo.exceptions import UserError
 
 
 @tagged('post_install', '-at_install')
@@ -212,8 +213,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             FROM account_account_tag_account_move_line_rel rel
             JOIN account_move_line line ON line.id = rel.account_move_line_id
             WHERE line.tax_exigible IS TRUE
+              AND line.company_id = %(company_id)s
             GROUP BY rel.account_account_tag_id
-        ''')
+        ''', {
+            'company_id': self.env.company.id,
+        })
 
         for tag_id, total_balance in self.cr.fetchall():
             tag, expected_balance = expected_values[tag_id]
@@ -1534,8 +1538,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         self.assertAmountsGroupByAccount([
             # Account                               Balance     Amount Currency
-            (self.cash_basis_transfer_account,      0.0,        0.0),
-            (self.tax_account_1,                    -33.33,     -100.0),
+            (self.cash_basis_transfer_account,      -16.67,        0.0),
+            (self.tax_account_1,                    -16.66,     -100.0),
         ])
 
     def test_reconcile_cash_basis_exchange_difference_transfer_account_check_entries_2(self):
@@ -1621,8 +1625,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         self.assertAmountsGroupByAccount([
             # Account                               Balance     Amount Currency
-            (self.cash_basis_transfer_account,      0.0,        0.0),
-            (self.tax_account_1,                    -20.0,      -10.0),
+            (self.cash_basis_transfer_account,      5.0,        0.0),
+            (self.tax_account_1,                    -25.0,      -10.0),
         ])
 
     def test_reconcile_cash_basis_exchange_difference_transfer_account_check_entries_3(self):
@@ -2148,3 +2152,37 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             ._create_payments()
 
         bill.button_draft()
+
+    def test_draft_reconciliation(self):
+        def filter(line):
+            return line.account_id == self.company_data['default_account_receivable']
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'line_ids': [
+                (0, 0, {
+                    'account_id': self.company_data['default_account_expense'].id,
+                    'debit': 100,
+                    'name': 'Accrual',
+                }),
+                (0, 0, {
+                    'account_id': self.company_data['default_account_receivable'].id,
+                    'credit': 100,
+                    'name': 'Accrual',
+                }),
+            ]
+        })
+        reverse = move._reverse_moves()
+        lines = (move + reverse).line_ids.filtered(filter)
+        self.assertFalse(lines.matched_debit_ids)
+        lines.reconcile()
+        self.assertTrue(lines.matched_debit_ids)
+        self.assertFalse(lines.matched_debit_ids.full_reconcile_id)
+        move.action_post()
+        self.assertFalse(lines.matched_debit_ids.full_reconcile_id)
+        reverse.action_post()
+        self.assertTrue(lines.matched_debit_ids.full_reconcile_id)
+        reverse.button_draft()
+        self.assertFalse(lines.matched_debit_ids)
+        lines.reconcile()
+        with self.assertRaises(UserError):
+            reverse.line_ids.filtered(filter).account_id = self.company_data['default_account_payable']

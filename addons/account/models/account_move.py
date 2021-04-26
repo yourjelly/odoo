@@ -2510,6 +2510,11 @@ class AccountMove(models.Model):
         for partner, count in supplier_count.items():
             (partner | partner.commercial_partner_id)._increase_rank('supplier_rank', count)
 
+        for line in self.line_ids:
+            partials = line.matched_debit_ids or line.matched_credit_ids
+            if partials and not partials.full_reconcile_id:
+                line._create_full_reconcile()
+
         # Trigger action for paid invoices in amount is zero
         to_post.filtered(
             lambda m: m.is_invoice(include_receipts=True) and m.currency_id.is_zero(m.amount_total)
@@ -4573,8 +4578,6 @@ class AccountMoveLine(models.Model):
             if not line.account_id.reconcile and line.account_id.internal_type != 'liquidity':
                 raise UserError(_("Account %s does not allow reconciliation. First change the configuration of this account to allow it.")
                                 % line.account_id.display_name)
-            if line.move_id.state != 'posted':
-                raise UserError(_('You can only reconcile posted entries.'))
             if company is None:
                 company = line.company_id
             elif line.company_id != company:
@@ -4586,19 +4589,9 @@ class AccountMoveLine(models.Model):
                 raise UserError(_("Entries are not from the same account: %s != %s")
                                 % (account.display_name, line.account_id.display_name))
 
-        sorted_lines = self.sorted(key=lambda line: (line.date_maturity or line.date, line.currency_id))
-
         # ==== Collect all involved lines through the existing reconciliation ====
 
-        involved_lines = sorted_lines
-        involved_partials = self.env['account.partial.reconcile']
-        current_lines = involved_lines
-        current_partials = involved_partials
-        while current_lines:
-            current_partials = (current_lines.matched_debit_ids + current_lines.matched_credit_ids) - current_partials
-            involved_partials += current_partials
-            current_lines = (current_partials.debit_move_id + current_partials.credit_move_id) - current_lines
-            involved_lines += current_lines
+        sorted_lines, involved_lines = self._get_involved_in_reconciliation()
 
         # ==== Create partials ====
 
@@ -4606,7 +4599,6 @@ class AccountMoveLine(models.Model):
 
         # Track newly created partials.
         results['partials'] = partials
-        involved_partials += partials
 
         # ==== Create entries for cash basis taxes ====
 
@@ -4615,14 +4607,50 @@ class AccountMoveLine(models.Model):
             tax_cash_basis_moves = partials._create_tax_cash_basis_moves()
             results['tax_cash_basis_moves'] = tax_cash_basis_moves
 
-        # ==== Check if a full reconcile is needed ====
+        # ==== Create full reconcile if needed ====
 
-        if involved_lines[0].currency_id and all(line.currency_id == involved_lines[0].currency_id for line in involved_lines):
+        full_reconcile = self._create_full_reconcile(involved_lines)
+        if full_reconcile:
+            results['full_reconcile'] = full_reconcile
+            exchange_move_lines = full_reconcile.exchange_move_id.line_ids.filtered(lambda line: line.account_id == account)
+            results['partials'] += exchange_move_lines.matched_debit_ids + exchange_move_lines.matched_credit_ids
+
+        # Trigger action for paid invoices
+        not_paid_invoices\
+            .filtered(lambda move: move.payment_state in ('paid', 'in_payment'))\
+            .action_invoice_paid()
+
+        return results
+
+    def _get_involved_in_reconciliation(self):
+        sorted_lines = self.sorted(lambda line: (line.date_maturity or line.date, line.currency_id))
+        involved_lines = sorted_lines
+        current_lines = involved_lines
+        current_partials = self.env['account.partial.reconcile']
+        while current_lines:
+            current_partials = (
+                current_lines.matched_debit_ids
+                + current_lines.matched_credit_ids
+                - current_partials
+            )
+            current_lines = (
+                current_partials.debit_move_id
+                + current_partials.credit_move_id
+                - current_lines
+            )
+            involved_lines += current_lines
+        return sorted_lines, involved_lines
+
+    def _create_full_reconcile(self, involved_lines=None):
+        if involved_lines is None:
+            involved_lines = self._get_involved_in_reconciliation()[1]
+        involved_partials = involved_lines.matched_debit_ids + involved_lines.matched_credit_ids
+        if involved_lines[0].currency_id and len(involved_lines.currency_id) == 1:
             is_full_needed = all(line.currency_id.is_zero(line.amount_residual_currency) for line in involved_lines)
         else:
             is_full_needed = all(line.company_currency_id.is_zero(line.amount_residual) for line in involved_lines)
 
-        if is_full_needed:
+        if is_full_needed and set(involved_lines.move_id.mapped('state')) == {'posted'}:
 
             # ==== Create the exchange difference move ====
 
@@ -4631,7 +4659,9 @@ class AccountMoveLine(models.Model):
             else:
                 exchange_move = involved_lines._create_exchange_difference_move()
                 if exchange_move:
-                    exchange_move_lines = exchange_move.line_ids.filtered(lambda line: line.account_id == account)
+                    exchange_move_lines = exchange_move.line_ids.filtered(
+                        lambda line: line.account_id == involved_lines.account_id
+                    )
 
                     # Track newly created lines.
                     involved_lines += exchange_move_lines
@@ -4640,24 +4670,16 @@ class AccountMoveLine(models.Model):
                     exchange_diff_partials = exchange_move_lines.matched_debit_ids \
                                              + exchange_move_lines.matched_credit_ids
                     involved_partials += exchange_diff_partials
-                    results['partials'] += exchange_diff_partials
 
                     exchange_move._post(soft=False)
 
             # ==== Create the full reconcile ====
 
-            results['full_reconcile'] = self.env['account.full.reconcile'].create({
+            return self.env['account.full.reconcile'].create({
                 'exchange_move_id': exchange_move and exchange_move.id,
                 'partial_reconcile_ids': [(6, 0, involved_partials.ids)],
                 'reconciled_line_ids': [(6, 0, involved_lines.ids)],
             })
-
-        # Trigger action for paid invoices
-        not_paid_invoices\
-            .filtered(lambda move: move.payment_state in ('paid', 'in_payment'))\
-            .action_invoice_paid()
-
-        return results
 
     def remove_move_reconcile(self):
         """ Undo a reconciliation """
