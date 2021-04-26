@@ -30,9 +30,11 @@ setup/win32/static/less/
 setup/win32/static/wkhtmltopdf/
 setup/win32/static/postgresql*.exe
 
-# web
-addons/web/node_modules/
-addons/web/package-lock.json
+# js tooling
+node_modules
+package-lock.json
+package.json
+.husky
 
 # various virtualenv
 /bin/
