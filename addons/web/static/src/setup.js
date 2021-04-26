@@ -7,7 +7,15 @@ import { legacySetupProm } from "./legacy/legacy_setup";
 const { mount, utils } = owl;
 const { whenReady } = utils;
 
-export async function startWebClient(webclient) {
+/**
+ * Function to start a webclient. 
+ * It is used both in community and enterprise in main.js. 
+ * It's meant to be webclient flexible so we can have a subclass of
+ * webclient in enterprise with added features.
+ * 
+ * @param {owl.Component} Webclient 
+ */
+export async function startWebClient (Webclient) {
   // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
   const sessionInfo = odoo.session_info;
   odoo.info = {
@@ -25,7 +33,7 @@ export async function startWebClient(webclient) {
   await whenReady();
   const legacyEnv = await legacySetupProm;
   mapLegacyEnvToWowlEnv(legacyEnv, env);
-  const root = await mount(webclient, { env, target: document.body, position: "self" });
+  const root = await mount(Webclient, { env, target: document.body, position: "self" });
   delete odoo.debug;
   odoo.__WOWL_DEBUG__ = { root };
 }
