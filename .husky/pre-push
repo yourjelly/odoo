@@ -42,6 +42,9 @@ ask_confirmation(){
     read -n 1 -r < /dev/tty
     echo -en "\033[0m"
 
+
+
+
     echo
         if echo $REPLY | grep -E '^[Yy]$' > /dev/null; then
             exit 0 # push will execute
