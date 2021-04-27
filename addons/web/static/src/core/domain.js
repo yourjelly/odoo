@@ -168,60 +168,92 @@ function normalizeDomainAST(domain, op = "&") {
 }
 
 /**
+ * @param {Object} record
+ * @param {Condition | boolean} condition
+ * @returns {boolean}
+ */
+function matchCondition(record, condition) {
+  if (typeof condition === "boolean") {
+    return condition;
+  }
+  const [field, operator, value] = condition;
+  const fieldValue = typeof field === "number" ? field : record[field];
+  switch (operator) {
+    case "=":
+    case "==":
+      return fieldValue === value;
+    case "!=":
+    case "<>":
+      return fieldValue !== value;
+    case "<":
+      return fieldValue < value;
+    case "<=":
+      return fieldValue <= value;
+    case ">":
+      return fieldValue > value;
+    case ">=":
+      return fieldValue >= value;
+    case "in":
+      if (Array.isArray(fieldValue)) {
+        return fieldValue.some((fv) => value.includes(fv));
+      }
+      return value.includes(fieldValue);
+    case "not in":
+      if (Array.isArray(fieldValue)) {
+        return !fieldValue.some((fv) => value.includes(fv));
+      }
+      return !value.includes(fieldValue);
+    case "like":
+      return fieldValue.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+    case "=like":
+      return new RegExp(
+        value
+          .toLowerCase()
+          .replace(/([.[]\{\}\+\*])/g, "\\$1")
+          .replace(/%/g, ".*")
+      ).test(fieldValue.toLowerCase());
+    case "ilike":
+      return fieldValue.indexOf(value) >= 0;
+    case "=ilike":
+      return new RegExp(value.replace(/%/g, ".*"), "i").test(fieldValue);
+  }
+  throw new Error("could not match domain");
+}
+
+/**
+ * @param {Object} record
+ * @returns {Object}
+ */
+function makeOperators(record) {
+  const match = matchCondition.bind(null, record);
+  return {
+    "!": (x) => !match(x),
+    "&": (a, b) => match(a) && match(b),
+    "|": (a, b) => match(a) || match(b),
+  };
+}
+
+/**
  *
- * @param {*} record
- * @param {*} domain
+ * @param {Object} record
+ * @param {DomainListRepr} domain
+ * @returns {boolean}
  */
 function matchDomain(record, domain) {
   if (domain.length === 0) {
     return true;
   }
-  switch (domain[0]) {
-    case "!":
-      return !matchDomain(record, domain.slice(1));
-    case "&":
-      return matchDomain(record, domain.slice(1, 2)) && matchDomain(record, domain.slice(2));
-    case "|":
-      return matchDomain(record, domain.slice(1, 2)) || matchDomain(record, domain.slice(2));
-    default:
-      const condition = domain[0];
-      const field = condition[0];
-      const fieldValue = typeof field === "number" ? field : record[field];
-      const value = condition[2];
-      switch (condition[1]) {
-        case "=":
-        case "==":
-          return fieldValue === value;
-        case "!=":
-        case "<>":
-          return fieldValue !== value;
-        case "<":
-          return fieldValue < value;
-        case "<=":
-          return fieldValue <= value;
-        case ">":
-          return fieldValue > value;
-        case ">=":
-          return fieldValue >= value;
-        case "in":
-          return value.includes(fieldValue);
-        case "not in":
-          return !value.includes(fieldValue);
-        case "like":
-          return fieldValue.toLowerCase().indexOf(value.toLowerCase()) >= 0;
-        case "=like":
-          const regExp = new RegExp(
-            value
-              .toLowerCase()
-              .replace(/([.\[\]\{\}\+\*])/g, "\\$1")
-              .replace(/%/g, ".*")
-          );
-          return regExp.test(fieldValue.toLowerCase());
-        case "ilike":
-          return fieldValue.indexOf(value) >= 0;
-        case "=ilike":
-          return new RegExp(value.replace(/%/g, ".*"), "i").test(fieldValue);
-      }
+  const operators = makeOperators(record);
+  const reversedDomain = Array.from(domain).reverse();
+  const condStack = [];
+  for (const item of reversedDomain) {
+    if (item in operators) {
+      const operator = operators[item];
+      const operands = condStack.splice(-operator.length);
+      condStack.push(operator(...operands));
+    } else {
+      condStack.push(item);
+    }
   }
-  throw new Error("could not match domain");
+  return matchCondition(record, condStack.pop());
 }
