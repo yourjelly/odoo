@@ -16,12 +16,12 @@ export function objectToUrlEncodedString(obj) {
 }
 
 /**
- * @param {string} [origin] if not given, defaults to the actual location origin
- * @returns {Object} with keys
- *   - origin: sanitized given origin, or actual origin
- *   - url: function to build complete urls based on a route and params
+ * Gets the origin url of the page, or cleans a given one
+ *
+ * @param {string} [origin]: a given origin url
+ * @return {string} a cleaned origin url
  */
-export function urlBuilder(origin) {
+export function getOrigin(origin) {
   if (origin) {
     // remove trailing slashes
     origin = origin.replace(/\/+$/, "");
@@ -29,19 +29,28 @@ export function urlBuilder(origin) {
     const { host, protocol } = browser.location;
     origin = `${protocol}//${host}`;
   }
+  return origin;
+}
 
-  function url(route, params) {
-    params = params || {};
-    let queryString = objectToUrlEncodedString(params);
-    queryString = queryString.length > 0 ? `?${queryString}` : queryString;
-
-    // Compare the wanted url against the current origin
-    let prefix = ["http://", "https://", "//"].some(
-      (el) => route.length >= el.length && route.slice(0, el.length) === el
-    );
-    prefix = prefix ? "" : origin;
-    return `${prefix}${route}${queryString}`;
+/**
+ * @param {string} route: the relative route, or absolute in the case of cors urls
+ * @param {object} [queryParams]: parameters to be appended as the url's queryString
+ * @param {object} [options]
+ * @param {string} [options.origin]: a precomputed origin
+ */
+export function url(route, queryParams, options={}) {
+  const origin = getOrigin(options.origin);
+  if (!route) {
+    return origin;
   }
 
-  return { origin, url };
+  let queryString = objectToUrlEncodedString(queryParams || {});
+  queryString = queryString.length > 0 ? `?${queryString}` : queryString;
+
+  // Compare the wanted url against the current origin
+  let prefix = ["http://", "https://", "//"].some(
+    (el) => route.length >= el.length && route.slice(0, el.length) === el
+  );
+  prefix = prefix ? "" : origin;
+  return `${prefix}${route}${queryString}`;
 }
