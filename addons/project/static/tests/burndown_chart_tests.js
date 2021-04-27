@@ -1,7 +1,7 @@
 /** @odoo-module alias=project.BurndownView */
 import { dom, createView, nextTick } from 'web.test_utils';
 import { COLORS, hexToRGBA } from 'web/static/src/js/views/graph/graph_utils';
-import { BurndownChartView } from '../src/js/burndown_chart/view';
+import { BurndownChartView } from 'project.BurndownChartView';
 
 QUnit.module('Project', {}, function () {
     QUnit.module('Views', {
