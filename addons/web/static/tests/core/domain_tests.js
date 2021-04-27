@@ -68,6 +68,21 @@ QUnit.module("domain", {}, () => {
     assert.ok(new Domain(currentDomain).contains({ ...record, member_ids: 3 }));
   });
 
+  QUnit.test("and", function (assert) {
+    const domain = new Domain([
+      "&",
+      "&",
+      ["a", "=", 1],
+      ["b", "=", 2],
+      ["c", "=", 3]
+    ]);
+
+    assert.ok(domain.contains({ a: 1, b: 2, c: 3 }));
+    assert.notOk(domain.contains({ a: -1, b: 2, c: 3 }));
+    assert.notOk(domain.contains({ a: 1, b: -1, c: 3 }));
+    assert.notOk(domain.contains({ a: 1, b: 2, c: -1 }));
+  });
+
   QUnit.test("not", function (assert) {
     const record = {
       a: 5,
@@ -75,6 +90,22 @@ QUnit.module("domain", {}, () => {
     };
     assert.ok(new Domain(["!", ["a", "=", 3]]).contains(record));
     assert.ok(new Domain(["!", ["group_method", "=", "count"]]).contains(record));
+  });
+
+  QUnit.test("complex domain", function (assert) {
+    const domain = new Domain([
+      "&",
+        "!",
+          ["a", "=", 1],
+        "|",
+          ["a", "=", 2],
+          ["a", "=", 3],
+    ]);
+
+    assert.notOk(domain.contains({ a: 1 }));
+    assert.ok(domain.contains({ a: 2 }));
+    assert.ok(domain.contains({ a: 3 }));
+    assert.notOk(domain.contains({ a: 4 }));
   });
 
   QUnit.test("toList", function (assert) {
@@ -153,9 +184,13 @@ QUnit.module("domain", {}, () => {
 
   QUnit.test("other operators", function (assert) {
     assert.ok(new Domain([["a", "in", [1, 2, 3]]]).contains({ a: 3 }));
+    assert.ok(new Domain([["a", "in", [1, 2, 3]]]).contains({ a: [3] }));
     assert.notOk(new Domain([["a", "in", [1, 2, 3]]]).contains({ a: 5 }));
+    assert.notOk(new Domain([["a", "in", [1, 2, 3]]]).contains({ a: [5] }));
     assert.notOk(new Domain([["a", "not in", [1, 2, 3]]]).contains({ a: 3 }));
+    assert.notOk(new Domain([["a", "not in", [1, 2, 3]]]).contains({ a: [3] }));
     assert.ok(new Domain([["a", "not in", [1, 2, 3]]]).contains({ a: 5 }));
+    assert.ok(new Domain([["a", "not in", [1, 2, 3]]]).contains({ a: [5] }));
     assert.ok(new Domain([["a", "like", "abc"]]).contains({ a: "abc" }));
     assert.notOk(new Domain([["a", "like", "abc"]]).contains({ a: "def" }));
     assert.ok(new Domain([["a", "=like", "abc"]]).contains({ a: "abc" }));
