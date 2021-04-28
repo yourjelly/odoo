@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Called by "git push" after it has checked the remote status,
 # but before anything has been pushed.
@@ -35,10 +35,8 @@ is_destructive='force|delete|\-f'
 will_remove_protected_branch=':'$protected_branch
 
 ask_confirmation(){
-    echo "\033[1;31m[Policy] Are you sure you want to force push or delete the '$protected_branch' branch? [y|n] \033[0m"
-    echo "\033[1m"
+    echo "[Policy] Are you sure you want to force push or delete the '$protected_branch' branch? [y|n]"
     read -n 1 -r < /dev/tty
-    echo "\033[0m"
 
     echo
         if echo $REPLY | grep -E '^[Yy]$' > /dev/null; then
