@@ -1,11 +1,14 @@
 #!/bin/sh
 
-cp -r _husky ../../../.husky
-cp  _eslintignore ../../../.eslintignore
-cp  _prettierignore ../../../.prettierignore
-cp  _eslintrc.json ../../../.eslintrc.json
-cp  _prettierrc.json ../../../.prettierrc.json
-cp  _package.json ../../../package.json
+script="$0"
+basename="$(dirname $script)"
+
+cp -r $basename/_husky  $basename/../../../.husky
+cp  $basename/_eslintignore  $basename/../../../.eslintignore
+cp  $basename/_prettierignore  $basename/../../../.prettierignore
+cp  $basename/_eslintrc.json  $basename/../../../.eslintrc.json
+cp  $basename/_prettierrc.json  $basename/../../../.prettierrc.json
+cp  $basename/_package.json  $basename/../../../package.json
 
 npm install
 
