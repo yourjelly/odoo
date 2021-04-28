@@ -1367,7 +1367,12 @@ class StockMove(models.Model):
                     available_quantity = move._get_available_quantity(move.location_id, package_id=forced_package_id)
                     if available_quantity <= 0:
                         continue
-                    taken_quantity = move._update_reserved_quantity(need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
+                    if self.env.context.get('qty_to_reserve'):
+                        # specific amount to reserve (e.g. from reception report)
+                        updated_need = min(need, self.env.context.get('qty_to_reserve').get(move, need))
+                        taken_quantity = move._update_reserved_quantity(updated_need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
+                    else:
+                        taken_quantity = move._update_reserved_quantity(need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
                     if float_is_zero(taken_quantity, precision_rounding=rounding):
                         continue
                     if float_compare(need, taken_quantity, precision_rounding=rounding) == 0:

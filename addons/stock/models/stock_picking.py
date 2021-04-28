@@ -935,6 +935,11 @@ class Picking(models.Model):
             pickings_to_backorder = self
         pickings_not_to_backorder.with_context(cancel_backorder=True)._action_done()
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
+
+        if self.user_has_groups('stock.group_auto_reception_report') and self.filtered(lambda p: p.picking_type_id.code == 'incoming'):
+            action = self.action_view_reception_report()
+            action['context'] = {'default_picking_ids': self.ids}
+            return action
         return True
 
     def action_set_quantities_to_reservation(self):
@@ -1379,6 +1384,10 @@ class Picking(models.Model):
         ]
         action['context'] = self.env.context
         action['domain'] = [('picking_id', 'in', self.ids)]
+        return action
+
+    def action_view_reception_report(self):
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.stock_reception_action")
         return action
 
     def _attach_sign(self):

@@ -1173,3 +1173,286 @@ class TestReports(TestReportsCommon):
         self.assertEqual(lines[1]['document_out'].id, delivery_at_confirm.id)
         self.assertEqual(lines[2]['document_out'].id, delivery_by_date_priority.id)
         self.assertEqual(lines[3]['document_out'].id, delivery_manual.id)
+
+    def test_report_reception_1_one_receipt(self):
+        """ Create 2 deliveries and 1 receipt where some of the products being received
+        can be reserved for the deliveries. Check that the reception report correctly
+        shows these corresponding potential allocations + correctly reserves incoming moves
+        when reserve button is pushed.
+        """
+
+        # make sure incoming moves don't auto-reserve when done
+        picking_type_manual = self.picking_type_out.copy()
+        picking_type_manual.reservation_method = 'manual'
+        picking_type_manual.sequence_code = "MANUAL"
+
+        product2 = self.env['product.product'].create({
+            'name': 'Extra Product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_all').id,
+        })
+
+        product3 = self.env['product.product'].create({
+            'name': 'Unpopular Product',
+            'type': 'product',
+            'categ_id': self.env.ref('product.product_category_all').id,
+        })
+
+        # Creates some deliveries for reception report to match against
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        delivery_form.partner_id = self.partner
+        delivery_form.picking_type_id = picking_type_manual
+        with delivery_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 5
+        with delivery_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = product2
+            move_line.product_uom_qty = 10
+        delivery1 = delivery_form.save()
+        delivery1.action_confirm()
+
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        delivery_form.partner_id = self.partner
+        delivery_form.picking_type_id = picking_type_manual
+        with delivery_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 2
+        delivery2 = delivery_form.save()
+        delivery2.action_confirm()
+
+        # Create a receipt
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        receipt_form.partner_id = self.partner
+        receipt_form.picking_type_id = self.picking_type_in
+        with receipt_form.move_ids_without_package.new() as move_line:
+            # incoming qty greater than total (2 moves) outgoing amount => 2 report lines, each = outgoing qty
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 15
+        with receipt_form.move_ids_without_package.new() as move_line:
+            # outgoing qty greater than incoming amount => report line = incoming qty
+            move_line.product_id = product2
+            move_line.product_uom_qty = 5
+        with receipt_form.move_ids_without_package.new() as move_line:
+            # not outgoing => shouldn't appear in report
+            move_line.product_id = product3
+            move_line.product_uom_qty = 5
+        receipt = receipt_form.save()
+
+        # check that reception report has correct number of deliveries/outgoing moves
+        # and doesn't think the quantities are available for reservation yet
+        report = self.env['report.stock.report_reception']
+        report_values = report._get_report_values(docids=[receipt.id])
+        sources_to_lines = report_values['sources_to_lines']
+        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
+        self.assertEqual(len(sources_to_lines), 2, "The report has wrong number of outgoing pickings.")
+        all_lines = []
+        for dummy, lines in sources_to_lines.items():
+            for line in lines:
+                self.assertFalse(line['is_qty_available'], "The receipt IS NOT done => its move quantities ARE NOT available to reserve (i.e. done).")
+                all_lines.append(line)
+        self.assertEqual(len(all_lines), 3, "The report has wrong number of outgoing moves.")
+        # we expect this order based on move creation
+        self.assertEqual(all_lines[0]['quantity'], 5, "The first move has wrong incoming qty.")
+        self.assertEqual(all_lines[0]['product']['id'], self.product.id, "The first move has wrong incoming product to reserve.")
+        self.assertEqual(all_lines[1]['quantity'], 5, "The second move has wrong incoming qty.")
+        self.assertEqual(all_lines[1]['product']['id'], product2.id, "The second move has wrong incoming product to reserve.")
+        self.assertEqual(all_lines[2]['quantity'], 2, "The last move has wrong incoming qty.")
+        self.assertEqual(all_lines[2]['product']['id'], self.product.id, "The third move has wrong incoming product to reserve.")
+
+        # check that report correctly realizes outgoing moves can be reserved when receipt is done
+        receipt.action_confirm()
+        for move in receipt.move_lines:
+            move.quantity_done = move.product_uom_qty
+        receipt.button_validate()
+        report_values = report._get_report_values(docids=[receipt.id])
+
+        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 3, "The receipt IS done => all corresponding outgoing pickings + 'all_sources' have reservable moves.")
+        sources_to_lines = report_values['sources_to_lines']
+        all_lines = []
+        move_ids = []
+        qtys = []
+        for dummy, lines in sources_to_lines.items():
+            for line in lines:
+                self.assertTrue(line['is_qty_available'], "The receipt IS done => its move quantities ARE available to reserve (i.e. done).")
+                all_lines.append(line)
+                move_ids.append(line['move_out'].id)
+                qtys.append(line['quantity'])
+        # line quantities depends on done vs not done incoming quantities => we need to check values again after done
+        # (makes more sense when report for multiple incoming pickings)
+        self.assertEqual(len(all_lines), 3, "The report has wrong number of outgoing moves.")
+        self.assertEqual(all_lines[0]['quantity'], 5, "The first move has wrong incoming qty to reserve.")
+        self.assertEqual(all_lines[0]['product']['id'], self.product.id, "The first move has wrong product to reserve.")
+        self.assertEqual(all_lines[1]['quantity'], 5, "The second move has wrong incoming qty to reserve.")
+        self.assertEqual(all_lines[1]['product']['id'], product2.id, "The second move has wrong product to reserve.")
+        self.assertEqual(all_lines[2]['quantity'], 2, "The last move has wrong incoming qty to reserve.")
+        self.assertEqual(all_lines[2]['product']['id'], self.product.id, "The third move has wrong product to reserve.")
+
+        # check that report reserve button works correctly
+        report.action_assign(move_ids, qtys, [receipt.id])
+        for move in (delivery1.move_lines | delivery2.move_lines):
+            if move.product_id != product2:
+                self.assertEqual(move.reserved_availability, move.product_uom_qty, "Demand qty should now be reserved.")
+            else:
+                # not enough incoming qty to reserve demand qty
+                self.assertEqual(move.reserved_availability, 5, "Part of demand qty should now be reserved.")
+
+    def test_report_reception_2_two_receipts(self):
+        """ Create 1 delivery and 2 receipts where the products being received
+        can be reserved for the delivery. Check that the reception report correctly
+        shows corresponding potential allocations when receipts have differing states.
+        """
+
+        # make sure incoming moves don't auto-reserve when done
+        picking_type_manual = self.picking_type_out.copy()
+        picking_type_manual.reservation_method = 'manual'
+        picking_type_manual.sequence_code = "MANUAL"
+
+        # Creates delivery for reception report to match against
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        delivery_form.partner_id = self.partner
+        delivery_form.picking_type_id = picking_type_manual
+        with delivery_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 100
+        delivery = delivery_form.save()
+        delivery.action_confirm()
+
+        # Create 2 receipts and check its reception report values
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        receipt_form.partner_id = self.partner
+        receipt_form.picking_type_id = self.picking_type_in
+        with receipt_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 5
+        receipt1 = receipt_form.save()
+
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        receipt_form.partner_id = self.partner
+        receipt_form.picking_type_id = self.picking_type_in
+        with receipt_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 3
+        receipt2 = receipt_form.save()
+
+        # check that report correctly merges not done incoming quantities
+        report = self.env['report.stock.report_reception']
+        report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
+        self.assertEqual(len(report_values['receipts']), 2, "There should be 2 receipts in this report")
+        sources_to_lines = report_values['sources_to_lines']
+        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
+        self.assertEqual(len(sources_to_lines), 1, "The report has wrong number of outgoing pickings.")
+        all_lines = list(sources_to_lines.values())[0]
+        self.assertEqual(len(all_lines), 1, "The report has wrong number of outgoing move lines.")
+        self.assertFalse(all_lines[0]['is_qty_available'], "The receipt IS NOT done => its move quantities ARE NOT available to reserve (i.e. done).")
+        self.assertEqual(all_lines[0]['quantity'], 8, "The move has wrong incoming qty.")
+
+        # check that report splits reservable and non-reservable quantities when 1 receipt is done and other isn't
+        receipt1.action_confirm()
+        for move in receipt1.move_lines:
+            move.quantity_done = move.product_uom_qty
+        receipt1.button_validate()
+        report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
+
+        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 2, "1 receipt is done => should have at least 1 reservable moves.")
+        sources_to_lines = report_values['sources_to_lines']
+        all_lines = list(sources_to_lines.values())[0]
+        # line quantities depends on done vs not done incoming quantities => should be 2 lines now
+        self.assertEqual(len(all_lines), 2, "The report has wrong number of lines (1 reserveable + 1 not).")
+        self.assertEqual(all_lines[0]['quantity'], 5, "The first move has wrong incoming qty to reserve.")
+        self.assertEqual(all_lines[1]['quantity'], 3, "The second move has wrong (expected) incoming qty.")
+
+    def test_report_reception_3_multiwarehouse(self):
+        """ Check that reception report respects same warehouse for
+        receipts and deliveries.
+        """
+        # Warehouse config.
+        wh_2 = self.env['stock.warehouse'].create({
+            'name': 'Other Warehouse',
+            'code': 'OTHER',
+        })
+        picking_type_out_2 = self.env['stock.picking.type'].search([
+            ('code', '=', 'outgoing'),
+            ('warehouse_id', '=', wh_2.id),
+        ])
+
+        # Creates delivery in warehouse2
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        delivery_form.partner_id = self.partner
+        delivery_form.picking_type_id = picking_type_out_2
+        with delivery_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 100
+        delivery = delivery_form.save()
+        delivery.action_confirm()
+
+        # Create a receipt in warehouse1
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        receipt_form.partner_id = self.partner
+        receipt_form.picking_type_id = self.picking_type_in
+        with receipt_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 15
+        receipt = receipt_form.save()
+
+        report = self.env['report.stock.report_reception']
+        report_values = report._get_report_values(docids=[receipt.id])
+        self.assertEqual(len(report_values['sources_to_lines']), 0, "The receipt and delivery are in different warehouses => no outgoing moves should be found.")
+
+    def test_report_reception_4_pick_pack(self):
+        """ Check that reception report ignores outgoing moves that
+        """
+
+        warehouse = self.env['stock.warehouse'].search([('lot_stock_id', '=', self.stock_location.id)], limit=1)
+        warehouse.write({'delivery_steps': 'pick_pack_ship'})
+
+        ship_move = self.env['stock.move'].create({
+            'name': 'The ship move',
+            'product_id': self.product.id,
+            'product_uom_qty': 5.0,
+            'product_uom': self.product.uom_id.id,
+            'location_id': warehouse.wh_output_stock_loc_id.id,
+            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            'warehouse_id': warehouse.id,
+            'picking_type_id': warehouse.out_type_id.id,
+            'procure_method': 'make_to_order',
+            'state': 'draft',
+        })
+
+        # create chained pick/pack moves to test with
+        ship_move._assign_picking()
+        ship_move._action_confirm()
+        pack_move = ship_move.move_orig_ids[0]
+        pick_move = pack_move.move_orig_ids[0]
+
+        self.assertEqual(pack_move.state, 'waiting', "Pack move wasn't created...")
+        self.assertEqual(pick_move.state, 'confirmed', "Pick move wasn't created...")
+
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
+        receipt_form.partner_id = self.partner
+        receipt_form.picking_type_id = self.picking_type_in
+        with receipt_form.move_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.product_uom_qty = 15
+        receipt = receipt_form.save()
+
+        report = self.env['report.stock.report_reception']
+        report_values = report._get_report_values(docids=[receipt.id])
+        self.assertEqual(len(report_values['sources_to_lines']), 1, "There should only be 1 line (pick move)")

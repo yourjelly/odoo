@@ -50,6 +50,9 @@ class StockPickingBatch(models.Model):
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type', check_company=True, copy=False,
         readonly=True, states={'draft': [('readonly', False)]})
+    picking_type_code = fields.Selection(
+        related='picking_type_id.code',
+        readonly=True)
     scheduled_date = fields.Datetime(
         'Scheduled Date', copy=False, store=True, readonly=False, compute="_compute_scheduled_date",
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -233,6 +236,11 @@ class StockPickingBatch(models.Model):
                 return res
             else:
                 raise UserError(_("Please add 'Done' quantities to the batch picking to create a new pack."))
+
+    def action_view_reception_report(self):
+        action = self.picking_ids[0].action_view_reception_report()
+        action['context'] = {'default_picking_ids': self.picking_ids.ids}
+        return action
 
     # -------------------------------------------------------------------------
     # Miscellaneous

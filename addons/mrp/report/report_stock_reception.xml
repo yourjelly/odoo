@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="mrp_report_reception_body" inherit_id="stock.report_reception_body">
+        <xpath expr="//a[@name='source_link']" position="before">
+            <i t-if="source._name == 'mrp.production' and source.priority == '1'" class="o_priority o_priority_star fa fa-star"/>
+        </xpath>
+    </template>
+</odoo>
