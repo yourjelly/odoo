@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_inventory_adjustment_name_form_view" model="ir.ui.view">
+        <field name="name">stock.inventory.adjustment.name.form.view</field>
+        <field name="model">stock.inventory.adjustment.name</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+                <div invisible="not context.get('quants_not_set_warning')" class="alert alert-warning" role="status">
+                    Warning: Some selected lines don't have any quantities set, they will be ignored.
+                </div>
+                <div>
+                    <group>
+                        <field name="inventory_adjustment_name" string="Inventory Reference"/>
+                    </group>
+                    <field name="message"/>
+                </div>
+                <footer>
+                    <button name="action_apply" string="Apply" type="object" class="btn-primary"/>
+                    <button name="cancel_button" string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
