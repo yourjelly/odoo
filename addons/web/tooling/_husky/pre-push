@@ -10,7 +10,6 @@
 # The commands below will not be allowed without confirmation...
 # `git push --force <remote> master-wowl`
 # `git push --delete <remote> master-wowl`
-# `git push <remote> :master-wowl`
 #
 # Nor will a force push while on the master branch be allowed...
 # `git co master-wowl`
@@ -32,8 +31,6 @@ push_command=$(ps -ocommand= -p $PPID)
 
 is_destructive='force|delete|\-f'
 
-will_remove_protected_branch=':'$protected_branch
-
 ask_confirmation(){
     echo "[Policy] Are you sure you want to force push or delete the '$protected_branch' branch? [y|n]"
     read -n 1 -r < /dev/tty
@@ -48,14 +45,6 @@ ask_confirmation(){
 }
 
 if [[ $push_command =~ $is_destructive ]] && [ $current_branch = $protected_branch ]; then
-  ask_confirmation
-fi
-
-if [[ $push_command =~ $is_destructive ]] && [[ $push_command =~ $protected_branch ]]; then
-  ask_confirmation
-fi
-
-if [[ $push_command =~ $will_remove_protected_branch ]]; then
   ask_confirmation
 fi
 
