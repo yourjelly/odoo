@@ -2,7 +2,21 @@
 
 const { onMounted, onPatched, onWillUnmount, useComponent } = owl.hooks;
 
-// TODO: better global explanation #TODODESCR
+/**
+ * This file contains various custom hooks.
+ * Their inner working is rather simple:
+ * Each custom hook simply hook itself to any number of owl lifecycle hooks.
+ * You can then use them just like an owl hook in any Component
+ * e.g.:
+ * import { useBus } from "@web/utils/hooks";
+ * ...
+ * setup() {
+ *    ...
+ *    useBus(someBus, someEvent, callback)
+ *    ...
+ * }
+ */
+
 // -----------------------------------------------------------------------------
 // Hook functions
 // -----------------------------------------------------------------------------

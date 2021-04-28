@@ -2,7 +2,20 @@
 
 import { formatFloat, humanNumber } from "./numbers";
 
-// #TODODESCR
+/**
+ * Formats a value as a currency.
+ *
+ * @param {number|false} value currency value number
+ * @param {string} cid currency id
+ * @param {Object} [options={}] formatting options
+ * @param {boolean} [options.noSymbol] this currency has not a sympbol
+ * @param {boolean} [options.humanReadable] this currency needs to be human readable
+ * @param {[number, number]} [options.digits]
+ *    the number of digits that should be used, instead of the default digits precision in the field.
+ *    Note: if the currency defines a precision, the currency's one is used.
+ *    The first number is always ignored (legacy constraint)
+ * @returns The formatted currency
+ */
 export function formatCurrency(value, cid, options = {}) {
   if (value === false) {
     return "";

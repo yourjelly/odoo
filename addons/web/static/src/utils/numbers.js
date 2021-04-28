@@ -47,7 +47,7 @@ function parseNumber(value, options = {}) {
 // -----------------------------------------------------------------------------
 
 /**
- * Formats a number into a string representing a float.
+ * Formats a number into a more readable string representing a float.
  *
  * @param {number|false} value
  * @param {Object} options additional options
@@ -71,7 +71,13 @@ export function formatFloat(value, options = {}) {
   return formatted.join(decimalPoint);
 }
 
-// #TODODESCR
+/**
+ * Parse a more readable formated string representing a float to a float
+ *
+ * @param {string} value the formatted number
+ * @returns float
+ * @throws Error if the value can't be parsed properly
+ */
 export function parseFloat(value) {
   let thousandsSepRegex = new RegExp(escapeRegExp(localization.thousandsSep), "g");
   let decimalPointRegex = new RegExp(escapeRegExp(localization.decimalPoint), "g");
@@ -85,7 +91,19 @@ export function parseFloat(value) {
   return parsed;
 }
 
-// #TODODESCR
+/**
+ * Format a number to a human readable format.
+ * By example, 3000 could become 3k. Or massive number can use the scientific exponential notation.
+ *
+ * @param {number} number to format
+ * @param {Object} [options] Options to format
+ * @param {number} [options.decimals=0] maximum number of decimals to use
+ * @param {number} [options.minDigits=1]
+ *    the minimum number of digits to preserve when switching to another
+ *    level of thousands (e.g. with a value of '2', 4321 will still be
+ *    represented as 4321 otherwise it will be down to one digit (4k))
+ * @returns string
+ */
 export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
   number = Math.round(number);
   const decimals = options.decimals || 0;
