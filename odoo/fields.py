@@ -3,6 +3,7 @@
 
 """ High-level objects for fields. """
 
+from babel import dates
 from collections import defaultdict
 from datetime import date, datetime, time
 from operator import attrgetter
@@ -27,6 +28,7 @@ from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
 from .tools.mimetypes import guess_mimetype
+from .tools.misc import get_lang
 
 from odoo.exceptions import CacheMiss
 
@@ -654,6 +656,18 @@ class Field(MetaField('DummyField', (object,), {})):
         Return whether the field may be used for grouping in :meth:`~odoo.models.BaseModel.read_group`.
         """
         return self.store and self.column_type
+
+    def _read_group_format_result(self, data: dict, gb: dict, env) -> list:
+        """
+        Formats the result of a call to :meth:`BaseModel._read_group` into a domain term.
+
+        :param dict data: the raw result of the call to :meth:`BaseModel._read_group`
+        :param dict gb: the groupby metainformation.
+        :returns: a list of one or more domain terms.
+        :rtype: list
+        """
+        value = data[gb['groupby']]
+        return [(gb['field'], '=', value)]
 
     #
     # Company-dependent fields
@@ -1832,6 +1846,40 @@ class Html(_String):
         return list(map(str, super().get_trans_terms(value)))
 
 
+def _read_group_format_result_datetime(self: Field, data: dict, gb: dict, env) -> list:
+    """
+    Serves as a proxy for formatting :meth:`BaseModel.read_group` for both Date and Datetime.
+    """
+    # /!\ this function mutates the data dict!
+    locale = get_lang(env).code
+    tzinfo = None
+    raw_value = data[gb['groupby']]
+    range_start = raw_value
+    range_end = raw_value + gb['interval']
+    # value from postgres is in local tz (so range is
+    # considered in local tz e.g. "day" is [00:00, 00:00[
+    # local rather than UTC which could be [11:00, 11:00]
+    # local) but domain and raw value should be in UTC
+    if gb['tz_convert']:
+        tzinfo = range_start.tzinfo
+        range_start = range_start.astimezone(pytz.utc)
+        # take into account possible hour change between start and end
+        range_end = tzinfo.localize(range_end.replace(tzinfo=None))
+        range_end = range_end.astimezone(pytz.utc)
+
+    range_start = self.to_string(range_start)
+    range_end = self.to_string(range_end)
+    fmt_func = getattr(dates, f"format_{self.type}")
+    label = fmt_func(raw_value, format=gb['display_format'], locale=locale)
+    # /!\
+    data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
+    return [
+        '&',
+        (gb['field'], '>=', range_start),
+        (gb['field'], '<', range_end),
+    ]
+
+
 class Date(Field):
     """ Encapsulates a python :class:`date <datetime.date>` object. """
     type = 'date'
@@ -1929,6 +1977,9 @@ class Date(Field):
         if not value:
             return ''
         return self.from_string(value)
+
+    def _read_group_format_result(self, data: dict, gb: dict, env) -> list:
+        return _read_group_format_result_datetime(self, data, gb, env)
 
 
 class Datetime(Field):
@@ -2034,6 +2085,9 @@ class Datetime(Field):
     def convert_to_display_name(self, value, record):
         assert record, 'Record expected'
         return Datetime.to_string(Datetime.context_timestamp(record, Datetime.from_string(value)))
+
+    def _read_group_format_result(self, data: dict, gb: dict, env) -> list:
+        return _read_group_format_result_datetime(self, data, gb, env)
 
 # http://initd.org/psycopg/docs/usage.html#binary-adaptation
 # Received data is returned as buffer (in Python 2) or memoryview (in Python 3).
@@ -2873,6 +2927,10 @@ class Many2one(_Relational):
             if ids0 is not None or not corecord.id:
                 ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
                 cache.set(corecord, invf, ids1)
+
+    def _read_group_format_result(self, data: dict, gb: dict, env) -> list:
+        value = data[gb['groupby']]
+        return [(gb['field'], '=', value[0])]
 
 
 class Many2oneReference(Integer):

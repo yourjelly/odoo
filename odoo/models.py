@@ -2246,8 +2246,8 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
         """
-            Helper method to format the data contained in the dictionary data by 
-            adding the domain corresponding to its values, the groupbys in the 
+            Helper method to format the data contained in the dictionary data by
+            adding the domain corresponding to its values, the groupbys in the
             context and by properly formatting the date/datetime values.
 
         :param data: a single group
@@ -2258,51 +2258,11 @@ class BaseModel(metaclass=MetaModel):
 
         sections = []
         for gb in annotated_groupbys:
-            ftype = gb['type']
+            field = self._fields.get(gb['field'])
             value = data[gb['groupby']]
-
-            # full domain for this groupby spec
-            d = None
             if value:
-                if ftype == 'many2one':
-                    value = value[0]
-                elif ftype in ('date', 'datetime'):
-                    locale = get_lang(self.env).code
-                    fmt = DEFAULT_SERVER_DATETIME_FORMAT if ftype == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
-                    tzinfo = None
-                    range_start = value
-                    range_end = value + gb['interval']
-                    # value from postgres is in local tz (so range is
-                    # considered in local tz e.g. "day" is [00:00, 00:00[
-                    # local rather than UTC which could be [11:00, 11:00]
-                    # local) but domain and raw value should be in UTC
-                    if gb['tz_convert']:
-                        tzinfo = range_start.tzinfo
-                        range_start = range_start.astimezone(pytz.utc)
-                        # take into account possible hour change between start and end
-                        range_end = tzinfo.localize(range_end.replace(tzinfo=None))
-                        range_end = range_end.astimezone(pytz.utc)
-
-                    range_start = range_start.strftime(fmt)
-                    range_end = range_end.strftime(fmt)
-                    if ftype == 'datetime':
-                        label = babel.dates.format_datetime(
-                            value, format=gb['display_format'],
-                            tzinfo=tzinfo, locale=locale
-                        )
-                    else:
-                        label = babel.dates.format_date(
-                            value, format=gb['display_format'],
-                            locale=locale
-                        )
-                    data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
-                    d = [
-                        '&',
-                        (gb['field'], '>=', range_start),
-                        (gb['field'], '<', range_end),
-                    ]
-
-            if d is None:
+                d = field._read_group_format_result(data, gb, self.env)
+            else:
                 d = [(gb['field'], '=', value)]
             sections.append(d)
         sections.append(domain)
