@@ -9,14 +9,14 @@ const { mount, utils } = owl;
 const { whenReady } = utils;
 
 /**
- * Function to start a webclient. 
- * It is used both in community and enterprise in main.js. 
+ * Function to start a webclient.
+ * It is used both in community and enterprise in main.js.
  * It's meant to be webclient flexible so we can have a subclass of
  * webclient in enterprise with added features.
- * 
- * @param {owl.Component} Webclient 
+ *
+ * @param {owl.Component} Webclient
  */
-export async function startWebClient (Webclient) {
+export async function startWebClient(Webclient) {
   // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)
   const sessionInfo = odoo.session_info;
   odoo.info = {
@@ -27,9 +27,11 @@ export async function startWebClient (Webclient) {
   odoo.isReady = false;
 
   // setup environment
-  const loadTemplates = odoo.loadTemplatesPromise.then(processTemplates);
   const env = makeEnv(odoo.debug);
-  const [_, templates] = await Promise.all([startServices(env), loadTemplates]);
+  const [, templates] = await Promise.all([
+    startServices(env),
+    odoo.loadTemplatesPromise.then(processTemplates),
+  ]);
   env.qweb.addTemplates(templates);
 
   // start web client
@@ -49,7 +51,7 @@ export async function startWebClient (Webclient) {
  * @param {String} templates
  * @returns {String} returns a strings containing only owl templates
  */
- export function processTemplates(templates) {
+export function processTemplates(templates) {
   // as we currently have two qweb engines (owl and legacy), owl templates are
   // flagged with attribute `owl="1"`. The following lines removes the 'owl'
   // attribute from the templates, so that it doesn't appear in the DOM. For now,
@@ -59,8 +61,8 @@ export async function startWebClient (Webclient) {
   const doc = new DOMParser().parseFromString(templates, "text/xml");
   const owlTemplates = [];
   for (let child of doc.querySelectorAll("templates > [owl]")) {
-      child.removeAttribute("owl");
-      owlTemplates.push(child.outerHTML);
+    child.removeAttribute("owl");
+    owlTemplates.push(child.outerHTML);
   }
   return `<templates> ${owlTemplates.join("\n")} </templates>`;
 }
