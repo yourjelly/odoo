@@ -1608,6 +1608,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :raise Invalid ArchitectureError: if there is view type other than form, tree, calendar, search etc defined on the structure
         """
         self.check_access_rights('read')
+        view_obj = self.env['ir.ui.view'].sudo()
 
         # find a view_id
         if not view_id:
@@ -1629,11 +1630,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
             if not view_id:
                 # otherwise try to find the lowest priority matching ir.ui.view
-                view_id = self.env['ir.ui.view'].default_view(self._name, view_type)
+                view_id = view_obj.default_view(self._name, view_type)
 
         node = self._fields_view_get(view_id, view_type)
         fields = self.env['ir.ui.view']._view_process(self, node)
-        view = self.env['ir.ui.view'].sudo().browse(view_id)
+        view = view_obj.browse(view_id)
 
         # Get the view arch and all other attributes describing the composition of the view
         result = {
