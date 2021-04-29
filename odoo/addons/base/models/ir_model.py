@@ -1895,7 +1895,6 @@ class IrModelData(models.Model):
         return [(xid.id, model_id_name[xid.model][xid.res_id] or xid.complete_name)
                 for xid in self]
 
-    # NEW V8 API
     @api.model
     @tools.ormcache('xmlid')
     def xmlid_lookup(self, xmlid):

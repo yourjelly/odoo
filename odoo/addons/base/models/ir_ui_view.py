@@ -390,15 +390,15 @@ actual arch.
             # the inherited node are now embeded in the view, we can validate those nodes only
             for node_check in tocheck:
                 # find the model of the node, by tracing field ancestors
-                model = self.env[self.model]
+                models = [ self.env[self.model] ]
                 parents = []
                 for field in node_check.iterancestors():
                     if field.tag in ('field','groupby'):
                         parents.append(field.attrib.get('name'))
                 while len(parents):
                     field = parents.pop(0)
-                    model = self.env[model._fields.get(field).comodel_name]
-                self._check_node(node_check, model)
+                    models.append( self.env[models[-1]._fields.get(field).comodel_name] )
+                self._check_node(node_check, models)
 
         return True
 
@@ -931,9 +931,15 @@ ORDER BY v.priority, v.id
                             not self._context.get(action, True) and is_base_model):
                         node.set(action, 'false')
 
-    def _has_fields(self, model, fields, node):
+    def _has_fields(self, models, fields, node):
+        # TODO: _has_fields is quite slow, don't retrieve _fields_view_get several times
         model_fields = None
         for name in fields:
+            model = models[-1]
+            if name.startswith('parent.'):
+                model = models[-2]
+                name = name[7:]
+
             field = model._fields.get(name)
             if not field:
                 model_fields = model_fields or model.fields_get(fields)
@@ -1121,24 +1127,24 @@ ORDER BY v.priority, v.id
         self._check_dropdown_menu(node)
         self._check_progress_bar(node)
 
-    def _check_node(self, node, model):
+    def _check_node(self, node, models):
         tag = node.tag
         if type(tag) is not str:
             return
         if hasattr(self, '_check_tag_' + tag):
-            getattr(self, '_check_tag_' + tag)(node, model)
+            getattr(self, '_check_tag_' + tag)(node, models[-1])
 
         # TODO: uncomment this WIP
-        self._validate_attrs(node, model)
+        self._validate_attrs(node, models)
 
-        newmodel = model
         if node.tag in ('field', 'groupby'):
             name = node.attrib.get('name')
-            field = model._fields.get(name)
+            field = models[-1]._fields.get(name)
             if field and field.comodel_name:
-                newmodel = self.env[field.comodel_name]
+                models = models.copy()
+                models.append( self.env[field.comodel_name] )
         for child in node:
-            self._check_node(child, newmodel)
+            self._check_node(child, models)
 
     #------------------------------------------------------
     # Validation tools
@@ -1169,27 +1175,28 @@ ORDER BY v.priority, v.id
     def _att_list(self, name):
         return [name, 't-att-%s' % name, 't-attf-%s' % name]
 
-    def _validate_attrs(self, node, model):
+    def _validate_attrs(self, node, models):
+        model = models[-1]
         """ Generic validation of node attrs. """
         for attr, expr in node.items():
             if attr == 'domain':
+                # TODO: this seems very slow
                 fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model)
-                self._has_fields(model, list(fields.keys()), node)
+                self._has_fields(models, list(fields.keys()), node)
 
             elif attr.startswith('decoration-'):
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
-                self._has_fields(model, fields, node)
+                self._has_fields(models, fields, node)
 
             elif attr in ('attrs', 'context'):
+                # TODO: this seems very slow
                 for key, val_ast in get_dict_asts(expr).items():
-                    print(key, expr, val_ast)
                     if attr == 'attrs' and isinstance(val_ast, ast.List):
                         # domains in attrs are used for readonly, invisible, ...
                         # and thus are only executed client side
                         desc = '%s.%s' % (attr, key)
                         fields = self._get_client_domain_variables(node, val_ast, desc, expr)
-                        print(model, fields, node)
-                        self._has_fields(model, fields, node)
+                        self._has_fields(models, fields, node)
 
                     elif key == 'group_by':  # only in context
                         if not isinstance(val_ast, ast.Str):
@@ -1209,7 +1216,7 @@ ORDER BY v.priority, v.id
                     else:
                         use = '%s.%s (%s)' % (attr, key, expr)
                         fields = dict.fromkeys(get_variable_names(val_ast), use)
-                        self._has_fields(model, fields, node)
+                        self._has_fields(models, fields, node)
 
             elif attr in ('col', 'colspan'):
                 # col check is mainly there for the tag 'group', but previous
@@ -1224,11 +1231,11 @@ ORDER BY v.priority, v.id
                 self._validate_classes(node, expr)
 
             elif attr == 'groups':
-                key_description = '%s=%r' % (attr, expr)
+                # TODO: this seems very slow can we use another, cached method?
                 for group in expr.replace('!', '').split(','):
-                    # further improvement: add all groups to name_manager in
-                    # order to batch check them at the end
-                    if not self.env['ir.model.data'].xmlid_to_res_id(group.strip(), raise_if_not_found=False):
+                    try:
+                        self.env['ir.model.data'].xmlid_lookup(group.strip())
+                    except ValueError:
                         msg = "The group %r defined in view does not exist!"
                         self._handle_view_error(msg % group, node)
 
