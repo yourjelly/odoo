@@ -27,7 +27,6 @@ class TestMailResend(TestMailCommon):
             'name': 'Partner 2',
             'email': 'p2@example.com'
         })
-        cls.user_partner = cls.env.user.partner_id
         cls.partners = cls.env['res.partner'].concat(cls.user1.partner_id, cls.user2.partner_id, cls.partner1, cls.partner2)
         cls.invalid_email_partners = cls.env['res.partner'].concat(cls.user1.partner_id, cls.partner1)
 
@@ -44,10 +43,9 @@ class TestMailResend(TestMailCommon):
 
         # three more failure sent on bus, one for each mail in failure and one for resend
         self._reset_bus()
-        # data = list()
-        # data.append((self.cr.dbname, 'res.partner', self.partner_admin.id))
-        # data.append((self.cr.dbname, 'res.partner', self.user_partner.id))
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 3):
+        data = list()
+        [data.append((self.cr.dbname, 'res.partner', id)) for id in (self.partner_admin.id, self.env.user.partner_id.id)]
+        with self.mock_mail_gateway(), self.assertBus(data * 3):
             wizard.resend_mail_action()
         done_msgs, done_notifs = self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -60,7 +58,7 @@ class TestMailResend(TestMailCommon):
 
         # two more failure update sent on bus, one for failed mail and one for resend
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
+        with self.mock_mail_gateway(), self.assertBus(data * 2):
             self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({}).resend_mail_action()
         done_msgs, done_notifs = self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -73,7 +71,7 @@ class TestMailResend(TestMailCommon):
 
         # A success update should be sent on bus once the email has no more failure
         self._reset_bus()
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)]):
+        with self.mock_mail_gateway(), self.assertBus(data):
             self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({}).resend_mail_action()
         self.assertMailNotifications(message, [
             {'content': '', 'message_type': 'notification',
@@ -113,10 +111,9 @@ class TestMailResend(TestMailCommon):
         wizard = self.env['mail.resend.message'].with_context({'mail_message_to_resend': message.id}).create({})
         # one update for cancell
         self._reset_bus()
-        # data = list()
-        # data.append((self.cr.dbname, 'res.partner', self.partner_admin.id))
-        # data.append((self.cr.dbname, 'res.partner', self.user_partner.id))
-        with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 1):
+        data = list()
+        [data.append((self.cr.dbname, 'res.partner', id)) for id in (self.partner_admin.id, self.env.user.partner_id.id)]
+        with self.mock_mail_gateway(), self.assertBus(data):
             wizard.cancel_mail_action()
 
         self.assertMailNotifications(message, [
