@@ -40,7 +40,7 @@ class MailMessage(models.Model):
 
         TDE FIXME: clean the overall message_format thingy
         """
-        message_values = super(MailMessage, self).message_format(fetch_followers)
+        message_values = super(MailMessage, self).message_format(fetch_followers=fetch_followers)
         all_sms_notifications = self.env['mail.notification'].sudo().search([
             ('mail_message_id', 'in', [r['id'] for r in message_values]),
             ('notification_type', '=', 'sms')
