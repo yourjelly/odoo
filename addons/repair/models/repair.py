@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
@@ -8,17 +9,11 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare
 
 
-class StockMove(models.Model):
-    _inherit = 'stock.move'
-
-    repair_id = fields.Many2one('repair.order', check_company=True)
-
-
 class Repair(models.Model):
     _name = 'repair.order'
     _description = 'Repair Order'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'create_date desc'
+    _order = 'create_date DESC, id DESC'
 
     name = fields.Char(
         'Repair Reference',

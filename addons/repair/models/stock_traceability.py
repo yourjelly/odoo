@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, api
@@ -23,4 +24,3 @@ class MrpStockReport(models.TransientModel):
         if not is_used:
             is_used = move_line.move_id.repair_id and move_line.produce_line_ids
         return move_lines, is_used
-
