@@ -1394,7 +1394,10 @@ ORDER BY v.priority, v.id
         # checking field names
         for name_seq in field_names:
             fnames = name_seq.split('.')
-            model = self.env[Model._fields[node.get('name')].comodel_name]
+            if node.tag=='filter':
+                model = Model
+            else:
+                model = self.env[Model._fields[node.get('name')].comodel_name]
             try:
                 for fname in fnames:
                     if not isinstance(model, models.BaseModel):
