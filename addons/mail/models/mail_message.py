@@ -1179,11 +1179,12 @@ class Message(models.Model):
             data_dict[partner.id] += message
             if author.id not in data_dict:
                 data_dict[author.id] += message
-        for partner, message in data_dict.items():
-            self.env['bus.bus'].sendmany([[
-                (self._cr.dbname, 'res.partner', partner),
-                {'type': 'message_notification_update', 'elements': message._message_notification_format()}
-                ]])
+        for partner, multimessage in data_dict.items():
+            for message in multimessage:
+                self.env['bus.bus'].sendmany([[
+                    (self._cr.dbname, 'res.partner', partner),
+                    {'type': 'message_notification_update', 'elements': message._message_notification_format()}
+                    ]])
 
     # ------------------------------------------------------
     # TOOLS

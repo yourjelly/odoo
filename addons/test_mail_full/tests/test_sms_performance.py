@@ -80,7 +80,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.SMSCase):
     @warmup
     def test_message_sms_record_default(self):
         record = self.test_record.with_user(self.env.user)
-        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=26):  # test_mail_enterprise: 28
+        with self.mockSMSGateway(sms_allow_unlink=True), self.assertQueryCount(employee=25):  # test_mail_enterprise: 28
             messages = record._message_sms(
                 body='Performance Test',
             )
