@@ -1172,18 +1172,19 @@ class Message(models.Model):
                 else:
                     messages |= message
 
-        data_dict = defaultdict(lambda: self.env['mail.message'])
+        data_dict = defaultdict(lambda: messages)
         for message in messages.sorted('author_id'):
             partner = self.env.user.partner_id
             author = message.author_id
             data_dict[partner.id] += message
             if author.id not in data_dict:
                 data_dict[author.id] += message
-        for partner, message in data_dict.items():
-            self.env['bus.bus'].sendmany([[
-                (self._cr.dbname, 'res.partner', partner),
-                {'type': 'message_notification_update', 'elements': message._message_notification_format()}
-                ]])
+        for partner, multimessage in data_dict.items():
+            for message in multimessage:
+                self.env['bus.bus'].sendmany([[
+                    (self._cr.dbname, 'res.partner', partner),
+                    {'type': 'message_notification_update', 'elements': message._message_notification_format()}
+                    ]])
 
     # ------------------------------------------------------
     # TOOLS
