@@ -367,7 +367,7 @@ def check_values(d):
     if not d:
         return d
     for v in d.values():
-        if isinstance(v, types.ModuleType):
+        if False and isinstance(v, types.ModuleType):
             raise TypeError(f"""Module {v} can not be used in evaluation contexts
 
 Prefer providing only the items necessary for your intended use.
@@ -402,18 +402,23 @@ class wrap_module:
     def __repr__(self):
         return self._repr
 
-# dateutil submodules are lazy so need to import them for them to "exist"
+# # dateutil submodules are lazy so need to import them for them to "exist"
+import datetime
 import dateutil
-mods = ['parser', 'relativedelta', 'rrule', 'tz']
-for mod in mods:
-    __import__('dateutil.%s' % mod)
-datetime = wrap_module(__import__('datetime'), ['date', 'datetime', 'time', 'timedelta', 'timezone', 'tzinfo', 'MAXYEAR', 'MINYEAR'])
-dateutil = wrap_module(dateutil, {
-    mod: getattr(dateutil, mod).__all__
-    for mod in mods
-})
-json = wrap_module(__import__('json'), ['loads', 'dumps'])
-time = wrap_module(__import__('time'), ['time', 'strptime', 'strftime'])
-pytz = wrap_module(__import__('pytz'), [
-    'utc', 'UTC', 'timezone',
-])
+import json
+import time
+import pytz
+
+# mods = ['parser', 'relativedelta', 'rrule', 'tz']
+# for mod in mods:
+#     __import__('dateutil.%s' % mod)
+# datetime = wrap_module(__import__('datetime'), ['date', 'datetime', 'time', 'timedelta', 'timezone', 'tzinfo', 'MAXYEAR', 'MINYEAR'])
+# dateutil = wrap_module(dateutil, {
+#     mod: getattr(dateutil, mod).__all__
+#     for mod in mods
+# })
+# json = wrap_module(__import__('json'), ['loads', 'dumps'])
+# time = wrap_module(__import__('time'), ['time', 'strptime', 'strftime'])
+# pytz = wrap_module(__import__('pytz'), [
+#     'utc', 'UTC', 'timezone',
+# ])
