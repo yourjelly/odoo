@@ -19,7 +19,7 @@ class MrpProduction(models.Model):
 
     extra_cost = fields.Float(copy=False, help='Extra cost per produced unit')
     show_valuation = fields.Boolean(compute='_compute_show_valuation')
-    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', copy=True, company_dependent=True,
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', copy=True,
         help="Analytic account in which cost and revenue entries will take place for financial management of the manufacturing order.")
 
     def _compute_show_valuation(self):
