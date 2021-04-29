@@ -1,6 +1,7 @@
-1. décommenter la ligne self._validate_attrs(node, model) dans ir_ui_view.py, et terminer les attributs (il reste les parent.XYZ dans les attributs à faire).
+0. décommenter la ligne self._validate_attrs(node, model) dans ir_ui_view.py, et terminer les attributs (il reste les parent.XYZ dans les attributs à faire).
    Installe une DB avec -i sale avant pour builder les vues, et ensuite, après avoir décommenté la ligne, en shell, tu fais: views = self.env['ir.ui.view'].search([('type','=','form')])
    for v in views: v.arch_db = v.arch_db
+1. Faire passer les tests qui pètent à l'install
 2. installer tous les modules et fixer les vues qui pêtent (j'en ai eu 6 sur sale et ses dépendances, donc il ne devrait pas y en avoir trop). Pour voir les exemples de ce que j'ai du fixer: git diff -r 6f9aa96c16a22bdd11ff59a0d7249923111e5d9a -- '*.xml'
 3. voir les TODO que j'ai laissé dans le diff
 4. je ne suis pas 100% sûr que j'ai tout implémenté à l'identique; faudrait comparer les output des fields_view_get de tous les objets

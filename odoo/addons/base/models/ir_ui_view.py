@@ -1129,7 +1129,7 @@ ORDER BY v.priority, v.id
             getattr(self, '_check_tag_' + tag)(node, model)
 
         # TODO: uncomment this WIP
-        # self._validate_attrs(node, model)
+        self._validate_attrs(node, model)
 
         newmodel = model
         if node.tag in ('field', 'groupby'):
@@ -1182,11 +1182,13 @@ ORDER BY v.priority, v.id
 
             elif attr in ('attrs', 'context'):
                 for key, val_ast in get_dict_asts(expr).items():
+                    print(key, expr, val_ast)
                     if attr == 'attrs' and isinstance(val_ast, ast.List):
                         # domains in attrs are used for readonly, invisible, ...
                         # and thus are only executed client side
                         desc = '%s.%s' % (attr, key)
                         fields = self._get_client_domain_variables(node, val_ast, desc, expr)
+                        print(model, fields, node)
                         self._has_fields(model, fields, node)
 
                     elif key == 'group_by':  # only in context
