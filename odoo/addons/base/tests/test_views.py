@@ -948,10 +948,16 @@ class TestTemplating(ViewCase):
             </xpath>"""
         })
 
-        arch_string = view1.with_context(inherit_branding=True).get_arch()
+        import pudb
+        pudb.set_trace()
+        v  = view1.with_context(inherit_branding=True)
 
-        arch = etree.fromstring(arch_string)
+
+        arch = v._get_arch()
         self.View.distribute_branding(arch)
+
+
+        print(etree.tostring(arch))
 
         self.assertEqual(
             arch,

@@ -574,7 +574,7 @@ UNION
     SELECT iuv.id, iuv.inherit_id, iuv.priority, iuv.model
     FROM ir_ui_view iuv
     INNER JOIN ir_ui_view_inherits iuvi ON iuvi.id = iuv.inherit_id
-    WHERE iuv.model=iuvi.model AND mode='extension' AND {sub_where_clause}
+    WHERE coalesce(iuv.model, '')=coalesce(iuvi.model, '') AND mode='extension' AND {sub_where_clause}
 )
 SELECT
     v.id, v.inherit_id,
@@ -671,20 +671,21 @@ ORDER BY v.priority, v.id
         """
         return locate_node(arch, spec)
 
-    def inherit_branding(self, specs_tree):
-        for node in specs_tree.iterchildren(tag=etree.Element):
-            xpath = node.getroottree().getpath(node)
-            if node.tag == 'data' or node.tag == 'xpath' or node.get('position'):
-                self.inherit_branding(node)
-            elif node.get('t-field'):
-                node.set('data-oe-xpath', xpath)
-                self.inherit_branding(node)
-            else:
-                node.set('data-oe-id', str(self.id))
-                node.set('data-oe-xpath', xpath)
-                node.set('data-oe-model', 'ir.ui.view')
-                node.set('data-oe-field', 'arch')
-        return specs_tree
+    def inherit_branding(self, node):
+        xpath = node.getroottree().getpath(node)
+        if node.tag == 'data' or node.tag == 'xpath' or node.get('position'):
+            for child in node.iterchildren(tag=etree.Element):
+                self.inherit_branding(child)
+        elif node.get('t-field'):
+            node.set('data-oe-xpath', xpath)
+            for child in node.iterchildren(tag=etree.Element):
+                self.inherit_branding(child)
+        else:
+            node.set('data-oe-id', str(self.id))
+            node.set('data-oe-xpath', xpath)
+            node.set('data-oe-model', 'ir.ui.view')
+            node.set('data-oe-field', 'arch')
+        return node
 
     @api.model
     def apply_inheritance_specs(self, source, specs_tree, pre_locate=lambda s: True):
@@ -716,11 +717,7 @@ ORDER BY v.priority, v.id
     def _get_node(self, views, nodes={}):
         node = nodes.get(self.id, etree.fromstring(self.arch))
         if self._context.get('inherit_branding'):
-            node.attrib.update({
-                'data-oe-model': 'ir.ui.view',
-                'data-oe-id': str(self.id),
-                'data-oe-field': 'arch',
-            })
+            self.inherit_branding(node)
 
         for view in self.browse(views[self.id]):
             node2 = view._get_node(views, nodes)
