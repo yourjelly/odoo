@@ -116,6 +116,31 @@ class ActionAdapter extends ComponentAdapter {
     }
   }
 
+  willUnmount() {
+    const shouldNullifyWidget = !this.widget && this.__widget;
+    if (shouldNullifyWidget) {
+      this.widget = this.__widget;
+    }
+    super.willUnmount();
+    if (shouldNullifyWidget) {
+      this.widget = null;
+    }
+  }
+
+  __destroy() {
+    if (this.widget && !this.wowlEnv.inDialog) {
+      // Determine whether to actually remove the el from the DOM
+      // if this component is being destroyed and still owns the widget, we need
+      // to remove the el *after* the VDOM's algorithm has effectively replaced the elements
+      // see @actionService.updateUI: ControllerComponent.mounted
+      if (this.widget.__parentedParent === this) {
+        this.widget.__delayedUnmount__ = true;
+      }
+      this.widget = null;
+    }
+    return super.__destroy(...arguments);
+  }
+
   /**
    * This function is called just before the component will be unmounted,
    * because it will be replaced by another one. However, we need to keep it

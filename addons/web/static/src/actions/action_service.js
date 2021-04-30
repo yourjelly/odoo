@@ -291,6 +291,12 @@ function makeActionManager(env) {
 
     class ControllerComponent extends Component {
       setup() {
+        // LEGACY COMPATIBILITY
+        if (controller.__owl__) {
+          // the controller"s widget is being reused
+          // prevent the DOM el to be cleanup by OWL's VDOM
+          controller.__owl__.vnode.elm = null;
+        }
         this.Component = controller.Component;
         this.componentRef = hooks.useRef("component");
         this.registerCallback = null;
@@ -345,8 +351,20 @@ function makeActionManager(env) {
               c.exportedState.__legacy_widget__.destroy();
             }
           }
-          // END LEGACY CODE COMPATIBILITY
+
           controllerStack = nextStack; // the controller is mounted, commit the new stack
+          // Legacy controllers support having theit legacy widget reused
+          // to avoid the widget's DOM elements to be removed by the legacy compatibility layer
+          // we only remove that element "after" the current controller is mounted
+          controllerStack.forEach(ct => {
+            const { __legacy_widget__ } = ct.exportedState || {};
+            if (__legacy_widget__ && __legacy_widget__.__delayedUnmount__) {
+              __legacy_widget__.el.remove();
+              __legacy_widget__.__delayedUnmount__ = false;
+            }
+          });
+          // END LEGACY CODE COMPATIBILITY
+
           // wait Promise callbacks to be executed
           pushState(controller);
           mode = "current";
@@ -380,6 +398,19 @@ function makeActionManager(env) {
       }
       onTitleUpdated(ev) {
         controller.title = ev.detail;
+      }
+
+      __patch() {
+        const res = super.__patch(...arguments);
+        // LEGACY COMPATIBILITY
+        // We store the vnode on the controller's description to be able to bypass
+        // VDOM's algorithm. This is because we support transmitting alive widgets across different
+        // compnent. see @constructor
+        if (this.Component.isLegacy) {
+          const { vnode } = this.__owl__;
+          controller.__owl__ = { vnode };
+        }
+        return res;
       }
     }
 
@@ -888,7 +919,7 @@ function makeActionManager(env) {
       if ("recordId" in options) {
         params.currentId = options.recordId;
       }
-      return __legacy_widget__.reload(params);
+      __legacy_widget__.reload(params);
     }
     // END LEGACY CODE COMPATIBILITY
 

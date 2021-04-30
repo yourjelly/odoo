@@ -81,6 +81,7 @@ QUnit.module("ActionManager", (hooks) => {
     // we resolve def => list view is now ready (but we want to ignore it)
     def.resolve();
     await testUtils.nextTick();
+    await legacyExtraNextTick();
     assert.containsOnce(webClient, ".o_kanban_view", "there should be a kanban view in dom");
     assert.containsNone(webClient, ".o_list_view", "there should not be a list view in dom");
   });
