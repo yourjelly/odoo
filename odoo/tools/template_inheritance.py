@@ -172,7 +172,9 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                         node.addprevious(child)
                     node.getparent().remove(node)
             elif pos == 'attributes':
-                for child in spec.getiterator('attribute'):
+                for child in spec:
+                    if child.tag != 'attribute':
+                        continue
                     attribute = child.get('name')
                     value = child.text or ''
                     if child.get('add') or child.get('remove'):

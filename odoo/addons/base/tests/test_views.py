@@ -147,12 +147,12 @@ class TestViewInheritance(ViewCase):
             element = E(view_type, string=name)
         else:
             element = E(view_type,
-                E.attribute(name, name='string'),
+                E.attribute(name, name=(view_type in ('form','tree')) and 'string' or 'name'),
                 position='attributes'
             )
         return etree.tostring(element, encoding='unicode')
 
-    def makeView(self, name, parent=None, arch=None):
+    def makeView(self, name, parent=None, arch=None, inherit=False):
         """ Generates a basic ir.ui.view with the provided name, parent and arch.
 
         If no parent is provided, the view is top-level.
@@ -168,7 +168,7 @@ class TestViewInheritance(ViewCase):
         view = self.View.create({
             'model': self.model,
             'name': name,
-            'arch': arch or self.arch_for(name, parent=parent),
+            'arch': arch or self.arch_for(name, inherit and 'attribute' or 'form', parent=parent),
             'inherit_id': parent,
             'priority': 5, # higher than default views
         })
@@ -186,25 +186,26 @@ class TestViewInheritance(ViewCase):
         self.a = self.makeView("A")
         self.a1 = self.makeView("A1", self.a.id)
         self.a2 = self.makeView("A2", self.a.id)
-        self.a11 = self.makeView("A11", self.a1.id)
+        self.a11 = self.makeView("A11", self.a1.id, inherit=True)
         self.a11.mode = 'primary'
-        self.makeView("A111", self.a11.id)
-        self.makeView("A12", self.a1.id)
-        self.makeView("A21", self.a2.id)
-        self.a22 = self.makeView("A22", self.a2.id)
-        self.makeView("A221", self.a22.id)
+        self.a111 = self.makeView("A111", self.a11.id, '<attribute name="name" position="attributes"><attribute name="name">A111</attribute></attribute>')
+        self.a12 = self.makeView("A12", self.a1.id, inherit=True)
+        self.a21 = self.makeView("A21", self.a2.id, inherit=True)
+        self.a22 = self.makeView("A22", self.a2.id, inherit=True)
+        self.a221 = self.makeView("A221", self.a22.id, '<attribute name="name" position="attributes"><attribute name="name">A221</attribute></attribute>')
 
         self.b = self.makeView('B', arch=self.arch_for("B", 'tree'))
-        self.makeView('B1', self.b.id, arch=self.arch_for("B1", 'tree', parent=self.b))
+        self.b1 = self.makeView('B1', self.b.id, arch=self.arch_for("B1", 'tree', parent=self.b))
         self.c = self.makeView('C', arch=self.arch_for("C", 'tree'))
         self.c.write({'priority': 1})
 
     def test_get_inheriting_views_arch(self):
         self.assertEqual(
-            self.view_ids['A'].get_inheriting_views_arch(),
-            self.view_ids['A1'] | self.view_ids['A2'] | self.view_ids['A12'] | self.view_ids['A21'] | self.view_ids['A22'] | self.view_ids['A221'])
-        self.assertEqual(self.view_ids['A21'].get_inheriting_views_arch(), self.View)
-        self.assertEqual(self.view_ids['A11'].get_inheriting_views_arch(), self.view_ids['A111'])
+            self.a.get_inheriting_views_arch(self.a.ids),
+            {
+                self.a.id: [self.a1.id, self.a2.id], self.a1.id: [self.a12.id], self.a12.id: [],
+                self.a2.id: [self.a21.id, self.a22.id], self.a22.id:[self.a221.id], self.a221.id: [], self.a21.id: []
+            })
 
     def test_default_view(self):
         default = self.View.default_view(model=self.model, view_type='form')
@@ -223,7 +224,7 @@ class TestViewInheritance(ViewCase):
             r1.write({'inherit_id': r1.id})
 
         r2 = self.makeView('R2', r1.id)
-        r3 = self.makeView('R3', r2.id)
+        r3 = self.makeView('R3', r2.id, inherit=True)
         with self.assertRaises(ValidationError), self.cr.savepoint():
             r2.write({'inherit_id': r3.id})
 
@@ -689,7 +690,7 @@ class TestTemplating(ViewCase):
             initial.get('data-oe-id'),
             "initial should come from the root view")
         self.assertEqual(
-            '/root[1]/item[1]',
+            '/root/item[1]',
             initial.get('data-oe-xpath'),
             "initial's xpath should be within the root view only")
 
@@ -750,7 +751,7 @@ class TestTemplating(ViewCase):
         # Fourth world - should have a correct oe-xpath, which is 3rd in main view
         [initial] = arch.xpath('/hello[1]/world[4]')
         self.assertEqual(
-            '/hello[1]/world[3]',
+            '/hello/world[3]',
             initial.get('data-oe-xpath'),
             "The node's xpath position should be correct")
 
@@ -804,7 +805,7 @@ class TestTemplating(ViewCase):
         # Third world - should have a correct oe-xpath, which is 3rd in main view
         [initial] = arch.xpath('/hello[1]/world[3]')
         self.assertEqual(
-            '/hello[1]/world[3]',
+            '/hello/world[3]',
             initial.get('data-oe-xpath'),
             "The node's xpath position should be correct")
 
@@ -839,7 +840,7 @@ class TestTemplating(ViewCase):
         [node] = arch.xpath('//*[@t-field="a"]')
         self.assertEqual(
             node.get('data-oe-xpath'),
-            '/hello[1]/world[2]',
+            '/hello/world[2]',
             'First t-field has indication of xpath')
 
         # Second t-field, from inheritance, should also have an indication of xpath
@@ -854,7 +855,7 @@ class TestTemplating(ViewCase):
         [node] = arch.xpath('//world[last()]')
         self.assertEqual(
             node.get('data-oe-xpath'),
-            '/hello[1]/world[4]',
+            '/hello/world[4]',
             "The node's xpath position should be correct")
 
         # Also test inherit via non-xpath t-field node, direct children of data,
@@ -913,7 +914,7 @@ class TestTemplating(ViewCase):
             "initial should come from the root view")
         self.assertEqual(
             initial.get('data-oe-xpath'),
-            '/root[1]/item[1]',
+            '/root/item[1]',
             "initial's xpath should be within the inherited view only")
 
         [second] = arch.xpath('//item[@order=2]')
@@ -948,16 +949,9 @@ class TestTemplating(ViewCase):
             </xpath>"""
         })
 
-        import pudb
-        pudb.set_trace()
         v  = view1.with_context(inherit_branding=True)
-
-
         arch = v._get_arch()
         self.View.distribute_branding(arch)
-
-
-        print(etree.tostring(arch))
 
         self.assertEqual(
             arch,
@@ -977,7 +971,7 @@ class TestTemplating(ViewCase):
                     'data-oe-model': 'ir.ui.view',
                     'data-oe-id': str(view1.id),
                     'data-oe-field': 'arch',
-                    'data-oe-xpath': '/root[1]/item[1]',
+                    'data-oe-xpath': '/root/item[1]',
                 })
             )
         )
@@ -1000,7 +994,7 @@ class TestTemplating(ViewCase):
             'data-oe-model': 'ir.ui.view',
             'data-oe-id': str(view.id),
             'data-oe-field': 'arch',
-            'data-oe-xpath': '/root[1]/item[1]',
+            'data-oe-xpath': '/root/item[1]',
         })))
 
     def test_call_no_branding(self):
@@ -2709,12 +2703,12 @@ class TestViewCombined(ViewCase):
             'model': 'b',
             'inherit_id': self.a3.id,
             'mode': 'primary',
-            'arch': '<xpath expr="//a1" position="after"><b1/></xpath>'
+            'arch': '<xpath expr="//a3" position="after"><b1/></xpath>'
         })
         self.b2 = self.View.create({
             'model': 'b',
             'inherit_id': self.b1.id,
-            'arch': '<xpath expr="//a1" position="after"><b2/></xpath>'
+            'arch': '<xpath expr="//b1" position="after"><b2/></xpath>'
         })
 
         self.c1 = self.View.create({
@@ -2727,20 +2721,20 @@ class TestViewCombined(ViewCase):
             'model': 'c',
             'inherit_id': self.c1.id,
             'priority': 5,
-            'arch': '<xpath expr="//a1" position="after"><c2/></xpath>'
+            'arch': '<xpath expr="//c1" position="after"><c2/></xpath>'
         })
         self.c3 = self.View.create({
             'model': 'c',
             'inherit_id': self.c2.id,
             'priority': 10,
-            'arch': '<xpath expr="//a1" position="after"><c3/></xpath>'
+            'arch': '<xpath expr="//c2" position="after"><c3/></xpath>'
         })
 
         self.d1 = self.View.create({
             'model': 'd',
             'inherit_id': self.b1.id,
             'mode': 'primary',
-            'arch': '<xpath expr="//a1" position="after"><d1/></xpath>'
+            'arch': '<xpath expr="//b1" position="after"><d1/></xpath>'
         })
 
     def test_basic_read(self):
@@ -2784,9 +2778,9 @@ class TestViewCombined(ViewCase):
             etree.fromstring(arch),
             E.qweb(
                 E.a1(),
-                E.c3(),
-                E.c2(),
                 E.c1(),
+                E.c2(),
+                E.c3(),
                 E.a3(),
                 E.a2(),
             ), arch)
@@ -2798,10 +2792,10 @@ class TestViewCombined(ViewCase):
             etree.fromstring(arch),
             E.qweb(
                 E.a1(),
+                E.a3(),
+                E.b1(),
                 E.d1(),
                 E.b2(),
-                E.b1(),
-                E.a3(),
                 E.a2(),
             ), arch)
 
