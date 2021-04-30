@@ -3457,7 +3457,6 @@ td {
 .receipt-screen .default-view .actions .buttons .button {
     flex: 1;
     border: solid 1px rgb(209, 209, 209);
-    padding: 1rem;
     text-align: center;
     border-radius: 3px;
     cursor: pointer;
