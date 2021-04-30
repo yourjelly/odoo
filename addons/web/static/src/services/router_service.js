@@ -55,105 +55,185 @@ function getRoute() {
   return { pathname, search: searchQuery, hash: hashQuery };
 }
 
-/**
- * @param {function} getCurrent function that returns the current route
- * @returns {function} function to compute the next hash
+/*
+ * @typedef {[key: string: string]} Query
+ * @typedef {Object} Route
  */
-export function makePreProcessQuery(getCurrent) {
-  const lockedKeys = new Set();
-  return (hash) => {
-    const newHash = {};
-    Object.keys(hash).forEach((key) => {
-      if (lockedKeys.has(key)) {
-        return;
-      }
-      const k = key.split(" ");
-      let value;
-      if (k.length === 2) {
-        value = hash[key];
-        key = k[1];
-        if (k[0] === "lock") {
-          lockedKeys.add(key);
-        } else if (k[0] === "unlock") {
-          lockedKeys.delete(key);
-        } else {
-          return;
-        }
-      }
-      newHash[key] = value || hash[key];
-    });
-    const current = getCurrent();
-    Object.keys(current.hash).forEach((key) => {
-      if (lockedKeys.has(key) && !(key in newHash)) {
-        newHash[key] = current.hash[key];
-      }
-    });
-    return newHash;
-  };
-}
 
-function makeRouter(env) {
-  let bus = env.bus;
-  let current = getRoute();
-  window.addEventListener("hashchange", () => {
-    current = getRoute();
-    bus.trigger("ROUTE_CHANGE");
+/**
+ * For each push request (replaceState or pushState), filterout keys that have been locked before
+ * overrides locked keys that are explicitly re-locked or unlocked
+ * registers keys in "hash" in "lockedKeys" according to the "lock" Boolean
+ *
+ * @param  {Set}  lockedKeys   A set containing all keys that were locked
+ * @param  {Query}  hash         An Object representing the pushed url hash
+ * @param  {Query}  currentHash The current hash compare against
+ * @param  {Boolean} [lock=false]         Whether to lock all hash keys in "hash" to prevent them from being changed afterwards
+ * @return {Query}   The resulting "hash" where previous locking has been applied
+ */
+function applyLocking(lockedKeys, hash, currentHash, lock = false) {
+  const newHash = {};
+  Object.keys(hash).forEach((key) => {
+    if (!lock && lockedKeys.has(key)) {
+      // forbid implicit override of key
+      return;
+    }
+    if (lock === "on") {
+      lockedKeys.add(key);
+    } else if (lock === "off") {
+      lockedKeys.delete(key);
+    }
+    newHash[key] = hash[key];
   });
 
-  function doPush(mode = "push", route) {
-    if (!shallowEqual(route.hash, current.hash)) {
-      const url = location.origin + routeToUrl(route);
-      if (mode === "push") {
-        window.history.pushState({}, url, url);
-      } else {
-        window.history.replaceState({}, url, url);
+  Object.keys(currentHash).forEach((key) => {
+    if (lockedKeys.has(key) && !(key in newHash)) {
+      newHash[key] = currentHash[key];
+    }
+  });
+  return newHash;
+}
+
+/**
+ * Builds and returns a router object that holds all the logic to properly handle pushState, replaceState
+ * with some specific features: Pushes are actually done in a setTimeoutin order to alter the actual
+ * history only when necessary. Pushes request can lock or unlock some keys.
+ * This allows components or services that want to alter the URL to own their keys in that URL,
+ * and protect them against external overrides
+
+ * @param  {Env} env                    The owl env
+ * @param  {Function} options.getRoute       a function that returns the full Route Object ccorresponding to the current URL state
+ * @param  {Function} options.historyPush    a function that should match history.pushState
+ * @param  {Function} options.historyReplace  a function that should match history.replaceState
+ * @param  {Function} options.redirect       a function that should redirect to an URL
+ * @return {router: Router , bus: EventBus}
+ */
+export function routerSkeleton(env, { getRoute, historyPush, historyReplace, redirect }) {
+  const bus = new owl.core.EventBus();
+  let current = getRoute();
+  const lockedKeys = new Set();
+
+  bus.on("hashchange", null, () => {
+    current = getRoute();
+    env.bus.trigger("ROUTE_CHANGE");
+  });
+
+  function computeNewRoute(hash, replace, currentRoute) {
+    if (!replace) {
+      hash = Object.assign({}, currentRoute.hash, hash);
+    }
+    hash = sanitizeHash(hash);
+    if (!shallowEqual(currentRoute.hash, hash)) {
+      return Object.assign({}, currentRoute, { hash });
+    }
+    return false;
+  }
+
+  /**
+   * Used when the setTimeout executes, allows all calls to a "pushState" function during the timeout
+   * to be aggregated together into one call to the "pushState" function
+   * @param  {[hash, options][]} allCallsArgs: the array of all args accumulated during calls
+   * @return {[hash, options]}
+   */
+  function aggregatePushes(allCallsArgs) {
+    let finalHash;
+    let finalOptions = {};
+    allCallsArgs.forEach(([hash, options = {}]) => {
+      hash = applyLocking(lockedKeys, hash, current.hash, options.lock);
+      if (finalHash) {
+        hash = applyLocking(lockedKeys, hash, finalHash, options.lock);
       }
+      finalOptions.replace = finalOptions.replace || options.replace;
+      finalHash = Object.assign(finalHash || {}, hash);
+    });
+    return [finalHash, finalOptions];
+  }
+
+  /**
+   * A pushState function that uses historyPush
+   * Executed at the end of the setTimeout, with hash and options being aggregates of all calls
+   * @param  {Query} hash   The new hash
+   * @param  {{ replace: boolean }} options to compute the new route.
+   * If replace is true, the new route will wipe the old one
+   */
+  function pushState(hash, options) {
+    const newRoute = computeNewRoute(hash, options.replace, current);
+    if (newRoute) {
+      historyPush(newRoute);
     }
     current = getRoute();
   }
 
-  function getCurrent() {
-    return current;
+  /**
+   * A pushState function that uses historyReplace
+   * Executed at the end of the setTimeout, with hash and options being aggregates of all calls
+   * @param  {Query} hash   The new hash
+   * @param  {{ replace: boolean }} options to compute the new route.
+   * If replace is true, the new route will wipe the old one
+   */
+  function replaceState(hash, options) {
+    const newRoute = computeNewRoute(hash, options.replace, current);
+    if (newRoute) {
+      historyReplace(newRoute);
+    }
+    current = getRoute();
   }
 
-  const preProcessQuery = makePreProcessQuery(getCurrent);
-  return {
+  const router = {
+    pushState: cumulativeCallable((allPushes) => pushState(...aggregatePushes(allPushes))),
+    replaceState: cumulativeCallable((allPushes) => replaceState(...aggregatePushes(allPushes))),
     get current() {
-      return getCurrent();
+      return current;
     },
-    pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
-    replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
-    redirect: (url, wait) => redirect(env, url, wait),
+    redirect,
   };
+  return { router, bus };
 }
 
-export function makePushState(getCurrent, doPush, preProcessQuery) {
-  let _replace = false;
-  let timeoutId;
-  let tempHash;
-  return (hash, replace = false) => {
+/**
+ * Utility function that allows to execute the "callable" function after a timeout
+ * callable is then passed all arguments of all calls to the resulting function during the timeout
+ * callable should decides how to aggregate those calls
+ *
+ * @param  {Function} callable  a function that takes a list of list og arguments to be aggregated
+ * @param  {number} [timeout] timeout after which callable is called
+ */
+function cumulativeCallable(callable, timeout) {
+  let timeoutId,
+    acc = [];
+  return (...args) => {
     clearTimeout(timeoutId);
-    hash = preProcessQuery(hash);
-    _replace = _replace || replace;
-    tempHash = Object.assign(tempHash || {}, hash);
+    acc.push(args);
     timeoutId = setTimeout(() => {
-      tempHash = sanitizeHash(tempHash);
-      const current = getCurrent();
-      if (!_replace) {
-        tempHash = Object.assign({}, current.hash, tempHash);
-      }
-      const route = Object.assign({}, current, { hash: tempHash });
-      doPush(route);
-      tempHash = undefined;
+      callable(acc);
+      acc = [];
       timeoutId = undefined;
-      _replace = false;
-    });
+    }, timeout);
   };
 }
 
 export const routerService = {
   start(env) {
-    return makeRouter(env);
+    function historyPush(route) {
+      const url = routeToUrl(route);
+      window.history.pushState({}, url, url);
+    }
+
+    function historyReplace(route) {
+      const url = routeToUrl(route);
+      window.history.replaceState({}, url, url);
+    }
+
+    const redirect = (url, wait) => redirect(env, url, wait);
+
+    const { router, bus } = routerSkeleton(env, {
+      getRoute,
+      historyPush,
+      historyReplace,
+      redirect,
+    });
+    window.addEventListener("hashchange", () => bus.trigger("hashchange"));
+    return router;
   },
 };
 

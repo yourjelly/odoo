@@ -600,7 +600,7 @@ QUnit.module("ActionManager", (hooks) => {
   });
 
   QUnit.test("change a param of an ir.actions.client in the url", async function (assert) {
-    assert.expect(13);
+    assert.expect(12);
     const ClientAction = AbstractAction.extend({
       hasControlPanel: true,
       init: function (parent, action) {
@@ -656,7 +656,7 @@ QUnit.module("ActionManager", (hooks) => {
       action: "9",
       a: "new value",
     });
-    assert.verifySteps(["start", "push_state push"]);
+    assert.verifySteps(["start"]); // No push because the url wouldn't have changed
     currentHash = webClient.env.services.router.current.hash;
     assert.deepEqual(currentHash, {
       action: "9",

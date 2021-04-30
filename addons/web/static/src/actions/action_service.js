@@ -1153,7 +1153,7 @@ function makeActionManager(env) {
       newState.view_type = props.type;
       newState.id = props.recordId ? `${props.recordId}` : undefined;
     }
-    env.services.router.pushState(newState, true);
+    env.services.router.pushState(newState, { replace: true });
   }
   return {
     doAction,

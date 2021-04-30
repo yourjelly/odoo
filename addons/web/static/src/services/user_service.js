@@ -80,7 +80,7 @@ export const userService = {
     };
 
     cids = allowedCompanies.join(",");
-    router.replaceState({ "lock cids": cids });
+    router.replaceState({ cids }, { lock: "on" });
     cookie.setCookie("cids", cids);
 
     systrayRegistry.add("SwitchCompanyMenu", SwitchCompanyMenu, { sequence: 1 });
@@ -117,7 +117,7 @@ export const userService = {
       showEffect,
       setCompanies: (mode, companyId) => {
         const nextCompanyIds = setCompanies(mode, companyId).join(",");
-        router.pushState({ "lock cids": nextCompanyIds });
+        router.pushState({ cids: nextCompanyIds }, { lock: "on" });
         cookie.setCookie("cids", nextCompanyIds);
         browser.setTimeout(() => window.location.reload()); // history.pushState is a little async
       },

@@ -1,15 +1,11 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import {
-  parseHash,
-  parseSearchQuery,
-  redirect,
-  routeToUrl,
-} from "@web/services/router_service";
+import { parseHash, parseSearchQuery, redirect, routeToUrl } from "@web/services/router_service";
 import { patch, unpatch } from "@web/utils/patch";
 import { makeTestEnv } from "../helpers/mock_env";
 import { nextTick } from "../helpers/utils";
+import { makeFakeRouterService } from "@web/../tests/helpers/mock_services";
 
 QUnit.module("Router");
 
@@ -115,8 +111,126 @@ QUnit.test("can redirect an URL", async (assert) => {
   unpatch(browser, "test.location");
 });
 
-// TODO: test
-//  - push/replaceState requests occuring in the same tick are aggregated
-//  - we don't push twice the same url (different key orders)
-//  - undefined keys are not pushed in the url
-//  - lock stuff
+QUnit.module("Router Push", (hooks) => {
+  let router;
+
+  hooks.beforeEach(async () => {
+    router = makeFakeRouterService().start({ bus: new owl.core.EventBus() });
+  });
+
+  QUnit.test("can push in same timeout", async (assert) => {
+    assert.deepEqual(router.current.hash, {});
+    router.pushState({ k1: 2 });
+    assert.deepEqual(router.current.hash, {});
+    router.pushState({ k1: 3 });
+    assert.deepEqual(router.current.hash, {});
+
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 3 });
+  });
+
+  QUnit.test("can lock keys", async (assert) => {
+    router.pushState({ k1: 2 }, { lock: "on" });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k1: 3 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k1: 4 }, { lock: "on" });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 4 });
+
+    router.pushState({ k1: 3 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 4 });
+  });
+
+  QUnit.test("can re-lock keys in same final call", async (assert) => {
+    router.pushState({ k1: 2 }, { lock: "on" });
+    await nextTick();
+    router.pushState({ k1: 1 }, { lock: "on" });
+    router.pushState({ k1: 4 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 1 });
+  });
+
+  QUnit.test("can unlock keys", async (assert) => {
+    router.pushState({ k1: 2 }, { lock: "on" });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k1: 3 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k1: 4 }, { lock: "off" });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 4 });
+
+    router.pushState({ k1: 3 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 3 });
+  });
+
+  QUnit.test("can replace hash", async (assert) => {
+    router.pushState({ k1: 2 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k2: 3 }, { replace: true });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k2: 3 });
+  });
+
+  QUnit.test("can replace hash with locked keys", async (assert) => {
+    router.pushState({ k1: 2 }, { lock: "on" });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k2: 3 }, { replace: true });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2, k2: 3 });
+  });
+
+  QUnit.test("can merge hash", async (assert) => {
+    router.pushState({ k1: 2 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2 });
+
+    router.pushState({ k2: 3 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 2, k2: 3 });
+  });
+
+  QUnit.test("undefined keys are not pushed", async (assert) => {
+    const onPushState = () => assert.step("pushed state");
+    router = makeFakeRouterService({ onPushState }).start({ bus: new owl.core.EventBus() });
+    router.pushState({ k1: undefined });
+    await nextTick();
+    assert.verifySteps([]);
+    assert.deepEqual(router.current.hash, {});
+  });
+
+  QUnit.test("undefined keys destroy previous non locked keys", async (assert) => {
+    router.pushState({ k1: 1 });
+    await nextTick();
+    assert.deepEqual(router.current.hash, { k1: 1 });
+    router.pushState({ k1: undefined });
+    await nextTick();
+    assert.deepEqual(router.current.hash, {});
+  });
+
+  QUnit.test("do not re-push when hash is same", async (assert) => {
+    const onPushState = () => assert.step("pushed state");
+    router = makeFakeRouterService({ onPushState }).start({ bus: new owl.core.EventBus() });
+
+    router.pushState({ k1: 1, k2: 2 });
+    await nextTick();
+    assert.verifySteps(["pushed state"]);
+    router.pushState({ k2: 2, k1: 1 });
+    await nextTick();
+    assert.verifySteps([]);
+  });
+});

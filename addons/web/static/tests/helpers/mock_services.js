@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { effectService } from "@web/effects/effect_service";
-import { makePreProcessQuery, makePushState, routeToUrl } from "@web/services/router_service";
+import { routerSkeleton } from "@web/services/router_service";
 import { SIZES } from "@web/services/ui_service";
 import { rpcService } from "@web/services/rpc_service";
 import { localization } from "@web/localization/localization_settings";
@@ -211,50 +211,53 @@ function stripUndefinedQueryKey(query) {
   return newObj;
 }
 
-function getRoute(route) {
-  route.hash = stripUndefinedQueryKey(route.hash);
-  route.search = stripUndefinedQueryKey(route.search);
-  return route;
-}
-
 export function makeFakeRouterService(params) {
-  let _current = {
+  let current = {
     pathname: "test.wowl",
     search: {},
     hash: {},
   };
   if (params && params.initialRoute) {
-    Object.assign(_current, params.initialRoute);
+    Object.assign(current, params.initialRoute);
   }
-  let current = getRoute(_current);
+
+  function getRoute() {
+    current.hash = stripUndefinedQueryKey(current.hash);
+    current.search = stripUndefinedQueryKey(current.search);
+    return current;
+  }
+
+  current = getRoute();
   return {
     start(env) {
-      function loadState(hash) {
-        current.hash = hash;
-        env.bus.trigger("ROUTE_CHANGE");
-      }
-      env.bus.on("test:hashchange", null, loadState);
-      function getCurrent() {
-        return current;
-      }
-      function doPush(mode = "push", route) {
-        const oldUrl = routeToUrl(current);
-        const newRoute = getRoute(route);
-        const newUrl = routeToUrl(newRoute);
-        if (params && params.onPushState && oldUrl !== newUrl) {
-          params.onPushState(mode, route.hash);
+      function historyPush(route) {
+        if (params && params.onPushState) {
+          params.onPushState("push", route.hash);
         }
-        current = newRoute;
+        current = route;
       }
-      const preProcessQuery = makePreProcessQuery(getCurrent);
-      return {
-        get current() {
-          return getCurrent();
-        },
-        pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
-        replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
-        redirect: (params && params.redirect) || (() => {}),
-      };
+
+      function historyReplace(route) {
+        if (params && params.onPushState) {
+          params.onPushState("replace", route.hash);
+        }
+        current = route;
+      }
+
+      const redirect = (params && params.redirect) || (() => {});
+
+      const { router, bus } = routerSkeleton(env, {
+        getRoute,
+        historyPush,
+        historyReplace,
+        redirect,
+      });
+      env.bus.on("test:hashchange", null, (hash) => {
+        current.hash = hash;
+        bus.trigger("hashchange");
+      });
+
+      return router;
     },
   };
 }
