@@ -5,6 +5,7 @@ import copy
 import itertools
 import logging
 
+from odoo.exceptions import ValidationError
 from odoo.tools.translate import _
 from odoo.tools import SKIPPED_ELEMENT_TYPES
 _logger = logging.getLogger(__name__)
@@ -106,7 +107,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
         it from the source and returns it.
         """
         if len(spec):
-            raise ValueError(
+            raise ValidationError(
                 _("Invalid specification for moved nodes: '%s'") %
                 etree.tostring(spec)
             )
@@ -116,7 +117,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
             remove_element(to_extract)
             return to_extract
         else:
-            raise ValueError(
+            raise ValidationError(
                 _("Element '%s' cannot be located in parent view") %
                 etree.tostring(spec)
             )
@@ -220,7 +221,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                         child = extract(child)
                     node.addprevious(child)
             else:
-                raise ValueError(
+                raise ValidationError(
                     _("Invalid position attribute: '%s'") %
                     pos
                 )
@@ -232,7 +233,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                 if attr != 'position'
             ])
             tag = "<%s%s>" % (spec.tag, attrs)
-            raise ValueError(
+            raise ValidationError(
                 _("Element '%s' cannot be located in parent view:\n%s", tag, etree.tostring(source).decode('utf-8'))
             )
 

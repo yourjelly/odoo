@@ -368,7 +368,7 @@ class TestApplyInheritanceSpecs(ViewCase):
                 E.field(name="whoops"),
                 name="target", position="serious_series")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             self.View.apply_inheritance_specs(self.base_arch, spec)
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -379,14 +379,14 @@ class TestApplyInheritanceSpecs(ViewCase):
             E.field(name="placeholder"),
             foo="42", version="7.0")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             self.View.apply_inheritance_specs(arch, spec)
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_target_not_found(self):
         spec = E.field(name="targut")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             self.View.apply_inheritance_specs(self.base_arch, spec)
 
 
@@ -562,7 +562,7 @@ class TestApplyInheritanceMoveSpecs(ViewCase):
             E.xpath(expr="//p[@name='none']", position="move"),
             expr="//div[@class='target']", position="after")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             self.apply_spec(self.base_arch, spec)
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -572,7 +572,7 @@ class TestApplyInheritanceMoveSpecs(ViewCase):
             E.xpath(E.p("Content2", {'class': 'new_p'}), expr="//p", position="move"),
             expr="//div[@class='target']", position="after")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             self.apply_spec(self.base_arch, spec)
 
     def test_incorrect_move_3(self):
@@ -1554,7 +1554,7 @@ class TestViews(ViewCase):
         # self.assertInvalid(arch % ('<field name="name"/><field name="type"/>', "'tata' if name else 'tutu'", 'type'), 'xxxx')
         self.assertInvalid(
             arch % ('', '0 if name else 1', '1'),
-            """Field name used in domain of <field name="inherit_id">  ([(0 if name else 1, '=', 1)]) must be present in view but is missing""",
+            """Field "name" does not exist in model "ir.ui.view""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -1584,7 +1584,7 @@ class TestViews(ViewCase):
                     <field name="inherit_id" domain="[('invalid_field', '=', 'res.users')]"/>
                 </form>
             """,
-            '''Unknown field "ir.ui.view.invalid_field" in domain of <field name="inherit_id"> "[('invalid_field', '=', 'res.users')]"''',
+            '''Unknown field "ir.ui.view.invalid_field" in domain of <field name="inherit_id">''',
         )
 
     def test_domain_field_searchable(self):
@@ -1885,11 +1885,11 @@ class TestViews(ViewCase):
         )
         self.assertInvalid(
             arch % ('name', 'invalid_field'),
-            """Unknown field "ir.ui.view.invalid_field" in domain of <filter name="draft"> "[('invalid_field', '=', 'dummy')]""",
+            """Unknown field "ir.ui.view.invalid_field" """,
         )
         self.assertInvalid(
             arch % ('name', 'inherit_children_ids.invalid_field'),
-            """Unknown field "ir.ui.view.invalid_field" in domain of <filter name="draft"> "[('inherit_children_ids.invalid_field', '=', 'dummy')]""",
+            """Unknown field "ir.ui.view.invalid_field" """,
         )
         # todo add check for non searchable fields and group by
 
@@ -1911,10 +1911,11 @@ class TestViews(ViewCase):
         # invalid domain: it should be a list of tuples
         self.assertInvalid(
             """ <search string="Search">
+                    <field name="name"/>
                     <filter string="Dummy" name="draft" domain="['name', '=', 'dummy']"/>
                 </search>
             """,
-            """Invalid domain format while checking ['name', '=', 'dummy'] in domain of <filter name="draft">""",
+            """Invalid domain format""",
         )
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -2083,7 +2084,7 @@ class TestViews(ViewCase):
             '_check_xml on ir.ui.view is private and cannot be called from a button',
             name='button name is a private method',
         )
-        self.assertWarning(arch % 'postprocess_and_fields', name='button name is a method that requires extra arguments')
+        self.assertInvalid(arch % 'postprocess_and_fields', name='button name is a method that requires extra arguments')
         arch = """
             <form>
                 <button type="action" name="%s"/>
@@ -2351,7 +2352,6 @@ class TestViews(ViewCase):
                 'arch': arch,
             })
         message = str(catcher.exception.args[0])
-        self.assertEqual(catcher.exception.context['name'], name)
         if expected_message:
             self.assertIn(expected_message, message)
         else:

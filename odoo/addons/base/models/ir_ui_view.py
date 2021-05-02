@@ -163,7 +163,7 @@ class field_validator:
             return model._fields.get(name)
         if model._name not in self.fget:
             self.fget[model._name] = model.fields_get(attributes=['relation'])
-        return self.fget[model._name][name]
+        return self.fget[model._name].get(name, None)
 
     def has_fields(self, models, fields, node):
         models = [x._name for x in models]
@@ -177,8 +177,6 @@ class field_validator:
                     self._load_fields()
                     self.mode = 'full'
                 else:
-                    import pudb
-                    pudb.set_trace()
                     msg = _(
                         'Field "%(field_name)s" does not exist in model "%(model_name)s"',
                         field_name=name, model_name=models[-1],
@@ -473,15 +471,15 @@ actual arch.
             if view.type == 'qweb':
                 continue
 
-            fval = field_validator(self, root, views.keys(), root_view)
+            fval = field_validator(view, root, views.keys(), root_view)
 
             # the inherited node are now embeded in the view, we can validate those nodes only
             for node in tocheck:
-                models = [ self.env[self.model] ]
+                models = [ self.env[view.model] ]
                 for node_field in node.iterancestors('field', 'groupby'):
                     field = node_field.attrib.get('name')
                     models.append( self.env[models[-1]._fields.get(field).comodel_name] )
-                self._check_node(node, models, fval)
+                view._check_node(node, models, fval)
         return True
 
     @api.constrains('type', 'groups_id', 'inherit_id')
@@ -709,7 +707,7 @@ ORDER BY v.priority, v.id
             error = _("View '%(name)s' is private", name=self.key)
         raise AccessError(error)
 
-    def _handle_view_error(self, message, failed_node):
+    def _handle_view_error(self, message, failed_node, raise_exception=True):
         """ Handle a view error by raising an exception or logging a warning,
         depending on the value of `raise_exception`.
 
@@ -733,9 +731,15 @@ ORDER BY v.priority, v.id
             'file': self.env.context.get('install_filename'),
             'line': failed_node.sourceline if failed_node is not None else 1,
         }
-        err = ValueError(message)
-        err.context = error_context
-        raise err
+        if raise_exception:
+            err = ValidationError(message)
+            err.context = error_context
+            raise err
+        _logger.warning(
+            "%s\nView error context:\n%s",
+            message, pprint.pformat(error_context)
+        )
+
 
     def locate_node(self, arch, spec):
         """ Locate a node in a source (parent) architecture.
@@ -1121,7 +1125,7 @@ ORDER BY v.priority, v.id
             else:
                 msg = _(
                     "Field '%(field)s' found in 'groupby' node does not exist in model %(model)s",
-                    field=name, model=name_manager.Model._name,
+                    field=name, model=model._name,
                 )
                 self._handle_view_error(msg, node)
 
@@ -1169,14 +1173,14 @@ ORDER BY v.priority, v.id
         if not any(node.get(alt) for alt in self._att_list('alt')):
             self._handle_view_error(
                 '<img> tag must contain an alt attribute',
-                failed_node=node
+                failed_node=node, raise_exception=False
             )
 
     def _check_tag_a(self, node, model, fval):
         if any('btn' in node.get(cl, '') for cl in self._att_list('class')):
             if node.get('role') != 'button':
                 msg = '"<a>" tag with "btn" class must have "button" role'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
 
     def _check_tag_ul(self, node, model, fval):
         self._check_dropdown_menu(node)
@@ -1212,22 +1216,22 @@ ORDER BY v.priority, v.id
         if any('dropdown-menu' in node.get(cl, '') for cl in self._att_list('class')):
             if node.get('role') != 'menu':
                 msg = 'dropdown-menu class must have menu role'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
 
     def _check_progress_bar(self, node):
         if any('o_progressbar' in node.get(cl, '') for cl in self._att_list('class')):
             if node.get('role') != 'progressbar':
                 msg = 'o_progressbar class must have progressbar role'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
             if not any(node.get(at) for at in self._att_list('aria-valuenow')):
                 msg = 'o_progressbar class must have aria-valuenow attribute'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
             if not any(node.get(at) for at in self._att_list('aria-valuemin')):
                 msg = 'o_progressbar class must have aria-valuemin attribute'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
             if not any(node.get(at) for at in self._att_list('aria-valuemax')):
                 msg = 'o_progressbar class must have aria-valuemaxattribute'
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
 
     def _att_list(self, name):
         return [name, 't-att-%s' % name, 't-attf-%s' % name]
@@ -1303,19 +1307,19 @@ ORDER BY v.priority, v.id
             elif attr == 'data-toggle' and expr == 'tab':
                 if node.get('role') != 'tab':
                     msg = 'tab link (data-toggle="tab") must have "tab" role'
-                    self._handle_view_error(msg, node)
+                    self._handle_view_error(msg, node, raise_exception=False)
                 aria_control = node.get('aria-controls') or node.get('t-att-aria-controls')
                 if not aria_control and not node.get('t-attf-aria-controls'):
                     msg = 'tab link (data-toggle="tab") must have "aria_control" defined'
-                    self._handle_view_error(msg, node)
+                    self._handle_view_error(msg, node, raise_exception=False)
                 if aria_control and '#' in aria_control:
                     msg = 'aria-controls in tablink cannot contains "#"'
-                    self._handle_view_error(msg, node)
+                    self._handle_view_error(msg, node, raise_exception=False)
 
             elif attr == "role" and expr in ('presentation', 'none'):
                 msg = ("A role cannot be `none` or `presentation`. "
                     "All your elements must be accessible with screen readers, describe it.")
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
 
     def _validate_classes(self, node, expr):
         """ Validate the classes present on node. """
@@ -1324,27 +1328,27 @@ ORDER BY v.priority, v.id
         # example: <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_applicant_kanban oe_semantic_html_override">
         if 'modal' in classes and node.get('role') != 'dialog':
             msg = '"modal" class should only be used with "dialog" role'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if 'modal-header' in classes and node.tag != 'header':
             msg = '"modal-header" class should only be used in "header" tag'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if 'modal-body' in classes and node.tag != 'main':
             msg = '"modal-body" class should only be used in "main" tag'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if 'modal-footer' in classes and node.tag != 'footer':
             msg = '"modal-footer" class should only be used in "footer" tag'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if 'tab-pane' in classes and node.get('role') != 'tabpanel':
             msg = '"tab-pane" class should only be used with "tabpanel" role'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if 'nav-tabs' in classes and node.get('role') != 'tablist':
             msg = 'A tab list with class nav-tabs must have role="tablist"'
-            self._handle_view_error(msg, node)
+            self._handle_view_error(msg, node, raise_exception=False)
 
         if any(klass.startswith('alert-') for klass in classes):
             if (
@@ -1355,7 +1359,7 @@ ORDER BY v.priority, v.id
                         "status role or an alert-link class. Please use alert and "
                         "alertdialog only for what expects to stop any activity to "
                         "be read immediately.")
-                self._handle_view_error(msg, node)
+                self._handle_view_error(msg, node, raise_exception=False)
 
         if any(klass.startswith('fa-') for klass in classes):
             description = 'A <%s> with fa class (%s)' % (node.tag, expr)
@@ -1430,7 +1434,7 @@ ORDER BY v.priority, v.id
             return
 
         msg = ('%s must have title in its tag, parents, descendants or have text')
-        self._handle_view_error(msg % description, node)
+        self._handle_view_error(msg % description, node, raise_exception=False)
 
     def _get_client_domain_variables(self, node, domain, key, expr):
         """ Returns all field and variable names present in the given domain
@@ -1439,14 +1443,28 @@ ORDER BY v.priority, v.id
         :param str: key (attrs.<attrs_key>)
         :param str domain:
         """
-        (field_names, var_names) = get_domain_identifiers(domain)
+        try:
+            (field_names, var_names) = get_domain_identifiers(domain)
+        except ValueError:
+            msg = _(
+                'Invalid domain format while checking %(attribute)s in %(value)s',
+                attribute=expr, value=key,
+            )
+            self._handle_view_error(msg, node)
         return dict.fromkeys(field_names | var_names, '%s (%s)' % (key, expr))
 
     def _get_server_domain_variables(self, node, domain, key, Model):
         """ Returns all the variable names present in the given domain (to be
         used server-side).
         """
-        (field_names, var_names) = get_domain_identifiers(domain)
+        try:
+            (field_names, var_names) = get_domain_identifiers(domain)
+        except ValueError:
+            msg = _(
+                'Invalid domain format: %(domain)s',
+                domain=domain
+            )
+            self._handle_view_error(msg, node)
 
         # checking field names
         for name_seq in field_names:
@@ -1464,6 +1482,12 @@ ORDER BY v.priority, v.id
                         )
                         self._handle_view_error(msg, node)
                     field = model._fields.get(fname)
+                    if not field:
+                        msg = _(
+                            'Unknown field "%(model)s.%(field)s" in %(attribute)s %(value)r',
+                            model=model._name, field=fname, attribute=key, value=domain,
+                        )
+                        self._handle_view_error(msg, node)
                     if not field._description_searchable:
                         msg = _(
                             'Unsearchable field "%(field)s" in path %(field_path)r in %(attribute)s=%(value)r',
