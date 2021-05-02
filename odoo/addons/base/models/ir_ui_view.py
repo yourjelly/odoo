@@ -843,7 +843,7 @@ ORDER BY v.priority, v.id
         """
         Utility function to get a view combined with its inherited views, returns a string.
         """
-        return etree.tostring(self._get_arch())
+        return etree.tostring(self._get_arch(), encoding="unicode")
 
 
     def _apply_groups(self, node, name_manager, node_info):
@@ -911,7 +911,7 @@ ORDER BY v.priority, v.id
 
             fields[node.get('name')] = {
                 'fields': self._view_process(model, groupby_node),
-                'arch': etree.tostring(groupby_node)
+                'arch': etree.tostring(groupby_node, encoding="unicode")
             }
             field_nodes[field].append(node)
 
@@ -950,10 +950,13 @@ ORDER BY v.priority, v.id
                 node.set('can_write', 'true' if can_write else 'false')
 
             for child in node:
+                attrs['views'] = {}
                 if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                     node.remove(child)
-                    attrs['fields'] = self._view_process(model, child)
-                    attrs['arch'] = etree.tostring(child)
+                    attrs['views'][child.tag] = {
+                        'fields': self._view_process(model, child),
+                        'arch': etree.tostring(child, encoding="unicode")
+                    }
 
         def _parse(model, node):
             tag = node.tag
