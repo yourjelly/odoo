@@ -1118,7 +1118,7 @@ class TestViews(ViewCase):
         self.assertTrue(validate())     # single view
 
         # validation of a inherited view
-        self._insert_view(
+        vid2 = self._insert_view(
             name='inherited view',
             model=model,
             priority=1,
@@ -1136,7 +1136,7 @@ class TestViews(ViewCase):
             name='inherited view 2',
             model=model,
             priority=5,
-            inherit_id=vid,
+            inherit_id=vid2,
             arch_db="""<?xml version="1.0"?>
                         <xpath expr="//field[@name='name']" position="after">
                           <field name="target"/>
@@ -1307,17 +1307,17 @@ class TestViews(ViewCase):
         view3 = self.View.create({
             'name': 'jake',
             'model': 'ir.ui.menu',
-            'inherit_id': view1.id,
+            'inherit_id': view2.id,
             'priority': 17,
             'arch': """
-                <footer position="attributes">
+                <xpath expr="//footer/footer" position="attributes">
                     <attribute name="thing">bob</attribute>
-                </footer>
+                </xpath>
             """
         })
 
-        view = self.View.with_context(check_view_ids=[view2.id, view3.id]) \
-                        .fields_view_get(view2.id, view_type='form')
+        view = self.View.with_context(check_view_ids=[view2.id, view3.id]).fields_view_get(view2.id, view_type='form')
+
         self.assertEqual(view['type'], 'form')
         self.assertEqual(
             etree.fromstring(

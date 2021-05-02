@@ -1,3 +1,4 @@
+0. Check all occurences of fields_get to use the new attributes=[], it's 20x faster
 1. Faire passer les tests qui pètent à l'install
 2. installer tous les modules et fixer les vues qui pêtent (j'en ai eu 6 sur sale et ses dépendances, donc il ne devrait pas y en avoir trop). Pour voir les exemples de ce que j'ai du fixer: git diff -r 6f9aa96c16a22bdd11ff59a0d7249923111e5d9a -- '*.xml'
 3. voir les TODO que j'ai laissé dans le diff

@@ -1560,31 +1560,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         View = self.env['ir.ui.view'].sudo()
-        # result = {
-        #     'model': self._name,
-        #     'field_parent': False,
-        # }
-
-        # try to find a view_id if none provided
-
         if view_id:
             node = View.browse(view_id)._get_arch()
-
-            # result['arch'] = root_view.get_arch()
-            # result['name'] = root_view.name
-            # result['type'] = root_view.type
-            # result['view_id'] = view_id
-            # result['field_parent'] = root_view.field_parent
-            # result['base_model'] = root_view.model
         else:
-            # fallback on default views methods if no ir.ui.view could be found
             try:
                 node = getattr(self, '_get_default_%s_view' % view_type)()
-                # return None, arch_etree
-
-                # result['arch'] = etree.tostring(arch_etree, encoding='unicode')
-                # result['type'] = view_type
-                # result['name'] = 'default'
             except AttributeError:
                 raise UserError(_("No default view of type '%s' could be found !", view_type))
         View._postprocess_access_rights(self._name, node)
@@ -1638,7 +1618,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # Get the view arch and all other attributes describing the composition of the view
         result = {
-            'arch': etree.tostring(node),
+            'arch': etree.tostring(node, encoding='unicode'),
             'fields': fields,
             'name': view and view.name or 'default',
             'type': view_type,
@@ -2912,20 +2892,20 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         readonly = not (has_access('write') or has_access('create'))
 
         res = {}
+        if attributes is None:
+            attrs = None
+        else:
+            attrs = [(x, '_description_' + x) for x in attributes]
         for fname, field in self._fields.items():
             if allfields and fname not in allfields:
                 continue
             if field.groups and not self.env.su and not self.user_has_groups(field.groups):
                 continue
 
-            description = field.get_description(self.env)
+            description = field.get_description(self.env, attrs)
             if readonly:
                 description['readonly'] = True
                 description['states'] = {}
-            if attributes:
-                description = {key: val
-                               for key, val in description.items()
-                               if key in attributes}
             res[fname] = description
 
         return res
