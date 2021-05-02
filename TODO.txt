@@ -1,7 +1,10 @@
-0. Check all occurences of fields_get to use the new attributes=[], it's 20x faster
-1. Faire passer les tests qui pètent à l'install
-2. installer tous les modules et fixer les vues qui pêtent (j'en ai eu 6 sur sale et ses dépendances, donc il ne devrait pas y en avoir trop). Pour voir les exemples de ce que j'ai du fixer: git diff -r 6f9aa96c16a22bdd11ff59a0d7249923111e5d9a -- '*.xml'
+0. Check why this query has "id" and "select" in master but not in my branch:
+   self.env['account.bank.statement'].fields_view_get(False, 'form')['fields']['line_ids'].keys()
+1. Faire passer les tests qui pètent à l'install de tous les modules
 3. voir les TODO que j'ai laissé dans le diff
-4. je ne suis pas 100% sûr que j'ai tout implémenté à l'identique; faudrait comparer les output des fields_view_get de tous les objets
-5. j'ai été "vite-fait": y'a surement du code mort à enlever, ou des trucs à fixer
-6. il faut virer la cache de read_template au profit de get_arch pour que fields_view_get en profite et pour fortement diminuer la clé de cache. (mais pour cela, faut virer le distribute branding quand le website n'est pas en mode edit). Enfin, je crois, j'ai pas creusé plus que cela, mais y'a clairement un truc qui va pas là.
+4. Code cleanup and documentation
+5. Implement Studio
+6. il faut virer la cache de read_template au profit de get_arch pour que fields_view_get en profite et
+   pour fortement diminuer la clé de cache. (mais pour cela, faut virer le distribute branding quand le
+   website n'est pas en mode edit).
+   Enfin, je crois, j'ai pas creusé plus que cela, mais y'a clairement un truc qui va pas là.
