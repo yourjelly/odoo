@@ -159,8 +159,6 @@ class field_validator:
         return (name=='id') or (name in self.fields.get(tuple(models), {}))
 
     def field_get(self, model, name):
-        if name in model._fields:
-            return model._fields.get(name)
         if model._name not in self.fget:
             self.fget[model._name] = model.fields_get(attributes=['relation'])
         return self.fget[model._name].get(name, None)
@@ -1013,8 +1011,15 @@ ORDER BY v.priority, v.id
                             not self._context.get(action, True) and is_base_model):
                         node.set(action, 'false')
 
-    def _check_tag_field(self, node, model, fval):
-        name = node.get('name')
+    def _check_tag_filter(self, node, models, fval):
+        if node.attrib.get('domain'):
+            expr = node.attrib.get('domain')
+            fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), models[-1])
+            fval.has_fields(models, list(fields.keys()), node)
+
+    def _check_tag_field(self, node, models, fval):
+        model = models[-1]
+        name = node.attrib.get('name')
         if not name:
             self._handle_view_error(_("Field tag must have a \"name\" attribute defined"), node)
         field = fval.field_get(model, name)
@@ -1024,12 +1029,20 @@ ORDER BY v.priority, v.id
                 field_name=name, model_name=model._name,
             )
             self._handle_view_error(msg, node)
-        if node.get('domain') and field.comodel_name not in self.env:
+        if node.get('domain') and field.get('relation', None) not in self.env:
             msg = _(
                 'Domain on non-relational field "%(name)s" makes no sense (domain:%(domain)s)',
                 name=name, domain=node.get('domain'),
             )
             self._handle_view_error(msg, node)
+
+        if node.attrib.get('domain'):
+            model2 = self.env[field['relation']]
+            expr = node.attrib.get('domain')
+            fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model2)
+            fval.has_fields(models, list(fields.keys()), node)
+        elif field.get('relation'):
+            self._get_field_domain_variables(node, model._fields.get(name))
 
         for attribute in ('invisible', 'readonly', 'required'):
             val = node.get(attribute)
@@ -1042,7 +1055,8 @@ ORDER BY v.priority, v.id
                     )
                     self._handle_view_error(msg, node)
 
-    def _check_tag_button(self, node, model, fval):
+    def _check_tag_button(self, node, models, fval):
+        model = models[-1]
         name = node.get('name')
         special = node.get('special')
         type_ = node.get('type')
@@ -1103,18 +1117,18 @@ ORDER BY v.priority, v.id
             description = 'A button with icon attribute (%s)' % node.get('icon')
             self._validate_fa_class_accessibility(node, description)
 
-    def _check_tag_graph(self, node, model, fval):
+    def _check_tag_graph(self, node, models, fval):
         for child in node.iterchildren(tag=etree.Element):
             if child.tag != 'field' and not isinstance(child, etree._Comment):
                 msg = _('A <graph> can only contains <field> nodes, found a <%s>', child.tag)
                 self._handle_view_error(msg, child)
 
-    def _check_tag_groupby(self, node, model, fval):
+    def _check_tag_groupby(self, node, models, fval):
         # groupby nodes should be considered as nested view because they may
         # contain fields on the comodel
         name = node.get('name')
         if name:
-            field = model._fields.get(name)
+            field = models[-1]._fields.get(name)
             if field:
                 if field.type != 'many2one':
                     msg = _(
@@ -1125,11 +1139,11 @@ ORDER BY v.priority, v.id
             else:
                 msg = _(
                     "Field '%(field)s' found in 'groupby' node does not exist in model %(model)s",
-                    field=name, model=model._name,
+                    field=name, model=models[-1]._name,
                 )
                 self._handle_view_error(msg, node)
 
-    def _check_tag_tree(self, node, model, fval):
+    def _check_tag_tree(self, node, models, fval):
         allowed_tags = ('field', 'button', 'control', 'groupby', 'widget', 'header')
         for child in node.iterchildren(tag=etree.Element):
             if child.tag not in allowed_tags and not isinstance(child, etree._Comment):
@@ -1139,7 +1153,7 @@ ORDER BY v.priority, v.id
                 )
                 self._handle_view_error(msg, child)
 
-    def _check_tag_search(self, node, model, fval):
+    def _check_tag_search(self, node, models, fval):
         if len(list(node.iterchildren('searchpanel'))) > 1:
             self._handle_view_error(_('Search tag can only contain one search panel'), node)
         if not list(node.iterdescendants(tag="field")):
@@ -1148,44 +1162,44 @@ ORDER BY v.priority, v.id
             # then a search is not possible.
             self._handle_view_error('Search tag requires at least one field element', failed_node=node)
 
-    def _check_tag_searchpanel(self, node, model, fval):
+    def _check_tag_searchpanel(self, node, models, fval):
         for child in node.iterchildren(tag=etree.Element):
             if child.get('domain') and child.get('select') != 'multi':
                 msg = _('Searchpanel item with select multi cannot have a domain.')
                 self._handle_view_error(msg, child)
 
-    def _check_tag_label(self, node, model, fval):
+    def _check_tag_label(self, node, models, fval):
         # replace return not arch.xpath('//label[not(@for) and not(descendant::input)]')
         for_ = node.get('for')
         if not for_:
             msg = _('Label tag must contain a "for". To match label style '
                     'without corresponding field or button, use \'class="o_form_label"\'.')
             self._handle_view_error(msg, node)
-        elif not model._fields.get(for_):
+        elif not models[-1]._fields.get(for_):
             message = _("Field `%(name)s` does not exist", name=field_name)
             view._handle_view_error(message, None)
 
-    def _check_tag_page(self, node, model, fval):
+    def _check_tag_page(self, node, models, fval):
         if node.getparent() is None or node.getparent().tag != 'notebook':
             self._handle_view_error(_('Page direct ancestor must be notebook'), node)
 
-    def _check_tag_img(self, node, model, fval):
+    def _check_tag_img(self, node, models, fval):
         if not any(node.get(alt) for alt in self._att_list('alt')):
             self._handle_view_error(
                 '<img> tag must contain an alt attribute',
                 failed_node=node, raise_exception=False
             )
 
-    def _check_tag_a(self, node, model, fval):
+    def _check_tag_a(self, node, models, fval):
         if any('btn' in node.get(cl, '') for cl in self._att_list('class')):
             if node.get('role') != 'button':
                 msg = '"<a>" tag with "btn" class must have "button" role'
                 self._handle_view_error(msg, node, raise_exception=False)
 
-    def _check_tag_ul(self, node, model, fval):
+    def _check_tag_ul(self, node, models, fval):
         self._check_dropdown_menu(node)
 
-    def _check_tag_div(self, node, model, fval):
+    def _check_tag_div(self, node, models, fval):
         self._check_dropdown_menu(node)
         self._check_progress_bar(node)
 
@@ -1194,7 +1208,7 @@ ORDER BY v.priority, v.id
         if type(tag) is not str:
             return
         if hasattr(self, '_check_tag_' + tag):
-            getattr(self, '_check_tag_' + tag)(node, models[-1], fval)
+            getattr(self, '_check_tag_' + tag)(node, models, fval)
 
         self._validate_attrs(node, models, fval.has_fields)
 
@@ -1240,17 +1254,11 @@ ORDER BY v.priority, v.id
         model = models[-1]
         """ Generic validation of node attrs. """
         for attr, expr in node.items():
-            if attr == 'domain':
-                # TODO: this seems very slow
-                fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model)
-                has_fields(models, list(fields.keys()), node)
-
-            elif attr.startswith('decoration-'):
+            if attr.startswith('decoration-'):
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
                 has_fields(models, fields, node)
 
             elif attr in ('attrs', 'context'):
-                # TODO: this seems very slow
                 for key, val_ast in get_dict_asts(expr).items():
                     if attr == 'attrs' and isinstance(val_ast, ast.List):
                         # domains in attrs are used for readonly, invisible, ...
@@ -1453,7 +1461,7 @@ ORDER BY v.priority, v.id
             self._handle_view_error(msg, node)
         return dict.fromkeys(field_names | var_names, '%s (%s)' % (key, expr))
 
-    def _get_server_domain_variables(self, node, domain, key, Model):
+    def _get_server_domain_variables(self, node, domain, key, main_model):
         """ Returns all the variable names present in the given domain (to be
         used server-side).
         """
@@ -1469,11 +1477,8 @@ ORDER BY v.priority, v.id
         # checking field names
         for name_seq in field_names:
             fnames = name_seq.split('.')
-            if node.tag=='filter':
-                model = Model
-            else:
-                model = self.env[Model._fields[node.get('name')].comodel_name]
             try:
+                model = main_model
                 for fname in fnames:
                     if not isinstance(model, models.BaseModel):
                         msg = _(
@@ -1494,7 +1499,7 @@ ORDER BY v.priority, v.id
                             field=field, field_path=name_seq, attribute=key, value=domain,
                         )
                         self._handle_view_error(msg, node)
-                    model = model[fname]
+                    model = self.env.get(field.comodel_name, None)
             except KeyError:
                 msg = _(
                     'Unknown field "%(model)s.%(field)s" in %(attribute)s%(value)r',
@@ -1504,10 +1509,17 @@ ORDER BY v.priority, v.id
 
         return dict.fromkeys(var_names, "%s (%s)" % (key, domain))
 
-    def _get_field_domain_variables(self, node, field, editable):
+    def _get_field_domain_variables(self, node, field):
         """ Return the variable names present in the field's domain, if no
         domain is given on the node itself.
         """
+        editable = False
+        for parent in node.iterancestors('tree', 'form', 'graph', 'pivot', 'kanban', 'gantt', 'calendar'):
+            if parent.tag=='form':
+                editable = True
+            elif parent.tag=='tree':
+                editable = parent.attrib.get('editable', False)
+            break
         if editable and not node.get('domain') and field.relational:
             domain = field._description_domain(self.env)
             if isinstance(domain, str):

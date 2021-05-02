@@ -1721,6 +1721,11 @@ class TestViews(ViewCase):
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
         })
+        self.View.create({
+            'name': 'valid domain',
+            'model': 'ir.ui.view',
+            'arch': arch % ('', ''),
+        })
         with self.assertRaises(ValidationError):
             self.View.create({
                 'name': 'valid domain',
@@ -1897,6 +1902,7 @@ class TestViews(ViewCase):
     def test_group_by_in_filter(self):
         arch = """
             <search string="Search">
+                <field name="name"/>
                 <filter string="Date" name="month" domain="[]" context="{'group_by':'%s'}"/>
             </search>
         """
@@ -2221,22 +2227,22 @@ class TestViews(ViewCase):
         self.assertValid('<form><div class="alert alert-success" role="alert"/></form>')
         self.assertValid('<form><div class="alert alert-success" role="alertdialog"/></form>')
         self.assertValid('<form><div class="alert alert-success" role="status"/></form>')
-        self.assertWarning('<form><div class="alert alert-success"/></form>')
+        self.assertInvalid('<form><div class="alert alert-success"/></form>')
 
     def test_valid_prohibited_none_role(self):
-        self.assertWarning('<form><div role="none"/></form>')
-        self.assertWarning('<form><div role="presentation"/></form>')
+        self.assertInvalid('<form><div role="none"/></form>')
+        self.assertInvalid('<form><div role="presentation"/></form>')
 
     def test_valid_alternative_image_text(self):
         self.assertValid('<form><img src="a" alt="a image"></img></form>')
-        self.assertWarning('<form><img src="a"></img></form>')
+        self.assertInvalid('<form><img src="a"></img></form>')
 
     def test_valid_accessibility_icon_text(self):
-        self.assertWarning(
+        self.assertInvalid(
             '<form><span class="fa fa-warning"/></form>',
             'A <span> with fa class (fa fa-warning) must have title in its tag, parents, descendants or have text'
         )
-        self.assertWarning(
+        self.assertInvalid(
             '<form><button icon="fa-warning"/></form>',
             'A button with icon attribute (fa-warning) must have title in its tag, parents, descendants or have text'
         )
@@ -2248,43 +2254,43 @@ class TestViews(ViewCase):
         self.assertValid('<form><span aria-label="text" class="fa fa-warning"/></form>')
 
     def test_valid_simili_button(self):
-        self.assertWarning('<form><a class="btn"/></form>')
+        self.assertInvalid('<form><a class="btn"/></form>')
         self.assertValid('<form><a class="btn" role="button"/></form>')
 
     def test_valid_dialog(self):
-        self.assertWarning('<form><div class="modal"/></form>')
+        self.assertInvalid('<form><div class="modal"/></form>')
         self.assertValid('<form><div role="dialog" class="modal"></div></form>')
-        self.assertWarning('<form><div class="modal-header"/></form>')
+        self.assertInvalid('<form><div class="modal-header"/></form>')
         self.assertValid('<form><header class="modal-header"/></form>')
-        self.assertWarning('<form><div class="modal-footer"/></form>')
+        self.assertInvalid('<form><div class="modal-footer"/></form>')
         self.assertValid('<form><footer class="modal-footer"/></form>')
-        self.assertWarning('<form><div class="modal-body"/></form>')
+        self.assertInvalid('<form><div class="modal-body"/></form>')
         self.assertValid('<form><main class="modal-body"/></form>')
 
     def test_valid_simili_dropdown(self):
         self.assertValid('<form><ul class="dropdown-menu" role="menu"></ul></form>')
-        self.assertWarning('<form><ul class="dropdown-menu"></ul></form>')
+        self.assertInvalid('<form><ul class="dropdown-menu"></ul></form>')
 
     def test_valid_simili_progressbar(self):
         self.assertValid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertWarning('<form><div class="o_progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemax="100">14%</div></form>')
-        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" >14%</div></form>')
+        self.assertInvalid('<form><div class="o_progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
+        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
+        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemax="100">14%</div></form>')
+        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" >14%</div></form>')
 
     def test_valid_simili_tabpanel(self):
         self.assertValid('<form><div class="tab-pane" role="tabpanel"/></form>')
-        self.assertWarning('<form><div class="tab-pane"/></form>')
+        self.assertInvalid('<form><div class="tab-pane"/></form>')
 
     def test_valid_simili_tablist(self):
         self.assertValid('<form><div class="nav-tabs" role="tablist"/></form>')
-        self.assertWarning('<form><div class="nav-tabs"/></form>')
+        self.assertInvalid('<form><div class="nav-tabs"/></form>')
 
     def test_valid_simili_tab(self):
         self.assertValid('<form><a data-toggle="tab" role="tab" aria-controls="test"/></form>')
-        self.assertWarning('<form><a data-toggle="tab" aria-controls="test"/></form>')
-        self.assertWarning('<form><a data-toggle="tab" role="tab"/></form>')
-        self.assertWarning('<form><a data-toggle="tab" role="tab" aria-controls="#test"/></form>')
+        self.assertInvalid('<form><a data-toggle="tab" aria-controls="test"/></form>')
+        self.assertInvalid('<form><a data-toggle="tab" role="tab"/></form>')
+        self.assertInvalid('<form><a data-toggle="tab" role="tab" aria-controls="#test"/></form>')
 
     def test_valid_focusable_button(self):
         self.assertValid('<form><a class="btn" role="button"/></form>')
