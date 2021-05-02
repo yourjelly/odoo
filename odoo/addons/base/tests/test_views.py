@@ -1334,13 +1334,9 @@ class TestViews(ViewCase):
     def test_modifiers(self):
         def _test_modifiers(what, expected):
             modifiers = {}
-            if isinstance(what, str):
-                node = etree.fromstring(what)
-                transfer_node_to_modifiers(node, modifiers)
-                assert modifiers == expected, "%s != %s" % (modifiers, expected)
-            elif isinstance(what, dict):
-                transfer_field_to_modifiers(what, modifiers)
-                assert modifiers == expected, "%s != %s" % (modifiers, expected)
+            node = etree.fromstring(what)
+            transfer_node_to_modifiers(node, modifiers)
+            assert modifiers == expected, "%s != %s" % (modifiers, expected)
 
         _test_modifiers('<field name="a"/>', {})
         _test_modifiers('<field name="a" invisible="1"/>', {"invisible": True})
@@ -1366,11 +1362,6 @@ class TestViews(ViewCase):
             """<field name="a" attrs="{'invisible': [['b', '=', 'c']]}"/>""",
             {"invisible": [["b", "=", "c"]]},
         )
-
-        # The dictionary is supposed to be the result of fields_get().
-        _test_modifiers({}, {})
-        _test_modifiers({"invisible": True}, {"invisible": True})
-        _test_modifiers({"invisible": False}, {})
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_invalid_field(self):
@@ -1720,11 +1711,6 @@ class TestViews(ViewCase):
             'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
-        })
-        self.View.create({
-            'name': 'valid domain',
-            'model': 'ir.ui.view',
-            'arch': arch % ('', ''),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
@@ -2208,7 +2194,7 @@ class TestViews(ViewCase):
         )
         self.assertInvalid(
             '<form><label for="model"/></form>',
-            "Name or id 'model' used in 'label for' must be present in view but is missing.",
+            'Field "model" does not exist in model',
         )
 
     def test_col_colspan_numerical(self):
@@ -2230,8 +2216,8 @@ class TestViews(ViewCase):
         self.assertInvalid('<form><div class="alert alert-success"/></form>')
 
     def test_valid_prohibited_none_role(self):
-        self.assertInvalid('<form><div role="none"/></form>')
-        self.assertInvalid('<form><div role="presentation"/></form>')
+        self.assertWarning('<form><div role="none"/></form>')
+        self.assertWarning('<form><div role="presentation"/></form>')
 
     def test_valid_alternative_image_text(self):
         self.assertValid('<form><img src="a" alt="a image"></img></form>')
@@ -2254,7 +2240,7 @@ class TestViews(ViewCase):
         self.assertValid('<form><span aria-label="text" class="fa fa-warning"/></form>')
 
     def test_valid_simili_button(self):
-        self.assertInvalid('<form><a class="btn"/></form>')
+        self.assertWarning('<form><a class="btn"/></form>')
         self.assertValid('<form><a class="btn" role="button"/></form>')
 
     def test_valid_dialog(self):
@@ -2269,14 +2255,14 @@ class TestViews(ViewCase):
 
     def test_valid_simili_dropdown(self):
         self.assertValid('<form><ul class="dropdown-menu" role="menu"></ul></form>')
-        self.assertInvalid('<form><ul class="dropdown-menu"></ul></form>')
+        self.assertWarning('<form><ul class="dropdown-menu"></ul></form>')
 
     def test_valid_simili_progressbar(self):
         self.assertValid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertInvalid('<form><div class="o_progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
-        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemax="100">14%</div></form>')
-        self.assertInvalid('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" >14%</div></form>')
+        self.assertWarning('<form><div class="o_progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
+        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100">14%</div></form>')
+        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemax="100">14%</div></form>')
+        self.assertWarning('<form><div class="o_progressbar" role="progressbar" aria-valuenow="14" aria-valuemin="0" >14%</div></form>')
 
     def test_valid_simili_tabpanel(self):
         self.assertValid('<form><div class="tab-pane" role="tabpanel"/></form>')
@@ -2288,9 +2274,9 @@ class TestViews(ViewCase):
 
     def test_valid_simili_tab(self):
         self.assertValid('<form><a data-toggle="tab" role="tab" aria-controls="test"/></form>')
-        self.assertInvalid('<form><a data-toggle="tab" aria-controls="test"/></form>')
-        self.assertInvalid('<form><a data-toggle="tab" role="tab"/></form>')
-        self.assertInvalid('<form><a data-toggle="tab" role="tab" aria-controls="#test"/></form>')
+        self.assertWarning('<form><a data-toggle="tab" aria-controls="test"/></form>')
+        self.assertWarning('<form><a data-toggle="tab" role="tab"/></form>')
+        self.assertWarning('<form><a data-toggle="tab" role="tab" aria-controls="#test"/></form>')
 
     def test_valid_focusable_button(self):
         self.assertValid('<form><a class="btn" role="button"/></form>')

@@ -78,7 +78,7 @@ def transfer_node_to_modifiers(node, modifiers, context=None):
     for a in ('invisible', 'readonly', 'required'):
         if node.get(a):
             v = bool(safe_eval.safe_eval(node.get(a), {'context': context or {}}))
-            if v or (a not in modifiers or not isinstance(modifiers[a], list)):
+            if v or (a in modifiers):
                 # Don't set the attribute to False if a dynamic value was
                 # provided (i.e. a domain from attrs or states).
                 modifiers[a] = v
@@ -1029,7 +1029,7 @@ ORDER BY v.priority, v.id
                 field_name=name, model_name=model._name,
             )
             self._handle_view_error(msg, node)
-        if node.get('domain') and field.get('relation', None) not in self.env:
+        if node.attrib.get('domain') and field.get('relation', None) not in self.env:
             msg = _(
                 'Domain on non-relational field "%(name)s" makes no sense (domain:%(domain)s)',
                 name=name, domain=node.get('domain'),
@@ -1042,7 +1042,8 @@ ORDER BY v.priority, v.id
             fields = self._get_server_domain_variables(node, expr, 'domain of <%s%s> ' % (node.tag, (' name="%s"' % node.get('name')) if node.get('name') else '' ), model2)
             fval.has_fields(models, list(fields.keys()), node)
         elif field.get('relation'):
-            self._get_field_domain_variables(node, model._fields.get(name))
+            fields = self._get_field_domain_variables(node, model._fields.get(name))
+            fval.has_fields(models, list(fields.keys()), node)
 
         for attribute in ('invisible', 'readonly', 'required'):
             val = node.get(attribute)
@@ -1175,9 +1176,7 @@ ORDER BY v.priority, v.id
             msg = _('Label tag must contain a "for". To match label style '
                     'without corresponding field or button, use \'class="o_form_label"\'.')
             self._handle_view_error(msg, node)
-        elif not models[-1]._fields.get(for_):
-            message = _("Field `%(name)s` does not exist", name=field_name)
-            view._handle_view_error(message, None)
+        fval.has_fields(models, [for_], node)
 
     def _check_tag_page(self, node, models, fval):
         if node.getparent() is None or node.getparent().tag != 'notebook':
@@ -1187,7 +1186,7 @@ ORDER BY v.priority, v.id
         if not any(node.get(alt) for alt in self._att_list('alt')):
             self._handle_view_error(
                 '<img> tag must contain an alt attribute',
-                failed_node=node, raise_exception=False
+                failed_node=node
             )
 
     def _check_tag_a(self, node, models, fval):
@@ -1306,7 +1305,7 @@ ORDER BY v.priority, v.id
                         self.env['ir.model.data'].xmlid_lookup(group.strip())
                     except ValueError:
                         msg = "The group %r defined in view does not exist!"
-                        self._handle_view_error(msg % group, node)
+                        self._handle_view_error(msg % group, node, raise_exception=False)
 
             elif attr == 'group':
                 msg = "attribute 'group' is not valid.  Did you mean 'groups'?"
@@ -1336,27 +1335,27 @@ ORDER BY v.priority, v.id
         # example: <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click oe_applicant_kanban oe_semantic_html_override">
         if 'modal' in classes and node.get('role') != 'dialog':
             msg = '"modal" class should only be used with "dialog" role'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if 'modal-header' in classes and node.tag != 'header':
             msg = '"modal-header" class should only be used in "header" tag'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if 'modal-body' in classes and node.tag != 'main':
             msg = '"modal-body" class should only be used in "main" tag'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if 'modal-footer' in classes and node.tag != 'footer':
             msg = '"modal-footer" class should only be used in "footer" tag'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if 'tab-pane' in classes and node.get('role') != 'tabpanel':
             msg = '"tab-pane" class should only be used with "tabpanel" role'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if 'nav-tabs' in classes and node.get('role') != 'tablist':
             msg = 'A tab list with class nav-tabs must have role="tablist"'
-            self._handle_view_error(msg, node, raise_exception=False)
+            self._handle_view_error(msg, node)
 
         if any(klass.startswith('alert-') for klass in classes):
             if (
@@ -1367,24 +1366,24 @@ ORDER BY v.priority, v.id
                         "status role or an alert-link class. Please use alert and "
                         "alertdialog only for what expects to stop any activity to "
                         "be read immediately.")
-                self._handle_view_error(msg, node, raise_exception=False)
+                self._handle_view_error(msg, node)
 
         if any(klass.startswith('fa-') for klass in classes):
             description = 'A <%s> with fa class (%s)' % (node.tag, expr)
             self._validate_fa_class_accessibility(node, description)
 
-            if any(klass.startswith('btn') for klass in classes):
-                if node.tag in ('a', 'button', 'select'):
-                    pass
-                elif node.tag == 'input' and node.get('type') in ('button', 'submit', 'reset'):
-                    pass
-                elif any(klass in classes for klass in ('btn-group', 'btn-toolbar', 'btn-ship')):
-                    pass
-                else:
-                    msg = ("A simili button must be in tag a/button/select or tag `input` "
-                            "with type button/submit/reset or have class in "
-                            "btn-group/btn-toolbar/btn-ship")
-                    self._handle_view_error(msg, node)
+        if any(klass.startswith('btn') for klass in classes):
+            if node.tag in ('a', 'button', 'select'):
+                pass
+            elif node.tag == 'input' and node.get('type') in ('button', 'submit', 'reset'):
+                pass
+            elif any(klass in classes for klass in ('btn-group', 'btn-toolbar', 'btn-ship')):
+                pass
+            else:
+                msg = ("A simili button must be in tag a/button/select or tag `input` "
+                        "with type button/submit/reset or have class in "
+                        "btn-group/btn-toolbar/btn-ship")
+                self._handle_view_error(msg, node, raise_exception=False)
 
     def _validate_fa_class_accessibility(self, node, description):
         valid_aria_attrs = set(
@@ -1442,7 +1441,7 @@ ORDER BY v.priority, v.id
             return
 
         msg = ('%s must have title in its tag, parents, descendants or have text')
-        self._handle_view_error(msg % description, node, raise_exception=False)
+        self._handle_view_error(msg % description, node)
 
     def _get_client_domain_variables(self, node, domain, key, expr):
         """ Returns all field and variable names present in the given domain
@@ -1513,14 +1512,21 @@ ORDER BY v.priority, v.id
         """ Return the variable names present in the field's domain, if no
         domain is given on the node itself.
         """
+        if node.get('readonly', False) in ("1", "True", "true"):
+            return {}
+        if field._description_readonly:
+            return {}
         editable = False
         for parent in node.iterancestors('tree', 'form', 'graph', 'pivot', 'kanban', 'gantt', 'calendar'):
             if parent.tag=='form':
                 editable = True
+                for p2 in parent.iterancestors('field'):
+                    if p2.attrib.get('readonly', False) in ("1", "True", "true"):
+                        editable = False
             elif parent.tag=='tree':
                 editable = parent.attrib.get('editable', False)
             break
-        if editable and not node.get('domain') and field.relational:
+        if editable and not node.get('domain'):
             domain = field._description_domain(self.env)
             if isinstance(domain, str):
                 return self._get_server_domain_variables(
