@@ -1927,12 +1927,11 @@ class TestViews(ViewCase):
             """Field inherit_id used in domain of <field name="groups_id">  ([['view_access', '=', inherit_id]]) must be present in view but is missing.""",
         )
         self.assertInvalid(
-            arch % ('', '<field name="inherit_id"/>', 'view_access', 'view_access'),
-            """Field view_access used in domain of <field name="groups_id">  ([['view_access', '=', view_access]]) must be present in view but is missing.""",
+            arch % ('', '<field name="inherit_id"/>', 'view_access', 'view_access')
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'inherit_id', 'inherit_id'),
-            """Unknown field "res.groups.inherit_id" in domain of <field name="groups_id"> "[['inherit_id', '=', inherit_id]]""",
+            """Unknown field "res.groups.inherit_id" in domain of <field name="groups_id">""",
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id" select="multi"/>', 'view_access', 'inherit_id'),
