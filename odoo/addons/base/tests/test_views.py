@@ -1924,7 +1924,7 @@ class TestViews(ViewCase):
         self.assertValid(arch % ('', '<field name="inherit_id"/>', 'view_access', 'inherit_id'))
         self.assertInvalid(
             arch % ('<field name="inherit_id"/>', '', 'view_access', 'inherit_id'),
-            """Field inherit_id used in domain of <field name="groups_id">  ([['view_access', '=', inherit_id]]) must be present in view but is missing.""",
+            """Field "inherit_id" does not exist in """
         )
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'view_access', 'view_access')
@@ -1932,10 +1932,6 @@ class TestViews(ViewCase):
         self.assertInvalid(
             arch % ('', '<field name="inherit_id"/>', 'inherit_id', 'inherit_id'),
             """Unknown field "res.groups.inherit_id" in domain of <field name="groups_id">""",
-        )
-        self.assertInvalid(
-            arch % ('', '<field name="inherit_id" select="multi"/>', 'view_access', 'inherit_id'),
-            """Field inherit_id used in domain of <field name="groups_id">  ([['view_access', '=', inherit_id]]) is present in view but is in select multi.""",
         )
 
         arch = """
@@ -2345,8 +2341,6 @@ class TestViews(ViewCase):
         message = str(catcher.exception.args[0])
         if expected_message:
             self.assertIn(expected_message, message)
-        else:
-            _logger.warning(message)
 
     def assertWarning(self, arch, expected_message=None, name='invalid view'):
         with self.assertLogs('odoo.addons.base.models.ir_ui_view', level="WARNING") as log_catcher:

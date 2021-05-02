@@ -130,7 +130,13 @@ class field_validator:
     def _load_fields(self):
         models = (self.model,)
         self.fields = collections.defaultdict(list)
-        for event, field in etree.iterwalk(self.root, ('start','end'), tag=("field", "groupby")):
+        for event, field in etree.iterwalk(self.root, ('start','end'), tag=("field", "groupby", "searchpanel")):
+            if field.tag=="searchpanel":
+                if event=='start':
+                    models += (models[-1], )
+                else:
+                    models = models[:-1]
+                continue
             fname = field.attrib.get('name')
             if event=='start':
                 self.fields[tuple(models)].append(fname)
@@ -474,9 +480,13 @@ actual arch.
             # the inherited node are now embeded in the view, we can validate those nodes only
             for node in tocheck:
                 models = [ self.env[view.model] ]
-                for node_field in node.iterancestors('field', 'groupby'):
-                    field = node_field.attrib.get('name')
-                    models.append( self.env[models[-1]._fields.get(field).comodel_name] )
+                for node_field in node.iterancestors('field', 'groupby', 'searchpanel'):
+                    if node_field.tag=='searchpanel':
+                        # a search panel defines a new namespace for fields inside
+                        models.append( models[-1] )
+                    else:
+                        field = node_field.attrib.get('name')
+                        models.append( self.env[models[-1]._fields.get(field).comodel_name] )
                 view._check_node(node, models, fval)
         return True
 
@@ -1215,8 +1225,9 @@ ORDER BY v.priority, v.id
             name = node.attrib.get('name')
             field = models[-1]._fields.get(name)
             if field and field.comodel_name:
-                models = models.copy()
-                models.append( self.env[field.comodel_name] )
+                models = models[:] + [ self.env[field.comodel_name] ]
+        elif node.tag in ('searchpanel',):
+            models = models[:] + [ models[-1] ]
         for child in node:
             self._check_node(child, models, fval)
 
