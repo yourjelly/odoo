@@ -30,11 +30,6 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 _logger = logging.getLogger(__name__)
 
-def unbuffer(symb, cr):
-    if symb is None:
-        return None
-    return str(symb)
-
 def undecimalize(symb, cr):
     if symb is None:
         return None
