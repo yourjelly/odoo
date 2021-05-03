@@ -262,7 +262,7 @@
     <xpath expr="//div[@id='o_wevent_index_sidebar']" position="inside">
         <div class="o_wevent_sidebar_block">
             <h6 class="o_wevent_sidebar_title">About us</h6>
-            <p>Use this paragrah to write a short text about your events or company.</p>
+            <p>Use this paragraph to write a short text about your events or company.</p>
         </div>
         <div id="oe_structure_website_event_about_us_1" class="oe_structure"/>
     </xpath>
