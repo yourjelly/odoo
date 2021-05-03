@@ -23,7 +23,7 @@ function assignOptions(kwargs, options, whileList) {
 // ORM
 // -----------------------------------------------------------------------------
 
-class ORM {
+export class ORM {
   constructor(rpc, user) {
     this.rpc = rpc;
     this.user = user;
