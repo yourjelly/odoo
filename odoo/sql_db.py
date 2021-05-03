@@ -8,41 +8,45 @@ the database, *not* a database abstraction toolkit. Database abstraction is what
 the ORM does, in fact.
 """
 
-from contextlib import contextmanager
-from functools import wraps
+
 import itertools
 import logging
+import psycopg2
+import psycopg2.extras
+import psycopg2.extensions
+import re
+import threading
 import time
 import uuid
 import warnings
 
+from contextlib import contextmanager
+from datetime import timedelta
 from decorator import decorator
-import psycopg2
-import psycopg2.extras
-import psycopg2.extensions
+from functools import wraps
+from inspect import currentframe
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED, ISOLATION_LEVEL_REPEATABLE_READ
 from psycopg2.pool import PoolError
 from werkzeug import urls
 
 from odoo.api import Environment
 
+from . import tools
+from .tools.func import frame_codeinfo
+
+
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 
 _logger = logging.getLogger(__name__)
+
 
 def undecimalize(symb, cr):
     if symb is None:
         return None
     return float(symb)
 
+
 psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,), 'float', undecimalize))
-
-
-from . import tools
-from .tools.func import frame_codeinfo
-from datetime import timedelta
-import threading
-from inspect import currentframe
 
 
 def flush_env(cr, *, clear=True):
@@ -69,7 +73,6 @@ def clear_env(cr):
             env.clear()
             break
 
-import re
 re_from = re.compile('.* from "?([a-zA-Z_0-9]+)"? .*$')
 re_into = re.compile('.* into "?([a-zA-Z_0-9]+)"? .*$')
 
