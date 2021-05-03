@@ -311,13 +311,16 @@
 <!-- Index - Sidebar - Quotes -->
 <template id="index_sidebar_quotes" inherit_id="website_event.index_sidebar" active="True" customize_show="True" name="Quotes" priority="60">
     <xpath expr="//div[@id='o_wevent_index_sidebar']" position="inside">
-        <div class="o_wevent_sidebar_block card">
-            <div class="card-body">
-                <blockquote class="blockquote mb-0">
-                    <p><em>Write here a quote from one of your attendees. It gives confidence in your events.</em></p>
-                    <footer class="blockquote-footer text-muted">Author</footer>
-                </blockquote>
-            </div>
+        <div class="o_wevent_sidebar_block">
+            <h6 class="o_wevent_sidebar_title">Testimonials</h6>
+            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote mb-0">
+                <div class="s_blockquote_content bg-white small">
+                    <p class="text-left">Write here a positive feedback from one of your attendees. It gives confidence in your events.</p>
+                    <footer class="blockquote-footer text-right">
+                        <span class="s_blockquote_author"><b>John DOE</b> &#8226; CEO of MyCompany</span>
+                    </footer>
+                </div>
+            </blockquote>
         </div>
         <div id="oe_structure_website_event_sidebar_4" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
