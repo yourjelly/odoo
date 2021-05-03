@@ -919,6 +919,12 @@ ORDER BY v.priority, v.id
             attrs = {key: node.get(key) for key in ('id', 'select') if node.get(key)}
             fields[node.get('name')] = attrs
             field = model._fields.get(node.get('name'))
+
+            # if the field does not exists on the object, but has been defined in
+            # fields_get ovewrite: do nothing
+            if not field:
+                return
+
             field_nodes[field].append(node)
 
             # TODO: this is also tested by fields_get, optimization possible here?
@@ -927,11 +933,13 @@ ORDER BY v.priority, v.id
                 node.getparent().remove(node)
                 return
 
-            # TODO: optimize: no need to "node2mod" & "mod2node" if field doesn't define the attribute)
             # TODO: cleanup API: remove fields.states and use modifiers only
             modifiers = {}
             transfer_field_to_modifiers(field, modifiers)
-            if modifiers:
+
+            # TODO: optimize: no need to "node2mod" & "mod2node" if field doesn't define the attribute)
+            # uncomment the 'or True" by converting views modifiers into real JSON
+            if True or modifiers:
                 transfer_node_to_modifiers(node, modifiers, self._context)
                 transfer_modifiers_to_node(modifiers, node)
             elif node.get('attrs'):
@@ -949,8 +957,8 @@ ORDER BY v.priority, v.id
                 node.set('can_create', 'true' if can_create else 'false')
                 node.set('can_write', 'true' if can_write else 'false')
 
+            attrs['views'] = {}
             for child in node:
-                attrs['views'] = {}
                 if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
                     node.remove(child)
                     attrs['views'][child.tag] = {
