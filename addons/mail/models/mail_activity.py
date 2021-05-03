@@ -212,6 +212,10 @@ class MailActivity(models.Model):
         help='Technical field for UX purpose')
     mail_template_ids = fields.Many2many(related='activity_type_id.mail_template_ids', readonly=True)
     chaining_type = fields.Selection(related='activity_type_id.chaining_type', readonly=True)
+    notify_by_email = fields.Boolean(
+        string='Notify by email',
+        help='Send a notification by email',
+        default=True)
     # access
     can_write = fields.Boolean(compute='_compute_can_write', help='Technical field to hide buttons if the current user has no access.')
 
@@ -392,7 +396,7 @@ class MailActivity(models.Model):
             # send a notification to assigned user; in case of manually done activity also check
             # target has rights on document otherwise we prevent its creation. Automated activities
             # are checked since they are integrated into business flows that should not crash.
-            if activity.user_id != self.env.user:
+            if activity.user_id != self.env.user and activity.notify_by_email:
                 if not activity.automated:
                     activity._check_access_assignation()
                 if not self.env.context.get('mail_activity_quick_update', False):
@@ -419,7 +423,7 @@ class MailActivity(models.Model):
                 to_check = user_changes.filtered(lambda act: not act.automated)
                 to_check._check_access_assignation()
                 if not self.env.context.get('mail_activity_quick_update', False):
-                    user_changes.action_notify()
+                    user_changes.filtered(lambda activity: activity.notify_by_email).action_notify()
             for activity in user_changes:
                 self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[activity.user_id.partner_id.id])
                 if activity.date_deadline <= fields.Date.today():
