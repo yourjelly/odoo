@@ -85,7 +85,7 @@
             <field name="mode">primary</field>
             <field name="inherit_id" ref="product.product_search_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//filter[@name='inactive']" position="after">
+                <xpath expr="//field[@name='product_tmpl_id']" position="after">
                     <separator/>
                     <filter name="real_stock_available" string="Available Products" domain="[('qty_available','&gt;',0)]"/>
                     <filter name="real_stock_negative" string="Negative Forecasted Quantity" domain="[('virtual_available','&lt;',0)]"/>
@@ -166,7 +166,7 @@
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_search_form_view"/>
             <field name="arch" type="xml">
-                <field name="pricelist_id" position="before">
+                <field name="name" position="inside">
                     <field name="location_id" options="{'no_create': True}" context="{'location': self}"/>
                     <field name="warehouse_id" context="{'warehouse': self}"/>
                 </field>

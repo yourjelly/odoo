@@ -140,12 +140,12 @@ class field_validator:
             fname = field.attrib.get('name')
             if event=='start':
                 self.fields[tuple(models)].append(fname)
-                try:
-                    comodel = self.env[models[-1]]._fields.get(fname).comodel_name
-                except:
-                    # TODO: we might use this instead, but it's much slower
-                    # comodel = self.env[models[-1]].fields_get(fname).get('relation',None)
-                    comodel = None
+                if field.attrib.get('id'):
+                    self.fields[tuple(models)].append(field.attrib.get('id'))
+                comodel = None
+                f = self.env[models[-1]]._fields.get(fname)
+                if f and hasattr(f, 'comodel_name'):
+                    comodel = f.comodel_name
                 models += (comodel, )
             else:
                 models = models[:-1]
@@ -939,7 +939,7 @@ ORDER BY v.priority, v.id
 
             # TODO: optimize: no need to "node2mod" & "mod2node" if field doesn't define the attribute)
             # uncomment the 'or True" by converting views modifiers into real JSON
-            if True or modifiers:
+            if modifiers:
                 transfer_node_to_modifiers(node, modifiers, self._context)
                 transfer_modifiers_to_node(modifiers, node)
             elif node.get('attrs'):
