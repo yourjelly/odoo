@@ -196,12 +196,13 @@ function factory(dependencies) {
          *
          * @static
          * @param {Array[]} domain
+         * @param {boolean} fetchFollowers
          * @param {integer} [limit]
          * @param {integer[]} [moderated_channel_ids]
          * @param {Object} [context]
          * @returns {mail.message[]}
          */
-        static async performRpcMessageFetch(domain, fetchFollowers, limit, moderated_channel_ids, context) {
+        static async performRpcMessageFetch({ domain, limit, moderated_channel_ids, context, fetchFollowers }) {
             const messagesData = await this.env.services.rpc({
                 model: 'mail.message',
                 method: 'message_fetch',

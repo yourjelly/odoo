@@ -3322,34 +3322,6 @@ QUnit.test('receive new needaction messages', async function (assert) {
     );
 });
 
-QUnit.test('should not display unfollow button when current user is not follower of the thread', async function (assert) {
-    assert.expect(1);
-
-    this.data['mail.message'].records.push({
-        body: "<p>Test</p>",
-        id: 100,
-        model: 'res.partner',
-        record_name: 'Refactoring',
-        res_id: 20,
-    });
-    this.data['mail.notification'].records.push({
-        mail_message_id: 100,
-        res_partner_id: this.data.currentPartnerId,
-    });
-    await this.start({
-        discuss: {
-            params: {
-                default_active_id: 'mail.box_inbox',
-            },
-        },
-    });
-    assert.containsNone(
-        document.body,
-        '.o_Message_commandUnfollow',
-        "should not have button unfollow"
-    );
-});
-
 QUnit.test('should display unfollow button when current user is follower of the thread', async function (assert) {
     assert.expect(1);
 

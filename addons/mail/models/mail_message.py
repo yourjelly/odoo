@@ -1013,16 +1013,11 @@ class Message(models.Model):
                     .with_prefetch(thread_ids_by_model_name[message_sudo.model])
                 record_name = record.display_name
 
-                if fetch_followers:
-                    followers = [{
-                        'email': follower.email,
-                        'id': follower.id,
-                        'is_active': follower.is_active,
-                        'is_editable': True,
-                        'name': follower.name,
-                        'partner_id': follower.partner_id.id,
-                    } for follower in record.message_follower_ids]
-                    vals['followers'] = followers
+                has_follower_access = self.env['mail.followers'].check_access_rights('read', raise_exception=False)
+
+                if has_follower_access and fetch_followers and record.check_access_rights('read'):
+                    vals['followers'] = record.message_follower_ids._followers_format()
+
             else:
                 record_name = False
 
@@ -1074,7 +1069,7 @@ class Message(models.Model):
             messages |= self.search(moderated_messages_dom, limit=limit)
             # Truncate the results to `limit`
             messages = messages.sorted(key='id', reverse=True)[:limit]
-        return messages.message_format(fetch_followers)
+        return messages.message_format(fetch_followers=fetch_followers)
 
     def message_format(self, fetch_followers=False):
         """ Get the message values in the format for web client. Since message values can be broadcasted,
@@ -1117,7 +1112,7 @@ class Message(models.Model):
                     'moderation_status': 'pending_moderation'
                 }
         """
-        vals_list = self._message_format(self._get_message_format_fields(), fetch_followers)
+        vals_list = self._message_format(self._get_message_format_fields(), fetch_followers=fetch_followers)
 
         com_id = self.env['ir.model.data'].xmlid_to_res_id('mail.mt_comment')
         note_id = self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note')

@@ -300,13 +300,13 @@ function factory(dependencies) {
             let messages;
             try {
                 messages = await this.async(() =>
-                    this.env.models['mail.message'].performRpcMessageFetch(
+                    this.env.models['mail.message'].performRpcMessageFetch({
                         domain,
-                        fetchFollowers,
                         limit,
                         moderated_channel_ids,
                         context,
-                    )
+                        fetchFollowers,
+                    })
                 );
             } catch(e) {
                 this.update({

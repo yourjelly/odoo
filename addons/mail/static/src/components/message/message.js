@@ -656,7 +656,7 @@ class Message extends Component {
      */
     _onClickUnfollow(ev) {
         if (!this.message.originThread) {
-          return;
+            return;
         }
         this.message.markAsRead();
         this.message.originThread.unfollow();
