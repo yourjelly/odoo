@@ -264,7 +264,7 @@
             <h6 class="o_wevent_sidebar_title">About us</h6>
             <p>Use this paragraph to write a short text about your events or company.</p>
         </div>
-        <div id="oe_structure_website_event_about_us_1" class="oe_structure"/>
+        <div id="oe_structure_website_event_sidebar_1" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
 </template>
 
@@ -282,7 +282,7 @@
                 <a t-if="website.social_instagram" t-att-href="website.social_instagram" class="o_wevent_social_link"><i class="fa fa-instagram text-instagram" aria-label="Instagram" title="Instagram"/></a>
             </div>
         </div>
-        <div id="oe_structure_website_event_follow_us_1" class="oe_structure"/>
+        <div id="oe_structure_website_event_sidebar_2" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
 </template>
 
@@ -302,6 +302,7 @@
                 <figcaption class="figure-caption text-muted">Our Trainings</figcaption>
             </figure>
         </a>
+        <div id="oe_structure_website_event_sidebar_3" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
 </template>
 
@@ -316,6 +317,7 @@
                 </blockquote>
             </div>
         </div>
+        <div id="oe_structure_website_event_sidebar_4" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
 </template>
 
@@ -325,6 +327,7 @@
         <div class="o_wevent_sidebar_block">
             <t t-snippet-call="website_event.s_country_events"/>
         </div>
+        <div id="oe_structure_website_event_sidebar_5" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
 </template>
 
