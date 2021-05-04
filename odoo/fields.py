@@ -7,7 +7,6 @@ from babel import dates
 from collections import defaultdict
 from datetime import date, datetime, time
 from operator import attrgetter
-from typing import Union
 from xmlrpc.client import MAXINT
 import base64
 import binascii
@@ -1847,16 +1846,57 @@ class Html(_String):
         return list(map(str, super().get_trans_terms(value)))
 
 
-class Date(Field):
-    """ Encapsulates a python :class:`date <datetime.date>` object. """
-    type = 'date'
-    column_type = ('date', 'date')
-    column_cast_from = ('timestamp',)
+class DateFieldMixin(Field):
+    """ Proxy class for common attributes and methods between Date and Datetime classes """
 
     start_of = staticmethod(date_utils.start_of)
     end_of = staticmethod(date_utils.end_of)
     add = staticmethod(date_utils.add)
     subtract = staticmethod(date_utils.subtract)
+
+    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
+        """
+        Serves as a proxy for formatting :meth:`BaseModel.read_group` for both Date and Datetime.
+        """
+        # /!\ this function mutates the data dict!
+        locale = get_lang(env).code
+        tzinfo = None
+        value = data[gb['groupby']]
+        range_start = value
+        range_end = value + gb['interval']
+        # value from postgres is in local tz (so range is
+        # considered in local tz e.g. "day" is [00:00, 00:00[
+        # local rather than UTC which could be [11:00, 11:00]
+        # local) but domain and raw value should be in UTC
+        if gb['tz_convert']:
+            tzinfo = range_start.tzinfo
+            range_start = range_start.astimezone(pytz.utc)
+            # take into account possible hour change between start and end
+            range_end = tzinfo.localize(range_end.replace(tzinfo=None))
+            range_end = range_end.astimezone(pytz.utc)
+
+        range_start = self.to_string(range_start)
+        range_end = self.to_string(range_end)
+        fmt_func = getattr(dates, f"format_{self.type}")
+        label = fmt_func(value, format=gb['display_format'], locale=locale)
+        # /!\
+        data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
+        return [
+            '&',
+            (gb['field'], '>=', range_start),
+            (gb['field'], '<', range_end),
+        ]
+
+    @staticmethod
+    def to_string(value):
+        raise NotImplementedError
+
+
+class Date(DateFieldMixin):
+    """ Encapsulates a python :class:`date <datetime.date>` object. """
+    type = 'date'
+    column_type = ('date', 'date')
+    column_cast_from = ('timestamp',)
 
     @staticmethod
     def today(*args):
@@ -1945,20 +1985,12 @@ class Date(Field):
             return ''
         return self.from_string(value)
 
-    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
-        return _read_group_domain_calc_dates(self, data, gb, env)
 
-
-class Datetime(Field):
+class Datetime(DateFieldMixin):
     """ Encapsulates a python :class:`datetime <datetime.datetime>` object. """
     type = 'datetime'
     column_type = ('timestamp', 'timestamp')
     column_cast_from = ('date',)
-
-    start_of = staticmethod(date_utils.start_of)
-    end_of = staticmethod(date_utils.end_of)
-    add = staticmethod(date_utils.add)
-    subtract = staticmethod(date_utils.subtract)
 
     @staticmethod
     def now(*args):
@@ -2053,42 +2085,6 @@ class Datetime(Field):
         assert record, 'Record expected'
         return Datetime.to_string(Datetime.context_timestamp(record, Datetime.from_string(value)))
 
-    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
-        return _read_group_domain_calc_dates(self, data, gb, env)
-
-
-def _read_group_domain_calc_dates(self: Union[Date, Datetime], data: dict, gb: dict, env) -> list:
-    """
-    Serves as a proxy for formatting :meth:`BaseModel.read_group` for both Date and Datetime.
-    """
-    # /!\ this function mutates the data dict!
-    locale = get_lang(env).code
-    tzinfo = None
-    raw_value = data[gb['groupby']]
-    range_start = raw_value
-    range_end = raw_value + gb['interval']
-    # value from postgres is in local tz (so range is
-    # considered in local tz e.g. "day" is [00:00, 00:00[
-    # local rather than UTC which could be [11:00, 11:00]
-    # local) but domain and raw value should be in UTC
-    if gb['tz_convert']:
-        tzinfo = range_start.tzinfo
-        range_start = range_start.astimezone(pytz.utc)
-        # take into account possible hour change between start and end
-        range_end = tzinfo.localize(range_end.replace(tzinfo=None))
-        range_end = range_end.astimezone(pytz.utc)
-
-    range_start = self.to_string(range_start)
-    range_end = self.to_string(range_end)
-    fmt_func = getattr(dates, f"format_{self.type}")
-    label = fmt_func(raw_value, format=gb['display_format'], locale=locale)
-    # /!\
-    data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
-    return [
-        '&',
-        (gb['field'], '>=', range_start),
-        (gb['field'], '<', range_end),
-    ]
 
 # http://initd.org/psycopg/docs/usage.html#binary-adaptation
 # Received data is returned as buffer (in Python 2) or memoryview (in Python 3).
