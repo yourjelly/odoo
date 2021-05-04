@@ -54,6 +54,10 @@ export function isMobileOS() {
   );
 }
 
+export function isIosApp() {
+  return navigator.userAgent.match(/OdooMobile \(iOS\)/i);
+}
+
 export function hasTouch() {
   return "ontouchstart" in window || "onmsgesturechange" in window;
 }
