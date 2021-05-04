@@ -14,6 +14,7 @@ odoo.define('pos_coupon.ResetProgramsButton', function (require) {
         async onClick() {
             const order = this.env.pos.get_order();
             order.resetPrograms();
+            this.trigger('cancel-popup');
         }
     }
     ResetProgramsButton.template = 'ResetProgramsButton';
