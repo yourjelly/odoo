@@ -2,8 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from werkzeug import urls
 import logging
 import pytz
 
@@ -456,8 +457,41 @@ class MailActivity(models.Model):
     def action_notify(self):
         if not self:
             return
+
+        # Helpers:
+
+        def get_body(activity_list_backend=None):
+            args = dict(
+                activity=activity,
+                activity_list_backend=activity_list_backend,
+                model_description=model_description,
+                access_link=self.env['mail.thread']._notify_get_action_link('view',
+                    model=activity.res_model,
+                    res_id=activity.res_id
+                ),
+            )
+            return body_template._render(
+                args,
+                engine='ir.qweb',
+                minimal_qcontext=True
+            )
+
+        def notify(partner_ids, body):
+            record.message_notify(
+                partner_ids=partner_ids,
+                body=body,
+                subject=_('%(activity_name)s: %(summary)s assigned to you',
+                    activity_name=activity.res_name,
+                    summary=activity.summary or activity.activity_type_id.name),
+                record_name=activity.res_name,
+                model_description=model_description,
+                email_layout_xmlid='mail.mail_notification_light'
+            )
+
         original_context = self.env.context
         body_template = self.env.ref('mail.message_activity_assigned')
+        now = fields.datetime.now()
+
         for activity in self:
             if activity.user_id.lang:
                 # Send the notification in the assigned user's language
@@ -465,29 +499,90 @@ class MailActivity(models.Model):
                 body_template = body_template.with_context(lang=activity.user_id.lang)
                 activity = activity.with_context(lang=activity.user_id.lang)
             model_description = self.env['ir.model']._get(activity.res_model).display_name
-            body = body_template._render(
-                dict(
-                    activity=activity,
-                    model_description=model_description,
-                    access_link=self.env['mail.thread']._notify_get_action_link('view', model=activity.res_model, res_id=activity.res_id),
-                ),
-                engine='ir.qweb',
-                minimal_qcontext=True
-            )
-            record = self.env[activity.res_model].browse(activity.res_id)
+            record = self.env[activity.res_model].browse(activity.res_id) 
             if activity.user_id:
-                record.message_notify(
-                    partner_ids=activity.user_id.partner_id.ids,
-                    body=body,
-                    subject=_('%(activity_name)s: %(summary)s assigned to you',
-                        activity_name=activity.res_name,
-                        summary=activity.summary or activity.activity_type_id.name),
-                    record_name=activity.res_name,
-                    model_description=model_description,
-                    email_layout_xmlid='mail.mail_notification_light',
-                )
+                (partners_to_notify, partners_to_warn) = self._get_partners_to_notify(activity.user_id.partner_id.ids, now)
+                if partners_to_notify:
+                    notify(partners_to_notify, get_body())
+                if partners_to_warn:
+                    notify(partners_to_warn, get_body(urls.url_join(
+                        self[0].get_base_url(),
+                        '/web#model=crm.lead&view_type=list&action=%s&menu_id=%s' % (
+                            self.env.ref('crm.crm_lead_action_my_activities').id,
+                            self.env.ref('crm.crm_menu_root').id
+                        )
+                    )))
+
             body_template = body_template.with_context(original_context)
             self = self.with_context(original_context)
+
+    def _get_partners_to_notify(self, partner_ids, now):
+        query = f"""
+            WITH
+            email_sent AS (
+                SELECT mail_message_id, res_partner_id
+                FROM mail_notification
+                WHERE (
+                    res_partner_id in %s AND
+                    notification_status = 'sent' AND
+                    notification_type = 'email'
+                )
+            ),
+            notification_sent AS (
+                SELECT res_partner_id, date
+                FROM email_sent
+                JOIN mail_message
+                ON mail_message.id = email_sent.mail_message_id
+                WHERE (
+                    mail_message.message_type = 'user_notification' AND
+                    mail_message.date >= %s
+                )
+            )
+            SELECT * FROM notification_sent;
+        """
+
+        self._cr.execute(query, (
+            tuple(partner_ids),
+            now - timedelta(hours=2)
+        ))
+
+        groups = dict.fromkeys(partner_ids, [])
+        for (partner_id, date) in self._cr.fetchall():
+            if partner_id in groups:
+                groups[partner_id].append(date)
+
+        partners_to_notify = []
+        partners_to_warn = []
+        threshold = 3
+
+        for (partner_id, dates) in groups.items():
+            n = 0
+            dt = timedelta(hours=1)
+            dates = sorted(dates, reverse=True)
+            for recent_date in self._get_dates_between(dates, now - dt, now):
+                count = len(self._get_dates_between(dates, recent_date - dt, recent_date))
+                if count > n:
+                    n = count
+            if n < threshold:
+                partners_to_notify.append(partner_id)
+            elif n == threshold:
+                partners_to_warn.append(partner_id)
+
+        return (partners_to_notify, partners_to_warn)
+
+    def _get_dates_between(self, dates, start, end):
+        """
+        :param dates list(Datetime)
+        :param start Datetime
+        :param end Datetime
+        """
+        acc = []
+        for date in dates:
+            if date < start:
+                return acc
+            if date >= start and date <= end:
+                acc.append(date)
+        return acc
 
     def action_done(self):
         """ Wrapper without feedback because web button add context as
