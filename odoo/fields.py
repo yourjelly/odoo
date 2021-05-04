@@ -667,7 +667,7 @@ class Field(MetaField('DummyField', (object,), {})):
         :rtype: list
         """
         value = data[gb['groupby']]
-        return [(gb['field'], '=', value)]
+        return [(self.name, '=', value)]
 
     #
     # Company-dependent fields
@@ -1858,10 +1858,12 @@ class DateFieldMixin(Field):
         """
         Serves as a proxy for formatting :meth:`BaseModel.read_group` for both Date and Datetime.
         """
-        # /!\ this function mutates the data dict!
+        value = data[gb['groupby']]
+        if not value:
+            return super()._read_group_domain_calc(data, gb, env)
+
         locale = get_lang(env).code
         tzinfo = None
-        value = data[gb['groupby']]
         range_start = value
         range_end = value + gb['interval']
         # value from postgres is in local tz (so range is
@@ -1879,12 +1881,12 @@ class DateFieldMixin(Field):
         range_end = self.to_string(range_end)
         fmt_func = getattr(dates, f"format_{self.type}")
         label = fmt_func(value, format=gb['display_format'], locale=locale)
-        # /!\
+        # /!\ data is being mutated directly...
         data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
         return [
             '&',
-            (gb['field'], '>=', range_start),
-            (gb['field'], '<', range_end),
+            (self.name, '>=', range_start),
+            (self.name, '<', range_end),
         ]
 
     @staticmethod
@@ -2927,7 +2929,9 @@ class Many2one(_Relational):
 
     def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
         value = data[gb['groupby']]
-        return [(gb['field'], '=', value[0])]
+        if not value:
+            return super()._read_group_domain_calc(data, gb, env)
+        return [(self.name, '=', value[0])]
 
 
 class Many2oneReference(Integer):

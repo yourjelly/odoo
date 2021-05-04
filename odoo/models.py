@@ -2259,12 +2259,7 @@ class BaseModel(metaclass=MetaModel):
         sections = []
         for gb in annotated_groupbys:
             field = self._fields.get(gb['field'])
-            value = data[gb['groupby']]
-            if value:
-                d = field._read_group_domain_calc(data, gb, self.env)
-            else:
-                d = [(gb['field'], '=', value)]
-            sections.append(d)
+            sections.append(field._read_group_domain_calc(data, gb, self.env))
         sections.append(domain)
 
         data['__domain'] = expression.AND(sections)
