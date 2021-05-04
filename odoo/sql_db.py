@@ -25,11 +25,11 @@ from datetime import timedelta
 from decorator import decorator
 from functools import wraps
 from inspect import currentframe
+from weakref import WeakSet
+
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED, ISOLATION_LEVEL_REPEATABLE_READ
 from psycopg2.pool import PoolError
 from werkzeug import urls
-
-from odoo.api import Environment
 
 from . import tools
 from .tools.func import frame_codeinfo
@@ -50,28 +50,14 @@ psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,)
 
 
 def flush_env(cr, *, clear=True):
-    """ Retrieve and flush an environment corresponding to the given cursor.
-        Also clear the environment if ``clear`` is true.
-    """
-    env_to_flush = None
-    for env in list(Environment.envs):
-        # don't flush() on another cursor or with a RequestUID
-        if env.cr is cr and (isinstance(env.uid, int) or env.uid is None):
-            env_to_flush = env
-            if env.uid is not None:
-                break               # prefer an environment with a real uid
+    warnings.warn("Use cr.flush() instead of flush_env(cr).", DeprecationWarning, stacklevel=2)
+    cr.flush()
 
-    if env_to_flush is not None:
-        env_to_flush['base'].flush()
-        if clear:
-            env_to_flush.clear()    # clear remaining new records to compute
 
 def clear_env(cr):
-    """ Retrieve and clear an environment corresponding to the given cursor """
-    for env in list(Environment.envs):
-        if env.cr is cr:
-            env.clear()
-            break
+    warnings.warn("Use cr.clear() instead of clear_env(cr).", DeprecationWarning, stacklevel=2)
+    cr.clear()
+
 
 re_from = re.compile('.* from "?([a-zA-Z_0-9]+)"? .*$')
 re_into = re.compile('.* into "?([a-zA-Z_0-9]+)"? .*$')
@@ -91,6 +77,7 @@ class BaseCursor:
     """ Base class for cursors that manage pre/post commit hooks. """
 
     def __init__(self):
+        self.envs = WeakSet()
         self.precommit = tools.Callbacks()
         self.postcommit = tools.Callbacks()
         self.prerollback = tools.Callbacks()
@@ -102,17 +89,17 @@ class BaseCursor:
         """context manager entering in a new savepoint"""
         name = uuid.uuid1().hex
         if flush:
-            flush_env(self, clear=False)
+            self.flush(clear=False)
             self.precommit.run()
         self.execute('SAVEPOINT "%s"' % name)
         try:
             yield
             if flush:
-                flush_env(self, clear=False)
+                self.flush(clear=False)
                 self.precommit.run()
         except Exception:
             if flush:
-                clear_env(self)
+                self.clear()
                 self.precommit.clear()
             self.execute('ROLLBACK TO SAVEPOINT "%s"' % name)
             raise
@@ -135,6 +122,25 @@ class BaseCursor:
         if exc_type is None:
             self.commit()
         self.close()
+
+    def flush(self, *, clear=True):
+        """ Flush an environment of ``self``.
+            Also clear the environment if ``clear`` is true.
+        """
+        # prefer an environment with a real uid (avoid RequestUID when possible)
+        env = next((env for env in self.envs if isinstance(env.uid, int)), None)
+        if env is None:
+            env = next((env for env in self.envs if env.uid is not None), None)
+        if env is not None:
+            env['base'].flush()
+            if clear:
+                env.clear()             # clear remaining new records to compute
+
+    def clear(self):
+        """ Clear one of the environments of ``self``. """
+        for env in self.envs:
+            env.clear()
+            break
 
 
 class Cursor(BaseCursor):
@@ -433,7 +439,7 @@ class Cursor(BaseCursor):
     @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
-        flush_env(self)
+        self.flush()
         self.precommit.run()
         result = self._cnx.commit()
         self._now = None
@@ -445,7 +451,7 @@ class Cursor(BaseCursor):
     @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
-        clear_env(self)
+        self.clear()
         self.precommit.clear()
         self.postcommit.clear()
         self.prerollback.run()
@@ -514,7 +520,7 @@ class TestCursor(BaseCursor):
     @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
-        flush_env(self)
+        self.flush()
         self.precommit.run()
         self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
         self.prerollback.clear()
@@ -524,7 +530,7 @@ class TestCursor(BaseCursor):
     @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
-        clear_env(self)
+        self.clear()
         self.precommit.clear()
         self.postcommit.clear()
         self.prerollback.run()

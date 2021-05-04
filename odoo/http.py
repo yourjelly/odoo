@@ -351,7 +351,7 @@ class WebRequest(object):
             if self._cr is not None:
                 # flush here to avoid triggering a serialization error outside
                 # of this context, which would not retry the call
-                flush_env(self._cr)
+                self._cr.flush()
                 self._cr.precommit.run()
             return result
 

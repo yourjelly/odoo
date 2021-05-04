@@ -518,6 +518,7 @@ class Environment(Mapping):
         self._protected = envs.protected        # proxy to shared data structure
         self.all = envs
         envs.add(self)
+        cr.envs.add(self)
         return self
 
     #
