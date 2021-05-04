@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="web_editor.step_zero" model="web_editor.collaboration.step">
+            <field name="document_id">fake_document_id</field>
+            <field name="step_id">FIRST_STEP_PREVIOUS_ID</field>
+            <field name="index" type="int">-1</field>
+        </record>
+    </data>
+</odoo>

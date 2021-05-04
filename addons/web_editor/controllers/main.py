@@ -11,6 +11,7 @@ import werkzeug.wrappers
 from PIL import Image, ImageFont, ImageDraw
 from lxml import etree
 from base64 import b64decode, b64encode
+from psycopg2 import sql
 
 from odoo.http import request
 from odoo import http, tools, _, SUPERUSER_ID
@@ -18,7 +19,6 @@ from odoo.addons.http_routing.models.ir_http import slug, unslug
 from odoo.exceptions import UserError
 from odoo.modules.module import get_module_path, get_resource_path
 from odoo.tools.misc import file_open
-
 from ..models.ir_attachment import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_IMAGE_MIMETYPES
 
 logger = logging.getLogger(__name__)
@@ -638,3 +638,122 @@ class Web_Editor(http.Controller):
             attachments.append(attachment._get_media_info())
 
         return attachments
+
+    # Add a step to the history and broadcast it if it has an index.
+    # TODO: This should also try to add an index to a potential step already in the
+    # database that would reference the current step as its
+    # previous step. It should do so recursively (if the updated step itself is
+    # referenced by the previous_step_id of another step, etc...).
+    # TODO: Implement a way to signal a client that the server needs to be
+    # synchronized in the case where a step is added when no history exists yet.
+    # (ie when a client stays open with no activity so long that the history
+    # gets deleted, and then the client is active again)
+    @http.route("/web_editor/collaboration/steps", type="json", auth="user")
+    def add_step(self, step, model, document_id):
+        collab_document_identifier = make_collab_document_identifier(model, document_id)
+        inserted_step_index = insert_step(convert_to_python(step, collab_document_identifier))
+        if inserted_step_index:
+            step['index'] = inserted_step_index
+            request.env['bus.bus'].sendone(
+                collab_document_identifier,
+                {'type': 'step', 'step': step}
+            )
+        return {}
+
+    # Get all the steps with a index in the history of a given document, sorted
+    # by index.
+    @http.route("/web_editor/collaboration/steps/all", type="json", auth="user")
+    def get_all_steps(self, model, document_id):
+        collab_document_identifier = make_collab_document_identifier(model, document_id)
+        steps = request.env['web_editor.collaboration.step'].sudo().search([('collab_document_id', '=', collab_document_identifier), ('index', '!=', False)], order='index ASC')
+        return [convert_to_js(x) for x in steps]
+
+    # Tries to create a new sequence for the document. If it fails, it means
+    # there's already a history for this document, in which case it returns said
+    # history. Otherwise, it inserts the steps of the new history.
+    # This assumes that the sequence for the document is dropped when the
+    # history for the document is deleted.
+    # TODO: cron that deletes a document history and its related sequence if
+    # the latest change is older than four hours old.
+    @http.route("/web_editor/collaboration/init", type="json", auth="user")
+    def initialise_history(self, initial_history, model, document_id):
+        collab_document_identifier = make_collab_document_identifier(model, document_id)
+        sequence_name = 'editor_collaboration_sequence_' + collab_document_identifier
+        try:
+            request.env.cr.execute(
+                sql.SQL('CREATE SEQUENCE {} MINVALUE 0 OWNED BY web_editor_collaboration_step.index').format(
+                    sql.Identifier(sequence_name)
+                )
+            )
+            for step in initial_history:
+                insert_step(convert_to_python(step, collab_document_identifier))
+            return {}
+        except Exception as e:
+            # TODO: catch the specific exception
+            request.env.cr.rollback()
+            return self.get_all_steps(model, document_id)
+
+def convert_to_js(step):
+    return {
+        'previousStepId': step.previous_step_id,
+        'mutations': json.loads(step.mutations),
+        'userId': step.create_uid.id,
+        'id': step.step_id,
+        'cursor': json.loads(step.cursor),
+        'index': step.index
+    }
+
+def convert_to_python(step, collab_document_identifier):
+    return {
+        'previous_step_id': step['previousStepId'],
+        'mutations': json.dumps(step['mutations']),
+        'collab_document_id': collab_document_identifier,
+        'step_id': step['id'],
+        'cursor': json.dumps(step['cursor']),
+        'user_id': request.env.user.id
+    }
+
+def make_collab_document_identifier(model, document_id):
+    return model + '_' + str(document_id)
+
+# Inserts a step, setting the index to:
+# - either NULL for the case where the previous_step_id is not referring to a
+#   step already present AND indexed in the database
+# - or the next value in the sequence for that document.
+def insert_step(step):
+    request.env.cr.execute("""
+        WITH
+        sel AS (
+            SELECT
+                %(mutations)s AS mutations,
+                %(collab_document_id)s AS collab_document_id,
+                %(step_id)s AS step_id,
+                %(cursor)s AS cursor,
+                %(previous_step_id)s AS previous_step_id,
+                (
+                    SELECT nextval(concat('editor_collaboration_sequence_', %(collab_document_id)s))
+                    FROM web_editor_collaboration_step wecs
+                    WHERE wecs.step_id = %(previous_step_id)s AND wecs.index IS NOT NULL
+                ) AS index,
+                NOW() AS create_date,
+                NOW() AS write_date,
+                %(user_id)s AS create_uid,
+                %(user_id)s AS write_uid
+        ),
+        ins as (
+            INSERT INTO web_editor_collaboration_step (
+                mutations,
+                collab_document_id,
+                step_id,
+                cursor,
+                previous_step_id,
+                index,
+                create_date,
+                write_date,
+                create_uid,
+                write_uid
+            ) SELECT * FROM sel
+        )
+        SELECT index FROM sel
+        """, step)
+    return request.env.cr.fetchone()[0]

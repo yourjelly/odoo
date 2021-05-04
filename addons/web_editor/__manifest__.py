@@ -13,6 +13,7 @@ Odoo Web Editor widget.
     'data': [
         'security/ir.model.access.csv',
         'data/editor_assets.xml',
+        'data/editor_collaboration.xml',
         'views/editor.xml',
         'views/snippets.xml',
     ],

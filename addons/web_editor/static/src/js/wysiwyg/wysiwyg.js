@@ -69,6 +69,11 @@ const Wysiwyg = Widget.extend({
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
+        const documentId = options.recordInfo.data_res_id;
+        const model = options.recordInfo.data_res_model;
+        const channel = `${model}_${documentId}`;
+        const userId = this.getSession().user_id;
+        const sendStep = (step) => this._rpc({route: '/web_editor/collaboration/steps', params: {step, document_id: documentId, model}})
         this.odooEditor = new OdooEditor(this.$editable[0], {
             toolbar: this.toolbar.$el[0],
             document: this.options.document,
@@ -76,6 +81,28 @@ const Wysiwyg = Widget.extend({
             isRootEditable: this.options.isRootEditable,
             controlHistoryFromDocument: this.options.controlHistoryFromDocument,
             getContentEditableAreas: this.options.getContentEditableAreas,
+            collaborative: {
+                send: sendStep,
+                requestSynchronization: () => this._rpc({route: '/web_editor/collaboration/steps/all', params: {document_id: documentId, model}})
+                    .then(res => this.odooEditor.historySynchronise(res)),
+                initServerHistory: (history) => this._rpc({route: '/web_editor/collaboration/init', params: {initial_history: history, document_id: documentId, model}}).then(res => {
+                        if(res.length){
+                            this.odooEditor.historySynchronise(res)
+                        }
+                    }),
+                userId
+            }
+        });
+        this.call('bus_service', 'startPolling')
+        this.call('bus_service', 'addChannel', channel)
+        this.call('bus_service', 'onNotification', this, (notifications) => {
+            notifications.forEach(([notificationChannel, message]) => {
+                if(notificationChannel === channel) {
+                    if(message.type === 'step') {
+                        this.odooEditor.historyReceive(message.step);
+                    }
+                }
+            })
         });
 
         this._observeOdooFieldChanges();
