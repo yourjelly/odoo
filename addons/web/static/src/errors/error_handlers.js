@@ -199,8 +199,9 @@ errorHandlerRegistry.add("rpcErrorHandler", rpcErrorHandler, { sequence: 98 });
  */
 function lostConnectionHandler(env) {
   let connectionLostNotifId;
-  return (error) => {
-    if (error.name === "CONNECTION_LOST_ERROR") {
+  return (uncaughtError) => {
+    const error = uncaughtError.originalError;
+    if (error && error.name === "CONNECTION_LOST_ERROR") {
       if (connectionLostNotifId) {
         // notification already displayed (can occur if there were several
         // concurrent rpcs when the connection was lost)
