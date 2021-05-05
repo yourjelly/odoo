@@ -63,9 +63,11 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 }),
             ]
         })
-        base_lines = invoice.line_ids.filtered('tax_ids')
+        base_lines = invoice.invoice_line_ids
         tax_lines = invoice.line_ids.filtered('tax_line_id').sorted(lambda x: (x.tax_line_id, len(x.tax_ids)))
-        report_lines = self.env['account.tax.details.report'].search([('company_id', '=', self.env.company.id)])
+        report_lines = self.env['account.tax.details.report']\
+            .search([('company_id', '=', self.env.company.id)])\
+            .sorted(lambda x: (x.base_line_id, x.tax_line_id, -abs(x.base_amount), -abs(x.tax_amount)))
 
         expected_report_line_values = [
             {
@@ -82,9 +84,21 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
             },
             {
                 'base_line_id': base_lines[0].id,
+                'tax_line_id': tax_lines[1].id,
+                'base_amount': -200.0,
+                'tax_amount': -20.0,
+            },
+            {
+                'base_line_id': base_lines[0].id,
                 'tax_line_id': tax_lines[2].id,
                 'base_amount': -1000.0,
                 'tax_amount': -50.0,
+            },
+            {
+                'base_line_id': base_lines[0].id,
+                'tax_line_id': tax_lines[2].id,
+                'base_amount': -200.0,
+                'tax_amount': -10.0,
             },
             {
                 'base_line_id': base_lines[1].id,
@@ -111,19 +125,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 'tax_amount': -200.0,
             },
             {
-                'base_line_id': base_lines[4].id,
-                'tax_line_id': tax_lines[1].id,
-                'base_amount': -200.0,
-                'tax_amount': -20.0,
-            },
-            {
-                'base_line_id': base_lines[4].id,
-                'tax_line_id': tax_lines[2].id,
-                'base_amount': -200.0,
-                'tax_amount': -10.0,
-            },
-            {
-                'base_line_id': base_lines[5].id,
+                'base_line_id': base_lines[3].id,
                 'tax_line_id': tax_lines[1].id,
                 'base_amount': -400.0,
                 'tax_amount': -40.0,
@@ -177,9 +179,11 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 }),
             ]
         })
-        base_lines = invoice.line_ids.filtered('tax_ids')
+        base_lines = invoice.invoice_line_ids
         tax_lines = invoice.line_ids.filtered('tax_line_id').sorted(lambda x: (x.tax_line_id, len(x.tax_ids)))
-        report_lines = self.env['account.tax.details.report'].search([('company_id', '=', self.env.company.id)])
+        report_lines = self.env['account.tax.details.report']\
+            .search([('company_id', '=', self.env.company.id)])\
+            .sorted(lambda x: (x.base_line_id, x.tax_line_id, -abs(x.base_amount), -abs(x.tax_amount)))
 
         self.assertRecordValues(
             report_lines,
@@ -198,42 +202,42 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 },
                 {
                     'base_line_id': base_lines[0].id,
-                    'tax_line_id': tax_lines[2].id,
-                    'base_amount': -1000.0,
-                    'tax_amount': -100.0,
-                },
-                {
-                    'base_line_id': base_lines[1].id,
-                    'tax_line_id': tax_lines[3].id,
-                    'base_amount': -1000.0,
-                    'tax_amount': -100.0,
-                },
-                {
-                    'base_line_id': base_lines[1].id,
-                    'tax_line_id': tax_lines[2].id,
-                    'base_amount': -1000.0,
-                    'tax_amount': -100.0,
-                },
-                {
-                    'base_line_id': base_lines[2].id,
                     'tax_line_id': tax_lines[1].id,
                     'base_amount': -100.0,
                     'tax_amount': -10.0,
                 },
                 {
-                    'base_line_id': base_lines[2].id,
+                    'base_line_id': base_lines[0].id,
                     'tax_line_id': tax_lines[2].id,
-                    'base_amount': -100.0,
-                    'tax_amount': -10.0,
+                    'base_amount': -1000.0,
+                    'tax_amount': -100.0,
                 },
                 {
-                    'base_line_id': base_lines[3].id,
+                    'base_line_id': base_lines[0].id,
                     'tax_line_id': tax_lines[2].id,
                     'base_amount': -110.0,
                     'tax_amount': -11.0,
                 },
                 {
-                    'base_line_id': base_lines[4].id,
+                    'base_line_id': base_lines[0].id,
+                    'tax_line_id': tax_lines[2].id,
+                    'base_amount': -110.0,
+                    'tax_amount': -11.0,
+                },
+                {
+                    'base_line_id': base_lines[1].id,
+                    'tax_line_id': tax_lines[2].id,
+                    'base_amount': -1000.0,
+                    'tax_amount': -100.0,
+                },
+                {
+                    'base_line_id': base_lines[1].id,
+                    'tax_line_id': tax_lines[2].id,
+                    'base_amount': -110.0,
+                    'tax_amount': -11.0,
+                },
+                {
+                    'base_line_id': base_lines[1].id,
                     'tax_line_id': tax_lines[2].id,
                     'base_amount': -100.0,
                     'tax_amount': -10.0,
