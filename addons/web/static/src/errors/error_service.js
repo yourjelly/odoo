@@ -112,4 +112,4 @@ export const errorService = {
   },
 };
 
-serviceRegistry.add("error", errorService);
+serviceRegistry.add("error", errorService, { sequence: 1 });
