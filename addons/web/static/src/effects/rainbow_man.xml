@@ -34,7 +34,10 @@
                     </svg>
                     <div class="o_reward_msg">
                         <div class="o_reward_msg_card">
-                            <div class="o_reward_msg_content"><t t-raw="props.message" /></div>
+                            <div class="o_reward_msg_content">
+                                <t t-if="!props.Component" t-raw="props.message" />
+                                <t t-else="" t-component="props.Component" t-props="props.props"/>
+                            </div>
                             <div class="o_reward_shadow_container">
                                 <div class="o_reward_shadow"/>
                             </div>
