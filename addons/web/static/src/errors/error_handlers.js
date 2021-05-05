@@ -54,9 +54,9 @@ function legacyRPCErrorHandler(env) {
       error = error.message;
       if (event.isDefaultPrevented()) {
         // in theory, here, event was already handled
-        uncaughtError.unhandledRejectionEvent.preventDefault();
         return true;
       }
+      uncaughtError.unhandledRejectionEvent.preventDefault();
       event.preventDefault();
       const exceptionName = error.exceptionName;
       let ErrorComponent = error.Component;
