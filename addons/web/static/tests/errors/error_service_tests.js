@@ -1,18 +1,21 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser";
-import { serviceRegistry }  from "@web/webclient/service_registry";
+import { serviceRegistry } from "@web/webclient/service_registry";
 import { RPCErrorDialog } from "@web/errors/error_dialogs";
 import { errorHandlerRegistry } from "@web/errors/error_handler_registry";
 import { errorService } from "@web/errors/error_service";
-import OdooError from "@web/errors/odoo_error";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { ConnectionLostError, RPCError } from "@web/services/rpc_service";
 import { errorDialogRegistry } from "@web/errors/error_dialog_registry";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { makeFakeLocalizationService, makeFakeNotificationService, makeFakeRPCService } from "../helpers/mock_services";
+import {
+  makeFakeLocalizationService,
+  makeFakeNotificationService,
+  makeFakeRPCService,
+} from "../helpers/mock_services";
 import { nextTick, patchWithCleanup } from "../helpers/utils";
 
 const { Component, tags } = owl;
@@ -162,7 +165,8 @@ QUnit.test("will let handlers from the registry handle errors first", async (ass
   });
   const testEnv = await makeTestEnv();
   testEnv.someValue = 14;
-  const error = new OdooError("boom");
+  const error = new Error();
+  error.name = "boom";
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null });
   unhandledRejectionCb(errorEvent);
   assert.verifySteps(["in handler"]);

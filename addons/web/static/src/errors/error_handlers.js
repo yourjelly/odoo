@@ -12,8 +12,34 @@ import { browser } from "../core/browser";
 
 /**
  * @typedef {import("../env").OdooEnv} OdooEnv
- * @typedef {(error: any) => boolean | void} ErrorHandler
+ * @typedef {import("./error_service").UncaughtError} UncaughError
+ * @typedef {(error: UncaughError) => boolean | void} ErrorHandler
  */
+
+// -----------------------------------------------------------------------------
+// Unhandled rejection errors
+// -----------------------------------------------------------------------------
+
+/**
+ * @param {OdooEnv} env
+ * @returns {ErrorHandler}
+ */
+function legacyRejectPromiseHandler(env) {
+  return (error) => {
+    if (error.name === "UncaughtPromiseError") {
+      const isLegitError = error.originalError && error.originalError instanceof Error;
+      if (!isLegitError) {
+        // we consider that a code throwing something that is not an error is
+        // a case where it is meant as an asynchronous control flow (as legacy
+        // code is sadly doing). For now, we just want to consider this as a non
+        // error, so we prevent default it.
+        error.unhandledRejectionEvent.preventDefault();
+        return true;
+      }
+    }
+  };
+}
+errorHandlerRegistry.add("legacyRejectPromiseHandler", legacyRejectPromiseHandler, { sequence: 1 });
 
 // -----------------------------------------------------------------------------
 // CORS errors
@@ -100,20 +126,21 @@ function rpcErrorHandler(env) {
       // Note that for a client side exception, we don't use this registry
       // as we can directly assign a value to `component`.
       // error is here a RPCError
-      const exceptionName = error.exceptionName;
-      let ErrorComponent = error.Component;
+      const rpcError = error.originalError;
+      const exceptionName = rpcError.exceptionName;
+      let ErrorComponent = rpcError.Component;
       if (!ErrorComponent && exceptionName && errorDialogRegistry.contains(exceptionName)) {
         ErrorComponent = errorDialogRegistry.get(exceptionName);
       }
       env.services.dialog.open(ErrorComponent || RPCErrorDialog, {
-        traceback: error.traceback || error.stack,
-        message: error.message,
-        name: error.name,
-        exceptionName: error.exceptionName,
-        data: error.data,
-        subType: error.subType,
-        code: error.code,
-        type: error.type,
+        traceback: rpcError.traceback || rpcError.stack,
+        message: rpcError.message,
+        name: rpcError.name,
+        exceptionName: rpcError.exceptionName,
+        data: rpcError.data,
+        subType: rpcError.subType,
+        code: rpcError.code,
+        type: rpcError.type,
       });
       return true;
     }
