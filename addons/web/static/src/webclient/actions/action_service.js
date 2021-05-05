@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { KeyNotFoundError } from "@web/core/registry";
 import { cleanDomFromBootstrap } from "@web/legacy/utils";
 import { browser } from "../../core/browser/browser";
 import { useBus } from "../../core/bus_hook";
@@ -188,12 +187,14 @@ function makeActionManager(env) {
      * @returns {Breadcrumbs}
      */
     function _getBreadcrumbs(stack) {
-        return stack.map((controller) => {
-            return {
-                jsId: controller.jsId,
-                name: controller.title || controller.action.name || env._t("Undefined"),
-            };
-        });
+        return stack
+            .filter((controller) => controller.action.tag !== "menu")
+            .map((controller) => {
+                return {
+                    jsId: controller.jsId,
+                    name: controller.title || controller.action.name || env._t("Undefined"),
+                };
+            });
     }
 
     /**
