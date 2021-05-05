@@ -31,13 +31,24 @@
                     <i class="fa fa-globe mr-2"/>Upcoming Events
                 </t>
             </h6>
-            <ul class="list-group mb-3">
-                <li t-foreach="events[:5]" t-as="event_dict" class="list-group-item d-flex justify-content-between">
-                    <a t-att-href="event_dict['url']">
-                        <i t-if="not event_dict['event'].website_published" class="fa fa-ban text-danger mr-1" role="img" aria-label="Unpublished" title="Unpublished"/>
-                        <span t-esc="event_dict['event'].name" t-attf-class="#{(not event_dict['event'].website_published) and 'text-danger' or ''}"/>
+            <ul class="list-unstyled">
+                <li t-foreach="events[:5]" t-as="event_dict" class="mb-2">
+                    <a t-att-href="event_dict['url']" class="text-decoration-none">
+                        <div class="s_country_events_list_event d-flex align-items-stretch o_cc1 o_cc rounded-right shadow-sm">
+                            <div class="s_country_events_list_date">
+                                <span t-esc="event_dict['event'].date_begin" t-options="{'widget': 'date', 'format': 'LLL'}" class="o_wevent_event_month"/>
+                                <span t-esc="event_dict['event'].date_begin" t-options="{'widget': 'date', 'format': 'dd'}" class="o_wevent_event_day"/>
+                            </div>
+                            <div class="s_country_events_list_info flex-grow-1 py-3 px-4">
+                                <div t-attf-class="mb-0 #{(not event_dict['event'].website_published) and 'text-danger' or ''}">
+                                    <i t-if="not event_dict['event'].website_published" class="fa fa-ban text-danger mr-1" role="img" aria-label="Unpublished" title="Unpublished"/>
+                                    <t t-esc="event_dict['event'].name"/>
+                                </div>
+                                <!-- TODO // doesn't work if not signed in -->
+                                <small itemprop="location" t-esc="event_dict['event'].address_id" t-options="{'widget': 'contact', 'fields': ['city'], 'no_marker': 'true'}"/>
+                            </div>
+                        </div>
                     </a>
-                    <span t-esc="event_dict['date']"/>
                 </li>
             </ul>
             <div t-if="len(events) &gt; 5">
