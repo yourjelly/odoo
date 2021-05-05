@@ -11,10 +11,10 @@ patch(WebClient.prototype, "web.service_provider_adapter", {
     // Effect Service
     const effect = useService("effect");
     useListener("show-effect", (ev) => {
-      effect.create(ev.detail.message, ev.detail);
+      effect.create(ev.detail.type, ev.detail);
     });
     bus.on("show-effect", this, (payload) => {
-      effect.create(payload.message, payload);
+      effect.create(payload.type, payload);
     });
 
     // Event call-service

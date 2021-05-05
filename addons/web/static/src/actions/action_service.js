@@ -1013,7 +1013,7 @@ function makeActionManager(env) {
       await _executeCloseAction();
     }
     if (effect) {
-      env.services.effect.create(effect.message, effect);
+      env.services.effect.create(effect.type, effect);
     }
   }
 
