@@ -345,6 +345,11 @@ msgid "<span class=\"o_label\">Profitability</span>"
 msgstr "<span class=\"o_label\">Rentabilité</span>"
 
 #. module: project
+#: model_terms:ir.ui.view,arch_db:project.view_project_kanban
+msgid "<span class=\"o_label\">Task</span>"
+msgstr "<span class=\"o_label\">Check</span>"
+
+#. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
 msgid "<strong class=\"d-block mb-2\">Attachments</strong>"
 msgstr "<strong class=\"d-block mb-2\">Pièces jointes</strong>"
@@ -3273,7 +3278,7 @@ msgstr "content"
 #. module: project
 #: code:addons/project/models/project.py:0
 #, python-format
-msgid "task"
+msgid "Task"
 msgstr "tâche"
 
 #. module: project

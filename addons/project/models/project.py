@@ -192,7 +192,7 @@ class Project(models.Model):
     is_favorite = fields.Boolean(compute='_compute_is_favorite', inverse='_inverse_is_favorite',
         string='Show Project on Dashboard',
         help="Whether this project should be displayed on your dashboard.")
-    label_tasks = fields.Char(string='Use Tasks as', default='Tasks', help="Label used for the tasks of the project.", translate=True)
+    label_tasks = fields.Char(string='Use Tasks as',default='Task' ,help="Label used for the tasks of the project.", translate=True)
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
     resource_calendar_id = fields.Many2one(
         'resource.calendar', string='Working Time',
@@ -959,7 +959,7 @@ class Task(models.Model):
 
     @api.model
     def get_empty_list_help(self, help):
-        tname = _("task")
+        tname = _("Task")
         project_id = self.env.context.get('default_project_id', False)
         if project_id:
             name = self.env['project.project'].browse(project_id).label_tasks
