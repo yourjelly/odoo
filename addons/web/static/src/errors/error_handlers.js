@@ -53,6 +53,8 @@ function legacyRPCErrorHandler(env) {
       event = error.event;
       error = error.message;
       if (event.isDefaultPrevented()) {
+        // in theory, here, event was already handled
+        uncaughtError.unhandledRejectionEvent.preventDefault();
         return true;
       }
       event.preventDefault();
