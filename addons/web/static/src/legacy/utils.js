@@ -136,29 +136,32 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
   // rpc
   legacyEnv.session.rpc = (...args) => {
     let rejection;
-    let error;
-    let event;
+    // let error;
+    // let event;
     const prom = new Promise((resolve, reject) => {
       rejection = () => reject();
       const [route, params, settings] = args;
-      wowlEnv.services.rpc(route, params, settings).then(resolve).catch((reason) => {
-        error = reason;
+      wowlEnv.services.rpc(route, params, settings).then(resolve)
+      .catch((reason) => {
+        // error = reason;
         if (reason instanceof RPCError) {
-          reason.event = $.Event();
+          // we do not reject an error here because we want to pass through
+          // the legacy guardedCatch code
+          reject ({ message: reason, event: $.Event(), legacy: true});
         }
         reject(reason);
       });
     });
     prom.abort = rejection;
-    prom.catch(() => {
-      setTimeout(function () {
-        // we want to execute this handler after all others (hence
-        // setTimeout) to let the other handlers prevent the event
-        if (!event || !event.isDefaultPrevented()) {
-          return Promise.reject(error);
-        }
-      }, 0);
-    });
+    // prom.catch(() => {
+    //   setTimeout(function () {
+    //     // we want to execute this handler after all others (hence
+    //     // setTimeout) to let the other handlers prevent the event
+    //     if (!event || !event.isDefaultPrevented()) {
+    //       return Promise.reject(error);
+    //     }
+    //   }, 0);
+    // });
     return prom;
   };
   // Storages

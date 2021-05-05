@@ -17,7 +17,7 @@ import { browser } from "../core/browser";
  */
 
 // -----------------------------------------------------------------------------
-// Unhandled rejection errors
+// Legacy error handling
 // -----------------------------------------------------------------------------
 
 /**
@@ -28,7 +28,8 @@ function legacyRejectPromiseHandler(env) {
   return (error) => {
     if (error.name === "UncaughtPromiseError") {
       const isLegitError = error.originalError && error.originalError instanceof Error;
-      if (!isLegitError) {
+      const isLegacyRPC = error.originalError && error.originalError.legacy;
+      if (!isLegitError && !isLegacyRPC) {
         // we consider that a code throwing something that is not an error is
         // a case where it is meant as an asynchronous control flow (as legacy
         // code is sadly doing). For now, we just want to consider this as a non
@@ -40,6 +41,42 @@ function legacyRejectPromiseHandler(env) {
   };
 }
 errorHandlerRegistry.add("legacyRejectPromiseHandler", legacyRejectPromiseHandler, { sequence: 1 });
+
+/**
+ * @param {OdooEnv} env
+ * @returns {ErrorHandler}
+ */
+function legacyRPCErrorHandler(env) {
+  return (uncaughtError) => {
+    let error = uncaughtError.originalError;
+    if (error && error.legacy && error.message && error.message.name === "RPC_ERROR") {
+      event = error.event;
+      error = error.message;
+      if (event.isDefaultPrevented()) {
+        return true;
+      }
+      event.preventDefault();
+      const exceptionName = error.exceptionName;
+      let ErrorComponent = error.Component;
+      if (!ErrorComponent && exceptionName && errorDialogRegistry.contains(exceptionName)) {
+        ErrorComponent = errorDialogRegistry.get(exceptionName);
+      }
+
+      env.services.dialog.open(ErrorComponent || RPCErrorDialog, {
+        traceback: error.traceback || error.stack,
+        message: error.message,
+        name: error.name,
+        exceptionName: error.exceptionName,
+        data: error.data,
+        subType: error.subType,
+        code: error.code,
+        type: error.type,
+      });
+      return true;
+    }
+  };
+}
+errorHandlerRegistry.add("legacyRPCErrorHandler", legacyRPCErrorHandler, { sequence: 2 });
 
 // -----------------------------------------------------------------------------
 // CORS errors
@@ -117,8 +154,9 @@ errorHandlerRegistry.add("emptyRejectionErrorHandler", emptyRejectionErrorHandle
  * @returns {ErrorHandler}
  */
 function rpcErrorHandler(env) {
-  return (error) => {
-    if (error.name === "RPC_ERROR") {
+  return (uncaughtError) => {
+    const error = uncaughtError.originalError;
+    if (error && error.name === "RPC_ERROR") {
       // When an error comes from the server, it can have an exeption name.
       // (or any string truly). It is used as key in the error dialog from
       // server registry to know which dialog component to use.
@@ -126,21 +164,21 @@ function rpcErrorHandler(env) {
       // Note that for a client side exception, we don't use this registry
       // as we can directly assign a value to `component`.
       // error is here a RPCError
-      const rpcError = error.originalError;
-      const exceptionName = rpcError.exceptionName;
-      let ErrorComponent = rpcError.Component;
+      const exceptionName = error.exceptionName;
+      let ErrorComponent = error.Component;
       if (!ErrorComponent && exceptionName && errorDialogRegistry.contains(exceptionName)) {
         ErrorComponent = errorDialogRegistry.get(exceptionName);
       }
+
       env.services.dialog.open(ErrorComponent || RPCErrorDialog, {
-        traceback: rpcError.traceback || rpcError.stack,
-        message: rpcError.message,
-        name: rpcError.name,
-        exceptionName: rpcError.exceptionName,
-        data: rpcError.data,
-        subType: rpcError.subType,
-        code: rpcError.code,
-        type: rpcError.type,
+        traceback: error.traceback || error.stack,
+        message: error.message,
+        name: error.name,
+        exceptionName: error.exceptionName,
+        data: error.data,
+        subType: error.subType,
+        code: error.code,
+        type: error.type,
       });
       return true;
     }
