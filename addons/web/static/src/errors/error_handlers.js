@@ -50,13 +50,13 @@ function legacyRPCErrorHandler(env) {
   return (uncaughtError) => {
     let error = uncaughtError.originalError;
     if (error && error.legacy && error.message && error.message.name === "RPC_ERROR") {
-      event = error.event;
+      const event = error.event;
       error = error.message;
+      uncaughtError.unhandledRejectionEvent.preventDefault();
       if (event.isDefaultPrevented()) {
         // in theory, here, event was already handled
         return true;
       }
-      uncaughtError.unhandledRejectionEvent.preventDefault();
       event.preventDefault();
       const exceptionName = error.exceptionName;
       let ErrorComponent = error.Component;
@@ -166,6 +166,7 @@ function rpcErrorHandler(env) {
       // Note that for a client side exception, we don't use this registry
       // as we can directly assign a value to `component`.
       // error is here a RPCError
+      uncaughtError.unhandledRejectionEvent.preventDefault();
       const exceptionName = error.exceptionName;
       let ErrorComponent = error.Component;
       if (!ErrorComponent && exceptionName && errorDialogRegistry.contains(exceptionName)) {
