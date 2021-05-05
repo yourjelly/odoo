@@ -232,7 +232,7 @@ class AccountTaxDetailsReport(models.Model):
                     tax_details.company_id,
                     tax_details.company_currency_id,
                     SUM(tax_details.base_amount) AS base_amount,
-                    SUM(tax_details.base_amount) AS tax_amount
+                    SUM(tax_details.tax_amount) AS tax_amount
                 FROM full_tax_details tax_details
                 GROUP BY
                     tax_details.base_line_id,
