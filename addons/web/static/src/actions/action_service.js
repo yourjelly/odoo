@@ -10,6 +10,7 @@ import { sprintf } from "../utils/strings";
 import { viewRegistry } from "../views/view_registry";
 import { serviceRegistry } from "../webclient/service_registry";
 import { actionRegistry } from "./action_registry";
+import { actionHandlersRegistry } from "./action_handlers_registry";
 
 const { Component, hooks, tags } = owl;
 
@@ -932,8 +933,13 @@ function makeActionManager(env) {
         return _executeReportAction(action, options);
       case "ir.actions.server":
         return _executeServerAction(action, options);
-      default:
+      default: {
+        const handler = actionHandlersRegistry.get(action.type);
+        if (handler) {
+          return handler({ env, action, options });
+        }
         throw new Error(`The ActionManager service can't handle actions of type ${action.type}`);
+      }
     }
   }
 
