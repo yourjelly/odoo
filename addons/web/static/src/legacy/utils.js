@@ -201,3 +201,46 @@ export function cleanDomFromBootstrap() {
     }
   }
 }
+
+export function makeLegacyNotificationService(legacyEnv) {
+  return {
+    dependencies: ["notification"],
+    start(env) {
+      function notify({title, message, subtitle, buttons=[], sticky, type, className, onClose}) {
+        if (subtitle) {
+          title = [title, subtitle].filter(Boolean).join(" ");
+        }
+        if (!message && title) {
+          message = title;
+          title = undefined;
+        }
+
+        buttons = buttons.map((button) => {
+          return {
+            name: button.text,
+            icon: button.icon,
+            primary: button.primary,
+            onClick: button.click,
+          };
+        });
+
+        return env.services.notification.create(message, {
+          sticky,
+          title,
+          type,
+          className,
+          onClose,
+          buttons,
+        });
+      }
+
+      function close(...args) {
+        //the legacy close method had 3 arguments : the notification id, silent and wait.
+        //the new close method only has 2 arguments : the notification id and wait.
+        return env.services.notification.close(args[0], args[2] ? args[2] : 0);
+      }
+
+      legacyEnv.services.notification = { notify, close };
+    },
+  };
+}
