@@ -326,6 +326,7 @@ export class ViewAdapter extends ActionAdapter {
       }
     } else if (ev.name === "execute_action") {
       const onSuccess = payload.on_success || (() => {});
+      const onFail = payload.on_fail || (() => {});
       this.actionService
         .doActionButton({
           args: payload.action_data.args,
@@ -342,14 +343,7 @@ export class ViewAdapter extends ActionAdapter {
           effect: payload.action_data.effect,
         })
         .then(onSuccess)
-        .catch((error) => {
-          if (payload.on_fail) {
-            payload.on_fail(error);
-          }
-          if (error instanceof Error) {
-            throw error;
-          }
-        });
+        .catch(onFail);
     } else {
       super._trigger_up(ev);
     }
