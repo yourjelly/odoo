@@ -5,7 +5,11 @@ import { actionService } from "@web/actions/action_service";
 import { browser, makeRAMLocalStorage } from "@web/core/browser";
 import { effectService } from "@web/effects/effect_service";
 import { hotkeyService } from "@web/hotkeys/hotkey_service";
-import { makeLegacyActionManagerService, mapLegacyEnvToWowlEnv } from "@web/legacy/utils";
+import {
+  makeLegacyActionManagerService,
+  mapLegacyEnvToWowlEnv,
+  makeLegacyNotificationService,
+} from "@web/legacy/utils";
 import { notificationService } from "@web/notifications/notification_service";
 import { dialogService } from "@web/services/dialog_service";
 import { menuService } from "@web/services/menu_service";
@@ -155,6 +159,8 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
   // deploy the legacyActionManagerService (in Wowl env)
   const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
   serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
+
+  serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
   // patch DebouncedField delay
   const debouncedField = legacy.basicFields.DebouncedField;
   const initialDebouncedVal = debouncedField.prototype.DEBOUNCE;
