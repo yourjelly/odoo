@@ -2,7 +2,7 @@
 
 import { browser } from "../core/browser";
 import AbstractStorageService from "web.AbstractStorageService";
-import { RPCError } from "../services/rpc_service";
+import { ConnectionAbortedError, RPCError } from "../services/rpc_service";
 import legacyConfig  from "web.config";
 
 export function mapDoActionOptionAPI(legacyOptions) {
@@ -138,20 +138,23 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
   legacyEnv.session.rpc = (...args) => {
     let rejection;
     const prom = new Promise((resolve, reject) => {
-      rejection = () => reject({
-        message: "XmlHttpRequestError abort",
-        event: $.Event('abort')
-    });
       const [route, params, settings] = args;
-      wowlEnv.services.rpc(route, params, settings).then(resolve)
-      .catch((reason) => {
-        if (reason instanceof RPCError) {
-          // we do not reject an error here because we want to pass through
-          // the legacy guardedCatch code
-          reject ({ message: reason, event: $.Event(), legacy: true});
-        }
-        reject(reason);
-      });
+      const jsonrpc = wowlEnv.services.rpc(route, params, settings);
+      rejection = () => {
+        jsonrpc.abort();
+      };
+      jsonrpc.then(resolve)
+        .catch((reason) => {
+          if (reason instanceof RPCError) {
+            // we do not reject an error here because we want to pass through
+            // the legacy guardedCatch code
+            reject ({ message: reason, event: $.Event(), legacy: true});
+          } else if (reason instanceof ConnectionAbortedError) {
+            reject({ message: reason.name, event: $.Event("abort")})
+          } else {
+            reject(reason);
+          }
+        });
     });
     prom.abort = rejection;
     return prom;

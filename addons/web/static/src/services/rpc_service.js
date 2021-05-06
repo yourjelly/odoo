@@ -21,6 +21,13 @@ export class ConnectionLostError extends Error {
   }
 }
 
+export class ConnectionAbortedError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "CONNECTION_ABORTED_ERROR";
+  }
+}
+
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
@@ -49,8 +56,10 @@ function jsonrpc(env, rpcId, url, params, settings = {}) {
     method: "call",
     params: params,
   };
-  return new Promise((resolve, reject) => {
-    const request = new XHR();
+  const request = new XHR();
+  let rejectFn;
+  const promise = new Promise((resolve, reject) => {
+    rejectFn = reject;
     if (!settings.shadow) {
       bus.trigger("RPC:REQUEST", data.id);
     }
@@ -80,6 +89,13 @@ function jsonrpc(env, rpcId, url, params, settings = {}) {
     request.setRequestHeader("Content-Type", "application/json");
     request.send(JSON.stringify(data));
   });
+  promise.abort = function () {
+    if (request.abort) {
+      request.abort();
+    }
+    rejectFn(new ConnectionAbortedError());
+  };
+  return promise;
 }
 
 // -----------------------------------------------------------------------------
