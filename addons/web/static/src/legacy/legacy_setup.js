@@ -2,6 +2,7 @@
 
 import { serviceRegistry } from "../webclient/service_registry";
 import {
+  makeLegacyNotificationService,
   makeLegacyActionManagerService,
   makeLegacyRpcService,
   makeLegacySessionService,
@@ -37,6 +38,7 @@ export const legacySetupProm = new Promise((resolve) => {
   const legacyWebClientService = makeLegacyWebClientService(legacyEnv);
   serviceRegistry.add("legacy_web_client", legacyWebClientService);
   const legacyDialogMappingService = makeLegacyDialogMappingService(legacyEnv);
+  serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
   serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
   await Promise.all([whenReady(), session.is_bound]);
   legacyEnv.qweb.addTemplates(session.owlTemplates);

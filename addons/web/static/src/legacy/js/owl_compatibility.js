@@ -244,10 +244,10 @@ odoo.define('web.OwlCompatibility', function () {
                     const result = service[payload.method].apply(service, args);
                     payload.callback(result);
                 } else {
-                    //Call the new Owl service (an adaptation is needed)
-                    //file: addons/web/static/src/legacy/service_provider_adapter.js
-                    //Note that this is only done for the backend
-                    this.trigger('call-service', payload);
+                    throw new Error(
+                        `The service "${service}" is not present in the legacy owl environment.
+                         You should probably create a mapper in @web/legacy/utils`
+                    );
                 }
             } else if (evType === 'get_session') {
                 if (payload.callback) {
