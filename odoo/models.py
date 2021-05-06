@@ -2243,29 +2243,42 @@ class BaseModel(metaclass=MetaModel):
                 value = pytz.timezone(self._context['tz']).localize(value)
         return value
 
-    @api.model
-    def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
+    def _read_group_apply_meta(
+            self,
+            data: dict,
+            annotated_groupbys: list,
+            groupby: list,
+            domain: list) -> dict:
         """
-            Helper method to format the data contained in the dictionary data by
-            adding the domain corresponding to its values, the groupbys in the
-            context and by properly formatting the date/datetime values.
+        Adds metainformation to the result of a :meth:`_read_group` call.
 
-        :param data: a single group
-        :param annotated_groupbys: expanded grouping metainformation
-        :param groupby: original grouping metainformation
-        :param domain: original domain for read_group
+        :param dict data: a single group
+        :param list annotated_groupbys: expanded grouping metainformation
+        :param list groupby: original grouping metainformation
+        :param list domain: original domain for read_group
         """
 
         sections = []
         for gb in annotated_groupbys:
             field = self._fields.get(gb['field'])
-            sections.append(field._read_group_domain_calc(data, gb, self.env))
+            sections.append(field._read_group_domain_calc(data, gb))
         sections.append(domain)
 
         data['__domain'] = expression.AND(sections)
         if len(groupby) - len(annotated_groupbys) >= 1:
             data['__context'] = { 'group_by': groupby[len(annotated_groupbys):]}
         del data['id']
+        return data
+
+    def _read_group_format_result(self, data: dict, annotated_groupbys: list) -> dict:
+        """
+        Formats the result of the _read_group output.
+        """
+        Model = self.browse()
+        for gb in annotated_groupbys:
+            field = self._fields.get(gb['field'])
+            value = data[gb['groupby']]
+            data[gb["groupby"]] = field._read_group_format_result(value, gb, Model)
         return data
 
     @api.model
@@ -2445,7 +2458,9 @@ class BaseModel(metaclass=MetaModel):
             data = self._read_group_fill_temporal(data, groupby, aggregated_fields,
                                                   annotated_groupbys)
 
-        result = [self._read_group_format_result(d, annotated_groupbys, groupby, domain) for d in data]
+        result = (self._read_group_apply_meta(d, annotated_groupbys, groupby, domain) for d in data)
+        result = (self._read_group_format_result(d, annotated_groupbys) for d in result)
+        result = list(result)
 
         if lazy:
             # Right now, read_group only fill results in lazy mode (by default).

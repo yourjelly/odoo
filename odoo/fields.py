@@ -6,6 +6,7 @@
 from babel import dates
 from collections import defaultdict
 from datetime import date, datetime, time
+from functools import lru_cache
 from operator import attrgetter
 from xmlrpc.client import MAXINT
 import base64
@@ -26,6 +27,7 @@ from .tools import (
 )
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
+from .tools import frozendict
 from .tools.translate import html_translate, _
 from .tools.mimetypes import guess_mimetype
 from .tools.misc import get_lang
@@ -657,7 +659,7 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         return self.store and self.column_type
 
-    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
+    def _read_group_domain_calc(self, data: dict, gb: dict) -> list:
         """
         Formats the result of a call to :meth:`BaseModel._read_group` into a domain term.
 
@@ -669,6 +671,11 @@ class Field(MetaField('DummyField', (object,), {})):
         value = data[gb['groupby']]
         return [(self.name, '=', value)]
 
+    def _read_group_format_result(self, value, gb, model):
+        """
+        Formats value for the web client, to be included in the output of read_group.
+        """
+        return value
     #
     # Company-dependent fields
     #
@@ -1854,18 +1861,25 @@ class DateFieldMixin(Field):
     add = staticmethod(date_utils.add)
     subtract = staticmethod(date_utils.subtract)
 
-    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
-        """
-        Serves as a proxy for formatting :meth:`BaseModel.read_group` for both Date and Datetime.
-        """
+    def _read_group_domain_calc(self, data: dict, gb: dict) -> list:
         value = data[gb['groupby']]
         if not value:
-            return super()._read_group_domain_calc(data, gb, env)
+            return super()._read_group_domain_calc(data, gb)
 
-        locale = get_lang(env).code
-        tzinfo = None
+        start, end = self._get_ranges(value, frozendict(gb))
+
+        return [
+            '&',
+            (self.name, '>=', self.to_string(start)),
+            (self.name, '<', self.to_string(end)),
+        ]
+
+    @staticmethod
+    @lru_cache()
+    def _get_ranges(value, gb):
         range_start = value
         range_end = value + gb['interval']
+        tzinfo = None
         # value from postgres is in local tz (so range is
         # considered in local tz e.g. "day" is [00:00, 00:00[
         # local rather than UTC which could be [11:00, 11:00]
@@ -1876,18 +1890,16 @@ class DateFieldMixin(Field):
             # take into account possible hour change between start and end
             range_end = tzinfo.localize(range_end.replace(tzinfo=None))
             range_end = range_end.astimezone(pytz.utc)
+        return range_start, range_end
 
-        range_start = self.to_string(range_start)
-        range_end = self.to_string(range_end)
+    def _read_group_format_result(self, value, gb, model):
+        if not value:
+            return super()._read_group_format_result(value, gb, model)
+        locale = get_lang(model.env).code
+        range_start, range_end = self._get_ranges(value, frozendict(gb))
         fmt_func = getattr(dates, f"format_{self.type}")
         label = fmt_func(value, format=gb['display_format'], locale=locale)
-        # /!\ data is being mutated directly...
-        data[gb['groupby']] = ('%s/%s' % (range_start, range_end), label)
-        return [
-            '&',
-            (self.name, '>=', range_start),
-            (self.name, '<', range_end),
-        ]
+        return ('%s/%s' % (range_start, range_end), label)
 
     @staticmethod
     def to_string(value):
@@ -2927,10 +2939,10 @@ class Many2one(_Relational):
                 ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
                 cache.set(corecord, invf, ids1)
 
-    def _read_group_domain_calc(self, data: dict, gb: dict, env) -> list:
+    def _read_group_domain_calc(self, data: dict, gb: dict) -> list:
         value = data[gb['groupby']]
         if not value:
-            return super()._read_group_domain_calc(data, gb, env)
+            return super()._read_group_domain_calc(data, gb)
         return [(self.name, '=', value[0])]
 
 
