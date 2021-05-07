@@ -4,12 +4,12 @@
 {
     'name': 'Sales Timesheet Purchase',
     'category': 'Hidden',
-    'summary': 'Bridge module between Sales Timesheet and Purchase',
+    'summary': 'Bridge module between Sales Timesheet and Expense',
     'description': """
-Allows to access purchase orders from Project Overview
+Allows to access expenses from Project Overview
 ======================================================
 """,
-    'depends': ['sale_timesheet', 'purchase'],
+    'depends': ['sale_timesheet', 'hr_expense'],
     'data': [
         'report/project_profitability_report_analysis_views.xml',
     ],

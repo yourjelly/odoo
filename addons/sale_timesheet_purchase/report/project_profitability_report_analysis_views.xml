@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_profitability_report_view_search_inherit" model="ir.ui.view">
+        <field name="name">project.profitability.report.search</field>
+        <field name="model">project.profitability.report</field>
+        <field name="inherit_id" ref="sale_timesheet.project_profitability_report_view_search" />
+        <field name="arch" type="xml">
+            <xpath expr="//group" postion="inside">
+                <filter string="Purchase Order" name="group_by_purchase_order" context="{'group_by':'purchase_order_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
