@@ -380,3 +380,69 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
         report_lines = self.env['account.tax.details.report'].search([('company_id', '=', self.env.company.id)])
         self.assertRecordValues(report_lines, expected_values_list)
         self.assertTotalAmounts(invoices, report_lines)
+
+    def test_fixed_tax_with_negative_quantity(self):
+        fixed_tax = self.env['account.tax'].create({
+            'name': "fixed_tax",
+            'amount_type': 'fixed',
+            'amount': 10.0,
+        })
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2019-01-01',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line1',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'price_unit': 100.0,
+                    'quantity': 5,
+                    'tax_ids': [Command.set(fixed_tax.ids)],
+                }),
+                Command.create({
+                    'name': 'line2',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'price_unit': 100.0,
+                    'quantity': 9,
+                    'tax_ids': [Command.set(fixed_tax.ids)],
+                }),
+                Command.create({
+                    'name': 'line3',
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'price_unit': 100.0,
+                    'quantity': -4,
+                    'tax_ids': [Command.set(fixed_tax.ids)],
+                }),
+            ]
+        })
+        base_lines = invoice.invoice_line_ids
+        tax_lines = invoice.line_ids.filtered('tax_line_id').sorted(lambda x: (x.tax_line_id, len(x.tax_ids)))
+        report_lines = self.env['account.tax.details.report']\
+            .search([('company_id', '=', self.env.company.id)])\
+            .sorted(lambda x: (x.base_line_id, x.tax_line_id, -abs(x.base_amount), -abs(x.tax_amount)))
+
+        self.assertRecordValues(
+            report_lines,
+            [
+                {
+                    'base_line_id': base_lines[0].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -500.0,
+                    'tax_amount': -50.0,
+                },
+                {
+                    'base_line_id': base_lines[1].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -900.0,
+                    'tax_amount': -90.0,
+                },
+                {
+                    'base_line_id': base_lines[2].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': 400.0,
+                    'tax_amount': 40.0,
+                },
+            ],
+        )
+        self.assertTotalAmounts(invoice, report_lines)
