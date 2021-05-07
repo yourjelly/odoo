@@ -85,13 +85,13 @@ class AccountTaxDetailsReport(models.Model):
                         base_line.balance AS base_amount,
                         SUM(
                             CASE WHEN tax.amount_type = 'fixed'
-                            THEN COALESCE(base_line.quantity, 1.0)
+                            THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * COALESCE(base_line.quantity, 1.0)
                             ELSE base_line.balance
                             END
                         ) OVER (PARTITION BY tax_line.id ORDER BY tax_line.tax_line_id, base_line.id) AS cumulated_base_amount,
                         SUM(
                             CASE WHEN tax.amount_type = 'fixed'
-                            THEN COALESCE(base_line.quantity, 1.0)
+                            THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * COALESCE(base_line.quantity, 1.0)
                             ELSE base_line.balance
                             END
                         ) OVER (PARTITION BY tax_line.id) AS total_base_amount,
@@ -161,13 +161,13 @@ class AccountTaxDetailsReport(models.Model):
                         tax_details.base_amount,
                         SUM(
                             CASE WHEN tax.amount_type = 'fixed'
-                            THEN COALESCE(base_line.quantity, 1.0)
+                            THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * COALESCE(base_line.quantity, 1.0)
                             ELSE base_line.balance
                             END
                         ) OVER (PARTITION BY tax_base_line.id ORDER BY tax_base_line.tax_line_id, base_line.id) AS cumulated_base_amount,
                         SUM(
                             CASE WHEN tax.amount_type = 'fixed'
-                            THEN COALESCE(base_line.quantity, 1.0)
+                            THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * COALESCE(base_line.quantity, 1.0)
                             ELSE base_line.balance
                             END
                         ) OVER (PARTITION BY tax_base_line.id) AS total_base_amount,
