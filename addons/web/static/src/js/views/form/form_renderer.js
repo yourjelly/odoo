@@ -255,7 +255,10 @@ var FormRenderer = BasicRenderer.extend({
                     continue; // No visible tab OR first tab = active tab (no change to make).
                 }
                 for (let i = 0; i < validTabsAmount; i++) {
-                    navs[i].querySelector('.nav-link').classList.toggle('active', activeIndex === i);
+                    const nav = navs[i].querySelector('.nav-link')
+                    if (nav) {
+                        nav.classList.toggle('active', activeIndex === i);
+                    }
                     pages[i].classList.toggle('active', activeIndex === i);
                 }
                 core.bus.trigger('DOM_updated');
