@@ -2001,7 +2001,7 @@ class AccountMove(models.Model):
         currencies = set()
         has_term_lines = False
         for line in self.line_ids:
-            if line.account_internal_type in ('receivable', 'payable'):
+            if line.account_internal_type in ('receivable', 'payable'): #TODO OCO voir à quoi sert ce qu'on aggrège ici et si le wh ne casse pas ça
                 sign = 1 if line.balance > 0.0 else -1
 
                 currencies.add(line.currency_id or line.company_currency_id)
@@ -2011,7 +2011,7 @@ class AccountMove(models.Model):
                 values['total_amount_currency'] += sign * line.amount_currency
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
-            elif not line.tax_exigible: #TODO OCO
+            elif not line.tax_exigible: #TODO OCO refactorer la fonction et ce qu'on met dans les entrées qu'on génère
 
                 values['to_process_lines'] += line
                 currencies.add(line.currency_id or line.company_currency_id)
@@ -3578,7 +3578,8 @@ class AccountMoveLine(models.Model):
     def _get_tax_exigible_domain(self):
         #TODO OCO DOC
         return [
-            '|', ('tax_line_id.tax_exigibility', '!=', 'on_payment'), # Also accepts tax_line_id = False #TODO OCO vérifier que tax_line_id False est aussi pris en compte
+            '|', ('tax_line_id', '=', False),
+            '|', ('tax_line_id.tax_exigibility', '!=', 'on_payment'),
             ('tax_cash_basis_rec_id', '!=', False),
         ]
 

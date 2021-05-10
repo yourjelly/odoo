@@ -211,12 +211,18 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 SUM(line.balance)
             FROM account_account_tag_account_move_line_rel rel
             JOIN account_move_line line ON line.id = rel.account_move_line_id
+            JOIN account_move move on line.move_id = move.id
+            LEFT JOIN account_tax tax ON line.tax_line_id = tax.id
             WHERE line.tax_exigible IS TRUE
               AND line.company_id = ANY(%(company_ids)s)
+              AND (
+                  tax.tax_exigibility != 'on_payment'
+                  OR move.tax_cash_basis_rec_id IS NOT NULL
+              )
             GROUP BY rel.account_account_tag_id
         ''', {
             'company_ids': self.env.companies.ids,
-        }) #TODO OCO^
+        })
 
         for tag_id, total_balance in self.cr.fetchall():
             tag, expected_balance = expected_values[tag_id]
