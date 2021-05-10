@@ -1288,13 +1288,13 @@ class AccountMove(models.Model):
                         total_untaxed_currency += line.amount_currency
                         total += line.balance
                         total_currency += line.amount_currency
-                    elif line.tax_line_id:
+                    elif line.tax_line_id and not line.tax_line_id.withholding:
                         # Tax amount.
                         total_tax += line.balance
                         total_tax_currency += line.amount_currency
                         total += line.balance
                         total_currency += line.amount_currency
-                    elif line.account_id.user_type_id.type in ('receivable', 'payable'):
+                    elif line.account_id.user_type_id.type in ('receivable', 'payable') or line.tax_line_id.withholding:
                         # Residual amount.
                         total_to_pay += line.balance
                         total_residual += line.amount_residual

@@ -88,6 +88,7 @@ class AccountTax(models.Model):
         ], string='Tax Due', default='on_invoice',
         help="Based on Invoice: the tax is due as soon as the invoice is validated.\n"
         "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
+    withholding = fields.Boolean(string="Is withholding", help="The tax lines from this tax will be added to the receivable/payable lines when compting the invoice total.") # TODO OCO moyen de faire plus clair ??
     cash_basis_transition_account_id = fields.Many2one(string="Cash Basis Transition Account",
         check_company=True,
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
