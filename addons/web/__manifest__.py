@@ -46,7 +46,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/xml/file_upload_progress_card.xml',
             'web/static/src/legacy/xml/kanban.xml',
             'web/static/src/legacy/xml/pivot.xml',
-            'web/static/src/legacy/xml/report.xml',
+
+            'web/static/src/report/report.xml',
+
             'web/static/src/legacy/xml/search_panel.xml',
             'web/static/src/legacy/xml/web_calendar.xml',
             'web/static/src/legacy/xml/graph.xml',
@@ -89,6 +91,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/fields/**/*',
             'web/static/src/views/**/*',
             'web/static/src/webclient/**/*',
+
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
             'web/static/src/env.js',
 
@@ -131,7 +134,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/scss/special_fields.scss',
             'web/static/src/legacy/scss/ribbon.scss',
             'web/static/src/legacy/scss/base_settings.scss',
-            'web/static/src/legacy/scss/report_backend.scss',
+            
+            'web/static/src/report/styles/report_backend.scss',
+
             'web/static/src/legacy/scss/dropdown_extra.scss',
             'web/static/src/legacy/scss/fields_extra.scss',
             'web/static/src/legacy/scss/form_view_extra.scss',
@@ -163,8 +168,10 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/core/math_utils.js',
             'web/static/src/legacy/js/core/misc.js',
             'web/static/src/legacy/js/fields/*',
-            'web/static/src/legacy/js/report/utils.js',
-            'web/static/src/legacy/js/report/client_action.js',
+
+            'web/static/src/report/utils.js',
+            'web/static/src/report/report_client_action.js',
+
             'web/static/src/legacy/js/services/data_manager.js',
             'web/static/src/legacy/js/services/report_service.js',
             'web/static/src/legacy/js/services/session.js',
@@ -234,7 +241,7 @@ This module provides the core of the Odoo Web Client.
         'web.report_assets_common': [
             ('include', 'web._assets_helpers'),
 
-            'web/static/src/legacy/scss/bootstrap_overridden_report.scss',
+            'web/static/src/report/styles/bootstrap_overridden_report.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
 
             ('include', 'web._assets_bootstrap'),
@@ -242,21 +249,25 @@ This module provides the core of the Odoo Web Client.
             'base/static/src/css/description.css',
             'web/static/lib/fontawesome/css/font-awesome.css',
             'web/static/fonts/fonts.scss',
-            'web/static/src/legacy/scss/report.scss',
-            'web/static/src/legacy/scss/layout_standard.scss',
-            'web/static/src/legacy/scss/layout_background.scss',
-            'web/static/src/legacy/scss/layout_boxed.scss',
-            'web/static/src/legacy/scss/layout_clean.scss',
-            '/web/static/src/legacy/scss/asset_styles_company_report.scss',
+
+            'web/static/src/report/styles/report.scss',
+            'web/static/src/report/styles/layout_standard.scss',
+            'web/static/src/report/styles/layout_background.scss',
+            'web/static/src/report/styles/layout_boxed.scss',
+            'web/static/src/report/styles/layout_clean.scss',
+            '/web/content/report/styles/asset_styles_company_report.scss',            
+
             'web/static/src/legacy/js/services/session.js',
             'web/static/src/legacy/js/public/public_root.js',
             'web/static/src/legacy/js/public/public_root_instance.js',
             'web/static/src/legacy/js/public/public_widget.js',
-            'web/static/src/legacy/js/report/utils.js',
-            'web/static/src/legacy/js/report/report.js',
+
+            'web/static/src/report/utils.js',
+            'web/static/src/report/report.js',
         ],
         'web.report_assets_pdf': [
-            'web/static/src/css/reset.min.css',
+            'web/static/src/report/styles/reset.min.css',
+            # 'web/static/src/report/styles/super.reset.min.scss',
         ],
 
         # ---------------------------------------------------------------------

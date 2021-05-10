@@ -463,9 +463,8 @@ download._download = (options) => {
         } else {
             xhr.open("POST", options.url);
             data = new FormData();
-            Object.entries(options.data).forEach((entry) => {
-                const [key, value] = entry;
-                data.append(key, value);
+            Object.keys(options.data).forEach((key) => {
+                data.append(key, options.data[key]);
             });
         }
         data.append("token", "dummy-because-api-expects-one");
