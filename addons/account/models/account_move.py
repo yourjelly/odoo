@@ -641,16 +641,12 @@ class AccountMove(models.Model):
             if not recompute_tax_base_amount:
                 line.tax_tag_ids = compute_all_vals['base_tags'] or [(5, 0, 0)]
 
-            tax_exigible = True
             for tax_vals in compute_all_vals['taxes']:
                 grouping_dict = self._get_tax_grouping_key_from_base_line(line, tax_vals)
                 grouping_key = _serialize_tax_grouping_key(grouping_dict)
 
                 tax_repartition_line = self.env['account.tax.repartition.line'].browse(tax_vals['tax_repartition_line_id'])
                 tax = tax_repartition_line.invoice_tax_id or tax_repartition_line.refund_tax_id
-
-                if tax.tax_exigibility == 'on_payment':
-                    tax_exigible = False
 
                 taxes_map_entry = taxes_map.setdefault(grouping_key, {
                     'tax_line': None,
@@ -661,8 +657,6 @@ class AccountMove(models.Model):
                 taxes_map_entry['amount'] += tax_vals['amount']
                 taxes_map_entry['tax_base_amount'] += self._get_base_amount_to_display(tax_vals['base'], tax_repartition_line, tax_vals['group'])
                 taxes_map_entry['grouping_dict'] = grouping_dict
-            if not recompute_tax_base_amount:
-                line.tax_exigible = tax_exigible
 
         # ==== Process taxes_map ====
         for taxes_map_entry in taxes_map.values():
@@ -720,7 +714,6 @@ class AccountMove(models.Model):
                     'company_currency_id': line.company_currency_id.id,
                     'tax_base_amount': tax_base_amount,
                     'exclude_from_invoice_tab': True,
-                    'tax_exigible': tax.tax_exigibility == 'on_invoice',
                     **taxes_map_entry['grouping_dict'],
                 })
 
@@ -738,19 +731,6 @@ class AccountMove(models.Model):
            or (tax_rep_ln.refund_tax_id and source_tax.type_tax_use == 'purchase'):
             return -base_amount
         return base_amount
-
-    def update_lines_tax_exigibility(self):
-        if all(account.user_type_id.type not in {'payable', 'receivable'} for account in self.mapped('line_ids.account_id')):
-            self.line_ids.write({'tax_exigible': True})
-        else:
-            tax_lines_caba = self.line_ids.filtered(lambda x: x.tax_line_id.tax_exigibility == 'on_payment')
-            base_lines_caba = self.line_ids.filtered(lambda x: any(tax.tax_exigibility == 'on_payment'
-                                                                   or (tax.amount_type == 'group'
-                                                                       and 'on_payment' in tax.mapped('children_tax_ids.tax_exigibility'))
-                                                               for tax in x.tax_ids))
-            caba_lines = tax_lines_caba + base_lines_caba
-            caba_lines.write({'tax_exigible': False})
-            (self.line_ids - caba_lines).write({'tax_exigible': True})
 
     def _recompute_cash_rounding_lines(self):
         ''' Handle the cash rounding feature on invoices.
@@ -818,7 +798,6 @@ class AccountMove(models.Model):
                     'name': _('%s (rounding)', biggest_tax_line.name),
                     'account_id': biggest_tax_line.account_id.id,
                     'tax_repartition_line_id': biggest_tax_line.tax_repartition_line_id.id,
-                    'tax_exigible': biggest_tax_line.tax_exigible,
                     'exclude_from_invoice_tab': True,
                 })
 
@@ -1873,9 +1852,7 @@ class AccountMove(models.Model):
 
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
         rslt = super(AccountMove, self).create(vals_list)
-        for i, vals in enumerate(vals_list):
-            if 'line_ids' in vals:
-                rslt[i].update_lines_tax_exigibility()
+
         return rslt
 
     def write(self, vals):
@@ -1924,10 +1901,8 @@ class AccountMove(models.Model):
                 res |= super(AccountMove, move).write(vals_hashing)
 
         # Ensure the move is still well balanced.
-        if 'line_ids' in vals:
-            if self._context.get('check_move_validity', True):
-                self._check_balanced()
-            self.update_lines_tax_exigibility()
+        if 'line_ids' in vals and self._context.get('check_move_validity', True):
+            self._check_balanced()
 
         self._synchronize_business_models(set(vals.keys()))
 
@@ -2036,7 +2011,7 @@ class AccountMove(models.Model):
                 values['total_amount_currency'] += sign * line.amount_currency
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
-            elif not line.tax_exigible:
+            elif not line.tax_exigible: #TODO OCO
 
                 values['to_process_lines'] += line
                 currencies.add(line.currency_id or line.company_currency_id)
@@ -3120,10 +3095,6 @@ class AccountMoveLine(models.Model):
         help='technical field for widget tax-group-custom-field')
     tax_base_amount = fields.Monetary(string="Base Amount", store=True, readonly=True,
         currency_field='company_currency_id')
-    tax_exigible = fields.Boolean(string='Appears in VAT report', default=True, readonly=True,
-        help="Technical field used to mark a tax line as exigible in the vat report or not (only exigible journal items"
-             " are displayed). By default all new journal items are directly exigible, but with the feature cash_basis"
-             " on taxes, some will become exigible only when the payment is recorded.")
     tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line',
         string="Originator Tax Distribution Line", ondelete='restrict', readonly=True,
         check_company=True,
@@ -3602,6 +3573,14 @@ class AccountMoveLine(models.Model):
             # balance is 0, so unit price is 0 as well
             vals = {'price_unit': 0.0}
         return vals
+
+    @api.model
+    def _get_tax_exigible_domain(self):
+        #TODO OCO DOC
+        return [
+            '|', ('tax_line_id.tax_exigibility', '!=', 'on_payment'), # Also accepts tax_line_id = False #TODO OCO vérifier que tax_line_id False est aussi pris en compte
+            ('tax_cash_basis_rec_id', '!=', False),
+        ]
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS

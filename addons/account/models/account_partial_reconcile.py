@@ -240,7 +240,6 @@ class AccountPartialReconcile(models.Model):
             'account_id': account.id,
             'tax_ids': [(6, 0, base_line.tax_ids.ids)],
             'tax_tag_ids': [(6, 0, base_line.tax_tag_ids.ids)],
-            'tax_exigible': True,
             'tax_tag_invert': base_line.tax_tag_invert,
         }
 
@@ -261,7 +260,6 @@ class AccountPartialReconcile(models.Model):
             'amount_currency': -cb_base_line_vals['amount_currency'],
             'currency_id': cb_base_line_vals['currency_id'],
             'partner_id': cb_base_line_vals['partner_id'],
-            'tax_exigible': True,
         }
 
     @api.model
@@ -286,7 +284,6 @@ class AccountPartialReconcile(models.Model):
             'amount_currency': amount_currency,
             'currency_id': tax_line.currency_id.id,
             'partner_id': tax_line.partner_id.id,
-            'tax_exigible': True,
             # No need to set tax_tag_invert as on the base line; it will be computed from the repartition line
         }
 
@@ -308,7 +305,6 @@ class AccountPartialReconcile(models.Model):
             'amount_currency': -cb_tax_line_vals['amount_currency'],
             'currency_id': cb_tax_line_vals['currency_id'],
             'partner_id': cb_tax_line_vals['partner_id'],
-            'tax_exigible': True,
         }
 
     @api.model
