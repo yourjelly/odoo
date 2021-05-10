@@ -221,24 +221,12 @@ def send_file(content, filename=None, mimetype=None, mtime=None, as_attachment=F
     _logger.info("response %s", r)
     return r
 
-# ?????
-
+# TODO check usage and remove of move to request as helper
 def content_disposition(filename):
     filename = odoo.tools.ustr(filename)
     escaped = werkzeug.urls.url_quote(filename, safe='')
 
     return "attachment; filename*=UTF-8''%s" % escaped
-
-def set_safe_image_headers(headers, content):
-    """Return new headers based on `headers` but with `Content-Length` and
-    `Content-Type` set appropriately depending on the given `content` only if it
-    is safe to do."""
-    content_type = guess_mimetype(content)
-    safe_types = ['image/jpeg', 'image/png', 'image/gif', 'image/x-icon']
-    if content_type in safe_types:
-        headers = set_header_field(headers, 'Content-Type', content_type)
-    set_header_field(headers, 'Content-Length', len(content))
-    return headers
 
 def set_header_field(headers, name, value):
     """ Return new headers based on `headers` but with `value` set for the
@@ -259,6 +247,17 @@ def set_header_field(headers, name, value):
     dictheaders = dict(headers)
     dictheaders[name] = value
     return list(dictheaders.items())
+
+def set_safe_image_headers(headers, content):
+    """Return new headers based on `headers` but with `Content-Length` and
+    `Content-Type` set appropriately depending on the given `content` only if it
+    is safe to do."""
+    content_type = guess_mimetype(content)
+    safe_types = ['image/jpeg', 'image/png', 'image/gif', 'image/x-icon']
+    if content_type in safe_types:
+        headers = set_header_field(headers, 'Content-Type', content_type)
+    set_header_field(headers, 'Content-Length', len(content))
+    return headers
 
 #----------------------------------------------------------
 # Controller and routes
@@ -449,7 +448,6 @@ class Request(object):
 
         self.session_mono = None
 
-
         # TODO remove
         self.session_db = None
         self.db = None
@@ -521,8 +519,8 @@ class Request(object):
         self._env = None
 
 
-    @property
-    def registry(self):
+    #@property
+    #def registry(self):
 
     @property
     def env(self):
