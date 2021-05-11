@@ -9,12 +9,14 @@
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button
                     class="oe_stat_button" name="action_open_repair_orders" 
-                    type="object" icon="fa-cog" groups='stock.group_stock_user'>
+                    type="object" icon="fa-cog" groups='stock.group_stock_user'
+                    attrs="{'invisible': [('repair_order_ids', '=', [])]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">1</span>
                         <span class="o_stat_text">Repair Order</span>
                     </div>
                 </button>
+                <field name="repair_order_ids" invisible="1"/>
             </xpath>
         </field>
     </record>

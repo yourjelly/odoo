@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
 from random import randint
 
 from odoo import api, fields, models, _, Command
@@ -175,7 +174,6 @@ class Repair(models.Model):
             if repair.sale_order_id:
                 continue
             so_values.append(repair._prepare_sale_order_values())
-        print(so_values)
         self.env['sale.order'].create(so_values)
         return True
 
@@ -275,12 +273,12 @@ class Repair(models.Model):
             'payment_term_id': partner.property_payment_term_id.id,
             'user_id': False,
             'partner_shipping_id': partner_addr['delivery'],
-            'repair_order_id': Command.link(self.id),
-            'order_line': Command.create([
-                operation._prepare_sale_order_line_values() for operation in self.operations
+            'repair_order_ids': Command.link(self.id),
+            'order_line': [
+                Command.create(operation._prepare_sale_order_line_values()) for operation in self.operations
             ] + [
-                fee._prepare_sale_order_line_values() for fee in self.fees_lines
-            ]),
+                Command.create(fee._prepare_sale_order_line_values()) for fee in self.fees_lines
+            ],
         }
 
     def _prepare_stock_move_values(self, owner_id):
@@ -441,6 +439,7 @@ class RepairLine(models.Model):
         'stock.production.lot', 'Lot/Serial',
         domain="[('product_id','=', product_id), ('company_id', '=', company_id)]", check_company=True)
     tracking = fields.Selection(string='Product Tracking', related="product_id.tracking")
+    sale_order_line_ids = fields.One2many('sale.order.line', 'repair_line_id')
 
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id')
     def _compute_price_subtotal(self):
@@ -519,15 +518,41 @@ class RepairLine(models.Model):
             else:
                 self.price_unit = price
 
-    def write(self):
+    def create(self, vals_list):
+        res = super().create(vals_list)
 
+        res._sync_sale_order()
+        res._sync_stock_move()
+
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+
+        self._sync_sale_order(vals)
+        self._sync_stock_move(vals)
+
+        return res
+
+    def _sync_sale_order(self, vals=False):
+        create_values = []
+        for line in self:
+            if not line.repair_id.sale_order_id:
+                continue
+            if line.sale_order_line_ids:
+                # TODO : avoid write for nothing ?? 
+                line.sale_order_line_ids.write(self._prepare_sale_order_line_values())
+            else:
+                create_values.append(self._prepare_sale_order_line_values())
+        self.env['sale.order.line'].create(create_values)
+
+    def _sync_stock_move(self, vals=False):
         # TODO Manage change of location, location_dest, qty impact the stock move behind
-
-        return super().write()
+        pass
 
     def _prepare_sale_order_line_values(self):
         self.ensure_one()
-        return {
+        res = {
             'name': self.name,
             'product_uom_qty': self.product_uom_qty if self.type == 'add' else -self.product_uom_qty,
             'product_id': self.product_id.id,
@@ -535,8 +560,12 @@ class RepairLine(models.Model):
             'price_unit': self.price_unit,
             'company_id': self.company_id.id,
             'currency_id': self.currency_id.id,
-            # 'tax_id': self.tax_id.ids,
+            'tax_id': self.tax_id.ids,
+            'repair_line_id': self.id,
         }
+        if self.repair_id.sale_order_id:
+            res['order_id'] = self.repair_id.sale_order_id.id
+        return res
 
 
 class RepairFee(models.Model):
@@ -562,6 +591,7 @@ class RepairFee(models.Model):
     tax_id = fields.Many2many(
         'account.tax', 'repair_fee_line_tax', 'repair_fee_line_id', 'tax_id', 'Taxes',
         domain="[('type_tax_use','=','sale'), ('company_id', '=', company_id)]", check_company=True)
+    sale_order_line_ids = fields.One2many('sale.order.line', 'repair_line_id')
 
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id')
     def _compute_price_subtotal(self):
@@ -621,9 +651,36 @@ class RepairFee(models.Model):
             else:
                 self.price_unit = price
 
+    def create(self, vals_list):
+        res = super().create(vals_list)
+
+        res._sync_sale_order()
+
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+
+        # TODO Manage change of location, location_dest, qty impact the stock move behind
+        self._sync_sale_order(vals)
+
+        return res
+
+    def _sync_sale_order(self, vals=False):
+        create_values = []
+        for line in self:
+            if not line.repair_id.sale_order_id:
+                continue
+            if line.sale_order_line_ids:
+                # TODO : avoid write for nothing ??
+                line.sale_order_line_ids.write(self._prepare_sale_order_line_values())
+            else:
+                create_values.append(self._prepare_sale_order_line_values())
+        self.env['sale.order.line'].create(create_values)
+
     def _prepare_sale_order_line_values(self):
         self.ensure_one()
-        return {
+        res = {
             'name': self.name,
             'product_uom_qty': self.product_uom_qty,
             'product_id': self.product_id.id,
@@ -631,8 +688,12 @@ class RepairFee(models.Model):
             'price_unit': self.price_unit,
             'company_id': self.company_id.id,
             'currency_id': self.currency_id.id,
-            # 'tax_id': self.tax_id.ids,
+            'tax_id': self.tax_id.ids,
+            'repair_fee_id': self.id,
         }
+        if self.repair_id.sale_order_id:
+            res['order_id'] = self.repair_id.sale_order_id.id
+        return res
 
 
 class RepairTags(models.Model):
