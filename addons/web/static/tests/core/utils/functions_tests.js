@@ -17,19 +17,47 @@ QUnit.module("utils", () => {
         assert.equal(callCount, 1, "Memoized function was called once to fill the cache");
         assert.equal(lastReceivedArgs, "first", "Memoized function received the correct argument");
         const secondValue = memoized("first");
-        assert.equal(callCount, 1, "Subsequent calls to memoized function with the same argument do not call the original function again");
-        assert.equal(firstValue, secondValue, "Subsequent call to memoized function with the same argument returns the same value");
+        assert.equal(
+            callCount,
+            1,
+            "Subsequent calls to memoized function with the same argument do not call the original function again"
+        );
+        assert.equal(
+            firstValue,
+            secondValue,
+            "Subsequent call to memoized function with the same argument returns the same value"
+        );
 
         const thirdValue = memoized();
-        assert.equal(callCount, 2, "Subsequent calls to memoized function with a different argument call the original function again");
+        assert.equal(
+            callCount,
+            2,
+            "Subsequent calls to memoized function with a different argument call the original function again"
+        );
         const fourthValue = memoized();
-        assert.equal(thirdValue, fourthValue, "Memoization also works with no first argument as a key");
-        assert.equal(callCount, 2, "Subsequent calls to memoized function with no first argument do not call the original function again");
+        assert.equal(
+            thirdValue,
+            fourthValue,
+            "Memoization also works with no first argument as a key"
+        );
+        assert.equal(
+            callCount,
+            2,
+            "Subsequent calls to memoized function with no first argument do not call the original function again"
+        );
 
         memoized(1, 2, 3);
         assert.equal(callCount, 3);
-        assert.deepEqual(lastReceivedArgs, [1, 2, 3], "Arguments after the first one are passed through correctly");
+        assert.deepEqual(
+            lastReceivedArgs,
+            [1, 2, 3],
+            "Arguments after the first one are passed through correctly"
+        );
         memoized(1, 20, 30);
-        assert.equal(callCount, 3, "Subsequent calls to memoized function with more than one argument do not call the original function again even if the arguments other than the first have changed");
+        assert.equal(
+            callCount,
+            3,
+            "Subsequent calls to memoized function with more than one argument do not call the original function again even if the arguments other than the first have changed"
+        );
     });
 });

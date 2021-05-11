@@ -121,8 +121,8 @@ async function loadBundle(name, options) {
     // TODO: if ("js/css") {...} to support lazy loading js/css from bundles
 
     // Wait only for the requested keys
-    const entries = await Promise.all(Object.keys(options)
-        .map(async key => [key, await bundlesCache[name][key]]),
+    const entries = await Promise.all(
+        Object.keys(options).map(async (key) => [key, await bundlesCache[name][key]])
     );
     return Object.fromEntries(entries);
 }
@@ -169,8 +169,8 @@ export const loadPublicAsset = memoize(async function _loadPublicAsset(xmlid, or
     const xml = await orm.call("ir.ui.view", "render_public_asset", [xmlid]);
     const doc = new DOMParser().parseFromString(`<xml>${xml}</xml>`, "text/xml");
     return loadAssets({
-        cssLibs: [...doc.querySelectorAll("link[href]")].map(node => node.getAttribute("href")),
-        jsLibs: [...doc.querySelectorAll("script[src]")].map(node => node.getAttribute("src")),
+        cssLibs: [...doc.querySelectorAll("link[href]")].map((node) => node.getAttribute("href")),
+        jsLibs: [...doc.querySelectorAll("script[src]")].map((node) => node.getAttribute("src")),
     });
 });
 /**
@@ -195,8 +195,8 @@ export async function loadAssets(assets) {
     if ("bundles" in assets) {
         const bundles = Object.entries(assets.bundles);
         const bundlesProm = Promise.all(
-            bundles.map(async ([name, options]) => [name, await loadBundle(name, options)]),
-        ).then(loadedBundles => {
+            bundles.map(async ([name, options]) => [name, await loadBundle(name, options)])
+        ).then((loadedBundles) => {
             loadedAssets.bundles = Object.fromEntries(loadedBundles);
         });
         proms.push(bundlesProm);
