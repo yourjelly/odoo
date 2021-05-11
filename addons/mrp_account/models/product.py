@@ -50,10 +50,8 @@ class ProductProduct(models.Model):
         dummy, bom_lines = bom.explode(self, 1)
         bom_lines = {line: data for line, data in bom_lines}
         value = 0
-        for move in stock_moves:
-            bom_line = move.bom_line_id
-            bom_line_data = bom_lines[bom_line]
-            bom_line_qty = bom_line_data['qty']
+        for move, bom_line_data in zip(stock_moves, bom_lines):
+            bom_line_qty = bom_line_data['product_qty']
             value += move.product_id._compute_average_price(qty_invoiced * bom_line_qty, qty_to_invoice * bom_line_qty, move)
         return value
 
