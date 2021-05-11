@@ -2,11 +2,11 @@
 
 import { registry } from "../core/registry";
 import {
-  makeLegacyNotificationService,
-  makeLegacyActionManagerService,
-  makeLegacyRpcService,
-  makeLegacySessionService,
-  makeLegacyDialogMappingService,
+    makeLegacyNotificationService,
+    makeLegacyActionManagerService,
+    makeLegacyRpcService,
+    makeLegacySessionService,
+    makeLegacyDialogMappingService,
 } from "./utils";
 import * as AbstractService from "web.AbstractService";
 import * as legacyEnv from "web.env";
@@ -18,30 +18,30 @@ const { whenReady } = utils;
 
 let legacySetupResolver;
 export const legacySetupProm = new Promise((resolve) => {
-  legacySetupResolver = resolve;
+    legacySetupResolver = resolve;
 });
 
 // build the legacy env and set it on owl.Component (this was done in main.js,
 // with the starting of the webclient)
 (async () => {
-  config.mode = legacyEnv.isDebug() ? "dev" : "prod";
-  AbstractService.prototype.deployServices(legacyEnv);
-  Component.env = legacyEnv;
-  const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
-  const serviceRegistry = registry.category("services");
-  serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
-  // add a service to redirect rpc events triggered on the bus in the
-  // legacy env on the bus in the wowl env
-  const legacyRpcService = makeLegacyRpcService(legacyEnv);
-  serviceRegistry.add("legacy_rpc", legacyRpcService);
-  const legacySessionService = makeLegacySessionService(legacyEnv, session);
-  serviceRegistry.add("legacy_session", legacySessionService);
-  const legacyWebClientService = makeLegacyWebClientService(legacyEnv);
-  serviceRegistry.add("legacy_web_client", legacyWebClientService);
-  const legacyDialogMappingService = makeLegacyDialogMappingService(legacyEnv);
-  serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
-  serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
-  await Promise.all([whenReady(), session.is_bound]);
-  legacyEnv.qweb.addTemplates(session.owlTemplates);
-  legacySetupResolver(legacyEnv);
+    config.mode = legacyEnv.isDebug() ? "dev" : "prod";
+    AbstractService.prototype.deployServices(legacyEnv);
+    Component.env = legacyEnv;
+    const legacyActionManagerService = makeLegacyActionManagerService(legacyEnv);
+    const serviceRegistry = registry.category("services");
+    serviceRegistry.add("legacy_action_manager", legacyActionManagerService);
+    // add a service to redirect rpc events triggered on the bus in the
+    // legacy env on the bus in the wowl env
+    const legacyRpcService = makeLegacyRpcService(legacyEnv);
+    serviceRegistry.add("legacy_rpc", legacyRpcService);
+    const legacySessionService = makeLegacySessionService(legacyEnv, session);
+    serviceRegistry.add("legacy_session", legacySessionService);
+    const legacyWebClientService = makeLegacyWebClientService(legacyEnv);
+    serviceRegistry.add("legacy_web_client", legacyWebClientService);
+    const legacyDialogMappingService = makeLegacyDialogMappingService(legacyEnv);
+    serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
+    serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
+    await Promise.all([whenReady(), session.is_bound]);
+    legacyEnv.qweb.addTemplates(session.owlTemplates);
+    legacySetupResolver(legacyEnv);
 })();

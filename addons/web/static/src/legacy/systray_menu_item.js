@@ -7,10 +7,10 @@ import { registry } from "../core/registry";
 const { Component, tags } = owl;
 
 class SystrayItemAdapter extends ComponentAdapter {
-  constructor() {
-    super(...arguments);
-    this.env = Component.env;
-  }
+    constructor() {
+        super(...arguments);
+        this.env = Component.env;
+    }
 }
 
 const legacySystrayMenuItems = legacySystrayMenu.Items;
@@ -18,16 +18,14 @@ const legacySystrayMenuItems = legacySystrayMenu.Items;
 // to the wowl one, but wrapped into Owl components
 
 legacySystrayMenuItems.forEach((item, index) => {
-  const name = `_legacy_systray_item_${index}`;
-  class SystrayItem extends Component {
-    constructor() {
-      super(...arguments);
-      this.Widget = item;
+    const name = `_legacy_systray_item_${index}`;
+    class SystrayItem extends Component {
+        constructor() {
+            super(...arguments);
+            this.Widget = item;
+        }
     }
-  }
-  SystrayItem.template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
-  SystrayItem.components = { SystrayItemAdapter };
-  registry
-    .category("systray")
-    .add(name, SystrayItem, { sequence: item.prototype.sequence });
+    SystrayItem.template = tags.xml`<SystrayItemAdapter Component="Widget" />`;
+    SystrayItem.components = { SystrayItemAdapter };
+    registry.category("systray").add(name, SystrayItem, { sequence: item.prototype.sequence });
 });
