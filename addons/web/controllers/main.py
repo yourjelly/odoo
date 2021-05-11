@@ -1656,7 +1656,12 @@ class Action(http.Controller):
     @http.route('/web/action/load', type='json', auth="user")
     def load(self, action_id, additional_context=None):
         Actions = request.env['ir.actions.actions']
-        value = False
+        value = {
+            'tag': "invalid_action",
+            'type': "ir.actions.client",
+            'target': "current",
+            'action_attempted': action_id,
+        }
         try:
             action_id = int(action_id)
         except ValueError:

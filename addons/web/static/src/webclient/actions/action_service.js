@@ -916,6 +916,15 @@ function makeActionManager(env) {
                 if (action.target !== "new") {
                     await clearUncommittedChanges(env);
                 }
+                if (action.tag === "invalid_action") {
+                    restore(
+                        controllerStack.length ? controllerStack[controllerStack.length - 2] : null
+                    );
+                    const newOptions = { ...options };
+                    newOptions.clearBreadcrumbs = false;
+                    await _executeClientAction(action, newOptions);
+                    return "invalid_action_processed";
+                }
                 return _executeClientAction(action, options);
             case "ir.actions.report":
                 return _executeReportAction(action, options);
