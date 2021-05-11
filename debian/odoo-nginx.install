@@ -1,0 +1,2 @@
+#!/usr/bin/dh-exec
+debian/odoo-nginx-site.conf => /etc/nginx/sites-available/odoo.conf

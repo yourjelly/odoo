@@ -1,0 +1,39 @@
+#!/bin/sh
+set -e
+. /usr/share/debconf/confmodule
+
+ODOO_CONFIGURATION_FILE=/etc/odoo/odoo.conf
+NGINX_ODOO_FILE=/etc/nginx/sites-available/odoo.conf
+
+# update odoo configuration file
+# setting number of workers
+db_get odoo-nginx/workers || true
+if [ -n "$RET"  ]; then
+    NBWORKERS=$RET
+    if [ ! $(grep workers $ODOO_CONFIGURATION_FILE) ]; then
+        echo "workers = $NBWORKERS" >> $ODOO_CONFIGURATION_FILE
+    else
+        sed -i -e "s/workers \?= \?[[:digit:]]\+/workers = $NBWORKERS/" $ODOO_CONFIGURATION_FILE
+    fi
+fi
+
+# setting proxy_mode
+if [ ! $(grep proxy_mode $ODOO_CONFIGURATION_FILE) ]; then
+        echo "proxy_mode = True" >> $ODOO_CONFIGURATION_FILE
+    else
+        sed -i -e "s/proxy_mode \?= \?False/proxy_mode = True/" $ODOO_CONFIGURATION_FILE
+    fi
+
+# update odoo nginx configuration file
+db_get odoo-nginx/server_name || true
+if [ -n "$RET"  ]; then
+	SERVERNAME=$RET
+	sed -i -e "s/server_name odoo.mycompany.com/server_name ${SERVERNAME}/g" $NGINX_ODOO_FILE
+fi
+
+# enable to odoo site
+ln -s $NGINX_ODOO_FILE /etc/nginx/sites-enabled/
+
+# restart odoo and reload nginx
+invoke-rc.d odoo restart
+invoke-rc.d nginx reload

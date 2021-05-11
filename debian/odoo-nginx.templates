@@ -1,0 +1,13 @@
+Template: odoo-nginx/workers
+Type: string
+Default: 8
+Description: Number of http workers ?
+ This depends on the number of CPU and the number of concurrent users you expect.
+ As a rule of thumb, this formula gives good results: (#CPU * 2) + 1.
+ Also, 1 workers ~= 6 concurrent users
+
+Template: odoo-nginx/server_name
+Type: string
+Default: foo.bar.com
+Description: Server name for nginx configuration
+ This is what nginx will listen for to handle requests for the Odo server.
