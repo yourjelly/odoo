@@ -1866,7 +1866,7 @@ class DateFieldMixin(Field):
         if not value:
             return super()._read_group_domain_calc(data, gb)
 
-        start, end = self._get_ranges(value, frozendict(gb))
+        start, end, _ = self._get_ranges(value, frozendict(gb))
 
         return [
             '&',
@@ -1890,16 +1890,16 @@ class DateFieldMixin(Field):
             # take into account possible hour change between start and end
             range_end = tzinfo.localize(range_end.replace(tzinfo=None))
             range_end = range_end.astimezone(pytz.utc)
-        return range_start, range_end
+        return range_start, range_end, tzinfo
 
     def _read_group_format_result(self, value, gb, model):
         if not value:
             return super()._read_group_format_result(value, gb, model)
         locale = get_lang(model.env).code
-        range_start, range_end = self._get_ranges(value, frozendict(gb))
+        range_start, range_end, tzinfo = self._get_ranges(value, frozendict(gb))
         fmt_func = getattr(dates, f"format_{self.type}")
-        label = fmt_func(value, format=gb['display_format'], locale=locale)
-        return ('%s/%s' % (range_start, range_end), label)
+        label = fmt_func(value, format=gb['display_format'], tzinfo=tzinfo, locale=locale)
+        return ('%s/%s' % (self.to_string(range_start), self.to_string(range_end)), label)
 
     @staticmethod
     def to_string(value):
