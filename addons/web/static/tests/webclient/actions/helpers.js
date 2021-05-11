@@ -29,6 +29,7 @@ import {
     makeFakeUserService,
 } from "../../helpers/mock_services";
 import { getFixture, legacyExtraNextTick, nextTick, patchWithCleanup } from "../../helpers/utils";
+import session from "web.session";
 
 const { Component, mount, tags } = owl;
 
@@ -67,6 +68,11 @@ export async function createWebClient(params) {
             controllers.push(this);
         },
     });
+    if (params.legacyParams && params.legacyParams.getTZOffset) {
+        patchWithCleanup(session, {
+            getTZOffset: params.legacyParams.getTZOffset,
+        });
+    }
 
     const mockRPC = params.mockRPC || undefined;
     const env = await makeTestEnv({
