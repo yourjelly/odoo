@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 
 
 class StockMove(models.Model):
@@ -11,26 +11,11 @@ class StockMove(models.Model):
     def write(self, vals):
         super().write(vals)
         if 'quantity_done' in vals:
-            for move in self.filtered('analytic_account_line_id'):
-                unit_amount = -move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
-                move.analytic_account_line_id.write({
-                    'unit_amount': unit_amount,
-                    'amount': unit_amount * move.product_id.standard_price,
-                })
+            self._create_or_update_analytic_entry()
 
     def _action_confirm(self, merge=True, merge_into=False):
         res = super()._action_confirm(merge=merge, merge_into=merge_into)
-        for move in res.filtered(lambda m: m.raw_material_production_id.analytic_account_id):
-            unit_amount = -move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
-            if not move.analytic_account_line_id:
-                move.analytic_account_line_id = self.env['account.analytic.line'].sudo().create(
-                    move._prepare_analytic_line(unit_amount, unit_amount * move.product_id.standard_price)
-                )
-            else:
-                move.analytic_account_line_id.write({
-                    'unit_amount': unit_amount,
-                    'amount': unit_amount * move.product_id.standard_price,
-                })
+        res._create_or_update_analytic_entry()
         return res
 
     def _action_cancel(self):
@@ -48,6 +33,19 @@ class StockMove(models.Model):
             'product_uom_id': self.product_id.uom_id.id,
             'company_id': self.company_id.id,
         }
+
+    def _create_or_update_analytic_entry(self):
+        for move in self.filtered(lambda m: m.raw_material_production_id.analytic_account_id):
+            unit_amount = -move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id)
+            if not move.analytic_account_line_id:
+                move.analytic_account_line_id = self.env['account.analytic.line'].sudo().create(
+                    move._prepare_analytic_line(unit_amount, unit_amount * move.product_id.standard_price)
+                )
+            else:
+                move.analytic_account_line_id.write({
+                    'unit_amount': unit_amount,
+                    'amount': unit_amount * move.product_id.standard_price,
+                })
 
     def _is_returned(self, valued_type):
         if self.unbuild_id and self.unbuild_id.mo_id:   # unbuilding a MO

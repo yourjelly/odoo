@@ -71,6 +71,7 @@ class MrpProduction(models.Model):
         # has access to account analytic lines but still should be
         # able to produce orders
         AccountAnalyticLine = self.env['account.analytic.line'].sudo()
+        (self.workorder_ids.mo_analytic_account_line_id | self.workorder_ids.wc_analytic_account_line_id).unlink()
         mo_precision_rounding = self.analytic_account_id.currency_id.rounding
         vals_list = []
         for wc_line in self.workorder_ids:
