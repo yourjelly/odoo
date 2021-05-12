@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.tools import float_is_zero
@@ -499,14 +501,19 @@ class AccountBankStatement(models.Model):
 class AccountBankStatementLine(models.Model):
     _name = "account.bank.statement.line"
     _inherits = {'account.move': 'move_id'}
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Bank Statement Line"
     _order = "statement_id desc, date, sequence, id desc"
     _check_company_auto = True
 
-    # FIXME: Fields having the same name in both tables are confusing (partner_id & state). We don't change it because:
-    # - It's a mess to track/fix.
-    # - Some fields here could be simplified when the onchanges will be gone in account.move.
-    # Should be improved in the future.
+    def _get_default_journal(self):
+        ''' Retrieve the default journal for the account.payment.
+        /!\ This method will not override the method in 'account.move' because the ORM
+        doesn't allow overriding methods using _inherits. Then, this method will be called
+        manually in 'create' and 'new'.
+        :return: An account.journal record.
+        '''
+        return self.env['account.move']._search_default_journal(('bank', 'cash'))
 
     # == Business fields ==
     move_id = fields.Many2one(
@@ -515,8 +522,11 @@ class AccountBankStatementLine(models.Model):
         check_company=True)
     statement_id = fields.Many2one(
         comodel_name='account.bank.statement',
-        string='Statement', index=True, required=True, ondelete='cascade',
-        check_company=True)
+        string="Statement",
+        index=True,
+        required=True,
+        check_company=True,
+    )
 
     sequence = fields.Integer(index=True, help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
@@ -534,7 +544,13 @@ class AccountBankStatementLine(models.Model):
         compute="_compute_is_reconciled",
         store=True,
         help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), expressed in its currency. This is a technical field use to speedup the application of reconciliation models.")
-    currency_id = fields.Many2one('res.currency', string='Journal Currency')
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string="Journal Currency",
+        store=True,
+        readonly=False,
+        compute='_compute_currency_id',
+    )
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Partner', ondelete='restrict',
@@ -545,6 +561,15 @@ class AccountBankStatementLine(models.Model):
         relation='account_payment_account_bank_statement_line_rel',
         string='Auto-generated Payments',
         help="Payments generated during the reconciliation of this bank statement lines.")
+
+    # == Stat buttons ==
+    reconciled_move_ids = fields.Many2many(
+        comodel_name='account.move',
+        string="Reconciled Journal Entries",
+        compute='_compute_stat_buttons_from_reconciliation')
+    reconciled_move_ids_count = fields.Integer(
+        string="# Reconciled Journal Entries",
+        compute="_compute_stat_buttons_from_reconciliation")
 
     # == Display purpose fields ==
     is_reconciled = fields.Boolean(string='Is Reconciled', store=True,
@@ -816,6 +841,49 @@ class AccountBankStatementLine(models.Model):
                 # The journal entry seems reconciled.
                 st_line.is_reconciled = True
 
+    @api.depends('journal_id')
+    def _compute_currency_id(self):
+        for pay in self:
+            pay.currency_id = pay.journal_id.currency_id or pay.journal_id.company_id.currency_id
+
+    @api.depends('move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
+    def _compute_stat_buttons_from_reconciliation(self):
+        for to_flush in ('account.move', 'account.move.line', 'account.partial.reconcile'):
+            self.env[to_flush].flush(self.env[to_flush]._fields)
+
+        res = defaultdict(set)
+        stored_ids = self._origin.ids
+        if stored_ids:
+            self._cr.execute('''
+                SELECT
+                    line.statement_line_id,
+                    ARRAY_AGG(credit_line.move_id) AS move_ids
+                FROM account_move_line line
+                JOIN account_partial_reconcile part ON part.debit_move_id = line.id
+                JOIN account_move_line credit_line ON credit_line.id = part.credit_move_id
+                WHERE line.statement_line_id IN %s
+                GROUP BY 1
+    
+                UNION ALL
+    
+                SELECT
+                    line.statement_line_id,
+                    ARRAY_AGG(debit_line.move_id) AS move_ids
+                FROM account_move_line line
+                JOIN account_partial_reconcile part ON part.credit_move_id = line.id
+                JOIN account_move_line debit_line ON debit_line.id = part.debit_move_id
+                WHERE line.statement_line_id IN %s
+                GROUP BY 1
+            ''', [tuple(self.ids), tuple(self.ids)])
+            for st_line_id, move_ids in self._cr.fetchall():
+                for move_id in move_ids:
+                    res[st_line_id].add(move_id)
+
+        for st_line in self:
+            rec_moves = self.env['account.move'].browse(list(res[st_line.id]))
+            st_line.reconciled_move_ids = rec_moves
+            st_line.reconciled_move_ids_count = len(rec_moves)
+
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
@@ -849,10 +917,11 @@ class AccountBankStatementLine(models.Model):
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
 
-            journal = statement.journal_id
-            # Ensure the journal is the same as the statement one.
-            vals['journal_id'] = journal.id
-            vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
+            # Force the computation of 'journal_id' since this field is set on account.move but must have the
+            # bank/cash type.
+            if 'journal_id' not in vals:
+                vals['journal_id'] = self._get_default_journal().id
+
             if 'date' not in vals:
                 vals['date'] = statement.date
 
@@ -1208,6 +1277,46 @@ class AccountBankStatementLine(models.Model):
         # Refresh analytic lines.
         self.move_id.line_ids.analytic_line_ids.unlink()
         self.move_id.line_ids.create_analytic_lines()
+
+    # -------------------------------------------------------------------------
+    # ACTIONS
+    # -------------------------------------------------------------------------
+
+    def button_post(self):
+        ''' draft -> posted '''
+        self.move_id.action_post()
+
+    def button_cancel(self):
+        ''' draft -> cancel '''
+        self.move_id.button_cancel()
+
+    def button_draft(self):
+        ''' (posted || cancel) -> draft '''
+        self.move_id.button_draft()
+
+    def button_open_reconciled_moves(self):
+        ''' Redirect the user to the bill(s) paid by this payment.
+        :return:    An action on account.move.
+        '''
+        self.ensure_one()
+
+        action = {
+            'name': _("Reconciled Journal Entries"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'context': {'create': False},
+        }
+        if self.reconciled_move_ids_count == 1:
+            action.update({
+                'view_mode': 'form',
+                'res_id': self.reconciled_move_ids.id,
+            })
+        else:
+            action.update({
+                'view_mode': 'list,form',
+                'domain': [('id', 'in', self.reconciled_move_ids.ids)],
+            })
+        return action
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
