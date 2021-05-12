@@ -1897,8 +1897,12 @@ class DateFieldMixin(Field):
             return super()._read_group_format_result(value, gb, model)
         locale = get_lang(model.env).code
         range_start, range_end, tzinfo = self._get_ranges(value, frozendict(gb))
-        fmt_func = getattr(dates, f"format_{self.type}")
-        label = fmt_func(value, format=gb['display_format'], tzinfo=tzinfo, locale=locale)
+        if self.type == 'datetime':
+            label = dates.format_datetime(
+                value, format=gb['display_format'], tzinfo=tzinfo, locale=locale
+            )
+        else:
+            label = dates.format_date(value, format=gb['display_format'], locale=locale)
         return ('%s/%s' % (self.to_string(range_start), self.to_string(range_end)), label)
 
     @staticmethod
