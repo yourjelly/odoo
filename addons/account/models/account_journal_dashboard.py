@@ -92,7 +92,6 @@ class account_journal(models.Model):
             return {'x':short_name,'y': amount, 'name':name}
 
         self.ensure_one()
-        BankStatement = self.env['account.bank.statement']
         data = []
         today = datetime.today()
         last_month = today + timedelta(days=-30)
@@ -101,7 +100,7 @@ class account_journal(models.Model):
         #starting point of the graph is the last statement
         last_stmt = self._get_last_bank_statement(domain=[('move_id.state', '=', 'posted')])
 
-        last_balance = last_stmt and last_stmt.balance_end_real or 0
+        last_balance = last_stmt and last_stmt.balance_end or 0
         data.append(build_graph_data(today, last_balance))
 
         #then we subtract the total amount of bank statement lines per day to get the previous points
@@ -241,7 +240,7 @@ class account_journal(models.Model):
                 JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
                 JOIN account_bank_statement st ON st_line.statement_id = st.id
                 WHERE st_line_move.journal_id IN %s
-                AND st.state = 'posted'
+                AND st_line_move.state = 'posted'
                 AND NOT st_line.is_reconciled
             ''', [tuple(self.ids)])
             number_to_reconcile = self.env.cr.fetchone()[0]

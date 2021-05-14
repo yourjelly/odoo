@@ -106,12 +106,8 @@ class AccountChartTemplate(models.Model):
         ref = self.env.ref
         return ('account.bank.statement', {
             f'{cid}_demo_bank_statement_1': {
-                'journal_id': self.env['account.journal'].search([
-                    ('type', '=', 'bank'),
-                    ('company_id', '=', cid),
-                ], limit=1).id,
                 'date': time.strftime('%Y')+'-01-01',
-                'balance_end_real': 9944.87,
+                'balance_end': 9944.87,
                 'balance_start': 5103.0,
                 'line_ids': [
                     Command.create({
@@ -332,7 +328,7 @@ class AccountChartTemplate(models.Model):
                 except (UserError, ValidationError):
                     _logger.exception('Error while posting demo data')
         elif created._name == 'account.bank.statement':
-            created.button_post()
+            created.line_ids.button_post()
 
     @api.model
     def _get_demo_account(self, xml_id, user_type_id, company):
