@@ -2450,7 +2450,7 @@ class BaseModel(metaclass=MetaModel):
         fetched_data = self._cr.dictfetchall()
 
         if not groupby_fields:
-            return fetched_data
+            return fetched_data, annotated_groupbys
 
         self._read_group_resolve_many2one_fields(fetched_data, annotated_groupbys)
 
