@@ -227,8 +227,8 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
                 templates = await odoo.loadTemplatesPromise;
             } else {
                 var cacheId = this.cache_hashes && this.cache_hashes.qweb;
-                const route = `/web/webclient/qweb/${(cacheId ? cacheId : Date.now())}`;
-                templates = await (await fetch(route, { bundle: 'web.assets_qweb' })).text();
+                const route = `/web/webclient/qweb/${(cacheId ? cacheId : Date.now())}?bundle=web.assets_qweb`;
+                templates = await (await fetch(route)).text();
             }
             const doc = new DOMParser().parseFromString(templates, "text/xml");
             if (!doc) {
