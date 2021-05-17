@@ -244,3 +244,12 @@ export function makeLegacyNotificationService(legacyEnv) {
         },
     };
 }
+
+export function mapLegacyHttpService(legacyEnv) {
+    return {
+        dependencies: ["http"],
+        start(env) {
+            legacyEnv.services.http = Object.assign({}, env.services.http);
+        },
+    };
+}

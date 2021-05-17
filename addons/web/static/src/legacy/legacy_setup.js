@@ -7,6 +7,7 @@ import {
     makeLegacyRpcService,
     makeLegacySessionService,
     makeLegacyDialogMappingService,
+    mapLegacyHttpService,
 } from "./utils";
 import * as AbstractService from "web.AbstractService";
 import * as legacyEnv from "web.env";
@@ -41,6 +42,7 @@ export const legacySetupProm = new Promise((resolve) => {
     const legacyDialogMappingService = makeLegacyDialogMappingService(legacyEnv);
     serviceRegistry.add("legacy_notification", makeLegacyNotificationService(legacyEnv));
     serviceRegistry.add("legacy_dialog_mapping", legacyDialogMappingService);
+    serviceRegistry.add("legacy_http", mapLegacyHttpService(legacyEnv));
     await Promise.all([whenReady(), session.is_bound]);
     legacyEnv.qweb.addTemplates(session.owlTemplates);
     legacySetupResolver(legacyEnv);
