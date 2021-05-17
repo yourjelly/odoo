@@ -116,7 +116,7 @@ QUnit.test('activity simplest layout', async function (assert) {
 });
 
 QUnit.test('activity with note layout', async function (assert) {
-    assert.expect(3);
+    assert.expect(1);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -125,16 +125,10 @@ QUnit.test('activity with note layout', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_note').length,
-        1,
-        "should have activity note"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_note. because
+    // We have already made assert for 'o_Activity_note' text.
     assert.strictEqual(
         document.querySelector('.o_Activity_note').textContent,
         "There is no good or bad note",
@@ -143,7 +137,7 @@ QUnit.test('activity with note layout', async function (assert) {
 });
 
 QUnit.test('activity info layout when planned after tomorrow', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     await this.start();
     const today = new Date();
@@ -156,16 +150,10 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_dueDateText').length,
-        1,
-        "should have activity delay"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_dueDateText. because
+    // We have already made assert for 'o_Activity_dueDateText' text.
     assert.ok(
         document.querySelector('.o_Activity_dueDateText').classList.contains('o-planned'),
         "activity delay should have the right color modifier class (planned)"
@@ -178,7 +166,7 @@ QUnit.test('activity info layout when planned after tomorrow', async function (a
 });
 
 QUnit.test('activity info layout when planned tomorrow', async function (assert) {
-    assert.expect(4);
+    assert.expect(1);
 
     await this.start();
     const today = new Date();
@@ -191,20 +179,12 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_dueDateText').length,
-        1,
-        "should have activity delay"
-    );
-    assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-planned'),
-        "activity delay should have the right color modifier class (planned)"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_dueDateText. because
+    // We have already made assert for 'o_Activity_dueDateText' text.
+
+    // already assert in 'activity info layout when planned after tomorrow'.
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
         'Tomorrow:',
@@ -213,7 +193,7 @@ QUnit.test('activity info layout when planned tomorrow', async function (assert)
 });
 
 QUnit.test('activity info layout when planned today', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     await this.start();
     const today = new Date();
@@ -224,16 +204,10 @@ QUnit.test('activity info layout when planned today', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_dueDateText').length,
-        1,
-        "should have activity delay"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_dueDateText. because
+    // We have already made assert for 'o_Activity_dueDateText' text.
     assert.ok(
         document.querySelector('.o_Activity_dueDateText').classList.contains('o-today'),
         "activity delay should have the right color modifier class (today)"
@@ -246,7 +220,7 @@ QUnit.test('activity info layout when planned today', async function (assert) {
 });
 
 QUnit.test('activity info layout when planned yesterday', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     await this.start();
     const today = new Date();
@@ -259,16 +233,10 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_dueDateText').length,
-        1,
-        "should have activity delay"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_dueDateText. because
+    // We have already made assert for 'o_Activity_dueDateText' text.
     assert.ok(
         document.querySelector('.o_Activity_dueDateText').classList.contains('o-overdue'),
         "activity delay should have the right color modifier class (overdue)"
@@ -281,7 +249,7 @@ QUnit.test('activity info layout when planned yesterday', async function (assert
 });
 
 QUnit.test('activity info layout when planned before yesterday', async function (assert) {
-    assert.expect(4);
+    assert.expect(1);
 
     await this.start();
     const today = new Date();
@@ -294,20 +262,12 @@ QUnit.test('activity info layout when planned before yesterday', async function 
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_dueDateText').length,
-        1,
-        "should have activity delay"
-    );
-    assert.ok(
-        document.querySelector('.o_Activity_dueDateText').classList.contains('o-overdue'),
-        "activity delay should have the right color modifier class (overdue)"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_dueDateText. because
+    // We have already made assert for 'o_Activity_dueDateText' text.
+
+    // already assert in 'activity info layout when planned yesterday'.
     assert.strictEqual(
         document.querySelector('.o_Activity_dueDateText').textContent,
         "5 days overdue:",
@@ -316,7 +276,7 @@ QUnit.test('activity info layout when planned before yesterday', async function 
 });
 
 QUnit.test('activity with a summary layout', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -325,16 +285,10 @@ QUnit.test('activity with a summary layout', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_summary').length,
-        1,
-        "should have activity summary"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_summary. because
+    // We have already made assert for 'o_Activity_summary' text.
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_type').length,
         0,
@@ -348,7 +302,7 @@ QUnit.test('activity with a summary layout', async function (assert) {
 });
 
 QUnit.test('activity without summary layout', async function (assert) {
-    assert.expect(5);
+    assert.expect(3);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -357,16 +311,10 @@ QUnit.test('activity without summary layout', async function (assert) {
         type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_type').length,
-        1,
-        "activity details should have an activity type section"
-    );
+    // already assert in simplest layout test.
+
+    // here no need to check the length of o_Activity_type. because
+    // We have already made assert for 'o_Activity_type' text.
     assert.strictEqual(
         document.querySelector('.o_Activity_type').textContent.trim(),
         "Fake type",
@@ -385,7 +333,7 @@ QUnit.test('activity without summary layout', async function (assert) {
 });
 
 QUnit.test('activity details toggle', async function (assert) {
-    assert.expect(5);
+    assert.expect(4);
 
     await this.start();
     const today = new Date();
@@ -401,11 +349,8 @@ QUnit.test('activity details toggle', async function (assert) {
         type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
+    // already assert in simplest layout test.
+
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_details').length,
         0,
@@ -437,7 +382,7 @@ QUnit.test('activity details toggle', async function (assert) {
 });
 
 QUnit.test('activity details layout', async function (assert) {
-    assert.expect(11);
+    assert.expect(6);
 
     await this.start();
     const today = new Date();
@@ -454,35 +399,21 @@ QUnit.test('activity details layout', async function (assert) {
         type: insert({ id: 1, displayName: "Fake type" }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
+    // already assert in 'simplest layout test'.
+
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_userAvatar').length,
         1,
         "should have activity user avatar"
     );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_detailsButton').length,
-        1,
-        "activity should have a details button"
-    );
+    // here no need to check the length of o_Activity_detailsButton. because
+    // We have already made assert for 'o_Activity_detailsButton' click.
 
     await afterNextRender(() =>
         document.querySelector('.o_Activity_detailsButton').click()
     );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_details').length,
-        1,
-        "activity details should be visible after clicking on details button"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_details .o_Activity_type').length,
-        1,
-        "activity details should have type"
-    );
+    // here no need to check the length of o_Activity_details. because
+    // We have already made assert for 'o_Activity_type' text.
     assert.strictEqual(
         document.querySelector('.o_Activity_details .o_Activity_type').textContent,
         "Fake type",
@@ -498,11 +429,8 @@ QUnit.test('activity details layout', async function (assert) {
         1,
         "activity details should have creator"
     );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_detailsAssignation').length,
-        1,
-        "activity details should have assignation information"
-    );
+    // here no need to check the length of o_Activity_detailsAssignation. because
+    // We have already made assert for 'o_Activity_detailsAssignation' text.
     assert.strictEqual(
         document.querySelector('.o_Activity_detailsAssignation').textContent.indexOf('Pauvre pomme'),
         0,
@@ -516,7 +444,7 @@ QUnit.test('activity details layout', async function (assert) {
 });
 
 QUnit.test('activity with mail template layout', async function (assert) {
-    assert.expect(8);
+    assert.expect(4);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -525,31 +453,14 @@ QUnit.test('activity with mail template layout', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
+    // already assert in 'simplest layout test'.
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_sidebar').length,
         1,
         "should have activity sidebar"
     );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_mailTemplates').length,
-        1,
-        "should have activity mail templates"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_mailTemplate').length,
-        1,
-        "should have activity mail template"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_MailTemplate_name').length,
-        1,
-        "should have activity mail template name"
-    );
+    // we have 'o_Activity_mailTemplate' inside of 'o_Activity_mailTemplates'.
+    // so no need to check about 'o_Activity_mailTemplates' length.
     assert.strictEqual(
         document.querySelector('.o_MailTemplate_name').textContent,
         "Dummy mail template",
@@ -568,7 +479,7 @@ QUnit.test('activity with mail template layout', async function (assert) {
 });
 
 QUnit.test('activity with mail template: preview mail', async function (assert) {
-    assert.expect(10);
+    assert.expect(8);
 
     const bus = new Bus();
     bus.on('do-action', null, payload => {
@@ -614,16 +525,10 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_MailTemplate_preview').length,
-        1,
-        "should have activity mail template name preview button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_MailTemplate_preview. because
+    // We have already made assert for 'o_MailTemplate_preview' click.
 
     document.querySelector('.o_MailTemplate_preview').click();
     assert.verifySteps(
@@ -633,7 +538,7 @@ QUnit.test('activity with mail template: preview mail', async function (assert) 
 });
 
 QUnit.test('activity with mail template: send mail', async function (assert) {
-    assert.expect(7);
+    assert.expect(5);
 
     await this.start({
         async mockRPC(route, args) {
@@ -657,16 +562,10 @@ QUnit.test('activity with mail template: send mail', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_MailTemplate_send').length,
-        1,
-        "should have activity mail template name send button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_MailTemplate_send. because
+    // We have already made assert for 'o_MailTemplate_send' click.
 
     document.querySelector('.o_MailTemplate_send').click();
     assert.verifySteps(
@@ -676,7 +575,7 @@ QUnit.test('activity with mail template: send mail', async function (assert) {
 });
 
 QUnit.test('activity upload document is available', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start();
     const today = new Date();
@@ -689,11 +588,8 @@ QUnit.test('activity upload document is available', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
+    // already assert in 'simplest layout test'.
+
     assert.strictEqual(
         document.querySelectorAll('.o_Activity_uploadButton').length,
         1,
@@ -707,7 +603,7 @@ QUnit.test('activity upload document is available', async function (assert) {
 });
 
 QUnit.test('activity click on mark as done', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     await this.start();
     const today = new Date();
@@ -721,16 +617,10 @@ QUnit.test('activity click on mark as done', async function (assert) {
     });
     await this.createActivityComponent(activity);
 
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_markDoneButton').length,
-        1,
-        "should have activity Mark as Done button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_markDoneButton. because
+    // We have already made assert for 'o_Activity_markDoneButton' click.
 
     await afterNextRender(() => {
         document.querySelector('.o_Activity_markDoneButton').click();
@@ -752,7 +642,7 @@ QUnit.test('activity click on mark as done', async function (assert) {
 });
 
 QUnit.test('activity mark as done popover should focus feedback input on open [REQUIRE FOCUS]', async function (assert) {
-    assert.expect(3);
+    assert.expect(1);
 
     await this.start();
     const today = new Date();
@@ -766,16 +656,10 @@ QUnit.test('activity mark as done popover should focus feedback input on open [R
     });
     await this.createActivityComponent(activity);
 
-    assert.containsOnce(
-        document.body,
-        '.o_Activity',
-        "should have activity component"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Activity_markDoneButton',
-        "should have activity Mark as Done button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_markDoneButton. because
+    // We have already made assert for 'o_Activity_markDoneButton' click.
 
     await afterNextRender(() => {
         document.querySelector('.o_Activity_markDoneButton').click();
@@ -788,7 +672,7 @@ QUnit.test('activity mark as done popover should focus feedback input on open [R
 });
 
 QUnit.test('activity click on edit', async function (assert) {
-    assert.expect(9);
+    assert.expect(7);
 
     const bus = new Bus();
     bus.on('do-action', null, payload => {
@@ -828,16 +712,10 @@ QUnit.test('activity click on edit', async function (assert) {
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_editButton').length,
-        1,
-        "should have activity edit button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_editButton. because
+    // We have already made assert for 'o_Activity_editButton' click.
 
     document.querySelector('.o_Activity_editButton').click();
     assert.verifySteps(
@@ -847,7 +725,7 @@ QUnit.test('activity click on edit', async function (assert) {
 });
 
 QUnit.test('activity edition', async function (assert) {
-    assert.expect(14);
+    assert.expect(11);
 
     this.data['mail.activity'].records.push({
         can_write: true,
@@ -896,21 +774,13 @@ QUnit.test('activity edition', async function (assert) {
     );
     await this.createActivityComponent(activity);
 
-    assert.containsOnce(
-        document.body,
-        '.o_Activity',
-        "should have activity component"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Activity_editButton',
-        "should have activity edit button"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Activity_icon',
-        "should have activity icon"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_editButton. because
+    // We have already made assert for 'o_Activity_editButton' click.
+
+    // here no need to check the length of o_Activity_icon. because
+    // We have already made assert for icons inside 'o_Activity_icon'.
     assert.containsOnce(
         document.body,
         '.o_Activity_icon.fa-times',
@@ -942,7 +812,7 @@ QUnit.test('activity edition', async function (assert) {
 });
 
 QUnit.test('activity click on cancel', async function (assert) {
-    assert.expect(7);
+    assert.expect(5);
 
     await this.start({
         async mockRPC(route, args) {
@@ -1004,16 +874,10 @@ QUnit.test('activity click on cancel', async function (assert) {
         target: this.widget.el,
     });
 
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity').length,
-        1,
-        "should have activity component"
-    );
-    assert.strictEqual(
-        document.querySelectorAll('.o_Activity_cancelButton').length,
-        1,
-        "should have activity cancel button"
-    );
+    // already assert in 'simplest layout test'.
+
+    // here no need to check the length of o_Activity_cancelButton. because
+    // We have already made assert for 'o_Activity_cancelButton' click.
 
     await afterNextRender(() =>
         document.querySelector('.o_Activity_cancelButton').click()
@@ -1066,7 +930,7 @@ QUnit.test('activity mark done popover close on ESCAPE', async function (assert)
 QUnit.test('activity mark done popover click on discard', async function (assert) {
     // This test is not in activity_mark_done_popover_tests.js as it requires the activity mark done
     // component to have a parent in order to allow testing interactions the popover.
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -1084,11 +948,8 @@ QUnit.test('activity mark done popover click on discard', async function (assert
         '.o_ActivityMarkDonePopover',
         "Popover component should be present"
     );
-    assert.containsOnce(
-        document.body,
-        '.o_ActivityMarkDonePopover_discardButton',
-        "Popover component should contain the discard button"
-    );
+    // here no need to check the length of o_ActivityMarkDonePopover_discardButton. because
+    // We have already made assert for 'o_ActivityMarkDonePopover_discardButton' click.
     await afterNextRender(() =>
         document.querySelector('.o_ActivityMarkDonePopover_discardButton').click()
     );
@@ -1100,7 +961,7 @@ QUnit.test('activity mark done popover click on discard', async function (assert
 });
 
 QUnit.test('data-oe-id & data-oe-model link redirection on click', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     const bus = new Bus();
     bus.on('do-action', null, payload => {
@@ -1130,11 +991,9 @@ QUnit.test('data-oe-id & data-oe-model link redirection on click', async functio
         thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityComponent(activity);
-    assert.containsOnce(
-        document.body,
-        '.o_Activity_note',
-        "activity should have a note"
-    );
+
+    // here no need to check the length of o_Activity_note. because
+    // We have already made assert for anchor inside 'o_Activity_note'.
     assert.containsOnce(
         document.querySelector('.o_Activity_note'),
         'a',
