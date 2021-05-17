@@ -62,7 +62,7 @@ export async function setupTests() {
         patchLegacyCoreBus();
     });
 
-    const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}`;
+    const templatesUrl = `/web/webclient/qweb/${new Date().getTime()}?bundle=web.assets_qweb`;
     // TODO replace by `processTemplates` when the legacy system is removed
     let templates = await loadFile(templatesUrl);
     // as we currently have two qweb engines (owl and legacy), owl templates are
