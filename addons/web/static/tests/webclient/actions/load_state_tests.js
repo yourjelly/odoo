@@ -894,4 +894,21 @@ QUnit.module("ActionManager", (hooks) => {
         delete core.action_registry.map.ClientAction;
         delete core.action_registry.map.ClientAction2;
     });
+
+    QUnit.test('state with integer active_ids should not crash', async function (assert) {
+        assert.expect(2);
+
+        const mockRPC = async (route, args) => {
+            if (route === '/web/action/run') {
+                assert.strictEqual(args.action_id, 2);
+                assert.deepEqual(args.context.active_ids, [3]);
+                return new Promise(() => {});
+            }
+        };
+        const webClient = await createWebClient({ testConfig, mockRPC });
+        await loadState(webClient, {
+            action: 2,
+            active_ids: 3,
+        });
+    });
 });
