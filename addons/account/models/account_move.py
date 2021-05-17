@@ -4892,6 +4892,11 @@ class AccountMoveLine(models.Model):
         for move_line in self:
             amount = (move_line.credit or 0.0) - (move_line.debit or 0.0)
             default_name = move_line.name or (move_line.ref or '/' + ' -- ' + (move_line.partner_id and move_line.partner_id.name or '/'))
+            category = 'other'
+            if move_line.move_id.move_type in ['out_invoice', 'out_refund']:
+                category = 'invoice'
+            elif move_line.move_id.move_type in ['in_invoice', 'in_refund']:
+                category = 'vendor_bill'
             result.append({
                 'name': default_name,
                 'date': move_line.date,
@@ -4908,6 +4913,7 @@ class AccountMoveLine(models.Model):
                 'user_id': move_line.move_id.invoice_user_id.id or self._uid,
                 'partner_id': move_line.partner_id.id,
                 'company_id': move_line.analytic_account_id.company_id.id or self.env.company.id,
+                'category': category,
             })
         return result
 

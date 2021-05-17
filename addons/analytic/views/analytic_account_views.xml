@@ -321,6 +321,7 @@
                     <group string="Group By..." expand="0" name="groupby">
                         <filter string="Analytic Account" name="account_id" context="{'group_by': 'account_id'}"/>
                         <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                        <filter string="Category" name='category' context="{'group_by': 'category'}"/>
                     </group>
                 </search>
             </field>

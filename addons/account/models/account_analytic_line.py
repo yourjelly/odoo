@@ -7,6 +7,10 @@ from odoo.exceptions import UserError
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
 
+    account_move_line_ids = fields.One2many('account.move.line', 'analytic_account_id', string='Account Moves')
+    invoice_count = fields.Integer("Invoice Count", compute='_compute_account_move_count')
+    vendor_bill_count = fields.Integer("Vendor Bill Count", compute='_compute_account_move_count')
+
     @api.constrains('company_id')
     def _check_company_consistency(self):
         analytic_accounts = self.filtered('company_id')
@@ -26,6 +30,43 @@ class AccountAnalyticAccount(models.Model):
         if self._cr.fetchone():
             raise UserError(_("You can't set a different company on your analytic account since there are some journal items linked to it."))
 
+    @api.depends('account_move_line_ids')
+    def _compute_account_move_count(self):
+        for account in self:
+            account.invoice_count = len(account.account_move_line_ids.move_id.filtered(lambda m: m.move_type == 'out_invoice' or m.move_type == 'out_refund'))
+            account.vendor_bill_count = len(account.account_move_line_ids.move_id.filtered(lambda m: m.move_type == 'in_invoice' or m.move_type == 'in_refund'))
+
+    def action_view_invoice(self):
+        self.ensure_one()
+        invoices = self.account_move_line_ids.move_id.filtered(lambda m: m.move_type == 'out_invoice' or m.move_type == 'out_refund')
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "domain": [['id', 'in', invoices.ids]],
+            "context": {"create": False},
+            "name": "Customer Invoices",
+            'view_mode': 'tree,form',
+        }
+        if len(invoices) == 1:
+            result['view_mode'] = 'form'
+            result['res_id'] = invoices.id
+        return result
+
+    def action_view_vendor_bill(self):
+        self.ensure_one()
+        vendor_bills = self.account_move_line_ids.move_id.filtered(lambda m: m.move_type == 'in_invoice' or m.move_type == 'in_refund')
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "domain": [['id', 'in', vendor_bills.ids]],
+            "context": {"create": False},
+            "name": "Vendor Bills",
+            'view_mode': 'tree,form',
+        }
+        if len(vendor_bills) == 1:
+            result['view_mode'] = 'form'
+            result['res_id'] = vendor_bills.id
+        return result
 
 class AccountAnalyticTag(models.Model):
     _inherit = 'account.analytic.tag'
@@ -62,6 +103,7 @@ class AccountAnalyticLine(models.Model):
     move_id = fields.Many2one('account.move.line', string='Journal Item', ondelete='cascade', index=True, check_company=True)
     code = fields.Char(size=8)
     ref = fields.Char(string='Ref.')
+    category = fields.Selection(selection_add=[('invoice', 'Customer Invoice'), ('vendor_bill', 'Vendor Bill')])
 
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
     def on_change_unit_amount(self):

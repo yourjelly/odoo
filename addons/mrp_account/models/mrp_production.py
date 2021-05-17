@@ -61,6 +61,7 @@ class MrpProduction(models.Model):
             'ref': wc.code,
             'unit_amount': hours,
             'company_id': self.company_id.id,
+            'category': 'manufacturing_order',
         }
 
     def _costs_generate(self):
