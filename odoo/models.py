@@ -2317,7 +2317,9 @@ class BaseModel(metaclass=MetaModel):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
-        result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        result, annotated_groupbys = self._read_group_raw(
+            domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        result = [self._read_group_format_result(d, annotated_groupbys) for d in result]
 
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         dt = [
@@ -2458,9 +2460,7 @@ class BaseModel(metaclass=MetaModel):
             data = self._read_group_fill_temporal(data, groupby, aggregated_fields,
                                                   annotated_groupbys)
 
-        result = (self._read_group_apply_meta(d, annotated_groupbys, groupby, domain) for d in data)
-        result = (self._read_group_format_result(d, annotated_groupbys) for d in result)
-        result = list(result)
+        result = [self._read_group_apply_meta(d, annotated_groupbys, groupby, domain) for d in data]
 
         if lazy:
             # Right now, read_group only fill results in lazy mode (by default).
@@ -2471,7 +2471,7 @@ class BaseModel(metaclass=MetaModel):
                 domain, groupby_fields[0], groupby[len(annotated_groupbys):],
                 aggregated_fields, count_field, result, read_group_order=order,
             )
-        return result
+        return result, annotated_groupbys
 
     def _read_group_resolve_many2one_fields(self, data, fields):
         many2onefields = {field['field'] for field in fields if field['type'] == 'many2one'}

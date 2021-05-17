@@ -38,7 +38,7 @@ class WebsiteBlog(http.Controller):
         groups = request.env['blog.post']._read_group_raw(
             dom,
             ['name', 'post_date'],
-            groupby=["post_date"], orderby="post_date desc")
+            groupby=["post_date"], orderby="post_date desc")[0]
         for group in groups:
             (r, label) = group['post_date']
             start, end = r.split('/')

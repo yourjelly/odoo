@@ -21,7 +21,7 @@ class MailGroup(http.Controller):
         groups = MailMessage.sudo()._read_group_raw(
             [('model', '=', 'mail.channel'), ('res_id', '=', group_id), ('message_type', '!=', 'notification')],
             ['subject', 'date'],
-            groupby=["date"], orderby="date desc")
+            groupby=["date"], orderby="date desc")[0]
         for group in groups:
             (r, label) = group['date']
             start, end = r.split('/')
