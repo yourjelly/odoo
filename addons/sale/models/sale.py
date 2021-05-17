@@ -495,6 +495,11 @@ class SaleOrder(models.Model):
         result = super(SaleOrder, self).create(vals)
         return result
 
+    @api.model
+    def write(self, vals):
+        if 'date_order' in vals:
+            raise UserError(_('It is forbidden to modify the following fields in a locked order.'))
+
     def _compute_field_value(self, field):
         super()._compute_field_value(field)
         if field.name != 'invoice_status' or self.env.context.get('mail_activity_automation_skip'):
