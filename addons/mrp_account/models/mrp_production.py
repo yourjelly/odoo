@@ -113,3 +113,14 @@ class MrpProduction(models.Model):
         context['no_at_date'] = True
         context['search_default_group_by_product_id'] = False
         return dict(action, domain=domain, context=context)
+
+    def action_view_analytic_account(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "account.analytic.account",
+            'res_id': self.analytic_account_id.id,
+            "context": {"create": False},
+            "name": "Analytic Account",
+            'view_mode': 'form',
+        }
