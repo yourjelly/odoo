@@ -87,7 +87,7 @@ QUnit.test('activity mark done popover simplest layout', async function (assert)
 });
 
 QUnit.test('activity with force next mark done popover simplest layout', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     await this.start();
     const activity = this.env.models['mail.activity'].create({
@@ -99,11 +99,7 @@ QUnit.test('activity with force next mark done popover simplest layout', async f
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
-    assert.containsOnce(
-        document.body,
-        '.o_ActivityMarkDonePopover',
-        "Popover component should be present"
-    );
+    // already assert in 'activity mark done popover simplest layout'.
     assert.containsOnce(
         document.body,
         '.o_ActivityMarkDonePopover_feedback',
