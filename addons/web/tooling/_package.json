@@ -1,7 +1,7 @@
 {
     "name": "odoo-js-config",
     "version": "0.0.1",
-    "description": "JS Config for better DX in javascript",
+    "description": "JS Config for better DX in javascr",
     "scripts": {
         "prepare": "husky install",
         "format-web": "prettier-eslint --write 'addons/web/static/src/**/*.js'  'addons/web/static/tests/**/*.js' 'addons/web/doc/**/*.md'",
