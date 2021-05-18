@@ -1,0 +1,13 @@
+# Ignore everything in legacy but the top level (adapters)
+addons/web/static/src/legacy/**/*
+!addons/web/static/src/legacy
+!addons/web/static/src/legacy/*.js
+
+# Ignore everything in legacy but the top level (adapters)
+web_enterprise/static/src/legacy/**/*
+!web_enterprise/static/src/legacy
+!web_enterprise/static/src/legacy/*.js
+
+# Ignore all legacy related tests
+addons/web/static/tests/**/legacy/*
+web_enterprise/static/tests/**/legacy/*
