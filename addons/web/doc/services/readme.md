@@ -21,8 +21,10 @@ available to the interface (and to other services).
 | Service                                     | Purpose                                                    |
 | ------------------------------------------- | ---------------------------------------------------------- |
 | [`action_manager`](action_manager.md)       | perform actions following user interactions                |
+| [`command`](../commands/command_service.md) | manage commands                                            |
 | [`crash_manager`](crash_manager.md)         | listen errors and open error dialogs                       |
 | [`dialog_manager`](dialog_manager.md)       | open dialogs                                               |
+| [`hotkey`](hotkey.md)                       | manage all keyboard shortcuts in a single place            |
 | [`menus`](menus.md)                         | keep track of all menu items (app and submenus)            |
 | [`model`](model.md)                         | interact with (python) models                              |
 | [`notifications`](notifications.md)         | display a notification (or error)                          |
