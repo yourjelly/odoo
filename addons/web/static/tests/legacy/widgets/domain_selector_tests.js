@@ -245,7 +245,7 @@ QUnit.module('DomainSelector', {
         domainSelector.destroy();
     });
 
-    QUnit.test("inline domain editor in modal", async function (assert) {
+    QUnit.skip("inline domain editor in modal", async function (assert) {
         assert.expect(1);
         const actions = [
             {
