@@ -141,7 +141,7 @@ QUnit.test('base disabled rendering', async function (assert) {
 });
 
 QUnit.test('attachment loading is delayed', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start({
@@ -160,16 +160,10 @@ QUnit.test('attachment loading is delayed', async function (assert) {
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar`).length,
-        1,
-        "should have a chatter topbar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the length of o_ChatterTopbar_buttonAttachments. because
+    // We have already check length of 'o_ChatterTopbar_buttonAttachmentsCountLoader'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
         0,
@@ -185,7 +179,7 @@ QUnit.test('attachment loading is delayed', async function (assert) {
 });
 
 QUnit.test('attachment counter while loading attachments', async function (assert) {
-    assert.expect(4);
+    assert.expect(2);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start({
@@ -202,16 +196,10 @@ QUnit.test('attachment counter while loading attachments', async function (asser
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar`).length,
-        1,
-        "should have a chatter topbar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the length of o_ChatterTopbar_buttonAttachments. because
+    // We have already check length of 'o_ChatterTopbar_buttonAttachmentsCountLoader'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
         1,
@@ -225,7 +213,7 @@ QUnit.test('attachment counter while loading attachments', async function (asser
 });
 
 QUnit.test('attachment counter transition when attachments become loaded)', async function (assert) {
-    assert.expect(7);
+    assert.expect(4);
 
     this.data['res.partner'].records.push({ id: 100 });
     const attachmentPromise = makeTestPromise();
@@ -244,16 +232,10 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar`).length,
-        1,
-        "should have a chatter topbar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the length of o_ChatterTopbar_buttonAttachments. because
+    // We have already check length of 'o_ChatterTopbar_buttonAttachmentsCountLoader'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
         1,
@@ -266,11 +248,8 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
     );
 
     await afterNextRender(() => attachmentPromise.resolve());
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
+    // here no need to check the length of o_ChatterTopbar_buttonAttachments. because
+    // We have already check length of 'o_ChatterTopbar_buttonAttachmentsCountLoader'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCountLoader`).length,
         0,
@@ -284,7 +263,7 @@ QUnit.test('attachment counter transition when attachments become loaded)', asyn
 });
 
 QUnit.test('attachment counter without attachments', async function (assert) {
-    assert.expect(4);
+    assert.expect(1);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start();
@@ -294,21 +273,10 @@ QUnit.test('attachment counter without attachments', async function (assert) {
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar`).length,
-        1,
-        "should have a chatter topbar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
-        1,
-        "attachments button should have a counter"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the length of o_ChatterTopbar_buttonAttachmentsCount. because
+    // We have already check text of 'o_ChatterTopbar_buttonAttachmentsCount'.
     assert.strictEqual(
         document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
         '0',
@@ -317,7 +285,7 @@ QUnit.test('attachment counter without attachments', async function (assert) {
 });
 
 QUnit.test('attachment counter with attachments', async function (assert) {
-    assert.expect(4);
+    assert.expect(1);
 
     this.data['res.partner'].records.push({ id: 100 });
     this.data['ir.attachment'].records.push(
@@ -341,21 +309,10 @@ QUnit.test('attachment counter with attachments', async function (assert) {
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar`).length,
-        1,
-        "should have a chatter topbar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter menu"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
-        1,
-        "attachments button should have a counter"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the length of o_ChatterTopbar_buttonAttachmentsCount. because
+    // We have already check text of 'o_ChatterTopbar_buttonAttachmentsCount'.
     assert.strictEqual(
         document.querySelector(`.o_ChatterTopbar_buttonAttachmentsCount`).textContent,
         '2',
@@ -364,7 +321,7 @@ QUnit.test('attachment counter with attachments', async function (assert) {
 });
 
 QUnit.test('composer state conserved when clicking on another topbar button', async function (assert) {
-    assert.expect(8);
+    assert.expect(4);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start();
@@ -374,26 +331,9 @@ QUnit.test('composer state conserved when clicking on another topbar button', as
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.containsOnce(
-        document.body,
-        `.o_ChatterTopbar`,
-        "should have a chatter topbar"
-    );
-    assert.containsOnce(
-        document.body,
-        `.o_ChatterTopbar_buttonSendMessage`,
-        "should have a send message button in chatter menu"
-    );
-    assert.containsOnce(
-        document.body,
-        `.o_ChatterTopbar_buttonLogNote`,
-        "should have a log note button in chatter menu"
-    );
-    assert.containsOnce(
-        document.body,
-        `.o_ChatterTopbar_buttonAttachments`,
-        "should have an attachments button in chatter menu"
-    );
+    // already assert in 'base rendering'.
+
+    // here no need to check the topbar buttons as we have already clicked on them.
 
     await afterNextRender(() => {
         document.querySelector(`.o_ChatterTopbar_buttonLogNote`).click();
@@ -425,7 +365,7 @@ QUnit.test('composer state conserved when clicking on another topbar button', as
 });
 
 QUnit.test('rendering with multiple partner followers', async function (assert) {
-    assert.expect(7);
+    assert.expect(5);
 
     await this.start();
     this.data['res.partner'].records.push({
@@ -456,16 +396,7 @@ QUnit.test('rendering with multiple partner followers', async function (assert) 
     });
     await this.createChatterTopbarComponent(chatter);
 
-    assert.containsOnce(
-        document.body,
-        '.o_FollowerListMenu',
-        "should have followers menu component"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_FollowerListMenu_buttonFollowers',
-        "should have followers button"
-    );
+    // We have already clicked on 'o_FollowerListMenu_buttonFollowers' button.
 
     await afterNextRender(() => {
         document.querySelector('.o_FollowerListMenu_buttonFollowers').click();
@@ -560,7 +491,7 @@ QUnit.test('log note/send message switching', async function (assert) {
 });
 
 QUnit.test('log note toggling', async function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start();
@@ -569,11 +500,7 @@ QUnit.test('log note toggling', async function (assert) {
         threadModel: 'res.partner',
     });
     await this.createChatterTopbarComponent(chatter);
-    assert.containsOnce(
-        document.body,
-        '.o_ChatterTopbar_buttonLogNote',
-        "should have a 'Log Note' button"
-    );
+    // We have already check active class of 'o_ChatterTopbar_buttonLogNote'.
     assert.doesNotHaveClass(
         document.querySelector('.o_ChatterTopbar_buttonLogNote'),
         'o-active',
@@ -600,7 +527,7 @@ QUnit.test('log note toggling', async function (assert) {
 });
 
 QUnit.test('send message toggling', async function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start();
@@ -609,11 +536,7 @@ QUnit.test('send message toggling', async function (assert) {
         threadModel: 'res.partner',
     });
     await this.createChatterTopbarComponent(chatter);
-    assert.containsOnce(
-        document.body,
-        '.o_ChatterTopbar_buttonSendMessage',
-        "should have a 'Send Message' button"
-    );
+    // We have already check active class of 'o_ChatterTopbar_buttonSendMessage'.
     assert.doesNotHaveClass(
         document.querySelector('.o_ChatterTopbar_buttonSendMessage'),
         'o-active',
