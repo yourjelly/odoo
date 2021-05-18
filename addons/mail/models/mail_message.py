@@ -701,11 +701,11 @@ class Message(models.Model):
         return super(Message, self).unlink()
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         if not self.env.is_admin():
             raise AccessError(_("Only administrators are allowed to use grouped read on message model"))
 
-        return super(Message, self).read_group(
+        return super(Message, self)._read_group_raw(
             domain=domain, fields=fields, groupby=groupby, offset=offset,
             limit=limit, orderby=orderby, lazy=lazy,
         )

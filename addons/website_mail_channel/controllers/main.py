@@ -18,10 +18,13 @@ class MailGroup(http.Controller):
     def _get_archives(self, group_id):
         MailMessage = request.env['mail.message']
         # use sudo to avoid side-effects due to custom ACLs
-        groups = MailMessage.sudo().read_group(
+        groups, annotated_groupbys = MailMessage.sudo()._read_group_raw(
             [('model', '=', 'mail.channel'), ('res_id', '=', group_id), ('message_type', '!=', 'notification')],
             ['subject', 'date'],
             groupby=["date"], orderby="date desc")
+        groups = (
+            MailMessage._read_group_format_result(group, annotated_groupbys) for group in groups
+        )
         for group in groups:
             (r, label) = group['date']
             start, end = r.split('/')
