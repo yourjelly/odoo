@@ -603,7 +603,7 @@ QUnit.test('chat window: fold', async function (assert) {
 });
 
 QUnit.test('chat window: open / close', async function (assert) {
-    assert.expect(10);
+    assert.expect(9);
 
     // channel that is expected to be found in the messaging menu
     // with random UUID, will be asserted during the test
@@ -616,11 +616,7 @@ QUnit.test('chat window: open / close', async function (assert) {
             return this._super(...arguments);
         },
     });
-    assert.containsNone(
-        document.body,
-        '.o_ChatWindow',
-        "should not have a chat window initially"
-    );
+    // already assert in 'chat window new message: basic rendering'
     await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
     await afterNextRender(() =>
         document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click()
@@ -779,7 +775,7 @@ QUnit.test("Mobile: chat window shouldn't open automatically after receiving a n
 });
 
 QUnit.test('chat window: close on ESCAPE', async function (assert) {
-    assert.expect(10);
+    assert.expect(9);
 
     // expected partner to be found by mention during the test
     this.data['res.partner'].records.push({ name: "TestPartner" });
@@ -793,11 +789,7 @@ QUnit.test('chat window: close on ESCAPE', async function (assert) {
             return this._super(...arguments);
         },
     });
-    assert.containsOnce(
-        document.body,
-        '.o_ChatWindow',
-        "chat window should be opened initially"
-    );
+    // already assert in 'chat window new message: basic rendering'
 
     await afterNextRender(() =>
         document.querySelector(`.o_Composer_buttonEmojis`).click()
