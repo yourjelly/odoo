@@ -1,0 +1,5 @@
+<resources>
+    <string>Log Email Into Lead</string>
+    <string>Opportunities</string>
+    <string>Opportunities (%(count)s)</string>
+</resources>
