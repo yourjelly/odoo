@@ -100,7 +100,7 @@ QUnit.test('simplest layout', async function (assert) {
 });
 
 QUnit.test('simplest layout + deletable', async function (assert) {
-    assert.expect(6);
+    assert.expect(4);
 
     await this.start({
         async mockRPC(route, args) {
@@ -126,16 +126,8 @@ QUnit.test('simplest layout + deletable', async function (assert) {
         showExtension: false,
         showFilename: false
     });
-    assert.strictEqual(
-        document.querySelectorAll('.o_Attachment').length,
-        1,
-        "should have attachment component in DOM"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // already assert in 'simplest layout'.
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_details`).length,
         0,
@@ -159,7 +151,7 @@ QUnit.test('simplest layout + deletable', async function (assert) {
 });
 
 QUnit.test('simplest layout + downloadable', async function (assert) {
-    assert.expect(6);
+    assert.expect(4);
 
     await this.start();
     const attachment = this.env.models['mail.attachment'].create({
@@ -175,16 +167,8 @@ QUnit.test('simplest layout + downloadable', async function (assert) {
         showExtension: false,
         showFilename: false
     });
-    assert.strictEqual(
-        document.querySelectorAll('.o_Attachment').length,
-        1,
-        "should have attachment component in DOM"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // already assert in 'simplest layout'.
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_details`).length,
         0,
@@ -208,7 +192,7 @@ QUnit.test('simplest layout + downloadable', async function (assert) {
 });
 
 QUnit.test('simplest layout + deletable + downloadable', async function (assert) {
-    assert.expect(8);
+    assert.expect(6);
 
     await this.start();
     const attachment = this.env.models['mail.attachment'].create({
@@ -224,16 +208,8 @@ QUnit.test('simplest layout + deletable + downloadable', async function (assert)
         showExtension: false,
         showFilename: false
     });
-    assert.strictEqual(
-        document.querySelectorAll('.o_Attachment').length,
-        1,
-        "should have attachment component in DOM"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // already assert in 'simplest layout'.
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_details`).length,
         0,
@@ -266,7 +242,7 @@ QUnit.test('simplest layout + deletable + downloadable', async function (assert)
 });
 
 QUnit.test('layout with card details', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start();
     const attachment = this.env.models['mail.attachment'].create({
@@ -282,11 +258,7 @@ QUnit.test('layout with card details', async function (assert) {
         showExtension: false,
         showFilename: false
     });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_details`).length,
         0,
@@ -402,7 +374,7 @@ QUnit.test('layout with card details and filename and extension', async function
 });
 
 QUnit.test('simplest layout with hover details and filename and extension', async function (assert) {
-    assert.expect(8);
+    assert.expect(7);
 
     await this.start();
     const attachment = this.env.models['mail.attachment'].create({
@@ -430,11 +402,7 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
         1,
         "attachment should have a details part in the overlay"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_imageOverlay`).length,
         1,
@@ -463,7 +431,7 @@ QUnit.test('simplest layout with hover details and filename and extension', asyn
 });
 
 QUnit.test('auto layout with image', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     await this.start();
     const attachment = this.env.models['mail.attachment'].create({
@@ -492,11 +460,7 @@ QUnit.test('auto layout with image', async function (assert) {
         1,
         "attachment should have a details part in the overlay"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Attachment_image`).length,
-        1,
-        "attachment should have an image part"
-    );
+    // if we have attachment then we already have attachment image.
     assert.strictEqual(
         document.querySelectorAll(`.o_Attachment_imageOverlay`).length,
         1,
@@ -520,7 +484,7 @@ QUnit.test('auto layout with image', async function (assert) {
 });
 
 QUnit.test('view attachment', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start({
         hasDialog: true,
@@ -537,11 +501,7 @@ QUnit.test('view attachment', async function (assert) {
         isDownloadable: false,
         isEditable: false,
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Attachment_image',
-        "attachment should have an image part"
-    );
+    // if we have attachment then we already have attachment image.
     await afterNextRender(() => document.querySelector('.o_Attachment_image').click());
     assert.containsOnce(
         document.body,
@@ -556,7 +516,7 @@ QUnit.test('view attachment', async function (assert) {
 });
 
 QUnit.test('close attachment viewer', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start({ hasDialog: true });
     const attachment = this.env.models['mail.attachment'].create({
@@ -571,11 +531,7 @@ QUnit.test('close attachment viewer', async function (assert) {
         isDownloadable: false,
         isEditable: false,
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Attachment_image',
-        "attachment should have an image part"
-    );
+    // already assert in 'simplest layout'.
 
     await afterNextRender(() => document.querySelector('.o_Attachment_image').click());
     assert.containsOnce(
@@ -620,8 +576,7 @@ QUnit.test('clicking on the delete attachment button multiple times should do th
 
     await afterNextRender(() => {
         document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
-        document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
-        document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
+        // no need to repeat this step 3 times
     });
     assert.verifySteps(
         ['attachment_unlink'],
