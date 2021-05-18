@@ -77,7 +77,7 @@ QUnit.test('base empty rendering', async function (assert) {
 });
 
 QUnit.test('base non-empty rendering', async function (assert) {
-    assert.expect(6);
+    assert.expect(3);
 
     this.data['ir.attachment'].records.push(
         {
@@ -111,21 +111,7 @@ QUnit.test('base non-empty rendering', async function (assert) {
         ['ir.attachment/search_read'],
         "should have fetched attachments"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_AttachmentBox`).length,
-        1,
-        "should have an attachment box"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_AttachmentBox_buttonAdd`).length,
-        1,
-        "should have a button add"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_FileUploader_input`).length,
-        1,
-        "should have a file input"
-    );
+    // already assert in 'base empty rendering'.
     assert.strictEqual(
         document.querySelectorAll(`.o_attachmentBox_attachmentList`).length,
         1,
@@ -134,7 +120,7 @@ QUnit.test('base non-empty rendering', async function (assert) {
 });
 
 QUnit.test('attachment box: drop attachments', async function (assert) {
-    assert.expect(5);
+    assert.expect(4);
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
@@ -150,11 +136,7 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
             name: 'text.txt',
         }),
     ];
-    assert.strictEqual(
-        document.querySelectorAll('.o_AttachmentBox').length,
-        1,
-        "should have an attachment box"
-    );
+    // already assert in 'base empty rendering'.
 
     await afterNextRender(() =>
         dragenterFiles(document.querySelector('.o_AttachmentBox'))
@@ -208,7 +190,7 @@ QUnit.test('attachment box: drop attachments', async function (assert) {
 });
 
 QUnit.test('view attachments', async function (assert) {
-    assert.expect(7);
+    assert.expect(5);
 
     await this.start({
         hasDialog: true,
@@ -253,11 +235,8 @@ QUnit.test('view attachments', async function (assert) {
         'Blah.txt',
         "attachment viewer iframe should point to clicked attachment",
     );
-    assert.containsOnce(
-        document.body,
-        '.o_AttachmentViewer_buttonNavigationNext',
-        "attachment viewer should allow to see next attachment",
-    );
+    // here no need to check the length of 'o_AttachmentViewer_buttonNavigationNext'. because
+    // We have already made click on 'o_AttachmentViewer_buttonNavigationNext'.
 
     await afterNextRender(() =>
         document.querySelector('.o_AttachmentViewer_buttonNavigationNext').click()
@@ -267,11 +246,8 @@ QUnit.test('view attachments', async function (assert) {
         'Blu.txt',
         "attachment viewer iframe should point to next attachment of attachment box",
     );
-    assert.containsOnce(
-        document.body,
-        '.o_AttachmentViewer_buttonNavigationNext',
-        "attachment viewer should allow to see next attachment",
-    );
+    // here no need to check the length of 'o_AttachmentViewer_buttonNavigationNext'. because
+    // We have already made click on 'o_AttachmentViewer_buttonNavigationNext'.
 
     await afterNextRender(() =>
         document.querySelector('.o_AttachmentViewer_buttonNavigationNext').click()
@@ -284,7 +260,7 @@ QUnit.test('view attachments', async function (assert) {
 });
 
 QUnit.test('remove attachment should ask for confirmation', async function (assert) {
-    assert.expect(5);
+    assert.expect(3);
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
@@ -297,16 +273,10 @@ QUnit.test('remove attachment should ask for confirmation', async function (asse
         model: 'res.partner',
     });
     await this.createAttachmentBoxComponent(thread);
-    assert.containsOnce(
-        document.body,
-        '.o_Attachment',
-        "should have an attachment",
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Attachment_asideItemUnlink',
-        "attachment should have a delete button"
-    );
+    // already assert in 'base empty rendering'.
+
+    // here no need to check the length of 'o_Attachment_asideItemUnlink'. because
+    // We have already made click on 'o_Attachment_asideItemUnlink'.
 
     await afterNextRender(() => document.querySelector('.o_Attachment_asideItemUnlink').click());
     assert.containsOnce(
