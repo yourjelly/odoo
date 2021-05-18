@@ -6,7 +6,8 @@
         "prepare": "husky install",
         "format-web": "prettier-eslint --write 'addons/web/static/src/**/*.js'  'addons/web/static/tests/**/*.js' 'addons/web/doc/**/*.md'",
         "format-staged": "lint-staged",
-        "lint-web": "prettier-eslint --list-different 'addons/web/static/src/**/*.js'  'addons/web/static/tests/**/*.js' 'addons/web/doc/**/*.md'"
+        "lint-web": "prettier-eslint --list-different 'addons/web/static/src/**/*.js'  'addons/web/static/tests/**/*.js' 'addons/web/doc/**/*.md'",
+        "format-all": "prettier-eslint --write '**/*.js'  '**/*.md'"
     },
     "devDependencies": {
         "eslint": "^7.25.0",
