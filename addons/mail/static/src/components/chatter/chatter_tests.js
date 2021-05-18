@@ -102,18 +102,14 @@ QUnit.test('base rendering when chatter has no attachment', async function (asse
 });
 
 QUnit.test('base rendering when chatter has no record', async function (assert) {
-    assert.expect(8);
+    assert.expect(7);
 
     await this.start();
     const chatter = this.env.models['mail.chatter'].create({
         threadModel: 'res.partner',
     });
     await this.createChatterComponent({ chatter });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Chatter`).length,
-        1,
-        "should have a chatter"
-    );
+    // already assert in 'basic rendering'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -151,7 +147,7 @@ QUnit.test('base rendering when chatter has no record', async function (assert) 
 });
 
 QUnit.test('base rendering when chatter has attachments', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     this.data['res.partner'].records.push({ id: 100 });
     this.data['ir.attachment'].records.push(
@@ -174,11 +170,7 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
         threadModel: 'res.partner',
     });
     await this.createChatterComponent({ chatter });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Chatter`).length,
-        1,
-        "should have a chatter"
-    );
+    // already assert in 'basic rendering'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
@@ -192,7 +184,7 @@ QUnit.test('base rendering when chatter has attachments', async function (assert
 });
 
 QUnit.test('show attachment box', async function (assert) {
-    assert.expect(6);
+    assert.expect(4);
 
     this.data['res.partner'].records.push({ id: 100 });
     this.data['ir.attachment'].records.push(
@@ -215,21 +207,14 @@ QUnit.test('show attachment box', async function (assert) {
         threadModel: 'res.partner',
     });
     await this.createChatterComponent({ chatter });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Chatter`).length,
-        1,
-        "should have a chatter"
-    );
+    // already assert in 'basic rendering'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar`).length,
         1,
         "should have a chatter topbar"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonAttachments`).length,
-        1,
-        "should have an attachments button in chatter topbar"
-    );
+    // here no need to check the length of o_ChatterTopbar_buttonAttachments. because
+    // We have already made click for 'o_ChatterTopbar_buttonAttachments'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonAttachmentsCount`).length,
         1,
@@ -252,7 +237,7 @@ QUnit.test('show attachment box', async function (assert) {
 });
 
 QUnit.test('composer show/hide on log note/send message [REQUIRE FOCUS]', async function (assert) {
-    assert.expect(10);
+    assert.expect(9);
 
     this.data['res.partner'].records.push({ id: 100 });
     await this.start();
@@ -261,11 +246,8 @@ QUnit.test('composer show/hide on log note/send message [REQUIRE FOCUS]', async 
         threadModel: 'res.partner',
     });
     await this.createChatterComponent({ chatter });
-    assert.strictEqual(
-        document.querySelectorAll(`.o_ChatterTopbar_buttonSendMessage`).length,
-        1,
-        "should have a send message button"
-    );
+    // here no need to check the length of o_ChatterTopbar_buttonSendMessage. because
+    // We have already made click for 'o_ChatterTopbar_buttonSendMessage'.
     assert.strictEqual(
         document.querySelectorAll(`.o_ChatterTopbar_buttonLogNote`).length,
         1,
@@ -334,7 +316,7 @@ QUnit.test('composer show/hide on log note/send message [REQUIRE FOCUS]', async 
 });
 
 QUnit.test('should display subject when subject is not the same as the thread name', async function (assert) {
-    assert.expect(2);
+    assert.expect(1);
 
     this.data['res.partner'].records.push({ id: 100 });
     this.data['mail.message'].records.push({
@@ -355,11 +337,8 @@ QUnit.test('should display subject when subject is not the same as the thread na
     });
     await this.createChatterComponent({ chatter });
 
-    assert.containsOnce(
-        document.body,
-        '.o_Message_subject',
-        "should display subject of the message"
-    );
+    // here no need to check the length of o_Message_subject. because
+    // We have already made assert for 'o_Message_subject' text.
     assert.strictEqual(
         document.querySelector('.o_Message_subject').textContent,
         "Subject: Salutations, voyageur",
