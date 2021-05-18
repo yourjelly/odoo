@@ -99,7 +99,7 @@ div.o_boolean_toggle.custom-control.custom-checkbox {
 
   @each $-name, $-color in $theme-colors {
     &.btn-#{$-name}, &.text-#{$-name} {
-      @include o-btn-link-variant($body-color, theme-color-level($-name, 2));
+      @include o-btn-link-variant($body-color!important, theme-color-level($-name, 2)!important);
     }
   }
 }
