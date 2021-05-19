@@ -66,7 +66,7 @@ QUnit.test('partner mention suggestion displayed', async function (assert) {
 });
 
 QUnit.test('partner mention suggestion correct data', async function (assert) {
-    assert.expect(6);
+    assert.expect(3);
 
     this.data['mail.channel'].records.push({ id: 20 });
     await this.start();
@@ -87,31 +87,22 @@ QUnit.test('partner mention suggestion correct data', async function (assert) {
         recordLocalId: partner.localId,
     });
 
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion',
-        "Partner mention suggestion should be present"
-    );
+    // already assert in 'partner mention suggestion displayed'.
+
     assert.strictEqual(
         document.querySelectorAll(`.o_PartnerImStatusIcon`).length,
         1,
         "Partner's im_status should be displayed"
     );
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion_part1',
-        "Partner's name should be present"
-    );
+    // here no need to check the length of o_ComposerSuggestion_part1. because
+    // We have already check text for 'o_ComposerSuggestion_part1'.
     assert.strictEqual(
         document.querySelector(`.o_ComposerSuggestion_part1`).textContent,
         "Demo User",
         "Partner's name should be displayed"
     );
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion_part2',
-        "Partner's email should be present"
-    );
+    // here no need to check the length of o_ComposerSuggestion_part2. because
+    // We have already check text for 'o_ComposerSuggestion_part2'.
     assert.strictEqual(
         document.querySelector(`.o_ComposerSuggestion_part2`).textContent,
         "(demo_user@odoo.com)",
@@ -120,7 +111,7 @@ QUnit.test('partner mention suggestion correct data', async function (assert) {
 });
 
 QUnit.test('partner mention suggestion active', async function (assert) {
-    assert.expect(2);
+    assert.expect(1);
 
     this.data['mail.channel'].records.push({ id: 20 });
     await this.start();
@@ -140,11 +131,7 @@ QUnit.test('partner mention suggestion active', async function (assert) {
         recordLocalId: partner.localId,
     });
 
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion',
-        "Partner mention suggestion should be displayed"
-    );
+    // already assert in 'partner mention suggestion displayed'.
     assert.hasClass(
         document.querySelector('.o_ComposerSuggestion'),
         'active',
