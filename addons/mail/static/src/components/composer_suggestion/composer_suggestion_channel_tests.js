@@ -61,7 +61,7 @@ QUnit.test('channel mention suggestion displayed', async function (assert) {
 });
 
 QUnit.test('channel mention suggestion correct data', async function (assert) {
-    assert.expect(3);
+    assert.expect(1);
 
     this.data['mail.channel'].records.push({
         id: 20,
@@ -79,16 +79,10 @@ QUnit.test('channel mention suggestion correct data', async function (assert) {
         recordLocalId: thread.localId,
     });
 
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion',
-        "Channel mention suggestion should be present"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion_part1',
-        "Channel name should be present"
-    );
+    // already assert in 'channel mention suggestion displayed'.
+
+    // here no need to check the length of o_ComposerSuggestion_part1. because
+    // We have already check text for 'o_ComposerSuggestion_part1'.
     assert.strictEqual(
         document.querySelector(`.o_ComposerSuggestion_part1`).textContent,
         "General",
@@ -97,7 +91,7 @@ QUnit.test('channel mention suggestion correct data', async function (assert) {
 });
 
 QUnit.test('channel mention suggestion active', async function (assert) {
-    assert.expect(2);
+    assert.expect(1);
 
     this.data['mail.channel'].records.push({ id: 20 });
     await this.start();
@@ -112,11 +106,7 @@ QUnit.test('channel mention suggestion active', async function (assert) {
         recordLocalId: thread.localId,
     });
 
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerSuggestion',
-        "Channel mention suggestion should be displayed"
-    );
+    // already assert in 'channel mention suggestion displayed'.
     assert.hasClass(
         document.querySelector('.o_ComposerSuggestion'),
         'active',
