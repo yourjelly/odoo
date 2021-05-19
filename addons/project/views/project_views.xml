@@ -273,14 +273,34 @@
                             <field name="label_tasks" string="Name of the tasks"/>
                             <field name="partner_id" widget="res_partner_many2one"/>
                         </group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="user_id" string="Project Manager" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
+                            <label for="date_start" string="Start and End Dates"/>
+                            <div name="date">
+                                <div name="date_edit_only" class="o_row oe_edit_only">
+                                    <span>From <field name="date_start" class='oe_inline'/></span>
+                                    <span>To <field name="date" class='oe_inline'/></span>
+                                </div>
+                                <div name="date_read_only" class="o_row oe_read_only">
+                                    <span attrs="{'invisible': [('date_start', '=', False)]}">From <field name="date_start" class='oe_inline'/></span>
+                                    <span attrs="{'invisible': [('date', '=', False)]}">To <field name="date" class='oe_inline'/></span>
+                                </div>
+                            </div>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
                     </group>
                     <notebook>
+                        <page name="description" string="Description">
+                            <field name="description"/>
+                        </page>
                         <page name="settings" string="Settings">
                             <group>
                                 <group>
-                                    <field name="active" invisible="1"/>
-                                    <field name="user_id" string="Project Manager" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
-                                    <field name="date" string="Deadline"/>
+                                    <field name="analytic_account_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" context="{'default_partner_id': partner_id}" groups="analytic.group_analytic_accounting"/>
+                                    <field name="privacy_visibility" widget="radio"/>
+                                </group>
+                                <group>
                                     <div name="alias_def" colspan="2" attrs="{'invisible': [('alias_domain', '=', False)]}">
                                         <!-- Always display the whole alias in edit mode. It depends in read only -->
                                         <label for="alias_enabled" class="font-weight-bold" string="Create tasks by sending an email"/>
@@ -304,11 +324,6 @@
                                         when the string is deleted. -->
                                     <field name="alias_contact" class="oe_inline oe_edit_only" string="Accept Emails From"
                                            attrs="{'invisible': ['|', ('alias_name', '=', ''), ('alias_name', '=', False)]}"/>
-                                </group>
-                                <group>
-                                    <field name="analytic_account_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" context="{'default_partner_id': partner_id}" groups="analytic.group_analytic_accounting"/>
-                                    <field name="privacy_visibility" widget="radio"/>
-                                    <field name="company_id" groups="base.group_multi_company"/>
                                 </group>
                                 <group name="extra_settings">
                                 </group>
@@ -373,11 +388,12 @@
                             </div>
                         </page>
                     </notebook>
-
-                    <div class="oe_chatter">
-                        <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
-                    </div>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
                 </form>
             </field>
         </record>
