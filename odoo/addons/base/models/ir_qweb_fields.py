@@ -435,11 +435,14 @@ class MonetaryConverter(models.AbstractModel):
         formatted_amount = lang.format(fmt, display_currency.round(value),
                                 grouping=True, monetary=True).replace(r' ', u'\N{NO-BREAK SPACE}').replace(r'-', u'-\N{ZERO WIDTH NO-BREAK SPACE}')
 
+        symbol = display_currency.symbol or ''
+        if display_currency.currency_unit_label == 'Rial':
+            symbol = u'<span style="font-family:serif">{symbol}</span>'.format(symbol=symbol)
         pre = post = u''
         if display_currency.position == 'before':
-            pre = u'{symbol}\N{NO-BREAK SPACE}'.format(symbol=display_currency.symbol or '')
+            pre = u'{symbol}\N{NO-BREAK SPACE}'.format(symbol=symbol)
         else:
-            post = u'\N{NO-BREAK SPACE}{symbol}'.format(symbol=display_currency.symbol or '')
+            post = u'\N{NO-BREAK SPACE}{symbol}'.format(symbol=symbol)
 
         return u'{pre}<span class="oe_currency_value">{0}</span>{post}'.format(formatted_amount, pre=pre, post=post)
 
