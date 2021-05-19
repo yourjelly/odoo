@@ -140,7 +140,7 @@ QUnit.test('reply: discard on pressing escape', async function (assert) {
 });
 
 QUnit.test('reply: discard on discard button click', async function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -150,11 +150,8 @@ QUnit.test('reply: discard on discard button click', async function (assert) {
         res_id: 20,
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
 
     await afterNextRender(() =>
         document.querySelector('.o_Message_commandReply').click()
@@ -181,7 +178,7 @@ QUnit.test('reply: discard on discard button click', async function (assert) {
 });
 
 QUnit.test('reply: discard on reply button toggle', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -191,11 +188,8 @@ QUnit.test('reply: discard on reply button toggle', async function (assert) {
         res_id: 20,
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
 
     await afterNextRender(() =>
         document.querySelector('.o_Message_commandReply').click()
@@ -217,7 +211,7 @@ QUnit.test('reply: discard on reply button toggle', async function (assert) {
 });
 
 QUnit.test('reply: discard on click away', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -227,11 +221,8 @@ QUnit.test('reply: discard on click away', async function (assert) {
         res_id: 20,
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
 
     await afterNextRender(() =>
         document.querySelector('.o_Message_commandReply').click()
@@ -284,7 +275,7 @@ QUnit.test('reply: discard on click away', async function (assert) {
 });
 
 QUnit.test('"reply to" composer should log note if message replied to is a note', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -312,11 +303,8 @@ QUnit.test('"reply to" composer should log note if message replied to is a note'
             return this._super(...arguments);
         },
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
 
     await afterNextRender(() =>
         document.querySelector('.o_Message_commandReply').click()
@@ -337,7 +325,7 @@ QUnit.test('"reply to" composer should log note if message replied to is a note'
 });
 
 QUnit.test('"reply to" composer should send message if message replied to is not a note', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -365,11 +353,8 @@ QUnit.test('"reply to" composer should send message if message replied to is not
             return this._super(...arguments);
         },
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
 
     await afterNextRender(() =>
         document.querySelector('.o_Message_commandReply').click()
@@ -390,7 +375,7 @@ QUnit.test('"reply to" composer should send message if message replied to is not
 });
 
 QUnit.test('error notifications should not be shown in Inbox', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -407,11 +392,8 @@ QUnit.test('error notifications should not be shown in Inbox', async function (a
         notification_type: 'email',
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
     assert.containsOnce(
         document.body,
         '.o_Message_originThreadLink',
@@ -425,7 +407,7 @@ QUnit.test('error notifications should not be shown in Inbox', async function (a
 });
 
 QUnit.test('show subject of message in Inbox', async function (assert) {
-    assert.expect(3);
+    assert.expect(1);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -435,16 +417,10 @@ QUnit.test('show subject of message in Inbox', async function (assert) {
         subject: "Salutations, voyageur", // will be asserted in the test
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Message_subject',
-        "should display subject of the message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
+    // here no need to check the length of o_Message_subject. because
+    // We have already check text of 'o_Message_subject'.
     assert.strictEqual(
         document.querySelector('.o_Message_subject').textContent,
         "Subject: Salutations, voyageur",
@@ -453,7 +429,7 @@ QUnit.test('show subject of message in Inbox', async function (assert) {
 });
 
 QUnit.test('show subject of message in history', async function (assert) {
-    assert.expect(3);
+    assert.expect(1);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -468,16 +444,11 @@ QUnit.test('show subject of message in history', async function (assert) {
             },
         },
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Message_subject',
-        "should display subject of the message"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
+
+    // here no need to check the length of o_Message_subject. because
+    // We have already check text of 'o_Message_subject'.
     assert.strictEqual(
         document.querySelector('.o_Message_subject').textContent,
         "Subject: Salutations, voyageur",
@@ -486,7 +457,7 @@ QUnit.test('show subject of message in history', async function (assert) {
 });
 
 QUnit.test('click on (non-channel/non-partner) origin thread link should redirect to form view', async function (assert) {
-    assert.expect(9);
+    assert.expect(7);
 
     const bus = new Bus();
     bus.on('do-action', null, payload => {
@@ -529,16 +500,11 @@ QUnit.test('click on (non-channel/non-partner) origin thread link should redirec
             bus,
         },
     });
-    assert.containsOnce(
-        document.body,
-        '.o_Message',
-        "should display a single message"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_Message_originThreadLink',
-        "should display origin thread link"
-    );
+    // here no need to check the length of o_Message. because
+    // 'o_Message_commandReply' is only visible when there is a message.
+
+    // here no need to check the length of o_Message_originThreadLink. because
+    // We have already check text of 'o_Message_originThreadLink'.
     assert.strictEqual(
         document.querySelector('.o_Message_originThreadLink').textContent,
         "Some record",
