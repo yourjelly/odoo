@@ -419,6 +419,7 @@ QUnit.test('show subject of message in Inbox', async function (assert) {
     await this.start();
     // here no need to check the length of o_Message. because
     // 'o_Message_commandReply' is only visible when there is a message.
+
     // here no need to check the length of o_Message_subject. because
     // We have already check text of 'o_Message_subject'.
     assert.strictEqual(

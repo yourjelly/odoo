@@ -298,7 +298,7 @@ QUnit.test('as moderator, moderated channel with pending moderation message', as
 });
 
 QUnit.test('as moderator, accept pending moderation message', async function (assert) {
-    assert.expect(12);
+    assert.expect(8);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -345,10 +345,8 @@ QUnit.test('as moderator, accept pending moderation message', async function (as
             this.env.messaging.moderation.localId
         }"]
     `);
-    assert.ok(
-        moderationBox,
-        "should display the moderation box"
-    );
+    // here no need to check the length of moderationBox. because
+    // we have made click on moderationBox.
 
     await afterNextRender(() => moderationBox.click());
     assert.ok(
@@ -365,7 +363,8 @@ QUnit.test('as moderator, accept pending moderation message', async function (as
         }"]
         .o_Message_moderationAction.o-accept
     `);
-    assert.ok(acceptButton, "should display the accept button");
+    // here no need to check the length of acceptButton. because
+    // we have made click on acceptButton.
 
     await afterNextRender(() => acceptButton.click());
     assert.verifySteps(['moderate']);
@@ -384,10 +383,8 @@ QUnit.test('as moderator, accept pending moderation message', async function (as
             }).localId
         }"]
     `);
-    assert.ok(
-        channel,
-        "should display the general channel"
-    );
+    // here no need to check the length of channel. because
+    // we have made click on channel.
 
     await afterNextRender(() => channel.click());
     const message = document.querySelector(`
@@ -395,10 +392,8 @@ QUnit.test('as moderator, accept pending moderation message', async function (as
             this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
-    assert.ok(
-        message,
-        "should display the accepted message"
-    );
+    // here no need to check the length of message. because
+    // we have made click on message.
     assert.containsNone(
         message,
         '.o_Message_moderationPending',
@@ -407,7 +402,7 @@ QUnit.test('as moderator, accept pending moderation message', async function (as
 });
 
 QUnit.test('as moderator, reject pending moderation message (reject with explanation)', async function (assert) {
-    assert.expect(23);
+    assert.expect(15);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -465,10 +460,8 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
             this.env.messaging.moderation.localId
         }"]
     `);
-    assert.ok(
-        moderationBox,
-        "should display the moderation box"
-    );
+    // here no need to check the length of moderationBox. because
+    // we have made click on moderationBox.
 
     await afterNextRender(() => moderationBox.click());
     const pendingMessage = document.querySelector(`
@@ -476,22 +469,16 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
             this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
-    assert.ok(
-        pendingMessage,
-        "should display the message to moderate"
-    );
+    // here no need to check the length of pendingMessage. because
+    // we have made click on pendingMessage.
     const rejectButton = pendingMessage.querySelector(':scope .o_Message_moderationAction.o-reject');
-    assert.ok(
-        rejectButton,
-        "should display the reject button"
-    );
+    // here no need to check the length of rejectButton. because
+    // we have check textcontent of rejectButton.
 
     await afterNextRender(() => rejectButton.click());
     const dialog = document.querySelector('.o_ModerationRejectDialog');
-    assert.ok(
-        dialog,
-        "a dialog should be prompt to the moderator on click reject"
-    );
+    // here no need to check the length of dialog. because
+    // we have check textcontent of dialog.
     assert.strictEqual(
         dialog.querySelector('.modal-title').textContent,
         "Send explanation to author",
@@ -499,10 +486,8 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
     );
 
     const messageTitle = dialog.querySelector(':scope .o_ModerationRejectDialog_title');
-    assert.ok(
-        messageTitle,
-        "should have a title for rejecting"
-    );
+    // here no need to check the length of messageTitle. because
+    // we have check attr of messageTitle.
     assert.hasAttrValue(
         messageTitle,
         'placeholder',
@@ -516,10 +501,8 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
     );
 
     const messageComment = dialog.querySelector(':scope .o_ModerationRejectDialog_comment');
-    assert.ok(
-        messageComment,
-        "should have a comment for rejecting"
-    );
+    // here no need to check the length of messageComment. because
+    // we have check attr of messageComment.
     assert.hasAttrValue(
         messageComment,
         'placeholder',
@@ -532,10 +515,8 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
         "comment for reject reason should have correct default text content"
     );
     const confirmReject = dialog.querySelector(':scope .o-reject');
-    assert.ok(
-        confirmReject,
-        "should have reject button"
-    );
+    // here no need to check the length of confirmReject. because
+    // we have check textcontent of confirmReject.
     assert.strictEqual(
         confirmReject.textContent,
         "Reject"
@@ -558,10 +539,8 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
             }).localId
         }"]
     `);
-    assert.ok(
-        channel,
-        'should display the general channel'
-    );
+    // here no need to check the length of channel. because
+    // we have made click on channel.
 
     await afterNextRender(() => channel.click());
     assert.containsNone(
@@ -572,7 +551,7 @@ QUnit.test('as moderator, reject pending moderation message (reject with explana
 });
 
 QUnit.test('as moderator, discard pending moderation message (reject without explanation)', async function (assert) {
-    assert.expect(16);
+    assert.expect(10);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -607,10 +586,8 @@ QUnit.test('as moderator, discard pending moderation message (reject without exp
             this.env.messaging.moderation.localId
         }"]
     `);
-    assert.ok(
-        moderationBox,
-        "should display the moderation box"
-    );
+    // here no need to check the length of moderationBox. because
+    // we have made click on moderationBox.
 
     await afterNextRender(() => moderationBox.click());
     const pendingMessage = document.querySelector(`
@@ -618,25 +595,19 @@ QUnit.test('as moderator, discard pending moderation message (reject without exp
             this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
-    assert.ok(
-        pendingMessage,
-        "should display the message to moderate"
-    );
+    // here no need to check the length of pendingMessage. because
+    // we have check for discard inside pendingMessage.
 
     const discardButton = pendingMessage.querySelector(`
         :scope .o_Message_moderationAction.o-discard
     `);
-    assert.ok(
-        discardButton,
-        "should display the discard button"
-    );
+    // here no need to check the length of discardButton. because
+    // we have made click on discardButton.
 
     await afterNextRender(() => discardButton.click());
     const dialog = document.querySelector('.o_ModerationDiscardDialog');
-    assert.ok(
-        dialog,
-        "a dialog should be prompt to the moderator on click discard"
-    );
+    // here no need to check the length of dialog. because
+    // we have check text content for dialog.
     assert.strictEqual(
         dialog.querySelector('.modal-title').textContent,
         "Confirmation",
@@ -649,10 +620,8 @@ QUnit.test('as moderator, discard pending moderation message (reject without exp
     );
 
     const confirmDiscard = dialog.querySelector(':scope .o-discard');
-    assert.ok(
-        confirmDiscard,
-        "should have discard button"
-    );
+    // here no need to check the length of confirmDiscard. because
+    // we have made click on confirmDiscard.
     assert.strictEqual(
         confirmDiscard.textContent,
         "Discard"
@@ -675,10 +644,8 @@ QUnit.test('as moderator, discard pending moderation message (reject without exp
             }).localId
         }"]
     `);
-    assert.ok(
-        channel,
-        "should display the general channel"
-    );
+    // here no need to check the length of channel. because
+    // we have made click on channel.
 
     await afterNextRender(() => channel.click());
     assert.containsNone(
@@ -689,7 +656,7 @@ QUnit.test('as moderator, discard pending moderation message (reject without exp
 });
 
 QUnit.test('as author, send message in moderated channel', async function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -726,10 +693,8 @@ QUnit.test('as author, send message in moderated channel', async function (asser
     });
     await afterNextRender(() => document.querySelector('.o_Composer_buttonSend').click());
     const messagePending = document.querySelector('.o_Message_moderationPending');
-    assert.ok(
-        messagePending,
-        "should display the pending message with pending info"
-    );
+    // here no need to check the length of messagePending. because
+    // we have check for class inside 'messagePending'.
     assert.hasClass(
         messagePending,
         'o-author',
@@ -738,7 +703,7 @@ QUnit.test('as author, send message in moderated channel', async function (asser
 });
 
 QUnit.test('as author, sent message accepted in moderated channel', async function (assert) {
-    assert.expect(5);
+    assert.expect(2);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -762,10 +727,8 @@ QUnit.test('as author, sent message accepted in moderated channel', async functi
             }).localId
         }"]
     `);
-    assert.ok(
-        channel,
-        "should display the general channel"
-    );
+    // here no need to check the length of channel. because
+    // we have made click on channel.
 
     await afterNextRender(() => channel.click());
     const messagePending = document.querySelector(`
@@ -774,10 +737,8 @@ QUnit.test('as author, sent message accepted in moderated channel', async functi
         }"]
         .o_Message_moderationPending
     `);
-    assert.ok(
-        messagePending,
-        "should display the pending message with pending info"
-    );
+    // here no need to check the length of messagePending. because
+    // we have check class inside messagePending.
     assert.hasClass(
         messagePending,
         'o-author',
@@ -800,10 +761,8 @@ QUnit.test('as author, sent message accepted in moderated channel', async functi
             this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
-    assert.ok(
-        message,
-        "should still display the message"
-    );
+    // here no need to check the length of message. because
+    // we have check class inside message.
     assert.containsNone(
         message,
         '.o_Message_moderationPending',
@@ -812,7 +771,7 @@ QUnit.test('as author, sent message accepted in moderated channel', async functi
 });
 
 QUnit.test('as author, sent message rejected in moderated channel', async function (assert) {
-    assert.expect(4);
+    assert.expect(3);
 
     this.data['mail.channel'].records.push({
         id: 20, // random unique id, will be used to link message and will be referenced in the test
@@ -848,10 +807,8 @@ QUnit.test('as author, sent message rejected in moderated channel', async functi
         }"]
         .o_Message_moderationPending
     `);
-    assert.ok(
-        messagePending,
-        "should display the pending message with pending info"
-    );
+    // here no need to check the length of messagePending. because
+    // we have check class inside messagePending.
     assert.hasClass(
         messagePending,
         'o-author',
