@@ -234,20 +234,19 @@ class account_journal(models.Model):
             outstanding_pay_account_balance, nb_lines_outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
                 domain=[('move_id.state', '=', 'posted')])
 
-            self._cr.execute('''
-                SELECT COUNT(st_line.id)
-                FROM account_bank_statement_line st_line
-                JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
-                JOIN account_bank_statement st ON st_line.statement_id = st.id
-                WHERE st_line_move.journal_id IN %s
-                AND st_line_move.state = 'posted'
-                AND NOT st_line.is_reconciled
-            ''', [tuple(self.ids)])
-            number_to_reconcile = self.env.cr.fetchone()[0]
+            number_to_reconcile = self.env['account.bank.statement.line'].search_count([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('is_reconciled', '=', False),
+            ])
 
-            to_check_ids = self.to_check_ids()
-            number_to_check = len(to_check_ids)
-            to_check_balance = sum([r.amount for r in to_check_ids])
+            lines_to_check = self.env['account.bank.statement.line'].search([
+                ('journal_id', '=', self.id),
+                ('state', '=', 'posted'),
+                ('to_check', '=', True),
+            ])
+            number_to_check = len(lines_to_check)
+            to_check_balance = sum(lines_to_check.mapped('amount'))
         #TODO need to check if all invoices are in the same currency than the journal!!!!
         elif self.type in ['sale', 'purchase']:
             title = _('Bills to pay') if self.type == 'purchase' else _('Invoices owed to you')
@@ -426,13 +425,6 @@ class account_journal(models.Model):
                 'domain': [('id', 'in', open_statements.ids)],
             })
         return action
-
-    def to_check_ids(self):
-        self.ensure_one()
-        domain = self.env['account.move.line']._get_suspense_moves_domain()
-        domain.append(('journal_id', '=', self.id))
-        statement_line_ids = self.env['account.move.line'].search(domain).mapped('statement_line_id')
-        return statement_line_ids
 
     def _select_action_to_open(self):
         self.ensure_one()

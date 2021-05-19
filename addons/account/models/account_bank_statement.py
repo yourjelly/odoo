@@ -3,125 +3,24 @@
 from collections import defaultdict
 
 from odoo import Command, api, fields, models, _
-from odoo.osv import expression
-from odoo.tools import float_is_zero
-from odoo.tools import float_compare, float_round, float_repr
-from odoo.tools.misc import formatLang, format_date
 from odoo.exceptions import UserError, ValidationError
-
-import time
-import math
-import base64
-import re
-
-
-# class AccountCashboxLine(models.Model):
-#     """ Cash Box Details """
-#     _name = 'account.cashbox.line'
-#     _description = 'CashBox Line'
-#     _rec_name = 'coin_value'
-#     _order = 'coin_value'
-#
-#     @api.depends('coin_value', 'number')
-#     def _sub_total(self):
-#         """ Calculates Sub total"""
-#         for cashbox_line in self:
-#             cashbox_line.subtotal = cashbox_line.coin_value * cashbox_line.number
-#
-#     coin_value = fields.Float(string='Coin/Bill Value', required=True, digits=0)
-#     number = fields.Integer(string='#Coins/Bills', help='Opening Unit Numbers')
-#     subtotal = fields.Float(compute='_sub_total', string='Subtotal', digits=0, readonly=True)
-#     cashbox_id = fields.Many2one('account.bank.statement.cashbox', string="Cashbox")
-#     currency_id = fields.Many2one('res.currency', related='cashbox_id.currency_id')
-#
-#
-# class AccountBankStmtCashWizard(models.Model):
-#     """
-#     Account Bank Statement popup that allows entering cash details.
-#     """
-#     _name = 'account.bank.statement.cashbox'
-#     _description = 'Bank Statement Cashbox'
-#     _rec_name = 'id'
-#
-#     cashbox_lines_ids = fields.One2many('account.cashbox.line', 'cashbox_id', string='Cashbox Lines')
-#     start_bank_stmt_ids = fields.One2many('account.bank.statement', 'cashbox_start_id')
-#     end_bank_stmt_ids = fields.One2many('account.bank.statement', 'cashbox_end_id')
-#     total = fields.Float(compute='_compute_total')
-#     currency_id = fields.Many2one('res.currency', compute='_compute_currency')
-#
-#     @api.depends('start_bank_stmt_ids', 'end_bank_stmt_ids')
-#     def _compute_currency(self):
-#         for cashbox in self:
-#             cashbox.currency_id = False
-#             if cashbox.end_bank_stmt_ids:
-#                 cashbox.currency_id = cashbox.end_bank_stmt_ids[0].currency_id
-#             if cashbox.start_bank_stmt_ids:
-#                 cashbox.currency_id = cashbox.start_bank_stmt_ids[0].currency_id
-#
-#     @api.depends('cashbox_lines_ids', 'cashbox_lines_ids.coin_value', 'cashbox_lines_ids.number')
-#     def _compute_total(self):
-#         for cashbox in self:
-#             cashbox.total = sum([line.subtotal for line in cashbox.cashbox_lines_ids])
-#
-#     @api.model
-#     def default_get(self, fields):
-#         vals = super(AccountBankStmtCashWizard, self).default_get(fields)
-#         balance = self.env.context.get('balance')
-#         statement_id = self.env.context.get('statement_id')
-#         if 'start_bank_stmt_ids' in fields and not vals.get('start_bank_stmt_ids') and statement_id and balance == 'start':
-#             vals['start_bank_stmt_ids'] = [(6, 0, [statement_id])]
-#         if 'end_bank_stmt_ids' in fields and not vals.get('end_bank_stmt_ids') and statement_id and balance == 'close':
-#             vals['end_bank_stmt_ids'] = [(6, 0, [statement_id])]
-#
-#         return vals
-#
-#     def name_get(self):
-#         result = []
-#         for cashbox in self:
-#             result.append((cashbox.id, str(cashbox.total)))
-#         return result
-#
-#     @api.model_create_multi
-#     def create(self, vals):
-#         cashboxes = super(AccountBankStmtCashWizard, self).create(vals)
-#         cashboxes._validate_cashbox()
-#         return cashboxes
-#
-#     def write(self, vals):
-#         res = super(AccountBankStmtCashWizard, self).write(vals)
-#         self._validate_cashbox()
-#         return res
-#
-#     def _validate_cashbox(self):
-#         for cashbox in self:
-#             if cashbox.start_bank_stmt_ids:
-#                 cashbox.start_bank_stmt_ids.write({'balance_start': cashbox.total})
-#             if cashbox.end_bank_stmt_ids:
-#                 cashbox.end_bank_stmt_ids.write({'balance_end_real': cashbox.total})
-#
-#
-# class AccountBankStmtCloseCheck(models.TransientModel):
-#     """
-#     Account Bank Statement wizard that check that closing balance is correct.
-#     """
-#     _name = 'account.bank.statement.closebalance'
-#     _description = 'Bank Statement Closing Balance'
-#
-#     def validate(self):
-#         bnk_stmt_id = self.env.context.get('active_id', False)
-#         if bnk_stmt_id:
-#             self.env['account.bank.statement'].browse(bnk_stmt_id).button_validate()
-#         return {'type': 'ir.actions.act_window_close'}
 
 
 class AccountBankStatement(models.Model):
     _name = "account.bank.statement"
     _description = "Bank Statement"
-    _order = "date desc, id desc"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = "last_date desc, date desc, id desc"
 
     name = fields.Char(
         string="Reference",
         copy=False,
+    )
+    last_date = fields.Date(
+        compute='_compute_last_date',
+        store=True,
+        help="Technical field holding the date of the last selected transaction for the current statement. "
+             "We need that in order to ensure lines are well ordered.",
     )
     date = fields.Date(
         required=True,
@@ -159,10 +58,17 @@ class AccountBankStatement(models.Model):
     balance_start = fields.Monetary(
         string="Starting Balance",
         copy=False,
+        default=lambda self: self._get_default_balances_from_context(self._context.get('default_line_ids'))[0],
     )
     balance_end = fields.Monetary(
+        string="Computed Balance",
+        compute='_compute_balance_end',
+        store=True,
+    )
+    balance_end_real = fields.Monetary(
         string="Ending Balance",
         copy=False,
+        default=lambda self: self._get_default_balances_from_context(self._context.get('default_line_ids'))[1],
     )
 
     # ==== Reconciliation ====
@@ -184,8 +90,29 @@ class AccountBankStatement(models.Model):
                 ))
 
     # -------------------------------------------------------------------------
+    # DEFAULT METHODS
+    # -------------------------------------------------------------------------
+
+    def _get_default_balances_from_context(self, line_ids_commands):
+        balance_start = balance_end = 0.0
+        if line_ids_commands:
+            st_lines = self.env['account.bank.statement']\
+                .new({'line_ids': line_ids_commands})\
+                .line_ids
+            if st_lines:
+                balance_start = st_lines[0].running_balance_end - st_lines[0].amount
+                balance_end = balance_start + sum(st_lines.mapped('amount'))
+
+        return balance_start, balance_end
+
+    # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('line_ids.date')
+    def _compute_last_date(self):
+        for st in self:
+            st.last_date = st.line_ids.sorted()[:1].date or st.date
 
     @api.depends('line_ids.is_reconciled')
     def _compute_is_reconciled(self):
@@ -217,6 +144,11 @@ class AccountBankStatement(models.Model):
             posted_lines = st.line_ids.filtered(lambda x: x.state == 'posted')
             st.nb_lines_to_reconcile = len(posted_lines) - len(posted_lines.filtered('is_reconciled'))
 
+    @api.depends('balance_start', 'line_ids.amount')
+    def _compute_balance_end(self):
+        for st in self:
+            st.balance_end = st.balance_start + sum(st.line_ids.mapped('amount'))
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -231,6 +163,17 @@ class AccountBankStatement(models.Model):
             result.append((st.id, label))
         return result
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        # OVERRIDE
+        # Fill 'balance_start' / 'balance_end' if not specified.
+        for vals in vals_list:
+            if all(field_name not in vals for field_name in ('balance_start', 'balance_end')) and 'line_ids' in vals:
+                balance_start, balance_end = self._get_default_balances_from_context(vals['line_ids'])
+                vals['balance_start'] = balance_start
+                vals['balance_end'] = balance_end
+        return super().create(vals_list)
+
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
@@ -241,7 +184,7 @@ class AccountBankStatementLine(models.Model):
     _inherits = {'account.move': 'move_id'}
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Bank Statement Line"
-    _order = "statement_date, statement_id desc, date, id desc"
+    _order = "date desc, statement_id, id desc"
     _check_company_auto = True
 
     def _get_default_journal(self):
@@ -263,11 +206,6 @@ class AccountBankStatementLine(models.Model):
         string="Bank Statement",
         index=True,
         check_company=True,
-    )
-    statement_date = fields.Date(
-        string="Statement Date",
-        related='statement_id.date',
-        store=True,
     )
 
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
@@ -356,8 +294,7 @@ class AccountBankStatementLine(models.Model):
         '''
         self.ensure_one()
 
-        statement = self.statement_id
-        journal = statement.journal_id
+        journal = self.journal_id
         company_currency = journal.company_id.currency_id
         journal_currency = journal.currency_id if journal.currency_id != company_currency else False
 
@@ -422,8 +359,7 @@ class AccountBankStatementLine(models.Model):
         '''
         self.ensure_one()
 
-        statement = self.statement_id
-        journal = statement.journal_id
+        journal = self.journal_id
         company_currency = journal.company_id.currency_id
         journal_currency = journal.currency_id or company_currency
         foreign_currency = self.foreign_currency_id or journal_currency or company_currency
@@ -630,39 +566,51 @@ class AccountBankStatementLine(models.Model):
             st_line.reconciled_move_ids = rec_moves
             st_line.reconciled_move_ids_count = len(rec_moves)
 
-    @api.depends('statement_id', 'statement_date', 'date')
+    @api.depends('statement_id', 'date')
     def _compute_running_balance_end(self):
         st_line_ids = []
+        journal_ids = set()
         for st_line in self:
-            if st_line.id:
-                st_line_ids.append(st_line.id)
+            if st_line._origin:
+                st_line_ids.append(st_line._origin.id)
+                journal_ids.add(st_line.journal_id.id)
             else:
                 st_line.running_balance_end = 0.0
 
         if not st_line_ids:
             return
 
-        record_by_id = {st_line.id: st_line for st_line in self}
-        order_split = re.split('\s*,\s*', self._order)
-        alias = {'date': 'move'}
-        order_by = ', '.join('%s.%s' % (alias.get(s, 'st_line'), s) for s in order_split)
+        record_by_id = {st_line._origin.id: st_line for st_line in self}
+        domain = [('journal_id', 'in', tuple(journal_ids))]
+        query = self._where_calc(domain)
+        tables, where_clause, where_params = query.get_sql()
+        order_by = ', '.join(self._generate_order_by_inner(
+            self._table,
+            self._order,
+            query,
+            reverse_direction=True,
+        ))
 
+        self.statement_id.flush(['last_date', 'date'])
+        self.flush(['amount', 'date', 'journal_id', 'statement_id'])
         self._cr.execute(f'''
             SELECT
                 *
             FROM (
                 SELECT
-                    st_line.id,
-                    SUM(st_line.amount) OVER (
-                        PARTITION BY move.journal_id
+                    account_bank_statement_line.id,
+                    SUM(account_bank_statement_line.amount) OVER (
+                        PARTITION BY account_bank_statement_line__move_id.journal_id
                         ORDER BY {order_by}
                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                     ) AS running_balance_start
-                FROM account_bank_statement_line st_line
-                JOIN account_move move ON move.id = st_line.move_id
+                FROM {tables}
+                LEFT JOIN account_bank_statement account_bank_statement_line__statement_id
+                    ON account_bank_statement_line__statement_id.id = account_bank_statement_line.statement_id
+                WHERE {where_clause}
             ) AS sub
             WHERE sub.id IN %s
-        ''', [tuple(st_line_ids)])
+        ''', where_params + [tuple(st_line_ids)])
 
         for st_line_id, balance in self._cr.fetchall():
             record_by_id[st_line_id].running_balance_end = balance
@@ -745,13 +693,6 @@ class AccountBankStatementLine(models.Model):
             move = st_line.move_id
             move_vals_to_write = {}
             st_line_vals_to_write = {}
-
-            if 'state' in changed_fields:
-                if (st_line.state == 'open' and move.state != 'draft') or (st_line.state == 'posted' and move.state != 'posted'):
-                    raise UserError(_(
-                        "You can't manually change the state of journal entry %s, as it has been created by bank "
-                        "statement %s."
-                    ) % (st_line.move_id.display_name, st_line.statement_id.display_name))
 
             if 'line_ids' in changed_fields:
                 liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
@@ -1103,12 +1044,27 @@ class AccountBankStatementLine(models.Model):
             'name': _("Bank Statement"),
             'view_mode': 'form',
             'res_model': 'account.bank.statement',
-            'view_id': self.env.ref('account.view_bank_statement_form').id,
+            'view_id': self.env.ref('account.view_bank_statement_form_popup').id,
             'type': 'ir.actions.act_window',
             'context': {
                 'default_line_ids': [Command.set(self.ids)],
             },
-            'target': 'new'
+            'target': 'new',
+        }
+
+    def button_set_journal_starting_balance(self):
+        journal = self.journal_id
+        if len(journal) != 1:
+            raise UserError(_("All transactions must belong to the same journal."))
+
+        return {
+            'name': journal.display_name,
+            'view_mode': 'form',
+            'res_model': 'account.journal',
+            'res_id': journal.id,
+            'view_id': self.env.ref('account.view_account_journal_form_set_starting_balance').id,
+            'type': 'ir.actions.act_window',
+            'target': 'new',
         }
 
     # -------------------------------------------------------------------------

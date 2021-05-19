@@ -116,6 +116,11 @@ class AccountJournal(models.Model):
 
     #groups_id = fields.Many2many('res.groups', 'account_journal_group_rel', 'journal_id', 'group_id', string='Groups')
     currency_id = fields.Many2one('res.currency', help='The currency used to enter statement', string="Currency")
+    journal_currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        compute='_compute_journal_currency_id',
+        store=True,
+    )
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True, default=lambda self: self.env.company,
         help="Company related to this journal")
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
@@ -189,6 +194,11 @@ class AccountJournal(models.Model):
     bank_statements_source = fields.Selection(selection=_get_bank_statements_available_sources, string='Bank Feeds', default='undefined', help="Defines how the bank statements will be registered")
     bank_acc_number = fields.Char(related='bank_account_id.acc_number', readonly=False)
     bank_id = fields.Many2one('res.bank', related='bank_account_id.bank_id', readonly=False)
+    bank_transaction_starting_balance = fields.Monetary(
+        currency_field='journal_currency_id',
+        copy=False,
+        default=0.0,
+    )
 
     # Sale journals fields
     sale_activity_type_id = fields.Many2one('mail.activity.type', string='Schedule Activity', default=False, help="Activity will be automatically scheduled on payment due date, improving collection process.")
@@ -230,6 +240,11 @@ class AccountJournal(models.Model):
                 journal.default_account_type = self.env.ref(default_account_id_types[journal.type]).id
             else:
                 journal.default_account_type = False
+
+    @api.depends('currency_id', 'company_id.currency_id')
+    def _compute_journal_currency_id(self):
+        for journal in self:
+            journal.journal_currency_id = journal.currency_id or journal.company_id.currency_id
 
     @api.depends('type')
     def _compute_outbound_payment_method_ids(self):
