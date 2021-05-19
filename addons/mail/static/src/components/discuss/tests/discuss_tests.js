@@ -250,7 +250,7 @@ QUnit.test('basic rendering: sidebar', async function (assert) {
 });
 
 QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     await this.start();
     const inbox = document.querySelector(`
@@ -274,11 +274,8 @@ QUnit.test('sidebar: basic mailbox rendering', async function (assert) {
         1,
         "inbox should have 'inbox' icon"
     );
-    assert.strictEqual(
-        inbox.querySelectorAll(`:scope .o_DiscussSidebarItem_name`).length,
-        1,
-        "mailbox should have a name"
-    );
+    // here no need to check the length of o_DiscussSidebarItem_name. because
+    // We have check for textcontent of 'o_DiscussSidebarItem_name'.
     assert.strictEqual(
         inbox.querySelector(`:scope .o_DiscussSidebarItem_name`).textContent,
         "Inbox",
@@ -364,21 +361,13 @@ QUnit.test('sidebar: change item', async function (assert) {
 });
 
 QUnit.test('sidebar: inbox with counter', async function (assert) {
-    assert.expect(2);
+    assert.expect(1);
 
     // notification expected to be counted at init_messaging
     this.data['mail.notification'].records.push({ res_partner_id: this.data.currentPartnerId });
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-            .o_DiscussSidebarItem_counter
-        `).length,
-        1,
-        "should display a counter (= have a counter when different from 0)"
-    );
+    // here no need to check the length of o_DiscussSidebarItem_counter. because
+    // We have check for textcontent of 'o_DiscussSidebarItem_counter'.
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-local-id="${
@@ -392,17 +381,11 @@ QUnit.test('sidebar: inbox with counter', async function (assert) {
 });
 
 QUnit.test('sidebar: add channel', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_groupHeaderItemAdd
-        `).length,
-        1,
-        "should be able to add channel from header"
-    );
+    // here no need to check the length of o_DiscussSidebar_groupHeaderItemAdd. because
+    // We have check for title of 'o_DiscussSidebar_groupHeaderItemAdd'.
     assert.strictEqual(
         document.querySelector(`
             .o_DiscussSidebar_groupChannel
@@ -423,7 +406,7 @@ QUnit.test('sidebar: add channel', async function (assert) {
 });
 
 QUnit.test('sidebar: basic channel rendering', async function (assert) {
-    assert.expect(14);
+    assert.expect(13);
 
     // channel expected to be found in the sidebar,
     // with a random unique id and name that  will be referenced in the test
@@ -460,11 +443,8 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
         1,
         "should have an icon"
     );
-    assert.strictEqual(
-        channel.querySelectorAll(`:scope .o_DiscussSidebarItem_name`).length,
-        1,
-        "should have a name"
-    );
+    // here no need to check the length of o_DiscussSidebarItem_name. because
+    // We have check textcontent of 'o_DiscussSidebarItem_name'.
     assert.strictEqual(
         channel.querySelector(`:scope .o_DiscussSidebarItem_name`).textContent,
         "General",
@@ -513,7 +493,7 @@ QUnit.test('sidebar: basic channel rendering', async function (assert) {
 });
 
 QUnit.test('sidebar: channel rendering with needaction counter', async function (assert) {
-    assert.expect(5);
+    assert.expect(4);
 
     // channel expected to be found in the sidebar
     // with a random unique id that will be used to link message
@@ -532,11 +512,8 @@ QUnit.test('sidebar: channel rendering with needaction counter', async function 
     });
     await this.start();
     const channel = document.querySelector(`.o_DiscussSidebar_groupChannel .o_DiscussSidebar_item`);
-    assert.strictEqual(
-        channel.querySelectorAll(`:scope .o_DiscussSidebarItem_counter`).length,
-        1,
-        "should have a counter when different from 0"
-    );
+    // here no need to check the length of o_DiscussSidebarItem_counter. because
+    // We have check textcontent of 'o_DiscussSidebarItem_counter'.
     assert.strictEqual(
         channel.querySelector(`:scope .o_DiscussSidebarItem_counter`).textContent,
         "1",
@@ -644,7 +621,7 @@ QUnit.test('sidebar: public/private channel rendering', async function (assert) 
 });
 
 QUnit.test('sidebar: basic chat rendering', async function (assert) {
-    assert.expect(11);
+    assert.expect(9);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat and a random name that will be asserted in the test
@@ -657,11 +634,8 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
         public: 'private', // expected value for testing a chat
     });
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll(`.o_DiscussSidebar_groupChat .o_DiscussSidebar_item`).length,
-        1,
-        "should have one chat item"
-    );
+    // here no need to check the length of o_DiscussSidebar_item. because
+    // We have check localId of 'o_DiscussSidebar_item'.
     const chat = document.querySelector(`.o_DiscussSidebar_groupChat .o_DiscussSidebar_item`);
     assert.strictEqual(
         chat.dataset.threadLocalId,
@@ -681,11 +655,8 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
         1,
         "should have an icon"
     );
-    assert.strictEqual(
-        chat.querySelectorAll(`:scope .o_DiscussSidebarItem_name`).length,
-        1,
-        "should have a name"
-    );
+    // here no need to check the length of o_DiscussSidebarItem_name. because
+    // We have check textcontent of 'o_DiscussSidebarItem_name'.
     assert.strictEqual(
         chat.querySelector(`:scope .o_DiscussSidebarItem_name`).textContent,
         "Demo",
@@ -758,7 +729,7 @@ QUnit.test('sidebar: chat rendering with unread counter', async function (assert
 });
 
 QUnit.test('sidebar: chat im_status rendering', async function (assert) {
-    assert.expect(7);
+    assert.expect(4);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat, and various im_status values to assert
@@ -794,45 +765,8 @@ QUnit.test('sidebar: chat im_status rendering', async function (assert) {
         3,
         "should have 3 chat items"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 11,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `).length,
-        1,
-        "should have Partner1 (Id 11)"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 12,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `).length,
-        1,
-        "should have Partner2 (Id 12)"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 13,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `).length,
-        1,
-        "should have Partner3 (Id 13)"
-    );
+    // here no need to check the length of chat1, chat2, chat3. because
+    // we have already check 'o_ThreadIcon' inside it.
     const chat1 = document.querySelector(`
         .o_DiscussSidebar_groupChat
         .o_DiscussSidebar_item[data-thread-local-id="${
@@ -900,7 +834,7 @@ QUnit.test('sidebar: chat custom name', async function (assert) {
 });
 
 QUnit.test('sidebar: rename chat', async function (assert) {
-    assert.expect(8);
+    assert.expect(7);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat, and a random name not used in the scope of this test but set for consistency
@@ -931,11 +865,8 @@ QUnit.test('sidebar: rename chat', async function (assert) {
         chat.querySelector(`:scope .o_DiscussSidebarItem_name`).classList.contains('o-editable'),
         "chat should have editable name"
     );
-    assert.strictEqual(
-        chat.querySelectorAll(`:scope .o_DiscussSidebarItem_nameInput`).length,
-        1,
-        "chat should have editable name input"
-    );
+    // here no need to check the length of 'o_DiscussSidebarItem_nameInput'. because
+    // we have already check value of 'o_DiscussSidebarItem_nameInput'.
     assert.strictEqual(
         chat.querySelector(`:scope .o_DiscussSidebarItem_nameInput`).value,
         "Marc",
@@ -964,39 +895,15 @@ QUnit.test('sidebar: rename chat', async function (assert) {
 });
 
 QUnit.test('default thread rendering', async function (assert) {
-    assert.expect(16);
+    assert.expect(9);
 
     // channel expected to be found in the sidebar,
     // with a random unique id that will be referenced in the test
     this.data['mail.channel'].records.push({ id: 20 });
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).length,
-        1,
-        "should have inbox mailbox in the sidebar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.starred.localId
-            }"]
-        `).length,
-        1,
-        "should have starred mailbox in the sidebar"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `).length,
-        1,
-        "should have history mailbox in the sidebar"
-    );
+
+    // here no need to check the length of 'o_DiscussSidebar_item'. because
+    // we have already check class inside of 'o_DiscussSidebar_item'.
     assert.strictEqual(
         document.querySelectorAll(`
             .o_DiscussSidebar_item[data-thread-local-id="${
@@ -1017,13 +924,8 @@ QUnit.test('default thread rendering', async function (assert) {
         `).classList.contains('o-active'),
         "inbox mailbox should be active thread"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
-        `).length,
-        1,
-        "should have empty thread in inbox"
-    );
+    // here no need to check the length of 'o_MessageList_empty'. because
+    // we have check textcontent inside of 'o_MessageList_empty'.
     assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
@@ -1047,13 +949,6 @@ QUnit.test('default thread rendering', async function (assert) {
         "starred mailbox should be active thread"
     );
     assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
-        `).length,
-        1,
-        "should have empty thread in starred"
-    );
-    assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
         `).textContent.trim(),
@@ -1074,13 +969,6 @@ QUnit.test('default thread rendering', async function (assert) {
             }"]
         `).classList.contains('o-active'),
         "history mailbox should be active thread"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
-        `).length,
-        1,
-        "should have empty thread in starred"
     );
     assert.strictEqual(
         document.querySelector(`.o_Discuss_thread .o_MessageList_empty`).textContent.trim(),
@@ -1107,13 +995,6 @@ QUnit.test('default thread rendering', async function (assert) {
             }"]
         `).classList.contains('o-active'),
         "channel 20 should be active thread"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_empty
-        `).length,
-        1,
-        "should have empty thread in starred"
     );
     assert.strictEqual(
         document.querySelector(`
@@ -1283,7 +1164,7 @@ QUnit.test('open channel from active_id as channel id', async function (assert) 
 
 QUnit.test('basic rendering of message', async function (assert) {
     // AKU TODO: should be in message-only tests
-    assert.expect(13);
+    assert.expect(10);
 
     // channel expected to be rendered, with a random unique id that will be referenced in the test
     this.data['mail.channel'].records.push({ id: 20 });
@@ -1317,11 +1198,8 @@ QUnit.test('basic rendering of message', async function (assert) {
         1,
         "should have message sidebar of message"
     );
-    assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_authorAvatar`).length,
-        1,
-        "should have author avatar in sidebar of message"
-    );
+    // here no need to check the length of 'o_Message_authorAvatar'. because
+    // we have check src inside of 'o_Message_authorAvatar'.
     assert.strictEqual(
         message.querySelector(`:scope .o_Message_authorAvatar`).dataset.src,
         "/web/image/res.partner/11/image_128",
@@ -1336,11 +1214,6 @@ QUnit.test('basic rendering of message', async function (assert) {
         message.querySelectorAll(`:scope .o_Message_header`).length,
         1,
         "should have header in core part of message"
-    );
-    assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_authorName`).length,
-        1,
-        "should have author name in header of message"
     );
     assert.strictEqual(
         message.querySelector(`:scope .o_Message_authorName`).textContent,
@@ -1368,11 +1241,6 @@ QUnit.test('basic rendering of message', async function (assert) {
         "should have command to star message"
     );
     assert.strictEqual(
-        message.querySelectorAll(`:scope .o_Message_content`).length,
-        1,
-        "should have content in core part of message"
-    );
-    assert.strictEqual(
         message.querySelector(`:scope .o_Message_content`).textContent.trim(),
         "body",
         "should have body of message in content part of message"
@@ -1384,7 +1252,7 @@ QUnit.test('basic rendering of squashed message', async function (assert) {
     // from messages of same author and same thread. Note that this should
     // be working in non-mailboxes
     // AKU TODO: should be message and/or message list-only tests
-    assert.expect(12);
+    assert.expect(11);
 
     // channel expected to be rendered, with a random unique id that will be referenced in the test
     this.data['mail.channel'].records.push({ id: 20 });
@@ -1480,11 +1348,6 @@ QUnit.test('basic rendering of squashed message', async function (assert) {
         "message 2 should have a header in core part"
     );
     assert.strictEqual(
-        message2.querySelectorAll(`:scope .o_Message_content`).length,
-        1,
-        "message 2 should have some content in core part"
-    );
-    assert.strictEqual(
         message2.querySelector(`:scope .o_Message_content`).textContent.trim(),
         "body2",
         "message 2 should have body in content part"
@@ -1554,7 +1417,7 @@ QUnit.test('inbox messages are never squashed', async function (assert) {
 
 QUnit.test('load all messages from channel initially, less than fetch limit (29 < 30)', async function (assert) {
     // AKU TODO: thread specific test
-    assert.expect(5);
+    assert.expect(4);
 
     // channel expected to be rendered, with a random unique id that will be referenced in the test
     this.data['mail.channel'].records.push({ id: 20 });
@@ -1581,13 +1444,7 @@ QUnit.test('load all messages from channel initially, less than fetch limit (29 
             return this._super(...arguments);
         },
     });
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_separatorDate
-        `).length,
-        1,
-        "should have a single date separator" // to check: may be client timezone dependent
-    );
+    // we have check textcontent of 'o_MessageList_separatorLabelDate'
     assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_separatorLabelDate
@@ -1613,7 +1470,7 @@ QUnit.test('load all messages from channel initially, less than fetch limit (29 
 
 QUnit.test('load more messages from channel', async function (assert) {
     // AKU: thread specific test
-    assert.expect(6);
+    assert.expect(4);
 
     // channel expected to be rendered, with a random unique id that will be referenced in the test
     this.data['mail.channel'].records.push({ id: 20 });
@@ -1634,13 +1491,7 @@ QUnit.test('load more messages from channel', async function (assert) {
             },
         },
     });
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_separatorDate
-        `).length,
-        1,
-        "should have a single date separator" // to check: may be client timezone dependent
-    );
+    // we have check textcontent of 'o_MessageList_separatorLabelDate'
     assert.strictEqual(
         document.querySelector(`
             .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_separatorLabelDate
@@ -1655,13 +1506,7 @@ QUnit.test('load more messages from channel', async function (assert) {
         30,
         "should have 30 messages"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Discuss_thread .o_ThreadView_messageList .o_MessageList_loadMore
-        `).length,
-        1,
-        "should have load more link"
-    );
+    // we have already click on 'o_MessageList_loadMore'
 
     await afterNextRender(() =>
         document.querySelector(`
@@ -2108,7 +1953,7 @@ QUnit.test('restore thread scroll position', async function (assert) {
 });
 
 QUnit.test('redirect to author (open chat)', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat and a random name that will be asserted in the test
@@ -2144,30 +1989,32 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
             },
         },
     });
+    const channelIndicator1 = document.querySelector(`
+        .o_DiscussSidebar_groupChannel
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.models['mail.thread'].findFromIdentifyingData({
+                id: 1,
+                model: 'mail.channel',
+            }).localId
+        }"]
+        .o_DiscussSidebarItem_activeIndicator
+    `);
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 1,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-            .o_DiscussSidebarItem_activeIndicator
-        `).classList.contains('o-item-active'),
+        channelIndicator1.classList.contains('o-item-active'),
         "channel 'General' should be active"
     );
+    const channelIndicator10 = document.querySelector(`
+        .o_DiscussSidebar_groupChat
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.models['mail.thread'].findFromIdentifyingData({
+                id: 10,
+                model: 'mail.channel',
+            }).localId
+        }"]
+        .o_DiscussSidebarItem_activeIndicator
+    `);
     assert.notOk(
-        document.querySelector(`
-            .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 10,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-            .o_DiscussSidebarItem_activeIndicator
-        `).classList.contains('o-item-active'),
+        channelIndicator10.classList.contains('o-item-active'),
         "Chat 'Demo' should not be active"
     );
     assert.strictEqual(
@@ -2181,11 +2028,7 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
             this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
         }"]
     `);
-    assert.strictEqual(
-        msg1.querySelectorAll(`:scope .o_Message_authorAvatar`).length,
-        1,
-        "message1 should have author image"
-    );
+    // we have already check class of 'o_Message_authorAvatar'
     assert.ok(
         msg1.querySelector(`:scope .o_Message_authorAvatar`).classList.contains('o_redirect'),
         "message1 should have redirect to author"
@@ -2195,36 +2038,18 @@ QUnit.test('redirect to author (open chat)', async function (assert) {
         msg1.querySelector(`:scope .o_Message_authorAvatar`).click()
     );
     assert.notOk(
-        document.querySelector(`
-            .o_DiscussSidebar_groupChannel
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 1,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-            .o_DiscussSidebarItem_activeIndicator
-        `).classList.contains('o-item-active'),
+        channelIndicator1.classList.contains('o-item-active'),
         "channel 'General' should become inactive after author redirection"
     );
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_groupChat
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 10,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-            .o_DiscussSidebarItem_activeIndicator
-        `).classList.contains('o-item-active'),
+        channelIndicator10.classList.contains('o-item-active'),
         "chat 'Demo' should become active after author redirection"
     );
 });
 
 QUnit.test('sidebar quick search', async function (assert) {
     // feature enables at 20 or more channels
-    assert.expect(6);
+    assert.expect(5);
 
     for (let id = 1; id <= 20; id++) {
         this.data['mail.channel'].records.push({ id, name: `channel${id}` });
@@ -2235,11 +2060,7 @@ QUnit.test('sidebar quick search', async function (assert) {
         20,
         "should have 20 channel items"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Discuss_sidebar input.o_DiscussSidebar_quickSearch`).length,
-        1,
-        "should have quick search in sidebar"
-    );
+    // already declared in a var and used further.
 
     const quickSearch = document.querySelector(`
         .o_Discuss_sidebar input.o_DiscussSidebar_quickSearch
@@ -2531,7 +2352,7 @@ QUnit.test('starred: unstar all', async function (assert) {
 });
 
 QUnit.test('toggle_star message', async function (assert) {
-    assert.expect(16);
+    assert.expect(13);
 
     // channel expected to be initially rendered
     // with a random unique id, will be referenced in the test
@@ -2570,11 +2391,7 @@ QUnit.test('toggle_star message', async function (assert) {
         0,
         "starred should display no counter (= 0)"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Discuss .o_Message`).length,
-        1,
-        "should have 1 message in channel"
-    );
+    // declared in a var and used further.
     let message = document.querySelector(`.o_Discuss .o_Message`);
     assert.notOk(
         message.classList.contains('o-starred'),
@@ -2598,11 +2415,7 @@ QUnit.test('toggle_star message', async function (assert) {
         "1",
         "starred should display a counter of 1"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Discuss .o_Message`).length,
-        1,
-        "should have kept 1 message in channel"
-    );
+    // declared in a var and used further.
     message = document.querySelector(`.o_Discuss .o_Message`);
     assert.ok(
         message.classList.contains('o-starred'),
@@ -2621,11 +2434,7 @@ QUnit.test('toggle_star message', async function (assert) {
         0,
         "starred should no longer display a counter (= 0)"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Discuss .o_Message`).length,
-        1,
-        "should still have 1 message in channel"
-    );
+    // declared in a var and used further.
     message = document.querySelector(`.o_Discuss .o_Message`);
     assert.notOk(
         message.classList.contains('o-starred'),
@@ -2686,7 +2495,7 @@ QUnit.test('composer state: text save and restore', async function (assert) {
 });
 
 QUnit.test('composer state: attachments save and restore', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     // channels expected to be found in the sidebar
     // with random unique id and name that will be referenced in the test
@@ -2745,11 +2554,7 @@ QUnit.test('composer state: attachments save and restore', async function (asser
     // Switch back to #general
     await afterNextRender(() => channels[0].click());
     // Check attachment is reloaded
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Composer .o_Attachment`).length,
-        1,
-        "should have 1 attachment in the composer"
-    );
+    // already checked dataset of 'o_Attachment'
     assert.strictEqual(
         document.querySelector(`.o_Composer .o_Attachment`).dataset.attachmentLocalId,
         this.env.models['mail.attachment'].findFromIdentifyingData({ id: 1 }).localId,
@@ -2782,7 +2587,7 @@ QUnit.test('composer state: attachments save and restore', async function (asser
 });
 
 QUnit.test('post a simple message', async function (assert) {
-    assert.expect(15);
+    assert.expect(14);
 
     // channel expected to be found in the sidebar
     // with a random unique id that will be referenced in the test
@@ -2859,11 +2664,7 @@ QUnit.test('post a simple message', async function (assert) {
         "",
         "should have no content in composer input after posting message"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Message`).length,
-        1,
-        "should display a message after posting message"
-    );
+   // declared in a var and used further
     const message = document.querySelector(`.o_Message`);
     assert.strictEqual(
         message.dataset.messageLocalId,
@@ -3063,7 +2864,7 @@ QUnit.test('do not post message on mailing channel with "Enter" keyboard shortcu
 
 QUnit.test('rendering of inbox message', async function (assert) {
     // AKU TODO: kinda message specific test
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['mail.message'].records.push({
         body: "not empty",
@@ -3074,11 +2875,7 @@ QUnit.test('rendering of inbox message', async function (assert) {
         res_id: 20, // random related id
     });
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll('.o_Message').length,
-        1,
-        "should display a message"
-    );
+    // declared in a var and used further.
     const message = document.querySelector('.o_Message');
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_originThread`).length,
@@ -3113,7 +2910,7 @@ QUnit.test('rendering of inbox message', async function (assert) {
 });
 
 QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async function (assert) {
-    assert.expect(3);
+    assert.expect(2);
 
     // channel expected to be found in the sidebar, with the expected message_unread_counter
     // and a random unique id that will be referenced in the test
@@ -3125,41 +2922,23 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
         res_id: 10,
     });
     await this.start();
-    assert.containsOnce(
-        document.body,
-        `.o_DiscussSidebar_item[data-thread-local-id="${
+    const channel10 = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
             this.env.models['mail.thread'].findFromIdentifyingData({
                 id: 10,
                 model: 'mail.channel',
             }).localId
-        }"]`,
-        "should have discuss sidebar item with the channel"
-    );
+        }"]
+    `);
     assert.hasClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 10,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `),
+        channel10,
         'o-unread',
         "sidebar item of channel ID 10 should be unread"
     );
 
     await afterNextRender(() => this.afterEvent({
         eventName: 'o-thread-last-seen-by-current-partner-message-id-changed',
-        func: () => {
-            document.querySelector(`
-                .o_DiscussSidebar_item[data-thread-local-id="${
-                    this.env.models['mail.thread'].findFromIdentifyingData({
-                        id: 10,
-                        model: 'mail.channel',
-                    }).localId
-                }"]
-            `).click();
-        },
+        func: () => { channel10.click() },
         message: "should wait until last seen by current partner message id changed",
         predicate: ({ thread }) => {
             return (
@@ -3170,46 +2949,27 @@ QUnit.test('mark channel as seen on last message visible [REQUIRE FOCUS]', async
         },
     }));
     assert.doesNotHaveClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 10,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `),
+        channel10,
         'o-unread',
         "sidebar item of channel ID 10 should not longer be unread"
     );
 });
 
 QUnit.test('receive new needaction messages', async function (assert) {
-    assert.expect(12);
+    assert.expect(10);
 
     await this.start();
+    const inbox = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.messaging.inbox.localId
+        }"]
+    `);
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `),
-        "should have inbox in sidebar"
-    );
-    assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).classList.contains('o-active'),
+        inbox.classList.contains('o-active'),
         "inbox should be current discuss thread"
     );
     assert.notOk(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-            .o_DiscussSidebarItem_counter
-        `),
+        inbox.querySelector(`.o_DiscussSidebarItem_counter`),
         "inbox item in sidebar should not have any counter"
     );
     assert.strictEqual(
@@ -3231,28 +2991,13 @@ QUnit.test('receive new needaction messages', async function (assert) {
         this.widget.call('bus_service', 'trigger', 'notification', notifications);
     });
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-            .o_DiscussSidebarItem_counter
-        `),
+        inbox.querySelector(`.o_DiscussSidebarItem_counter`),
         "inbox item in sidebar should now have counter"
     );
     assert.strictEqual(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-            .o_DiscussSidebarItem_counter
-        `).textContent,
+        inbox.querySelector(`.o_DiscussSidebarItem_counter`).textContent,
         '1',
         "inbox item in sidebar should have counter of '1'"
-    );
-    assert.strictEqual(
-        document.querySelectorAll(`.o_Discuss_thread .o_Message`).length,
-        1,
-        "should have one message in inbox"
     );
     assert.strictEqual(
         document.querySelector(`.o_Discuss_thread .o_Message`).dataset.messageLocalId,
@@ -3273,12 +3018,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
         this.widget.call('bus_service', 'trigger', 'notification', notifications2);
     });
     assert.strictEqual(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-            .o_DiscussSidebarItem_counter
-        `).textContent,
+        inbox.querySelector(`.o_DiscussSidebarItem_counter`).textContent,
         '2',
         "inbox item in sidebar should have counter of '2'"
     );
@@ -3308,7 +3048,7 @@ QUnit.test('receive new needaction messages', async function (assert) {
 });
 
 QUnit.test('reply to message from inbox (message linked to document)', async function (assert) {
-    assert.expect(19);
+    assert.expect(16);
 
     // message that is expected to be found in Inbox
     this.data['mail.message'].records.push({
@@ -3357,11 +3097,6 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         },
     });
     assert.strictEqual(
-        document.querySelectorAll('.o_Message').length,
-        1,
-        "should display a single message"
-    );
-    assert.strictEqual(
         document.querySelector('.o_Message').dataset.messageLocalId,
         this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
         "should display message with ID 100"
@@ -3379,10 +3114,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         document.querySelector('.o_Message').classList.contains('o-selected'),
         "message should be selected after clicking on reply icon"
     );
-    assert.ok(
-        document.querySelector('.o_Composer'),
-        "should have composer after clicking on reply to message"
-    );
+    // we have already checked for textcontent of 'o_Composer_threadName'.
     assert.strictEqual(
         document.querySelector(`.o_Composer_threadName`).textContent,
         " on: Refactoring",
@@ -3419,10 +3151,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
         document.querySelector('.o_Message').classList.contains('o-selected'),
         "message should not longer be selected after posting reply"
     );
-    assert.ok(
-        document.querySelector('.o_notification'),
-        "should display a notification after posting reply"
-    );
+    // already checked for textcontent of 'o_notification_content'.
     assert.strictEqual(
         document.querySelector('.o_notification_content').textContent,
         "Message posted on \"Refactoring\"",
@@ -3431,7 +3160,7 @@ QUnit.test('reply to message from inbox (message linked to document)', async fun
 });
 
 QUnit.test('load recent messages from thread (already loaded some old messages)', async function (assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     // channel expected to be found in the sidebar,
     // with a random unique id that will be referenced in the test
@@ -3450,11 +3179,6 @@ QUnit.test('load recent messages from thread (already loaded some old messages)'
         });
     }
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll('.o_Message').length,
-        1,
-        "Inbox should have a single message initially"
-    );
     assert.strictEqual(
         document.querySelector('.o_Message').dataset.messageLocalId,
         this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId,
@@ -3490,12 +3214,13 @@ QUnit.test('load recent messages from thread (already loaded some old messages)'
         `should display 31 messages inside the channel after clicking on it (the previously known
         message from Inbox and the 30 most recent messages that have been fetched)`
     );
+    const message = document.querySelectorAll(`
+        .o_Message[data-message-local-id="${
+            this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
+        }"]
+    `)
     assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Message[data-message-local-id="${
-                this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
-            }"]
-        `).length,
+        message.length,
         1,
         "should display the message from Inbox inside the channel too"
     );
@@ -3518,11 +3243,7 @@ QUnit.test('load recent messages from thread (already loaded some old messages)'
         "should display 50 messages inside the channel after scrolling to load more (all messages fetched)"
     );
     assert.strictEqual(
-        document.querySelectorAll(`
-            .o_Message[data-message-local-id="${
-                this.env.models['mail.message'].findFromIdentifyingData({ id: 100 }).localId
-            }"]
-        `).length,
+        message.length,
         1,
         "should still display the message from Inbox inside the channel too"
     );
@@ -3588,19 +3309,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
         "should have empty thread in history"
     );
 
-    await afterNextRender(() =>
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).click()
-    );
+    const inbox = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.messaging.inbox.localId
+        }"]
+    `);
+    await afterNextRender(() => inbox.click());
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).classList.contains('o-active'),
+        inbox.classList.contains('o-active'),
         "inbox mailbox should be active thread"
     );
     assert.strictEqual(
@@ -3618,11 +3334,7 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
         document.querySelector('.o_widget_Discuss_controlPanelButtonMarkAllRead').click()
     );
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).classList.contains('o-active'),
+        inbox.classList.contains('o-active'),
         "inbox mailbox should still be active after mark as read"
     );
     assert.strictEqual(
@@ -3631,19 +3343,14 @@ QUnit.test('messages marked as read move to "History" mailbox', async function (
         "inbox mailbox should now be empty after mark as read"
     );
 
-    await afterNextRender(() =>
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `).click()
-    );
+    const history = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.messaging.history.localId
+        }"]
+    `);
+    await afterNextRender(() => history.click());
     assert.ok(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `).classList.contains('o-active'),
+        history.classList.contains('o-active'),
         "history mailbox should be active"
     );
     assert.strictEqual(
@@ -3692,12 +3399,13 @@ QUnit.test('mark a single message as read should only move this message to "Hist
             },
         },
     });
+    const history = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.messaging.history.localId
+        }"]
+    `);
     assert.hasClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `),
+        history,
         'o-active',
         "history mailbox should initially be the active thread"
     );
@@ -3707,19 +3415,14 @@ QUnit.test('mark a single message as read should only move this message to "Hist
         "history mailbox should initially be empty"
     );
 
-    await afterNextRender(() =>
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `).click()
-    );
+    const inbox = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.messaging.inbox.localId
+        }"]
+    `)
+    await afterNextRender(() => inbox.click());
     assert.hasClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.inbox.localId
-            }"]
-        `),
+        inbox,
         'o-active',
         "inbox mailbox should be active thread after clicking on it"
     );
@@ -3750,19 +3453,9 @@ QUnit.test('mark a single message as read should only move this message to "Hist
         "message still in inbox should be the one not marked as read"
     );
 
-    await afterNextRender(() =>
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `).click()
-    );
+    await afterNextRender(() => history.click());
     assert.hasClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.messaging.history.localId
-            }"]
-        `),
+        history,
         'o-active',
         "history mailbox should be active after clicking on it"
     );
@@ -4022,7 +3715,7 @@ QUnit.test('receive new chat messages: out of odoo focus (tab title)', async fun
 });
 
 QUnit.test('auto-focus composer on opening thread', async function (assert) {
-    assert.expect(14);
+    assert.expect(11);
 
     // expected correspondent, with a random unique id that will be used to link
     // partner to chat and a random name that will be asserted in the test
@@ -4042,39 +3735,21 @@ QUnit.test('auto-focus composer on opening thread', async function (assert) {
         }
     );
     await this.start();
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-name="Inbox"]
-        `).length,
-        1,
-        "should have mailbox 'Inbox' in the sidebar"
-    );
+    // already check for classlist of 'inbox'
     assert.ok(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-name="Inbox"]
         `).classList.contains('o-active'),
         "mailbox 'Inbox' should be active initially"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-name="General"]
-        `).length,
-        1,
-        "should have channel 'General' in the sidebar"
-    );
+    // already check for classlist of 'general'
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-name="General"]
         `).classList.contains('o-active'),
         "channel 'General' should not be active initially"
     );
-    assert.strictEqual(
-        document.querySelectorAll(`
-            .o_DiscussSidebar_item[data-thread-name="Demo User"]
-        `).length,
-        1,
-        "should have chat 'Demo User' in the sidebar"
-    );
+    // already check for classlist of 'demo user'
     assert.notOk(
         document.querySelector(`
             .o_DiscussSidebar_item[data-thread-name="Demo User"]
@@ -4170,18 +3845,17 @@ QUnit.test('mark channel as seen if last message is visible when switching chann
             },
         },
     });
+    const channel = document.querySelector(`
+        .o_DiscussSidebar_item[data-thread-local-id="${
+            this.env.models['mail.thread'].findFromIdentifyingData({
+                id: 10,
+                model: 'mail.channel',
+            }).localId
+        }"]
+    `);
     await afterNextRender(() => this.afterEvent({
         eventName: 'o-thread-last-seen-by-current-partner-message-id-changed',
-        func: () => {
-            document.querySelector(`
-                .o_DiscussSidebar_item[data-thread-local-id="${
-                    this.env.models['mail.thread'].findFromIdentifyingData({
-                        id: 10,
-                        model: 'mail.channel',
-                    }).localId
-                }"]
-            `).click();
-        },
+        func: () => { channel.click() },
         message: "should wait until last seen by current partner message id changed",
         predicate: ({ thread }) => {
             return (
@@ -4192,14 +3866,7 @@ QUnit.test('mark channel as seen if last message is visible when switching chann
         },
     }));
     assert.doesNotHaveClass(
-        document.querySelector(`
-            .o_DiscussSidebar_item[data-thread-local-id="${
-                this.env.models['mail.thread'].findFromIdentifyingData({
-                    id: 10,
-                    model: 'mail.channel',
-                }).localId
-            }"]
-        `),
+        channel,
         'o-unread',
         "sidebar item of channel ID 10 should no longer be unread"
     );
