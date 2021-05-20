@@ -173,6 +173,9 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
             _logger.info("TEST BEGIN")
             self.cr.sql_log = True
             self.cr.sql_log_story = []
+            self.cr.execute("select name, id from ir_model_fields where model='res.partner'")
+            for row in self.cr.fetchall():
+                _logger.info('%s: %s' % (row[0], row[1]))
             with self.assertQueryCount(user_sales_manager=1368):  # still some randomness (1366 spotted) - crm only: ??
                 mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
                     'active_model': 'crm.lead',
