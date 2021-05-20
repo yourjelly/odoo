@@ -142,6 +142,10 @@ class SaleOrder(models.Model):
 
     def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):
         """ Add or set product quantity, add_qty can be negative """
+        for field_name in self.env['res.partner']._fields:
+            field = self.env['res.partner']._fields[field_name]
+            if field.company_dependent:
+                print(field_name, field.company_dependent)
         self.ensure_one()
         product_context = dict(self.env.context)
         product_context.setdefault('lang', self.sudo().partner_id.lang)
