@@ -185,6 +185,7 @@ class Project(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", check_company=True,
         help="Analytic account to which this project is linked for financial management. "
              "Use an analytic account to record cost and revenue on your project.")
+    analytic_account_balance = fields.Monetary(related="analytic_account_id.balance")
 
     favorite_user_ids = fields.Many2many(
         'res.users', 'project_favorite_user_rel', 'project_id', 'user_id',
@@ -467,6 +468,18 @@ class Project(models.Model):
         action_context = ast.literal_eval(action['context']) if action['context'] else {}
         action_context['search_default_project_id'] = self.id
         return dict(action, context=action_context)
+
+    def action_view_analytic_account_entries(self):
+        self.ensure_one()
+        return {
+            'res_model': 'account.analytic.line',
+            'type': 'ir.actions.act_window',
+            'name': _("Gross Margin"),
+            'domain': [('account_id', '=', self.analytic_account_id.id)],
+            'views': [(self.env.ref('analytic.view_account_analytic_line_tree').id, 'list'), (False, 'graph'), (False, 'pivot')],
+            'view_mode': 'tree,form,graph,pivot',
+            'context': {'search_default_group_date': 1}
+        }
 
     # ---------------------------------------------------
     #  Business Methods
