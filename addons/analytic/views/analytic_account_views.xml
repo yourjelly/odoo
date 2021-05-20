@@ -177,8 +177,8 @@
                         <group name="main">
                             <group>
                                 <field name="active" invisible="1"/>
-                                <field name="code"/>
                                 <field name="partner_id"/>
+                                <field name="code"/>
                             </group>
                             <group>
                                 <field name="group_id"/>

@@ -11,6 +11,14 @@
                     icon="fa-wrench" attrs="{'invisible': [('production_count', '=', 0)]}">
                     <field string="Manufacturing Orders" name="production_count" widget="statinfo"/>
                 </button>
+                <button class="oe_stat_button" type="object" name="action_view_workorder"
+                    icon="fa-wrench" attrs="{'invisible': [('workorder_count', '=', 0)]}">
+                    <field string="Work Orders" name="workorder_count" widget="statinfo"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_mrp_bom"
+                    icon="fa-flask" attrs="{'invisible': [('bom_count', '=', 0)]}">
+                    <field string="Bills of Materials" name="bom_count" widget="statinfo"/>
+                </button>
             </div>
         </field>
     </record>

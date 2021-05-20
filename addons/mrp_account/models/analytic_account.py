@@ -9,12 +9,26 @@ class AccountAnalyticAccount(models.Model):
     _description = 'Analytic Account'
 
     production_ids = fields.One2many('mrp.production', 'analytic_account_id', string='Manufacturing Orders')
-    production_count = fields.Integer("Production Count", compute='_compute_production_count')
+    production_count = fields.Integer("Manufacturing Orders Count", compute='_compute_production_count')
+    bom_ids = fields.One2many('mrp.bom', 'analytic_account_id', string='Bills of Materials')
+    bom_count = fields.Integer("BoM Count", compute='_compute_bom_count')
+    workcenter_ids = fields.One2many('mrp.workcenter', 'costs_hour_account_id', string='Workcenters')
+    workorder_count = fields.Integer("Work Order Count", compute='_compute_workorder_count')
 
     @api.depends('production_ids')
     def _compute_production_count(self):
         for account in self:
             account.production_count = len(account.production_ids)
+
+    @api.depends('bom_ids')
+    def _compute_bom_count(self):
+        for account in self:
+            account.bom_count = len(account.bom_ids)
+
+    @api.depends('workcenter_ids.order_ids')
+    def _compute_workorder_count(self):
+        for account in self:
+            account.workorder_count = len(account.workcenter_ids.order_ids)
 
     def action_view_mrp_production(self):
         self.ensure_one()
@@ -28,6 +42,32 @@ class AccountAnalyticAccount(models.Model):
         if len(self.production_ids) == 1:
             result['view_mode'] = 'form'
             result['res_id'] = self.production_ids.id
+        return result
+
+    def action_view_mrp_bom(self):
+        self.ensure_one()
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "mrp.bom",
+            "domain": [['id', 'in', self.bom_ids.ids]],
+            "name": "Bills of Materials",
+            'view_mode': 'tree,form',
+        }
+        if self.bom_count == 1:
+            result['view_mode'] = 'form'
+            result['res_id'] = self.bom_ids.id
+        return result
+
+    def action_view_workorder(self):
+        self.ensure_one()
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "mrp.workorder",
+            "domain": [['workcenter_id', 'in', self.workcenter_ids.ids]],
+            "context": {"create": False},
+            "name": "Work Orders",
+            'view_mode': 'tree',
+        }
         return result
 
 
