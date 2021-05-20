@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
+
 from odoo.addons.crm.tests import common as crm_common
 from odoo.tests.common import tagged, users
 
+_logger = logging.getLogger(__name__)
 
-@tagged('lead_manage', 'crm_performance')
+@tagged('lead_manage', 'crm_performance', 'bso')
 class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
 
     @classmethod
@@ -166,16 +169,27 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
         test_leads = self._create_leads_batch(count=50, user_ids=[False])
         user_ids = self.assign_users.ids
 
-        with self.assertQueryCount(user_sales_manager=1368):  # still some randomness (1366 spotted) - crm only: ??
-            mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
-                'active_model': 'crm.lead',
-                'active_ids': test_leads.ids,
-            }).create({
-                'deduplicate': True,
-                'user_ids': user_ids,
-                'force_assignment': True,
-            })
-            mass_convert.action_mass_convert()
+        try:
+            _logger.info("TEST BEGIN")
+            self.cr.sql_log = True
+            self.cr.sql_log_story = []
+            with self.assertQueryCount(user_sales_manager=1368):  # still some randomness (1366 spotted) - crm only: ??
+                mass_convert = self.env['crm.lead2opportunity.partner.mass'].with_context({
+                    'active_model': 'crm.lead',
+                    'active_ids': test_leads.ids,
+                }).create({
+                    'deduplicate': True,
+                    'user_ids': user_ids,
+                    'force_assignment': True,
+                })
+                mass_convert.action_mass_convert()
+            _logger.info("TEST END")
+        finally:
+            self.cr.sql_log = False
+            for line in self.cr.sql_log_story:
+                _logger.info(line)
+            _logger.info("SQL DUMP END")
+            self.cr.sql_log_story = None
 
         self.assertEqual(set(test_leads.mapped('type')), set(['opportunity']))
         self.assertEqual(len(test_leads.partner_id), len(test_leads))

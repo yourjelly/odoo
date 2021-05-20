@@ -234,6 +234,7 @@ class Cursor(BaseCursor):
         self.sql_log = _logger.isEnabledFor(logging.DEBUG)
 
         self.sql_log_count = 0
+        self.sql_log_story = []
 
         # avoid the call of close() (by __del__) if an exception
         # is raised by any of the following initialisations
@@ -314,6 +315,7 @@ class Cursor(BaseCursor):
             delay *= 1E6
 
             query_lower = self._obj.query.decode().lower()
+            self.sql_log_story.append(query_lower)
             res_from = re_from.match(query_lower)
             if res_from:
                 self.sql_from_log.setdefault(res_from.group(1), [0, 0])
