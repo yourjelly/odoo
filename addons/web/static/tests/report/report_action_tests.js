@@ -2,12 +2,16 @@
 
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui_service";
-import testUtils from "web.test_utils";
-import ReportClientAction from "report.client_action";
-import { clearRegistryWithCleanup } from "../../helpers/mock_env";
-import { makeFakeNotificationService, makeFakeUserService } from "../../helpers/mock_services";
-import { createWebClient, doAction, getActionManagerTestConfig } from "./helpers";
-import { mockDownload } from "@web/../tests/helpers/utils";
+import { mockDownload } from "../helpers/utils";
+import { ReportClientAction } from "@web/report/report_client_action";
+import { clearRegistryWithCleanup } from "../helpers/mock_env";
+import { makeFakeNotificationService, makeFakeUserService } from "../helpers/mock_services";
+import { patchWithCleanup } from "../helpers/utils";
+import {
+    createWebClient,
+    doAction,
+    getActionManagerTestConfig,
+} from "../webclient/actions/helpers";
 
 let testConfig;
 
@@ -139,26 +143,29 @@ QUnit.module("ActionManager", (hooks) => {
                     return Promise.resolve(true);
                 }
             };
+
             // patch the report client action to override its iframe's url so that
             // it doesn't trigger an RPC when it is appended to the DOM (for this
             // usecase, using removeSRCAttribute doesn't work as the RPC is
             // triggered as soon as the iframe is in the DOM, even if its src
             // attribute is removed right after)
-            testUtils.mock.patch(ReportClientAction, {
-                async start() {
-                    await this._super(...arguments);
-                    this._rpc({ route: this.iframe.getAttribute("src") });
-                    this.iframe.setAttribute("src", "about:blank");
+            patchWithCleanup(ReportClientAction.prototype, {
+                setup() {
+                    this._super(...arguments);
+                    this.env.services.rpc(this.report_url);
+                    this.report_url = "about:blank";
                 },
             });
+
             const webClient = await createWebClient({ testConfig, mockRPC });
+
             await doAction(webClient, 7);
             assert.containsOnce(
                 webClient,
                 ".o_report_iframe",
                 "should have opened the report client action"
             );
-            assert.containsOnce(webClient, ".o_cp_buttons .o_report_buttons .o_report_print");
+            assert.containsOnce(webClient, ".btn.o_report_print");
             assert.verifySteps([
                 "/web/webclient/load_menus",
                 "/web/action/load",
@@ -167,7 +174,6 @@ QUnit.module("ActionManager", (hooks) => {
                 // context={"lang":'en',"uid":7,"tz":'taht', allowed_company_ids: [1]}
                 "/report/html/some_report?context=%7B%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%2C%22allowed_company_ids%22%3A%5B1%5D%7D",
             ]);
-            testUtils.mock.unpatch(ReportClientAction);
         }
     );
 
@@ -201,13 +207,14 @@ QUnit.module("ActionManager", (hooks) => {
         // usecase, using removeSRCAttribute doesn't work as the RPC is
         // triggered as soon as the iframe is in the DOM, even if its src
         // attribute is removed right after)
-        testUtils.mock.patch(ReportClientAction, {
-            async start() {
-                await this._super(...arguments);
-                this._rpc({ route: this.iframe.getAttribute("src") });
-                this.iframe.setAttribute("src", "about:blank");
+        patchWithCleanup(ReportClientAction.prototype, {
+            setup() {
+                this._super(...arguments);
+                this.env.services.rpc(this.report_url);
+                this.report_url = "about:blank";
             },
         });
+
         const webClient = await createWebClient({ testConfig, mockRPC });
         await doAction(webClient, 12);
         assert.containsOnce(webClient, ".o_report_iframe", "should have opened the client action");
@@ -217,7 +224,6 @@ QUnit.module("ActionManager", (hooks) => {
             // context={"some_key":2}
             "/report/html/some_report?context=%7B%22some_key%22%3A2%7D",
         ]);
-        testUtils.mock.unpatch(ReportClientAction);
     });
 
     QUnit.test(
@@ -284,7 +290,7 @@ QUnit.module("ActionManager", (hooks) => {
         };
         const webClient = await createWebClient({ testConfig, mockRPC });
         let customHandlerCalled = false;
-        registry.category("ir.actions.report handlers").add("custom_handler", async action => {
+        registry.category("ir.actions.report handlers").add("custom_handler", async (action) => {
             if (action.id === 7 && !customHandlerCalled) {
                 customHandlerCalled = true;
                 assert.step("calling custom handler");
