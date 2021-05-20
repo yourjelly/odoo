@@ -90,7 +90,7 @@ QUnit.test('base rendering editable', async function (assert) {
 });
 
 QUnit.test('hover following button', async function (assert) {
-    assert.expect(8);
+    assert.expect(6);
 
     this.data['res.partner'].records.push({ id: 100, message_follower_ids: [1] });
     this.data['mail.followers'].records.push({
@@ -108,16 +108,9 @@ QUnit.test('hover following button', async function (assert) {
     });
     thread.follow();
     await this.createFollowButtonComponent(thread);
-    assert.containsOnce(
-        document.body,
-        '.o_FollowButton',
-        "should have follow button component"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_FollowButton_unfollow',
-        "should have 'Unfollow' button"
-    );
+    //already assert in test 'base rendering'
+
+    // we have already check for textcontent of 'o_FollowButton_unfollow'.
     assert.strictEqual(
         document.querySelector('.o_FollowButton_unfollow').textContent.trim(),
         'Following',
@@ -158,7 +151,7 @@ QUnit.test('hover following button', async function (assert) {
 });
 
 QUnit.test('click on "follow" button', async function (assert) {
-    assert.expect(7);
+    assert.expect(5);
 
     this.data['res.partner'].records.push({ id: 100, message_follower_ids: [1] });
     this.data['mail.followers'].records.push({
@@ -184,17 +177,9 @@ QUnit.test('click on "follow" button', async function (assert) {
         model: 'res.partner',
     });
     await this.createFollowButtonComponent(thread);
-    assert.containsOnce(
-        document.body,
-        '.o_FollowButton',
-        "should have follow button component"
-    );
-    assert.containsOnce(
-        document.body,
-        '.o_FollowButton_follow',
-        "should have button follow"
-    );
+    //already assert in test 'base rendering'.
 
+    // we have already click on 'o_FollowButton_follow'.
     await afterNextRender(() => {
         document.querySelector('.o_FollowButton_follow').click();
     });
@@ -215,7 +200,7 @@ QUnit.test('click on "follow" button', async function (assert) {
 });
 
 QUnit.test('click on "unfollow" button', async function (assert) {
-    assert.expect(7);
+    assert.expect(6);
 
     this.data['res.partner'].records.push({ id: 100, message_follower_ids: [1] });
     this.data['mail.followers'].records.push({
@@ -250,11 +235,7 @@ QUnit.test('click on "unfollow" button', async function (assert) {
         '.o_FollowButton_follow',
         "should not have button follow"
     );
-    assert.containsOnce(
-        document.body,
-        '.o_FollowButton_unfollow',
-        "should have button unfollow"
-    );
+    // we have already click on 'o_FollowButton_unfollow'.
 
     await afterNextRender(() => document.querySelector('.o_FollowButton_unfollow').click());
     assert.verifySteps(['rpc:message_unsubscribe']);
