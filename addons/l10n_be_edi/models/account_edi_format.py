@@ -12,16 +12,11 @@ class AccountEdiFormat(models.Model):
     # Export
     ####################################################
 
-    def _get_efff_values(self, invoice):
-        return {
-            **self._get_ubl_2_0_values(invoice),
-        }
-
     def _export_efff(self, invoice):
         self.ensure_one()
         # Create file content.
-        xml_content = b"<?xml version='1.0' encoding='UTF-8'?>"
-        xml_content += self.env.ref('l10n_be_edi.export_efff_invoice')._render(self._get_efff_values(invoice))
+        builder = self.env['account.edi.format']._get_ubl_2_0_builder(invoice)
+        xml_content = builder.build()
         xml_name = '%s.xml' % invoice._get_efff_name()
         return self.env['ir.attachment'].create({
             'name': xml_name,

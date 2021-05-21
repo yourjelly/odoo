@@ -6,27 +6,13 @@ from lxml import etree
 
 
 class Node:
-    def __init__(self):
-        pass
+    def __init__(self, tag, required=None):
+        self.tag = tag
+        self.required = required
 
     def build(self, nsmap, errors, parent_node=None):
         # TO BE OVERRIDDEN
         return []
-
-    def find_elements(self, tag_path):
-        # TO BE OVERRIDDEN
-        return []
-
-    def find_element(self, tag_path):
-        elements = self.find_elements(tag_path)
-        return elements[0] if elements else None
-
-    def build_nsmap(self, nsmap, inherited_nsmap):
-        if nsmap:
-            full_nsmap = dict(inherited_nsmap)
-            full_nsmap.update(nsmap)
-            return full_nsmap
-        return inherited_nsmap
 
     def format_tag(self, tag, nsmap):
         tag_split = tag.split(':')
@@ -36,34 +22,28 @@ class Node:
 
 
 class Value(Node):
-    def __init__(self, tag, value, attrs=None, internal_data=None, required=None, nsmap=None, value_format=None):
-        super().__init__()
-        self.tag = tag
+    def __init__(self, tag, value, attrs=None, internal_data=None, required=None, value_format=None):
+        super().__init__(tag, required=required)
         self.value = value
         self.attrs = attrs
         self.internal_data = internal_data
         self.required = required
-        self.nsmap = nsmap
         self.value_format = value_format
 
     def build(self, nsmap, errors, parent_node=None):
         if self.value is None or parent_node is None:
             return []
 
-        nsmap = self.build_nsmap(self.nsmap, nsmap)
-        element = etree.SubElement(parent_node, self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=self.nsmap)
+        element = etree.SubElement(parent_node, self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=nsmap)
         element.text = str(self.value_format(self.value) if self.value_format else self.value)
         return [element]
-
-    def find_elements(self, tag_path):
-        return [self] if self.tag == tag_path else []
 
     def set_value(self, value):
         self.value = value
 
 
 class FieldValue(Value):
-    def __init__(self, tag, record, fieldnames, attrs=None, internal_data=None, required=None, nsmap=None, value_format=None):
+    def __init__(self, tag, record, fieldnames, attrs=None, internal_data=None, required=None, value_format=None):
         self.record = record
         self.fieldnames = fieldnames
         super().__init__(
@@ -72,7 +52,6 @@ class FieldValue(Value):
             attrs=attrs,
             internal_data=internal_data,
             required=self._create_required_error_message if required else None,
-            nsmap=nsmap,
             value_format=value_format,
         )
 
@@ -112,30 +91,25 @@ class MonetaryValue(Value):
             attrs=attrs,
             internal_data=internal_data,
             required=required,
-            nsmap=nsmap,
             value_format=lambda amount: float_repr(amount, precision_digits),
         )
 
 
 class Parent(Node):
-    def __init__(self, tag, children_nodes, attrs=None, internal_data=None, required=None, nsmap=None):
-        super().__init__()
-        self.tag = tag
+    def __init__(self, tag, children_nodes, attrs=None, internal_data=None, required=None):
+        super().__init__(tag, required=required)
         self.attrs = attrs
         self.internal_data = internal_data
-        self.required = required
-        self.nsmap = nsmap
-        self.children_nodes = children_nodes
+        self.children_nodes = {child.tag: child for child in children_nodes}
 
     def build(self, nsmap, errors, parent_node=None):
-        nsmap = self.build_nsmap(self.nsmap, nsmap)
         if parent_node is not None:
-            new_parent_node = etree.SubElement(parent_node, self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=self.nsmap)
+            new_parent_node = etree.SubElement(parent_node, self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=nsmap)
         else:
-            new_parent_node = etree.Element(self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=self.nsmap)
+            new_parent_node = etree.Element(self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=nsmap)
 
         all_sub_elements = []
-        for child in self.children_nodes:
+        for child in self.children_nodes.values():
             sub_elements = child.build(nsmap, errors, parent_node=new_parent_node)
             if sub_elements:
                 all_sub_elements += sub_elements
@@ -147,24 +121,53 @@ class Parent(Node):
 
         return [new_parent_node]
 
-    def find_elements(self, tag_path):
-        tags = tag_path.split('/')
-        if tags[0] != self.tag:
-            return []
+    def __getitem__(self, key):
+        return self.children_nodes[key]
 
-        tag_path = '/'.join(tags[1:])
-        if not tag_path:
-            return []
+    def __setitem__(self, key, value):
+        if key != value.tag:
+            raise ValueError("Key must be the same as the value node's tag.")
+        self.children_nodes[key] = value
 
-        elements = []
-        for child in self.children_nodes:
-            elements += child.find_elements(tag_path)
-        return elements
+    def __delitem__(self, key):
+        del self.children_nodes[key]
+
+    def __iter__(self):
+        return iter(self.children_nodes)
+
+    def __len__(self):
+        return len(self.children_nodes)
+
+    def insert_before(self, key, node):  # This is bad :(
+        keys = list(self.children_nodes.keys())
+        vals = list(self.children_nodes.values())
+        i = keys.index(key)
+        keys.insert(i, node.tag)
+        vals.insert(i, node)
+        self.children_nodes.clear()
+        self.children_nodes.update({x: vals[i] for i, x in enumerate(keys)})
+
+    def insert_after(self, key, node):
+        keys = list(self.children_nodes.keys())
+        vals = list(self.children_nodes.values())
+        i = keys.index(key) + 1
+
+        if keys[-1] != key:
+            keys.insert(i, node.tag)
+            vals.insert(i, node)
+            self.children_nodes.clear()
+            self.children_nodes.update({x: vals[i] for i, x in enumerate(keys)})
+        else:
+            self.children_nodes[node.tag] = node
 
 
 class Multi(Node):
-    def __init__(self, children_nodes):
-        super().__init__()
+    def __init__(self, children_nodes, required=None):
+        assert len(children_nodes)
+        tag = children_nodes[0].tag
+        if any(child.tag != tag for child in children_nodes):
+            raise ValueError('All childs of a multi node must have the same tag')
+        super().__init__(tag, required=required)
         self.children_nodes = children_nodes
 
     def build(self, nsmap, errors, parent_node=None):
@@ -177,27 +180,32 @@ class Multi(Node):
                 all_sub_elements += sub_elements
         return all_sub_elements
 
-    def find_elements(self, tag_path):
-        elements = []
-        for child in self.children_nodes:
-            elements += child.find_elements(tag_path)
-        return elements
+    def __getitem__(self, key):
+        return self.children_nodes[key]
+
+    def __setitem__(self, key, value):
+        if value.tag != self.tag:
+            raise ValueError('All childs of a multi node must have the same tag')
+        self.children_nodes[key] = value
+
+    def __delitem__(self, key):
+        del self.children_nodes[key]
+
+    def __iter__(self):
+        return iter(self.children_nodes)
+
+    def __len__(self):
+        return len(self.children_nodes)
 
 
 class XmlBuilder:
-    def __init__(self, root_node):
+    def __init__(self, root_node, nsmap):
         self.root_node = root_node
+        self.nsmap = nsmap
         assert isinstance(root_node, Parent)
 
     def build(self):
-        elements = self.root_node.build({}, [])
+        elements = self.root_node.build(self.nsmap, [])
         root = elements[0]
-        tree_str = b"<?xml version='1.0' encoding='UTF-8'?>"
-        tree_str += etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+        tree_str = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding='UTF-8')
         return tree_str
-
-    def find_elements(self, tag_path):
-        return self.root_node.find_elements(tag_path)
-
-    def find_element(self, tag_path):
-        return self.root_node.find_element(tag_path)

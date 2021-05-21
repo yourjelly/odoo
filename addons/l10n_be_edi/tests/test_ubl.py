@@ -86,7 +86,12 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                         <Language>
                             <LocaleCode>en_US</LocaleCode>
                         </Language>
-                        <PostalAddress/>
+                        <PartyTaxScheme>
+                            <RegistrationName>company_1_data</RegistrationName>
+                            <TaxScheme>
+                                <ID schemeAgencyID="6" schemeID="UN/ECE 5153">VAT</ID>
+                            </TaxScheme>
+                        </PartyTaxScheme>
                         <Contact>
                             <Name>company_1_data</Name>
                         </Contact>
@@ -100,7 +105,12 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                         <Language>
                             <LocaleCode>en_US</LocaleCode>
                         </Language>
-                        <PostalAddress/>
+                        <PartyTaxScheme>
+                            <RegistrationName>partner_b</RegistrationName>
+                            <TaxScheme>
+                                <ID schemeAgencyID="6" schemeID="UN/ECE 5153">VAT</ID>
+                            </TaxScheme>
+                        </PartyTaxScheme>
                         <Contact>
                             <Name>partner_b</Name>
                         </Contact>
@@ -108,8 +118,8 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                 </AccountingCustomerParty>
                 <PaymentMeans>
                     <PaymentMeansCode listID="UN/ECE 4461">31</PaymentMeansCode>
-                    <InstructionID>INV/2017/01/0001</InstructionID>
                     <PaymentDueDate>2017-01-01</PaymentDueDate>
+                    <InstructionID>INV/2017/01/0001</InstructionID>
                 </PaymentMeans>
                 <TaxTotal>
                     <TaxAmount currencyID="Gol">220.000</TaxAmount>
@@ -156,7 +166,7 @@ class TestL10nBeEdi(AccountEdiTestCommon):
 
     def test_turlututu(self):
         builder = self.env['account.edi.format']._get_ubl_2_1_builder(self.invoice)
-        print(builder.build())
+        #print(builder.build())
 
     def test_efff_simple_case(self):
         ''' Test the generated Facturx Edi attachment without any modification of the invoice. '''
