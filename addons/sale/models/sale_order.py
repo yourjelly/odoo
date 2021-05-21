@@ -298,14 +298,29 @@ class SaleOrder(models.Model):
     @api.depends('company_id')
     def _compute_require_payment(self):
         for order in self:
-            company = order.company_id or self.env.company
+            company = order.company_id or order.env.company
             order.require_payment = company.portal_confirmation_pay
 
     @api.depends('company_id')
     def _compute_require_signature(self):
         for order in self:
-            company = order.company_id or self.env.company
+            company = order.company_id or order.env.company
             order.require_signature = company.portal_confirmation_sign
+
+    @api.depends('company_id')
+    def _compute_validity_date(self):
+        use_validity_days = self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days')
+        if use_validity_days:
+            now = fields.Datetime.now()
+            for order in self:
+                company = order.company_id or order.env.company
+                days = company.quotation_validity_days
+                if days > 0:
+                    order.validity_date = now + timedelta(company.quotation_validity_days)
+                else:
+                    order.validity_date = False
+        else:
+            self.validity_date = False
 
     # Portal Mixin override
     def _compute_access_url(self):
