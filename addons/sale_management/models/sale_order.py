@@ -10,18 +10,9 @@ from odoo.exceptions import UserError, ValidationError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    @api.model
-    def default_get(self, fields_list):
-        default_vals = super(SaleOrder, self).default_get(fields_list)
-        if "sale_order_template_id" in fields_list and not default_vals.get("sale_order_template_id"):
-            company_id = default_vals.get('company_id', False)
-            company = self.env["res.company"].browse(company_id) if company_id else self.env.company
-            default_vals['sale_order_template_id'] = company.sale_order_template_id.id
-        return default_vals
-
     sale_order_template_id = fields.Many2one(
         'sale.order.template', 'Quotation Template',
-        readonly=True, check_company=True,
+        compute="_compute_sale_order_template_id", store=True, check_company=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     sale_order_option_ids = fields.One2many(
@@ -49,11 +40,18 @@ class SaleOrder(models.Model):
             default['validity_date'] = fields.Date.context_today(self) + timedelta(self.sale_order_template_id.number_of_days)
         return super(SaleOrder, self).copy(default=default)
 
-    @api.onchange('partner_id')
-    def onchange_partner_id(self):
-        super(SaleOrder, self).onchange_partner_id()
-        template = self.sale_order_template_id.with_context(lang=self.partner_id.lang)
-        self.note = template.note or self.note
+    @api.depends('company_id', 'partner_id', 'sale_order_template_id')
+    def _compute_note(self):
+        super()._compute_note()
+        for order in self:
+            if order.sale_order_template_id:
+                order.note = order.sale_order_template_id.with_context(lang=order.partner_id.lang).note or order.note
+
+    @api.depends('company_id')
+    def _compute_sale_order_template_id(self):
+        for order in self:
+            company = order.company_id or self.env.company
+            order.sale_order_template_id = company.sale_order_template_id
 
     def _compute_line_data_for_template_change(self, line):
         return {
