@@ -48,6 +48,8 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = 'no'
 
     def _expected_date(self):
+        if not self:
+            return False
         self.ensure_one()
         if self.order_id.date_order and self.order_id.state in ['sale', 'done']:
             order_date = self.order_id.date_order
