@@ -390,7 +390,6 @@ class SaleOrder(models.Model):
         addr = self.partner_id.address_get(['delivery', 'invoice'])
         self.update({
             'pricelist_id': self.partner_id.property_product_pricelist and self.partner_id.property_product_pricelist.id or False,
-            'payment_term_id': self.partner_id.property_payment_term_id and self.partner_id.property_payment_term_id.id or False,
             'partner_invoice_id': addr['invoice'],
             'partner_shipping_id': addr['delivery'],
         })
