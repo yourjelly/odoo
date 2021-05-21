@@ -3,6 +3,9 @@
 # set server timezone in UTC before time module imported
 __import__('os').environ['TZ'] = 'UTC'
 import odoo
-
+import requests
+import logging
 if __name__ == "__main__":
-    odoo.cli.main()
+    print(requests.get('http://odoo.com').status_code)
+    print(requests.get('http://google.com').status_code)
+    #odoo.cli.main()
