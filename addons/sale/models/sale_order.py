@@ -374,7 +374,7 @@ class SaleOrder(models.Model):
 
     @api.depends('state', 'validity_date')
     def _compute_is_expired(self):
-        today = fields.Date.context_today()
+        today = fields.Date.context_today(self)
         for order in self:
             order.is_expired = order.state == 'sent' and order.validity_date and order.validity_date < today
 
@@ -420,7 +420,7 @@ class SaleOrder(models.Model):
     def _compute_validity_date(self):
         use_validity_days = self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days')
         if use_validity_days:
-            today = fields.Date.context_today()
+            today = fields.Date.context_today(self)
             for order in self:
                 days = self._get_validity_duration()
                 if days > 0:
