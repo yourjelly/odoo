@@ -1078,6 +1078,10 @@ class SaleOrder(models.Model):
         }
 
     def _force_lines_to_invoice_policy_order(self):
+        # FIXME VFE: WTF is that broll ???
+        # Seems to manually overwrite a computed field (readonly)
+        # Is this meant to invoice everything, without considering the invoicing policy ???
+        # Not even sure this works fine...
         for line in self.order_line:
             if self.state in ['sale', 'done']:
                 line.qty_to_invoice = line.product_uom_qty - line.qty_invoiced

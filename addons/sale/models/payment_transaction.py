@@ -115,6 +115,7 @@ class PaymentTransaction(models.Model):
                 trans = trans.with_company(trans.acquirer_id.company_id)\
                     .with_context(company_id=trans.acquirer_id.company_id.id)
                 trans.sale_order_ids._force_lines_to_invoice_policy_order()
+                # FIXME VFE: shouldn't the final parameter be specified to True for the invoices creation ?
                 invoices = trans.sale_order_ids._create_invoices()
                 trans.invoice_ids = [(6, 0, invoices.ids)]
 
