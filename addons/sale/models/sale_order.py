@@ -136,7 +136,8 @@ class SaleOrder(models.Model):
                                       help="This is the delivery date promised to the customer. "
                                            "If set, the delivery order will be scheduled based on "
                                            "this date rather than product lead times.")
-    expected_date = fields.Datetime("Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
+    expected_date = fields.Datetime(
+        "Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
         help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
     amount_undiscounted = fields.Float('Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
 
@@ -317,14 +318,13 @@ class SaleOrder(models.Model):
             take the picking_policy of SO into account.
         """
         for order in self:
-            dates_list = []
-            for line in order.order_line.filtered(lambda x: x.state != 'cancel' and not x._is_delivery() and not x.display_type):
-                dt = line._expected_date()
-                dates_list.append(dt)
-            if dates_list:
-                order.expected_date = fields.Datetime.to_string(min(dates_list))
-            else:
+            if order.state == 'cancel':
                 order.expected_date = False
+            else:
+                dates_list = order.order_line.filtered(
+                    lambda line: not line.display_type and not line._is_delivery()
+                ).mapped(lambda line: line._expected_date())
+                order.expected_date = dates_list and min(dates_list)
 
     @api.onchange('expected_date')
     def _onchange_commitment_date(self):
