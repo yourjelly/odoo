@@ -19,13 +19,6 @@ class SaleOrder(models.Model):
     _order = 'date_order desc, id desc'
     _check_company_auto = True
 
-    @api.model
-    def _default_validity_date(self):
-        if self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days'):
-            days = self.env.company.quotation_validity_days
-            if days > 0:
-                return fields.Datetime.now() + timedelta(days)
-        return False
 
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
     origin = fields.Char(string='Source Document', help="Reference of the document that generated this sales order request.")
@@ -40,8 +33,9 @@ class SaleOrder(models.Model):
         ('cancel', 'Cancelled'),
         ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
     date_order = fields.Datetime(string='Order Date', required=True, readonly=True, index=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False, default=fields.Datetime.now, help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    validity_date = fields.Date(string='Expiration', readonly=True, copy=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-                                default=_default_validity_date)
+    validity_date = fields.Date(
+        string='Expiration', compute="_compute_validity_date", store=True, copy=False,
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
     is_expired = fields.Boolean(compute='_compute_is_expired', string="Is expired")
     require_signature = fields.Boolean(
         'Online Signature', compute="_compute_require_signature", store=True,
@@ -307,16 +301,21 @@ class SaleOrder(models.Model):
             company = order.company_id or order.env.company
             order.require_signature = company.portal_confirmation_sign
 
+    def _get_validity_duration(self):
+        """Overridden in sale_management to consider Quotation Templates"""
+        self.ensure_one()
+        company = self.company_id or self.env.company
+        return company.quotation_validity_days
+
     @api.depends('company_id')
     def _compute_validity_date(self):
         use_validity_days = self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days')
         if use_validity_days:
-            now = fields.Datetime.now()
+            today = fields.Date.context_today()
             for order in self:
-                company = order.company_id or order.env.company
-                days = company.quotation_validity_days
+                days = self._get_validity_duration()
                 if days > 0:
-                    order.validity_date = now + timedelta(company.quotation_validity_days)
+                    order.validity_date = today + timedelta(days)
                 else:
                     order.validity_date = False
         else:

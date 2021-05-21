@@ -33,13 +33,7 @@ class SaleOrder(models.Model):
                     bad_products=', '.join(bad_products.mapped('display_name')),
                 ))
 
-    @api.returns('self', lambda value: value.id)
-    def copy(self, default=None):
-        if self.sale_order_template_id and self.sale_order_template_id.number_of_days > 0:
-            default = dict(default or {})
-            default['validity_date'] = fields.Date.context_today(self) + timedelta(self.sale_order_template_id.number_of_days)
-        return super(SaleOrder, self).copy(default=default)
-
+    # Compute overrides
     @api.depends('company_id', 'partner_id', 'sale_order_template_id')
     def _compute_note(self):
         super()._compute_note()
@@ -61,6 +55,17 @@ class SaleOrder(models.Model):
             if order.sale_order_template_id:
                 order.require_signature = order.sale_order_template_id.require_signature
 
+    @api.depends('company_id', 'sale_order_template_id')
+    def _compute_validity_date(self):
+        # Only adds the new dependency
+        # the effective change is given by _get_validity_duration
+        super()._compute_validity_date()
+
+    def _get_validity_duration(self):
+        self.ensure_one()
+        return self.sale_order_template_id.number_of_days or super()._get_validity_duration()
+
+    # New computes
     @api.depends('company_id')
     def _compute_sale_order_template_id(self):
         for order in self:
@@ -148,9 +153,6 @@ class SaleOrder(models.Model):
             option_lines.append((0, 0, data))
 
         self.sale_order_option_ids = option_lines
-
-        if template.number_of_days > 0:
-            self.validity_date = fields.Date.context_today(self) + timedelta(template.number_of_days)
 
         if template.note:
             self.note = template.note
