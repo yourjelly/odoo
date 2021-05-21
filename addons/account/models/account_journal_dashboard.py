@@ -452,10 +452,7 @@ class account_journal(models.Model):
         self.ensure_one()
 
         def get_action_vals_from_name(action_name):
-            action_vals = self.env["ir.actions.act_window"]._for_xml_id(action_name)
-            if 'context' in action_vals and isinstance(action_vals['context'], str):
-                action_vals['context'] = ast.literal_eval(action_vals['context'])
-            return action_vals
+            return self.env["ir.actions.act_window"]._for_xml_id(action_name, parse=True)
 
         if self._context.get('action_name'):
             action = get_action_vals_from_name(self._context.get('action_name'))
