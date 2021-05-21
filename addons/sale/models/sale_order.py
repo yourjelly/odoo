@@ -19,6 +19,9 @@ class SaleOrder(models.Model):
     _order = 'date_order desc, id desc'
     _check_company_auto = True
 
+    # TODO VFE:
+    #   Test correct propagation of fiels on record copy
+    #   Check editable/not editable fields w.r.t order state
 
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
     origin = fields.Char(string='Source Document', help="Reference of the document that generated this sales order request.")
@@ -231,6 +234,7 @@ class SaleOrder(models.Model):
                 order.invoice_status = 'no'
 
     def _search_invoice_ids(self, operator, value):
+        # TODO VFE inselect Query ?
         if operator == 'in' and value:
             self.env.cr.execute("""
                 SELECT array_agg(so.id)
