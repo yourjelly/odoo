@@ -23,11 +23,13 @@ class SaleOrder(models.Model):
     #   Test correct propagation of fiels on record copy
     #   Check editable/not editable fields w.r.t order state
 
-    name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
-    origin = fields.Char(string='Source Document', help="Reference of the document that generated this sales order request.")
+    name = fields.Char(
+        string='Order Reference', required=True, copy=False, readonly=True,
+        states={'draft': [('readonly', False)]}, index=True,
+        default=lambda self: _('New'))
+    origin = fields.Char(
+        string='Source Document', help="Reference of the document that generated this sales order request.")
     client_order_ref = fields.Char(string='Customer Reference', copy=False)
-    reference = fields.Char(string='Payment Ref.', copy=False,
-        help='The payment communication of this sale order.')
     state = fields.Selection([
         ('draft', 'Quotation'),
         ('sent', 'Quotation Sent'),
@@ -35,25 +37,17 @@ class SaleOrder(models.Model):
         ('done', 'Locked'),
         ('cancel', 'Cancelled'),
         ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
-    date_order = fields.Datetime(string='Order Date', required=True, readonly=True, index=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False, default=fields.Datetime.now, help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    validity_date = fields.Date(
-        string='Expiration', compute="_compute_validity_date", store=True, copy=False,
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
-    is_expired = fields.Boolean(compute='_compute_is_expired', string="Is expired")
-    require_signature = fields.Boolean(
-        'Online Signature', compute="_compute_require_signature", store=True,
+
+    company_id = fields.Many2one(
+        'res.company', 'Company', required=True, index=True,
+        default=lambda self: self.env.company)
+    date_order = fields.Datetime(
+        string='Order Date', required=True, readonly=True, index=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-        help='Request a online signature to the customer in order to confirm orders automatically.')
-    require_payment = fields.Boolean(
-        'Online Payment', compute="_compute_require_payment", store=True,
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
-        help='Request an online payment to the customer in order to confirm orders automatically.')
+        copy=False, default=fields.Datetime.now,
+        help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
     create_date = fields.Datetime(string='Creation Date', readonly=True, index=True, help="Date on which sales order is created.")
 
-    user_id = fields.Many2one(
-        'res.users', string='Salesperson', index=True, tracking=2,
-        compute="_compute_user_id", store=True, readonly=False,
-        domain=lambda self: [('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)])
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
@@ -75,14 +69,65 @@ class SaleOrder(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
     currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, ondelete="restrict")
+    currency_rate = fields.Float(
+        "Currency Rate",digits=(12, 6),
+        compute='_compute_currency_rate', compute_sudo=True, store=True, readonly=True,
+        help='The rate of the currency to the currency of rate 1 applicable at the date of the order')
+
+    # Partner-based computes
+    fiscal_position_id = fields.Many2one(
+        'account.fiscal.position', string='Fiscal Position',
+        domain="[('company_id', '=', company_id)]", check_company=True,
+        compute="_compute_fiscal_position_id", store=True, readonly=False,
+        help="Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices."
+        "The default value comes from the customer.")
+    payment_term_id = fields.Many2one(
+        'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
+        compute="_compute_payment_term_id", store=True, readonly=False,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
+    user_id = fields.Many2one(
+        'res.users', string='Salesperson', index=True, tracking=2,
+        compute="_compute_user_id", store=True, readonly=False,
+        domain=lambda self: [('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)])
+
+    # User(Salesman)-based computes
+    team_id = fields.Many2one(
+        'crm.team', 'Sales Team',
+        compute="_compute_team_id", store=True, readonly=False,
+        change_default=True, check_company=True,  # Unrequired company
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+
+    order_line = fields.One2many(
+        'sale.order.line', 'order_id', string='Order Lines', copy=True,
+        states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, auto_join=True)
+
+    # SO-lines based computes
+    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=5)
+    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
+    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+
+    # Analytics #
+    #############
+
     analytic_account_id = fields.Many2one(
         'account.analytic.account', 'Analytic Account',
         readonly=True, copy=False, check_company=True,  # Unrequired company
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="The analytic account related to a sales order.")
+    tag_ids = fields.Many2many('crm.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags')
 
-    order_line = fields.One2many('sale.order.line', 'order_id', string='Order Lines', states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True, auto_join=True)
+    # Delivery #
+    ############
+
+    commitment_date = fields.Datetime(
+        'Delivery Date', copy=False,
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        help="This is the delivery date promised to the customer. "
+            "If set, the delivery order will be scheduled based on this date rather than product lead times.")
+
+    # Invoicing #
+    #############
 
     invoice_count = fields.Integer(string='Invoice Count', compute='_get_invoiced', readonly=True)
     invoice_ids = fields.Many2many("account.move", string='Invoices', compute="_get_invoiced", readonly=True, copy=False, search="_search_invoice_ids")
@@ -93,55 +138,50 @@ class SaleOrder(models.Model):
         ('no', 'Nothing to Invoice')
         ], string='Invoice Status', compute='_compute_invoice_status', store=True, readonly=True)
 
-    note = fields.Text('Terms and conditions', compute="_compute_note", store=True, readonly=False)
+    # Payment #
+    ###########
 
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=5)
-    amount_by_group = fields.Binary(string="Tax amount by group", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
-    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
-    currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=(12, 6), readonly=True, help='The rate of the currency to the currency of rate 1 applicable at the date of the order')
-
-    payment_term_id = fields.Many2one(
-        'account.payment.term', string='Payment Terms', check_company=True,  # Unrequired company
-        compute="_compute_payment_term_id", store=True, readonly=False,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
-    fiscal_position_id = fields.Many2one(
-        'account.fiscal.position', string='Fiscal Position',
-        domain="[('company_id', '=', company_id)]", check_company=True,
-        compute="_compute_fiscal_position_id", store=True, readonly=False,
-        help="Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices."
-        "The default value comes from the customer.")
-    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
-    team_id = fields.Many2one(
-        'crm.team', 'Sales Team',
-        compute="_compute_team_id", store=True, readonly=False,
-        change_default=True, check_company=True,  # Unrequired company
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
-
-    signature = fields.Image('Signature', help='Signature received through the portal.', copy=False, attachment=True, max_width=1024, max_height=1024)
-    signed_by = fields.Char('Signed By', help='Name of the person that signed the SO.', copy=False)
-    signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
-
-    commitment_date = fields.Datetime('Delivery Date', copy=False,
-                                      states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
-                                      help="This is the delivery date promised to the customer. "
-                                           "If set, the delivery order will be scheduled based on "
-                                           "this date rather than product lead times.")
-    expected_date = fields.Datetime(
-        "Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
-        help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
-    amount_undiscounted = fields.Float('Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
-
-    type_name = fields.Char('Type Name', compute='_compute_type_name')
-
+    reference = fields.Char(string='Payment Ref.', copy=False,
+        help='The payment communication of this sale order.')
     transaction_ids = fields.Many2many('payment.transaction', 'sale_order_transaction_rel', 'sale_order_id', 'transaction_id',
                                        string='Transactions', copy=False, readonly=True)
     authorized_transaction_ids = fields.Many2many('payment.transaction', compute='_compute_authorized_transaction_ids',
                                                   string='Authorized Transactions', copy=False, readonly=True)
-    show_update_pricelist = fields.Boolean(string='Has Pricelist Changed',
-                                           help="Technical Field, True if the pricelist was changed;\n"
-                                                " this will then display a recomputation button")
-    tag_ids = fields.Many2many('crm.tag', 'sale_order_tag_rel', 'order_id', 'tag_id', string='Tags')
+
+    # Portal & other UI/reporting fields #
+    ######################################
+
+    amount_by_group = fields.Binary(
+        string="Tax amount by group", compute='_amount_by_group',
+        help="type: [(name, amount, base, formated amount, formated base)]")
+    amount_undiscounted = fields.Float(
+        'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
+    expected_date = fields.Datetime(
+        "Expected Date", compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
+        help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
+    is_expired = fields.Boolean(compute='_compute_is_expired', string="Is expired")
+    note = fields.Text('Terms and conditions', compute="_compute_note", store=True, readonly=False)
+    require_payment = fields.Boolean(
+        'Online Payment', compute="_compute_require_payment", store=True,
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        help='Request an online payment to the customer in order to confirm orders automatically.')
+    require_signature = fields.Boolean(
+        'Online Signature', compute="_compute_require_signature", store=True,
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        help='Request a online signature to the customer in order to confirm orders automatically.')
+    show_update_pricelist = fields.Boolean(
+        string='Has Pricelist Changed',
+        help="Technical Field, True if the pricelist was changed;\nthis will then display a recomputation button")
+    signature = fields.Image('Signature', help='Signature received through the portal.', copy=False, attachment=True, max_width=1024, max_height=1024)
+    signed_by = fields.Char('Signed By', help='Name of the person that signed the SO.', copy=False)
+    signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
+    type_name = fields.Char('Type Name', compute='_compute_type_name')
+    validity_date = fields.Date(
+        string='Expiration', compute="_compute_validity_date", store=True, copy=False,
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]})
+
+    # Constraints #
+    ###############
 
     _sql_constraints = [
         ('date_order_conditional_required', "CHECK( (state IN ('sale', 'done') AND date_order IS NOT NULL) OR state NOT IN ('sale', 'done') )", "A confirmed sales order requires a confirmation date."),
@@ -159,6 +199,9 @@ class SaleOrder(models.Model):
                     quote_company=order.company_id.display_name,
                     bad_products=', '.join(bad_products.mapped('display_name')),
                 ))
+
+    # Computes #
+    ############
 
     @api.depends('pricelist_id', 'date_order', 'company_id')
     def _compute_currency_rate(self):
