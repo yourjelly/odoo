@@ -274,6 +274,8 @@ class SaleOrder(models.Model):
         for order in self:
             if order.team_id:
                 order = order.with_context(default_team_id=order.team_id.id)
+            elif order.partner_id.team_id:
+                order = order.with_context(default_team_id=order.partner_id.team_id.id)
             order.team_id = order.env['crm.team'].with_company(
                 order.company_id)._get_default_team_id(user_id=order.user_id.id)
 
