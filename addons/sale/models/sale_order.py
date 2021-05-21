@@ -328,6 +328,8 @@ class SaleOrder(models.Model):
 
     @api.onchange('expected_date')
     def _onchange_commitment_date(self):
+        # FIXME VFE overridden in same file
+        # remove or try to keep the logic ???
         self.commitment_date = self.expected_date
 
     @api.onchange('fiscal_position_id')
