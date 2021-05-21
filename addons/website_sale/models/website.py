@@ -325,7 +325,7 @@ class Website(models.Model):
 
             # change the partner, and trigger the onchange
             sale_order.write({'partner_id': partner.id})
-            sale_order.with_context(not_self_saleperson=True).onchange_partner_id()
+            sale_order.with_context(not_self_saleperson=True)._onchange_partner_id()
             sale_order.write({'partner_invoice_id': partner.id})
             sale_order['payment_term_id'] = self.sale_get_payment_term(partner)
 
