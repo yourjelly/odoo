@@ -214,6 +214,33 @@ class SaleOrder(models.Model):
             else:
                 order.currency_rate = 1.0
 
+    @api.depends('company_id', 'partner_id', 'partner_shipping_id')
+    def _compute_fiscal_position_id(self):
+        for order in self:
+            order.fiscal_position_id = order.env['account.fiscal.position'].with_company(
+                order.company_id
+            ).get_fiscal_position(order.partner_id.id, order.partner_shipping_id.id)
+
+    @api.depends('company_id', 'partner_id')
+    def _compute_payment_term_id(self):
+        for order in self:
+            order.payment_term_id = order.with_company(order.company_id).partner_id.property_payment_term_id.id
+
+    @api.depends('partner_id')
+    def _compute_user_id(self):
+        for order in self:
+            order.user_id = order.partner_id.user_id or order.partner_id.commercial_partner_id.user_id or order.env.user
+
+    @api.depends('company_id', 'user_id')
+    def _compute_team_id(self):
+        for order in self:
+            if order.team_id:
+                order = order.with_context(default_team_id=order.team_id.id)
+            elif order.partner_id.team_id:
+                order = order.with_context(default_team_id=order.partner_id.team_id.id)
+            order.team_id = order.env['crm.team'].with_company(
+                order.company_id)._get_default_team_id(user_id=order.user_id.id)
+
     @api.depends('order_line.price_total')
     def _amount_all(self):
         """Compute the total amounts of the SO."""
@@ -295,32 +322,61 @@ class SaleOrder(models.Model):
             return [('order_line.invoice_lines', '=', False)]
         return ['&', ('order_line.invoice_lines.move_id.move_type', 'in', ('out_invoice', 'out_refund')), ('order_line.invoice_lines.move_id', operator, value)]
 
-    @api.depends('company_id', 'partner_id', 'partner_shipping_id')
-    def _compute_fiscal_position_id(self):
+    # Payment
+    @api.depends('transaction_ids')
+    def _compute_authorized_transaction_ids(self):
         for order in self:
-            order.fiscal_position_id = order.env['account.fiscal.position'].with_company(
-                order.company_id
-            ).get_fiscal_position(order.partner_id.id, order.partner_shipping_id.id)
+            order.authorized_transaction_ids = order.transaction_ids.filtered(lambda t: t.state == 'authorized')
 
-    @api.depends('company_id', 'partner_id')
-    def _compute_payment_term_id(self):
+    # Portal & other UI/reporting fields
+    def _amount_by_group(self):
         for order in self:
-            order.payment_term_id = order.with_company(order.company_id).partner_id.property_payment_term_id.id
+            currency = order.currency_id or order.company_id.currency_id
+            fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
+            res = {}
+            for line in order.order_line:
+                price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
+                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id, partner=order.partner_shipping_id)['taxes']
+                for tax in line.tax_id:
+                    group = tax.tax_group_id
+                    res.setdefault(group, {'amount': 0.0, 'base': 0.0})
+                    for t in taxes:
+                        if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
+                            res[group]['amount'] += t['amount']
+                            res[group]['base'] += t['base']
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            order.amount_by_group = [(
+                l[0].name, l[1]['amount'], l[1]['base'],
+                fmt(l[1]['amount']), fmt(l[1]['base']),
+                len(res),
+            ) for l in res]
 
-    @api.depends('partner_id')
-    def _compute_user_id(self):
+    def _compute_amount_undiscounted(self):
         for order in self:
-            order.user_id = order.partner_id.user_id or order.partner_id.commercial_partner_id.user_id or order.env.user
+            total = 0.0
+            for line in order.order_line:
+                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
+            order.amount_undiscounted = total
 
-    @api.depends('company_id', 'user_id')
-    def _compute_team_id(self):
+    @api.depends('order_line.customer_lead', 'date_order', 'order_line.state')
+    def _compute_expected_date(self):
+        """ For service and consumable, we only take the min dates. This method is extended in sale_stock to
+            take the picking_policy of SO into account.
+        """
         for order in self:
-            if order.team_id:
-                order = order.with_context(default_team_id=order.team_id.id)
-            elif order.partner_id.team_id:
-                order = order.with_context(default_team_id=order.partner_id.team_id.id)
-            order.team_id = order.env['crm.team'].with_company(
-                order.company_id)._get_default_team_id(user_id=order.user_id.id)
+            if order.state == 'cancel':
+                order.expected_date = False
+            else:
+                dates_list = order.order_line.filtered(
+                    lambda line: not line.display_type and not line._is_delivery()
+                ).mapped(lambda line: line._expected_date())
+                order.expected_date = dates_list and min(dates_list)
+
+    @api.depends('state', 'validity_date')
+    def _compute_is_expired(self):
+        today = fields.Date.context_today()
+        for order in self:
+            order.is_expired = order.state == 'sent' and order.validity_date and order.validity_date < today
 
     @api.depends('company_id', 'partner_id')
     def _compute_note(self):
@@ -355,6 +411,11 @@ class SaleOrder(models.Model):
         company = self.company_id or self.env.company
         return company.quotation_validity_days
 
+    @api.depends('state')
+    def _compute_type_name(self):
+        for record in self:
+            record.type_name = _('Quotation') if record.state in ('draft', 'sent', 'cancel') else _('Sales Order')
+
     @api.depends('company_id')
     def _compute_validity_date(self):
         use_validity_days = self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days')
@@ -375,67 +436,14 @@ class SaleOrder(models.Model):
         for order in self:
             order.access_url = '/my/orders/%s' % (order.id)
 
-    # UI computes
-    def _compute_is_expired(self):
-        today = fields.Date.today()
-        for order in self:
-            order.is_expired = order.state == 'sent' and order.validity_date and order.validity_date < today
-
-    @api.depends('order_line.customer_lead', 'date_order', 'order_line.state')
-    def _compute_expected_date(self):
-        """ For service and consumable, we only take the min dates. This method is extended in sale_stock to
-            take the picking_policy of SO into account.
-        """
-        for order in self:
-            if order.state == 'cancel':
-                order.expected_date = False
-            else:
-                dates_list = order.order_line.filtered(
-                    lambda line: not line.display_type and not line._is_delivery()
-                ).mapped(lambda line: line._expected_date())
-                order.expected_date = dates_list and min(dates_list)
+    # Onchanges #
+    #############
 
     @api.onchange('expected_date')
     def _onchange_commitment_date(self):
         # FIXME VFE overridden in same file
         # remove or try to keep the logic ???
         self.commitment_date = self.expected_date
-
-    @api.onchange('fiscal_position_id')
-    def _compute_tax_id(self):
-        """Recompute taxes when the fiscal position is modified."""
-        self.order_line._compute_tax_id()
-
-    @api.depends('transaction_ids')
-    def _compute_authorized_transaction_ids(self):
-        for trans in self:
-            trans.authorized_transaction_ids = trans.transaction_ids.filtered(lambda t: t.state == 'authorized')
-
-    def _compute_amount_undiscounted(self):
-        for order in self:
-            total = 0.0
-            for line in order.order_line:
-                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty  # why is there a discount in a field named amount_undiscounted ??
-            order.amount_undiscounted = total
-
-    @api.depends('state')
-    def _compute_type_name(self):
-        for record in self:
-            record.type_name = _('Quotation') if record.state in ('draft', 'sent', 'cancel') else _('Sales Order')
-
-    def validate_taxes_on_sales_order(self):
-        # Override for correct taxcloud computation
-        # when using coupon and delivery
-        self.ensure_one()
-        return
-
-    def _track_subtype(self, init_values):
-        self.ensure_one()
-        if 'state' in init_values and self.state == 'sale':
-            return self.env.ref('sale.mt_order_confirmed')
-        elif 'state' in init_values and self.state == 'sent':
-            return self.env.ref('sale.mt_order_sent')
-        return super(SaleOrder, self)._track_subtype(init_values)
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -512,27 +520,13 @@ class SaleOrder(models.Model):
         else:
             self.show_update_pricelist = False
 
-    def update_prices(self):
-        self.ensure_one()
-        lines_to_update = []
-        for line in self.order_line.filtered(lambda line: not line.display_type):
-            product = line.product_id.with_context(
-                partner=self.partner_id,
-                quantity=line.product_uom_qty,
-                date=self.date_order,
-                pricelist=self.pricelist_id.id,
-                uom=line.product_uom.id
-            )
-            price_unit = self.env['account.tax']._fix_tax_included_price_company(
-                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
-            if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
-                discount = max(0, (price_unit - product.price) * 100 / price_unit)
-            else:
-                discount = 0
-            lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
-        self.update({'order_line': lines_to_update})
-        self.show_update_pricelist = False
-        self.message_post(body=_("Product prices have been recomputed according to pricelist <b>%s<b> ", self.pricelist_id.display_name))
+    @api.onchange('fiscal_position_id')
+    def _compute_tax_id(self):
+        """Recompute taxes when the fiscal position is modified."""
+        self.order_line._compute_tax_id()
+
+    # ORM overrides #
+    #################
 
     @api.model
     def create(self, vals):
@@ -601,6 +595,42 @@ class SaleOrder(models.Model):
         for order in self:
             if order.state not in ('draft', 'cancel'):
                 raise UserError(_('You can not delete a sent quotation or a confirmed sales order. You must first cancel it.'))
+
+    def validate_taxes_on_sales_order(self):
+        # Override for correct taxcloud computation
+        # when using coupon and delivery
+        self.ensure_one()
+        return
+
+    def _track_subtype(self, init_values):
+        self.ensure_one()
+        if 'state' in init_values and self.state == 'sale':
+            return self.env.ref('sale.mt_order_confirmed')
+        elif 'state' in init_values and self.state == 'sent':
+            return self.env.ref('sale.mt_order_sent')
+        return super(SaleOrder, self)._track_subtype(init_values)
+
+    def update_prices(self):
+        self.ensure_one()
+        lines_to_update = []
+        for line in self.order_line.filtered(lambda line: not line.display_type):
+            product = line.product_id.with_context(
+                partner=self.partner_id,
+                quantity=line.product_uom_qty,
+                date=self.date_order,
+                pricelist=self.pricelist_id.id,
+                uom=line.product_uom.id
+            )
+            price_unit = self.env['account.tax']._fix_tax_included_price_company(
+                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
+            if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
+                discount = max(0, (price_unit - product.price) * 100 / price_unit)
+            else:
+                discount = 0
+            lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
+        self.update({'order_line': lines_to_update})
+        self.show_update_pricelist = False
+        self.message_post(body=_("Product prices have been recomputed according to pricelist <b>%s<b> ", self.pricelist_id.display_name))
 
     def _create_upsell_activity(self):
         self and self.activity_unlink(['sale.mail_act_sale_upsell'])
@@ -1019,28 +1049,6 @@ class SaleOrder(models.Model):
         for order in self:
             analytic = self.env['account.analytic.account'].create(order._prepare_analytic_account_data(prefix))
             order.analytic_account_id = analytic
-
-    def _amount_by_group(self):
-        for order in self:
-            currency = order.currency_id or order.company_id.currency_id
-            fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
-            res = {}
-            for line in order.order_line:
-                price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
-                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id, partner=order.partner_shipping_id)['taxes']
-                for tax in line.tax_id:
-                    group = tax.tax_group_id
-                    res.setdefault(group, {'amount': 0.0, 'base': 0.0})
-                    for t in taxes:
-                        if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
-                            res[group]['amount'] += t['amount']
-                            res[group]['base'] += t['base']
-            res = sorted(res.items(), key=lambda l: l[0].sequence)
-            order.amount_by_group = [(
-                l[0].name, l[1]['amount'], l[1]['base'],
-                fmt(l[1]['amount']), fmt(l[1]['base']),
-                len(res),
-            ) for l in res]
 
     def has_to_be_signed(self, include_draft=False):
         return (self.state == 'sent' or (self.state == 'draft' and include_draft)) and not self.is_expired and self.require_signature and not self.signature
