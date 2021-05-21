@@ -48,26 +48,19 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
-        cls.statement = cls.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        cls.statement_line = cls.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': cls.bank_journal_1.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': cls.partner_a.id,
-                    'foreign_currency_id': cls.currency_2.id,
-                    'amount': 1250.0,
-                    'amount_currency': 2500.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': cls.partner_a.id,
+            'foreign_currency_id': cls.currency_2.id,
+            'amount': 1250.0,
+            'amount_currency': 2500.0,
         })
-        cls.statement_line = cls.statement.line_ids
 
         cls.expected_st_line = {
             'date': fields.Date.from_string('2019-01-01'),
-            'journal_id': cls.statement.journal_id.id,
+            'journal_id': cls.statement_line.journal_id.id,
             'payment_ref': 'line_1',
             'partner_id': cls.partner_a.id,
             'currency_id': cls.currency_1.id,
@@ -81,7 +74,7 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
             'name': cls.statement_line.payment_ref,
             'partner_id': cls.statement_line.partner_id.id,
             'currency_id': cls.currency_2.id,
-            'account_id': cls.statement.journal_id.default_account_id.id,
+            'account_id': cls.statement_line.journal_id.default_account_id.id,
             'debit': 1250.0,
             'credit': 0.0,
             'amount_currency': 2500.0,
@@ -91,7 +84,7 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
             'name': cls.statement_line.payment_ref,
             'partner_id': cls.statement_line.partner_id.id,
             'currency_id': cls.currency_2.id,
-            'account_id': cls.statement.journal_id.suspense_account_id.id,
+            'account_id': cls.statement_line.journal_id.suspense_account_id.id,
             'debit': 0.0,
             'credit': 1250.0,
             'amount_currency': -2500.0,
@@ -119,22 +112,15 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         if journal_currency:
             journal.currency_id = journal_currency.id
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': journal.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': foreign_currency and foreign_currency.id,
-                    'amount': amount,
-                    'amount_currency': amount_currency,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': foreign_currency and foreign_currency.id,
+            'amount': amount,
+            'amount_currency': amount_currency,
         })
-        statement_line = statement.line_ids
 
         # ==== Test the statement line amounts are correct ====
         # If there is a bug in the compute/inverse methods, the amount/amount_currency could be
@@ -284,23 +270,17 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_journal_curr_1_statement_curr_2(self):
         self.bank_journal_2.currency_id = self.currency_1
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_2.id,
-                    'amount': 0.0,
-                    'amount_currency': 10.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_2.id,
+            'amount': 0.0,
+            'amount_currency': 10.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': 10.0,        'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': -10.0,       'currency_id': self.currency_2.id},
         ])
@@ -308,23 +288,17 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_currency_journal_curr_1_statement_curr_2(self):
         self.bank_journal_2.currency_id = self.currency_1
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_2.id,
-                    'amount': 10.0,
-                    'amount_currency': 0.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_2.id,
+            'amount': 10.0,
+            'amount_currency': 0.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 10.0,     'credit': 0.0,      'amount_currency': 0.0,         'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 10.0,     'amount_currency': 0.0,         'currency_id': self.currency_2.id},
         ])
@@ -332,23 +306,17 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_journal_curr_2_statement_curr_1(self):
         self.bank_journal_2.currency_id = self.currency_2
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_1.id,
-                    'amount': 0.0,
-                    'amount_currency': 10.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_1.id,
+            'amount': 0.0,
+            'amount_currency': 10.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 10.0,     'credit': 0.0,      'amount_currency': 0.0,         'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 10.0,     'amount_currency': -10.0,       'currency_id': self.currency_1.id},
         ])
@@ -356,23 +324,17 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_currency_journal_curr_2_statement_curr_1(self):
         self.bank_journal_2.currency_id = self.currency_2
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_1.id,
-                    'amount': 10.0,
-                    'amount_currency': 0.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_1.id,
+            'amount': 10.0,
+            'amount_currency': 0.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': 10.0,        'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': 0.0,         'currency_id': self.currency_1.id},
         ])
@@ -380,23 +342,17 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_journal_curr_2_statement_curr_3(self):
         self.bank_journal_2.currency_id = self.currency_2
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_3.id,
-                    'amount': 0.0,
-                    'amount_currency': 10.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_3.id,
+            'amount': 0.0,
+            'amount_currency': 10.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': 0.0,         'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 0.0,      'amount_currency': -10.0,       'currency_id': self.currency_3.id},
         ])
@@ -404,40 +360,26 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
     def test_zero_amount_currency_journal_curr_2_statement_curr_3(self):
         self.bank_journal_2.currency_id = self.currency_2
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': self.currency_3.id,
-                    'amount': 10.0,
-                    'amount_currency': 0.0,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': self.currency_3.id,
+            'amount': 10.0,
+            'amount_currency': 0.0,
         })
 
-        self.assertRecordValues(statement.line_ids.move_id.line_ids, [
+        self.assertRecordValues(statement_line.move_id.line_ids, [
             {'debit': 5.0,      'credit': 0.0,      'amount_currency': 10.0,        'currency_id': self.currency_2.id},
             {'debit': 0.0,      'credit': 5.0,      'amount_currency': 0.0,         'currency_id': self.currency_3.id},
         ])
 
     def test_constraints(self):
-        def assertStatementLineConstraint(statement_vals, statement_line_vals):
+        def assertStatementLineConstraint(statement_line_vals):
             with self.assertRaises(Exception), self.cr.savepoint():
-                self.env['account.bank.statement'].create({
-                    **statement_vals,
-                    'line_ids': [(0, 0, statement_line_vals)],
-                })
+                self.env['account.bank.statement.line'].create(statement_line_vals)
 
-        statement_vals = {
-            'name': 'test_statement',
-            'date': '2019-01-01',
-            'journal_id': self.bank_journal_2.id,
-        }
         statement_line_vals = {
             'date': '2019-01-01',
             'payment_ref': 'line_1',
@@ -450,51 +392,16 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         # ==== Test constraints at creation ====
 
         # Foreign currency must not be the same as the journal one.
-        assertStatementLineConstraint(statement_vals, {
+        assertStatementLineConstraint({
             **statement_line_vals,
             'foreign_currency_id': self.currency_1.id,
         })
 
         # Can't have a stand alone amount in foreign currency without foreign currency set.
-        assertStatementLineConstraint(statement_vals, {
+        assertStatementLineConstraint({
             **statement_line_vals,
             'amount_currency': 10.0,
         })
-
-        # ==== Test constraints at edition ====
-
-        statement = self.env['account.bank.statement'].create({
-            **statement_vals,
-            'line_ids': [(0, 0, statement_line_vals)],
-        })
-        st_line = statement.line_ids
-
-        # You can't messed up the journal entry by adding another liquidity line.
-        addition_lines_to_create = [
-            {
-                'debit': 1.0,
-                'credit': 0,
-                'account_id': self.bank_journal_2.default_account_id.id,
-                'move_id': st_line.move_id.id,
-            },
-            {
-                'debit': 0,
-                'credit': 1.0,
-                'account_id': self.company_data['default_account_revenue'].id,
-                'move_id': st_line.move_id.id,
-            },
-        ]
-        with self.assertRaises(UserError), self.cr.savepoint():
-            st_line.move_id.write({
-                'line_ids': [(0, 0, vals) for vals in addition_lines_to_create]
-            })
-
-        with self.assertRaises(UserError), self.cr.savepoint():
-            st_line.line_ids.create(addition_lines_to_create)
-
-        # You can't set the journal entry in an unconsistent state.
-        with self.assertRaises(UserError), self.cr.savepoint():
-            st_line.move_id.action_post()
 
     def test_statement_line_move_onchange_1(self):
         ''' Test the consistency between the account.bank.statement.line and the generated account.move.lines
@@ -505,11 +412,10 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         self.assertBankStatementLine(self.statement_line, self.expected_st_line, [self.expected_counterpart_line, self.expected_bank_line])
 
         # Inverse the amount + change them.
-        with Form(self.statement) as statement_form:
-            with statement_form.line_ids.edit(0) as st_line_form:
-                st_line_form.amount = -2000.0
-                st_line_form.amount_currency = -4000.0
-                st_line_form.foreign_currency_id = self.currency_3
+        with Form(self.statement_line) as st_line_form:
+            st_line_form.amount = -2000.0
+            st_line_form.amount_currency = -4000.0
+            st_line_form.foreign_currency_id = self.currency_3
 
         self.assertBankStatementLine(self.statement_line, {
             **self.expected_st_line,
@@ -534,10 +440,9 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         ])
 
         # Check changing the label and the partner.
-        with Form(self.statement) as statement_form:
-            with statement_form.line_ids.edit(0) as st_line_form:
-                st_line_form.payment_ref = 'line_1 (bis)'
-                st_line_form.partner_id = self.partner_b
+        with Form(self.statement_line) as st_line_form:
+            st_line_form.payment_ref = 'line_1 (bis)'
+            st_line_form.partner_id = self.partner_b
 
         self.assertBankStatementLine(self.statement_line, {
             **self.expected_st_line,
@@ -597,22 +502,15 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         if journal_currency:
             journal.currency_id = journal_currency.id
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
+        statement_line = self.env['account.bank.statement.line'].create({
             'date': '2019-01-01',
             'journal_id': journal.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'foreign_currency_id': foreign_currency and foreign_currency.id,
-                    'amount': amount,
-                    'amount_currency': amount_currency,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'foreign_currency_id': foreign_currency and foreign_currency.id,
+            'amount': amount,
+            'amount_currency': amount_currency,
         })
-        statement_line = statement.line_ids
 
         # - There is 3 flows to check:
         #   * The invoice will fully reconcile the statement line.
@@ -669,7 +567,7 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
             },
         ])
         test_invoices.action_post()
-        statement.button_post()
+        statement_line.button_post()
         counterpart_lines = test_invoices.mapped('line_ids').filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
 
         # Check the full reconciliation.
@@ -888,7 +786,7 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         - Ensure the reconciliation can be undo.
         - Ensure the reconciliation is still possible with to_check.
         '''
-        self.statement.button_post()
+        self.statement_line.button_post()
 
         receivable_acc_1 = self.company_data['default_account_receivable']
         receivable_acc_2 = self.copy_account(self.company_data['default_account_receivable'])
@@ -1117,21 +1015,14 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         self.bank_journal_2.currency_id = self.currency_2
         self.currency_data['rates'][-1].rate = 1.1698
 
-        statement = self.env['account.bank.statement'].create({
-            'name': 'test_statement',
-            'date': '2017-01-01',
+        statement_line = self.env['account.bank.statement.line'].create({
+            'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': 'line_1',
-                    'partner_id': self.partner_a.id,
-                    'amount': 7541.66,
-                }),
-            ],
+            'payment_ref': 'line_1',
+            'partner_id': self.partner_a.id,
+            'amount': 7541.66,
         })
-        statement.button_post()
-        statement_line = statement.line_ids
+        statement_line.button_post()
 
         payment = self.env['account.payment'].create({
             'amount': 7767.70,
@@ -1159,19 +1050,12 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         ''' Ensure the statement line is directly marked as reconciled when having an amount of zero. '''
         self.company_data['company'].account_journal_suspense_account_id.reconcile = False
 
-        statement = self.env['account.bank.statement'].with_context(skip_check_amounts_currencies=True).create({
-            'name': 'test_statement',
-            'date': '2017-01-01',
+        statement_line = self.env['account.bank.statement.line'].create({
+            'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': "Happy new year",
-                    'amount': 0.0,
-                }),
-            ],
+            'payment_ref': "Happy new year",
+            'amount': 0.0,
         })
-        statement_line = statement.line_ids
 
         self.assertRecordValues(statement_line, [{'is_reconciled': True, 'amount_residual': 0.0}])
 
@@ -1179,19 +1063,12 @@ class TestAccountBankStatementLine(TestAccountBankStatementCommon):
         ''' Ensure the analytic lines are generated during the reconciliation. '''
         analytic_account = self.env['account.analytic.account'].create({'name': 'analytic_account'})
 
-        statement = self.env['account.bank.statement'].with_context(skip_check_amounts_currencies=True).create({
-            'name': 'test_statement',
-            'date': '2017-01-01',
+        statement_line = self.env['account.bank.statement.line'].create({
+            'date': '2019-01-01',
             'journal_id': self.bank_journal_2.id,
-            'line_ids': [
-                (0, 0, {
-                    'date': '2019-01-01',
-                    'payment_ref': "line",
-                    'amount': 100.0,
-                }),
-            ],
+            'payment_ref': "line",
+            'amount': 100.0,
         })
-        statement_line = statement.line_ids
 
         statement_line.reconcile([{
             'balance': -100.0,

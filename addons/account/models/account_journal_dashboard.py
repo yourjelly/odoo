@@ -439,7 +439,7 @@ class account_journal(models.Model):
             'res_model': 'account.bank.statement.line',
             'view_mode': 'tree,form',
             'views': [
-                (self.env.ref('account.view_bank_statement_line_tree_transaction_mode').id, 'list'),
+                (self.env.ref('account.view_bank_statement_line_tree').id, 'list'),
                 (self.env.ref('account.view_bank_statement_line_form').id, 'form'),
             ],
             'search_view_id': self.env.ref('account.view_bank_statement_line_search').id,
@@ -514,7 +514,6 @@ class account_journal(models.Model):
         if mode == 'form':
             action['views'] = [[False, 'form']]
         return action
-
 
     def open_action_with_context(self):
         action_name = self.env.context.get('action_name', False)

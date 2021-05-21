@@ -620,7 +620,7 @@ class AccountBankStatementLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('amount', 'amount_currency', 'currency_id', 'foreign_currency_id', 'journal_id')
+    @api.constrains('amount', 'amount_currency', 'currency_id', 'foreign_currency_id')
     def _check_amounts_currencies(self):
         ''' Ensure the consistency the specified amounts and the currencies. '''
 
@@ -1088,7 +1088,6 @@ class AccountBankStatementLine(models.Model):
         to their original states.
         '''
         self.line_ids.remove_move_reconcile()
-        self.payment_ids.unlink()
 
         for st_line in self:
             st_line.with_context(force_delete=True).write({
