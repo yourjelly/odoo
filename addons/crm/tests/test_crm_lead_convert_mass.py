@@ -173,6 +173,10 @@ class TestLeadConvertMass(crm_common.TestLeadConvertMassCommon):
             _logger.info("TEST BEGIN")
             self.cr.sql_log = True
             self.cr.sql_log_story = []
+            for field_name in self.env['res.partner']._fields:
+                field = self.env['res.partner']._fields[field_name]
+                if field.company_dependent:
+                    _logger.info('%s: company_dependent %s' % (field_name, field.company_dependent))
             self.cr.execute("select name, id from ir_model_fields where model='res.partner'")
             for row in self.cr.fetchall():
                 _logger.info('%s: %s' % (row[0], row[1]))
