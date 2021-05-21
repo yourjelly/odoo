@@ -47,6 +47,20 @@ class SaleOrder(models.Model):
             if order.sale_order_template_id:
                 order.note = order.sale_order_template_id.with_context(lang=order.partner_id.lang).note or order.note
 
+    @api.depends('company_id', 'sale_order_template_id')
+    def _compute_require_payment(self):
+        super()._compute_require_payment()
+        for order in self:
+            if order.sale_order_template_id:
+                order.require_payment = order.sale_order_template_id.require_payment
+
+    @api.depends('company_id', 'sale_order_template_id')
+    def _compute_require_signature(self):
+        super()._compute_require_signature()
+        for order in self:
+            if order.sale_order_template_id:
+                order.require_signature = order.sale_order_template_id.require_signature
+
     @api.depends('company_id')
     def _compute_sale_order_template_id(self):
         for order in self:
@@ -92,8 +106,6 @@ class SaleOrder(models.Model):
     def onchange_sale_order_template_id(self):
 
         if not self.sale_order_template_id:
-            self.require_signature = self._get_default_require_signature()
-            self.require_payment = self._get_default_require_payment()
             return
 
         template = self.sale_order_template_id.with_context(lang=self.partner_id.lang)
@@ -139,9 +151,6 @@ class SaleOrder(models.Model):
 
         if template.number_of_days > 0:
             self.validity_date = fields.Date.context_today(self) + timedelta(template.number_of_days)
-
-        self.require_signature = template.require_signature
-        self.require_payment = template.require_payment
 
         if template.note:
             self.note = template.note

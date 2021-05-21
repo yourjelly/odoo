@@ -20,14 +20,6 @@ class SaleOrder(models.Model):
     _check_company_auto = True
 
     @api.model
-    def _default_require_payment(self):
-        return self.env.company.portal_confirmation_pay
-
-    @api.model
-    def _default_require_signature(self):
-        return self.env.company.portal_confirmation_sign
-
-    @api.model
     def _default_validity_date(self):
         if self.env['ir.config_parameter'].sudo().get_param('sale.use_quotation_validity_days'):
             days = self.env.company.quotation_validity_days
@@ -51,10 +43,12 @@ class SaleOrder(models.Model):
     validity_date = fields.Date(string='Expiration', readonly=True, copy=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
                                 default=_default_validity_date)
     is_expired = fields.Boolean(compute='_compute_is_expired', string="Is expired")
-    require_signature = fields.Boolean('Online Signature', default=_default_require_signature, readonly=True,
+    require_signature = fields.Boolean(
+        'Online Signature', compute="_compute_require_signature", store=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         help='Request a online signature to the customer in order to confirm orders automatically.')
-    require_payment = fields.Boolean('Online Payment', default=_default_require_payment, readonly=True,
+    require_payment = fields.Boolean(
+        'Online Payment', compute="_compute_require_payment", store=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         help='Request an online payment to the customer in order to confirm orders automatically.')
     create_date = fields.Datetime(string='Creation Date', readonly=True, index=True, help="Date on which sales order is created.")
@@ -299,6 +293,18 @@ class SaleOrder(models.Model):
                     order.note = ""
         else:
             self.note = ""
+
+    @api.depends('company_id')
+    def _compute_require_payment(self):
+        for order in self:
+            company = order.company_id or self.env.company
+            order.require_payment = company.portal_confirmation_pay
+
+    @api.depends('company_id')
+    def _compute_require_signature(self):
+        for order in self:
+            company = order.company_id or self.env.company
+            order.require_signature = company.portal_confirmation_sign
 
     # Portal Mixin override
     def _compute_access_url(self):
