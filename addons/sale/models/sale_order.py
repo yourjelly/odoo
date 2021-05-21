@@ -99,7 +99,7 @@ class SaleOrder(models.Model):
         ('invoiced', 'Fully Invoiced'),
         ('to invoice', 'To Invoice'),
         ('no', 'Nothing to Invoice')
-        ], string='Invoice Status', compute='_get_invoice_status', store=True, readonly=True)
+        ], string='Invoice Status', compute='_compute_invoice_status', store=True, readonly=True)
 
     note = fields.Text('Terms and conditions', compute="_compute_note", store=True, readonly=False)
     terms_type = fields.Selection(related='company_id.terms_type')
@@ -207,7 +207,7 @@ class SaleOrder(models.Model):
             order.invoice_count = len(invoices)
 
     @api.depends('state', 'order_line.invoice_status')
-    def _get_invoice_status(self):
+    def _compute_invoice_status(self):
         """
         Compute the invoice status of a SO. Possible statuses:
         - no: if the SO is not in status 'sale' or 'done', we consider that there is nothing to
