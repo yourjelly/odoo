@@ -543,8 +543,18 @@ class SaleOrder(models.Model):
             vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
             vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
             vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist.id)
-        result = super(SaleOrder, self).create(vals)
-        return result
+        return super().create(vals)
+
+    def _create_upsell_activity(self):
+        self and self.activity_unlink(['sale.mail_act_sale_upsell'])
+        for order in self:
+            ref = "<a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a>"
+            order_ref = ref % (order._name, order.id, order.name)
+            customer_ref = ref % (order.partner_id._name, order.partner_id.id, order.partner_id.display_name)
+            order.activity_schedule(
+                'sale.mail_act_sale_upsell',
+                user_id=order.user_id.id or order.partner_id.user_id.id,
+                note=_("Upsell %(order)s for customer %(customer)s", order=order_ref, customer=customer_ref))
 
     def _compute_field_value(self, field):
         super()._compute_field_value(field)
@@ -588,17 +598,35 @@ class SaleOrder(models.Model):
                 return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
         return super(SaleOrder, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
+    @api.model
+    def get_empty_list_help(self, help):
+        self = self.with_context(
+            empty_list_help_document_name=_("sale order"),
+        )
+        return super(SaleOrder, self).get_empty_list_help(help)
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
         for order in self:
             if order.state not in ('draft', 'cancel'):
                 raise UserError(_('You can not delete a sent quotation or a confirmed sales order. You must first cancel it.'))
 
-    def validate_taxes_on_sales_order(self):
-        # Override for correct taxcloud computation
-        # when using coupon and delivery
-        self.ensure_one()
-        return
+    # Mail.thread overrides #
+    #########################
+
+    @api.returns('mail.message', lambda value: value.id)
+    def message_post(self, **kwargs):
+        if self.env.context.get('mark_so_as_sent'):
+            self.filtered(lambda o: o.state == 'draft').with_context(tracking_disable=True).write({'state': 'sent'})
+        return super(SaleOrder, self.with_context(mail_post_autofollow=True)).message_post(**kwargs)
+
+    def _sms_get_number_fields(self):
+        """ No phone or mobile field is available on sale model. Instead SMS will
+        fallback on partner-based computation using ``_sms_get_partner_fields``. """
+        return []
+
+    def _sms_get_partner_fields(self):
+        return ['partner_id']
 
     def _track_subtype(self, init_values):
         self.ensure_one()
@@ -608,73 +636,8 @@ class SaleOrder(models.Model):
             return self.env.ref('sale.mt_order_sent')
         return super(SaleOrder, self)._track_subtype(init_values)
 
-    def update_prices(self):
-        self.ensure_one()
-        lines_to_update = []
-        for line in self.order_line.filtered(lambda line: not line.display_type):
-            product = line.product_id.with_context(
-                partner=self.partner_id,
-                quantity=line.product_uom_qty,
-                date=self.date_order,
-                pricelist=self.pricelist_id.id,
-                uom=line.product_uom.id
-            )
-            price_unit = self.env['account.tax']._fix_tax_included_price_company(
-                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
-            if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
-                discount = max(0, (price_unit - product.price) * 100 / price_unit)
-            else:
-                discount = 0
-            lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
-        self.update({'order_line': lines_to_update})
-        self.show_update_pricelist = False
-        self.message_post(body=_("Product prices have been recomputed according to pricelist <b>%s<b> ", self.pricelist_id.display_name))
-
-    def _create_upsell_activity(self):
-        self and self.activity_unlink(['sale.mail_act_sale_upsell'])
-        for order in self:
-            ref = "<a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a>"
-            order_ref = ref % (order._name, order.id, order.name)
-            customer_ref = ref % (order.partner_id._name, order.partner_id.id, order.partner_id.display_name)
-            order.activity_schedule(
-                'sale.mail_act_sale_upsell',
-                user_id=order.user_id.id or order.partner_id.user_id.id,
-                note=_("Upsell %(order)s for customer %(customer)s", order=order_ref, customer=customer_ref))
-
-    def _prepare_invoice(self):
-        """
-        Prepare the dict of values to create the new invoice for a sales order. This method may be
-        overridden to implement custom invoice generation (making sure to call super() to establish
-        a clean extension chain).
-        """
-        self.ensure_one()
-        journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
-        if not journal:
-            raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
-
-        invoice_vals = {
-            'ref': self.client_order_ref or '',
-            'move_type': 'out_invoice',
-            'narration': self.note,
-            'currency_id': self.currency_id.id,
-            'campaign_id': self.campaign_id.id,
-            'medium_id': self.medium_id.id,
-            'source_id': self.source_id.id,
-            'invoice_user_id': self.user_id.id,
-            'team_id': self.team_id.id,
-            'partner_id': self.partner_invoice_id.id,
-            'partner_shipping_id': self.partner_shipping_id.id,
-            'fiscal_position_id': self.fiscal_position_id.id,
-            'partner_bank_id': self.company_id.partner_id.bank_ids[:1].id,
-            'journal_id': journal.id,  # company comes from the journal
-            'invoice_origin': self.name,
-            'invoice_payment_term_id': self.payment_term_id.id,
-            'payment_reference': self.reference,
-            'transaction_ids': [(6, 0, self.transaction_ids.ids)],
-            'invoice_line_ids': [],
-            'company_id': self.company_id.id,
-        }
-        return invoice_vals
+    # Invoicing #
+    #############
 
     def action_view_invoice(self):
         invoices = self.mapped('invoice_ids')
@@ -746,6 +709,41 @@ class SaleOrder(models.Model):
                 invoiceable_line_ids.append(line.id)
 
         return self.env['sale.order.line'].browse(invoiceable_line_ids + down_payment_line_ids)
+
+    def _prepare_invoice(self):
+        """
+        Prepare the dict of values to create the new invoice for a sales order. This method may be
+        overridden to implement custom invoice generation (making sure to call super() to establish
+        a clean extension chain).
+        """
+        self.ensure_one()
+        journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
+        if not journal:
+            raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
+
+        invoice_vals = {
+            'ref': self.client_order_ref or '',
+            'move_type': 'out_invoice',
+            'narration': self.note,
+            'currency_id': self.currency_id.id,
+            'campaign_id': self.campaign_id.id,
+            'medium_id': self.medium_id.id,
+            'source_id': self.source_id.id,
+            'invoice_user_id': self.user_id.id,
+            'team_id': self.team_id.id,
+            'partner_id': self.partner_invoice_id.id,
+            'partner_shipping_id': self.partner_shipping_id.id,
+            'fiscal_position_id': self.fiscal_position_id.id,
+            'partner_bank_id': self.company_id.partner_id.bank_ids[:1].id,
+            'journal_id': journal.id,  # company comes from the journal
+            'invoice_origin': self.name,
+            'invoice_payment_term_id': self.payment_term_id.id,
+            'payment_reference': self.reference,
+            'transaction_ids': [(6, 0, self.transaction_ids.ids)],
+            'invoice_line_ids': [],
+            'company_id': self.company_id.id,
+        }
+        return invoice_vals
 
     def _create_invoices(self, grouped=False, final=False, date=None):
         """
@@ -868,6 +866,9 @@ class SaleOrder(models.Model):
             )
         return moves
 
+    # State updates #
+    #################
+
     def action_draft(self):
         orders = self.filtered(lambda s: s.state in ['cancel', 'sent'])
         return orders.write({
@@ -878,7 +879,7 @@ class SaleOrder(models.Model):
         })
 
     def action_quotation_send(self):
-        ''' Opens a wizard to compose an email, with relevant mail template loaded by default '''
+        """ Opens a wizard to compose an email, with relevant mail template loaded by default """
         self.ensure_one()
         template_id = self._find_mail_template()
         lang = self.env.context.get('lang')
@@ -948,20 +949,6 @@ class SaleOrder(models.Model):
             template_id = self.env['ir.model.data'].xmlid_to_res_id('sale.email_template_edi_sale', raise_if_not_found=False)
 
         return template_id
-
-    @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, **kwargs):
-        if self.env.context.get('mark_so_as_sent'):
-            self.filtered(lambda o: o.state == 'draft').with_context(tracking_disable=True).write({'state': 'sent'})
-        return super(SaleOrder, self.with_context(mail_post_autofollow=True)).message_post(**kwargs)
-
-    def _sms_get_number_fields(self):
-        """ No phone or mobile field is available on sale model. Instead SMS will
-        fallback on partner-based computation using ``_sms_get_partner_fields``. """
-        return []
-
-    def _sms_get_partner_fields(self):
-        return ['partner_id']
 
     def _send_order_confirmation_mail(self):
         if self.env.su:
@@ -1048,6 +1035,9 @@ class SaleOrder(models.Model):
             analytic = self.env['account.analytic.account'].create(order._prepare_analytic_account_data(prefix))
             order.analytic_account_id = analytic
 
+    # Portal methods #
+    ##################
+
     def has_to_be_signed(self, include_draft=False):
         return (self.state == 'sent' or (self.state == 'draft' and include_draft)) and not self.is_expired and self.require_signature and not self.signature
 
@@ -1088,7 +1078,20 @@ class SaleOrder(models.Model):
             else:
                 line.qty_to_invoice = 0
 
-    # Payment
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        return '%s %s' % (self.type_name, self.name)
+
+    def _get_portal_return_action(self):
+        """ Return the action used to display orders when returning from customer portal.
+
+        Note: extended in enterprise/sale_renting.
+        """
+        self.ensure_one()
+        return self.env.ref('sale.action_quotations_with_onboarding')
+
+    # Payment #
+    ###########
 
     def payment_action_capture(self):
         self.authorized_transaction_ids._send_capture_request()
@@ -1100,18 +1103,7 @@ class SaleOrder(models.Model):
         self.ensure_one()
         return self.transaction_ids._get_last()
 
-    @api.model
-    def _get_customer_lead(self, product_tmpl_id):
-        return False
-
-    def _get_report_base_filename(self):
-        self.ensure_one()
-        return '%s %s' % (self.type_name, self.name)
-
-    def _get_portal_return_action(self):
-        """ Return the action used to display orders when returning from customer portal. """
-        self.ensure_one()
-        return self.env.ref('sale.action_quotations_with_onboarding')
+    # Others
 
     @api.model
     def _prepare_down_payment_section_line(self, **optional_values):
@@ -1134,9 +1126,36 @@ class SaleOrder(models.Model):
             down_payments_section_line.update(optional_values)
         return down_payments_section_line
 
+    def update_prices(self):
+        """Recompute the prices of all existing lines."""
+        self.ensure_one()
+        lines_to_update = []
+        for line in self.order_line.filtered(lambda line: not line.display_type):
+            product = line.product_id.with_context(
+                partner=self.partner_id,
+                quantity=line.product_uom_qty,
+                date=self.date_order,
+                pricelist=self.pricelist_id.id,
+                uom=line.product_uom.id
+            )
+            price_unit = self.env['account.tax']._fix_tax_included_price_company(
+                line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
+            if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
+                discount = max(0, (price_unit - product.price) * 100 / price_unit)
+            else:
+                discount = 0
+            lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
+        self.update({'order_line': lines_to_update})
+        self.show_update_pricelist = False
+        self.message_post(body=_("Product prices have been recomputed according to pricelist <b>%s<b> ", self.pricelist_id.display_name))
+
+    # Bridges between independent modules #
     @api.model
-    def get_empty_list_help(self, help):
-        self = self.with_context(
-            empty_list_help_document_name=_("sale order"),
-        )
-        return super(SaleOrder, self).get_empty_list_help(help)
+    def _get_customer_lead(self, product_tmpl_id):
+        return False
+
+    def validate_taxes_on_sales_order(self):
+        # Override for correct taxcloud computation
+        # when using coupon and delivery
+        self.ensure_one()
+        return
