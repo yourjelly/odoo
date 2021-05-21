@@ -54,7 +54,8 @@ class SaleOrder(models.Model):
     create_date = fields.Datetime(string='Creation Date', readonly=True, index=True, help="Date on which sales order is created.")
 
     user_id = fields.Many2one(
-        'res.users', string='Salesperson', index=True, tracking=2, default=lambda self: self.env.user,
+        'res.users', string='Salesperson', index=True, tracking=2,
+        compute="_compute_user_id", store=True, readonly=False,
         domain=lambda self: [('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)])
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=True,
