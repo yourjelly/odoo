@@ -5,7 +5,7 @@
         <field name="model">account.bank.statement</field>
         <field name="mode">primary</field>
         <field name="priority">1000</field>
-        <field name="inherit_id" ref="account.view_bank_statement_form"/>
+        <field name="inherit_id" ref="account.view_bank_statement_form_transaction_mode"/>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='button_validate_or_action']" position="replace"/>
         </field>

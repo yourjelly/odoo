@@ -8,6 +8,7 @@ from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools.float_utils import float_compare
 
+import ast
 import base64
 from collections import defaultdict
 import functools
@@ -125,7 +126,7 @@ class IrActions(models.Model):
         return result
 
     @api.model
-    def _for_xml_id(self, full_xml_id):
+    def _for_xml_id(self, full_xml_id, parse=False):
         """ Returns the action content for the provided xml_id
 
         :param xml_id: the namespace-less id of the action (the @id
@@ -135,11 +136,17 @@ class IrActions(models.Model):
         record = self.env.ref(full_xml_id)
         assert isinstance(self.env[record._name], type(self))
         action = record.sudo().read()[0]
-        return {
+        action_vals = {
             field: value
             for field, value in action.items()
             if field in record._get_readable_fields()
         }
+
+        if parse:
+            for field_name in ('context', 'domain'):
+                if field_name in action_vals and isinstance(action_vals[field_name], str):
+                    action_vals[field_name] = ast.literal_eval(action_vals[field_name])
+        return action_vals
 
     def _get_readable_fields(self):
         """ return the list of fields that are safe to read

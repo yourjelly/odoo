@@ -426,37 +426,50 @@ class account_journal(models.Model):
             })
         return action
 
-    def _select_action_to_open(self):
-        self.ensure_one()
-        if self._context.get('action_name'):
-            return self._context.get('action_name')
-        elif self.type == 'bank':
-            return 'action_bank_statement_tree'
-        elif self.type == 'cash':
-            return 'action_view_bank_statement_tree'
-        elif self.type == 'sale':
-            return 'action_move_out_invoice_type'
-        elif self.type == 'purchase':
-            return 'action_move_in_invoice_type'
-        else:
-            return 'action_move_journal_line'
+    def action_open_bank_statements(self):
+        action_vals = self.env['ir.actions.act_window']._for_xml_id('account.action_bank_statement_tree', parse=True)
+        action_vals['domain'] = [('journal_id', '=', self.id)]
+        action_vals['context']['default_journal_id'] = self.id
+        return action_vals
+
+    def action_open_bank_transactions(self):
+        return {
+            'name': _("Bank Transactions"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.bank.statement.line',
+            'view_mode': 'tree,form',
+            'views': [
+                (self.env.ref('account.view_bank_statement_line_tree_transaction_mode').id, 'list'),
+                (self.env.ref('account.view_bank_statement_line_form').id, 'form'),
+            ],
+            'search_view_id': self.env.ref('account.view_bank_statement_line_search').id,
+            'context': {'default_journal_id': self.id},
+            'domain': [('journal_id', '=', self.id)],
+        }
 
     def open_action(self):
         """return action based on type for related journals"""
         self.ensure_one()
-        action_name = self._select_action_to_open()
 
-        # Set 'account.' prefix if missing.
-        if not action_name.startswith("account."):
-            action_name = 'account.%s' % action_name
+        def get_action_vals_from_name(action_name):
+            action_vals = self.env["ir.actions.act_window"]._for_xml_id(action_name)
+            if 'context' in action_vals and isinstance(action_vals['context'], str):
+                action_vals['context'] = ast.literal_eval(action_vals['context'])
+            return action_vals
 
-        action = self.env["ir.actions.act_window"]._for_xml_id(action_name)
+        if self._context.get('action_name'):
+            action = get_action_vals_from_name(self._context.get('action_name'))
+        elif self.type in ('bank', 'cash'):
+            return self.action_open_bank_transactions()
+        elif self.type == 'sale':
+            action = get_action_vals_from_name('account.action_move_out_invoice_type')
+        elif self.type == 'purchase':
+            action = get_action_vals_from_name('account.action_move_in_invoice_type')
+        else:
+            action = get_action_vals_from_name('account.action_move_journal_line')
 
         context = self._context.copy()
-        if 'context' in action and type(action['context']) == str:
-            context.update(ast.literal_eval(action['context']))
-        else:
-            context.update(action.get('context', {}))
+        context.update(action.get('context', {}))
         action['context'] = context
         action['context'].update({
             'default_journal_id': self.id,
@@ -501,6 +514,7 @@ class account_journal(models.Model):
         if mode == 'form':
             action['views'] = [[False, 'form']]
         return action
+
 
     def open_action_with_context(self):
         action_name = self.env.context.get('action_name', False)

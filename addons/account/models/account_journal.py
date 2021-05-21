@@ -199,6 +199,14 @@ class AccountJournal(models.Model):
         copy=False,
         default=0.0,
     )
+    bank_statement_mode = fields.Selection(
+        selection=[
+            ('transaction', "Bank Transactions"),
+            ('statement', "Bank Statements"),
+        ],
+        required=True,
+        default='transaction',
+    )
 
     # Sale journals fields
     sale_activity_type_id = fields.Many2one('mail.activity.type', string='Schedule Activity', default=False, help="Activity will be automatically scheduled on payment due date, improving collection process.")

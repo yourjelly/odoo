@@ -184,7 +184,7 @@ class AccountBankStatementLine(models.Model):
     _inherits = {'account.move': 'move_id'}
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Bank Statement Line"
-    _order = "date desc, statement_id, id desc"
+    _order = "date desc, statement_id, sequence, id desc"
     _check_company_auto = True
 
     def _get_default_journal(self):
@@ -208,6 +208,7 @@ class AccountBankStatementLine(models.Model):
         check_company=True,
     )
 
+    sequence = fields.Integer(index=True, help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
     partner_name = fields.Char(
         help="This field is used to record the third party name when importing bank statement in electronic format, "
@@ -1044,12 +1045,12 @@ class AccountBankStatementLine(models.Model):
             'name': _("Bank Statement"),
             'view_mode': 'form',
             'res_model': 'account.bank.statement',
-            'view_id': self.env.ref('account.view_bank_statement_form_popup').id,
+            'view_id': self.env.ref('account.view_bank_statement_form').id,
             'type': 'ir.actions.act_window',
             'context': {
                 'default_line_ids': [Command.set(self.ids)],
             },
-            'target': 'new',
+            'target': 'current',
         }
 
     def button_set_journal_starting_balance(self):
