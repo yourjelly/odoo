@@ -682,8 +682,6 @@ Reason(s) of this behavior could be:
         invoice_item_sequence = 0 # Incremental sequencing to keep the lines order on the invoice.
         for order in self:
             order = order.with_company(order.company_id)
-            current_section_vals = None
-            down_payments = order.env['sale.order.line']
 
             invoice_vals = order._prepare_invoice()
             invoiceable_lines = order._get_invoiceable_lines(final)
@@ -702,7 +700,6 @@ Reason(s) of this behavior could be:
                             sequence=invoice_item_sequence,
                         )),
                     )
-                    dp_section = True
                     invoice_item_sequence += 1
                 invoice_line_vals.append(
                     (0, 0, line._prepare_invoice_line(
