@@ -244,14 +244,9 @@ class SaleOrderOption(models.Model):
             self.price_unit = new_sol._get_display_price(product)
 
     def button_add_to_order(self):
-        self.add_option_to_order()
-
-    def add_option_to_order(self):
         self.ensure_one()
 
-        sale_order = self.order_id
-
-        if sale_order.state not in ['draft', 'sent']:
+        if self.order_id.state not in ['draft', 'sent']:
             raise UserError(_('You cannot add options to a confirmed order.'))
 
         values = self._get_values_to_add_to_order()
@@ -259,8 +254,7 @@ class SaleOrderOption(models.Model):
         order_line._compute_tax_id()
 
         self.write({'line_id': order_line.id})
-        if sale_order:
-            sale_order.add_option_to_order_with_taxcloud()
+        self.order_id.validate_taxes_on_sales_order()
 
 
     def _get_values_to_add_to_order(self):

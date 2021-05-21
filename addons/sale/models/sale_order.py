@@ -1061,5 +1061,3 @@ class SaleOrder(models.Model):
             down_payments_section_line.update(optional_values)
         return down_payments_section_line
 
-    def add_option_to_order_with_taxcloud(self):
-        self.ensure_one()
