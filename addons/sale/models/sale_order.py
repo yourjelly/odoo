@@ -152,7 +152,7 @@ class SaleOrder(models.Model):
     ######################################
 
     amount_by_group = fields.Binary(
-        string="Tax amount by group", compute='_amount_by_group',
+        string="Tax amount by group", compute='_compute_amount_by_group',
         help="type: [(name, amount, base, formated amount, formated base)]")
     amount_undiscounted = fields.Float(
         'Amount Before Discount', compute='_compute_amount_undiscounted', digits=0)
@@ -329,7 +329,7 @@ class SaleOrder(models.Model):
             order.authorized_transaction_ids = order.transaction_ids.filtered(lambda t: t.state == 'authorized')
 
     # Portal & other UI/reporting fields
-    def _amount_by_group(self):
+    def _compute_amount_by_group(self):
         for order in self:
             currency = order.currency_id or order.company_id.currency_id
             fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
@@ -446,7 +446,7 @@ class SaleOrder(models.Model):
         self.commitment_date = self.expected_date
 
     @api.onchange('partner_id')
-    def onchange_partner_id(self):
+    def _onchange_partner_id(self):
         """
         Update the following fields when the partner is changed:
         - Pricelist
@@ -472,12 +472,10 @@ class SaleOrder(models.Model):
         })
 
     @api.onchange('partner_id')
-    def onchange_partner_id_warning(self):
+    def _onchange_partner_id_warning(self):
         if not self.partner_id:
             return
-        warning = {}
-        title = False
-        message = False
+
         partner = self.partner_id
 
         # If partner has no warning, check its company
@@ -488,18 +486,18 @@ class SaleOrder(models.Model):
             # Block if partner only has warning but parent company is blocked
             if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
                 partner = partner.parent_id
-            title = ("Warning for %s") % partner.name
-            message = partner.sale_warn_msg
             warning = {
-                    'title': title,
-                    'message': message,
+                'title': _("Warning for %s", partner.name),
+                'message': partner.sale_warn_msg,
             }
             if partner.sale_warn == 'block':
-                self.update({'partner_id': False, 'partner_invoice_id': False, 'partner_shipping_id': False, 'pricelist_id': False})
+                self.update({
+                    'partner_id': False,
+                    'partner_invoice_id': False,
+                    'partner_shipping_id': False,
+                    'pricelist_id': False,
+                })
                 return {'warning': warning}
-
-        if warning:
-            return {'warning': warning}
 
     @api.onchange('commitment_date')
     def _onchange_commitment_date(self):
