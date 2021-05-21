@@ -94,7 +94,6 @@ class SaleOrder(models.Model):
         ], string='Invoice Status', compute='_compute_invoice_status', store=True, readonly=True)
 
     note = fields.Text('Terms and conditions', compute="_compute_note", store=True, readonly=False)
-    terms_type = fields.Selection(related='company_id.terms_type')
 
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=5)
     amount_by_group = fields.Binary(string="Tax amount by group", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
