@@ -63,6 +63,7 @@
       background: $-backend-entry-hover-bg;
       outline: 1px solid $o-navbar-inverse-link-hover-bg;
       outline-offset: -1px;
+      color: $white;
     }
   }
 
@@ -76,7 +77,7 @@
 
   // = Owl <Dropdown> components
   // --------------------------------------------------------------------------
-  .o_dropdown_toggler {
+  .o_dropdown .o_dropdown_toggler {
     @extend %-main-navbar-entry-base;
     @extend %-main-navbar-entry-padding;
     @extend %-main-navbar-entry-bg-hover;
