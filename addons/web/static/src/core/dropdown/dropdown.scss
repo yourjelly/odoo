@@ -1,5 +1,5 @@
-// Default Boostrap Classes customizations
-//------------------------------------------------------------------------------
+// = Default Boostrap Classes customizations
+// ----------------------------------------------------------------------------
 .dropdown-menu {
   min-width: 100%;
   max-height: 90vh;
@@ -34,7 +34,9 @@
   }
 
   &.disabled a, &:disabled a {
-    @include o-hover-text-color($dropdown-link-disabled-color, $dropdown-link-disabled-color);
+    @include o-hover-text-color(
+      $dropdown-link-disabled-color,
+      $dropdown-link-disabled-color);
   }
 }
 
@@ -48,10 +50,13 @@
 }
 
 .dropdown-item-text {
-  // Commonly used in to wrap forms into dropdown menus.
-  // Specify a reasonable minimum-width to avoid inner elements
-  // to overlap each other.
+  // Commonly used in to wrap forms into dropdown menus. Specify a reasonable
+  // minimum-width to avoid that inner elements overlap each other.
   min-width: 15rem;
+}
+
+.dropdown-divider:first-child {
+  display: none;
 }
 
 .o_rtl {
@@ -60,8 +65,8 @@
   }
 }
 
-// Extend Owl custom classes to visually match Boostrap ones
-//------------------------------------------------------------------------------
+// = Extend Owl custom classes to visually match Boostrap ones
+// ----------------------------------------------------------------------------
 .o_dropdown {
   @extend .dropdown;
 
@@ -82,8 +87,8 @@
   }
 }
 
-// Owl components specific rules
-//------------------------------------------------------------------------------
+// = Owl components specific rules
+// -----------------------------------------------------------------------------
 .o_dropdown_item:not(.disabled):not(:disabled) {
   // Needed 'cause <DropdownItem> generate <li> html tags that for browsers are
   // normally not clickable.
