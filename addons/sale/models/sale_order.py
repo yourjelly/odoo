@@ -500,7 +500,7 @@ class SaleOrder(models.Model):
                 return {'warning': warning}
 
     @api.onchange('commitment_date')
-    def _onchange_commitment_date(self):
+    def _onchange_commitment_date_warning(self):
         """ Warn if the commitment dates is sooner than the expected date """
         if (self.commitment_date and self.expected_date and self.commitment_date < self.expected_date):
             return {
