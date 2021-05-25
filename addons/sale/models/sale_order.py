@@ -956,6 +956,7 @@ class SaleOrder(models.Model):
             self = self.with_user(SUPERUSER_ID)
         template_id = self._find_mail_template(force_confirmation_template=True)
         if template_id:
+            # TODO VFE: batch send ?
             for order in self:
                 order.with_context(force_send=True).message_post_with_template(template_id, composition_mode='comment', email_layout_xmlid="mail.mail_notification_paynow")
 
