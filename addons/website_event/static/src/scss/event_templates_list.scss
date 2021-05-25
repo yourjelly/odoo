@@ -19,10 +19,12 @@
 .o_wevent_index {
     // Events List
     .o_wevent_events_list {
-        header {
-            a {
+        a {
+            .o_record_cover_image {
                 transition: all .25s ease-in-out;
-                @include hover-focus {
+            }
+            &:hover, &:focus {
+                .o_record_cover_image {
                     transform: scale(1.05);
                 }
             }
