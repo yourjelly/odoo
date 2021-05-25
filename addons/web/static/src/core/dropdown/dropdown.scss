@@ -70,6 +70,10 @@
 .o_dropdown {
   @extend .dropdown;
 
+  &_toggler {
+    @extend .dropdown-toggle;
+  }
+
   &_menu {
     @extend .dropdown-menu;
 
@@ -95,7 +99,7 @@
   cursor: pointer;
 }
 
-button.o_dropdown_toggler, button.o_dropdown_toggler_btn {
+button.o_dropdown_toggler {
   > span {
     min-width: max-content;
   }
