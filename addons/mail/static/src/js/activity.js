@@ -213,10 +213,11 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {integer} id
+     * @param {integer} previousActivityTypeID
      * @param {function} callback
      * @return {Promise}
      */
-    _openActivityForm: function (id, callback) {
+    _openActivityForm: function (id, previousActivityTypeID=false, callback) {
         var action = {
             type: 'ir.actions.act_window',
             name: _t("Schedule Activity"),
@@ -227,6 +228,7 @@ var BasicActivity = AbstractField.extend({
             context: {
                 default_res_id: this.res_id,
                 default_res_model: this.model,
+                default_activity_type_id: previousActivityTypeID,
             },
             res_id: id || false,
         };
@@ -502,7 +504,8 @@ var BasicActivity = AbstractField.extend({
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
-        return this._openActivityForm(false, this._reload.bind(this));
+        var previousActivityTypeID = this.viewType === 'default' ? $(ev.currentTarget).data('previous-activity-type-id') : 4;
+        return this._openActivityForm(false, previousActivityTypeID, this._reload.bind(this, { activity: true, thread: true }));
     },
 
     /**
@@ -721,6 +724,7 @@ var KanbanActivity = BasicActivity.extend({
             self.$('.o_activity').html(QWeb.render('mail.KanbanActivityDropdown', {
                 selection: self.selection,
                 records: _.groupBy(setDelayLabel(activities), 'state'),
+                typeId: activities.length >= 1 ? activities[0].activity_type_id[0] : false,
                 session: session,
                 widget: self,
             }));
