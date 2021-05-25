@@ -12,7 +12,7 @@ class ReportProjectTaskBurndownChart(models.Model):
     _name = 'project.task.burndown.chart.report'
     _description = 'Burndown Chart'
     _auto = False
-    _order = 'date'
+    _order = 'date desc'
 
     project_id = fields.Many2one('project.project', readonly=True)
     display_project_id = fields.Many2one('project.project', readonly=True)
