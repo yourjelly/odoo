@@ -618,8 +618,12 @@
                                         <div>
                                             <span class="o_value"><t t-esc="record.task_count.value"/></span>
                                             <span class="o_label"><t t-esc="record.label_tasks.value"/></span>
+                                            <field name="activity_ids" widget="kanban_activity"/>
                                         </div>
                                     </a>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                    </div>
                                 </div>
                             </div>
                         </t>
