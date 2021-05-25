@@ -149,7 +149,7 @@ var BasicActivity = AbstractField.extend({
      */
     scheduleActivity: function () {
         var callback = this._reload.bind(this, { activity: true, thread: true });
-        return this._openActivityForm(false, callback);
+        return this._openActivityForm(false, false, callback);
     },
 
     //------------------------------------------------------------
@@ -212,21 +212,26 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {integer} id
+     * @param {integer} previousActivityTypeID
      * @param {function} callback
      * @return {Promise}
      */
-    _openActivityForm: function (id, callback) {
-        var action = {
+    _openActivityForm: function (id, previousActivityTypeID, callback) {
+        const context = {
+            default_res_id: this.res_id,
+            default_res_model: this.model,
+        };
+        if (previousActivityTypeID) {
+            context.default_activity_type_id = previousActivityTypeID;
+        }
+        const action = {
             type: 'ir.actions.act_window',
             name: _t("Schedule Activity"),
             res_model: 'mail.activity',
             view_mode: 'form',
             views: [[false, 'form']],
             target: 'new',
-            context: {
-                default_res_id: this.res_id,
-                default_res_model: this.model,
-            },
+            context: context,
             res_id: id || false,
         };
         return this.do_action(action, { on_close: callback });
@@ -307,7 +312,7 @@ var BasicActivity = AbstractField.extend({
     _onEditActivity: function (ev) {
         ev.preventDefault();
         var activityID = $(ev.currentTarget).data('activity-id');
-        return this._openActivityForm(activityID, this._reload.bind(this, { activity: true, thread: true }));
+        return this._openActivityForm(activityID, false, this._reload.bind(this, { activity: true, thread: true }));
     },
     /**
      * @private
@@ -501,7 +506,8 @@ var BasicActivity = AbstractField.extend({
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
-        return this._openActivityForm(false, this._reload.bind(this));
+        const previousActivityTypeID = $(ev.currentTarget).data('previous-activity-type-id');
+        return this._openActivityForm(false, previousActivityTypeID, this._reload.bind(this, { activity: true, thread: true }));
     },
 
     /**
@@ -720,6 +726,7 @@ var KanbanActivity = BasicActivity.extend({
             self.$('.o_activity').html(QWeb.render('mail.KanbanActivityDropdown', {
                 selection: self.selection,
                 records: _.groupBy(setDelayLabel(activities), 'state'),
+                typeId: (activities.length >= 1 && self.viewType === 'default') ? activities[0].activity_type_id[0] : false,
                 session: session,
                 widget: self,
             }));
