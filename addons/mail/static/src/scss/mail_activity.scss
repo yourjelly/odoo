@@ -84,18 +84,6 @@
                 }
             }
 
-            .o_thread_message_collapse .dl-horizontal.card {
-                display: inline-block;
-                margin-bottom: 0;
-
-                dt {
-                    max-width: 80px;
-                }
-                dd {
-                    margin-left: 95px;
-                }
-            }
-
             .o_thread_message_note {
                 margin: 2px 0 5px;
                 padding: 0px;
@@ -196,7 +184,7 @@
             }
 
             ul.o_activity_log {
-                color: $body-color;
+                cursor: default;
 
                 li {
                     .o_activity_title_entry {
@@ -208,33 +196,13 @@
                         }
                     }
 
-                    .o_edit_button {
-                        opacity: 0.5;
-                    }
-
-                    &:hover .o_edit_button{
-                        opacity: 1;
-                    }
-
-                    .o_activity_link_kanban {
-                        font-size: 1.5em;
-                        @include o-hover-text-color($text-muted, theme-color('success'));
-                        @include o-hover-opacity(0.5, 1);
-                    }
-
                     &.o_activity_selected {
                         border-bottom: 0;
-                    }
-
-                    &.o_activity_form > div {
-                        padding-top: 0.5em;
-                        padding-bottom: 0.7em;
                     }
                 }
             }
 
             .o_no_activity {
-                padding: 10px;
                 cursor: initial;
             }
         }

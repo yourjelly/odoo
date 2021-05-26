@@ -1,29 +1,33 @@
 // ------------------------------------------------------------------
-// Layout
+// Drop Zone
 // ------------------------------------------------------------------
 
 .o_DropZone {
-    display: flex;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
+    @include o-position-absolute(0, 0, 0, 0);
     z-index: 1;
-    align-items: center;
-    justify-content: center;
+    transition: all .2s;
+}
+
+.o_DropZone_content {
+    @include o-position-absolute(4%, 4%, 4%, 4%);
+    border-width: 2px!important;
+    transition: all .4s;
+}
+
+.o_DropZone_contentIcon {
+    transition: margin .2s ease-in-out;
 }
 
 // ------------------------------------------------------------------
-// Style
+// Interactions
 // ------------------------------------------------------------------
 
 .o_DropZone {
-    color: $o-enterprise-primary-color;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px dashed $o-enterprise-primary-color;
+    &:not(.o-dragging-inside) .o_DropZone_content {
+        border: 2px dashed currentColor!important;
+    }
 
     &.o-dragging-inside {
-        border-width: 5px;
+        background: rgba(#FFF, 0.9);
     }
 }

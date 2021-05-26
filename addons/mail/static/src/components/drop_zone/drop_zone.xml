@@ -2,10 +2,19 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.DropZone" owl="1">
-        <div class="o_DropZone" t-att-class="{ 'o-dragging-inside': state.isDraggingInside }" t-on-dragenter="_onDragenter" t-on-dragleave="_onDragleave" t-on-dragover="_onDragover" t-on-drop="_onDrop">
-            <h4>
-                Drag Files Here <i class="fa fa-download"/>
-            </h4>
+        <div class="o_DropZone" t-on-dragenter="_onDragenter" t-on-dragleave="_onDragleave" t-on-dragover="_onDragover" t-on-drop="_onDrop" t-att-class="state.isDraggingInside ? 'o-dragging-inside' : 'bg-white-75'">
+            <span class="o_DropZone_content d-flex flex-column align-items-center justify-content-center border" t-att-class="state.isDraggingInside ? 'text-primary border-primary' : 'text-600'">
+                <svg class="o_DropZone_contentIcon" viewBox="0 0 24 24" width="60" height="60" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" t-att-class="state.isDraggingInside ? 'mb-5' : 'mb-2'">
+                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" stroke="currentColor"/>
+                    <g t-att-class="state.isDraggingInside ? 'text-900' : 'text-600'">
+                        <line x1="12" y1="12" x2="12" y2="21" stroke="currentColor"/>
+                        <polyline points="16 16 12 12 8 16" stroke="currentColor"/>
+                    </g>
+                </svg>
+                <h4 class="m-0" t-att-class="state.isDraggingInside ? 'text-900' : 'text-600'">
+                    Drag Files Here
+                </h4>
+            </span>
         </div>
     </t>
 

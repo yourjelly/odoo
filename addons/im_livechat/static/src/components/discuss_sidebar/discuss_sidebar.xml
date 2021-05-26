@@ -5,10 +5,10 @@
             <t t-set="livechats" t-value="quickSearchOrderedAndPinnedLivechatList()"/>
             <t t-if="livechats and livechats.length">
                 <div class="o_DiscussSidebar_group o_DiscussSidebar_groupLivechat">
-                    <div class="o_DiscussSidebar_groupHeader">
-                        <div class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle">
+                    <div class="o_DiscussSidebar_groupHeader d-flex align-items-center py-2 px-3">
+                        <small class="o_DiscussSidebar_groupHeaderItem o_DiscussSidebar_groupTitle font-weight-bold text-uppercase text-500">
                             Livechat
-                        </div>
+                        </small>
                     </div>
                     <div class="o_DiscussSidebar_list">
                         <t t-foreach="livechats" t-as="livechat" t-key="livechat.localId">

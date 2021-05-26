@@ -22,7 +22,7 @@
                             </t>
                         </div>
                     </main>
-                    <div class="modal-footer">
+                    <div class="modal-footer justify-content-start">
                         <button class="o-apply btn btn-primary" t-on-click="_onClickApply">
                             Apply
                         </button>

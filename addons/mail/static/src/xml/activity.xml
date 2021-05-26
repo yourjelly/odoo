@@ -109,7 +109,7 @@
         </div>
     </t>
     <t t-name="mail.activity_feedback_form">
-        <div>
+        <div class="pt-1 pb-2">
             <textarea class="form-control" rows="3" id="activity_feedback" placeholder="Write Feedback"/>
             <div class="mt8">
                 <t t-if="chaining_type === 'suggest'">
