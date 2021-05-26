@@ -2,31 +2,31 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.MessageList" owl="1">
-        <div class="o_MessageList" t-att-class="{ 'o-empty': threadView and threadView.messages.length === 0 }" t-on-scroll="onScroll">
+        <div class="o_MessageList d-flex flex-column overflow-auto bg-white" t-att-class=" threadView and threadView.messages.length === 0 ? ' o-empty align-items-center justify-content-center' : 'pb-3'" t-on-scroll="onScroll">
             <t t-if="threadView">
                 <!-- No result messages -->
                 <t t-if="threadView.nonEmptyMessages.length === 0">
-                    <div class="o_MessageList_empty o_MessageList_item">
+                    <div class="o_MessageList_empty o_MessageList_item d-flex flex-column align-items-center justify-content-center flex-grow-1 h-100 w-100 p-4 text-center font-italic text-muted">
                         <t t-if="threadView.thread === env.messaging.inbox">
-                            <div class="o_MessageList_emptyTitle">
+                            <div class="o_MessageList_emptyTitle font-weight-bold h4">
                                 Congratulations, your inbox is empty
                             </div>
                             New messages appear here.
                         </t>
                         <t t-elif="threadView.thread === env.messaging.starred">
-                            <div class="o_MessageList_emptyTitle">
+                            <div class="o_MessageList_emptyTitle font-weight-bold h4">
                                 No starred messages
                             </div>
                             You can mark any message as 'starred', and it shows up in this mailbox.
                         </t>
                         <t t-elif="threadView.thread === env.messaging.history">
-                            <div class="o_MessageList_emptyTitle o-neutral-face-icon">
+                            <div class="o_MessageList_emptyTitle o-neutral-face-icon font-weight-bold h4">
                                 No history messages
                             </div>
                             Messages marked as read will appear in the history.
                         </t>
                         <t t-elif="threadView.thread === env.messaging.moderation">
-                            <div class="o_MessageList_emptyTitle">
+                            <div class="o_MessageList_emptyTitle font-weight-bold h4">
                                 You have no messages to moderate.
                             </div>
                             Messages pending moderation appear here.
@@ -55,15 +55,15 @@
                 <t t-set="prev_message" t-value="0"/>
                 <t t-foreach="orderedMessages" t-as="message" t-key="message.localId">
                     <t t-if="message === threadView.thread.messageAfterNewMessageSeparator">
-                        <div class="o_MessageList_separator o_MessageList_separatorNewMessages o_MessageList_item" t-att-class="{ 'o-disable-animation': env.disableAnimation }" t-transition="fade">
-                            <hr class="o_MessageList_separatorLine o_MessageList_separatorLineNewMessages"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelNewMessages">New messages</span>
+                        <div class="o_MessageList_separator o_MessageList_separatorNewMessages o_MessageList_item mx-3 d-flex align-items-center flex-grow-0 flex-shrink-0 font-weight-bold" t-att-class="{ 'o-disable-animation': env.disableAnimation }" t-transition="fade">
+                            <hr class="o_MessageList_separatorLine o_MessageList_separatorLineNewMessages flex-grow-1 w-auto"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelNewMessages bg-white pl-3"><em>New messages</em></span>
                         </div>
                     </t>
                     <t t-if="!message.isEmpty">
                         <t t-set="message_day" t-value="getDateDay(message)"/>
                         <t t-if="current_day !== message_day">
-                            <div class="o_MessageList_separator o_MessageList_separatorDate o_MessageList_item">
-                                <hr class="o_MessageList_separatorLine"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelDate"><t t-esc="message_day"/></span><hr class="o_MessageList_separatorLine"/>
+                            <div class="o_MessageList_separator o_MessageList_separatorDate o_MessageList_item py-3 mx-3 d-flex align-items-center flex-grow-0 flex-shrink-0 font-weight-bold">
+                                <hr class="o_MessageList_separatorLine flex-grow-1 w-auto"/><span class="o_MessageList_separatorLabel o_MessageList_separatorLabelDate bg-white px-3"><t t-esc="message_day"/></span><hr class="o_MessageList_separatorLine flex-grow-1 w-auto"/>
                                 <t t-set="current_day" t-value="message_day"/>
                                 <t t-set="isMessageSquashed" t-value="false"/>
                             </div>
@@ -94,13 +94,13 @@
 
     <t t-name="mail.MessageList.loadMore" owl="1">
         <t t-if="threadView.threadCache.isLoadingMore">
-            <div class="o_MessageList_item o_MessageList_isLoadingMore">
-                <i class="o_MessageList_isLoadingMoreIcon fa fa-spin fa-circle-o-notch"/>
+            <div class="o_MessageList_item o_MessageList_isLoadingMore align-self-center">
+                <i class="o_MessageList_isLoadingMoreIcon fa fa-spin fa-circle-o-notch mr-1"/>
                 Loading...
             </div>
         </t>
         <t t-elif="!threadView.threadCache.isAllHistoryLoaded and !threadView.thread.isTemporary">
-            <a class="o_MessageList_item o_MessageList_loadMore" href="#" t-on-click="_onClickLoadMore" t-ref="loadMore">
+            <a class="o_MessageList_item o_MessageList_loadMore align-self-center" href="#" t-on-click="_onClickLoadMore" t-ref="loadMore">
                 Load more
             </a>
         </t>

@@ -2,10 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.PartnerImStatusIcon" owl="1">
-        <span class="o_PartnerImStatusIcon fa-stack"
+        <span class="o_PartnerImStatusIcon fa-stack d-flex flex-column"
             t-att-class="{
                 'o-away': partner and partner.im_status === 'away',
-                'text-warning': partner and partner.im_status === 'away',
                 'o-background': !props.hasBackground,
                 'o-bot': partner and env.messaging.partnerRoot === partner,
                 'o-has-open-chat': props.hasOpenChat,
@@ -17,20 +16,20 @@
         >
             <t t-if="partner" name="rootCondition">
                 <t t-if="props.hasBackground">
-                    <i class="o_PartnerImStatusIcon_outerBackground fa fa-circle fa-stack-1x"/>
-                    <i class="o_PartnerImStatusIcon_innerBackground fa fa-circle fa-stack-1x"/>
+                    <i class="o_PartnerImStatusIcon_outerBackground fa fa-fw fa-circle fa-stack-1x"/>
+                    <i t-if="partner.im_status === 'offline'" class="o_PartnerImStatusIcon_innerBackground fa fa-fw fa-circle fa-stack-1x text-200"/>
                 </t>
                 <t t-if="partner.im_status === 'online'">
-                    <i class="o_PartnerImStatusIcon_icon o-online fa fa-circle fa-stack-1x" title="Online" role="img" aria-label="User is online"/>
+                    <i class="o_PartnerImStatusIcon_icon o-online fa fa-fw fa-circle text-success fa-stack-1x" title="Online" role="img" aria-label="User is online"/>
                 </t>
                 <t t-if="partner.im_status === 'away'">
-                    <i class="o_PartnerImStatusIcon_icon o-away fa fa-circle fa-stack-1x" title="Idle" role="img" aria-label="User is idle"/>
+                    <i class="o_PartnerImStatusIcon_icon o-away fa fa-fw fa-circle text-warning fa-stack-1x" title="Idle" role="img" aria-label="User is idle"/>
                 </t>
                 <t t-if="partner.im_status === 'offline'">
-                    <i class="o_PartnerImStatusIcon_icon o-offline fa fa-circle-o fa-stack-1x" title="Offline" role="img" aria-label="User is offline"/>
+                    <i class="o_PartnerImStatusIcon_icon o-offline fa fa-fw fa-circle-o text-600 fa-stack-1x" title="Offline" role="img" aria-label="User is offline"/>
                 </t>
                 <t t-if="partner === env.messaging.partnerRoot">
-                    <i class="o_PartnerImStatusIcon_icon o-bot fa fa-heart fa-stack-1x" title="Bot" role="img" aria-label="User is a bot"/>
+                    <i class="o_PartnerImStatusIcon_icon o-bot text-primary fa fa-fw fa-heart fa-stack-1x" title="Bot" role="img" aria-label="User is a bot"/>
                 </t>
             </t>
         </span>

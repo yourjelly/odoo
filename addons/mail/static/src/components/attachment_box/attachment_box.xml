@@ -2,15 +2,15 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.AttachmentBox" owl="1">
-        <div class="o_AttachmentBox">
-            <div class="o_AttachmentBox_title">
-                <hr class="o_AttachmentBox_dashedLine"/>
-                <span class="o_AttachmentBox_titleText">
+        <div class="o_AttachmentBox px-3 position-relative">
+            <div class="o_AttachmentBox_title d-flex align-items-center my-4">
+                <div class="o_AttachmentBox_dashedLine flex-grow-1"/>
+                <span class="o_AttachmentBox_titleText mx-3 font-weight-bold">
                     Attachments
                 </span>
-                <hr class="o_AttachmentBox_dashedLine"/>
+                <div class="o_AttachmentBox_dashedLine flex-grow-1"/>
             </div>
-            <div class="o_AttachmentBox_content">
+            <div class="o_AttachmentBox_content d-flex flex-column">
                 <t t-if="isDropZoneVisible.value">
                     <DropZone
                         class="o_AttachmentBox_dropZone"
@@ -29,7 +29,7 @@
                         t-on-o-attachment-removed="_onAttachmentRemoved"
                     />
                 </t>
-                <button class="o_AttachmentBox_buttonAdd btn btn-link" type="button" t-on-click="_onClickAdd">
+                <button class="o_AttachmentBox_buttonAdd btn btn-link align-self-center" type="button" t-on-click="_onClickAdd">
                     <i class="fa fa-plus-square"/>
                     Add attachments
                 </button>

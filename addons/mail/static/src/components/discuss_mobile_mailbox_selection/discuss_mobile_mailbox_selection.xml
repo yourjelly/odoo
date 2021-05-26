@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.DiscussMobileMailboxSelection" owl="1">
-        <div class="o_DiscussMobileMailboxSelection">
+        <div class="o_DiscussMobileMailboxSelection btn-group w-100 border-bottom shadow-sm">
             <t t-foreach="orderedMailboxes" t-as="mailbox" t-key="mailbox.localId">
                 <button class="o_DiscussMobileMailboxSelection_button btn"
                     t-att-class="{
