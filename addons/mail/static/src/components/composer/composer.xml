@@ -2,13 +2,18 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Composer" owl="1">
-        <div class="o_Composer"
+        <div class="o_Composer bg-100"
             t-att-class="{
                 'o-focused': composer and composer.hasFocus,
                 'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
                 'o-has-footer': hasFooter,
                 'o-has-header': hasHeader,
                 'o-is-compact': props.isCompact,
+                'pr-3': props.hasCurrentPartnerAvatar,
+                'pl-1': props.hasCurrentPartnerAvatar,
+                'pt-3': props.hasCurrentPartnerAvatar and hasHeader,
+                'pt-4': props.hasCurrentPartnerAvatar and !hasHeader,
+                'pb-4': props.hasCurrentPartnerAvatar,
             }"
             t-on-keydown="_onKeydown"
         >
@@ -34,7 +39,7 @@
                         </t>
                         <t t-if="props.hasFollowers and !composer.isLog">
                             <!-- Text for followers -->
-                            <small class="o_Composer_followers">
+                            <small class="o_Composer_followers w-100 flex-grow-0 flex-shrink-0">
                                 <b class="text-muted">To: </b>
                                 <em class="text-muted">Followers of </em>
                                 <b>
@@ -47,14 +52,17 @@
                                 </b>
                             </small>
                             <ComposerSuggestedRecipientList
+                                class="mb-2 w-100 flex-grow-0 flex-shrink-0"
                                 threadLocalId="composer.thread.localId"
                             />
                         </t>
                     </div>
                 </t>
-                <t t-if="composer.thread and composer.thread.model === 'mail.channel' and composer.thread.mass_mailing">
-                    <div class="o_Composer_subject">
-                        <input class="o_Composer_subjectInput" type="text" placeholder="Subject" t-on-input="_onInputSubject" t-ref="subject"/>
+                <t t-set="hasSubjectField" t-value="composer.thread and composer.thread.model === 'mail.channel' and composer.thread.mass_mailing"/>
+                <t t-if="hasSubjectField">
+                    <div class="o_Composer_subject border border-bottom-0 rounded-lg-top px-3 bg-white">
+                        <input class="o_Composer_subjectInput d-flex flex-shrink-1 flex-grow-1 py-2 px-0 border-0 rounded-lg-top" type="text" placeholder="Subject" t-on-input="_onInputSubject" t-ref="subject"/>
+                        <div class="border-bottom mb-2"></div>
                     </div>
                 </t>
                 <t t-if="props.hasCurrentPartnerAvatar">
@@ -62,17 +70,22 @@
                         <img class="o_Composer_currentPartnerAvatar rounded-circle" t-att-src="currentPartnerAvatar" alt=""/>
                     </div>
                 </t>
-                <div
-                    class="o_Composer_coreMain"
+                <div class="o_Composer_coreMain d-flex flex-nowrap align-items-start flex-grow-1 flex-shrink-1 bg-white"
                     t-att-class="{
                         'o-composer-is-compact': props.isCompact,
                         'o-composer-is-extended': composer.thread and composer.thread.mass_mailing,
-                    }"
-                >
+                        'flex-column': !props.isCompact,
+                    }">
                     <TextInput
-                        class="o_Composer_textInput"
+                        class="o_Composer_textInput flex-grow-1 flex-shrink-1 align-self-stretch bg-white"
                         t-att-class="{
                             'o-composer-is-compact': props.isCompact,
+                            'border-top' : !hasSubjectField,
+                            'border-left': props.hasCurrentPartnerAvatar,
+                            'border-bottom': props.hasCurrentPartnerAvatar and props.isCompact,
+                            'border-right': props.hasCurrentPartnerAvatar and !props.isCompact,
+                            'rounded-lg-left': props.hasCurrentPartnerAvatar and props.isCompact,
+                            'rounded-lg-top': props.hasCurrentPartnerAvatar and !props.isCompact and !hasSubjectField,
                             'o_Composer_textInput-mobile': env.messaging.device.isMobile,
                             'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
                         }"
@@ -86,19 +99,39 @@
                         t-key="composer.localId"
                         t-ref="textInput"
                     />
-                    <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': env.messaging.device.isMobile }">
-                        <div class="o_Composer_toolButtons"
+                    <div class="o_Composer_buttons d-flex align-items-stretch align-self-stretch flex-grow-0 flex-shrink-0"
+                        t-att-class="{
+                            'o-composer-is-compact': props.isCompact,
+                            'o-mobile': env.messaging.device.isMobile,
+                            'px-3': !props.isCompact,
+                            'w-100': !props.isCompact,
+                            'border-top': props.isCompact,
+                            'border-bottom': props.hasCurrentPartnerAvatar,
+                            'border-left': props.hasCurrentPartnerAvatar and !props.isCompact,
+                            'border-right': (props.hasCurrentPartnerAvatar and !props.isCompact) or props.hasCurrentPartnerAvatar and props.isCompact and props.hasDiscardButton,
+                            'rounded-lg-bottom': props.hasCurrentPartnerAvatar and !props.isCompact,
+                            'rounded-lg-right': props.hasCurrentPartnerAvatar and props.isCompact,
+                        }">
+                        <div class="o_Composer_toolButtons d-flex py-1 bg-white"
                             t-att-class="{
                                 'o-composer-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
                                 'o-composer-is-compact': props.isCompact,
+                                'border-top': !props.isCompact,
+                                'flex-row': !props.isCompact,
+                                'justify-content-between': !props.isCompact,
+                                'w-100': !props.isCompact,
                             }">
                             <t t-if="props.isCompact">
-                                <div class="o_Composer_toolButtonSeparator"/>
+                                <div class="o_Composer_toolButtonSeparator border-left my-2 flex-grow-0 flex-shrink-0"/>
                             </t>
-                            <div class="o_Composer_primaryToolButtons" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
+                            <div class="o_Composer_primaryToolButtons d-flex align-items-center"
+                                t-att-class="{
+                                    'o-composer-is-compact': props.isCompact,
+                                    'px-2': props.isCompact
+                                }">
                                 <Popover position="'top'" t-on-o-emoji-selection="_onEmojiSelection">
                                     <!-- TODO FIXME o-open not possible to code due to https://github.com/odoo/owl/issues/693 -->
-                                    <button class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn btn-light"
+                                    <button class="o_Composer_button o_Composer_buttonEmojis o_Composer_toolButton btn btn-light border-0 bg-white text-600 rounded-circle mr-1"
                                         t-att-class="{
                                             'o-open': false and state.displayed,
                                             'o-mobile': env.messaging.device.isMobile,
@@ -111,11 +144,11 @@
                                         <EmojisPopover t-ref="emojisPopover"/>
                                     </t>
                                 </Popover>
-                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-light fa fa-paperclip" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" title="Add attachment" type="button" t-on-click="_onClickAddAttachment"/>
+                                <button class="o_Composer_button o_Composer_buttonAttachment o_Composer_toolButton btn btn-light border-0 bg-white text-600 rounded-circle fa fa-paperclip" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" title="Add attachment" type="button" t-on-click="_onClickAddAttachment"/>
                             </div>
                             <t t-if="props.isExpandable">
                                 <div class="o_Composer_secondaryToolButtons">
-                                    <button class="btn btn-light fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" title="Full composer" type="button" t-on-click="_onClickFullComposer"/>
+                                    <button class="btn btn-light border-0 bg-white text-600 rounded-circle fa fa-expand o_Composer_button o_Composer_buttonFullComposer o_Composer_toolButton" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }" title="Full composer" type="button" t-on-click="_onClickFullComposer"/>
                                 </div>
                             </t>
                         </div>
@@ -125,14 +158,23 @@
                     </div>
                 </div>
                 <t t-if="hasFooter">
-                    <div class="o_Composer_coreFooter" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
+                    <t t-set="hasAttachments" t-value="composer.attachments.length > 0"/>
+                    <div class="o_Composer_coreFooter"
+                        t-att-class="{
+                            'o-composer-is-compact': props.isCompact,
+                            'ml-0': !props.isCompact,
+                            'border-top': hasAttachments and props.isCompact and !props.hasCurrentPartnerAvatar,
+                            'px-2': hasAttachments and props.isCompact and !props.hasCurrentPartnerAvatar,
+                        }">
                         <t t-if="props.hasThreadTyping">
-                            <ThreadTextualTypingStatus class="o_Composer_threadTextualTypingStatus" threadLocalId="composer.thread.localId"/>
+                            <ThreadTextualTypingStatus class="o_Composer_threadTextualTypingStatus small text-truncate" threadLocalId="composer.thread.localId"/>
                         </t>
-                        <t t-if="composer.attachments.length > 0">
+                        <t t-if="hasAttachments">
                             <AttachmentList
-                                class="o_Composer_attachmentList"
-                                t-att-class="{ 'o-composer-is-compact': props.isCompact }"
+                                class="o_Composer_attachmentList flex-shrink-1 flex-grow-1"
+                                t-att-class="{
+                                    'o-composer-is-compact': props.isCompact,
+                                }"
                                 areAttachmentsEditable="true"
                                 attachmentsDetailsMode="props.attachmentsDetailsMode"
                                 attachmentsImageSize="'small'"
@@ -151,15 +193,23 @@
     </t>
 
     <t t-name="mail.Composer.actionButtons" owl="1">
-        <div class="o_Composer_actionButtons" t-att-class="{ 'o-composer-is-compact': props.isCompact }">
+        <div class="o_Composer_actionButtons" t-att-class="{
+                'o-composer-is-compact': props.isCompact,
+                'd-flex': props.isCompact,
+                'mt-2': !props.isCompact,
+            }">
             <t t-if="props.hasSendButton">
+                <t t-set="isLast" t-value="env.messaging.device.isMobile or !props.hasDiscardButton"/>
                 <button class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary"
                     t-att-class="{
                         'fa': env.messaging.device.isMobile,
                         'fa-paper-plane-o': env.messaging.device.isMobile,
-                        'o-last': env.messaging.device.isMobile or !props.hasDiscardButton,
+                        'o-last': isLast,
                         'o-composer-is-compact': props.isCompact,
                         'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
+                        'border-left-0': props.isCompact,
+                        'rounded-0': isLast and props.hasCurrentPartnerAvatar and props.isCompact,
+                        'rounded-lg-right': isLast and props.hasCurrentPartnerAvatar and props.isCompact
                     }"
                     t-att-disabled="!composer.canPostMessage ? 'disabled' : ''"
                     type="button"
@@ -169,7 +219,14 @@
                 </button>
             </t>
             <t t-if="!env.messaging.device.isMobile and props.hasDiscardButton">
-                <button class="o_Composer_actionButton o-last o_Composer_button o_Composer_buttonDiscard btn btn-secondary" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar }" type="button" t-on-click="_onClickDiscard">
+                <button class="o_Composer_actionButton o-last o_Composer_button o_Composer_buttonDiscard btn btn-secondary border-0"
+                    t-att-class="{
+                        'o-composer-is-compact': props.isCompact,
+                        'o-has-current-partner-avatar': props.hasCurrentPartnerAvatar,
+                        'rounded-0': isLast and props.hasCurrentPartnerAvatar and props.isCompact,
+                        'rounded-lg-right': props.hasCurrentPartnerAvatar and props.isCompact
+                    }"
+                    type="button" t-on-click="_onClickDiscard">
                     Discard
                 </button>
             </t>

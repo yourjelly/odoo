@@ -2,18 +2,25 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ChatWindow" owl="1">
-        <div class="o_ChatWindow" tabindex="0" t-att-data-visible-index="chatWindow ? chatWindow.visibleIndex : undefined"
+        <div class="o_ChatWindow d-flex flex-column shadow-lg" tabindex="0" t-att-data-visible-index="chatWindow ? chatWindow.visibleIndex : undefined"
             t-att-class="{
                 'o-focused': chatWindow and chatWindow.isFocused,
                 'o-folded': chatWindow and chatWindow.isFolded,
                 'o-fullscreen': props.isFullscreen,
+                'w-100': props.isFullscreen,
+                'h-100': props.isFullscreen,
                 'o-mobile': env.messaging.device.isMobile,
+                'position-fixed': env.messaging.device.isMobile,
+                'rounded-top': !env.messaging.device.isMobile,
+                'mw-100': !env.messaging.device.isMobile,
+                'mh-100': !env.messaging.device.isMobile,
                 'o-new-message': chatWindow and !chatWindow.thread,
             }" t-on-keydown="_onKeydown" t-on-focusout="_onFocusout" t-att-data-chat-window-local-id="chatWindow ? chatWindow.localId : undefined" t-att-data-thread-local-id="chatWindow ? (chatWindow.thread ? chatWindow.thread.localId : '') : undefined"
         >
             <t t-if="chatWindow">
                 <ChatWindowHeader
-                    class="o_ChatWindow_header"
+                    class="o_ChatWindow_header flex-grow-0 flex-shrink-0 rounded-top"
+                    t-att-class="{'rounded-top': !env.messaging.device.isMobile}"
                     chatWindowLocalId="chatWindow.localId"
                     hasCloseAsBackButton="props.hasCloseAsBackButton"
                     isExpandable="props.isExpandable"
@@ -22,7 +29,7 @@
                 />
                 <t t-if="chatWindow.threadView">
                     <ThreadView
-                        class="o_ChatWindow_thread"
+                        class="o_ChatWindow_thread flex-grow-1 flex-shrink-1"
                         composerAttachmentsDetailsMode="'card'"
                         hasComposer="chatWindow.thread.model !== 'mail.box' and (!chatWindow.thread.mass_mailing or env.messaging.device.isMobile)"
                         hasComposerCurrentPartnerAvatar="false"
@@ -34,17 +41,19 @@
                     />
                 </t>
                 <t t-if="chatWindow.hasNewMessageForm">
-                    <div class="o_ChatWindow_newMessageForm">
-                        <span class="o_ChatWindow_newMessageFormLabel">
-                            To:
-                        </span>
-                        <AutocompleteInput
-                            class="o_ChatWindow_newMessageFormInput"
-                            placeholder="newMessageFormInputPlaceholder"
-                            select="_onAutocompleteSelect"
-                            source="_onAutocompleteSource"
-                            t-ref="input"
-                        />
+                    <div class="o_ChatWindow_newMessageForm form-inline">
+                        <div class="form-group w-100 px-3 mt-3">
+                            <label class="o_ChatWindow_newMessageFormLabel pr-2 font-weight-bold">
+                                To:
+                            </label>
+                            <AutocompleteInput
+                                class="o_ChatWindow_newMessageFormInput form-control flex-grow-1 flex-shrink-1"
+                                placeholder="newMessageFormInputPlaceholder"
+                                select="_onAutocompleteSelect"
+                                source="_onAutocompleteSource"
+                                t-ref="input"
+                            />
+                        </div>
                     </div>
                 </t>
             </t>

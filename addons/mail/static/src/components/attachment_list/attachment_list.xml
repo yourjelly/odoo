@@ -2,11 +2,12 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.AttachmentList" owl="1">
-        <div class="o_AttachmentList">
-            <div class="o_AttachmentList_partialList o_AttachmentList_partialListImages">
+        <div class="o_AttachmentList d-flex flex-column justify-content-start">
+            <div class="o_AttachmentList_partialList o_AttachmentList_partialListImages w-100 d-flex flex-grow-1 flex-wrap mx-n1"
+                t-att-class="{'mt-2': imageAttachments.length != 0}">
                 <t t-foreach="imageAttachments" t-as="attachment" t-key="attachment.localId">
                     <Attachment
-                        class="o_AttachmentList_attachment o_AttachmentList_imageAttachment"
+                        class="o_AttachmentList_attachment o_AttachmentList_imageAttachment mx-1 mb-2 mw-100"
                         attachmentLocalId="attachment.localId"
                         attachmentLocalIds="viewableAttachments.map(attachment => attachment.localId)"
                         detailsMode="props.attachmentsDetailsMode"
@@ -18,10 +19,11 @@
                     />
                 </t>
             </div>
-            <div class="o_AttachmentList_partialList o_AttachmentList_partialListNonImages">
+            <div class="o_AttachmentList_partialList o_AttachmentList_partialListNonImages w-100 d-flex flex-grow-1 flex-wrap justify-content-start mx-n1"
+                t-att-class="{'mt-2': nonImageAttachments.length != 0 and imageAttachments.length == 0}">
                 <t t-foreach="nonImageAttachments" t-as="attachment" t-key="attachment.localId">
                     <Attachment
-                        class="o_AttachmentList_attachment o_AttachmentList_nonImageAttachment"
+                        class="o_AttachmentList_attachment o_AttachmentList_nonImageAttachment mx-1 mb-2 mw-100"
                         attachmentLocalId="attachment.localId"
                         attachmentLocalIds="viewableAttachments.map(attachment => attachment.localId)"
                         detailsMode="'card'"
