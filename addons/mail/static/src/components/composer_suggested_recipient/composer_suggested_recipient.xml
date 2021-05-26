@@ -9,9 +9,9 @@
                         <t t-if="suggestedRecipientInfo.name">
                             <t t-esc="suggestedRecipientInfo.name"/>
                         </t>
-                        <t t-if="suggestedRecipientInfo.email">
+                        <em t-if="suggestedRecipientInfo.email" class="text-muted small">
                             (<t t-esc="suggestedRecipientInfo.email"/>)
-                        </t>
+                        </em>
                     </label>
                 </div>
                 <t t-if="!suggestedRecipientInfo.partner">

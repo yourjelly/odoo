@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.ChatWindowManager" owl="1">
-        <div class="o_ChatWindowManager">
+        <div class="o_ChatWindowManager d-flex flex-row-reverse">
             <t t-if="env.isMessagingInitialized()">
                 <!-- Note: DOM elements are ordered from left to right -->
                 <t t-if="env.messaging.chatWindowManager.hasHiddenChatWindows">

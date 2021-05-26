@@ -96,13 +96,13 @@ class Attachment extends Component {
             if (this.props.imageSize === "large") {
                 size = '400x400';
             } else if (this.props.imageSize === "medium") {
-                size = '200x200';
+                size = '140x140';
             } else if (this.props.imageSize === "small") {
                 size = '100x100';
             }
         }
         // background-size set to override value from `o_image` which makes small image stretched
-        return `background-image:url(/web/image/${this.attachment.id}/${size}); background-size: auto;`;
+        return `background-image:url(/web/image/${this.attachment.id}/${size}); background-size: contain;`;
     }
 
     //--------------------------------------------------------------------------
