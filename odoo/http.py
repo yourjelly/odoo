@@ -204,7 +204,6 @@ def send_file(content, filename=None, mimetype=None, mtime=None, as_attachment=F
     if as_attachment:
         r.headers.add('Content-Disposition', 'attachment', filename=filename or 'file.bin')
 
-
     if cache_timeout:
         if mtime:
             r.last_modified = mtime
@@ -442,98 +441,31 @@ class Request(object):
     def __init__(self, app, httprequest):
         self.app = app
         self.httprequest = httprequest
+        self.params = None
 
         # Session
         self.session_sid = None
-
         self.session_mono = None
+        self.session_orig = None
+        self.session_rotate = None
+        self.session = {}
 
-        # TODO remove
-        self.session_db = None
+        # Environment
         self.db = None
-
         self.cr = None
-
         self.env = None
-
-
-
-        # We keep a default one and then we merge headers._list
-        self.response = werkzeug.wrappers.Response(mimetype='text/html')
-        self.response_template = None
-        self.response_qcontext = None
-        #self.response_headers = werkzeug.datastructures.Headers()
-
-
-        # To check
-        self.auth_method = None
-        self._request_type = None
-        self._cr = None
-        self._uid = None
-        self._context = None
-        self._env = None
-
-        # prevents transaction commit, use when you catch an exception during handling
-        self._failed = None
 
         # TODO remove
         self.endpoint = None
+        # prevents transaction commit, use when you catch an exception during handling
+        self._failed = None
+        # To check for REMOVAL: self.session_db = None self.auth_method = None self._request_type = None self._cr = None self._uid = None self._context = None self._env = None
 
-
-    @property
-    def cr(self):
-        """ :class:`~odoo.sql_db.Cursor` initialized for the current method call.
-
-        Accessing the cursor when the current request uses the ``none``
-        authentication will raise an exception.
-        """
-        # can not be a lazy_property because manual rollback in _call_function
-        # if already set (?)
-        if not self.db:
-            raise RuntimeError('request not bound to a database')
-        if not self._cr:
-            self._cr = self.registry.cursor()
-        return self._cr
-
-    @property
-    def uid(self):
-        # TODO Remove
-        return self._uid
-
-    @uid.setter
-    def uid(self, val):
-        self._uid = val
-        self._env = None
-
-    @property
-    def context(self):
-        # Remove
-        """ :class:`~collections.Mapping` of context values for the current request """
-        if self._context is None:
-            self._context = frozendict(self.session.context)
-        return self._context
-
-    @context.setter
-    def context(self, val):
-        self._context = frozendict(val)
-        self._env = None
-
-
-    #@property
-    #def registry(self):
-
-    @property
-    def env(self):
-        """ The :class:`~odoo.api.Environment` bound to current request. """
-        if self._env is None:
-            self._env = odoo.api.Environment(self.cr, self.uid, self.context)
-        return self._env
-
-    #@lazy_property
-    #@functools.cached_property
-    #def session(self):
-    #    # TODO makz session lazy
-    #    return self.httprequest.session
+        # Response
+        # We keep a default one and then we merge headers._list #self.response_headers = werkzeug.datastructures.Headers()
+        self.response = werkzeug.wrappers.Response(mimetype='text/html')
+        self.response_template = None
+        self.response_qcontext = None
 
     #------------------------------------------------------
     # Common helpers
@@ -701,11 +633,149 @@ class Request(object):
         self.session_mono = len(dbs) == 1
         return self.session_db
 
-    def session_env(self):
-        return odoo.registry(self.db)
-        pass
+        #    def setup_db(self, httprequest):
+        #        db = httprequest.session.db
+        #        # Check if session.db is legit
+        #        if db:
+        #            if db not in db_filter([db], httprequest=httprequest):
+        #                _logger.warning("Logged into database '%s', but dbfilter rejects it; logging session out.", db)
+        #                httprequest.session.logout()
+        #                db = None
 
     def session_pre(self):
+
+
+        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV'
+        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb'
+        "Set-Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb; Expires=Sat, 05-Jun-2021 22:04:27 GMT; Max-Age=7776000; HttpOnly; Path=/"
+
+        cookie = self.httprequest.cookies.get('session_id')
+        cookie_dbname = None
+        r = re.match('([0-9a-zA-Z]{40})(_([0-9a-zA-Z_-]{1,64}))?',cookie)
+        if r:
+            self.session_sid = re.group(1)
+            cookie_dbname = re.group(3)
+
+        # Decode session
+        self.session_orig = "{}"
+        self.session = {}
+
+        #    def _default_values(self):
+        #        self.setdefault("db", None)
+        #        self.setdefault("uid", None)
+        #        self.setdefault("login", None)
+        #        self.setdefault("session_token", None)
+        #        self.setdefault("context", {})
+        #        self.setdefault("debug", '')
+        #def setup_lang(self, httprequest):
+        #    if "lang" not in httprequest.session.context:
+        #        alang = httprequest.accept_languages.best or "en-US"
+        #        try:
+        #            code, territory, _, _ = babel.core.parse_locale(alang, sep='-')
+        #            if territory:
+        #                lang = '%s_%s' % (code, territory)
+        #            else:
+        #                lang = babel.core.LOCALE_ALIASES[code]
+        #        except (ValueError, KeyError):
+        #            lang = 'en_US'
+        #        httprequest.session.context["lang"] = lang
+
+        dbname = session_locate_db(cookie_dbname)
+        if dbname:
+            try:
+                registry = odoo.registry(dbname)
+                registry.check_signaling()
+                self.cr = registry.cursor()
+                self.cr.execute("SELECT id,sid,json FROM ir_session WHERE sid = %s",self.session_id)
+                select = self.cr.fetchall()
+
+            except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
+                # psycopg2 error or attribute error while constructing
+                # the registry. That means either
+                # - the database probably does not exists anymore
+                # - the database is corrupted
+                # - the database version doesnt match the server version
+                self.session_logout()
+                return werkzeug.utils.redirect('/web/database/selector')
+
+            self.db = dbname
+            #self._setup_thread()
+            if select:
+                self.session_orig = select[0][3]
+                self.session=json.loads(self.session_orig)
+                self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
+            else:
+                # No session means 1 but this will be changed in ir.http dispatch
+                self.env = odoo.api.Environment(self.cr, 1, {})
+
+    def session_authenticate_start(self, login=None, password=None):
+        """ Authenticate the current user with the given db, login and
+        password. If successful, store the authentication parameters in the
+        current session and request, unless multi-factor-authentication is
+        activated. In that case, that last part will be done by
+        :ref:`session_authenticate_finalize`.
+        """
+        wsgienv = {
+            "interactive" : True,
+            "base_location" : request.httprequest.url_root.rstrip('/'),
+            "HTTP_HOST" : request.httprequest.environ['HTTP_HOST'],
+            "REMOTE_ADDR" : request.httprequest.environ['REMOTE_ADDR'],
+        }
+        uid = seld.env['res.users'].authenticate(self.db, login, password, wsgienv)
+        self.session["session_authenticate_start_login"] = login
+        self.session["session_authenticate_start_uid"] = uid
+        #self.rotate = True
+
+        # if 2FA is disabled we finalize immediatly
+        user = self.env(user=uid)['res.users'].browse(uid)
+        if not user._mfa_url():
+            self.session_authenticate_finalize()
+
+    def session_authenticate_finalize(self):
+        """ Finalizes a partial session, should be called on MFA validation to
+        convert a partial / pre-session into a full-fledged "logged-in" one """
+        #self.rotate = True
+        self.session["login"] = self.pop('session_authenticate_start_login')
+        self.session["uid"] = self.pop('session_authenticate_start_uid')
+        #self.env[]
+        self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
+
+    def session_setup_context(self):
+        user = self.env['res.users'].browse(self.session["uid"])
+        context = user.context_get() or {}
+        #        self.context['uid'] = self.uid
+        #        self._fix_lang(self.context)
+        #    def get_context(self):
+        #        """
+        #        Re-initializes the current user's session context (based on his
+        #        preferences) by calling res.users.get_context() with the old context.
+        #
+        #        :returns: the new context
+        #        """
+        #        assert self.uid, "The user needs to be logged-in to initialize his context"
+        #        self.context = dict(request.env['res.users'].context_get() or {})
+        #        return self.context
+        #
+        #    def _fix_lang(self, context):
+        #        """ OpenERP provides languages which may not make sense and/or may not
+        #        be understood by the web client's libraries.
+        #
+        #        Fix those here.
+        #
+        #        :param dict context: context to fix
+        #        """
+        #        lang = context.get('lang')
+        #
+        #        # inane OpenERP locale
+        #        if lang == 'ar_AR':
+        #            lang = 'ar'
+        #
+        #        # lang to lang_REGION (datejs only handles lang_REGION, no bare langs)
+        #        if lang in babel.core.LOCALE_ALIASES:
+        #            lang = babel.core.LOCALE_ALIASES[lang]
+        #
+        #        context['lang'] = lang or 'en_US'
+        pass
 
         #class AuthenticationError(Exception):
         #    pass
@@ -722,56 +792,6 @@ class Request(object):
         #        self.inited = True
         #        self._default_values()
         #        self.modified = False
-        #
-        #    def __getattr__(self, attr):
-        #        return self.get(attr, None)
-        #    def __setattr__(self, k, v):
-        #        if getattr(self, "inited", False):
-        #            try:
-        #                object.__getattribute__(self, k)
-        #            except:
-        #                return self.__setitem__(k, v)
-        #        object.__setattr__(self, k, v)
-        #
-        #    def authenticate(self, db, login=None, password=None):
-        #        """
-        #        Authenticate the current user with the given db, login and
-        #        password. If successful, store the authentication parameters in the
-        #        current session and request, unless multi-factor-authentication
-        #        is activated. In that case, that last part will be done by
-        #        :ref:`finalize`.
-        #        """
-        #
-        #        wsgienv = request.httprequest.environ
-        #        env = dict(
-        #            interactive=True,
-        #            base_location=request.httprequest.url_root.rstrip('/'),
-        #            HTTP_HOST=wsgienv['HTTP_HOST'],
-        #            REMOTE_ADDR=wsgienv['REMOTE_ADDR'],
-        #        )
-        #        uid = odoo.registry(db)['res.users'].authenticate(db, login, password, env)
-        #        self.pre_uid = uid
-        #
-        #        self.rotate = True
-        #        self.db = db
-        #        self.login = login
-        #        request.disable_db = False
-        #
-        #        user = request.env(user=uid)['res.users'].browse(uid)
-        #        if not user._mfa_url():
-        #            self.finalize()
-        #
-        #        return uid
-        #
-        #    def finalize(self):
-        #        """ Finalizes a partial session, should be called on MFA validation to
-        #        convert a partial / pre-session into a full-fledged "logged-in" one
-        #        """
-        #        self.rotate = True
-        #        request.uid = self.uid = self.pop('pre_uid')
-        #        user = request.env(user=self.uid)['res.users'].browse(self.uid)
-        #        self.session_token = user._compute_session_token(self.sid)
-        #        self.get_context()
         #
         #    def check_security(self):
         #        """
@@ -795,113 +815,8 @@ class Request(object):
         #        self._default_values()
         #        self.rotate = True
         #
-        #    def _default_values(self):
-        #        self.setdefault("db", None)
-        #        self.setdefault("uid", None)
-        #        self.setdefault("login", None)
-        #        self.setdefault("session_token", None)
-        #        self.setdefault("context", {})
-        #        self.setdefault("debug", '')
-        #
-        #    def get_context(self):
-        #        """
-        #        Re-initializes the current user's session context (based on his
-        #        preferences) by calling res.users.get_context() with the old context.
-        #
-        #        :returns: the new context
-        #        """
-        #        assert self.uid, "The user needs to be logged-in to initialize his context"
-        #        self.context = dict(request.env['res.users'].context_get() or {})
-        #        self.context['uid'] = self.uid
-        #        self._fix_lang(self.context)
-        #        return self.context
-        #
-        #    def _fix_lang(self, context):
-        #        """ OpenERP provides languages which may not make sense and/or may not
-        #        be understood by the web client's libraries.
-        #
-        #        Fix those here.
-        #
-        #        :param dict context: context to fix
-        #        """
-        #        lang = context.get('lang')
-        #
-        #        # inane OpenERP locale
-        #        if lang == 'ar_AR':
-        #            lang = 'ar'
-        #
-        #        # lang to lang_REGION (datejs only handles lang_REGION, no bare langs)
-        #        if lang in babel.core.LOCALE_ALIASES:
-        #            lang = babel.core.LOCALE_ALIASES[lang]
-        #
-        #        context['lang'] = lang or 'en_US'
-        #
-
-
-
-
-        #def setup_session(self, httprequest):
-        #    # recover or create session
-
-        #    sid = httprequest.cookies.get('session_id')
-        #    if sid is None:
-        #        httprequest.session = self.session_store.new()
-        #    else:
-        #        httprequest.session = self.session_store.get(sid)
-
-
-        #    def setup_db(self, httprequest):
-        #        db = httprequest.session.db
-        #        # Check if session.db is legit
-        #        if db:
-        #            if db not in db_filter([db], httprequest=httprequest):
-        #                _logger.warning("Logged into database '%s', but dbfilter rejects it; logging session out.", db)
-        #                httprequest.session.logout()
-        #                db = None
-
-        #def setup_lang(self, httprequest):
-        #    if "lang" not in httprequest.session.context:
-        #        alang = httprequest.accept_languages.best or "en-US"
-        #        try:
-        #            code, territory, _, _ = babel.core.parse_locale(alang, sep='-')
-        #            if territory:
-        #                lang = '%s_%s' % (code, territory)
-        #            else:
-        #                lang = babel.core.LOCALE_ALIASES[code]
-        #        except (ValueError, KeyError):
-        #            lang = 'en_US'
-        #        httprequest.session.context["lang"] = lang
-
-        #        if not db:
-        #            httprequest.session.db = db_monodb(httprequest)
-        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV'
-        # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb'
-        " Set-Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb; Expires=Sat, 05-Jun-2021 22:04:27 GMT; Max-Age=7776000; HttpOnly; Path=/"
-
-        cookie = self.httprequest.cookies.get('session_id')
-        cookie_dbname = None
-        r = re.match('([0-9a-zA-Z]{40})(_([0-9a-zA-Z_-]{1,64}))?',cookie)
-        if r:
-            self.session_sid = re.group(1)
-            cookie_dbname = re.group(3)
-
-        # Decode session
-        self.session_orig = "{}"
-        self.session = {}
-
-        dbname = session_locate_db(cookie_dbname)
-        # TODO rename session_db in to db
-        self.db = self.session_db
-        if dbname:
-
-
-
-
-            pass
-            # if selec in db:
 
     def session_post(self):
-
         #def save_session(self, httprequest, response):
         #    save_session = (not request.endpoint) or request.endpoint.routing.get('save_session', True)
         #    if not save_session:
@@ -916,11 +831,8 @@ class Request(object):
         #            httprequest.session.modified = True
         #        self.session_store.save(httprequest.session)
 
-        #    if hasattr(response, 'set_cookie'):
-        #        response.set_cookie('session_id', httprequest.session.sid, max_age=90 * 24 * 60 * 60, httponly=True)
 
-        # TEST db mode
-        #def session_gc(session_store):
+        #def session_gc(session_store): -> Move to daily CRON
         #    if random.random() < 0.001:
         #        # we keep session one week
         #        last_week = time.time() - 60*60*24*7
@@ -931,23 +843,26 @@ class Request(object):
         #                    os.unlink(path)
         #            except OSError:
         #                pass
-
-        return response
         # TODO delete, rotate
-        dump = json.dump(self.session, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
-        if dump != self.session_orig:
-            if not self.session_sid:
-                # 232 bits (30*8*62/64) of urandom entropy should be enough for everyone
-                self.session_sid = base64.b64encode(os.urandom(30)).decode('ascii').replace('/','a').replace('+','l')
-            # SAVE in DB
 
-            # Set reply
-            sid = self.session_sid
-            if not self.session_mono:
-                sid += "_" + self.session_db
-            self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
-            # cookie_samesite="Lax" ?  cookie_path="/" ?
+        if self.db:
+            dump = json.dump(self.session, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+            if self.session_orig != dump:
+                if not self.session_sid:
+                    # 232 bits (30*8*62/64) of urandom entropy should be enough for everyone
+                    self.session_sid = base64.b64encode(os.urandom(30)).decode('ascii').replace('/','a').replace('+','l')
+                # SAVE in DB
+                self.cr.execute("""
+                    INSERT INTO ir_session (sid, create_date, write_date, json) VALUES (%s, NOW(), NOW(), %s)
+                    ON CONFLICT (sid) DO UPDATE SET write_date = NOW(), json = %s
+                """, self.session_sid, dump, dump);
+                # Set reply
+                sid = self.session_sid
+                if not self.session_mono:
+                    sid += "_" + self.session_db
+                self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
 
+                # cookie_samesite="Lax" ?  cookie_path="/" ?
 
     #------------------------------------------------------
     # HTTP Controllers
@@ -1183,39 +1098,6 @@ class Request(object):
             r = self.json_dispatch(endpoint, args, auth)
         return r
 
-    @contextlib.contextmanager
-    def contextmanager(self):
-        # set thread local request
-        _request_stack.push(self)
-        # ensure we have a thread local set of environement
-        with odoo.api.Environment.manage():
-            try:
-                # This will connect to the db using a cursor
-                self.session_pre()
-                # debug on thread
-                self._setup_thread()
-                yield
-                # waring session not writter if exception
-                self.session_post()
-            except Exception(e):
-                pass
-            finally:
-                pass
-            # finnaly
-            #def __exit__(self, exc_type, exc_value, traceback):
-            #    if self._cr:
-            #        try:
-            #            if exc_type is None and not self._failed:
-            #                self._cr.commit()
-            #                if self.registry:
-            #                    self.registry.signal_changes()
-            #            elif self.registry:
-            #                self.registry.reset_changes()
-            #        finally:
-            #            self._cr.close()
-            # release thread local request
-        _request_stack.pop()
-
     def _handle_exception(self, exception):
         """Called within an except block to allow converting exceptions
            to abitrary responses. Anything returned (except None) will
@@ -1299,32 +1181,36 @@ class Request(object):
         except (werkzeug.exceptions.NotFound, werkzeug.exceptions.MethodNotAllowed) as nodb_exception:
             nodb_endpoint = None
 
-        with self.contextmanager():
+        # Thread local request
+        _request_stack.push(self)
+        # Thread local environments
+        with odoo.api.Environment.manage():
+            self.session_pre()
             # ir.http handling
-            if self.session_db:
-                try:
-                    odoo.registry(db).check_signaling()
-                    with odoo.tools.mute_logger('odoo.sql_db'):
-                        ir_http = request.registry['ir.http']
-                except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
-                    # psycopg2 error or attribute error while constructing
-                    # the registry. That means either
-                    # - the database probably does not exists anymore
-                    # - the database is corrupted
-                    # - the database version doesnt match the server version
-                    self.session_logout()
-                    return werkzeug.utils.redirect('/web/database/selector')
-
-
+            if self.db:
                 try:
                     if nodb_endpoint:
                         result = request.dispatch(nodb_endpoint, args, "none")
                     else:
-                        result = ir_http._dispatch()
+                        result = self.env["ir.http"]._dispatch()
                     response = self.coerce_response(result)
                     return response(environ, start_response)
                 except Exception as e:
                     return request._handle_exception(e)
+                    # finnaly
+                    #def __exit__(self, exc_type, exc_value, traceback):
+                    #    if self._cr:
+                    #        try:
+                    #            if exc_type is None and not self._failed:
+                    #                self._cr.commit()
+                    #                if self.registry:
+                    #                    self.registry.signal_changes()
+                    #            elif self.registry:
+                    #                self.registry.reset_changes()
+                    #        finally:
+                    #            self._cr.close()
+                    # release thread local request
+                self.session_post()
             # no db handling
             else:
                 if nodb_endpoint:
@@ -1333,7 +1219,7 @@ class Request(object):
                     result = nodb_exception
                 response = self.coerce_response(result)
                 return response(environ, start_response)
-
+        _request_stack.pop()
 
 #----------------------------------------------------------
 # WSGI Layer
@@ -1445,3 +1331,4 @@ class Application(object):
 
 # wsgi handler
 application = root = Application()
+#
