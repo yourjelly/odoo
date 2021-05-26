@@ -20,7 +20,10 @@
                         <span><i class="o_MessagingMenu_dropdownLoadingIcon fa fa-circle-o-notch fa-spin"/>Please wait...</span>
                     </t>
                     <t t-else="">
-                        <div class="o_MessagingMenu_dropdownMenuHeader" t-att-class="{ 'o-mobile': env.messaging.device.isMobile }">
+                        <div class="o_MessagingMenu_dropdownMenuHeader" t-att-class="{
+                                'o-mobile': env.messaging.device.isMobile,
+                                'border-bottom': !env.messaging.device.isMobile
+                            }">
                             <t t-if="!env.messaging.device.isMobile">
                                 <t t-foreach="['all', 'chat', 'channel']" t-as="tabId" t-key="tabId">
                                     <button class="o_MessagingMenu_tabButton o-desktop btn btn-link" t-att-class="{ 'o-active': messagingMenu.activeTabId === tabId, }" t-on-click="_onClickDesktopTabButton" type="button" role="tab" t-att-data-tab-id="tabId">

@@ -65,7 +65,7 @@ class Activity extends Component {
      * @returns {string}
      */
     get assignedUserText() {
-        return _.str.sprintf(this.env._t("for %s"), this.activity.assignee.nameOrDisplayName);
+        return this.activity.assignee.nameOrDisplayName;
     }
 
     /**

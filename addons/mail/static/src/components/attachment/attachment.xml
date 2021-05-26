@@ -2,11 +2,14 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Attachment" owl="1">
-        <div class="o_Attachment"
+        <t t-set="isCard" t-value="attachment and detailsMode === 'card'"/>
+
+        <div class="o_Attachment d-flex align-items-center overflow-hidden border rounded"
             t-att-class="{
                 'o-downloadable': props.isDownloadable,
                 'o-editable': props.isEditable,
-                'o-has-card-details': attachment and detailsMode === 'card',
+                'o-has-card-details': isCard,
+                'bg-white': isCard,
                 'o-isUploading': attachment and attachment.isUploading,
                 'o-viewable': attachment and attachment.isViewable,
             }" t-att-title="attachment ? attachment.displayName : undefined" t-att-data-attachment-local-id="attachment ? attachment.localId : undefined"
@@ -14,33 +17,36 @@
             <t t-if="attachment">
                 <!-- Image style-->
                 <!-- o_image from mimetype.scss -->
-                <div class="o_Attachment_image o_image" t-on-click="_onClickImage"
+                <div class="o_Attachment_image flex-shrink-0 o_image" t-on-click="_onClickImage"
                     t-att-class="{
                         'o-attachment-viewable': attachment.isViewable,
-                        'o-details-overlay': detailsMode !== 'card',
+                        'o-details-overlay': !isCard,
+                        'position-relative': !isCard,
+                        'mx-1': isCard,
+                        'my-2' : isCard and attachment.isLinkedToComposer,
                         'o-large': props.imageSize === 'large',
                         'o-medium': props.imageSize === 'medium',
                         'o-small': props.imageSize === 'small',
                     }" t-att-href="attachmentUrl" t-att-style="imageStyle" t-att-data-mimetype="attachment.mimetype"
                 >
                     <t t-if="(props.showFilename or props.showExtension) and detailsMode === 'hover'">
-                        <div class="o_Attachment_imageOverlay">
-                            <div class="o_Attachment_details o_Attachment_imageOverlayDetails">
+                        <div class="o_Attachment_imageOverlay text-white p-1 d-flex justify-content-between">
+                            <div class="o_Attachment_details o_Attachment_imageOverlayDetails d-flex flex-column justify-content-end">
                                 <t t-if="props.showFilename">
-                                    <div class="o_Attachment_filename">
+                                    <div class="o_Attachment_filename text-truncate">
                                         <t t-esc="attachment.displayName"/>
                                     </div>
                                 </t>
                                 <t t-if="props.showExtension">
-                                    <div class="o_Attachment_extension">
+                                    <div class="o_Attachment_extension text-uppercase small font-weight-bold">
                                         <t t-esc="attachment.extension"/>
                                     </div>
                                 </t>
                             </div>
-                            <div class="o_Attachment_actions">
+                            <div class="o_Attachment_actions d-flex flex-column justify-content-between">
                                 <!-- Remove button -->
                                 <t t-if="props.isEditable" t-key="'unlink'">
-                                    <div class="o_Attachment_action o_Attachment_actionUnlink"
+                                    <div class="o_Attachment_action o_Attachment_actionUnlink rounded-circle text-center"
                                         t-att-class="{
                                             'o-pretty': attachment.isLinkedToComposer,
                                         }" t-on-click="_onClickUnlink" title="Remove"
@@ -50,7 +56,7 @@
                                 </t>
                                 <!-- Download button -->
                                 <t t-if="props.isDownloadable and !attachment.isUploading" t-key="'download'">
-                                    <div class="o_Attachment_action o_Attachment_actionDownload" t-on-click="_onClickDownload" title="Download">
+                                    <div class="o_Attachment_action o_Attachment_actionDownload rounded-circle text-center" t-on-click="_onClickDownload" title="Download">
                                         <i class="fa fa-download"/>
                                     </div>
                                 </t>
@@ -60,14 +66,14 @@
                 </div>
                 <!-- Attachment details -->
                 <t t-if="(props.showFilename or props.showExtension) and detailsMode === 'card'">
-                    <div class="o_Attachment_details">
+                    <div class="o_Attachment_details d-flex flex-column justify-content-center">
                         <t t-if="props.showFilename">
-                            <div class="o_Attachment_filename">
+                            <div class="o_Attachment_filename text-truncate">
                                 <t t-esc="attachment.displayName"/>
                             </div>
                         </t>
                         <t t-if="props.showExtension">
-                            <div class="o_Attachment_extension">
+                            <div class="o_Attachment_extension text-uppercase small font-weight-bold text-muted">
                                 <t t-esc="attachment.extension"/>
                             </div>
                         </t>
@@ -75,30 +81,33 @@
                 </t>
                 <!-- Attachment aside -->
                 <t t-if="detailsMode !== 'hover' and (props.isDownloadable or props.isEditable)">
-                    <div class="o_Attachment_aside" t-att-class="{ 'o-has-multiple-action': props.isDownloadable and props.isEditable }">
+                    <div class="o_Attachment_aside ml-2 h-100 btn-group-vertical"
+                        t-att-class="{'o-has-multiple-action': props.isDownloadable and props.isEditable}">
                         <!-- Uploading icon -->
                         <t t-if="attachment.isUploading and attachment.isLinkedToComposer">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploading" title="Uploading">
+                            <div class="o_Attachment_asideItem btn d-flex align-items-center justify-content-center p-1 o_Attachment_asideItemUploading" title="Uploading">
                                 <i class="fa fa-spin fa-circle-o-notch"/>
                             </div>
                         </t>
                         <!-- Uploaded icon -->
                         <t t-if="!attachment.isUploading and attachment.isLinkedToComposer">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUploaded" title="Uploaded">
-                                <i class="fa fa-check"/>
+                            <div class="o_Attachment_asideItem btn d-flex align-items-center justify-content-center p-1 o_Attachment_asideItemUploaded" title="Uploaded">
+                                <i class="fa fa-check text-success"/>
                             </div>
                         </t>
                         <!-- Remove button -->
                         <t t-if="props.isEditable">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemUnlink" t-att-class="{ 'o-pretty': attachment.isLinkedToComposer }" t-on-click="_onClickUnlink" title="Remove">
+                            <button class="o_Attachment_asideItem o_Attachment_asideItemUnlink btn p-1"
+                                t-on-click="_onClickUnlink" title="Remove"
+                                t-att-class="attachment.isLinkedToComposer ? 'o-pretty btn-danger m-0': 'btn-sm btn-link text-danger text-muted'">
                                 <i class="fa fa-times"/>
-                            </div>
+                            </button>
                         </t>
                         <!-- Download button -->
                         <t t-if="props.isDownloadable and !attachment.isUploading">
-                            <div class="o_Attachment_asideItem o_Attachment_asideItemDownload" t-on-click="_onClickDownload" title="Download">
+                            <button class="o_Attachment_asideItem btn btn-link text-primary p-1 o_Attachment_asideItemDownload" t-on-click="_onClickDownload" title="Download">
                                 <i class="fa fa-download"/>
-                            </div>
+                            </button>
                         </t>
                     </div>
                 </t>

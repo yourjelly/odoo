@@ -2,22 +2,25 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.Discuss" owl="1">
-        <div class="o_Discuss"
+        <div class="o_Discuss d-flex h-100"
             t-att-class="{
                 'o-adding-item': discuss ? discuss.isAddingChannel or discuss.isAddingChat : false,
                 'o-mobile': env.messaging ? env.messaging.device.isMobile : false,
+                'flex-column': env.messaging ? env.messaging.device.isMobile : false,
+                'align-items-center': env.messaging ? env.messaging.device.isMobile : false,
+                'bg-white': env.messaging ? env.messaging.device.isMobile : false,
             }"
         >
             <t t-if="!env.isMessagingInitialized()">
-                <div class="o_Discuss_messagingNotInitialized"><i class="o_Discuss_messagingNotInitializedIcon fa fa-circle-o-notch fa-spin"/>Please wait...</div>
+                <div class="o_Discuss_messagingNotInitialized d-flex flex-grow-1 align-items-center justify-content-center"><i class="o_Discuss_messagingNotInitializedIcon fa fa-circle-o-notch fa-spin mr-1"/>Please wait...</div>
             </t>
             <t t-else="">
                 <t t-if="!env.messaging.device.isMobile">
-                    <DiscussSidebar class="o_Discuss_sidebar"/>
+                    <DiscussSidebar class="o_Discuss_sidebar h-100 overflow-auto flex-grow-0 flex-shrink-0"/>
                 </t>
                 <t t-if="env.messaging.device.isMobile" t-call="mail.Discuss.content"/>
                 <t t-else="">
-                    <div class="o_Discuss_content">
+                    <div class="o_Discuss_content d-flex flex-column flex-grow-1 h-100 overflow-auto">
                         <t t-call="mail.Discuss.content"/>
                     </div>
                 </t>
@@ -33,12 +36,12 @@
 
     <t t-name="mail.Discuss.content" owl="1">
         <t t-if="env.messaging.device.isMobile and discuss.activeMobileNavbarTabId === 'mailbox'">
-            <DiscussMobileMailboxSelection class="o_Discuss_mobileMailboxSelection"/>
+            <DiscussMobileMailboxSelection class="o_Discuss_mobileMailboxSelection w-100"/>
         </t>
         <t t-if="env.messaging.device.isMobile and (discuss.isAddingChannel or discuss.isAddingChat)">
-            <div class="o_Discuss_mobileAddItemHeader">
+            <div class="o_Discuss_mobileAddItemHeader d-flex justify-content-center px-3 py-2 w-100">
                 <AutocompleteInput
-                    class="o_Discuss_mobileAddItemHeaderInput"
+                    class="o_Discuss_mobileAddItemHeaderInput form-control flex-grow-1"
                     isFocusOnMount="true"
                     isHtml="discuss.isAddingChannel"
                     placeholder="discuss.isAddingChannel ? addChannelInputPlaceholder : addChatInputPlaceholder"
@@ -50,8 +53,11 @@
         </t>
         <t t-if="discuss.threadView">
             <ThreadView
-                class="o_Discuss_thread"
-                t-att-class="{ 'o-mobile': env.messaging.device.isMobile }"
+                class="o_Discuss_thread flex-grow-1"
+                t-att-class="{
+                    'o-mobile': env.messaging.device.isMobile,
+                    'w-100': env.messaging.device.isMobile
+                }"
                 composerAttachmentsDetailsMode="'card'"
                 hasComposer="discuss.thread.model !== 'mail.box'"
                 hasComposerCurrentPartnerAvatar="!env.messaging.device.isMobile"
@@ -68,19 +74,19 @@
             />
         </t>
         <t t-if="!discuss.thread and (!env.messaging.device.isMobile or discuss.activeMobileNavbarTabId === 'mailbox')">
-            <div class="o_Discuss_noThread">
+            <div class="o_Discuss_noThread d-flex flex-grow-1 w-100 justify-content-center align-items-center">
                 No conversation selected.
             </div>
         </t>
         <t t-if="env.messaging.device.isMobile and discuss.activeMobileNavbarTabId !== 'mailbox'">
             <NotificationList
-                class="o_Discuss_notificationList"
+                class="o_Discuss_notificationList w-100 flex-grow-1"
                 filter="discuss.activeMobileNavbarTabId"
             />
         </t>
         <t t-if="env.messaging.device.isMobile and !discuss.isReplyingToMessage">
             <MobileMessagingNavbar
-                class="o_Discuss_mobileNavbar"
+                class="o_Discuss_mobileNavbar w-100"
                 activeTabId="discuss.activeMobileNavbarTabId"
                 tabs="mobileNavbarTabs()"
                 t-on-o-select-mobile-messaging-navbar-tab="_onSelectMobileNavbarTab"
@@ -88,7 +94,7 @@
         </t>
         <t t-if="discuss.isReplyingToMessage">
             <Composer
-                class="o_Discuss_replyingToMessageComposer"
+                class="o_Discuss_replyingToMessageComposer w-100"
                 composerLocalId="discuss.replyingToMessage.originThread.composer.localId"
                 hasCurrentPartnerAvatar="!env.messaging.device.isMobile"
                 hasDiscardButton="true"

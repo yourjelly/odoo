@@ -18,13 +18,13 @@
 </t>
 
 <t t-name="mail.KanbanActivityLoading">
-    <div class="dropdown-item text-center o_no_activity">
+    <div class="dropdown-item text-center o_no_activity py-4 px-2">
         <span class="fa fa-circle-o-notch fa-spin fa-2x" role="img" aria-label="Loading..." title="Loading..."/>
     </div>
 </t>
 
 <t t-name="mail.KanbanActivityDropdown">
-    <span role="menuitem" t-if="_.isEmpty(records)" class="dropdown-item-text text-center o_no_activity">
+    <span role="menuitem" t-if="_.isEmpty(records)" class="dropdown-item-text text-center o_no_activity py-4 px-2">
         <i>Schedule activities to help you get things done.</i>
     </span>
     <div t-else="" aria-haspopup="true" role="menu" class="o_activity_log_container dropdown-item bg-100 p-0">
@@ -45,14 +45,14 @@
                     <t class="activities_list_group_item">
                         <t t-call="mail.activities-list-group-item"/>
                     </t>
-                    <li t-attf-id="o_activity_form_{{log.id}}" class="o_activity_form list-group-item border-top-0 py-0 mb-2 collapse"></li>
+                    <li t-attf-id="o_activity_form_{{log.id}}" class="o_activity_form list-group-item border-top-0 py-0 collapse"></li>
                 </t>
             </t>
         </ul>
     </div>
     <div class="dropdown-divider m-0"/>
-    <div role="menuitem" class="o_schedule_activity dropdown-header p-0 text-center">
-        <button class="btn btn-secondary btn-block p-3">
+    <div role="menuitem" class="o_schedule_activity p-0 text-center">
+        <button class="btn btn-secondary btn-block p-3 border-0">
             <i class="fa fa-plus fa-fw"></i><strong>Schedule an activity</strong>
         </button>
     </div>
@@ -64,7 +64,7 @@
             <div t-attf-class="o_activity_title_entry o_mail_activity {{ log.chaining_type === 'suggest' ? 'align-items-center' : 'mb-1'}}">
                 <span t-attf-class="fa #{log.icon ? log.icon : 'fa-bell' } fa-fw mr-2 text-center text-muted" role="img" aria-label="Log" title="Log"/>
                 <strong class="text-dark o_activity_summary"><t t-esc="log.title_action or log.summary or log.activity_type_id[1]"/></strong>
-                <button t-if="log.chaining_type === 'suggest' and log.can_write" class="btn btn-sm btn-link py-0 o_edit_button"><i class="fa fa-pencil"/></button>
+                <button t-if="log.chaining_type === 'suggest' and log.can_write" class="btn btn-sm btn-link text-primary py-0 o_edit_button"><i class="fa fa-pencil"/></button>
             </div>
             <div class="o_activity_title_entry mt-1" t-if="log.state != 'today'">
                 <span class="fa fa-clock-o fa-fw mr-2 text-center text-muted" role="img" aria-label="Deadline" title="Deadline"/>
@@ -88,7 +88,7 @@
                 <a  t-att-data-chaining-type-activity="log.chaining_type"
                     t-att-data-previous-activity-type-id="log.activity_type_id[0]"
                     t-att-data-activity-id="log.id"
-                    class="o_mark_as_done_upload_file o_activity_link o_activity_link_kanban fa fa-upload"
+                    class="o_mark_as_done_upload_file o_activity_link o_activity_link_kanban fa fa-upload btn btn-lg btn-link text-success p-0"
                     title="Upload file" role="img" t-att-data-fileupload-id="log.fileuploadID"/>
                     <span class="d-none">
                         <t t-call="HiddenInputFile">
@@ -104,7 +104,7 @@
                     t-att-data-previous-activity-type-id="log.activity_type_id[0]"
                     t-att-data-activity-id="log.id"
                     t-attf-href="#o_mark_done_form{{log.id}}"
-                    class="o_mark_as_done o_activity_link o_activity_link_kanban fa fa-check-circle"
+                    class="o_mark_as_done o_activity_link o_activity_link_kanban fa fa-check-circle btn btn-lg btn-link text-success p-0"
                     data-toggle="collapse" title="Mark as done" role="img" aria-label="Mark as done"/>
             </t>
         </div>
