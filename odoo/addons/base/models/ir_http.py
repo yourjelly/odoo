@@ -76,6 +76,9 @@ class SignedIntConverter(werkzeug.routing.NumberConverter):
     num_convert = int
 
 
+SessionExpiredException = werkzeug.exceptions.HTTPException
+
+
 class IrHttp(models.AbstractModel):
     _name = 'ir.http'
     _description = "HTTP Routing"
@@ -94,38 +97,38 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _auth_method_user(cls):
-        request.uid = request.session.uid
-        if not request.uid:
-            raise http.SessionExpiredException("Session expired")
+        if not request.session["uid"]:
+            raise SessionExpiredException("Session expired")
 
     @classmethod
     def _auth_method_none(cls):
-        request.uid = None
+        pass
+        #request.uid = None
 
     @classmethod
     def _auth_method_public(cls):
-        if not request.session.uid:
-            request.uid = request.env.ref('base.public_user').id
-        else:
-            request.uid = request.session.uid
+        if not request.session["uid"]:
+            request.session["uid"] = request.env.ref('base.public_user').id
+            request.session_reset_env()
 
     @classmethod
     def _authenticate(cls, endpoint):
         auth_method = endpoint.routing["auth"]
         try:
-            if request.session.uid:
-                try:
-                    request.session.check_security()
-                    # what if error in security.check()
-                    #   -> res_users.check()
-                    #   -> res_users._check_credentials()
-                except (AccessDenied, http.SessionExpiredException):
-                    # All other exceptions mean undetermined status (e.g. connection pool full),
-                    # let them bubble up
-                    request.session.logout(keep_db=True)
-            if request.uid is None:
+            # NOT NEEDED anymore
+            #if request.session["uid"]:
+            #    try:
+            #        request.session.check_security()
+            #        # what if error in security.check()
+            #        #   -> res_users.check()
+            #        #   -> res_users._check_credentials()
+            #    except (AccessDenied, http.SessionExpiredException):
+            #        # All other exceptions mean undetermined status (e.g. connection pool full),
+            #        # let them bubble up
+            #        request.session.logout(keep_db=True)
+            if request.session["uid"] is None:
                 getattr(cls, "_auth_method_%s" % auth_method)()
-        except (AccessDenied, http.SessionExpiredException, werkzeug.exceptions.HTTPException):
+        except (AccessDenied, SessionExpiredException, werkzeug.exceptions.HTTPException):
             raise
         except Exception:
             _logger.info("Exception during request Authentication.", exc_info=True)
@@ -149,7 +152,8 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _serve_attachment(cls):
-        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        _logger.info("TRY attachement  %s", request.httprequest.path)
+        env = api.Environment(request.env.cr, SUPERUSER_ID, request.env.context)
         attach = env['ir.attachment'].get_serve_attachment(request.httprequest.path, extra_fields=['name', 'checksum'])
         if attach:
             wdate = attach[0]['__last_update']
@@ -248,9 +252,9 @@ class IrHttp(models.AbstractModel):
                 raise result
 
         except Exception as e:
-            import traceback
-            print('-'*40)
-            traceback.print_exc()
+            #import traceback
+            #print('-'*40)
+            #traceback.print_exc()
             return cls._handle_exception(e)
 
         return result
@@ -269,7 +273,7 @@ class IrHttp(models.AbstractModel):
 
         if key not in cls._routing_map:
             _logger.info("Generating routing map for key %s" % str(key))
-            installed = request.registry._init_modules | set(odoo.conf.server_wide_modules)
+            installed = request.env.registry._init_modules | set(odoo.conf.server_wide_modules)
             if tools.config['test_enable'] and odoo.modules.module.current_test:
                 installed.add(odoo.modules.module.current_test)
             mods = sorted(installed)

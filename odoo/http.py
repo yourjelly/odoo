@@ -154,72 +154,6 @@ def serialize_exception(e):
         tmp["exception_type"] = "except_orm"
     return tmp
 
-def send_file(content, filename=None, mimetype=None, mtime=None, as_attachment=False, cache_timeout=STATIC_CACHE):
-    """Send file, str or bytes content with mime and cache handling.
-
-    Sends the contents of a file to the client.  Using werkzeug file_wrapper
-    support.
-
-    If filename of content.name is provided it will try to guess the mimetype
-    for you, but you can also explicitly provide one.
-
-    :param content : fileobject to read from or str or bytes.
-    :param filename: optional if content has a 'name' attribute, used for attachment name and mimetype guess (i.e. io.BytesIO)
-    :param mimetype: the mimetype of the file if provided, otherwise auto detection happens based on the name.
-    :param mtime: optional if content has a 'name' attribute, last modification time used for contitional response.
-    :param as_attachment: set to `True` if you want to send this file with a ``Content-Disposition: attachment`` header.
-    :param cache_timeout: set to `False` to disable etags and conditional response handling (last modified and etags)
-    """
-
-    # REM for odo i removed the unsafe path api
-    if isinstance(content, str):
-        content = content.encode('utf8')
-    if isinstance(content, bytes):
-        content = io.BytesIO(content)
-
-    # Only used when filename or mtime argument is not provided
-    path = getattr(content, 'name', 'file.bin')
-
-    if not filename:
-        filename = os.path.basename(path)
-
-    if not mimetype:
-        mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-
-    if not mtime:
-        try:
-            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(path))
-        except Exception:
-            pass
-
-    content.seek(0, 2)
-    size = content.tell()
-    content.seek(0)
-
-    data = werkzeug.wsgi.wrap_file(request.httprequest.environ, content)
-
-    r = Response(data, mimetype=mimetype, direct_passthrough=True)
-    r.content_length = size
-
-    if as_attachment:
-        r.headers.add('Content-Disposition', 'attachment', filename=filename or 'file.bin')
-
-    if cache_timeout:
-        if mtime:
-            r.last_modified = mtime
-        crc = zlib.adler32(filename.encode('utf-8') if isinstance(filename, str) else filename) & 0xffffffff
-        etag = 'odoo-%s-%s-%s' % ( mtime, size, crc)
-        if not werkzeug.http.is_resource_modified(request.httprequest.environ, etag, last_modified=mtime):
-            r = werkzeug.wrappers.Response(status=304)
-        else:
-            r.cache_control.public = True
-            r.cache_control.max_age = cache_timeout
-            # expires is deprecated
-            #r.expires = int(time.time() + cache_timeout)
-            r.set_etag(etag)
-    _logger.info("response %s", r)
-    return r
-
 # TODO check usage and remove of move to request as helper
 def content_disposition(filename):
     filename = odoo.tools.ustr(filename)
@@ -389,6 +323,7 @@ class Response(werkzeug.wrappers.Response):
     def set_default(self, template=None, qcontext=None, uid=None):
         # TODO is needed ?
         self.template = template
+        _logger.info("reponse template %s",self.template)
         self.qcontext = qcontext or dict()
         self.qcontext['response_template'] = self.template
         self.uid = uid
@@ -405,15 +340,16 @@ class Response(werkzeug.wrappers.Response):
 
     @property
     def is_qweb(self):
+        _logger.info("reponse is qweb template %s",self.template)
         return self.template is not None
 
     def render(self):
         # WHY lazy qweb again ?
         """ Renders the Response's template, returns the result
         """
-        env = request.env(user=self.uid or request.uid or odoo.SUPERUSER_ID)
         self.qcontext['request'] = request
-        return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+        # Should we support uid ?
+        return request.env["ir.ui.view"]._render_template(self.template, self.qcontext)
 
     def flatten(self):
         """ Forces the rendering of the response's template, sets the result
@@ -470,6 +406,72 @@ class Request(object):
     #------------------------------------------------------
     # Common helpers
     #------------------------------------------------------
+    def send_file(self, content, filename=None, mimetype=None, mtime=None, as_attachment=False, cache_timeout=STATIC_CACHE):
+        """Send file, str or bytes content with mime and cache handling.
+
+        Sends the contents of a file to the client.  Using werkzeug file_wrapper
+        support.
+
+        If filename of content.name is provided it will try to guess the mimetype
+        for you, but you can also explicitly provide one.
+
+        :param content : fileobject to read from or str or bytes.
+        :param filename: optional if content has a 'name' attribute, used for attachment name and mimetype guess (i.e. io.BytesIO)
+        :param mimetype: the mimetype of the file if provided, otherwise auto detection happens based on the name.
+        :param mtime: optional if content has a 'name' attribute, last modification time used for contitional response.
+        :param as_attachment: set to `True` if you want to send this file with a ``Content-Disposition: attachment`` header.
+        :param cache_timeout: set to `False` to disable etags and conditional response handling (last modified and etags)
+        """
+
+        # REM for odo i removed the unsafe path api
+        if isinstance(content, str):
+            content = content.encode('utf8')
+        if isinstance(content, bytes):
+            content = io.BytesIO(content)
+
+        # Only used when filename or mtime argument is not provided
+        path = getattr(content, 'name', 'file.bin')
+
+        if not filename:
+            filename = os.path.basename(path)
+
+        if not mimetype:
+            mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+
+        if not mtime:
+            try:
+                mtime = datetime.datetime.fromtimestamp(os.path.getmtime(path))
+            except Exception:
+                pass
+
+        content.seek(0, 2)
+        size = content.tell()
+        content.seek(0)
+
+        data = werkzeug.wsgi.wrap_file(self.httprequest.environ, content)
+
+        r = werkzeug.wrappers.Response(data, mimetype=mimetype, direct_passthrough=True)
+        r.content_length = size
+
+        if as_attachment:
+            r.headers.add('Content-Disposition', 'attachment', filename=filename or 'file.bin')
+
+        if cache_timeout:
+            if mtime:
+                r.last_modified = mtime
+            crc = zlib.adler32(filename.encode('utf-8') if isinstance(filename, str) else filename) & 0xffffffff
+            etag = 'odoo-%s-%s-%s' % ( mtime, size, crc)
+            if not werkzeug.http.is_resource_modified(self.httprequest.environ, etag, last_modified=mtime):
+                r = werkzeug.wrappers.Response(status=304)
+            else:
+                r.cache_control.public = True
+                r.cache_control.max_age = cache_timeout
+                # expires is deprecated
+                #r.expires = int(time.time() + cache_timeout)
+                r.set_etag(etag)
+        _logger.info("response %s", r)
+        return r
+
     def _setup_thread(self):
         # cleanup db/uid trackers - they're set in Request or in for
         # servie rpc in odoo.service.*.dispatch().
@@ -497,34 +499,34 @@ class Request(object):
             threading.current_thread().uid = self.session.uid
 
     def _call_function(self, endpoint, *args, **kwargs):
-        # Move to handle
-        first_time = True
-        # Correct exception handling and concurency retry
-        @service_model.check
-        def checked_call(___dbname, *a, **kw):
-            nonlocal first_time
-            # The decorator can call us more than once if there is an database error. In this
-            # case, the request cursor is unusable. Rollback transaction to create a new one.
-            if self._cr and not first_time:
-                self._cr.rollback()
-                self.env.clear()
-            first_time = False
-            #_logger.info("CALLL function",stack_info=True)
-            result = endpoint(*a, **kw)
-            if isinstance(result, Response) and result.is_qweb:
-                # Early rendering of lazy responses to benefit from @service_model.check protection
-                result.flatten()
-            # TODO
-            #if self._cr is not None:
-            #    # flush here to avoid triggering a serialization error outside
-            #    # of this context, which would not retry the call
-            #    flush_env(self._cr)
-            #    self._cr.precommit()
-            self.env['base'].flush()
-            return result
+        ## Move to handle
+        #first_time = True
+        ## Correct exception handling and concurency retry
+        #@service_model.check
+        #def checked_call(___dbname, *a, **kw):
+        #    nonlocal first_time
+        #    # The decorator can call us more than once if there is an database error. In this
+        #    # case, the request cursor is unusable. Rollback transaction to create a new one.
+        #    if self._cr and not first_time:
+        #        self._cr.rollback()
+        #        self.env.clear()
+        #    first_time = False
+        #    #_logger.info("CALLL function",stack_info=True)
+        #    result = endpoint(*a, **kw)
+        #    if isinstance(result, Response) and result.is_qweb:
+        #        # Early rendering of lazy responses to benefit from @service_model.check protection
+        #        result.flatten()
+        #    # TODO
+        #    #if self._cr is not None:
+        #    #    # flush here to avoid triggering a serialization error outside
+        #    #    # of this context, which would not retry the call
+        #    #    flush_env(self._cr)
+        #    #    self._cr.precommit()
+        #    self.env['base'].flush()
+        #    return result
 
-        if self.db:
-            return checked_call(self.db, *args, **kwargs)
+        #if self.db:
+        #    return checked_call(self.db, *args, **kwargs)
         return endpoint(*args, **kwargs)
 
     def rpc_debug_pre(self, endpoint, params, model=None, method=None):
@@ -642,6 +644,10 @@ class Request(object):
         #                httprequest.session.logout()
         #                db = None
 
+    def session_reset_env(self):
+        # TODO load context
+        self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
+
     def session_pre(self):
 
 
@@ -649,7 +655,7 @@ class Request(object):
         # example 'Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb'
         "Set-Cookie: session_id=CR2SuuwwY7KEjIm2JpJFk2S0bHkdQP2INAViiTnV_mydb; Expires=Sat, 05-Jun-2021 22:04:27 GMT; Max-Age=7776000; HttpOnly; Path=/"
 
-        cookie = self.httprequest.cookies.get('session_id')
+        cookie = self.httprequest.cookies.get('session_id','')
         cookie_dbname = None
         r = re.match('([0-9a-zA-Z]{40})(_([0-9a-zA-Z_-]{1,64}))?',cookie)
         if r:
@@ -658,7 +664,13 @@ class Request(object):
 
         # Decode session
         self.session_orig = "{}"
-        self.session = {}
+        self.session = {
+            "uid": None,
+            "login": None,
+            "token": None,
+            "context": {},
+            "debug": '',
+        }
 
         #    def _default_values(self):
         #        self.setdefault("db", None)
@@ -680,30 +692,31 @@ class Request(object):
         #            lang = 'en_US'
         #        httprequest.session.context["lang"] = lang
 
-        dbname = session_locate_db(cookie_dbname)
+        dbname = self.session_locate_db(cookie_dbname)
         if dbname:
             try:
                 registry = odoo.registry(dbname)
                 registry.check_signaling()
                 self.cr = registry.cursor()
-                self.cr.execute("SELECT id,sid,json FROM ir_session WHERE sid = %s",self.session_id)
+                self.cr.execute("SELECT json FROM ir_session WHERE sid = %s", (self.session_sid,))
                 select = self.cr.fetchall()
 
-            except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError):
+            except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
                 # psycopg2 error or attribute error while constructing
                 # the registry. That means either
                 # - the database probably does not exists anymore
                 # - the database is corrupted
                 # - the database version doesnt match the server version
+                raise e
                 self.session_logout()
                 return werkzeug.utils.redirect('/web/database/selector')
 
             self.db = dbname
             #self._setup_thread()
             if select:
-                self.session_orig = select[0][3]
-                self.session=json.loads(self.session_orig)
-                self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
+                self.session_orig = select[0][0]
+                self.session = json.loads(self.session_orig)
+                self.session_reset_env()
             else:
                 # No session means 1 but this will be changed in ir.http dispatch
                 self.env = odoo.api.Environment(self.cr, 1, {})
@@ -922,7 +935,7 @@ class Request(object):
         :type time_limit: int | None
         :returns: ASCII token string
         """
-        token = self.session.sid
+        token = self.session_sid
         # if no `time_limit` => distant 1y expiry (31536000) so max_ts acts as salt, e.g. vs BREACH
         max_ts = int(time.time() + (time_limit or 31536000))
 
@@ -1018,11 +1031,11 @@ class Request(object):
             r = Response(status=204)  # no content
         elif isinstance(r, (bytes, str)):
             r = Response(response)
-        elif isinstance(r, werkzeug.exceptions.HTTPException):
-            r = r.get_response(request.httprequest.environ)
-        elif isinstance(r, werkzeug.wrappers.BaseResponse):
-            r = Response.force_type(r)
-            r.set_default()
+        #elif isinstance(r, werkzeug.exceptions.HTTPException):
+        #    r = r.get_response(request.httprequest.environ)
+        #elif isinstance(r, werkzeug.wrappers.BaseResponse):
+        #    r = Response.force_type(r)
+        #    r.set_default()
         return r
 
     #------------------------------------------------------
@@ -1076,7 +1089,7 @@ class Request(object):
         # remove ?
         self.params = params
 
-        self.context = params.pop('context', dict(self.session.context))
+        self.context = params.pop('context', dict(self.session["context"]))
 
         # Call the endpoint
         t0 = self.rpc_debug_pre(endpoint, params)
@@ -1174,51 +1187,84 @@ class Request(object):
             response = result
         return response
 
-    def handle(self):
-        # locate nodb controller first
-        try:
-            nodb_endpoint, nodb_args = self.app.nodb_routing_map.bind_to_environ(self.httprequest.environ).match()
-        except (werkzeug.exceptions.NotFound, werkzeug.exceptions.MethodNotAllowed) as nodb_exception:
-            nodb_endpoint = None
+    def handle_static(self):
+        path_info = werkzeug.wsgi.get_path_info(self.httprequest.environ)
+        for prefix, directory in self.app.statics.items():
+            #_logger.info('check %s %s',path_info, static)
+            if path_info.startswith(prefix):
+                suffix = path_info[len(prefix):]
+                filename = werkzeug.security.safe_join(directory, suffix)
+                try:
+                    content = open(filename, "rb")
+                except Exception:
+                    raise werkzeug.exceptions.NotFound("File not found.\n")
+                # TODO Honor DisableCacheMiddleware TODO implement DisableCacheMiddleware(app)
+                # May we need to move to Request to do this as we need session
+                #if req.session and req.session.debug and not 'wkhtmltopdf' in req.headers.get('User-Agent'):
+                #    #if "assets" in req.session.debug and (".js" in req.base_url or ".css" in req.base_url):
+                #    #    new_headers = [('Cache-Control', 'no-store')]
+                #    #else:
+                #    #    new_headers = [('Cache-Control', 'no-cache')]
+                #    for k, v in headers:
+                #        if k.lower() != 'cache-control':
+                #            new_headers.append((k, v))
+                return self.send_file(content)
 
+    def handle(self):
         # Thread local request
         _request_stack.push(self)
-        # Thread local environments
-        with odoo.api.Environment.manage():
-            self.session_pre()
-            # ir.http handling
-            if self.db:
-                try:
-                    if nodb_endpoint:
-                        result = request.dispatch(nodb_endpoint, args, "none")
-                    else:
-                        result = self.env["ir.http"]._dispatch()
-                    response = self.coerce_response(result)
-                    return response(environ, start_response)
-                except Exception as e:
-                    return request._handle_exception(e)
-                    # finnaly
-                    #def __exit__(self, exc_type, exc_value, traceback):
-                    #    if self._cr:
-                    #        try:
-                    #            if exc_type is None and not self._failed:
-                    #                self._cr.commit()
-                    #                if self.registry:
-                    #                    self.registry.signal_changes()
-                    #            elif self.registry:
-                    #                self.registry.reset_changes()
-                    #        finally:
-                    #            self._cr.close()
-                    # release thread local request
-                self.session_post()
-            # no db handling
-            else:
-                if nodb_endpoint:
-                    result = request.dispatch(nodb_endpoint, nodb_args, "none")
+        # Serve static file if found
+        response = self.handle_static()
+        if response:
+            return response
+        else:
+            # Serve controllers
+            # locate nodb controller first
+            try:
+                nodb_endpoint, nodb_args = self.app.nodb_routing_map.bind_to_environ(self.httprequest.environ).match()
+            except (werkzeug.exceptions.NotFound, werkzeug.exceptions.MethodNotAllowed) as nodb_exception:
+                nodb_endpoint = None
+            # Thread local environments
+            with odoo.api.Environment.manage():
+                self.session_pre()
+                # ir.http handling
+                if self.db:
+                    try:
+                        if nodb_endpoint:
+                            result = request.dispatch(nodb_endpoint, nodb_args, "none")
+                        else:
+                            result = self.env["ir.http"]._dispatch()
+                        response = self.coerce_response(result)
+                        # TODO proper commit and sign changes
+                        #return request._handle_exception(e)
+                        # finnaly
+                        #def __exit__(self, exc_type, exc_value, traceback):
+                        #    if self._cr:
+                        #        try:
+                        #            if exc_type is None and not self._failed:
+                        #                self._cr.commit()
+                        #                if self.registry:
+                        #                    self.registry.signal_changes()
+                        #            elif self.registry:
+                        #                self.registry.reset_changes()
+                        #        finally:
+                        #            self._cr.close()
+                        # release thread local request
+                        self.env.cr.commit()
+                        self.env.registry.signal_changes()
+                        return response
+                    except Exception as e:
+                        _logger.exception(e)
+                        raise e
+                    self.session_post()
+                # no db handling
                 else:
-                    result = nodb_exception
-                response = self.coerce_response(result)
-                return response(environ, start_response)
+                    if nodb_endpoint:
+                        result = request.dispatch(nodb_endpoint, nodb_args, "none")
+                    else:
+                        result = nodb_exception
+                    response = self.coerce_response(result)
+                    return response
         _request_stack.pop()
 
 #----------------------------------------------------------
@@ -1280,29 +1326,6 @@ class Application(object):
             rule.merge_slashes = False
             self.nodb_routing_map.add(rule)
 
-    def serve_static(environ):
-        path_info = werkzeug.wsgi.get_path_info(environ)
-        for prefix, directory in self.statics.items():
-            #_logger.info('check %s %s',path_info, static)
-            if path_info.startswith(prefix):
-                suffix = path_info[len(prefix):]
-                filename = werkzeug.security.safe_join(directory, suffix)
-                try:
-                    content = open(filename, "rb")
-                except Exception:
-                    raise werkzeug.exceptions.NotFound("File not found.\n")
-                # TODO Honor DisableCacheMiddleware TODO implement DisableCacheMiddleware(app)
-                # May we need to move to Request to do this as we need session
-                #if req.session and req.session.debug and not 'wkhtmltopdf' in req.headers.get('User-Agent'):
-                #    #if "assets" in req.session.debug and (".js" in req.base_url or ".css" in req.base_url):
-                #    #    new_headers = [('Cache-Control', 'no-store')]
-                #    #else:
-                #    #    new_headers = [('Cache-Control', 'no-cache')]
-                #    for k, v in headers:
-                #        if k.lower() != 'cache-control':
-                #            new_headers.append((k, v))
-                return send_file(content)
-
     def __call__(self, environ, start_response):
         if odoo.tools.config['proxy_mode']:
             self.proxy_mode(environ)
@@ -1314,17 +1337,12 @@ class Application(object):
             _logger.info("HTTP Application configured")
 
         try:
-            # Serve static file if found
-            response = self.serve_static(environ, start_response):
-            if response:
-                return response(environ, start_response)
-
-            # Serve controllers
             httprequest = werkzeug.wrappers.Request(environ)
             httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
             request = Request(self, httprequest)
+            response = request.handle()
             # TODO removed app on httprequest grep website and test_qweb request.httprequest.app.get_db_router(request.db)
-            return request.handle()
+            return response(environ, start_response)
 
         except werkzeug.exceptions.HTTPException as e:
             return e(environ, start_response)

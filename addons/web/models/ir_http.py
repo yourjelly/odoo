@@ -71,13 +71,13 @@ class Http(models.AbstractModel):
     @api.model
     def get_frontend_session_info(self):
         session_info = {
-            'is_admin': request.session.uid and self.env.user._is_admin() or False,
-            'is_system': request.session.uid and self.env.user._is_system() or False,
-            'is_website_user': request.session.uid and self.env.user._is_public() or False,
-            'user_id': request.session.uid and self.env.user.id or False,
+            'is_admin': self.env.user._is_admin(),
+            'is_system': self.env.user._is_system(),
+            'is_website_user': self.env.user._is_public(),
+            'user_id': self.env.user.id,
             'is_frontend': True,
         }
-        if request.session.uid:
+        if request.session["uid"]:
             version_info = odoo.service.common.exp_version()
             session_info.update({
                 'server_version': version_info.get('server_version'),

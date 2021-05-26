@@ -98,9 +98,9 @@ OPERATOR_MAPPING = {
 # Odoo Web helpers
 #----------------------------------------------------------
 
-db_list = http.db_list
+#db_list = http.db_list
 
-db_monodb = http.db_monodb
+#db_monodb = http.db_monodb
 
 def clean(name): return name.replace('\x3c', '')
 def serialize_exception(f):
@@ -127,61 +127,65 @@ def redirect_with_hash(*args, **kw):
     """
     return http.redirect_with_hash(*args, **kw)
 
-def abort_and_redirect(url):
-    r = request.httprequest
-    response = werkzeug.utils.redirect(url, 302)
-    response = r.app.get_response(r, response, explicit_session=False)
-    werkzeug.exceptions.abort(response)
+#def abort_and_redirect(url):
+#    r = request.httprequest
+#    response = werkzeug.utils.redirect(url, 302)
+#    response = r.app.get_response(r, response, explicit_session=False)
+#    werkzeug.exceptions.abort(response)
 
 def ensure_db(redirect='/web/database/selector'):
-    # This helper should be used in web client auth="none" routes
-    # if those routes needs a db to work with.
-    # If the heuristics does not find any database, then the users will be
-    # redirected to db selector or any url specified by `redirect` argument.
-    # If the db is taken out of a query parameter, it will be checked against
-    # `http.db_filter()` in order to ensure it's legit and thus avoid db
-    # forgering that could lead to xss attacks.
-    db = request.params.get('db') and request.params.get('db').strip()
+    if not request.db:
+        response = werkzeug.utils.redirect(redirect, 302)
+        werkzeug.exceptions.abort(response)
 
-    # Ensure db is legit
-    if db and db not in http.db_filter([db]):
-        db = None
+    ## This helper should be used in web client auth="none" routes
+    ## if those routes needs a db to work with.
+    ## If the heuristics does not find any database, then the users will be
+    ## redirected to db selector or any url specified by `redirect` argument.
+    ## If the db is taken out of a query parameter, it will be checked against
+    ## `http.db_filter()` in order to ensure it's legit and thus avoid db
+    ## forgering that could lead to xss attacks.
+    #db = request.params.get('db') and request.params.get('db').strip()
 
-    if db and not request.session.db:
-        # User asked a specific database on a new session.
-        # That mean the nodb router has been used to find the route
-        # Depending on installed module in the database, the rendering of the page
-        # may depend on data injected by the database route dispatcher.
-        # Thus, we redirect the user to the same page but with the session cookie set.
-        # This will force using the database route dispatcher...
-        r = request.httprequest
-        url_redirect = werkzeug.urls.url_parse(r.base_url)
-        if r.query_string:
-            # in P3, request.query_string is bytes, the rest is text, can't mix them
-            query_string = iri_to_uri(r.query_string)
-            url_redirect = url_redirect.replace(query=query_string)
-        request.session.db = db
-        abort_and_redirect(url_redirect)
+    ## Ensure db is legit
+    #if db and db not in http.db_filter([db]):
+    #    db = None
 
-    # if db not provided, use the session one
-    if not db and request.session.db and http.db_filter([request.session.db]):
-        db = request.session.db
+    #if db and not request.session.db:
+    #    # User asked a specific database on a new session.
+    #    # That mean the nodb router has been used to find the route
+    #    # Depending on installed module in the database, the rendering of the page
+    #    # may depend on data injected by the database route dispatcher.
+    #    # Thus, we redirect the user to the same page but with the session cookie set.
+    #    # This will force using the database route dispatcher...
+    #    r = request.httprequest
+    #    url_redirect = werkzeug.urls.url_parse(r.base_url)
+    #    if r.query_string:
+    #        # in P3, request.query_string is bytes, the rest is text, can't mix them
+    #        query_string = iri_to_uri(r.query_string)
+    #        url_redirect = url_redirect.replace(query=query_string)
+    #    request.session.db = db
+    #    abort_and_redirect(url_redirect)
 
-    # if no database provided and no database in session, use monodb
-    if not db:
-        db = db_monodb(request.httprequest)
+    ## if db not provided, use the session one
+    #if not db and request.session.db and http.db_filter([request.session.db]):
+    #    db = request.session.db
 
-    # if no db can be found til here, send to the database selector
-    # the database selector will redirect to database manager if needed
-    if not db:
-        werkzeug.exceptions.abort(werkzeug.utils.redirect(redirect, 303))
+    ## if no database provided and no database in session, use monodb
+    #if not db:
+    #    db = db_monodb(request.httprequest)
 
-    # always switch the session to the computed db
-    if db != request.session.db:
-        request.session.logout()
-        abort_and_redirect(request.httprequest.url)
+    ## if no db can be found til here, send to the database selector
+    ## the database selector will redirect to database manager if needed
+    #if not db:
+    #    werkzeug.exceptions.abort(werkzeug.utils.redirect(redirect, 303))
 
-    request.session.db = db
+    ## always switch the session to the computed db
+    #if db != request.session.db:
+    #    request.session.logout()
+    #    abort_and_redirect(request.httprequest.url)
+
+    #request.session.db = db
 
 def module_installed(environment):
     # Candidates module the current heuristic is the /static dir
@@ -876,7 +880,7 @@ class Home(http.Controller):
     @http.route('/web', type='http', auth="none")
     def web_client(self, s_action=None, **kw):
         ensure_db()
-        if not request.session.uid:
+        if not request.session["uid"]:
             return werkzeug.utils.redirect('/web/login', 303)
         if kw.get('redirect'):
             return werkzeug.utils.redirect(kw.get('redirect'), 303)
@@ -914,17 +918,17 @@ class Home(http.Controller):
     def web_login(self, redirect=None, **kw):
         ensure_db()
         request.params['login_success'] = False
-        if request.httprequest.method == 'GET' and redirect and request.session.uid:
+        if request.httprequest.method == 'GET' and redirect and request.session["uid"]:
             return http.redirect_with_hash(redirect)
 
-        if not request.uid:
-            request.uid = odoo.SUPERUSER_ID
+        #if not request.uid:
+        #    request.uid = odoo.SUPERUSER_ID
 
         values = request.params.copy()
-        try:
-            values['databases'] = http.db_list()
-        except odoo.exceptions.AccessDenied:
-            values['databases'] = None
+        #try:
+        #    values['databases'] = http.db_list()
+        #except odoo.exceptions.AccessDenied:
+        #    values['databases'] = None
 
         if request.httprequest.method == 'POST':
             old_uid = request.uid
@@ -949,7 +953,10 @@ class Home(http.Controller):
             values['disable_database_manager'] = True
 
         response = request.render('web.login', values)
+        _logger.info("hello response template %s",response.template)
         response.headers['X-Frame-Options'] = 'DENY'
+        _logger.info("hello %s",response)
+
         return response
 
     @http.route('/web/become', type='http', auth='user', sitemap=False)
@@ -1610,11 +1617,12 @@ class Binary(http.Controller):
         imgext = '.png'
         placeholder = functools.partial(get_resource_path, 'web', 'static', 'src', 'img')
         uid = None
-        if request.session.db:
-            dbname = request.session.db
-            uid = request.session.uid
-        elif dbname is None:
-            dbname = db_monodb()
+        #if request.session.db:
+        #    dbname = request.session.db
+        #    uid = request.session.uid
+        #elif dbname is None:
+        #    dbname = db_monodb()
+        dbname = request.db
 
         if not uid:
             uid = odoo.SUPERUSER_ID
@@ -1647,11 +1655,11 @@ class Binary(http.Controller):
                         imgext = '.' + mimetype.split('/')[1]
                         if imgext == '.svg+xml':
                             imgext = '.svg'
-                        response = http.send_file(image_data, filename=imgname + imgext, mimetype=mimetype, mtime=row[1])
+                        response = request.send_file(image_data, filename=imgname + imgext, mimetype=mimetype, mtime=row[1])
                     else:
-                        response = http.send_file(placeholder('nologo.png'))
+                        response = request.send_file(placeholder('nologo.png'))
             except Exception:
-                response = http.send_file(placeholder(imgname + imgext))
+                response = request.send_file(placeholder(imgname + imgext))
 
         return response
 

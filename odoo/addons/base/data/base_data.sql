@@ -120,6 +120,18 @@ CREATE TABLE res_partner (
     primary key(id)
 );
 
+CREATE TABLE ir_session (
+    id serial NOT NULL,
+    create_uid integer DEFAULT 1, -- references res_users on delete set null,
+    create_date timestamp without time zone,
+    write_date timestamp without time zone,
+    write_uid integer DEFAULT 1, -- references res_users on delete set null,
+    sid character varying,
+    json character varying,
+    primary key(id)
+);
+ALTER TABLE ir_session add constraint sid_uniq unique (sid);
+
 
 ---------------------------------
 -- Default data

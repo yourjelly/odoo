@@ -581,4 +581,5 @@ class IrAttachment(models.Model):
     def get_serve_attachment(self, url, extra_domain=None, extra_fields=None, order=None):
         domain = [('type', '=', 'binary'), ('url', '=', url)] + (extra_domain or [])
         fieldNames = ['__last_update', 'datas', 'mimetype'] + (extra_fields or [])
+        _logger.info("Search %s", domain)
         return self.search_read(domain, fieldNames, order=order, limit=1)

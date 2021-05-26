@@ -298,6 +298,7 @@ class AssetsBundle(object):
         """
         assert extension in ('js', 'min.js', 'js.map', 'css', 'min.css', 'css.map')
         ira = self.env['ir.attachment']
+        _logger.info("SAVE atatachement %s %s",self.name,extension)
 
         # Set user direction in name to store two bundles
         # 1 for ltr and 1 for rtl, this will help during cleaning of assets bundle
@@ -330,6 +331,7 @@ class AssetsBundle(object):
         values = {
             'url': url,
         }
+        _logger.info("SAVE atatachement %s %s",values, attachment.id)
         attachment.write(values)
 
         if self.env.context.get('commit_assetsbundle') is True:
