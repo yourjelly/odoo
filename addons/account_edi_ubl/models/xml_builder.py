@@ -20,9 +20,12 @@ class Node:
             tag_split[0] = '{%s}' % nsmap[tag_split[0]]
         return ''.join(tag_split)
 
+    def get_all_items(self, key, recursive=False):
+        return [self] if self.tag == key else []
+
 
 class Value(Node):
-    def __init__(self, tag, value, attrs=None, internal_data=None, required=None, value_format=None):
+    def __init__(self, tag, value=None, attrs=None, internal_data=None, required=None, value_format=None):
         super().__init__(tag, required=required)
         self.value = value
         self.attrs = attrs
@@ -31,15 +34,19 @@ class Value(Node):
         self.value_format = value_format
 
     def build(self, nsmap, errors, parent_node=None):
-        if self.value is None or parent_node is None:
+        value = self.get_value()
+        if value is None or parent_node is None:
             return []
 
         element = etree.SubElement(parent_node, self.format_tag(self.tag, nsmap), attrib=self.attrs, nsmap=nsmap)
-        element.text = str(self.value_format(self.value) if self.value_format else self.value)
+        element.text = str(self.value_format(value) if self.value_format else value)
         return [element]
 
     def set_value(self, value):
         self.value = value
+
+    def get_value(self):
+        return self.value
 
 
 class FieldValue(Value):
@@ -48,14 +55,13 @@ class FieldValue(Value):
         self.fieldnames = fieldnames
         super().__init__(
             tag,
-            self._get_value(),
             attrs=attrs,
             internal_data=internal_data,
             required=self._create_required_error_message if required else None,
             value_format=value_format,
         )
 
-    def _get_value(self):
+    def get_value(self):
         for fieldname in self.fieldnames:
             value = self.record
             for sub_fieldname in fieldname.split('.'):
@@ -160,6 +166,13 @@ class Parent(Node):
         else:
             self.children_nodes[node.tag] = node
 
+    def get_all_items(self, key, recursive=False):
+        res = [self] if self.tag == key else []
+        if recursive:
+            for node in self.children_nodes.values():
+                res.extend(node.get_all_items(key, recursive))
+        return res
+
 
 class Multi(Node):
     def __init__(self, children_nodes, required=None):
@@ -196,6 +209,13 @@ class Multi(Node):
 
     def __len__(self):
         return len(self.children_nodes)
+
+    def get_all_items(self, key, recursive=False):
+        res = []
+        for node in self.children_nodes:
+            # Multi is not a level in the xml hierarchy, so we always go recursively.
+            res.extend(node.get_all_items(key, recursive))
+        return res
 
 
 class XmlBuilder:

@@ -176,6 +176,7 @@ class AccountEdiTestCommon(AccountTestInvoicingCommon):
         if not attachment:
             raise ValueError('No attachment was generated after posting EDI')
         xml_content = base64.b64decode(attachment.with_context(bin_size=False).datas)
+        print(xml_content.decode())
         current_etree = self.get_xml_tree_from_string(xml_content)
         expected_etree = self.get_xml_tree_from_string(expected_values)
         if applied_xpath:

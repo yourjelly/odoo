@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from odoo.addons.account_edi_ubl.models import xml_builder
 from odoo import models, _
 
 import base64
@@ -62,11 +63,47 @@ class AccountEdiFormat(models.Model):
 
         return values
 
+    def _nlcius_PartyType(self, accounting_party, partner):
+        accounting_party['cac:Party'].insert_after('cac:PartyTaxScheme',
+            xml_builder.Parent('cbc:PartyLegalEntity', [
+                xml_builder.FieldValue(
+                    'cbc:RegistrationName',
+                    partner,
+                    ['name']
+                ),
+                xml_builder.FieldValue(
+                    'cbc:CompanyID',
+                    partner,
+                    ['l10n_nl_oin', 'l10n_nl_kvk'],
+                    attrs={'schemeID': '0190' if partner.l10n_nl_oin else '0106'},
+                ),
+            ])
+        )
+
+        if partner.country_code == 'NL':
+            endpoint_node = accounting_party['cac:Party']['cbc:EndpointID']
+            endpoint_node.fieldnames = ['l10n_nl_oin', 'l10n_nl_kvk']
+            endpoint_node.attrs = {'schemeID': '0190' if partner.l10n_nl_oin else '0106'}
+
+            accounting_party['cac:Party'].insert_after('cbc:EndpointID',
+            xml_builder.Parent('cac:PartyIdentification', [
+                xml_builder.FieldValue('cbc:ID', partner, ['l10n_nl_oin', 'l10n_nl_kvk'])
+            ]))
+
+    def _get_nlcius_builder(self, invoice):
+        builder = self._get_bis3_builder(invoice)
+        builder.root_node['cbc:CustomizationID'].set_value('urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0')
+        self._nlcius_PartyType(builder.root_node['cac:AccountingSupplierParty'], invoice.company_id.partner_id.commercial_partner_id)
+        self._nlcius_PartyType(builder.root_node['cac:AccountingCustomerParty'], invoice.commercial_partner_id)
+        return builder
+
     def _export_nlcius(self, invoice):
         self.ensure_one()
         # Create file content.
-        xml_content = b"<?xml version='1.0' encoding='UTF-8'?>"
-        xml_content += self.env.ref('l10n_nl_edi.export_nlcius_invoice')._render(self._get_nlcius_values(invoice))
+        # xml_content = b"<?xml version='1.0' encoding='UTF-8'?>"
+        # xml_content += self.env.ref('l10n_nl_edi.export_nlcius_invoice')._render(self._get_nlcius_values(invoice))
+        builder = self.env['account.edi.format']._get_nlcius_builder(invoice)
+        xml_content = builder.build()
         vat = invoice.company_id.partner_id.commercial_partner_id.vat
         xml_name = 'nlcius-%s%s%s.xml' % (vat or '', '-' if vat else '', invoice.name.replace('/', '_'))
         return self.env['ir.attachment'].create({

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.addons.account_edi_ubl.models import xml_builder
 from odoo import models
 from odoo.exceptions import UserError
 from odoo.tests.common import Form
@@ -121,6 +122,32 @@ class AccountEdiFormat(models.Model):
                 partner_vals['bis3_endpoint_scheme'] = COUNTRY_EAS[partner.country_id.code]
 
         return values
+
+    def _bis3_PartyType(self, ubl_PartyType, partner):
+        party = ubl_PartyType['cac:Party']
+        # TODO this is in ubl as well, maybe we should put it in ubl directly and correct the tests (ubl)
+        party.insert_before('cac:PartyName',
+            xml_builder.FieldValue('cbc:EndpointID', partner, ['vat'], attrs={'schemeID': str(COUNTRY_EAS[partner.country_id.code])}))
+
+        # TODO This is bis3 only
+        del party['cac:Language']
+        for tax_scheme in party['cac:PartyTaxScheme']:
+            del tax_scheme['cbc:RegistrationName']
+            tax_scheme['cac:TaxScheme']['cbc:ID'].attrs = {}  # UBL-DT-27
+
+    def _get_bis3_builder(self, invoice):
+        builder = self._get_ubl_2_1_builder(invoice)
+        builder.root_node['cbc:CustomizationID'].set_value('urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0')
+        builder.root_node['cbc:ProfileID'].set_value('urn:fdc:peppol.eu:2017:poacc:billing:01:1.0')
+        del builder.root_node['cbc:UBLVersionID']
+        del builder.root_node['cbc:LineCountNumeric']
+        builder.root_node.insert_after('cbc:IssueDate',
+            xml_builder.FieldValue('cbc:DueDate', invoice, ['invoice_date_due'], value_format=lambda date: date.strftime('%Y-%m-%d')))
+        self._bis3_PartyType(builder.root_node['cac:AccountingSupplierParty'], invoice.company_id.partner_id.commercial_partner_id)
+        self._bis3_PartyType(builder.root_node['cac:AccountingCustomerParty'], invoice.commercial_partner_id)
+        for node in builder.root_node.get_all_items('cac:Country', recursive=True):
+            del node['cbc:Name']
+        return builder
 
     ####################################################
     # Import

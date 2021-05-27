@@ -19,7 +19,6 @@ class TestUBL(AccountEdiTestCommon):
         })
 
         cls.partner_a.write({
-            'l10n_nl_kvk': '77777677',
             'country_id': cls.env.ref('base.be').id,
             'vat': 'BE0477472701',
         })
