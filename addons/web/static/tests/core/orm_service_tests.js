@@ -21,7 +21,6 @@ QUnit.module("ORM Service", {
 function makeFakeRPC() {
     const query = { route: null, params: null };
     const rpc = {
-        name: "rpc",
         start() {
             return async (route, params) => {
                 query.route = route;
@@ -259,3 +258,32 @@ QUnit.test("useModel is specialized for component", async (assert) => {
     assert.strictEqual(component.rpc, component.orm.rpc);
     assert.notStrictEqual(component.orm, env.services.orm);
 });
+
+QUnit.test("silent mode", async (assert) => {
+    serviceRegistry.add("rpc", {
+        start() {
+            return async (route, params, settings) => {
+                assert.step(`${route}${settings.silent ? ' (silent)' : ''}`);
+            };
+        },
+    });
+    const env = await makeTestEnv();
+    const orm = env.services.orm;
+
+    orm.call('my_model', 'my_method');
+    orm.silent.call('my_model', 'my_method');
+    orm.call('my_model', 'my_method');
+    orm.read('my_model');
+    orm.silent.read('my_model');
+    orm.read('my_model');
+
+    assert.verifySteps([
+      "/web/dataset/call_kw/my_model/my_method",
+      "/web/dataset/call_kw/my_model/my_method (silent)",
+      "/web/dataset/call_kw/my_model/my_method",
+      "/web/dataset/call_kw/my_model/read",
+      "/web/dataset/call_kw/my_model/read (silent)",
+      "/web/dataset/call_kw/my_model/read",
+  ]);
+});
+
