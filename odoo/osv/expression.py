@@ -764,55 +764,11 @@ class expression(object):
                 if prefix:
                     return [(left, 'in', left_model.search(doms).ids)]
                 return doms
-            if left_model != left_model.env[left_model._fields[parent or left_model._parent_name].comodel_name]:
-                def parent_model(model):
-                    parent_field = model._fields.get(model._parent_name)
-                    if not parent_field:
-                        return None
-                    return model.env[parent_field.comodel_name]
-
-                def idempotent(model):
-                    return model == parent_model(model)
-
-                def children_ids(model, ids):
-                    """ Return the ids of recors on <model> with id or parent id in <ids> """
-                    ids = model.search(['|', ('id', 'in', ids), (model._parent_name, 'in', ids)]).ids
-                    if not idempotent(model):
-                        return ids
-                    # model is idempotent, so we need to keep looking
-                    all_ids = set(ids)
-                    while ids:
-                        ids = model.search([(model._parent_name, 'in', ids)]).ids
-                        all_ids.update(ids)
-                    return list(all_ids)
-
-                def parent_models(model):
-                    """ Return all the parent models up to the root, including <model> """
-                    models = [model]
-                    while True:
-                        next_model = parent_model(models[-1])
-                        if next_model is None or next_model == models[-1]:
-                            break
-                        models.append(next_model)
-                    return models
-
-                def children_ids_multiple(models, ids):
-                    """ Return ids of records that are children of <ids> on the <models> hierarchy """
-                    models = list(models)
-                    pids = list(ids)
-                    all_ids = set()
-                    while models:
-                        model = models.pop()
-                        pids = children_ids(model, list(set(pids + ids)))
-                        all_ids.update(pids)
-                    return list(all_ids)
-
-                parent_models = parent_models(left_model)
-                cids = children_ids_multiple(parent_models, ids)
-                return [(left, 'in', cids)]
             else:
                 parent_name = parent or left_model._parent_name
                 child_ids = set(ids)
+                if left_model._name != left_model._fields[parent_name].comodel_name:
+                    return [(left, 'in', list(child_ids))]
                 while ids:
                     ids = left_model.search([(parent_name, 'in', ids)]).ids
                     child_ids.update(ids)
