@@ -60,7 +60,7 @@ function jsonrpc(env, rpcId, url, params, settings = {}) {
     let rejectFn;
     const promise = new Promise((resolve, reject) => {
         rejectFn = reject;
-        if (!settings.shadow) {
+        if (!settings.silent) {
             bus.trigger("RPC:REQUEST", data.id);
         }
         // handle success
