@@ -94,7 +94,7 @@ export const calendarNotificationService = {
 
         async function getNextCalendarNotif() {
             try {
-                const result = await rpc("/calendar/notify", {}, { shadow: true });
+                const result = await rpc("/calendar/notify", {}, { silent: true });
                 displayCalendarNotification(result);
             } catch (error) {
                 if (!(error instanceof ConnectionLostError)) {
