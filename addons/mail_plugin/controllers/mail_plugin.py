@@ -26,7 +26,7 @@ class MailPluginController(http.Controller):
 
     @http.route('/mail_plugin/partner/enrich_and_create_company',
                 type="json", auth="outlook", cors="*")
-    def res_partner_enrich_and_create_company(self, partner_id):
+    def res_partner_enrich_and_create_company(self, partner_id, update=False):
         """
         Route used when the user clicks on the create and enrich partner button
         it will try to find a company using IAP, if a company is found
@@ -44,11 +44,14 @@ class MailPluginController(http.Controller):
             response = {'error': _('Contact has no valid email')}
             return response
 
-        company, enrichment_info = self._create_company_from_iap(normalized_email)
+        if update:
+            company, enrichment_info = self._create_or_update_company_from_iap(normalized_email, partner_id)
+        else:
+            company, enrichment_info = self._create_or_update_company_from_iap(normalized_email)
 
         response['enrichment_info'] = enrichment_info
         response['company'] = self._get_company_data(company)
-        if company:
+        if company and not update:
             partner.write({'parent_id': company})
 
         return response
@@ -95,7 +98,7 @@ class MailPluginController(http.Controller):
             }
             company = self._find_existing_company(normalized_email)
             if not company:  # create and enrich company
-                company, enrichment_info = self._create_company_from_iap(normalized_email)
+                company, enrichment_info = self._create_or_update_company_from_iap(normalized_email)
                 response['partner']['enrichment_info'] = enrichment_info
             response['partner']['company'] = self._get_company_data(company)
 
@@ -214,7 +217,7 @@ class MailPluginController(http.Controller):
 
         return company_values
 
-    def _create_company_from_iap(self, email):
+    def _create_or_update_company_from_iap(self, email, partner_id=False):
         domain = tools.email_domain_extract(email)
         iap_data = self._iap_enrich(domain)
         if 'enrichment_info' in iap_data:
@@ -224,14 +227,16 @@ class MailPluginController(http.Controller):
         emails = iap_data.get('email')
         new_company_info = {
             'is_company': True,
-            'name': iap_data.get("name") or domain,
             'street': iap_data.get("street_name"),
             'city': iap_data.get("city"),
             'zip': iap_data.get("postal_code"),
             'phone': phone_numbers[0] if phone_numbers else None,
             'website': iap_data.get("domain"),
-            'email': emails[0] if emails else None
         }
+
+        if not partner_id:
+            new_company_info['name'] = iap_data.get("name") or domain
+            new_company_info['email'] = emails[0] if emails else None
 
         logo_url = iap_data.get('logo')
         if logo_url:
@@ -259,7 +264,11 @@ class MailPluginController(http.Controller):
             'iap_enrich_info': json.dumps(iap_data),
         })
 
-        new_company = request.env['res.partner'].create(new_company_info)
+        if partner_id:
+            request.env['res.partner'].browse(partner_id).update(new_company_info)
+            new_company = request.env['res.partner'].browse(partner_id)
+        else:
+            new_company = request.env['res.partner'].create(new_company_info)
 
         new_company.message_post_with_view(
             'iap_mail.enrich_company',
@@ -267,7 +276,9 @@ class MailPluginController(http.Controller):
             subtype_id=request.env.ref('mail.mt_note').id,
         )
 
-        return new_company, {'type': 'company_created'}
+        enrichment_type = 'company_updated' if partner_id else 'company_created'
+
+        return new_company, {'type': enrichment_type}
 
     def _get_partner_data(self, partner):
 
