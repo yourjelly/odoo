@@ -8,7 +8,7 @@ export const companyAutocompleteService = {
     start(env, { orm, user }) {
         if (odoo.session_info.iap_company_enrich) {
             const currentCompanyId = user.current_company.id;
-            orm.call("res.company", "iap_enrich_auto", [currentCompanyId], {}, { shadow: true });
+            orm.silent.call("res.company", "iap_enrich_auto", [currentCompanyId], {});
         }
     },
 };
