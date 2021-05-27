@@ -35,7 +35,13 @@ export class Notification extends Component {
 Notification.template = "web.NotificationWowl";
 Notification.props = {
     id: { type: Number },
-    message: { type: String },
+    message: {
+        validate: (m) => {
+            return (
+                typeof m === "string" || (typeof m === "object" && typeof m.toString === "function")
+            );
+        },
+    },
     title: { type: [String, Boolean], optional: true },
     type: {
         type: String,
