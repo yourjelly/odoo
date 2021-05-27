@@ -27,6 +27,11 @@ class ORM {
     constructor(rpc, user) {
         this.rpc = rpc;
         this.user = user;
+        this._silent = false;
+    }
+
+    get silent() {
+        return Object.assign(Object.create(this), { _silent: true });
     }
 
     call(model, method, args = [], kwargs = {}) {
@@ -39,7 +44,7 @@ class ORM {
             args,
             kwargs: fullKwargs,
         };
-        return this.rpc(url, params);
+        return this.rpc(url, params, { silent: this._silent });
     }
 
     create(model, state, ctx) {
