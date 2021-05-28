@@ -1,4 +1,3 @@
-
 odoo.define('web_tour.TourManager', function(require) {
 "use strict";
 
