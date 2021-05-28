@@ -20,6 +20,12 @@ const StockReportGraphView = GraphView.extend({
     }),
 });
 
+/**
+ * This whole thing should not extend the client report action. 
+ * It should be a client action on its own. (client report action is an example on how to do one).
+ * It it were to be converted to a client action, some changes to the python side might be required as
+ * templates would no longer be loaded in an iframe with a src url.
+ */
 const ReplenishReport = clientAction.extend({
     /**
      * @override
