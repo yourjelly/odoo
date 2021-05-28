@@ -5,6 +5,7 @@
         <record id="edi_efff_1" model="account.edi.format">
             <field name="name">E-FFF (BE)</field>
             <field name="code">efff_1</field>
+            <field name="parent" ref="account_edi_ubl.edi_ubl_2_1"/> <!-- TODO e-fff should be dependent from 2.0, this is just for tests  -->
         </record>
 
     </data>

@@ -12,10 +12,19 @@ class AccountEdiFormat(models.Model):
     # Export
     ####################################################
 
+    def _get_xml_builder(self, invoice):
+        builder = super()._get_xml_builder(invoice) # How to guarente that the order will be respected ?
+        if not self._is_instance('efff_1'):
+            return builder
+
+        print('Stuff specific to e-fff')
+        return builder
+
     def _export_efff(self, invoice):
         self.ensure_one()
         # Create file content.
-        builder = self.env['account.edi.format']._get_ubl_2_0_builder(invoice)
+        #builder = self.env['account.edi.format']._get_ubl_2_0_builder(invoice)
+        builder = self._get_xml_builder(invoice)
         xml_content = builder.build()
         xml_name = '%s.xml' % invoice._get_efff_name()
         return self.env['ir.attachment'].create({

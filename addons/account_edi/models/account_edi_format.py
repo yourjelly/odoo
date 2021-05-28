@@ -21,6 +21,8 @@ class AccountEdiFormat(models.Model):
 
     name = fields.Char()
     code = fields.Char(required=True)
+    parent = fields.Many2one('account.edi.format')
+    abstract = fields.Boolean('Can this format be generated ?')
 
     _sql_constraints = [
         ('unique_code', 'unique (code)', 'This code already exists')
@@ -207,6 +209,12 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return {payment: {'success': True} for payment in payments}  # By default, cancel succeeds doing nothing.
 
+    def _get_xml_builder(self, invoice):
+        return False
+
+    # def _get_xml_builder_party(self, partner):
+    #     pass
+
     ####################################################
     # Import methods to override based on EDI Format
     ####################################################
@@ -289,6 +297,15 @@ class AccountEdiFormat(models.Model):
             reader_buffer.close()
             buffer.close()
         return pdf_content
+
+    def _is_instance(self, code):
+        self.ensure_one()
+        if self.code == code:
+            return True
+        if not self.parent:
+            return False
+        return self.parent._is_instance(code)
+
 
     ####################################################
     # Import Internal methods (not meant to be overridden)
