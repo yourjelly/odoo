@@ -209,7 +209,7 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return {payment: {'success': True} for payment in payments}  # By default, cancel succeeds doing nothing.
 
-    def _get_xml_builder(self, invoice):
+    def _get_xml_builder(self, invoice, parent_builder=None):
         return False
 
     # def _get_xml_builder_party(self, partner):
@@ -297,15 +297,6 @@ class AccountEdiFormat(models.Model):
             reader_buffer.close()
             buffer.close()
         return pdf_content
-
-    def _is_instance(self, code):
-        self.ensure_one()
-        if self.code == code:
-            return True
-        if not self.parent:
-            return False
-        return self.parent._is_instance(code)
-
 
     ####################################################
     # Import Internal methods (not meant to be overridden)

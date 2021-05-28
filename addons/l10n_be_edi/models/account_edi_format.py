@@ -3,7 +3,7 @@
 from odoo import models
 
 import base64
-
+from odoo.addons.account_edi_ubl.models import xml_builder
 
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
@@ -12,13 +12,11 @@ class AccountEdiFormat(models.Model):
     # Export
     ####################################################
 
-    def _get_xml_builder(self, invoice):
-        builder = super()._get_xml_builder(invoice) # How to guarente that the order will be respected ?
-        if not self._is_instance('efff_1'):
-            return builder
-
+    @xml_builder.builder('efff_1')
+    def _get_xml_builder(self, invoice, parent_builder):
+        # parent_builder is ubl_2_1 (should be ubl_2_0 but for the sake of the example I changed it in the data)
         print('Stuff specific to e-fff')
-        return builder
+        return parent_builder
 
     def _export_efff(self, invoice):
         self.ensure_one()

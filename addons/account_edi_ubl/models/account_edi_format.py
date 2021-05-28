@@ -259,9 +259,10 @@ class AccountEdiFormatUBL_2_0(models.Model):
             },
         )
 
-    def _get_xml_builder(self, invoice):
-        if self._is_instance('ubl_2_0'):
-            return self._get_ubl_2_0_builder(invoice)
+    @xml_builder.builder('ubl_2_0')
+    def _get_xml_builder(self, invoice, parent_builder=None):
+        # parent_builder is none since ubl_2_0 doesn't have a parent
+        return self._get_ubl_2_0_builder(invoice)
 
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
@@ -437,12 +438,11 @@ class AccountEdiFormat(models.Model):
         builder.root_node.insert_after('cbc:LineCountNumeric', buyerReference)
         return builder
 
-    def _get_xml_builder(self, invoice):
-        builder = super()._get_xml_builder(invoice)
-        if not self._is_instance('ubl_2_1'):
-            return builder
-
-        # TODO same as _get_ubl_2_1_builder
+    @xml_builder.builder('ubl_2_1')
+    def _get_xml_builder(self, invoice, parent_builder=None):
+        builder = parent_builder  # parent builder => ubl_2_0 builder
+        # Modify for ubl_2_1
+        # TODO this is copy-pasted from _get_ubl_2_1_builder, clean depending on the chosen solution
         builder.root_node['cbc:UBLVersionID'].set_value(2.1)
         buyerReference = xml_builder.FieldValue('cbc:BuyerReference', invoice, ['commercial_partner_id.name'])
         builder.root_node.insert_after('cbc:LineCountNumeric', buyerReference)

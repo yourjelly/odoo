@@ -4,6 +4,35 @@ from odoo import _
 from odoo.tools import float_repr
 from lxml import etree
 
+from functools import wraps
+
+
+# TODO put this in account_edi !
+
+# TODO if _get_xml_builder is note defined for edi_format.code or the parent it would crash.
+# Guarentees the order of execution !!
+def builder(code):
+    def decorator(func):
+        @wraps(func)
+        def wrap(edi_format, *args, **kwargs):
+            if 'parent_builder' in kwargs:
+                # LAS : Don't take this into account if it's your first read.
+                # in case parent_builder is passed as a parameter on the first call, we could say it is overridden.
+                # Doesn't really make sense though, would be a hack, so maybe we should delete this and discard
+                # the builder given in the parameter.
+                return func(edi_format, parent_builder=kwargs['parent_builder'], *args, **kwargs)
+            if edi_format.code != code:
+                return False
+            builder = None
+            if edi_format.parent:
+                for parent in edi_format.__class__.__bases__:  # find the function of the parent
+                    builder = parent._get_xml_builder(edi_format.parent, *args, **kwargs)
+                    if builder:
+                        break
+            return func(edi_format, parent_builder=builder, *args, **kwargs)
+        return wrap
+    return decorator
+
 
 class Node:
     def __init__(self, tag, required=None):
