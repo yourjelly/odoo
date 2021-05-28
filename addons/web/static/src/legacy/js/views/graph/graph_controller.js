@@ -195,7 +195,7 @@ var GraphController = AbstractController.extend({
         // Update button classes accordingly to the current mode
         const buttons = actionsContainer.querySelectorAll('.o_dropdown_toggler');
         for (const button of buttons) {
-            button.classList.remove('o_dropdown_toggler', 'btn-secondary');
+            button.classList.remove('btn-secondary');
             if (this.isEmbedded) {
                 button.classList.add('btn-outline-secondary');
             } else {
