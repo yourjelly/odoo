@@ -119,13 +119,6 @@ def serialize_exception(f):
             return werkzeug.exceptions.InternalServerError(json.dumps(error))
     return wrap
 
-def redirect_with_hash(*args, **kw):
-    """
-        .. deprecated:: 8.0
-
-        Use the ``http.redirect_with_hash()`` function instead.
-    """
-    return http.redirect_with_hash(*args, **kw)
 
 #def abort_and_redirect(url):
 #    r = request.httprequest
@@ -874,7 +867,7 @@ class Home(http.Controller):
 
     @http.route('/', type='http', auth="none")
     def index(self, s_action=None, db=None, **kw):
-        return http.local_redirect('/web', query=request.params, keep_hash=True)
+        return request.redirect('/web', query=request.params)
 
     # ideally, this route should be `auth="user"` but that don't work in non-monodb mode.
     @http.route('/web', type='http', auth="none")
@@ -920,7 +913,7 @@ class Home(http.Controller):
         ensure_db()
         request.params['login_success'] = False
         if request.httprequest.method == 'GET' and redirect and request.session["uid"]:
-            return http.redirect_with_hash(redirect)
+            return request.redirect(redirect)
 
         #if not request.uid:
         #    request.uid = odoo.SUPERUSER_ID
@@ -935,7 +928,7 @@ class Home(http.Controller):
             try:
                 uid = request.session_authenticate_start(request.params['login'], request.params['password'])
                 request.params['login_success'] = True
-                return http.redirect_with_hash(self._login_redirect(uid, redirect=redirect))
+                return request.redirect(self._login_redirect(uid, redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
                 if e.args == odoo.exceptions.AccessDenied().args:
                     values['error'] = _("Wrong login/password")
@@ -965,7 +958,7 @@ class Home(http.Controller):
             request.env['res.users'].clear_caches()
             request.session.session_token = security.compute_session_token(request.session, request.env)
 
-        return http.local_redirect(self._login_redirect(uid), keep_hash=True)
+        return request.redirect(self._login_redirect(uid))
 
 class WebClient(http.Controller):
 
@@ -1121,7 +1114,7 @@ class Database(http.Controller):
             country_code = post.get('country_code') or False
             request.rpc_service('db', 'create_database', [master_pwd, name, bool(post.get('demo')), lang, password, post['login'], country_code, post['phone']])
             request.session.authenticate(name, post['login'], password)
-            return http.local_redirect('/web/')
+            return request.redirect('/web/')
         except Exception as e:
             error = "Database creation error: %s" % (str(e) or repr(e))
         return self._render_template(error=error)

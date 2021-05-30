@@ -111,23 +111,7 @@ NO_POSTMORTEM = (
 #----------------------------------------------------------
 # Helpers
 #----------------------------------------------------------
-# TODO move to request method as helper ?
-def local_redirect(path, query=None, keep_hash=False, code=303):
-    # FIXME: drop the `keep_hash` param, now useless
-    url = path
-    if not query:
-        query = {}
-    if query:
-        url += '?' + werkzeug.urls.url_encode(query)
-    return werkzeug.utils.redirect(url, code)
-
-def redirect_with_hash(url, code=303):
-    # Section 7.1.2 of RFC 7231 requires preservation of URL fragment through redirects,
-    # so we don't need any special handling anymore. This function could be dropped in the future.
-    # seealso : http://www.rfc-editor.org/info/rfc7231
-    #           https://tools.ietf.org/html/rfc7231#section-7.1.2
-    return werkzeug.utils.redirect(url, code)
-
+# Move to Request.json_exception
 def serialize_exception(e):
     tmp = {
         "name": type(e).__module__ + "." + type(e).__name__ if type(e).__module__ else type(e).__name__,
@@ -844,6 +828,14 @@ class Request(object):
     #------------------------------------------------------
     # HTTP Controllers
     #------------------------------------------------------
+    def redirect(self, path, query=None, code=303):
+        url = path
+        if not query:
+            query = {}
+        if query:
+            url += '?' + werkzeug.urls.url_encode(query)
+        return werkzeug.utils.redirect(url, code)
+
     def render(self, template, qcontext=None, lazy=True, **kw):
         """ Lazy render of a QWeb template.
 
