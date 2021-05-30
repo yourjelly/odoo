@@ -220,7 +220,7 @@ def module_boot(db=None):
     for i in server_wide_modules:
         if i in http.addons_manifest and i not in serverside:
             serverside.append(i)
-    monodb = db or db_monodb()
+    monodb = request.db
     if monodb:
         dbside = module_installed_bypass_session(monodb)
         dbside = [i for i in dbside if i not in serverside]
@@ -303,7 +303,7 @@ def _get_login_redirect_url(uid, redirect=None):
     """ Decide if user requires a specific post-login redirect, e.g. for 2FA, or if they are
     fully logged and can proceed to the requested URL
     """
-    if request.session.uid: # fully logged
+    if request.session["uid"]: # fully logged
         return redirect or '/web'
 
     # partial session (MFA)
@@ -880,12 +880,13 @@ class Home(http.Controller):
     @http.route('/web', type='http', auth="none")
     def web_client(self, s_action=None, **kw):
         ensure_db()
+        _logger.info("seesion uid %s",  request.session["uid"])
         if not request.session["uid"]:
             return werkzeug.utils.redirect('/web/login', 303)
         if kw.get('redirect'):
             return werkzeug.utils.redirect(kw.get('redirect'), 303)
 
-        request.uid = request.session.uid
+        #request.uid = request.session.uid
         try:
             context = request.env['ir.http'].webclient_rendering_context()
             response = request.render('web.webclient_bootstrap', qcontext=context)
@@ -901,7 +902,7 @@ class Home(http.Controller):
         :param unique: this parameters is not used, but mandatory: it is used by the HTTP stack to make a unique request
         :return: the menus (including the images in Base64)
         """
-        menus = request.env["ir.ui.menu"].load_menus(request.session.debug)
+        menus = request.env["ir.ui.menu"].load_menus(request.session["debug"])
         body = json.dumps(menus, default=ustr)
         response = request.make_response(body, [
             # this method must specify a content-type application/json instead of using the default text/html set because
@@ -931,13 +932,11 @@ class Home(http.Controller):
         #    values['databases'] = None
 
         if request.httprequest.method == 'POST':
-            old_uid = request.uid
             try:
-                uid = request.session.authenticate(request.session.db, request.params['login'], request.params['password'])
+                uid = request.session_authenticate_start(request.params['login'], request.params['password'])
                 request.params['login_success'] = True
                 return http.redirect_with_hash(self._login_redirect(uid, redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
-                request.uid = old_uid
                 if e.args == odoo.exceptions.AccessDenied().args:
                     values['error'] = _("Wrong login/password")
                 else:
@@ -953,9 +952,7 @@ class Home(http.Controller):
             values['disable_database_manager'] = True
 
         response = request.render('web.login', values)
-        _logger.info("hello response template %s",response.template)
         response.headers['X-Frame-Options'] = 'DENY'
-        _logger.info("hello %s",response)
 
         return response
 
@@ -1004,7 +1001,7 @@ class WebClient(http.Controller):
 
     @http.route('/web/webclient/qweb/<string:unique>', type='http', auth="none", cors="*")
     def qweb(self, unique, mods=None, db=None):
-        content = HomeStaticTemplateHelpers.get_qweb_templates(mods, db, debug=request.session.debug)
+        content = HomeStaticTemplateHelpers.get_qweb_templates(mods, db, debug=request.session["debug"])
 
         return request.make_response(content, [
                 ('Content-Type', 'text/xml'),

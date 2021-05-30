@@ -285,7 +285,6 @@ class IrQWeb(models.AbstractModel, QWeb):
         return AssetsBundle(xmlid, files, env=env, css=css, js=js)
 
     def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
-        _logger.info("TCALL ASSET %s %s", xmlid, options )
         """Generates asset nodes.
         If debug=assets, the assets will be regenerated when a file which composes them has been modified.
         Else, the assets will be generated only once and then stored in cache.

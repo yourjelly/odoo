@@ -98,7 +98,8 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _auth_method_user(cls):
         if not request.session["uid"]:
-            raise SessionExpiredException("Session expired")
+            raise AccessDenied()
+            #raise SessionExpiredException("Session expired")
 
     @classmethod
     def _auth_method_none(cls):

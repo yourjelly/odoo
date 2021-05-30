@@ -3,6 +3,7 @@
 # Odoo HTTP layer
 #----------------------------------------------------------
 import ast
+import base64
 import collections
 import contextlib
 import datetime
@@ -359,6 +360,18 @@ class Response(werkzeug.wrappers.Response):
             self.response.append(self.render())
             self.template = None
 
+    def update(self, *args, **kwargs):
+        """Replace headers in this object with items from another headers object and keyword arguments.
+        To extend existing keys instead of replacing, use :meth:`extend` instead.
+        If provided, the first argument can be another :class:`Headers` object, a :class:`MultiDict`, :class:`dict`, or iterable of pairs.
+        .. versionadded:: 1.0
+        """
+        if len(args) > 1:
+            raise TypeError(f"update expected at most 1 arguments, got {len(args)}")
+
+        if args:
+            mapping = args[0]
+
 class Request(object):
     """ Odoo request.
 
@@ -645,8 +658,12 @@ class Request(object):
         #                db = None
 
     def session_reset_env(self):
+        # No uid means 1, I know it looks dangerous but it's checked again in
+        # ir.http dispatch auth_*
+        uid = self.session["uid"] or 1
         # TODO load context
-        self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
+        self.env = odoo.api.Environment(self.cr, uid, {})
+
 
     def session_pre(self):
 
@@ -659,26 +676,19 @@ class Request(object):
         cookie_dbname = None
         r = re.match('([0-9a-zA-Z]{40})(_([0-9a-zA-Z_-]{1,64}))?',cookie)
         if r:
-            self.session_sid = re.group(1)
-            cookie_dbname = re.group(3)
+            self.session_sid = r.group(1)
+            cookie_dbname = r.group(3)
 
         # Decode session
         self.session_orig = "{}"
         self.session = {
             "uid": None,
             "login": None,
-            "token": None,
+            "token": None, # TODO REMOVE
             "context": {},
             "debug": '',
         }
 
-        #    def _default_values(self):
-        #        self.setdefault("db", None)
-        #        self.setdefault("uid", None)
-        #        self.setdefault("login", None)
-        #        self.setdefault("session_token", None)
-        #        self.setdefault("context", {})
-        #        self.setdefault("debug", '')
         #def setup_lang(self, httprequest):
         #    if "lang" not in httprequest.session.context:
         #        alang = httprequest.accept_languages.best or "en-US"
@@ -713,14 +723,16 @@ class Request(object):
 
             self.db = dbname
             #self._setup_thread()
+            #import pudb; pu.db
             if select:
                 self.session_orig = select[0][0]
                 self.session = json.loads(self.session_orig)
-                self.session_reset_env()
-            else:
-                # No session means 1 but this will be changed in ir.http dispatch
-                self.env = odoo.api.Environment(self.cr, 1, {})
 
+            self.session_reset_env()
+            #raise 1
+
+
+    # TODO move to ir.http
     def session_authenticate_start(self, login=None, password=None):
         """ Authenticate the current user with the given db, login and
         password. If successful, store the authentication parameters in the
@@ -734,7 +746,9 @@ class Request(object):
             "HTTP_HOST" : request.httprequest.environ['HTTP_HOST'],
             "REMOTE_ADDR" : request.httprequest.environ['REMOTE_ADDR'],
         }
-        uid = seld.env['res.users'].authenticate(self.db, login, password, wsgienv)
+        uid = self.env['res.users'].authenticate(self.db, login, password, wsgienv)
+        _logger.info("UID %s",uid)
+
         self.session["session_authenticate_start_login"] = login
         self.session["session_authenticate_start_uid"] = uid
         #self.rotate = True
@@ -748,8 +762,8 @@ class Request(object):
         """ Finalizes a partial session, should be called on MFA validation to
         convert a partial / pre-session into a full-fledged "logged-in" one """
         #self.rotate = True
-        self.session["login"] = self.pop('session_authenticate_start_login')
-        self.session["uid"] = self.pop('session_authenticate_start_uid')
+        self.session["login"] = self.session.pop('session_authenticate_start_login')
+        self.session["uid"] = self.session.pop('session_authenticate_start_uid')
         #self.env[]
         self.env = odoo.api.Environment(self.cr, self.session["uid"], {})
 
@@ -758,16 +772,6 @@ class Request(object):
         context = user.context_get() or {}
         #        self.context['uid'] = self.uid
         #        self._fix_lang(self.context)
-        #    def get_context(self):
-        #        """
-        #        Re-initializes the current user's session context (based on his
-        #        preferences) by calling res.users.get_context() with the old context.
-        #
-        #        :returns: the new context
-        #        """
-        #        assert self.uid, "The user needs to be logged-in to initialize his context"
-        #        self.context = dict(request.env['res.users'].context_get() or {})
-        #        return self.context
         #
         #    def _fix_lang(self, context):
         #        """ OpenERP provides languages which may not make sense and/or may not
@@ -789,38 +793,6 @@ class Request(object):
         #
         #        context['lang'] = lang or 'en_US'
         pass
-
-        #class AuthenticationError(Exception):
-        #    pass
-        #
-        #class SessionExpiredException(Exception):
-        #    pass
-        #
-        #class OpenERPSession(werkzeug.contrib.sessions.Session):
-        #    def __init__(self, *args, **kwargs):
-        #        self.inited = False
-        #        self.modified = False
-        #        self.rotate = False
-        #        super(OpenERPSession, self).__init__(*args, **kwargs)
-        #        self.inited = True
-        #        self._default_values()
-        #        self.modified = False
-        #
-        #    def check_security(self):
-        #        """
-        #        Check the current authentication parameters to know if those are still
-        #        valid. This method should be called at each request. If the
-        #        authentication fails, a :exc:`SessionExpiredException` is raised.
-        #        """
-        #        if not self.db or not self.uid:
-        #            raise SessionExpiredException("Session expired")
-        #        # We create our own environment instead of the request's one.
-        #        # to avoid creating it without the uid since request.uid isn't set yet
-        #        env = odoo.api.Environment(request.cr, self.uid, self.context)
-        #        # here we check if the session is still valid
-        #        if not security.check_session(self, env):
-        #            raise SessionExpiredException("Session expired")
-        #
         #    def logout(self, keep_db=False):
         #        for k in list(self):
         #            if not (keep_db and k == 'db') and k != 'debug':
@@ -830,20 +802,9 @@ class Request(object):
         #
 
     def session_post(self):
-        #def save_session(self, httprequest, response):
         #    save_session = (not request.endpoint) or request.endpoint.routing.get('save_session', True)
         #    if not save_session:
         #        return
-
-        #    if httprequest.session.should_save:
-        #        if httprequest.session.rotate:
-        #            self.session_store.delete(httprequest.session)
-        #            httprequest.session.sid = self.session_store.generate_key()
-        #            if httprequest.session.uid:
-        #                httprequest.session.session_token = security.compute_session_token(httprequest.session, request.env)
-        #            httprequest.session.modified = True
-        #        self.session_store.save(httprequest.session)
-
 
         #def session_gc(session_store): -> Move to daily CRON
         #    if random.random() < 0.001:
@@ -859,23 +820,28 @@ class Request(object):
         # TODO delete, rotate
 
         if self.db:
-            dump = json.dump(self.session, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+
+            dump = json.dumps(self.session, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+
+            _logger.info("old  %s new  %s ", self.session_orig , dump);
+
             if self.session_orig != dump:
                 if not self.session_sid:
                     # 232 bits (30*8*62/64) of urandom entropy should be enough for everyone
                     self.session_sid = base64.b64encode(os.urandom(30)).decode('ascii').replace('/','a').replace('+','l')
                 # SAVE in DB
+
                 self.cr.execute("""
                     INSERT INTO ir_session (sid, create_date, write_date, json) VALUES (%s, NOW(), NOW(), %s)
                     ON CONFLICT (sid) DO UPDATE SET write_date = NOW(), json = %s
-                """, self.session_sid, dump, dump);
-                # Set reply
-                sid = self.session_sid
-                if not self.session_mono:
-                    sid += "_" + self.session_db
-                self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
+                """, (self.session_sid, dump, dump));
 
-                # cookie_samesite="Lax" ?  cookie_path="/" ?
+            # Set reply
+            sid = self.session_sid
+            if not self.session_mono:
+                sid += "_" + self.session_db
+            # cookie_samesite="Lax" ?  cookie_path="/" ?
+            self.response.set_cookie('session_id', sid, max_age=90 * 24 * 60 * 60, httponly=True)
 
     #------------------------------------------------------
     # HTTP Controllers
@@ -961,7 +927,7 @@ class Request(object):
             except ValueError:
                 return False
 
-        token = self.session.sid
+        token = self.session_sid
 
         msg = '%s%s' % (token, max_ts)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
@@ -1178,14 +1144,25 @@ class Request(object):
         #    return self._json_response(error=error)
 
     def coerce_response(self, result):
-        if isinstance(result, Response) and result.is_qweb:
-            result.flatten()
-        if isinstance(result, (bytes, str)):
-            # Use already exoting
-            response = Response(result, mimetype='text/html')
-        else:
-            response = result
-        return response
+        if result:
+            if isinstance(result, (bytes, str)):
+                # Use already existing
+                self.response.set_data(result)
+            else:
+                if isinstance(result, Response) and result.is_qweb:
+                    result.flatten()
+
+                # Preserve self.response.headers
+                for key in result.headers.keys():
+                    values = result.headers.getlist(key)
+
+                    values_iter = iter(values)
+                    self.response.headers.set(key, next(values_iter))
+                    for value in values_iter:
+                        self.response.headers.add(key, value)
+
+                result.headers = self.response.headers
+                self.response = result
 
     def handle_static(self):
         path_info = werkzeug.wsgi.get_path_info(self.httprequest.environ)
@@ -1234,7 +1211,7 @@ class Request(object):
                             result = request.dispatch(nodb_endpoint, nodb_args, "none")
                         else:
                             result = self.env["ir.http"]._dispatch()
-                        response = self.coerce_response(result)
+                        self.coerce_response(result)
                         # TODO proper commit and sign changes
                         #return request._handle_exception(e)
                         # finnaly
@@ -1250,13 +1227,14 @@ class Request(object):
                         #        finally:
                         #            self._cr.close()
                         # release thread local request
+                        _logger.info("session POSt")
+                        self.session_post()
                         self.env.cr.commit()
                         self.env.registry.signal_changes()
-                        return response
+                        return self.response
                     except Exception as e:
                         _logger.exception(e)
                         raise e
-                    self.session_post()
                 # no db handling
                 else:
                     if nodb_endpoint:

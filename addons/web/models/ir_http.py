@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import hashlib
 import json
+import logging
 
 from odoo import api, models
 from odoo.http import request
@@ -11,13 +12,14 @@ from odoo.addons.web.controllers.main import module_boot, HomeStaticTemplateHelp
 
 import odoo
 
+_logger = logging.getLogger(__name__)
 
 class Http(models.AbstractModel):
     _inherit = 'ir.http'
 
     def webclient_rendering_context(self):
         return {
-            'menu_data': request.env['ir.ui.menu'].load_menus(request.session.debug),
+            'menu_data': request.env['ir.ui.menu'].load_menus(request.session["debug"]),
             'session_info': self.session_info(),
         }
 
@@ -25,21 +27,21 @@ class Http(models.AbstractModel):
         user = request.env.user
         version_info = odoo.service.common.exp_version()
 
-        user_context = request.session.get_context() if request.session.uid else {}
+        user_context = request.session["context"] # if request.session.uid else {}
         IrConfigSudo = self.env['ir.config_parameter'].sudo()
         session_info = {
-            "uid": request.session.uid,
-            "is_system": user._is_system() if request.session.uid else False,
-            "is_admin": user._is_admin() if request.session.uid else False,
-            "user_context": request.session.get_context() if request.session.uid else {},
-            "db": request.session.db,
+            "uid": request.session["uid"],
+            "is_system": user._is_system(),
+            "is_admin": user._is_admin(),
+            "user_context": request.session["context"],
+            "db": request.db,
             "server_version": version_info.get('server_version'),
             "server_version_info": version_info.get('server_version_info'),
             "name": user.name,
             "username": user.login,
             "partner_display_name": user.partner_id.display_name,
-            "company_id": user.company_id.id if request.session.uid else None,  # YTI TODO: Remove this from the user context
-            "partner_id": user.partner_id.id if request.session.uid and user.partner_id else None,
+            "company_id": user.company_id.id,  # YTI TODO: Remove this from the user context
+            "partner_id": user.partner_id.id,
             "web.base.url": IrConfigSudo.get_param('web.base.url', default=''),
             "active_ids_limit": int(IrConfigSudo.get_param('web.active_ids_limit', default='20000')),
         }
@@ -49,10 +51,10 @@ class Http(models.AbstractModel):
             # to avoid access errors and unnecessary information, it is only included for users
             # with access to the backend ('internal'-type users)
             mods = module_boot()
-            qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=mods, debug=request.session.debug)
-            lang = user_context.get("lang")
+            qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=mods, debug=request.session["debug"])
+            lang = user_context.get("lang", "en_US")
             translation_hash = request.env['ir.translation'].get_web_translations_hash(mods, lang)
-            menu_json_utf8 = json.dumps(request.env['ir.ui.menu'].load_menus(request.session.debug), default=ustr, sort_keys=True).encode()
+            menu_json_utf8 = json.dumps(request.env['ir.ui.menu'].load_menus(request.session["debug"]), default=ustr, sort_keys=True).encode()
             cache_hashes = {
                 "load_menus": hashlib.sha512(menu_json_utf8).hexdigest()[:64], # sha512/256
                 "qweb": qweb_checksum,
@@ -70,6 +72,7 @@ class Http(models.AbstractModel):
 
     @api.model
     def get_frontend_session_info(self):
+        _logger.info("get_frontend_session_info %s %s", self.env, self.env.user)
         session_info = {
             'is_admin': self.env.user._is_admin(),
             'is_system': self.env.user._is_system(),
