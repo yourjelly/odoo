@@ -319,6 +319,7 @@ class Module(models.Model):
                 raise UserError(_('You are trying to remove a module that is installed or will be installed.'))
 
     def unlink(self):
+        _logger.info("helo",stack_info=1)
         self.clear_caches()
         return super(Module, self).unlink()
 

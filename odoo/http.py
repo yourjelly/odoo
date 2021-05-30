@@ -664,7 +664,6 @@ class Request(object):
         # TODO load context
         self.env = odoo.api.Environment(self.cr, uid, {})
 
-
     def session_pre(self):
 
 
@@ -730,7 +729,6 @@ class Request(object):
 
             self.session_reset_env()
             #raise 1
-
 
     # TODO move to ir.http
     def session_authenticate_start(self, login=None, password=None):
@@ -1007,7 +1005,7 @@ class Request(object):
     #------------------------------------------------------
     # JSON-RPC2 Controllers
     #------------------------------------------------------
-    def _json_response(self, result=None, error=None, request_id=None):
+    def json_response(self, result=None, error=None, request_id=None):
         status = 200
         response = { 'jsonrpc': '2.0', 'id': request_id }
         if error is not None:
@@ -1062,7 +1060,7 @@ class Request(object):
         result = self._call_function(endpoint, **params)
         self.rpc_debug_post(t0, result)
 
-        return self._json_response(result, request_id=request_id)
+        return self.json_response(result, request_id=request_id)
 
     #------------------------------------------------------
     # Handling
