@@ -177,7 +177,8 @@ function addLegacyMockEnvironment(env, testConfig, legacyParams = {}) {
         localSession = { getTZOffset: legacyParams.getTZOffset };
     }
 
-    const legacyEnv = makeTestEnvironment({ dataManager, bus: core.bus, session: localSession });
+    const baseEnv = { dataManager, bus: core.bus, session: localSession };
+    const legacyEnv = makeTestEnvironment(Object.assign(baseEnv, legacyParams.env));
 
     if (legacyParams.serviceRegistry) {
         const legacyServiceMap = core.serviceRegistry.map;
