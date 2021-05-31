@@ -45,6 +45,7 @@ class Http(models.AbstractModel):
             'profile_session': request.session.profile_session,
             'profile_collectors': request.session.profile_collectors,
             'profile_params': request.session.profile_params,
+            "home_action_id": user.action_id.id,
         }
         if self.env.user.has_group('base.group_user'):
             # the following is only useful in the context of a webclient bootstrapping
