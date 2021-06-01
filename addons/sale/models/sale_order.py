@@ -497,7 +497,7 @@ class SaleOrder(models.Model):
                     'partner_shipping_id': False,
                     'pricelist_id': False,
                 })
-                return {'warning': warning}
+            return {'warning': warning}
 
     @api.onchange('commitment_date')
     def _onchange_commitment_date_warning(self):
