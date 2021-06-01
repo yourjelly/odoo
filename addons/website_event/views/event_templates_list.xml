@@ -15,7 +15,7 @@
             <!-- Content -->
             <div t-attf-class="o_wevent_events_list #{opt_events_list_cards and 'opt_event_list_cards_bg'}">
                 <div class="container">
-                    <div class="row">
+                    <div t-if="search_tags" class="row">
                         <t t-call="website_event.searched_tags"/>
                     </div>
                     <div class="row">
