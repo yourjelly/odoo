@@ -175,6 +175,7 @@ class SaleOrder(models.Model):
     signature = fields.Image('Signature', help='Signature received through the portal.', copy=False, attachment=True, max_width=1024, max_height=1024)
     signed_by = fields.Char('Signed By', help='Name of the person that signed the SO.', copy=False)
     signed_on = fields.Datetime('Signed On', help='Date of the signature.', copy=False)
+    terms_type = fields.Selection(related='company_id.terms_type')
     type_name = fields.Char('Type Name', compute='_compute_type_name')
     validity_date = fields.Date(
         string='Expiration', compute="_compute_validity_date", store=True, copy=False,
