@@ -605,11 +605,11 @@ class SaleOrder(models.Model):
         return super(SaleOrder, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
-    def get_empty_list_help(self, help):
+    def get_empty_list_help(self, help_msg):
         self = self.with_context(
             empty_list_help_document_name=_("sale order"),
         )
-        return super(SaleOrder, self).get_empty_list_help(help)
+        return super(SaleOrder, self).get_empty_list_help(help_msg)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
