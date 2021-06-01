@@ -153,11 +153,30 @@
     <t t-else="" t-set="opt_event_size" t-value="opt_index_sidebar and 'col-12' or 'col-xl-10 offset-xl-1'"/>
     <!-- No events -->
     <t t-if="not event_ids">
-        <div class="col-12">
-            <div class="h2 mb-3">No events found.</div>
-            <div class="alert alert-info text-center" groups="event.group_event_user">
-                <p class="m-0">Use the top button '<b>+ New</b>' to create an event.</p>
+        <div class="col-lg-12">
+            <div class="o_not_editable" groups="event.group_event_user">
+                <div class="container">
+                    <div class="alert alert-info text-center d-lg-flex justify-content-between align-items-center">
+                        <span class="text-info"><b>No Events scheduled.</b></span>
+                        <span class="text-info">Use the top button '<b>+ New</b>' to create an event.</span>
+                    </div>
+                    <div class="text-center text-muted p-3"><i class="fa fa-info-circle"></i> Edit the content below this line to adapt the default <strong>No events</strong> page.</div>
+                </div>
+                <hr/>
             </div>
+            <!-- This part should be editable -->
+            <section class="bg-white">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 pt80 pb80 text-center">
+                            <!-- To transform to SVG -->
+                            <img src="/website_event/static/src/img/no_events.png" width="200" class="img-fluid mb-5" alt=""/>
+                            <h2>No Events scheduled yet.</h2>
+                            <p>Please check back later.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </t>
     <!-- List -->
