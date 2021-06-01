@@ -28,7 +28,8 @@ class SaleOrder(models.Model):
         states={'draft': [('readonly', False)]}, index=True,
         default=lambda self: _('New'))
     origin = fields.Char(
-        string='Source Document', help="Reference of the document that generated this sales order request.")
+        string='Source Document', help="Reference of the document that generated this sales order request.",
+        copy=False)
     client_order_ref = fields.Char(string='Customer Reference', copy=False)
     state = fields.Selection([
         ('draft', 'Quotation'),
@@ -46,7 +47,8 @@ class SaleOrder(models.Model):
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         copy=False, default=fields.Datetime.now,
         help="Creation date of draft/sent orders,\nConfirmation date of confirmed orders.")
-    create_date = fields.Datetime(string='Creation Date', readonly=True, index=True, help="Date on which sales order is created.")
+    create_date = fields.Datetime(
+        string='Creation Date', index=True, help="Date on which sales order is created.")
 
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=True,
@@ -68,10 +70,11 @@ class SaleOrder(models.Model):
         required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=1,
         help="If you change the pricelist, only newly added lines will be affected.")
-    currency_id = fields.Many2one(related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, ondelete="restrict")
+    currency_id = fields.Many2one(
+        related='pricelist_id.currency_id', depends=["pricelist_id"], store=True, ondelete="restrict")
     currency_rate = fields.Float(
-        "Currency Rate",digits=(12, 6),
-        compute='_compute_currency_rate', compute_sudo=True, store=True, readonly=True,
+        "Currency Rate", digits=(12, 6),
+        compute='_compute_currency_rate', compute_sudo=True, store=True,
         help='The rate of the currency to the currency of rate 1 applicable at the date of the order')
 
     # Partner-based computes
@@ -102,9 +105,9 @@ class SaleOrder(models.Model):
         states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, auto_join=True)
 
     # SO-lines based computes
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', tracking=5)
-    amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', tracking=4)
+    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, compute='_compute_amounts', tracking=5)
+    amount_tax = fields.Monetary(string='Taxes', store=True, compute='_compute_amounts')
+    amount_total = fields.Monetary(string='Total', store=True, compute='_compute_amounts', tracking=4)
 
     # Analytics #
     #############
@@ -129,24 +132,27 @@ class SaleOrder(models.Model):
     # Invoicing #
     #############
 
-    invoice_count = fields.Integer(string='Invoice Count', compute='_get_invoiced', readonly=True)
-    invoice_ids = fields.Many2many("account.move", string='Invoices', compute="_get_invoiced", readonly=True, copy=False, search="_search_invoice_ids")
+    invoice_count = fields.Integer(string='Invoice Count', compute='_get_invoiced')
+    invoice_ids = fields.Many2many(
+        "account.move", string='Invoices', compute="_get_invoiced", search="_search_invoice_ids")
     invoice_status = fields.Selection([
         ('upselling', 'Upselling Opportunity'),
         ('invoiced', 'Fully Invoiced'),
         ('to invoice', 'To Invoice'),
         ('no', 'Nothing to Invoice')
-        ], string='Invoice Status', compute='_compute_invoice_status', store=True, readonly=True)
+        ], string='Invoice Status', compute='_compute_invoice_status', store=True)
 
     # Payment #
     ###########
 
-    reference = fields.Char(string='Payment Ref.', copy=False,
-        help='The payment communication of this sale order.')
-    transaction_ids = fields.Many2many('payment.transaction', 'sale_order_transaction_rel', 'sale_order_id', 'transaction_id',
-                                       string='Transactions', copy=False, readonly=True)
-    authorized_transaction_ids = fields.Many2many('payment.transaction', compute='_compute_authorized_transaction_ids',
-                                                  string='Authorized Transactions', copy=False, readonly=True)
+    reference = fields.Char(
+        string='Payment Ref.', copy=False, help='The payment communication of this sale order.')
+    transaction_ids = fields.Many2many(
+        'payment.transaction', 'sale_order_transaction_rel', 'sale_order_id', 'transaction_id',
+        string='Transactions', copy=False, readonly=True)
+    authorized_transaction_ids = fields.Many2many(
+        'payment.transaction', compute='_compute_authorized_transaction_ids',
+        string='Authorized Transactions')
 
     # Portal & other UI/reporting fields #
     ######################################
@@ -243,10 +249,9 @@ class SaleOrder(models.Model):
                 order.company_id)._get_default_team_id(user_id=order.user_id.id)
 
     @api.depends('order_line.price_total')
-    def _amount_all(self):
+    def _compute_amounts(self):
         """Compute the total amounts of the SO."""
         for order in self:
-            # TODO VFE check perf change
             amount_untaxed = sum(order.order_line.mapped('price_subtotal'))
             amount_tax = sum(order.order_line.mapped('price_tax'))
             order.update({
