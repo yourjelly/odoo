@@ -95,6 +95,8 @@ class LinkTracker(models.Model):
     @api.model
     @api.depends('url')
     def _get_title_from_url(self, url):
+        print(' LINK TRACKER ' * 5)
+        print(' url: %s' % url)
         try:
             head = requests.head(url, timeout=5)
             if (

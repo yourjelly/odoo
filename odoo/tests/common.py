@@ -783,6 +783,8 @@ class ChromeBrowser():
         if self.chrome_pid is not None:
             return
 
+        netlog_path = '/data/build/logs/netlog-%s.json' % str(time.time())
+
         switches = {
             '--headless': '',
             '--no-default-browser-check': '',
@@ -808,6 +810,7 @@ class ChromeBrowser():
             '--remote-debugging-port': '0',
             '--no-sandbox': '',
             '--disable-gpu': '',
+            '--log-net-log' : netlog_path,
         }
         cmd = [self.executable]
         cmd += ['%s=%s' % (k, v) if v else k for k, v in switches.items()]
