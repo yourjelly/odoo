@@ -158,6 +158,7 @@
             .o_mail_activity {
                 display: flex;
                 max-width: 275px;
+                // -webkit-backface-visibility: hidden;
                 .o_activity_btn {
                     margin-right: 3px;
                 }
@@ -176,6 +177,11 @@
     }
 }
 
+.o_action, .o_view_controller{
+    overflow-y: visible;
+    height: 100%;
+}
+
 .o_kanban_record, .o_view_controller{
     .o_mail_activity {
         .o_activity_btn {
@@ -189,6 +195,10 @@
         div.o_activity {
             min-width: 290px;
             padding: 0px 0px;
+
+            // &.show {
+            //     display: table-cell;
+            // }
 
             .o_activity_log_container {
                 max-height: 300px;

@@ -401,8 +401,9 @@ QUnit.test('activity view: search more to schedule an activity for a record of a
     assert.expect(5);
     _.extend(this.data.task.fields, {
         name: { string: "Name", type: "char" },
+        activity_type_id: {string: "Activity type", type: "many2one"},
     });
-    this.data.task.records[2] = { id: 31, name: "Task 3", activity_ids: 2 };
+    this.data.task.records[2] = { id: 31, name: "Task 3", activity_type_id: [3] };
     var activity = await createView({
         View: ActivityView,
         model: 'task',
@@ -429,9 +430,9 @@ QUnit.test('activity view: search more to schedule an activity for a record of a
                 assert.step('doAction');
                 var expectedAction = {
                     context: {
-                        default_activity_type_id: false,
                         default_res_id: { id: 31, display_name: undefined },
                         default_res_model: "task",
+                        default_activity_type_id: 3,
                     },
                     name: "Schedule Activity",
                     res_id: false,
