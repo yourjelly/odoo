@@ -492,7 +492,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     QUnit.test("domain is kept when switching between views", async function (assert) {
         assert.expect(5);
-        testConfig.serverData.actions[3].search_view_id = [1, "a custom search view"];
+        testConfig.serverData.actions[3].search_view_id = [4, "a custom search view"];
         const webClient = await createWebClient({ testConfig });
         await doAction(webClient, 3);
         assert.containsN(webClient, ".o_data_row", 5);
@@ -1460,7 +1460,7 @@ QUnit.module("ActionManager", (hooks) => {
             },
             name: "Partners",
             res_model: "partner",
-            search_view_id: [1, "a custom search view"],
+            search_view_id: [4, "a custom search view"],
             type: "ir.actions.act_window",
             views: [[false, "list"]],
         };
@@ -1988,7 +1988,7 @@ QUnit.module("ActionManager", (hooks) => {
                 }),
             });
             legacyViewRegistry.add("test_view", TestCustoFormView);
-            testConfig.serverData.views["partner,1,form"] = `
+            testConfig.serverData.views["partner,3,form"] = `
       <form js_class="test_view">
         <field name="foo" />
         <footer>

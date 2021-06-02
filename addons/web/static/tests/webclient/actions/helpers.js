@@ -416,7 +416,7 @@ export function getActionManagerTestConfig() {
             res_model: "partner",
             target: "new",
             type: "ir.actions.act_window",
-            views: [[1, "form"]],
+            views: [[3, "form"]],
         },
         {
             id: 1001,
@@ -467,7 +467,7 @@ export function getActionManagerTestConfig() {
             '<field name="foo"/>' +
             "</group>" +
             "</form>",
-        "partner,1,form": `
+        "partner,3,form": `
       <form>
       <footer>
       <button class="btn-primary" string="Save" special="save"/>
@@ -487,7 +487,7 @@ export function getActionManagerTestConfig() {
         "pony,false,form": "<form>" + '<field name="name"/>' + "</form>",
         // search views
         "partner,false,search": '<search><field name="foo" string="Foo"/></search>',
-        "partner,1,search":
+        "partner,4,search":
             "<search>" +
             '<filter name="bar" help="Bar" domain="[(\'bar\', \'=\', 1)]"/>' +
             "</search>",
