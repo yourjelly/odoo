@@ -110,15 +110,6 @@
                                                 <span><t t-esc="record.last_session_closing_date.value"/></span>
                                             </div>
                                         </div>
-
-                                        <div t-if="record.last_session_closing_date.value" attrs='{"invisible": [("cash_control","=",False)]}' class="row">
-                                            <div class="col-6">
-                                                <span>Cash Balance</span>
-                                            </div>
-                                            <div class="col-6">
-                                                <span><field name="last_session_closing_cash" widget="monetary"/></span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div style="text-align:right;">
