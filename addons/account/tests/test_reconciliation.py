@@ -39,28 +39,24 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         move.action_post()
 
         # Create a bank statement of 40 EURO.
-        bank_stmt = self.env['account.bank.statement'].create({
+        st_line = self.env['account.bank.statement.line'].create({
             'journal_id': self.bank_journal_euro.id,
             'date': '%s-01-01' % time.strftime('%Y'),
-            'line_ids': [
-                (0, 0, {
-                    'payment_ref': 'test',
-                    'partner_id': partner.id,
-                    'amount': 40.0,
-                    'date': '%s-01-01' % time.strftime('%Y')
-                })
-            ],
+            'payment_ref': 'test',
+            'partner_id': partner.id,
+            'amount': 40.0,
+            'date': '%s-01-01' % time.strftime('%Y')
         })
 
         # Reconcile the bank statement with the invoice.
         receivable_line = move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
-        bank_stmt.button_post()
-        bank_stmt.line_ids[0].reconcile([
+        st_line.button_post()
+        st_line.reconcile([
             {'id': receivable_line.id},
             {'name': 'exchange difference', 'balance': -7.3, 'account_id': self.diff_income_account.id},
         ])
 
-        self.assertRecordValues(bank_stmt.line_ids.line_ids, [
+        self.assertRecordValues(st_line.line_ids, [
             {'debit': 40.0,     'credit': 0.0,      'amount_currency': 40.0,    'currency_id': self.currency_euro_id},
             {'debit': 0.0,      'credit': 7.3,      'amount_currency': -7.3,    'currency_id': self.currency_euro_id},
             {'debit': 0.0,      'credit': 32.7,     'amount_currency': -32.7,   'currency_id': self.currency_euro_id},

@@ -93,61 +93,58 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         cls.bank_st, cls.bank_st_2, cls.cash_st = cls.env['account.bank.statement'].create([
             {
                 'name': 'test bank journal',
-                'journal_id': cls.bank_journal.id,
                 'line_ids': [
                     (0, 0, {
+                        'journal_id': cls.bank_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'invoice %s-%s-%s' % tuple(invoice_number.split('/')[1:]),
                         'partner_id': cls.partner_1.id,
                         'amount': 100,
-                        'sequence': 1,
                     }),
                     (0, 0, {
+                        'journal_id': cls.bank_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'xxxxx',
                         'partner_id': cls.partner_1.id,
                         'amount': 600,
-                        'sequence': 2,
                     }),
                 ],
             }, {
                 'name': 'second test bank journal',
-                'journal_id': cls.bank_journal.id,
                 'line_ids': [
                     (0, 0, {
+                        'journal_id': cls.bank_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'nawak',
                         'narration': 'Communication: RF12 3456',
                         'partner_id': cls.partner_3.id,
                         'amount': 600,
-                        'sequence': 1,
                     }),
                     (0, 0, {
+                        'journal_id': cls.bank_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'RF12 3456',
                         'partner_id': cls.partner_3.id,
                         'amount': 600,
-                        'sequence': 2,
                     }),
                     (0, 0, {
+                        'journal_id': cls.bank_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'baaaaah',
                         'ref': 'RF12 3456',
                         'partner_id': cls.partner_3.id,
                         'amount': 600,
-                        'sequence': 2,
                     }),
                 ],
             }, {
                 'name': 'test cash journal',
-                'journal_id': cls.cash_journal.id,
                 'line_ids': [
                     (0, 0, {
+                        'journal_id': cls.cash_journal.id,
                         'date': '2020-01-01',
                         'payment_ref': 'yyyyy',
                         'partner_id': cls.partner_2.id,
                         'amount': -1000,
-                        'sequence': 1,
                     }),
                 ],
             }
@@ -156,7 +153,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         cls.bank_line_1, cls.bank_line_2 = cls.bank_st.line_ids
         cls.bank_line_3, cls.bank_line_4, cls.bank_line_5 = cls.bank_st_2.line_ids
         cls.cash_line_1 = cls.cash_st.line_ids
-        cls._post_statements(cls)
+        (cls.bank_st + cls.bank_st_2 + cls.cash_st).line_ids.button_post()
 
     @classmethod
     def _create_invoice_line(cls, amount, partner, type, currency=None, pay_reference=None, ref=None, name=None):
@@ -180,12 +177,6 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         invoice.action_post()
         lines = invoice.line_ids
         return lines.filtered(lambda l: l.account_id.user_type_id.type in ('receivable', 'payable'))
-
-    def _post_statements(self):
-        self.bank_st.balance_end_real = self.bank_st.balance_end
-        self.bank_st_2.balance_end_real = self.bank_st_2.balance_end
-        self.cash_st.balance_end_real = self.cash_st.balance_end
-        (self.bank_st + self.bank_st_2 + self.cash_st).button_post()
 
     @freeze_time('2020-01-01')
     def _check_statement_matching(self, rules, expected_values, statements=None):
