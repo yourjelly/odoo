@@ -30,9 +30,18 @@ export class DialogContainer extends Component {
             throw new Error(dialogClass.name + " must be a subclass of Dialog");
         }
         const id = this.dialogId++;
+        const forceClose = () => this.doCloseDialog(id);
         this.dialogs[id] = {
             id,
-            class: dialogClass,
+            class: class extends dialogClass {
+                close() {
+                    if (!this.el) {
+                        forceClose();
+                    } else {
+                        super.close(...arguments);
+                    }
+                }
+            },
             props,
             options,
         };
