@@ -297,6 +297,16 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
+    QUnit.test("actions in target new can have a fullscreen dialog", async (assert) => {
+        assert.expect(1);
+
+        const webClient = await createWebClient({ testConfig });
+
+        await doAction(webClient, 5, { dialogFullscreen: true });
+
+        assert.containsOnce(webClient, ".modal.o_modal_full .o_form_view");
+    });
+
     QUnit.module('Actions in target="inline"');
     QUnit.test(
         'form views for actions in target="inline" open in edit mode',

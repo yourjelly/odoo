@@ -403,6 +403,15 @@ function makeActionManager(env) {
         return index;
     }
 
+    function computeOptionsForUI(options = {}) {
+        return {
+            clearBreadcrumbs: options.clearBreadcrumbs,
+            onClose: options.onClose,
+            stackPosition: options.stackPosition,
+            dialogFullscreen: options.dialogFullscreen,
+        };
+    }
+
     /**
      * Triggers a re-rendering with respect to the given controller.
      *
@@ -524,6 +533,7 @@ function makeActionManager(env) {
                 // TODO add size
                 ActionComponent: ControllerComponent,
                 actionProps: controller.props,
+                fullscreen: options.dialogFullscreen,
             };
             if (action.name) {
                 actionDialogProps.title = action.name;
@@ -654,11 +664,7 @@ function makeActionManager(env) {
         };
         action.controllers[view.type] = controller;
 
-        const updateUIOptions = {
-            clearBreadcrumbs: options.clearBreadcrumbs,
-            onClose: options.onClose,
-            stackPosition: options.stackPosition,
-        };
+        const updateUIOptions = computeOptionsForUI(options);
 
         if (lazyView) {
             updateUIOptions.lazyController = {
@@ -715,11 +721,7 @@ function makeActionManager(env) {
                 action,
                 props: _getClientActionProps(action, options),
             };
-            return _updateUI(controller, {
-                clearBreadcrumbs: options.clearBreadcrumbs,
-                stackPosition: options.stackPosition,
-                onClose: options.onClose,
-            });
+            return _updateUI(controller, computeOptionsForUI(options));
         } else {
             const next = clientAction(env, action);
             if (next) {
@@ -1024,7 +1026,7 @@ function makeActionManager(env) {
         // in case an effect is returned from python and there is already an effect
         // attribute on the button, the priority is given to the button attribute
         const effect = params.effect ? evaluateExpr(params.effect) : action.effect;
-        const options = { onClose: params.onClose };
+        const options = Object.assign({ onClose: params.onClose }, params.options);
         await doAction(action, options);
         if (params.close) {
             await _executeCloseAction();

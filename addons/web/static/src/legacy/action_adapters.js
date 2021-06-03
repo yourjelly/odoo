@@ -39,34 +39,37 @@ class ActionAdapter extends ComponentAdapter {
         // This is protected in legacy (backward compatibility) but should not e supported in Wowl
         this.tempQuery = {};
         let originalUpdateControlPanel;
-        useEffect(() => {
-            this.title.setParts({ action: this.widget.getTitle() });
-            const query = objectToQuery(this.widget.getState());
-            Object.assign(query, this.tempQuery);
-            this.tempQuery = null;
-            this.__widget = this.widget;
-            if (!this.wowlEnv.inDialog) {
-                this.router.pushState(query);
-            }
-            this.wowlEnv.bus.on("ACTION_MANAGER:UPDATE", this, (info) => {
-                if (info.type === "MAIN") {
-                    this.env.bus.trigger("close_dialogs");
+        useEffect(
+            () => {
+                this.title.setParts({ action: this.widget.getTitle() });
+                const query = objectToQuery(this.widget.getState());
+                Object.assign(query, this.tempQuery);
+                this.tempQuery = null;
+                this.__widget = this.widget;
+                if (!this.wowlEnv.inDialog) {
+                    this.router.pushState(query);
                 }
-                cleanDomFromBootstrap();
-            });
-            originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
-            this.__widget.updateControlPanel = (newProps) => {
+                this.wowlEnv.bus.on("ACTION_MANAGER:UPDATE", this, (info) => {
+                    if (info.type === "MAIN") {
+                        this.env.bus.trigger("close_dialogs");
+                    }
+                    cleanDomFromBootstrap();
+                });
+                originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
+                this.__widget.updateControlPanel = (newProps) => {
+                    this.trigger("controller-title-updated", this.__widget.getTitle());
+                    return originalUpdateControlPanel(newProps);
+                };
                 this.trigger("controller-title-updated", this.__widget.getTitle());
-                return originalUpdateControlPanel(newProps);
-            };
-            this.trigger("controller-title-updated", this.__widget.getTitle());
-            core.bus.trigger("DOM_updated");
+                core.bus.trigger("DOM_updated");
 
-            return () => {
-                this.__widget.updateControlPanel = originalUpdateControlPanel;
-                this.wowlEnv.bus.off("ACTION_MANAGER:UPDATE", this);
-            };
-        }, () => []);
+                return () => {
+                    this.__widget.updateControlPanel = originalUpdateControlPanel;
+                    this.wowlEnv.bus.off("ACTION_MANAGER:UPDATE", this);
+                };
+            },
+            () => []
+        );
     }
 
     _trigger_up(ev) {
@@ -188,34 +191,37 @@ function useMagicLegacyReload() {
     let legacyReloadProm = null;
     const getReloadProm = () => legacyReloadProm;
     let manualReload;
-    useEffect(() => {
-        const widget = comp.widget;
-        const controllerReload = widget.reload;
-        widget.reload = function (...args) {
-            manualReload = true;
-            legacyReloadProm = controllerReload.call(widget, ...args);
-            return legacyReloadProm.then(() => {
-                if (manualReload) {
-                    legacyReloadProm = null;
-                    manualReload = false;
-                }
-            });
-        };
-        const controllerUpdate = widget.update;
-        widget.update = function (...args) {
-            const updateProm = controllerUpdate.call(widget, ...args);
-            const manualUpdate = !manualReload;
-            if (manualUpdate) {
-                legacyReloadProm = updateProm;
-            }
-            return updateProm.then(() => {
+    useEffect(
+        () => {
+            const widget = comp.widget;
+            const controllerReload = widget.reload;
+            widget.reload = function (...args) {
+                manualReload = true;
+                legacyReloadProm = controllerReload.call(widget, ...args);
+                return legacyReloadProm.then(() => {
+                    if (manualReload) {
+                        legacyReloadProm = null;
+                        manualReload = false;
+                    }
+                });
+            };
+            const controllerUpdate = widget.update;
+            widget.update = function (...args) {
+                const updateProm = controllerUpdate.call(widget, ...args);
+                const manualUpdate = !manualReload;
                 if (manualUpdate) {
-                    legacyReloadProm = null;
+                    legacyReloadProm = updateProm;
                 }
-            });
-        };
-        widget[magicReloadSymbol] = getReloadProm;
-    }, () => []);
+                return updateProm.then(() => {
+                    if (manualUpdate) {
+                        legacyReloadProm = null;
+                    }
+                });
+            };
+            widget[magicReloadSymbol] = getReloadProm;
+        },
+        () => []
+    );
     return getReloadProm;
 }
 
@@ -347,6 +353,7 @@ export class ViewAdapter extends ActionAdapter {
                     type: payload.action_data.type,
                     onClose: payload.on_closed,
                     effect: payload.action_data.effect,
+                    options: payload.action_data.options,
                 }),
                 payload
             );

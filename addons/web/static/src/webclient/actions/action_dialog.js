@@ -23,6 +23,7 @@ class ActionDialog extends Dialog {
         const action = actionProps && actionProps.action;
         this.actionType = action && action.type;
         this.title = "title" in this.props ? this.props.title : this.constructor.title;
+        this.fullscreen = this.props.fullscreen;
     }
 }
 ActionDialog.components = { ...Dialog.components, DebugMenu };
@@ -32,6 +33,7 @@ ActionDialog.props = {
     ActionComponent: { optional: true },
     actionProps: { optional: true },
     title: { optional: true },
+    fullscreen: { optional: true, type: Boolean },
 };
 
 /**

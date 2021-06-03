@@ -868,6 +868,27 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
+    QUnit.test(
+        "requests for execute_action can take data-options to have the right modal class",
+        async (assert) => {
+            assert.expect(1);
+            testConfig.serverData.views["partner,666,form"] = /*xml*/ `
+            <form>
+                <header>
+                    <button name="5" string="Call method" type="action" options='{"dialogFullscreen": true}'/>
+                </header>
+                <field name="display_name"/>
+            </form>
+          `;
+
+            const webClient = await createWebClient({ testConfig });
+            await doAction(webClient, 24);
+            await testUtils.dom.click(webClient.el.querySelector('button[name="5"]'));
+            await legacyExtraNextTick();
+            assert.containsOnce(webClient.el, ".modal.o_modal_full .o_form_view");
+        }
+    );
+
     QUnit.test("requests for execute_action of type action are handled", async function (assert) {
         assert.expect(12);
         const mockRPC = async (route, args) => {
