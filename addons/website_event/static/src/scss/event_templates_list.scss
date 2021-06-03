@@ -34,23 +34,24 @@
                 @extend .bg-200;
             }
         }
+        header {
+            height: 200px;
+        }
         .opt_events_list_columns {
-            header {
-                height: 200px;
+            .o_wevent_event_template {
+                @include o-position-absolute($top: 0, $left: 0);
+                @include border-right-radius($rounded-pill);
+                padding: ($spacer * .5) $card-spacer-x;
+                transform: translateY(-50%);
             }
         }
         .opt_events_list_rows {
-            @include media-breakpoint-down(sm) {
-                header {
-                    height: 200px;
-                }
+            .o_wevent_event_template {
+                float: right;
+                transform: translateX($card-spacer-x);
+                padding: ($spacer * .5) $card-spacer-x;
+                @include border-left-radius($rounded-pill);
             }
-        }
-        .o_wevent_badge_event {
-            @include o-position-absolute($top: 0, $left: 0);
-            @include border-left-radius(0);
-            padding: ($spacer * .5) $card-spacer-x;
-            transform: translateY(-50%);
         }
         .o_wevent_event_date {
             top: $card-spacer-x;
@@ -63,12 +64,12 @@
             text-align: center;
 
             .o_wevent_event_day {
-                font-size: 1.125rem;
+                font-size: $font-size-lg;
                 font-weight: 300;
                 line-height: 1;
             }
             .o_wevent_event_month {
-                font-size: 0.75rem;
+                font-size: $font-size-sm;
                 font-weight: $font-weight-bold;
                 text-transform: uppercase;
             }
@@ -83,6 +84,14 @@
         }
         .card-title {
             color: $body-color;
+        }
+        .card-text {
+            font-size: $font-size-sm;
+        }
+        .o_wevent_event_tags {
+            .badge {
+                padding: $badge-padding-y * 2 $badge-padding-x * 2;
+            }
         }
     }
     .o_wevent_sidebar_title {
@@ -114,7 +123,6 @@
         width: 100%;
     }
 }
-
 
 .s_country_events_list_event {
     .s_country_events_list_date {
