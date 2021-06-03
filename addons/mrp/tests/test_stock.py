@@ -7,55 +7,47 @@ from odoo.tests import Form
 
 
 class TestWarehouse(common.TestMrpCommon):
-    def setUp(self):
-        super(TestWarehouse, self).setUp()
 
-        unit = self.env.ref("uom.product_uom_unit")
-        self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.depot_location = self.env['stock.location'].create({
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        unit = cls.env.ref("uom.product_uom_unit")
+        cls.stock_location = cls.env.ref('stock.stock_location_stock')
+        cls.depot_location = cls.env['stock.location'].create({
             'name': 'Depot',
             'usage': 'internal',
-            'location_id': self.stock_location.id,
+            'location_id': cls.stock_location.id,
         })
-        self.env["stock.putaway.rule"].create({
-            "location_in_id": self.stock_location.id,
-            "location_out_id": self.depot_location.id,
-            'category_id': self.env.ref('product.product_category_all').id,
+        cls.env["stock.putaway.rule"].create({
+            "location_in_id": cls.stock_location.id,
+            "location_out_id": cls.depot_location.id,
+            'category_id': cls.env.ref('product.product_category_all').id,
         })
-        mrp_workcenter = self.env['mrp.workcenter'].create({
+        mrp_workcenter = cls.env['mrp.workcenter'].create({
             'name': 'Assembly Line 1',
-            'resource_calendar_id': self.env.ref('resource.resource_calendar_std').id,
+            'resource_calendar_id': cls.env.ref('resource.resource_calendar_std').id,
         })
-        self.env['stock.quant'].create({
-            'location_id': self.stock_location_14.id,
-            'product_id': self.graphics_card.id,
+        cls.env['stock.quant'].create({
+            'location_id': cls.stock_location_14.id,
+            'product_id': cls.graphics_card.id,
             'inventory_quantity': 16.0
         }).action_apply_inventory()
 
-        self.bom_laptop = self.env['mrp.bom'].create({
-            'product_tmpl_id': self.laptop.product_tmpl_id.id,
+        cls.bom_laptop = cls.env['mrp.bom'].create({
+            'product_tmpl_id': cls.laptop.product_tmpl_id.id,
             'product_qty': 1,
             'product_uom_id': unit.id,
             'consumption': 'flexible',
             'bom_line_ids': [(0, 0, {
-                'product_id': self.graphics_card.id,
+                'product_id': cls.graphics_card.id,
                 'product_qty': 1,
                 'product_uom_id': unit.id
             })],
             'operation_ids': [
-                (0, 0, {'name': 'Cutting Machine', 'workcenter_id': self.workcenter_1.id, 'time_cycle': 12, 'sequence': 1}),
+                (0, 0, {'name': 'Cutting Machine', 'workcenter_id': cls.workcenter_1.id, 'time_cycle': 12, 'sequence': 1}),
             ],
         })
-
-    def new_mo_laptop(self):
-        form = Form(self.env['mrp.production'])
-        form.product_id = self.laptop
-        form.product_qty = 1
-        form.bom_id = self.bom_laptop
-        p = form.save()
-        p.action_confirm()
-        p.action_assign()
-        return p
 
     def test_manufacturing_route(self):
         warehouse_1_stock_manager = self.warehouse_1.with_user(self.user_stock_manager)
@@ -157,7 +149,14 @@ class TestWarehouse(common.TestMrpCommon):
         product.produce wizard.
         """
         self.laptop.tracking = 'serial'
-        mo_laptop = self.new_mo_laptop()
+
+        form = Form(self.env['mrp.production'])
+        form.product_id = self.laptop
+        form.product_qty = 1
+        form.bom_id = self.bom_laptop
+        mo_laptop = form.save()
+        mo_laptop.action_confirm()
+        mo_laptop.action_assign()
         serial = self.env['stock.production.lot'].create({'product_id': self.laptop.id, 'company_id': self.env.company.id})
 
         mo_form = Form(mo_laptop)

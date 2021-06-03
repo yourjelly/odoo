@@ -10,7 +10,6 @@ class TestSaleMargin(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        print("setup testSaleMargin")
         cls.SaleOrder = cls.env['sale.order']
 
         cls.product_uom_id = cls.env.ref('uom.product_uom_unit').id
