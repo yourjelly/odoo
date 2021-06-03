@@ -19,10 +19,6 @@ def patch_api(func):
 @patch.object(User, '_get_google_calendar_token', lambda user: 'dummy-token')
 class TestSyncGoogle(TransactionCase):
 
-    def setUp(self):
-        super().setUp()
-        self.google_service = GoogleCalendarService(self.env['google.service'])
-
     def assertGoogleEventDeleted(self, google_id):
         GoogleSync._google_delete.assert_called()
         args, dummy = GoogleSync._google_delete.call_args

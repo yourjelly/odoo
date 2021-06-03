@@ -12,16 +12,17 @@ from odoo.tests.common import TransactionCase
 class TestHrAttendance(TransactionCase):
     """Test for presence validity"""
 
-    def setUp(self):
-        super(TestHrAttendance, self).setUp()
-        self.user = new_test_user(self.env, login='fru', groups='base.group_user,hr_attendance.group_hr_attendance_use_pin')
-        self.user_no_pin = new_test_user(self.env, login='gru', groups='base.group_user')
-        self.test_employee = self.env['hr.employee'].create({
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = new_test_user(cls.env, login='fru', groups='base.group_user,hr_attendance.group_hr_attendance_use_pin')
+        cls.user_no_pin = new_test_user(cls.env, login='gru', groups='base.group_user')
+        cls.test_employee = cls.env['hr.employee'].create({
             'name': "François Russie",
-            'user_id': self.user.id,
+            'user_id': cls.user.id,
             'pin': '1234',
         })
-        self.employee_kiosk = self.env['hr.employee'].create({
+        cls.employee_kiosk = cls.env['hr.employee'].create({
             'name': "Machiavel",
             'pin': '5678',
         })

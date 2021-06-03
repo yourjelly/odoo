@@ -12,6 +12,7 @@ class TestOnchangeProductId(TransactionCase):
 
     def setUp(self):
         super(TestOnchangeProductId, self).setUp()
+        print("SETUP TestOnchangePID")
         self.fiscal_position_model = self.env['account.fiscal.position']
         self.fiscal_position_tax_model = self.env['account.fiscal.position.tax']
         self.tax_model = self.env['account.tax']

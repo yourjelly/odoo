@@ -8,19 +8,20 @@ from odoo.addons.base.models.qweb import QWebException
 
 class TestMultiCompany(TestHrCommon):
 
-    def setUp(self):
-        super().setUp()
-        self.company_1 = self.env['res.company'].create({'name': 'Opoo'})
-        self.company_2 = self.env['res.company'].create({'name': 'Otoo'})
-        self.employees = self.env['hr.employee'].create([
-            {'name': 'Bidule', 'company_id': self.company_1.id},
-            {'name': 'Machin', 'company_id': self.company_2.id},
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.company_1 = cls.env['res.company'].create({'name': 'Opoo'})
+        cls.company_2 = cls.env['res.company'].create({'name': 'Otoo'})
+        cls.employees = cls.env['hr.employee'].create([
+            {'name': 'Bidule', 'company_id': cls.company_1.id},
+            {'name': 'Machin', 'company_id': cls.company_2.id},
         ])
-        self.res_users_hr_officer.company_ids = [
-            (4, self.company_1.id),
-            (4, self.company_2.id),
+        cls.res_users_hr_officer.company_ids = [
+            (4, cls.company_1.id),
+            (4, cls.company_2.id),
         ]
-        self.res_users_hr_officer.company_id = self.company_1.id
+        cls.res_users_hr_officer.company_id = cls.company_1.id
 
     def test_multi_company_report(self):
         content, content_type = self.env.ref('hr.hr_employee_print_badge').with_user(self.res_users_hr_officer).with_context(

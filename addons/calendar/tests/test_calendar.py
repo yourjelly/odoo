@@ -12,12 +12,9 @@ import re
 
 class TestCalendar(SavepointCaseWithUserDemo):
 
-    def setUp(self):
-        super(TestCalendar, self).setUp()
-
-        self.CalendarEvent = self.env['calendar.event']
+    def test_basic_event_creation(self):
         # In Order to test calendar, I will first create One Simple Event with real data
-        self.event_tech_presentation = self.CalendarEvent.create({
+        self.event_tech_presentation = self.env['calendar.event'].create({
             'privacy': 'private',
             'start': '2011-04-30 16:00:00',
             'stop': '2011-04-30 18:30:00',
@@ -30,7 +27,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
     def test_event_order(self):
         """ check the ordering of events when searching """
         def create_event(name, date):
-            return self.CalendarEvent.create({
+            return self.env['calendar.event'].create({
                 'name': name,
                 'start': date + ' 12:00:00',
                 'stop': date + ' 14:00:00',
@@ -42,35 +39,35 @@ class TestCalendar(SavepointCaseWithUserDemo):
         domain = [('id', 'in', (foo1 + foo2 + bar1 + bar2).ids)]
 
         # sort them by name only
-        events = self.CalendarEvent.search(domain, order='name')
+        events = self.env['calendar.event'].search(domain, order='name')
         self.assertEqual(events.mapped('name'), ['bar', 'bar', 'foo', 'foo'])
-        events = self.CalendarEvent.search(domain, order='name desc')
+        events = self.env['calendar.event'].search(domain, order='name desc')
         self.assertEqual(events.mapped('name'), ['foo', 'foo', 'bar', 'bar'])
 
         # sort them by start date only
-        events = self.CalendarEvent.search(domain, order='start')
+        events = self.env['calendar.event'].search(domain, order='start')
         self.assertEqual(events.mapped('start'), (foo1 + bar1 + foo2 + bar2).mapped('start'))
-        events = self.CalendarEvent.search(domain, order='start desc')
+        events = self.env['calendar.event'].search(domain, order='start desc')
         self.assertEqual(events.mapped('start'), (foo2 + bar2 + bar1 + foo1).mapped('start'))
 
         # sort them by name then start date
-        events = self.CalendarEvent.search(domain, order='name asc, start asc')
+        events = self.env['calendar.event'].search(domain, order='name asc, start asc')
         self.assertEqual(list(events), [bar1, bar2, foo1, foo2])
-        events = self.CalendarEvent.search(domain, order='name asc, start desc')
+        events = self.env['calendar.event'].search(domain, order='name asc, start desc')
         self.assertEqual(list(events), [bar2, bar1, foo2, foo1])
-        events = self.CalendarEvent.search(domain, order='name desc, start asc')
+        events = self.env['calendar.event'].search(domain, order='name desc, start asc')
         self.assertEqual(list(events), [foo1, foo2, bar1, bar2])
-        events = self.CalendarEvent.search(domain, order='name desc, start desc')
+        events = self.env['calendar.event'].search(domain, order='name desc, start desc')
         self.assertEqual(list(events), [foo2, foo1, bar2, bar1])
 
         # sort them by start date then name
-        events = self.CalendarEvent.search(domain, order='start asc, name asc')
+        events = self.env['calendar.event'].search(domain, order='start asc, name asc')
         self.assertEqual(list(events), [foo1, bar1, bar2, foo2])
-        events = self.CalendarEvent.search(domain, order='start asc, name desc')
+        events = self.env['calendar.event'].search(domain, order='start asc, name desc')
         self.assertEqual(list(events), [foo1, bar1, foo2, bar2])
-        events = self.CalendarEvent.search(domain, order='start desc, name asc')
+        events = self.env['calendar.event'].search(domain, order='start desc, name asc')
         self.assertEqual(list(events), [bar2, foo2, bar1, foo1])
-        events = self.CalendarEvent.search(domain, order='start desc, name desc')
+        events = self.env['calendar.event'].search(domain, order='start desc, name desc')
         self.assertEqual(list(events), [foo2, bar2, bar1, foo1])
 
     def test_event_activity(self):
@@ -153,7 +150,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
     def test_event_allday(self):
         self.env.user.tz = 'Pacific/Honolulu'
 
-        event = self.CalendarEvent.create({
+        event = self.env['calendar.event'].create({
             'name': 'All Day',
             'start': "2018-10-16 00:00:00",
             'start_date': "2018-10-16",
@@ -166,7 +163,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         self.assertEqual(str(event.stop), '2018-10-18 18:00:00')
 
     def test_recurring_around_dst(self):
-        m = self.CalendarEvent.create({
+        m = self.env['calendar.event'].create({
             'name': "wheee",
             'start': '2018-10-27 14:30:00',
             'allday': False,
@@ -275,7 +272,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         ]
         partner_ids = [(6, False, [p.id for p in partners]),]
         now = fields.Datetime.context_timestamp(partners[0], fields.Datetime.now())
-        m = self.CalendarEvent.create({
+        m = self.env['calendar.event'].create({
             'name': "mailTest1",
             'allday': False,
             'rrule': u'FREQ=DAILY;INTERVAL=1;COUNT=5',
@@ -304,7 +301,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         _test_one_mail_per_attendee(self, partners)
 
         # create a new event in the past
-        self.CalendarEvent.create({
+        self.env['calendar.event'].create({
             'name': "NOmailTest",
             'allday': False,
             'recurrency': False,
@@ -331,7 +328,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             'login': 'web',
             'company_id': web_company.id
         })
-        self.CalendarEvent.with_user(web_user).with_company(web_company).sudo().create({
+        self.env['calendar.event'].with_user(web_user).with_company(web_company).sudo().create({
             'name': "Test",
             'allday': False,
             'recurrency': False,

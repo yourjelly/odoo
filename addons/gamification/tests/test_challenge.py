@@ -7,23 +7,21 @@ from odoo.exceptions import UserError
 
 class TestGamificationCommon(TransactionCaseWithUserDemo):
 
-    def setUp(self):
-        super(TestGamificationCommon, self).setUp()
-        employees_group = self.env.ref('base.group_user')
-        self.user_ids = employees_group.users
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        employees_group = cls.env.ref('base.group_user')
+        cls.user_ids = employees_group.users
 
         # Push demo user into the challenge before creating a new one
-        self.env.ref('gamification.challenge_base_discover')._update_all()
-        self.robot = self.env['res.users'].with_context(no_reset_password=True).create({
+        cls.env.ref('gamification.challenge_base_discover')._update_all()
+        cls.robot = cls.env['res.users'].with_context(no_reset_password=True).create({
             'name': 'R2D2',
             'login': 'r2d2@openerp.com',
             'email': 'r2d2@openerp.com',
             'groups_id': [(6, 0, [employees_group.id])]
         })
-        self.badge_good_job = self.env.ref('gamification.badge_good_job')
-
-
-class test_challenge(TestGamificationCommon):
+        cls.badge_good_job = cls.env.ref('gamification.badge_good_job')
 
     def test_00_join_challenge(self):
         challenge = self.env.ref('gamification.challenge_base_discover')
@@ -58,9 +56,6 @@ class test_challenge(TestGamificationCommon):
 
         badge_ids = self.env['gamification.badge.user'].search([('badge_id', '=', badge_id), ('user_id', '=', demo.id)])
         self.assertEqual(len(badge_ids), 1, "Demo user has not received the badge")
-
-
-class test_badge_wizard(TestGamificationCommon):
 
     def test_grant_badge(self):
         wiz = self.env['gamification.badge.user.wizard'].create({

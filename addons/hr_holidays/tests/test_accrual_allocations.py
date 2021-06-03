@@ -11,25 +11,29 @@ from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 
 
 class TestAccrualAllocations(TestHrHolidaysCommon):
-    def setUp(self):
-        super(TestAccrualAllocations, self).setUp()
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
         # Make sure we have the rights to create, validate and delete the leaves, leave types and allocations
-        LeaveType = self.env['hr.leave.type'].with_user(self.user_hrmanager_id).with_context(tracking_disable=True)
+        LeaveType = cls.env['hr.leave.type'].with_user(cls.user_hrmanager_id).with_context(tracking_disable=True)
 
-        self.accrual_type = LeaveType.create({
+        cls.accrual_type = LeaveType.create({
             'name': 'accrual',
             'allocation_type': 'fixed',
             'validity_start': False,
         })
 
-        self.unpaid_type = LeaveType.create({
+        cls.unpaid_type = LeaveType.create({
             'name': 'unpaid',
             'allocation_type': 'no',
             'unpaid': True,
             'validity_start': False,
         })
 
+    def setUp(self):
+        super().setUp()
         self.set_employee_create_date(self.employee_emp_id, '2010-02-03 00:00:00')
         self.set_employee_create_date(self.employee_hruser_id, '2010-02-03 00:00:00')
 

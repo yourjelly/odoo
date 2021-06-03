@@ -13,11 +13,12 @@ from odoo.addons.google_calendar.tests.test_sync_common import TestSyncGoogle, p
 @patch.object(User, '_get_google_calendar_token', lambda user: 'dummy-token')
 class TestSyncOdoo2Google(TestSyncGoogle):
 
-    def setUp(self):
-        super().setUp()
-        self.google_service = GoogleCalendarService(self.env['google.service'])
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.google_service = GoogleCalendarService(cls.env['google.service'])
         # Make sure this test will work for the next 30 years
-        self.env['ir.config_parameter'].set_param('google_calendar.sync.range_days', 10000)
+        cls.env['ir.config_parameter'].set_param('google_calendar.sync.range_days', 10000)
 
     @patch_api
     def test_event_creation(self):
