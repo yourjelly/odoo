@@ -87,4 +87,12 @@
             </search>
         </field>
     </record>
+
+    <record model="ir.actions.act_window" id="action_meeting_room_from_event">
+        <field name="res_model">event.meeting.room</field>
+        <field name="name">Event Rooms</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_event_id': active_id, 'default_event_id': active_id}</field>
+    </record>
+
 </odoo>
