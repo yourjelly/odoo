@@ -407,4 +407,55 @@ QUnit.module("ActionManager", (hooks) => {
         const notificationElement = document.body.querySelector(notificationSelector);
         assert.verifySteps(["onClose"]);
     });
+
+    QUnit.test("client actions support defining their own target as a function", async (assert) => {
+        assert.expect(6);
+
+        let forceTarget;
+
+        class TargetClientAction extends owl.Component {}
+        TargetClientAction.template = owl.tags.xml`<div class="targetted_client_action"/>`;
+        TargetClientAction.target = (env) => {
+            assert.strictEqual(env, webClient.env);
+            return forceTarget;
+        };
+
+        const webClient = await createWebClient({ testConfig });
+        registry.category("actions").add("target.clientAction", TargetClientAction);
+        await doAction(webClient, {
+            tag: "target.clientAction",
+            type: "ir.actions.client",
+            target: "main",
+        });
+        assert.containsOnce(webClient, ".targetted_client_action");
+        assert.doesNotHaveClass(webClient.el, "o_fullscreen");
+
+        forceTarget = "fullscreen";
+        await doAction(webClient, {
+            tag: "target.clientAction",
+            type: "ir.actions.client",
+            target: "main",
+        });
+        assert.containsOnce(webClient, ".targetted_client_action");
+        assert.hasClass(webClient.el, "o_fullscreen");
+    });
+
+    QUnit.test("client actions support defining their own target as a string", async (assert) => {
+        assert.expect(2);
+
+        class TargetClientAction extends owl.Component {}
+        TargetClientAction.template = owl.tags.xml`<div class="targetted_client_action"/>`;
+        TargetClientAction.target = "fullscreen";
+
+        const webClient = await createWebClient({ testConfig });
+        registry.category("actions").add("target.clientAction", TargetClientAction);
+
+        await doAction(webClient, {
+            tag: "target.clientAction",
+            type: "ir.actions.client",
+            target: "main",
+        });
+        assert.containsOnce(webClient, ".targetted_client_action");
+        assert.hasClass(webClient.el, "o_fullscreen");
+    });
 });

@@ -275,13 +275,6 @@ function makeActionManager(env) {
             // No possible override for target="new"
             return "new";
         }
-        if (action.type === "ir.actions.client") {
-            const clientAction = actionRegistry.get(action.tag);
-            if (clientAction.target) {
-                // Target is forced by the definition of the client action
-                return clientAction.target;
-            }
-        }
         if (controllerStack.some((c) => c.action.target === "fullscreen")) {
             // Force fullscreen when one of the controllers is set to fullscreen
             return "fullscreen";
@@ -708,7 +701,13 @@ function makeActionManager(env) {
         const clientAction = actionRegistry.get(action.tag);
         if (clientAction.prototype instanceof Component) {
             if (action.target !== "new" && clientAction.target) {
-                action.target = clientAction.target;
+                let target;
+                if (typeof clientAction.target === "function") {
+                    target = clientAction.target(env);
+                } else {
+                    target = clientAction.target;
+                }
+                action.target = target || action.target;
             }
             const controller = {
                 jsId: `controller_${++id}`,
