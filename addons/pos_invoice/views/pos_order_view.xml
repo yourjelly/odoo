@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="pos_invoice.view_pos_pos_form" model="ir.ui.view">
+        <field name="name">pos.order.form</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="paid_invoice_id" invisible="1" />
+                <button name="action_view_paid_invoice"
+                    string="Paid Invoice"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-pencil-square-o"
+                    attrs="{'invisible':[('paid_invoice_id', '==', False)]}">
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
