@@ -213,7 +213,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             JOIN account_move_line line ON line.id = rel.account_move_line_id
             JOIN account_move move on line.move_id = move.id
             LEFT JOIN account_tax tax ON line.tax_line_id = tax.id
-            WHERE line.tax_exigible IS TRUE
+            WHERE line.tax_exigible IS TRUE   --TODO OCO modifier ça
               AND line.company_id = ANY(%(company_ids)s)
               AND (
                   tax.tax_exigibility != 'on_payment'

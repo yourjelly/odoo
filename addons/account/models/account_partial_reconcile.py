@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
 
 from datetime import date
@@ -230,6 +230,14 @@ class AccountPartialReconcile(models.Model):
                                 account.move.line.
         '''
         account = base_line.company_id.account_cash_basis_base_account_id or base_line.account_id
+        tax_ids = base_line.tax_ids.filtered(lambda x: x.tax_exigibility == 'on_payment')
+
+        tax_type = tax_ids[0].type_tax_use # To this point there should always be at least one
+        if base_line.move_id.move_type == 'entry':
+            is_refund = (tax_type == 'sale' and record.debit) or (tax_type == 'purchase' and record.credit)
+        else:
+            is_refund = base_line.move_id.is_inbound()
+
         return {
             'name': base_line.move_id.name,
             'debit': balance if balance > 0.0 else 0.0,
@@ -238,8 +246,8 @@ class AccountPartialReconcile(models.Model):
             'currency_id': base_line.currency_id.id,
             'partner_id': base_line.partner_id.id,
             'account_id': account.id,
-            'tax_ids': [(6, 0, base_line.tax_ids.ids)],
-            'tax_tag_ids': [(6, 0, base_line.tax_tag_ids.ids)],
+            'tax_ids': [Command.set(tax_ids.ids)],
+            'tax_tag_ids': [Command.set(tax_ids.get_tax_tags(is_refund, base).ids)],
             'tax_tag_invert': base_line.tax_tag_invert,
         }
 
@@ -272,14 +280,18 @@ class AccountPartialReconcile(models.Model):
         :return:                A python dictionary that could be passed to the create method of
                                 account.move.line.
         '''
+        tax_ids = tax_line.tax_ids.filtered(lambda x: x.tax_exigibility == 'on_payment')
+        base_tags = tax_ids.get_tax_tags(bool(tax_line.tax_repartition_line_id.refund_tax_id), 'base')
+        all_tags = base_tags + tax_line.tax_repartition_line_id.tag_ids
+
         return {
             'name': tax_line.name,
             'debit': balance if balance > 0.0 else 0.0,
             'credit': -balance if balance < 0.0 else 0.0,
             'tax_base_amount': tax_line.tax_base_amount,
             'tax_repartition_line_id': tax_line.tax_repartition_line_id.id,
-            'tax_ids': [(6, 0, tax_line.tax_ids.ids)],
-            'tax_tag_ids': [(6, 0, tax_line.tax_tag_ids.ids)],
+            'tax_ids': [Command.set(tax_ids.ids)],
+            'tax_tag_ids': [Command.set(all_tags.ids)],
             'account_id': tax_line.tax_repartition_line_id.account_id.id or tax_line.account_id.id,
             'amount_currency': amount_currency,
             'currency_id': tax_line.currency_id.id,

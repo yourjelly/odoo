@@ -2011,7 +2011,8 @@ class AccountMove(models.Model):
                 values['total_amount_currency'] += sign * line.amount_currency
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
-            elif not line.tax_exigible: #TODO OCO refactorer la fonction et ce qu'on met dans les entrées qu'on génère
+            elif 'on_payment' in (line.tax_ids + line.tax_line_id).mapped('tax_exigibility'):
+                # Meaning something is needed in the cas basis entry for this line
 
                 values['to_process_lines'] += line
                 currencies.add(line.currency_id or line.company_currency_id)
@@ -3577,10 +3578,19 @@ class AccountMoveLine(models.Model):
     @api.model
     def _get_tax_exigible_domain(self):
         #TODO OCO DOC
+
+        # TODO OCO on n'a pas le choix: pour les tags sur les lignes de base, ça ne marchera pas si la taxe caba et la taxe
+        # "normale" ajoute tous les deux les leurs. => AUCUN moyen sans jointures dégueu qui dépendent de la config des
+        # taxes de savoir ce qui est à rapporter mtnt ou plus tard
+        # ==> à la place: on ne met les tags de caba que sur l'OD de caba (que je mettrais bien en plus sur la facture, non ?)
+        # De cette façon, plus de trucs magiques avec les tags: what you see is what you get
+        # Il faudra faire attention que si la taxe caba partage sur sa ligne de base un tag identique avec les autres tags de la ligne,
+        # on le met donc sur la move line de la facture, mais l'écriture de caba ne doit pas le reprendre (bah ouais, ça fait doublon)
+        # (mais bon, ça n'arrivera à priori pas hein, c'est juste pour être complet)
         return [
-            '|', ('tax_line_id', '=', False),
-            '|', ('tax_line_id.tax_exigibility', '!=', 'on_payment'),
-            ('tax_cash_basis_rec_id', '!=', False),
+            '|', ('move_id.tax_cash_basis_rec_id', '!=', False),
+            '|', ('tax_line_id', '=', False), ('tax_line_id.tax_exigibility', '!=', 'on_payment'),
+            '|', ('tax_ids', '=', False), ('tax_ids.tax_exigibility', '!=', 'on_payment'), # So, if there is at least one non-cash basis tax in tax_ids
         ]
 
     # -------------------------------------------------------------------------
