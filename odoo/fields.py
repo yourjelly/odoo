@@ -57,7 +57,6 @@ def resolve_mro(model, name, predicate):
         in mro order on ``model`` that satisfy ``predicate``.  Model registry
         classes are ignored.
     """
-    result = []
     for cls in type(model).mro():
         if not is_registry_class(cls):
             value = cls.__dict__.get(name, Default)
@@ -65,8 +64,7 @@ def resolve_mro(model, name, predicate):
                 continue
             if not predicate(value):
                 break
-            result.append(value)
-    return result
+            yield value
 
 
 class MetaField(type):
