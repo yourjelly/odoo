@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import ast
 import logging
 import os.path
 import re
@@ -270,7 +269,7 @@ class QWeb(object):
         """ Prepare the global context that will sent to eval the qweb generated
         code.
 
-        :param values: template values to be used for rendering
+        :param globals_dict: template global values use in compiled code
         :param options: frozen dict of compilation parameters.
         """
         globals_dict['Sized'] = Sized
@@ -370,20 +369,15 @@ class QWeb(object):
         """
         compile t-options and add to the dict the t-options-xxx values
         """
-        t_options = el.attrib.pop('t-options', None)
-        directive = ''
-        if t_options:
-            directive = f't-options="{t_options}"'
-
         code = []
         dict_arg = []
         for key in list(el.attrib):
             if key.startswith('t-options-'):
                 value = el.attrib.pop(key)
-                directive += f' {key}={repr(value)}'
                 option_name = key[10:]
                 dict_arg.append(f'{repr(option_name)}:{self._compile_expr(value)}')
 
+        t_options = el.attrib.pop('t-options', None)
         if t_options and dict_arg:
             code.append(self._indent(f"{varname} = {{**{self._compile_expr(t_options)}, {', '.join(dict_arg)}}}", indent))
         elif dict_arg:
@@ -1225,7 +1219,6 @@ class QWeb(object):
         compilation of the content of this element.
         """
         expr = el.attrib.pop('t-call')
-        _values = self._make_name('values_copy')
 
         if el.attrib.get('t-call-options'): # retro-compatibility
             el.attrib.set('t-options', el.attrib.pop('t-call-options'))
@@ -1281,7 +1274,6 @@ class QWeb(object):
                 """).strip(), indent))
         else:
             code.append(self._indent(f"yield from self._compile({template}, t_call_options)(self, t_call_values)", indent))
-
 
         return code
 
