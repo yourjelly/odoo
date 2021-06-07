@@ -2,7 +2,6 @@
 
 import { registry } from "@web/core/registry";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
-import { EffectContainer } from "@web/webclient/effects/effect_container";
 import testUtils from "web.test_utils";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { click, legacyExtraNextTick, nextTick, patchWithCleanup } from "../../helpers/utils";
@@ -23,9 +22,7 @@ QUnit.module("ActionManager", (hooks) => {
         assert.expect(10);
         patchWithCleanup(odoo.session_info, { show_effect: true });
         clearRegistryWithCleanup(mainComponentRegistry);
-        mainComponentRegistry.add("EffectContainer", {
-            Component: EffectContainer,
-        });
+
         const webClient = await createWebClient({ serverData });
         await doAction(webClient, 1);
         assert.containsOnce(webClient.el, ".o_kanban_view");
@@ -86,9 +83,7 @@ QUnit.module("ActionManager", (hooks) => {
             }
         };
         clearRegistryWithCleanup(mainComponentRegistry);
-        mainComponentRegistry.add("EffectContainer", {
-            Component: EffectContainer,
-        });
+
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 6);
         await click(webClient.el.querySelector('button[name="object"]'));
@@ -113,9 +108,6 @@ QUnit.module("ActionManager", (hooks) => {
             }
         };
         clearRegistryWithCleanup(mainComponentRegistry);
-        mainComponentRegistry.add("EffectContainer", {
-            Component: EffectContainer,
-        });
 
         const webClient = await createWebClient({ serverData, mockRPC });
         await doAction(webClient, 6);
