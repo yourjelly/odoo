@@ -34,7 +34,8 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
                 method: 'read',
                 args: [[invoiceId]],
                 kwargs: {
-                    fields: ['amount_residual'],
+                    fields: ['amount_residual', 'partner_id'],
+                    load: false,
                 },
             });
             if (!invoice) {
@@ -44,6 +45,7 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
                 });
             }
             const order = this.env.pos.get_order();
+            const partner = this.env.pos.db.get_partner_by_id(invoice.partner_id)
             const new_line = new models.Orderline({}, {
                 pos: this.env.pos,
                 order: order,
@@ -53,6 +55,7 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
             });
             order.add_orderline(new_line);
             order.paid_invoice_id = invoice.id;
+            order.set_client(partner);
         }
     }
     PayInvoiceButton.template = 'pos_invoice.PayInvoiceButton';
