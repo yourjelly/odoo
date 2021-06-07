@@ -2,6 +2,25 @@
 
 import models from 'point_of_sale.models';
 
+const existing_models = models.PosModel.prototype.models;
+const product_index = _.findIndex(existing_models, function (model) {
+    return model.model === 'product.product';
+});
+const product_model = existing_models[product_index];
+
+models.load_models([
+    {
+        model: product_model.model,
+        fields: product_model.fields,
+        order: product_model.order,
+        domain: function (self) {
+            return [['id', '=', self.config.pay_invoice_product_id[0]]];
+        },
+        context: product_model.context,
+        loaded: product_model.loaded,
+    },
+]);
+
 var _order_super = models.Order.prototype;
 models.Order = models.Order.extend({
     export_as_JSON: function () {

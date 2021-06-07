@@ -9,9 +9,10 @@
     "depends": ["point_of_sale"],
     "data": [
         "views/pos_order_view.xml",
+        "views/pos_config_views.xml",
     ],
     "installable": True,
-    "auto_install": True,
+    "auto_install": False,
     "assets": {
         "point_of_sale.assets": [
             "pos_invoice/static/src/css/pos.css",

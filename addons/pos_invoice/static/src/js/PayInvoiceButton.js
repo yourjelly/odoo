@@ -21,14 +21,14 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
             this.env.pos.off('change:selectedOrder', null, this);
         }
         async onClick() {
-            let { confirmed, payload: ids } = await this.showPopup('TextInputPopup', {
-                title: this.env._t('Enter Promotion or Coupon Code'),
+            let { confirmed, payload: id } = await this.showPopup('TextInputPopup', {
+                title: this.env._t('Enter Invoice ID'),
                 startingValue: '',
             });
-            if (!confirmed || !ids) {
+            if (!confirmed || !id) {
                 return;
             }
-            const [invoiceId, productId] = ids.split(/\s+/).map(val => parseInt(val, 10));
+            const invoiceId = parseInt(id, 10);
             const [invoice] = await this.rpc({
                 model: 'account.move',
                 method: 'read',
@@ -47,7 +47,7 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
             const new_line = new models.Orderline({}, {
                 pos: this.env.pos,
                 order: order,
-                product: this.env.pos.db.get_product_by_id(productId),
+                product: this.env.pos.db.get_product_by_id(this.env.pos.config.pay_invoice_product_id[0]),
                 price: invoice.amount_residual,
                 price_manually_set: true,
             });
@@ -60,8 +60,7 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
     ProductScreen.addControlButton({
         component: PayInvoiceButton,
         condition: function () {
-            // TODO jcb - proper condition to show it
-            return true;
+            return this.env.pos.config.module_pos_invoice && this.env.pos.config.pay_invoice_product_id;
         },
     });
 
