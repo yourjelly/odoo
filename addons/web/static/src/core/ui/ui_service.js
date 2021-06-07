@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
-import { useService } from "./service_hook";
-import { registry } from "./registry";
-import { debounce } from "./utils/timing";
-import { useEffect } from "./effect_hook";
+import { useService } from "@web/core/service_hook";
+import { registry } from "@web/core/registry";
+import { debounce } from "@web/core/utils/timing";
+import { useEffect } from "@web/core/effect_hook";
+import { BlockUI } from "./block_ui";
 
 const { Component, core, hooks } = owl;
 const { EventBus } = core;
@@ -25,10 +26,13 @@ export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 export function useActiveElement(refName = null) {
     const uiService = useService("ui");
     const owner = refName ? useRef(refName) : Component.current;
-    useEffect(() => {
-        uiService.activateElement(owner.el);
-        return () => uiService.deactivateElement(owner.el);
-    }, () => []);
+    useEffect(
+        () => {
+            uiService.activateElement(owner.el);
+            return () => uiService.deactivateElement(owner.el);
+        },
+        () => []
+    );
 }
 
 export const uiService = {
@@ -37,6 +41,7 @@ export const uiService = {
 
         // block/unblock code
         const bus = new EventBus();
+        registry.category("main_components").add("BlockUI", { Component: BlockUI, props: { bus } });
 
         let blockCount = 0;
         function block() {
