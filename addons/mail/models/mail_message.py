@@ -995,16 +995,17 @@ class Message(models.Model):
                     })
 
             if message_sudo.model and message_sudo.res_id:
-                record = self.env[message_sudo.model] \
+                has_follower_access_rights = self.env['mail.followers'].check_access_rights('read', raise_exception=False)
+                self.env['mail.followers'].check_access_rule('read')
+
+                record_sudo = self.env[message_sudo.model] \
                     .browse(message_sudo.res_id) \
                     .sudo() \
                     .with_prefetch(thread_ids_by_model_name[message_sudo.model])
-                record_name = record.display_name
+                record_name = record_sudo.display_name
 
-                has_follower_access = self.env['mail.followers'].check_access_rights('read', raise_exception=False)
-
-                if has_follower_access and fetch_followers and record.check_access_rights('read'):
-                    vals['followers'] = record.message_follower_ids._follower_format()
+                if has_follower_access_rights and fetch_followers and record_sudo.check_access_rights('read'):
+                    vals['followers'] = record_sudo.message_follower_ids._follower_format()
             else:
                 record_name = False
 

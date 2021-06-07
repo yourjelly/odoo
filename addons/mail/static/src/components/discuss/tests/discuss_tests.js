@@ -3063,18 +3063,8 @@ QUnit.test('do not post message on mailing channel with "Enter" keyboard shortcu
 
 QUnit.test('rendering of inbox message', async function (assert) {
     // AKU TODO: kinda message specific test
-    assert.expect(8);
+    assert.expect(7);
 
-    this.data['mail.followers'].records.push({
-        email: "bla@bla.bla",
-        id: 1,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: this.data.currentPartnerId,
-        res_id: 20,
-        res_model: 'res.partner',
-    });
     this.data['mail.message'].records.push({
         body: "not empty",
         model: 'res.partner', // random existing model
@@ -3102,8 +3092,8 @@ QUnit.test('rendering of inbox message', async function (assert) {
     );
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_command`).length,
-        4,
-        "should display 4 commands"
+        3,
+        "should display 3 commands"
     );
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_commandStar`).length,
@@ -3119,6 +3109,36 @@ QUnit.test('rendering of inbox message', async function (assert) {
         message.querySelectorAll(`:scope .o_Message_commandMarkAsRead`).length,
         1,
         "should display mark as read command"
+    );
+});
+
+QUnit.test('rendering of inbox message with unfollow button', async function (assert) {
+    assert.expect(2);
+
+    this.data['mail.followers'].records.push({
+        email: "bla@bla.bla",
+        id: 1,
+        is_active: true,
+        is_editable: true,
+        name: "François Perusse",
+        partner_id: this.data.currentPartnerId,
+        res_id: 20,
+        res_model: 'res.partner',
+    });
+    this.data['mail.message'].records.push({
+        body: "not empty",
+        model: 'res.partner',
+        needaction: true,
+        needaction_partner_ids: [this.data.currentPartnerId],
+        record_name: 'Refactoring',
+        res_id: 20,
+    });
+    await this.start();
+    const message = document.querySelector('.o_Message');
+    assert.strictEqual(
+        message.querySelectorAll(`:scope .o_Message_command`).length,
+        4,
+        "should display 4 commands"
     );
     assert.strictEqual(
         message.querySelectorAll(`:scope .o_Message_commandUnfollow`).length,
@@ -3319,49 +3339,6 @@ QUnit.test('receive new needaction messages', async function (assert) {
             }"]
         `),
         "should display 2nd needaction message"
-    );
-});
-
-QUnit.test('should display unfollow button when current user is follower of the thread', async function (assert) {
-    assert.expect(1);
-
-    this.data['res.partner'].records.push({
-        id: 20,
-        message_follower_ids: [1],
-    });
-    this.data['mail.followers'].records.push({
-        email: "bla@bla.bla",
-        id: 1,
-        is_active: true,
-        is_editable: true,
-        name: "François Perusse",
-        partner_id: this.data.currentPartnerId,
-        res_id: 20,
-        res_model: 'res.partner',
-    });
-    this.data['mail.message'].records.push({
-        body: "<p>Test</p>",
-        id: 100,
-        model: 'res.partner',
-        needaction: true,
-        record_name: 'Refactoring',
-        res_id: 20,
-    });
-    this.data['mail.notification'].records.push({
-        mail_message_id: 100,
-        res_partner_id: this.data.currentPartnerId,
-    });
-    await this.start({
-        discuss: {
-            params: {
-                default_active_id: 'mail.box_inbox',
-            },
-        },
-    });
-    assert.containsOnce(
-        document.body,
-        '.o_Message_commandUnfollow',
-        "should have button unfollow"
     );
 });
 

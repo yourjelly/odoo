@@ -345,4 +345,5 @@ GROUP BY fol.id%s%s""" % (
             # should be always be displayed and not only when "debug" mode is activated.
             'is_editable': True,
             'name': follower.name,
-            'partner_id': follower.partner_id.id} for follower in self]
+            'partner_id': follower.partner_id.id
+        } for follower in self]

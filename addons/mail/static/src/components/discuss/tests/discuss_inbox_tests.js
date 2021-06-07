@@ -424,6 +424,49 @@ QUnit.test('error notifications should not be shown in Inbox', async function (a
     );
 });
 
+QUnit.test('should display unfollow button when current user is follower of the thread', async function (assert) {
+    assert.expect(1);
+
+    this.data['res.partner'].records.push({
+        id: 20,
+        message_follower_ids: [1],
+    });
+    this.data['mail.followers'].records.push({
+        email: "bla@bla.bla",
+        id: 1,
+        is_active: true,
+        is_editable: true,
+        name: "François Perusse",
+        partner_id: this.data.currentPartnerId,
+        res_id: 20,
+        res_model: 'res.partner',
+    });
+    this.data['mail.message'].records.push({
+        body: "<p>Test</p>",
+        id: 100,
+        model: 'res.partner',
+        needaction: true,
+        record_name: 'Refactoring',
+        res_id: 20,
+    });
+    this.data['mail.notification'].records.push({
+        mail_message_id: 100,
+        res_partner_id: this.data.currentPartnerId,
+    });
+    await this.start({
+        discuss: {
+            params: {
+                default_active_id: 'mail.box_inbox',
+            },
+        },
+    });
+    assert.containsOnce(
+        document.body,
+        '.o_Message_commandUnfollow',
+        "should have button unfollow"
+    );
+});
+
 QUnit.test('show subject of message in Inbox', async function (assert) {
     assert.expect(3);
 

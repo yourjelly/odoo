@@ -1069,6 +1069,26 @@ MockServer.include({
         }]);
     },
     /**
+     * Simulates `_follower_format` on `mail.followers`.
+     *
+     * @private
+     * @returns {integer[]} ids
+     * @returns {Object[]}
+     */
+    _mockMailFollowers_followerFormat(ids) {
+        const followers = this._getRecords('mail.followers',[['id', 'in', ids]]);
+        return followers.map(follower => {
+            return {
+                'email': follower.email,
+                'id': follower.id,
+                'is_active': follower.is_active,
+                'is_editable': follower.is_editable,
+                'name': follower.name,
+                'partner_id': follower.partner_id,
+            };
+        });
+    },
+    /**
      * Simulates `mark_all_as_read` on `mail.message`.
      *
      * @private
@@ -1120,9 +1140,9 @@ MockServer.include({
      *
      * @private
      * @param {Array[]} domain
-     * @param {boolean} fetch_followers
      * @param {string} [limit=20]
      * @param {Object} [moderated_channel_ids]
+     * @param {boolean} fetch_followers
      * @returns {Object[]}
      */
     _mockMailMessageMessageFetch(domain, limit = 20, moderated_channel_ids, fetch_followers) {
@@ -1173,8 +1193,8 @@ MockServer.include({
      * Simulates `message_format` on `mail.message`.
      *
      * @private
-     * @param {boolean} fetch_followers
      * @returns {integer[]} ids
+     * @param {boolean} fetch_followers
      * @returns {Object[]}
      */
     _mockMailMessageMessageFormat(ids, fetch_followers) {
@@ -1240,18 +1260,10 @@ MockServer.include({
                 tracking_value_ids: trackingValueIds,
             });
             if (fetch_followers) {
-                const follower_recs = this._getRecords('mail.followers', [['res_id', '=', message.res_id], ['res_model', '=', message.model]]);
-                const followers = follower_recs.map(follower => {
-                    return {
-                        'email': follower.email,
-                        'id': follower.id,
-                        'is_active': follower.is_active,
-                        'is_editable': follower.is_editable,
-                        'name': follower.name,
-                        'partner_id': follower.partner_id,
-                    };
-                });
-                response.followers = followers;
+                const followerRecs = this._getRecords('mail.followers', [['res_id', '=', message.res_id], ['res_model', '=', message.model]]);
+                response.followers = this._mockMailFollowers_followerFormat(
+                    followerRecs.map(follower => follower.id)
+                );
             }
             if (message.subtype_id) {
                 const subtype = this._getRecords('mail.message.subtype', [
