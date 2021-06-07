@@ -23,3 +23,7 @@ class PosOrder(models.Model):
             'type': 'ir.actions.act_window',
             'res_id': self.paid_invoice_id.id,
         }
+
+    def _is_special(self):
+        result = super()._is_special()
+        return result or bool(self.paid_invoice_id)

@@ -721,6 +721,9 @@ class PosOrder(models.Model):
         """
         return self.mapped(self._export_for_ui) if self else []
 
+    def _is_special(self):
+        return self.is_invoiced
+
 
 class PosOrderLine(models.Model):
     _name = "pos.order.line"

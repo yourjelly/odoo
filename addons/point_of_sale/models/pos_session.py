@@ -429,6 +429,7 @@ class PosSession(models.Model):
         self.write({'move_id': account_move.id})
 
         data = {}
+        data = self._initialize_amounts_to_accumulate(data)
         data = self._accumulate_amounts(data)
         data = self._create_non_reconciliable_move_lines(data)
         data = self._create_cash_statement_lines_and_cash_move_lines(data)
@@ -439,7 +440,7 @@ class PosSession(models.Model):
 
         return data
 
-    def _accumulate_amounts(self, data):
+    def _initialize_amounts_to_accumulate(self, data):
         # Accumulate the amounts for each accounting lines group
         # Each dict maps `key` -> `amounts`, where `key` is the group key.
         # E.g. `combine_receivables` is derived from pos.payment records
@@ -462,6 +463,52 @@ class PosSession(models.Model):
         # These receivable lines are reconciled to the corresponding invoice receivable lines
         # of this session's move_id.
         order_account_move_receivable_lines = defaultdict(lambda: self.env['account.move.line'])
+        MoveLine = self.env['account.move.line'].with_context(check_move_validity=False)
+        data.update({
+            'taxes':                               taxes,
+            'sales':                               sales,
+            'stock_expense':                       stock_expense,
+            'split_receivables':                   split_receivables,
+            'combine_receivables':                 combine_receivables,
+            'split_receivables_cash':              split_receivables_cash,
+            'combine_receivables_cash':            combine_receivables_cash,
+            'invoice_receivables':                 invoice_receivables,
+            'stock_return':                        stock_return,
+            'stock_output':                        stock_output,
+            'order_account_move_receivable_lines': order_account_move_receivable_lines,
+            'rounding_difference':                 rounding_difference,
+            'MoveLine':                            MoveLine,
+            'tax_amounts':                         tax_amounts,
+            'amounts':                             amounts,
+        })
+        return data
+
+    def _process_special_order(self, data, order):
+        if order.is_invoiced:
+            invoice = order.account_move
+            invoice_receivables = data['invoice_receivables']
+            order_account_move_receivable_lines = data['order_account_move_receivable_lines']
+            # Combine invoice receivable lines
+            key = order.partner_id or invoice.partner_id
+            if self.config_id.cash_rounding:
+                invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_paid}, order.date_order)
+            else:
+                invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_total}, order.date_order)
+            # side loop to gather receivable lines by account for reconciliation
+            for move_line in invoice.line_ids.filtered(lambda aml: aml.account_id.internal_type == 'receivable' and not aml.reconciled):
+                order_account_move_receivable_lines[move_line.account_id.id] |= move_line
+
+    def _accumulate_amounts(self, data):
+        split_receivables = data['split_receivables']
+        split_receivables_cash = data['split_receivables_cash']
+        combine_receivables = data['combine_receivables']
+        combine_receivables_cash = data['combine_receivables_cash']
+        sales = data['sales']
+        taxes = data['taxes']
+        stock_expense = data['stock_expense']
+        stock_return = data['stock_return']
+        stock_output = data['stock_output']
+        rounding_difference = data['rounding_difference']
         rounded_globally = self.company_id.tax_calculation_rounding_method == 'round_globally'
         for order in self.order_ids:
             # Combine pos receivable lines
@@ -480,18 +527,10 @@ class PosSession(models.Model):
                     else:
                         combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
 
-            if order.is_invoiced:
-                # Combine invoice receivable lines
-                key = order.partner_id
-                if self.config_id.cash_rounding:
-                    invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_paid}, order.date_order)
-                else:
-                    invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_total}, order.date_order)
-                # side loop to gather receivable lines by account for reconciliation
-                for move_line in order.account_move.line_ids.filtered(lambda aml: aml.account_id.internal_type == 'receivable' and not aml.reconciled):
-                    order_account_move_receivable_lines[move_line.account_id.id] |= move_line
+            if order._is_special():
+                self._process_special_order(data, order)
             else:
-                order_taxes = defaultdict(tax_amounts)
+                order_taxes = defaultdict(data['tax_amounts'])
                 for order_line in order.lines:
                     line = self._prepare_line(order_line)
                     # Combine sales/refund lines
@@ -562,23 +601,7 @@ class PosSession(models.Model):
                         stock_return[out_key] = self._update_amounts(stock_return[out_key], {'amount': amount}, move.picking_id.date)
                     else:
                         stock_output[out_key] = self._update_amounts(stock_output[out_key], {'amount': amount}, move.picking_id.date)
-        MoveLine = self.env['account.move.line'].with_context(check_move_validity=False)
 
-        data.update({
-            'taxes':                               taxes,
-            'sales':                               sales,
-            'stock_expense':                       stock_expense,
-            'split_receivables':                   split_receivables,
-            'combine_receivables':                 combine_receivables,
-            'split_receivables_cash':              split_receivables_cash,
-            'combine_receivables_cash':            combine_receivables_cash,
-            'invoice_receivables':                 invoice_receivables,
-            'stock_return':                        stock_return,
-            'stock_output':                        stock_output,
-            'order_account_move_receivable_lines': order_account_move_receivable_lines,
-            'rounding_difference':                 rounding_difference,
-            'MoveLine':                            MoveLine
-        })
         return data
 
     def _create_non_reconciliable_move_lines(self, data):
@@ -671,27 +694,29 @@ class PosSession(models.Model):
         # Create invoice receivable lines for this session's move_id.
         # Keep reference of the invoice receivable lines because
         # they are reconciled with the lines in order_account_move_receivable_lines
-        MoveLine = data.get('MoveLine')
         invoice_receivables = data.get('invoice_receivables')
+        invoice_receivable_lines = self._create_invoice_receivable_lines_helper(data, invoice_receivables, _('From invoiced orders'))
+        data.update({'invoice_receivable_lines': invoice_receivable_lines})
+        return data
 
-        invoice_receivable_vals = defaultdict(list)
-        invoice_receivable_lines = {}
-        for partner, amounts in invoice_receivables.items():
+    def _create_invoice_receivable_lines_helper(self, data, receivables, message):
+        MoveLine = data['MoveLine']
+        receivable_vals = defaultdict(list)
+        receivable_lines = {}
+        for partner, amounts in receivables.items():
             commercial_partner = partner.commercial_partner_id
             account_id = commercial_partner.property_account_receivable_id.id
-            invoice_receivable_vals[commercial_partner].append(self._get_invoice_receivable_vals(account_id, amounts['amount'], amounts['amount_converted'], partner=commercial_partner))
-        for commercial_partner, vals in invoice_receivable_vals.items():
+            receivable_vals[commercial_partner].append(self._get_invoice_receivable_vals(account_id, amounts['amount'], amounts['amount_converted'], partner=commercial_partner, message=message))
+        for commercial_partner, vals in receivable_vals.items():
             account_id = commercial_partner.property_account_receivable_id.id
             receivable_lines = MoveLine.create(vals)
             for receivable_line in receivable_lines:
                 if (not receivable_line.reconciled):
-                    if account_id not in invoice_receivable_lines:
-                        invoice_receivable_lines[account_id] = receivable_line
+                    if account_id not in receivable_lines:
+                        receivable_lines[account_id] = receivable_line
                     else:
-                        invoice_receivable_lines[account_id] |= receivable_line
-
-        data.update({'invoice_receivable_lines': invoice_receivable_lines})
-        return data
+                        receivable_lines[account_id] |= receivable_line
+        return receivable_lines
 
     def _create_stock_output_lines(self, data):
         # Keep reference to the stock output lines because
@@ -719,7 +744,6 @@ class PosSession(models.Model):
         split_cash_receivable_lines = data.get('split_cash_receivable_lines')
         combine_cash_receivable_lines = data.get('combine_cash_receivable_lines')
         order_account_move_receivable_lines = data.get('order_account_move_receivable_lines')
-        invoice_receivable_lines = data.get('invoice_receivable_lines')
         stock_output_lines = data.get('stock_output_lines')
 
         for statement in self.statement_ids:
@@ -751,7 +775,7 @@ class PosSession(models.Model):
         # reconcile invoice receivable lines
         for account_id in order_account_move_receivable_lines:
             ( order_account_move_receivable_lines[account_id]
-            | invoice_receivable_lines.get(account_id, self.env['account.move.line'])
+            | self._get_receivable_lines_for_reconciliation(data, account_id)
             ).reconcile()
 
         # reconcile stock output lines
@@ -764,6 +788,11 @@ class PosSession(models.Model):
             | stock_account_move_lines.filtered(lambda aml: aml.account_id == account_id)
             ).filtered(lambda aml: not aml.reconciled).reconcile()
         return data
+
+    def _get_receivable_lines_for_reconciliation(self, data, account_id):
+        """Should return receivable lines that will be reconciled with the order account moves receivable lines."""
+        invoice_receivable_lines = data.get('invoice_receivable_lines')
+        return invoice_receivable_lines.get(account_id, self.env['account.move.line'])
 
     def _prepare_line(self, order_line):
         """ Derive from order_line the order date, income account, amount and taxes information.
@@ -842,7 +871,7 @@ class PosSession(models.Model):
         partial_vals = {
             'account_id': account_id,
             'move_id': self.move_id.id,
-            'name': 'From invoiced orders',
+            'name': kwargs.get('message', ''),
             'partner_id': partner and partner.id or False,
         }
         return self._credit_amounts(partial_vals, amount, amount_converted)
