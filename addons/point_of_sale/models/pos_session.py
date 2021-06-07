@@ -508,7 +508,6 @@ class PosSession(models.Model):
         stock_expense = data['stock_expense']
         stock_return = data['stock_return']
         stock_output = data['stock_output']
-        rounding_difference = data['rounding_difference']
         rounded_globally = self.company_id.tax_calculation_rounding_method == 'round_globally'
         for order in self.order_ids:
             # Combine pos receivable lines
@@ -578,7 +577,7 @@ class PosSession(models.Model):
 
                 if self.config_id.cash_rounding:
                     diff = order.amount_paid - order.amount_total
-                    rounding_difference = self._update_amounts(rounding_difference, {'amount': diff}, order.date_order)
+                    data['rounding_difference'] = self._update_amounts(data['rounding_difference'], {'amount': diff}, order.date_order)
 
                 # Increasing current partner's customer_rank
                 partners = (order.partner_id | order.partner_id.commercial_partner_id)
