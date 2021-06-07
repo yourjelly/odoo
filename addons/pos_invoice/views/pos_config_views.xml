@@ -13,11 +13,11 @@
                     <div class="o_setting_right_pane">
                         <label for="module_pos_invoice" string="Pay Invoices"/>
                         <div class="text-muted">
-                            Pay invoices
+                            Allow your customers to pay unpaid or partially paid invoices within POS
                         </div>
                         <div class="content-group" attrs="{'invisible': [('module_pos_invoice', '=', False)]}">
                             <div class="mt16" id="pay_invoice_product_id">
-                                <label string="Pay Invoice Product" for="pay_invoice_product_id" class="o_light_label"/>
+                                <label string="'Pay Invoice' Product" for="pay_invoice_product_id" class="o_light_label"/>
                                 <field name="pay_invoice_product_id"/>
                             </div>
                         </div>
