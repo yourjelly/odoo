@@ -2012,7 +2012,7 @@ class AccountMove(models.Model):
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
             elif 'on_payment' in (line.tax_ids + line.tax_line_id).mapped('tax_exigibility'):
-                # Meaning something is needed in the cas basis entry for this line
+                # Meaning something is needed in the cash basis entry for this line
 
                 values['to_process_lines'] += line
                 currencies.add(line.currency_id or line.company_currency_id)
@@ -3588,9 +3588,15 @@ class AccountMoveLine(models.Model):
         # on le met donc sur la move line de la facture, mais l'écriture de caba ne doit pas le reprendre (bah ouais, ça fait doublon)
         # (mais bon, ça n'arrivera à priori pas hein, c'est juste pour être complet)
         return [
+            # Lines with only tags are always exigible
+            '|', '&', ('tax_line_id', '=', False), ('tax_ids', '=', False),
+
+            # Lines from CABA entries are always exigible
             '|', ('move_id.tax_cash_basis_rec_id', '!=', False),
-            '|', ('tax_line_id', '=', False), ('tax_line_id.tax_exigibility', '!=', 'on_payment'),
-            '|', ('tax_ids', '=', False), ('tax_ids.tax_exigibility', '!=', 'on_payment'), # So, if there is at least one non-cash basis tax in tax_ids
+
+            # Lines from non-CABA taxes are always exigible
+            '|', ('tax_line_id.tax_exigibility', '!=', 'on_payment'),
+            ('tax_ids.tax_exigibility', '!=', 'on_payment'), # So: exigible if at least one tax from tax_ids isn't on_payment
         ]
 
     # -------------------------------------------------------------------------

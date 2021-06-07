@@ -133,6 +133,7 @@ class AccountPartialReconcile(models.Model):
     # RECONCILIATION METHODS
     # -------------------------------------------------------------------------
 
+    #TODO OCO rien à voir avec ceci, mais au passage: dans le détails des pmts réconciliés avec la facture, il faudra un machin pour mentionner le withholding
     def _collect_tax_cash_basis_values(self):
         ''' Collect all information needed to create the tax cash basis journal entries on the current partials.
         :return:    A dictionary mapping each move_id to the result of 'account_move._collect_tax_cash_basis_values'.
@@ -234,9 +235,9 @@ class AccountPartialReconcile(models.Model):
 
         tax_type = tax_ids[0].type_tax_use # To this point there should always be at least one
         if base_line.move_id.move_type == 'entry':
-            is_refund = (tax_type == 'sale' and record.debit) or (tax_type == 'purchase' and record.credit)
+            is_refund = (tax_type == 'sale' and base_line.debit) or (tax_type == 'purchase' and base_line.credit)
         else:
-            is_refund = base_line.move_id.is_inbound()
+            is_refund = base_line.move_id.move_type in ('in_refund', 'out_refund')
 
         return {
             'name': base_line.move_id.name,
@@ -247,7 +248,7 @@ class AccountPartialReconcile(models.Model):
             'partner_id': base_line.partner_id.id,
             'account_id': account.id,
             'tax_ids': [Command.set(tax_ids.ids)],
-            'tax_tag_ids': [Command.set(tax_ids.get_tax_tags(is_refund, base).ids)],
+            'tax_tag_ids': [Command.set(tax_ids.get_tax_tags(is_refund, 'base').ids)],
             'tax_tag_invert': base_line.tax_tag_invert,
         }
 
@@ -281,7 +282,7 @@ class AccountPartialReconcile(models.Model):
                                 account.move.line.
         '''
         tax_ids = tax_line.tax_ids.filtered(lambda x: x.tax_exigibility == 'on_payment')
-        base_tags = tax_ids.get_tax_tags(bool(tax_line.tax_repartition_line_id.refund_tax_id), 'base')
+        base_tags = tax_ids.get_tax_tags(tax_line.tax_repartition_line_id.refund_tax_id, 'base')
         all_tags = base_tags + tax_line.tax_repartition_line_id.tag_ids
 
         return {
@@ -345,7 +346,7 @@ class AccountPartialReconcile(models.Model):
             base_line.partner_id.id,
             (account or base_line.account_id).id,
             tuple(base_line.tax_ids.ids),
-            tuple(base_line.tax_tag_ids.ids),
+            #TODO OCO tuple(base_line.tax_tag_ids.ids), => renommer la fonction et/ou la localiser dans la fct où elle est utile
         )
 
     @api.model
@@ -375,7 +376,7 @@ class AccountPartialReconcile(models.Model):
             tax_line.partner_id.id,
             (account or tax_line.account_id).id,
             tuple(tax_line.tax_ids.ids),
-            tuple(tax_line.tax_tag_ids.ids),
+            #TODO OCO tuple(tax_line.tax_tag_ids.ids), => renommer la fonction et/ou la localiser dans la fct où elle est utile
             tax_line.tax_repartition_line_id.id,
         )
 
