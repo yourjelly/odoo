@@ -21,18 +21,18 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
             this.env.pos.off('change:selectedOrder', null, this);
         }
         async onClick() {
-            let { confirmed, payload: id } = await this.showPopup('TextInputPopup', {
+            let { confirmed, payload: ids } = await this.showPopup('TextInputPopup', {
                 title: this.env._t('Enter Promotion or Coupon Code'),
                 startingValue: '',
             });
-            if (!confirmed || !id) {
+            if (!confirmed || !ids) {
                 return;
             }
-            id = parseInt(id, 10);
+            const [invoiceId, productId] = ids.split(/\s+/).map(val => parseInt(val, 10));
             const [invoice] = await this.rpc({
                 model: 'account.move',
                 method: 'read',
-                args: [[id]],
+                args: [[invoiceId]],
                 kwargs: {
                     fields: ['amount_residual'],
                 },
@@ -47,8 +47,7 @@ odoo.define('pos_invoice.PayInvoiceButton', function (require) {
             const new_line = new models.Orderline({}, {
                 pos: this.env.pos,
                 order: order,
-                // TODO jcb - need to provide a dynamic product, and not 51
-                product: this.env.pos.db.get_product_by_id(51),
+                product: this.env.pos.db.get_product_by_id(productId),
                 price: invoice.amount_residual,
                 price_manually_set: true,
             });
