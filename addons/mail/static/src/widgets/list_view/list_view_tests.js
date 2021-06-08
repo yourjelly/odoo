@@ -53,14 +53,14 @@ QUnit.test('list activity widget: done the acitivty with "ENTER" keyboard shortc
         activity_type_id: 3,
     });
     this.data['mail.activity'].records.push({
-        id: 1,
-        display_name: "Call with Al",
-        date_deadline: moment().format("YYYY-MM-DD"), // now
+        activity_type_id: 3,
         can_write: true,
+        create_uid: this.data.currentUserId,
+        display_name: "Call with Al",
+        date_deadline: moment().format("YYYY-MM-DD"),
+        id: 1,
         state: "today",
         user_id: this.data.currentUserId,
-        create_uid: this.data.currentUserId,
-        activity_type_id: 3,
     });
 
     const { widget: list } = await start({
@@ -100,14 +100,14 @@ QUnit.test('list activity widget: done and schedule the next acitivty with "ENTE
         activity_type_id: 3,
     });
     this.data['mail.activity'].records.push({
-        id: 1,
-        display_name: "Call with Al",
-        date_deadline: moment().format("YYYY-MM-DD"), // now
+        activity_type_id: 3,
         can_write: true,
+        create_uid: this.data.currentUserId,
+        display_name: "Call with Al",
+        date_deadline: moment().format("YYYY-MM-DD"),
+        id: 1,
         state: "today",
         user_id: this.data.currentUserId,
-        create_uid: this.data.currentUserId,
-        activity_type_id: 3,
     });
 
     const { widget: list } = await start({
