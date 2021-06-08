@@ -25,14 +25,14 @@ export class DebugMenu extends Component {
                 Object.assign(globalContext, { accessRights });
             }
         };
-        this.env.bus.on("DEBUG-MANAGER:ADD-CONTEXT", this, (payload) => {
+        this.props.bus.on("DEBUG-MANAGER:ADD-CONTEXT", this, (payload) => {
             const { category, context, inDialog, itemId } = payload;
             if (this.env.inDialog === inDialog) {
                 this.contexts.set(itemId, context);
                 this.activeCategories.add(category);
             }
         });
-        this.env.bus.on("DEBUG-MANAGER:REMOVE-CONTEXT", this, (payload) => {
+        this.props.bus.on("DEBUG-MANAGER:REMOVE-CONTEXT", this, (payload) => {
             const { category, inDialog, itemId } = payload;
             if (this.env.inDialog === inDialog) {
                 this.contexts.delete(itemId);
@@ -85,10 +85,11 @@ export function useDebugMenu(category, context = {}) {
         inDialog: env.inDialog,
         itemId: debugElementsId++,
     };
+    const bus = getDebugBus();
     useEffect(
         () => {
-            env.bus.trigger("DEBUG-MANAGER:ADD-CONTEXT", payload);
-            return () => env.bus.trigger("DEBUG-MANAGER:REMOVE-CONTEXT", payload);
+            bus.trigger("DEBUG-MANAGER:ADD-CONTEXT", payload);
+            return () => bus.trigger("DEBUG-MANAGER:REMOVE-CONTEXT", payload);
         },
         () => []
     );

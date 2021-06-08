@@ -16,15 +16,23 @@ export function editModelDebug(env, title, model, id) {
     });
 }
 
+let bus;
+
+export function getDebugBus() {
+    return bus;
+}
+
 export const debugService = {
     dependencies: ["orm"],
     start(env, { orm }) {
+        bus = new owl.core.EventBus();
         let accessRightsProm;
         if (env.debug !== "") {
             registry.category("systray").add(
                 "web.debug_mode_menu",
                 {
                     Component: DebugMenu,
+                    props: { bus },
                 },
                 { sequence: 100 }
             );
