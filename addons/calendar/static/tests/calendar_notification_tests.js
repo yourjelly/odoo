@@ -10,13 +10,11 @@ import { calendarNotificationService } from "@calendar/js/services/calendar_noti
 import { click, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { NotificationContainer } from "@web/core/notifications/notification_container";
 import { browser } from "@web/core/browser/browser";
-import { clearRegistryWithCleanup } from "@web/../tests/helpers/mock_env";
 import { registry } from "@web/core/registry";
 
 const LocalStorageService = AbstractStorageService.extend({
     storage: new RamStorage(),
 });
-const mainComponentRegistry = registry.category("main_components");
 const serviceRegistry = registry.category("services");
 
 QUnit.module("Calendar Notification", (hooks) => {
@@ -27,11 +25,6 @@ QUnit.module("Calendar Notification", (hooks) => {
         legacyServicesRegistry.add("local_storage", LocalStorageService);
 
         serviceRegistry.add("calendarNotification", calendarNotificationService);
-
-        clearRegistryWithCleanup(mainComponentRegistry);
-        mainComponentRegistry.add("NotificationContainer", {
-            Component: NotificationContainer
-        });
 
         patchWithCleanup(browser, {
             setTimeout: (fn) => fn(),
