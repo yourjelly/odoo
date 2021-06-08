@@ -9,11 +9,17 @@ class PosOrder(models.Model):
 
 
     def test_paid(self):
-        if self.config_id.cash_rounding:
-            total = float_round(self.amount_total, precision_rounding=self.config_id.rounding_method.rounding, rounding_method=self.config_id.rounding_method.rounding_method)
-            return float_is_zero(total - self.amount_paid, precision_rounding=self.config_id.currency_id.rounding)
-        else:
-            return super(PosOrder, self).test_paid()
+        res = super(PosOrder, self).test_paid()
+        if not res and self.config_id.cash_rounding:
+            currency = self.config_id.currency_id
+            if self.config_id.rounding_method.rounding_method == "HALF-UP":
+                maxDiff = currency.round(self.config_id.rounding_method.rounding / 2)
+            else:
+                maxDiff = currency.round(self.config_id.rounding_method.rounding)
+
+            diff = currency.round(self.amount_total - self.amount_paid)
+            res = abs(diff) < maxDiff
+        return res
 
     def _prepare_invoice(self):
         vals = super(PosOrder, self)._prepare_invoice()
