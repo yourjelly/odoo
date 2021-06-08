@@ -2943,11 +2943,9 @@ class Many2one(_Relational):
                 ids1 = tuple(unique((ids0 or ()) + valid_records._ids))
                 cache.set(corecord, invf, ids1)
 
-    def _read_group_domain_calc(self, data: dict, gb: dict) -> list:
-        value = data[gb['groupby']]
-        if not value:
-            return super()._read_group_domain_calc(data, gb)
-        return [(self.name, '=', value[0])]
+    def _read_group_format_result(self, value, gb, model):
+        m2o_record = model.env[self.comodel_name].browse(value).sudo()
+        return (value, lazy_name_get(m2o_record))
 
 
 class Many2oneReference(Integer):
@@ -4142,5 +4140,5 @@ def apply_required(model, field_name):
 from .exceptions import AccessError, MissingError, UserError
 from .models import (
     check_pg_name, expand_ids, is_definition_class, is_registry_class,
-    BaseModel, IdType, NewId, PREFETCH_MAX,
+    BaseModel, IdType, NewId, PREFETCH_MAX, lazy_name_get,
 )

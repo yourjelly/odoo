@@ -2321,6 +2321,9 @@ class BaseModel(metaclass=MetaModel):
             domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         result = [self._read_group_format_result(d, annotated_groupbys) for d in result]
 
+        # ideally all of this would be done in the override of _read_group_format_result of Date
+        # and Datetime fields but alas some code requires both range and label whereas the web
+        # client only expects labels
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         dt = [
             f for f in groupby
@@ -2452,8 +2455,6 @@ class BaseModel(metaclass=MetaModel):
         if not groupby_fields:
             return fetched_data, annotated_groupbys
 
-        self._read_group_resolve_many2one_fields(fetched_data, annotated_groupbys)
-
         data = [{k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.items()} for r in fetched_data]
 
         if self.env.context.get('fill_temporal') and data:
@@ -2472,15 +2473,6 @@ class BaseModel(metaclass=MetaModel):
                 aggregated_fields, count_field, result, read_group_order=order,
             )
         return result, annotated_groupbys
-
-    def _read_group_resolve_many2one_fields(self, data, fields):
-        many2onefields = {field['field'] for field in fields if field['type'] == 'many2one'}
-        for field in many2onefields:
-            ids_set = {d[field] for d in data if d[field]}
-            m2o_records = self.env[self._fields[field].comodel_name].browse(ids_set)
-            data_dict = dict(lazy_name_get(m2o_records.sudo()))
-            for d in data:
-                d[field] = (d[field], data_dict[d[field]]) if d[field] else False
 
     def _inherits_join_add(self, current_model, parent_model_name, query):
         """
