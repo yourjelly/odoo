@@ -93,6 +93,12 @@
     }
   }
 
+  .o_nav_entry {
+    padding: 0;
+    @extend %-main-navbar-entry-base;
+    @extend %-main-navbar-entry-padding;
+  }
+
   ul.o_dropdown_menu {
     margin-top: 0;
     border-top: 0;
@@ -150,17 +156,13 @@
     font-weight: $-backend-font-weight-bold;
 
     @include hover() {
-      background-color: transparent;
+      background: none;
     }
   }
 
   .o_menu_sections {
     display: flex;
     grid-area: sections;
-
-    > .o_dropdown_item {
-      @extend %-main-navbar-entry-padding;
-    }
 
     .o_more_dropdown_section_group {
       padding: $-backend-entry-vpadding $-backend-entry-hpadding;

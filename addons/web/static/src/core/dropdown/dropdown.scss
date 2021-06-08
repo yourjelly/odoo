@@ -25,6 +25,9 @@
     @extend .dropdown-item.active;
   }
 
+}
+
+.dropdown-menu .dropdown-item {
   // Using <a> tags inside a '.dropdown-item' elements  should not be necessary
   // since the class in usually applied to the <a> tag itself.
   // The following rules will handle custom layouts needs (eg '.o_user_menu').

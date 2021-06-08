@@ -7,7 +7,8 @@ import { ActionContainer } from "./actions/action_container";
 import { NavBar } from "./navbar/navbar";
 import { useEffect } from "@web/core/effect_hook";
 
-const { Component } = owl;
+const { Component, hooks } = owl;
+const { useExternalListener } = hooks;
 const mainComponentRegistry = registry.category("main_components");
 
 export class WebClient extends Component {
@@ -26,9 +27,22 @@ export class WebClient extends Component {
                 this.el.classList.toggle("o_fullscreen", mode === "fullscreen");
             }
         });
-        useEffect(() => {
-            this.loadRouterState();
-        }, () => []);
+        useEffect(
+            () => {
+                this.loadRouterState();
+            },
+            () => []
+        );
+        useExternalListener(
+            window,
+            "click",
+            (ev) => {
+                if (ev.ctrlKey && ev.target instanceof HTMLAnchorElement && ev.target.href) {
+                    ev.stopImmediatePropagation();
+                }
+            },
+            { capture: true }
+        );
     }
 
     mounted() {

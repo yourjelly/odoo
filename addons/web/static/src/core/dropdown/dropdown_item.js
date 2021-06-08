@@ -54,6 +54,10 @@ DropdownItem.props = {
         type: String,
         optional: true,
     },
+    href: {
+        type: String,
+        optional: true,
+    },
     title: {
         type: String,
         optional: true,
