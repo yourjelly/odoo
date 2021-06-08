@@ -46,23 +46,38 @@ function getMatchedCSSRules(a) {
     var style;
     a.matches = a.matches || a.webkitMatchesSelector || a.mozMatchesSelector || a.msMatchesSelector || a.oMatchesSelector;
     for (r = 0; r < rulesCache.length; r++) {
-        if (a.matches(rulesCache[r].selector)) {
-            style = rulesCache[r].style;
-            if (style.parentRule) {
-                var style_obj = {};
-                var len;
-                for (k = 0, len = style.length ; k < len ; k++) {
-                    if (style[k].indexOf('animation') !== -1) {
-                        continue;
+        try {
+            if (a.matches(rulesCache[r].selector)) {
+                style = rulesCache[r].style;
+                if (style.parentRule) {
+                    var style_obj = {};
+                    var len;
+                    for (k = 0, len = style.length; k < len; k++) {
+                        if (style[k].indexOf('animation') !== -1) {
+                            continue;
+                        }
+                        style_obj[style[k]] = style[style[k].replace(/-(.)/g, function (a, b) { return b.toUpperCase(); })];
+                        if (new RegExp(style[k] + '\s*:[^:;]+!important').test(style.cssText)) {
+                            style_obj[style[k]] += ' !important';
+                        }
                     }
-                    style_obj[style[k]] = style[style[k].replace(/-(.)/g, function (a, b) { return b.toUpperCase(); })];
-                    if (new RegExp(style[k] + '\s*:[^:;]+!important' ).test(style.cssText)) {
-                        style_obj[style[k]] += ' !important';
-                    }
+                    rulesCache[r].style = style = style_obj;
                 }
-                rulesCache[r].style = style = style_obj;
+                css.push([rulesCache[r].selector, style]);
             }
-            css.push([rulesCache[r].selector, style]);
+        } catch (e) {
+            // Any CSS rule that is not understood by Webkit will usually be
+            // ignored by the renderer, but that is not the case when the
+            // selector is explicitely matched against in pure javascript. In
+            // such cases, the engine throws a SyntaxError, resulting in a
+            // traceback. The code above will match against such selector as
+            // long as they are used in the CSS of Odoo alongside the editor.
+            // This try catch protects against getting a traceback in those
+            // cases on Safari and other webkit-based browsers.
+            if (!(e instanceof SyntaxError)) {
+                throw e;
+            }
+
         }
     }
 
