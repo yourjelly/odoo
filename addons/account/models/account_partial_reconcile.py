@@ -4,6 +4,7 @@ from odoo.exceptions import UserError, ValidationError
 
 from datetime import date
 
+# TODO OCO bug: il a l'air de créer une exchange diff pour la base inutilement en cas de caba wh, sans doute une histoire de clé sur les tax_ids ; vérifier
 
 class AccountPartialReconcile(models.Model):
     _name = "account.partial.reconcile"
@@ -330,8 +331,8 @@ class AccountPartialReconcile(models.Model):
             base_line_vals['currency_id'],
             base_line_vals['partner_id'],
             base_line_vals['account_id'],
-            tuple(base_line_vals['tax_ids'][0][2]),     # Decode [(6, 0, [...])] command
-            tuple(base_line_vals['tax_tag_ids'][0][2]), # Decode [(6, 0, [...])] command
+            tuple(base_line_vals['tax_ids'][0][2]),     # Decode [(6, 0, [...])] command   #TODO OCO on devrait pas filtrer  et ne prendre que les on_payment???
+            tuple(base_line_vals['tax_tag_ids'][0][2]), # Decode [(6, 0, [...])] command #TOD OCO voir si garder ça ici ne pose pas de souci (rendre ça optionnel ??) ===> j'ai l'impression qu'on mixe les deux méthoes qui créent des clés quand on fait l'exch diff=> on compare le résultat des clés caba avec la clé du move de base. A mon avis. >> dans ce cas précis, on devrait ignorer les tags
         )
 
     @api.model
@@ -345,7 +346,7 @@ class AccountPartialReconcile(models.Model):
             base_line.currency_id.id,
             base_line.partner_id.id,
             (account or base_line.account_id).id,
-            tuple(base_line.tax_ids.ids),
+            tuple(base_line.tax_ids.ids), # TODO OCO on devrait sans doute filtrer ce qui est on_payment ici => Je pense que c'est ça qui cause le bug de l'exchange diff pour les lignes de bases ; Les lignes de caba et celles du move n'ont pas les mêmes clés
             #TODO OCO tuple(base_line.tax_tag_ids.ids), => renommer la fonction et/ou la localiser dans la fct où elle est utile
         )
 

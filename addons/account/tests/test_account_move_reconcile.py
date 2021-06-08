@@ -199,39 +199,6 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 "Amount currency of %s is incorrect" % account.name,
             )
 
-    def assertTaxGridAmounts(self, amount_per_tag): # TODO OCO pour moi, on peut carrément retirer ce truc
-        expected_values = {tag.id: (tag, balance) for tag, balance in amount_per_tag}
-
-        if not expected_values:
-            return
-
-        self.cr.execute('''
-            SELECT
-                rel.account_account_tag_id,
-                SUM(line.balance)
-            FROM account_account_tag_account_move_line_rel rel
-            JOIN account_move_line line ON line.id = rel.account_move_line_id
-            JOIN account_move move on line.move_id = move.id
-            LEFT JOIN account_tax tax ON line.tax_line_id = tax.id
-            WHERE line.tax_exigible IS TRUE   --TODO OCO modifier ça
-              AND line.company_id = ANY(%(company_ids)s)
-              AND (
-                  tax.tax_exigibility != 'on_payment'
-                  OR move.tax_cash_basis_rec_id IS NOT NULL
-              )
-            GROUP BY rel.account_account_tag_id
-        ''', {
-            'company_ids': self.env.companies.ids,
-        })
-
-        for tag_id, total_balance in self.cr.fetchall():
-            tag, expected_balance = expected_values[tag_id]
-            self.assertEqual(
-                total_balance,
-                expected_balance,
-                "Balance of %s is incorrect" % tag.name,
-            )
-
     # -------------------------------------------------------------------------
     # Test creation of account.partial.reconcile/account.full.reconcile
     # during the reconciliation.
@@ -1887,14 +1854,6 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             {'debit': 0.0,      'credit': 33.33,    'tax_tag_ids': [],                      'account_id': self.cash_basis_transfer_account.id},
         ])
 
-        """self.assertTaxGridAmounts([ #TODO OCO supprimer ?
-            # Tag               Balance
-            (self.tax_tags[0],  -100.0),
-            (self.tax_tags[1],  -33.33),
-            (self.tax_tags[2],  100.0),
-            (self.tax_tags[3],  33.33),
-        ])"""
-
     def test_reconcile_cash_basis_tax_grid_multi_taxes(self):
         ''' Test the tax grid when reconciling an invoice with multiple taxes/tax repartition. '''
         base_taxes = self.cash_basis_tax_a_third_amount + self.cash_basis_tax_tiny_amount
@@ -1969,14 +1928,6 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             {'debit': 0.01,     'credit': 0.0,      'tax_ids': [],              'tax_tag_ids': [],                      'account_id': self.cash_basis_transfer_account.id},
             {'debit': 0.0,      'credit': 0.01,     'tax_ids': [],              'tax_tag_ids': self.tax_tags[5].ids,    'account_id': self.tax_account_2.id},
         ])
-
-        """self.assertTaxGridAmounts([ #TODO OCO supprimer ?
-            # Tag               Balance
-            (self.tax_tags[0],  -100.0),
-            (self.tax_tags[1],  -33.33),
-            (self.tax_tags[4],  -100.0),
-            (self.tax_tags[5],  -0.01),
-        ])"""
 
     def test_caba_mix_reconciliation(self):
         """ Test the reconciliation of tax lines (when using a reconcilable tax account)

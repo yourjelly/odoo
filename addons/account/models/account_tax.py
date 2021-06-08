@@ -544,7 +544,7 @@ class AccountTax(models.Model):
                 subsequent_taxes = taxes[i+1:]
 
                 if not include_caba_tags:
-                    subsequent_taxes = subsequent_taxes.filtered(lambda x: x.tax.exigibility != 'on_payment')
+                    subsequent_taxes = subsequent_taxes.filtered(lambda x: x.tax_exigibility != 'on_payment')
 
                 subsequent_tags = subsequent_taxes.get_tax_tags(is_refund, 'base')
 
@@ -600,8 +600,14 @@ class AccountTax(models.Model):
             total_included += factorized_tax_amount
             i += 1
 
+        base_taxes_for_tags = taxes
+        if not include_caba_tags:
+            base_taxes_for_tags = base_taxes_for_tags.filtered(lambda x: x.tax_exigibility != 'on_payment')
+
+        base_rep_lines = base_taxes_for_tags.mapped(is_refund and 'refund_repartition_line_ids' or 'invoice_repartition_line_ids').filtered(lambda x: x.repartition_type == 'base')
+
         return {
-            'base_tags': taxes.mapped(is_refund and 'refund_repartition_line_ids' or 'invoice_repartition_line_ids').filtered(lambda x: x.repartition_type == 'base').mapped('tag_ids').ids,
+            'base_tags': base_rep_lines.tag_ids.ids,
             'taxes': taxes_vals,
             'total_excluded': sign * total_excluded,
             'total_included': sign * currency.round(total_included),
