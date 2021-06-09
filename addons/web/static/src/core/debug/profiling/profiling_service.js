@@ -89,8 +89,10 @@ const profilingService = {
                 }
                 await setProfiling({ collectors: nextCollectors });
             },
-            async setParams(nextParams) {
-                await setProfiling({ params: Object.assign({}, state.params, nextParams) });
+            async setParam(key, value) {
+                const nextParams = Object.assign({}, state.params);
+                nextParams[key] = value;
+                await setProfiling({ params: nextParams });
             },
             isCollectorEnabled(collector) {
                 return state.collectors.includes(collector);

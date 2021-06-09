@@ -13,14 +13,8 @@ export class ProfilingItem extends Component {
         useBus(this.props.bus, "UPDATE", this.render);
     }
 
-    get interval() {
-        return this.profiling.state.params.traces_async_interval;
-    }
-
-    changeTracesInterval(ev) {
-        this.profiling.setParams({
-            traces_async_interval: ev.target.value,
-        });
+    changeParam(param, ev) {
+        this.profiling.setParam(param, ev.target.value);
     }
     openProfiles() {
         this.actionService.doAction("base.action_menu_ir_profile");
