@@ -28,7 +28,8 @@
                     <div class="input-group-prepend">
                         <div class="input-group-text">Interval</div>
                     </div>
-                    <select id="profile_traces_async_interval" class="profile_param form-control" t-on-change="changeTracesInterval">
+                    <select class="profile_param form-control" t-on-change="changeParam('traces_async_interval')">
+                        <t t-set="interval" t-value="profiling.state.params.traces_async_interval"/>
                         <option value="">Default</option>
                         <option value="0.001" t-att-selected="interval === '0.001'">0.001</option>
                         <option value="0.01" t-att-selected="interval === '0.01'">0.01</option>
