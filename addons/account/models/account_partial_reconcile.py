@@ -519,16 +519,8 @@ class AccountPartialReconcile(models.Model):
                     # and well reported in the Tax Report.
                     # ==========================================================================
 
-                    if line.tax_repartition_line_id:
-                        # Tax line.
-
-                        cb_line_vals = self._prepare_cash_basis_tax_line_vals(line, balance, amount_currency)
-                        grouping_key = self._get_cash_basis_tax_line_grouping_key_from_vals(cb_line_vals)
-                    elif line.tax_ids:
-                        # Base line.
-
-                        cb_line_vals = self._prepare_cash_basis_base_line_vals(line, balance, amount_currency)
-                        grouping_key = self._get_cash_basis_base_line_grouping_key_from_vals(cb_line_vals)
+                    cb_line_vals = self._prepare_cash_basis_base_line_vals(line, balance, amount_currency)
+                    grouping_key = self._get_cash_basis_base_line_grouping_key_from_vals(cb_line_vals)
 
                     if grouping_key in partial_lines_to_create:
                         aggregated_vals = partial_lines_to_create[grouping_key]['vals']
