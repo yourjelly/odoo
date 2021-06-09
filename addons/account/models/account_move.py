@@ -1588,6 +1588,12 @@ class AccountMove(models.Model):
             if record.is_sale_document() and journal_type != 'sale' or record.is_purchase_document() and journal_type != 'purchase':
                 raise ValidationError(_("The chosen journal has a type that is not compatible with your invoice type. Sales operations should go to 'sale' journals, and purchase operations to 'purchase' ones."))
 
+    @api.constrains('company_id')
+    def _check_company_id(self):
+        for move in self:
+            if not move.company_id:
+                raise ValidationError(_("You cannot have a an entry which does not have a company."))
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
