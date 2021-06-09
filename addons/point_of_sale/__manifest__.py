@@ -145,6 +145,7 @@
             'point_of_sale/static/src/js/Popups/EditListInput.js',
             'point_of_sale/static/src/js/Popups/EditListPopup.js',
             'point_of_sale/static/src/js/Popups/NumberPopup.js',
+            'point_of_sale/static/src/js/Popups/DiscountPopup.js',
             'point_of_sale/static/src/js/Popups/OfflineErrorPopup.js',
             'point_of_sale/static/src/js/Popups/OrderImportPopup.js',
             'point_of_sale/static/src/js/Popups/ProductConfiguratorPopup.js',
@@ -166,6 +167,8 @@
             ('include', 'web.assets_backend'),
         ],
         'web.assets_qweb': [
+            'point_of_sale/static/src/xml/Popups/NumberPopup.js',
+            'point_of_sale/static/src/xml/Popups/DiscountPopup.js',
             'point_of_sale/static/src/xml/**/*',
         ],
     }

@@ -1618,8 +1618,7 @@ exports.Orderline = Backbone.Model.extend({
         this.product = options.product;
         this.set_product_lot(this.product);
         this.set_quantity(1);
-        this.discount = 0;
-        this.discountStr = '0';
+        this.input_discount = 0;
         this.selected = false;
         this.description = '';
         this.price_extra = 0;
@@ -1637,7 +1636,7 @@ exports.Orderline = Backbone.Model.extend({
         this.product = this.pos.db.get_product_by_id(json.product_id);
         this.set_product_lot(this.product);
         this.price = json.price_unit;
-        this.set_discount(json.discount);
+        this.set_input_discount(json.input_discount);
         this.set_quantity(json.qty, 'do not recompute unit price');
         this.set_description(json.description);
         this.set_price_extra(json.price_extra);
@@ -1661,7 +1660,7 @@ exports.Orderline = Backbone.Model.extend({
         orderline.order = null;
         orderline.quantity = this.quantity;
         orderline.quantityStr = this.quantityStr;
-        orderline.discount = this.discount;
+        orderline.input_discount = this.input_discount;
         orderline.price = this.price;
         orderline.selected = false;
         orderline.price_manually_set = this.price_manually_set;
@@ -1722,20 +1721,24 @@ exports.Orderline = Backbone.Model.extend({
         this.has_product_lot = product.tracking !== 'none';
         this.pack_lot_lines  = this.has_product_lot && new PacklotlineCollection(null, {'order_line': this});
     },
-    // sets a discount [0,100]%
-    set_discount: function(discount){
-        var parsed_discount = isNaN(parseFloat(discount)) ? 0 : field_utils.parse.float('' + discount);
+    set_input_discount: function(input_discount){
+        var parsed_discount = isNaN(parseFloat(input_discount)) ? 0 : field_utils.parse.float('' + input_discount);
         var disc = Math.min(Math.max(parsed_discount || 0, 0),100);
-        this.discount = disc;
-        this.discountStr = '' + disc;
+        this.input_discount = disc;
         this.trigger('change',this);
     },
-    // returns the discount [0,100]%
-    get_discount: function(){
-        return this.discount;
+    get_discount: function(withGlobalDiscount = true){
+        if (withGlobalDiscount) {
+            const globalDisc = this.order.getGlobalDiscount();
+            const priceMultiplier = (1 - globalDisc / 100.0) * (1 - this.input_discount / 100.0);
+            const actualDiscount = (1 - priceMultiplier) * 100;
+            return actualDiscount;
+        } else {
+            return this.input_discount;
+        }
     },
     get_discount_str: function(){
-        return this.discountStr;
+        return '' + (this.input_discount || 0);
     },
     set_description: function(description){
         this.description = description || '';
@@ -1860,7 +1863,7 @@ exports.Orderline = Backbone.Model.extend({
             return false;
         }else if(!this.get_unit() || !this.get_unit().is_pos_groupable){
             return false;
-        }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
+        }else if(this.get_discount(false) > 0){             // we don't merge discounted orderlines
             return false;
         }else if(!utils.float_is_zero(price - order_line_price - orderline.get_price_extra(),
                     this.pos.currency.decimals)){
@@ -1897,6 +1900,7 @@ exports.Orderline = Backbone.Model.extend({
             description: this.description,
             full_product_name: this.get_full_product_name(),
             price_extra: this.get_price_extra(),
+            input_discount: this.input_discount,
         };
     },
     //used to create a json of the ticket, to be sent to the printer
@@ -1906,7 +1910,7 @@ exports.Orderline = Backbone.Model.extend({
             quantity:           this.get_quantity(),
             unit_name:          this.get_unit().name,
             price:              this.get_unit_display_price(),
-            discount:           this.get_discount(),
+            discount:           this.get_discount(false),
             product_name:       this.get_product().display_name,
             product_name_wrapped: this.generate_wrapped_product_name(),
             price_lst:          this.get_lst_price(),
@@ -1977,15 +1981,11 @@ exports.Orderline = Backbone.Model.extend({
             return this.get_unit_price();
         }
     },
-    get_base_price:    function(){
-        var rounding = this.pos.currency.rounding;
-        return round_pr(this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100), rounding);
-    },
     get_display_price_one: function(){
         var rounding = this.pos.currency.rounding;
         var price_unit = this.get_unit_price();
         if (this.pos.config.iface_tax_included !== 'total') {
-            return round_pr(price_unit * (1.0 - (this.get_discount() / 100.0)), rounding);
+            return round_pr(price_unit * (1.0 - (this.get_discount(false) / 100.0)), rounding);
         } else {
             var product =  this.get_product();
             var taxes_ids = this.tax_ids || product.taxes_id;
@@ -2000,15 +2000,12 @@ exports.Orderline = Backbone.Model.extend({
 
             var all_taxes = this.compute_all(product_taxes, price_unit, 1, this.pos.currency.rounding);
 
-            return round_pr(all_taxes.total_included * (1 - this.get_discount()/100), rounding);
+            return round_pr(all_taxes.total_included * (1 - this.get_discount(false)/100), rounding);
         }
     },
-    get_display_price: function(){
-        if (this.pos.config.iface_tax_included === 'total') {
-            return this.get_price_with_tax();
-        } else {
-            return this.get_base_price();
-        }
+    get_display_price: function() {
+        const orderlinePrices = this.get_all_prices(false, false);
+        return orderlinePrices['with_discount'][this.pos.config.iface_tax_included];
     },
     get_price_without_tax: function(){
         return this.get_all_prices().priceWithoutTax;
@@ -2249,10 +2246,10 @@ exports.Orderline = Backbone.Model.extend({
             'total_included': sign * round_pr(total_included, this.pos.currency.rounding),
         }
     },
-    get_all_prices: function(){
+    get_all_prices: function(unit = false, withGlobalDiscount = true){
         var self = this;
 
-        var price_unit = this.get_unit_price() * (1.0 - (this.get_discount() / 100.0));
+        var price_unit = this.get_unit_price() * (1.0 - (this.get_discount(withGlobalDiscount) / 100.0));
         var taxtotal = 0;
 
         var product =  this.get_product();
@@ -2270,8 +2267,9 @@ exports.Orderline = Backbone.Model.extend({
         });
         product_taxes = _.uniq(product_taxes, function(tax) { return tax.id; });
 
-        var all_taxes = this.compute_all(product_taxes, price_unit, this.get_quantity(), this.pos.currency.rounding);
-        var all_taxes_before_discount = this.compute_all(product_taxes, this.get_unit_price(), this.get_quantity(), this.pos.currency.rounding);
+        const quantity = unit ? 1 : this.get_quantity()
+        var all_taxes = this.compute_all(product_taxes, price_unit, quantity, this.pos.currency.rounding);
+        var all_taxes_before_discount = this.compute_all(product_taxes, this.get_unit_price(), quantity, this.pos.currency.rounding);
         _(all_taxes.taxes).each(function(tax) {
             taxtotal += tax.amount;
             taxdetail[tax.id] = tax.amount;
@@ -2281,9 +2279,18 @@ exports.Orderline = Backbone.Model.extend({
             "priceWithTax": all_taxes.total_included,
             "priceWithoutTax": all_taxes.total_excluded,
             "priceSumTaxVoid": all_taxes.total_void,
+            // TODO jcb - use of the following should be removed, use the one below.
             "priceWithTaxBeforeDiscount": all_taxes_before_discount.total_included,
             "tax": taxtotal,
             "taxDetails": taxdetail,
+            "with_discount": {
+                "total": all_taxes.total_included,
+                "subtotal": all_taxes.total_excluded,
+            },
+            "without_discount": {
+                "total": all_taxes_before_discount.total_included,
+                "subtotal": all_taxes_before_discount.total_excluded,
+            }
         };
     },
     display_discount_policy: function(){
@@ -2568,6 +2575,7 @@ exports.Order = Backbone.Model.extend({
         this.employee       = this.pos.employee;
         this.finalized      = false; // if true, cannot be modified.
         this.set_pricelist(this.pos.default_pricelist);
+        this.global_discount_type = 'percent';
 
         this.set({ client: null });
 
@@ -2702,6 +2710,8 @@ exports.Order = Backbone.Model.extend({
         this.isFromClosedSession = json.is_session_closed;
         this.is_tipped = json.is_tipped || false;
         this.tip_amount = json.tip_amount || 0;
+        this.global_discount = json.global_discount || 0;
+        this.global_discount_type = json.global_discount_type || 'percent';
     },
     export_as_JSON: function() {
         var orderLines, paymentLines;
@@ -2734,6 +2744,7 @@ exports.Order = Backbone.Model.extend({
             to_ship: this.to_ship ? this.to_ship : false,
             is_tipped: this.is_tipped || false,
             tip_amount: this.tip_amount || 0,
+            global_discount: this.getGlobalDiscount(),
         };
         if (!this.is_paid && this.user_id) {
             json.user_id = this.user_id;
@@ -2790,7 +2801,7 @@ exports.Order = Backbone.Model.extend({
             total_without_tax: this.get_total_without_tax(),
             total_tax: this.get_total_tax(),
             total_paid: this.get_total_paid(),
-            total_discount: this.get_total_discount(),
+            globalDiscountInfo: this.getGlobalDiscountInfo(),
             rounding_applied: this.get_rounding_applied(),
             tax_details: this.get_tax_details(),
             change: this.locked ? this.amount_return : this.get_change(),
@@ -3014,8 +3025,8 @@ exports.Order = Backbone.Model.extend({
             orderline.set_lst_price(options.lst_price);
         }
 
-        if(options.discount !== undefined){
-            orderline.set_discount(options.discount);
+        if(options.input_discount !== undefined){
+            orderline.set_input_discount(options.input_discount);
         }
 
         if (options.description !== undefined){
@@ -3157,14 +3168,19 @@ exports.Order = Backbone.Model.extend({
             return sum + orderLine.get_price_without_tax();
         }), 0), this.pos.currency.rounding);
     },
-    get_total_discount: function() {
-        return round_pr(this.orderlines.reduce((function(sum, orderLine) {
-            sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-            if (orderLine.display_discount_policy() === 'without_discount'){
-                sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
-            }
-            return sum;
-        }), 0), this.pos.currency.rounding);
+    getGlobalDiscountInfo: function() {
+        const globalDiscountPerc = this.getGlobalDiscount();
+        if (utils.float_is_zero(globalDiscountPerc, 10)) {
+            return false;
+        }
+        const gross_total = this.get_orderlines().reduce((total, line) => total + line.get_all_prices(false, false).priceWithTax, 0)
+        const total = this.get_total_with_tax();
+        return {
+            type: this.global_discount_type,
+            percentage: `${this.pos.format_pr(globalDiscountPerc, 0.01)}%`,
+            amount: this.pos.format_currency(total - gross_total),
+            subtotal: gross_total,
+        };
     },
     get_total_tax: function() {
         if (this.pos.company.tax_calculation_rounding_method === "round_globally") {
@@ -3481,6 +3497,28 @@ exports.Order = Backbone.Model.extend({
     },
     is_to_ship: function(){
         return this.to_ship;
+    },
+    setGlobalDiscount: function(val, type = 'percent') {
+        this.global_discount = val
+        this.global_discount_type = type;
+        this.trigger('set-global-discount');
+        this.trigger('change');
+    },
+    getGlobalDiscount: function() {
+        if (this.global_discount_type === 'percent') {
+            return this.global_discount || 0;
+        }
+        // this is the complicated part. We need the total amount without discount
+        // then divide the global_discount to the undiscounted total to get the percentage.
+        if (this.assume_zero_percentage) {
+            return 0;
+        } else {
+            this.assume_zero_percentage = true;
+            const order_total = this.get_total_with_tax();
+            const result = 100 * this.global_discount / order_total;
+            this.assume_zero_percentage = false;
+            return result;
+        }
     },
 });
 

@@ -3,6 +3,8 @@
 
     <t t-name="Orderline" owl="1">
         <li t-on-click="selectLine" class="orderline" t-att-class="addedClasses">
+            <t t-set="_unitPrices" t-value="props.line.get_all_prices(true, false)" />
+            <t t-set="_iface_tax_included" t-value="env.pos.config.iface_tax_included" />
             <span class="product-name">
                 <t t-esc="props.line.get_full_product_name()"/>
                 <span> </span>
@@ -36,15 +38,14 @@
                         </em>
                         <span> </span><t t-esc="props.line.get_unit().name" />
                         at
-                        <t t-if="props.line.display_discount_policy() == 'without_discount' and
-                            props.line.get_unit_display_price() &lt; props.line.get_lst_price()">
+                        <t t-if="props.line.display_discount_policy() == 'without_discount' and (props.line.get_discount(false) gt 0)">
                             <s>
-                                <t t-esc="env.pos.format_currency(props.line.get_fixed_lst_price(),'Product Price')" />
+                                <t t-esc="env.pos.format_currency(_unitPrices['without_discount'][_iface_tax_included])" />
                             </s>
-                            <t t-esc="env.pos.format_currency(props.line.get_unit_display_price(),'Product Price')" />
+                            <t t-esc="env.pos.format_currency(_unitPrices['with_discount'][_iface_tax_included])" />
                         </t>
                         <t t-else="">
-                            <t t-esc="env.pos.format_currency(props.line.get_unit_display_price(),'Product Price')" />
+                            <t t-esc="env.pos.format_currency(_unitPrices['with_discount'][_iface_tax_included])" />
                         </t>
                         /
                         <t t-esc="props.line.get_unit().name" />

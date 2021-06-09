@@ -2059,7 +2059,6 @@ td {
 .pos .order .summary{
     width:100%;
     text-align:right;
-    font-weight: bold;
     margin-top:20px;
     margin-bottom:10px;
 }
@@ -2067,9 +2066,15 @@ td {
     float: right;
     margin-right:15px;
     margin-left: 15px;
-    padding-top:5px;
+    padding-left: 30px;
     border-top: solid 2px;
     border-color:#777;
+}
+.pos .order .summary .line tr .label {
+    padding-right: 30px;
+}
+.pos .order .summary .line tr td {
+    padding-top: 5px;
 }
 .pos .order .summary .total {
     font-size: 22px;

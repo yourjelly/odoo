@@ -261,6 +261,10 @@ class PosOrder(models.Model):
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
     is_tipped = fields.Boolean('Is this already tipped?', readonly=True)
     tip_amount = fields.Float(string='Tip Amount', digits=0, readonly=True)
+    global_discount = fields.Float(string='Global Discount', digits=0, readonly=True)
+    global_discount_type = fields.Selection(
+        [('percent', 'Percentage'), ('amount', 'Amount')],
+        'Global Discount Type', readonly=True, copy=False, default='percent')
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
@@ -764,6 +768,7 @@ class PosOrderLine(models.Model):
     product_uom_id = fields.Many2one('uom.uom', string='Product UoM', related='product_id.uom_id')
     currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
     full_product_name = fields.Char('Full Product Name')
+    input_discount = fields.Float(string="Input Discount (%)", digits=0, default=0.0, help="Combined with the order's global_discount to derive the actual discount.")
 
     def _prepare_refund_data(self, refund_order, PosOrderLineLot):
         """
@@ -867,6 +872,7 @@ class PosOrderLine(models.Model):
             'tax_ids': [[6, False, orderline.tax_ids.mapped(lambda tax: tax.id)]],
             'id': orderline.id,
             'pack_lot_ids': [[0, 0, lot] for lot in orderline.pack_lot_ids.export_for_ui()],
+            'input_discount': orderline.input_discount,
         }
 
     def export_for_ui(self):

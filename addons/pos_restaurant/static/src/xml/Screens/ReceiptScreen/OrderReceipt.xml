@@ -7,7 +7,7 @@
                 <div>PRO FORMA</div>
             </t>
         </xpath>
-        <xpath expr="//div[hasclass('receipt-change')]" position="attributes">
+        <xpath expr="//tr[hasclass('receipt-change')]" position="attributes">
             <attribute name="t-if">!props.isBill</attribute>
         </xpath>
         <xpath expr="//div[hasclass('cashier')]" position="after">

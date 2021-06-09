@@ -60,7 +60,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
             return NumberBuffer.get();
         }
     }
-    NumberPopup.template = 'NumberPopup';
+    NumberPopup.template = 'point_of_sale.NumberPopup';
     NumberPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

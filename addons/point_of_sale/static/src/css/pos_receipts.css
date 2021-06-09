@@ -39,10 +39,7 @@
     font-size: 75%;
 }
 
-.pos-receipt .pos-receipt-amount {
-    font-size: 125%;
-    padding-left: 6em;
-}
+.pos-receipt .pos-receipt-amount {}
 
 .pos-receipt .pos-receipt-title {
     font-weight: bold;
@@ -62,4 +59,22 @@
 .pos-payment-terminal-receipt {
     text-align: center;
     font-size: 75%;
+}
+
+.pos-receipt-summary {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pos-receipt table {
+    max-width: 100%;
+}
+
+.pos-receipt table td {
+    text-align: right;
+    padding-top: 2px;
+}
+
+.pos-receipt table td.label {
+    padding-right: 15px;
 }

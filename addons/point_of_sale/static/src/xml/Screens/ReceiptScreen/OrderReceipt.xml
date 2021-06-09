@@ -104,75 +104,75 @@
                 </t>
             </div>
 
-            <!-- Subtotal -->
-
-            <t t-if="!isTaxIncluded">
-                <div class="pos-receipt-right-align">--------</div>
-                <br/>
-                <div>Subtotal<span t-esc="env.pos.format_currency(receipt.subtotal)" class="pos-receipt-right-align"/></div>
-                <t t-foreach="receipt.tax_details" t-as="tax" t-key="tax.name">
-                    <div>
-                        <t t-esc="tax.name" />
-                        <span t-esc='env.pos.format_currency_no_symbol(tax.amount)' class="pos-receipt-right-align"/>
-                    </div>
-                </t>
-            </t>
-
-            <!-- Total -->
-            <div class="pos-receipt-right-align">--------</div>
-            <br/>
-            <div class="pos-receipt-amount">
-                TOTAL
-                <span t-esc="env.pos.format_currency(receipt.total_with_tax)" class="pos-receipt-right-align"/>
+            <div class="pos-receipt-summary">
+                <table>
+                    <t t-if="env.pos.config.iface_tax_included === 'subtotal'">
+                        <tr>
+                            <td></td>
+                            <td>----------------</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Subtotal (Tax Excluded)</td>
+                            <td t-esc="env.pos.format_currency(receipt.subtotal)" />
+                        </tr>
+                    </t>
+                    <!-- Total -->
+                    <tr>
+                        <td></td>
+                        <td>----------------</td>
+                    </tr>
+                    <t t-if="receipt.globalDiscountInfo">
+                        <tr>
+                            <td class="label">Subtotal</td>
+                            <td t-esc="env.pos.format_currency(receipt.globalDiscountInfo.subtotal)" />
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Global Discount
+                                <t t-if="receipt.globalDiscountInfo.type === 'percent'">
+                                    (<t t-esc="receipt.globalDiscountInfo.percentage"></t>)
+                                </t>
+                            </td>
+                            <td t-esc="receipt.globalDiscountInfo.amount" />
+                        </tr>
+                    </t>
+                    <tr>
+                        <td class="label">Total</td>
+                        <td t-esc="env.pos.format_currency(receipt.total_with_tax)" />
+                    </tr>
+                    <t t-if="receipt.total_rounded != receipt.total_with_tax">
+                        <tr>
+                            <td class="label">Rounding</td>
+                            <td t-esc='env.pos.format_currency(receipt.rounding_applied)' />
+                        </tr>
+                        <tr>
+                            <td class="label">To Pay</td>
+                            <td t-esc='env.pos.format_currency(receipt.total_rounded)' />
+                        </tr>
+                    </t>
+                    <t t-foreach="receipt.tax_details" t-as="tax" t-key="tax.name">
+                        <tr>
+                            <td class="label"><t t-esc="tax.name" /></td>
+                            <td t-esc="env.pos.format_currency_no_symbol(tax.amount)" />
+                        </tr>
+                    </t>
+                    <tr>
+                        <td></td>
+                        <td>----------------</td>
+                    </tr>
+                    <!-- Payment Lines -->
+                    <t t-foreach="receipt.paymentlines" t-as="line" t-key="line.cid">
+                        <tr>
+                            <td class="label"><t t-esc="line.name" /></td>
+                            <td t-esc="env.pos.format_currency_no_symbol(line.amount)" />
+                        </tr>
+                    </t>
+                    <tr class="pos-receipt-amount receipt-change">
+                        <td class="label">Change</td>
+                        <td t-esc="env.pos.format_currency(receipt.change)" />
+                    </tr>
+                </table>
             </div>
-            <t t-if="receipt.total_rounded != receipt.total_with_tax">
-                <div class="pos-receipt-amount">
-                  Rounding
-                <span t-esc='env.pos.format_currency(receipt.rounding_applied)' class="pos-receipt-right-align"/>
-                </div>
-                <div class="pos-receipt-amount">
-                  To Pay
-                 <span t-esc='env.pos.format_currency(receipt.total_rounded)' class="pos-receipt-right-align"/>
-              </div>
-            </t>
-            <br/><br/>
-
-            <!-- Payment Lines -->
-
-            <t t-foreach="receipt.paymentlines" t-as="line" t-key="line.cid">
-                <div>
-                    <t t-esc="line.name" />
-                    <span t-esc="env.pos.format_currency_no_symbol(line.amount)" class="pos-receipt-right-align"/>
-                </div>
-            </t>
-            <br/>
-
-            <div class="pos-receipt-amount receipt-change">
-                CHANGE
-                <span t-esc="env.pos.format_currency(receipt.change)" class="pos-receipt-right-align"/>
-            </div>
-            <br/>
-
-            <!-- Extra Payment Info -->
-
-            <t t-if="receipt.total_discount">
-                <div>
-                    Discounts
-                    <span t-esc="env.pos.format_currency(receipt.total_discount)" class="pos-receipt-right-align"/>
-                </div>
-            </t>
-            <t t-if="isTaxIncluded">
-                <t t-foreach="receipt.tax_details" t-as="tax" t-key="tax.name">
-                    <div>
-                        <t t-esc="tax.name" />
-                        <span t-esc="env.pos.format_currency_no_symbol(tax.amount)" class="pos-receipt-right-align"/>
-                    </div>
-                </t>
-                <div>
-                    Total Taxes
-                    <span t-esc="env.pos.format_currency(receipt.total_tax)" class="pos-receipt-right-align"/>
-                </div>
-            </t>
 
             <div class="before-footer" />
 

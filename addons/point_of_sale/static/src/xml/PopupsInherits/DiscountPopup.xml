@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.DiscountPopup" t-inherit="point_of_sale.NumberPopup" t-inherit-mode="primary" owl="1">
+        <xpath expr="//footer[hasclass('footer')]" position="replace">
+            <footer class="footer centered">
+                <div class="button confirm" t-on-mousedown.prevent="confirmPercent">
+                    <t t-esc="props.percentText" />
+                </div>
+                <div class="button confirm" t-on-mousedown.prevent="confirmAmount">
+                    <t t-esc="props.amountText" />
+                </div>
+            </footer>
+        </xpath>
+    </t>
+
+</templates>

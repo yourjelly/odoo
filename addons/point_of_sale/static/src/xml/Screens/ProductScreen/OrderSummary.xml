@@ -4,18 +4,45 @@
     <t t-name="OrderSummary" owl="1">
         <div class="summary clearfix">
             <div class="line">
-                <div class="entry total">
-                    <span class="badge">Total: </span>
-                    <span class="value">
-                        <t t-esc="props.total" />
-                    </span>
-                    <div t-if="props.tax" class="subentry">
-                        Taxes:
-                        <span class="value">
+                <table>
+                    <tr t-if="env.pos.config.iface_tax_included !== 'total'">
+                        <td class="label">Subtotal (Tax Excluded)</td>
+                        <td class="value">
+                            <t t-esc="props.total_excluded" />
+                        </td>
+                    </tr>
+                    <t t-if="props.globalDiscount">
+                        <tr>
+                            <td class="label">Subtotal</td>
+                            <td class="value">
+                                <t t-esc="props.globalDiscount.subtotal" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Global Discount
+                                <t t-if="props.globalDiscount.type === 'percent'">
+                                    (<t t-esc="props.globalDiscount.percentage" />)
+                                </t>
+                            </td>
+                            <td class="value">
+                                <t t-esc="props.globalDiscount.amount" />
+                            </td>
+                        </tr>
+                    </t>
+                    <tr>
+                        <td class="label">Total</td>
+                        <td class="value">
+                            <t t-esc="props.total" />
+                        </td>
+                    </tr>
+                    <tr t-if="props.tax">
+                        <td class="label">Tax</td>
+                        <td class="value">
                             <t t-esc="props.tax" />
-                        </span>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </t>

@@ -190,7 +190,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 if (this.state.numpadMode === 'quantity') {
                     this.currentOrder.get_selected_orderline().set_quantity(val);
                 } else if (this.state.numpadMode === 'discount') {
-                    this.currentOrder.get_selected_orderline().set_discount(val);
+                    this.currentOrder.get_selected_orderline().set_input_discount(val);
                 } else if (this.state.numpadMode === 'price') {
                     var selected_orderline = this.currentOrder.get_selected_orderline();
                     selected_orderline.price_manually_set = true;
@@ -246,7 +246,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         _barcodeDiscountAction(code) {
             var last_orderline = this.currentOrder.get_last_orderline();
             if (last_orderline) {
-                last_orderline.set_discount(code.value);
+                last_orderline.set_input_discount(code.value);
             }
         }
         // IMPROVEMENT: The following two methods should be in PosScreenComponent?

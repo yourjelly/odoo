@@ -4,6 +4,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
     const { useState, useRef, onPatched } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const { onChangeOrder } = require('point_of_sale.custom_hooks');
+    const { float_is_zero } = require('web.utils');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
@@ -24,7 +25,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                     this.scrollToBottom = false;
                 }
             });
-            this.state = useState({ total: 0, tax: 0 });
+            this.state = useState({ total: 0, tax: 0, globalDiscount: false });
             this._updateSummary();
         }
         get order() {
@@ -82,6 +83,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                     this
                 );
                 order.on('change', this.render, this);
+                order.on('set-global-discount', this._updateSummary, this);
             }
             this._updateSummary();
             this.trigger('new-orderline-selected');
@@ -92,13 +94,35 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                 order.orderlines.off('change', null, this);
                 order.orderlines.off('add remove', null, this);
                 order.off('change', null, this);
+                order.off('set-global-discount', null, this);
             }
         }
         _updateSummary() {
-            const total = this.order ? this.order.get_total_with_tax() : 0;
-            const tax = this.order ? total - this.order.get_total_without_tax() : 0;
+            const order = this.order;
+            const total_without_tax = order.get_total_without_tax();
+            const total = order ? order.get_total_with_tax() : 0;
+            const tax = order ? total - total_without_tax : 0;
+            this.state.total_excluded = this.env.pos.format_currency(
+                order
+                    .get_orderlines()
+                    .reduce((total, line) => total + line.get_all_prices(false, false).priceWithoutTax, 0)
+            );
             this.state.total = this.env.pos.format_currency(total);
             this.state.tax = this.env.pos.format_currency(tax);
+            const globalDiscountPerc = order.getGlobalDiscount();
+            if (!float_is_zero(globalDiscountPerc, 10)) {
+                const gross_total = order
+                    ? order.get_orderlines().reduce((total, line) => total + line.get_all_prices(false, false).priceWithTax, 0)
+                    : 0;
+                this.state.globalDiscount = {
+                    type: order.global_discount_type,
+                    percentage: `${this.env.pos.format_pr(globalDiscountPerc, 0.01)}%`,
+                    amount: this.env.pos.format_currency(total - gross_total),
+                    subtotal: this.env.pos.format_currency(gross_total),
+                };
+            } else {
+                this.state.globalDiscount = false;
+            }
             this.render();
         }
     }
