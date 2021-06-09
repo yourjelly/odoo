@@ -114,18 +114,25 @@ div.o_boolean_toggle.custom-control.custom-checkbox {
   margin: 1px 2px 1px 0;
 }
 
-//== Btn-link variations
+//== Btn-link
 .btn-link {
   font-weight: $btn-font-weight;
 
-  &.btn-secondary {
-    @include o-btn-link-variant($body-color, $headings-color);
+  // -- Btn-link variations
+  // Adapt the behavieur of .btn-link buttons when in conjuction with contextual
+  // classes (eg. text-warning). 'muted' is set as default text color, while
+  // the contextual-class color will be used on ':hover'.
+
+  // Apply all theme-colors variations except "secondary"
+  @each $-name, $-color in map-remove($theme-colors, "secondary") {
+    &.btn-#{$-name}, &.text-#{$-name} {
+      @include o-btn-link-variant($o-main-color-muted!important, o-text-color($-name) or $-color!important);
+    }
   }
 
-  @each $-name, $-color in $theme-colors {
-    &.btn-#{$-name}, &.text-#{$-name} {
-      @include o-btn-link-variant($body-color!important, theme-color-level($-name, 2)!important);
-    }
+  // Specific behavieur for "secondary"
+  &.btn-secondary {
+    @include o-btn-link-variant($body-color, $headings-color);
   }
 }
 
