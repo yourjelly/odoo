@@ -795,9 +795,17 @@ class MailThread(models.AbstractModel):
         """ Generic wrapper on ``_notify_classify_recipients`` checking mail.thread
         inheritance and allowing to call model-specific implementation in a one liner.
         This method should not be overridden. """
-        if records and hasattr(records, '_notify_classify_recipients'):
-            return records._notify_classify_recipients(message, recipient_data)
-        return self._notify_classify_recipients(message, recipient_data)
+        if not records or not hasattr(records, '_notify_classify_recipients'):
+            records = self
+
+        batches = {}
+        for data in recipient_data:
+            partner = self.env['res.partner'].browse(data['id'])
+            batches.setdefault(partner.lang or self.env.lang, []).append(data)
+
+        for (lang, recipient_data_batch) in batches.items():
+            records = records.with_context(lang=lang)
+            yield (lang, records._notify_classify_recipients(message, recipient_data_batch).values())
 
     @api.multi
     def _notify_get_reply_to(self, default=None, records=None, company=None, doc_names=None):

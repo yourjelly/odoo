@@ -104,14 +104,6 @@ class Partner(models.Model):
         if not rdata:
             return True
 
-        base_template_ctx = self._notify_prepare_template_context(message, record, model_description=model_description)
-        template_xmlid = message.layout if message.layout else 'mail.message_notification_email'
-        try:
-            base_template = self.env.ref(template_xmlid, raise_if_not_found=True).with_context(lang=base_template_ctx['lang'])
-        except ValueError:
-            _logger.warning('QWeb template %s not found when sending notification emails. Sending without layouting.' % (template_xmlid))
-            base_template = False
-
         # prepare notification mail values
         base_mail_values = {
             'mail_message_id': message.id,
@@ -130,7 +122,7 @@ class Partner(models.Model):
         emails = self.env['mail.mail'].sudo()
         email_pids = set()
         recipients_nbr, recipients_max = 0, 50
-        for group_tpl_values in [group for group in recipients.values() if group['recipients']]:
+        for (base_template, base_template_ctx, group_tpl_values) in self.get_template_generator(recipients, message, record, model_description):
             # generate notification email content
             template_ctx = {**base_template_ctx, **group_tpl_values}
             mail_body = base_template.render(template_ctx, engine='ir.qweb', minimal_qcontext=True) if base_template else message.body
@@ -190,6 +182,20 @@ class Partner(models.Model):
                 emails.send()
 
         return True
+
+    def get_template_generator(self, recipients, message, record, model_description):
+        template_xmlid = message.layout if message.layout else 'mail.message_notification_email'
+        for (lang, batch) in recipients:
+            self = self.with_context(lang=lang)
+            base_template_ctx = self._notify_prepare_template_context(message, record, model_description=model_description)
+            try:
+                base_template = self.env.ref(template_xmlid, raise_if_not_found=True).with_context(lang=base_template_ctx['lang'])
+            except ValueError:
+                _logger.warning('QWeb template %s not found when sending notification emails. Sending without layouting.' % (template_xmlid))
+                base_template = False
+            for group_tpl_values in batch:
+                if group_tpl_values['recipients']:
+                    yield (base_template, base_template_ctx, group_tpl_values)
 
     @api.multi
     def _notify_by_chat(self, message):
