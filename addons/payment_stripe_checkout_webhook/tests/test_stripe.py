@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 import odoo
+from odoo.tools import mute_logger
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.tests.common import PaymentAcquirerCommon
 from . import stripe_mocks
@@ -40,13 +41,15 @@ class StripeTest(StripeCommon):
         with self.assertRaises(ValidationError):
             self.env['payment.acquirer']._handle_stripe_webhook(dict(type='checkout.session.completed'))
 
+    @mute_logger('odoo.addons.payment_stripe.models.payment')
+    @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.requests')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.request')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.datetime')
-    def test_handle_checkout_webhook(self, dt, request):
+    def test_handle_checkout_webhook(self, dt, ch_request, tx_request):
         # pass signature verification
         dt.utcnow.return_value.timestamp.return_value = 1591264652
-        request.httprequest.headers = {'Stripe-Signature': stripe_mocks.checkout_session_signature}
-        request.httprequest.data = stripe_mocks.checkout_session_body
+        ch_request.httprequest.headers = {'Stripe-Signature': stripe_mocks.checkout_session_signature}
+        ch_request.httprequest.data = stripe_mocks.checkout_session_body
         # test setup
         tx = self.env['payment.transaction'].create({
             'reference': 'tx_ref_test_handle_checkout_webhook',
@@ -57,13 +60,16 @@ class StripeTest(StripeCommon):
             'type': 'server2server',
             'amount': 30
         })
-        tx.stripe_payment_intent = 'pi_1IjRYzAlCFm536g8wzNAbBqz'
+        tx.stripe_payment_intent = 'pi_1GptaRAlCFm536g8AfCF6Zi0'
         stripe_object = stripe_mocks.checkout_session_object
+        tx_request.request.return_value = stripe_mocks.ok_tx_resp
 
         actual = self.stripe._handle_checkout_webhook(stripe_object)
 
         self.assertTrue(actual)
 
+    @mute_logger('odoo.addons.payment_stripe.models.payment')
+    @mute_logger('odoo.addons.payment.models.payment_acquirer')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.requests')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.request')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.datetime')
@@ -104,6 +110,7 @@ class StripeTest(StripeCommon):
 
         self.assertFalse(actual)
 
+    @mute_logger('odoo.addons.payment_stripe.models.payment')
     def test_handle_checkout_webhook_no_odoo_tx(self):
         stripe_object = stripe_mocks.checkout_session_object
 
@@ -147,6 +154,7 @@ class StripeTest(StripeCommon):
 
         self.assertTrue(actual)
 
+    @mute_logger('odoo.addons.payment_stripe_checkout_webhook.models.payment')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.request')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.datetime')
     def test_verify_stripe_signature_tampered_body(self, dt, request):
@@ -157,6 +165,7 @@ class StripeTest(StripeCommon):
         with self.assertRaises(ValidationError):
             self.stripe._verify_stripe_signature()
 
+    @mute_logger('odoo.addons.payment_stripe_checkout_webhook.models.payment')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.request')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.datetime')
     def test_verify_stripe_signature_wrong_secret(self, dt, request):
@@ -170,6 +179,7 @@ class StripeTest(StripeCommon):
         with self.assertRaises(ValidationError):
             self.stripe._verify_stripe_signature()
 
+    @mute_logger('odoo.addons.payment_stripe_checkout_webhook.models.payment')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.request')
     @patch('odoo.addons.payment_stripe_checkout_webhook.models.payment.datetime')
     def test_verify_stripe_signature_too_old(self, dt, request):

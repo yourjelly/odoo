@@ -123,7 +123,7 @@ class PaymentAcquirerStripeCheckoutWH(models.Model):
 
     def _stripe_request(self, url, data=False, method='POST'):
         self.ensure_one()
-        url = urls.url_join('https://%s/' % self._get_stripe_api_url(), url)
+        url = urls.url_join(self._get_stripe_api_url(), url)
         headers = {
             'AUTHORIZATION': 'Bearer %s' % self.sudo().stripe_secret_key,
             'Stripe-Version': '2019-05-16', # SetupIntent need a specific version
@@ -155,7 +155,6 @@ class PaymentTransactionStripeCheckoutWH(models.Model):
 
     stripe_payment_intent = fields.Char(string='Stripe Payment Intent ID', readonly=True)
 
-    @api.multi
     def _stripe_s2s_validate_tree(self, tree):
         result = super()._stripe_s2s_validate_tree(tree)
 
