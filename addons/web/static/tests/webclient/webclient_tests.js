@@ -79,34 +79,46 @@ QUnit.test("webclient for a non superuser", async (assert) => {
     webClient.destroy();
 });
 
-// QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
-//     assert.expect(7);
-//     class MyComponent extends Component {
-//         /** @param {MouseEvent} ev */
-//         onclick(ev) {
-//             assert.step(ev.ctrlKey ? "ctrl-click" : "click");
-//         }
-//     }
-//     MyComponent.template = xml`<a href="#" class="MyComponent" t-on-click="onclick" />`;
-//     const target = getFixture();
-//     let env = await makeTestEnv(baseConfig);
+QUnit.test("control-click propagation stopped on <a href/>", async (assert) => {
+    assert.expect(7);
 
-//     // Mount the component as standalone and control-click the <a href/>
-//     const standaloneComponent = await mount(MyComponent, { env, target });
-//     assert.verifySteps([]);
-//     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: false });
-//     await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: true });
-//     assert.verifySteps(["click", "ctrl-click"]);
-//     standaloneComponent.destroy();
+    patchWithCleanup(WebClient.prototype, {
+        /** @param {MouseEvent} ev */
+        onGlobalClick(ev) {
+            this._super(ev);
+            // Necessary in order to prevent the test browser to open in new tab on ctrl-click
+            ev.preventDefault();
+        },
+    });
 
-//     // Register the component as a main one, mount the webclient and control-click the <a href/>
-//     clearRegistryWithCleanup(mainComponentRegistry);
-//     mainComponentRegistry.add("mycomponent", { Component: MyComponent });
-//     env = await makeTestEnv(baseConfig);
-//     const webClient = await mount(WebClient, { env, target });
-//     assert.verifySteps([]);
-//     await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: false });
-//     await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: true });
-//     assert.verifySteps(["click"]);
-//     webClient.destroy();
-// });
+    class MyComponent extends Component {
+        /** @param {MouseEvent} ev */
+        onclick(ev) {
+            assert.step(ev.ctrlKey ? "ctrl-click" : "click");
+            // Necessary in order to prevent the test browser to open in new tab on ctrl-click
+            ev.preventDefault();
+        }
+    }
+    MyComponent.template = xml`<a href="#" class="MyComponent" t-on-click="onclick" />`;
+    const target = getFixture();
+    let env = await makeTestEnv(baseConfig);
+
+    // Mount the component as standalone and control-click the <a href/>
+    const standaloneComponent = await mount(MyComponent, { env, target });
+    assert.verifySteps([]);
+    await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: false });
+    await triggerEvent(standaloneComponent.el, "", "click", { ctrlKey: true });
+    assert.verifySteps(["click", "ctrl-click"]);
+    standaloneComponent.destroy();
+
+    // Register the component as a main one, mount the webclient and control-click the <a href/>
+    clearRegistryWithCleanup(mainComponentRegistry);
+    mainComponentRegistry.add("mycomponent", { Component: MyComponent });
+    env = await makeTestEnv(baseConfig);
+    const webClient = await mount(WebClient, { env, target });
+    assert.verifySteps([]);
+    await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: false });
+    await triggerEvent(webClient.el, ".MyComponent", "click", { ctrlKey: true });
+    assert.verifySteps(["click"]);
+    webClient.destroy();
+});

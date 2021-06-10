@@ -33,17 +33,7 @@ export class WebClient extends Component {
             },
             () => []
         );
-        useExternalListener(
-            window,
-            "click",
-            (ev) => {
-                if (ev.ctrlKey && ev.target instanceof HTMLAnchorElement && ev.target.href) {
-                    ev.stopImmediatePropagation();
-                    throw new Error("WWWOWOWLWLL");
-                }
-            },
-            { capture: true }
-        );
+        useExternalListener(window, "click", this.onGlobalClick, { capture: true });
     }
 
     mounted() {
@@ -91,6 +81,12 @@ export class WebClient extends Component {
         const firstApp = root.children[0];
         if (firstApp) {
             return this.menuService.selectMenu(firstApp);
+        }
+    }
+
+    onGlobalClick(ev) {
+        if (ev.ctrlKey && ev.target instanceof HTMLAnchorElement && ev.target.href) {
+            ev.stopImmediatePropagation();
         }
     }
 }
