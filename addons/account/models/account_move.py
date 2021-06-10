@@ -903,6 +903,7 @@ class AccountMove(models.Model):
             :param total_amount_currency:   The invoice's total in invoice's currency.
             :return:                        A list <to_pay_company_currency, to_pay_invoice_currency, due_date>.
             '''
+            #TODO OCO ici, on pourrait passer les taxes withholding en revue pour aller injecter ce qu'il nous faut.
             if self.invoice_payment_term_id:
                 to_compute = self.invoice_payment_term_id.compute(total_balance, date_ref=date, currency=self.company_id.currency_id)
                 if self.currency_id == self.company_id.currency_id:

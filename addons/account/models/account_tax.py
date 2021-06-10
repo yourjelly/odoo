@@ -598,6 +598,7 @@ class AccountTax(models.Model):
                     skip_checkpoint = True
 
             total_included += factorized_tax_amount
+            previous_tax_amount = tax_amount # TODO OCO wip: ajouté pour le récupérer sur les taxes qui prennent leur base comme ça. Peut-être ajouter que seulement si affect_subesequent ? (et donc renommer include_base_amount)
             i += 1
 
         base_taxes_for_tags = taxes
