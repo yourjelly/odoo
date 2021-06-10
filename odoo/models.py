@@ -1995,7 +1995,7 @@ class BaseModel(metaclass=MetaModel):
 
         if field.relational:
             # groups is a recordset; determine order on groups's model
-            groups = self.env[field.comodel_name].browse([value[0] for value in values])
+            groups = self.env[field.comodel_name].browse(values)
             order = groups._order
             if read_group_order == groupby + ' desc':
                 order = tools.reverse_order(order)

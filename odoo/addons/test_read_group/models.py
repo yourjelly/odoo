@@ -56,6 +56,7 @@ class Order(models.Model):
     _name = 'test_read_group.order'
     _description = 'Sales order'
 
+    name = fields.Char()
     line_ids = fields.One2many('test_read_group.order.line', 'order_id')
 
 
