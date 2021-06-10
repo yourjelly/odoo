@@ -271,7 +271,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(__system__=31, emp=37):
+        with self.assertQueryCount(__system__=30, emp=36):
             composer.send_mail()
 
     @users('__system__', 'emp')
