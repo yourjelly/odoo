@@ -38,37 +38,37 @@ QUnit.module("Components", (hooks) => {
         assert.containsNone(parent.el, "ul.o_dropdown_menu");
     });
 
-    // QUnit.test("can be rendered (insideList)", async (assert) => {
-    //     class Parent extends owl.Component {}
-    //     Parent.template = owl.tags.xml`<Dropdown insideList="true"/>`;
-    //     parent = await mount(Parent, { env, target });
-    //     assert.strictEqual(
-    //         parent.el.outerHTML,
-    //         '<li class="o_dropdown"><button class="o_dropdown_toggler "><span></span></button></li>'
-    //     );
-    //     assert.containsOnce(parent.el, "button.o_dropdown_toggler");
-    //     assert.containsNone(parent.el, "ul.o_dropdown_menu");
-    // });
+    QUnit.test("can be rendered (insideList)", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`<Dropdown insideList="true"/>`;
+        parent = await mount(Parent, { env, target });
+        assert.strictEqual(
+            parent.el.outerHTML,
+            '<li class="o_dropdown"><button class="o_dropdown_toggler "><span></span></button></li>'
+        );
+        assert.containsOnce(parent.el, "button.o_dropdown_toggler");
+        assert.containsNone(parent.el, "ul.o_dropdown_menu");
+    });
 
-    // QUnit.test("DropdownItem can be rendered (span)", async (assert) => {
-    //     class Parent extends owl.Component {}
-    //     Parent.template = owl.tags.xml`<DropdownItem>coucou</DropdownItem>`;
-    //     parent = await mount(Parent, { env, target });
-    //     assert.strictEqual(
-    //         parent.el.outerHTML,
-    //         '<li class="o_dropdown_item"><span>coucou</span></li>'
-    //     );
-    // });
+    QUnit.test("DropdownItem can be rendered (span)", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`<DropdownItem>coucou</DropdownItem>`;
+        parent = await mount(Parent, { env, target });
+        assert.strictEqual(
+            parent.el.outerHTML,
+            '<li class="o_dropdown_item"><span>coucou</span></li>'
+        );
+    });
 
-    // QUnit.test("DropdownItem can be rendered (a)", async (assert) => {
-    //     class Parent extends owl.Component {}
-    //     Parent.template = owl.tags.xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
-    //     parent = await mount(Parent, { env, target });
-    //     assert.strictEqual(
-    //         parent.el.outerHTML,
-    //         '<li class="o_dropdown_item"><a href="#">coucou</a></li>'
-    //     );
-    // });
+    QUnit.test("DropdownItem can be rendered (a)", async (assert) => {
+        class Parent extends owl.Component {}
+        Parent.template = owl.tags.xml`<DropdownItem href="'#'">coucou</DropdownItem>`;
+        parent = await mount(Parent, { env, target });
+        assert.strictEqual(
+            parent.el.outerHTML,
+            '<li class="o_dropdown_item"><a href="#">coucou</a></li>'
+        );
+    });
 
     QUnit.test("can be styled", async (assert) => {
         class Parent extends owl.Component {}

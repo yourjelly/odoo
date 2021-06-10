@@ -39,7 +39,7 @@ export class WebClient extends Component {
             (ev) => {
                 if (ev.ctrlKey && ev.target instanceof HTMLAnchorElement && ev.target.href) {
                     ev.stopImmediatePropagation();
-                    throw new Error("WWWOWOWLWLL");
+                    // throw new Error("WWWOWOWLWLL");
                 }
             },
             { capture: true }
