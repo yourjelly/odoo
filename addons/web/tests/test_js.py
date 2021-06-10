@@ -7,17 +7,12 @@ import odoo.tests
 RE_ONLY = re.compile(r'QUnit\.(only|debug)\(')
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@odoo.tests.tagged('post_install', '-at_install','wowl')
 class WebSuite(odoo.tests.HttpCase):
 
     def test_js(self):
         # webclient desktop test suite
         self.browser_js('/web/tests?mod=web&failfast', "", "", login='admin', timeout=1800)
-
-    def test_check_suite(self):
-        # verify no js test is using `QUnit.only` as it forbid any other test to be executed
-        self._check_only_call('web.qunit_suite_tests')
-        self._check_only_call('web.qunit_mobile_suite_tests')
 
     def _check_only_call(self, suite):
         # As we currently aren't in a request context, we can't render `web.layout`.
