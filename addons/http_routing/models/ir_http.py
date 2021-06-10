@@ -16,7 +16,7 @@ except ImportError:
     slugify_lib = None
 
 import odoo
-from odoo import api, models, registry, exceptions, tools
+from odoo import api, models, registry, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
 from odoo.addons.base.models.qweb import QWebException
@@ -423,7 +423,7 @@ class IrHttp(models.AbstractModel):
         # handle // in url
         if request.httprequest.method == 'GET' and '//' in request.httprequest.path:
             new_url = request.httprequest.path.replace('//', '/') + '?' + request.httprequest.query_string.decode('utf-8')
-            return werkzeug.utils.redirect(new_url, 301)
+            return http.redirect(new_url, 301)
 
         # locate the controller method
         try:
@@ -456,7 +456,7 @@ class IrHttp(models.AbstractModel):
 
         # For website routes (only), add website params on `request`
         if request.is_frontend:
-            request.redirect = lambda url, code=302: werkzeug.utils.redirect(url_for(url), code)
+            request.redirect = lambda url, code=302: http.redirect(url_for(url), code)
 
             cls._add_dispatch_parameters(func)
 
@@ -493,7 +493,7 @@ class IrHttp(models.AbstractModel):
                         path = request.httprequest.path[:-1]
                         if request.httprequest.query_string:
                             path += '?' + request.httprequest.query_string.decode('utf-8')
-                        return werkzeug.utils.redirect(path, code=301)
+                        return http.redirect(path, code=301)
                     path.pop(1)
                     routing_error = None
                     return cls.reroute('/'.join(path) or '/')
@@ -557,7 +557,7 @@ class IrHttp(models.AbstractModel):
                     path = '/' + request.lang.url_code + path
                 if request.httprequest.query_string:
                     path += '?' + request.httprequest.query_string.decode('utf-8')
-                return werkzeug.utils.redirect(path, code=301)
+                return http.redirect(path, code=301)
 
     @classmethod
     def _get_exception_code_values(cls, exception):

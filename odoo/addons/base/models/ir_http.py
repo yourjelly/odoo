@@ -159,7 +159,7 @@ class IrHttp(models.AbstractModel):
 
             if (not datas and name != request.httprequest.path and
                     name.startswith(('http://', 'https://', '/'))):
-                return werkzeug.utils.redirect(name, 301)
+                return http.redirect(name, 301)
 
             response = werkzeug.wrappers.Response()
             response.last_modified = wdate
@@ -485,6 +485,6 @@ class IrHttp(models.AbstractModel):
         if status == 304:
             return werkzeug.wrappers.Response(status=status, headers=headers)
         elif status == 301:
-            return werkzeug.utils.redirect(content, code=301)
+            return http.redirect(content, code=301)
         elif status != 200:
             return request.not_found()

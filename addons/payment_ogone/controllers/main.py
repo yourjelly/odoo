@@ -5,8 +5,6 @@ import logging
 import pprint
 import re
 
-import werkzeug
-
 from odoo import _, http
 from odoo.exceptions import ValidationError
 from odoo.http import request
@@ -75,7 +73,7 @@ class OgoneController(http.Controller):
             request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', feedback_data)
             if tx_sudo.state in ('cancel', 'error'):
                 tx_sudo.token_id.active = False  # The initial payment failed, archive the token
-            return werkzeug.utils.redirect('/payment/status')
+            return http.redirect('/payment/status')
 
     @http.route(
         [_directlink_return_url] + _backward_compatibility_urls, type='http', auth='public',
@@ -101,7 +99,7 @@ class OgoneController(http.Controller):
         tx_sudo = request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', data)
         if tx_sudo.state in ('cancel', 'error'):
             tx_sudo.token_id.active = False  # The initial payment failed, archive the token
-        return werkzeug.utils.redirect('/payment/status')
+        return http.redirect('/payment/status')
 
     def _homogenize_data(self, data):
         """ Format keys to follow an homogenized convention inspired by Ogone Directlink API.

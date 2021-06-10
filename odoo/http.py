@@ -166,14 +166,14 @@ def local_redirect(path, query=None, keep_hash=False, code=303):
         query = {}
     if query:
         url += '?' + urls.url_encode(query)
-    return werkzeug.utils.redirect(url, code)
+    return redirect(url, code)
 
 def redirect_with_hash(url, code=303):
     # Section 7.1.2 of RFC 7231 requires preservation of URL fragment through redirects,
     # so we don't need any special handling anymore. This function could be dropped in the future.
     # seealso : http://www.rfc-editor.org/info/rfc7231
     #           https://tools.ietf.org/html/rfc7231#section-7.1.2
-    return werkzeug.utils.redirect(url, code)
+    return redirect(url, code)
 
 class WebRequest(object):
     """ Parent class for all Odoo Web request types, mostly deals with
@@ -759,7 +759,7 @@ class HttpRequest(WebRequest):
                 query = werkzeug.urls.url_encode({
                     'redirect': redirect,
                 })
-                return werkzeug.utils.redirect('/web/login?%s' % query)
+                return odoo.http.redirect('/web/login?%s' % query)
         except werkzeug.exceptions.HTTPException as e:
             return e
 
@@ -1521,6 +1521,10 @@ class Root(object):
         if not db:
             return self.nodb_routing_map
         return request.registry['ir.http'].routing_map()
+
+
+def redirect(location, code=302, Response=Response):
+    return werkzeug.utils.redirect(location, code=code, Response=Response)
 
 def db_list(force=False, httprequest=None):
     dbs = odoo.service.db.list_dbs(force)

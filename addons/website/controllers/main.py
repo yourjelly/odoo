@@ -152,7 +152,7 @@ class Website(Home):
         if lang == 'default':
             lang = request.website.default_lang_id.url_code
             r = '/%s%s' % (lang, r or '/')
-        redirect = werkzeug.utils.redirect(r or ('/%s' % lang), 303)
+        redirect = http.redirect(r or ('/%s' % lang), 303)
         lang_code = request.env['res.lang']._lang_get_code(lang)
         redirect.set_cookie('frontend_lang', lang_code)
         return redirect
@@ -402,8 +402,8 @@ class Website(Home):
             return werkzeug.wrappers.Response(url, mimetype='text/plain')
 
         if ext_special_case:  # redirect non html pages to backend to edit
-            return werkzeug.utils.redirect('/web#id=' + str(page.get('view_id')) + '&view_type=form&model=ir.ui.view')
-        return werkzeug.utils.redirect(url + "?enable_editor=1")
+            return http.redirect('/web#id=' + str(page.get('view_id')) + '&view_type=form&model=ir.ui.view')
+        return http.redirect(url + "?enable_editor=1")
 
     @http.route("/website/get_switchable_related_views", type="json", auth="user", website=True)
     def get_switchable_related_views(self, key):

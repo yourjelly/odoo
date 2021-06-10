@@ -16,7 +16,7 @@ from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website_profile.controllers.main import WebsiteProfile
 from odoo.exceptions import AccessError, UserError
-from odoo.http import request
+from odoo.http import request, redirect
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
@@ -600,7 +600,7 @@ class WebsiteSlides(WebsiteProfile):
     @http.route('/slides/channel/add', type='http', auth='user', methods=['POST'], website=True)
     def slide_channel_create(self, *args, **kw):
         channel = request.env['slide.channel'].create(self._slide_channel_prepare_values(**kw))
-        return werkzeug.utils.redirect("/slides/%s" % (slug(channel)))
+        return redirect("/slides/%s" % (slug(channel)))
 
     def _slide_channel_prepare_values(self, **kw):
         # `tag_ids` is a string representing a list of int with coma. i.e.: '2,5,7'
@@ -624,7 +624,7 @@ class WebsiteSlides(WebsiteProfile):
         if not request.website.is_public_user():
             channel = request.env['slide.channel'].browse(int(channel_id))
             channel.action_add_member()
-        return werkzeug.utils.redirect("/slides/%s" % (slug(channel)))
+        return redirect("/slides/%s" % (slug(channel)))
 
     @http.route(['/slides/channel/join'], type='json', auth='public', website=True)
     def slide_channel_join(self, channel_id):
@@ -795,7 +795,7 @@ class WebsiteSlides(WebsiteProfile):
         next_slide = None
         if next_slide_id:
             next_slide = self._fetch_slide(next_slide_id).get('slide', None)
-        return werkzeug.utils.redirect("/slides/slide/%s" % (slug(next_slide) if next_slide else slug(slide)))
+        return redirect("/slides/slide/%s" % (slug(next_slide) if next_slide else slug(slide)))
 
     @http.route('/slides/slide/set_completed', website=True, type="json", auth="public")
     def slide_set_completed(self, slide_id):
@@ -1041,7 +1041,7 @@ class WebsiteSlides(WebsiteProfile):
 
         request.env['slide.slide'].create(self._get_new_slide_category_values(channel, name))
 
-        return werkzeug.utils.redirect("/slides/%s" % (slug(channel)))
+        return redirect("/slides/%s" % (slug(channel)))
 
     # --------------------------------------------------
     # SLIDE.UPLOAD

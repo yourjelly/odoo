@@ -128,7 +128,7 @@ def redirect_with_hash(*args, **kw):
 
 def abort_and_redirect(url):
     r = request.httprequest
-    response = werkzeug.utils.redirect(url, 302)
+    response = http.redirect(url, 302)
     response = r.app.get_response(r, response, explicit_session=False)
     werkzeug.exceptions.abort(response)
 
@@ -173,7 +173,7 @@ def ensure_db(redirect='/web/database/selector'):
     # if no db can be found til here, send to the database selector
     # the database selector will redirect to database manager if needed
     if not db:
-        werkzeug.exceptions.abort(werkzeug.utils.redirect(redirect, 303))
+        werkzeug.exceptions.abort(http.redirect(redirect, 303))
 
     # always switch the session to the computed db
     if db != request.session.db:
@@ -245,7 +245,7 @@ def login_and_redirect(db, login, key, redirect_url='/web'):
     return set_cookie_and_redirect(redirect_url)
 
 def set_cookie_and_redirect(redirect_url):
-    redirect = werkzeug.utils.redirect(redirect_url, 303)
+    redirect = http.redirect(redirect_url, 303)
     redirect.autocorrect_location_header = False
     return redirect
 
@@ -825,9 +825,9 @@ class Home(http.Controller):
     def web_client(self, s_action=None, **kw):
         ensure_db()
         if not request.session.uid:
-            return werkzeug.utils.redirect('/web/login', 303)
+            return http.redirect('/web/login', 303)
         if kw.get('redirect'):
-            return werkzeug.utils.redirect(kw.get('redirect'), 303)
+            return http.redirect(kw.get('redirect'), 303)
 
         request.uid = request.session.uid
         try:
@@ -836,7 +836,7 @@ class Home(http.Controller):
             response.headers['X-Frame-Options'] = 'DENY'
             return response
         except AccessError:
-            return werkzeug.utils.redirect('/web/login?error=access')
+            return http.redirect('/web/login?error=access')
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
     def web_load_menus(self, unique):
@@ -1276,7 +1276,7 @@ class Session(http.Controller):
     @http.route('/web/session/logout', type='http', auth="none")
     def logout(self, redirect='/web'):
         request.session.logout(keep_db=True)
-        return werkzeug.utils.redirect(redirect, 303)
+        return http.redirect(redirect, 303)
 
 
 class DataSet(http.Controller):

@@ -155,7 +155,7 @@ class OAuthController(http.Controller):
                 # oauth credentials not valid, user could be on a temporary session
                 _logger.info('OAuth2: access denied, redirect to main page in case a valid session exists, without setting cookies')
                 url = "/web/login?oauth_error=3"
-                redirect = werkzeug.utils.redirect(url, 303)
+                redirect = http.redirect(url, 303)
                 redirect.autocorrect_location_header = False
                 return redirect
             except Exception as e:
