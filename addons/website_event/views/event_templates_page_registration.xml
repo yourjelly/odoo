@@ -18,7 +18,7 @@
                         <h2 t-field="event.subtitle" class="o_wevent_event_subtitle" placeholder="Event Subtitle"/>
                     </div>
                 </div>
-                <div class="container">
+                <div class="container mb-4">
                     <t t-call="website_event.registration_template"/>
                 </div>
             </t>
@@ -30,11 +30,11 @@
 <!-- Event - Description -->
 <template id="event_description_full" name="Event Description" track="1">
     <t t-call="website_event.event_details">
-        <section class="bg-200 mt-n5">
-            <div class="container overflow-hidden">
-                <div class="row no-gutters mt-n4 mb-3">
+        <section class="bg-200">
+            <div class="container py-1">
+                <div class="row no-gutters mt-n5 mb-5">
                     <!-- Description -->
-                    <div id="o_wevent_event_main_col" class="col-lg-8 bg-white px-3 pt-5 pb-0 shadow-sm">
+                    <div id="o_wevent_event_main_col" class="col-lg-8 bg-white p-5 shadow-sm">
                         <span t-field="event.description" itemprop="description"/>
                     </div>
                     <div class="col-lg-4 bg-light shadow-sm d-print-none">

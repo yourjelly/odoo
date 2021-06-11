@@ -23,8 +23,7 @@
             @include font-size($display4-size);
         }
         .o_wevent_event_subtitle {
-            font-weight: $lead-font-weight;
-            @include font-size($lead-font-size);
+            @include font-size($font-size-lg);
         }
     }
 
