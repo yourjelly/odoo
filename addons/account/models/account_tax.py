@@ -74,10 +74,19 @@ class AccountTax(models.Model):
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
         help="If set, taxes with a higher sequence than this one will be affected by it, provided they accept it.")
-    is_base_affected = fields.Boolean(
+    is_base_affected = fields.Boolean( # TODO OCO remplacer par un champ sélection qui dit si on prend juste la base, ou bien base+prev taxes, ou bien juste prev tax amount
         string="Base Affected by Previous Taxes",
         default=True,
         help="If set, taxes with a lower sequence might affect this one, provided they try to do it.")
+    base_computation = fields.Selection(
+        string="Base Computation",
+        selection=[
+            ('line_base', "From line base"),
+            ('previous_base_and_tax', "Previous taxes base + tax amount"),
+            ('previous_tax', "Previous tax amount")
+        ], # TODO OCO better labels (even technical, if possible)
+        help="How this tax should compute its base" #TODO OCO DOC ajouter l'explication des options
+    )
     analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
@@ -508,10 +517,13 @@ class AccountTax(models.Model):
         taxes_vals = []
         i = 0
         cumulated_tax_included_amount = 0
+        previous_tax_amount = 0
         for tax in taxes:
             price_include = self._context.get('force_price_include', tax.price_include)
 
-            if price_include or tax.is_base_affected:
+            if tax.base_computation == 'previous_tax':#TODO OCO il va falloir empêcher quelque part qu'on mettre une taxe qui se calcule comme ça en price_include; ça n'a pas de sens de dire que le montant de la taxe est déjà inclus dans celle qui précède
+                tax_base_amount = previous_tax_amount # TODO OCO donc ça veut dire que si elle est la première taxe (rien qui précède), elle aura 0. Ca me semble logique, en un sens, non ?
+            elif price_include or tax.base_computation == 'previous_base_and_tax':
                 tax_base_amount = base
             else:
                 tax_base_amount = total_excluded
