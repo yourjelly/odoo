@@ -95,7 +95,6 @@ This module provides the core of the Odoo Web Client.
 
             'web/static/lib/jquery.scrollTo/jquery.scrollTo.js',
             'web/static/lib/fuzzy-master/fuzzy.js',
-            'web/static/lib/Chart/Chart.js',  # TODO: lazy load it
             'web/static/lib/luxon/luxon.js',
             'web/static/lib/py.js/lib/py.js',
             'web/static/lib/py.js/lib/py_extras.js',
