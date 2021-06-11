@@ -323,82 +323,82 @@
 
 <template id="registration_complete" name="Registration Completed">
     <t t-call="website_event.layout">
-        <div class="container my-5 o_wereg_confirmed">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <h3>Registration confirmed!</h3>
-                    <span class="h4 text-muted" t-esc="event.name"/>
-                </div>
-            </div>
-            <div class="row mb-3 o_wereg_confirmed_attendees">
-                <div class="col-md-4 col-xs-12 mt-3" t-foreach="attendees" t-as="attendee">
-                    <div class="d-flex flex-column">
-                        <span class="font-weight-bold text-truncate">
-                            <t t-if="attendee.name" t-esc="attendee.name"/>
-                            <t t-else="">N/A</t>
-                        </span>
-                        <span class="text-truncate">
-                            <i class="fa fa-envelope mr-2   "></i>
-                            <t t-if="attendee.email" t-esc="attendee.email"/>
-                            <t t-else="">N/A</t>
-                        </span>
-                        <span t-if="attendee.phone">
-                            <i class="fa fa-phone mr-2"></i>
-                            <t t-esc="attendee.phone"/>
-                        </span>
-                        <span>
-                            <i class="fa fa-ticket mr-2"></i>
-                            <t t-if="attendee.event_ticket_id">
-                                <t t-esc="attendee.event_ticket_id.name"/> (Ref: <t t-esc="attendee.id"/>)
-                            </t>
-                            <t t-else="">Ref: <t t-esc="attendee.id"/></t>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <div class="row">
-                        <div class="col-2 col-md-1">
-                            <b>Start</b>
+    <section class="bg-200 py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 d-flex align-items-center">
+                    <i class="fa fa-check fa-1x rounded-circle bg-primary mr-3"/>
+                    <h2 class="my-0">Registration confirmed</h2>
+                    <div class="dropdown ml-auto">
+                        <i class="fa fa-calendar mr-1"/>
+                        <a href="#" role="button" data-toggle="dropdown">Add to Calendar</a>
+                        <div class="dropdown-menu">
+                            <a t-att-href="iCal_url" class="dropdown-item">iCal/Outlook</a>
+                            <a t-att-href="google_url" class="dropdown-item" target="_blank">Google</a>
                         </div>
-                        <div class="col pl-0">
-                            <span itemprop="startDate" t-esc="event.date_begin_located"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-2 col-md-1">
-                            <b>End</b>
-                        </div>
-                        <div class="col pl-0">
-                            <span itemprop="endDate" t-esc="event.date_end_located"/>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <h5 t-field="event.address_id" class="text-secondary font-weight-bold" t-options='{
-                            "widget": "contact",
-                            "fields": ["name"]
-                            }'/>
-                        <a itemprop="location" t-att-href="event.google_map_link()" target="_BLANK" temprop="location" t-field="event.address_id" t-options='{
-                            "widget": "contact",
-                            "fields": ["address"]
-                            }'/>
-                        <div itemprop="location" t-field="event.address_id" t-options='{
-                            "widget": "contact",
-                            "fields": ["phone", "mobile", "email"]
-                            }'/>
-                    </div>
-                    <div id="add_to_calendar" class="mt-4 d-flex flex-column flex-md-row">
-                        <a role="button" class="btn btn-primary" t-att-href="iCal_url">
-                            <i class="fa fa-fw fa-calendar"/> Add to iCal/Outlook
-                        </a>
-                        <a role="button" class="btn btn-primary ml-md-2 mt-2 mt-md-0" t-att-href="google_url" target='_blank'>
-                            <i class="fa fa-fw fa-calendar"/> Add to Google Calendar
-                        </a>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
+    <section class="py-5">
+        <div class="container o_wereg_confirmed">
+            <div class="row mb-4">
+                <div class="col-lg-12 mb-4">
+                    <h4 class="o_page_header mb-0">Attendee(s)</h4>
+                </div>
+                <div class="col-lg-4 mb-4" t-foreach="attendees" t-as="attendee">
+                    <div class="mb-2">
+                        <b t-if="attendee.name" t-esc="attendee.name"/>
+                        <b t-else="">N/A</b>
+                    </div>
+                    <div>
+                        <t t-if="attendee.email" t-esc="attendee.email"/>
+                        <t t-else="" class="text-muted">N/A</t>
+                    </div>
+                    <div class="mb-2">
+                        <t t-if="attendee.phone" t-esc="attendee.phone"/>
+                        <t t-else="" class="text-muted">N/A</t>
+                    </div>
+                    <div t-if="attendee.event_ticket_id">
+                        <b>Ticket:</b> <t t-esc="attendee.event_ticket_id.name"/>
+                    </div>
+                    <div>
+                        <b>Ref:</b> <t t-esc="attendee.id"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row o_wereg_confirmed_attendees">
+                <div class="col-lg-12 mb-4">
+                    <h4 t-esc="event.name" class="o_page_header mb-0"/>
+                </div>
+                <div t-if="event.address_id" class="col-lg-4 mb-4">
+                    <h6 class="o_wevent_sidebar_title">Location</h6>
+                    <b t-field="event.address_id" t-options="{'widget': 'contact', 'fields': ['name']}"/>
+                    <div temprop="location" t-field="event.address_id" t-options="{
+                        'widget': 'contact',
+                        'fields': ['address'],
+                        'no_marker': True,
+                        }"/>
+                    <a t-att-href="event.google_map_link()" target="_blank">Get the direction</a>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="o_wevent_sidebar_title">Organizer</h6>
+                    <b t-field="event.organizer_id" t-options="{'widget': 'contact', 'fields': ['name']}"/>
+                    <div itemprop="location" t-field="event.organizer_id" t-options="{
+                        'widget': 'contact',
+                        'fields': ['phone', 'mobile', 'email'],
+                        }"/>
+                </div>
+                <div class="col-lg-4 d-flex flex-column mb-4">
+                    <h6 class="o_wevent_sidebar_title">Date &amp; Time</h6>
+                    <span><b>Start:</b> <t t-esc="event.date_begin_located"/></span>
+                    <span><b>End:</b> <t t-esc="event.date_end_located"/></span>
+                </div>
+            </div>
+
+        </div>
+    </section>
     </t>
 </template>
 
