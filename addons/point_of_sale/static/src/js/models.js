@@ -246,7 +246,7 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'account.tax',
-        fields: ['name','amount', 'price_include', 'include_base_amount', 'is_base_affected', 'amount_type', 'children_tax_ids'],
+        fields: ['name','amount', 'price_include', 'is_base_affected', 'is_base_affected', 'amount_type', 'children_tax_ids'],
         domain: function(self) {return [['company_id', '=', self.company && self.company.id || false]]},
         loaded: function(self, taxes){
             self.taxes = taxes;
@@ -2207,7 +2207,9 @@ exports.Orderline = Backbone.Model.extend({
         i = 0;
         var cumulated_tax_included_amount = 0;
         _(taxes.reverse()).each(function(tax){
-            if(tax.price_include || tax.is_base_affected)
+            if(tax.base_computation == 'previous_tax')
+                var tax_base_amount = previous_tax_amount;
+            else if(tax.price_include || tax.base_computation == 'previous_base_and_tax')
                 var tax_base_amount = base;
             else
                 var tax_base_amount = total_excluded;
@@ -2237,8 +2239,9 @@ exports.Orderline = Backbone.Model.extend({
             }
 
             total_included += tax_amount;
+            previous_tax_amount = tax_amount;
             i += 1;
-        });
+        });//TODO OCO en fin de tâche, bien s'assurer que c'est toujours raccord avec le compute_all python
 
         return {
             'taxes': taxes_vals,

@@ -1054,7 +1054,7 @@ class TestTax(TestTaxCommon):
             'include_base_amount': include_base_amount,
             'is_base_affected': is_base_affected,
             'sequence': i,
-        } for i, amount, include_base_amount, is_base_affected in [
+        } for i, amount, include_base_amount, is_base_affected in [ #TODO OCO
             (0, 6, True, True),
             (1, 6, True, False),
             (2, 10, False, True),

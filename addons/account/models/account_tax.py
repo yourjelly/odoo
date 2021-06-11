@@ -74,10 +74,6 @@ class AccountTax(models.Model):
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
         help="If set, taxes with a higher sequence than this one will be affected by it, provided they accept it.")
-    is_base_affected = fields.Boolean( # TODO OCO remplacer par un champ sélection qui dit si on prend juste la base, ou bien base+prev taxes, ou bien juste prev tax amount
-        string="Base Affected by Previous Taxes",
-        default=True,
-        help="If set, taxes with a lower sequence might affect this one, provided they try to do it.")
     base_computation = fields.Selection(
         string="Base Computation",
         selection=[

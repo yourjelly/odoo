@@ -924,7 +924,7 @@ class AccountTaxTemplate(models.Model):
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Subsequent Taxes', default=False,
         help="If set, taxes with a higher sequence than this one will be affected by it, provided they accept it.")
-    is_base_affected = fields.Boolean(
+    is_base_affected = fields.Boolean( #TODO OCO
         string="Base Affected by Previous Taxes",
         default=True,
         help="If set, taxes with a lower sequence might affect this one, provided they try to do it.")
@@ -977,7 +977,7 @@ class AccountTaxTemplate(models.Model):
             'description': self.description,
             'price_include': self.price_include,
             'include_base_amount': self.include_base_amount,
-            'is_base_affected': self.is_base_affected,
+            #'is_base_affected': self.is_base_affected, #TODO OCO => modifier les tax templates, donc
             'analytic': self.analytic,
             'children_tax_ids': [(6, 0, children_ids)],
             'tax_exigibility': self.tax_exigibility,
