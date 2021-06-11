@@ -117,30 +117,24 @@
 <!-- Event - Registration -->
 <template id="registration_template" name="Registration">
     <div t-if="toast_message" class="o_wevent_register_toaster d-none" t-att-data-message="toast_message"/>
-    <div t-if="not event.event_registrations_open" class="bg-white mb-5">
-        <div class="alert alert-info mb-0 d-flex justify-content-between align-items-center" role="status">
+    <div t-if="not event.event_registrations_open" class="row no-gutters align-items-center bg-white mb-5">
+        <div class="col-md-8">
+            <i class="fa fa-ticket text-danger mx-3"/>
             <t t-if="not event.event_registrations_started">
-                <div class="col-md-8 d-flex">
-                    <em class="mr-2">Ticket Sales starting on
-                        <span class="" t-esc="event.start_sale_datetime"
-                            t-options="{'widget': 'datetime', 'tz_name': event.date_tz, 'format': 'short'}"/>
-                        <span t-esc="event.date_tz"/>
-                    </em>
-                    <t t-call="website_event.registration_configure_tickets_button"
-                        t-if="request.env.user.has_group('event.group_event_manager')"/>
-                </div>
-                <button class="btn btn-danger ml-2 col-md-4"  disabled="1">Registrations not yet open</button>
+                Ticket sales starting on:
+                <span t-esc="event.start_sale_datetime"
+                        t-options="{'widget': 'datetime', 'tz_name': event.date_tz, 'format': 'short'}"/>
+                - <span class="text-muted" t-esc="event.date_tz"/>
             </t>
-            <t t-else="">
-                <div class="col-md-8">
-                    <em t-if="event.event_registrations_sold_out">Tickets for this Event are <b>Sold Out</b></em>
-                    <em t-else="">Registrations are <b>closed</b></em>
-                </div>
-                <button class="btn btn-danger ml-3 col-md-4 py-2" disabled="1">
-                    <span t-if="event.event_registrations_sold_out">Sold Out</span>
-                    <span t-else="">Registrations Closed</span>
-                </button>
-            </t>
+            <t t-elif="event.event_registrations_sold_out">Tickets for this event are <b>Sold Out</b></t>
+            <t t-else="">Registrations are <b>Closed</b></t>
+        </div>
+        <div class="col-md-4 p-2">
+            <button class="btn btn-danger btn-block" disabled="1">
+                <t t-if="not event.event_registrations_started">Registrations not yet open</t>
+                <t t-elif="event.event_registrations_sold_out">Sold Out</t>
+                <span t-else="">Registrations Closed</span>
+            </button>
         </div>
     </div>
     <form t-if="event.event_registrations_open and (not event.event_ticket_ids or any(not ticket.is_expired for ticket in event.event_ticket_ids))"
