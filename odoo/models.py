@@ -2001,24 +2001,21 @@ class BaseModel(metaclass=MetaModel):
                 order = tools.reverse_order(order)
             groups = getattr(self, field.group_expand)(groups, domain, order)
             groups = groups.sudo()
-            values = lazy_name_get(groups)
-            value2key = lambda value: value and value[0]
-
+            values = groups.ids
         else:
             # groups is a list of values
             values = getattr(self, field.group_expand)(values, domain, None)
             if read_group_order == groupby + ' desc':
                 values.reverse()
-            value2key = lambda value: value
 
         # Merge the current results (list of dicts) with all groups. Determine
         # the global order of results groups, which is supposed to be in the
         # same order as read_group_result (in the case of a many2one field).
-        result = OrderedDict((value2key(value), {}) for value in values)
+        result = OrderedDict((value, {}) for value in values)
 
         # fill in results from read_group_result
         for line in read_group_result:
-            key = value2key(line[groupby])
+            key = line[groupby]
             if not result.get(key):
                 result[key] = line
             else:
@@ -2026,7 +2023,7 @@ class BaseModel(metaclass=MetaModel):
 
         # fill in missing results from all groups
         for value in values:
-            key = value2key(value)
+            key = value
             if not result[key]:
                 line = dict.fromkeys(aggregated_fields, False)
                 line[groupby] = value
