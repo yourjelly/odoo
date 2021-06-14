@@ -1,25 +1,24 @@
-{%- set mod = name|snake -%}
-{%- set model = "%s.%s"|format(mod, mod) -%}
-{%- set root = "/%s/%s"|format(mod, mod) -%}
+<t t-set="mod" t-value="snake(name)" />
+<t t-set="model" t-value="'%s.%s' % (mod, mod)" />
+<t t-set="root" t-value="'/%s/%s' % (mod, mod)" />
 # -*- coding: utf-8 -*-
 # from odoo import http
-
-
-# class {{ mod|pascal }}(http.Controller):
-#     @http.route('{{ root }}/', auth='public')
+<t t-out="newline" />
+<t t-out="newline" />
+# class <t t-out="pascal(mod)"/> (http.Controller):
+#     @http.route('<t t-out="root" />/', auth='public')
 #     def index(self, **kw):
 #         return "Hello, world"
-
-#     @http.route('{{ root }}/objects/', auth='public')
+<t t-out="newline" />
+#     @http.route('<t t-out="root" />/objects/', auth='public')
 #     def list(self, **kw):
-#         return http.request.render('{{ mod }}.listing', {
-#             'root': '{{ root }}',
-#             'objects': http.request.env['{{ model }}'].search([]),
+#         return http.request.render('<t t-out="mod" />.listing', {
+#             'root': '<t t-out="root" />',
+#             'objects': http.request.env['<t t-out="model" />'].search([]),
 #         })
-
-#     @http.route('{{ root }}/objects/<model("{{ model }}"):obj>/', auth='public')
+<t t-out="newline" />
+#     @http.route('<t t-out="root" />/objects/<model("<t t-out="model" />"):obj>/', auth='public')
 #     def object(self, obj, **kw):
-#         return http.request.render('{{ mod }}.object', {
+#         return http.request.render('<t t-out="mod" />.object', {
 #             'object': obj
 #         })
-

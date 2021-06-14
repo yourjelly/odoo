@@ -5,8 +5,11 @@ import argparse
 import os
 import re
 import sys
+import lxml
+from markupsafe import Markup
 
-import jinja2
+from odoo.addons.base.models.qweb import QWeb
+
 
 from . import Command
 
@@ -76,9 +79,6 @@ def directory(p, create=False):
         die("%s is not a directory" % p)
     return expanded
 
-env = jinja2.Environment()
-env.filters['snake'] = snake
-env.filters['pascal'] = pascal
 class template(object):
     def __init__(self, identifier):
         # TODO: archives (zipfile, tarfile)
@@ -120,13 +120,24 @@ class template(object):
             if not os.path.exists(destdir):
                 os.makedirs(destdir)
 
+            params = params.copy()
+            params['snake'] = snake
+            params['pascal'] = pascal
+            params['lt'] = Markup('&lt;')
+            newline_string_hack = '___scaffold_newline_template___'
+            params['newline'] = newline_string_hack
+
             with open(dest, 'wb') as f:
                 if ext not in ('.py', '.xml', '.csv', '.js', '.rst', '.html', '.template'):
                     f.write(content)
                 else:
-                    env.from_string(content.decode('utf-8'))\
-                       .stream(params or {})\
-                       .dump(f, encoding='utf-8')
+                    content_qweb = "<t>"+content.decode()+"</t>"
+                    rendered = QWeb().render(lxml.html.fragment_fromstring(content_qweb), params)
+                    # qweb strip whitespace so add a text with the variable params[newline]
+                    rendered = rendered.decode('utf-8').replace(newline_string_hack+'\n', '\n')
+                    rendered = rendered + '\n'
+
+                    f.write(rendered.encode('utf-8'))
 
 def die(message, code=1):
     print(message, file=sys.stderr)

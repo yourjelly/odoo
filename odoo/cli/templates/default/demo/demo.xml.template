@@ -1,12 +1,12 @@
-{%- set mod= name|snake -%}
-{%- set model = "%s.%s"|format(mod, mod) -%}
+<t t-set="mod" t-value="snake(name)" />
+<t t-set="model" t-value="'%s.%s' % (mod, mod)" />
 <odoo>
     <data>
-<!--{% for item in range(5) %}
-          <record id="object{{ item }}" model="{{ model }}">
-            <field name="name">Object {{ item }}</field>
-            <field name="value">{{ item * 10 }}</field>
+<t t-out="lt" />!--<t t-foreach="range(5)" t-as="item">
+          <record t-attf-id="object{{ item }}" t-attf-model="{{ model }}">
+            <field name="name">Object <t t-out="item /></field>
+            <field name="value"><t t-out="item * 10 /></field>
           </record>
-{% endfor %}-->
+<t t-out="lt" />/t>-->
     </data>
 </odoo>

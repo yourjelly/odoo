@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-
+<t t-out="newline" />
+<t t-set="mod" t-value="snake(name)" />
+<t t-set="model" t-value="'%s.%s' % (mod, mod)" />
 # from odoo import models, fields, api
-
-
-# class {{ name|snake }}(models.Model):
-#     _name = '{{ name|snake }}.{{ name|snake }}'
-#     _description = '{{ name|snake }}.{{ name|snake }}'
-
+<t t-out="newline" />
+<t t-out="newline" />
+# class <t t-out="mod" />(models.Model):
+#     _name = '<t t-out="model" />'
+#     _description = '<t t-out="model" />'
+<t t-out="newline" />
 #     name = fields.Char()
 #     value = fields.Integer()
 #     value2 = fields.Float(compute="_value_pc", store=True)
@@ -16,4 +18,3 @@
 #     def _value_pc(self):
 #         for record in self:
 #             record.value2 = float(record.value) / 100
-

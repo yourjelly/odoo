@@ -1,12 +1,13 @@
-{%- set mod = name|snake -%}
-{%- set model = "%s.%s"|format(mod, mod) -%}
+<t t-set="mod" t-value="snake(name)" />
+<t t-set="model" t-value="'%s.%s' % (mod, mod)" />
+<t t-out="newline" />
 <odoo>
   <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="{{mod}}.list">
-      <field name="name">{{name}} list</field>
-      <field name="model">{{model}}</field>
+    <t t-out="lt" />!-- explicit list view definition -->
+<t t-out="lt" />!--
+    <record model="ir.ui.view" t-attf-id="{{mod}}.list">
+      <field name="name"><t t-esc="name"/> list</field>
+      <field name="model"><t t-esc="model"/></field>
       <field name="arch" type="xml">
         <tree>
           <field name="name"/>
@@ -16,21 +17,21 @@
       </field>
     </record>
 -->
-
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="{{mod}}.action_window">
-      <field name="name">{{name}} window</field>
-      <field name="res_model">{{model}}</field>
+<t t-out="newline" />
+    <t t-out="lt" />!-- actions opening views on models -->
+<t t-out="lt" />!--
+    <record model="ir.actions.act_window" t-attf-id="{{mod}}.action_window">
+      <field name="name"><t t-esc="name"/> window</field>
+      <field name="res_model"><t t-esc="model"/></field>
       <field name="view_mode">tree,form</field>
     </record>
 -->
-
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="{{mod}}.action_server">
-      <field name="name">{{name}} server</field>
-      <field name="model_id" ref="model_{{mod}}_{{mod}}"/>
+<t t-out="newline" />
+    <t t-out="lt" />!-- server action to the one above -->
+<t t-out="lt" />!--
+    <record model="ir.actions.server" t-attf-id="{{mod}}.action_server">
+      <field name="name"><t t-esc="name"/> server</field>
+      <field name="model_id" t-attf-ref="model_{{mod}}_{{mod}}"/>
       <field name="state">code</field>
       <field name="code">
         action = {
@@ -41,22 +42,22 @@
       </field>
     </record>
 -->
-
-    <!-- Top menu item -->
-<!--
-    <menuitem name="{{name}}" id="{{mod}}.menu_root"/>
+<t t-out="newline" />
+    <t t-out="lt" />!-- Top menu item -->
+<t t-out="lt" />!--
+    <menuitem t-attf-name="{{name}}" t-attf-id="{{mod}}.menu_root"/>
 -->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="{{mod}}.menu_1" parent="{{mod}}.menu_root"/>
-    <menuitem name="Menu 2" id="{{mod}}.menu_2" parent="{{mod}}.menu_root"/>
+    <t t-out="lt" />!-- menu categories -->
+<t t-out="lt" />!--
+    <menuitem name="Menu 1" t-attf-id="{{mod}}.menu_1" t-attf-parent="{{mod}}.menu_root"/>
+    <menuitem name="Menu 2" t-attf-id="{{mod}}.menu_2" t-attf-parent="{{mod}}.menu_root"/>
 -->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="{{mod}}.menu_1_list" parent="{{mod}}.menu_1"
-              action="{{mod}}.action_window"/>
-    <menuitem name="Server to list" id="{{mod}}" parent="{{mod}}.menu_2"
-              action="{{mod}}.action_server"/>
+    <t t-out="lt" />!-- actions -->
+<t t-out="lt" />!--
+    <menuitem name="List" t-attf-id="{{mod}}.menu_1_list" t-attf-parent="{{mod}}.menu_1"
+              t-attf-action="{{mod}}.action_window"/>
+    <menuitem name="Server to list" t-attf-id="{{mod}}" t-attf-parent="{{mod}}.menu_2"
+              t-attf-action="{{mod}}.action_server"/>
 -->
   </data>
 </odoo>

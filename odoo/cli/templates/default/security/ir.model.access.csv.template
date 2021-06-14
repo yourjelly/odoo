@@ -1,6 +1,6 @@
-{%- set snake_name = name|snake -%}
-{%- set id = "access_%s_%s"|format(snake_name, snake_name) -%}
-{%- set name = "%s.%s"|format(snake_name, snake_name) -%}
-{%- set model_id = "model_%s_%s"|format(snake_name, snake_name) -%}
+<t t-set="snake_name" t-value="snake(name)" />
+<t t-set="id" t-value="'access_%s_%s' % (snake_name, snake_name)" />
+<t t-set="name" t-value="'%s.%s' % (snake_name, snake_name)" />
+<t t-set="model_id" t-value="'model_%s_%s' % (snake_name, snake_name)" />
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-{{ id }},{{ name }},{{ model_id }},base.group_user,1,1,1,1
+<t t-out="id" />,<t t-out="name" />,<t t-out="model_id" />,base.group_user,1,1,1,1

@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-
+<t t-out="newline" />
 from . import controllers
 from . import models
