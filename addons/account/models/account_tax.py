@@ -81,6 +81,8 @@ class AccountTax(models.Model):
             ('previous_base_and_tax', "Previous taxes base + tax amount"),
             ('previous_tax', "Previous tax amount")
         ], # TODO OCO better labels (even technical, if possible)
+        default='line_base',
+        required=True,
         help="How this tax should compute its base" #TODO OCO DOC ajouter l'explication des options
     )
     analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
@@ -549,7 +551,7 @@ class AccountTax(models.Model):
             subsequent_taxes = self.env['account.tax']
             subsequent_tags = self.env['account.account.tag']
             if tax.include_base_amount:
-                subsequent_taxes = taxes[i+1:]
+                subsequent_taxes = taxes[i+1:].filtered(lambda x: x.base_computation != 'line_base')
 
                 if not include_caba_tags:
                     subsequent_taxes = subsequent_taxes.filtered(lambda x: x.tax_exigibility != 'on_payment')
