@@ -98,7 +98,7 @@ class ImLivechatChannel(models.Model):
         """
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id('im_livechat.rating_rating_action_livechat')
-        action['context'] = {'search_default_parent_res_id': self.id}
+        action['context'] = {'search_default_parent_res_name': self.name}
         return action
 
     # --------------------------
