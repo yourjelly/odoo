@@ -2945,7 +2945,8 @@ class Many2one(_Relational):
 
     def _read_group_format_result(self, value, gb, model):
         m2o_record = model.env[self.comodel_name].browse(value).sudo()
-        return lazy_name_get(m2o_record)[0]
+        lz = lazy_name_get(m2o_record)
+        return lz[0] if lz else False
 
 
 class Many2oneReference(Integer):
