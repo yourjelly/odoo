@@ -229,13 +229,13 @@
                         t-attf-class="small w-100 #{opt_events_list_cards and 'card-footer' or (not opt_events_list_columns and 'mt-3 pt-2 border-top') or 'py-2 border-top'}">
                         <span t-if="not event.event_registrations_open" class="text-danger">
                             <t t-if="not event.event_registrations_started">
-                                Registrations not yet open
+                                Registration not yet open
                             </t>
                             <t t-elif="event.event_registrations_sold_out">
                                 Sold Out
                             </t>
                             <t t-else="">
-                                Registrations Closed
+                                Registration closed
                             </t>
                         </span>
                     </footer>
