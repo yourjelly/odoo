@@ -1909,13 +1909,11 @@ exports.Orderline = Backbone.Model.extend({
             id: this.id,
             quantity:           this.get_quantity(),
             unit_name:          this.get_unit().name,
-            price:              this.get_unit_display_price(),
+            unitPrices:         this.get_all_prices(true, false),
             discount:           this.get_discount(false),
             product_name:       this.get_product().display_name,
             product_name_wrapped: this.generate_wrapped_product_name(),
-            price_lst:          this.get_lst_price(),
             display_discount_policy:    this.display_discount_policy(),
-            price_display_one:  this.get_display_price_one(),
             price_display :     this.get_display_price(),
             price_with_tax :    this.get_price_with_tax(),
             price_without_tax:  this.get_price_without_tax(),
@@ -1969,17 +1967,6 @@ exports.Orderline = Backbone.Model.extend({
         var digits = this.pos.dp['Product Price'];
         // round and truncate to mimic _symbol_set behavior
         return parseFloat(round_di(this.price || 0, digits).toFixed(digits));
-    },
-    get_unit_display_price: function(){
-        if (this.pos.config.iface_tax_included === 'total') {
-            var quantity = this.quantity;
-            this.quantity = 1.0;
-            var price = this.get_all_prices().priceWithTax;
-            this.quantity = quantity;
-            return price;
-        } else {
-            return this.get_unit_price();
-        }
     },
     get_display_price_one: function(){
         var rounding = this.pos.currency.rounding;
