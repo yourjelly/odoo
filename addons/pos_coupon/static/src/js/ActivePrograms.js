@@ -35,6 +35,7 @@ odoo.define('pos_coupon.ActivePrograms', function (require) {
          * This is used to set the render parameters before eventually rendering this component.
          */
         _setRenderParams() {
+            if (!this.env.pos.config.use_coupon_programs) return;
             const order = this.currentOrder;
             const unRewardedArray = order.rewardsContainer ? order.rewardsContainer.getUnawarded() : [];
             const nonGeneratingProgramIds = new Set(unRewardedArray.map(({ program }) => program.id));
