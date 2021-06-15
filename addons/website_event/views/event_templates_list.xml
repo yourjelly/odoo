@@ -280,14 +280,24 @@
     <xpath expr="//div[@id='o_wevent_index_sidebar']" position="inside">
         <div class="o_wevent_sidebar_block">
             <h6 class="o_wevent_sidebar_title">Follow Us</h6>
-            <div class="o_wevent_sidebar_social mx-n1">
-                <a t-if="website.social_facebook" t-att-href="website.social_facebook" class="o_wevent_social_link"><i class="fa fa-facebook text-facebook" aria-label="Facebook" title="Facebook"/></a>
-                <a t-if="website.social_twitter" t-att-href="website.social_twitter" class="o_wevent_social_link"><i class="fa fa-twitter text-twitter" aria-label="Twitter" title="Twitter"/></a>
-                <a t-if="website.social_linkedin" t-att-href="website.social_linkedin" class="o_wevent_social_link"><i class="fa fa-linkedin text-linkedin" aria-label="LinkedIn" title="LinkedIn"/></a>
-                <a t-if="website.social_youtube" t-att-href="website.social_youtube" class="o_wevent_social_link"><i class="fa fa-youtube-play text-youtube" aria-label="Youtube" title="Youtube"/></a>
-                <a t-if="website.social_github" t-att-href="website.social_github" class="o_wevent_social_link"><i class="fa fa-github text-github" aria-label="Github" title="Github"/></a>
-                <a t-if="website.social_instagram" t-att-href="website.social_instagram" class="o_wevent_social_link"><i class="fa fa-instagram text-instagram" aria-label="Instagram" title="Instagram"/></a>
-            </div>
+            <a t-if="website.social_facebook" t-att-href="website.social_facebook">
+                <i class="fa fa-facebook text-facebook rounded-circle shadow-sm" aria-label="Facebook" title="Facebook"/>
+            </a>
+            <a t-if="website.social_twitter" t-att-href="website.social_twitter">
+                <i class="fa fa-twitter text-twitter rounded-circle shadow-sm" aria-label="Twitter" title="Twitter"/>
+            </a>
+            <a t-if="website.social_linkedin" t-att-href="website.social_linkedin">
+                <i class="fa fa-linkedin text-linkedin rounded-circle shadow-sm" aria-label="LinkedIn" title="LinkedIn"/>
+            </a>
+            <a t-if="website.social_youtube" t-att-href="website.social_youtube">
+                <i class="fa fa-youtube-play text-youtube rounded-circle shadow-sm" aria-label="Youtube" title="Youtube"/>
+            </a>
+            <a t-if="website.social_github" t-att-href="website.social_github">
+                <i class="fa fa-github text-github rounded-circle shadow-sm" aria-label="Github" title="Github"/>
+            </a>
+            <a t-if="website.social_instagram" t-att-href="website.social_instagram">
+                <i class="fa fa-instagram text-instagram rounded-circle shadow-sm" aria-label="Instagram" title="Instagram"/>
+            </a>
         </div>
         <div id="oe_structure_website_event_sidebar_2" class="oe_structure oe_empty" data-editor-message="+"/>
     </xpath>
