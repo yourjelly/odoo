@@ -8,7 +8,7 @@ import datetime
 from pytz import timezone
 
 from odoo import api, exceptions, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from odoo.addons.resource.models.resource import make_aware, Intervals
 from odoo.tools.float_utils import float_compare
 
@@ -261,41 +261,40 @@ class MrpWorkcenter(models.Model):
                 remaining -= interval_minutes
         return False, 'Not available slot 700 days after the planned start'
 
-
-class MrpWorkcenterProductivityLossType(models.Model):
-    _name = "mrp.workcenter.productivity.loss.type"
-    _description = 'MRP Workorder productivity losses'
-    _rec_name = 'loss_type'
-
-    @api.depends('loss_type')
-    def name_get(self):
-        """ As 'category' field in form view is a Many2one, its value will be in
-        lower case. In order to display its value capitalized 'name_get' is
-        overrided.
-        """
-        result = []
-        for rec in self:
-            result.append((rec.id, rec.loss_type.title()))
-        return result
-
-    loss_type = fields.Selection([
-            ('availability', 'Availability'),
-            ('performance', 'Performance'),
-            ('quality', 'Quality'),
-            ('productive', 'Productive')], string='Category', default='availability', required=True)
-
-
 class MrpWorkcenterProductivityLoss(models.Model):
     _name = "mrp.workcenter.productivity.loss"
     _description = "Workcenter Productivity Losses"
     _order = "sequence, id"
 
     name = fields.Char('Blocking Reason', required=True)
-    sequence = fields.Integer('Sequence', default=1)
-    manual = fields.Boolean('Is a Blocking Reason', default=True)
-    loss_id = fields.Many2one('mrp.workcenter.productivity.loss.type', domain=([('loss_type', 'in', ['quality', 'availability'])]), string='Category')
-    loss_type = fields.Selection(string='Effectiveness Category', related='loss_id.loss_type', store=True, readonly=False)
+    sequence = fields.Integer('Sequence', compute='_compute_manual')
+    loss_type_manual = fields.Selection(
+        [('productive', 'Productive'), ('performance', 'Performance')],
+        string='Effectiveness Category',
+        inverse='_inverse_loss_type_domain', compute='_compute_loss_type_domain')
+    loss_type = fields.Selection([
+        ('availability', 'Availability'),
+        ('performance', 'Performance'),
+        ('quality', 'Quality'),
+        ('productive', 'Productive')], string='Effectiveness Category')
 
+    @api.depends('loss_type')
+    def _compute_loss_type_domain(self):
+        self.loss_type_manual = False
+        for loss in self:
+            if loss.loss_type in ('productive', 'performance'):
+                loss.loss_type_manual = loss.loss_type
+
+    def _inverse_loss_type_domain(self):
+        for loss in self:
+            if loss.loss_type_manual:
+                loss.loss_type = loss.loss_type_manual
+
+    def unlink(self):
+        manuals = self.filtered(lambda l: l.loss_type in ('productive', 'performance'))
+        if manuals:
+            raise UserError(_('You cannot remove the this type of Productivity losses'))
+        return super().unlink()
 
 class MrpWorkcenterProductivity(models.Model):
     _name = "mrp.workcenter.productivity"
@@ -331,7 +330,7 @@ class MrpWorkcenterProductivity(models.Model):
         'mrp.workcenter.productivity.loss', "Loss Reason",
         ondelete='restrict', required=True)
     loss_type = fields.Selection(
-        string="Effectiveness", related='loss_id.loss_type', store=True, readonly=False)
+        string="Effectiveness", related='loss_id.loss_type', store=True)
     description = fields.Text('Description')
     date_start = fields.Datetime('Start Date', default=fields.Datetime.now, required=True)
     date_end = fields.Datetime('End Date')

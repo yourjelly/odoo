@@ -450,7 +450,8 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="loss_id" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="loss_type" invisible="1"/>
+                        <field name="loss_type_manual"/>
                     </group>
                 </sheet>
             </form>
@@ -474,8 +475,6 @@
         <field name="model">mrp.workcenter.productivity.loss</field>
         <field name="arch" type="xml">
             <kanban>
-                <field name="name"/>
-                <field name="manual"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click">
@@ -484,12 +483,6 @@
                             </div>
                             <div>
                                 <strong>Effectiveness Category: </strong><field name="loss_type"/>
-                            </div>
-                            <div>
-                                <strong>Is a Blocking Reason? </strong>
-                                <span class="float-right" title="Is a Blocking Reason?">
-                                    <field name="manual" widget="boolean"/>
-                                </span>
                             </div>
                         </div>
                     </t>
@@ -507,6 +500,25 @@
             </search>
         </field>
     </record>
+
+    <record model="ir.actions.act_window" id="mrp_workcenter_productivity_loss_action">
+        <field name="name">Workcenter Productivity Losses</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">mrp.workcenter.productivity.loss</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('loss_type', 'in', ('productive', 'performance'))]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No default blocking Reasons
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mrp_workcenter_productivity_loss"
+          parent="menu_mrp_configuration"
+          action="mrp_workcenter_productivity_loss_action"
+          groups="group_no_one"
+          sequence="80"/>
 
     <record id="oee_search_view" model="ir.ui.view">
         <field name="name">mrp.workcenter.productivity.search</field>
