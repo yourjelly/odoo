@@ -1058,7 +1058,7 @@ function makeActionManager(env) {
             await _executeCloseAction();
         }
         if (effect) {
-            env.services.effect.create(effect.type, effect);
+            env.services.effect.add(effect.type, effect);
         }
     }
 
