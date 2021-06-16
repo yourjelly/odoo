@@ -7,7 +7,7 @@ class IrUiMenu(models.Model):
     _inherit = "ir.ui.menu"
 
     def load_web_menus(self, debug):
-        menus = super(IrUiMenu, self).load_menus(debug)
+        menus = self.load_menus(debug)
 
         web_menus = {}
         for menu in menus.values():
