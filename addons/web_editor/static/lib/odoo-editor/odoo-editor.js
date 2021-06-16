@@ -29,7 +29,8 @@ var exportVariable = (function (exports) {
     };
 
     const URL_REGEX = /((?:https?:\/\/)?(?:[a-z0-9-]{1,63}\.){1,2}[a-z]{2,15}(?:\/[^\s]*)?)/gi;
-    const URL_REGEX_WITH_INFOS = /((https?:\/\/)?([a-z0-9-]{1,63}\.){1,2}[a-z]{2,15}(\/[^\s]*)?)/gi;
+    const URL_REGEX_WITH_INFOS = /((https?:\/\/)?([a-z0-9-]{1,63}\.){1,2}[a-z]{2,15}(\/[^\s]*)?(\s|$))/gi;
+    const YOUTUBE_URL_GET_VIDEO_ID = /^(?:(?:https?:)?\/\/)?(?:(?:www|m)\.)?(?:youtube\.com|youtu\.be)(?:\/(?:[\w-]+\?v=|embed\/|v\/)?)([^\s?&#]+)(?:\S+)?$/i;
 
     //------------------------------------------------------------------------------
     // Position and sizes
@@ -812,7 +813,13 @@ var exportVariable = (function (exports) {
         }
         const tagName = node.nodeName.toUpperCase();
         // Every custom jw-* node will be considered as blocks.
-        if (tagName.startsWith('JW-') || tagName === 'T') {
+        if (
+            tagName.startsWith('JW-') ||
+            (tagName === 'T' &&
+                node.getAttribute('t-esc') === null &&
+                node.getAttribute('t-out') === null &&
+                node.getAttribute('t-raw') === null)
+        ) {
             return true;
         }
         if (tagName === 'BR') {
@@ -850,10 +857,7 @@ var exportVariable = (function (exports) {
      */
     function isBold(node) {
         const fontWeight = +getComputedStyle(closestElement(node)).fontWeight;
-        return (
-            fontWeight > 500 ||
-            fontWeight > +getComputedStyle(closestBlock(node)).fontWeight
-        );
+        return fontWeight > 500 || fontWeight > +getComputedStyle(closestBlock(node)).fontWeight;
     }
 
     function isUnbreakable(node) {
@@ -867,6 +871,16 @@ var exportVariable = (function (exports) {
             isUnremovable(node) || // An unremovable node is always unbreakable.
             ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
             node.hasAttribute('t') ||
+            (node.nodeType === Node.ELEMENT_NODE &&
+                (node.nodeName === 'T' ||
+                    node.getAttribute('t-if') ||
+                    node.getAttribute('t-esc') ||
+                    node.getAttribute('t-elif') ||
+                    node.getAttribute('t-else') ||
+                    node.getAttribute('t-foreach') ||
+                    node.getAttribute('t-value') ||
+                    node.getAttribute('t-out') ||
+                    node.getAttribute('t-raw'))) ||
             node.classList.contains('oe_unbreakable')
         );
     }
@@ -880,7 +894,12 @@ var exportVariable = (function (exports) {
             node.parentElement &&
             !node.parentElement.isContentEditable &&
             node.nodeName !== 'A'; // links can be their own contenteditable but should be removable by default.
-        return isEditableRoot || (node.classList && node.classList.contains('oe_unremovable'));
+        return (
+            isEditableRoot ||
+            (node.nodeType === Node.ELEMENT_NODE &&
+                (node.getAttribute('t-set') || node.getAttribute('t-call'))) ||
+            (node.classList && node.classList.contains('oe_unremovable'))
+        );
     }
 
     function containsUnbreakable(node) {
@@ -3354,7 +3373,7 @@ var exportVariable = (function (exports) {
             this.el.style.width = `${this.options.width}px`;
             document.body.append(this.el);
 
-            this.options.editable.addEventListener('keydown', this.onKeydown.bind(this), true);
+            this.addKeydownTrigger('/', { commands: this.options.commands });
 
             this._mainWrapperElement = document.createElement('div');
             this._mainWrapperElement.className = 'oe-commandbar-mainWrapper';
@@ -3413,8 +3432,17 @@ var exportVariable = (function (exports) {
                             });
                         });
                     }
-
-                    commandElWrapper.innerHTML = `
+                    let commandImgEl, commandTitleEl, commandDescriptionEl;
+                    switch (command.style) {
+                        case 'small':
+                            commandTitleEl = document.createElement('div');
+                            commandTitleEl.setAttribute('class', 'oe-commandbar-commandSmall');
+                            commandTitleEl.setAttribute('title', command.description);
+                            commandTitleEl.innerText = command.title;
+                            commandElWrapper.append(commandTitleEl);
+                            break;
+                        default:
+                            commandElWrapper.innerHTML = `
                     <div class="oe-commandbar-commandLeftCol">
                         <i class="oe-commandbar-commandImg fa"></i>
                     </div>
@@ -3423,18 +3451,19 @@ var exportVariable = (function (exports) {
                         </div>
                         <div class="oe-commandbar-commandDescription">
                         </div>
-                    </div>
-                `;
-                    const commandImgEl = commandElWrapper.querySelector('.oe-commandbar-commandImg');
-                    const commandTitleEl = commandElWrapper.querySelector(
-                        '.oe-commandbar-commandTitle',
-                    );
-                    const commandDescriptionEl = commandElWrapper.querySelector(
-                        '.oe-commandbar-commandDescription',
-                    );
-                    commandTitleEl.innerText = command.title;
-                    commandDescriptionEl.innerText = command.description;
-                    commandImgEl.classList.add(command.fontawesome);
+                    </div>`;
+                            commandImgEl = commandElWrapper.querySelector('.oe-commandbar-commandImg');
+                            commandTitleEl = commandElWrapper.querySelector(
+                                '.oe-commandbar-commandTitle',
+                            );
+                            commandDescriptionEl = commandElWrapper.querySelector(
+                                '.oe-commandbar-commandDescription',
+                            );
+                            commandTitleEl.innerText = command.title;
+                            commandDescriptionEl.innerText = command.description;
+                            commandImgEl.classList.add(command.fontawesome);
+                    }
+
                     groupWrapperEl.append(commandElWrapper);
 
                     const commandElWrapperMouseMove = () => {
@@ -3450,122 +3479,163 @@ var exportVariable = (function (exports) {
                     commandElWrapper.addEventListener('mousemove', commandElWrapperMouseMove);
                     commandElWrapper.addEventListener(
                         'mousedown',
-                        event => {
+                        ev => {
+                            ev.preventDefault();
+                            ev.stopImmediatePropagation();
                             this._currentValidate();
-                            event.preventDefault();
-                            event.stopPropagation();
                         },
                         true,
                     );
                 }
             }
+            this._resetPosition();
         }
 
-        onKeydown(event) {
-            const selection = document.getSelection();
-            if (!selection.isCollapsed || !selection.rangeCount) return;
-
-            if (event.key === '/' && !this._active) {
-                this.options.onActivate && this.options.onActivate();
-
-                const showOnceOnKeyup = () => {
-                    this.show();
-                    event.target.removeEventListener('keyup', showOnceOnKeyup, true);
-                    initialTarget = event.target;
-                    oldValue = event.target.innerText;
-                };
-                event.target.addEventListener('keyup', showOnceOnKeyup, true);
-                this._active = true;
-                this.render(this.options.commands);
-                this._resetPosition();
-
-                let initialTarget;
-                let oldValue;
-
-                const keyup = event => {
-                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                        event.preventDefault();
-                        return;
+        addKeydownTrigger(triggerKey, options) {
+            this.options.editable.addEventListener(
+                'keydown',
+                ev => {
+                    const selection = this.options.document.getSelection();
+                    if (!selection.isCollapsed || !selection.rangeCount) return;
+                    if (ev.key === triggerKey && !this._active) {
+                        this.open({ ...options, openOnKeyupTarget: ev.target });
                     }
-                    if (!initialTarget) return;
-                    const diff = patienceDiff(
-                        oldValue.split(''),
-                        initialTarget.innerText.split(''),
-                        true,
-                    );
-                    this._lastText = diff.bMove.join('').trim();
+                },
+                true,
+            );
+        }
 
-                    if (this._lastText.match(/\s/)) {
-                        this._stop();
-                        return;
-                    }
-                    const term = this._lastText;
+        open(openOptions) {
+            this.options.onActivate && this.options.onActivate();
+            this._currentOpenOptions = openOptions;
 
-                    this._currentFilteredCommands = this._filter(term);
-                    this.render(this._currentFilteredCommands);
-                    this._resetPosition();
-                };
-                const keydown = e => {
-                    if (e.key === 'Enter') {
-                        e.stopImmediatePropagation();
-                        this._currentValidate();
-                        e.preventDefault();
-                    } else if (e.key === 'Escape') {
-                        e.stopImmediatePropagation();
-                        this._stop();
-                        e.preventDefault();
-                    } else if (e.key === 'Backspace' && !this._lastText) {
-                        this._stop();
-                    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
+            const openOnKeyupTarget = this._currentOpenOptions.openOnKeyupTarget;
+            const onValueChangeFunction = term =>
+                this._currentOpenOptions.valueChangeFunction
+                    ? this._currentOpenOptions.valueChangeFunction(term)
+                    : this._filter(term, this._currentOpenOptions.commands);
 
-                        const index = this._currentFilteredCommands.findIndex(
-                            c => c === this._currentSelectedCommand,
-                        );
-                        if (!this._currentFilteredCommands.length || index === -1) {
-                            this._currentSelectedCommand = undefined;
-                        } else {
-                            const n = e.key === 'ArrowDown' ? 1 : -1;
-                            const newIndex = cycle(index + n, this._currentFilteredCommands.length - 1);
-                            this._currentSelectedCommand = this._currentFilteredCommands[newIndex];
-                        }
-                        e.preventDefault();
-                        this.render(this._currentFilteredCommands);
-                    }
-                };
-                const mousemove = () => {
-                    this._hoverActive = true;
-                };
+            const showOnceOnKeyup = () => {
+                this.show();
+                openOnKeyupTarget.removeEventListener('keyup', showOnceOnKeyup, true);
+                initialTarget = openOnKeyupTarget;
+                this._initialValue = openOnKeyupTarget.innerText;
+            };
+            openOnKeyupTarget.addEventListener('keyup', showOnceOnKeyup, true);
 
-                this._stop = () => {
-                    this._active = false;
-                    this.hide();
-                    this._currentSelectedCommand = undefined;
+            this._active = true;
+            this._currentFilteredCommands = this._currentOpenOptions.commands;
+            this.render(this._currentOpenOptions.commands);
 
-                    document.removeEventListener('mousedown', this._stop);
-                    document.removeEventListener('keyup', keyup);
-                    document.removeEventListener('keydown', keydown, true);
-                    document.removeEventListener('mousemove', mousemove);
+            let initialTarget;
 
-                    this.options.onStop && this.options.onStop();
-                };
-                this._currentValidate = () => {
-                    const command = this._currentFilteredCommands.find(
+            const keyup = async ev => {
+                if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                    ev.preventDefault();
+                    return;
+                }
+                if (!initialTarget) return;
+                const diff = patienceDiff(
+                    this._initialValue.split(''),
+                    initialTarget.innerText.split(''),
+                    true,
+                );
+                this._lastText = diff.bMove.join('');
+                if (this._lastText.match(/\s/) && this._currentOpenOptions.closeOnSpace !== false) {
+                    this._stop();
+                    return;
+                }
+                const term = this._lastText;
+
+                this._currentFilteredCommands =
+                    term === '' ? this._currentOpenOptions.commands : await onValueChangeFunction(term);
+                this.render(this._currentFilteredCommands);
+            };
+            const keydown = ev => {
+                if (ev.key === 'Enter') {
+                    ev.stopImmediatePropagation();
+                    this._currentValidate();
+                    ev.preventDefault();
+                } else if (ev.key === 'Escape') {
+                    ev.stopImmediatePropagation();
+                    this._stop();
+                    ev.preventDefault();
+                } else if (ev.key === 'Backspace' && !this._lastText) {
+                    this._stop();
+                } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                    ev.preventDefault();
+                    ev.stopImmediatePropagation();
+
+                    const index = this._currentFilteredCommands.findIndex(
                         c => c === this._currentSelectedCommand,
                     );
-                    if (command) {
-                        this.options.preValidate && this.options.preValidate();
-                        command.callback();
-                        this.options.postValidate && this.options.postValidate();
+                    if (!this._currentFilteredCommands.length || index === -1) {
+                        this._currentSelectedCommand = undefined;
+                    } else {
+                        const n = ev.key === 'ArrowDown' ? 1 : -1;
+                        const newIndex = cycle(index + n, this._currentFilteredCommands.length - 1);
+                        this._currentSelectedCommand = this._currentFilteredCommands[newIndex];
                     }
-                    this._stop();
-                };
-                document.addEventListener('mousedown', this._stop);
-                document.addEventListener('keyup', keyup);
-                document.addEventListener('keydown', keydown, true);
+                    ev.preventDefault();
+                    this.render(this._currentFilteredCommands);
+                }
+            };
+            const mousemove = () => {
+                this._hoverActive = true;
+            };
+
+            this._stop = () => {
+                this._active = false;
+                this.hide();
+                this._currentSelectedCommand = undefined;
+
+                this.options.document.removeEventListener('keyup', keyup);
+                this.options.document.removeEventListener('keydown', keydown, true);
+                this.options.document.removeEventListener('mousemove', mousemove);
+                this.options.document.removeEventListener('mousedown', this._stop);
+                if (document !== this.options.document) {
+                    document.removeEventListener('mousemove', mousemove);
+                    document.removeEventListener('mousedown', this._stop);
+                }
+
+                this.options.onStop && this.options.onStop();
+            };
+            this._currentValidate = () => {
+                const command = this._currentFilteredCommands.find(
+                    c => c === this._currentSelectedCommand,
+                );
+                if (command) {
+                    !command.isIntermediateStep &&
+                        this.options.preValidate &&
+                        this.options.preValidate();
+                    command.callback();
+                    !command.isIntermediateStep &&
+                        this.options.postValidate &&
+                        this.options.postValidate();
+                }
+                !command.isIntermediateStep && this._stop();
+            };
+            this.options.document.addEventListener('keyup', keyup);
+            this.options.document.addEventListener('keydown', keydown, true);
+            this.options.document.addEventListener('mousemove', mousemove);
+            this.options.document.addEventListener('mousedown', this._stop);
+            // If the Golbal document is diferent than the provided options.document,
+            // which happend when the editor is inside an Iframe.
+            // We need to listen to the mouse event on both document
+            // to be sure the command bar will always close when clicking outside of it.
+            if (document !== this.options.document) {
                 document.addEventListener('mousemove', mousemove);
+                document.addEventListener('mousedown', this._stop);
             }
+        }
+
+        nextOpenOptions(openOptions) {
+            this._currentOpenOptions = openOptions;
+            this._initialValue = (
+                this._currentOpenOptions.openOnKeyupTarget || this.options.editable
+            ).innerText;
+            this._currentFilteredCommands = this._currentOpenOptions.commands;
+            this.render(this._currentOpenOptions.commands);
         }
 
         show() {
@@ -3583,8 +3653,8 @@ var exportVariable = (function (exports) {
         // private
         // -------------------------------------------------------------------------
 
-        _filter(term) {
-            let commands = this.options.commands;
+        _filter(term, commands) {
+            const initalCommands = commands;
             term = term.toLowerCase();
             term = term.replaceAll(/\s/g, '\\s');
             const regex = new RegExp(
@@ -3594,7 +3664,7 @@ var exportVariable = (function (exports) {
                     .join('.*'),
             );
             if (term.length) {
-                commands = this.options.commands.filter(command => {
+                commands = initalCommands.filter(command => {
                     const commandText = (command.groupName + ' ' + command.title).toLowerCase();
                     return commandText.match(regex);
                 });
@@ -3608,7 +3678,12 @@ var exportVariable = (function (exports) {
                 this.hide();
                 return;
             }
-            const { left, top } = position;
+            let { left, top } = position;
+            if (this.options.getContextFromParentRect) {
+                const parentContextRect = this.options.getContextFromParentRect();
+                left += parentContextRect.left;
+                top += parentContextRect.top;
+            }
 
             this.el.style.left = `${left}px`;
             this.el.style.top = `${top}px`;
@@ -3768,6 +3843,215 @@ var exportVariable = (function (exports) {
         }
     }
 
+    class QWebPlugin {
+        constructor(editor) {
+            this._editor = editor;
+            this._tGroupCount = 0;
+            this._hideBranchingSelection = this._hideBranchingSelection.bind(this);
+            this._makeBranchingSelection();
+            this._clickListeners = [];
+        }
+        destroy() {
+            this._selectElWrapper.remove();
+            for (const listener of this._clickListeners) {
+                document.removeEventListener('click', listener);
+            }
+        }
+        cleanForSave(editable) {
+            for (const node of editable.querySelectorAll('[data-oe-t-group]')) {
+                node.removeAttribute('data-oe-t-group');
+                node.removeAttribute('data-oe-t-group-active');
+                node.removeAttribute('data-oe-t-inline');
+                node.removeAttribute('data-oe-t-selectable');
+            }
+        }
+        sanitizeElement(subRoot) {
+            if (subRoot.nodeType !== Node.ELEMENT_NODE) {
+                return;
+            }
+
+            this._fixInlines(subRoot);
+
+            const demoElements = subRoot.querySelectorAll('[t-esc], [t-raw], [t-out]');
+            for (const element of demoElements) {
+                element.setAttribute('contenteditable', 'false');
+            }
+
+            this._groupQwebBranching(subRoot);
+        }
+        _groupQwebBranching(subRoot) {
+            const tNodes = subRoot.querySelectorAll('[t-if], [t-elif], [t-else]');
+            const groupsEncounter = new Set();
+            for (const node of tNodes) {
+                const parentTNode = [...node.parentElement.children];
+                const index = parentTNode.indexOf(node);
+                const prevNode = parentTNode[index - 1];
+
+                let groupId;
+                if (
+                    prevNode &&
+                    node.previousElementSibling === prevNode &&
+                    !node.hasAttribute('t-if')
+                ) {
+                    // Make the first t-if selectable, if prevNode is not a t-if,
+                    // it's already data-oe-t-selectable.
+                    prevNode.setAttribute('data-oe-t-selectable', 'true');
+                    groupId = parseInt(prevNode.getAttribute('data-oe-t-group'));
+                    node.setAttribute('data-oe-t-selectable', 'true');
+                } else {
+                    groupId = this._tGroupCount++;
+                }
+                groupsEncounter.add(groupId);
+                node.setAttribute('data-oe-t-group', groupId);
+
+                const clickListener = e => {
+                    e.stopImmediatePropagation();
+                    this._showBranchingSelection(node);
+                };
+                this._clickListeners.push(clickListener);
+                node.addEventListener('click', clickListener);
+            }
+            for (const groupId of groupsEncounter) {
+                const isOneElementActive = subRoot.querySelector(
+                    `[data-oe-t-group='${groupId}'][data-oe-t-group-active]`,
+                );
+                // If there is no element in groupId activated, activate the first
+                // one.
+                if (!isOneElementActive) {
+                    subRoot
+                        .querySelector(`[data-oe-t-group='${groupId}']`)
+                        .setAttribute('data-oe-t-group-active', 'true');
+                }
+            }
+        }
+        _fixInlines(subRoot) {
+            const checkAllInline = el => {
+                return [...el.children].every(child => {
+                    if (child.tagName === 'T') {
+                        return checkAllInline(child);
+                    } else {
+                        return (
+                            child.nodeType !== Node.ELEMENT_NODE ||
+                            window.getComputedStyle(child).display === 'inline'
+                        );
+                    }
+                });
+            };
+            const tElements = subRoot.querySelectorAll('t');
+            const elementInSet = new Set();
+            // Wait for the content to be on the dom to check checkAllInline
+            // otherwise the getComputedStyle will be wrong.
+            // todo: remove the setTimeout when the editor will provide a signal
+            // that the editable is on the dom.
+            setTimeout(() => {
+                this._editor.observerUnactive('qweb-plugin-checkAllInline');
+                for (const tElement of tElements) {
+                    if (checkAllInline(tElement)) {
+                        tElement.setAttribute('data-oe-t-inline', 'true');
+                        elementInSet.add(tElement);
+                    }
+                }
+                this._editor.observerActive('qweb-plugin-checkAllInline');
+            });
+        }
+        _makeBranchingSelection() {
+            this._selectElWrapper = document.createElement('div');
+            this._selectElWrapper.classList.add('oe-qweb-select');
+            this._selectElWrapper.innerHTML = '';
+            this._editor.document.body.append(this._selectElWrapper);
+            this._hideBranchingSelection();
+        }
+        _showBranchingSelection(target) {
+            this._hideBranchingSelection();
+
+            const branchingHierarchyElements = [target, ...ancestors(target)]
+                .filter(element => element.getAttribute('data-oe-t-group-active') === 'true')
+                .filter(element => {
+                    const itemGroupId = element.getAttribute('data-oe-t-group');
+
+                    const groupItemsNodes = element.parentElement.querySelectorAll(
+                        `[data-oe-t-group='${itemGroupId}']`,
+                    );
+                    return groupItemsNodes.length > 1;
+                });
+
+            if (!branchingHierarchyElements.length) return;
+
+            const groupsActive = branchingHierarchyElements.map(node =>
+                node.getAttribute('data-oe-t-group'),
+            );
+            for (const branchingElement of branchingHierarchyElements) {
+                this._selectElWrapper.prepend(this._renderBranchingSelection(branchingElement));
+            }
+            const closeSelectHandler = event => {
+                const path = [event.target, ...ancestors(event.target)];
+                const shouldClose = !path.find(
+                    element =>
+                        element === this._selectElWrapper ||
+                        groupsActive.includes(element.getAttribute('data-oe-t-group')),
+                );
+                if (shouldClose) {
+                    this._hideBranchingSelection();
+                    document.removeEventListener('mousedown', closeSelectHandler);
+                }
+            };
+            document.addEventListener('mousedown', closeSelectHandler);
+            this._selectElWrapper.style.display = 'flex';
+            this._updateBranchingSelectionPosition(
+                branchingHierarchyElements[branchingHierarchyElements.length - 1],
+            );
+        }
+        _updateBranchingSelectionPosition(target) {
+            window.addEventListener('mousewheel', this._hideBranchingSelection);
+
+            const box = target.getBoundingClientRect();
+            const selBox = this._selectElWrapper.getBoundingClientRect();
+
+            this._selectElWrapper.style.left = `${window.scrollX + box.left}px`;
+            this._selectElWrapper.style.top = `${window.scrollY + box.top - selBox.height}px`;
+        }
+        _renderBranchingSelection(target) {
+            const selectEl = document.createElement('select');
+            const groupId = parseInt(target.getAttribute('data-oe-t-group'));
+            const groupElements = target.parentElement.querySelectorAll(
+                `[data-oe-t-group='${groupId}']`,
+            );
+            for (const element of groupElements) {
+                const optionElement = document.createElement('option');
+                if (element.hasAttribute('t-if')) {
+                    optionElement.innerText = 'if';
+                } else if (element.hasAttribute('t-elif')) {
+                    optionElement.innerText = 'elif';
+                } else if (element.hasAttribute('t-else')) {
+                    optionElement.innerText = 'else';
+                }
+                if (element.hasAttribute('data-oe-t-group-active')) {
+                    optionElement.selected = true;
+                }
+                selectEl.appendChild(optionElement);
+            }
+
+            selectEl.onchange = () => {
+                let activeElement;
+                for (let i = 0; i < groupElements.length; i++) {
+                    if (i === selectEl.selectedIndex) {
+                        activeElement = groupElements[i];
+                        groupElements[i].setAttribute('data-oe-t-group-active', 'true');
+                    } else {
+                        groupElements[i].removeAttribute('data-oe-t-group-active');
+                    }
+                }
+                this._showBranchingSelection(activeElement);
+            };
+            return selectEl;
+        }
+        _hideBranchingSelection() {
+            this._selectElWrapper.style.display = 'none';
+            this._selectElWrapper.innerHTML = ``;
+            window.removeEventListener('mousewheel', this._hideBranchingSelection);
+        }
+    }
+
     const UNBREAKABLE_ROLLBACK_CODE = 'UNBREAKABLE';
     const UNREMOVABLE_ROLLBACK_CODE = 'UNREMOVABLE';
     const BACKSPACE_ONLY_COMMANDS = ['oDeleteBackward', 'oDeleteForward'];
@@ -3849,6 +4133,10 @@ var exportVariable = (function (exports) {
             // Map that from an node id to the dom node.
             this._idToNodeMap = new Map();
 
+            // Instanciate plugins.
+            this._plugins = [];
+            this._pluginAdd(QWebPlugin);
+
             // -------------------
             // Alter the editable
             // -------------------
@@ -3861,6 +4149,7 @@ var exportVariable = (function (exports) {
             editable.oid = 1;
             this._idToNodeMap.set(1, editable);
             this.editable = this.options.toSanitize ? sanitize(editable) : editable;
+            this._pluginCall('sanitizeElement', [editable]);
 
             // Set contenteditable before clone as FF updates the content at this point.
             this._activateContenteditable();
@@ -3944,6 +4233,7 @@ var exportVariable = (function (exports) {
             this._removeDomListener();
             this.commandBar.destroy();
             this.commandbarTablePicker.el.remove();
+            this._pluginCall('destroy', []);
         }
 
         sanitize() {
@@ -3964,6 +4254,7 @@ var exportVariable = (function (exports) {
 
             // sanitize and mark current position as sanitized
             sanitize(commonAncestor);
+            this._pluginCall('sanitizeElement', [commonAncestor]);
         }
 
         addDomListener(element, eventName, callback) {
@@ -4749,9 +5040,17 @@ var exportVariable = (function (exports) {
                 }
             }
         }
-        _removeContenteditableLinks() {
-            for (const node of this.editable.querySelectorAll('a[contenteditable]')) {
-                node.removeAttribute('contenteditable');
+        _resetContenteditableLinks() {
+            if (this._fixLinkMutatedElements) {
+                for (const element of this._fixLinkMutatedElements.wasContenteditableTrue) {
+                    element.setAttribute('contenteditable', 'true');
+                }
+                for (const element of this._fixLinkMutatedElements.wasContenteditableFalse) {
+                    element.setAttribute('contenteditable', 'false');
+                }
+                for (const element of this._fixLinkMutatedElements.wasContenteditableNull) {
+                    element.removeAttribute('contenteditable');
+                }
             }
         }
         _activateContenteditable() {
@@ -4963,6 +5262,7 @@ var exportVariable = (function (exports) {
             this.commandBar = new CommandBar({
                 editable: this.editable,
                 document: this.document,
+                getContextFromParentRect: this.options.getContextFromParentRect,
                 _t: this.options._t,
                 onShow: () => {
                     this.commandbarTablePicker.hide();
@@ -5212,7 +5512,12 @@ var exportVariable = (function (exports) {
                         setCursor(range.endContainer, range.endOffset);
                     }
                     // Check for url after user insert a space so we won't transform an incomplete url.
-                    if (ev.data.includes(' ') && selection && selection.anchorNode) {
+                    if (
+                        ev.data.includes(' ') &&
+                        selection &&
+                        selection.anchorNode &&
+                        !this.commandBar._active
+                    ) {
                         ev.preventDefault();
                         this._convertUrlInElement(closestElement(selection.anchorNode));
                         this.execCommand('insertText', ev.data);
@@ -5342,7 +5647,11 @@ var exportVariable = (function (exports) {
                 hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
                 hint.removeAttribute('placeholder');
             }
+            this.cleanForSave();
             this.observerActive();
+        }
+        cleanForSave(element = this.editable) {
+            this._pluginCall('cleanForSave', [element]);
         }
         /**
          * Handle the hint preview for the commandbar.
@@ -5416,13 +5725,32 @@ var exportVariable = (function (exports) {
             // editable zones.
             this.automaticStepSkipStack();
             const link = closestElement(ev.target, 'a');
-            if (link && !link.querySelector('div') && !closestElement(ev.target, '.o_not_editable')) {
-                this._removeContenteditableLinks();
+            this._resetContenteditableLinks();
+            if (
+                link &&
+                !link.querySelector('div') &&
+                !closestElement(ev.target, '.o_not_editable') &&
+                link.getAttribute('contenteditable') !== 'false'
+            ) {
                 const editableChildren = link.querySelectorAll('[contenteditable=true]');
                 this._stopContenteditable();
+
+                this._fixLinkMutatedElements = {
+                    wasContenteditableTrue: [...editableChildren],
+                    wasContenteditableFalse: [],
+                    wasContenteditableNull: [],
+                };
+                const contentEditableAttribute = link.getAttribute('contenteditable');
+                if (contentEditableAttribute === 'true') {
+                    this._fixLinkMutatedElements.wasContenteditableTrue.push(link);
+                } else if (contentEditableAttribute === 'false') {
+                    this._fixLinkMutatedElements.wasContenteditableFalse.push(link);
+                } else {
+                    this._fixLinkMutatedElements.wasContenteditableNull.push(link);
+                }
+
                 [...editableChildren, link].forEach(node => node.setAttribute('contenteditable', true));
             } else {
-                this._removeContenteditableLinks();
                 this._activateContenteditable();
             }
 
@@ -5541,10 +5869,71 @@ var exportVariable = (function (exports) {
                     const url = /^https?:\/\//gi.test(splitAroundUrl[i])
                         ? splitAroundUrl[i]
                         : 'https://' + splitAroundUrl[i];
-                    this.execCommand(
-                        'insertHTML',
-                        `<a href="${url}" ${linkAttrs}>${splitAroundUrl[i]}</a>`,
-                    );
+                    const youtubeUrl = YOUTUBE_URL_GET_VIDEO_ID.exec(url);
+                    const urlFileExtention = url.split('.').pop();
+                    const baseEmbedCommand = [
+                        {
+                            groupName: 'paste',
+                            title: 'Paste as URL',
+                            description: 'Create an URL.',
+                            fontawesome: 'fa-link',
+                            callback: () => {
+                                this.historyUndo();
+                                this.execCommand(
+                                    'insertHTML',
+                                    `<a href="${url}" ${linkAttrs}>${splitAroundUrl[i]}</a>`,
+                                );
+                            },
+                        },
+                        {
+                            groupName: 'paste',
+                            title: 'Paste as text',
+                            description: 'Simple text paste.',
+                            fontawesome: 'fa-font',
+                            callback: () => {},
+                        },
+                    ];
+
+                    this.execCommand('insertText', splitAroundUrl[i]);
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(urlFileExtention)) {
+                        this.commandBar.open({
+                            commands: [
+                                {
+                                    groupName: 'Embed',
+                                    title: 'Embed Image',
+                                    description: 'Embed the image in the document.',
+                                    fontawesome: 'fa-image',
+                                    callback: () => {
+                                        this.historyUndo();
+                                        this.execCommand('insertHTML', `<img src="${url}" />`);
+                                    },
+                                },
+                            ].concat(baseEmbedCommand),
+                        });
+                    } else if (youtubeUrl) {
+                        this.commandBar.open({
+                            commands: [
+                                {
+                                    groupName: 'Embed',
+                                    title: 'Embed Youtube Video',
+                                    description: 'Embed the youtube video in the document.',
+                                    fontawesome: 'fa-youtube-play',
+                                    callback: () => {
+                                        this.historyUndo();
+                                        this.execCommand(
+                                            'insertHTML',
+                                            `<iframe width="560" height="315" src="https://www.youtube.com/embed/${youtubeUrl[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+                                        );
+                                    },
+                                },
+                            ].concat(baseEmbedCommand),
+                        });
+                    } else {
+                        this.execCommand(
+                            'insertHTML',
+                            `<a href="${url}" ${linkAttrs}>${splitAroundUrl[i]}</a>`,
+                        );
+                    }
                 } else if (splitAroundUrl[i] !== '') {
                     this.execCommand('insertText', splitAroundUrl[i]);
                 }
@@ -5681,6 +6070,16 @@ var exportVariable = (function (exports) {
                 );
             }
         }
+        _pluginAdd(Plugin) {
+            this._plugins.push(new Plugin(this));
+        }
+        _pluginCall(method, args) {
+            for (const plugin of this._plugins) {
+                if (plugin[method]) {
+                    plugin[method](...args);
+                }
+            }
+        }
     }
 
     exports.BACKSPACE_FIRST_COMMANDS = BACKSPACE_FIRST_COMMANDS;
@@ -5693,6 +6092,7 @@ var exportVariable = (function (exports) {
     exports.UNREMOVABLE_ROLLBACK_CODE = UNREMOVABLE_ROLLBACK_CODE;
     exports.URL_REGEX = URL_REGEX;
     exports.URL_REGEX_WITH_INFOS = URL_REGEX_WITH_INFOS;
+    exports.YOUTUBE_URL_GET_VIDEO_ID = YOUTUBE_URL_GET_VIDEO_ID;
     exports.ancestors = ancestors;
     exports.boundariesIn = boundariesIn;
     exports.boundariesOut = boundariesOut;

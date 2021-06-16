@@ -1764,6 +1764,7 @@ class Html(_String):
     sanitize_form = True                # whether to sanitize forms
     strip_style = False                 # whether to strip style attributes (removed and therefore not sanitized)
     strip_classes = False               # whether to strip classes attributes
+    strip_qweb = False                  # whether to strip qweb <t> tag and qweb attributes
 
     def _get_attrs(self, model_class, name):
         # called by _setup_attrs(), working together with _String._setup_attrs()
@@ -1779,6 +1780,7 @@ class Html(_String):
     _related_sanitize_style = property(attrgetter('sanitize_style'))
     _related_strip_style = property(attrgetter('strip_style'))
     _related_strip_classes = property(attrgetter('strip_classes'))
+    _related_strip_qweb = property(attrgetter('strip_qweb'))
 
     _description_sanitize = property(attrgetter('sanitize'))
     _description_sanitize_tags = property(attrgetter('sanitize_tags'))
@@ -1786,6 +1788,7 @@ class Html(_String):
     _description_sanitize_style = property(attrgetter('sanitize_style'))
     _description_strip_style = property(attrgetter('strip_style'))
     _description_strip_classes = property(attrgetter('strip_classes'))
+    _description_strip_qweb = property(attrgetter('strip_qweb'))
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if value is None or value is False:
@@ -1798,7 +1801,8 @@ class Html(_String):
                 sanitize_style=self.sanitize_style,
                 sanitize_form=self.sanitize_form,
                 strip_style=self.strip_style,
-                strip_classes=self.strip_classes)
+                strip_classes=self.strip_classes,
+                strip_qweb=self.strip_qweb)
         return value
 
     def convert_to_cache(self, value, record, validate=True):
@@ -1812,7 +1816,8 @@ class Html(_String):
                 sanitize_style=self.sanitize_style,
                 sanitize_form=self.sanitize_form,
                 strip_style=self.strip_style,
-                strip_classes=self.strip_classes)
+                strip_classes=self.strip_classes,
+                strip_qweb=self.strip_qweb)
         return value
 
     def convert_to_record(self, value, record):

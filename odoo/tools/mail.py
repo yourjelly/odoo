@@ -43,6 +43,14 @@ safe_attrs = clean.defs.safe_attrs | frozenset(
      'data-class', 'data-mimetype', 'data-original-src', 'data-original-id', 'data-gl-filter', 'data-quality', 'data-resize-width',
      'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
      ])
+allowed_tags_qweb = allowed_tags | frozenset(['t'])
+safe_attrs_qweb = safe_attrs | frozenset([
+    't-out', 't-esc',
+    't-set', 't-value',
+    't-if', 't-elif', 't-else',
+    't-foreach', 't-as',
+    't-call'
+]) | frozenset(["t-att-" + att for att in safe_attrs]) | frozenset(["t-attf-" + att for att in safe_attrs])
 
 
 class _Cleaner(clean.Cleaner):
@@ -168,7 +176,7 @@ class _Cleaner(clean.Cleaner):
                 del el.attrib['style']
 
 
-def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=False, sanitize_style=False, sanitize_form=True, strip_style=False, strip_classes=False):
+def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=False, sanitize_style=False, sanitize_form=True, strip_style=False, strip_classes=False, strip_qweb=True):
     if not src:
         return src
     src = ustr(src, errors='replace')
@@ -192,7 +200,10 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
         'processing_instructions': False
     }
     if sanitize_tags:
-        kwargs['allow_tags'] = allowed_tags
+        if strip_qweb:
+            kwargs['allow_tags'] = allowed_tags
+        else:
+            kwargs['allow_tags'] = allowed_tags_qweb
         if etree.LXML_VERSION >= (2, 3, 1):
             # kill_tags attribute has been added in version 2.3.1
             kwargs.update({
@@ -203,10 +214,13 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
             kwargs['remove_tags'] = tags_to_kill + tags_to_remove
 
     if sanitize_attributes and etree.LXML_VERSION >= (3, 1, 0):  # lxml < 3.1.0 does not allow to specify safe_attrs. We keep all attributes in order to keep "style"
-        if strip_classes:
-            current_safe_attrs = safe_attrs - frozenset(['class'])
-        else:
+        if strip_qweb:
             current_safe_attrs = safe_attrs
+        else:
+            current_safe_attrs = safe_attrs_qweb
+        if strip_classes:
+            current_safe_attrs = current_safe_attrs - frozenset(['class', 't-att-class', 't-attf-class'])
+
         kwargs.update({
             'safe_attrs_only': True,
             'safe_attrs': current_safe_attrs,
@@ -283,6 +297,33 @@ def is_html_empty(html_content):
     tag_re = re.compile(r'\<\s*\/?(?:p|div|span|br|b|i)(?:(?=\s+\w*)[^/>]*|\s*)/?\s*\>')
     return not bool(re.sub(tag_re, '', html_content).strip())
 
+def bracket_to_qweb_instructions(text):
+    reg = re.compile(r"""
+    ((?:[^\$|\\]|\\.)*)
+    (?:\$\{
+         ((?:[^}\'\"\\]
+             |'(?:[^'\\]|\\.)*'?
+             |"(?:[^"\\]|\\.)*"?
+             |(?:\\.))*)
+    })?
+    """, re.X)
+
+    groups = reg.findall(text)[0:-1]
+    instructions = []
+    for group in groups:
+        if group[0]:
+            instructions.append(['text', group[0]])
+        expression = re.sub(r'(\")', '&quot;', group[1]).strip()
+        if expression:
+            # `| safe` in the expression means that the content should not be escaped
+            safePattern = re.compile(r"(.*).*\s*\|\s*safe\s*$")
+            if safePattern.search(expression):
+                expression = safePattern.sub(r'\1', expression).strip()
+                instructions.append(['eval', expression])
+            else:
+                instructions.append(['eval_escape', expression])
+
+    return instructions
 
 def html_keep_url(text):
     """ Transform the url into clickable link with <a/> tag """

@@ -19,7 +19,6 @@ import unicodedata
 from collections import OrderedDict, defaultdict
 
 import babel.messages.pofile
-import jinja2
 import werkzeug
 import werkzeug.exceptions
 import werkzeug.utils
@@ -45,16 +44,6 @@ from odoo.models import check_method_name
 from odoo.service import db, security
 
 _logger = logging.getLogger(__name__)
-
-if hasattr(sys, 'frozen'):
-    # When running on compiled windows binary, we don't have access to package loader.
-    path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
-    loader = jinja2.FileSystemLoader(path)
-else:
-    loader = jinja2.PackageLoader('odoo.addons.web', "views")
-
-env = jinja2.Environment(loader=loader, autoescape=True)
-env.filters["json"] = json.dumps
 
 CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 
@@ -1064,7 +1053,7 @@ class Database(http.Controller):
             monodb = db_monodb()
             if monodb:
                 d['databases'] = [monodb]
-        return Markup(env.get_template("database_manager.html").render(d))
+        return request.render('web.database_manager', d)
 
     @http.route('/web/database/selector', type='http', auth="none")
     def selector(self, **kw):

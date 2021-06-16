@@ -584,7 +584,7 @@ class MailCase(MockEmail):
         create_values = {
             'name': 'TestTemplate',
             'subject': 'About ${object.name}',
-            'body_html': '<p>Hello ${object.name}</p>',
+            'body_html': '<p>Hello <t t-esc="object.name"/></p>',
             'model_id': cls.env['ir.model']._get(model).id,
         }
         if template_values:

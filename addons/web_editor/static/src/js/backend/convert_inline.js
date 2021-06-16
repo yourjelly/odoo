@@ -410,6 +410,9 @@ FieldHtml.include({
     _toInline: function () {
         var $editable = this.wysiwyg.getEditable();
         var html = this.wysiwyg.getValue();
+        const $odooEditor = $editable.closest('.odoo-editor');
+        // Remove temporarily the class so that css editing will not be converted.
+        $odooEditor.removeClass('odoo-editor');
         $editable.html(html);
 
         attachmentThumbnailToLinkImg($editable);
@@ -424,6 +427,7 @@ FieldHtml.include({
                 return $(this).get(0).style[attribute] || 'auto';
             });
         });
+        $odooEditor.addClass('odoo-editor');
 
         this.wysiwyg.setValue($editable.html(), {
             notifyChange: false,

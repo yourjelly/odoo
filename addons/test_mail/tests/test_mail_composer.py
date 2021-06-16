@@ -60,7 +60,7 @@ class TestMailComposer(TestMailCommon, TestRecipients):
         cls.template = cls.env['mail.template'].create({
             'name': 'TestTemplate',
             'subject': 'TemplateSubject ${object.name}',
-            'body_html': '<p>TemplateBody ${object.name}</p>',
+            'body_html': '<p>TemplateBody <t t-esc="object.name"></t></p>',
             'partner_to': '${object.customer_id.id if object.customer_id else ""}',
             'email_to': '${(object.email_from if not object.customer_id else "") | safe}',
             'email_from': '${(object.user_id.email_formatted or user.email_formatted) | safe}',
