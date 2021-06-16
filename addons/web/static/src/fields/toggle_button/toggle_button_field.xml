@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.ToggleButtonField" owl="1">
+        <button
+            type="button"
+            class="o_icon_button"
+            t-att-aria-pressed="props.value"
+            t-att-title="props.value ? props.attrs.options.active : props.attrs.options.inactive"
+            t-att-aria-label="props.value ? props.attrs.options.active : props.attrs.options.inactive"
+        >
+            <i class="fa fa-circle"
+                t-att-title="props.value ? props.attrs.options.active : props.attrs.options.inactive"
+                t-att-class="{
+                    o_toggle_button_success: props.value,
+                    'text-muted': !props.value,
+                }"
+            />
+        </button>
+    </t>
+
+</templates>

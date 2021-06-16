@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.MonetaryField" owl="1">
+        <t t-if="props.isEditing">
+            <div class="o_field_monetary o_field_number o_input">
+                <input
+                    t-att-placeholder="props.attrs.placeholder"
+                    t-att-value="props.value !== false ? props.value : ''"
+                />
+            </div>
+        </t>
+        <t t-else="">
+            <span
+                class="o_field_monetary o_field_number"
+                t-esc="formattedValue"
+            />
+        </t>
+    </t>
+
+</templates>

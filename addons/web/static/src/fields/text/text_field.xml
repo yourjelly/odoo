@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.TextField" owl="1">
+        <t t-if="props.isEditing">
+            <textarea class="o_field_text">
+                <t t-esc="props.value or ''" />
+            </textarea>
+        </t>
+        <t t-else="">
+            <span class="o_field_text">
+                <t t-esc="props.value or ''" />
+            </span>
+        </t>
+    </t>
+
+</templates>

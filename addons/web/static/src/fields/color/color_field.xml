@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.ColorField" owl="1">
+        <div>
+            <button
+                class="o_field_color"
+                t-att-data-value="props.value"
+                t-att-tabindex="props.isEditing ? 0 : -1"
+                t-att-title="props.value"
+                t-attf-style="background-color: {{ props.value }};"
+            />
+        </div>
+    </t>
+
+</templates>

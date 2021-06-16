@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.UrlField" owl="1">
+        <t t-if="props.isEditing">
+            <input
+                class="o_field_url"
+                t-att-value="props.value"
+                t-on-click.stop=""
+            />
+        </t>
+        <t t-else="">
+            <div class="o_field_url o_form_uri o_text_overflow">
+                <t t-if="props.value">
+                    <a
+                        target="_blank"
+                        t-att-href="href"
+                        t-esc="props.attrs.text or props.value"
+                    />
+                </t>
+            </div>
+        </t>
+    </t>
+
+</templates>

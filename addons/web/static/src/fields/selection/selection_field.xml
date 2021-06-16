@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.SelectionField" owl="1">
+        <t t-if="props.isEditing">
+            <select class="o_input">
+                <t t-foreach="props.meta.selection" t-as="option" t-key="option[0]">
+                    <option
+                        t-att-selected="option[0] === props.value"
+                        t-att-value="option[0]"
+                        t-esc="option[1]"
+                    />
+                </t>
+            </select>
+        </t>
+        <t t-else="">
+            <span t-esc="formattedValue" />
+        </t>
+    </t>
+
+</templates>

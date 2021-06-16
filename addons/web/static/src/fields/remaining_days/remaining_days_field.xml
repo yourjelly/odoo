@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.RemainingDaysField" owl="1">
+        <t t-if="props.value">
+            <div
+                t-att-title="props.value"
+                t-att-class="{
+                    'font-weight-bold': diffDays lte 0,
+                    'text-danger': diffDays lt 0,
+                    'text-warning': diffDays === 0,
+                }"
+            >
+                <t t-if="Math.abs(diffDays) gt 99">
+                    <t t-esc="formattedValue" />
+                </t>
+                <t t-elif="diffDays === 0">Today</t>
+                <t t-elif="diffDays lt 0">
+                    <t t-if="diffDays === -1">Yesterday</t>
+                    <t t-else=""><t t-esc="-diffDays" /> days ago</t>
+                </t>
+                <t t-else="">
+                    <t t-if="diffDays === 1">Tomorrow</t>
+                    <t t-else="">In <t t-esc="diffDays" /> days</t>
+                </t>
+            </div>
+        </t>
+        <t t-else="">
+            <div />
+        </t>
+    </t>
+
+</templates>

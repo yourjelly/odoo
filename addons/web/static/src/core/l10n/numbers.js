@@ -68,7 +68,9 @@ export function formatFloat(value, options = {}) {
     const grouping = options.grouping || localization.grouping;
     const thousandsSep = options.thousandsSep || localization.thousandsSep;
     const decimalPoint = options.decimalPoint || localization.decimalPoint;
-    const formatted = value.toFixed(options.precision || 2).split(".");
+    const formatted = value
+        .toFixed(options.precision !== undefined ? options.precision : 2)
+        .split(".");
     formatted[0] = insertThousandsSep(+formatted[0], thousandsSep, grouping);
     return formatted.join(decimalPoint);
 }

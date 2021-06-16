@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.PriorityField" owl="1">
+        <div class="o_priority" role="radiogroup">
+            <t t-foreach="props.meta.selection" t-as="option" t-key="option[0]">
+                <span
+                    class="o_priority_star fa"
+                    role="radio"
+                    t-att-aria-checked="currentOptionIndex gte option_index"
+                    t-att-class="{
+                        'fa-star': currentOptionIndex gte option_index,
+                        'fa-star-o': currentOptionIndex lt option_index,
+                    }"
+                />
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CopyClipboardCharField" owl="1">
+        <button class="btn btn-sm btn-primary o_clipboard_button o_btn_char_copy" t-on-click="copy">
+            <span class="fa fa-clipboard"></span><span> Copy</span>
+        </button>
+    </t>
+
+</templates>

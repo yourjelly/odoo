@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.BadgeField" owl="1">
+        <t t-if="props.value">
+            <span class="o_field_badge badge badge-pill" t-esc="formattedValue" />
+        </t>
+        <t t-else="">
+            <span />
+        </t>
+    </t>
+
+</templates>

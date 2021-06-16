@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.IntegerField" owl="1">
+        <t t-if="props.isEditing">
+            <input
+                class="o_field_integer o_field_number"
+                t-att-placeholder="props.attrs.placeholder"
+                t-att-value="props.value !== false ? props.value : ''"
+            />
+        </t>
+        <t t-else="">
+            <span
+                class="o_field_integer o_field_number"
+                t-esc="formattedValue"
+            />
+        </t>
+    </t>
+
+</templates>

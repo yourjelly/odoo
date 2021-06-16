@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.LinkButtonField" owl="1">
+        <div class="o_field_link_button">
+            <t t-if="props.value">
+                <span
+                    role="img"
+                    class="fa"
+                    t-attf-class="{{ props.attrs.icon or 'fa-globe' }}"
+                    t-att-title="props.value"
+                    t-att-aria-label="props.value"
+                    t-on-click.stop="onClick"
+                />
+            </t>
+        </div>
+    </t>
+
+</templates>
