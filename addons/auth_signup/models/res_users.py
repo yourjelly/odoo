@@ -188,7 +188,7 @@ class ResUsers(models.Model):
         assert template._name == 'mail.template'
 
         email_values = {
-            'email_to': '${object.email|safe}',
+            'email_to': '${object.email}',
             'email_cc': False,
             'auto_delete': True,
             'recipient_ids': [],

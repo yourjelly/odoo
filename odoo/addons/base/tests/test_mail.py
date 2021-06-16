@@ -33,24 +33,6 @@ class TestSanitizer(BaseCase):
             html = html_sanitize(content)
             self.assertEqual(html, expected, 'html_sanitize is broken')
 
-    def test_mako(self):
-        cases = [
-            ('''<p>Some text</p>
-<% set signup_url = object.get_signup_url() %>
-% if signup_url:
-<p>
-    You can access this document and pay online via our Customer Portal:
-</p>''', '''<p>Some text</p>
-<% set signup_url = object.get_signup_url() %>
-% if signup_url:
-<p>
-    You can access this document and pay online via our Customer Portal:
-</p>''')
-        ]
-        for content, expected in cases:
-            html = html_sanitize(content, silent=False)
-            self.assertEqual(html, expected, 'html_sanitize: broken mako management')
-
     def test_evil_malicious_code(self):
         # taken from https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Tests
         cases = [
@@ -101,6 +83,16 @@ class TestSanitizer(BaseCase):
             self.assertIn(tag, sanitized_html, 'html_sanitize stripped too much of original html')
         for attr in ['javascript']:
             self.assertNotIn(attr, sanitized_html, 'html_sanitize did not remove enough unwanted attributes')
+
+    def test_qweb_strip_true(self):
+        sanitized_html = html_sanitize(test_mail_examples.QWEB_SOURCE, strip_qweb=True, sanitize_attributes=True)
+        for content in ['<t', 't-attf-name', 't-att-value']:
+            self.assertNotIn(content, sanitized_html, 'html_sanitize should have stripped unwanted qweb tag or qweb attributes')
+
+    def test_qweb_strip_false(self):
+        sanitized_html = html_sanitize(test_mail_examples.QWEB_SOURCE, strip_qweb=False, sanitize_attributes=True)
+        for content in ['<t', 't-attf-name', 't-att-value']:
+            self.assertIn(content, sanitized_html, 'html_sanitize stripped too much of qweb tag or qweb attributes')
 
     def test_sanitize_unescape_emails(self):
         not_emails = [

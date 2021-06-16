@@ -199,10 +199,10 @@ class TestMailAPIPerformance(BaseMailPerformance):
             'name': 'TestTemplate',
             'model_id': self.env['ir.model']._get('mail.test.ticket').id,
             'subject': 'About ${object.name}',
-            'body_html': '<p>Hello ${object.name}</p>',
-            'email_from': '${object.user_id.email_formatted | safe}',
+            'body_html': '<p>Hello <t t-esc="object.name"/></p>',
+            'email_from': '${object.user_id.email_formatted}',
             'partner_to': '${object.customer_id.id}',
-            'email_to': '${("%s Customer <%s>" % (object.name, object.email_from)) | safe}',
+            'email_to': '${("%s Customer <%s>" % (object.name, object.email_from))}',
         })
 
     @users('__system__', 'emp')

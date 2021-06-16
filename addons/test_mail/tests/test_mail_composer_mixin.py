@@ -49,4 +49,4 @@ class TestMailComposerMixin(TestMailCommon, TestRecipients):
         body = record._render_field('body', record.ids)[record.id]
         self.assertEqual(body, '<p>Content from %s</p>' % self.env.user.name)
         description = record._render_field('description', record.ids)[record.id]
-        self.assertEqual(description, '<p>Description for </p>')
+        self.assertEqual(str(description), '<p>Description for Invite</p>')

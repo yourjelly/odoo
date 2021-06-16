@@ -11,7 +11,7 @@ class MailComposerMixin(models.AbstractModel):
     Main current purpose is to hide details related to subject and body computation
     and rendering based on a mail.template. It also give the base tools to control
     who is allowed to edit body, notably when dealing with templating language
-    like jinja or qweb.
+    like small_qweb or qweb.
 
     It is meant to evolve in a near future with upcoming support of qweb and fine
     grain control of rendering access.

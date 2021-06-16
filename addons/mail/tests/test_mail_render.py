@@ -26,32 +26,6 @@ class TestMailRender(common.MailCommon):
             'lang': 'fr_FR',
         })
 
-        # some jinja templates
-        cls.base_jinja_bits = [
-            '<p>Hello</p>',
-            '<p>Hello ${object.name}</p>',
-            """<p>
-% set english = object.lang == 'en_US'
-% if english
-    <span>English Speaker</span>
-% else
-    <span>Other Speaker</span>
-% endif
-</p>"""
-        ]
-        cls.base_jinja_bits_fr = [
-            '<p>Bonjour</p>',
-            '<p>Bonjour ${object.name}</p>',
-            """<p>
-% set english = object.lang == 'en_US'
-% if english
-    <span>Narrateur Anglais</span>
-% else
-    <span>Autre Narrateur</span>
-% endif
-</p>"""
-        ]
-
         # some qweb templates, their views and their xml ids
         cls.base_qweb_bits = [
             '<p>Hello</p>',
@@ -59,6 +33,14 @@ class TestMailRender(common.MailCommon):
             """<p>
     <span t-if="object.lang == 'en_US'">English Speaker</span>
     <span t-else="">Other Speaker</span>
+</p>"""
+        ]
+        cls.base_qweb_bits_fr = [
+            '<p>Bonjour</p>',
+            '<p>Bonjour <t t-esc="object.name"/></p>',
+            """<p>
+    <span t-if="object.lang == 'en_US'">Narrateur Anglais</span>
+    <span t-else="">Autre Narrateur</span>
 </p>"""
         ]
         cls.base_qweb_templates = cls.env['ir.ui.view'].create([
@@ -94,10 +76,10 @@ class TestMailRender(common.MailCommon):
         ]
 
         # link to mail template
-        cls.test_template_jinja = cls.env['mail.template'].create({
+        cls.test_template_small_qweb = cls.env['mail.template'].create({
             'name': 'Test Template',
-            'subject': cls.base_jinja_bits[0],
-            'body_html': cls.base_jinja_bits[1],
+            'subject': cls.base_qweb_bits[0],
+            'body_html': cls.base_qweb_bits[1],
             'model_id': cls.env['ir.model']._get('res.partner').id,
             'lang': '${object.lang}'
         })
@@ -107,23 +89,23 @@ class TestMailRender(common.MailCommon):
             'type': 'model',
             'name': 'mail.template,subject',
             'lang': 'fr_FR',
-            'res_id': cls.test_template_jinja.id,
-            'src': cls.test_template_jinja.subject,
-            'value': cls.base_jinja_bits_fr[0],
+            'res_id': cls.test_template_small_qweb.id,
+            'src': cls.test_template_small_qweb.subject,
+            'value': cls.base_qweb_bits_fr[0],
         })
         cls.env['ir.translation'].create({
             'type': 'model',
             'name': 'mail.template,body_html',
             'lang': 'fr_FR',
-            'res_id': cls.test_template_jinja.id,
-            'src': cls.test_template_jinja.body_html,
-            'value': cls.base_jinja_bits_fr[1],
+            'res_id': cls.test_template_small_qweb.id,
+            'src': cls.test_template_small_qweb.body_html,
+            'value': cls.base_qweb_bits_fr[1],
         })
         cls.env['ir.model.data'].create({
             'name': 'test_template_xmlid',
             'module': 'mail',
-            'model': cls.test_template_jinja._name,
-            'res_id': cls.test_template_jinja.id,
+            'model': cls.test_template_small_qweb._name,
+            'res_id': cls.test_template_small_qweb.id,
         })
 
     @users('employee')
@@ -147,7 +129,7 @@ class TestMailRender(common.MailCommon):
             '<span>Context Custom Context Value, value Custom Render Value</span>'
         ]
         for src, expected in zip(srces, results):
-            for engine in ['jinja']:
+            for engine in ['small_qweb']:
                 result = MailRenderMixin.with_context(**custom_ctx)._render_template(
                     src, partner._name, partner.ids,
                     engine=engine, add_context=add_context
@@ -155,14 +137,15 @@ class TestMailRender(common.MailCommon):
                 self.assertEqual(expected, result)
 
     @users('employee')
-    def test_render_mail_template_jinja(self):
-        template = self.env['mail.template'].browse(self.test_template_jinja.ids)
+    def test_render_mail_template_small_qweb(self):
+        template = self.env['mail.template'].browse(self.test_template_small_qweb.ids)
         partner = self.env['res.partner'].browse(self.render_object.ids)
         for fname, expected in zip(['subject', 'body_html'], self.base_rendered):
             rendered = template._render_field(
                 fname,
                 partner.ids,
-                compute_lang=True
+                engine='qweb',
+                compute_lang=True,
             )[partner.id]
             self.assertEqual(rendered, expected)
 
@@ -171,19 +154,20 @@ class TestMailRender(common.MailCommon):
             rendered = template._render_field(
                 fname,
                 partner.ids,
-                compute_lang=True
+                engine='qweb',
+                compute_lang=True,
             )[partner.id]
             self.assertEqual(rendered, expected)
 
     @users('employee')
-    def test_render_template_jinja(self):
+    def test_render_template_qweb(self):
         partner = self.env['res.partner'].browse(self.render_object.ids)
-        for source, expected in zip(self.base_jinja_bits, self.base_rendered):
+        for source, expected in zip(self.base_qweb_bits, self.base_rendered):
             rendered = self.env['mail.render.mixin']._render_template(
                 source,
                 partner._name,
                 partner.ids,
-                engine='jinja',
+                engine='qweb',
             )[partner.id]
             self.assertEqual(rendered, expected)
 
@@ -205,7 +189,7 @@ class TestMailRender(common.MailCommon):
         partner = self.env['res.partner'].browse(self.render_object.ids)
         src = '${user.name} - ${object.name}'
         expected = '%s - %s' % (self.env.user.name, partner.name)
-        result = self.env['mail.render.mixin'].sudo()._render_template_jinja(
+        result = self.env['mail.render.mixin'].sudo()._render_template_small_qweb(
             src, partner._name, partner.ids
         )[partner.id]
         self.assertIn(expected, result)
@@ -231,7 +215,7 @@ class TestMailRender(common.MailCommon):
 <p>return value</p>"""
         context = {'cust_function': cust_function}
 
-        result = self.env['mail.render.mixin']._render_template_jinja(
+        result = self.env['mail.render.mixin']._render_template_small_qweb(
             src, partner._name, partner.ids,
             add_context=context
         )[partner.id]
@@ -247,7 +231,7 @@ class TestMailRender(common.MailCommon):
         # static string
         src = 'This is a string'
         expected = 'This is a string'
-        for engine in ['jinja']:
+        for engine in ['small_qweb']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -256,7 +240,7 @@ class TestMailRender(common.MailCommon):
         # code string
         src = 'This is a string with a number ${13+13}'
         expected = 'This is a string with a number 26'
-        for engine in ['jinja']:
+        for engine in ['small_qweb']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -265,7 +249,7 @@ class TestMailRender(common.MailCommon):
         # block string
         src = "This is a string with a block ${'hidden' if False else 'displayed'}"
         expected = 'This is a string with a block displayed'
-        for engine in ['jinja']:
+        for engine in ['small_qweb']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -274,11 +258,11 @@ class TestMailRender(common.MailCommon):
         # static xml
         src = '<p class="text-muted"><span>This is a string</span></p>'
         expected = '<p class="text-muted"><span>This is a string</span></p>'
-        for engine in ['jinja', 'qweb']:
+        for engine in ['small_qweb', 'qweb']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
-            self.assertEqual(expected, result if engine == 'jinja' else result.decode())  # tde: checkme
+            self.assertEqual(expected, result.decode() if engine == 'qweb_view' else str(result))  # tde: checkme
 
         # code xml
         srces = [
@@ -286,36 +270,8 @@ class TestMailRender(common.MailCommon):
             '<p class="text-muted"><span>This is a string with a number <t t-out="13+13"/></span></p>',
         ]
         expected = '<p class="text-muted"><span>This is a string with a number 26</span></p>'
-        for engine, src in zip(['jinja', 'qweb'], srces):
+        for engine, src in zip(['small_qweb', 'qweb'], srces):
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
-            self.assertEqual(expected, result if engine == 'jinja' else result.decode())  # tde: checkme
-
-        # condition block xml
-        src = """<b>Test</b>
-% if False:
-    <b>Code not executed</b>
-% endif"""
-        expected = "<b>Test</b>\n"  # TDE: to check
-        for engine in ['jinja']:
-            result = MailRenderMixin._render_template(
-                src, partner._name, partner.ids, engine=engine,
-            )[partner.id]
-            self.assertEqual(expected, result)
-
-        # complete block xml
-        src = """<p>
-% set line_statement_variable = 3
-<span>We have ${line_statement_variable} cookies in stock</span>
-<span>We have <% set block_variable = 4 %>${block_variable} cookies in stock</span>
-</p>"""
-        expected = """<p>
-<span>We have 3 cookies in stock</span>
-<span>We have 4 cookies in stock</span>
-</p>"""
-        for engine in ['jinja']:
-            result = MailRenderMixin._render_template(
-                src, partner._name, partner.ids, engine=engine,
-            )[partner.id]
-            self.assertEqual(result, expected)
+            self.assertEqual(expected, result.decode() if engine == 'qweb_view' else str(result))
