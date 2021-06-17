@@ -53,7 +53,7 @@
     </record>
 
     <record id="action_project_task_burndown_chart_report" model="ir.actions.act_window">
-        <field name="name">Burndown Chart</field>
+        <field name="name">Burndown Chart record</field>
         <field name="res_model">project.task.burndown.chart.report</field>
         <field name="view_mode">graph,pivot</field>
         <field name="search_view_id" ref="project_task_burndown_chart_report_view_search"/>

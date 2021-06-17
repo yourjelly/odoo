@@ -524,6 +524,7 @@ class Project(models.Model):
         }
 
     def _get_tasks_analysis(self):
+        import pdb();pdb.set_trace()
         self.ensure_one()
         counts = self._get_tasks_analysis_counts(updated=True)
         data = [{

@@ -93,6 +93,7 @@ class ProjectUpdate(models.Model):
 
     @api.model
     def _get_tasks_values(self, project):
+        debugger;
         counts = project._get_tasks_analysis_counts(created=True)
         return {
             'open_tasks': counts['open_tasks_count'],
@@ -190,6 +191,7 @@ class ProjectUpdate(models.Model):
         } for milestone in milestones]
 
     def action_burndown_open_tasks(self):
+        debugger;
         if not self.id or not self.project_id:
             return False
         action = self.env['ir.actions.act_window']._for_xml_id('project.action_project_task_burndown_chart_report')

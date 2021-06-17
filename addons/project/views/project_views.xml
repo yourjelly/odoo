@@ -257,9 +257,10 @@
                                 </span>
                             </div>
                         </button>
+                        <t t-debug="pdb"></t>
                         <button name="%(action_project_task_burndown_chart_report)d" type="action" class="oe_stat_button" icon="fa-area-chart" groups="project.group_project_manager">
                             <span class="o_stat_text">
-                                Burndown Chart
+                                Burndown Chart check
                             </span>
                         </button>
                         <button class="oe_stat_button" name="%(project.project_update_all_action)d" type="action" groups="project.group_project_manager">
@@ -599,8 +600,9 @@
                                                 <div role="menuitem">
                                                     <a name="action_view_tasks_analysis" type="object">Tasks Analysis</a>
                                                 </div>
+                                                <t t-debug="pdb"></t>
                                                 <div role="menuitem">
-                                                    <a name="%(action_project_task_burndown_chart_report)d" type="action">Burndown Chart</a>
+                                                    <a name="%(action_project_task_burndown_chart_report)d" type="action">yo</a>
                                                 </div>
                                             </div>
                                         </div>
