@@ -144,6 +144,8 @@
             </t>
             <t t-elif="event.event_registrations_sold_out">Tickets for this event are sold out.</t>
             <t t-else="">Registration for this event is closed.</t>
+            <span t-if="request.env.user.has_group('event.group_event_manager')"
+                t-call="website_event.registration_configure_tickets_button" class="float-right"/>
         </div>
         <div class="col-lg-4 p-2 pl-lg-0">
             <button class="btn btn-danger btn-block" disabled="1">
@@ -240,12 +242,12 @@
                             <b t-if="tickets" t-field="tickets.name"/>
                             <b t-else="">Registration</b>
                         </span>
-                        <small t-if="tickets.end_sale_datetime and tickets.sale_available and not tickets.is_expired" class="text-muted ml-3" itemprop="availabilityEnds">Sales end on
+                        <span t-if="tickets.end_sale_datetime and tickets.sale_available and not tickets.is_expired" itemprop="availabilityEnds" class="text-muted small ml-3">Sales end on
                             <span itemprop="priceValidUntil" t-esc="tickets.end_sale_datetime"
                                 t-options="{'widget': 'datetime', 'date_only': True, 'tz_name': event.date_tz, 'format': 'short'}"/>
-                        </small>
+                        </span>
                         <t t-call="website_event.registration_configure_tickets_button"
-                        t-if="request.env.user.has_group('event.group_event_manager')"/>
+                            t-if="request.env.user.has_group('event.group_event_manager')"/>
                         <div class="ml-md-auto text-nowrap px-2">
                             <span class="font-weight-bold align-middle px-2">Qty</span>
                             <link itemprop="availability" content="http://schema.org/InStock"/>
