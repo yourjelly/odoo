@@ -7,6 +7,8 @@ var FieldHtml = require('web_editor.field.html');
 var fieldRegistry = require('web.field_registry');
 var convertInline = require('web_editor.convertInline');
 
+const { sprintf } = require('web.utils');
+
 var _t = core._t;
 
 
@@ -333,6 +335,157 @@ var MassMailingFieldHtml = FieldHtml.extend({
             'min-height': '100vh',
             width: '100%'
         });
+
+        this._initDynamicPlaceholderGenerator();
+    },
+
+    /**
+     * @private
+     */
+    _initDynamicPlaceholderGenerator: function () {
+        const getCommandsForSearchTerm = async searchTerm => {
+            const fields = await this._rpc({
+                model: 'ir.model.fields',
+                method: 'name_search',
+                kwargs: {
+                    name: searchTerm,
+                    args: [["model_id", "=", "mailing.contact"], ["ttype", "!=", "one2many"], ["ttype", "!=", "many2many"]],
+                    operator: "ilike",
+                    limit: 10,
+                },
+            });
+            let commands = [];
+            for (let fieldEntry of fields) {
+                commands.push({
+                    groupName: searchTerm ? sprintf(_t('Search result for "%s"'), searchTerm) : _t('Search for a field name'),
+                    title: fieldEntry[1],
+                    description: sprintf(_t('Select "%s" as your base dynamic placeholder field.'), fieldEntry[1]),
+                    style: 'small',
+                    isIntermediateStep: true,
+                    callback: async () => {
+                        const fieldDetails = await this._rpc({
+                            model: 'ir.model.fields',
+                            method: 'read',
+                            args: [[fieldEntry[0]]],
+                        });
+                        if (fieldDetails[0].relation) {
+                            this._dynamicPlaceholderGeneratorSubField(fieldDetails[0]);
+                        } else {
+                            this._dynamicPlaceholderGeneratorDefaultValue(fieldDetails[0]);
+                        }
+                    },
+                });
+            }
+            return commands;
+        };
+
+        getCommandsForSearchTerm("").then(initComands => {
+            this.wysiwyg.odooEditor.commandBar.addKeydownTrigger('#', {
+                commands: initComands,
+                valueChangeFunction: getCommandsForSearchTerm
+            });
+        });
+    },
+    /**
+     * @private
+     * @param {object} fieldDetails
+     */
+    _dynamicPlaceholderGeneratorSubField: function (fieldDetails) {
+        this.wysiwyg.odooEditor.commandBar.nextOpenOptions({
+            commands: [{
+                groupName: sprintf(_t('%s : Search for a related field name'), fieldDetails.relation),
+                title: sprintf(_t('Or use "%s" field'), fieldDetails.relation),
+                description: sprintf(_t('Use the "%s" field directly with no related field.'), fieldDetails.relation),
+                style: 'small',
+                isIntermediateStep: true,
+                callback: () => {
+                    this._dynamicPlaceholderGeneratorDefaultValue(fieldDetails);
+                },
+            }],
+            valueChangeFunction: async (searchTerm) => {
+                const subfields = await this._rpc({
+                    model: 'ir.model.fields',
+                    method: 'name_search',
+                    kwargs: {
+                        name: searchTerm,
+                        args: [["model_id", "=", fieldDetails.relation], ["ttype", "!=", "one2many"], ["ttype", "!=", "many2many"]],
+                        operator: "ilike",
+                        limit: 8,
+                    },
+                });
+                let commands = [];
+                for (let subfieldEntry of subfields) {
+                    commands.push({
+                        groupName: sprintf(_t('Related field search result for "%s"'), searchTerm),
+                        title: subfieldEntry[1],
+                        description: sprintf(_t('Select "%s" as the related field in your dynamic placeholder.'), subfieldEntry[1]),
+                        style: 'small',
+                        isIntermediateStep: true,
+                        callback: async () => {
+                            const detailsData = await this._rpc({
+                              model: 'ir.model.fields',
+                              method: 'read',
+                              args: [[subfieldEntry[0]]],
+                            });
+                            this._dynamicPlaceholderGeneratorDefaultValue(fieldDetails, detailsData[0]);
+                        },
+                    });
+                }
+                commands.push({
+                    groupName: _t('Without related field'),
+                    title: sprintf(_t('Use "%s" field'), fieldDetails.relation),
+                    description: sprintf(_t('Use the "%s" field directly with no related field.'), fieldDetails.relation),
+                    style: 'small',
+                    isIntermediateStep: true,
+                    callback: () => {
+                        this._dynamicPlaceholderGeneratorDefaultValue(fieldDetails);
+                    },
+                });
+                return commands;
+            }
+        });
+    },
+    /**
+     * @private
+     * @param {object} fieldDetails
+     * @param {object} subFieldDetails optionnal
+     */
+    _dynamicPlaceholderGeneratorDefaultValue: function (fieldDetails, subFieldDetails = undefined) {
+        const dynamicPlaceholderBase = "${object." + fieldDetails.name + (subFieldDetails ? "." + subFieldDetails.name : ""),
+              dynamicPlaceholder = dynamicPlaceholderBase + "}";
+
+        this.wysiwyg.odooEditor.commandBar.nextOpenOptions({
+            closeOnSpace: false,
+            commands: [{
+                groupName: _t('Type to add a default value'),
+                title: sprintf(_t('Or insert "%s"'), dynamicPlaceholder),
+                description: _t('Insert the dynamic placeholder without default value.'),
+                style: 'small',
+                callback: () => {
+                    this.wysiwyg.odooEditor.execCommand('insertText', dynamicPlaceholder);
+                },
+            }],
+            valueChangeFunction: async (defaultValue) => {
+                const dynamicPlaceholderWithDefaultValue = dynamicPlaceholderBase + ` or '''${defaultValue}'''}`;
+                return [{
+                    groupName: sprintf(_t('With default value "%s"'), defaultValue),
+                    title: sprintf(_t('Insert "%s"'), dynamicPlaceholderWithDefaultValue),
+                    description: sprintf(_t('Insert the dynamic placeholder with "%s" as default value.'), defaultValue),
+                    style: 'small',
+                    callback: () => {
+                        this.wysiwyg.odooEditor.execCommand('insertText', dynamicPlaceholderWithDefaultValue);
+                    },
+                }, {
+                    groupName: _t('No default value'),
+                    title: sprintf(_t('Insert "%s"'), dynamicPlaceholder),
+                    description: _t('Insert the dynamic placeholder without default value.'),
+                    style: 'small',
+                    callback: () => {
+                        this.wysiwyg.odooEditor.execCommand('insertText', dynamicPlaceholder);
+                    },
+                }];
+            }
+        });
     },
     /**
      * @private
@@ -428,7 +581,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             $themeSelectorNew.appendTo(this.wysiwyg.$iframeBody);
         }
 
-        this.wysiwyg.$iframeBody.addClass("o_mass_mailing_iframe")
+        this.wysiwyg.$iframeBody.addClass("o_mass_mailing_iframe");
 
         /**
          * Add proposition to install enterprise themes if not installed.
