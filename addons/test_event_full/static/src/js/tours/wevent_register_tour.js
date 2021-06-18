@@ -78,7 +78,7 @@ var registerSteps = [{
     trigger: 'a.btn-primary:contains("Register")',
 }, {
     content: "Select 2 units of 'Standard' ticket type",
-    trigger: '#o_wevent_tickets_collapse .row:has(.o_wevent_registration_multi_select:contains("Free")) select',
+    trigger: '#o_wevent_tickets_collapse .row:has(.o_wevent_registration_multi_select:contains("FREE")) select',
     run: 'text 2',
 }, {
     content: "Click on 'Register' button",
