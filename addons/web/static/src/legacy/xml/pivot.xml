@@ -96,7 +96,7 @@
                     <div role="menuitem" aria-haspopup="true" class="o_inline_dropdown">
                         <a href="#"
                            t-on-click.prevent="_onClickMenuGroupBy(item.fieldName, 'month')"
-                           class="dropdown-item o_pivot_field_selection"
+                           class="dropdown-item o_pivot_field_selection position-relative"
                            t-att-data-field="item.fieldName"
                         >
                             <t t-esc="item.description"/>
