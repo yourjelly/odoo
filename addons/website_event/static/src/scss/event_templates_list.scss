@@ -49,9 +49,13 @@
         .opt_events_list_rows {
             .o_wevent_event_template {
                 float: right;
-                transform: translateX($card-spacer-x);
+                margin-top: .5rem;
                 padding: ($spacer * .5) $card-spacer-x;
-                @include border-left-radius($rounded-pill);
+                transform: translateX($card-spacer-x);
+                @include border-radius($rounded-pill);
+            }
+            .card .o_wevent_event_template {
+                @include border-right-radius(0);
             }
         }
         .o_wevent_event_date {
