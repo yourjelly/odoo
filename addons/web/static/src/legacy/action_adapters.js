@@ -9,20 +9,9 @@ import { Dialog } from "../core/dialog/dialog";
 import { useEffect } from "../core/effect_hook";
 import { useService } from "../core/service_hook";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
-import { cleanDomFromBootstrap, mapDoActionOptionAPI } from "./utils";
+import { cleanDomFromBootstrap, wrapSuccessOrFail, mapDoActionOptionAPI } from "./utils";
 
 const { Component, tags } = owl;
-
-function wrapSuccessOrFail(promise, { on_success, on_fail } = {}) {
-    return promise.then(on_success || (() => {})).catch((reason) => {
-        if (on_fail) {
-            on_fail(reason);
-        }
-        if (reason instanceof Error) {
-            throw reason;
-        }
-    });
-}
 
 class ActionAdapter extends ComponentAdapter {
     setup() {
@@ -76,12 +65,8 @@ class ActionAdapter extends ComponentAdapter {
     _trigger_up(ev) {
         const payload = ev.data;
         if (ev.name === "do_action") {
-            if (payload.action.context) {
-                payload.action.context = new Context(payload.action.context).eval();
-            }
-            this.onReverseBreadcrumb = ev.data.options && ev.data.options.on_reverse_breadcrumb;
-            const legacyOptions = mapDoActionOptionAPI(ev.data.options);
-            wrapSuccessOrFail(this.actionService.doAction(payload.action, legacyOptions), payload);
+            this.onReverseBreadcrumb = payload.options && payload.options.on_reverse_breadcrumb;
+            handleDoAction(this.actionService, payload);
         } else if (ev.name === "breadcrumb_clicked") {
             this.actionService.restore(payload.controllerID);
         } else if (ev.name === "push_state") {
@@ -359,4 +344,12 @@ export class ViewAdapter extends ActionAdapter {
             super._trigger_up(ev);
         }
     }
+}
+
+export function handleDoAction(actionService, eventPayload) {
+    if (eventPayload.action.context) {
+        eventPayload.action.context = new Context(eventPayload.action.context).eval();
+    }
+    const legacyOptions = mapDoActionOptionAPI(eventPayload.options);
+    wrapSuccessOrFail(actionService.doAction(eventPayload.action, legacyOptions), eventPayload);
 }
