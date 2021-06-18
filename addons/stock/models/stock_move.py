@@ -93,6 +93,10 @@ class StockMove(models.Model):
         'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
         copy=False,
         help="Optional: previous stock move when chaining them")
+    is_reception_report_linked = fields.Boolean(help="Technical field to support reception report reservations")
+    report_reserved_quantity = fields.Float(
+        copy=False,
+        help="Technical field to support reception report reservations. Expected to be in product's uom, not move's uom.")
     picking_id = fields.Many2one('stock.picking', 'Transfer', index=True, states={'done': [('readonly', True)]}, check_company=True)
     state = fields.Selection([
         ('draft', 'New'), ('cancel', 'Cancelled'),
@@ -783,7 +787,7 @@ class StockMove(models.Model):
             'product_id', 'price_unit', 'procure_method', 'location_id', 'location_dest_id',
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
             'package_level_id', 'propagate_cancel', 'description_picking', 'date_deadline',
-            'product_packaging_id',
+            'product_packaging_id', 'is_reception_report_linked',
         ]
 
     @api.model

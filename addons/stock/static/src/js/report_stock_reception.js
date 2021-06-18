@@ -49,21 +49,22 @@ const ReceptionReport = clientAction.extend({
         $(ev.currentTarget).hide()
         let quantities = []  // incoming qty amounts to reserve
         let modelIds = parseInt(ev.target.getAttribute('move-id'));
+        let inIds = []
         if (isNaN(modelIds)) {
             // dealing with a "Reserve All"
             modelIds = JSON.parse("[" + ev.target.getAttribute('move-ids') + "]")[0];
-            let alreadyReserved = [];  // quantity has previously been reserved
+            let alreadyReserved = [];  // moves that have previously been reserved
             for (const id of modelIds) {
                 let button = $(this.iframe).contents().find("button.o_report_reception_reserve[move-id=" + id.toString() + "]");
                 if ($(button).is(':visible')) {
                     quantities.push(parseFloat(button.attr('qty')));
+                    inIds.push(JSON.parse("[" + button.attr('move-ins-ids') + "]")[0])
                     button.hide();
                 } else {
                     alreadyReserved.push(id);
                 }
             }
             if (alreadyReserved.length > 0) {
-                // remove moveIds so they don't show up in chatter pdf
                 modelIds = modelIds.filter(item => !alreadyReserved.includes(item))
             }
             if ($(ev.target).hasClass("o_reserve_all")) {
@@ -72,10 +73,11 @@ const ReceptionReport = clientAction.extend({
             }
         } else {
             quantities.push(parseFloat(ev.target.getAttribute('qty')));
+            inIds = JSON.parse("[" + ev.target.getAttribute('move-ins-ids') + "]");
         }
         return this._rpc({
             model: 'report.stock.report_reception',
-            args: [false, modelIds, quantities, this.pickingIds],
+            args: [false, modelIds, quantities, inIds[0]],
             method: 'action_assign'
         })
     },

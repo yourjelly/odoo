@@ -1249,7 +1249,7 @@ class TestReports(TestReportsCommon):
         report = self.env['report.stock.report_reception']
         report_values = report._get_report_values(docids=[receipt.id])
         sources_to_lines = report_values['sources_to_lines']
-        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
+        self.assertEqual(len(report_values['sources_to_reservable_move_out_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
         self.assertEqual(len(sources_to_lines), 2, "The report has wrong number of outgoing pickings.")
         all_lines = []
         for dummy, lines in sources_to_lines.items():
@@ -1272,7 +1272,7 @@ class TestReports(TestReportsCommon):
         receipt.button_validate()
         report_values = report._get_report_values(docids=[receipt.id])
 
-        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 3, "The receipt IS done => all corresponding outgoing pickings + 'all_sources' have reservable moves.")
+        self.assertEqual(len(report_values['sources_to_reservable_move_out_ids']), 3, "The receipt IS done => all corresponding outgoing pickings + 'all_sources' have reservable moves.")
         sources_to_lines = report_values['sources_to_lines']
         all_lines = []
         move_ids = []
@@ -1351,7 +1351,7 @@ class TestReports(TestReportsCommon):
         report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
         self.assertEqual(len(report_values['receipts']), 2, "There should be 2 receipts in this report")
         sources_to_lines = report_values['sources_to_lines']
-        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
+        self.assertEqual(len(report_values['sources_to_reservable_move_out_ids']), 0, "The receipt IS NOT done => no outgoing moves can be reserved.")
         self.assertEqual(len(sources_to_lines), 1, "The report has wrong number of outgoing pickings.")
         all_lines = list(sources_to_lines.values())[0]
         self.assertEqual(len(all_lines), 1, "The report has wrong number of outgoing move lines.")
@@ -1365,7 +1365,7 @@ class TestReports(TestReportsCommon):
         receipt1.button_validate()
         report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
 
-        self.assertEqual(len(report_values['sources_to_reservable_move_ids']), 2, "1 receipt is done => should have at least 1 reservable moves.")
+        self.assertEqual(len(report_values['sources_to_reservable_move_out_ids']), 2, "1 receipt is done => should have at least 1 reservable moves.")
         sources_to_lines = report_values['sources_to_lines']
         all_lines = list(sources_to_lines.values())[0]
         # line quantities depends on done vs not done incoming quantities => should be 2 lines now
