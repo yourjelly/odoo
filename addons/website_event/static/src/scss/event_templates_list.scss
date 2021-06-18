@@ -1,3 +1,21 @@
+// Compatibility
+.o_wevent_social_link {
+    $o_link_size: 3em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    @include size($o_link_size);
+    margin: 0 ($spacer * .25) ($spacer * .5) ($spacer * .25);
+    line-height: $o_link_size;
+    background-color: gray('100');
+    border: $border-width solid $border-color;
+    border-radius: 50%;
+    text-align: center;
+    @include hover-focus {
+        background-color: gray('300');
+    }
+}
+
 // Index
 .o_wevent_index {
     // Events List
@@ -86,6 +104,10 @@
     }
     .o_wevent_sidebar_block {
         margin: 0 0 ($spacer * 2.5) 0;
+
+        .s_share .fa {
+            background-color: #fff;
+        }
     }
     .o_wevent_sidebar_figure {
         position: relative;

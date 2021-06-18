@@ -101,10 +101,27 @@
                         <div class="o_wevent_sidebar_block">
                             <h6 class="o_wevent_sidebar_title">SHARE</h6>
                             <p class="mb-2">Find out what people see and say about this event, and join the conversation.</p>
-                            <t t-snippet-call="website.s_share">
-                                <t t-set="_no_title" t-value="True"/>
-                                <t t-set="_classes" t-valuef="o_wevent_sidebar_social"/>
-                            </t>
+                            <div class="s_share text-left">
+                                <h6 class="s_share_title mb-3 d-none">Share this page</h6>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={url}" class="s_share_facebook" target="_blank">
+                                    <i class="fa fa-facebook rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?text={title}&amp;url={url}" class="s_share_twitter" target="_blank">
+                                    <i class="fa fa-twitter rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="http://www.linkedin.com/sharing/share-offsite/?url={url}" class="s_share_linkedin" target="_blank">
+                                    <i class="fa fa-linkedin rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="whatsapp://send?text={title}&amp;url={url}" class="s_share_whatsapp" target="_blank">
+                                    <i class="fa fa-whatsapp rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="http://pinterest.com/pin/create/button/?url={url}&amp;description={title}" class="s_share_pinterest" target="_blank">
+                                    <i class="fa fa-pinterest rounded-circle shadow-sm"/>
+                                </a>
+                                <a href="mailto:?body={url}&amp;subject={title}" class="s_share_email">
+                                    <i class="fa fa-envelope rounded-circle shadow-sm"/>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
