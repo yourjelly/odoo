@@ -203,7 +203,7 @@
                 </header>
                 <div t-attf-class="d-flex flex-column w-100 #{opt_events_list_columns and 'position-relative flex-fill' or 'col-md-8 col-lg-9'} #{not opt_events_list_cards and not opt_events_list_columns and 'px-4' or ''}">
                     <!-- Body -->
-                    <main t-attf-class="w-100 #{opt_events_list_columns and 'py-3'} #{opt_events_list_cards and 'card-body' or 'flex-fill'}">
+                    <main t-attf-class="w-100 #{opt_events_list_columns and 'py-3'} #{opt_events_list_cards and 'card-body' or 'flex-fill text-body'}">
                         <!-- Title -->
                         <h5 t-attf-class="card-title text-truncate my-2 #{(not event.website_published) and 'text-danger'}">
                             <span t-field="event.name" itemprop="name"/>
