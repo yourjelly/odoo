@@ -625,7 +625,7 @@ $o-form-label-margin-right: 0px;
     .o_horizontal_separator {
         font-size: $font-size-sm;
         font-weight: $font-weight-bold;
-        margin: 1.2em 0 .8em;
+        margin: 1.2em ($grid-gutter-width * .5) .8em 0;
 
         &:not(:empty) {
             box-shadow: 0 1px 0 rgba($body-color, .05);
