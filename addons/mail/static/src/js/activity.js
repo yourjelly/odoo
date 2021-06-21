@@ -212,17 +212,17 @@ var BasicActivity = AbstractField.extend({
     /**
      * @private
      * @param {integer} id
-     * @param {integer} previousActivityTypeID
+     * @param {integer} previousTypeID
      * @param {function} callback
      * @return {Promise}
      */
-    _openActivityForm: function (id, previousActivityTypeID, callback) {
+    _openActivityForm: function (id, previousTypeID, callback) {
         const context = {
             default_res_id: this.res_id,
             default_res_model: this.model,
         };
-        if (previousActivityTypeID) {
-            context.default_activity_type_id = previousActivityTypeID;
+        if (previousTypeID) {
+            context.default_activity_type_id = previousTypeID;
         }
         const action = {
             type: 'ir.actions.act_window',
@@ -506,8 +506,8 @@ var BasicActivity = AbstractField.extend({
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
-        const previousActivityTypeID = $(ev.currentTarget).data('previous-activity-type-id');
-        return this._openActivityForm(false, previousActivityTypeID, this._reload.bind(this, { activity: true, thread: true }));
+        const previousTypeID = parseInt(ev.currentTarget.getAttribute('data-previous-activity-type-id'));
+        return this._openActivityForm(false, previousTypeID, this._reload.bind(this, { activity: true, thread: true }));
     },
 
     /**
@@ -726,8 +726,8 @@ var KanbanActivity = BasicActivity.extend({
             self.$('.o_activity').html(QWeb.render('mail.KanbanActivityDropdown', {
                 selection: self.selection,
                 records: _.groupBy(setDelayLabel(activities), 'state'),
-                typeId: (activities.length >= 1 && self.viewType === 'default') ? activities[0].activity_type_id[0] : false,
                 session: session,
+                typeId: (activities.length && self.viewType === 'default') ? activities[0].activity_type_id[0] : false,
                 widget: self,
             }));
             self._bindOnUploadAction(activities);
