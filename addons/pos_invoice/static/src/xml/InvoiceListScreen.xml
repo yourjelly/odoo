@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.InvoiceListScreen" owl="1">
+        <div class="order-management-screen screen" t-att-class="{ oe_hidden: !props.isShown }">
+            <div class="screen-full-width">
+                <div class="rightpane">
+                    <div class="flex-container">
+                        <div class="control-panel">
+                            <div class="item button back" t-on-click="trigger('close-screen')">
+                                <i class="fa fa-angle-double-left"></i>
+                                <span> Back</span>
+                            </div>
+                            <div class="item search-box">
+                                <span class="icon">
+                                    <i class="fa fa-search" />
+                                </span>
+                                <input type="text" t-model="state.searchString" t-on-keydown="onInputKeydown" placeholder="E.g. INV/00001" />
+                                <span class="clear" t-on-click="trigger('clear-search')">
+                                    <i class="fa fa-remove" />
+                                </span>
+                            </div>
+                            <div class="item">
+                                <div class="page-controls">
+                                    <div class="previous" t-att-class="{ disabled: isAtFirstPage() }" t-on-click="trigger('set-page', { increment: -1 })">
+                                        <i class="fa fa-fw fa-caret-left" role="img" aria-label="Previous Order List"
+                                            title="Previous Order List"></i>
+                                    </div>
+                                    <div class="next" t-att-class="{ disabled: isAtLastPage() }" t-on-click="trigger('set-page', { increment: 1 })" >
+                                        <i class="fa fa-fw fa-caret-right" role="img" aria-label="Next Order List"
+                                            title="Next Order List"></i>
+                                    </div>
+                                </div>
+                                <div class="page">
+                                    <span>
+                                        <t t-esc="getPageNumber()" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="orders">
+                            <div class="order-row header">
+                                <t t-set="_headerDetails" t-value="getHeaderDetails()" />
+                                <t t-foreach="viewInfo.fieldsToShow" t-as="fieldName" t-key="fieldName">
+                                    <div class="header" t-att-class="_headerDetails[fieldName].classes">
+                                        <t t-esc="_headerDetails[fieldName].text" />
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="order-list">
+                                <t t-foreach="invoices" t-as="invoice" t-key="invoice.id">
+                                    <div class="order-row" t-on-click="trigger('click-invoice', invoice)">
+                                        <t t-set="_invoiceDetails" t-value="getInvoiceDetails(invoice)" />
+                                        <t t-foreach="viewInfo.fieldsToShow" t-as="fieldName" t-key="fieldName" >
+                                            <div class="item" t-att-class="_invoiceDetails[fieldName].classes">
+                                                <t t-esc="_invoiceDetails[fieldName].text" />
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
