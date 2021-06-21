@@ -1796,7 +1796,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.only('buttons in form view, new record', async function (assert) {
+    QUnit.test('buttons in form view, new record', async function (assert) {
         // this simulates a situation similar to the settings forms.
         assert.expect(7);
 
