@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account_edi.tests.common import AccountEdiTestCommon
+from odoo.fields import Command
 from odoo.tests import tagged
-from odoo import Command
+from odoo.addons.account_edi_ubl.models.ubl import Ubl20
+
 
 
 @tagged('post_install', '-at_install')
@@ -165,62 +167,62 @@ class TestL10nBeEdi(AccountEdiTestCommon):
     ####################################################
 
     def test_turlututu(self):
-        builder = self.edi_format._get_xml_builder(self.invoice)
+        ubl = Ubl20(self.invoice)
         #builder = self.env['account.edi.format']._get_ubl_2_1_builder(self.invoice)
-        print(builder.build())
+        print(ubl.builder.build())
 
-    # def test_efff_simple_case(self):
-    #     ''' Test the generated Facturx Edi attachment without any modification of the invoice. '''
-    #     self.assert_generated_file_equal(self.invoice, self.expected_invoice_efff_values)
+    def test_efff_simple_case(self):
+        ''' Test the generated Facturx Edi attachment without any modification of the invoice. '''
+        self.assert_generated_file_equal(self.invoice, self.expected_invoice_efff_values)
 
-    # def test_efff_group_of_taxes(self):
-    #     self.invoice.write({
-    #         'invoice_line_ids': [(1, self.invoice.invoice_line_ids.id, {'tax_ids': [Command.set(self.tax_group.ids)]})],
-    #     })
+    def test_efff_group_of_taxes(self):
+        self.invoice.write({
+            'invoice_line_ids': [(1, self.invoice.invoice_line_ids.id, {'tax_ids': [Command.set(self.tax_group.ids)]})],
+        })
 
-    #     applied_xpath = '''
-    #         <xpath expr="//TaxTotal" position="replace">
-    #             <TaxTotal>
-    #                 <TaxAmount currencyID="Gol">320.000</TaxAmount>
-    #                 <TaxSubtotal>
-    #                     <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
-    #                     <TaxAmount currencyID="Gol">100.000</TaxAmount>
-    #                     <Percent>10.0</Percent>
-    #                 </TaxSubtotal>
-    #                 <TaxSubtotal>
-    #                     <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
-    #                     <TaxAmount currencyID="Gol">220.000</TaxAmount>
-    #                     <Percent>20.0</Percent>
-    #                 </TaxSubtotal>
-    #             </TaxTotal>
-    #         </xpath>
-    #         <xpath expr="//LegalMonetaryTotal/LineExtensionAmount" position="replace">
-    #             <LineExtensionAmount currencyID="Gol">1000.000</LineExtensionAmount>
-    #         </xpath>
-    #         <xpath expr="//LegalMonetaryTotal/TaxExclusiveAmount" position="replace">
-    #             <TaxExclusiveAmount currencyID="Gol">1000.000</TaxExclusiveAmount>
-    #         </xpath>
-    #         <xpath expr="//InvoiceLine/LineExtensionAmount" position="replace">
-    #             <LineExtensionAmount currencyID="Gol">1000.000</LineExtensionAmount>
-    #         </xpath>
-    #         <xpath expr="//InvoiceLine/TaxTotal" position="replace">
-    #             <TaxTotal>
-    #                 <TaxAmount currencyID="Gol">320.000</TaxAmount>
-    #                 <TaxSubtotal>
-    #                     <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
-    #                     <TaxAmount currencyID="Gol">100.000</TaxAmount>
-    #                     <Percent>10.0</Percent>
-    #                 </TaxSubtotal>
-    #                 <TaxSubtotal>
-    #                     <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
-    #                     <TaxAmount currencyID="Gol">220.000</TaxAmount>
-    #                     <Percent>20.0</Percent>
-    #                 </TaxSubtotal>
-    #             </TaxTotal>
-    #         </xpath>
-    #     '''
+        applied_xpath = '''
+            <xpath expr="//TaxTotal" position="replace">
+                <TaxTotal>
+                    <TaxAmount currencyID="Gol">320.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">100.000</TaxAmount>
+                        <Percent>10.0</Percent>
+                    </TaxSubtotal>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <Percent>20.0</Percent>
+                    </TaxSubtotal>
+                </TaxTotal>
+            </xpath>
+            <xpath expr="//LegalMonetaryTotal/LineExtensionAmount" position="replace">
+                <LineExtensionAmount currencyID="Gol">1000.000</LineExtensionAmount>
+            </xpath>
+            <xpath expr="//LegalMonetaryTotal/TaxExclusiveAmount" position="replace">
+                <TaxExclusiveAmount currencyID="Gol">1000.000</TaxExclusiveAmount>
+            </xpath>
+            <xpath expr="//InvoiceLine/LineExtensionAmount" position="replace">
+                <LineExtensionAmount currencyID="Gol">1000.000</LineExtensionAmount>
+            </xpath>
+            <xpath expr="//InvoiceLine/TaxTotal" position="replace">
+                <TaxTotal>
+                    <TaxAmount currencyID="Gol">320.000</TaxAmount>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1000.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">100.000</TaxAmount>
+                        <Percent>10.0</Percent>
+                    </TaxSubtotal>
+                    <TaxSubtotal>
+                        <TaxableAmount currencyID="Gol">1100.000</TaxableAmount>
+                        <TaxAmount currencyID="Gol">220.000</TaxAmount>
+                        <Percent>20.0</Percent>
+                    </TaxSubtotal>
+                </TaxTotal>
+            </xpath>
+        '''
 
-    #     self.assert_generated_file_equal(self.invoice, self.expected_invoice_efff_values, applied_xpath)
+        self.assert_generated_file_equal(self.invoice, self.expected_invoice_efff_values, applied_xpath)
 
     ####################################################
     # Test import

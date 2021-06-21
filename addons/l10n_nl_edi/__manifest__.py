@@ -11,7 +11,6 @@ NLCIUS is the Dutch implementation of EN 16931 norm. Both for UBL and UN / CEFAC
     'depends': ['l10n_nl', 'account_edi_ubl_bis3'],
     'data': [
         'data/account_edi_data.xml',
-        'data/nlcius_template.xml',
     ],
     'installable': True,
     'auto_install': True,

@@ -11,7 +11,7 @@ class TestUBL(AccountEdiTestCommon):
 
         cls.company_data['company'].partner_id.write({
             'street': 'Archefstraat 42',
-            'zip': '1000',
+            # TODO remove this, test of errors 'zip': '1000',
             'city': 'Amsterdam',
             'country_id': cls.env.ref('base.nl').id,
             'l10n_nl_kvk': '82777822',

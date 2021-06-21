@@ -209,12 +209,6 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return {payment: {'success': True} for payment in payments}  # By default, cancel succeeds doing nothing.
 
-    def _get_xml_builder(self, invoice, parent_builder=None):
-        return False
-
-    # def _get_xml_builder_party(self, partner):
-    #     pass
-
     ####################################################
     # Import methods to override based on EDI Format
     ####################################################

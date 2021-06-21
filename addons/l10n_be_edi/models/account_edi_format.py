@@ -3,7 +3,8 @@
 from odoo import models
 
 import base64
-from odoo.addons.account_edi_ubl.models import xml_builder
+from odoo.addons.account_edi_ubl.models.ubl import Ubl20
+
 
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
@@ -12,18 +13,11 @@ class AccountEdiFormat(models.Model):
     # Export
     ####################################################
 
-    @xml_builder.builder('efff_1')
-    def _get_xml_builder(self, invoice, parent_builder):
-        # parent_builder is ubl_2_1 (should be ubl_2_0 but for the sake of the example I changed it in the data)
-        print('Stuff specific to e-fff')
-        return parent_builder
-
     def _export_efff(self, invoice):
         self.ensure_one()
         # Create file content.
-        #builder = self.env['account.edi.format']._get_ubl_2_0_builder(invoice)
-        builder = self._get_xml_builder(invoice)
-        xml_content = builder.build()
+        ubl = Ubl20(invoice)
+        xml_content = ubl.builder.build()
         xml_name = '%s.xml' % invoice._get_efff_name()
         return self.env['ir.attachment'].create({
             'name': xml_name,
@@ -52,6 +46,14 @@ class AccountEdiFormat(models.Model):
         if self.code != 'efff_1':
             return super()._is_compatible_with_journal(journal)
         return journal.type == 'sale' and journal.country_code == 'BE'
+
+    def _check_move_configuration(self, move):
+        self.ensure_one()
+        if self.code != 'efff_1':
+            return super()._check_move_configuration(move)
+
+        ubl = Ubl20(move)
+        return ubl.builder.get_errors()
 
     def _post_invoice_edi(self, invoices):
         self.ensure_one()

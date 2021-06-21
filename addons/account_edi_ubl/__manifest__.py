@@ -8,7 +8,6 @@
     'category': 'Accounting/Accounting',
     'depends': ['account_edi'],
     'data': [
-        'data/ubl_templates.xml',
         'data/account_edi_data.xml',
     ],
     'installable': True,
