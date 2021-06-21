@@ -294,9 +294,13 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
      * @param {$node} $node
      */
     _addFieldTooltip: function (widget, $node) {
+        debugger
         // optional argument $node, the jQuery element on which the tooltip
         // should be attached if not given, the tooltip is attached on the
         // widget's $el
+        console.log("$node :", $node);
+        console.log("widget.$el :", widget.$el);
+
         $node = $node.length ? $node : widget.$el;
         $node.tooltip(this._getTooltipOptions(widget));
     },

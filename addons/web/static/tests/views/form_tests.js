@@ -1796,10 +1796,12 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('buttons in form view, new record', async function (assert) {
+    QUnit.only('buttons in form view, new record', async function (assert) {
         // this simulates a situation similar to the settings forms.
         assert.expect(7);
 
+        console.log("TEST YOLO <----");
+        console.log("***********");
         var resID;
 
         var form = await createView({
@@ -1818,6 +1820,8 @@ QUnit.module('Views', {
                     '</sheet>' +
                 '</form>',
             mockRPC: function (route, args) {
+                debugger
+                console.log(args.method)
                 assert.step(args.method);
                 if (args.method === 'create') {
                     return this._super.apply(this, arguments).then(function (result) {
@@ -1831,6 +1835,8 @@ QUnit.module('Views', {
 
         await testUtils.mock.intercept(form, 'execute_action', function (event) {
             assert.step('execute_action');
+            console.log("execute_action")
+
             assert.deepEqual(event.data.env.currentID, resID,
                 "execute action should be done on correct record id");
             event.data.on_success();
