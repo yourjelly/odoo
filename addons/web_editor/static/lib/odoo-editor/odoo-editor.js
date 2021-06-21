@@ -3572,9 +3572,11 @@ var exportVariable = (function (exports) {
                 this.options.document.removeEventListener('keydown', keydown, true);
                 this.options.document.removeEventListener('mousemove', mousemove);
                 this.options.document.removeEventListener('mousedown', this._stop);
+                this.options.document.removeEventListener('scroll', this._stop);
                 if (document !== this.options.document) {
                     document.removeEventListener('mousemove', mousemove);
                     document.removeEventListener('mousedown', this._stop);
+                    document.removeEventListener('scroll', this._stop);
                 }
 
                 this.options.onStop && this.options.onStop();
@@ -3598,6 +3600,7 @@ var exportVariable = (function (exports) {
             this.options.document.addEventListener('keydown', keydown, true);
             this.options.document.addEventListener('mousemove', mousemove);
             this.options.document.addEventListener('mousedown', this._stop);
+            this.options.document.addEventListener('scroll', this._stop);
             // If the Golbal document is diferent than the provided options.document,
             // which happend when the editor is inside an Iframe.
             // We need to listen to the mouse event on both document
@@ -3605,6 +3608,7 @@ var exportVariable = (function (exports) {
             if (document !== this.options.document) {
                 document.addEventListener('mousemove', mousemove);
                 document.addEventListener('mousedown', this._stop);
+                document.addEventListener('scroll', this._stop);
             }
         }
 
@@ -5036,6 +5040,11 @@ var exportVariable = (function (exports) {
                     for (const element of document.querySelectorAll(this.options.noScrollSelector)) {
                         element.classList.add('oe-noscroll');
                     }
+                    for (const element of this.document.querySelectorAll(
+                        this.options.noScrollSelector,
+                    )) {
+                        element.classList.add('oe-noscroll');
+                    }
                     this.observerActive();
                 },
                 preValidate: () => {
@@ -5047,6 +5056,9 @@ var exportVariable = (function (exports) {
                 onStop: () => {
                     this.observerUnactive();
                     for (const element of document.querySelectorAll('.oe-noscroll')) {
+                        element.classList.remove('oe-noscroll');
+                    }
+                    for (const element of this.document.querySelectorAll('.oe-noscroll')) {
                         element.classList.remove('oe-noscroll');
                     }
                     this.observerActive();
