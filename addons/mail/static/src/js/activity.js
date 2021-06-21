@@ -217,13 +217,6 @@ var BasicActivity = AbstractField.extend({
      * @return {Promise}
      */
     _openActivityForm: function (id, previousTypeID, callback) {
-        const context = {
-            default_res_id: this.res_id,
-            default_res_model: this.model,
-        };
-        if (previousTypeID) {
-            context.default_activity_type_id = previousTypeID;
-        }
         const action = {
             type: 'ir.actions.act_window',
             name: _t("Schedule Activity"),
@@ -231,9 +224,15 @@ var BasicActivity = AbstractField.extend({
             view_mode: 'form',
             views: [[false, 'form']],
             target: 'new',
-            context: context,
+            context: {
+                default_res_id: this.res_id,
+                default_res_model: this.model,
+            },
             res_id: id || false,
         };
+        if (previousTypeID) {
+            action.context.default_activity_type_id = previousTypeID;
+        }
         return this.do_action(action, { on_close: callback });
     },
     /**
@@ -506,7 +505,7 @@ var BasicActivity = AbstractField.extend({
      */
     _onScheduleActivity: function (ev) {
         ev.preventDefault();
-        const previousTypeID = parseInt(ev.currentTarget.getAttribute('data-previous-activity-type-id'));
+        const previousTypeID = parseInt(ev.currentTarget.getAttribute('data-previous-type-id'));
         return this._openActivityForm(false, previousTypeID, this._reload.bind(this, { activity: true, thread: true }));
     },
 
@@ -727,7 +726,9 @@ var KanbanActivity = BasicActivity.extend({
                 selection: self.selection,
                 records: _.groupBy(setDelayLabel(activities), 'state'),
                 session: session,
-                typeId: (activities.length && self.viewType === 'default') ? activities[0].activity_type_id[0] : false,
+                typeId: activities.length && self.viewType === 'default'
+                        ? activities[0].activity_type_id[0]
+                        : false,
                 widget: self,
             }));
             self._bindOnUploadAction(activities);
