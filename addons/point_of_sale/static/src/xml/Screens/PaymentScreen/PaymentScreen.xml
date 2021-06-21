@@ -20,10 +20,13 @@
                     </div>
                 </t>
                 <div class="main-content">
+                    <t t-set="_total" t-value="currentOrder.get_total_with_tax() + currentOrder.get_rounding_applied()" />
+                    <t t-set="_due" t-value="currentOrder.get_due()" />
+                    <t t-set="_change" t-value="currentOrder.get_change()" />
                     <div class="left-content">
                         <t t-if="env.isMobile">
                             <section class="paymentlines-container">
-                                <PaymentScreenStatus paymentLines="paymentLines" />
+                                <PaymentScreenStatus paymentLines="paymentLines" total="_total" due="_due" change="_change" />
                             </section>
                         </t>
                         <div class="paymentmethods-container">
@@ -39,7 +42,7 @@
                     <div class="right-content">
                         <t t-if="!env.isMobile">
                             <section class="paymentlines-container">
-                                <PaymentScreenStatus paymentLines="paymentLines" />
+                                <PaymentScreenStatus paymentLines="paymentLines" total="_total" due="_due" change="_change" />
                             </section>
                         </t>
 
