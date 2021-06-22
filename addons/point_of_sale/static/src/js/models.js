@@ -2444,9 +2444,9 @@ exports.Paymentline = Backbone.Model.extend({
     },
     //sets the amount of money on this payment line
     set_amount: function(value){
-        this.order.assert_editable();
+        if (this.order) this.order.assert_editable();
         this.amount = round_di(parseFloat(value) || 0, this.pos.currency.decimals);
-        if (this.pos.config.iface_customer_facing_display) this.pos.send_current_order_to_customer_facing_display();
+        if (this.order && this.pos.config.iface_customer_facing_display) this.pos.send_current_order_to_customer_facing_display();
         this.trigger('change',this);
     },
     // returns the amount of money on this paymentline
@@ -2540,7 +2540,7 @@ exports.Paymentline = Backbone.Model.extend({
     },
 });
 
-var PaymentlineCollection = Backbone.Collection.extend({
+exports.PaymentlineCollection = Backbone.Collection.extend({
     model: exports.Paymentline,
 });
 
@@ -2563,7 +2563,7 @@ exports.Order = Backbone.Model.extend({
         this.creation_date  = new Date();
         this.to_invoice     = false;
         this.orderlines     = new OrderlineCollection();
-        this.paymentlines   = new PaymentlineCollection();
+        this.paymentlines   = new exports.PaymentlineCollection();
         this.pos_session_id = this.pos.pos_session.id;
         this.employee       = this.pos.employee;
         this.finalized      = false; // if true, cannot be modified.

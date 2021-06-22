@@ -24,10 +24,11 @@ odoo.define('pos_invoice.InvoiceListScreen', function (require) {
                 fieldInfo: undefined,
             };
             this.invoices = [];
-            useListener('close-screen', this.close)
+            useListener('close-screen', this.close);
             useListener('search', this._onSearch);
             useListener('clear-search', this._onClearSearch);
             useListener('set-page', this._onSetPage);
+            useListener('click-invoice', this._onClickInvoice);
         }
         async willStart() {
             if (!ACCOUNT_MOVE_FIELDS_INFO) {
@@ -66,6 +67,9 @@ odoo.define('pos_invoice.InvoiceListScreen', function (require) {
             }
             this.viewInfo.currentPage = newPage;
             return this._fetch();
+        }
+        _onClickInvoice(event) {
+            this.showScreen('InvoicePaymentScreen', { invoice: event.detail });
         }
         async _fetch() {
             const kwargs = this._getFetchKwargs();
@@ -117,7 +121,7 @@ odoo.define('pos_invoice.InvoiceListScreen', function (require) {
         getPageNumber() {
             const lastPage = this._getLastPage();
             if (lastPage === 0) {
-                return '';
+                return '(0/0)';
             } else {
                 return `(${this.viewInfo.currentPage}/${lastPage})`;
             }

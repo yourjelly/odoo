@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.InvoicePaymentScreen" owl="1">
+        <div class="payment-screen screen" t-att-class="{ oe_hidden: !props.isShown }">
+            <div class="screen-content">
+                <t t-if="!env.isMobile">
+                    <div class="top-content">
+                        <div class="button back" t-on-click="showScreen('InvoiceListScreen')">
+                            <i class="fa fa-angle-double-left fa-fw"></i>
+                            <span class="back_text">Back</span>
+                        </div>
+                        <div class="top-content-center">
+                            <h1>Payment</h1>
+                        </div>
+                        <div class="button next" t-att-class="{ highlight: isFullyPaid() }" t-on-click="onValidate">
+                            <span class="next_text">Validate</span>
+                            <i class="fa fa-angle-double-right fa-fw"></i>
+                        </div>
+                    </div>
+                </t>
+                <div class="main-content">
+                    <div class="left-content">
+                        <div class="paymentmethods-container">
+                            <PaymentScreenPaymentLines paymentLines="paymentLines.models" />
+                            <div class="paymentmethods">
+                                <t t-foreach="payment_methods_from_config" t-as="paymentMethod"
+                                    t-key="paymentMethod.id">
+                                    <PaymentMethodButton paymentMethod="paymentMethod" />
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right-content">
+                        <section class="paymentlines-container">
+                            <PaymentScreenStatus paymentLines="paymentLines" change="getChange()" due="getRemaining()" total="props.invoice.amount_residual" />
+                        </section>
+
+                        <div class="payment-buttons-container">
+                            <section class="payment-numpad">
+                                <PaymentScreenNumpad />
+                            </section>
+
+                            <div class="payment-buttons">
+                                <div class="customer-button">
+                                    <div class="button">
+                                        <i class="fa fa-user" role="img" aria-label="Customer" title="Customer" />
+                                        <span class="js_customer_name">
+                                            <t t-if="props.invoice.partner_id">
+                                                <t t-esc="props.invoice.partner_id[1]" />
+                                            </t>
+                                            <t t-else="">Customer</t>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
