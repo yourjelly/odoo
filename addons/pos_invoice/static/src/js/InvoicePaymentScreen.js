@@ -22,9 +22,12 @@ odoo.define('pos_invoice.InvoicePaymentScreen', function (require) {
                 // event triggered when successfully pressed a digit
                 triggerAtInput: 'update-selected-paymentline',
             });
-            this.payment_methods_from_config = this.env.pos.payment_methods.filter((method) =>
-                this.env.pos.config.payment_method_ids.includes(method.id)
-            );
+            this.payment_methods_from_config = this.env.pos.payment_methods.filter((method) => {
+                return (
+                    this.env.pos.config.payment_method_ids.includes(method.id) &&
+                    (method.is_cash_count ? true : method.bank_journal_id)
+                );
+            });
             if (!(this.props.invoice.id in invoicePaymentsMap)) {
                 invoicePaymentsMap[this.props.invoice.id] = new models.PaymentlineCollection();
             }
@@ -37,8 +40,39 @@ odoo.define('pos_invoice.InvoicePaymentScreen', function (require) {
             });
             this.selectedPayment = this.paymentLines.find((payment) => payment.selected);
         }
-        onValidate() {
-            alert('validated!');
+        async onValidate() {
+            const paymentsVals = [];
+            for (const payment of this.paymentLines.models) {
+                paymentsVals.push({
+                    journal_id: this.getJournalId(payment),
+                    amount: payment.amount,
+                });
+            }
+            if (!paymentsVals.length) return;
+            const result = await this.rpc({
+                model: 'account.move',
+                method: 'pay_invoice',
+                args: [[this.props.invoice.id], paymentsVals],
+            });
+            if (!result) {
+                await this.showPopup('ErrorPopup', {
+                    title: this.env._t('Payment Error'),
+                    body: this.env._t('Error occurred when registering payment in invoice.'),
+                });
+            } else {
+                const { confirmed } = await this.showPopup('ConfirmPopup', {
+                    title: this.env._t('Payment Successful'),
+                    body: this.env._t('Do you want to print the invoice?'),
+                });
+                if (confirmed) {
+                    await this.env.pos.do_action('account.account_invoices', {
+                        additional_context: {
+                            active_ids: [this.props.invoice.id],
+                        },
+                    });
+                }
+            }
+            this.showScreen('InvoiceListScreen');
         }
         _onUpdateSelectedPayment() {
             if (NumberBuffer.get() === null && this.selectedPayment) {
@@ -55,7 +89,7 @@ odoo.define('pos_invoice.InvoicePaymentScreen', function (require) {
             const newPaymentline = new models.Paymentline({}, { payment_method: event.detail, pos: this.env.pos });
             newPaymentline.set_amount(this.getRemaining());
             this.paymentLines.add(newPaymentline);
-            this._onSelectPayment({ detail: { cid: newPaymentline.cid } })
+            this._onSelectPayment({ detail: { cid: newPaymentline.cid } });
         }
         _onSelectPayment(event) {
             const paymentToSelect = this.paymentLines.get(event.detail.cid);
@@ -85,6 +119,14 @@ odoo.define('pos_invoice.InvoicePaymentScreen', function (require) {
         }
         isFullyPaid() {
             return this.getTotalPayments() >= this.getAmountToPay();
+        }
+        getJournalId(payment) {
+            const paymentMethod = payment.payment_method;
+            if (paymentMethod.is_cash_count) {
+                return paymentMethod.cash_journal_id[0];
+            } else {
+                return paymentMethod.bank_journal_id[0];
+            }
         }
     }
     InvoicePaymentScreen.template = 'point_of_sale.InvoicePaymentScreen';

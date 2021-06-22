@@ -40,6 +40,12 @@ class AccountMove(models.Model):
 
         return lot_values
 
+    def pay_invoice(self, payments_vals):
+        for vals in payments_vals:
+            paymentWizard = self.env['account.payment.register'].with_context({ 'active_model': 'account.move', 'active_ids': self.ids }).create(vals)
+            paymentWizard._create_payments()
+        return True
+
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
