@@ -197,10 +197,10 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         handleError(env, error, originalError) {
             if (this.env.pos && originalError && originalError.message) {
-                const { type, message, data } = originalError.message;
+                const { message, stack } = originalError;
                 this.showPopup('ErrorTracebackPopup', {
-                    title: type,
-                    body: message + '\n' + data.debug + '\n',
+                    title: error.name,
+                    body: message + '\n' + stack + '\n',
                 });
                 return true;
             }
