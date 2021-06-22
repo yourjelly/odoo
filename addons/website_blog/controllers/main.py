@@ -91,16 +91,16 @@ class WebsiteBlog(http.Controller):
         else:
             domain += [("post_date", "<=", fields.Datetime.now())]
 
-        use_cover = request.website.is_view_active('website_blog.opt_blog_cover_post')
-        fullwidth_cover = request.website.is_view_active('website_blog.opt_blog_cover_post_fullwidth_design')
+        use_latest_post_cover = request.website.is_view_active('website_blog.opt_blog_cover_latest_post')
+        fullwidth_cover = request.website.is_view_active('website_blog.opt_blog_cover_post_full_width')
 
         # if blog, we show blog title, if use_cover and not fullwidth_cover we need pager + latest always
         offset = (page - 1) * self._blog_post_per_page
         first_post = BlogPost
-        if not blog:
-            first_post = BlogPost.search(domain + [('website_published', '=', True)], order="post_date desc, id asc", limit=1)
-            if use_cover and not fullwidth_cover:
-                offset += 1
+
+        first_post = BlogPost.search(domain + [('website_published', '=', True)], order="post_date desc, id asc", limit=1)
+        if use_latest_post_cover and not fullwidth_cover:
+            offset += 1
 
         if search:
             tags_like_search = BlogTag.search([('name', 'ilike', search)])
