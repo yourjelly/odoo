@@ -9,6 +9,7 @@
     "depends": ["point_of_sale"],
     "data": [
         "views/pos_config_views.xml",
+        "views/pos_payment_method_views.xml",
     ],
     "installable": True,
     "auto_install": False,
