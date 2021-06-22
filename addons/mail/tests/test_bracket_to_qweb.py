@@ -4,56 +4,63 @@
 from odoo.tests import BaseCase
 from odoo.tools import bracket_to_qweb_instructions
 
-# Convert tuples into string for easier understanding of test output.
-def bracket_to_qweb_string(text):
-    instructions = bracket_to_qweb_instructions(text)
-    string = ''
-    for instruction_type, content in instructions:
-        if instruction_type == 'text':
-            string += content
-        if instruction_type == 'eval_escape':
-            string += '<t t-out="' + content + '"/>'
-        if instruction_type == 'eval':
-            string += '<t t-raw="' + content + '"/>'
-    return string
-
 class TestBracketToQweb(BaseCase):
-    def test_t_out(self):
+    def test_expression(self):
         text = '${a}'
-        self.assertEqual(bracket_to_qweb_string(text), '<t t-out="a"/>')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('', 'a')])
 
-    def test_t_out_surrounded(self):
+    def test_t_2(self):
+        text = r'$\{a}'
+        self.assertEqual(bracket_to_qweb_instructions(text), [(r'$\{a}', '')])
+
+    def test_t_3(self):
+        text = r'\\${a}'
+        self.assertEqual(bracket_to_qweb_instructions(text), [("\\", 'a')])
+
+    def test_expression_surrounded(self):
         text = "one ${two} tree"
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="two"/> tree')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', 'two'), (' tree', '')])
 
-    def test_multiples_t_out(self):
+    def test_multiples_expression(self):
         text = "one ${two} tree ${four}"
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="two"/> tree <t t-out="four"/>')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', 'two'), (' tree ', 'four')])
 
-    def test_t_out_escaping_dollar(self):
-        text = "one \\${two} tree"
-        self.assertEqual(bracket_to_qweb_string(text), 'one \\${two} tree')
+    def test_expression_escaping_dollar(self):
+        text = r"one \${two} tree"
+        self.assertEqual(bracket_to_qweb_instructions(text), [(r'one \${two} tree', '')])
 
-    def test_t_out_escaping_inside_bracket(self):
-        text = r"one ${\}} tree"
-        self.assertEqual(bracket_to_qweb_string(text), r'one <t t-out="\}"/> tree')
+    def test_expression_escaping_escaping_dollar(self):
+        text = r"one \\${two} tree"
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one \\', 'two'), (' tree', '')])
 
-    def test_t_out_with_quote_and_curly_bracket(self):
+    def test_expression_escaping_inside_bracket(self):
+        text = r"one ${{\}} tree"
+        self.assertEqual(bracket_to_qweb_instructions(text), [(r'one ', '{}'), (' tree', '')])
+
+    def test_expression_escaping_inside_quote_with_curly_bracket(self):
+        text = r"one ${'\\}'} tree"
+        self.assertEqual(bracket_to_qweb_instructions(text), [(r'one ', r"'\}'"), (' tree', '')])
+
+    def test_expression_with_quote_and_curly_bracket(self):
         text = "one ${'}'} tree"
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="\'}\'"/> tree')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', "'}'"), (' tree', '')])
 
-    def test_t_out_escape_quote(self):
-        text = "one ${'\\'}'} tree"
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="\'\\\'}\'"/> tree')
+    def test_expression_escape_quote(self):
+        text = r"one ${'\'}'} tree"
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', r"'\'}'"), (' tree', '')])
 
-    def test_t_out_escape_double_quote(self):
+    def test_expression_escape_double_quote(self):
         text = 'one ${"}"} tree'
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="&quot;}&quot;"/> tree')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', '"}"'), (' tree', '')])
 
-    def test_t_out_function_call(self):
+    def test_expression_function_call(self):
         text = 'one ${function(name="two")} tree'
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-out="function(name=&quot;two&quot;)"/> tree')
+        self.assertEqual(bracket_to_qweb_instructions(text), [('one ', 'function(name="two")'), (' tree', '')])
 
-    def test_t_raw(self):
-        text = 'one ${two | safe } tree'
-        self.assertEqual(bracket_to_qweb_string(text), 'one <t t-raw="two"/> tree')
+    def test_t_dollar_without_curly_bracket(self):
+        text = '100$'
+        self.assertEqual(bracket_to_qweb_instructions(text), [('100$', '')])
+
+    def test_t_dollar_with_curly_bracket(self):
+        text = r'100$${one}'
+        self.assertEqual(bracket_to_qweb_instructions(text), [('100$', 'one')])

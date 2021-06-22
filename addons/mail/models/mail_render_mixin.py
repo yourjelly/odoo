@@ -396,23 +396,17 @@ class MailRenderMixin(models.AbstractModel):
             results[record.id] = ''
 
             instructions = bracket_to_qweb_instructions(tools.ustr(template_txt))
-            for instruction_type, content in instructions:
-                if instruction_type == 'text':
-                    results[record.id] += content
-                    continue
+            instructions
+            for string, expression in instructions:
+                results[record.id] += string
 
-                try:
-                    qweb_string = '<t t-out="'+content+'"/>'
-                    wrapped_lxml_object = lxml.html.fragment_fromstring(qweb_string, create_parent=True)
-                    result = self.env['ir.qweb']._render(wrapped_lxml_object, variables)
-                    unwrapped_string = result[5:-6].decode()
-                    if instruction_type == 'eval':
-                        unwrapped_string = html.unescape(unwrapped_string)
-                    results[record.id] += unwrapped_string
+                if expression:
+                    try:
+                        results[record.id] += safe_eval.safe_eval(expression, variables)
 
-                except Exception as e:
-                    _logger.info("Failed to render template : %s", qweb_string, exc_info=True)
-                    raise UserError(_("Failed to render QWeb template : %s)", e))
+                    except Exception as e:
+                        _logger.info("Failed to render small_qweb expression : %s", expression, exc_info=True)
+                        raise UserError(_("Failed to render small_qweb template : %s)", e))
 
         for res_id in results:
             results[res_id] = Markup(results[res_id])

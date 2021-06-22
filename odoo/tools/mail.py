@@ -299,31 +299,29 @@ def is_html_empty(html_content):
 
 def bracket_to_qweb_instructions(text):
     reg = re.compile(r"""
-    ((?:[^\$|\\]|\\.)*)
+    (
+        (?:
+            (?:\\\\)
+            |(?:\\\$)
+            |(?:(?!\$\{).)
+        )*
+    )
     (?:\$\{
-         ((?:[^}\'\"\\]
-             |'(?:[^'\\]|\\.)*'?
-             |"(?:[^"\\]|\\.)*"?
-             |(?:\\.))*)
+        ((?:[^}\'\"\\]
+            |'(?:[^'\\]|\\.)*'?
+            |"(?:[^"\\]|\\.)*"?
+            |(?:\\.))*)
     })?
     """, re.X)
 
-    groups = reg.findall(text)[0:-1]
-    instructions = []
-    for group in groups:
-        if group[0]:
-            instructions.append(['text', group[0]])
-        expression = re.sub(r'(\")', '&quot;', group[1]).strip()
-        if expression:
-            # `| safe` in the expression means that the content should not be escaped
-            safePattern = re.compile(r"(.*).*\s*\|\s*safe\s*$")
-            if safePattern.search(expression):
-                expression = safePattern.sub(r'\1', expression).strip()
-                instructions.append(['eval', expression])
-            else:
-                instructions.append(['eval_escape', expression])
+    groups = []
+    for group in reg.findall(text)[0:-1]:
+        string_match = re.sub(r'\\\\', r'\\', group[0])
+        expression_match = re.sub(r'(?<!\\)\\}', r'}', group[1])
+        expression_match = re.sub(r'\\\\', r'\\', expression_match)
+        groups.append((string_match, expression_match))
+    return groups
 
-    return instructions
 
 def html_keep_url(text):
     """ Transform the url into clickable link with <a/> tag """
