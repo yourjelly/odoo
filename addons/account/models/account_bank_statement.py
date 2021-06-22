@@ -1067,9 +1067,10 @@ class AccountBankStatementLine(models.Model):
             # Don't modify the params directly.
             vals = dict(vals)
 
-            if 'id' in vals:
+            to_browse_id = vals.pop('id', None)
+            if to_browse_id:
                 # Existing account.move.line.
-                to_browse_ids.append(vals.pop('id'))
+                to_browse_ids.append(to_browse_id)
                 to_process_vals.append(vals)
                 if any(x in vals for x in ('balance', 'amount_residual', 'amount_residual_currency')):
                     partial_rec_needed = False
@@ -1247,6 +1248,33 @@ class AccountBankStatementLine(models.Model):
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
+
+    def _retrieve_partner(self):
+        self.ensure_one()
+
+        if self.partner_id:
+            return self.partner_id
+
+        if self.account_number:
+            account_number_nums = re.sub(r'\W+', '', self.account_number)
+            if account_number_nums:
+                domain = [('sanitized_acc_number', 'ilike', account_number_nums)]
+                for extra_domain in ([('company_id', '=', self.company_id.id)], []):
+                    bank_account = self.env['res.partner.bank'].search(extra_domain + domain, limit=1)
+                    if bank_account:
+                        return bank_account.partner_id
+
+        if self.partner_name:
+            domain = [
+                ('parent_id', '=', False),
+                ('name', 'ilike', self.partner_name),
+            ]
+            for extra_domain in ([('company_id', '=', self.company_id.id)], []):
+                partner = self.env['res.partner'].search(extra_domain + domain, limit=1)
+                if partner:
+                    return partner
+
+        return self.env['res.partner']
 
     def _find_or_create_bank_account(self):
         bank_account = self.env['res.partner.bank'].search(

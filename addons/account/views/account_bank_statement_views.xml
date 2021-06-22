@@ -323,6 +323,7 @@
                 </form>
             </field>
         </record>
+
         <record id="view_bank_statement_line_tree" model="ir.ui.view">
             <field name="name">account.bank.statement.line.tree</field>
             <field name="model">account.bank.statement.line</field>
