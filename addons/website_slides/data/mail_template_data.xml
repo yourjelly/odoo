@@ -43,7 +43,7 @@
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
                         Hello<br/><br/>
-                        <t t-out="user.name or ''">Mitchell Admin</t> shared the <t t-out="object.slide_type  or ''">document</t> <strong t-out="object.name or ''">Trees</strong> with you!
+                        <t t-out="user.name or ''">Mitchell Admin</t> shared the <t t-out="object.slide_type or ''">document</t> <strong t-out="object.name or ''">Trees</strong> with you!
                         <div style="margin: 16px 8px 16px 8px; text-align: center;">
                             <a t-att-href="(object.website_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_url">
                                 <img t-att-alt="object.name" t-attf-src="{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024" style="height:auto; width:150px; margin: 16px;"/>

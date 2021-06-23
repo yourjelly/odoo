@@ -18,7 +18,7 @@
     Thank you,
     <t t-if="object.event_id.user_id.signature">
         <br />
-        <t t-out="object.event_id.user_id.signature  or ''">--<br/>Mitchell Admin</t>
+        <t t-out="object.event_id.user_id.signature or ''">--<br/>Mitchell Admin</t>
     </t>
 </div></field>
             <field name="report_template" ref="report_event_registration_badge"/>
