@@ -17,20 +17,29 @@
                     </p>
                     <group>
                         <field name="company_id" groups="base.group_multi_company"/>
-                        <field name="fiscal_position_id" domain="[('company_id','=', company_id)]"
-                               options="{'no_create': True}"
-                               placeholder="Current EU B2C Fiscal Position, if any"/>
-                        <field name="tax_id"
+                        <field name="tax_ids" widget="many2many_tags"
                                domain="[('type_tax_use', '=', 'sale'),
                                         ('amount_type', '=', 'percent'),
                                         ('company_id','=', company_id)]"
                                options="{'no_create': True}"/>
-                        <field name="account_collected_id"
-                            placeholder="Keep empty to use current Service VAT account"/>
                         <field name="done_country_ids" widget="many2many_tags" readonly="1"
                                attrs="{'invisible': [('done_country_ids', '=', [(6, False, [])])]}"/>
                         <field name="todo_country_ids" widget="many2many_tags"
                                domain="[('country_group_ids', 'in', %(base.europe)d)]"/>
+                        <field name="fiscal_position_id" domain="[('company_id','=', company_id)]"
+                               options="{'no_create': True}"
+                               placeholder="Current EU B2C Fiscal Position, if any"/>
+                        <field name="account_collected_id"
+                               placeholder="Keep empty to use current Service VAT account"/>
+                        <field name="proposed_tax_ids">
+                            <tree editable="bottom" create="false">
+                                <field name="country_id"/>
+                                <field name="amount"/>
+                                <field name="name"/>
+                                <field name="map_tax_id"/>
+                                <field name="apply_tax_id"/>
+                            </tree>
+                        </field>
                     </group>
                     <footer>
                         <button string="Create Fiscal Positions and Taxes"

@@ -45,7 +45,7 @@ class l10n_eu_service(models.TransientModel):
             [('country_id', 'in', eu_country_group.country_ids.ids),
              ('vat_required', '=', False), ('auto_apply', '=', True),
              ('company_id', '=', user.company_id.id)])
-        return eu_country_group.country_ids - eu_fiscal.mapped('country_id') - user.company_id.country_id
+        return eu_country_group.country_ids - eu_fiscal.mapped('country_id') - user.company_id.country_id - self.env.company.country_id
 
     company_id = fields.Many2one(
         'res.company', string='Company', required=True, default=_get_default_company_id)
@@ -70,6 +70,30 @@ class l10n_eu_service(models.TransientModel):
         'res.country', 'l10n_eu_service_country_rel_todo', default=_default_todo_country_ids,
         string='EU Customers From', required=True)
 
+    tax_ids = fields.Many2many('account.tax', 'l10n_eu_service_tax_rel_todo', required=True, string="Domestic Taxes")
+    proposed_tax_ids = fields.Many2many(string="Fiscal Position Preview", comodel_name='l10n_eu_service.wizard.tax', relation='l10n_eu_service_tax_props', compute='_compute_proposed_tax_ids', readonly=False)
+
+    @api.depends('todo_country_ids', 'tax_ids')
+    def _compute_proposed_tax_ids(self):
+        tax_rate = self.env['l10n_eu_service.service_tax_rate']
+        for record in self:
+            proposals = []
+            for tax in record.tax_ids:
+                for country in record.todo_country_ids:
+                    rate = tax_rate.search([('country_id', '=', country.id if isinstance(country.id, int) else country.id.origin)]).rate or 0.0
+                    values = {
+                        # 'name': existing_fps.name or _('OSS B2C %(country)s' % {'country': country.name}),
+                        'country_id': country.id if isinstance(country.id, int) else country.id.origin,
+                        'map_tax_id': tax.id if isinstance(tax.id, int) else tax.id.origin,
+                        # 'apply_tax_id': _('VAT in %(country)s (%(rate)s)' % {'country':country.name, 'rate':rate}),
+                        'amount': rate,
+                        'account_collected_id': record.account_collected_id,
+                    }
+                    # res = self.env['l10n_eu_service.wizard.tax'].create(values)
+                    # proposals.append([4, res.id])
+                    proposals.append([0, 0, values])
+            record.proposed_tax_ids = proposals
+
     def _get_repartition_line_copy_values(self, original_rep_lines):
         return [(0, 0, {
             'factor_percent': line.factor_percent,
@@ -80,39 +104,37 @@ class l10n_eu_service(models.TransientModel):
         }) for line in original_rep_lines]
 
     def generate_eu_service(self):
-        tax_rate = self.env["l10n_eu_service.service_tax_rate"]
         account_tax = self.env['account.tax']
-        fpos = self.env['account.fiscal.position']
-        for country in self.todo_country_ids:
-            format_params = {'country_name': country.name}
-            tax_name = _("VAT for EU Services to %(country_name)s") % format_params
-            #create a new tax based on the selected service tax
-            data_tax = {
-                'name': tax_name,
-                'amount': tax_rate.search([('country_id', '=', country.id)]).rate,
-                'invoice_repartition_line_ids': self._get_repartition_line_copy_values(self.tax_id.invoice_repartition_line_ids),
-                'refund_repartition_line_ids': self._get_repartition_line_copy_values(self.tax_id.refund_repartition_line_ids),
-                'type_tax_use': 'sale',
-                'description': "EU-VAT-%s-S" % country.code,
-                'sequence': 1000,
-            }
-            tax = account_tax.create(data_tax)
+        account_fpos = self.env['account.fiscal.position']
+        for record in self.proposed_tax_ids:
+            tax = account_tax.search([('name', '=', record.apply_tax_id)])
+            if not tax:
+                tax = account_tax.create({
+                    'name': record.apply_tax_id,
+                    'amount': record.amount,
+                    'invoice_repartition_line_ids': self._get_repartition_line_copy_values(record.map_tax_id.invoice_repartition_line_ids),
+                    'refund_repartition_line_ids': self._get_repartition_line_copy_values(record.map_tax_id.refund_repartition_line_ids),
+                    'type_tax_use': 'sale',
+                    'description': "%s%%" % record.amount,
+                    'sequence': 1000,
+                })
             if self.fiscal_position_id:
                 account_ids = [(6, 0, self.fiscal_position_id.account_ids.ids)]
             else:
                 account_ids = False
-            #create a fiscal position for the country
-            fiscal_pos_name = _("Intra-EU B2C in %(country_name)s") % {'country_name': country.name}
-            fiscal_pos_name += " (EU-VAT-%s)" % country.code
-            data_fiscal = {
-                'name': fiscal_pos_name,
-                'company_id': self.company_id.id,
-                'vat_required': False,
-                'auto_apply': True,
-                'country_id': country.id,
-                'account_ids': account_ids,
-                'tax_ids': [(0, 0, {'tax_src_id': self.tax_id.id, 'tax_dest_id': tax.id})],
-            }
-            fpos.create(data_fiscal)
-
+            fpos = account_fpos.search([('country_id', '=', record.country_id.id)], limit=1)
+            if not fpos:
+                fpos = account_fpos.create({
+                    'name': record.name,
+                    'company_id': self.company_id.id,
+                    'vat_required': False,
+                    'auto_apply': True,
+                    'country_id': record.country_id.id,
+                    'account_ids': account_ids,
+                    'tax_ids': [(0, 0, {'tax_src_id': record.map_tax_id.id, 'tax_dest_id': tax.id})]
+                })
+            else:
+                fpos.write({
+                    'tax_ids': [(0, 0, {'tax_src_id': record.map_tax_id.id, 'tax_dest_id': tax.id})]
+                })
         return {'type': 'ir.actions.act_window_close'}
