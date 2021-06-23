@@ -408,9 +408,6 @@ class MailRenderMixin(models.AbstractModel):
                         _logger.info("Failed to render small_qweb expression : %s", expression, exc_info=True)
                         raise UserError(_("Failed to render small_qweb template : %s)", e))
 
-        for res_id in results:
-            results[res_id] = Markup(results[res_id])
-
         return results
 
     @api.model
