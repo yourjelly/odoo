@@ -9,6 +9,10 @@ class TestParseSmallQweb(BaseCase):
         text = '${a}'
         self.assertEqual(parse_small_qweb(text), [('', 'a')])
 
+    def test_expression_multiline(self):
+        text = 'a\nb'
+        self.assertEqual(parse_small_qweb(text), [('a\nb', '')])
+
     def test_t_2(self):
         text = r'$\{a}'
         self.assertEqual(parse_small_qweb(text), [(r'$\{a}', '')])

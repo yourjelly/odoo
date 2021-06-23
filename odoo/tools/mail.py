@@ -312,7 +312,7 @@ def parse_small_qweb(text):
             |"(?:[^"\\]|\\.)*"?
             |(?:\\.))*)
     })?
-    """, re.X)
+    """, re.X | re.DOTALL)
 
     groups = []
     for group in reg.findall(text)[0:-1]:
