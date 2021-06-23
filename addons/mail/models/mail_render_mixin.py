@@ -15,7 +15,7 @@ from werkzeug import urls
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
-from odoo.tools import is_html_empty, safe_eval, bracket_to_qweb_instructions
+from odoo.tools import is_html_empty, safe_eval, parse_small_qweb
 from odoo.addons.http_routing.models.ir_http import slug
 
 _logger = logging.getLogger(__name__)
@@ -395,7 +395,7 @@ class MailRenderMixin(models.AbstractModel):
 
             results[record.id] = ''
 
-            instructions = bracket_to_qweb_instructions(tools.ustr(template_txt))
+            instructions = parse_small_qweb(tools.ustr(template_txt))
             instructions
             for string, expression in instructions:
                 results[record.id] += string

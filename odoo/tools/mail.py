@@ -297,7 +297,7 @@ def is_html_empty(html_content):
     tag_re = re.compile(r'\<\s*\/?(?:p|div|span|br|b|i)(?:(?=\s+\w*)[^/>]*|\s*)/?\s*\>')
     return not bool(re.sub(tag_re, '', html_content).strip())
 
-def bracket_to_qweb_instructions(text):
+def parse_small_qweb(text):
     reg = re.compile(r"""
     (
         (?:
