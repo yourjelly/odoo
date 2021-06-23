@@ -5,8 +5,8 @@
             <field name="name">Calendar: Meeting Invitation</field>
             <field name="model_id" ref="calendar.model_calendar_attendee"/>
             <field name="subject">Invitation to ${object.event_id.name}</field>
-            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '') | safe}</field>
-            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email) | safe}</field>
+            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '')}</field>
+            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email)}</field>
             <field name="partner_to">${object.partner_id.id if object.partner_id.email and object.partner_id.email == object.email else False}</field>
             <field name="lang">${object.partner_id.lang}</field>
             <field name="body_html" type="html">
@@ -134,8 +134,8 @@
             <field name="name">Calendar: Date updated</field>
             <field name="model_id" ref="calendar.model_calendar_attendee"/>
             <field name="subject">${object.event_id.name}: Date updated</field>
-            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '') | safe}</field>
-            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email) | safe}</field>
+            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '')}</field>
+            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email)}</field>
             <field name="partner_to">${object.partner_id.id if object.partner_id.email and object.partner_id.email == object.email else False}</field>
             <field name="lang">${object.partner_id.lang}</field>
             <field name="body_html" type="html">
@@ -259,8 +259,8 @@
             <field name="name">Calendar: Reminder</field>
             <field name="model_id" ref="calendar.model_calendar_attendee"/>
             <field name="subject">${object.event_id.name} - Reminder</field>
-            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '') | safe}</field>
-            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email) | safe}</field>
+            <field name="email_from">${(object.event_id.user_id.email_formatted or user.email_formatted or '')}</field>
+            <field name="email_to">${('' if object.partner_id.email and object.partner_id.email == object.email else object.email)}</field>
             <field name="partner_to">${object.partner_id.id if object.partner_id.email and object.partner_id.email == object.email else False}</field>
             <field name="lang">${object.partner_id.lang}</field>
             <field name="body_html" type="html">
