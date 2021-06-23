@@ -43,6 +43,14 @@ class DriverController(http.Controller):
         """
         helpers.check_certificate()
 
+    @http.route('/hw_drivers/devices_status', type='http', auth='none', cors='*', csrf=False, save_session=False)
+    def devices_status(self):
+        """
+        This route is called to get the list of devices
+        Used in pos to check if devices are connected
+        """
+        return iot_devices
+
     @http.route('/hw_drivers/event', type='json', auth='none', cors='*', csrf=False, save_session=False)
     def event(self, listener):
         """

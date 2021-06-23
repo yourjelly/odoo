@@ -145,6 +145,10 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         window.hw_proxy = this;
     },
     set_connection_status: function(status, drivers, msg=''){
+        // console.log('this');
+        // console.log(this);
+        // console.log(status);
+        // console.log(drivers);
         var oldstatus = this.get('status');
         var newstatus = {};
         newstatus.status = status;
@@ -152,6 +156,8 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         newstatus.drivers = drivers ? drivers : newstatus.drivers;
         newstatus.msg = msg;
         this.set('status',newstatus);
+        // console.log('sdfsgdfg');
+        // console.log(newstatus);
     },
     disconnect: function(){
         if(this.get('status').status !== 'disconnected'){
