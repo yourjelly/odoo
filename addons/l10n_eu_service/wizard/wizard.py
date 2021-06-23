@@ -138,3 +138,45 @@ class l10n_eu_service(models.TransientModel):
                     'tax_ids': [(0, 0, {'tax_src_id': record.map_tax_id.id, 'tax_dest_id': tax.id})]
                 })
         return {'type': 'ir.actions.act_window_close'}
+
+    def get_replacement_tax_amount(self, country_id, amount, foreign_country_id):
+        return 0.0 #this should look up the tax mapping
+
+    def create_eu_taxes_and_fiscal_positions(self):
+        companies = self.env['res.company'].search([])
+        for c in companies:
+            tax_ids = self.env['account.tax'].search([('type_tax_use', '=', 'sale'),
+                ('amount_type', '=', 'percent'),
+                ('company_id','=', c.id)])
+            for tax_to_map in tax_ids:
+                eu_countries = self.env.ref("base.europe").country_ids - c.country_id
+                for country in eu_countries:
+                    replacement_tax_amt = self.get_replacement_tax_amount(c.country_id, tax_to_map.amount, country)
+                    eu_tax_name =_('%(label)s in %(country)s (%(rate)s)' % {'label': country.vat_label, 'country': country.name, 'rate':replacement_tax_amt})
+                    existing_tax = self.env['account.tax'].search([('name', '=', eu_tax_name)])
+                    if not existing_tax:
+                        existing_tax = self.env['account.tax'].create({
+                            'name': eu_tax_name,
+                            'amount': replacement_tax_amt,
+                            'invoice_repartition_line_ids': self._get_repartition_line_copy_values(tax_to_map.invoice_repartition_line_ids),
+                            'refund_repartition_line_ids': self._get_repartition_line_copy_values(tax_to_map.refund_repartition_line_ids),
+                            'type_tax_use': 'sale',
+                            'description': "%s%%" % replacement_tax_amt,
+                            'sequence': 1000,
+                        })
+                    fpos = self.env['account.fiscal.position'].search([('country_id', '=', country.id)], limit=1)
+                    if not fpos:
+                        new_fpos_name = _('OSS B2C %(country)s' % {'country': country.name})
+                        fpos = self.env['account.fiscal.position'].create({
+                            'name': new_fpos_name,
+                            'company_id': c.id,
+                            'vat_required': False,
+                            'auto_apply': True,
+                            'country_id': country.id,
+                            'account_ids': False,
+                            'tax_ids': [(0, 0, {'tax_src_id': tax_to_map.id, 'tax_dest_id': existing_tax.id})]
+                        })
+                    else:
+                        fpos.write({
+                            'tax_ids': [(0, 0, {'tax_src_id': tax_to_map.id, 'tax_dest_id': existing_tax.id})]
+                        })

@@ -42,6 +42,8 @@
                         </field>
                     </group>
                     <footer>
+                        <button string="Create All Fiscal Positions and Taxes"
+                                name="create_eu_taxes_and_fiscal_positions" type="object" class="btn-primary"/>
                         <button string="Create Fiscal Positions and Taxes"
                                 name="generate_eu_service" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
