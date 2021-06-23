@@ -9,7 +9,7 @@
             <field name="use_default_to" eval="True"/>
             <field name="body_html" type="html">
 <div>
-    Dear <t t-out="object.partner_id.name or 'customer' or ''">Brandon Freeman</t>,<br/>
+    Dear <t t-out="object.partner_id.name or 'customer'">Brandon Freeman</t>,<br/>
     Thank you for your enquiry.<br />
     If you have any questions, please let us know.
     <br/><br/>

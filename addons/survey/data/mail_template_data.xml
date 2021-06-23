@@ -9,7 +9,7 @@
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px; font-size: 13px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
-        Dear <t t-out="object.partner_id.name or 'participant' or ''">participant</t><br/><br/>
+        Dear <t t-out="object.partner_id.name or 'participant'">participant</t><br/><br/>
         <t t-if="object.survey_id.certification">
             You have been invited to take a new certification.
         </t>
@@ -60,7 +60,7 @@
     <table style="width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;">
         <tbody>
             <tr><td style="padding:15px 20px 10px 20px;">
-                <p>Dear <span t-out="object.partner_id.name or 'participant' or ''">participant</span></p>
+                <p>Dear <span t-out="object.partner_id.name or 'participant'">participant</span></p>
                 <p>
                     Here is, in attachment, your certification document for
                         <strong t-out="object.survey_id.display_name or ''">Feedback Form</strong>

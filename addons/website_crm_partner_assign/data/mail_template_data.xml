@@ -37,14 +37,14 @@
                             Hello,<br/>
                             We have been contacted by those prospects that are in your region. Thus, the following leads have been assigned to <t t-out="ctx['partner_id'].name or ''"></t>:<br/>
                             <ol t-foreach="ctx['partner_leads']" t-as="lead">
-                                <li><a t-att-href="lead.lead_link" t-out="lead.lead_id.name or 'Subject Undefined' or ''">Subject Undefined</a>, <t t-out="lead.lead_id.partner_name or lead.lead_id.contact_name or 'Contact Name Undefined' or ''">Contact Name Undefined</t>, <t t-out="lead.lead_id.country_id and lead.lead_id.country_id.name or 'Country Undefined'  or ''">Country Undefined</t>, <t t-out="lead.lead_id.email_from or 'Email Undefined' or ''">Email Undefined</t>, <t t-out="lead.lead_id.phone or ''">+1 (650) 691-3277</t> </li><br/>
+                                <li><a t-att-href="lead.lead_link" t-out="lead.lead_id.name or 'Subject Undefined'">Subject Undefined</a>, <t t-out="lead.lead_id.partner_name or lead.lead_id.contact_name or 'Contact Name Undefined'">Contact Name Undefined</t>, <t t-out="lead.lead_id.country_id and lead.lead_id.country_id.name or 'Country Undefined'">Country Undefined</t>, <t t-out="lead.lead_id.email_from or 'Email Undefined' or ''">Email Undefined</t>, <t t-out="lead.lead_id.phone or ''">+1 (650) 691-3277</t> </li><br/>
                             </ol>
                             <t t-if="ctx.get('partner_in_portal')">
                                 Please connect to your <a href="${record.get_portal_url()}">Partner Portal</a> to get details. On each lead are two buttons on the top left corner that you should press after having contacted the lead: "I'm interested" &amp; "I'm not interested".<br/>
                             </t>
                             <t t-else="">
                                 You do not have yet a portal access to our database. Please contact
-                                <t t-out="ctx['partner_id'].user_id and ctx['partner_id'].user_id.email and 'your account manager %s (%s)' % (ctx['partner_id'].user_id.name,ctx['partner_id'].user_id.email) or 'us' or ''">us</t>.<br/>
+                                <t t-out="ctx['partner_id'].user_id and ctx['partner_id'].user_id.email and 'your account manager %s (%s)' % (ctx['partner_id'].user_id.name,ctx['partner_id'].user_id.email) or 'us'">us</t>.<br/>
                             </t>
                             The lead will be sent to another partner if you do not contact the lead before 20 days.<br/><br/>
                             Thank you,<br/>
