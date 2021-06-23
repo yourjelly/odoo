@@ -54,6 +54,7 @@
         'views/snippets/s_call_to_action.xml',
         'views/snippets/s_references.xml',
         'views/snippets/s_popup.xml',
+        'views/snippets/s_cookiesbar.xml',
         'views/snippets/s_faq_collapse.xml',
         'views/snippets/s_features_grid.xml',
         'views/snippets/s_tabs.xml',
@@ -115,6 +116,8 @@
             'website/static/src/js/show_password.js',
             'website/static/src/js/post_link.js',
             'website/static/src/js/user_custom_javascript.js',
+            'website/static/src/js/http_cookie.js',
+
         ],
         'web._assets_primary_variables': [
             'website/static/src/scss/primary_variables.scss',
