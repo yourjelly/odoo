@@ -16,21 +16,34 @@ class PosPayment(models.Model):
     _order = "id desc"
 
     name = fields.Char(string='Label', readonly=True)
-    pos_order_id = fields.Many2one('pos.order', string='Order', required=True)
+    pos_order_id = fields.Many2one('pos.order', string='Order')
+    pos_move_id = fields.Many2one('pos.move', string='Move')
     amount = fields.Monetary(string='Amount', required=True, currency_field='currency_id', readonly=True, help="Total amount of the payment.")
     payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True)
     payment_date = fields.Datetime(string='Date', required=True, readonly=True, default=lambda self: fields.Datetime.now())
-    currency_id = fields.Many2one('res.currency', string='Currency', related='pos_order_id.currency_id')
-    currency_rate = fields.Float(string='Conversion Rate', related='pos_order_id.currency_rate', help='Conversion rate from company currency to order currency.')
-    partner_id = fields.Many2one('res.partner', string='Customer', related='pos_order_id.partner_id')
-    session_id = fields.Many2one('pos.session', string='Session', related='pos_order_id.session_id', store=True)
-    company_id = fields.Many2one('res.company', string='Company', related='pos_order_id.company_id')
+    currency_id = fields.Many2one('res.currency', string='Currency', compute='_compute_related')
+    currency_rate = fields.Float(string='Conversion Rate', compute='_compute_related', help='Conversion rate from company currency to order currency.')
+    partner_id = fields.Many2one('res.partner', string='Customer', compute='_compute_related')
+    # TODO jcb - remove the following comment
+    # no need to store session_id, otherwise, when installing pos, we the warning: "inconsistent 'compute_sudo' for computed fields"
+    session_id = fields.Many2one('pos.session', string='Session', compute='_compute_related')
+    company_id = fields.Many2one('res.company', string='Company', compute='_compute_related')
     card_type = fields.Char('Type of card used')
     cardholder_name = fields.Char('Cardholder Name')
     transaction_id = fields.Char('Payment Transaction ID')
     payment_status = fields.Char('Payment Status')
     ticket = fields.Char('Payment Receipt Info')
     is_change = fields.Boolean(string='Is this payment change?', default=False)
+
+    @api.depends('pos_order_id', 'pos_move_id')
+    def _compute_related(self):
+        for payment in self:
+            related_record = payment.pos_order_id or payment.pos_move_id
+            payment.currency_id = related_record.currency_id
+            payment.currency_rate = related_record.currency_rate
+            payment.partner_id = related_record.partner_id
+            payment.session_id = related_record.session_id
+            payment.company_id = related_record.company_id
 
     @api.model
     def name_get(self):

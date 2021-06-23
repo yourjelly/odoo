@@ -83,6 +83,7 @@ class PosSession(models.Model):
     cash_real_expected = fields.Monetary(string="Expected", readonly=True)
 
     order_ids = fields.One2many('pos.order', 'session_id',  string='Orders')
+    move_ids = fields.One2many('pos.move', 'session_id',  string='Moves')
     order_count = fields.Integer(compute='_compute_order_count')
     statement_ids = fields.One2many('account.bank.statement', 'pos_session_id', string='Cash Statements', readonly=True)
     failed_pickings = fields.Boolean(compute='_compute_picking_count')

@@ -11,6 +11,7 @@ from . import digest
 from . import pos_category
 from . import pos_config
 from . import pos_order
+from . import pos_move
 from . import pos_session
 from . import product
 from . import res_partner
