@@ -25,7 +25,7 @@ patchRecordMethods('PublicLivechatGlobal', {
             return this.loadQWebTemplate();
         }
         if (this.options.chat_request_session) {
-            set_cookie('im_livechat_session', JSON.stringify(this.options.chat_request_session), 60 * 60);
+            set_cookie('im_livechat_session', JSON.stringify(this.options.chat_request_session), 60 * 60, 'required');
         }
         return this._super();
     },

@@ -137,7 +137,7 @@ const PublicLivechatWindow = Widget.extend({
             folded = !this.messaging.publicLivechatGlobal.publicLivechat.isFolded;
         }
         this.messaging.publicLivechatGlobal.publicLivechat.update({ isFolded: folded });
-        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60);
+        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60, 'required');
         this.updateVisualFoldState();
     },
     /**

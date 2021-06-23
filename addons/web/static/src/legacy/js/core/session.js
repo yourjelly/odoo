@@ -172,11 +172,12 @@ var Session = core.Class.extend(mixins.EventDispatcherMixin, {
      * @param name the cookie's name
      * @param value the cookie's value
      * @param ttl the cookie's time to live, 1 year by default, set to -1 to delete
+     * @param type the type of the cookies ('required' as default value)
      */
-    set_cookie: function (name, value, ttl) {
+    set_cookie(name, value, ttl, type = 'required') {
         if (!this.name) { return; }
         ttl = ttl || 24*60*60*365;
-        utils.set_cookie(this.name + '|' + name, value, ttl);
+        utils.set_cookie(this.name + '|' + name, value, ttl, type);
     },
     /**
      * Load additional web addons of that instance and init them

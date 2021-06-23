@@ -1262,6 +1262,13 @@ class Website(models.Model):
             (_('Homepage'), url_for('/'), 'website'),
             (_('Contact Us'), url_for('/contactus'), 'website_crm'),
         ]
+        if self.cookies_bar:
+            suggested_controllers.append((
+                _('Cookies Consent'),
+                # TODO check link after https://github.com/odoo/odoo/pull/76442 is rebased and merged
+                url_for('#website_cookies_bar'),
+                'website',
+            ),)
         return suggested_controllers
 
     @api.model

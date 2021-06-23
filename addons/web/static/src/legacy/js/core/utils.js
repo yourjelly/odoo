@@ -1129,7 +1129,10 @@ var utils = Object.assign({
         }
         return curr;
     },
-}, cookieUtils);
+}, {
+    get_cookie: cookieUtils.get_cookie,
+    set_cookie: cookieUtils.set_cookie,
+});
 
 return utils;
 

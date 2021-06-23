@@ -96,7 +96,7 @@ const PopupWidget = publicWidget.Widget.extend({
      */
     _onHideModal: function () {
         const nbDays = this.$el.find('.modal').data('consentsDuration');
-        utils.set_cookie(this.$el.attr('id'), true, nbDays * 24 * 60 * 60);
+        utils.set_cookie(this.el.id, true, nbDays * 24 * 60 * 60, 'required');
         this._popupAlreadyShown = true;
 
         this.$target.find('.media_iframe_video iframe').each((i, iframe) => {
@@ -115,6 +115,59 @@ const PopupWidget = publicWidget.Widget.extend({
 });
 
 publicWidget.registry.popup = PopupWidget;
+
+// Extending the popup widget with cookiebar functionality.
+// This allows for refusing optional cookies for now and can be
+// extended to picking which cookies categories are accepted.
+publicWidget.registry.cookies_bar = PopupWidget.extend({
+    selector: '.s_cookiesbar',
+    cookieDurationDays: 365,
+    events: Object.assign({}, PopupWidget.prototype.events, {
+        'click #cookies-consent-essential': '_onConsentEssentialClick',
+        'click #cookies-consent-all': '_onConsentAllClick',
+    }),
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param acceptOptional Whether optional cookies were accepted or not
+     */
+    _onAcceptClick(acceptOptional) {
+        const acceptedCookieTypes = JSON.parse(utils.get_cookie('accepted_cookie_types') || '{}');
+        Object.assign(acceptedCookieTypes, {'required': true, 'optional': acceptOptional});
+        utils.set_cookie('accepted_cookie_types',
+            JSON.stringify(acceptedCookieTypes),
+            this.cookieDurationDays * 24 * 60 * 60, 'required');
+        // Prevent the modal from reopening again.
+        this._onHideModal();
+    },
+    /**
+     * @private
+     */
+    _onConsentAllClick() {
+        this._onAcceptClick(true);
+    },
+    /**
+     * @private
+     */
+    _onConsentEssentialClick() {
+        this._onAcceptClick(false);
+    },
+    /**
+     * @private
+     */
+    _onHideModal() {
+        this._super.apply(this, arguments);
+        if (!utils.get_cookie('accepted_cookie_types')) {
+            // No confirmation => show popup again next time.
+            utils.set_cookie(this.el.id, false, -1, 'required');
+            this._popupAlreadyShown = false;
+        }
+    },
+});
 
 return PopupWidget;
 });

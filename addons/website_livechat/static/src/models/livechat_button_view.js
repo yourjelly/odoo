@@ -51,7 +51,7 @@ patchRecordMethods('LivechatButtonView', {
         this.widget._sendWelcomeMessage();
         this.messaging.publicLivechatGlobal.chatWindow.renderMessages();
         this.env.services.bus_service.addChannel(this.messaging.publicLivechatGlobal.publicLivechat.uuid);
-        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60);
+        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60, 'required');
         this.update({ isOpeningChat: false });
     },
 });

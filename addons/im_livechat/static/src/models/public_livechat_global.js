@@ -24,7 +24,7 @@ registerModel({
                 while (urlHistory.length > this.HISTORY_LIMIT) {
                     urlHistory.shift();
                 }
-                set_cookie(this.LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60 * 60 * 24); // 1 day cookie
+                set_cookie(this.LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60 * 60 * 24, 'optional'); // 1 day cookie
             }
             if (this.isAvailable) {
                 this.willStart();
