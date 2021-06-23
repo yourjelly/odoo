@@ -5,7 +5,8 @@ import { clear } from '@mail/model/model_field_command';
 // ensure that the model definition is loaded before the patch
 import '@im_livechat/models/livechat_button_view';
 
-import { set_cookie, unaccent } from 'web.utils';
+import {unaccent} from 'web.utils';
+import {set_cookie} from 'web.utils.cookies';
 
 patchRecordMethods('LivechatButtonView', {
     /**
@@ -51,7 +52,7 @@ patchRecordMethods('LivechatButtonView', {
         this.widget._sendWelcomeMessage();
         this.messaging.publicLivechatGlobal.chatWindow.renderMessages();
         this.env.services.bus_service.addChannel(this.messaging.publicLivechatGlobal.publicLivechat.uuid);
-        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60);
+        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60, 'required');
         this.update({ isOpeningChat: false });
     },
 });

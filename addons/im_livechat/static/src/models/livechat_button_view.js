@@ -4,7 +4,8 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
-import { get_cookie, set_cookie, unaccent } from 'web.utils';
+import {unaccent} from 'web.utils';
+import {get_cookie, set_cookie} from 'web.utils.cookies';
 
 registerModel({
     name: 'LivechatButtonView',
@@ -329,12 +330,12 @@ registerModel({
                         this.messaging.publicLivechatGlobal.chatWindow.renderMessages();
                         this.messaging.publicLivechatGlobal.update({ notificationHandler: {} });
 
-                        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60);
-                        set_cookie('im_livechat_auto_popup', JSON.stringify(false), 60 * 60);
+                        set_cookie('im_livechat_session', unaccent(JSON.stringify(this.messaging.publicLivechatGlobal.publicLivechat.widget.toData()), true), 60 * 60, 'required');
+                        set_cookie('im_livechat_auto_popup', JSON.stringify(false), 60 * 60, 'optional');
                         if (this.messaging.publicLivechatGlobal.publicLivechat.operator) {
                             const operatorPidId = this.messaging.publicLivechatGlobal.publicLivechat.operator.id;
                             const oneWeek = 7 * 24 * 60 * 60;
-                            set_cookie('im_livechat_previous_operator_pid', operatorPidId, oneWeek);
+                            set_cookie('im_livechat_previous_operator_pid', operatorPidId, oneWeek, 'optional');
                         }
                     });
                 }

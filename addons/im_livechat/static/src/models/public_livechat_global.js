@@ -5,8 +5,8 @@ import { attr, many, one } from '@mail/model/model_field';
 import { clear } from '@mail/model/model_field_command';
 
 import { qweb } from 'web.core';
-
-import { get_cookie, Markup, set_cookie } from 'web.utils';
+import { Markup } from 'web.utils';
+import {get_cookie, set_cookie} from 'web.utils.cookies';
 
 registerModel({
     name: 'PublicLivechatGlobal',
@@ -24,7 +24,7 @@ registerModel({
                 while (urlHistory.length > this.HISTORY_LIMIT) {
                     urlHistory.shift();
                 }
-                set_cookie(this.LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60 * 60 * 24); // 1 day cookie
+                set_cookie(this.LIVECHAT_COOKIE_HISTORY, JSON.stringify(urlHistory), 60 * 60 * 24, 'optional'); // 1 day cookie
             }
             if (this.isAvailable) {
                 this.willStart();

@@ -2578,6 +2578,7 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
         const $content = this.$target.find('.modal-content');
         const selectorsToKeep = [
             '.o_cookies_bar_text_button',
+            '.o_cookies_bar_text_button_essential',
             '.o_cookies_bar_text_policy',
             '.o_cookies_bar_text_title',
             '.o_cookies_bar_text_primary',
@@ -2590,15 +2591,17 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
 
         for (const selector of selectorsToKeep) {
             const $currentLayoutEls = $content.find(selector).contents();
-            const $newLayoutEl = $template.find(selector);
+            const $newLayoutEls = $template.find(selector);
             if ($currentLayoutEls.length) {
                 // save value before change, eg 'title' is not inside 'discrete' template
                 // but we want to preserve it in case of select another layout later
                 this.$savedSelectors[selector] = $currentLayoutEls;
             }
             const $savedSelector = this.$savedSelectors[selector];
-            if ($newLayoutEl.length && $savedSelector && $savedSelector.length) {
-                $newLayoutEl.empty().append($savedSelector);
+            if ($newLayoutEls.length && $savedSelector && $savedSelector.length) {
+                $newLayoutEls.each((index, newLayoutEl) => {
+                    $(newLayoutEl).empty().append($savedSelector.clone());
+                });
             }
         }
 
