@@ -4,7 +4,7 @@
 from odoo.tests import BaseCase
 from odoo.tools import parse_small_qweb
 
-class TestBracketToQweb(BaseCase):
+class TestParseSmallQweb(BaseCase):
     def test_expression(self):
         text = '${a}'
         self.assertEqual(parse_small_qweb(text), [('', 'a')])
