@@ -188,7 +188,7 @@
                                     <li>Mail: <a t-attf-href="mailto:{{ event_organizer.email }}" style="text-decoration:none;color:#875A7B;" t-out="event_organizer.email or ''">info@yourcompany.com</a></li>
                                 </t>
                                 <t t-if="event_organizer.phone">
-                                    <li>Phone: <t t-out="event_organizer.phone or ''">+1 (650) 691-3277</t></li>
+                                    <li>Phone: <t t-out="event_organizer.phone or ''">+1 650-123-4567</t></li>
                                 </t>
                             </ul>
                         </div>
