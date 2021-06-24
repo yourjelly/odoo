@@ -21,13 +21,13 @@ class PosPayment(models.Model):
     amount = fields.Monetary(string='Amount', required=True, currency_field='currency_id', readonly=True, help="Total amount of the payment.")
     payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True)
     payment_date = fields.Datetime(string='Date', required=True, readonly=True, default=lambda self: fields.Datetime.now())
-    currency_id = fields.Many2one('res.currency', string='Currency', compute='_compute_related')
-    currency_rate = fields.Float(string='Conversion Rate', compute='_compute_related', help='Conversion rate from company currency to order currency.')
-    partner_id = fields.Many2one('res.partner', string='Customer', compute='_compute_related')
+    currency_id = fields.Many2one('res.currency', string='Currency', compute='_compute_related', store=True)
+    currency_rate = fields.Float(string='Conversion Rate', compute='_compute_related', help='Conversion rate from company currency to order currency.', store=True)
+    partner_id = fields.Many2one('res.partner', string='Customer', compute='_compute_related', store=True)
     # TODO jcb - remove the following comment
     # no need to store session_id, otherwise, when installing pos, we the warning: "inconsistent 'compute_sudo' for computed fields"
-    session_id = fields.Many2one('pos.session', string='Session', compute='_compute_related')
-    company_id = fields.Many2one('res.company', string='Company', compute='_compute_related')
+    session_id = fields.Many2one('pos.session', string='Session', compute='_compute_related', store=True)
+    company_id = fields.Many2one('res.company', string='Company', compute='_compute_related', store=True)
     card_type = fields.Char('Type of card used')
     cardholder_name = fields.Char('Cardholder Name')
     transaction_id = fields.Char('Payment Transaction ID')

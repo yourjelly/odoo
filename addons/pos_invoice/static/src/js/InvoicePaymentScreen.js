@@ -41,23 +41,27 @@ odoo.define('pos_invoice.InvoicePaymentScreen', function (require) {
             this.selectedPayment = this.paymentLines.find((payment) => payment.selected);
         }
         async onValidate() {
-            const paymentsVals = [];
-            for (const payment of this.paymentLines.models) {
-                paymentsVals.push({
-                    journal_id: this.getJournalId(payment),
-                    amount: payment.amount,
-                });
+            const vals = {
+                currency_id: this.env.pos.currency.id,
+                partner_id: this.props.invoice.partner_id[0],
+                session_id: this.env.pos.pos_session.id,
+                company_id: this.env.pos.company.id,
+                invoice_id: this.props.invoice.id,
+                payment_ids: []
             }
-            if (!paymentsVals.length) return;
-            const result = await this.rpc({
-                model: 'account.move',
-                method: 'pay_invoice',
-                args: [[this.props.invoice.id], paymentsVals],
+            for (const payment of this.paymentLines.models) {
+                vals.payment_ids.push([0, 0, payment.export_as_JSON()])
+            }
+            if (!vals.payment_ids.length) return;
+            const { result, message } = await this.rpc({
+                model: 'pos.move',
+                method: 'action_pay_invoice',
+                args: [vals],
             });
             if (!result) {
                 await this.showPopup('ErrorPopup', {
                     title: this.env._t('Payment Error'),
-                    body: this.env._t('Error occurred when registering payment in invoice.'),
+                    body: message,
                 });
             } else {
                 const { confirmed } = await this.showPopup('ConfirmPopup', {
