@@ -402,7 +402,9 @@ class MailRenderMixin(models.AbstractModel):
 
                 if expression:
                     try:
-                        results[record.id] += str(safe_eval.safe_eval(expression, variables))
+                        result = safe_eval.safe_eval(expression, variables)
+                        if result:
+                            results[record.id] += str(result)
 
                     except Exception as e:
                         _logger.info("Failed to render small_qweb expression : %s", expression, exc_info=True)
