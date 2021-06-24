@@ -53,4 +53,6 @@ References
         'data/l10n_eu_service.service_tax_rate.csv',
         'views/res_config_settings_views.xml'
     ],
+    'post_init_hook': '_post_install_hook_map_eu_taxes',
+    'uninstall_hook': "_uninstall_hook_clear",
 }
