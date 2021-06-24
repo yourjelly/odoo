@@ -9,7 +9,6 @@ import re
 
 import dateutil.relativedelta as relativedelta
 import lxml
-import html
 from markupsafe import Markup
 from werkzeug import urls
 
