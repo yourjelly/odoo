@@ -33,6 +33,12 @@
                             type="object">
                             <field name="order_count" widget="statinfo" string="Orders"/>
                         </button>
+                        <button name="action_view_move"
+                            class="oe_stat_button"
+                            icon="fa-shopping-basket"
+                            type="object">
+                            <field name="move_count" widget="statinfo" string="Other Transactions"/>
+                        </button>
                         <button class="oe_stat_button" name="action_stock_picking" type="object" icon="fa-truck" attrs="{'invisible':[('picking_count', '=', 0)]}">
                             <field name="picking_count" widget="statinfo" string="Pickings" attrs="{'invisible': [('failed_pickings', '!=', False)]}"/>
                             <field name="picking_count" widget="statinfo" string="Pickings" class="text-danger" attrs="{'invisible': [('failed_pickings', '=', False)]}"/>

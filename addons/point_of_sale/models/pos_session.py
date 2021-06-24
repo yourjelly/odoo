@@ -85,6 +85,7 @@ class PosSession(models.Model):
     order_ids = fields.One2many('pos.order', 'session_id',  string='Orders')
     move_ids = fields.One2many('pos.move', 'session_id',  string='Moves')
     order_count = fields.Integer(compute='_compute_order_count')
+    move_count = fields.Integer(compute='_compute_move_count')
     statement_ids = fields.One2many('account.bank.statement', 'pos_session_id', string='Cash Statements', readonly=True)
     failed_pickings = fields.Boolean(compute='_compute_picking_count')
     picking_count = fields.Integer(compute='_compute_picking_count')
@@ -132,6 +133,11 @@ class PosSession(models.Model):
         sessions_data = {order_data['session_id'][0]: order_data['session_id_count'] for order_data in orders_data}
         for session in self:
             session.order_count = sessions_data.get(session.id, 0)
+
+    @api.depends('move_ids')
+    def _compute_move_count(self):
+        for session in self:
+            session.move_count = len(session.move_ids)
 
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_picking_count(self):
@@ -1121,6 +1127,16 @@ class PosSession(models.Model):
                 (self.env.ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'tree'),
                 (self.env.ref('point_of_sale.view_pos_pos_form').id, 'form'),
                 ],
+            'type': 'ir.actions.act_window',
+            'domain': [('session_id', 'in', self.ids)],
+        }
+
+    def action_view_move(self):
+        return {
+            'name': _('Other Transactions'),
+            'res_model': 'pos.move',
+            'view_mode': 'tree,form',
+            'views': [(False, 'tree'), (False, 'form')],
             'type': 'ir.actions.act_window',
             'domain': [('session_id', 'in', self.ids)],
         }

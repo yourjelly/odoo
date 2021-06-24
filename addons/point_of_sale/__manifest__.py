@@ -23,6 +23,7 @@
         'views/pos_assets_qunit.xml',
         'views/point_of_sale_report.xml',
         'views/point_of_sale_view.xml',
+        'views/pos_move_views.xml',
         'views/pos_order_view.xml',
         'views/pos_category_view.xml',
         'views/product_view.xml',
