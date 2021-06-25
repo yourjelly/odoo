@@ -59,8 +59,7 @@ QUnit.test("palette dialog can be rendered and closed on outside click", async (
     assert.containsOnce(target, ".o_command_palette");
 
     // Close on outside click
-    window.dispatchEvent(new MouseEvent("mousedown"));
-    await nextTick();
+    await click(document.body);
     assert.containsNone(target, ".o_command_palette");
 });
 
@@ -228,7 +227,7 @@ QUnit.test("access to hotkeys from the command palette", async (assert) => {
     triggerHotkey("control+k", true);
     await nextTick();
 
-     // Trigger the command b
+    // Trigger the command b
     triggerHotkey("b");
     await nextTick();
     assert.containsNone(target, ".o_command_palette", "palette is closed due to command action");

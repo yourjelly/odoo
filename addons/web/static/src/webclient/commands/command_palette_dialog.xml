@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <t t-name="web.CommandPaletteDialogBody" owl="1">
-    <CommandPalette t-props="props" closeMe="close"/>
+    <CommandPalette t-ref="container" t-props="props" closeMe="close"/>
   </t>
 
 </templates>

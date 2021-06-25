@@ -5,10 +5,11 @@ import { useService } from "../service_hook";
 import { useEffect } from "../effect_hook";
 import { scrollTo } from "../utils/scrolling";
 import { ParentClosingMode } from "./dropdown_item";
+import { useClickAway } from "../click_away_hook";
 
 const { Component, core, hooks, useState, QWeb } = owl;
 const { EventBus } = core;
-const { useExternalListener, onWillStart } = hooks;
+const { onWillStart } = hooks;
 
 /**
  * @typedef DropdownState
@@ -40,7 +41,12 @@ export class Dropdown extends Component {
 
         if (!this.props.manualOnly) {
             // Close on outside click listener
-            useExternalListener(window, "click", this.onWindowClicked);
+            useClickAway(this.close, {
+                ignoreWhen: () => {
+                    return !this.state.open || this.ui.activeElement !== this.myActiveEl;
+                },
+            });
+
             // Listen to all dropdowns state changes
             useBus(Dropdown.bus, "state-changed", this.onDropdownStateChanged);
         }
@@ -260,27 +266,6 @@ export class Dropdown extends Component {
     onTogglerMouseEnter() {
         if (this.state.groupIsOpen && !this.state.open) {
             this.open();
-        }
-    }
-
-    /**
-     * Used to close ourself on outside click.
-     *
-     * @param {MouseEvent} ev
-     */
-    onWindowClicked(ev) {
-        // Return if already closed
-        if (!this.state.open) {
-            return;
-        }
-        // Return if it's a different ui active element
-        if (this.ui.activeElement !== this.myActiveEl) {
-            return;
-        }
-
-        const gotClickedInside = this.el.contains(ev.target);
-        if (!gotClickedInside) {
-            this.close();
         }
     }
 }

@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
+import { useClickAway } from "../click_away_hook";
 import { Popover } from "./popover";
 
 const { Component } = owl;
-const { useExternalListener, useState } = owl.hooks;
+const { useState } = owl.hooks;
 const { xml } = owl.tags;
 
 class PopoverController extends Component {
@@ -11,7 +12,11 @@ class PopoverController extends Component {
         this.state = useState({ displayed: false });
         this.targetObserver = new MutationObserver(this.onTargetMutate.bind(this));
 
-        useExternalListener(window, "click", this.onClickAway, { capture: true });
+        useClickAway(this.props.close, {
+            ignoreWhen: (target) => {
+                return !this.props.closeOnClickAway || this.target.contains(target);
+            },
+        });
     }
     mounted() {
         this.targetObserver.observe(this.target.parentElement, { childList: true });
@@ -36,14 +41,6 @@ class PopoverController extends Component {
             return document.querySelector(this.props.target);
         } else {
             return this.props.target;
-        }
-    }
-    onClickAway(ev) {
-        if (this.target.contains(ev.target) || ev.target.closest(".o_popover")) {
-            return;
-        }
-        if (this.props.closeOnClickAway) {
-            this.props.close();
         }
     }
     onTargetMutate() {

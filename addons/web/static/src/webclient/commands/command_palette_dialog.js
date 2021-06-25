@@ -1,10 +1,8 @@
 /** @odoo-module **/
 
+import { useClickAway } from "@web/core/click_away_hook";
 import { Dialog } from "@web/core/dialog/dialog";
 import { CommandPalette } from "./command_palette";
-
-const { hooks } = owl;
-const { useExternalListener } = hooks;
 
 /**
  * @typedef {import("./command_service").Command} Command
@@ -13,18 +11,7 @@ const { useExternalListener } = hooks;
 export class CommandPaletteDialog extends Dialog {
     setup() {
         super.setup();
-        useExternalListener(window, "mousedown", this.onWindowMouseDown);
-    }
-
-    /**
-     * Used to close ourself on outside click.
-     */
-    onWindowMouseDown(ev) {
-        const element = ev.target.parentElement;
-        const gotClickedInside = this.modalRef.el.contains(element);
-        if (!gotClickedInside) {
-            this.close();
-        }
+        useClickAway(this.close, { container: "container" });
     }
 }
 CommandPaletteDialog.renderHeader = false;
