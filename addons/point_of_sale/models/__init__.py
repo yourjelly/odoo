@@ -5,6 +5,7 @@ from . import account_bank_statement
 from . import account_journal
 from . import account_tax
 from . import account_move
+from . import account_payment
 from . import barcode_rule
 from . import chart_template
 from . import digest

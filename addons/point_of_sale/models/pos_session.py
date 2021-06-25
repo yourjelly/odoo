@@ -795,23 +795,26 @@ class PosSession(models.Model):
                 all_statement_vals[move].append(self._get_statement_line_vals(statement, self.env['account.account'], payment.amount, move.date, move.partner_id))
         statement_lines_map = {}
         for move in all_statement_vals:
-            if move.invoice_id.payment_state != 'in_payment': continue
+            if not move.invoice_id.payment_state in ['in_payment', 'partial']: continue
             statement_lines_map[move] = self.env['account.bank.statement.line'].create(all_statement_vals[move])
         return statement_lines_map
 
     def _reconcile_cash_payments_from_pos_moves(self, statement_lines_map):
         for move in statement_lines_map:
-            if move.invoice_id.payment_state != 'in_payment': continue
-            lines_vals = self._get_data_for_reconciling_statement(move.invoice_id)
+            if not move.invoice_id.payment_state in ['in_payment', 'partial']: continue
+            lines_vals = self._get_data_for_reconciling_statement(move)
             statement_lines_map[move].reconcile(lines_vals)
         return
 
-    def _get_data_for_reconciling_statement(self, in_payment_invoice):
+    def _get_data_for_reconciling_statement(self, pos_move):
         lines_vals = []
-        for _, _, line in in_payment_invoice._get_reconciled_invoices_partials():
-            line = line.payment_id.move_id.line_ids.filtered(lambda _line: not _line.full_reconcile_id)
+        pos_payment_ids = set(pos_move.payment_ids.ids)
+        for _, _, line in pos_move.invoice_id._get_reconciled_invoices_partials():
+            if not line.payment_id.pos_payment_id.id in pos_payment_ids: continue
+            line = line.payment_id.move_id.line_ids.filtered(lambda _line: not _line.reconciled)
             lines_vals.append({
                 'name': line.name,
+                'balance': -line.balance,
                 'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                 'id': line.id,
                 'currency_id': line.currency_id.id,

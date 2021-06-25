@@ -26,7 +26,7 @@ class PosMove(models.Model):
                 journal = payment_method.cash_journal_id if payment_method.is_cash_count else payment_method.bank_journal_id
                 paymentWizard = (
                     self.env["account.payment.register"]
-                    .with_context({"active_model": "account.move", "active_ids": move.invoice_id.ids})
+                    .with_context({"active_model": "account.move", "active_ids": move.invoice_id.ids, "pos_payment_id": payment.id})
                     .create(
                         {
                             "journal_id": journal.id,
