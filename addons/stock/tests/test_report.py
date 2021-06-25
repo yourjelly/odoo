@@ -1277,12 +1277,14 @@ class TestReports(TestReportsCommon):
         all_lines = []
         move_ids = []
         qtys = []
+        in_ids = []
         for dummy, lines in sources_to_lines.items():
             for line in lines:
                 self.assertTrue(line['is_qty_available'], "The receipt IS done => its move quantities ARE available to reserve (i.e. done).")
                 all_lines.append(line)
                 move_ids.append(line['move_out'].id)
                 qtys.append(line['quantity'])
+                in_ids += line['move_ins']
         # line quantities depends on done vs not done incoming quantities => we need to check values again after done
         # (makes more sense when report for multiple incoming pickings)
         self.assertEqual(len(all_lines), 3, "The report has wrong number of outgoing moves.")
@@ -1294,13 +1296,14 @@ class TestReports(TestReportsCommon):
         self.assertEqual(all_lines[2]['product']['id'], self.product.id, "The third move has wrong product to reserve.")
 
         # check that report reserve button works correctly
-        report.action_assign(move_ids, qtys, [receipt.id])
-        for move in (delivery1.move_lines | delivery2.move_lines):
-            if move.product_id != product2:
-                self.assertEqual(move.reserved_availability, move.product_uom_qty, "Demand qty should now be reserved.")
-            else:
-                # not enough incoming qty to reserve demand qty
-                self.assertEqual(move.reserved_availability, 5, "Part of demand qty should now be reserved.")
+        report.action_assign(move_ids, qtys, in_ids)
+        self.assertEqual(receipt.move_lines[0].report_reserved_quantity, 7, "First (5) and last (2) moves' demand total for product1 should now be reserved (7).")
+        self.assertEqual(len(receipt.move_lines[0].move_dest_ids.ids), 2, "Demand qty of first and last moves should now be linked to incoming.")
+        self.assertEqual(receipt.move_lines[1].report_reserved_quantity, 5, "Part of second (10) move's demand total for product2 should now be reserved (5).")
+        self.assertEqual(len(receipt.move_lines[1].move_dest_ids.ids), 1, "Demand qty of second move should now be linked to incoming.")
+        self.assertEqual(receipt.move_lines[2].report_reserved_quantity, 0, "product3 should not have been reserved")
+        self.assertEqual(len(receipt.move_lines[2].move_dest_ids.ids), 0, "product3 should have no moves linked to it.")
+        self.assertEqual(len(delivery1.move_lines.filtered(lambda m: m.product_id == product2)), 2, "product2 outgoing move should be split between linked and non-linked quantities.")
 
     def test_report_reception_2_two_receipts(self):
         """ Create 1 delivery and 2 receipts where the products being received
@@ -1415,7 +1418,7 @@ class TestReports(TestReportsCommon):
         self.assertEqual(len(report_values['sources_to_lines']), 0, "The receipt and delivery are in different warehouses => no outgoing moves should be found.")
 
     def test_report_reception_4_pick_pack(self):
-        """ Check that reception report ignores outgoing moves that
+        """ Check that reception report ignores outgoing moves that are not beginning of chain
         """
 
         warehouse = self.env['stock.warehouse'].search([('lot_stock_id', '=', self.stock_location.id)], limit=1)

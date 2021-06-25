@@ -217,21 +217,22 @@ class ReceptionReport(models.AbstractModel):
                 if need_comparison >= 0:
                     potential_ins.pop()  # we're using up this incoming move
                 for in_move_to_link in in_moves_to_link:
-                    if float_compare(in_move_to_link.product_qty, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding) == 1:
-                        # we have a merged internal move case from multiple receipts => we need to make sure we don't over-reserve by accident
-                        qty_to_split = min(quantity_remaining, qty_to_link)
-                        self._split(in_move_to_link, in_move_to_link.product_uom_qty - in_move_to_link.product_id.uom_id._compute_quantity(qty_to_split, in_move_to_link.product_uom, rounding_method='HALF-UP'))
-                    need_comparison = float_compare(qty_to_link, in_move_to_link.product_qty, precision_rounding=in_move.product_id.uom_id.rounding)
-                    if need_comparison == -1 and not is_single_step:
-                        # we have more qty in incoming move than is needed for the outgoing move => split incoming move (not needed when single step)
-                        self._split(in_move_to_link, in_move_to_link.product_uom_qty - in_move_to_link.product_id.uom_id._compute_quantity(qty_to_link, in_move_to_link.product_uom, rounding_method='HALF-UP'))
-                    in_move.report_reserved_quantity += in_move_to_link.product_qty
+                    if not is_single_step:
+                        if float_compare(in_move_to_link.product_qty, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding) == 1:
+                            # we have a merged internal move case from multiple receipts => we need to make sure we don't over-reserve by accident
+                            qty_to_split = min(quantity_remaining, qty_to_link)
+                            self._split(in_move_to_link, in_move_to_link.product_uom_qty - in_move_to_link.product_id.uom_id._compute_quantity(qty_to_split, in_move_to_link.product_uom, rounding_method='HALF-UP'))
+                        need_comparison = float_compare(qty_to_link, in_move_to_link.product_qty, precision_rounding=in_move.product_id.uom_id.rounding)
+                        if need_comparison == -1:
+                            # we have more qty in incoming move than is needed for the outgoing move => split incoming move (not needed when single step)
+                            self._split(in_move_to_link, in_move_to_link.product_uom_qty - in_move_to_link.product_id.uom_id._compute_quantity(qty_to_link, in_move_to_link.product_uom, rounding_method='HALF-UP'))
+                    linked_qty = min(in_move_to_link.product_qty, qty_to_link)
+                    in_move.report_reserved_quantity += linked_qty
                     in_move_to_link.move_dest_ids |= out
-                    in_move_to_link.procure_method = 'make_to_order'
                     out.procure_method = 'make_to_order'
                     quantity_remaining -= in_move_to_link.product_qty
                     in_move_to_link.is_reception_report_linked = True
-                    qty_to_link -= in_move_to_link.product_qty
+                    qty_to_link -= linked_qty
                     if float_is_zero(qty_to_link, precision_rounding=out.product_id.uom_id.rounding) or float_is_zero(quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding):
                         break  # we have satistfied the qty_to_link or we have used up this in_move
                 if float_is_zero(qty_to_link, precision_rounding=out.product_id.uom_id.rounding):
