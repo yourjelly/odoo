@@ -732,10 +732,17 @@ class PosSession(models.Model):
         invoice_receivable_lines = data.get('invoice_receivable_lines')
         stock_output_lines = data.get('stock_output_lines')
 
+        done = False
+
         for statement in self.statement_ids:
+            if not done:
+                _statements = self._create_invoice_cash_payments_statement_lines()
             if not self.config_id.cash_control:
                 statement.write({'balance_end_real': statement.balance_end})
             statement.button_post()
+            if not done:
+                self._reconcile_cash_payments_from_pos_moves(_statements)
+                done = True
             all_lines = (
                   split_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
                 | combine_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
@@ -774,6 +781,42 @@ class PosSession(models.Model):
             | stock_account_move_lines.filtered(lambda aml: aml.account_id == account_id)
             ).filtered(lambda aml: not aml.reconciled).reconcile()
         return data
+
+    def _create_invoice_cash_payments_statement_lines(self):
+        # create the statement lines
+        # reconcile the statement lines to the payments in the invoices
+        # only if cash
+        all_statement_vals = defaultdict(lambda: [])
+        statement = self.cash_register_id
+        for move in self.move_ids:
+            for payment in move.payment_ids:
+                payment_method = payment.payment_method_id
+                if not payment_method.is_cash_count: continue
+                all_statement_vals[move].append(self._get_statement_line_vals(statement, self.env['account.account'], payment.amount, move.date, move.partner_id))
+        statement_lines_map = {}
+        for move in all_statement_vals:
+            if move.invoice_id.payment_state != 'in_payment': continue
+            statement_lines_map[move] = self.env['account.bank.statement.line'].create(all_statement_vals[move])
+        return statement_lines_map
+
+    def _reconcile_cash_payments_from_pos_moves(self, statement_lines_map):
+        for move in statement_lines_map:
+            if move.invoice_id.payment_state != 'in_payment': continue
+            lines_vals = self._get_data_for_reconciling_statement(move.invoice_id)
+            statement_lines_map[move].reconcile(lines_vals)
+        return
+
+    def _get_data_for_reconciling_statement(self, in_payment_invoice):
+        lines_vals = []
+        for _, _, line in in_payment_invoice._get_reconciled_invoices_partials():
+            line = line.payment_id.move_id.line_ids.filtered(lambda _line: not _line.full_reconcile_id)
+            lines_vals.append({
+                'name': line.name,
+                'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
+                'id': line.id,
+                'currency_id': line.currency_id.id,
+            })
+        return lines_vals
 
     def _prepare_line(self, order_line):
         """ Derive from order_line the order date, income account, amount and taxes information.
