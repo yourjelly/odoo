@@ -63,6 +63,7 @@ function registerView(name, LegacyView) {
                 modelName: this.props.resModel,
                 currentId: this.props.resId,
                 controllerState: {
+                    ...this.props.state,
                     currentId:
                         "resId" in this.props
                             ? this.props.resId
