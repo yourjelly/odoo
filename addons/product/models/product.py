@@ -8,7 +8,6 @@ from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 
-
 from odoo.tools import float_compare, float_round
 
 _logger = logging.getLogger(__name__)
@@ -168,7 +167,7 @@ class ProductProduct(models.Model):
                     ('product_tmpl_id', '=', record.product_tmpl_id.id),
                     ('active', '=', True),
                 ]) <= 1
-            ):
+              ):
                 record[variant_field] = False
                 record.product_tmpl_id[template_field] = record[template_field]
             else:
@@ -177,7 +176,7 @@ class ProductProduct(models.Model):
     def _compute_image_1920(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_1920 = record.image_variant_1920 or record.product_tmpl_id.image_1920
+            record.image_1920 = record.image_variant_1920 or record.product_tmpl_id.image_1920 or record.product_tmpl_id.get_placeholder()
 
     def _set_image_1920(self):
         return self._set_template_field('image_1920', 'image_variant_1920')
@@ -185,22 +184,22 @@ class ProductProduct(models.Model):
     def _compute_image_1024(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_1024 = record.image_variant_1024 or record.product_tmpl_id.image_1024
+            record.image_1024 = record.image_variant_1024 or record.product_tmpl_id.image_1024 or record.product_tmpl_id.get_placeholder()
 
     def _compute_image_512(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_512 = record.image_variant_512 or record.product_tmpl_id.image_512
+            record.image_512 = record.image_variant_512 or record.product_tmpl_id.image_512 or record.product_tmpl_id.get_placeholder()
 
     def _compute_image_256(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_256 = record.image_variant_256 or record.product_tmpl_id.image_256
+            record.image_256 = record.image_variant_256 or record.product_tmpl_id.image_256 or record.product_tmpl_id.get_placeholder()
 
     def _compute_image_128(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_128 = record.image_variant_128 or record.product_tmpl_id.image_128
+            record.image_128 = record.image_variant_128 or record.product_tmpl_id.image_128 or record.product_tmpl_id.get_placeholder()
 
     def _compute_can_image_1024_be_zoomed(self):
         """Get the image from the template if no image is set on the variant."""

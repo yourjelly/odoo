@@ -9,6 +9,9 @@ from odoo import api, fields, models, tools, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.osv import expression
 
+from base64 import b64encode
+from odoo.tools import file_open
+
 _logger = logging.getLogger(__name__)
 
 
@@ -17,12 +20,6 @@ class ProductTemplate(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product Template"
     _order = "priority desc, name"
-
-    def _get_placeholder_filename(self, field=None):
-        image_fields = ['image_%s' % size for size in [1920, 1024, 512, 256, 128]]
-        if field in image_fields:
-            return 'product/static/img/placeholder.png'
-        return super()._get_placeholder_filename(field=field)
 
     @tools.ormcache()
     def _get_default_category_id(self):
@@ -1252,3 +1249,16 @@ class ProductTemplate(models.Model):
             'label': _('Import Template for Products'),
             'template': '/product/static/xls/product_template.xls'
         }]
+
+    def get_placeholder(self):
+        return b64encode(file_open("product/static/img/placeholder.png", 'rb').read())
+
+    image_ph_1920 = fields.Image("Image with placeholder", compute='_compute_image_1920_with_placeholder', max_width=1920, max_height=1920)
+    image_ph_1024 = fields.Image("Image with placeholder 1024", related="image_ph_1920", max_width=1024, max_height=1024)
+    image_ph_512 = fields.Image("Image with placeholder 512", related="image_ph_1920", max_width=512, max_height=512)
+    image_ph_256 = fields.Image("Image with placeholder 256", related="image_ph_1920", max_width=256, max_height=256)
+    image_ph_128 = fields.Image("Image with placeholder 128", related="image_ph_1920", max_width=128, max_height=128)
+
+    def _compute_image_1920_with_placeholder(self):
+        for record in self:
+            record.image_1920 = record.image_1920 or record.get_placeholder()
