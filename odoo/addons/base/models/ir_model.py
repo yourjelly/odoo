@@ -2197,8 +2197,18 @@ class IrModelData(models.Model):
         # remove models
         delete(self.env['ir.model'].browse(unique(model_ids)))
 
+        # attempt to remove undeletable model data that may have become available again because
+        # of the tables being dropped just above
+        undeletable_data = self.browse(undeletable_ids)
+        for data in undeletable_data:
+            # do it sequentially because not **all** data may have become deletable
+            # and doing a binary search again would be overkill here
+            try:
+                data.unlink()
+            except Exception:
+                ...
         # remove remaining module data records
-        (module_data - self.browse(undeletable_ids)).unlink()
+        (module_data - undeletable_data).unlink()
 
     @api.model
     def _process_end(self, modules):
