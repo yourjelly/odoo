@@ -26,6 +26,9 @@ class ReceptionReport(models.AbstractModel):
         product_to_qty_expected = defaultdict(float)
         product_to_qty_done = defaultdict(float)
         product_to_ins_to_reserve = defaultdict(lambda: [])
+        product_to_total_reserved = defaultdict(float)
+        linked_outs = self.env['stock.move']  # moves that were previously reserved
+        product_to_reserved_ins = defaultdict(lambda: [])
         for move in receipts.move_lines:
             if move.product_id.type != 'product':
                 continue
@@ -36,6 +39,10 @@ class ReceptionReport(models.AbstractModel):
                     product_to_ins_to_reserve[move.product_id].append(move.id)
             else:
                 product_to_qty_expected[move.product_id] += move.product_qty
+            if move.report_reserved_quantity:
+                linked_outs |= self._get_linked_outs(move)
+                product_to_total_reserved[move.product_id] += move.report_reserved_quantity
+                product_to_reserved_ins[move.product_id].append(move.id)
 
         # incoming move products
         product_ids = set()
@@ -120,10 +127,17 @@ class ReceptionReport(models.AbstractModel):
                         and float_is_zero(product_to_qty_done.get(product_id, 0), precision_rounding=uom.rounding):
                     break
 
-        # TODO: add already reserved lines... + handling of changed Done qty after already reserved
-        # for move, qty in already_linked_moves_to_qty.items():
-        #     source = move._get_source_document()
-        #     sources_to_lines[source].append(self._prepare_report_line(qty, move.product_id, move, is_qty_available=True, is_reserved=True))
+        for linked_out in linked_outs:
+            if float_is_zero(product_to_total_reserved[linked_out.product_id], precision_rounding=linked_out.product_id.uom_id.rounding):
+                # it is possible there are different receipts linked to the same outgoing => best guess as to which outs correspond to this report...
+                continue
+            qty_reserved = min(product_to_total_reserved[linked_out.product_id], linked_out.product_qty)
+            source = self._get_last_steps(linked_out)[0]._get_source_document()
+            if not source:
+                continue
+            sources_to_lines[source].append(self._prepare_report_line(qty_reserved, linked_out.product_id, linked_out, is_qty_available=False, is_reserved=True, move_ins=product_to_reserved_ins[linked_out.product_id]))
+            product_to_total_reserved[linked_out.product_id] -= qty_reserved
+
         # dates aren't auto-formatted when printed in report :(
         sources_to_formatted_scheduled_date = defaultdict(lambda: [])
         for source, dummy in sources_to_lines.items():
@@ -246,18 +260,62 @@ class ReceptionReport(models.AbstractModel):
                                        and move.reservation_date <= fields.Date.today()))\
             ._action_assign()
 
-    def _get_last_steps(self, move):
-        """ Returns the last step in the move chain that has not been linked by the reception report
+    def action_unassign(self, move_id, qty, in_ids):
+        out = self.env['stock.move'].browse(move_id)
+        ins = self.env['stock.move'].browse(in_ids)
+
+        for in_move in ins:
+            in_move_links = self._get_last_steps(in_move, return_links=True)
+            for in_move_link in in_move_links:
+                if out.id not in in_move_link.move_dest_ids.ids:
+                    continue
+                amount_unreserved = min([qty, in_move.report_reserved_quantity, in_move_link.product_qty])
+                if in_move_link != in_move and float_compare(in_move_link.product_qty, amount_unreserved, precision_rounding=in_move_link.product_id.uom_id.rounding) == 1:
+                    self._split(in_move_link, in_move_link.product_qty - amount_unreserved)
+                in_move_link.move_dest_ids -= out
+                if not in_move_link.move_dest_ids:
+                    in_move_link.is_reception_report_linked = False
+                in_move.report_reserved_quantity -= amount_unreserved
+                qty -= amount_unreserved
+                if float_is_zero(qty, precision_rounding=out.product_id.uom_id.rounding) or float_is_zero(in_move.report_reserved_quantity, precision_rounding=out.product_id.uom_id.rounding):
+                    break
+            if float_is_zero(qty, precision_rounding=out.product_id.uom_id.rounding):
+                out.procure_method = 'make_to_stock'
+                break
+
+    def _get_last_steps(self, move, return_links=False):
+        """ Returns the last step in the move chain that has (or not depending on flag) been linked by the reception report
         (i.e. to an outgoing move chain). Returns no moves if 1-step and already linked.
         """
         moves = self.env['stock.move']
         if move.is_reception_report_linked:
-            return moves
-        if not move.move_dest_ids:
+            if not return_links:
+                return moves
+            return move
+        if not move.move_dest_ids and not return_links:
             moves |= move
         else:
             for dest in move.move_dest_ids:
-                moves |= self._get_last_steps(dest)
+                moves |= self._get_last_steps(dest, return_links)
+        return moves
+
+    def _get_linked_outs(self, move):
+        moves = self.env['stock.move']
+        if move.is_reception_report_linked:
+            return move.move_dest_ids
+        if move.move_dest_ids:
+            for dest in move.move_dest_ids:
+                moves |= self._get_linked_outs(dest)
+        return moves
+
+    def _get_first_steps(self, move):
+        moves = self.env['stock.move']
+        if not move.move_orig_ids:
+            return move
+        for orig_move in move.move_orig_ids:
+            if orig_move.is_reception_report_linked:
+                return move
+            moves |= self._get_first_steps(orig_move)
         return moves
 
     def _split(self, move, qty):

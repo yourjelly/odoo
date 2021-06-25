@@ -51,7 +51,7 @@
                             <th groups="uom.group_uom"/>
                             <th t-if="sources_to_reservable_move_out_ids[source] and report_type == 'html'">
                                 <button t-if="report_type == 'html'"
-                                        class="btn btn-sm btn-primary o_report_reception_reserve"
+                                        class="btn btn-sm btn-primary o_report_reception_reserve o_doc_reserve_all"
                                         t-attf-model="stock.move"
                                         t-att-move-ids="sources_to_reservable_move_out_ids[source]"
                                         name="reserve_source_link">
@@ -86,6 +86,17 @@
                                         t-att-qty="line['quantity']"
                                         name="reserve_link">
                                         Reserve
+                                    </button>
+                                </td>
+                                <td t-if="line['is_reserved'] and report_type == 'html'">
+                                    <button
+                                        class="btn btn-sm btn-primary o_report_reception_unreserve"
+                                        t-attf-model="stock.move"
+                                        t-att-move-id="line['move_out'].id"
+                                        t-att-move-ins-ids="line['move_ins']"
+                                        t-att-qty="line['quantity']"
+                                        name="unreserve_link">
+                                        Unreserve
                                     </button>
                                 </td>
                             </tr>

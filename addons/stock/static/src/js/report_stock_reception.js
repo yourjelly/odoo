@@ -37,7 +37,22 @@ const ReceptionReport = clientAction.extend({
     _bindAdditionalActionHandlers: function () {
         let rr = $(this.iframe).contents().find('.o_report_reception');
         rr.on('click', '.o_report_reception_reserve', this._onClickReserve.bind(this));
+        rr.on('click', '.o_report_reception_unreserve', this._onClickUnreserve.bind(this));
         rr.on('click', '.o_report_reception_forecasted', this._onClickForecastReport.bind(this));
+    },
+
+
+    _switchButton: function(button) {
+        let $button = $(button);
+        if ($button.text().indexOf("Unreserve") >= 0) {
+            $button.text("Reserve");
+            $button.addClass("o_report_reception_reserve");
+            $button.removeClass("o_report_reception_unreserve");
+        } else {
+            $button.text("Unreserve");
+            $button.addClass("o_report_reception_unreserve");
+            $button.removeClass("o_report_reception_reserve");
+        }
     },
 
     /**
@@ -46,39 +61,59 @@ const ReceptionReport = clientAction.extend({
      * @returns {Promise}
      */
     _onClickReserve: function(ev) {
-        $(ev.currentTarget).hide()
         let quantities = []  // incoming qty amounts to reserve
         let modelIds = parseInt(ev.target.getAttribute('move-id'));
         let inIds = []
         if (isNaN(modelIds)) {
             // dealing with a "Reserve All"
+            $(ev.currentTarget).hide();
             modelIds = JSON.parse("[" + ev.target.getAttribute('move-ids') + "]")[0];
-            let alreadyReserved = [];  // moves that have previously been reserved
+            let reservedIds = [];  // moves that have previously been reserved
             for (const id of modelIds) {
-                let button = $(this.iframe).contents().find("button.o_report_reception_reserve[move-id=" + id.toString() + "]");
-                if ($(button).is(':visible')) {
-                    quantities.push(parseFloat(button.attr('qty')));
-                    inIds.push(JSON.parse("[" + button.attr('move-ins-ids') + "]")[0])
-                    button.hide();
-                } else {
-                    alreadyReserved.push(id);
+                let toReserve = $(this.iframe).contents().find("button.o_report_reception_reserve[move-id=" + id.toString() + "]");
+                let alreadyReserved = $(this.iframe).contents().find("button.o_report_reception_unreserve[move-id=" + id.toString() + "]");
+                if (toReserve.length) {
+                    quantities.push(parseFloat(toReserve.attr('qty')));
+                    inIds.push(JSON.parse("[" + toReserve.attr('move-ins-ids') + "]")[0]);
+                    this._switchButton(toReserve);
+                }
+                if (alreadyReserved.length) {
+                    reservedIds.push(id);
                 }
             }
-            if (alreadyReserved.length > 0) {
-                modelIds = modelIds.filter(item => !alreadyReserved.includes(item))
+            if (reservedIds.length > 0) {
+                modelIds = modelIds.filter(item => !reservedIds.includes(item));
             }
             if ($(ev.target).hasClass("o_reserve_all")) {
                 // hide sources' "Reserve All"
-                $(this.iframe).contents().find("button.o_report_reception_reserve").hide();
+                $(this.iframe).contents().find("button.o_doc_reserve_all").hide();
             }
         } else {
             quantities.push(parseFloat(ev.target.getAttribute('qty')));
             inIds = JSON.parse("[" + ev.target.getAttribute('move-ins-ids') + "]");
+            this._switchButton(ev.currentTarget);
         }
         return this._rpc({
             model: 'report.stock.report_reception',
             args: [false, modelIds, quantities, inIds[0]],
             method: 'action_assign'
+        })
+    },
+
+    /**
+     * Unreserve the specified move
+     *
+     * @returns {Promise}
+     */
+     _onClickUnreserve: function(ev) {
+        this._switchButton(ev.currentTarget);
+        let quantity = parseFloat(ev.target.getAttribute('qty'));
+        let modelId = parseInt(ev.target.getAttribute('move-id'));
+        let inIds = JSON.parse("[" + ev.target.getAttribute('move-ins-ids') + "]");
+        return this._rpc({
+            model: 'report.stock.report_reception',
+            args: [false, modelId, quantity, inIds[0]],
+            method: 'action_unassign'
         })
     },
 
