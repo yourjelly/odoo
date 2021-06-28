@@ -7,7 +7,6 @@ export const FACET_ICONS = {
     comparison: "fa fa-adjust",
 };
 
-// GroupByMenu parameters
 export const GROUPABLE_TYPES = [
     "boolean",
     "char",
