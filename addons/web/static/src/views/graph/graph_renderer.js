@@ -105,7 +105,7 @@ export class GraphRenderer extends Component {
         }
         const chartAreaTop = this.chart.chartArea.top;
         const viewContentTop = this.el.getBoundingClientRect().top;
-        const innerHTML = this.env.qweb.renderToString("wowl.GraphRenderer.CustomTooltip", {
+        const innerHTML = this.env.qweb.renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: getMeasureDescription(measure, fields, fieldModif),
             tooltipItems: this.getTooltipItems(data, metaData, tooltipModel),

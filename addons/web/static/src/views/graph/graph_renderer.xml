@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="wowl.GraphRenderer.CustomTooltip" owl="1">
+    <t t-name="web.GraphRenderer.CustomTooltip" owl="1">
         <div class="o_graph_custom_tooltip">
             <table>
                 <thead>
@@ -22,7 +22,7 @@
         </div>
     </t>
 
-    <t t-name="wowl.GraphRenderer" owl="1">
+    <t t-name="web.GraphRenderer" owl="1">
         <div class="o_graph_renderer">
             <div class="o_graph_canvas_container" t-ref="container">
                 <canvas t-ref="canvas"/>
