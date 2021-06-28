@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { hexToRGBA } from "@web/views/graph/graph_utils";
+import { hexToRGBA } from "@web/views/graph/colors";
 import { GraphRenderer } from "@web/views/graph/graph_renderer";
 
 export class BurndownChartRenderer extends GraphRenderer {

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _lt } from "@web/core/l10n/translation";
-import { BORDER_WHITE, DEFAULT_BG, getColor, hexToRGBA } from "./graph_utils";
+import { BORDER_WHITE, DEFAULT_BG, getColor, hexToRGBA } from "./colors";
 import { formatFloat, humanNumber } from "@web/core/l10n/numbers";
 import { getMeasureDescription, SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";

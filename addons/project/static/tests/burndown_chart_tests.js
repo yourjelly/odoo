@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { click } from "@web/../tests/helpers/utils";
-import { COLORS, hexToRGBA } from "@web/views/graph/graph_utils";
+import { COLORS, hexToRGBA } from "@web/views/graph/colors";
 import { dialogService } from "@web/core/dialog/dialog_service";
 import { getGraphRenderer } from "@web/../tests/views/graph_view_tests";
 import { makeView } from "@web/../tests/views/helpers";
