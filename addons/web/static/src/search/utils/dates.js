@@ -130,7 +130,7 @@ export const PER_YEAR = {
 /**
  * Constructs the string representation of a domain and its description. The
  * domain is of the form:
- *      ['|',..., '|', d_1,..., d_n]
+ *      ['|', d_1 ,..., '|', d_n]
  * where d_i is a time range of the form
  *      ['&', [fieldName, >=, leftBound_i], [fieldName, <=, rightBound_i]]
  * where leftBound_i and rightBound_i are date or datetime computed accordingly
