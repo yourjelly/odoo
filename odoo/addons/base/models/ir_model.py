@@ -425,6 +425,11 @@ class IrModel(models.Model):
         cr.execute('SELECT * FROM ir_model WHERE state=%s', ['manual'])
         for model_data in cr.dictfetchall():
             model_class = self._instanciate(model_data)
+            model_class._inherit = []
+            if model_class._name.startswith('x_') and model_data['is_mail_thread']:
+                model_class._inherit.append('mail.thread')
+            if model_class._name.startswith('x_') and model_data['is_mail_activity']:
+                model_class._inherit.append('mail.activity.mixin')
             Model = model_class._build_model(self.pool, cr)
             if tools.table_kind(cr, Model._table) not in ('r', None):
                 # not a regular table, so disable schema upgrades
