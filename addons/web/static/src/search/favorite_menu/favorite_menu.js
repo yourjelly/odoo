@@ -9,9 +9,6 @@ const favoriteMenuRegistry = registry.category("favoriteMenu");
 
 const { Component } = owl;
 
-class FavoriteMenuDialog extends ConfirmationDialog {}
-FavoriteMenuDialog.size = "modal-md";
-
 export class FavoriteMenu extends Component {
     setup() {
         this.icon = FACET_ICONS.favorite;
@@ -26,12 +23,12 @@ export class FavoriteMenu extends Component {
             (searchItem) => searchItem.type === "favorite"
         );
         const registryMenus = [];
-        for (const Component of favoriteMenuRegistry.getAll()) {
-            if (Component.shouldBeDisplayed(this.env)) {
+        for (const item of favoriteMenuRegistry.getAll()) {
+            if ("isDisplayed" in item ? item.isDisplayed(this.env) : true) {
                 registryMenus.push({
-                    Component,
-                    groupNumber: Component.groupNumber,
-                    key: Component.name,
+                    Component: item.Component,
+                    groupNumber: item.groupNumber,
+                    key: item.Component.name,
                 });
             }
         }
@@ -61,7 +58,7 @@ export class FavoriteMenu extends Component {
             confirm: () => this.env.searchModel.deleteFavorite(itemId),
             cancel: () => {},
         };
-        this.dialogService.add(FavoriteMenuDialog, dialogProps);
+        this.dialogService.add(ConfirmationDialog, dialogProps);
     }
 }
 

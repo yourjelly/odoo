@@ -96,8 +96,9 @@ export class CustomFavoriteItem extends Component {
     }
 }
 
-CustomFavoriteItem.groupNumber = 3;
-CustomFavoriteItem.shouldBeDisplayed = () => true;
 CustomFavoriteItem.template = "wowl.CustomFavoriteItem";
-
-favoriteMenuRegistry.add("custom-favorite-item", CustomFavoriteItem);
+favoriteMenuRegistry.add(
+    "custom-favorite-item",
+    { Component: CustomFavoriteItem, groupNumber: 3 },
+    { sequence: 10 }
+);
