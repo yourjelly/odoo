@@ -10,7 +10,7 @@ import {
 import { click, triggerEvent } from "../helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { makeView } from "./helpers";
-import { BORDER_WHITE, DEFAULT_BG } from "@web/views/graph/graph_utils";
+import { BORDER_WHITE, DEFAULT_BG } from "@web/views/graph/colors";
 import { processGraphViewDescription } from "@web/views/graph/graph_view";
 import { registry } from "@web/core/registry";
 import { setupControlPanelServiceRegistry } from "../search/helpers";
@@ -3216,10 +3216,7 @@ QUnit.module("Views", (hooks) => {
         assert.hasClass(graph.el, "o_view_sample_data");
         assert.containsOnce(graph, ".o_view_nocontent");
         assert.containsOnce(graph, ".o_graph_canvas_container canvas");
-        assert.hasClass(
-            graph.el.querySelector(".o_graph_renderer"),
-            "o_sample_data_disabled"
-        );
+        assert.hasClass(graph.el.querySelector(".o_graph_renderer"), "o_sample_data_disabled");
 
         await toggleFilterMenu(graph);
         await toggleMenuItem(graph, "False Domain");
