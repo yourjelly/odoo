@@ -53,7 +53,7 @@ class ProjectControlPanel extends ControlPanel {
         });
     }
 }
-ControlPanel.template = "wowl.ControlPanel"; /** @todo should be something good that inherits from wowl.ControlPanel */
+ControlPanel.template = "web.ControlPanel"; /** @todo should be something good that inherits from web.ControlPanel */
 
 class ProjectGraphView extends GraphView {}
 GraphView.ControlPanel = ProjectControlPanel;
