@@ -401,6 +401,7 @@ const Wysiwyg = Widget.extend({
      */
     setValue: function (value) {
         this.$editable.html(value);
+        // todo: check if it's still usefull
         this.odooEditor.sanitize();
     },
     /**
