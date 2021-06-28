@@ -625,7 +625,7 @@ export class GraphRenderer extends Component {
     }
 }
 
-GraphRenderer.template = "wowl.GraphRenderer";
+GraphRenderer.template = "web.GraphRenderer";
 GraphRenderer.props = {
     data: Object,
     metaData: Object,
