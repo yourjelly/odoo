@@ -450,9 +450,8 @@ FieldHtml.include({
         // fix outlook image rendering bug
         $editable.find('img[style*="width"], img[style*="height"]').removeAttr('height width');
 
-        this.wysiwyg.setValue($editable.html(), {
-            notifyChange: false,
-        });
+        this.wysiwyg.setValue($editable.html());
+        this.wysiwyg.odooEditor.resetHistory();
     },
 
     //--------------------------------------------------------------------------
