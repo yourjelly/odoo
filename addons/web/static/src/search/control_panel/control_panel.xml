@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="wowl.ControlPanel" owl="1">
+    <t t-name="web.ControlPanel" owl="1">
         <div class="o_control_panel">
             <div t-if="display['top']" class="o_cp_top">
                 <div t-if="display['top-left']" class="o_cp_top_left">
                     <t t-slot="control-panel-top-left">
-                        <t t-call="wowl.Breadcrumbs" />
+                        <t t-call="web.Breadcrumbs" />
                     </t>
                 </div>
                 <div t-if="display['top-right']" class="o_cp_top_right">
@@ -46,7 +46,7 @@
         </div>
     </t>
 
-    <t t-name="wowl.Breadcrumbs" owl="1">
+    <t t-name="web.Breadcrumbs" owl="1">
         <ol class="breadcrumb">
             <t t-foreach="props.breadcrumbs or []" t-as="breadcrumb" t-key="breadcrumb.jsId">
                 <li class="breadcrumb-item"

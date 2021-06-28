@@ -62,4 +62,4 @@ export class FavoriteMenu extends Component {
     }
 }
 
-FavoriteMenu.template = "wowl.FavoriteMenu";
+FavoriteMenu.template = "web.FavoriteMenu";

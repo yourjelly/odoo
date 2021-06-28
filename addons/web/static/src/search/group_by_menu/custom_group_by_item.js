@@ -16,4 +16,4 @@ export class CustomGroupByItem extends Component {
     }
 }
 
-CustomGroupByItem.template = "wowl.CustomGroupByItem";
+CustomGroupByItem.template = "web.CustomGroupByItem";

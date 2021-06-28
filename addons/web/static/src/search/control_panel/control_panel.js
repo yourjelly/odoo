@@ -77,7 +77,7 @@ export class ControlPanel extends Component {
 }
 
 ControlPanel.components = { ComparisonMenu, FavoriteMenu, FilterMenu, GroupByMenu, SearchBar };
-ControlPanel.template = "wowl.ControlPanel";
+ControlPanel.template = "web.ControlPanel";
 ControlPanel.props = {
     breadcrumbs: { type: Array, element: { jsId: String, name: String }, optional: true },
     display: { type: Object, optional: true },

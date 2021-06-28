@@ -461,4 +461,4 @@ export class SearchBar extends Component {
     }
 }
 
-SearchBar.template = "wowl.SearchBar";
+SearchBar.template = "web.SearchBar";

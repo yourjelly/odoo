@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="wowl.FavoriteMenu" owl="1">
+    <t t-name="web.FavoriteMenu" owl="1">
         <Dropdown class="btn-group o_favorite_menu"
             togglerClass="'o_dropdown_toggler btn btn-secondary'"
             t-on-dropdown-item-selected="onFavoriteSelected"

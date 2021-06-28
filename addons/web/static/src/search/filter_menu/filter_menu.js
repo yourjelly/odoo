@@ -33,4 +33,4 @@ export class FilterMenu extends Component {
 }
 
 FilterMenu.components = { CustomFilterItem };
-FilterMenu.template = "wowl.FilterMenu";
+FilterMenu.template = "web.FilterMenu";

@@ -50,4 +50,4 @@ export class GroupByMenu extends Component {
 }
 
 GroupByMenu.components = { CustomGroupByItem };
-GroupByMenu.template = "wowl.GroupByMenu";
+GroupByMenu.template = "web.GroupByMenu";

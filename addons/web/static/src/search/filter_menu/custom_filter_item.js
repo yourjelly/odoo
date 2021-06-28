@@ -319,4 +319,4 @@ export class CustomFilterItem extends Component {
 
 // CustomFilterItem.components = { DatePicker, DateTimePicker };
 
-CustomFilterItem.template = "wowl.CustomFilterItem";
+CustomFilterItem.template = "web.CustomFilterItem";

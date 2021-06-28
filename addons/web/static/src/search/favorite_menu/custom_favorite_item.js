@@ -96,7 +96,7 @@ export class CustomFavoriteItem extends Component {
     }
 }
 
-CustomFavoriteItem.template = "wowl.CustomFavoriteItem";
+CustomFavoriteItem.template = "web.CustomFavoriteItem";
 favoriteMenuRegistry.add(
     "custom-favorite-item",
     { Component: CustomFavoriteItem, groupNumber: 3 },

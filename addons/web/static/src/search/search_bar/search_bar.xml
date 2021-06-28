@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="wowl.SearchBar.Facets" owl="1">
+    <t t-name="web.SearchBar.Facets" owl="1">
         <t t-foreach="env.searchModel.facets" t-as="facet" t-key="facet_index">
             <div class="o_searchview_facet"
                 role="img"
@@ -33,7 +33,7 @@
         </t>
     </t>
 
-    <t t-name="wowl.SearchBar.Input" owl="1">
+    <t t-name="web.SearchBar.Input" owl="1">
         <input type="text"
             class="o_searchview_input"
             autofocus=""
@@ -46,7 +46,7 @@
         />
     </t>
 
-    <t t-name="wowl.SearchBar.Items" owl="1">
+    <t t-name="web.SearchBar.Items" owl="1">
         <ul class="o_dropdown_menu o_searchview_autocomplete dropdown-menu show" role="menu">
             <t t-foreach="items" t-as="item" t-key="item.id">
                 <li class="o_menu_item"
@@ -76,7 +76,7 @@
         </ul>
     </t>
 
-    <t t-name="wowl.SearchBar" owl="1">
+    <t t-name="web.SearchBar" owl="1">
         <div class="o_cp_searchview" role="search">
             <div class="o_searchview" role="search" aria-autocomplete="list">
                 <i class="o_searchview_icon fa fa-search"
@@ -85,10 +85,10 @@
                     title="Search..."
                 />
                 <div class="o_searchview_input_container">
-                    <t t-call="wowl.SearchBar.Facets"/>
-                    <t t-call="wowl.SearchBar.Input"/>
+                    <t t-call="web.SearchBar.Facets"/>
+                    <t t-call="web.SearchBar.Input"/>
                     <t t-if="items.length">
-                        <t t-call="wowl.SearchBar.Items"/>
+                        <t t-call="web.SearchBar.Items"/>
                     </t>
                 </div>
             </div>
