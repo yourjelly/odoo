@@ -1764,7 +1764,7 @@ class Html(_String):
     sanitize_form = True                # whether to sanitize forms
     strip_style = False                 # whether to strip style attributes (removed and therefore not sanitized)
     strip_classes = False               # whether to strip classes attributes
-    strip_qweb = False                  # whether to strip qweb <t> tag and qweb attributes
+    strip_qweb = True                  # whether to strip qweb <t> tag and qweb attributes
 
     def _get_attrs(self, model_class, name):
         # called by _setup_attrs(), working together with _String._setup_attrs()
