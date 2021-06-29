@@ -9,6 +9,7 @@ import { GraphRenderer } from "./graph_renderer";
 import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { registry } from "@web/core/registry";
+import { sortBy } from "@web/core/utils/arrays";
 import { useModel } from "@web/core/model";
 import { useService } from "@web/core/service_hook";
 
@@ -112,7 +113,6 @@ export class GraphView extends Component {
     setup() {
         this.actionService = useService("action");
 
-        this.buttonTemplate = this.constructor.buttonTemplate;
         this.model = useModel({ Model: this.constructor.Model });
 
         useSetupAction({
@@ -122,20 +122,34 @@ export class GraphView extends Component {
     }
 
     async willStart() {
-        const { arch, fields, groupBy, state } = this.props;
+        const { additionalMeasures, arch, fields, state } = this.props;
         const loadParams = {};
         if (state) {
-            // we could simplify this
-            loadParams.state = state;
-            this.initialGroupBy = state.groupBy || [];
+            Object.assign(loadParams, state);
         } else {
             const propsFromArch = processGraphViewDescription({ arch, fields });
             Object.assign(loadParams, this.props, propsFromArch);
-            if (propsFromArch.groupBy && propsFromArch.groupBy.length === 0) {
-                loadParams.groupBy = groupBy;
+            const measures = [];
+            for (const fieldName in fields) {
+                const field = fields[fieldName];
+                const { invisible, isMeasure, string } = loadParams.fieldModif[fieldName] || {};
+                if (!["id", "__count"].includes(fieldName) && field.store === true) {
+                    if (
+                        (!invisible && ["integer", "float", "monetary"].includes(field.type)) ||
+                        (!invisible && isMeasure) ||
+                        additionalMeasures.includes(fieldName)
+                    ) {
+                        measures.push({
+                            description: string || field.string,
+                            fieldName,
+                        });
+                    }
+                }
             }
-            this.initialGroupBy = loadParams.groupBy || [];
+            /** @todo waiting NGR reply: groupableFields is not used for now (we use search arch in withSearch inside dashboard) */
+            loadParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
         }
+        this.initialGroupBy = loadParams.groupBy;
         await this.model.load(loadParams);
     }
 

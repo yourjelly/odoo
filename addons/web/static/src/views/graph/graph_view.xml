@@ -67,7 +67,7 @@
         <div class="o_graph_view" t-att-class="{ o_view_sample_data: model.metaData.useSampleModel }">
             <t t-component="constructor.ControlPanel" t-props="controlPanelProps" t-if="props.display.controlPanel !== false">
                 <t t-set-slot="control-panel-bottom-left">
-                    <t t-call="{{ buttonTemplate }}"/>
+                    <t t-call="{{ constructor.buttonTemplate }}"/>
                 </t>
             </t>
             <div class="o_content">

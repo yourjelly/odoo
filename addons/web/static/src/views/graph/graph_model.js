@@ -238,15 +238,11 @@ export class GraphModel extends Model {
     }
 
     async load(loadParams) {
-        let metaData;
-        if ("state" in loadParams) {
-            metaData = loadParams.state;
-        } else {
-            metaData = Object.assign({}, this.metaData, loadParams);
-        }
+        let metaData = Object.assign({}, this.metaData, loadParams);
         this.normalize(metaData);
 
         let dataPoints = await this.keepLast.add(this.loadDataPoints(metaData));
+
         this.metaData = metaData;
         this.data = null;
 
@@ -376,24 +372,25 @@ export class GraphModel extends Model {
     }
 
     normalize(metaData) {
-        const { graph_measure, graph_mode, graph_groupbys } = metaData.context || {};
+        const { context, fieldModif, fields } = metaData;
+        const { graph_measure, graph_mode, graph_groupbys } = context || {};
 
         const groupBy = [];
         metaData.groupBy = graph_groupbys || metaData.groupBy;
         for (const gb of metaData.groupBy) {
             let ngb = gb;
             if (typeof gb === "string") {
-                ngb = getGroupBy(gb, metaData.fields);
+                ngb = getGroupBy(gb, fields);
             }
-            const fieldModif = metaData.fieldModif[gb.fieldName] || {};
-            if (!fieldModif.invisible) {
+            const { invisible } = fieldModif[gb.fieldName] || {};
+            if (!invisible) {
                 groupBy.push(ngb);
             }
         }
         const processedGroupBy = [];
         for (const gb of groupBy) {
             const { fieldName, interval } = gb;
-            const { store, type } = metaData.fields[fieldName];
+            const { store, type } = fields[fieldName];
             if (
                 !store ||
                 ["id", "__count"].includes(fieldName) ||
@@ -421,31 +418,6 @@ export class GraphModel extends Model {
         if (!MODES.includes(metaData.mode)) {
             metaData.mode = "bar";
         }
-
-        const { additionalMeasures, fields } = metaData;
-        const measures = [];
-        metaData.groupableFields = {};
-        for (const fieldName in fields) {
-            const field = fields[fieldName];
-            const fieldModif = metaData.fieldModif[fieldName] || {};
-            if (!["id", "__count"].includes(fieldName) && field.store === true) {
-                if (
-                    (!fieldModif.invisible &&
-                        ["integer", "float", "monetary"].includes(field.type)) ||
-                    (!fieldModif.invisible && fieldModif.isMeasure) ||
-                    additionalMeasures.includes(fieldName)
-                ) {
-                    measures.push({
-                        description: fieldModif.string || field.string,
-                        fieldName,
-                    });
-                }
-                if (!fieldModif.invisible && GROUPABLE_TYPES.includes(field.type)) {
-                    metaData.groupableFields[fieldName] = field;
-                }
-            }
-        }
-        metaData.measures = sortBy(measures, (m) => m.description.toLowerCase());
     }
 
     processDataPoints(dataPoints) {
