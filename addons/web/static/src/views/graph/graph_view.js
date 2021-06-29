@@ -146,7 +146,6 @@ export class GraphView extends Component {
                     }
                 }
             }
-            /** @todo waiting NGR reply: groupableFields is not used for now (we use search arch in withSearch inside dashboard) */
             loadParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
         }
         this.initialGroupBy = loadParams.groupBy;
@@ -270,7 +269,6 @@ GraphView.defaultProps = {
 
     additionalMeasures: [],
     disableLinking: false,
-    fieldModif: {},
     measure: "__count",
     mode: "bar",
     order: null,
@@ -298,7 +296,6 @@ GraphView.props = {
 
     additionalMeasures: { type: Array, elements: String, optional: 1 },
     disableLinking: { type: Boolean, optional: 1 },
-    fieldModif: { type: Object, elements: Object, optional: 1 },
     measure: { type: String, optional: 1 },
     mode: { validate: (m) => MODES.includes(m), optional: 1 },
     order: { validate: (o) => ORDERS.includes(o), optional: 1 },
@@ -306,7 +303,7 @@ GraphView.props = {
     title: { type: String, optional: 1 },
 };
 
-GraphView.type = "graph"; // refer to python view type
+GraphView.type = "graph";
 
 GraphView.display_name = _lt("Graph");
 GraphView.icon = "fa-bar-chart";

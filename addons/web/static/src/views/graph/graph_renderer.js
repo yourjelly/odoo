@@ -516,13 +516,11 @@ export class GraphRenderer extends Component {
      * @param {Object} legendItem
      */
     onLegendClick(ev, legendItem) {
-        /** @todo check this in line mode */
         this.removeTooltips();
         // Default 'onClick' fallback. See web/static/lib/Chart/Chart.js#15138
         const index = legendItem.datasetIndex;
         const meta = this.chart.getDatasetMeta(index);
-        meta.hidden =
-            meta.hidden === null ? Boolean(this.chart.data.datasets[index].hidden) : undefined;
+        meta.hidden = meta.hidden === null ? !this.chart.data.datasets[index].hidden : null;
         this.chart.update();
     }
 

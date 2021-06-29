@@ -22,8 +22,8 @@ export function getMeasureDescription(measure, fields, fieldModif) {
 
 // Remove and directly do computations in graph model?
 class DateClasses {
-    // acutally we have a matrix of values and undefined. An equivalence class is formed of defined values of a column. So nothing has to do with
-    // dates but we only use Dateclasses to manage identification of dates.
+    // actually we have a matrix of values and undefined. An equivalence class is formed of defined values of a column.
+    // So nothing has to do with dates but we only use Dateclasses to manage identification of dates.
     /**
      * @param {(any[])[]} array
      */
@@ -105,6 +105,8 @@ export class GraphModel extends Model {
      * Separates dataPoints coming from the read_group(s) into different
      * datasets. This function returns the parameters data and labels used
      * to produce the charts.
+     * @param {Object[]}
+     * @returns {Object}
      */
     getData(dataPoints) {
         const { domains, groupBy, mode } = this.metaData;
@@ -191,7 +193,6 @@ export class GraphModel extends Model {
 
     /**
      * Determines the dataset to which the data point belongs.
-     * @private
      * @param {Object} dataPoint
      * @returns {string}
      */
@@ -211,6 +212,10 @@ export class GraphModel extends Model {
         return datasetLabel;
     }
 
+    /**
+     * @param {Object[]} dataPoints
+     * @returns {DateClasses}
+     */
     getDateClasses(dataPoints) {
         const { domains } = this.metaData;
         const dateSets = domains.map(() => new Set());
@@ -223,13 +228,22 @@ export class GraphModel extends Model {
     }
 
     /**
-     * Determines whether the set of data points is good.
+     * Determines whether the set of data points is good. If not this.data will be (re)set to null
+     * @param {Object[]}
+     * @returns {boolean}
      */
     isValidData(dataPoints) {
         const { mode } = this.metaData;
+        let somePositive = false;
+        let someNegative = false;
         if (mode === "pie") {
-            const someNegative = dataPoints.some((dataPt) => dataPt.value < 0);
-            const somePositive = dataPoints.some((dataPt) => dataPt.value > 0);
+            for (const dataPt of dataPoints) {
+                if (dataPt.value > 0) {
+                    somePositive = true;
+                } else if (dataPt.value < 0) {
+                    someNegative = true;
+                }
+            }
             if (someNegative && somePositive) {
                 return false;
             }
@@ -237,6 +251,9 @@ export class GraphModel extends Model {
         return true;
     }
 
+    /**
+     * @param {Object} loadParams
+     */
     async load(loadParams) {
         let metaData = Object.assign({}, this.metaData, loadParams);
         this.normalize(metaData);
@@ -278,6 +295,9 @@ export class GraphModel extends Model {
      * with correct fields for each domain.  We have to do some light processing
      * to separate date groups in the field list, because they can be defined
      * with an aggregation function, such as my_date:week.
+     * @param {Object} metaData
+     * @param {boolean} [useFakeORM=false]
+     * @returns {Object[]}
      */
     async loadDataPoints(metaData, useFakeORM = false) {
         const { measure, domains, fields, groupBy, resModel } = metaData;
@@ -371,8 +391,12 @@ export class GraphModel extends Model {
         return promResults.flat();
     }
 
+    /**
+     * Normalize the keys "groupBy", "measure", and "mode".
+     * @param {Object} metaData
+     */
     normalize(metaData) {
-        const { context, fieldModif, fields } = metaData;
+        const { context, fields } = metaData;
         const { graph_measure, graph_mode, graph_groupbys } = context || {};
 
         const groupBy = [];
@@ -382,11 +406,9 @@ export class GraphModel extends Model {
             if (typeof gb === "string") {
                 ngb = getGroupBy(gb, fields);
             }
-            const { invisible } = fieldModif[gb.fieldName] || {};
-            if (!invisible) {
-                groupBy.push(ngb);
-            }
+            groupBy.push(ngb);
         }
+
         const processedGroupBy = [];
         for (const gb of groupBy) {
             const { fieldName, interval } = gb;
@@ -408,6 +430,7 @@ export class GraphModel extends Model {
                 }
             }
         }
+
         metaData.groupBy = processedGroupBy;
 
         metaData.measure = graph_measure || metaData.measure;
@@ -420,6 +443,11 @@ export class GraphModel extends Model {
         }
     }
 
+    /**
+     * Eventually filters and sort data points.
+     * @param {Object[]} dataPoints
+     * @returns {Object[]}
+     */
     processDataPoints(dataPoints) {
         const { domains, groupBy, mode, order } = this.metaData;
         let processedDataPoints = [];
@@ -427,12 +455,8 @@ export class GraphModel extends Model {
             processedDataPoints = dataPoints.filter(
                 (dataPoint) => dataPoint.labels[0] !== this.env._t("Undefined")
             );
-        } else if (mode === "bar") {
-            processedDataPoints = dataPoints.filter((dataPoint) => dataPoint.count !== 0);
         } else {
-            processedDataPoints = dataPoints.filter(
-                (dataPoint) => dataPoint.count !== 0 // && dataPoint.value !== 0 add this???
-            );
+            processedDataPoints = dataPoints.filter((dataPoint) => dataPoint.count !== 0);
         }
 
         if (order !== null && mode !== "pie" && domains.length === 1 && groupBy.length > 0) {
@@ -440,23 +464,23 @@ export class GraphModel extends Model {
             // based on the sum of values by group in ascending/descending order
             const groupedDataPoints = {};
             for (const dataPt of processedDataPoints) {
-                const key = dataPt.labels[0];
+                const key = dataPt.labels[0]; // = x-axis value under the current assumptions
                 if (!groupedDataPoints[key]) {
                     groupedDataPoints[key] = [];
                 }
                 groupedDataPoints[key].push(dataPt);
             }
+            const groups = Object.values(groupedDataPoints);
             const groupTotal = (group) => group.reduce((sum, dataPt) => sum + dataPt.value, 0);
-            processedDataPoints = sortBy(
-                Object.values(groupedDataPoints),
-                groupTotal,
-                order.toLowerCase()
-            ).flat();
+            processedDataPoints = sortBy(groups, groupTotal, order.toLowerCase()).flat();
         }
 
         return processedDataPoints;
     }
 
+    /**
+     * @param {Object} params
+     */
     async updateMetaData(params) {
         await this.load(params);
         this.trigger("update");
