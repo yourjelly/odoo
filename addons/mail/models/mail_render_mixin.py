@@ -395,7 +395,6 @@ class MailRenderMixin(models.AbstractModel):
             results[record.id] = ''
 
             instructions = parse_small_qweb(tools.ustr(template_txt))
-            instructions
             for string, expression in instructions:
                 results[record.id] += string
 
