@@ -390,21 +390,22 @@ class MailRenderMixin(models.AbstractModel):
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
 
-            results[record.id] = ''
+            results[record.id] = []
 
             instructions = parse_small_qweb(tools.ustr(template_txt))
             for string, expression in instructions:
-                results[record.id] += string
+                results[record.id].append(string)
 
                 if expression:
                     try:
                         result = safe_eval.safe_eval(expression, variables)
                         if result:
-                            results[record.id] += str(result)
+                            results[record.id].append(str(result))
 
                     except Exception as e:
                         _logger.info("Failed to render small_qweb expression : %s", expression, exc_info=True)
                         raise UserError(_("Failed to render small_qweb template : %s)", e))
+            results[record.id] = ''.join(results[record.id])
 
         return results
 
