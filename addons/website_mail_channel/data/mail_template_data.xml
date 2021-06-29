@@ -9,15 +9,15 @@
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     Hello,<br/><br/>
-    You have requested to be subscribed to the mailing list <strong>${object.name}</strong>.
+    You have requested to be subscribed to the mailing list <strong t-out="object.name or ''">general</strong>.
     <br/><br/>
-    To confirm, please visit the following link: <strong><a href="${ctx['token_url']}">${ctx['token_url']}</a></strong>
+    To confirm, please visit the following link: <strong><a t-att-href="ctx.get('token_url', '')" t-out="ctx.get('token_url', '')">http://yourcompany.odoo.com/abc</a></strong>
     <br/><br/>
     If this was a mistake or you did not requested this action, please ignore this message.
-    % if user.signature
+    <t t-if="user.signature">
         <br/>
-        ${user.signature | safe}
-    % endif
+        <t t-out="user.signature or ''">--<br/>Mitchell Admin</t>
+    </t>
 </div></field>
             <field name="auto_delete" eval="True"/>
         </record>
@@ -29,15 +29,15 @@
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     Hello,<br/><br/>
-    You have requested to be unsubscribed to the mailing list <strong>${object.name}</strong>.
+    You have requested to be unsubscribed to the mailing list <strong t-out="object.name or ''">general</strong>.
     <br/><br/>
-    To confirm, please visit the following link: <strong><a href="${ctx['token_url']}">${ctx['token_url']}</a></strong>.
+    To confirm, please visit the following link: <strong><a t-att-href="ctx.get('token_url', '')" t-out="ctx.get('token_url', '')">http://yourcompany.odoo.com/abc</a></strong>.
     <br/><br/>
     If this was a mistake or you did not requested this action, please ignore this message.
-    % if user.signature:
+    <t t-if="user.signature">
         <br/>
-        ${user.signature | safe}
-    % endif
+        <t t-out="user.signature or ''">--<br/>Mitchell Admin</t>
+    </t>
 </div></field>
             <field name="auto_delete" eval="True"/>
         </record>
