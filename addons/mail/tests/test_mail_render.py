@@ -141,34 +141,34 @@ class TestMailRender(common.MailCommon):
         template = self.env['mail.template'].browse(self.test_template_small_qweb.ids)
         partner = self.env['res.partner'].browse(self.render_object.ids)
         for fname, expected in zip(['subject', 'body_html'], self.base_rendered):
-            rendered = str(template._render_field(
+            rendered = template._render_field(
                 fname,
                 partner.ids,
                 compute_lang=True,
                 engine='qweb',
-            )[partner.id])
+            )[partner.id]
             self.assertEqual(rendered, expected)
 
         partner = self.env['res.partner'].browse(self.render_object_fr.ids)
         for fname, expected in zip(['subject', 'body_html'], self.base_rendered_fr):
-            rendered = str(template._render_field(
+            rendered = template._render_field(
                 fname,
                 partner.ids,
                 compute_lang=True,
                 engine='qweb',
-            )[partner.id])
+            )[partner.id]
             self.assertEqual(rendered, expected)
 
     @users('employee')
     def test_render_template_qweb(self):
         partner = self.env['res.partner'].browse(self.render_object.ids)
         for source, expected in zip(self.base_qweb_bits, self.base_rendered):
-            rendered = str(self.env['mail.render.mixin']._render_template(
+            rendered = self.env['mail.render.mixin']._render_template(
                 source,
                 partner._name,
                 partner.ids,
                 engine='qweb',
-            )[partner.id])
+            )[partner.id]
             self.assertEqual(rendered, expected)
 
     @users('employee')
