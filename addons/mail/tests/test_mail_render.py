@@ -144,8 +144,8 @@ class TestMailRender(common.MailCommon):
             rendered = template._render_field(
                 fname,
                 partner.ids,
-                compute_lang=True,
                 engine='qweb',
+                compute_lang=True,
             )[partner.id]
             self.assertEqual(rendered, expected)
 
@@ -154,8 +154,8 @@ class TestMailRender(common.MailCommon):
             rendered = template._render_field(
                 fname,
                 partner.ids,
-                compute_lang=True,
                 engine='qweb',
+                compute_lang=True,
             )[partner.id]
             self.assertEqual(rendered, expected)
 
