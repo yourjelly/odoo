@@ -378,11 +378,6 @@ class MailRenderMixin(models.AbstractModel):
         if any(r is None for r in res_ids):
             raise ValueError(_('Template rendering should be called on a valid record IDs.'))
 
-        # TDE note: support 'safe' context key as backward compatibility for 6dde919bb9850912f618b561cd2141bffe41340c
-        if options is None:
-            options = {}
-        no_autoescape = options.get('render_safe') or self._context.get('safe')
-
         results = dict.fromkeys(res_ids, u"")
         if not template_txt:
             return results
