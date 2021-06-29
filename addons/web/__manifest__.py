@@ -54,7 +54,7 @@ This module provides the core of the Odoo Web Client.
             '/web/static/lib/bootstrap/js/popover.js',
             '/web/static/lib/bootstrap/js/scrollspy.js',
             '/web/static/lib/bootstrap/js/tab.js',
-            '/web/static/src/js/database_manager/database_manager.js',
+            '/web/static/src/public/database_manager.js',
         ],
 
         'web.assets_qweb': [
