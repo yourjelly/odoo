@@ -3,12 +3,12 @@
 import { getFixture } from "@web/../tests/helpers/utils";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
-import { View } from "@web/views/view_utils/view/view";
+import { View } from "@web/views/view";
 
 const { mount } = owl;
 
 /**
- * @typedef {import("../../src/views/view_utils/view/view").ViewProps} ViewProps
+ * @typedef {import("../../src/views/view").ViewProps} ViewProps
  */
 
 /**

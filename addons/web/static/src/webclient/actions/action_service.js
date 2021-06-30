@@ -11,7 +11,7 @@ import { makeContext } from "../../core/context";
 import { registry } from "@web/core/registry";
 import { sprintf } from "../../core/utils/strings";
 import { useBus } from "../../core/bus_hook";
-import { View } from "@web/views/view_utils/view/view";
+import { View } from "@web/views/view";
 
 const { Component, hooks, tags } = owl;
 

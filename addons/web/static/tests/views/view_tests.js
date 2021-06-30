@@ -5,7 +5,7 @@ import { getFixture, nextTick, patchWithCleanup } from "@web/../tests/helpers/ut
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { ormService } from "@web/core/orm_service";
 import { registry } from "@web/core/registry";
-import { View } from "@web/views/view_utils/view/view";
+import { View } from "@web/views/view";
 import { viewService } from "@web/views/view_service";
 
 const { Component, mount, hooks, tags } = owl;
