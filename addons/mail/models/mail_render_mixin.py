@@ -392,7 +392,7 @@ class MailRenderMixin(models.AbstractModel):
 
             results[record.id] = []
 
-            instructions = parse_inline_template(tools.ustr(template_txt))
+            instructions = parse_inline_template(template_txt)
             for string, expression in instructions:
                 results[record.id].append(string)
 
