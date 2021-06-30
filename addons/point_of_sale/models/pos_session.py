@@ -310,7 +310,7 @@ class PosSession(models.Model):
     def _validate_session(self, balancing_account=False, amount_to_balance=0):
         self.ensure_one()
         sudo = self.user_has_groups('point_of_sale.group_pos_user')
-        if self.order_ids or self.statement_ids.line_ids:
+        if self.order_ids:
             self.cash_real_transaction = self.cash_register_total_entry_encoding
             self.cash_real_expected = self.cash_register_balance_end
             self.cash_real_difference = self.cash_register_difference
@@ -452,7 +452,6 @@ class PosSession(models.Model):
         data = self._accumulate_amounts(data)
         data = self._create_non_reconciliable_move_lines(data)
         data = self._create_cash_statement_lines_and_cash_move_lines(data)
-        data = self._create_invoice_receivable_lines(data)
         data = self._create_stock_output_lines(data)
         if balancing_account and amount_to_balance:
             data = self._create_balancing_line(data, balancing_account, amount_to_balance)
@@ -471,19 +470,14 @@ class PosSession(models.Model):
         split_receivables_cash = defaultdict(amounts)
         combine_receivables = defaultdict(amounts)
         combine_receivables_cash = defaultdict(amounts)
-        invoice_receivables = defaultdict(amounts)
         sales = defaultdict(amounts)
         taxes = defaultdict(tax_amounts)
         stock_expense = defaultdict(amounts)
         stock_return = defaultdict(amounts)
         stock_output = defaultdict(amounts)
         rounding_difference = {'amount': 0.0, 'amount_converted': 0.0}
-        # Track the receivable lines of the invoiced orders' account moves for reconciliation
-        # These receivable lines are reconciled to the corresponding invoice receivable lines
-        # of this session's move_id.
-        order_account_move_receivable_lines = defaultdict(lambda: self.env['account.move.line'])
         rounded_globally = self.company_id.tax_calculation_rounding_method == 'round_globally'
-        for order in self.order_ids:
+        for order in self.order_ids.filtered(lambda order: not order.is_invoiced):
             # Combine pos receivable lines
             # Separate cash payments for cash reconciliation later.
             for payment in order.payment_ids:
@@ -500,70 +494,59 @@ class PosSession(models.Model):
                     else:
                         combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
 
-            if order.is_invoiced:
-                # Combine invoice receivable lines
-                key = order.partner_id
-                if self.config_id.cash_rounding:
-                    invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_paid}, order.date_order)
-                else:
-                    invoice_receivables[key] = self._update_amounts(invoice_receivables[key], {'amount': order.amount_total}, order.date_order)
-                # side loop to gather receivable lines by account for reconciliation
-                for move_line in order.account_move.line_ids.filtered(lambda aml: aml.account_id.internal_type == 'receivable' and not aml.reconciled):
-                    order_account_move_receivable_lines[move_line.account_id.id] |= move_line
-            else:
-                order_taxes = defaultdict(tax_amounts)
-                for order_line in order.lines:
-                    line = self._prepare_line(order_line)
-                    # Combine sales/refund lines
-                    sale_key = (
-                        # account
-                        line['income_account_id'],
-                        # sign
-                        -1 if line['amount'] < 0 else 1,
-                        # for taxes
-                        tuple((tax['id'], tax['account_id'], tax['tax_repartition_line_id']) for tax in line['taxes']),
-                        line['base_tags'],
+            order_taxes = defaultdict(tax_amounts)
+            for order_line in order.lines:
+                line = self._prepare_line(order_line)
+                # Combine sales/refund lines
+                sale_key = (
+                    # account
+                    line['income_account_id'],
+                    # sign
+                    -1 if line['amount'] < 0 else 1,
+                    # for taxes
+                    tuple((tax['id'], tax['account_id'], tax['tax_repartition_line_id']) for tax in line['taxes']),
+                    line['base_tags'],
+                )
+                sales[sale_key] = self._update_amounts(sales[sale_key], {'amount': line['amount']}, line['date_order'])
+                # Combine tax lines
+                for tax in line['taxes']:
+                    tax_key = (tax['account_id'], tax['tax_repartition_line_id'], tax['id'], tuple(tax['tag_ids']))
+                    order_taxes[tax_key] = self._update_amounts(
+                        order_taxes[tax_key],
+                        {'amount': tax['amount'], 'base_amount': tax['base']},
+                        tax['date_order'],
+                        round=not rounded_globally
                     )
-                    sales[sale_key] = self._update_amounts(sales[sale_key], {'amount': line['amount']}, line['date_order'])
-                    # Combine tax lines
-                    for tax in line['taxes']:
-                        tax_key = (tax['account_id'], tax['tax_repartition_line_id'], tax['id'], tuple(tax['tag_ids']))
-                        order_taxes[tax_key] = self._update_amounts(
-                            order_taxes[tax_key],
-                            {'amount': tax['amount'], 'base_amount': tax['base']},
-                            tax['date_order'],
-                            round=not rounded_globally
-                        )
-                for tax_key, amounts in order_taxes.items():
-                    if rounded_globally:
-                        amounts = self._round_amounts(amounts)
-                    for amount_key, amount in amounts.items():
-                        taxes[tax_key][amount_key] += amount
+            for tax_key, amounts in order_taxes.items():
+                if rounded_globally:
+                    amounts = self._round_amounts(amounts)
+                for amount_key, amount in amounts.items():
+                    taxes[tax_key][amount_key] += amount
 
-                if self.company_id.anglo_saxon_accounting and order.picking_ids.ids:
-                    # Combine stock lines
-                    stock_moves = self.env['stock.move'].sudo().search([
-                        ('picking_id', 'in', order.picking_ids.ids),
-                        ('company_id.anglo_saxon_accounting', '=', True),
-                        ('product_id.categ_id.property_valuation', '=', 'real_time')
-                    ])
-                    for move in stock_moves:
-                        exp_key = move.product_id._get_product_accounts()['expense']
-                        out_key = move.product_id.categ_id.property_stock_account_output_categ_id
-                        amount = -sum(move.sudo().stock_valuation_layer_ids.mapped('value'))
-                        stock_expense[exp_key] = self._update_amounts(stock_expense[exp_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
-                        if move.location_id.usage == 'customer':
-                            stock_return[out_key] = self._update_amounts(stock_return[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
-                        else:
-                            stock_output[out_key] = self._update_amounts(stock_output[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
+            if self.company_id.anglo_saxon_accounting and order.picking_ids.ids:
+                # Combine stock lines
+                stock_moves = self.env['stock.move'].sudo().search([
+                    ('picking_id', 'in', order.picking_ids.ids),
+                    ('company_id.anglo_saxon_accounting', '=', True),
+                    ('product_id.categ_id.property_valuation', '=', 'real_time')
+                ])
+                for move in stock_moves:
+                    exp_key = move.product_id._get_product_accounts()['expense']
+                    out_key = move.product_id.categ_id.property_stock_account_output_categ_id
+                    amount = -sum(move.sudo().stock_valuation_layer_ids.mapped('value'))
+                    stock_expense[exp_key] = self._update_amounts(stock_expense[exp_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
+                    if move.location_id.usage == 'customer':
+                        stock_return[out_key] = self._update_amounts(stock_return[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
+                    else:
+                        stock_output[out_key] = self._update_amounts(stock_output[out_key], {'amount': amount}, move.picking_id.date, force_company_currency=True)
 
-                if self.config_id.cash_rounding:
-                    diff = order.amount_paid - order.amount_total
-                    rounding_difference = self._update_amounts(rounding_difference, {'amount': diff}, order.date_order)
+            if self.config_id.cash_rounding:
+                diff = order.amount_paid - order.amount_total
+                rounding_difference = self._update_amounts(rounding_difference, {'amount': diff}, order.date_order)
 
-                # Increasing current partner's customer_rank
-                partners = (order.partner_id | order.partner_id.commercial_partner_id)
-                partners._increase_rank('customer_rank')
+            # Increasing current partner's customer_rank
+            partners = (order.partner_id | order.partner_id.commercial_partner_id)
+            partners._increase_rank('customer_rank')
 
         if self.company_id.anglo_saxon_accounting:
             global_session_pickings = self.picking_ids.filtered(lambda p: not p.pos_order_id)
@@ -592,10 +575,8 @@ class PosSession(models.Model):
             'combine_receivables':                 combine_receivables,
             'split_receivables_cash':              split_receivables_cash,
             'combine_receivables_cash':            combine_receivables_cash,
-            'invoice_receivables':                 invoice_receivables,
             'stock_return':                        stock_return,
             'stock_output':                        stock_output,
-            'order_account_move_receivable_lines': order_account_move_receivable_lines,
             'rounding_difference':                 rounding_difference,
             'MoveLine':                            MoveLine
         })
@@ -643,8 +624,6 @@ class PosSession(models.Model):
     def _create_cash_statement_lines_and_cash_move_lines(self, data):
         # Create the split and combine cash statement lines and account move lines.
         # Keep the reference by statement for reconciliation.
-        # `split_cash_statement_lines` maps `statement` -> split cash statement lines
-        # `combine_cash_statement_lines` maps `statement` -> combine cash statement lines
         # `split_cash_receivable_lines` maps `statement` -> split cash receivable lines
         # `combine_cash_receivable_lines` maps `statement` -> combine cash receivable lines
         MoveLine = data.get('MoveLine')
@@ -653,64 +632,28 @@ class PosSession(models.Model):
 
         statements_by_journal_id = {statement.journal_id.id: statement for statement in self.statement_ids}
         # handle split cash payments
-        split_cash_statement_line_vals = defaultdict(list)
         split_cash_receivable_vals = defaultdict(list)
         for payment, amounts in split_receivables_cash.items():
             statement = statements_by_journal_id[payment.payment_method_id.cash_journal_id.id]
-            split_cash_statement_line_vals[statement].append(self._get_statement_line_vals(statement, payment.payment_method_id.receivable_account_id, amounts['amount'], date=payment.payment_date, partner=payment.pos_order_id.partner_id))
             split_cash_receivable_vals[statement].append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
         # handle combine cash payments
-        combine_cash_statement_line_vals = defaultdict(list)
         combine_cash_receivable_vals = defaultdict(list)
         for payment_method, amounts in combine_receivables_cash.items():
             if not float_is_zero(amounts['amount'] , precision_rounding=self.currency_id.rounding):
                 statement = statements_by_journal_id[payment_method.cash_journal_id.id]
-                combine_cash_statement_line_vals[statement].append(self._get_statement_line_vals(statement, payment_method.receivable_account_id, amounts['amount']))
                 combine_cash_receivable_vals[statement].append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
-        # create the statement lines and account move lines
-        BankStatementLine = self.env['account.bank.statement.line']
-        split_cash_statement_lines = {}
-        combine_cash_statement_lines = {}
+        # create the account move lines
         split_cash_receivable_lines = {}
         combine_cash_receivable_lines = {}
         for statement in self.statement_ids:
-            split_cash_statement_lines[statement] = BankStatementLine.create(split_cash_statement_line_vals[statement])
-            combine_cash_statement_lines[statement] = BankStatementLine.create(combine_cash_statement_line_vals[statement])
             split_cash_receivable_lines[statement] = MoveLine.create(split_cash_receivable_vals[statement])
             combine_cash_receivable_lines[statement] = MoveLine.create(combine_cash_receivable_vals[statement])
 
         data.update(
-            {'split_cash_statement_lines':    split_cash_statement_lines,
-             'combine_cash_statement_lines':  combine_cash_statement_lines,
+            {
              'split_cash_receivable_lines':   split_cash_receivable_lines,
              'combine_cash_receivable_lines': combine_cash_receivable_lines
              })
-        return data
-
-    def _create_invoice_receivable_lines(self, data):
-        # Create invoice receivable lines for this session's move_id.
-        # Keep reference of the invoice receivable lines because
-        # they are reconciled with the lines in order_account_move_receivable_lines
-        MoveLine = data.get('MoveLine')
-        invoice_receivables = data.get('invoice_receivables')
-
-        invoice_receivable_vals = defaultdict(list)
-        invoice_receivable_lines = {}
-        for partner, amounts in invoice_receivables.items():
-            commercial_partner = partner.commercial_partner_id
-            account_id = commercial_partner.property_account_receivable_id.id
-            invoice_receivable_vals[commercial_partner].append(self._get_invoice_receivable_vals(account_id, amounts['amount'], amounts['amount_converted'], partner=commercial_partner))
-        for commercial_partner, vals in invoice_receivable_vals.items():
-            account_id = commercial_partner.property_account_receivable_id.id
-            receivable_lines = MoveLine.create(vals)
-            for receivable_line in receivable_lines:
-                if (not receivable_line.reconciled):
-                    if account_id not in invoice_receivable_lines:
-                        invoice_receivable_lines[account_id] = receivable_line
-                    else:
-                        invoice_receivable_lines[account_id] |= receivable_line
-
-        data.update({'invoice_receivable_lines': invoice_receivable_lines})
         return data
 
     def _create_stock_output_lines(self, data):
@@ -734,45 +677,7 @@ class PosSession(models.Model):
 
     def _reconcile_account_move_lines(self, data):
         # reconcile cash receivable lines
-        split_cash_statement_lines = data.get('split_cash_statement_lines')
-        combine_cash_statement_lines = data.get('combine_cash_statement_lines')
-        split_cash_receivable_lines = data.get('split_cash_receivable_lines')
-        combine_cash_receivable_lines = data.get('combine_cash_receivable_lines')
-        order_account_move_receivable_lines = data.get('order_account_move_receivable_lines')
-        invoice_receivable_lines = data.get('invoice_receivable_lines')
         stock_output_lines = data.get('stock_output_lines')
-
-        for statement in self.statement_ids:
-            if not self.config_id.cash_control:
-                statement.write({'balance_end_real': statement.balance_end})
-            statement.button_post()
-            all_lines = (
-                  split_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
-                | combine_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
-                | split_cash_receivable_lines[statement]
-                | combine_cash_receivable_lines[statement]
-            )
-            accounts = all_lines.mapped('account_id')
-            lines_by_account = [all_lines.filtered(lambda l: l.account_id == account) for account in accounts]
-            for lines in lines_by_account:
-                lines.reconcile()
-            # We try to validate the statement after the reconciliation is done
-            # because validating the statement requires each statement line to be
-            # reconciled.
-            # Furthermore, if the validation failed, which is caused by unreconciled
-            # cash difference statement line, we just ignore that. Leaving the statement
-            # not yet validated. Manual reconciliation and validation should be made
-            # by the user in the accounting app.
-            try:
-                statement.button_validate()
-            except UserError:
-                pass
-
-        # reconcile invoice receivable lines
-        for account_id in order_account_move_receivable_lines:
-            ( order_account_move_receivable_lines[account_id]
-            | invoice_receivable_lines.get(account_id, self.env['account.move.line'])
-            ).reconcile()
 
         # reconcile stock output lines
         pickings = self.picking_ids.filtered(lambda p: not p.pos_order_id)
@@ -857,16 +762,6 @@ class PosSession(models.Model):
         }
         return self._debit_amounts(partial_vals, amount, amount_converted)
 
-    def _get_invoice_receivable_vals(self, account_id, amount, amount_converted, **kwargs):
-        partner = kwargs.get('partner', False)
-        partial_vals = {
-            'account_id': account_id,
-            'move_id': self.move_id.id,
-            'name': 'From invoiced orders',
-            'partner_id': partner and partner.id or False,
-        }
-        return self._credit_amounts(partial_vals, amount, amount_converted)
-
     def _get_sale_vals(self, key, amount, amount_converted):
         account_id, sign, tax_keys, base_tag_ids = key
         tax_ids = set(tax[0] for tax in tax_keys)
@@ -904,17 +799,6 @@ class PosSession(models.Model):
     def _get_stock_output_vals(self, out_account, amount, amount_converted):
         partial_args = {'account_id': out_account.id, 'move_id': self.move_id.id}
         return self._credit_amounts(partial_args, amount, amount_converted, force_company_currency=True)
-
-    def _get_statement_line_vals(self, statement, receivable_account, amount, date=False, partner=False):
-        return {
-            'date': fields.Date.context_today(self, timestamp=date),
-            'amount': amount,
-            'payment_ref': self.name,
-            'statement_id': statement.id,
-            'journal_id': statement.journal_id.id,
-            'counterpart_account_id': receivable_account.id,
-            'partner_id': partner and self.env["res.partner"]._find_accounting_partner(partner).id
-        }
 
     def _update_amounts(self, old_amounts, amounts_to_add, date, round=True, force_company_currency=False):
         """Responsible for adding `amounts_to_add` to `old_amounts` considering the currency of the session.
