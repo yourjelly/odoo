@@ -10,9 +10,8 @@ class PosPaymentMethod(models.Model):
     fields: is_cash_count = True and a cash_journal_id set to an
     `account.journal` (type='cash') record.
 
-    When a pos.payment.method is cash, cash_journal_id is required as
-    it will be the journal where the account.bank.statement.line records
-    will be created.
+    Journal is require for every payment method. It is needed for automatic
+    registration of payment in the invoice of order.
     """
 
     _name = "pos.payment.method"
@@ -33,9 +32,7 @@ class PosPaymentMethod(models.Model):
     is_cash_count = fields.Boolean(string='Cash')
     cash_journal_id = fields.Many2one('account.journal',
         string='Cash Journal',
-        domain=[('type', '=', 'cash')],
-        ondelete='restrict',
-        help='The payment method is of type cash. A cash statement will be automatically generated.')
+        ondelete='restrict')
     split_transactions = fields.Boolean(
         string='Split Transactions',
         default=False,
@@ -66,9 +63,7 @@ class PosPaymentMethod(models.Model):
 
     @api.onchange('is_cash_count')
     def _onchange_is_cash_count(self):
-        if not self.is_cash_count:
-            self.cash_journal_id = False
-        else:
+        if self.is_cash_count:
             self.use_payment_terminal = False
 
     def _is_write_forbidden(self, fields):

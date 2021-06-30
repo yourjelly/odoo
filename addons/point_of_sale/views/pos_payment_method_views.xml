@@ -17,7 +17,7 @@
                             <field name="hide_use_payment_terminal" invisible="1"/>
                             <field name="receivable_account_id" groups="account.group_account_readonly" />
                             <field name="is_cash_count" />
-                            <field name="cash_journal_id" attrs="{'invisible': [('is_cash_count', '=', False)], 'required': [('is_cash_count', '=', True)]}" />
+                            <field name="cash_journal_id" required="1" domain="['|', ('type', '=', 'cash'), ('type', '=', 'bank')]" />
                             <field name="split_transactions" groups="base.group_no_one" />
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />
                         </group>

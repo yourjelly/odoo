@@ -490,6 +490,22 @@ class PosOrder(models.Model):
             vals.update({'narration': self.note})
         return vals
 
+    @api.model
+    def _register_payments(self, order, invoice):
+        for payment in order.payment_ids:
+            payment_method = payment.payment_method_id
+            payment_wizard = (
+                self.env["account.payment.register"]
+                .with_context({"active_model": "account.move", "active_ids": invoice.ids})
+                .create(
+                    {
+                        "journal_id": payment_method.cash_journal_id.id,
+                        "amount": payment.amount,
+                    }
+                )
+            )
+            payment_wizard._create_payments()
+
     def action_pos_order_invoice(self):
         moves = self.env['account.move']
 
@@ -508,6 +524,9 @@ class PosOrder(models.Model):
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
             new_move.sudo().with_company(order.company_id)._post()
             moves += new_move
+
+            # register payments to the invoice
+            self._register_payments(order, new_move)
 
         if not moves:
             return {}
