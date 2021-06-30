@@ -10,6 +10,7 @@ import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { registry } from "@web/core/registry";
 import { sortBy } from "@web/core/utils/arrays";
+import { useDebugMenu } from "@web/core/debug/debug_menu";
 import { useModel } from "@web/core/model";
 import { useService } from "@web/core/service_hook";
 
@@ -112,6 +113,10 @@ export function processGraphViewDescription(viewDescription) {
 export class GraphView extends Component {
     setup() {
         this.actionService = useService("action");
+
+        const { arch, searchViewId, viewId } = this.props;
+        const { type } = this.constructor
+        useDebugMenu("view", { arch, searchViewId, type, viewId });
 
         this.model = useModel({ Model: this.constructor.Model });
 
@@ -265,6 +270,8 @@ GraphView.defaultProps = {
     domains: [{ arrayRepr: [], description: null }],
     fields: {},
     groupBy: [],
+    searchViewId: false,
+    viewId: false,
     useSampleModel: false,
 
     additionalMeasures: [],
@@ -289,7 +296,9 @@ GraphView.props = {
     fields: { type: Object, elements: Object, optional: 1 },
     groupBy: { type: Array, elements: String, optional: 1 },
     noContentHelp: { type: String, optional: 1 },
+    searchViewId: { type: [Number,false], optional: 1 },
     state: { type: Object, optional: 1 },
+    viewId: { type: [Number,false], optional: 1 },
     views: { type: Array, element: Array, optional: 1 },
     viewSwitcherEntries: { type: Array, optional: 1 },
     useSampleModel: { type: Boolean, optional: 1 },
