@@ -384,28 +384,24 @@ function viewSeparator() {
     };
 }
 
-function fieldsViewGet({ component, env }) {
+function fieldsViewGet({ arch, env }) {
     return {
         type: "item",
         description: env._t("Fields View Get"),
         callback: () => {
-            const props = {
-                arch: component.props.viewInfo.arch,
-            };
+            const props = { arch };
             env.services.dialog.add(FieldViewGetDialog, props);
         },
         sequence: 340,
     };
 }
 
-export function editView({ accessRights, action, component, env }) {
+export function editView({ accessRights, type, viewId, env }) {
     if (!accessRights.canEditView) {
         return null;
     }
-    let { view_id: viewId, type: viewType } = component.props.viewInfo;
-    viewType = viewType === "tree" ? "list" : viewType;
-    const displayName = action.views.find((v) => v.type === viewType).name.toString();
-    const description = env._t("Edit View: ") + displayName;
+    const displayName = type[0].toUpperCase() + type.slice(1); 
+    const description = env._t("Edit View: ") + `${displayName}`;
     return {
         type: "item",
         description,
@@ -416,16 +412,16 @@ export function editView({ accessRights, action, component, env }) {
     };
 }
 
-function editControlPanelView({ accessRights, component, env }) {
+function editSearchView({ accessRights, searchViewId, env }) {
     if (!accessRights.canEditView) {
         return null;
     }
-    const description = env._t("Edit ControlPanelView");
+    const description = env._t("Edit SearchView");
     return {
         type: "item",
         description,
         callback: () => {
-            editModelDebug(env, description, "ir.ui.view", component.props.viewInfo.view_id);
+            editModelDebug(env, description, "ir.ui.view", searchViewId);
         },
         sequence: 360,
     };
@@ -516,7 +512,8 @@ debugRegistry
     .add("viewSeparator", viewSeparator)
     .add("fieldsViewGet", fieldsViewGet)
     .add("editView", editView)
-    .add("editControlPanelView", editControlPanelView);
+    .add("editControlPanelView", editSearchView);
+
 
 debugRegistry
     .category("form")

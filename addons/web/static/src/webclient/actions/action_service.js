@@ -12,6 +12,7 @@ import { registry } from "@web/core/registry";
 import { sprintf } from "../../core/utils/strings";
 import { useBus } from "../../core/bus_hook";
 import { View } from "@web/views/view";
+import { useDebugMenu } from "@web/core/debug/debug_menu";
 
 const { Component, hooks, tags } = owl;
 
@@ -481,6 +482,7 @@ function makeActionManager(env) {
             setup() {
                 this.Component = controller.Component;
                 this.componentRef = hooks.useRef("component");
+                useDebugMenu("action", { action });
                 this.__beforeLeave__ = null;
                 this.__exportState__ = null;
                 this.__exportSearchState__ = null;
