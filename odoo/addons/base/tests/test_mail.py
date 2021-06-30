@@ -84,16 +84,6 @@ class TestSanitizer(BaseCase):
         for attr in ['javascript']:
             self.assertNotIn(attr, sanitized_html, 'html_sanitize did not remove enough unwanted attributes')
 
-    def test_qweb_strip_true(self):
-        sanitized_html = html_sanitize(test_mail_examples.QWEB_SOURCE, strip_qweb=True, sanitize_attributes=True)
-        for content in ['<t', 't-attf-name', 't-att-value']:
-            self.assertNotIn(content, sanitized_html, 'html_sanitize should have stripped unwanted qweb tag or qweb attributes')
-
-    def test_qweb_strip_false(self):
-        sanitized_html = html_sanitize(test_mail_examples.QWEB_SOURCE, strip_qweb=False, sanitize_attributes=True)
-        for content in ['<t', 't-attf-name', 't-att-value']:
-            self.assertIn(content, sanitized_html, 'html_sanitize stripped too much of qweb tag or qweb attributes')
-
     def test_sanitize_unescape_emails(self):
         not_emails = [
             '<blockquote cite="mid:CAEJSRZvWvud8c6Qp=wfNG6O1+wK3i_jb33qVrF7XyrgPNjnyUA@mail.gmail.com" type="cite">cat</blockquote>',

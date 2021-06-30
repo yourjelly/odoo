@@ -19,10 +19,6 @@ test12</font></div><div><font color="#1f1f1f" face="monospace" size="2"><br></fo
 <a href="javascript:alert('malicious code')">test link</a>
 """
 
-QWEB_SOURCE = u"""
-<div><span t-attf-name="name1" t-att-value="value1"><t t-out="content" /></span></div>
-"""
-
 EDI_LIKE_HTML_SOURCE = u"""<div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
     <p>Hello ${object.partner_id.name},</p>
     <p>A new invoice is available for you: </p>
