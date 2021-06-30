@@ -1,18 +1,18 @@
 odoo.define('adyen_platforms.account_views', function (require) {
 "use strict";
 
-var core = require('web.core');
-var Dialog = require('web.Dialog');
-var FormController = require('web.FormController');
-var FormView = require('web.FormView');
-var viewRegistry = require('web.view_registry');
+const core = require('web.core');
+const Dialog = require('web.Dialog');
+const FormController = require('web.FormController');
+const FormView = require('web.FormView');
+const viewRegistry = require('web.view_registry');
 
-var _t = core._t;
-var QWeb = core.qweb;
+const _t = core._t;
+const QWeb = core.qweb;
 
 var AdyenAccountFormController = FormController.extend({
     _saveRecord: function (recordID, options) {
-        if(this.model.isNew(this.handle) && this.canBeSaved()) {
+        if (this.model.isNew(this.handle) && this.canBeSaved()) {
             var _super = this._super.bind(this, recordID, options);
             var buttons = [
                 {
@@ -24,8 +24,7 @@ var AdyenAccountFormController = FormController.extend({
                         this.close();
                         _super();
                     },
-                },
-                {
+                }, {
                     text: _t("Cancel"),
                     close: true,
                 }
