@@ -451,7 +451,6 @@ class PosSession(models.Model):
         data = {}
         data = self._accumulate_amounts(data)
         data = self._create_non_reconciliable_move_lines(data)
-        data = self._create_cash_statement_lines_and_cash_move_lines(data)
         data = self._create_stock_output_lines(data)
         if balancing_account and amount_to_balance:
             data = self._create_balancing_line(data, balancing_account, amount_to_balance)
@@ -594,6 +593,8 @@ class PosSession(models.Model):
         stock_expense = data.get('stock_expense')
         split_receivables = data.get('split_receivables')
         combine_receivables = data.get('combine_receivables')
+        split_receivables_cash = data.get('split_receivables_cash')
+        combine_receivables_cash = data.get('combine_receivables_cash')
         rounding_difference = data.get('rounding_difference')
         MoveLine = data.get('MoveLine')
 
@@ -617,43 +618,10 @@ class PosSession(models.Model):
             + [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
             + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables.items()]
             + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables.items()]
+            + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables_cash.items()]
+            + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables_cash.items()]
             + rounding_vals
         )
-        return data
-
-    def _create_cash_statement_lines_and_cash_move_lines(self, data):
-        # Create the split and combine cash statement lines and account move lines.
-        # Keep the reference by statement for reconciliation.
-        # `split_cash_receivable_lines` maps `statement` -> split cash receivable lines
-        # `combine_cash_receivable_lines` maps `statement` -> combine cash receivable lines
-        MoveLine = data.get('MoveLine')
-        split_receivables_cash = data.get('split_receivables_cash')
-        combine_receivables_cash = data.get('combine_receivables_cash')
-
-        statements_by_journal_id = {statement.journal_id.id: statement for statement in self.statement_ids}
-        # handle split cash payments
-        split_cash_receivable_vals = defaultdict(list)
-        for payment, amounts in split_receivables_cash.items():
-            statement = statements_by_journal_id[payment.payment_method_id.cash_journal_id.id]
-            split_cash_receivable_vals[statement].append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
-        # handle combine cash payments
-        combine_cash_receivable_vals = defaultdict(list)
-        for payment_method, amounts in combine_receivables_cash.items():
-            if not float_is_zero(amounts['amount'] , precision_rounding=self.currency_id.rounding):
-                statement = statements_by_journal_id[payment_method.cash_journal_id.id]
-                combine_cash_receivable_vals[statement].append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
-        # create the account move lines
-        split_cash_receivable_lines = {}
-        combine_cash_receivable_lines = {}
-        for statement in self.statement_ids:
-            split_cash_receivable_lines[statement] = MoveLine.create(split_cash_receivable_vals[statement])
-            combine_cash_receivable_lines[statement] = MoveLine.create(combine_cash_receivable_vals[statement])
-
-        data.update(
-            {
-             'split_cash_receivable_lines':   split_cash_receivable_lines,
-             'combine_cash_receivable_lines': combine_cash_receivable_lines
-             })
         return data
 
     def _create_stock_output_lines(self, data):
