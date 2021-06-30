@@ -470,7 +470,6 @@ class PosOrder(models.Model):
         self.ensure_one()
         timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
         vals = {
-            'payment_reference': self.name,
             'invoice_origin': self.name,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
             'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
