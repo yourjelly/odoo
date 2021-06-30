@@ -466,9 +466,7 @@ class PosSession(models.Model):
         amounts = lambda: {'amount': 0.0, 'amount_converted': 0.0}
         tax_amounts = lambda: {'amount': 0.0, 'amount_converted': 0.0, 'base_amount': 0.0, 'base_amount_converted': 0.0}
         split_receivables = defaultdict(amounts)
-        split_receivables_cash = defaultdict(amounts)
         combine_receivables = defaultdict(amounts)
-        combine_receivables_cash = defaultdict(amounts)
         sales = defaultdict(amounts)
         taxes = defaultdict(tax_amounts)
         stock_expense = defaultdict(amounts)
@@ -482,16 +480,10 @@ class PosSession(models.Model):
             for payment in order.payment_ids:
                 amount, date = payment.amount, payment.payment_date
                 if payment.payment_method_id.split_transactions:
-                    if payment.payment_method_id.is_cash_count:
-                        split_receivables_cash[payment] = self._update_amounts(split_receivables_cash[payment], {'amount': amount}, date)
-                    else:
-                        split_receivables[payment] = self._update_amounts(split_receivables[payment], {'amount': amount}, date)
+                    split_receivables[payment] = self._update_amounts(split_receivables[payment], {'amount': amount}, date)
                 else:
                     key = payment.payment_method_id
-                    if payment.payment_method_id.is_cash_count:
-                        combine_receivables_cash[key] = self._update_amounts(combine_receivables_cash[key], {'amount': amount}, date)
-                    else:
-                        combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
+                    combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
 
             order_taxes = defaultdict(tax_amounts)
             for order_line in order.lines:
@@ -572,8 +564,6 @@ class PosSession(models.Model):
             'stock_expense':                       stock_expense,
             'split_receivables':                   split_receivables,
             'combine_receivables':                 combine_receivables,
-            'split_receivables_cash':              split_receivables_cash,
-            'combine_receivables_cash':            combine_receivables_cash,
             'stock_return':                        stock_return,
             'stock_output':                        stock_output,
             'rounding_difference':                 rounding_difference,
@@ -586,15 +576,13 @@ class PosSession(models.Model):
         #   - sales
         #   - taxes
         #   - stock expense
-        #   - non-cash split receivables (not for automatic reconciliation)
-        #   - non-cash combine receivables (not for automatic reconciliation)
+        #   - split receivables
+        #   - combine receivables
         taxes = data.get('taxes')
         sales = data.get('sales')
         stock_expense = data.get('stock_expense')
         split_receivables = data.get('split_receivables')
         combine_receivables = data.get('combine_receivables')
-        split_receivables_cash = data.get('split_receivables_cash')
-        combine_receivables_cash = data.get('combine_receivables_cash')
         rounding_difference = data.get('rounding_difference')
         MoveLine = data.get('MoveLine')
 
@@ -618,8 +606,6 @@ class PosSession(models.Model):
             + [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
             + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables.items()]
             + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables.items()]
-            + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables_cash.items()]
-            + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables_cash.items()]
             + rounding_vals
         )
         return data
