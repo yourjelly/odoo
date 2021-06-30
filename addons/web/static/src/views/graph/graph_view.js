@@ -13,6 +13,7 @@ import { sortBy } from "@web/core/utils/arrays";
 import { useDebugMenu } from "@web/core/debug/debug_menu";
 import { useModel } from "@web/core/model";
 import { useService } from "@web/core/service_hook";
+import { ArchParser } from "../utils/arch_parser";
 
 const viewRegistry = registry.category("views");
 
@@ -20,59 +21,48 @@ const { Component } = owl;
 
 const ORDERS = ["ASC", "DESC", null];
 
-export function processGraphViewDescription(viewDescription) {
-    const fields = viewDescription.fields || {};
-    const arch = viewDescription.arch || "<graph/>";
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(arch, "text/xml");
-
-    const metaData = { fields, fieldModif: {} };
-    function parseXML(node) {
-        if (!(node instanceof Element)) {
-            return;
-        }
-        if (node.nodeType === 1) {
-            const nodeAttrs = {};
-            for (const attrName of node.getAttributeNames()) {
-                nodeAttrs[attrName] = node.getAttribute(attrName);
-            }
+export class GraphArchParser extends ArchParser {
+    parse(arch, fields = {}) {
+        const metaData = { fields, fieldModif: {} };
+        this.visitArch(arch, (node) => {
             switch (node.tagName) {
                 case "graph":
-                    if ("disable_linking" in nodeAttrs) {
-                        metaData.disableLinking = Boolean(evaluateExpr(nodeAttrs.disable_linking));
+                    if (node.hasAttribute("disable_linking")) {
+                        metaData.disableLinking = Boolean(
+                            evaluateExpr(node.getAttribute("disable_linking"))
+                        );
                     }
-                    if ("stacked" in nodeAttrs) {
-                        metaData.stacked = Boolean(evaluateExpr(nodeAttrs.stacked));
+                    if (node.hasAttribute("stacked")) {
+                        metaData.stacked = Boolean(evaluateExpr(node.getAttribute("stacked")));
                     }
-                    const mode = nodeAttrs.type;
+                    const mode = node.getAttribute("type");
                     if (mode && MODES.includes(mode)) {
                         metaData.mode = mode;
                     }
-                    const order = nodeAttrs.order;
+                    const order = node.getAttribute("order");
                     if (order && ORDERS.includes(order)) {
                         metaData.order = order;
                     }
-                    const title = nodeAttrs.string;
+                    const title = node.getAttribute("string");
                     if (title) {
                         metaData.title = title;
                     }
-                    for (let child of node.childNodes) {
-                        parseXML(child);
-                    }
                     break;
                 case "field":
-                    let fieldName = nodeAttrs.name; // exists (rng validation)
+                    let fieldName = node.getAttribute("name"); // exists (rng validation)
                     if (fieldName === "id") {
                         break;
                     }
-                    const string = nodeAttrs.string;
+                    const string = node.getAttribute("string");
                     if (string) {
                         if (!metaData.fieldModif[fieldName]) {
                             metaData.fieldModif[fieldName] = {};
                         }
                         metaData.fieldModif[fieldName].string = string;
                     }
-                    const isInvisible = Boolean(evaluateExpr(nodeAttrs.invisible || "0"));
+                    const isInvisible = Boolean(
+                        evaluateExpr(node.getAttribute("invisible") || "0")
+                    );
                     if (isInvisible) {
                         if (!metaData.fieldModif[fieldName]) {
                             metaData.fieldModif[fieldName] = {};
@@ -80,7 +70,7 @@ export function processGraphViewDescription(viewDescription) {
                         metaData.fieldModif[fieldName].invisible = true;
                         break;
                     }
-                    const isMeasure = nodeAttrs.type === "measure";
+                    const isMeasure = node.getAttribute("type") === "measure";
                     if (isMeasure) {
                         if (!metaData.fieldModif[fieldName]) {
                             metaData.fieldModif[fieldName] = {};
@@ -92,7 +82,7 @@ export function processGraphViewDescription(viewDescription) {
                         const { type } = metaData.fields[fieldName]; // exists (rng validation)
                         if (GROUPABLE_TYPES.includes(type)) {
                             let groupBy = fieldName;
-                            const interval = nodeAttrs.interval;
+                            const interval = node.getAttribute("interval");
                             if (interval) {
                                 groupBy += `:${interval}`;
                             }
@@ -104,10 +94,9 @@ export function processGraphViewDescription(viewDescription) {
                     }
                     break;
             }
-        }
+        });
+        return metaData;
     }
-    parseXML(xml.documentElement);
-    return metaData;
 }
 
 export class GraphView extends Component {
@@ -115,7 +104,7 @@ export class GraphView extends Component {
         this.actionService = useService("action");
 
         const { arch, searchViewId, viewId } = this.props;
-        const { type } = this.constructor
+        const { type } = this.constructor;
         useDebugMenu("view", { arch, searchViewId, type, viewId });
 
         this.model = useModel({ Model: this.constructor.Model });
@@ -132,7 +121,8 @@ export class GraphView extends Component {
         if (state) {
             Object.assign(loadParams, state);
         } else {
-            const propsFromArch = processGraphViewDescription({ arch, fields });
+            const parser = new GraphArchParser();
+            const propsFromArch = parser.parse(arch, fields);
             Object.assign(loadParams, this.props, propsFromArch);
             const measures = [];
             for (const fieldName in fields) {
@@ -296,9 +286,9 @@ GraphView.props = {
     fields: { type: Object, elements: Object, optional: 1 },
     groupBy: { type: Array, elements: String, optional: 1 },
     noContentHelp: { type: String, optional: 1 },
-    searchViewId: { type: [Number,false], optional: 1 },
+    searchViewId: { type: [Number, false], optional: 1 },
     state: { type: Object, optional: 1 },
-    viewId: { type: [Number,false], optional: 1 },
+    viewId: { type: [Number, false], optional: 1 },
     views: { type: Array, element: Array, optional: 1 },
     viewSwitcherEntries: { type: Array, optional: 1 },
     useSampleModel: { type: Boolean, optional: 1 },

@@ -11,7 +11,7 @@ import { click, triggerEvent } from "../helpers/utils";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { makeView } from "./helpers";
 import { BORDER_WHITE, DEFAULT_BG } from "@web/views/graph/colors";
-import { processGraphViewDescription } from "@web/views/graph/graph_view";
+import { GraphArchParser } from "@web/views/graph/graph_view";
 import { registry } from "@web/core/registry";
 import { setupControlPanelServiceRegistry } from "../search/helpers";
 import { dialogService } from "@web/core/dialog/dialog_service";
@@ -1969,17 +1969,16 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("process default view description", async function (assert) {
         assert.expect(1);
-        const propsFromArch = processGraphViewDescription({});
+        const propsFromArch = new GraphArchParser().parse();
         assert.deepEqual(propsFromArch, { fields: {}, fieldModif: {} });
     });
 
     QUnit.test("process simple arch (no field tag)", async function (assert) {
         assert.expect(2);
         const fields = serverData.models.foo.fields;
-        let propsFromArch = processGraphViewDescription({
-            arch: `<graph order="ASC" disable_linking="1" type="line"/>`,
-            fields,
-        });
+        const arch1 = `<graph order="ASC" disable_linking="1" type="line"/>`;
+        let propsFromArch = new GraphArchParser().parse(arch1, fields);
+
         assert.deepEqual(propsFromArch, {
             disableLinking: true,
             fields,
@@ -1987,10 +1986,9 @@ QUnit.module("Views", (hooks) => {
             mode: "line",
             order: "ASC",
         });
-        propsFromArch = processGraphViewDescription({
-            arch: `<graph disable_linking="0" string="Title" stacked="False"/>`,
-            fields,
-        });
+        let arch2 = `<graph disable_linking="0" string="Title" stacked="False"/>`;
+        propsFromArch = new GraphArchParser().parse(arch2, fields);
+
         assert.deepEqual(propsFromArch, {
             disableLinking: false,
             fields,
@@ -2004,9 +2002,7 @@ QUnit.module("Views", (hooks) => {
         assert.expect(1);
         const fields = serverData.models.foo.fields;
         fields.fighters = { type: "text", string: "Fighters" };
-        let propsFromArch = processGraphViewDescription({
-            fields,
-            arch: `
+        let arch = `
         <graph type="pie">
           <field name="revenue" type="measure"/>
           <field name="date" interval="day"/>
@@ -2015,8 +2011,8 @@ QUnit.module("Views", (hooks) => {
           <field name="id"/>
           <field name="fighters" string="FooFighters"/>
         <graph/>
-      `,
-        });
+      `;
+        let propsFromArch = new GraphArchParser().parse(arch, fields);
         assert.deepEqual(propsFromArch, {
             fields,
             fieldModif: {
