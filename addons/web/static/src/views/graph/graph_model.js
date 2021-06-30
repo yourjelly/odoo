@@ -7,7 +7,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { Model } from "@web/core/model";
 import { ORM } from "@web/core/orm_service";
 import { rankInterval } from "@web/search/utils/dates";
-import { SampleServer } from "@web/views/view_utils/sample_server";
+import { SampleServer } from "@web/views/utils/sample_server";
 import { sortBy } from "@web/core/utils/arrays";
 
 export const SEP = " / ";
