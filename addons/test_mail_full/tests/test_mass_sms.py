@@ -253,7 +253,7 @@ class TestMassSMSInternals(TestMassSMSCommon):
             with self.mockSMSGateway():
                 mailing_test.action_send_sms()
 
-        # Test if bad small_qweb in the body raises an error
+        # Test if bad inline_template in the body raises an error
         mailing.write({
             'body_plaintext': 'Hello ${object.name_id.id}',
         })

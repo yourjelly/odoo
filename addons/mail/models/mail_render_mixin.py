@@ -14,7 +14,7 @@ from werkzeug import urls
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
-from odoo.tools import is_html_empty, safe_eval, parse_small_qweb
+from odoo.tools import is_html_empty, safe_eval, parse_inline_template
 from odoo.addons.http_routing.models.ir_http import slug
 
 _logger = logging.getLogger(__name__)
@@ -350,14 +350,14 @@ class MailRenderMixin(models.AbstractModel):
         return results
 
     @api.model
-    def _render_small_qweb_eval_context(self):
+    def _render_inline_template_eval_context(self):
         return self._get_common_eval_context()
 
     @api.model
-    def _render_template_small_qweb(self, template_txt, model, res_ids,
+    def _render_template_inline_template(self, template_txt, model, res_ids,
                                add_context=None, options=None):
         """ Render a string-based template on records given by a model and a list
-        of IDs, using small_qweb.
+        of IDs, using inline_template.
 
         In addition to the generic evaluation context available, some other
         variables are added:
@@ -369,7 +369,7 @@ class MailRenderMixin(models.AbstractModel):
 
         :param dict add_context: additional context to give to renderer. It
           allows to add or update values to base rendering context generated
-          by ``MailRenderMixin._render_small_qweb_eval_context()``;
+          by ``MailRenderMixin._render_inline_template_eval_context()``;
         :param dict options: options for rendering;
 
         :return dict: {res_id: string of rendered template based on record}
@@ -392,7 +392,7 @@ class MailRenderMixin(models.AbstractModel):
 
             results[record.id] = []
 
-            instructions = parse_small_qweb(tools.ustr(template_txt))
+            instructions = parse_inline_template(tools.ustr(template_txt))
             for string, expression in instructions:
                 results[record.id].append(string)
 
@@ -403,8 +403,8 @@ class MailRenderMixin(models.AbstractModel):
                             results[record.id].append(str(result))
 
                     except Exception as e:
-                        _logger.info("Failed to render small_qweb expression : %s", expression, exc_info=True)
-                        raise UserError(_("Failed to render small_qweb template : %s)", e))
+                        _logger.info("Failed to render inline_template expression : %s", expression, exc_info=True)
+                        raise UserError(_("Failed to render inline_template template : %s)", e))
             results[record.id] = ''.join(results[record.id])
 
         return results
@@ -424,7 +424,7 @@ class MailRenderMixin(models.AbstractModel):
         return rendered
 
     @api.model
-    def _render_template(self, template_src, model, res_ids, engine='small_qweb',
+    def _render_template(self, template_src, model, res_ids, engine='inline_template',
                          add_context=None, options=None, post_process=False):
         """ Render the given string on records designed by model / res_ids using
         the given rendering engine. Possible engine are small_web, qweb, or
@@ -435,7 +435,7 @@ class MailRenderMixin(models.AbstractModel):
           rendering (aka 'crm.lead');
         :param list res_ids: list of ids of records. All should belong to the
           Odoo model given by model;
-        :param string engine: small_qweb, qweb or qweb_view;
+        :param string engine: inline_template, qweb or qweb_view;
 
         :param dict add_context: additional context to give to renderer. It
           allows to add or update values to base rendering context generated
@@ -448,8 +448,8 @@ class MailRenderMixin(models.AbstractModel):
         """
         if not isinstance(res_ids, (list, tuple)):
             raise ValueError(_('Template rendering should be called only using on a list of IDs.'))
-        if engine not in ('small_qweb', 'qweb', 'qweb_view'):
-            raise ValueError(_('Template rendering supports only small_qweb, qweb, or qweb_view (view or raw).'))
+        if engine not in ('inline_template', 'qweb', 'qweb_view'):
+            raise ValueError(_('Template rendering supports only inline_template, qweb, or qweb_view (view or raw).'))
 
         if engine == 'qweb_view':
             rendered = self._render_template_qweb_view(template_src, model, res_ids,
@@ -458,21 +458,21 @@ class MailRenderMixin(models.AbstractModel):
             rendered = self._render_template_qweb(template_src, model, res_ids,
                                                   add_context=add_context, options=options)
         else:
-            rendered = self._render_template_small_qweb(template_src, model, res_ids,
+            rendered = self._render_template_inline_template(template_src, model, res_ids,
                                                    add_context=add_context, options=options)
         if post_process:
             rendered = self._render_template_postprocess(rendered)
 
         return rendered
 
-    def _render_lang(self, res_ids, engine='small_qweb'):
+    def _render_lang(self, res_ids, engine='inline_template'):
         """ Given some record ids, return the lang for each record based on
         lang field of template or through specific context-based key. Lang is
         computed by performing a rendering on res_ids, based on self.render_model.
 
         :param list res_ids: list of ids of records. All should belong to the
           Odoo model given by model;
-        :param string engine: small_qweb or qweb_view;
+        :param string engine: inline_template or qweb_view;
 
         :return dict: {res_id: lang code (i.e. en_US)}
         """
@@ -486,13 +486,13 @@ class MailRenderMixin(models.AbstractModel):
             for res_id, lang in rendered_langs.items()
         )
 
-    def _classify_per_lang(self, res_ids, engine='small_qweb'):
+    def _classify_per_lang(self, res_ids, engine='inline_template'):
         """ Given some record ids, return for computed each lang a contextualized
         template and its subset of res_ids.
 
         :param list res_ids: list of ids of records (all belonging to same model
           defined by self.render_model)
-        :param string engine: small_qweb, qweb, or qweb_view;
+        :param string engine: inline_template, qweb, or qweb_view;
 
         :return dict: {lang: (template with lang=lang_code if specific lang computed
           or template, res_ids targeted by that language}
@@ -511,7 +511,7 @@ class MailRenderMixin(models.AbstractModel):
             for lang, lang_res_ids in lang_to_res_ids.items()
         )
 
-    def _render_field(self, field, res_ids, engine='small_qweb',
+    def _render_field(self, field, res_ids, engine='inline_template',
                       compute_lang=False, set_lang=False,
                       add_context=None, options=None, post_process=False):
         """ Given some record ids, render a template located on field on all
@@ -522,7 +522,7 @@ class MailRenderMixin(models.AbstractModel):
         :param field: a field name existing on self;
         :param list res_ids: list of ids of records (all belonging to same model
           defined by ``self.render_model``)
-        :param string engine: small_qweb, qweb, or qweb_view;
+        :param string engine: inline_template, qweb, or qweb_view;
 
         :param boolean compute_lang: compute language to render on translated
           version of the template instead of default (probably english) one.

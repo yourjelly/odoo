@@ -76,7 +76,7 @@ class TestMailRender(common.MailCommon):
         ]
 
         # link to mail template
-        cls.test_template_small_qweb = cls.env['mail.template'].create({
+        cls.test_template_inline_template = cls.env['mail.template'].create({
             'name': 'Test Template',
             'subject': cls.base_qweb_bits[0],
             'body_html': cls.base_qweb_bits[1],
@@ -89,23 +89,23 @@ class TestMailRender(common.MailCommon):
             'type': 'model',
             'name': 'mail.template,subject',
             'lang': 'fr_FR',
-            'res_id': cls.test_template_small_qweb.id,
-            'src': cls.test_template_small_qweb.subject,
+            'res_id': cls.test_template_inline_template.id,
+            'src': cls.test_template_inline_template.subject,
             'value': cls.base_qweb_bits_fr[0],
         })
         cls.env['ir.translation'].create({
             'type': 'model',
             'name': 'mail.template,body_html',
             'lang': 'fr_FR',
-            'res_id': cls.test_template_small_qweb.id,
-            'src': cls.test_template_small_qweb.body_html,
+            'res_id': cls.test_template_inline_template.id,
+            'src': cls.test_template_inline_template.body_html,
             'value': cls.base_qweb_bits_fr[1],
         })
         cls.env['ir.model.data'].create({
             'name': 'test_template_xmlid',
             'module': 'mail',
-            'model': cls.test_template_small_qweb._name,
-            'res_id': cls.test_template_small_qweb.id,
+            'model': cls.test_template_inline_template._name,
+            'res_id': cls.test_template_inline_template.id,
         })
 
     @users('employee')
@@ -129,7 +129,7 @@ class TestMailRender(common.MailCommon):
             '<span>Context Custom Context Value, value Custom Render Value</span>'
         ]
         for src, expected in zip(srces, results):
-            for engine in ['small_qweb']:
+            for engine in ['inline_template']:
                 result = MailRenderMixin.with_context(**custom_ctx)._render_template(
                     src, partner._name, partner.ids,
                     engine=engine, add_context=add_context
@@ -137,8 +137,8 @@ class TestMailRender(common.MailCommon):
                 self.assertEqual(expected, result)
 
     @users('employee')
-    def test_render_mail_template_small_qweb(self):
-        template = self.env['mail.template'].browse(self.test_template_small_qweb.ids)
+    def test_render_mail_template_inline_template(self):
+        template = self.env['mail.template'].browse(self.test_template_inline_template.ids)
         partner = self.env['res.partner'].browse(self.render_object.ids)
         for fname, expected in zip(['subject', 'body_html'], self.base_rendered):
             rendered = template._render_field(
@@ -189,7 +189,7 @@ class TestMailRender(common.MailCommon):
         partner = self.env['res.partner'].browse(self.render_object.ids)
         src = '${user.name} - ${object.name}'
         expected = '%s - %s' % (self.env.user.name, partner.name)
-        result = self.env['mail.render.mixin'].sudo()._render_template_small_qweb(
+        result = self.env['mail.render.mixin'].sudo()._render_template_inline_template(
             src, partner._name, partner.ids
         )[partner.id]
         self.assertIn(expected, result)
@@ -215,7 +215,7 @@ class TestMailRender(common.MailCommon):
 <p>return value</p>"""
         context = {'cust_function': cust_function}
 
-        result = self.env['mail.render.mixin']._render_template_small_qweb(
+        result = self.env['mail.render.mixin']._render_template_inline_template(
             src, partner._name, partner.ids,
             add_context=context
         )[partner.id]
@@ -231,7 +231,7 @@ class TestMailRender(common.MailCommon):
         # static string
         src = 'This is a string'
         expected = 'This is a string'
-        for engine in ['small_qweb']:
+        for engine in ['inline_template']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -240,7 +240,7 @@ class TestMailRender(common.MailCommon):
         # code string
         src = 'This is a string with a number ${13+13}'
         expected = 'This is a string with a number 26'
-        for engine in ['small_qweb']:
+        for engine in ['inline_template']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -249,7 +249,7 @@ class TestMailRender(common.MailCommon):
         # block string
         src = "This is a string with a block ${'hidden' if False else 'displayed'}"
         expected = 'This is a string with a block displayed'
-        for engine in ['small_qweb']:
+        for engine in ['inline_template']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -258,7 +258,7 @@ class TestMailRender(common.MailCommon):
         # static xml
         src = '<p class="text-muted"><span>This is a string</span></p>'
         expected = '<p class="text-muted"><span>This is a string</span></p>'
-        for engine in ['small_qweb', 'qweb']:
+        for engine in ['inline_template', 'qweb']:
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
@@ -270,7 +270,7 @@ class TestMailRender(common.MailCommon):
             '<p class="text-muted"><span>This is a string with a number <t t-out="13+13"/></span></p>',
         ]
         expected = '<p class="text-muted"><span>This is a string with a number 26</span></p>'
-        for engine, src in zip(['small_qweb', 'qweb'], srces):
+        for engine, src in zip(['inline_template', 'qweb'], srces):
             result = MailRenderMixin._render_template(
                 src, partner._name, partner.ids, engine=engine,
             )[partner.id]
