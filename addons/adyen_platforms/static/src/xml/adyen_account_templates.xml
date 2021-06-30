@@ -109,17 +109,21 @@
     </t>
 
     <t t-name="AdyenKYCStatusTag">
-        <t t-if="value === 'awaiting_data'">
-            <span class="badge badge-pill badge-warning">Data to provide</span>
-        </t>
-        <t t-if="value === 'pending'">
-            <span class="badge badge-pill badge-info">Waiting for validation</span>
-        </t>
-        <t t-if="value === 'passed'">
-            <span class="badge badge-pill badge-success">Confirmed</span>
-        </t>
-        <t t-if="value === 'failed'">
-            <span class="badge badge-pill badge-danger">Failed</span>
-        </t>
+        <span t-if="value === 'awaiting_data'"
+            class="badge badge-pill badge-warning">
+            Data to provide
+        </span>
+        <span t-elif="value === 'pending'"
+            class="badge badge-pill badge-info">
+            Waiting for validation
+        </span>
+        <span t-elif="value === 'passed'"
+            class="badge badge-pill badge-success">
+            Confirmed
+        </span>
+        <span t-elif="value === 'failed'"
+            class="badge badge-pill badge-danger">
+            Failed
+        </span>
     </t>
 </templates>
