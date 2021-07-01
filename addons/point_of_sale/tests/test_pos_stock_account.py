@@ -60,7 +60,7 @@ class TestPoSStock(TestPoSCommon):
         | account             | balance |
         +---------------------+---------+
         | sale_account        | -1010.0 |
-        | pos_receivable-cash |  1010.0 |
+        | outstanding cash    |  1010.0 |
         | expense_account     |   327.0 |
         | output_account      |  -327.0 |
         +---------------------+---------+
@@ -103,8 +103,8 @@ class TestPoSStock(TestPoSCommon):
         sales_line = account_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sales_line.balance, -orders_total, msg='Sales line balance should be equal to total orders amount.')
 
-        receivable_line_cash = account_move.line_ids.filtered(lambda line: line.account_id in self.pos_receivable_account + self.env['account.account'].search([('name', '=', 'Account Receivable (PoS)')]) and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 1010.0, msg='Cash receivable should be equal to the total cash payments.')
+        outstanding_cash = account_move.line_ids.filtered(lambda line: line.account_id == self._get_inbound_outstanding_account(self.cash_pm) and self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash.balance, 1010.0, msg='Cash receivable should be equal to the total cash payments.')
 
         expense_line = account_move.line_ids.filtered(lambda line: line.account_id == self.expense_account)
         self.assertAlmostEqual(expense_line.balance, 327.0)
@@ -112,7 +112,6 @@ class TestPoSStock(TestPoSCommon):
         output_line = account_move.line_ids.filtered(lambda line: line.account_id == self.output_account)
         self.assertAlmostEqual(output_line.balance, -327.0)
 
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
         self.assertTrue(output_line.full_reconcile_id, msg='The stock output account line should be fully-reconciled.')
 
     def test_02_orders_with_invoice(self):
@@ -128,8 +127,7 @@ class TestPoSStock(TestPoSCommon):
         | account             | balance |
         +---------------------+---------+
         | sale_account        |  -650.0 |
-        | pos_receivable-cash |  1010.0 |
-        | receivable          |  -360.0 |
+        | outstanding cash    |   650.0 |
         | expense_account     |   206.0 |
         | output_account      |  -206.0 |
         +---------------------+---------+
@@ -178,12 +176,6 @@ class TestPoSStock(TestPoSCommon):
         sales_line = account_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sales_line.balance, -650.0)
 
-        receivable_line = account_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -360.0, msg='Receivable line balance should equal the negative of total amount of invoiced orders.')
-
-        receivable_line_cash = account_move.line_ids.filtered(lambda line: line.account_id in self.pos_receivable_account + self.env['account.account'].search([('name', '=', 'Account Receivable (PoS)')]) and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 1010.0, msg='Cash receivable should be equal to the total cash payments.')
-
         expense_line = account_move.line_ids.filtered(lambda line: line.account_id == self.expense_account)
         self.assertAlmostEqual(expense_line.balance, 206.0)
 
@@ -199,7 +191,6 @@ class TestPoSStock(TestPoSCommon):
         for move_line in invoiced_order.account_move.line_ids.filtered(lambda line: line.account_id == self.output_account):
             self.assertTrue(move_line.full_reconcile_id)
 
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
         self.assertTrue(output_line.full_reconcile_id, msg='The stock output account line should be fully-reconciled.')
 
     def test_03_order_product_w_owner(self):
