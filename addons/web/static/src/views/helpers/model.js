@@ -34,14 +34,14 @@ export class Model extends EventBus {
 
 /**
  * @template {Model} T
- * @param {Object} params
- * @param {new (env: Object, services: Object) => T} params.Model
- * @param {Function} [params.onUpdate]
+ * @param {new (env: Object, services: Object) => T} ModelClass
+ * @param {Object} loadParams
+ * @param {Object} [options]
+ * @param {Function} [options.onUpdate]
  * @returns {T}
  */
-export function useModel(params) {
+export function useModel(ModelClass, loadParams, options = {}) {
     const component = useComponent();
-    const ModelClass = params.Model;
     if (!(ModelClass.prototype instanceof Model)) {
         throw new Error(`the model class should extend Model`);
     }
@@ -50,9 +50,8 @@ export function useModel(params) {
         services[key] = useService(key);
     }
     const model = new ModelClass(component.env, services);
-    useBus(model, "update", params.onUpdate || component.render);
+    useBus(model, "update", options.onUpdate || component.render);
 
-    const loadParams = params.loadParams;
     const initialGroupBy = loadParams.groupBy.slice();
 
     onWillStart(() => {

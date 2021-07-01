@@ -136,7 +136,7 @@ export class GraphView extends Component {
             loadParams.measures = sortBy(measures, (m) => m.description.toLowerCase());
         }
 
-        this.model = useModel({ Model: this.constructor.Model, loadParams });
+        this.model = useModel(this.constructor.Model, loadParams);
 
         useSetupAction({
             exportState: () => this.model.metaData, // maybe its too much: what about __exportState__, breadcrumbs,... ?
