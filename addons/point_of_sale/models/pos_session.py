@@ -701,7 +701,7 @@ class PosSession(models.Model):
 
     def _get_split_receivable_vals(self, payment, amount, amount_converted):
         partial_vals = {
-            'account_id': payment.payment_method_id.receivable_account_id.id,
+            'account_id': self._get_payment_account_id(amount, payment.payment_method_id),
             'move_id': self.move_id.id,
             'partner_id': self.env["res.partner"]._find_accounting_partner(payment.partner_id).id,
             'name': '%s - %s' % (self.name, payment.payment_method_id.name),
@@ -710,11 +710,16 @@ class PosSession(models.Model):
 
     def _get_combine_receivable_vals(self, payment_method, amount, amount_converted):
         partial_vals = {
-            'account_id': payment_method.receivable_account_id.id,
+            'account_id': self._get_payment_account_id(amount, payment_method),
             'move_id': self.move_id.id,
             'name': '%s - %s' % (self.name, payment_method.name)
         }
         return self._debit_amounts(partial_vals, amount, amount_converted)
+
+    def _get_payment_account_id(self, amount, payment_method):
+        default_account = self.company_id.account_journal_payment_debit_account_id if amount > 0 else self.company_id.account_journal_payment_credit_account_id
+        payment_account = payment_method.inbound_payment_method_line_id.payment_account_id if amount > 0 else payment_method.outbound_payment_method_line_id.payment_account_id
+        return payment_account and payment_account.id or default_account.id
 
     def _get_sale_vals(self, key, amount, amount_converted):
         account_id, sign, tax_keys, base_tag_ids = key

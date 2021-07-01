@@ -28,7 +28,7 @@ class PosPaymentMethod(models.Model):
         domain=[('reconcile', '=', True), ('user_type_id.type', '=', 'receivable')],
         default=lambda self: self.env.company.account_default_pos_receivable_account_id,
         ondelete='restrict',
-        help='Account used as counterpart of the income account in the accounting entry representing the pos sales.')
+        help='Account used as counterpart of the income account in the accounting entry representing the pos sales. (Deprecated)')
     is_cash_count = fields.Boolean(string='Cash')
     cash_journal_id = fields.Many2one('account.journal',
         string='Cash Journal',
@@ -44,6 +44,24 @@ class PosPaymentMethod(models.Model):
     hide_use_payment_terminal = fields.Boolean(compute='_compute_hide_use_payment_terminal', help='Technical field which is used to '
                                                'hide use_payment_terminal when no payment interfaces are installed.')
     active = fields.Boolean(default=True)
+    inbound_payment_method_line_id = fields.Many2one(
+        'account.payment.method.line',
+        string="Inbound Account Payment Method Line",
+        help="This is a technical field for pointing a POS Payment Method to an inbound payment method line from the journal.",
+    )
+    outbound_payment_method_line_id = fields.Many2one(
+        'account.payment.method.line',
+        string="Outbound Account Payment Method Line",
+        help="This is a technical field for pointing a POS Payment Method to an outbound payment method line from the journal.",
+    )
+    available_inbound_payment_method_line_ids = fields.Many2many('account.payment.method.line', compute="_compute_available_payment_method_line_ids")
+    available_outbound_payment_method_line_ids = fields.Many2many('account.payment.method.line', compute="_compute_available_payment_method_line_ids")
+
+    @api.depends('cash_journal_id')
+    def _compute_available_payment_method_line_ids(self):
+        for payment_method in self:
+            payment_method.available_inbound_payment_method_line_ids = payment_method.cash_journal_id.inbound_payment_method_line_ids
+            payment_method.available_outbound_payment_method_line_ids = payment_method.cash_journal_id.outbound_payment_method_line_ids
 
     @api.depends('is_cash_count')
     def _compute_hide_use_payment_terminal(self):
