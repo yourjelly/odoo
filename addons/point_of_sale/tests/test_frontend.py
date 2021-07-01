@@ -31,8 +31,17 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         # Pricelists are set below, do not take demo data into account
         env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')]).unlink()
 
+        bank_journal = journal_obj.create({
+            'name': 'Bank Test',
+            'type': 'bank',
+            'company_id': main_company.id,
+            'code': 'BNK',
+            'sequence': 10,
+        })
+
         env['pos.payment.method'].create({
             'name': 'Bank',
+            'cash_journal_id': bank_journal.id,
         })
         cls.main_pos_config = env['pos.config'].create({
             'name': 'Shop',
