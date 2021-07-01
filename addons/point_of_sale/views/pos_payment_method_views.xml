@@ -18,7 +18,7 @@
                             <field name="available_inbound_payment_method_line_ids" invisible="1"/>
                             <field name="available_outbound_payment_method_line_ids" invisible="1"/>
                             <field name="is_cash_count" />
-                            <field name="cash_journal_id" required="1" domain="['|', ('type', '=', 'cash'), ('type', '=', 'bank')]" />
+                            <field name="cash_journal_id" required="1" domain="is_cash_count and [('type', '=', 'cash')] or [('type', '=', 'bank')]" />
                             <field name="split_transactions" groups="base.group_no_one" />
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />
                             <field name="inbound_payment_method_line_id" groups="account.group_account_readonly" domain="[('id', 'in', available_inbound_payment_method_line_ids)]" />
@@ -40,8 +40,8 @@
             <tree string="Payment Methods">
                 <field name="hide_use_payment_terminal" invisible="1"/>
                 <field name="name" />
-                <field name="receivable_account_id" groups="account.group_account_readonly"/>
                 <field name="is_cash_count" />
+                <field name="cash_journal_id" groups="account.group_account_readonly"/>
                 <field name="split_transactions" groups="base.group_no_one" />
                 <field name="use_payment_terminal" attrs="{'invisible': [('hide_use_payment_terminal', '=', True)]}" />
                 <field name="company_id" groups="base.group_multi_company" />

@@ -31,7 +31,7 @@ class PosPaymentMethod(models.Model):
         help='Account used as counterpart of the income account in the accounting entry representing the pos sales. (Deprecated)')
     is_cash_count = fields.Boolean(string='Cash')
     cash_journal_id = fields.Many2one('account.journal',
-        string='Cash Journal',
+        string='Journal',
         ondelete='restrict')
     split_transactions = fields.Boolean(
         string='Split Transactions',
@@ -81,6 +81,7 @@ class PosPaymentMethod(models.Model):
 
     @api.onchange('is_cash_count')
     def _onchange_is_cash_count(self):
+        self.cash_journal_id = False
         if self.is_cash_count:
             self.use_payment_terminal = False
 
