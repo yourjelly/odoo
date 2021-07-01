@@ -476,6 +476,27 @@ def prepend_html_content(html_body, html_content):
 
     return html_body[:insert_index] + html_content + html_body[insert_index:]
 
+def prepend_preview(html, preview):
+    """ Prepare the email body before sending. Add the text preview at the
+    beginning of the mail. The preview text is displayed bellow the mail
+    subject of most mail client (gmail, outlook...).
+
+    :param html: html content for which we want to prepend a preview
+    :param preview: the preview to add before the html content
+    :return: html with preprended preview
+    """
+    if preview:
+        preview = preview.strip()
+
+    if preview:
+        html_preview = markupsafe.Markup("""
+            <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;">
+                {}
+            </div>
+        """).format(preview)
+        return prepend_html_content(markupsafe.Markup(html), html_preview)
+    return html
+
 #----------------------------------------------------------
 # Emails
 #----------------------------------------------------------

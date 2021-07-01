@@ -207,29 +207,6 @@ class MailRenderMixin(models.AbstractModel):
             html = self.env['mail.render.mixin']._replace_local_links(html)
         return html
 
-    @api.model
-    def _prepend_preview(self, html, preview):
-        """ Prepare the email body before sending. Add the text preview at the
-        beginning of the mail. The preview text is displayed bellow the mail
-        subject of most mail client (gmail, outlook...).
-
-        :param html: html content for which we want to prepend a preview
-        :param preview: the preview to add before the html content
-        :return: html with preprended preview
-        """
-        if preview:
-            preview = preview.strip()
-
-        if preview:
-            # todo: check with tde if it is ok to remove the .format()
-            html_preview = Markup("""
-                <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;">
-                   %s
-                </div>
-            """ % preview)
-            return tools.prepend_html_content(html, html_preview)
-        return html
-
     # ------------------------------------------------------------
     # RENDERING
     # ------------------------------------------------------------

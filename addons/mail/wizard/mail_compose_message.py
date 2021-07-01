@@ -83,6 +83,11 @@ class MailComposer(models.TransientModel):
 
     # content
     subject = fields.Char('Subject', compute=False)
+    preview = fields.Char(
+        'Preview', translate=False,
+        help='Catchy preview sentence that encourages recipients to open this email.\n'
+             'In most inboxes, this is displayed next to the subject.\n'
+             'Keep it empty if you prefer the first characters of your email content to appear instead.')
     body = fields.Html('Contents', render_engine='qweb', compute=False, default='')
     parent_id = fields.Many2one(
         'mail.message', 'Parent Message', index=True, ondelete='set null',
@@ -477,6 +482,7 @@ class MailComposer(models.TransientModel):
             res_ids = [res_ids]
 
         subjects = self._render_field('subject', res_ids, options={"render_safe": True})
+        previews = self._render_field('preview', res_ids)
         bodies = self._render_field('body', res_ids, post_process=True)
         emails_from = self._render_field('email_from', res_ids)
         replies_to = self._render_field('reply_to', res_ids)
@@ -489,7 +495,7 @@ class MailComposer(models.TransientModel):
         for res_id in res_ids:
             results[res_id] = {
                 'subject': subjects[res_id],
-                'body': bodies[res_id],
+                'body': tools.prepend_preview(bodies[res_id], previews[res_id]),
                 'email_from': emails_from[res_id],
                 'reply_to': replies_to[res_id],
             }
