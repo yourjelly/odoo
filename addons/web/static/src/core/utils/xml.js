@@ -23,7 +23,7 @@ export class XMLParser {
                 }
             }
         }
-        const xmlDoc = typeof xml === "string" ? this.parseXML(xml) : arch;
+        const xmlDoc = typeof xml === "string" ? this.parseXML(xml) : xml;
         visit(xmlDoc);
     }
 
