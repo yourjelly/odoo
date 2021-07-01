@@ -660,6 +660,18 @@ class MassMailing(models.Model):
                 # send the KPI mail only if it's the first sending
                 'kpi_mail_required': not mailing.sent_date,
             })
+
+            if not mailing.keep_archives:
+                to_remove = self.env['mail.mail'].sudo().search([
+                    ('mailing_id', '=', mailing.id),
+                    '|',
+                    ('failure_reason', '=', False),
+                    ('failure_reason', '=', ''),
+                ])
+                if to_remove:
+                    _logger.info('Remove %i <mail.mail> successfully sent', len(to_remove))
+                    to_remove.unlink()
+
         return True
 
     def convert_links(self):
