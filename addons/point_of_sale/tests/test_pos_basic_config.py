@@ -54,8 +54,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         | account             | balance |
         +---------------------+---------+
         | sale                |    -590 |
-        | pos receivable cash |     370 |
-        | pos receivable bank |     220 |
+        | outstanding cash    |     370 |
+        | outstanding bank    |     220 |
         +---------------------+---------+
         | Total balance       |     0.0 |
         +---------------------+---------+
@@ -122,13 +122,11 @@ class TestPoSBasicConfig(TestPoSCommon):
         sales_line = session_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sales_line.balance, -590.0, msg='Sales line balance should be equal to total orders amount.')
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 220.0, msg='Bank receivable should be equal to the total bank payments.')
+        outstanding_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_line_bank.balance, 220.0, msg='Outstanding bank balance should be equal to the total bank payments.')
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 370.0, msg='Cash receivable should be equal to the total cash payments.')
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
+        outstanding_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_line_cash.balance, 370.0, msg='Outstanding cash balance should be equal to the total cash payments.')
 
     def test_orders_with_invoiced(self):
         """ Test for orders: one with invoice
@@ -161,8 +159,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         +---------------------+---------+
         | sale                |    -560 |
         | pos receivable cash |     150 |
-        | pos receivable bank |     540 |
-        | receivable          |    -130 |
+        | pos receivable bank |     410 |
         +---------------------+---------+
         | Total balance       |     0.0 |
         +---------------------+---------+
@@ -260,24 +257,15 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertAlmostEqual(sales_line.balance, -(orders_total - invoice.amount_total), msg='Sales line should be total order minus invoiced order.')
 
         pos_receivable_line_bank = session_move.line_ids.filtered(
-            lambda line: self.bank_pm.name in line.name and line.account_id == self.bank_pm.receivable_account_id
+            lambda line: self.bank_pm.name in line.name and line.account_id == self._get_inbound_outstanding_account(self.bank_pm)
         )
-        self.assertAlmostEqual(pos_receivable_line_bank.balance, 540.0, msg='Bank receivable should be equal to the total bank payments.')
+        self.assertAlmostEqual(pos_receivable_line_bank.balance, 410.0, msg='Bank receivable should be equal to the total bank payments.')
 
         pos_receivable_line_cash = session_move.line_ids.filtered(
-            lambda line: self.cash_pm.name in line.name and line.account_id == self.bank_pm.receivable_account_id
+            lambda line: self.cash_pm.name in line.name and line.account_id == self._get_inbound_outstanding_account(self.cash_pm)
         )
         self.assertAlmostEqual(pos_receivable_line_cash.balance, 150.0, msg='Cash receivable should be equal to the total cash payments.')
 
-        receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -invoice.amount_total)
-
-        # cash receivable and invoice receivable lines should be fully reconciled
-        self.assertTrue(pos_receivable_line_cash.full_reconcile_id)
-        self.assertTrue(receivable_line.full_reconcile_id)
-
-        # matching number of the receivable lines should be the same
-        self.assertEqual(receivable_line.full_reconcile_id, invoice_receivable_line.full_reconcile_id)
 
     def test_orders_with_zero_valued_invoiced(self):
         """One invoiced order but with zero receivable line balance."""
@@ -289,10 +277,7 @@ class TestPoSBasicConfig(TestPoSCommon):
 
         invoice = self.pos_session.order_ids.account_move
         invoice_receivable_line = invoice.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        receivable_line = self.pos_session.move_id.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-
         self.assertTrue(invoice_receivable_line.reconciled)
-        self.assertTrue(receivable_line.reconciled)
 
     def test_return_order(self):
         """ Test return order
@@ -324,7 +309,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         +---------------------+---------+
         | sale (sales)        |    -210 |
         | sale (refund)       |     100 |
-        | pos receivable bank |     110 |
+        | outstanding bank    |     110 |
         +---------------------+---------+
         | Total balance       |     0.0 |
         +---------------------+---------+
@@ -414,12 +399,12 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertEqual(len(sale_lines), 2, msg='There should be lines for both sales and refund.')
         self.assertAlmostEqual(sum(sale_lines.mapped('balance')), -110.0)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 110.0)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 110.0)
 
         # net cash in the session is zero, thus, there should be no receivable cash line.
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertFalse(receivable_line_cash, 'There should be no receivable cash line because both the order and return order are paid with cash - they cancelled.')
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertFalse(outstanding_cash_line, 'There should be no receivable cash line because both the order and return order are paid with cash - they cancelled.')
 
     def test_split_cash_payments(self):
         self.open_new_session()
@@ -448,16 +433,13 @@ class TestPoSBasicConfig(TestPoSCommon):
         # check values after the session is closed
         account_move = self.pos_session.move_id
 
-        bank_receivable_lines = account_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertEqual(len(bank_receivable_lines), 1, msg='Bank receivable lines should only have one line because it\'s supposed to be combined.')
-        self.assertAlmostEqual(bank_receivable_lines.balance, 300.0, msg='Bank receivable should be equal to the total bank payments.')
+        bank_outstanding_line = account_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertEqual(len(bank_outstanding_line), 1, msg='Bank receivable lines should only have one line because it\'s supposed to be combined.')
+        self.assertAlmostEqual(bank_outstanding_line.balance, 300.0, msg='Bank receivable should be equal to the total bank payments.')
 
-        cash_receivable_lines = account_move.line_ids.filtered(lambda line: self.cash_split_pm.name in line.name)
-        self.assertEqual(len(cash_receivable_lines), 3, msg='There should be a number of cash receivable lines because the cash_pm is `split_transactions`.')
-        self.assertAlmostEqual(sum(cash_receivable_lines.mapped('balance')), 290, msg='Total cash receivable balance should be equal to the total cash payments.')
-
-        for line in cash_receivable_lines:
-            self.assertTrue(line.full_reconcile_id, msg='Each cash receivable line should be fully-reconciled.')
+        cash_outstanding_line = account_move.line_ids.filtered(lambda line: self.cash_split_pm.name in line.name)
+        self.assertEqual(len(cash_outstanding_line), 3, msg='There should be a number of cash receivable lines because the cash_pm is `split_transactions`.')
+        self.assertAlmostEqual(sum(cash_outstanding_line.mapped('balance')), 290, msg='Total cash receivable balance should be equal to the total cash payments.')
 
     def test_rounding_method(self):
         # set the cash rounding method
@@ -534,128 +516,3 @@ class TestPoSBasicConfig(TestPoSCommon):
 
         rounding_line = session_account_move.line_ids.filtered(lambda line: line.name == 'Rounding line')
         self.assertAlmostEqual(rounding_line.credit, 0.03, msg='The credit should be equals to 0.03')
-
-    def test_correct_partner_on_invoice_receivables(self):
-        self.open_new_session()
-
-        # create orders
-        # each order with total amount of 100.
-        orders = []
-        # from 1st to 8th order: use the same customer (self.customer) but varies with is_invoiced and payment method.
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.cash_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0001'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0002'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.cash_split_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0003'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_split_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0004'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.cash_pm, 100)], customer=self.customer, uid='00100-010-0005'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.customer, uid='00100-010-0006'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.cash_split_pm, 100)], customer=self.customer, uid='00100-010-0007'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_split_pm, 100)], customer=self.customer, uid='00100-010-0008'))
-        # 9th and 10th orders for self.other_customer, both invoiced and paid by bank
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.other_customer, is_invoiced=True, uid='00100-010-0009'))
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.other_customer, is_invoiced=True, uid='00100-010-0010'))
-        # 11th order: invoiced to self.customer with bank payment method
-        orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0011'))
-
-        # sync orders
-        self.env['pos.order'].create_from_ui(orders)
-
-        # close the session
-        self.pos_session.action_pos_session_validate()
-
-        # self.customer's bank split payments
-        customer_pos_receivable_bank = self.pos_session.move_id.line_ids.filtered(lambda line: line.partner_id == self.customer and 'Split (Bank) PM' in line.name)
-        self.assertEqual(len(customer_pos_receivable_bank), 2, msg='there are 2 bank split payments from self.customer')
-        self.assertEqual(bool(customer_pos_receivable_bank.full_reconcile_id), False, msg="the pos (bank) receivable lines shouldn't be reconciled")
-
-        # self.customer's cash split payments
-        customer_pos_receivable_cash = self.pos_session.move_id.line_ids.filtered(lambda line: line.partner_id == self.customer and 'Split (Cash) PM' in line.name)
-        self.assertEqual(len(customer_pos_receivable_cash), 2, msg='there are 2 cash split payments from self.customer')
-        self.assertEqual(bool(customer_pos_receivable_cash.full_reconcile_id), True, msg="cash pos (cash) receivable lines should be reconciled")
-
-        # self.customer's invoice receivable counterpart
-        customer_invoice_receivable_counterpart = self.pos_session.move_id.line_ids.filtered(lambda line: line.partner_id == self.customer and 'From invoiced orders' in line.name)
-        self.assertEqual(len(customer_invoice_receivable_counterpart), 1, msg='there should one aggregated invoice receivable counterpart for self.customer')
-        self.assertEqual(bool(customer_invoice_receivable_counterpart.full_reconcile_id), True, msg='the aggregated receivable for self.customer should be reconciled')
-        self.assertEqual(customer_invoice_receivable_counterpart.balance, -500, msg='aggregated balance should be -500')
-
-        # self.other_customer also made invoiced orders
-        # therefore, it should also have aggregated receivable counterpart in the session's account_move
-        other_customer_invoice_receivable_counterpart = self.pos_session.move_id.line_ids.filtered(lambda line: line.partner_id == self.other_customer and 'From invoiced orders' in line.name)
-        self.assertEqual(len(other_customer_invoice_receivable_counterpart), 1, msg='there should one aggregated invoice receivable counterpart for self.other_customer')
-        self.assertEqual(bool(other_customer_invoice_receivable_counterpart.full_reconcile_id), True, msg='the aggregated receivable for self.other_customer should be reconciled')
-        self.assertEqual(other_customer_invoice_receivable_counterpart.balance, -200, msg='aggregated balance should be -200')
-
-    def test_cash_register_if_no_order(self):
-        # Process one order with product3
-        self.open_new_session()
-        session = self.pos_session
-        order_data = self.create_ui_order_data([(self.product3, 1)])
-        amount_paid = order_data['data']['amount_paid']
-        self.env['pos.order'].create_from_ui([order_data])
-        session.action_pos_session_closing_control()
-
-        cash_register = session.cash_register_id
-        self.assertEqual(cash_register.balance_start, 0)
-        self.assertEqual(cash_register.balance_end_real, amount_paid)
-
-        # Open/Close session without any order
-        self.open_new_session()
-        session = self.pos_session
-        session.action_pos_session_closing_control()
-        cash_register = session.cash_register_id
-        self.assertEqual(cash_register.balance_start, amount_paid)
-        self.assertEqual(cash_register.balance_end_real, amount_paid)
-        self.assertEqual(self.config.last_session_closing_cash, amount_paid)
-
-        # Open/Close session with cash control and without any order
-        self.config.cash_control = True
-        self.open_new_session()
-        session = self.pos_session
-        session.set_cashbox_pos(amount_paid, False)
-        session.action_pos_session_closing_control()
-        self.env['account.bank.statement.cashbox'].create([{
-            'start_bank_stmt_ids': [],
-            'end_bank_stmt_ids': [(4, session.cash_register_id.id,)],
-            'cashbox_lines_ids': [(0, 0, {'number': 1, 'coin_value': amount_paid})],
-            'is_a_template': False
-        }])
-        session.action_pos_session_validate()
-        self.assertEqual(cash_register.balance_start, amount_paid)
-        self.assertEqual(cash_register.balance_end_real, amount_paid)
-        self.assertEqual(self.config.last_session_closing_cash, amount_paid)
-
-    def test_start_balance_with_two_pos(self):
-        """ When having several POS with cash control, this tests ensures that each POS has its correct opening amount """
-
-        def open_and_check(pos_data):
-            self.config = pos_data['config']
-            self.open_new_session()
-            session = self.pos_session
-            self.assertEqual(session.cash_register_id.balance_start, pos_data['amount_paid'])
-            session.set_cashbox_pos(pos_data['amount_paid'], False)
-
-        self.config.cash_control = True
-        pos01_config = self.config
-        pos02_config = pos01_config.copy()
-        pos01_data = {'config': pos01_config, 'p_qty': 1, 'amount_paid': 0}
-        pos02_data = {'config': pos02_config, 'p_qty': 3, 'amount_paid': 0}
-
-        for pos_data in [pos01_data, pos02_data]:
-            open_and_check(pos_data)
-            session = self.pos_session
-
-            order_data = self.create_ui_order_data([(self.product3, pos_data['p_qty'])])
-            pos_data['amount_paid'] += order_data['data']['amount_paid']
-            self.env['pos.order'].create_from_ui([order_data])
-
-            session.action_pos_session_closing_control()
-            self.env['account.bank.statement.cashbox'].create([{
-                'start_bank_stmt_ids': [],
-                'end_bank_stmt_ids': [(4, session.cash_register_id.id,)],
-                'cashbox_lines_ids': [(0, 0, {'number': 1, 'coin_value': pos_data['amount_paid']})],
-                'is_a_template': False
-            }])
-            session.action_pos_session_validate()
-
-        open_and_check(pos01_data)
-        open_and_check(pos02_data)

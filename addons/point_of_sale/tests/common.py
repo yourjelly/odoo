@@ -250,6 +250,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             'receivable_account_id': cls.pos_receivable_account.id,
             'is_cash_count': False,
             'company_id': cls.env.company.id,
+            'cash_journal_id': cls.company_data['default_journal_bank'].id,
         })
         cash_split_pm = cls.env['pos.payment.method'].create({
             'name': 'Split (Cash) PM',
@@ -262,6 +263,8 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             'name': 'Split (Bank) PM',
             'receivable_account_id': cls.pos_receivable_account.id,
             'split_transactions': True,
+            'is_cash_count': False,
+            'cash_journal_id': cls.company_data['default_journal_bank'].id,
         })
         config.write({'payment_method_ids': [(4, cash_split_pm.id), (4, bank_split_pm.id), (4, cash_payment_method.id), (4, bank_payment_method.id)]})
         return config
@@ -278,6 +281,14 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             'type': 'cash',
             'company_id': cls.company.id,
             'code': 'CSHO',
+            'sequence': 10,
+            'currency_id': cls.other_currency.id
+        })
+        other_bank_journal = cls.env['account.journal'].create({
+            'name': 'Bank Other',
+            'type': 'bank',
+            'company_id': cls.company.id,
+            'code': 'BNKO',
             'sequence': 10,
             'currency_id': cls.other_currency.id
         })
@@ -310,6 +321,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         other_bank_payment_method = cls.env['pos.payment.method'].create({
             'name': 'Bank Other',
             'receivable_account_id': cls.pos_receivable_account.id,
+            'cash_journal_id': other_bank_journal.id,
         })
 
         new_config = Form(cls.env['pos.config'])
@@ -514,3 +526,8 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         self.bank_pm = self.pos_session.payment_method_ids.filtered(lambda pm: not pm.is_cash_count and not pm.split_transactions)[:1]
         self.cash_split_pm = self.pos_session.payment_method_ids.filtered(lambda pm: pm.is_cash_count and pm.split_transactions)[:1]
         self.bank_split_pm = self.pos_session.payment_method_ids.filtered(lambda pm: not pm.is_cash_count and pm.split_transactions)[:1]
+
+    def _get_inbound_outstanding_account(self, payment_method):
+        default_account = self.env.company.account_journal_payment_debit_account_id
+        payment_account = payment_method.inbound_payment_method_line_id.payment_account_id
+        return payment_account or default_account

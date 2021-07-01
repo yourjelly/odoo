@@ -600,14 +600,18 @@ class PosSession(models.Model):
         if not float_is_zero(rounding_difference['amount'], precision_rounding=self.currency_id.rounding) or not float_is_zero(rounding_difference['amount_converted'], precision_rounding=self.currency_id.rounding):
             rounding_vals = [self._get_rounding_difference_vals(rounding_difference['amount'], rounding_difference['amount_converted'])]
 
-        MoveLine.create(
-            tax_vals
+        vals_list = [
+            vals for vals in
+            (tax_vals
             + [self._get_sale_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in sales.items()]
             + [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
             + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables.items()]
             + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables.items()]
-            + rounding_vals
-        )
+            + rounding_vals)
+            if not (vals['debit'] == 0 and vals['credit'] == 0)
+        ]
+
+        MoveLine.create(vals_list)
         return data
 
     def _create_stock_output_lines(self, data):
