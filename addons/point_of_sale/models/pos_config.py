@@ -691,6 +691,7 @@ class PosConfig(models.Model):
             if pos_config.payment_method_ids or pos_config.has_active_session:
                 continue
             cash_journal = self.env['account.journal'].search([('company_id', '=', company.id), ('type', '=', 'cash')], limit=1)
+            bank_journal = self.env['account.journal'].search([('company_id', '=', company.id), ('type', '=', 'bank')], limit=1)
             pos_receivable_account = company.account_default_pos_receivable_account_id
             payment_methods = self.env['pos.payment.method']
             if cash_journal:
@@ -701,12 +702,14 @@ class PosConfig(models.Model):
                     'cash_journal_id': cash_journal.id,
                     'company_id': company.id,
                 })
-            payment_methods |= payment_methods.create({
-                'name': _('Bank'),
-                'receivable_account_id': pos_receivable_account.id,
-                'is_cash_count': False,
-                'company_id': company.id,
-            })
+            if bank_journal:
+                payment_methods |= payment_methods.create({
+                    'name': _('Bank'),
+                    'receivable_account_id': pos_receivable_account.id,
+                    'is_cash_count': False,
+                    'cash_journal_id': bank_journal.id,
+                    'company_id': company.id,
+                })
             pos_config.write({'payment_method_ids': [(6, 0, payment_methods.ids)]})
 
     def generate_pos_journal(self, company):
