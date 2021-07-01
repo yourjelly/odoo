@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
+import { SEARCH_KEYS } from "@web/search/with_search/with_search";
 import { useBus } from "@web/core/bus_hook";
 import { useService } from "@web/core/service_hook";
-import { SEARCH_KEYS } from "../../search/with_search/with_search";
 
 const { core, hooks } = owl;
 const { EventBus } = core;
