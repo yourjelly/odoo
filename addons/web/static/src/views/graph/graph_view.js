@@ -11,7 +11,7 @@ import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { registry } from "@web/core/registry";
 import { sortBy } from "@web/core/utils/arrays";
 import { useDebugMenu } from "@web/core/debug/debug_menu";
-import { useModel } from "@web/core/model";
+import { useModel } from "../helpers/model";
 import { useService } from "@web/core/service_hook";
 import { XMLParser } from "@web/core/utils/xml";
 
