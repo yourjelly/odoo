@@ -576,3 +576,17 @@
     display: flex;
     justify-content: space-between;
 }
+
+.buttons .button.close-search-icon {
+    background: white;
+    text-align: center;
+}
+.buttons .search {
+    width: 100%;
+    background: white;
+}
+.buttons .search input {
+    width: 85%;
+    color: #63717f;
+    border: solid 1px white;
+}

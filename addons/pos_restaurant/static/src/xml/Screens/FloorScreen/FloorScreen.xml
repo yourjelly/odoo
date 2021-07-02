@@ -14,6 +14,22 @@
                     </div>
                 </t>
 
+                <div t-if="env.isMobile and !isFloorEmpty" class="buttons" t-attf-style="background: {{state.floorBackground}};">
+                    <t t-if="state.isDisplaySearch">
+                        <span class="button close-search-icon" t-on-click="_onCloseSearch">
+                            <i class="fa fa-arrow-left" role="img" aria-label="Back" title="Back" />
+                        </span>
+                        <input class="search button" type="text" autofocus="autofocus" placeholder="Search..." name="searchTable" t-model="state.searchQuery" />
+                    </t>
+                    <t t-else="">
+                        <span class="search button" t-attf-style="background: {{state.floorBackground }};">
+                            <span class="search-icon" t-on-click="state.isDisplaySearch=!state.isDisplaySearch">
+                                <i class="fa fa-search" role="img" aria-label="Search" title="Search" />
+                            </span>
+                        </span>
+                    </t>
+                </div>
+
                 <div
                     t-on-click="trigger('deselect-table')"
                     t-on-touchstart="_onPinchStart"
@@ -28,7 +44,7 @@
                         <span> button in the editing toolbar to create new tables.</span>
                     </div>
                     <div t-else="" class="tables">
-                        <t t-foreach="activeTables" t-as="table" t-key="table.id">
+                        <t t-foreach="displayTables" t-as="table" t-key="table.id">
                             <TableWidget t-if="table.id !== state.selectedTableId" table="table" />
                             <EditableTable t-else="" table="table" />
                         </t>
