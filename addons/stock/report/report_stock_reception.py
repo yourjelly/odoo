@@ -24,37 +24,21 @@ class ReceptionReport(models.AbstractModel):
 
         # incoming move qtys
         product_to_qty_expected = defaultdict(float)
-        product_to_qty_done = defaultdict(float)
-        product_to_ins_to_reserve = defaultdict(lambda: [])
-        product_to_total_reserved = defaultdict(float)
-        linked_outs = self.env['stock.move']  # moves that were previously reserved
-        product_to_reserved_ins = defaultdict(lambda: [])
+        product_to_qty_done = defaultdict(list)
+        product_to_total_reserved = defaultdict(tuple)
+
         for move in receipts.move_lines:
             if move.product_id.type != 'product':
                 continue
+            if move.report_reserved_quantity:
+                linked_outs = self._get_linked_outs(move)
+                product_to_total_reserved[move] = (move.report_reserved_quantity, linked_outs)
             if move.state == 'done':
                 quantity_done = move.product_uom._compute_quantity(move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
-                if float_compare(move.report_reserved_quantity, quantity_done, precision_rounding=move.product_uom.rounding) == -1:
-                    product_to_qty_done[move.product_id] += quantity_done - move.report_reserved_quantity
-                    product_to_ins_to_reserve[move.product_id].append(move.id)
-            else:
+                if quantity_done != move.report_reserved_quantity:
+                    product_to_qty_done[move.product_id].append((quantity_done - move.report_reserved_quantity, move))
+            elif move.product_qty:
                 product_to_qty_expected[move.product_id] += move.product_qty
-            if move.report_reserved_quantity:
-                linked_outs |= self._get_linked_outs(move)
-                product_to_total_reserved[move.product_id] += move.report_reserved_quantity
-                product_to_reserved_ins[move.product_id].append(move.id)
-
-        # incoming move products
-        product_ids = set()
-        for product_id, qty in product_to_qty_expected.items():
-            if float_is_zero(qty, precision_rounding=product_id.uom_id.rounding):
-                continue
-            product_ids.add(product_id.id)
-        for product_id, qty in product_to_qty_done.items():
-            if float_is_zero(product_to_qty_done[product_id], precision_rounding=product_id.uom_id.rounding):
-                continue
-            product_ids.add(product_id.id)
-        product_ids = list(product_ids)
 
         # only match for outgoing moves in same warehouse
         warehouse = receipts[0].picking_type_id.warehouse_id
@@ -62,20 +46,16 @@ class ReceptionReport(models.AbstractModel):
             [('id', 'child_of', warehouse.view_location_id.id)],
             ['id'],
         )]
-
-        outs = []
-        if product_ids:
-            outs = self.env['stock.move'].search(
-                [
-                    ('state', 'in', ['confirmed', 'partially_available', 'waiting']),
-                    ('product_qty', '>', 0),
-                    ('location_id', 'in', wh_location_ids),
-                    ('move_orig_ids', '=', False),
-                    ('product_id', 'in', product_ids),
-                    '|', ('picking_id.picking_type_code', '!=', 'incoming'),
-                         ('picking_id', '=', False),
-                ],
-                order='reservation_date, priority desc, date, id')
+        outs = self.env['stock.move'].search(
+            [
+                ('state', 'in', ['confirmed', 'partially_available', 'waiting']),
+                ('product_qty', '>', 0),
+                ('location_id', 'in', wh_location_ids),
+                ('location_id.usage', '!=', 'supplier'),
+                ('move_orig_ids', '=', False),
+                ('product_id', 'in', [p.id for p in list(product_to_qty_done.keys()) + list(product_to_qty_expected.keys())]),
+            ],
+            order='reservation_date, priority desc, date, id')
 
         products_to_outs = defaultdict(lambda: [])
         for out in outs:
@@ -83,60 +63,53 @@ class ReceptionReport(models.AbstractModel):
                 products_to_outs[out.product_id].append(out)
 
         sources_to_lines = defaultdict(lambda: [])  # group by source so we can print them together
-        sources_to_reservable_move_out_ids = defaultdict(lambda: [])  # track moves by source + 'all_sources' for "Reserve All" buttons
-        sources_to_reservable_move_in_ids = defaultdict(set)  # track moves by source + 'all_sources' for "Reserve All" buttons
         for product_id, outs in products_to_outs.items():
             for out in outs:
                 source = self._get_last_steps(out)[0]._get_source_document()
                 if not source:
                     continue
-                already_reserved = 0.0
-                uom = out.product_uom
-                qty_expected = product_to_qty_expected.get(product_id, 0)
-                qty_done = product_to_qty_done.get(product_id, 0)
+
+                qty_to_reserve = out.product_qty
+                product_uom = out.product_id.uom_id
                 if out.state == 'partially_available':
-                    already_reserved = out.product_uom._compute_quantity(out.reserved_availability, uom)
-                demand = out.product_qty - already_reserved
-                to_reserve = min(qty_done, demand)
-                if float_is_zero(to_reserve, precision_rounding=uom.rounding):
-                    to_expect = min(qty_expected, demand)
-                    if float_is_zero(to_expect, precision_rounding=uom.rounding):
-                        # no more qtys done or to do that can be reserved for this product
-                        break
+                    qty_to_reserve -= out.product_uom._compute_quantity(out.reserved_availability, product_uom)
+
+                moves_in = self.env['stock.move']
+                qty_done = 0
+                for move_in_qty, move_in in product_to_qty_done[out.product_id]:
+                    moves_in |= move_in
+                    if float_compare(qty_done + move_in_qty, qty_to_reserve, precision_rounding=product_uom.rounding) <= 0:
+                        qty_to_add = move_in_qty
+                        move_in_qty = 0
                     else:
-                        sources_to_lines[source].append(self._prepare_report_line(to_expect, product_id, out, is_qty_available=False))
-                        product_to_qty_expected[product_id] -= to_expect
-                else:
-                    sources_to_lines[source].append(self._prepare_report_line(to_reserve, product_id, out, is_qty_available=True, move_ins=product_to_ins_to_reserve[product_id]))
-                    sources_to_reservable_move_out_ids[source].append(out.id)
-                    sources_to_reservable_move_out_ids['all_sources'].append(out.id)
-                    sources_to_reservable_move_in_ids[source].update(product_to_ins_to_reserve[product_id])
-                    sources_to_reservable_move_in_ids['all_sources'].update(product_to_ins_to_reserve[product_id])
-                    product_to_qty_done[product_id] -= to_reserve
-                    # check if we should split line between reservable and non-reservable qtys
-                    if float_compare(demand, to_reserve, precision_rounding=uom.rounding) == 1:
-                        to_expect = min(qty_expected, demand - to_reserve)
-                        if float_is_zero(to_expect, precision_rounding=uom.rounding):
-                            break
-                        else:
-                            sources_to_lines[source].append(self._prepare_report_line(to_expect, product_id, out, is_qty_available=False))
-                            product_to_qty_expected[product_id] -= to_expect
+                        qty_to_add = qty_to_reserve - qty_done
+                        move_in_qty -= qty_to_add
+                    qty_done += qty_to_add
+                    if float_compare(qty_to_reserve, qty_done, precision_rounding=product_uom.rounding) == 0:
+                        break
+                # Clean the list for next iteration
+                product_to_qty_done[out.product_id] = [t for t in product_to_qty_done[out.product_id] if t[0]]
 
-                # ignore rest of this product's moves if no more incoming qtys to allocate
-                if float_is_zero(product_to_qty_expected.get(product_id, 0), precision_rounding=uom.rounding) \
-                        and float_is_zero(product_to_qty_done.get(product_id, 0), precision_rounding=uom.rounding):
-                    break
+                if not float_is_zero(qty_done, precision_rounding=product_uom.rounding):
+                    sources_to_lines[source].append(self._prepare_report_line(
+                        qty_done, product_id, out, is_qty_available=True, move_ins=moves_in))
 
-        for linked_out in linked_outs:
-            if float_is_zero(product_to_total_reserved[linked_out.product_id], precision_rounding=linked_out.product_id.uom_id.rounding):
+                qty_expected = product_to_qty_expected.get(product_id, 0)
+                if float_compare(qty_to_reserve, qty_done, precision_rounding=product_uom.rounding) > 0 and\
+                        not float_is_zero(qty_expected, precision_rounding=product_uom.rounding):
+                    to_expect = min(qty_expected, qty_to_reserve - qty_done)
+                    sources_to_lines[source].append(self._prepare_report_line(to_expect, product_id, out, is_qty_available=False))
+                    product_to_qty_expected[product_id] -= to_expect
+
+        for in_move, (out_qty, out_moves) in product_to_total_reserved.items():
+            if float_is_zero(out_qty, precision_rounding=in_move.product_id.uom_id.rounding):
                 # it is possible there are different receipts linked to the same outgoing => best guess as to which outs correspond to this report...
                 continue
-            qty_reserved = min(product_to_total_reserved[linked_out.product_id], linked_out.product_qty)
-            source = self._get_last_steps(linked_out)[0]._get_source_document()
+            source = self._get_last_steps(out_moves)[0]._get_source_document()
             if not source:
                 continue
-            sources_to_lines[source].append(self._prepare_report_line(qty_reserved, linked_out.product_id, linked_out, is_qty_available=False, is_reserved=True, move_ins=product_to_reserved_ins[linked_out.product_id]))
-            product_to_total_reserved[linked_out.product_id] -= qty_reserved
+            sources_to_lines[source].append(self._prepare_report_line(out_qty, in_move.product_id, out_moves,
+                                            is_qty_available=False, is_reserved=True, move_ins=in_move))
 
         # dates aren't auto-formatted when printed in report :(
         sources_to_formatted_scheduled_date = defaultdict(lambda: [])
@@ -148,7 +121,6 @@ class ReceptionReport(models.AbstractModel):
             'doc_ids': docids,
             'doc_model': 'stock.picking',
             'sources_to_lines': sources_to_lines,
-            'sources_to_reservable_move_out_ids': sources_to_reservable_move_out_ids,
             'precision': self.env['decimal.precision'].precision_get('Product Unit of Measure'),
             'receipts': receipts,
             'sources_to_formatted_scheduled_date': sources_to_formatted_scheduled_date,
@@ -166,7 +138,7 @@ class ReceptionReport(models.AbstractModel):
             'move_out': move_out,
             'is_qty_available': is_qty_available,
             'is_reserved': is_reserved,
-            'move_ins': move_ins
+            'move_ins': move_ins and move_ins.ids or False,
         }
 
     def _get_formatted_scheduled_date(self, source):
@@ -194,16 +166,10 @@ class ReceptionReport(models.AbstractModel):
         """ Links incoming move's last step(s) (or itself if 1-step) to outgoing move's
         first step (or itself if 1-step)
         """
-        outs = self.env['stock.move'].browse(move_ids)
-        outs_to_expected_qty = dict(zip(outs, qtys))
-        ins = self.env['stock.move'].browse(in_ids)
 
-        products_to_ins = defaultdict(lambda: [])
-        for move in ins:
-            products_to_ins[move.product_id].append(move)
-
-        def _link_move(out, qty_to_link):
-            potential_ins = products_to_ins[out.product_id]
+        def _link_move(out, qty_to_link, ins):
+            out = self.env['stock.move'].browse(out)
+            potential_ins = self.env['stock.move'].browse(ins)
 
             if float_compare(out.product_qty, qty_to_link, precision_rounding=out.product_id.uom_id.rounding) == 1:
                 # we are only reserving part of its demand => let's split it now to prevent reservation problems later
@@ -216,7 +182,7 @@ class ReceptionReport(models.AbstractModel):
                 quantity_remaining = quantity_done - in_move.report_reserved_quantity
                 if float_compare(0, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding) >= 0:
                     # in move is already completely linked (e.g. during another reverse click) => don't count it again
-                    potential_ins.pop()
+                    potential_ins = potential_ins[1:]
                     continue
 
                 # get incoming move(s) to link to outgoing move
@@ -229,7 +195,7 @@ class ReceptionReport(models.AbstractModel):
 
                 need_comparison = float_compare(qty_to_link, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding)
                 if need_comparison >= 0:
-                    potential_ins.pop()  # we're using up this incoming move
+                    potential_ins = potential_ins[1:]  # we're using up this incoming move
                 for in_move_to_link in in_moves_to_link:
                     if not is_single_step:
                         if float_compare(in_move_to_link.product_qty, quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding) == 1:
@@ -245,19 +211,20 @@ class ReceptionReport(models.AbstractModel):
                     in_move_to_link.move_dest_ids |= out
                     out.procure_method = 'make_to_order'
                     quantity_remaining -= in_move_to_link.product_qty
-                    in_move_to_link.is_reception_report_linked = True
+                    in_move_to_link.report_reserved_quantity = linked_qty
                     qty_to_link -= linked_qty
                     if float_is_zero(qty_to_link, precision_rounding=out.product_id.uom_id.rounding) or float_is_zero(quantity_remaining, precision_rounding=in_move.product_id.uom_id.rounding):
                         break  # we have satistfied the qty_to_link or we have used up this in_move
                 if float_is_zero(qty_to_link, precision_rounding=out.product_id.uom_id.rounding):
                     break
 
-        for out, qty in outs_to_expected_qty.items():
-            _link_move(out, qty)
+        for out, qty, ins in zip(move_ids, qtys, in_ids):
+            _link_move(out, qty, ins)
 
-        outs.filtered(lambda move: move.picking_type_id.reservation_method == 'at_confirm'
-                                   or (move.picking_type_id.reservation_method != 'manual'
-                                       and move.reservation_date <= fields.Date.today()))\
+        self.env['stock.move'].browse(move_ids).filtered(
+            lambda move: move.picking_type_id.reservation_method == 'at_confirm' or
+            (move.picking_type_id.reservation_method != 'manual' and
+             move.reservation_date <= fields.Date.today()))\
             ._action_assign()
 
     def action_unassign(self, move_id, qty, in_ids):
@@ -274,7 +241,7 @@ class ReceptionReport(models.AbstractModel):
                     self._split(in_move_link, in_move_link.product_qty - amount_unreserved)
                 in_move_link.move_dest_ids -= out
                 if not in_move_link.move_dest_ids:
-                    in_move_link.is_reception_report_linked = False
+                    in_move_link.report_reserved_quantity = 0
                 in_move.report_reserved_quantity -= amount_unreserved
                 qty -= amount_unreserved
                 if float_is_zero(qty, precision_rounding=out.product_id.uom_id.rounding) or float_is_zero(in_move.report_reserved_quantity, precision_rounding=out.product_id.uom_id.rounding):
@@ -288,7 +255,7 @@ class ReceptionReport(models.AbstractModel):
         (i.e. to an outgoing move chain). Returns no moves if 1-step and already linked.
         """
         moves = self.env['stock.move']
-        if move.is_reception_report_linked:
+        if move.report_reserved_quantity:
             if not return_links:
                 return moves
             return move
@@ -301,7 +268,7 @@ class ReceptionReport(models.AbstractModel):
 
     def _get_linked_outs(self, move):
         moves = self.env['stock.move']
-        if move.is_reception_report_linked:
+        if move.report_reserved_quantity:
             return move.move_dest_ids
         if move.move_dest_ids:
             for dest in move.move_dest_ids:
@@ -313,7 +280,7 @@ class ReceptionReport(models.AbstractModel):
         if not move.move_orig_ids:
             return move
         for orig_move in move.move_orig_ids:
-            if orig_move.is_reception_report_linked:
+            if orig_move.report_reserved_quantity:
                 return move
             moves |= self._get_first_steps(orig_move)
         return moves

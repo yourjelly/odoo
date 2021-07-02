@@ -25,10 +25,8 @@
                                 <t t-esc="receipt.state"/>
                             </div>
                         </t>
-                        <button t-if="sources_to_reservable_move_out_ids['all_sources'] and report_type == 'html'"
+                        <button t-if="report_type == 'html' and any(not s['is_reserved'] and s['move_ins'] for source in sources_to_lines for s in sources_to_lines[source])"
                                 class="btn btn-sm btn-primary o_report_reception_reserve o_reserve_all"
-                                t-attf-model="stock.move"
-                                t-att-move-ids="sources_to_reservable_move_out_ids['all_sources']"
                                 name="reserve_all_link">
                                 Reserve All
                         </button>
@@ -49,11 +47,9 @@
                             </th>
                             <th>Expected Delivery <t t-esc="sources_to_formatted_scheduled_date[source]"/></th>
                             <th groups="uom.group_uom"/>
-                            <th t-if="sources_to_reservable_move_out_ids[source] and report_type == 'html'">
-                                <button t-if="report_type == 'html'"
-                                        class="btn btn-sm btn-primary o_report_reception_reserve o_doc_reserve_all"
-                                        t-attf-model="stock.move"
-                                        t-att-move-ids="sources_to_reservable_move_out_ids[source]"
+                            <th t-if="report_type == 'html' and any(s['move_ins'] for s in sources_to_lines[source])">
+                                <button t-if="report_type == 'html' and any(not s['is_reserved'] for s in sources_to_lines[source])"
+                                        class="btn btn-sm btn-primary o_report_reception_reserve o_reserve_all"
                                         name="reserve_source_link">
                                         Reserve All
                                 </button>
@@ -77,7 +73,7 @@
                                 </td>
                                 <td class="text-right"><t t-esc="line['quantity']"/></td>
                                 <td groups="uom.group_uom"><t t-esc="line['uom']"/></td>
-                                <td t-if="sources_to_reservable_move_out_ids[source] and report_type == 'html'">
+                                <td t-if="report_type == 'html' and not line['is_reserved'] and line['move_ins']">
                                     <button t-if="line['is_qty_available']"
                                         class="btn btn-sm btn-primary o_report_reception_reserve"
                                         t-attf-model="stock.move"

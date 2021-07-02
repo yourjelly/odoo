@@ -61,41 +61,35 @@ const ReceptionReport = clientAction.extend({
      * @returns {Promise}
      */
     _onClickReserve: function(ev) {
-        let quantities = []  // incoming qty amounts to reserve
-        let modelIds = parseInt(ev.target.getAttribute('move-id'));
-        let inIds = []
-        if (isNaN(modelIds)) {
-            // dealing with a "Reserve All"
-            $(ev.currentTarget).hide();
-            modelIds = JSON.parse("[" + ev.target.getAttribute('move-ids') + "]")[0];
-            let reservedIds = [];  // moves that have previously been reserved
-            for (const id of modelIds) {
-                let toReserve = $(this.iframe).contents().find("button.o_report_reception_reserve[move-id=" + id.toString() + "]");
-                let alreadyReserved = $(this.iframe).contents().find("button.o_report_reception_unreserve[move-id=" + id.toString() + "]");
-                if (toReserve.length) {
-                    quantities.push(parseFloat(toReserve.attr('qty')));
-                    inIds.push(JSON.parse("[" + toReserve.attr('move-ins-ids') + "]")[0]);
-                    this._switchButton(toReserve);
-                }
-                if (alreadyReserved.length) {
-                    reservedIds.push(id);
-                }
-            }
-            if (reservedIds.length > 0) {
-                modelIds = modelIds.filter(item => !reservedIds.includes(item));
-            }
-            if ($(ev.target).hasClass("o_reserve_all")) {
-                // hide sources' "Reserve All"
-                $(this.iframe).contents().find("button.o_doc_reserve_all").hide();
-            }
+        let quantities = [];  // incoming qty amounts to reserve
+        let moveIds = [];
+        let inIds = [];
+        var nodeToReserve = []
+        if (! ev.currentTarget.className.includes('o_reserve_all')) {
+            nodeToReserve = [ev.currentTarget];
         } else {
-            quantities.push(parseFloat(ev.target.getAttribute('qty')));
-            inIds = JSON.parse("[" + ev.target.getAttribute('move-ins-ids') + "]");
-            this._switchButton(ev.currentTarget);
+            ev.target.style.display = 'none';
+            if (ev.target.querySelectorAll('.o_reserve_all').length != 0) {
+                ev.target.querySelectorAll('.o_reserve_all').style.display = 'none';
+            }
+            // Local reserve all
+            var nodeToReserve = ev.target.querySelectorAll('.o_report_reception_reserve:not(o_reserve_all)');
+            if (nodeToReserve.length == 0) {
+                let parent = ev.target.closest('.o_report_reception_table');
+                nodeToReserve = parent.querySelectorAll('.o_report_reception_reserve:not(.o_reserve_all)');
+            }
         }
+
+        nodeToReserve.forEach(node => {
+            moveIds.push(parseInt(node.getAttribute('move-id')));
+            quantities.push(parseFloat(node.getAttribute('qty')));
+            inIds.push(JSON.parse(node.getAttribute('move-ins-ids')));
+            this._switchButton(node);
+        });
+
         return this._rpc({
             model: 'report.stock.report_reception',
-            args: [false, modelIds, quantities, inIds[0]],
+            args: [false, moveIds, quantities, inIds],
             method: 'action_assign'
         })
     },

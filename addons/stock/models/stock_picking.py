@@ -1387,8 +1387,7 @@ class Picking(models.Model):
         return action
 
     def action_view_reception_report(self):
-        action = self.env["ir.actions.actions"]._for_xml_id("stock.stock_reception_action")
-        return action
+        return self.env["ir.actions.actions"]._for_xml_id("stock.stock_reception_action")
 
     def _attach_sign(self):
         """ Render the delivery report in pdf and attach it to the picking in `self`. """

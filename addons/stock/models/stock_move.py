@@ -93,7 +93,6 @@ class StockMove(models.Model):
         'stock.move', 'stock_move_move_rel', 'move_dest_id', 'move_orig_id', 'Original Move',
         copy=False,
         help="Optional: previous stock move when chaining them")
-    is_reception_report_linked = fields.Boolean(help="Technical field to support reception report reservations")
     report_reserved_quantity = fields.Float(
         copy=False,
         help="Technical field to support reception report reservations. Expected to be in product's uom, not move's uom.")
@@ -774,6 +773,7 @@ class StockMove(models.Model):
         origin = '/'.join(set(self.filtered(lambda m: m.origin).mapped('origin')))
         return {
             'product_uom_qty': sum(self.mapped('product_uom_qty')),
+            'report_reserved_quantity': sum(self.mapped('report_reserved_quantity')),
             'date': min(self.mapped('date')) if self.mapped('picking_id').move_type == 'direct' else max(self.mapped('date')),
             'move_dest_ids': [(4, m.id) for m in self.mapped('move_dest_ids')],
             'move_orig_ids': [(4, m.id) for m in self.mapped('move_orig_ids')],
@@ -787,7 +787,7 @@ class StockMove(models.Model):
             'product_id', 'price_unit', 'procure_method', 'location_id', 'location_dest_id',
             'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id',
             'package_level_id', 'propagate_cancel', 'description_picking', 'date_deadline',
-            'product_packaging_id', 'is_reception_report_linked',
+            'product_packaging_id',
         ]
 
     @api.model
