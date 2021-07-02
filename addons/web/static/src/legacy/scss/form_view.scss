@@ -158,7 +158,7 @@ $o-form-label-margin-right: 0px;
         }
 
         .o_row {
-            > .o_field_widget, > div {
+            > .o_field_widget, > div:not(.o_field_many2one_selection) {
                 flex: 1 1 auto;
                 width: 0!important; // 3rd flex argument does not work with input (must be auto and real width 0)
 
@@ -167,10 +167,6 @@ $o-form-label-margin-right: 0px;
                     width: auto!important;
                 }
             }
-        }
-
-        .o_field_many2one .o_field_many2one_selection {
-            width: 100% !important;
         }
     }
 
