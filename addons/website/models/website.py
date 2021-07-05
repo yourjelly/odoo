@@ -39,7 +39,7 @@ DEFAULT_CDN_FILTERS = [
     "^/website/image/",
 ]
 
-DEFAULT_ENDPOINT = 'https://website.api.odoo.com'
+DEFAULT_ENDPOINT = 'https://tmp_website.api.odoo.com'
 
 class Website(models.Model):
 
