@@ -106,13 +106,13 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         self.assertAlmostEqual(sale_account_line.balance, -1119.6)
         self.assertAlmostEqual(sale_account_line.amount_currency, -559.80)
 
-        pos_receivable_line_bank = session_move.line_ids.filtered(lambda line: line.account_id == self.pos_receivable_account and self.bank_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_bank.balance, 279.9)
-        self.assertAlmostEqual(pos_receivable_line_bank.amount_currency, 139.95)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 279.9)
+        self.assertAlmostEqual(outstanding_bank_line.amount_currency, 139.95)
 
-        pos_receivable_line_cash = session_move.line_ids.filtered(lambda line: line.account_id == self.pos_receivable_account and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_cash.balance, 839.7)
-        self.assertAlmostEqual(pos_receivable_line_cash.amount_currency, 419.85)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 839.7)
+        self.assertAlmostEqual(outstanding_cash_line.amount_currency, 419.85)
 
     def test_03_orders_with_invoice(self):
         """ orders with invoice
@@ -139,9 +139,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         | account             | balance | amount_currency |
         +---------------------+---------+-----------------+
         | sale_account        |  -659.8 |         -329.90 |
-        | pos receivable bank |   279.9 |          139.95 |
-        | pos receivable cash |   839.7 |          419.85 |
-        | invoice receivable  |  -459.8 |         -229.90 |
+        | outstanding cash    |   659.8 |          329.90 |
         +---------------------+---------+-----------------+
         | Total balance       |     0.0 |            0.00 |
         +---------------------+---------+-----------------+
@@ -180,17 +178,12 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         self.assertAlmostEqual(sale_account_line.balance, -659.8)
         self.assertAlmostEqual(sale_account_line.amount_currency, -329.9)
 
-        pos_receivable_line_bank = session_move.line_ids.filtered(lambda line: line.account_id == self.pos_receivable_account and self.bank_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_bank.balance, 279.9)
-        self.assertAlmostEqual(pos_receivable_line_bank.amount_currency, 139.95)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertFalse(outstanding_bank_line)
 
-        pos_receivable_line_cash = session_move.line_ids.filtered(lambda line: line.account_id == self.pos_receivable_account and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_cash.balance, 839.7)
-        self.assertAlmostEqual(pos_receivable_line_cash.amount_currency, 419.85)
-
-        invoice_receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(invoice_receivable_line.balance, -459.8)
-        self.assertAlmostEqual(invoice_receivable_line.amount_currency, -229.9)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 659.8)
+        self.assertAlmostEqual(outstanding_cash_line.amount_currency, 329.9)
 
     def test_04_anglo_saxon_products(self):
         """
@@ -221,7 +214,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         | account             |    balance | amount_currency |
         +---------------------+------------+-----------------+
         | sale_account        |   -7153.90 |        -3576.95 |
-        | pos_receivable-cash |    7153.90 |         3576.95 |
+        | outstanding cash    |    7153.90 |         3576.95 |
         | expense_account     |    2375.99 |         2375.99 |
         | output_account      |   -2375.99 |        -2375.99 |
         +---------------------+------------+-----------------+
@@ -252,9 +245,9 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         self.assertAlmostEqual(sales_line.balance, -7153.90, msg='Sales line balance should be equal to total orders amount.')
         self.assertAlmostEqual(sales_line.amount_currency, -3576.95)
 
-        receivable_line_cash = session_account_move.line_ids.filtered(lambda line: self.pos_receivable_account == line.account_id and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 7153.90, msg='Cash receivable should be equal to the total cash payments.')
-        self.assertAlmostEqual(receivable_line_cash.amount_currency, 3576.95)
+        outstanding_cash_line = session_account_move.line_ids.filtered(lambda line: line.name and (self.cash_pm.name in line.name))
+        self.assertAlmostEqual(outstanding_cash_line.balance, 7153.90, msg='Outstanding cash line should be equal to the total cash payments.')
+        self.assertAlmostEqual(outstanding_cash_line.amount_currency, 3576.95)
 
         expense_line = session_account_move.line_ids.filtered(lambda line: line.account_id == self.expense_account)
         self.assertAlmostEqual(expense_line.balance, 2375.99)
@@ -263,9 +256,6 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         output_line = session_account_move.line_ids.filtered(lambda line: line.account_id == self.output_account)
         self.assertAlmostEqual(output_line.balance, -2375.99)
         self.assertAlmostEqual(output_line.amount_currency, -2375.99)
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
-        self.assertTrue(output_line.full_reconcile_id, msg='The stock output account line should be fully-reconciled.')
 
     def test_05_tax_base_amount(self):
         self.open_new_session()
@@ -282,9 +272,9 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         self.assertAlmostEqual(sales_line.balance, -49)
         self.assertAlmostEqual(sales_line.amount_currency, -24.5)
 
-        receivable_line_cash = session_account_move.line_ids.filtered(lambda line: self.pos_receivable_account == line.account_id and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 52.43)
-        self.assertAlmostEqual(receivable_line_cash.amount_currency, 26.215)
+        outstanding_cash_line = session_account_move.line_ids.filtered(lambda line: line.name and (self.cash_pm.name in line.name))
+        self.assertAlmostEqual(outstanding_cash_line.balance, 52.43)
+        self.assertAlmostEqual(outstanding_cash_line.amount_currency, 26.215)
 
         tax_line = session_account_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(tax_line.balance, -3.43)
