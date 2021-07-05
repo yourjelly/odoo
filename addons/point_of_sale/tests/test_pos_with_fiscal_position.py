@@ -21,6 +21,7 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         cls.new_tax_17 = cls.env['account.tax'].create({'name': 'New Tax 17%', 'amount': 17})
         cls.new_tax_17.invoice_repartition_line_ids.write({'account_id': cls.tax_received_account.id})
 
+        # both fiscal positions maps sale_account to other_sale_account
         cls.fpos = cls._create_fiscal_position()
         cls.fpos_no_tax_dest = cls._create_fiscal_position_no_tax_dest()
 
@@ -116,8 +117,8 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         | tax 17%             |  -80.70 |
         | tax 10%             |  -36.35 |
         | tax 7%              |  -10.85 |
-        | pos receivable bank |  265.75 |
-        | pos receivable cash |  855.30 |
+        | outstanding bank    |  265.75 |
+        | outstanding cash    |  855.30 |
         +---------------------+---------+
         | Total balance       |     0.0 |
         +---------------------+---------+
@@ -166,19 +167,17 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         for balance, amount in zip(sorted(other_sale_account_lines.mapped('balance')), sorted(lines_balance)):
             self.assertAlmostEqual(balance, amount)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 265.75)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 265.75)
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 855.3)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 855.3)
 
         manually_calculated_taxes = (-80.7, -36.35, -10.85)
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(len(manually_calculated_taxes), len(tax_lines.mapped('balance')))
         for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
             self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id)
 
     def test_02_no_invoice_fpos_no_tax_dest(self):
         """ Customer with fiscal position that maps a tax to no tax.
@@ -188,11 +187,11 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         +---------+----------+---------------+----------+-----+---------+-------------+--------+
         | order   | payments | invoiced?     | product  | qty | untaxed | tax         |  total |
         +---------+----------+---------------+----------+-----+---------+-------------+--------+
-        | order 1 | bank     | yes, customer | product1 |  10 |  109.90 | 0           | 109.90 |
+        | order 1 | bank     | no, customer  | product1 |  10 |  109.90 | 0 [7% -> 0] | 109.90 |
         |         |          |               | product2 |  10 |  181.73 | 18.17 [10%] | 199.90 |
-        |         |          |               | product3 |  10 |  309.90 | 0           | 309.90 |
+        |         |          |               | product3 |  10 |  309.90 | 0 [7% -> 0] | 309.90 |
         +---------+----------+---------------+----------+-----+---------+-------------+--------+
-        | order 2 | cash     | yes, customer | product1 |   5 |   54.95 | 0           |  54.95 |
+        | order 2 | cash     | no, customer  | product1 |   5 |   54.95 | 0 [7% -> 0] |  54.95 |
         |         |          |               | product2 |   5 |   90.86 | 9.09 [10%]  |  99.95 |
         +---------+----------+---------------+----------+-----+---------+-------------+--------+
         | order 3 | bank     | no            | product2 |   5 |   90.86 | 9.09 [10%]  |  99.95 |
@@ -260,19 +259,17 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         for balance, amount in zip(sorted(other_sale_account_lines.mapped('balance')), sorted(lines_balance)):
             self.assertAlmostEqual(balance, amount)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 885.45)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 885.45)
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 154.9)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 154.9)
 
         manually_calculated_taxes = [-36.35, -10.85]
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(len(manually_calculated_taxes), len(tax_lines.mapped('balance')))
         for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
             self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id)
 
     def test_03_invoiced_fpos(self):
         """ Invoice 2 orders.
@@ -302,10 +299,7 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         | other_sale_account  |  -90.86 |  (for the 10% base amount)
         | tax 10%             |   -9.09 |
         | tax 17%             |   -9.34 |
-        | pos receivable cash |  429.99 |
-        | pos receivable bank |  691.06 |
-        | receivable          | -691.06 |
-        | other receivable    | -265.75 |
+        | outstanding cash    |  164.24 |
         +---------------------+---------+
         | Total balance       |     0.0 |
         +---------------------+---------+
@@ -367,24 +361,14 @@ class TestPoSWithFiscalPosition(TestPoSCommon):
         for balance, amount in zip(sorted(other_sale_account_lines.mapped('balance')), sorted(lines_balance)):
             self.assertAlmostEqual(balance, amount)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 691.06)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertFalse(outstanding_bank_line.balance, 'There are no bank payments from uninvoiced orders.')
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 429.99)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 164.24)
 
         manually_calculated_taxes = [-9.09, -9.34]
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(len(manually_calculated_taxes), len(tax_lines.mapped('balance')))
         for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
             self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
-
-        receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -691.06, msg='That is not the correct receivable line balance.')
-
-        other_receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.other_receivable_account)
-        self.assertAlmostEqual(other_receivable_line.balance, -265.75, msg='That is not the correct other receivable line balance.')
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id)
-        self.assertTrue(receivable_line.full_reconcile_id)
-        self.assertTrue(other_receivable_line.full_reconcile_id)
