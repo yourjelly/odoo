@@ -117,19 +117,17 @@ class TestPoSMultipleSaleAccounts(TestPoSCommon):
         other_sale_account_line = session_move.line_ids.filtered(lambda line: line.account_id == self.other_sale_account)
         self.assertAlmostEqual(other_sale_account_line.balance, -363.45)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 264.76)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 264.76)
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 805.86)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 805.86)
 
         manually_calculated_taxes = (-41.12, -78.61)
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(sum(manually_calculated_taxes), sum(tax_lines.mapped('balance')))
         for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
             self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id)
 
     def test_03_orders_with_invoice(self):
         """ orders with invoice
@@ -160,9 +158,8 @@ class TestPoSMultipleSaleAccounts(TestPoSCommon):
         | other_sale_account  | -272.59 |
         | tax 7%              |  -31.26 |
         | tax 10%             |  -55.43 |
-        | pos receivable cash |  647.11 |
-        | pos receivable bank |  423.51 |
-        | receivable          | -264.76 |
+        | outstanding cash    |  647.11 |
+        | outstanding bank    |  158.75 |
         +---------------------+---------+
         | Total balance       |    0.00 |
         +---------------------+---------+
@@ -209,20 +206,14 @@ class TestPoSMultipleSaleAccounts(TestPoSCommon):
         other_sale_account_line = session_move.line_ids.filtered(lambda line: line.account_id == self.other_sale_account)
         self.assertAlmostEqual(other_sale_account_line.balance, -272.59)
 
-        pos_receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_bank.balance, 423.51)
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 158.75)
 
-        pos_receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(pos_receivable_line_cash.balance, 647.11)
+        outstanting_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanting_cash_line.balance, 647.11)
 
         manually_calculated_taxes = (-31.26, -55.43)
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
         self.assertAlmostEqual(sum(manually_calculated_taxes), sum(tax_lines.mapped('balance')))
         for t1, t2 in zip(sorted(manually_calculated_taxes), sorted(tax_lines.mapped('balance'))):
             self.assertAlmostEqual(t1, t2, msg='Taxes should be correctly combined.')
-
-        receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -264.76)
-
-        self.assertTrue(pos_receivable_line_cash.full_reconcile_id)
-        self.assertTrue(receivable_line.full_reconcile_id)
