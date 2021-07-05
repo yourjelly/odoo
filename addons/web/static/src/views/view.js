@@ -199,9 +199,9 @@ export class View extends Component {
 
         // determine ViewClass to instantiate (if not already done)
 
-        if (rootAttrs.js_class) {
-            ViewClass = viewRegistry.get(rootAttrs.js_class);
-        }
+        // if (rootAttrs.js_class) {
+        //     ViewClass = viewRegistry.get(rootAttrs.js_class);
+        // }
 
         // prepare the view props
         let viewProps = {

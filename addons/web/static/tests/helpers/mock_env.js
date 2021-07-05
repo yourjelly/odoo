@@ -49,6 +49,7 @@ export function prepareRegistriesWithCleanup() {
     cloneRegistryWithCleanup(registry.category("error_handlers"));
 
     cloneRegistryWithCleanup(registry.category("main_components"));
+    cloneRegistryWithCleanup(registry.category("fields"));
 
     // Clear registries
     clearRegistryWithCleanup(registry.category("command_categories"));
