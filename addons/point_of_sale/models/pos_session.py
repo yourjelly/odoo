@@ -49,25 +49,15 @@ class PosSession(models.Model):
     sequence_number = fields.Integer(string='Order Sequence Number', help='A sequence number that is incremented with each order', default=1)
     login_number = fields.Integer(string='Login Sequence Number', help='A sequence number that is incremented each time a user resumes the pos session', default=0)
 
-    cash_control = fields.Boolean(compute='_compute_cash_all', string='Has Cash Control', compute_sudo=True)
-    cash_journal_id = fields.Many2one('account.journal', compute='_compute_cash_all', string='Cash Journal', store=True)
-    cash_register_id = fields.Many2one('account.bank.statement', compute='_compute_cash_all', string='Cash Register', store=True)
+    cash_control = fields.Boolean(compute='_compute_cash_control', string='Has Cash Control', compute_sudo=True)
 
     cash_register_balance_end_real = fields.Monetary(
-        related='cash_register_id.balance_end_real',
         string="Ending Balance",
-        help="Total of closing cash control lines.",
-        readonly=True)
+        help="Total of closing cash control lines.")
     cash_register_balance_start = fields.Monetary(
-        related='cash_register_id.balance_start',
         string="Starting Balance",
         help="Total of opening cash control lines.",
         readonly=True)
-    cash_register_total_entry_encoding = fields.Monetary(
-        compute='_compute_cash_balance',
-        string='Total Cash Transaction',
-        readonly=True,
-        help="Total of all paid sales orders")
     cash_register_balance_end = fields.Monetary(
         compute='_compute_cash_balance',
         string="Theoretical Closing Balance",
@@ -78,13 +68,9 @@ class PosSession(models.Model):
         string='Before Closing Difference',
         help="Difference between the theoretical closing balance and the real closing balance.",
         readonly=True)
-    cash_real_difference = fields.Monetary(string='Difference', readonly=True)
-    cash_real_transaction = fields.Monetary(string='Transaction', readonly=True)
-    cash_real_expected = fields.Monetary(string="Expected", readonly=True)
 
     order_ids = fields.One2many('pos.order', 'session_id',  string='Orders')
     order_count = fields.Integer(compute='_compute_order_count')
-    statement_ids = fields.One2many('account.bank.statement', 'pos_session_id', string='Cash Statements', readonly=True)
     failed_pickings = fields.Boolean(compute='_compute_picking_count')
     picking_count = fields.Integer(compute='_compute_picking_count')
     picking_ids = fields.One2many('stock.picking', 'pos_session_id')
@@ -105,22 +91,15 @@ class PosSession(models.Model):
         for session in self:
             session.is_in_company_currency = session.currency_id == session.company_id.currency_id
 
-    @api.depends('payment_method_ids', 'order_ids', 'cash_register_balance_start', 'cash_register_id')
+    @api.depends('payment_method_ids', 'order_ids', 'cash_register_balance_start', 'cash_register_balance_end_real')
     def _compute_cash_balance(self):
         for session in self:
             cash_payment_method = session.payment_method_ids.filtered('is_cash_count')[:1]
             if cash_payment_method:
-                total_cash_payment = 0.0
-                result = self.env['pos.payment'].read_group([('session_id', '=', self.id), ('payment_method_id', '=', cash_payment_method.id)], ['amount'], ['session_id'])
-                if result:
-                    total_cash_payment = result[0]['amount']
-                session.cash_register_total_entry_encoding = session.cash_register_id.total_entry_encoding + (
-                    0.0 if session.state == 'closed' else total_cash_payment
-                )
-                session.cash_register_balance_end = session.cash_register_balance_start + session.cash_register_total_entry_encoding
+                total_cash_payment = sum(session.order_ids.mapped('payment_ids').filtered(lambda payment: payment.payment_method_id == cash_payment_method).mapped('amount'))
+                session.cash_register_balance_end = session.cash_register_balance_start + total_cash_payment
                 session.cash_register_difference = session.cash_register_balance_end_real - session.cash_register_balance_end
             else:
-                session.cash_register_total_entry_encoding = 0.0
                 session.cash_register_balance_end = 0.0
                 session.cash_register_difference = 0.0
 
@@ -150,20 +129,10 @@ class PosSession(models.Model):
         action['domain'] = [('id', 'in', self.picking_ids.ids)]
         return action
 
-    @api.depends('config_id', 'statement_ids', 'payment_method_ids')
-    def _compute_cash_all(self):
-        # Only one cash register is supported by point_of_sale.
+    @api.depends('payment_method_ids')
+    def _compute_cash_control(self):
         for session in self:
-            session.cash_journal_id = session.cash_register_id = session.cash_control = False
-            cash_payment_methods = session.payment_method_ids.filtered('is_cash_count')
-            if not cash_payment_methods:
-                continue
-            for statement in session.statement_ids:
-                if statement.journal_id == cash_payment_methods[0].cash_journal_id:
-                    session.cash_control = session.config_id.cash_control
-                    session.cash_journal_id = statement.journal_id.id
-                    session.cash_register_id = statement.id
-                    break  # stop iteration after finding the cash journal
+            session.cash_control = session.config_id.cash_control and bool(session.payment_method_ids.filtered('is_cash_count'))
 
     @api.constrains('config_id')
     def _check_pos_config(self):
@@ -182,13 +151,6 @@ class PosSession(models.Model):
             if (company.period_lock_date and start_date <= company.period_lock_date) or (company.fiscalyear_lock_date and start_date <= company.fiscalyear_lock_date):
                 raise ValidationError(_("You cannot create a session before the accounting lock date."))
 
-    def _check_bank_statement_state(self):
-        for session in self:
-            closed_statement_ids = session.statement_ids.filtered(lambda x: x.state != "open")
-            if closed_statement_ids:
-                raise UserError(_("Some Cash Registers are already posted. Please reset them to new in order to close the session.\n"
-                                  "Cash Registers: %r", list(statement.name for statement in closed_statement_ids)))
-
     @api.model
     def create(self, values):
         config_id = values.get('config_id') or self.env.context.get('default_config_id')
@@ -206,24 +168,10 @@ class PosSession(models.Model):
         if values.get('name'):
             pos_name += ' ' + values['name']
 
-        cash_payment_methods = pos_config.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
-        statement_ids = self.env['account.bank.statement']
-        if self.user_has_groups('point_of_sale.group_pos_user'):
-            statement_ids = statement_ids.sudo()
-        for cash_journal in cash_payment_methods.mapped('cash_journal_id'):
-            ctx['journal_id'] = cash_journal.id if pos_config.cash_control and cash_journal.type == 'cash' else False
-            st_values = {
-                'journal_id': cash_journal.id,
-                'user_id': self.env.user.id,
-                'name': pos_name,
-            }
-            statement_ids |= statement_ids.with_context(ctx).create(st_values)
-
         update_stock_at_closing = pos_config.company_id.point_of_sale_update_stock_quantities == "closing"
 
         values.update({
             'name': pos_name,
-            'statement_ids': [(6, 0, statement_ids.ids)],
             'config_id': config_id,
             'update_stock_at_closing': update_stock_at_closing,
         })
@@ -236,11 +184,6 @@ class PosSession(models.Model):
 
         return res
 
-    def unlink(self):
-        for session in self.filtered(lambda s: s.statement_ids):
-            session.statement_ids.unlink()
-        return super(PosSession, self).unlink()
-
     def login(self):
         self.ensure_one()
         login_number = self.login_number + 1
@@ -250,16 +193,11 @@ class PosSession(models.Model):
         return login_number
 
     def action_pos_session_open(self):
-        # second browse because we need to refetch the data from the DB for cash_register_id
-        # we only open sessions that haven't already been opened
         for session in self.filtered(lambda session: session.state in ('new_session', 'opening_control')):
             values = {}
             if not session.start_at:
                 values['start_at'] = fields.Datetime.now()
             if session.config_id.cash_control and not session.rescue:
-                last_sessions = self.env['pos.session'].search([('config_id', '=', self.config_id.id)]).ids
-                # last session includes the new one already.
-                self.cash_register_id.balance_start = self.env['pos.session'].browse(last_sessions[1]).cash_register_id.balance_end_real if len(last_sessions) > 1 else 0
                 values['state'] = 'opening_control'
             else:
                 values['state'] = 'opened'
@@ -267,7 +205,6 @@ class PosSession(models.Model):
         return True
 
     def action_pos_session_closing_control(self, balancing_account=False, amount_to_balance=0):
-        self._check_pos_session_balance()
         for session in self:
             if any(order.state == 'draft' for order in session.order_ids):
                 raise UserError(_("You cannot close the POS when orders are still in draft"))
@@ -277,24 +214,11 @@ class PosSession(models.Model):
             if not session.config_id.cash_control:
                 return session.action_pos_session_close(balancing_account, amount_to_balance)
 
-    def _check_pos_session_balance(self):
-        for session in self:
-            for statement in session.statement_ids:
-                if (statement != session.cash_register_id) and (statement.balance_end != statement.balance_end_real):
-                    statement.write({'balance_end_real': statement.balance_end})
-
     def action_pos_session_validate(self):
-        self._check_pos_session_balance()
         return self.action_pos_session_close()
 
     def action_pos_session_close(self, balancing_account=False, amount_to_balance=0):
-        # Session without cash payment method will not have a cash register.
-        # However, there could be other payment methods, thus, session still
-        # needs to be validated.
-        self._check_bank_statement_state()
-        if not self.cash_register_id:
-            return self._validate_session(balancing_account, amount_to_balance)
-
+        self.ensure_one()
         if self.cash_control and abs(self.cash_register_difference) > self.config_id.amount_authorized_diff:
             # Only pos manager can close statements with cash_register_difference greater than amount_authorized_diff.
             if not self.user_has_groups("point_of_sale.group_pos_manager"):
@@ -311,9 +235,6 @@ class PosSession(models.Model):
         self.ensure_one()
         sudo = self.user_has_groups('point_of_sale.group_pos_user')
         if self.order_ids:
-            self.cash_real_transaction = self.cash_register_total_entry_encoding
-            self.cash_real_expected = self.cash_register_balance_end
-            self.cash_real_difference = self.cash_register_difference
             if self.state == 'closed':
                 raise UserError(_('This session is already closed.'))
             self._check_if_no_draft_orders()
@@ -349,11 +270,9 @@ class PosSession(models.Model):
             else:
                 self.move_id.unlink()
         else:
-            statement = self.cash_register_id
             if not self.config_id.cash_control:
-                statement.write({'balance_end_real': statement.balance_end})
-            statement.button_post()
-            statement.button_validate()
+                self.write({'cash_register_balance_end_real': self.cash_register_balance_end})
+
         self.write({'state': 'closed'})
         return {
             'type': 'ir.actions.client',
@@ -922,12 +841,9 @@ class PosSession(models.Model):
         fully_reconciled_lines = reconcilable_lines.filtered(lambda aml: aml.full_reconcile_id)
         partially_reconciled_lines = reconcilable_lines - fully_reconciled_lines
 
-        cash_move_lines = self.env['account.move.line'].search([('statement_id', '=', self.cash_register_id.id)])
-
         ids = (non_reconcilable_lines.ids
                 + fully_reconciled_lines.mapped('full_reconcile_id').mapped('reconciled_line_ids').ids
-                + sum(partially_reconciled_lines.mapped(get_matched_move_lines), partially_reconciled_lines.ids)
-                + cash_move_lines.ids)
+                + sum(partially_reconciled_lines.mapped(get_matched_move_lines), partially_reconciled_lines.ids))
 
         return self.env['account.move.line'].browse(ids).mapped('move_id')
 
@@ -957,22 +873,14 @@ class PosSession(models.Model):
             'url': self.config_id._get_pos_base_url() + '?config_id=%d' % self.config_id.id,
         }
 
-    def open_cashbox_pos(self):
-        self.ensure_one()
-        action = self.cash_register_id.open_cashbox_id()
-        action['view_id'] = self.env.ref('point_of_sale.view_account_bnk_stmt_cashbox_footer').id
-        action['context']['pos_session_id'] = self.id
-        action['context']['default_pos_id'] = self.config_id.id
-        return action
-
     def set_cashbox_pos(self, cashbox_value, notes):
         self.state = 'opened'
-        self.cash_register_id.balance_start = cashbox_value
+        self.cash_register_balance_start = cashbox_value
         if notes:
             self.env['mail.message'].create({
                         'body': notes,
-                        'model': 'account.bank.statement',
-                        'res_id': self.cash_register_id.id,
+                        'model': 'pos.session',
+                        'res_id': self.id,
                     })
 
     def action_view_order(self):

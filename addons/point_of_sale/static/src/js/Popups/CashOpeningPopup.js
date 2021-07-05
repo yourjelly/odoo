@@ -12,7 +12,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
     class CashOpeningPopup extends AbstractAwaitablePopup {
         constructor() {
             super(...arguments);
-            this.cashBoxValue = this.env.pos.bank_statement.balance_start || 0;;
+            this.cashBoxValue = this.env.pos.pos_session.cash_register_balance_start || this.env.pos.config.last_session_closing_cash;;
             this.currency = this.env.pos.currency;
             this.state = useState({
                 notes: "",
@@ -28,7 +28,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
         }
 
         startSession() {
-            this.env.pos.bank_statement.balance_start = parseFloat(this.cashBoxValue);
+            this.env.pos.pos_session.cash_register_balance_start = parseFloat(this.cashBoxValue);
             this.env.pos.pos_session.state = 'opened';
             this.rpc({
                    model: 'pos.session',

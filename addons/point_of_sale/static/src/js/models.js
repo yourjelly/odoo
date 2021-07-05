@@ -275,7 +275,7 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'pos.session',
-        fields: ['id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids', 'cash_register_id', 'state'],
+        fields: ['id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids', 'state'],
         domain: function(self){
             var domain = [
                 ['state','in',['opening_control','opened']],
@@ -357,13 +357,6 @@ exports.PosModel = Backbone.Model.extend({
             _.map(pricelists, function (pricelist) { pricelist.items = []; });
             self.default_pricelist = _.findWhere(pricelists, {id: self.config.pricelist_id[0]});
             self.pricelists = pricelists;
-        },
-    },{
-        model:  'account.bank.statement',
-        fields: ['id', 'balance_start'],
-        domain: function(self){ return [['id', '=', self.pos_session.cash_register_id[0]]]; },
-        loaded: function(self, statement){
-            self.bank_statement = statement[0];
         },
     },{
         model:  'product.pricelist.item',

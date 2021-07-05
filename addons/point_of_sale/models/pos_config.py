@@ -163,7 +163,6 @@ class PosConfig(models.Model):
     current_session_state = fields.Char(compute='_compute_current_session')
     last_session_closing_cash = fields.Float(compute='_compute_last_session')
     last_session_closing_date = fields.Date(compute='_compute_last_session')
-    last_session_closing_cashbox = fields.Many2one('account.bank.statement.cashbox', compute='_compute_last_session')
     pos_session_username = fields.Char(compute='_compute_current_session_user')
     pos_session_state = fields.Char(compute='_compute_current_session_user')
     pos_session_duration = fields.Char(compute='_compute_current_session_user')
@@ -286,21 +285,15 @@ class PosConfig(models.Model):
         for pos_config in self:
             session = PosSession.search_read(
                 [('config_id', '=', pos_config.id), ('state', '=', 'closed')],
-                ['cash_register_balance_end_real', 'stop_at', 'cash_register_id'],
+                ['cash_register_balance_end_real', 'stop_at'],
                 order="stop_at desc", limit=1)
             if session:
                 timezone = pytz.timezone(self._context.get('tz') or self.env.user.tz or 'UTC')
                 pos_config.last_session_closing_date = session[0]['stop_at'].astimezone(timezone).date()
-                if session[0]['cash_register_id']:
-                    pos_config.last_session_closing_cash = session[0]['cash_register_balance_end_real']
-                    pos_config.last_session_closing_cashbox = self.env['account.bank.statement'].browse(session[0]['cash_register_id'][0]).cashbox_end_id
-                else:
-                    pos_config.last_session_closing_cash = 0
-                    pos_config.last_session_closing_cashbox = False
+                pos_config.last_session_closing_cash = session[0]['cash_register_balance_end_real']
             else:
                 pos_config.last_session_closing_cash = 0
                 pos_config.last_session_closing_date = False
-                pos_config.last_session_closing_cashbox = False
 
     @api.depends('session_ids')
     def _compute_current_session_user(self):
