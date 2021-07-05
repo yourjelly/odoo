@@ -9,7 +9,7 @@ class report_product_pricelist(models.AbstractModel):
     _description = 'Pricelist Report'
 
     def _get_report_values(self, docids, data):
-        product_ids = [int(i) for i in data['active_ids'].split(',')]
+        product_ids = [int(i) for i in data['active_ids'].split(',')if i.isdigit()]
         pricelist_id = data['pricelist_id'] and int(data['pricelist_id']) or None
         quantities = [int(i) for i in data['quantities'].split(',')] or [1]
         return self._get_report_data(data['active_model'], product_ids, pricelist_id, quantities, 'pdf')
@@ -22,6 +22,8 @@ class report_product_pricelist(models.AbstractModel):
             self.env.context.get('pricelist_id'),
             self.env.context.get('quantities') or [1]
         )
+        import pdb;
+        pdb.set_trace()
         return self.env.ref('product.report_pricelist_page')._render(render_values)
 
     def _get_report_data(self, active_model, active_ids, pricelist_id, quantities, report_type='html'):
