@@ -95,11 +95,11 @@ class TestPoSProductsWithTax(TestPoSCommon):
         sales_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sum(sales_lines.mapped('balance')), -628.18, msg='Sales line balance should be equal to untaxed orders amount.')
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_bank.balance, 230.25, msg='Bank receivable should be equal to the total bank payments.')
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 230.25, msg='Bank receivable should be equal to the total bank payments.')
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 474.64, msg='Cash receivable should be equal to the total cash payments.')
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 474.64, msg='Cash receivable should be equal to the total cash payments.')
 
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
 
@@ -110,8 +110,6 @@ class TestPoSProductsWithTax(TestPoSCommon):
 
         base_amounts = (355.45, 518.18)
         self.assertAlmostEqual(sum(base_amounts), sum(tax_lines.mapped('tax_base_amount')))
-
-        self.assertTrue(receivable_line_cash.full_reconcile_id, 'Cash receivable line should be fully-reconciled.')
 
     def test_orders_with_invoiced(self):
         """ Test for orders: one with invoice
@@ -187,26 +185,11 @@ class TestPoSProductsWithTax(TestPoSCommon):
         sales_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sum(sales_lines.mapped('balance')), -515.46)
 
-        # check receivable line
-        # should be equivalent to receivable in the invoice
-        # should also be fully-reconciled
-        receivable_line = session_move.line_ids.filtered(lambda line: line.account_id in self.receivable_account + self.env['account.account'].search([('name', '=', 'Account Receivable')]) and line.name == 'From invoiced orders')
-        self.assertAlmostEqual(receivable_line.balance, -426.09)
-        self.assertTrue(receivable_line.full_reconcile_id, msg='Receivable line for invoices should be fully reconciled.')
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_bank_line.balance, 410.70)
 
-        pos_receivable_line_bank = session_move.line_ids.filtered(
-            lambda line: self.bank_pm.name in line.name and line.account_id == self.bank_pm.receivable_account_id
-        )
-        self.assertAlmostEqual(pos_receivable_line_bank.balance, 836.79)
-
-        pos_receivable_line_cash = session_move.line_ids.filtered(
-            lambda line: self.cash_pm.name in line.name and line.account_id == self.bank_pm.receivable_account_id
-        )
-        self.assertAlmostEqual(pos_receivable_line_cash.balance, 156.11)
-        self.assertTrue(pos_receivable_line_cash.full_reconcile_id)
-
-        receivable_line = session_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -invoice.amount_total)
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, 156.11)
 
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
 
@@ -282,11 +265,11 @@ class TestPoSProductsWithTax(TestPoSCommon):
         sales_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
         self.assertAlmostEqual(sum(sales_lines.mapped('balance')), 93.63)
 
-        receivable_line_bank = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
-        self.assertFalse(receivable_line_bank, msg='There should be no bank receivable line because no bank payment made.')
+        outstanding_bank_line = session_move.line_ids.filtered(lambda line: self.bank_pm.name in line.name)
+        self.assertFalse(outstanding_bank_line, msg='There should be no bank outstanding line because no bank payment made.')
 
-        receivable_line_cash = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
-        self.assertFalse(receivable_line_cash, msg='There should be no cash receivable line because it is combined with the original cash payment.')
+        outstanding_cash_line = session_move.line_ids.filtered(lambda line: self.cash_pm.name in line.name)
+        self.assertAlmostEqual(outstanding_cash_line.balance, -104.01, msg='Outstanding cash line should equal the cash payment of the refund.')
 
         manually_calculated_taxes = (4.01, 6.37)  # should be positive since it is return order
         tax_lines = session_move.line_ids.filtered(lambda line: line.account_id == self.tax_received_account)
