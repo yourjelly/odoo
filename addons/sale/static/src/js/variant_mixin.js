@@ -507,6 +507,7 @@ var VariantMixin = {
             .trigger('change');
 
         this.handleCustomValues($(ev.target));
+        this._displayColorExtraPrice($parent);
     },
 
     /**
@@ -623,7 +624,28 @@ var VariantMixin = {
      */
     _getUri: function (uri) {
         return uri;
-    }
+    },
+
+    /**
+     * Display extra price for color attributes
+     *
+     * @private
+     * @param {$.Element} $parent
+     */
+    _displayColorExtraPrice: function ($parent) {
+        const $colorInput = $parent.find('.css_attribute_color.active:not(.css_not_available) input');
+        _.each($colorInput, el => {
+            const $variantColorAttribute = $(el).closest('.variant_attribute');
+            $variantColorAttribute.find('.o_extra_price_color_badge').remove();
+            const $extraPrice = $(el).closest('li').find('.o_variant_color_extra_price .badge');
+            if ($extraPrice.length) {
+                const colorNameEl = document.createElement('span');
+                colorNameEl.classList.add('text-muted', 'font-italic');
+                colorNameEl.textContent = $(el).attr('title') + ":";
+                $extraPrice.clone().prepend($(colorNameEl)).addClass('o_extra_price_color_badge').appendTo($variantColorAttribute);
+            }
+        });
+    },
 };
 
 return VariantMixin;

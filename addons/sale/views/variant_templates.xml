@@ -125,6 +125,9 @@
                                         t-att-data-is_single="single"
                                         t-att-data-is_single_and_custom="single_and_custom"/>
                                 </label>
+                                <span t-if="ptav.price_extra" class="o_variant_color_extra_price d-none">
+                                    <t t-call="sale.badge_extra_price"/>
+                                </span>
                             </li>
                         </ul>
                     </t>
