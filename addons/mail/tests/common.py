@@ -74,6 +74,9 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
             self.send_email_mocked = send_email_mocked
             yield
 
+        if mail_unlink_sent:
+            self.env['mail.mail'].sudo()._gc_mail_mail()
+
     def _init_mail_mock(self):
         self._mails = []
         self._mails_args = []
@@ -265,7 +268,12 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
                 continue
             if mail_message is not None and mail.mail_message_id != mail_message:
                 continue
-            if status and mail.state != status:
+            if status and mail.state != status \
+               and not (status in ('sent', 'cancel') and mail.state == 'todelete' and mail.auto_delete) \
+               and not (status == 'exception' and mail.state == 'todelete' and mail.auto_delete
+                        and mail.failure_type not in ('mail_email_invalid', 'mail_email_missing')):
+                # todelete is equivalent to sent or cancel
+                # exception caused by missing email are also set as "to delete"
                 continue
             if all(p in mail.recipient_ids for p in recipients):
                 break
@@ -294,7 +302,12 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
                 continue
             if mail_message is not None and mail.mail_message_id != mail_message:
                 continue
-            if status and mail.state != status:
+            if status and mail.state != status \
+               and not (status in ('sent', 'cancel') and mail.state == 'todelete') \
+               and not (status == 'exception' and mail.state == 'todelete'
+                        and mail.failure_type not in ('mail_email_invalid', 'mail_email_missing')):
+                # todelete is equivalent to sent or cancel
+                # exception caused by missing email are also set as "to delete"
                 continue
             if (mail.email_to == email_to and not mail.recipient_ids) or (not mail.email_to and mail.recipient_ids.email == email_to):
                 break
@@ -401,7 +414,10 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         found_mail = self._find_mail_mail_wid(mail_id)
         self.assertTrue(bool(found_mail))
         if status:
-            self.assertEqual(found_mail.state, status)
+            if status in ('sent', 'cancel') and found_mail.auto_delete:
+                self.assertIn(found_mail.state, ('todelete', status))
+            else:
+                self.assertEqual(found_mail.state, status)
         if content:
             self.assertIn(content, found_mail.body_html)
         for fname, fvalue in (fields_values or {}).items():
