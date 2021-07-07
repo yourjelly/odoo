@@ -104,7 +104,7 @@ class Product(models.Model):
         'location', 'warehouse',
     )
     def _compute_quantities(self):
-        products = self.filtered(lambda p: p.type != 'service')
+        products = self.with_context(active_test=False).filtered(lambda p: p.type != 'service')
         res = products._compute_quantities_dict(self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'), self._context.get('from_date'), self._context.get('to_date'))
         for product in products:
             product.qty_available = res[product.id]['qty_available']
@@ -518,6 +518,7 @@ class Product(models.Model):
         self = self.with_context(
             hide_location=hide_location, hide_lot=hide_lot,
             no_at_date=True, search_default_on_hand=True,
+            active_test=False,
         )
 
         # If user have rights to write on quant, we define the view as editable.
