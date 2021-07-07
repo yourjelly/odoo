@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <t t-name="web.FormView" owl="1">
+      <div class="o_form_view">
+          <ControlPanel
+              t-props="props.info"
+              displayName="model.data.display_name"
+              display="{'top-right': false, 'bottom-right': false}"
+          />
+          <div class="o_content">
+              <FormRenderer model="model" fields="props.fields" info="archInfo" />
+          </div>
+      </div>
+  </t>
+</templates>
