@@ -37,26 +37,6 @@ This module provides the core of the Odoo Web Client.
         #   > web.assets_common = assets common to both frontend and backend clients.
         #   > web_editor.assets_wysiwyg = assets needed by components defined in the "web_editor" module.
 
-        'web.assets_database_manager': [
-            '/web/static/lib/fontawesome/css/font-awesome.css',
-            '/web/static/lib/bootstrap/css/bootstrap.css',
-            '/web/static/lib/jquery/jquery.js',
-            '/web/static/lib/popper/popper.js',
-            '/web/static/lib/bootstrap/js/index.js',
-            '/web/static/lib/bootstrap/js/util.js',
-            '/web/static/lib/bootstrap/js/alert.js',
-            '/web/static/lib/bootstrap/js/button.js',
-            '/web/static/lib/bootstrap/js/carousel.js',
-            '/web/static/lib/bootstrap/js/collapse.js',
-            '/web/static/lib/bootstrap/js/dropdown.js',
-            '/web/static/lib/bootstrap/js/modal.js',
-            '/web/static/lib/bootstrap/js/tooltip.js',
-            '/web/static/lib/bootstrap/js/popover.js',
-            '/web/static/lib/bootstrap/js/scrollspy.js',
-            '/web/static/lib/bootstrap/js/tab.js',
-            '/web/static/src/public/database_manager.js',
-        ],
-
         'web.assets_qweb': [
             'web/static/src/**/*.xml',
             ('remove', 'web/static/src/legacy/**/*.xml'),

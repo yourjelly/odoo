@@ -24,13 +24,14 @@ import werkzeug.exceptions
 import werkzeug.utils
 import werkzeug.wrappers
 import werkzeug.wsgi
-from lxml import etree
+from lxml import etree, html
 from markupsafe import Markup
 from werkzeug.urls import url_encode, url_decode, iri_to_uri
 
 import odoo
 import odoo.modules.registry
 from odoo.api import call_kw, Environment
+from odoo.addons.base.models.qweb import QWeb
 from odoo.modules import get_module_path, get_resource_path, module
 from odoo.tools import image_process, html_escape, pycompat, ustr, apply_inheritance_specs, lazy_property, float_repr, osutil
 from odoo.tools.mimetypes import guess_mimetype
@@ -50,7 +51,6 @@ CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 DBNAME_PATTERN = '^[a-zA-Z0-9][a-zA-Z0-9_.-]+$'
 
 COMMENT_PATTERN = r'Modified by [\s\w\-.]+ from [\s\w\-.]+'
-
 
 def none_values_filtered(func):
     @functools.wraps(func)
@@ -1053,7 +1053,27 @@ class Database(http.Controller):
             monodb = db_monodb()
             if monodb:
                 d['databases'] = [monodb]
-        return request.render('web.database_manager', d)
+
+        dirname = os.path.dirname(os.path.realpath(__file__))
+        templates = {}
+
+        text_file = open(dirname + "/../static/src/public/database_manager.qweb.html", "r")
+        template = text_file.read()
+        text_file.close()
+        text_file = open(dirname + "/../static/src/public/database_manager.master_input.qweb.html", "r")
+        templates['master_input'] = text_file.read()
+        text_file.close()
+        text_file = open(dirname + "/../static/src/public/database_manager.create_form.qweb.html", "r")
+        templates['create_form'] = text_file.read()
+        text_file.close()
+
+        def load(template_name, vals):
+            render_template(templates[template_name], vals)
+
+        def render_template(string, vals):
+            Markup(QWeb()._render(html.fragment_fromstring(string), vals, load=load))
+
+        return Markup(QWeb()._render(html.document_fromstring(template), d, load=load))
 
     @http.route('/web/database/selector', type='http', auth="none")
     def selector(self, **kw):
