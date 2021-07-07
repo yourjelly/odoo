@@ -4,7 +4,7 @@
          <record id="slide_template_published" model="mail.template">
             <field name="name">Slide Published</field>
             <field name="model_id" ref="model_slide_slide"/>
-            <field name="subject">New ${object.slide_type} published on ${object.channel_id.name}</field>
+            <field name="subject">New {{ object.slide_type }} published on {{ object.channel_id.name }}</field>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -36,9 +36,9 @@
         <record id="slide_template_shared" model="mail.template">
             <field name="name">Slide Shared</field>
             <field name="model_id" ref="model_slide_slide"/>
-            <field name="subject">${user.name} shared a ${object.slide_type} with you!</field>
-            <field name="email_from">${user.email_formatted}</field>
-            <field name="email_to">${ctx.get('email', '')}</field>
+            <field name="subject">{{ user.name }} shared a {{ object.slide_type }} with you!</field>
+            <field name="email_from">{{ user.email_formatted }}</field>
+            <field name="email_to">{{ ctx.get('email', '') }}</field>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -67,9 +67,9 @@
         <record id="mail_template_channel_completed" model="mail.template">
             <field name="name">Completed Course</field>
             <field name="model_id" ref="model_slide_channel_partner"/>
-            <field name="subject">Congratulation! You completed ${object.channel_id.name}</field>
-            <field name="email_from">${(object.channel_id.user_id.email_formatted or object.channel_id.user_id.company_id.catchall_formatted)}</field>
-            <field name="partner_to">${object.partner_id.id}</field>
+            <field name="subject">Congratulation! You completed {{ object.channel_id.name }}</field>
+            <field name="email_from">{{ (object.channel_id.user_id.email_formatted or object.channel_id.user_id.company_id.catchall_formatted) }}</field>
+            <field name="partner_to">{{ object.partner_id.id }}</field>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <div style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -92,14 +92,14 @@
                 </div>
             </field>
             <field name="auto_delete" eval="True"/>
-            <field name="lang">${object.partner_id.lang}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
         </record>
 
         <!-- Slide channel invite feature -->
         <record id="mail_template_slide_channel_invite" model="mail.template">
             <field name="name">Channel: Invite by email</field>
             <field name="model_id" ref="model_slide_channel_partner" />
-            <field name="subject">You have been invited to join ${object.channel_id.name}</field>
+            <field name="subject">You have been invited to join {{ object.channel_id.name }}</field>
             <field name="use_default_to" eval="True"/>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -109,7 +109,7 @@
     </p>
 </div>
             </field>
-            <field name="lang">${object.partner_id.lang}</field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
     </data>

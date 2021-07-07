@@ -23,7 +23,7 @@ class TestMassMailCommon(MassMailCommon, TestMailCommon):
         cls.mailing_bl = cls.env['mailing.mailing'].with_user(cls.user_marketing).create({
             'name': 'SourceName',
             'subject': 'MailingSubject',
-            'preview': 'Hi ${object.name} :)',
+            'preview': 'Hi {{ object.name }} :)',
             'body_html': """<div><p>Hello <t t-esc="object.name"/></p>,
 <t t-set="url" t-value="'www.odoo.com'"/>
 <t t-set="httpurl" t-value="'https://www.odoo.eu'"/>f

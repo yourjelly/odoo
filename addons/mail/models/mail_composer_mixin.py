@@ -22,7 +22,7 @@ class MailComposerMixin(models.AbstractModel):
 
     # Content
     subject = fields.Char('Subject', compute='_compute_subject', readonly=False, store=True)
-    body = fields.Html('Contents', compute='_compute_body', store=True, readonly=False, sanitize=False)
+    body = fields.Html('Contents', compute='_compute_body', store=True, readonly=False, sanitize_style=True)
     template_id = fields.Many2one('mail.template', 'Mail Template', domain="[('model', '=', render_model)]")
     # Access
     can_edit_body = fields.Boolean('Can Edit Body', compute='_compute_can_edit_body')

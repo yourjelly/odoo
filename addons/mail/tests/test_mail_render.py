@@ -81,7 +81,7 @@ class TestMailRender(common.MailCommon):
             'subject': cls.base_qweb_bits[0],
             'body_html': cls.base_qweb_bits[1],
             'model_id': cls.env['ir.model']._get('res.partner').id,
-            'lang': '${object.lang}'
+            'lang': '{{ object.lang }}'
         })
 
         # some translations
@@ -119,9 +119,9 @@ class TestMailRender(common.MailCommon):
             'custom_value': 'Custom Render Value'
         }
         srces = [
-            '<b>I am ${user.name}</b>',
-            '<span>Datetime is ${format_datetime(datetime.datetime(2021, 6, 1), dt_format="MM - d - YYY")}</span>',
-            '<span>Context ${ctx.get("custom_ctx")}, value ${custom_value}</span>',
+            '<b>I am {{ user.name }}</b>',
+            '<span>Datetime is {{ format_datetime(datetime.datetime(2021, 6, 1), dt_format="MM - d - YYY") }}</span>',
+            '<span>Context {{ ctx.get("custom_ctx") }}, value {{ custom_value }}</span>',
         ]
         results = [
             '<b>I am %s</b>' % self.env.user.name,
@@ -187,7 +187,7 @@ class TestMailRender(common.MailCommon):
     def test_template_rendering_impersonate(self):
         """ Test that the use of SUDO do not change the current user. """
         partner = self.env['res.partner'].browse(self.render_object.ids)
-        src = '${user.name} - ${object.name}'
+        src = '{{ user.name }} - {{ object.name }}'
         expected = '%s - %s' % (self.env.user.name, partner.name)
         result = self.env['mail.render.mixin'].sudo()._render_template_inline_template(
             src, partner._name, partner.ids
@@ -210,7 +210,7 @@ class TestMailRender(common.MailCommon):
         cust_function.call = False
 
         src = """<h1>This is a test</h1>
-<p>${cust_function()}</p>"""
+<p>{{ cust_function() }}</p>"""
         expected = """<h1>This is a test</h1>
 <p>return value</p>"""
         context = {'cust_function': cust_function}
@@ -238,7 +238,7 @@ class TestMailRender(common.MailCommon):
             self.assertEqual(expected, result)
 
         # code string
-        src = 'This is a string with a number ${13+13}'
+        src = 'This is a string with a number {{ 13+13 }}'
         expected = 'This is a string with a number 26'
         for engine in ['inline_template']:
             result = MailRenderMixin._render_template(
@@ -247,7 +247,7 @@ class TestMailRender(common.MailCommon):
             self.assertEqual(expected, result)
 
         # block string
-        src = "This is a string with a block ${'hidden' if False else 'displayed'}"
+        src = "This is a string with a block {{ 'hidden' if False else 'displayed' }}"
         expected = 'This is a string with a block displayed'
         for engine in ['inline_template']:
             result = MailRenderMixin._render_template(
@@ -266,7 +266,7 @@ class TestMailRender(common.MailCommon):
 
         # code xml
         srces = [
-            '<p class="text-muted"><span>This is a string with a number ${13+13}</span></p>',
+            '<p class="text-muted"><span>This is a string with a number {{ 13+13 }}</span></p>',
             '<p class="text-muted"><span>This is a string with a number <t t-out="13+13"/></span></p>',
         ]
         expected = '<p class="text-muted"><span>This is a string with a number 26</span></p>'

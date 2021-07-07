@@ -28,7 +28,7 @@ class TestMassMailing(TestMassMailCommon):
         mailing = self.env['mailing.mailing'].create({
             'name': 'TestName',
             'subject': 'TestSubject',
-            'body_html': 'Hello ${object.name}',
+            'body_html': 'Hello {{ object.name }}',
             'reply_to_mode': 'new',
             'reply_to': '%s@%s' % (self.test_alias.alias_name, self.test_alias.alias_domain),
             'keep_archives': True,

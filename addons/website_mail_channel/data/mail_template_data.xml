@@ -5,7 +5,7 @@
         <record id="mail_template_list_subscribe" model="mail.template">
             <field name="name">Channel: Mailing list subscription</field>
             <field name="model_id" ref="mail.model_mail_channel"/>
-            <field name="subject">Confirm subscription to ${object.name}</field>
+            <field name="subject">Confirm subscription to {{ object.name }}</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     Hello,<br/><br/>
@@ -25,7 +25,7 @@
         <record id="mail_template_list_unsubscribe" model="mail.template">
             <field name="name">Channel: Mailing list unsubscription</field>
             <field name="model_id" ref="mail.model_mail_channel"/>
-            <field name="subject">Confirm unsubscription to ${object.name}</field>
+            <field name="subject">Confirm unsubscription to {{ object.name }}</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     Hello,<br/><br/>

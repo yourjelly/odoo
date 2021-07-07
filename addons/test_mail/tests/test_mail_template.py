@@ -65,7 +65,7 @@ class TestMailTemplate(TestMailCommon, TestRecipients):
             'subject': 'English Subject',
             'body_html': '<p>English Body</p>',
             'model_id': self.env['ir.model']._get(partner._name).id,
-            'lang': '${object.lang}'
+            'lang': '{{ object.lang }}'
         })
         # Make sure Spanish translations have not been altered
         description_translations = self.env['ir.translation'].search([('module', '=', 'base'), ('src', '=', partner._description), ('lang', '=', 'es_ES')])
@@ -138,7 +138,7 @@ class TestMailTemplate(TestMailCommon, TestRecipients):
     #         mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
 
     #         self.email_template_in_2_days.write({
-    #             'scheduled_date': "${(datetime.datetime.now() + relativedelta(days=2)).strftime('%s')}" % DEFAULT_SERVER_DATETIME_FORMAT,
+    #             'scheduled_date': "{{ (datetime.datetime.now() + relativedelta(days=2)).strftime('%s') }}" % DEFAULT_SERVER_DATETIME_FORMAT,
     #         })
 
     #         mail_now_id = self.email_template.send_mail(self.test_record.id)

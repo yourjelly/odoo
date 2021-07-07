@@ -24,6 +24,8 @@ from odoo.tools import misc
 
 _logger = logging.getLogger(__name__)
 
+INLINE_TEMPLATE_REGEX = re.compile(r"\{\{(.+?)\}\}")
+
 #----------------------------------------------------------
 # HTML Sanitizer
 #----------------------------------------------------------
@@ -284,37 +286,19 @@ def is_html_empty(html_content):
     return not bool(re.sub(tag_re, '', html_content).strip())
 
 def parse_inline_template(text):
-    reg = re.compile(r"""
-    (?=(?P<a>
-        (?:
-            (?:\\\\)
-            |(?:\\\$)
-            |(?:(?!\$\{).)
-        )*
-    ))(?P=a)
-    (?:\$\{
-        (?=(?P<b>(?:
-            [^}\'\"\\]
-            |'
-                (?=(?P<c>
-                    (?:[^'\\]|\\.)*
-                ))(?P=c)'?
-            |"
-                (?=(?P<d>
-                    (?:[^"\\]|\\.)*
-                ))(?P=d)"?
-            |
-                (?:\\.)
-        )*))(?P=b)
-    })?
-    """, re.X | re.DOTALL)
-
     groups = []
-    for group in reg.findall(text)[0:-1]:
-        string_match = re.sub(r'\\\\', r'\\', group[0])
-        expression_match = re.sub(r'(?<!\\)\\}', r'}', group[1])
-        expression_match = re.sub(r'\\\\', r'\\', expression_match)
-        groups.append((string_match, expression_match))
+    current_literal_index = 0
+    for match in INLINE_TEMPLATE_REGEX.finditer(text):
+        literal = text[current_literal_index:match.start()]
+        expression = match.group(1)
+        groups.append((literal, expression))
+        current_literal_index = match.end()
+
+    # string past last regex match
+    literal = text[current_literal_index:]
+    if literal:
+        groups.append((literal, ''))
+
     return groups
 
 

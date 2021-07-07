@@ -3,9 +3,9 @@
     <data noupdate="1">
         <record id="email_template_badge_received" model="mail.template">
             <field name="name">Received Badge</field>
-            <field name="subject">New badge ${object.badge_id.name} granted</field>
+            <field name="subject">New badge {{ object.badge_id.name }} granted</field>
             <field name="model_id" ref="gamification.model_gamification_badge_user"/>
-            <field name="partner_to">${object.user_id.partner_id.id}</field>
+            <field name="partner_to">{{ object.user_id.partner_id.id }}</field>
             <field name="body_html" type="html">
 <table border="0" cellpadding="0" style="padding-top: 16px; background-color: #F1F1F1; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
 <table border="0" width="590" cellpadding="0" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;" summary="o_mail_notification">
@@ -95,14 +95,14 @@
     </table>
 </td></tr>
 </table></field>
-            <field name="lang">${object.user_id.lang}</field>
+            <field name="lang">{{ object.user_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 
         <record id="email_template_goal_reminder" model="mail.template">
             <field name="name">Goal: Reminder for Goal Update</field>
             <field name="model_id" ref="gamification.model_gamification_goal"/>
-            <field name="partner_to">${object.user_id.partner_id.id}</field>
+            <field name="partner_to">{{ object.user_id.partner_id.id }}</field>
             <field name="body_html" type="html">
 <div>
     <strong>Reminder</strong><br/>
@@ -114,7 +114,7 @@
         <t t-out="object.challenge_id.manager_id.signature or ''"></t>
     </t>
 </div></field>
-            <field name="lang">${object.user_id.lang}</field>
+            <field name="lang">{{ object.user_id.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
         
@@ -319,9 +319,9 @@
         <record id="mail_template_data_new_rank_reached" model="mail.template">
             <field name="name">User: New rank reached</field>
             <field name="model_id" ref="base.model_res_users"/>
-            <field name="subject">New rank: ${object.rank_id.name}</field>
+            <field name="subject">New rank: {{ object.rank_id.name }}</field>
             <field name="email_to"></field>
-            <field name="partner_to">${object.partner_id.id}</field>
+            <field name="partner_to">{{ object.partner_id.id }}</field>
             <field name="body_html" type="html">
 <div style="background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;">
 <table style="width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;">
@@ -361,7 +361,7 @@
     </tbody>
  </table>
 </div></field>
-            <field name="lang">${object.lang}</field>
+            <field name="lang">{{ object.lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
 

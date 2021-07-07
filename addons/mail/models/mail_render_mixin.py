@@ -68,7 +68,7 @@ class MailRenderMixin(models.AbstractModel):
         'Language',
         help="Optional translation language (ISO code) to select when sending out an email. "
              "If not set, the english version will be used. This should usually be a placeholder expression "
-             "that provides the appropriate language, e.g. ${object.partner_id.lang}.")
+             "that provides the appropriate language, e.g. {{ object.partner_id.lang }}.")
     # rendering context
     render_model = fields.Char("Rendering Model", compute='_compute_render_model', store=False)
     # expression builder

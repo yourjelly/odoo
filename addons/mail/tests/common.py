@@ -583,7 +583,7 @@ class MailCase(MockEmail):
     def _create_template(cls, model, template_values=None):
         create_values = {
             'name': 'TestTemplate',
-            'subject': 'About ${object.name}',
+            'subject': 'About {{ object.name }}',
             'body_html': '<p>Hello <t t-esc="object.name"/></p>',
             'model_id': cls.env['ir.model']._get(model).id,
         }

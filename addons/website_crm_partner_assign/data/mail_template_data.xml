@@ -5,9 +5,9 @@
         <record id="email_template_lead_forward_mail" model="mail.template">
             <field name="name">Lead Forward: Send to partner</field>
             <field name="model_id" ref="website_crm_partner_assign.model_crm_lead_forward_to_partner" />
-            <field name="subject">Fwd: Lead: ${ctx['partner_id'].name}</field>
-            <field name="email_from">${user.email_formatted}</field>
-            <field name="email_to">${ctx['partner_id'].email_formatted}</field>
+            <field name="subject">Fwd: Lead: {{ ctx['partner_id'].name }}</field>
+            <field name="email_from">{{ user.email_formatted }}</field>
+            <field name="email_to">{{ ctx['partner_id'].email_formatted }}</field>
             <field name="body_html" type="html">
 <table border="0" cellpadding="0" cellspacing="0" style="padding-top: 16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;"><tr><td align="center">
 <table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 16px; background-color: white; color: #454748; border-collapse:separate;">
@@ -19,7 +19,7 @@
                 <tr><td valign="middle">
                     <span style="font-size: 10px;">Your leads</span><br/>
                 </td><td valign="middle" align="right">
-                    <img src="/logo.png?company=${user.company_id.id}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="'%s' % company.name"/>
+                    <img src="/logo.png?company={{ user.company_id.id }}" style="padding: 0px; margin: 0px; height: auto; width: 80px;" t-att-alt="'%s' % company.name"/>
                 </td></tr>
                 <tr><td colspan="2" style="text-align:center;">
                   <hr width="100%" style="background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;"/>
@@ -40,7 +40,7 @@
                                 <li><a t-att-href="lead.lead_link" t-out="lead.lead_id.name or 'Subject Undefined'">Subject Undefined</a>, <t t-out="lead.lead_id.partner_name or lead.lead_id.contact_name or 'Contact Name Undefined'">Contact Name Undefined</t>, <t t-out="lead.lead_id.country_id and lead.lead_id.country_id.name or 'Country Undefined'">Country Undefined</t>, <t t-out="lead.lead_id.email_from or 'Email Undefined' or ''">Email Undefined</t>, <t t-out="lead.lead_id.phone or ''">+1 650-123-4567</t> </li><br/>
                             </ol>
                             <t t-if="ctx.get('partner_in_portal')">
-                                Please connect to your <a href="${record.get_portal_url()}">Partner Portal</a> to get details. On each lead are two buttons on the top left corner that you should press after having contacted the lead: "I'm interested" &amp; "I'm not interested".<br/>
+                                Please connect to your <a href="{{ record.get_portal_url() }}">Partner Portal</a> to get details. On each lead are two buttons on the top left corner that you should press after having contacted the lead: "I'm interested" &amp; "I'm not interested".<br/>
                             </t>
                             <t t-else="">
                                 You do not have yet a portal access to our database. Please contact
@@ -94,7 +94,7 @@
 </td></tr>
 </table>
             </field>
-            <field name="lang">${ctx['partner_id'].lang}</field>
+            <field name="lang">{{ ctx['partner_id'].lang }}</field>
             <field name="auto_delete" eval="True"/>
         </record>
     </data>

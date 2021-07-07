@@ -17,7 +17,7 @@
     <t t-set="record = object.env['crm.team'].search([('alias_name', '!=', 'False')], limit=1)" />
     <p class="tip_title">Tip: Convert incoming emails into opportunities</p>
     <t t-if="record and record.alias_domain">
-        <p class="tip_content">Did you know emails sent to ${record.alias_id.display_name} generate opportunities in your pipeline?<br/>
+        <p class="tip_content">Did you know emails sent to {{ record.alias_id.display_name }} generate opportunities in your pipeline?<br/>
         <a t-attf-href="mailto:{{record.alias_id.display_name}}" target="_blank">Try sending an email</a> to your CRM. This email address is configurable by sales team members.</p>
     </t>
     <t t-else="">
