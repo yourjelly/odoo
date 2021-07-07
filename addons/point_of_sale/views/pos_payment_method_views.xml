@@ -18,6 +18,7 @@
                             <field name="available_inbound_payment_method_line_ids" invisible="1"/>
                             <field name="available_outbound_payment_method_line_ids" invisible="1"/>
                             <field name="is_cash_count" />
+                            <field name="receivable_account_id" groups="account.group_account_readonly" />
                             <field name="cash_journal_id" required="1" domain="is_cash_count and [('type', '=', 'cash')] or [('type', '=', 'bank')]" />
                             <field name="split_transactions" groups="base.group_no_one" />
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />

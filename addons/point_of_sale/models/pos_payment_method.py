@@ -28,7 +28,7 @@ class PosPaymentMethod(models.Model):
         domain=[('reconcile', '=', True), ('user_type_id.type', '=', 'receivable')],
         default=lambda self: self.env.company.account_default_pos_receivable_account_id,
         ondelete='restrict',
-        help='Account used as counterpart of the income account in the accounting entry representing the pos sales. (Deprecated)')
+        help='Account used as counterpart of the income account in the accounting entry representing the pos sales.')
     is_cash_count = fields.Boolean(string='Cash')
     cash_journal_id = fields.Many2one('account.journal',
         string='Journal',
