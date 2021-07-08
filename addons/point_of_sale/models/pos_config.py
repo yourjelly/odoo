@@ -223,6 +223,7 @@ class PosConfig(models.Model):
     ship_later = fields.Boolean(string="Ship Later")
     warehouse_id = fields.Many2one('stock.warehouse', default=_default_warehouse_id, ondelete='restrict')
     route_id = fields.Many2one('stock.location.route', string="Spefic route for products delivered later.")
+    show_out_of_stock = fields.Boolean("Show when a product is out of stock")
     picking_policy = fields.Selection([
         ('direct', 'As soon as possible'),
         ('one', 'When all products are ready')],

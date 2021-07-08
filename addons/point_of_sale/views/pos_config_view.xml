@@ -570,6 +570,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                          <div class="o_setting_left_pane">
+                              <field name="show_out_of_stock"/>
+                          </div>
+                            <div class="o_setting_right_pane">
+                                <label for="show_out_of_stock" string="Out of stock"/>
+                            </div>
+                        </div>
                     </div>
                     <h2>Accounting</h2>
                     <div class="row mt16 o_settings_container" id="accounting_section">

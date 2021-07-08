@@ -275,7 +275,8 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'pos.session',
-        fields: ['id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids', 'cash_register_id', 'state'],
+        fields: ['id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids', 'cash_register_id',
+                'state', 'update_stock_at_closing', 'show_out_of_stock'],
         domain: function(self){
             var domain = [
                 ['state','in',['opening_control','opened']],
@@ -289,6 +290,7 @@ exports.PosModel = Backbone.Model.extend({
             self.pos_session.login_number = odoo.login_number;
             self.config_id = self.config_id || self.pos_session && self.pos_session.config_id[0];
             tmp.payment_method_ids = pos_sessions[0].payment_method_ids;
+            self.pos_session.update_stock_quantities = pos_sessions[0].update_stock_at_closing ? "closing" : "real";
         },
     },{
         model: 'pos.config',
@@ -419,9 +421,11 @@ exports.PosModel = Backbone.Model.extend({
         },
     },{
         model:  'product.product',
+        label: 'load_products',
         fields: ['display_name', 'lst_price', 'standard_price', 'categ_id', 'pos_categ_id', 'taxes_id',
                  'barcode', 'default_code', 'to_weight', 'uom_id', 'description_sale', 'description',
-                 'product_tmpl_id','tracking', 'write_date', 'available_in_pos', 'attribute_line_ids'],
+                 'product_tmpl_id','tracking', 'write_date', 'available_in_pos', 'attribute_line_ids',
+                 'qty_available'],
         order:  _.map(['sequence','default_code','name'], function (name) { return {name: name}; }),
         domain: function(self){
             var domain = ['&', '&', ['sale_ok','=',true],['available_in_pos','=',true],'|',['company_id','=',self.config.company_id[0]],['company_id','=',false]];
@@ -1752,7 +1756,7 @@ exports.Orderline = Backbone.Model.extend({
     // sets the quantity of the product. The quantity will be rounded according to the
     // product's unity of measure properties. Quantities greater than zero will not get
     // rounded to zero
-    set_quantity: function(quantity, keep_price){
+    set_quantity: async function(quantity, keep_price){
         this.order.assert_editable();
         if(quantity === 'remove'){
             this.order.remove_orderline(this);
@@ -1781,6 +1785,18 @@ exports.Orderline = Backbone.Model.extend({
             this.set_unit_price(this.product.get_price(this.order.pricelist, this.get_quantity(), this.get_price_extra()));
             this.order.fix_tax_included_price(this);
         }
+
+        if(this.pos.pos_session.update_stock_quantities === "real") {
+            let fields = _.find(this.pos.models, function(model){ return model.label === 'load_products'; }).fields;
+            let result = await this.pos.rpc({
+                model: 'product.product',
+                method: 'read',
+                args: [[this.product.id], fields]
+            });
+
+            this.set_out_of_stock(result[0].qty_available <= this.quantity);
+        }
+
         this.trigger('change', this);
     },
     // return the quantity of product
@@ -1849,6 +1865,11 @@ exports.Orderline = Backbone.Model.extend({
     // returns true if this orderline is selected
     is_selected: function(){
         return this.selected;
+    },
+    set_out_of_stock: function(hasStock) {
+        this.out_of_stock = hasStock;
+        this.trigger('change',this);
+        this.trigger('new-orderline-selected');
     },
     // when we add an new orderline we want to merge it with the last line to see reduce the number of items
     // in the orderline. This returns true if it makes sense to merge the two
@@ -2961,7 +2982,7 @@ exports.Order = Backbone.Model.extend({
         line.set_unit_price(line.compute_fixed_price(line.price));
     },
 
-    add_product: function(product, options){
+    add_product: async function(product, options){
         if(this._printed){
             this.destroy();
             return this.pos.get_order().add_product(product, options);
@@ -2992,6 +3013,17 @@ exports.Order = Backbone.Model.extend({
         }
         if (this.pos.config.iface_customer_facing_display) {
             this.pos.send_current_order_to_customer_facing_display();
+        }
+
+        if(this.pos.pos_session.update_stock_quantities === "real") {
+            let fields = _.find(this.pos.models, function(model){ return model.label === 'load_products'; }).fields;
+            let result = await this.pos.rpc({
+                model: 'product.product',
+                method: 'read',
+                args: [[product.id], fields]
+            });
+
+            this.selected_orderline.set_out_of_stock(result[0].qty_available <= this.selected_orderline.quantity);
         }
     },
     set_orderline_options: function(orderline, options) {

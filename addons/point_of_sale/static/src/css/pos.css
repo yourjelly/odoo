@@ -3610,3 +3610,7 @@ td {
 .pos .pos-topheader .oe_status:hover {
     background: rgb(104,69,95);
 }
+
+.pos .outOfStock {
+    color: red;
+}

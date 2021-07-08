@@ -4,7 +4,14 @@
     <t t-name="Orderline" owl="1">
         <li t-on-click="selectLine" class="orderline" t-att-class="addedClasses">
             <span class="product-name">
-                <t t-esc="props.line.get_full_product_name()"/>
+                <t t-if="props.line.out_of_stock">
+                    <span class="outOfStock">
+                        <t t-esc="props.line.get_full_product_name()"/>
+                    </span>
+                </t>
+                <t t-else="">
+                    <t t-esc="props.line.get_full_product_name()"/>
+                </t>
                 <span> </span>
                 <t t-if="props.line.get_product().tracking!=='none' &amp;&amp; (env.pos.picking_type.use_create_lots || env.pos.picking_type.use_existing_lots)">
                     <t t-if="props.line.has_valid_product_lot()">
