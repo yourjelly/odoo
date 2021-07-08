@@ -186,6 +186,10 @@ class Task(models.Model):
         for task in self.with_context(active_test=False):
             task.subtask_effective_hours = sum(child_task.effective_hours + child_task.subtask_effective_hours for child_task in task.child_ids)
 
+    @api.model
+    def _search_default_calendar(self, user, date_start, date_end):
+        return user._get_calendar_of_period(date_start, date_end)
+
     def action_view_subtask_timesheet(self):
         self.ensure_one()
         tasks = self.with_context(active_test=False)._get_all_subtasks()

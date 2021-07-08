@@ -1089,6 +1089,10 @@ class Task(models.Model):
         return super(Task, self).copy(default)
 
     @api.model
+    def _search_default_calendar(self, user, date_start, date_end):
+        return user.resource_calendar_id or self.env.company.resource_calendar_id
+
+    @api.model
     def get_empty_list_help(self, help):
         tname = _("task")
         project_id = self.env.context.get('default_project_id', False)

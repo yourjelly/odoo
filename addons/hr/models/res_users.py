@@ -222,6 +222,10 @@ class User(models.Model):
     def _search_company_employee(self, operator, value):
         return [('employee_ids', operator, value)]
 
+    def _get_calendar_of_period(self, date_from=None, date_to=None):
+        self.ensure_one()
+        return {(date_from, date_to): self.employee_id.resource_calendar_id or self.resource_calendar_id or self.env.company.resource_calendar_id}
+
     def action_create_employee(self):
         self.ensure_one()
         self.env['hr.employee'].create(dict(
