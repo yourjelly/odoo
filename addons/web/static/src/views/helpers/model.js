@@ -8,31 +8,29 @@ const { core, hooks } = owl;
 const { EventBus } = core;
 const { useComponent, onWillStart, onWillUpdateProps } = hooks;
 
+const LOAD_KEYS = [...SEARCH_KEYS, 'resId', 'resIds'];
+
 export class Model extends EventBus {
     /**
      * @param {Object} env
      * @param {Object} services
      */
-    constructor(env, services) {
+    constructor(env, params, services) {
         super();
         this.env = env;
-        this.setup(services);
+        this.setup(params, services);
     }
 
     /**
+     * @param {Object} params
      * @param {Object} services
      */
-    setup(services) {}
+    setup(params, services) {}
 
     /**
-     * @param {Object} params
+     * @param {Object} searchParams
      */
-    load(params) {}
-
-    /**
-     * @param {Object} params
-     */
-    reload(params) {}
+    load(searchParams) {}
 
     notify() {
         this.trigger("update");
@@ -40,9 +38,20 @@ export class Model extends EventBus {
 }
 Model.services = [];
 
+function getSearchParams(props, initialGroupBy) {
+    const params = {};
+    for (const key of LOAD_KEYS) {
+        params[key] = props[key];
+    }
+    if (params.groupBy && params.groupBy.length === 0) {
+        params.groupBy = initialGroupBy.slice();
+    }
+    return params;
+}
+
 /**
  * @template {Model} T
- * @param {new (env: Object, services: Object) => T} ModelClass
+ * @param {new (env: Object, params: Object, services: Object) => T} ModelClass
  * @param {Object} loadParams
  * @param {Object} [options]
  * @param {Function} [options.onUpdate]
@@ -57,25 +66,20 @@ export function useModel(ModelClass, loadParams, options = {}) {
     for (const key of ModelClass.services) {
         services[key] = useService(key);
     }
-    const model = new ModelClass(component.env, services);
+    const model = new ModelClass(component.env, loadParams, services);
     useBus(model, "update", options.onUpdate || component.render);
 
     const initialGroupBy = (loadParams.groupBy || component.props.groupBy).slice();
 
     onWillStart(() => {
-        return model.load(loadParams);
+        const searchParams = getSearchParams(component.props, initialGroupBy);
+        return model.load(searchParams);
     });
 
     onWillUpdateProps((nextProps) => {
-        const params = {};
-        for (const key of SEARCH_KEYS) {
-            params[key] = nextProps[key];
-        }
-        if (params.groupBy && params.groupBy.length === 0) {
-            params.groupBy = initialGroupBy;
-        }
-        params.useSampleModel = false;
-        return model.reload(params);
+        const searchParams = getSearchParams(component.props, initialGroupBy);
+        searchParams.useSampleModel = false;
+        return model.load(searchParams);
     });
     return model;
 }
