@@ -387,7 +387,11 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
         order_5_partner_b = self._create_sale_order(partner_b)
         orders = order_1_partner_a + order_2_partner_b + order_3_partner_b+ order_4_partner_a + order_5_partner_b
 
-        moves = orders._create_invoices()
+        moves = orders.with_context(
+            default_journal_id=self.env['account.move'].with_context(
+                default_type='out_invoice'
+            )._get_default_journal().id
+        )._create_invoices()
         # Check invoices
         self.assertEqual(len(moves), 2)
         move_partner_a = moves.filtered(lambda x: x.partner_id == partner_a)
