@@ -11,7 +11,7 @@ import { FormRenderer } from "./form_renderer";
 // -----------------------------------------------------------------------------
 
 class FormArchParser extends XMLParser {
-    parse(arch, fields) {
+    parse(arch) {
         const _fields = new Set();
         _fields.add("display_name");
         const xmlDoc = this.parseXML(arch);
@@ -34,16 +34,14 @@ class FormView extends owl.Component {
     static components = { ControlPanel, FormRenderer };
 
     setup() {
-        debugger;
-        console.log(this.props);
         useDebugMenu("view", { component: this });
-        this.archInfo = new FormArchParser().parse(this.props.arch, this.props.fields);
+        this.archInfo = new FormArchParser().parse(this.props.arch);
         this.model = useModel(RelationalModel, {
             resModel: this.props.resModel,
             resId: this.props.resId,
             resIds: this.props.resIds,
             fields: this.props.fields,
-            activeFields: this.archInfo.fields
+            activeFields: this.archInfo.fields,
         });
     }
 }

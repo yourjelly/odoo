@@ -9,7 +9,7 @@
               display="{'top-right': false, 'bottom-right': false}"
           />
           <div class="o_content">
-              <FormRenderer model="model" fields="props.fields" info="archInfo" />
+              <FormRenderer model="model" fields="props.fields" info="archInfo" mode="'readonly'" />
           </div>
       </div>
   </t>
