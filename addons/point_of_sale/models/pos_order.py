@@ -143,6 +143,7 @@ class PosOrder(models.Model):
 
         if pos_order.to_invoice and pos_order.state == 'paid':
             pos_order.action_pos_order_invoice()
+            pos_order._apply_invoice_payments()
 
         return pos_order.id
 
@@ -527,6 +528,14 @@ class PosOrder(models.Model):
     # this method is unused, and so is the state 'cancel'
     def action_pos_order_cancel(self):
         return self.write({'state': 'cancel'})
+
+    def _apply_invoice_payments(self):
+        for order in self:
+            receivable_account = order.partner_id.commercial_partner_id.property_account_receivable_id
+            payment_moves = order.payment_ids._create_payment_moves()
+            invoice_receivable = order.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account)
+            payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account)
+            (invoice_receivable | payment_receivables).reconcile()
 
     @api.model
     def create_from_ui(self, orders, draft=False):

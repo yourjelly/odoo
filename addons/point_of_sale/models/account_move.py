@@ -8,6 +8,7 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     pos_order_ids = fields.One2many('pos.order', 'account_move')
+    pos_payment_ids = fields.One2many('pos.payment', 'account_move_id')
 
     def _stock_account_get_last_step_stock_moves(self):
         stock_moves = super(AccountMove, self)._stock_account_get_last_step_stock_moves()

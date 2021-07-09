@@ -31,6 +31,7 @@ class PosPayment(models.Model):
     payment_status = fields.Char('Payment Status')
     ticket = fields.Char('Payment Receipt Info')
     is_change = fields.Boolean(string='Is this payment change?', default=False)
+    account_move_id = fields.Many2one('account.move')
 
     @api.model
     def name_get(self):
@@ -62,3 +63,31 @@ class PosPayment(models.Model):
 
     def export_for_ui(self):
         return self.mapped(self._export_for_ui) if self else []
+
+    def _create_payment_moves(self):
+        result = self.env['account.move']
+        for payment in self:
+            partner = payment.pos_order_id.partner_id.commercial_partner_id
+            credit_account = partner.property_account_receivable_id
+            journal = payment.pos_order_id.session_id.config_id.journal_id
+            pos_session = payment.pos_order_id.session_id
+            account_move = self.env['account.move'].with_context(default_journal_id=journal.id).create({
+                'journal_id': journal.id,
+                'date': fields.Date.context_today(payment),
+                'ref': payment.name,
+            })
+            result |= account_move
+            payment.write({'account_move_id': account_move.id})
+            amounts = pos_session._update_amounts({'amount': 0, 'amount_converted': 0}, {'amount': payment.amount}, payment.payment_date)
+            credit_line_vals = pos_session._credit_amounts({
+                'account_id': credit_account.id,
+                'partner_id': partner.id,
+                'move_id': account_move.id,
+            }, amounts['amount'], amounts['amount_converted'])
+            debit_line_vals = pos_session._debit_amounts({
+                'account_id': pos_session.company_id.account_default_pos_receivable_account_id.id,
+                'move_id': account_move.id,
+            }, amounts['amount'], amounts['amount_converted'])
+            self.env['account.move.line'].with_context(check_move_validity=False).create([credit_line_vals, debit_line_vals])
+            account_move._post()
+        return result
