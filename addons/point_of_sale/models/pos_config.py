@@ -89,7 +89,7 @@ class PosConfig(models.Model):
         return self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.company.id)], limit=1)
 
     def _default_payment_methods(self):
-        return self.env['pos.payment.method'].search([('split_transactions', '=', False), ('company_id', '=', self.env.company.id)])
+        return self.env['pos.payment.method'].search([('company_id', '=', self.env.company.id)])
 
     def _default_pricelist(self):
         return self.env['product.pricelist'].search([('company_id', 'in', (False, self.env.company.id)), ('currency_id', '=', self.env.company.currency_id.id)], limit=1)

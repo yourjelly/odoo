@@ -465,8 +465,6 @@ class PosSession(models.Model):
         # field of the pos.payment record.
         amounts = lambda: {'amount': 0.0, 'amount_converted': 0.0}
         tax_amounts = lambda: {'amount': 0.0, 'amount_converted': 0.0, 'base_amount': 0.0, 'base_amount_converted': 0.0}
-        split_receivables = defaultdict(amounts)
-        split_receivables_cash = defaultdict(amounts)
         combine_receivables = defaultdict(amounts)
         combine_receivables_cash = defaultdict(amounts)
         invoice_receivables = defaultdict(amounts)
@@ -486,17 +484,11 @@ class PosSession(models.Model):
             # Separate cash payments for cash reconciliation later.
             for payment in order.payment_ids:
                 amount, date = payment.amount, payment.payment_date
-                if payment.payment_method_id.split_transactions:
-                    if payment.payment_method_id.is_cash_count:
-                        split_receivables_cash[payment] = self._update_amounts(split_receivables_cash[payment], {'amount': amount}, date)
-                    else:
-                        split_receivables[payment] = self._update_amounts(split_receivables[payment], {'amount': amount}, date)
+                key = payment.payment_method_id
+                if payment.payment_method_id.is_cash_count:
+                    combine_receivables_cash[key] = self._update_amounts(combine_receivables_cash[key], {'amount': amount}, date)
                 else:
-                    key = payment.payment_method_id
-                    if payment.payment_method_id.is_cash_count:
-                        combine_receivables_cash[key] = self._update_amounts(combine_receivables_cash[key], {'amount': amount}, date)
-                    else:
-                        combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
+                    combine_receivables[key] = self._update_amounts(combine_receivables[key], {'amount': amount}, date)
 
             if order.is_invoiced:
                 # Combine invoice receivable lines
@@ -586,9 +578,7 @@ class PosSession(models.Model):
             'taxes':                               taxes,
             'sales':                               sales,
             'stock_expense':                       stock_expense,
-            'split_receivables':                   split_receivables,
             'combine_receivables':                 combine_receivables,
-            'split_receivables_cash':              split_receivables_cash,
             'combine_receivables_cash':            combine_receivables_cash,
             'invoice_receivables':                 invoice_receivables,
             'stock_return':                        stock_return,
@@ -604,12 +594,10 @@ class PosSession(models.Model):
         #   - sales
         #   - taxes
         #   - stock expense
-        #   - non-cash split receivables (not for automatic reconciliation)
         #   - non-cash combine receivables (not for automatic reconciliation)
         taxes = data.get('taxes')
         sales = data.get('sales')
         stock_expense = data.get('stock_expense')
-        split_receivables = data.get('split_receivables')
         combine_receivables = data.get('combine_receivables')
         rounding_difference = data.get('rounding_difference')
         MoveLine = data.get('MoveLine')
@@ -632,31 +620,21 @@ class PosSession(models.Model):
             tax_vals
             + [self._get_sale_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in sales.items()]
             + [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
-            + [self._get_split_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in split_receivables.items()]
             + [self._get_combine_receivable_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in combine_receivables.items()]
             + rounding_vals
         )
         return data
 
     def _create_cash_statement_lines_and_cash_move_lines(self, data):
-        # Create the split and combine cash statement lines and account move lines.
+        # Create the combine cash statement lines and account move lines.
         # Keep the reference by statement for reconciliation.
-        # `split_cash_statement_lines` maps `statement` -> split cash statement lines
         # `combine_cash_statement_lines` maps `statement` -> combine cash statement lines
-        # `split_cash_receivable_lines` maps `statement` -> split cash receivable lines
         # `combine_cash_receivable_lines` maps `statement` -> combine cash receivable lines
         MoveLine = data.get('MoveLine')
-        split_receivables_cash = data.get('split_receivables_cash')
         combine_receivables_cash = data.get('combine_receivables_cash')
 
         statements_by_journal_id = {statement.journal_id.id: statement for statement in self.statement_ids}
-        # handle split cash payments
-        split_cash_statement_line_vals = defaultdict(list)
-        split_cash_receivable_vals = defaultdict(list)
-        for payment, amounts in split_receivables_cash.items():
-            statement = statements_by_journal_id[payment.payment_method_id.cash_journal_id.id]
-            split_cash_statement_line_vals[statement].append(self._get_statement_line_vals(statement, payment.payment_method_id.receivable_account_id, amounts['amount'], date=payment.payment_date, partner=payment.pos_order_id.partner_id))
-            split_cash_receivable_vals[statement].append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
+
         # handle combine cash payments
         combine_cash_statement_line_vals = defaultdict(list)
         combine_cash_receivable_vals = defaultdict(list)
@@ -667,20 +645,14 @@ class PosSession(models.Model):
                 combine_cash_receivable_vals[statement].append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
         # create the statement lines and account move lines
         BankStatementLine = self.env['account.bank.statement.line']
-        split_cash_statement_lines = {}
         combine_cash_statement_lines = {}
-        split_cash_receivable_lines = {}
         combine_cash_receivable_lines = {}
         for statement in self.statement_ids:
-            split_cash_statement_lines[statement] = BankStatementLine.create(split_cash_statement_line_vals[statement])
             combine_cash_statement_lines[statement] = BankStatementLine.create(combine_cash_statement_line_vals[statement])
-            split_cash_receivable_lines[statement] = MoveLine.create(split_cash_receivable_vals[statement])
             combine_cash_receivable_lines[statement] = MoveLine.create(combine_cash_receivable_vals[statement])
 
         data.update(
-            {'split_cash_statement_lines':    split_cash_statement_lines,
-             'combine_cash_statement_lines':  combine_cash_statement_lines,
-             'split_cash_receivable_lines':   split_cash_receivable_lines,
+            {'combine_cash_statement_lines':  combine_cash_statement_lines,
              'combine_cash_receivable_lines': combine_cash_receivable_lines
              })
         return data
@@ -732,9 +704,7 @@ class PosSession(models.Model):
 
     def _reconcile_account_move_lines(self, data):
         # reconcile cash receivable lines
-        split_cash_statement_lines = data.get('split_cash_statement_lines')
         combine_cash_statement_lines = data.get('combine_cash_statement_lines')
-        split_cash_receivable_lines = data.get('split_cash_receivable_lines')
         combine_cash_receivable_lines = data.get('combine_cash_receivable_lines')
         order_account_move_receivable_lines = data.get('order_account_move_receivable_lines')
         invoice_receivable_lines = data.get('invoice_receivable_lines')
@@ -745,9 +715,7 @@ class PosSession(models.Model):
                 statement.write({'balance_end_real': statement.balance_end})
             statement.button_post()
             all_lines = (
-                  split_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
-                | combine_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
-                | split_cash_receivable_lines[statement]
+                combine_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
                 | combine_cash_receivable_lines[statement]
             )
             accounts = all_lines.mapped('account_id')
@@ -837,15 +805,6 @@ class PosSession(models.Model):
             if float_compare(0.0, amount, precision_rounding=self.currency_id.rounding) < 0:   # profit
                 partial_args['account_id'] = self.config_id.rounding_method.profit_account_id.id
                 return self._credit_amounts(partial_args, amount, amount_converted)
-
-    def _get_split_receivable_vals(self, payment, amount, amount_converted):
-        partial_vals = {
-            'account_id': payment.payment_method_id.receivable_account_id.id,
-            'move_id': self.move_id.id,
-            'partner_id': self.env["res.partner"]._find_accounting_partner(payment.partner_id).id,
-            'name': '%s - %s' % (self.name, payment.payment_method_id.name),
-        }
-        return self._debit_amounts(partial_vals, amount, amount_converted)
 
     def _get_combine_receivable_vals(self, payment_method, amount, amount_converted):
         partial_vals = {

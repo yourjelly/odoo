@@ -24,9 +24,8 @@ class PosPaymentMethod(models.Model):
 
     name = fields.Char(string="Payment Method", required=True, translate=True)
     receivable_account_id = fields.Many2one('account.account',
-        string='Intermediary Account',
+        string='Outstanding Account',
         required=True,
-        domain=[('reconcile', '=', True), ('user_type_id.type', '=', 'receivable')],
         default=lambda self: self.env.company.account_default_pos_receivable_account_id,
         ondelete='restrict',
         help='Account used as counterpart of the income account in the accounting entry representing the pos sales.')
@@ -36,10 +35,6 @@ class PosPaymentMethod(models.Model):
         domain=[('type', '=', 'cash')],
         ondelete='restrict',
         help='The payment method is of type cash. A cash statement will be automatically generated.')
-    split_transactions = fields.Boolean(
-        string='Split Transactions',
-        default=False,
-        help='If ticked, each payment will generate a separated journal item. Ticking that option will slow the closing of the PoS.')
     open_session_ids = fields.Many2many('pos.session', string='Pos Sessions', compute='_compute_open_session_ids', help='Open PoS sessions that are using this payment method.')
     config_ids = fields.Many2many('pos.config', string='Point of Sale Configurations')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
