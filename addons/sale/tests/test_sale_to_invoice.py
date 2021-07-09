@@ -353,3 +353,52 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
         qty_invoiced_field = sol_prod_deliver._fields.get('qty_invoiced')
         sol_prod_deliver.env.add_to_compute(qty_invoiced_field, sol_prod_deliver)
         self.assertEqual(sol_prod_deliver.qty_invoiced, expected_qty)
+
+    def _create_sale_order(self, partner):
+        sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
+            'partner_id': partner.id,
+            'partner_invoice_id': partner.id,
+            'partner_shipping_id': partner.id,
+            'pricelist_id': self.pricelist_usd.id,
+            'order_line': [(0, 0, {
+                'name': self.product_order.name,
+                'product_id': self.product_order.id,
+                'product_uom_qty': 5,
+                'product_uom': self.product_order.uom_id.id,
+                'price_unit': self.product_order.list_price,
+                'tax_id': False,
+            })],
+        })
+        sale_order.action_confirm()
+        return sale_order
+
+    def test_multi_sales_to_invoice(self):
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        partner_a = self.env['res.partner'].create({
+            'name': 'Test A',
+            'parent_id': partner.id
+        })
+        partner_b = partner_a.copy({'name': 'Test B'})
+        # Create some orders with different partner_invoice_id
+        order_1_partner_a = self._create_sale_order(partner_a)
+        order_2_partner_b = self._create_sale_order(partner_b)
+        order_3_partner_b = self._create_sale_order(partner_b)
+        order_4_partner_a = self._create_sale_order(partner_a)
+        order_5_partner_b = self._create_sale_order(partner_b)
+        orders = order_1_partner_a + order_2_partner_b + order_3_partner_b+ order_4_partner_a + order_5_partner_b
+
+        moves = orders._create_invoices()
+        # Check invoices
+        self.assertEqual(len(moves), 2)
+        move_partner_a = moves.filtered(lambda x: x.partner_id == partner_a)
+        orders_partner_a = orders.filtered(lambda x: x.partner_invoice_id == partner_a)
+        self.assertEqual(
+            move_partner_a.invoice_line_ids,
+            orders_partner_a.mapped("order_line.invoice_lines")
+        )
+        move_partner_b = moves.filtered(lambda x: x.partner_id == partner_b)
+        orders_partner_b = orders.filtered(lambda x: x.partner_invoice_id == partner_b)
+        self.assertEqual(
+            move_partner_b.invoice_line_ids,
+            orders_partner_b.mapped("order_line.invoice_lines")
+        )
