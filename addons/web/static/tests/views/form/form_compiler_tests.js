@@ -89,7 +89,7 @@ QUnit.module("Form Compiler", (hooks) => {
                 <form>
                     <sheet>
                         <notebook>
-                            <page name="p1" modifiers="{invisible: 1}"><field name="charfield"/></page>
+                            <page name="p1" attrs="{'invisible': [['display_name', '=', 'lol']]}"><field name="charfield"/></page>
                             <page name="p2"><field name="display_name"/></page>
                         </notebook>
                     </sheet>

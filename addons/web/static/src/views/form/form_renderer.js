@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { registry } from "../../core/registry";
+import { Domain } from "@web/core/domain";
 
 const { Component } = owl;
 const { useSubEnv, useState } = owl.hooks;
@@ -62,22 +63,38 @@ class FormCompiler {
         }
     }
 
-    wrapForModifiers(node, transformed) {
+    getModifiers(node) {
         const modifiers = node.getAttribute("modifiers");
         if (!modifiers) {
+            return null;
+        }
+        const parsed = JSON.parse(modifiers);
+        return parsed;
+    }
+
+    getInvisible(node) {
+        if (node.getAttribute("invisible")) {
+            return true;
+        }
+        const modifiers = this.getModifiers(node);
+        if (!modifiers) {
+            return false;
+        }
+        if (modifiers.invisible && !Array.isArray(modifiers.invisible)) {
+            return true;
+        }
+        return modifiers.invisible;
+    }
+
+    applyInvisible(invisible, transformed) {
+        if (!invisible) {
             return transformed;
         }
-        const modsId = `mods_${this.id++}`;
-        const t = this.document.createElement("t");
-        const tset = this.document.createElement("t");
-        tset.setAttribute("t-set", `${modsId}`);
-        tset.setAttribute("t-value", `evalModifiers(${modifiers})`);
-        t.append(tset);
-        const tif = this.document.createElement("t");
-        tif.setAttribute("t-if", `!${modsId}.invisible`);
-        tif.append(transformed);
-        t.append(tif);
-        return t;
+        if (typeof invisible === "boolean") {
+            return;
+        }
+        transformed.setAttribute("t-if", `!evalDomain(${JSON.stringify(invisible)})`);
+        return transformed;
     }
 
     compile(xmlNode) {
@@ -188,25 +205,33 @@ class FormCompiler {
         contents.classList.add("tab-content");
         notebook.appendChild(contents);
 
-        const modifiers = {};
+        const invisibleDomains = {};
 
         for (let child of node.childNodes) {
             if (!(child instanceof Element)) {
                 continue;
             }
             const page = this.compilePage(child, _params);
-            modifiers[page.pageId] = page.modifiers;
-            this.appendChild(headersList, this.wrapForModifiers(child, page.header));
+            if (!page) {
+                continue;
+            }
+            invisibleDomains[page.pageId] = page.invisible;
+            this.appendChild(headersList, this.applyInvisible(page.invisible, page.header));
             this.appendChild(contents, page.content);
         }
         activePage.setAttribute(
             "t-value",
-            `state.activePage or getActivePage(${JSON.stringify(modifiers)})`
+            `state.activePage or getActivePage(${JSON.stringify(invisibleDomains)})`
         );
         return notebook;
     }
 
     compilePage(node, params) {
+        const invisible = this.getInvisible(node);
+        if (typeof invisible === "boolean" && invisible) {
+            return;
+        }
+
         const pageId = `page_${this.id++}`;
         const header = this.document.createElement("li");
         header.classList.add("nav-item");
@@ -228,9 +253,7 @@ class FormCompiler {
             this.appendChild(content, this.compileNode(child, params));
         }
 
-        const modifiers = node.getAttribute("modifiers");
-
-        return { pageId, header, content, modifiers };
+        return { pageId, header, content, invisible };
     }
 }
 
@@ -248,21 +271,17 @@ export class FormRenderer extends Component {
         this.record = this.props.model.root;
     }
 
-    evalModifiers(modifiers) {
-        console.log(modifiers);
-        return modifiers;
+    evalDomain(domain) {
+        domain = new Domain(domain);
+        return domain.contains(this.record.data);
     }
 
-    getActivePage(jsonedModifiers) {
-        // const mods = [];
-        // for (const mod of jsonedModifiers) {
-        //     if (mod) {
-        //         mods.push(JSON.parse(mod));
-        //     }
-        // }
-        // console.log(mods);
-        debugger;
-        return Object.keys(jsonedModifiers)[1];
+    getActivePage(invisibleDomains) {
+        for (const page in invisibleDomains) {
+            if (!invisibleDomains[page] || !this.evalDomain(invisibleDomains[page])) {
+                return page;
+            }
+        }
     }
 }
 
