@@ -341,11 +341,11 @@ class PosSession(models.Model):
 
             if self.move_id.line_ids:
                 self.move_id._post()
-                self._reconcile_account_move_lines(data)
                 # Set the uninvoiced orders' state to 'done'
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
                 self.move_id.unlink()
+            self._reconcile_account_move_lines(data)
         else:
             statement = self.cash_register_id
             if not self.config_id.cash_control:
@@ -645,8 +645,11 @@ class PosSession(models.Model):
         combine_cash_statement_lines = {}
         combine_cash_receivable_lines = {}
         for statement in self.statement_ids:
-            payment_method = statement_to_payment_method[statement]
-            combine_cash_statement_lines[statement] = BankStatementLine.create(combine_cash_statement_line_vals[statement]).mapped('move_id.line_ids').filtered(lambda line: line.account_id == payment_method.receivable_account_id)
+            payment_method = statement_to_payment_method.get(statement)
+            statement_lines = self.env['account.move.line']
+            if payment_method:
+                statement_lines = BankStatementLine.create(combine_cash_statement_line_vals[statement]).mapped('move_id.line_ids').filtered(lambda line: line.account_id == payment_method.receivable_account_id)
+            combine_cash_statement_lines[statement] = statement_lines
             combine_cash_receivable_lines[statement] = MoveLine.create(combine_cash_receivable_vals[statement])
 
         data.update(
