@@ -41,6 +41,7 @@
         'views/report_userlabel.xml',
         'views/report_saledetails.xml',
         'views/point_of_sale_dashboard.xml',
+        'views/report_invoice.xml',
     ],
     'demo': [
         'data/point_of_sale_demo.xml',

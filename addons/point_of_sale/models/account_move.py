@@ -41,6 +41,12 @@ class AccountMove(models.Model):
 
         return lot_values
 
+    def _get_reconciled_vals(self, partial, amount, counterpart_line):
+        result = super()._get_reconciled_vals(partial, amount, counterpart_line)
+        if counterpart_line.move_id.pos_payment_ids:
+            pos_payment = counterpart_line.move_id.pos_payment_ids
+            result['pos_payment_name'] = pos_payment.payment_method_id.name
+        return result
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'

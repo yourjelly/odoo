@@ -75,6 +75,7 @@ class PosPayment(models.Model):
                 'journal_id': journal.id,
                 'date': fields.Date.context_today(payment),
                 'ref': payment.name,
+                'pos_payment_ids': payment.ids,
             })
             result |= account_move
             payment.write({'account_move_id': account_move.id})
