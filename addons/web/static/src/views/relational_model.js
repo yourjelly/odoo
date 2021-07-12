@@ -39,7 +39,7 @@ class DataList extends DataPoint {
     async load(params) {
         this.domain = params.domain;
         const fields = this.model.activeFields;
-        const records = await this.orm.searchRead(this.model.resModel, this.domain, fields, {
+        let records = await this.orm.searchRead(this.model.resModel, this.domain, fields, {
             limit: 40
         });
         this.data = records.map((record) => new DataRecord(this.model, record.id, record));
