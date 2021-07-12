@@ -92,23 +92,27 @@ class WebsiteAccount(CustomerPortal):
         today = fields.Date.today()
         this_week_end_date = fields.Date.to_string(fields.Date.from_string(today) + datetime.timedelta(days=7))
 
-        searchbar_filters = {
-            'all': {'label': _('Active'), 'domain': []},
-            'today': {'label': _('Today Activities'), 'domain': [('activity_date_deadline', '=', today)]},
-            'week': {'label': _('This Week Activities'),
-                     'domain': [('activity_date_deadline', '>=', today), ('activity_date_deadline', '<=', this_week_end_date)]},
-            'overdue': {'label': _('Overdue Activities'), 'domain': [('activity_date_deadline', '<', today)]},
-            'won': {'label': _('Won'), 'domain': [('stage_id.is_won', '=', True)]},
-            'lost': {'label': _('Lost'), 'domain': [('active', '=', False), ('probability', '=', 0)]},
-        }
+        searchbar_filters = OrderedDict([
+            ('all', {'label': _('Active'), 'domain': []}),
+            ('today', {'label': _('Today Activities'),
+                       'domain': [('activity_date_deadline', '=', today)]}),
+            ('week', {'label': _('This Week Activities'),
+                      'domain': [('activity_date_deadline', '>=', today), ('activity_date_deadline', '<=', this_week_end_date)]}),
+            ('overdue', {'label': _('Overdue Activities'), 'domain': [('activity_date_deadline', '<', today)]}),
+            ('won', {'label': _('Won'), 'domain': [('stage_id.is_won', '=', True)]}),
+            ('lost', {'label': _('Lost'), 'domain': [('active', '=', False), ('probability', '=', 0)]})
+        ])
+
         searchbar_sortings = {
             'date': {'label': _('Newest'), 'order': 'create_date desc'},
-            'name': {'label': _('Name'), 'order': 'name'},
-            'contact_name': {'label': _('Contact Name'), 'order': 'contact_name'},
             'revenue': {'label': _('Expected Revenue'), 'order': 'expected_revenue desc'},
             'probability': {'label': _('Probability'), 'order': 'probability desc'},
             'stage': {'label': _('Stage'), 'order': 'stage_id'},
+            'activity': {'label': _('Next Activity'), 'order': 'activity_date_deadline'}
         }
+
+        # TODO: check if key exists before accessing it
+        # If the user provides an unknown key -> Crash
 
         # default sort by value
         if not sortby:
@@ -143,8 +147,10 @@ class WebsiteAccount(CustomerPortal):
             'pager': pager,
             'searchbar_sortings': searchbar_sortings,
             'sortby': sortby,
-            'searchbar_filters': OrderedDict(sorted(searchbar_filters.items())),
+            'searchbar_filters': searchbar_filters,
             'filterby': filterby,
+            'activity_types': request.env['mail.activity.type'].sudo().search([]),
+            'countries': request.env['res.country'].sudo().search([])
         })
         return request.render("website_crm_partner_assign.portal_my_opportunities", values)
 
