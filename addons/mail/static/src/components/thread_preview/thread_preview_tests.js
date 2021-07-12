@@ -1,15 +1,17 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/thread_preview/thread_preview_tests.js', function (require) {
+'use strict';
 
-import { ThreadPreview } from '@mail/components/thread_preview/thread_preview';
-import {
+const components = {
+    ThreadPreview: require('mail/static/src/components/thread_preview/thread_preview.js'),
+};
+
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { ThreadPreview };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -45,6 +47,7 @@ QUnit.test('mark as read', async function (assert) {
         message_unread_counter: 1,
     });
     this.data['mail.message'].records.push({
+        channel_ids: [11],
         id: 100,
         model: 'mail.channel',
         res_id: 11,
@@ -106,4 +109,6 @@ QUnit.test('mark as read', async function (assert) {
 
 });
 });
+});
+
 });

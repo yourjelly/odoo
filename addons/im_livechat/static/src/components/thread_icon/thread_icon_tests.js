@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/thread_icon/thread_icon_tests.js', function (require) {
+'use strict';
 
-import { ThreadIcon } from '@mail/components/thread_icon/thread_icon';
-import {
+const components = {
+    ThreadIcon: require('mail/static/src/components/thread_icon/thread_icon.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { ThreadIcon };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('im_livechat', {}, function () {
 QUnit.module('components', {}, function () {
@@ -70,8 +71,8 @@ QUnit.test('livechat: public website visitor is typing', async function (assert)
         const typingData = {
             info: 'typing_status',
             is_typing: true,
-            partner_id: this.env.messaging.publicPartners[0].id,
-            partner_name: this.env.messaging.publicPartners[0].name,
+            partner_id: this.env.messaging.publicPartner.id,
+            partner_name: this.env.messaging.publicPartner.name,
         };
         const notification = [[false, 'mail.channel', 20], typingData];
         this.widget.call('bus_service', 'trigger', 'notification', [notification]);
@@ -90,4 +91,6 @@ QUnit.test('livechat: public website visitor is typing', async function (assert)
 
 });
 });
+});
+
 });

@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/attachment/attachment_tests.js', function (require) {
+'use strict';
 
-import { afterEach, beforeEach, start } from '@mail/utils/test_utils';
+const { afterEach, beforeEach, start } = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('models', {}, function () {
@@ -39,7 +40,7 @@ QUnit.test('create (txt)', async function (assert) {
     assert.strictEqual(this.env.models['mail.attachment'].findFromIdentifyingData({ id: 750 }), attachment);
     assert.strictEqual(attachment.filename, "test.txt");
     assert.strictEqual(attachment.id, 750);
-    assert.notOk(attachment.isUploading);
+    assert.notOk(attachment.isTemporary);
     assert.strictEqual(attachment.mimetype, 'text/plain');
     assert.strictEqual(attachment.name, "test.txt");
 });
@@ -138,4 +139,6 @@ QUnit.test('isViewable', async function (assert) {
 
 });
 });
+});
+
 });

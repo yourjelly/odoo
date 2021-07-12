@@ -7,7 +7,6 @@ from odoo.exceptions import AccessError
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.tests.common import TransactionCase
 from odoo.tools.misc import mute_logger
-from odoo import Command
 
 # test group that demo user should not have
 GROUP_SYSTEM = 'base.group_system'
@@ -180,7 +179,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
             'name': 'test_rule1',
             'model_id': model_res_partner.id,
             'domain_force': False,
-            'groups': [Command.set(group_user.ids)],
+            'groups': [(6, 0, group_user.ids)],
         })
 
         # read as demo user the partners (one blank domain)
@@ -203,7 +202,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
             'name': 'test_rule2',
             'model_id': model_res_partner.id,
             'domain_force': False,
-            'groups': [Command.set(group_user.ids)],
+            'groups': [(6, 0, group_user.ids)],
         })
 
         # read as demo user with domains [] and blank
@@ -225,7 +224,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
             'name': 'test_rule3',
             'model_id': model_res_partner.id,
             'domain_force': False,
-            'groups': [Command.set(group_user.ids)],
+            'groups': [(6, 0, group_user.ids)],
         })
 
         # read the partners as demo user
@@ -258,7 +257,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
         # create a new group with demo user in it, and a complex rule
         group_test = self.env['res.groups'].create({
             'name': 'Test Group',
-            'users': [Command.set(self.user_demo.ids)],
+            'users': [(6, 0, self.user_demo.ids)],
         })
 
         # add the rule to the new group, with a domain containing an implicit
@@ -266,7 +265,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
         # normalized before combining it
         rule3.write({
             'domain_force': "[('name','!=',False),('id','!=',False)]",
-            'groups': [Command.set(group_test.ids)],
+            'groups': [(6, 0, group_test.ids)],
         })
 
         # read the partners again as demo user, which should give results

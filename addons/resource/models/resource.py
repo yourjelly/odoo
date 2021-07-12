@@ -253,12 +253,10 @@ class ResourceCalendar(models.Model):
     @api.depends('two_weeks_calendar')
     def _compute_two_weeks_explanation(self):
         today = fields.Date.today()
-        week_type = self.env['resource.calendar.attendance'].get_week_type(today)
-        week_type_str = _("second") if week_type else _("first")
+        week_type = _("odd") if int(math.floor((today.toordinal() - 1) / 7) % 2) else _("even")
         first_day = date_utils.start_of(today, 'week')
         last_day = date_utils.end_of(today, 'week')
-        self.two_weeks_explanation = _("The current week (from %s to %s) correspond to the  %s one.", first_day,
-                                       last_day, week_type_str)
+        self.two_weeks_explanation = "This week (from %s to %s) is an %s week." % (first_day, last_day, week_type)
 
     def _get_global_attendances(self):
         return self.attendance_ids.filtered(lambda attendance:
@@ -291,7 +289,7 @@ class ResourceCalendar(models.Model):
             self.attendance_ids.unlink()
             self.attendance_ids = [
                 (0, 0, {
-                    'name': 'First week',
+                    'name': 'Even week',
                     'dayofweek': '0',
                     'sequence': '0',
                     'hour_from': 0,
@@ -301,11 +299,12 @@ class ResourceCalendar(models.Model):
                     'display_type':
                     'line_section'}),
                 (0, 0, {
-                    'name': 'Second week',
+                    'name': 'Odd week',
                     'dayofweek': '0',
                     'sequence': '25',
                     'hour_from': 0,
-                    'day_period': 'morning',
+                    'day_period':
+                    'morning',
                     'week_type': '1',
                     'hour_to': 0,
                     'display_type': 'line_section'}),
@@ -372,6 +371,14 @@ class ResourceCalendar(models.Model):
     # --------------------------------------------------
     # Computation API
     # --------------------------------------------------
+    # YTI TODO: Remove me in master
+    def _attendance_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):
+        if resource is None:
+            resource = self.env['resource.resource']
+        return self._attendance_intervals_batch(
+            start_dt, end_dt, resources=resource, domain=domain, tz=tz
+        )[resource.id]
+
     def _attendance_intervals_batch(self, start_dt, end_dt, resources=None, domain=None, tz=None):
         """ Return the attendance intervals in the given datetime range.
             The returned intervals are expressed in specified tz or in the resource's timezone.
@@ -417,7 +424,7 @@ class ResourceCalendar(models.Model):
                 if attendance.date_to:
                     until = min(until, attendance.date_to)
                 if attendance.week_type:
-                    start_week_type = self.env['resource.calendar.attendance'].get_week_type(start)
+                    start_week_type = int(math.floor((start.toordinal()-1)/7) % 2)
                     if start_week_type != int(attendance.week_type):
                         # start must be the week of the attendance
                         # if it's not the case, we must remove one week
@@ -498,6 +505,14 @@ class ResourceCalendar(models.Model):
 
         return {r.id: Intervals(result[r.id]) for r in resources_list}
 
+    # YTI TODO: Remove me in master
+    def _work_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):
+        if resource is None:
+            resource = self.env['resource.resource']
+        return self._work_intervals_batch(
+            start_dt, end_dt, resources=resource, domain=domain, tz=tz
+        )[resource.id]
+
     def _work_intervals_batch(self, start_dt, end_dt, resources=None, domain=None, tz=None):
         """ Return the effective work intervals between the given datetimes. """
         if not resources:
@@ -563,6 +578,12 @@ class ResourceCalendar(models.Model):
             'days': days,
             'hours': sum(day_hours.values()),
         }
+
+    # YTI TODO: Remove me in master
+    def _get_day_total(self, from_datetime, to_datetime, resource=None):
+        if resource is None:
+            resource = self.env['resource.resource']
+        return self._get_resources_day_total(from_datetime, to_datetime, resources=resource)[resource.id]
 
     def _get_resources_day_total(self, from_datetime, to_datetime, resources=None):
         """
@@ -670,7 +691,7 @@ class ResourceCalendar(models.Model):
         if compute_leaves:
             intervals = self._work_intervals_batch(from_datetime, to_datetime, domain=domain)[False]
         else:
-            intervals = self._attendance_intervals_batch(from_datetime, to_datetime, domain=domain)[False]
+            intervals = self._attendance_intervals_batch(from_datetime, to_datetime)[False]
 
         return self._get_days_data(intervals, day_total)
 
@@ -686,22 +707,17 @@ class ResourceCalendar(models.Model):
         """
         day_dt, revert = make_aware(day_dt)
 
-        if resource is None:
-            resource = self.env['resource.resource']
-
         # which method to use for retrieving intervals
         if compute_leaves:
-            get_intervals = partial(self._work_intervals_batch, domain=domain, resources=resource)
-            resource_id = resource.id
+            get_intervals = partial(self._work_intervals, domain=domain, resource=resource)
         else:
-            get_intervals = self._attendance_intervals_batch
-            resource_id = False
+            get_intervals = self._attendance_intervals
 
         if hours >= 0:
             delta = timedelta(days=14)
             for n in range(100):
                 dt = day_dt + delta * n
-                for start, stop, meta in get_intervals(dt, dt + delta)[resource_id]:
+                for start, stop, meta in get_intervals(dt, dt + delta):
                     interval_hours = (stop - start).total_seconds() / 3600
                     if hours <= interval_hours:
                         return revert(start + timedelta(hours=hours))
@@ -712,7 +728,7 @@ class ResourceCalendar(models.Model):
             delta = timedelta(days=14)
             for n in range(100):
                 dt = day_dt - delta * n
-                for start, stop, meta in reversed(get_intervals(dt - delta, dt)[resource_id]):
+                for start, stop, meta in reversed(get_intervals(dt - delta, dt)):
                     interval_hours = (stop - start).total_seconds() / 3600
                     if hours <= interval_hours:
                         return revert(stop - timedelta(hours=hours))
@@ -733,16 +749,16 @@ class ResourceCalendar(models.Model):
 
         # which method to use for retrieving intervals
         if compute_leaves:
-            get_intervals = partial(self._work_intervals_batch, domain=domain)
+            get_intervals = partial(self._work_intervals, domain=domain)
         else:
-            get_intervals = self._attendance_intervals_batch
+            get_intervals = self._attendance_intervals
 
         if days > 0:
             found = set()
             delta = timedelta(days=14)
             for n in range(100):
                 dt = day_dt + delta * n
-                for start, stop, meta in get_intervals(dt, dt + delta)[False]:
+                for start, stop, meta in get_intervals(dt, dt + delta):
                     found.add(start.date())
                     if len(found) == days:
                         return revert(stop)
@@ -754,7 +770,7 @@ class ResourceCalendar(models.Model):
             delta = timedelta(days=14)
             for n in range(100):
                 dt = day_dt - delta * n
-                for start, stop, meta in reversed(get_intervals(dt - delta, dt)[False]):
+                for start, stop, meta in reversed(get_intervals(dt - delta, dt)):
                     found.add(start.date())
                     if len(found) == days:
                         return revert(start)
@@ -798,9 +814,9 @@ class ResourceCalendarAttendance(models.Model):
     day_period = fields.Selection([('morning', 'Morning'), ('afternoon', 'Afternoon')], required=True, default='morning')
     resource_id = fields.Many2one('resource.resource', 'Resource')
     week_type = fields.Selection([
-        ('1', 'Second'),
-        ('0', 'First')
-        ], 'Week Number', default=False)
+        ('1', 'Odd week'),
+        ('0', 'Even week')
+        ], 'Week Even/Odd', default=False)
     two_weeks_calendar = fields.Boolean("Calendar in 2 weeks mode", related='calendar_id.two_weeks_calendar')
     display_type = fields.Selection([
         ('line_section', "Section")], default=False, help="Technical field for UX purpose.")
@@ -812,30 +828,11 @@ class ResourceCalendarAttendance(models.Model):
         # avoid negative or after midnight
         self.hour_from = min(self.hour_from, 23.99)
         self.hour_from = max(self.hour_from, 0.0)
-        self.hour_to = min(self.hour_to, 24)
+        self.hour_to = min(self.hour_to, 23.99)
         self.hour_to = max(self.hour_to, 0.0)
 
         # avoid wrong order
         self.hour_to = max(self.hour_to, self.hour_from)
-
-    @api.model
-    def get_week_type(self, date):
-        # week_type is defined by
-        #  * counting the number of days from January 1 of year 1
-        #    (extrapolated to dates prior to the first adoption of the Gregorian calendar)
-        #  * converted to week numbers and then the parity of this number is asserted.
-        # It ensures that an even week number always follows an odd week number. With classical week number,
-        # some years have 53 weeks. Therefore, two consecutive odd week number follow each other (53 --> 1).
-        return int(math.floor((date.toordinal() - 1) / 7) % 2)
-
-    def _compute_display_name(self):
-        super()._compute_display_name()
-        this_week_type = str(self.get_week_type(fields.Date.context_today(self)))
-        section_names = {'0': _('First week'), '1': _('Second week')}
-        section_info = {True: _('this week'), False: _('other week')}
-        for record in self.filtered(lambda l: l.display_type == 'line_section'):
-            section_name = "%s (%s)" % (section_names[record.week_type], section_info[this_week_type == record.week_type])
-            record.display_name = section_name
 
     def _copy_attendance_vals(self):
         self.ensure_one()
@@ -851,7 +848,6 @@ class ResourceCalendarAttendance(models.Model):
             'display_type': self.display_type,
             'sequence': self.sequence,
         }
-
 
 class ResourceResource(models.Model):
     _name = "resource.resource"
@@ -891,6 +887,12 @@ class ResourceResource(models.Model):
     _sql_constraints = [
         ('check_time_efficiency', 'CHECK(time_efficiency>0)', 'Time efficiency must be strictly positive'),
     ]
+
+    @api.constrains('time_efficiency')
+    def _check_time_efficiency(self):
+        for record in self:
+            if record.time_efficiency == 0:
+                raise ValidationError(_('The efficiency factor cannot be equal to 0.'))
 
     @api.model_create_multi
     def create(self, vals_list):

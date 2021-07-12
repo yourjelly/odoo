@@ -15,6 +15,12 @@
     transform: scale(1.5);
 }
 
+.o-background {
+    transform: scale(1);
+    margin-inline-end: map-get($spacers, 1);
+    margin-top: 2px;
+}
+
 // ------------------------------------------------------------------
 // Style
 // ------------------------------------------------------------------
@@ -26,7 +32,7 @@
 }
 
 .o_PartnerImStatusIcon_innerBackground {
-    color: $white;
+    color: white;
 }
 
 .o_PartnerImStatusIcon_icon {
@@ -47,3 +53,7 @@
         color: $o-enterprise-primary-color;
     }
 }
+
+
+
+

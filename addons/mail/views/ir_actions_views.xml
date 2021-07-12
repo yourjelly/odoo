@@ -22,9 +22,7 @@
                                         'required': [('state', '=', 'next_activity'), ('activity_date_deadline_range', '>', 0)]
                                     }"/>
                                 </div>
-                                <field name="activity_user_type" attrs="{
-                                    'required': [('state', '=', 'next_activity')]
-                                }"/>
+                                <field name="activity_user_type"/>
                                 <field name="activity_user_field_name" attrs="{
                                     'invisible': [('activity_user_type', '=', 'specific')],
                                     'required': [('state', '=', 'next_activity'), ('activity_user_type', '=', 'generic')]
@@ -40,6 +38,8 @@
                 </xpath>
                 <xpath expr="//field[@name='link_field_id']" position="after">
                     <field name="partner_ids" widget="many2many_tags"
+                        attrs="{'invisible': [('state', '!=', 'followers')]}"/>
+                    <field name="channel_ids" widget="many2many_tags"
                         attrs="{'invisible': [('state', '!=', 'followers')]}"/>
                     <field name="template_id"
                         attrs="{'invisible': [('state', '!=', 'email')],

@@ -1,16 +1,17 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status_tests.js', function (require) {
+'use strict';
 
-import { ThreadTextualTypingStatus } from '@mail/components/thread_textual_typing_status/thread_textual_typing_status';
-import {
+const components = {
+    ThreadTextualTypingStatus: require('mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     nextAnimationFrame,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { ThreadTextualTypingStatus };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -361,4 +362,6 @@ QUnit.test('receive several other members typing status "is typing"', async func
 
 });
 });
+});
+
 });

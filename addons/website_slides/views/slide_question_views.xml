@@ -6,9 +6,11 @@
         <field name="arch" type="xml">
             <form string="Quiz">
                 <sheet>
-                    <label for="question" string="Question Name"/>
+                    <div class="oe_edit_only">
+                        <label for="question" string="Question Name"/>
+                    </div>
                     <h1>
-                        <field name="question" default_focus="1"/>
+                        <field name="question" default_focus="1" placeholder="Name"/>
                     </h1>
                     <field name="answer_ids">
                         <tree editable="bottom" create="true" delete="true">

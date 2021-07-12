@@ -2,7 +2,6 @@ odoo.define("website_sale.tour_shop_custom_attribute_value", function (require) 
     "use strict";
 
     var tour = require("web_tour.tour");
-    const tourUtils = require('website_sale.tour_utils');
 
     tour.register("shop_custom_attribute_value", {
         url: "/shop?search=Customizable Desk",
@@ -21,9 +20,7 @@ odoo.define("website_sale.tour_shop_custom_attribute_value", function (require) 
         id: 'add_cart_step',
         trigger: 'a:contains(Add to Cart)',
         run: 'click',
-    },
-        tourUtils.goToCart(), 
-    {
+    }, {
         trigger: 'span:contains(Custom TEST: Wood)',
         extra_trigger: '#cart_products',
         run: function (){}, // check

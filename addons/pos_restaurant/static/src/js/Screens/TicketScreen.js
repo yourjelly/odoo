@@ -89,7 +89,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                     }
 
                     if (!amount) {
-                        await this.setNoTip(serverId);
+                        await this.setNoTip();
                     } else {
                         order.finalized = false;
                         order.set_tip(amount);
@@ -111,7 +111,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                     return confirmed;
                 }
             }
-            async setNoTip(serverId) {
+            async setNoTip() {
                 await this.rpc({
                     method: 'set_no_tip',
                     model: 'pos.order',

@@ -1,13 +1,14 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/file_uploader/file_uploader.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 
-import core from 'web.core';
+const core = require('web.core');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-export class FileUploader extends Component {
+class FileUploader extends Component {
 
     /**
      * @override
@@ -43,7 +44,7 @@ export class FileUploader extends Component {
      */
     async uploadFiles(files) {
         await this._unlinkExistingAttachments(files);
-        this._createUploadingAttachments(files);
+        this._createTemporaryAttachments(files);
         await this._performUpload(files);
         this._fileInputRef.el.value = '';
     }
@@ -89,13 +90,13 @@ export class FileUploader extends Component {
      * @private
      * @param {FileList|Array} files
      */
-    _createUploadingAttachments(files) {
+    _createTemporaryAttachments(files) {
         for (const file of files) {
             this.env.models['mail.attachment'].create(
                 Object.assign(
                     {
                         filename: file.name,
-                        isUploading: true,
+                        isTemporary: true,
                         name: file.name
                     },
                     this.props.newAttachmentExtraData
@@ -111,7 +112,7 @@ export class FileUploader extends Component {
     async _performUpload(files) {
         for (const file of files) {
             const uploadingAttachment = this.env.models['mail.attachment'].find(attachment =>
-                attachment.isUploading &&
+                attachment.isTemporary &&
                 attachment.filename === file.name
             );
             if (!uploadingAttachment) {
@@ -169,14 +170,14 @@ export class FileUploader extends Component {
             if (error || !id) {
                 this.env.services['notification'].notify({
                     type: 'danger',
-                    message: error,
+                    message: owl.utils.escape(error),
                 });
-                const relatedUploadingAttachments = this.env.models['mail.attachment']
+                const relatedTemporaryAttachments = this.env.models['mail.attachment']
                     .find(attachment =>
                         attachment.filename === filename &&
-                        attachment.isUploading
+                        attachment.isTemporary
                     );
-                for (const attachment of relatedUploadingAttachments) {
+                for (const attachment of relatedTemporaryAttachments) {
                     attachment.delete();
                 }
                 return;
@@ -233,4 +234,8 @@ Object.assign(FileUploader, {
         uploadModel: String,
     },
     template: 'mail.FileUploader',
+});
+
+return FileUploader;
+
 });

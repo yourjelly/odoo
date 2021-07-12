@@ -138,12 +138,3 @@ class TestPartner(TransactionCase):
         self.assertEqual(partner.lang, 'fr_FR')
         self.assertEqual(partner.child_ids.filtered(lambda p: p.name == "First Child").lang, 'de_DE')
         self.assertEqual(partner.child_ids.filtered(lambda p: p.name == "Second Child").lang, 'fr_FR')
-
-    def test_partner_merge_wizard_dst_partner_id(self):
-        """ Check that dst_partner_id in merge wizard displays id along with partner name """
-        test_partner = self.env['res.partner'].create({'name': 'Radu the Handsome'})
-        expected_partner_name = '%s (%s)' % (test_partner.name, test_partner.id)
-
-        partner_merge_wizard = self.env['base.partner.merge.automatic.wizard'].with_context(
-            {'partner_show_db_id': True, 'default_dst_partner_id': test_partner}).new()
-        self.assertEqual(partner_merge_wizard.dst_partner_id.display_name, expected_partner_name, "'Destination Contact' name should contain db ID in brackets")

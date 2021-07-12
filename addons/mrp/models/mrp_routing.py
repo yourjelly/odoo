@@ -7,26 +7,26 @@ from odoo import api, fields, models, _
 class MrpRoutingWorkcenter(models.Model):
     _name = 'mrp.routing.workcenter'
     _description = 'Work Center Usage'
-    _order = 'bom_id, sequence, id'
+    _order = 'sequence, id'
     _check_company_auto = True
 
     name = fields.Char('Operation', required=True)
-    active = fields.Boolean(default=True)
     workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True, check_company=True)
     sequence = fields.Integer(
         'Sequence', default=100,
         help="Gives the sequence order when displaying a list of routing Work Centers.")
     bom_id = fields.Many2one(
-        'mrp.bom', 'Bill of Material',
-        index=True, ondelete='cascade', required=True,
+        'mrp.bom', 'Bill of Material', check_company=True,
+        index=True, ondelete='cascade',
         help="The Bill of Material this operation is linked to")
-    company_id = fields.Many2one('res.company', 'Company', related='bom_id.company_id')
+    company_id = fields.Many2one(
+        'res.company', 'Company', default=lambda self: self.env.company)
     worksheet_type = fields.Selection([
         ('pdf', 'PDF'), ('google_slide', 'Google Slide'), ('text', 'Text')],
         string="Work Sheet", default="text",
         help="Defines if you want to use a PDF or a Google Slide as work sheet."
     )
-    note = fields.Html('Description', help="Text worksheet description")
+    note = fields.Text('Description', help="Text worksheet description")
     worksheet = fields.Binary('PDF')
     worksheet_google_slide = fields.Char('Google Slide', help="Paste the url of your Google Slide. Make sure the access to the document is public.")
     time_mode = fields.Selection([
@@ -34,7 +34,6 @@ class MrpRoutingWorkcenter(models.Model):
         ('manual', 'Set duration manually')], string='Duration Computation',
         default='manual')
     time_mode_batch = fields.Integer('Based on', default=10)
-    time_computed_on = fields.Char('Computed on last', compute='_compute_time_computed_on')
     time_cycle_manual = fields.Float(
         'Manual Duration', default=60,
         help="Time in minutes:"
@@ -43,11 +42,6 @@ class MrpRoutingWorkcenter(models.Model):
     time_cycle = fields.Float('Duration', compute="_compute_time_cycle")
     workorder_count = fields.Integer("# Work Orders", compute="_compute_workorder_count")
     workorder_ids = fields.One2many('mrp.workorder', 'operation_id', string="Work Orders")
-
-    @api.depends('time_mode', 'time_mode_batch')
-    def _compute_time_computed_on(self):
-        for operation in self:
-            operation.time_computed_on = _('%i work orders') % operation.time_mode_batch if operation.time_mode != 'manual' else False
 
     @api.depends('time_cycle_manual', 'time_mode', 'workorder_ids')
     def _compute_time_cycle(self):
@@ -73,9 +67,3 @@ class MrpRoutingWorkcenter(models.Model):
         count_data = dict((item['operation_id'][0], item['operation_id_count']) for item in data)
         for operation in self:
             operation.workorder_count = count_data.get(operation.id, 0)
-
-    def copy_to_bom(self):
-        if 'bom_id' in self.env.context:
-            bom_id = self.env.context.get('bom_id')
-            for operation in self:
-                operation.copy({'name': _("%s (copy)", operation.name), 'bom_id': bom_id})

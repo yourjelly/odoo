@@ -54,7 +54,7 @@ class MailMail(models.Model):
         'Auto Delete',
         help="This option permanently removes any track of email after it's been sent, including from the Technical menu in the Settings, in order to preserve storage space of your Odoo database.")
     failure_reason = fields.Text(
-        'Failure Reason', readonly=1, copy=False,
+        'Failure Reason', readonly=1,
         help="Failure reason. This is usually the exception thrown by the email server, stored to ease the debugging of mailing issues.")
     scheduled_date = fields.Char('Scheduled Send Date',
         help="If set, the queue manager will send the email after the date. If not set, the email will be send as soon as possible.")
@@ -99,9 +99,6 @@ class MailMail(models.Model):
         if self._context.get('default_type') not in type(self).message_type.base_field.selection:
             self = self.with_context(dict(self._context, default_type=None))
         return super(MailMail, self).default_get(fields)
-
-    def action_retry(self):
-        self.filtered(lambda mail: mail.state == 'exception').mark_outgoing()
 
     def mark_outgoing(self):
         return self.write({'state': 'outgoing'})

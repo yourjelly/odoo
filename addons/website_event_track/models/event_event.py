@@ -10,6 +10,8 @@ class Event(models.Model):
 
     track_ids = fields.One2many('event.track', 'event_id', 'Tracks')
     track_count = fields.Integer('Track Count', compute='_compute_track_count')
+    sponsor_ids = fields.One2many('event.sponsor', 'event_id', 'Sponsors')
+    sponsor_count = fields.Integer('Sponsor Count', compute='_compute_sponsor_count')
     website_track = fields.Boolean(
         'Tracks on Website', compute='_compute_website_track',
         readonly=False, store=True)
@@ -28,6 +30,12 @@ class Event(models.Model):
         result = dict((data['event_id'][0], data['event_id_count']) for data in data)
         for event in self:
             event.track_count = result.get(event.id, 0)
+
+    def _compute_sponsor_count(self):
+        data = self.env['event.sponsor'].read_group([], ['event_id'], ['event_id'])
+        result = dict((data['event_id'][0], data['event_id_count']) for data in data)
+        for event in self:
+            event.sponsor_count = result.get(event.id, 0)
 
     @api.depends('event_type_id', 'website_menu')
     def _compute_website_track(self):
@@ -73,19 +81,33 @@ class Event(models.Model):
         super(Event, self)._update_website_menus(menus_update_by_field=menus_update_by_field)
         for event in self:
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('website_track')):
-                event._update_website_menu_entry('website_track', 'track_menu_ids', 'track')
+                event._update_website_menu_entry('website_track', 'track_menu_ids', '_get_track_menu_entries')
             if event.menu_id and (not menus_update_by_field or event in menus_update_by_field.get('website_track_proposal')):
-                event._update_website_menu_entry('website_track_proposal', 'track_proposal_menu_ids', 'track_proposal')
+                event._update_website_menu_entry('website_track_proposal', 'track_proposal_menu_ids', '_get_track_proposal_menu_entries')
 
     def _get_menu_type_field_matching(self):
         res = super(Event, self)._get_menu_type_field_matching()
         res['track_proposal'] = 'website_track_proposal'
         return res
 
-    def _get_website_menu_entries(self):
+    def _get_track_menu_entries(self):
+        """ Method returning menu entries to display on the website view of the
+        event, possibly depending on some options in inheriting modules.
+
+        Each menu entry is a tuple containing :
+          * name: menu item name
+          * url: if set, url to a route (do not use xml_id in that case);
+          * xml_id: template linked to the page (do not use url in that case);
+          * menu_type: key linked to the menu, used to categorize the created
+            website.event.menu;
+        """
         self.ensure_one()
-        return super(Event, self)._get_website_menu_entries() + [
+        return [
             (_('Talks'), '/event/%s/track' % slug(self), False, 10, 'track'),
-            (_('Agenda'), '/event/%s/agenda' % slug(self), False, 70, 'track'),
-            (_('Talk Proposals'), '/event/%s/track_proposal' % slug(self), False, 15, 'track_proposal')
+            (_('Agenda'), '/event/%s/agenda' % slug(self), False, 70, 'track')
         ]
+
+    def _get_track_proposal_menu_entries(self):
+        """ See website_event_track._get_track_menu_entries() """
+        self.ensure_one()
+        return [(_('Talk Proposals'), '/event/%s/track_proposal' % slug(self), False, 15, 'track_proposal')]

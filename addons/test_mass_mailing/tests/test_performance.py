@@ -45,13 +45,13 @@ class TestMassMailPerformance(TestMassMailPerformanceBase):
             'name': 'Test',
             'subject': 'Test',
             'body_html': '<p>Hello <a role="button" href="https://www.example.com/foo/bar?baz=qux">quux</a><a role="button" href="/unsubscribe_from_list">Unsubscribe</a></p>',
-            'reply_to_mode': 'new',
+            'reply_to_mode': 'email',
             'mailing_model_id': self.ref('test_mass_mailing.model_mailing_performance'),
             'mailing_domain': [('id', 'in', self.mm_recs.ids)],
         })
 
-        # runbot needs +50 compared to local
-        with self.assertQueryCount(__system__=1665, marketing=1665):
+        # runbot needs +51 compared to local
+        with self.assertQueryCount(__system__=1714, marketing=1715):  # test_mass_mailing_only: 1663 - 1664
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)
@@ -85,13 +85,13 @@ class TestMassMailBlPerformance(TestMassMailPerformanceBase):
             'name': 'Test',
             'subject': 'Test',
             'body_html': '<p>Hello <a role="button" href="https://www.example.com/foo/bar?baz=qux">quux</a><a role="button" href="/unsubscribe_from_list">Unsubscribe</a></p>',
-            'reply_to_mode': 'new',
+            'reply_to_mode': 'email',
             'mailing_model_id': self.ref('test_mass_mailing.model_mailing_performance_blacklist'),
             'mailing_domain': [('id', 'in', self.mm_recs.ids)],
         })
 
-        # runbot needs +62 compared to local
-        with self.assertQueryCount(__system__=1943, marketing=1943):
+        # runbot needs +63 compared to local
+        with self.assertQueryCount(__system__=1992, marketing=1993):  # test_mass_mailing only: 1929 - 1930
             mailing.action_send_mail()
 
         self.assertEqual(mailing.sent, 50)

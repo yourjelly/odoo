@@ -18,14 +18,10 @@
     color: gray('600');
 
     &.o-following {
-        color: o-text-color('success');
+        color: $green;
     }
 
     &.o-unfollow {
-        color: o-text-color('warning')
-    }
-
-    &:focus {
-        background-color: gray('200');
+        color: $orange;
     }
 }

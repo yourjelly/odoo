@@ -44,15 +44,15 @@ class StockWarehouseOrderpoint(models.Model):
             orderpoint.show_bom = orderpoint.route_id.id in manufacture_route
 
     def _quantity_in_progress(self):
-        bom_kits = self.env['mrp.bom']._bom_find(self.product_id, bom_type='phantom')
         bom_kit_orderpoints = {
-            orderpoint: bom_kits[orderpoint.product_id]
+            orderpoint: bom
             for orderpoint in self
-            if orderpoint.product_id in bom_kits
+            for bom in self.env['mrp.bom']._bom_find(product=orderpoint.product_id, bom_type='phantom')
+            if bom
         }
         res = super(StockWarehouseOrderpoint, self.filtered(lambda p: p not in bom_kit_orderpoints))._quantity_in_progress()
         for orderpoint in bom_kit_orderpoints:
-            dummy, bom_sub_lines = bom_kit_orderpoints[orderpoint].explode(orderpoint.product_id, 1)
+            boms, bom_sub_lines = bom_kit_orderpoints[orderpoint].explode(orderpoint.product_id, 1)
             ratios_qty_available = []
             # total = qty_available + in_progress
             ratios_total = []
@@ -74,16 +74,6 @@ class StockWarehouseOrderpoint(models.Model):
             product_qty = min(ratios_total or [0]) - min(ratios_qty_available or [0])
             res[orderpoint.id] = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.product_uom, round=False)
         return res
-
-    def _get_qty_multiple_to_order(self):
-        """ Calculates the minimum quantity that can be ordered according to the qty and UoM of the BoM
-        """
-        self.ensure_one()
-        qty_multiple_to_order = super()._get_qty_multiple_to_order()
-        if 'manufacture' in self.rule_ids.mapped('action'):
-            bom = self.env['mrp.bom']._bom_find(self.product_id, bom_type='normal')[self.product_id]
-            return bom.product_uom_id._compute_quantity(bom.product_qty, self.product_uom)
-        return qty_multiple_to_order
 
     def _set_default_route_id(self):
         route_id = self.env['stock.rule'].search([

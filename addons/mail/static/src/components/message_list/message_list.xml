@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.MessageList" owl="1">
-        <div class="o_MessageList" t-att-class="{ 'o-empty': threadView and threadView.messages.length === 0 }" t-on-scroll="onScroll">
+        <div class="o_MessageList" t-att-class="{ 'o-empty': threadView and threadView.messages.length === 0, 'o-has-message-selection': props.selectedMessageLocalId }" t-on-scroll="onScroll">
             <t t-if="threadView">
                 <!-- No result messages -->
                 <t t-if="threadView.nonEmptyMessages.length === 0">
@@ -37,17 +37,7 @@
                     </div>
                 </t>
                 <!-- LOADING (if order asc)-->
-                <t t-if="threadView.threadCache.hasLoadingFailed">
-                    <div class="o_ThreadView_alertLoadingFailed alert alert-info">
-                        <div>
-                            An error occured while fetching messages.
-                        </div>
-                        <button class="o_ThreadView_alertLoadingFailedRetryButton btn btn-link" t-on-click="_onClickRetryLoadMoreMessages">
-                            Click here to retry
-                        </button>
-                    </div>
-                </t>
-                <t t-elif="props.order === 'asc' and orderedMessages.length > 0">
+                <t t-if="props.order === 'asc' and orderedMessages.length > 0">
                     <t t-call="mail.MessageList.loadMore"/>
                 </t>
                 <!-- MESSAGES -->
@@ -73,9 +63,13 @@
                         </t>
                         <Message
                             class="o_MessageList_item o_MessageList_message"
+                            t-att-class="{
+                                'o-has-message-selection': props.selectedMessageLocalId,
+                            }"
                             hasMarkAsReadIcon="props.haveMessagesMarkAsReadIcon"
                             hasCheckbox="props.hasMessageCheckbox"
                             hasReplyIcon="props.haveMessagesReplyIcon"
+                            isSelected="props.selectedMessageLocalId === message.localId"
                             isSquashed="isMessageSquashed"
                             messageLocalId="message.localId"
                             threadViewLocalId="threadView.localId"
@@ -85,7 +79,7 @@
                     </t>
                 </t>
                 <!-- LOADING (if order desc)-->
-                <t t-if="!threadView.threadCache.hasLoadingFailed and props.order === 'desc' and orderedMessages.length > 0">
+                <t t-if="props.order === 'desc' and orderedMessages.length > 0">
                     <t t-call="mail.MessageList.loadMore"/>
                 </t>
             </t>
@@ -95,7 +89,7 @@
     <t t-name="mail.MessageList.loadMore" owl="1">
         <t t-if="threadView.threadCache.isLoadingMore">
             <div class="o_MessageList_item o_MessageList_isLoadingMore">
-                <i class="o_MessageList_isLoadingMoreIcon fa fa-spin fa-circle-o-notch"/>
+                <i class="o_MessageList_isLoadingMoreIcon fa fa-spin fa-spinner"/>
                 Loading...
             </div>
         </t>

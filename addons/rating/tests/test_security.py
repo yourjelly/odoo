@@ -8,7 +8,7 @@ from odoo.tools import mute_logger
 
 
 @tagged('security')
-class TestAccessRating(common.TransactionCase):
+class TestAccessRating(common.SavepointCase):
 
     @classmethod
     def setUpClass(cls):

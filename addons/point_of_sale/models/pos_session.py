@@ -8,6 +8,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_is_zero, float_compare
 
+
 class PosSession(models.Model):
     _name = 'pos.session'
     _order = 'id desc'
@@ -110,7 +111,10 @@ class PosSession(models.Model):
         for session in self:
             cash_payment_method = session.payment_method_ids.filtered('is_cash_count')[:1]
             if cash_payment_method:
-                total_cash_payment = sum(session.order_ids.mapped('payment_ids').filtered(lambda payment: payment.payment_method_id == cash_payment_method).mapped('amount'))
+                total_cash_payment = 0.0
+                result = self.env['pos.payment'].read_group([('session_id', '=', self.id), ('payment_method_id', '=', cash_payment_method.id)], ['amount'], ['session_id'])
+                if result:
+                    total_cash_payment = result[0]['amount']
                 session.cash_register_total_entry_encoding = session.cash_register_id.total_entry_encoding + (
                     0.0 if session.state == 'closed' else total_cash_payment
                 )
@@ -123,8 +127,10 @@ class PosSession(models.Model):
 
     @api.depends('order_ids.payment_ids.amount')
     def _compute_total_payments_amount(self):
+        result = self.env['pos.payment'].read_group([('session_id', 'in', self.ids)], ['amount'], ['session_id'])
+        session_amount_map = dict((data['session_id'][0], data['amount']) for data in result)
         for session in self:
-            session.total_payments_amount = sum(session.order_ids.mapped('payment_ids.amount'))
+            session.total_payments_amount = session_amount_map.get(session.id) or 0
 
     def _compute_order_count(self):
         orders_data = self.env['pos.order'].read_group([('session_id', 'in', self.ids)], ['session_id'], ['session_id'])
@@ -135,8 +141,8 @@ class PosSession(models.Model):
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_picking_count(self):
         for session in self:
-            session.picking_count = len(session.picking_ids.ids)
-            session.failed_pickings = bool(session.picking_ids.filtered(lambda p: p.state != 'done'))
+            session.picking_count = self.env['stock.picking'].search_count([('pos_session_id', '=', session.id)])
+            session.failed_pickings = bool(self.env['stock.picking'].search([('pos_session_id', '=', session.id), ('state', '!=', 'done')], limit=1))
 
     def action_stock_picking(self):
         self.ensure_one()
@@ -261,14 +267,16 @@ class PosSession(models.Model):
             session.write(values)
         return True
 
-    def action_pos_session_closing_control(self, balancing_account=False, amount_to_balance=0):
+    def action_pos_session_closing_control(self):
         self._check_pos_session_balance()
         for session in self:
+            if any(order.state == 'draft' for order in session.order_ids):
+                raise UserError(_("You cannot close the POS when orders are still in draft"))
             if session.state == 'closed':
                 raise UserError(_('This session is already closed.'))
             session.write({'state': 'closing_control', 'stop_at': fields.Datetime.now()})
             if not session.config_id.cash_control:
-                return session.action_pos_session_close(balancing_account, amount_to_balance)
+                session.action_pos_session_close()
 
     def _check_pos_session_balance(self):
         for session in self:
@@ -280,13 +288,13 @@ class PosSession(models.Model):
         self._check_pos_session_balance()
         return self.action_pos_session_close()
 
-    def action_pos_session_close(self, balancing_account=False, amount_to_balance=0):
+    def action_pos_session_close(self):
         # Session without cash payment method will not have a cash register.
         # However, there could be other payment methods, thus, session still
         # needs to be validated.
         self._check_bank_statement_state()
         if not self.cash_register_id:
-            return self._validate_session(balancing_account, amount_to_balance)
+            return self._validate_session()
 
         if self.cash_control and abs(self.cash_register_difference) > self.config_id.amount_authorized_diff:
             # Only pos manager can close statements with cash_register_difference greater than amount_authorized_diff.
@@ -298,9 +306,9 @@ class PosSession(models.Model):
             else:
                 return self._warning_balance_closing()
         else:
-            return self._validate_session(balancing_account, amount_to_balance)
+            return self._validate_session()
 
-    def _validate_session(self, balancing_account=False, amount_to_balance=0):
+    def _validate_session(self):
         self.ensure_one()
         sudo = self.user_has_groups('point_of_sale.group_pos_user')
         if self.order_ids or self.statement_ids.line_ids:
@@ -312,31 +320,16 @@ class PosSession(models.Model):
             self._check_if_no_draft_orders()
             if self.update_stock_at_closing:
                 self._create_picking_at_end_of_session()
+            # Users without any accounting rights won't be able to create the journal entry. If this
+            # case, switch to sudo for creation and posting.
             try:
-                data = self.with_company(self.company_id)._create_account_move(balancing_account, amount_to_balance)
+                self.with_company(self.company_id)._create_account_move()
             except AccessError as e:
                 if sudo:
-                    data = self.sudo().with_company(self.company_id)._create_account_move(balancing_account, amount_to_balance)
+                    self.sudo().with_company(self.company_id)._create_account_move()
                 else:
                     raise e
-
-            try:
-                balance = sum(self.move_id.line_ids.mapped('balance'))
-                self.move_id._check_balanced()
-            except UserError:
-                # Creating the account move is just part of a big database transaction
-                # when closing a session. There are other database changes that will happen
-                # before attempting to create the account move, such as, creating the picking
-                # records.
-                # We don't, however, want them to be committed when the account move creation
-                # failed; therefore, we need to roll back this transaction before showing the
-                # close session wizard.
-                self.env.cr.rollback()
-                return self._close_session_action(balance)
-
             if self.move_id.line_ids:
-                self.move_id._post()
-                self._reconcile_account_move_lines(data)
                 # Set the uninvoiced orders' state to 'done'
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
@@ -355,25 +348,6 @@ class PosSession(models.Model):
             'params': {'menu_id': self.env.ref('point_of_sale.menu_point_root').id},
         }
 
-    def _close_session_action(self, amount_to_balance):
-        default_account = self._get_balancing_account()
-        wizard = self.env['pos.close.session.wizard'].create({
-            'amount_to_balance': amount_to_balance,
-            'account_id': default_account.id,
-            'account_readonly': not self.env.user.has_group('account.group_account_readonly'),
-            'message': _("There is a difference between the amounts to post and the amounts of the orders, it is probably caused by taxes or accounting configurations changes.")
-        })
-        return {
-            'name': _("Force Close Session"),
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'pos.close.session.wizard',
-            'res_id': wizard.id,
-            'target': 'new',
-            'context': {**self.env.context, 'active_ids': self.ids, 'active_model': 'pos.session'},
-        }
-
     def _create_picking_at_end_of_session(self):
         self.ensure_one()
         lines_grouped_by_dest_location = {}
@@ -385,7 +359,7 @@ class PosSession(models.Model):
             session_destination_id = picking_type.default_location_dest_id.id
 
         for order in self.order_ids:
-            if order.company_id.anglo_saxon_accounting and order.is_invoiced or order.to_ship:
+            if order.company_id.anglo_saxon_accounting and order.is_invoiced:
                 continue
             destination_id = order.partner_id.property_stock_customer.id or session_destination_id
             if destination_id in lines_grouped_by_dest_location:
@@ -397,17 +371,24 @@ class PosSession(models.Model):
             pickings = self.env['stock.picking']._create_picking_from_pos_order_lines(location_dest_id, lines, picking_type)
             pickings.write({'pos_session_id': self.id, 'origin': self.name})
 
-    def _create_balancing_line(self, data, balancing_account, amount_to_balance):
-        if (not float_is_zero(amount_to_balance, precision_rounding=self.currency_id.rounding)):
-            balancing_vals = self._prepare_balancing_line_vals(amount_to_balance, self.move_id, balancing_account)
+    def _create_balancing_line(self, data):
+        imbalance_amount = 0
+        for line in self.move_id.line_ids:
+            # it is an excess debit so it should be credited
+            imbalance_amount += line.debit - line.credit
+
+        if (not float_is_zero(imbalance_amount, precision_rounding=self.currency_id.rounding)):
+            balancing_vals = self._prepare_balancing_line_vals(imbalance_amount, self.move_id)
             MoveLine = data.get('MoveLine')
             MoveLine.create(balancing_vals)
+
         return data
 
-    def _prepare_balancing_line_vals(self, imbalance_amount, move, balancing_account):
+    def _prepare_balancing_line_vals(self, imbalance_amount, move):
+        account = self._get_balancing_account()
         partial_vals = {
             'name': _('Difference at closing PoS session'),
-            'account_id': balancing_account.id,
+            'account_id': account.id,
             'move_id': move.id,
             'partner_id': False,
         }
@@ -423,7 +404,7 @@ class PosSession(models.Model):
         propoerty_account = self.env['ir.property']._get('property_account_receivable_id', 'res.partner')
         return self.company_id.account_default_pos_receivable_account_id or propoerty_account or self.env['account.account']
 
-    def _create_account_move(self, balancing_account=False, amount_to_balance=0):
+    def _create_account_move(self):
         """ Create account.move and account.move.line records for this session.
 
         Side-effects include:
@@ -447,10 +428,12 @@ class PosSession(models.Model):
         data = self._create_cash_statement_lines_and_cash_move_lines(data)
         data = self._create_invoice_receivable_lines(data)
         data = self._create_stock_output_lines(data)
-        if balancing_account and amount_to_balance:
-            data = self._create_balancing_line(data, balancing_account, amount_to_balance)
+        data = self._create_balancing_line(data)
 
-        return data
+        if account_move.line_ids:
+            account_move._post()
+
+        data = self._reconcile_account_move_lines(data)
 
     def _accumulate_amounts(self, data):
         # Accumulate the amounts for each accounting lines group

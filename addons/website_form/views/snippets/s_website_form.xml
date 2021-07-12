@@ -48,21 +48,21 @@
 
         <!-- Add Field Form -->
         <div data-js="AddFieldForm" data-selector=".s_website_form" data-target="form">
-            <we-button class="o_we_bg_brand_primary"
+            <we-button class="o_we_text_success"
                 title="Add a new field at the end"
                 data-add-field=""
                 data-no-preview="true">
-                + Field
+                <i class="fa fa-fw fa-plus"/>
             </we-button>
         </div>
 
         <!-- Add Field -->
         <div data-js="AddField" data-selector=".s_website_form_field" data-exclude=".s_website_form_dnone">
-            <we-button class="o_we_bg_brand_primary"
+            <we-button class="o_we_text_success"
                 title="Add a new field after this one"
                 data-add-field=""
                 data-no-preview="true">
-                + Field
+                <i class="fa fa-fw fa-plus"/>
             </we-button>
         </div>
 
@@ -92,15 +92,16 @@
                 <we-button data-select-type="tel">Telephone</we-button>
                 <we-button data-select-type="url">Url</we-button>
             </we-select>
-            <we-select string="⌙ Display" data-name="multi_check_display_opt" data-no-preview="true">
+            <t t-set="unit_textarea_height">rows</t>
+            <we-input string="Height" data-step="1" t-attf-data-select-attribute="3#{unit_textarea_height}" t-att-data-unit="unit_textarea_height"
+                data-attribute-name="rows" data-apply-to="textarea"/>
+            <we-select string="Display" data-name="multi_check_display_opt" data-no-preview="true">
                 <we-button data-multi-checkbox-display="horizontal">Horizontal</we-button>
                 <we-button data-multi-checkbox-display="vertical">Vertical</we-button>
             </we-select>
-            <t t-set="unit_textarea_height">rows</t>
-            <we-input string="⌙ Height" data-step="1" t-attf-data-select-attribute="3#{unit_textarea_height}" t-att-data-unit="unit_textarea_height"
-                data-attribute-name="rows" data-apply-to="textarea"/>
-            <we-input string="Label" class="o_we_large_input" data-set-label-text=""/>
-            <we-button-group string="⌙ Position">
+            <we-input string="Input Placeholder" class="o_we_large_input" data-name="placeholder_opt" data-set-placeholder=""/>
+            <we-input string="Label Name" class="o_we_large_input" data-set-label-text=""/>
+            <we-button-group string="Label Position">
                 <we-button title="Hide"
                            data-select-label-position="none">
                     <i class="fa fa-eye-slash"/>
@@ -115,22 +116,6 @@
                            data-select-label-position="right"
                            data-img="/website/static/src/img/snippets_options/pos_right.svg"/>
             </we-button-group>
-            <we-checkbox string="Description" data-toggle-description="true" data-no-preview="true"/>
-            <we-input string="Placeholder" class="o_we_large_input"
-                data-select-attribute="" data-attribute-name="placeholder"
-                data-apply-to="input[type='text'], input[type='email'], input[type='number'], input[type='tel'], input[type='url'], textarea"/>
-            <t t-set="default_value_label">Default Value</t>
-            <we-input t-att-string="default_value_label" class="o_we_large_input" data-select-textarea-value="" data-apply-to="textarea"/>
-            <we-checkbox t-att-string="default_value_label" data-select-attribute="checked" data-attribute-name="checked"
-                      data-apply-to=".col-sm > * > input[type='checkbox']" data-no-preview="true"/>
-            <we-input t-att-string="default_value_label" class="o_we_large_input" data-select-attribute="" data-attribute-name="value" data-select-property=""
-                      data-property-name="value" data-apply-to="input[type='text']:not(.datetimepicker-input), input[type='email'], input[type='tel'], input[type='url']"/>
-            <we-input t-att-string="default_value_label" class="o_we_large_input" data-select-attribute="" data-attribute-name="value" data-select-property=""
-                      data-step="1" data-property-name="value" data-apply-to="input[type='number']"/>
-            <we-datetimepicker t-att-string="default_value_label" data-select-attribute="" data-attribute-name="value" data-select-value-property=""
-                               data-apply-to=".s_website_form_datetime input"/>
-            <we-datepicker t-att-string="default_value_label" data-select-attribute="" data-attribute-name="value" data-select-value-property=""
-                           data-apply-to=".s_website_form_date input"/>
             <we-checkbox string="Required" data-name="required_opt" data-no-preview="true"
                 data-toggle-required="s_website_form_required"/>
             <we-checkbox string="Hidden" data-name="hidden_opt" data-no-preview="true"
@@ -157,24 +142,21 @@
     </xpath>
 </template>
 
+<template id="assets_snippet_s_website_form_css_000" inherit_id="website.assets_frontend" active="False">
+    <xpath expr="//link[last()]" position="after">
+        <link rel="stylesheet" type="text/scss" href="/website_form/static/src/snippets/s_website_form/000.scss"/>
+    </xpath>
+</template>
+<template id="assets_snippet_s_website_form_css_001" inherit_id="website.assets_frontend">
+    <xpath expr="//link[last()]" position="after">
+        <link rel="stylesheet" type="text/scss" href="/website_form/static/src/snippets/s_website_form/001.scss"/>
+    </xpath>
+</template>
 
-<record id="website_form.s_website_form_000_scss" model="ir.asset">
-    <field name="name">Website form 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website_form/static/src/snippets/s_website_form/000.scss</field>
-    <field name="active" eval="False"/>
-</record>
-
-<record id="website_form.s_website_form_001_scss" model="ir.asset">
-    <field name="name">Website form 001 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website_form/static/src/snippets/s_website_form/001.scss</field>
-</record>
-
-<record id="website_form.s_website_form_000_js" model="ir.asset">
-    <field name="name">Website form 000 JS</field>
-    <field name="bundle">web.assets_frontend</field>
-    <field name="path">website_form/static/src/snippets/s_website_form/000.js</field>
-</record>
+<template id="assets_snippet_s_website_form_js_000" inherit_id="website.assets_frontend">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website_form/static/src/snippets/s_website_form/000.js"/>
+    </xpath>
+</template>
 
 </odoo>

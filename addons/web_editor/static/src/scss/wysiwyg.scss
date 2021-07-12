@@ -21,27 +21,59 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     }
 }
 
-// Editor website toolbar
+// EDITOR TOP BAR AND POPOVER
+.note-popover .popover {
+    max-width: 350px;
+    left: 50% !important;
+    transform: translate(-50%, 0);
+
+    .popover-body {
+        white-space: normal;
+    }
+}
+
+#web_editor-top-edit {
+    @include o-position-absolute(0, 0, auto, 0);
+    position: fixed;
+    z-index: $o-we-zindex + 1;
+    height: var(--o-we-toolbar-height);
+    background-color: $o-we-bg;
+
+    .note-popover .popover {
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        border: none !important;
+        max-width: none;
+        transform: none;
+    }
+    .note-popover .popover .popover-body {
+        height: var(--o-we-toolbar-height);
+    }
+}
+
 .wysiwyg_iframe,
 .note-editor {
-    border: $o-we-border-width solid $o-we-fg-light;
+    border: $o-we-border-width solid $o-we-border-color;
     margin: 0;
     padding: 0;
 }
-.oe-toolbar {
+// avoid popover bar over its opened modal
+.note-popover .popover {
+    z-index: $o-we-overlay-zindex;
+}
+.note-popover .popover .popover-body,
+.panel-heading.note-toolbar {
     padding-bottom: 0;
-    border-bottom: $o-we-border-width solid $o-we-fg-light;
+    border-bottom: $o-we-border-width solid $o-we-border-color;
     background-color: $o-we-bg;
     color: $o-we-color;
     font-family: $o-we-font-family;
 
-    &.noarrow::before {
-        display: none;
-    }
-
     // Main layout of buttons
     .btn-group, .btn {
         width: auto !important;
+        height: 100% !important;
         margin-top: 0;
         margin-bottom: 0;
         background: transparent;
@@ -50,6 +82,31 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     }
     .btn-secondary {
         color: inherit;
+    }
+
+    // Active buttons and opened dropdowns
+    .btn {
+        padding: 0.5em 0.75em !important;
+        border-left: $o-we-item-border-width solid $o-we-item-border-color;
+        border-right: $o-we-item-border-width solid $o-we-item-border-color;
+        background: $o-we-sidebar-content-field-clickable-bg;
+        color: inherit;
+        font-size: $o-we-font-size !important;
+
+        &.active,
+        &:focus, &:active, &:focus:active {
+            @extend %we-active-button;
+        }
+
+        // This element should have been removed but still exists in 13.0 by
+        // mistake. This takes advantage of it to restore the color preview
+        // feature which disappeared and cannot be fixed as in 12.0.
+        // TODO fix the right way in 14.0.
+        > .caret {
+            display: block;
+            @include o-position-absolute(auto, 0, 0, 0);
+            border-bottom: 2px solid transparent;
+        }
     }
     .btn-group.show {
         > .btn {
@@ -68,25 +125,18 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         outline: none !important;
     }
     .dropdown-menu {
+        transform: none !important;
         margin-top: $o-we-dropdown-spacing;
         padding: 0;
+        margin-top: $o-we-toolbar-height;
         border: $o-we-dropdown-border-width solid $o-we-dropdown-border-color;
         background-color: $o-we-dropdown-bg;
         box-shadow: $o-we-dropdown-shadow;
-
-        &.colorpicker-menu {
-            bottom: 100%;
-            margin-top: 0;
-            margin-bottom: 0.125rem;
-        }
-    }
-    .dropdown-toggle::after {
-        display: none;
     }
     .dropdown-menu.show { // To overcome .note-XXX .dropdown-menu rules
         min-width: 0;
     }
-    .dropdown-item { // To overcome wysiwyg rules breaking this in iframes
+    .dropdown-item { // To overcome summernote rules breaking this in iframes
         display: block;
         max-width: none;
         overflow: visible;
@@ -116,54 +166,47 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         border-top: $o-we-dropdown-item-spacing solid transparent;
     }
 
-    // Specific elements
-    #colorInputButtonGroup label:last-of-type .btn {
-        margin: 0 1px 0 -1px;
-    }
-    .oe-tablepicker {
-        margin: 1px 2px -8px 2px !important;
+    .note-style {
+        .dropdown-item {
+            > * {
+                display: inline;;
+            }
+            &, > * {
+                line-height: 2;
+            }
+            &[data-value="blockquote"] {
+                padding-top: 0.5em;
+                padding-bottom: 0.5em;
 
-        .oe-tablepicker-cell {
-            width: 5px !important;
+                > * {
+                    display: block;
+                }
+            }
         }
     }
+
+    // Specific elements
     .o_image_alt {
         @include o-text-overflow();
         max-width: 150px;
     }
-}
-body:not(.editor_has_snippets) {
-    .oe-toolbar {
-        // Bootstrap sets .modal z-index at 1050. Ensure toolbar is visible in
-        // modals. Only apply this to the toolbar if it's not in a snippets menu.
-        z-index: 1051;
+    .note-color-palette div .note-color-btn {
+        border-color: $o-we-dropdown-bg;
     }
-}
-@media only screen and (max-width: 767px) {
-    .oe-toolbar {
-        background-color: white;
-
-        .btn {
-            color: black;
-        }
-        &::before {
-            display: none;
-        }
-        &::after {
-            display: none;
+    .note-custom-color-palette .note-color-row {
+        height: auto!important;
+        .note-color-btn {
+            float: left;
+            height: 20px;
+            width: 20px;
+            padding: 0;
+            margin: 0;
+            border: 1px solid $o-we-dropdown-bg;
         }
     }
 }
-
-.oe_edited_link {
-    position: relative;
-    display: inline-block;
-    &::before {
-        content: '';
-        border: dashed 3px #01bad2;
-        position: absolute;
-        inset: -5px;
-    }
+.note-color ul.show {
+    min-width: 216px !important;
 }
 
 // ANIMATIONS
@@ -259,7 +302,8 @@ body .modal {
             }
 
             .o_we_attachment_selected {
-                @include o-we-active-wrapper($top: 5px, $left: 5px);
+                border-color: $o-brand-primary;
+                box-shadow: 0px 0px 2px 2px $o-brand-primary;
             }
 
             .o_we_attachment_optimized .badge {
@@ -276,7 +320,7 @@ body .modal {
                     margin: 5px;
                     width: 50px;
                     height: 50px;
-                    padding: 15px 0; // 0 allows to center properly
+                    padding: 15px;
                     cursor: pointer;
                 }
             }
@@ -324,10 +368,6 @@ body .modal {
                         }
                     }
                 }
-
-                #video-suggestion > .o_sample_video {
-                    cursor: pointer;
-                }
             }
         }
     }
@@ -345,11 +385,15 @@ body .modal {
             border-left: 1px solid gray('200');
         }
     }
-}
 
-.o_we_progressbar:last-child {
-    hr {
-        display: none;
+    .o_we_image_optimize_dialog {
+        .o_we_title_label {
+            font-size: $o-we-font-size;
+        }
+        .o_we_preview_area {
+            max-height: 400px;
+            overflow: auto;
+        }
     }
 }
 
@@ -386,6 +430,16 @@ img::selection {
         height: initial !important;
         top: initial !important;
         left: initial !important;
+
+        #web_editor-toolbars .popover-body {
+            display: flex;
+            width: 100%;
+            overflow-x: auto;
+
+            .btn-group {
+                position: static;
+            }
+        }
     }
 }
 
@@ -403,34 +457,6 @@ img::selection {
             padding: 0.5rem 0; // To use more editor space if necessary
         }
     }
-}
-
-.o_wysiwyg_wrapper {
-    position: relative;
-    margin-bottom: 11px;
-}
-.o_wysiwyg_resizer {
-    background: #f5f5f5;
-    height: 10px;
-    width: 100%;
-    border-left: $o-we-border-width solid $o-we-fg-light;
-    border-bottom: $o-we-border-width solid $o-we-fg-light;
-    border-right: $o-we-border-width solid $o-we-fg-light;
-    cursor: row-resize;
-    padding-top: 1px;
-}
-.o_wysiwyg_resizer_hook {
-    width: 20px;
-    margin: 1px auto;
-    border-top: 1px solid #a9a9a9;
-}
-.note-editable {
-    border: $o-we-border-width solid $o-we-fg-light;
-    overflow: auto;
-    background: white;
-    color: black;
-    height: 100%;
-    padding: 5px 10px;
 }
 
 .o_we_no_pointer_events {
@@ -493,8 +519,4 @@ img::selection {
             }
         }
     }
-}
-
-[data-oe-xpath], [data-oe-xpath] [contenteditable=true] {
-    outline: none;
 }

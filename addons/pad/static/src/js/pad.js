@@ -10,13 +10,9 @@ var _t = core._t;
 var FieldPad = AbstractField.extend({
     template: 'FieldPad',
     content: "",
-    events: _.extend({}, AbstractField.prototype.events, {
+    events: {
         'click .oe_pad_switch': '_onToggleFullScreen',
-    }),
-    isQuickEditable: true,
-    quickEditExclusion: [
-        '[href]',
-    ],
+    },
 
     /**
      * @override
@@ -164,11 +160,6 @@ var FieldPad = AbstractField.extend({
                     .removeClass('oe_pad_loading')
                     .html('<div class="oe_pad_readonly"><div>');
                 self.$('.oe_pad_readonly').html(data);
-                _.each(self.$('a'), (link) => {
-                    if (link.hostname !== window.location.hostname && link.target === "") {
-                        link.target = "_blank";
-                    }
-                });
             }).guardedCatch(function () {
                 self.$('.oe_pad_content').text(_t('Unable to load pad'));
             });
@@ -184,13 +175,6 @@ var FieldPad = AbstractField.extend({
     // Handlers
     //--------------------------------------------------------------------------
 
-    /**
-     * @override
-     * @private
-     */
-    _onKeydown: function () {
-        // managed by the pad.
-    },
     /**
      * @override
      * @private

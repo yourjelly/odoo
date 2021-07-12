@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/utils/utils.js', function (require) {
+'use strict';
 
-import { delay } from 'web.concurrency';
-import {
-    patch as webUtilsPatch,
+const { delay } = require('web.concurrency');
+const {
+    patch: webUtilsPatch,
     unaccent,
-    unpatch as webUtilsUnpatch,
-} from 'web.utils';
+    unpatch: webUtilsUnpatch,
+} = require('web.utils');
 
 //------------------------------------------------------------------------------
 // Public
@@ -136,7 +137,7 @@ function patchClassMethods(Class, patchName, patch) {
  * @returns {function} unpatch function
  */
 function patchInstanceMethods(Class, patchName, patch) {
-    return webUtilsPatch(Class.prototype, patchName, patch);
+    return webUtilsPatch(Class, patchName, patch);
 }
 
 /**
@@ -170,14 +171,14 @@ function unpatchClassMethods(Class, patchName) {
  * @param {string} patchName
  */
 function unpatchInstanceMethods(Class, patchName) {
-    return webUtilsUnpatch(Class.prototype, patchName);
+    return webUtilsUnpatch(Class, patchName);
 }
 
 //------------------------------------------------------------------------------
 // Export
 //------------------------------------------------------------------------------
 
-export {
+return {
     cleanSearchTerm,
     executeGracefully,
     isEventHandled,
@@ -188,3 +189,5 @@ export {
     unpatchClassMethods,
     unpatchInstanceMethods,
 };
+
+});

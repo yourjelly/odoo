@@ -364,7 +364,7 @@ class TestMassSMS(TestMassSMSCommon):
             'mailing_model_id': self.env['ir.model']._get('mail.test.sms.partner.2many').id,
         })
 
-        self.env['mail.test.sms.partner.2many'].create([
+        records = self.env['mail.test.sms.partner.2many'].create([
             {'name': 'SMSTest on %s' % partner.name,
              'customer_ids': [(4, partner.id)],
             } for partner in self.partners

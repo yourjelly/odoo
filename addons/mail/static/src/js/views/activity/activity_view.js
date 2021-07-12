@@ -1,13 +1,13 @@
-/** @odoo-module **/;
+odoo.define('mail.ActivityView', function (require) {
+"use strict";
 
-import ActivityController from '@mail/js/views/activity/activity_controller';
-import ActivityModel from '@mail/js/views/activity/activity_model';
-import ActivityRenderer from '@mail/js/views/activity/activity_renderer';
-
-import BasicView from 'web.BasicView';
-import core from 'web.core';
-import RendererWrapper from 'web.RendererWrapper';
-import view_registry from 'web.view_registry';
+const ActivityController = require('mail.ActivityController');
+const ActivityModel = require('mail.ActivityModel');
+const ActivityRenderer = require('mail.ActivityRenderer');
+const BasicView = require('web.BasicView');
+const core = require('web.core');
+const RendererWrapper = require('web.RendererWrapper');
+const view_registry = require('web.view_registry');
 
 const _lt = core._lt;
 
@@ -48,4 +48,6 @@ const ActivityView = BasicView.extend({
 
 view_registry.add('activity', ActivityView);
 
-export default ActivityView;
+return ActivityView;
+
+});

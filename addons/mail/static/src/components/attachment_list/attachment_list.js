@@ -1,14 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/attachment_list/attachment_list.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { Attachment } from '@mail/components/attachment/attachment';
+const components = {
+    Attachment: require('mail/static/src/components/attachment/attachment.js'),
+};
+
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
 const { Component } = owl;
 
-const components = { Attachment };
-
-export class AttachmentList extends Component {
+class AttachmentList extends Component {
 
     /**
      * @override
@@ -110,4 +112,8 @@ Object.assign(AttachmentList, {
         },
     },
     template: 'mail.AttachmentList',
+});
+
+return AttachmentList;
+
 });

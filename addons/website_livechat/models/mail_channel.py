@@ -18,7 +18,7 @@ class MailChannel(models.Model):
          delete mail_channel as not useful to keep empty chat
          """
         super(MailChannel, self)._execute_channel_pin(pinned)
-        if self.livechat_active and not self.message_ids:
+        if self.livechat_active and not self.channel_message_ids:
             self.unlink()
 
     def channel_info(self, extra_info=False):
@@ -33,13 +33,13 @@ class MailChannel(models.Model):
             visitor = channel.livechat_visitor_id
             if visitor:
                 channel_infos_dict[channel.id]['visitor'] = {
-                    'display_name': visitor.display_name,
+                    'name': visitor.display_name,
                     'country_code': visitor.country_id.code.lower() if visitor.country_id else False,
                     'country_id': visitor.country_id.id,
                     'is_connected': visitor.is_connected,
                     'history': self.sudo()._get_visitor_history(visitor),
-                    'website_name': visitor.website_id.name,
-                    'lang_name': visitor.lang_id.name,
+                    'website': visitor.website_id.name,
+                    'lang': visitor.lang_id.name,
                     'partner_id': visitor.partner_id.id,
                 }
         return list(channel_infos_dict.values())

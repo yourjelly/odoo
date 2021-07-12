@@ -7,7 +7,6 @@ var publicWidget = require('web.public.widget');
 var utils = require('web.utils');
 var VariantMixin = require('sale.VariantMixin');
 var website_sale_utils = require('website_sale.utils');
-const cartHandlerMixin = website_sale_utils.cartHandlerMixin;
 
 var qweb = core.qweb;
 var _t = core._t;
@@ -67,7 +66,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
         $(document.body).on('click.product_comparaison_widget', '.o_comparelist_remove', function (ev) {
             self._removeFromComparelist(ev);
             self.guard.exec(function() {
-                var new_link = '/shop/compare?products=' + self.comparelist_product_ids.toString();
+                var new_link = '/shop/compare/?products=' + self.comparelist_product_ids.toString();
                 window.location.href = _.isEmpty(self.comparelist_product_ids) ? '/shop' : new_link;
             });
         });
@@ -100,12 +99,10 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
                 }
             }
 
-            let $form = $elem.closest('form');
-            $form = $form.length ? $form : $('#product_details > form');
             this.selectOrCreateProduct(
-                $form,
+                $elem.closest('form'),
                 productId,
-                $form.find('.product_template_id').val(),
+                $elem.closest('form').find('.product_template_id').val(),
                 false
             ).then(function (productId) {
                 productId = parseInt(productId, 10) || parseInt($elem.data('product-product-id'), 10);
@@ -236,7 +233,7 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
             this.$('.o_comparelist_products').addClass('d-md-block');
             if (this.comparelist_product_ids.length >=2) {
                 this.$('.o_comparelist_button').addClass('d-md-block');
-                this.$('.o_comparelist_button a').attr('href', '/shop/compare?products='+this.comparelist_product_ids.toString());
+                this.$('.o_comparelist_button a').attr('href', '/shop/compare/?products='+this.comparelist_product_ids.toString());
             }
         }
     },
@@ -253,12 +250,11 @@ var ProductComparison = publicWidget.Widget.extend(VariantMixin, {
     },
 });
 
-publicWidget.registry.ProductComparison = publicWidget.Widget.extend(cartHandlerMixin, {
-    selector: '.js_sale',
+publicWidget.registry.ProductComparison = publicWidget.Widget.extend({
+    selector: '.oe_website_sale',
     events: {
         'click .o_add_compare, .o_add_compare_dyn': '_onClickAddCompare',
         'click #o_comparelist_table tr': '_onClickComparelistTr',
-        'submit form[action="/shop/cart/update"]': '_onFormSubmit',
     },
 
     /**
@@ -267,7 +263,6 @@ publicWidget.registry.ProductComparison = publicWidget.Widget.extend(cartHandler
     start: function () {
         var def = this._super.apply(this, arguments);
         this.productComparison = new ProductComparison(this);
-        this.getRedirectOption();
         return Promise.all([def, this.productComparison.appendTo(this.$el)]);
     },
 
@@ -290,22 +285,6 @@ publicWidget.registry.ProductComparison = publicWidget.Widget.extend(cartHandler
         var $target = $(ev.currentTarget);
         $($target.data('target')).children().slideToggle(100);
         $target.find('.fa-chevron-circle-down, .fa-chevron-circle-right').toggleClass('fa-chevron-circle-down fa-chevron-circle-right');
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
-    _onFormSubmit(ev) {
-        ev.preventDefault();
-        const $form = $(ev.currentTarget);
-        const cellIndex = $(ev.currentTarget).closest('td')[0].cellIndex;
-        this.getCartHandlerOptions(ev);
-        // Override product image container for animation. 
-        this.$itemImgContainer = this.$('#o_comparelist_table tr').first().find('td').eq(cellIndex);
-        const productId = parseInt($form.find('input[type="hidden"][name="product_id"]').first().val());
-        if (productId) {
-            return this.addToCart({product_id: productId, add_qty: 1});
-        }
     },
 });
 return ProductComparison;

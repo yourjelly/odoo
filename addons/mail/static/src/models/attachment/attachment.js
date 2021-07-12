@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/attachment/attachment.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many, many2one } from '@mail/model/model_field';
-import { clear, insert, link, replace } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
-    let nextUploadingId = -1;
-    function getAttachmentNextUploadingId() {
-        const id = nextUploadingId;
-        nextUploadingId -= 1;
+    let nextTemporaryId = -1;
+    function getAttachmentNextTemporaryId() {
+        const id = nextTemporaryId;
+        nextTemporaryId -= 1;
         return id;
     }
     class Attachment extends dependencies['mail.model'] {
@@ -40,10 +41,10 @@ function factory(dependencies) {
 
             // relation
             if ('res_id' in data && 'res_model' in data) {
-                data2.originThread = insert({
+                data2.originThread = [['insert', {
                     id: data.res_id,
                     model: data.res_model,
-                });
+                }]];
             }
 
             return data2;
@@ -57,7 +58,7 @@ function factory(dependencies) {
             const dataList = isMulti ? data : [data];
             for (const data of dataList) {
                 if (!data.id) {
-                    data.id = getAttachmentNextUploadingId();
+                    data.id = getAttachmentNextTemporaryId();
                 }
             }
             return super.create(...arguments);
@@ -87,8 +88,8 @@ function factory(dependencies) {
                 return;
             }
             this.env.messaging.dialogManager.open('mail.attachment_viewer', {
-                attachment: link(attachment),
-                attachments: replace(attachments),
+                attachment: [['link', attachment]],
+                attachments: [['replace', attachments]],
             });
         }
 
@@ -99,7 +100,7 @@ function factory(dependencies) {
             if (this.isUnlinkPending) {
                 return;
             }
-            if (!this.isUploading) {
+            if (!this.isTemporary) {
                 this.update({ isUnlinkPending: true });
                 try {
                     await this.async(() => this.env.services.rpc({
@@ -128,24 +129,24 @@ function factory(dependencies) {
         }
 
         /**
-         * Reconciliation between uploading attachment and real attachment.
-         *
          * @private
+         * @returns {mail.composer[]}
          */
-        _created() {
-            if (this.isUploading) {
-                return;
+        _computeComposers() {
+            if (this.isTemporary) {
+                return [];
             }
-            const relatedUploadingAttachment = this.env.models['mail.attachment']
+            const relatedTemporaryAttachment = this.env.models['mail.attachment']
                 .find(attachment =>
                     attachment.filename === this.filename &&
-                    attachment.isUploading
+                    attachment.isTemporary
                 );
-            if (relatedUploadingAttachment) {
-                const composers = relatedUploadingAttachment.composers;
-                relatedUploadingAttachment.delete();
-                this.update({ composers: replace(composers) });
+            if (relatedTemporaryAttachment) {
+                const composers = relatedTemporaryAttachment.composers;
+                relatedTemporaryAttachment.delete();
+                return [['replace', composers]];
             }
+            return [];
         }
 
         /**
@@ -311,7 +312,7 @@ function factory(dependencies) {
          * @returns {AbortController|undefined}
          */
         _computeUploadingAbortController() {
-            if (this.isUploading) {
+            if (this.isTemporary) {
                 if (!this.uploadingAbortController) {
                     const abortController = new AbortController();
                     abortController.signal.onabort = () => {
@@ -323,7 +324,7 @@ function factory(dependencies) {
                 }
                 return this.uploadingAbortController;
             }
-            return;
+            return undefined;
         }
     }
 
@@ -336,6 +337,7 @@ function factory(dependencies) {
         }),
         checkSum: attr(),
         composers: many2many('mail.composer', {
+            compute: '_computeComposers',
             inverse: 'attachments',
         }),
         defaultSource: attr({
@@ -367,12 +369,13 @@ function factory(dependencies) {
                 'url',
             ],
         }),
-        id: attr({
-            required: true,
-        }),
+        id: attr(),
         isLinkedToComposer: attr({
             compute: '_computeIsLinkedToComposer',
             dependencies: ['composers'],
+        }),
+        isTemporary: attr({
+            default: false,
         }),
         isTextFile: attr({
             compute: '_computeIsTextFile',
@@ -382,9 +385,6 @@ function factory(dependencies) {
          * True if an unlink RPC is pending, used to prevent multiple unlink attempts.
          */
         isUnlinkPending: attr({
-            default: false,
-        }),
-        isUploading: attr({
             default: false,
         }),
         isViewable: attr({
@@ -422,7 +422,7 @@ function factory(dependencies) {
         uploadingAbortController: attr({
             compute: '_computeUploadingAbortController',
             dependencies: [
-                'isUploading',
+                'isTemporary',
                 'uploadingAbortController',
             ],
         }),
@@ -435,3 +435,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.attachment', factory);
+
+});

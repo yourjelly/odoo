@@ -1,4 +1,5 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/component_hooks/use_store/use_store.js', function (require) {
+'use strict';
 
 /**
  * Similar to owl.hooks.useStore but to decide if a new render has to be done it
@@ -14,7 +15,7 @@
  *  as number (applies to all keys) or as an object (depth for specific keys)
  * @returns {Proxy} @see owl.hooks.useStore
  */
-export function useStore(selector, options = {}) {
+function useStore(selector, options = {}) {
     const store = options.store || owl.Component.current.env.store;
     const hashFn = store.observer.revNumber.bind(store.observer);
     const isEqual = options.isEqual || ((a, b) => a === b);
@@ -119,3 +120,7 @@ export function useStore(selector, options = {}) {
         isEqual: proxyComparatorDeep(options.compareDepth),
     }));
 }
+
+return useStore;
+
+});

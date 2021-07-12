@@ -25,7 +25,7 @@ class ResPartnerAutocompleteSync(models.Model):
 
             if partner.vat and partner._is_vat_syncable(partner.vat):
                 params['vat'] = partner.vat
-                _, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('update', params)
+                result, error = partner._rpc_remote_api('update', params)
                 if error:
                     _logger.error('Send Partner to sync failed: %s' % str(error))
 

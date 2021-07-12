@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestMailFullRecipients
+from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestRecipients
 
 
-class TestSMSWizards(TestMailFullCommon, TestMailFullRecipients):
+class TestSMSWizards(TestMailFullCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):

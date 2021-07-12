@@ -3,11 +3,11 @@
 
 from datetime import datetime
 
-from odoo.tests.common import TransactionCase, new_test_user
+from odoo.tests.common import SavepointCase, new_test_user
 from odoo.exceptions import AccessError
 
 
-class TestAccessRights(TransactionCase):
+class TestAccessRights(SavepointCase):
 
     @classmethod
     def setUpClass(cls):

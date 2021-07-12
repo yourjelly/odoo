@@ -45,5 +45,4 @@ from . import test_reports
 from . import test_tests_tags
 from . import test_form_create
 from . import test_cloc
-from . import test_profiler
 from . import test_pdf

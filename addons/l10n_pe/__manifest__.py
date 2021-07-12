@@ -11,8 +11,6 @@
         'base_address_extended',
         'base_address_city',
         'l10n_latam_base',
-        'l10n_latam_invoice_document',
-        'account_debit_note',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -23,7 +21,6 @@
         'data/l10n_pe_chart_post_data.xml',
         'data/account_tax_data.xml',
         'data/fiscal_position_data.xml',
-        'data/l10n_latam_document_type_data.xml',
         'data/account_chart_template_data.xml',
         'data/res.city.csv',
         'data/l10n_pe.res.city.district.csv',

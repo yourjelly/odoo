@@ -184,6 +184,8 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             self.$newContentMenuChoices.removeClass('o_hidden');
             $('body').addClass('o_new_content_open');
             self.$('> a').focus();
+
+            wUtils.removeLoader();
         });
     },
     /**
@@ -307,7 +309,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                             }
                             // change style to use spinner
                             $i.removeClass()
-                                .addClass('fa fa-spin fa-circle-o-notch fa-spin')
+                                .addClass('fa fa-spin fa-spinner fa-pulse')
                                 .css('background-image', 'none');
                             $p.removeClass('o_uninstalled_module')
                                 .text(_.str.sprintf(self.newContentText.installPleaseWait, name));

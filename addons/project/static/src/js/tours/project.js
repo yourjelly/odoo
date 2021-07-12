@@ -29,7 +29,7 @@ tour.register('project_tour', {
 }, {
     trigger: 'input.o_project_name',
     content: _t('Choose a <b>name</b> for your project. <i>It can be anything you want: the name of a customer,\
-     of a product, of a team, of a construction site, etc.</i>'),
+     of a product, of a team, of a construction site...</i>'),
     position: 'right',
 }, {
     trigger: '.o_open_tasks',
@@ -39,23 +39,17 @@ tour.register('project_tour', {
         actions.auto('.modal:visible .btn.btn-primary');
     },
 }, {
-    trigger: ".o_kanban_project_tasks .o_column_quick_create .input-group",
+    trigger: ".o_kanban_project_tasks .o_column_quick_create input",
     content: _t("Add columns to organize your tasks into <b>stages</b> <i>e.g. New - In Progress - Done</i>."),
-    position: 'right',
-    run: function (actions) {
-        actions.text("Test", this.$anchor.find("input"));
-    },
+    position: 'bottom',
 }, {
     trigger: ".o_kanban_project_tasks .o_column_quick_create .o_kanban_add",
     auto: true,
 }, {
-    trigger: ".o_kanban_project_tasks .o_column_quick_create .input-group",
+    trigger: ".o_kanban_project_tasks .o_column_quick_create input",
     extra_trigger: '.o_kanban_group',
     content: _t("Add columns to organize your tasks into <b>stages</b> <i>e.g. New - In Progress - Done</i>."),
-    position: 'right',
-    run: function (actions) {
-        actions.text("Test", this.$anchor.find("input"));
-    },
+    position: 'bottom',
 }, {
     trigger: ".o_kanban_project_tasks .o_column_quick_create .o_kanban_add",
     auto: true,
@@ -88,8 +82,8 @@ tour.register('project_tour', {
     position: "bottom",
 }, {
     trigger: ".o_ChatterTopbar_buttonSendMessage",
-    content: _t("Use the chatter to <b>send emails</b> and communicate efficiently with your customers. \
-    Add new people to the followers' list to make them aware of the main changes about this task."),
+    content: _t("Use this chatter to <b>send emails</b> and communicate efficently with your customers. \
+    Add new people in the followers list to make them aware about the main changes about this task."),
     width: 350,
     position: "bottom",
 }, {
@@ -104,13 +98,13 @@ tour.register('project_tour', {
     content: _t("Use <b>activities</b> to organize your daily work."),
 }, {
     trigger: ".modal-dialog .btn-primary",
-    content: "Schedule your activity once it is ready.",
+    content: "Schedule your activity once it is ready",
     position: "bottom",
     run: "click",
 }, {
     trigger: ".breadcrumb-item:not(.active):last",
     extra_trigger: '.o_form_project_tasks.o_form_readonly',
-    content: _t("Let's go back to the <b>kanban view</b> to have an overview of your next tasks."),
+    content: _t("Let's go back to your <b>kanban view</b> to have an overview of your next tasks."),
     position: "right",
     run: 'click',
 }]);

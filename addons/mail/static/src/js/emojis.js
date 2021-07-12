@@ -1,4 +1,5 @@
-/** @odoo-module **/
+odoo.define('mail.emojis', function (require) {
+"use strict";
 
 /**
  * This module exports the list of all available emojis on the client side.
@@ -149,4 +150,6 @@ _.each(data, function (unicode, source) {
 
 var emojis = _.values(emojiDict);
 
-export default emojis;
+return emojis;
+
+});

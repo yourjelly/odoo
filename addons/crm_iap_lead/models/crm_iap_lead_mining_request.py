@@ -5,7 +5,6 @@ import logging
 
 from odoo import api, fields, models, _
 from odoo.addons.iap.tools import iap_tools
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -33,22 +32,19 @@ class CRMLeadMiningRequest(models.Model):
         return self.env.user.company_id.country_id
 
     name = fields.Char(string='Request Number', required=True, readonly=True, default=lambda self: _('New'), copy=False)
-    state = fields.Selection([('draft', 'Draft'), ('error', 'Error'), ('done', 'Done')], string='Status', required=True, default='draft')
+    state = fields.Selection([('draft', 'Draft'), ('done', 'Done'), ('error', 'Error')], string='Status', required=True, default='draft')
 
     # Request Data
     lead_number = fields.Integer(string='Number of Leads', required=True, default=3)
     search_type = fields.Selection([('companies', 'Companies'), ('people', 'Companies and their Contacts')], string='Target', required=True, default='companies')
-    error_type = fields.Selection([
-        ('credits', 'Insufficient Credits'),
-        ('no_result', 'No Result'),
-    ], string='Error Type', readonly=True)
+    error = fields.Text(string='Error', readonly=True)
 
     # Lead / Opportunity Data
 
     lead_type = fields.Selection([('lead', 'Leads'), ('opportunity', 'Opportunities')], string='Type', required=True, default=_default_lead_type)
     display_lead_label = fields.Char(compute='_compute_display_lead_label')
     team_id = fields.Many2one(
-        'crm.team', string='Sales Team', ondelete="set null",
+        'crm.team', string='Sales Team',
         domain="[('use_opportunities', '=', True)]", readonly=False, compute='_compute_team_id', store=True)
     user_id = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
     tag_ids = fields.Many2many('crm.tag', string='Tags')
@@ -61,8 +57,6 @@ class CRMLeadMiningRequest(models.Model):
     company_size_max = fields.Integer(default=1000)
     country_ids = fields.Many2many('res.country', string='Countries', default=_default_country_ids)
     state_ids = fields.Many2many('res.country.state', string='States')
-    available_state_ids = fields.One2many('res.country.state', compute='_compute_available_state_ids',
-        help="List of available states based on selected countries")
     industry_ids = fields.Many2many('crm.iap.lead.industry', string='Industries')
 
     # Contact Generation Filter
@@ -110,50 +104,10 @@ class CRMLeadMiningRequest(models.Model):
         for request in self:
             request.lead_count = mapped_data.get(request.id, 0)
 
-    @api.depends('user_id', 'lead_type')
+    @api.depends('user_id')
     def _compute_team_id(self):
-        """ When changing the user, also set a team_id or restrict team id
-        to the ones user_id is member of. """
-        for mining in self:
-            # setting user as void should not trigger a new team computation
-            if not mining.user_id:
-                continue
-            user = mining.user_id
-            if mining.team_id and user in mining.team_id.member_ids | mining.team_id.user_id:
-                continue
-            team_domain = [('use_leads', '=', True)] if mining.lead_type == 'lead' else [('use_opportunities', '=', True)]
-            team = self.env['crm.team']._get_default_team_id(user_id=user.id, domain=team_domain)
-            mining.team_id = team.id
-
-    @api.depends('country_ids')
-    def _compute_available_state_ids(self):
-        """ States for some specific countries should not be offered as filtering options because
-        they drastically reduce the amount of IAP reveal results.
-
-        For example, in Belgium, only 11% of companies have a defined state within the
-        reveal service while the rest of them have no state defined at all.
-
-        Meaning specifying states for that country will yield a lot less results than what you could
-        expect, which is not the desired behavior.
-        Obviously all companies are active within a state, it's just a lack of data in the reveal
-        service side.
-
-        To help users create meaningful iap searches, we only keep the states filtering for several
-        whitelisted countries (based on their country code).
-        The complete list and reasons for this change can be found on task-2471703. """
-
-        for lead_mining_request in self:
-            countries = lead_mining_request.country_ids.filtered(lambda country:
-                country.code in iap_tools._STATES_FILTER_COUNTRIES_WHITELIST)
-            lead_mining_request.available_state_ids = self.env['res.country.state'].search([
-                ('country_id', 'in', countries.ids)
-            ])
-
-    @api.onchange('available_state_ids')
-    def _onchange_available_state_ids(self):
-        self.state_ids -= self.state_ids.filtered(
-            lambda state: (state._origin.id or state.id) not in self.available_state_ids.ids
-        )
+        for record in self:
+            record.team_id = record.user_id.sale_team_id
 
     @api.onchange('lead_number')
     def _onchange_lead_number(self):
@@ -199,15 +153,7 @@ class CRMLeadMiningRequest(models.Model):
             payload.update({'company_size_min': self.company_size_min,
                             'company_size_max': self.company_size_max})
         if self.industry_ids:
-            # accumulate all reveal_ids (separated by ',') into one list
-            # eg: 3 records with values: "175,176", "177" and "190,191"
-            # will become ['175','176','177','190','191']
-            all_industry_ids = [
-                reveal_id.strip()
-                for reveal_ids in self.mapped('industry_ids.reveal_ids')
-                for reveal_id in reveal_ids.split(',')
-            ]
-            payload['industry_ids'] = all_industry_ids
+            payload['industry_ids'] = self.industry_ids.mapped('reveal_id')
         if self.search_type == 'people':
             payload.update({'contact_number': self.contact_number,
                             'contact_filter_type': self.contact_filter_type})
@@ -223,7 +169,6 @@ class CRMLeadMiningRequest(models.Model):
         This will perform the request and create the corresponding leads.
         The user will be notified if he hasn't enough credits.
         """
-        self.error_type = False
         server_payload = self._prepare_iap_payload()
         reveal_account = self.env['iap.account'].get('reveal')
         dbuuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
@@ -235,17 +180,12 @@ class CRMLeadMiningRequest(models.Model):
         }
         try:
             response = iap_tools.iap_jsonrpc(endpoint, params=params, timeout=300)
-            if not response.get('data'):
-                self.error_type = 'no_result'
-                return False
-
             return response['data']
         except iap_tools.InsufficientCreditError as e:
-            self.error_type = 'credits'
+            self.error = 'Insufficient credits. Recharge your account and retry.'
             self.state = 'error'
-            return False
-        except Exception as e:
-            raise UserError(_("Your request could not be executed: %s", e))
+            self._cr.commit()
+            raise e
 
     def _create_leads_from_response(self, result):
         """ This method will get the response from the service and create the leads accordingly """
@@ -292,45 +232,32 @@ class CRMLeadMiningRequest(models.Model):
         if self.name == _('New'):
             self.name = self.env['ir.sequence'].next_by_code('crm.iap.lead.mining.request') or _('New')
         results = self._perform_request()
-
         if results:
             self._create_leads_from_response(results)
             self.state = 'done'
-            if self.lead_type == 'lead':
-                return self.action_get_lead_action()
-            elif self.lead_type == 'opportunity':
-                return self.action_get_opportunity_action()
-        elif self.env.context.get('is_modal'):
-            # when we are inside a modal already, we re-open the same record
-            # that way, the form view is updated and the correct error message appears
-            # (sadly, there is no way to simply 'reload' a form view within a modal)
-            return {
-                'name': _('Generate Leads'),
-                'res_model': 'crm.iap.lead.mining.request',
-                'views': [[False, 'form']],
-                'target': 'new',
-                'type': 'ir.actions.act_window',
-                'res_id': self.id,
-                'context': dict(self.env.context, edit=True, form_view_initial_mode='edit')
-            }
-        else:
-            # will reload the form view and show the error message on top
-            return False
+        if self.lead_type == 'lead':
+            return self.action_get_lead_action()
+        elif self.lead_type == 'opportunity':
+            return self.action_get_opportunity_action()
 
     def action_get_lead_action(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("crm.crm_lead_all_leads")
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'lead')]
+        action['help'] = _("""<p class="o_view_nocontent_empty_folder">
+            No leads found
+        </p><p>
+            No leads could be generated according to your search criteria
+        </p>""")
         return action
 
     def action_get_opportunity_action(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("crm.crm_lead_opportunities")
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'opportunity')]
+        action['help'] = _("""<p class="o_view_nocontent_empty_folder">
+            No opportunities found
+        </p><p>
+            No opportunities could be generated according to your search criteria
+        </p>""")
         return action
-
-    def action_buy_credits(self):
-        return {
-            'type': 'ir.actions.act_url',
-            'url': self.env['iap.account'].get_credits_url(service_name='reveal'),
-        }

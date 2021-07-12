@@ -55,10 +55,10 @@ class Rating(models.Model):
     rating = fields.Float(string="Rating Value", group_operator="avg", default=0, help="Rating value: 0=Unhappy, 5=Happy")
     rating_image = fields.Binary('Image', compute='_compute_rating_image')
     rating_text = fields.Selection([
-        ('top', 'Satisfied'),
-        ('ok', 'Okay'),
-        ('ko', 'Dissatisfied'),
-        ('none', 'No Rating yet')], string='Rating', store=True, compute='_compute_rating_text', readonly=True)
+        ('satisfied', 'Satisfied'),
+        ('not_satisfied', 'Not satisfied'),
+        ('highly_dissatisfied', 'Highly dissatisfied'),
+        ('no_rating', 'No Rating yet')], string='Rating', store=True, compute='_compute_rating_text', readonly=True)
     feedback = fields.Text('Comment', help="Reason of the rating")
     message_id = fields.Many2one(
         'mail.message', string="Message",
@@ -117,20 +117,19 @@ class Rating(models.Model):
     def _compute_rating_text(self):
         for rating in self:
             if rating.rating >= RATING_LIMIT_SATISFIED:
-                rating.rating_text = 'top'
+                rating.rating_text = 'satisfied'
             elif rating.rating >= RATING_LIMIT_OK:
-                rating.rating_text = 'ok'
+                rating.rating_text = 'not_satisfied'
             elif rating.rating >= RATING_LIMIT_MIN:
-                rating.rating_text = 'ko'
+                rating.rating_text = 'highly_dissatisfied'
             else:
-                rating.rating_text = 'none'
+                rating.rating_text = 'no_rating'
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for values in vals_list:
-            if values.get('res_model_id') and values.get('res_id'):
-                values.update(self._find_parent_data(values))
-        return super().create(vals_list)
+    @api.model
+    def create(self, values):
+        if values.get('res_model_id') and values.get('res_id'):
+            values.update(self._find_parent_data(values))
+        return super(Rating, self).create(values)
 
     def write(self, values):
         if values.get('res_model_id') and values.get('res_id'):

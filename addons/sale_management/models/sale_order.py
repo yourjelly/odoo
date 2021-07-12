@@ -5,7 +5,6 @@ from datetime import timedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import is_html_empty
 
 
 class SaleOrder(models.Model):
@@ -54,7 +53,7 @@ class SaleOrder(models.Model):
     def onchange_partner_id(self):
         super(SaleOrder, self).onchange_partner_id()
         template = self.sale_order_template_id.with_context(lang=self.partner_id.lang)
-        self.note = template.note if not is_html_empty(template.note) else self.note
+        self.note = template.note or self.note
 
     def _compute_line_data_for_template_change(self, line):
         return {
@@ -146,7 +145,7 @@ class SaleOrder(models.Model):
         self.require_signature = template.require_signature
         self.require_payment = template.require_payment
 
-        if not is_html_empty(template.note):
+        if template.note:
             self.note = template.note
 
     def action_confirm(self):

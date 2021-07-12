@@ -1,7 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/thread/thread_tests.js', function (require) {
+'use strict';
 
-import { insert } from '@mail/model/model_field_command';
-import { afterEach, beforeEach, start } from '@mail/utils/test_utils';
+const { afterEach, beforeEach, start } = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('models', {}, function () {
@@ -55,7 +55,7 @@ QUnit.test('create (channel)', async function (assert) {
     const thread = this.env.models['mail.thread'].create({
         channel_type: 'channel',
         id: 100,
-        members: insert([{
+        members: [['insert', [{
             email: "john@example.com",
             id: 9,
             name: "John",
@@ -63,7 +63,7 @@ QUnit.test('create (channel)', async function (assert) {
             email: "fred@example.com",
             id: 10,
             name: "Fred",
-        }]),
+        }]]],
         message_needaction_counter: 6,
         model: 'mail.channel',
         name: "General",
@@ -113,12 +113,12 @@ QUnit.test('create (chat)', async function (assert) {
     const channel = this.env.models['mail.thread'].create({
         channel_type: 'chat',
         id: 200,
-        members: insert({
+        members: [['insert', {
             email: "demo@example.com",
             id: 5,
             im_status: 'online',
             name: "Demo",
-        }),
+        }]],
         model: 'mail.channel',
     });
     assert.ok(channel);
@@ -145,4 +145,6 @@ QUnit.test('create (chat)', async function (assert) {
 
 });
 });
+});
+
 });

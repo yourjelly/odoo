@@ -19,7 +19,7 @@ class ResCompany(models.Model):
 
     @api.onchange('country_id')
     def onchange_country(self):
-        """ Argentinean companies use round_globally as tax_calculation_rounding_method """
+        """ Argentinian companies use round_globally as tax_calculation_rounding_method """
         for rec in self.filtered(lambda x: x.country_id.code == "AR"):
             rec.tax_calculation_rounding_method = 'round_globally'
 
@@ -31,7 +31,7 @@ class ResCompany(models.Model):
         remaining.l10n_ar_company_requires_vat = False
 
     def _localization_use_documents(self):
-        """ Argentinean localization use documents """
+        """ Argentinian localization use documents """
         self.ensure_one()
         return True if self.country_id.code == "AR" else super()._localization_use_documents()
 

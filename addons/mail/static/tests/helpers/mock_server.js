@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail.MockServer', function (require) {
+"use strict";
 
-import { nextAnimationFrame } from '@mail/utils/test_utils';
+const { nextAnimationFrame } = require('mail/static/src/utils/test_utils.js');
 
-import MockServer from 'web.MockServer';
+const MockServer = require('web.MockServer');
 
 MockServer.include({
     /**
@@ -250,13 +251,15 @@ MockServer.include({
         if (args.method === 'message_subscribe') {
             const ids = args.args[0];
             const partner_ids = args.args[1] || args.kwargs.partner_ids;
-            const subtype_ids = args.args[2] || args.kwargs.subtype_ids;
-            return this._mockMailThreadMessageSubscribe(args.model, ids, partner_ids, subtype_ids);
+            const channel_ids = args.args[2] || args.kwargs.channel_ids;
+            const subtype_ids = args.args[3] || args.kwargs.subtype_ids;
+            return this._mockMailThreadMessageSubscribe(args.model, ids, partner_ids, channel_ids, subtype_ids);
         }
         if (args.method === 'message_unsubscribe') {
             const ids = args.args[0];
             const partner_ids = args.args[1] || args.kwargs.partner_ids;
-            return this._mockMailThreadMessageUnsubscribe(args.model, ids, partner_ids);
+            const channel_ids = args.args[2] || args.kwargs.channel_ids;
+            return this._mockMailThreadMessageUnsubscribe(args.model, ids, partner_ids, channel_ids);
         }
         if (args.method === 'message_post') {
             const id = args.args[0];
@@ -415,7 +418,7 @@ MockServer.include({
             moderation_counter,
             needaction_inbox_counter,
             partner_root: partnerRootFormat,
-            public_partners: [publicPartnerFormat],
+            public_partner: publicPartnerFormat,
             shortcodes,
             starred_counter: starredCounter,
         };
@@ -597,10 +600,7 @@ MockServer.include({
     _mockMailChannelChannelFetched(ids) {
         const channels = this._getRecords('mail.channel', [['id', 'in', ids]]);
         for (const channel of channels) {
-            const channelMessages = this._getRecords('mail.message', [
-                ['model', '=', 'mail.channel'],
-                ['res_id', '=', channel.id],
-            ]);
+            const channelMessages = this._getRecords('mail.message', [['channel_ids', 'in', channel.id]]);
             const lastMessage = channelMessages.reduce((lastMessage, message) => {
                 if (message.id > lastMessage.id) {
                     return message;
@@ -636,10 +636,7 @@ MockServer.include({
     _mockMailChannelChannelFetchPreview(ids) {
         const channels = this._getRecords('mail.channel', [['id', 'in', ids]]);
         return channels.map(channel => {
-            const channelMessages = this._getRecords('mail.message', [
-                ['model', '=', 'mail.channel'],
-                ['res_id', '=', channel.id],
-            ]);
+            const channelMessages = this._getRecords('mail.message', [['channel_ids', 'in', channel.id]]);
             const lastMessage = channelMessages.reduce((lastMessage, message) => {
                 if (message.id > lastMessage.id) {
                     return message;
@@ -732,8 +729,7 @@ MockServer.include({
         return channels.map(channel => {
             const members = channel.members.map(partnerId => partnerInfos[partnerId]);
             const messages = this._getRecords('mail.message', [
-                ['model', '=', 'mail.channel'],
-                ['res_id', '=', channel.id],
+                ['channel_ids', 'in', [channel.id]],
             ]);
             const lastMessageId = messages.reduce((lastMessageId, message) => {
                 if (!lastMessageId || message.id > lastMessageId) {
@@ -754,12 +750,6 @@ MockServer.include({
             });
             if (channel.channel_type === 'channel') {
                 delete res.members;
-            } else {
-                res['seen_partners_info'] = [{
-                    partner_id: this.currentPartnerId,
-                    seen_message_id: channel.seen_message_id,
-                    fetched_message_id: channel.fetched_message_id,
-                }];
             }
             return res;
         });
@@ -810,9 +800,8 @@ MockServer.include({
         }
         const channel = this._getRecords('mail.channel', [['id', '=', channel_id]])[0];
         const messagesBeforeGivenLastMessage = this._getRecords('mail.message', [
+            ['channel_ids', 'in', [channel.id]],
             ['id', '<=', last_message_id],
-            ['model', '=', 'mail.channel'],
-            ['res_id', '=', channel.id],
         ]);
         if (!messagesBeforeGivenLastMessage || messagesBeforeGivenLastMessage.length === 0) {
             return;
@@ -887,9 +876,8 @@ MockServer.include({
                     ["dbName", 'res.partner', this.currentPartnerId],
                     {
                         'body': `<span class="o_mail_notification">${message}</span>`,
+                        'channel_ids': [channel.id],
                         'info': 'transient_message',
-                        'model': 'mail.channel',
-                        'res_id': channel.id,
                     }
                 ];
                 this._widget.call('bus_service', 'trigger', 'notification', [notification]);
@@ -977,10 +965,15 @@ MockServer.include({
                 moderation_status = 'pending_moderation';
             }
         }
+        let channel_ids = [];
+        if (moderation_status === 'accepted') {
+            channel_ids = [[4, channel.id]];
+        }
         const messageId = this._mockMailThreadMessagePost(
             'mail.channel',
             [id],
             Object.assign(kwargs, {
+                channel_ids,
                 message_type,
                 moderation_status,
             }),
@@ -1027,7 +1020,7 @@ MockServer.include({
         this._widget.call('bus_service', 'trigger', 'notification', notifications);
     },
     /**
-     * Simulates `_get_channel_partner_info` on `mail.channel`.
+     * Simulates `partner_info` on `mail.channel`.
      *
      * @private
      * @param {integer[]} all_partners
@@ -1275,7 +1268,7 @@ MockServer.include({
                 this._mockWrite('mail.message', [[message.id], {
                     moderation_status: 'accepted',
                 }]);
-                this._mockMailThread_NotifyThread(model, [message.res_id], message.id);
+                this._mockMailThread_NotifyThread(model, message.channel_ids, message.id);
             }
         }
     },
@@ -1341,7 +1334,9 @@ MockServer.include({
                     ),
                 },
             ]);
-            const data = { type: 'mark_as_read', message_ids: [message.id], needaction_inbox_counter: this._mockResPartnerGetNeedactionCount() };
+            // NOTE server is sending grouped notifications per channel_ids but
+            // this optimization is not needed here.
+            const data = { type: 'mark_as_read', message_ids: [message.id], channel_ids: message.channel_ids, needaction_inbox_counter: this._mockResPartnerGetNeedactionCount() };
             const busNotifications = [[[false, 'res.partner', this.currentPartnerId], data]];
             this._widget.call('bus_service', 'trigger', 'notification', busNotifications);
         }
@@ -1612,10 +1607,11 @@ MockServer.include({
      * @param {string} model not in server method but necessary for thread mock
      * @param {integer[]} ids
      * @param {integer[]} partner_ids
+     * @param {integer[]} channel_ids
      * @param {integer[]} subtype_ids
      * @returns {boolean}
      */
-    _mockMailThreadMessageSubscribe(model, ids, partner_ids, subtype_ids) {
+    _mockMailThreadMessageSubscribe(model, ids, partner_ids, channel_ids, subtype_ids) {
         // message_subscribe is too complex for a generic mock.
         // mockRPC should be considered for a specific result.
     },
@@ -1642,7 +1638,7 @@ MockServer.include({
             notifications.push([[false, 'res.partner', message.author_id], notificationData]);
         }
         // members
-        const channels = this._getRecords('mail.channel', [['id', '=', message.res_id]]);
+        const channels = this._getRecords('mail.channel', [['id', 'in', message.channel_ids]]);
         for (const channel of channels) {
             notifications.push([[false, 'mail.channel', channel.id], messageFormat]);
         }
@@ -1655,16 +1651,19 @@ MockServer.include({
      * @param {string} model not in server method but necessary for thread mock
      * @param {integer[]} ids
      * @param {integer[]} partner_ids
+     * @param {integer[]} channel_ids
      * @returns {boolean|undefined}
      */
-    _mockMailThreadMessageUnsubscribe(model, ids, partner_ids) {
-        if (!partner_ids) {
+    _mockMailThreadMessageUnsubscribe(model, ids, partner_ids, channel_ids) {
+        if (!partner_ids && !channel_ids) {
             return true;
         }
         const followers = this._getRecords('mail.followers', [
             ['res_model', '=', model],
             ['res_id', 'in', ids],
+            '|',
             ['partner_id', 'in', partner_ids || []],
+            ['channel_id', 'in', channel_ids || []],
         ]);
         this._mockUnlink(model, [followers.map(follower => follower.id)]);
     },
@@ -1689,7 +1688,7 @@ MockServer.include({
          * @param {integer} limit
          * @returns {Object[]}
          */
-        const mentionSuggestionsFilter = (partners, search, limit) => {
+        const mentionSuggestionsFilter = function (partners, search, limit) {
             const matchingPartners = partners
                 .filter(partner => {
                     // no search term is considered as return all
@@ -1704,7 +1703,14 @@ MockServer.include({
                         return true;
                     }
                     return false;
-                }).map(partner => this._mockResPartnerMailPartnerFormat(partner.id));
+                }).map(partner => {
+                    // expected format
+                    return {
+                        email: partner.email,
+                        id: partner.id,
+                        name: partner.name,
+                    };
+                });
             // reduce results to max limit
             matchingPartners.length = Math.min(matchingPartners.length, limit);
             return matchingPartners;
@@ -1718,12 +1724,11 @@ MockServer.include({
 
         let extraMatchingPartners = [];
         // if not enough results add extra suggestions based on partners
-        const remainingLimit = limit - mainMatchingPartners.length;
         if (mainMatchingPartners.length < limit) {
             const partners = this._getRecords('res.partner', [['id', 'not in', mainMatchingPartners.map(partner => partner.id)]]);
-            extraMatchingPartners = mentionSuggestionsFilter(partners, search, remainingLimit);
+            extraMatchingPartners = mentionSuggestionsFilter(partners, search, limit);
         }
-        return mainMatchingPartners.concat(extraMatchingPartners);
+        return [mainMatchingPartners, extraMatchingPartners];
     },
     /**
      * Simulates `get_needaction_count` on `res.partner`.
@@ -1791,15 +1796,14 @@ MockServer.include({
             [['id', '=', id]],
             { active_test: false }
         )[0];
-        // Servers is also returning `user_id` and `is_internal_user` but not
-        // done here for simplification.
         return {
             "active": partner.active,
             "display_name": partner.display_name,
-            "email": partner.email,
             "id": partner.id,
             "im_status": partner.im_status,
             "name": partner.name,
         };
     },
+});
+
 });

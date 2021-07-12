@@ -1,39 +1,35 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/utils/test_utils.js', function (require) {
+'use strict';
 
-import BusService from 'bus.BusService';
-
-import {
-    addMessagingToEnv,
-    addTimeControlToEnv,
-} from '@mail/env/test_env';
-import { ModelManager } from '@mail/model/model_manager';
-import ChatWindowService from '@mail/services/chat_window_service/chat_window_service';
-import DialogService from '@mail/services/dialog_service/dialog_service';
-import { nextTick } from '@mail/utils/utils';
-import DiscussWidget from '@mail/widgets/discuss/discuss';
-import MessagingMenuWidget from '@mail/widgets/messaging_menu/messaging_menu';
-import { MockModels } from '@mail/../tests/helpers/mock_models';
-
-import AbstractStorageService from 'web.AbstractStorageService';
-import NotificationService from 'web.NotificationService';
-import RamStorage from 'web.RamStorage';
-import {
-    createView,
-    makeTestPromise,
-    mock,
-} from 'web.test_utils';
-import Widget from 'web.Widget';
-import { createWebClient, getActionManagerServerData } from "@web/../tests/webclient/helpers";
-
-import { ComponentAdapter } from "web.OwlCompatibility";
-import LegacyMockServer from "web.MockServer";
-import LegacyRegistry from "web.Registry";
+const BusService = require('bus.BusService');
 
 const {
-    addMockEnvironment,
-    patch: legacyPatch,
-    unpatch: legacyUnpatch,
-} = mock;
+    addMessagingToEnv,
+    addTimeControlToEnv,
+} = require('mail/static/src/env/test_env.js');
+const ModelManager = require('mail/static/src/model/model_manager.js');
+const ChatWindowService = require('mail/static/src/services/chat_window_service/chat_window_service.js');
+const DialogService = require('mail/static/src/services/dialog_service/dialog_service.js');
+const { nextTick } = require('mail/static/src/utils/utils.js');
+const DiscussWidget = require('mail/static/src/widgets/discuss/discuss.js');
+const MessagingMenuWidget = require('mail/static/src/widgets/messaging_menu/messaging_menu.js');
+const MockModels = require('mail/static/tests/helpers/mock_models.js');
+
+const AbstractStorageService = require('web.AbstractStorageService');
+const NotificationService = require('web.NotificationService');
+const RamStorage = require('web.RamStorage');
+const {
+    createActionManager,
+    createView,
+    makeTestPromise,
+    mock: {
+        addMockEnvironment,
+        patch: legacyPatch,
+        unpatch: legacyUnpatch,
+    },
+} = require('web.test_utils');
+const Widget = require('web.Widget');
+
 const { Component } = owl;
 
 //------------------------------------------------------------------------------
@@ -388,8 +384,8 @@ async function createRootComponent(self, Component, { props = {}, target }) {
  * @param {Object} [param0.env={}]
  * @param {function} [param0.mockFetch]
  * @param {function} [param0.mockRPC]
- * @param {boolean} [param0.hasWebClient=false] if set, use
- *   createWebClient
+ * @param {boolean} [param0.hasActionManager=false] if set, use
+ *   createActionManager.
  * @param {boolean} [param0.hasChatWindow=false] if set, mount chat window
  *   service.
  * @param {boolean} [param0.hasDiscuss=false] if set, mount discuss app.
@@ -445,7 +441,7 @@ async function start(param0 = {}) {
     };
     const {
         env: providedEnv,
-        hasWebClient = false,
+        hasActionManager = false,
         hasChatWindow = false,
         hasDialog = false,
         hasDiscuss = false,
@@ -460,7 +456,7 @@ async function start(param0 = {}) {
         throw Error(`Unknown parameter value ${waitUntilMessagingCondition} for 'waitUntilMessaging'.`);
     }
     delete param0.env;
-    delete param0.hasWebClient;
+    delete param0.hasActionManager;
     delete param0.hasChatWindow;
     delete param0.hasDiscuss;
     delete param0.hasMessagingMenu;
@@ -549,47 +545,8 @@ async function start(param0 = {}) {
                 }
             }
         });
-    } else if (hasWebClient) {
-        let serverData;
-        if (!kwargs.serverData) {
-            serverData = getActionManagerServerData();
-        } else {
-            serverData = kwargs.serverData;
-            delete kwargs.serverData;
-        }
-
-        if (kwargs.actions) {
-            const actions = {};
-            kwargs.actions.forEach((act) => {
-                actions[act.xml_id || act.id] = act;
-            });
-            Object.assign(serverData.actions, actions);
-            delete kwargs.actions;
-        }
-
-        Object.assign(serverData.views, kwargs.archs);
-        delete kwargs.archs;
-
-        Object.assign(serverData.models, kwargs.data);
-        delete kwargs.data;
-
-        const mockRPC = kwargs.mockRPC;
-        delete kwargs.mockRPC;
-
-        if (kwargs.services) {
-            const serviceRegistry = kwargs.serviceRegistry = new LegacyRegistry();
-            for (const sname in kwargs.services) {
-                serviceRegistry.add(sname, kwargs.services[sname]);
-            }
-            delete kwargs.services;
-        }
-
-        const legacyParams = kwargs;
-        legacyParams.withLegacyMockServer = true;
-        legacyParams.env = env;
-
-        widget = await createWebClient({ serverData, mockRPC, legacyParams });
-
+    } else if (hasActionManager) {
+        widget = await createActionManager(kwargs);
         legacyPatch(widget, {
             destroy() {
                 destroyCallbacks.forEach(callback => callback({ widget }));
@@ -794,7 +751,7 @@ function pasteFiles(el, files) {
 // Export
 //------------------------------------------------------------------------------
 
-export {
+return {
     afterEach,
     afterNextRender,
     beforeEach,
@@ -806,3 +763,5 @@ export {
     pasteFiles,
     start,
 };
+
+});

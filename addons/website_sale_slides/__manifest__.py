@@ -11,6 +11,7 @@
     'installable': True,
     'data': [
         'report/sale_report_views.xml',
+        'views/assets.xml',
         'views/website_slides_menu_views.xml',
         'views/slide_channel_views.xml',
         'views/website_slides_templates.xml',
@@ -20,9 +21,4 @@
         'data/slide_demo.xml',
         'data/sale_order_demo.xml',
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'website_sale_slides/static/src/js/**/*',
-        ],
-    }
 }

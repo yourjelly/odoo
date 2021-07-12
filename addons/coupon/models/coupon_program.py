@@ -47,11 +47,10 @@ class CouponProgram(models.Model):
         default='on_current_order', string="Applicability")
     coupon_ids = fields.One2many('coupon.coupon', 'program_id', string="Generated Coupons", copy=False)
     coupon_count = fields.Integer(compute='_compute_coupon_count')
-    company_id = fields.Many2one('res.company', string="Company", required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.company)
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     validity_duration = fields.Integer(default=30,
         help="Validity duration for a coupon after its generation")
-    total_order_count = fields.Integer("Total Order Count", compute="_compute_total_order_count")
 
     @api.constrains('promo_code')
     def _check_promo_code_constraint(self):
@@ -102,12 +101,9 @@ class CouponProgram(models.Model):
             self.mapped('discount_line_product_id').write({'name': self[0].reward_id.display_name})
         return res
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_active(self):
+    def unlink(self):
         if self.filtered('active'):
             raise UserError(_('You can not delete a program in active state'))
-
-    def unlink(self):
         # get reference to rule and reward
         rule = self.rule_id
         reward = self.reward_id
@@ -136,25 +132,20 @@ class CouponProgram(models.Model):
         else:
             return True
 
+    def _is_valid_product(self, product):
+        # NOTE: if you override this method, think of also overriding _get_valid_products
+        # we also encourage the use of _get_valid_products as its execution is faster
+        if self.rule_products_domain:
+            domain = ast.literal_eval(self.rule_products_domain) + [('id', '=', product.id)]
+            return bool(self.env['product.product'].search_count(domain))
+        else:
+            return True
+
     def _get_valid_products(self, products):
         if self.rule_products_domain:
             domain = ast.literal_eval(self.rule_products_domain)
             return products.filtered_domain(domain)
         return products
-
-    def _generate_coupons(self, partner_id):
-        '''Generate coupons that can be used in the next order for the given partner_id.'''
-        generated_coupons = self.env['coupon.coupon']
-        for program in self:
-            generated_coupons |= self.env['coupon.coupon'].create({
-                'program_id': program.id,
-                'partner_id': partner_id,
-            })
-        return generated_coupons
-
-    def _compute_total_order_count(self):
-        for program in self:
-            program.total_order_count = 0
 
     def _get_discount_product_values(self):
         return {

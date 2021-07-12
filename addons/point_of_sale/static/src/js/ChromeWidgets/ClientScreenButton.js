@@ -9,8 +9,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
     class ClientScreenButton extends PosComponent {
         constructor() {
             super(...arguments);
-            this.local = this.env.pos.config.iface_customer_facing_display_local && !this.env.pos.config.iface_customer_facing_display_proxy;
-            this.state = useState({ status: this.local ? 'success' : 'failure' });
+            this.state = useState({ status: 'failure' });
             this._start();
         }
         get message() {
@@ -21,21 +20,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 not_found: this.env._t('Client Screen Unsupported. Please upgrade the IoT Box'),
             }[this.state.status];
         }
-        onClick() {
-            if (this.local) {
-                return this.onClickLocal();
-            } else {
-                return this.onClickProxy();
-            }
-        }
-        async onClickLocal() {
-            this.env.pos.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
-            const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
-            var $renderedHtml = $('<div>').html(renderedHtml);
-            $(this.env.pos.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-            $(this.env.pos.customer_display.document.head).html($renderedHtml.find('.resources').html());
-        }
-        async onClickProxy() {
+        async onClick() {
             try {
                 const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
                 const ownership = await this.env.pos.proxy.take_ownership_over_client_screen(
@@ -62,10 +47,6 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
             }
         }
         _start() {
-            if (this.local) {
-                return;
-            }
-
             const self = this;
             async function loop() {
                 if (self.env.pos.proxy.posbox_supports_display) {

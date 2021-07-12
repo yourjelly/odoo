@@ -47,38 +47,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-6 o_setting_box" id="quality_control">
-                                <div class="o_setting_left_pane">
-                                    <field name="module_quality_control" widget="upgrade_boolean"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="module_quality_control"/>
-                                    <div class="text-muted">
-                                        Add quality checks to your transfer operations
-                                    </div>
-                                    <div class="row mt-2" attrs="{'invisible': [('module_quality_control','=',False)]}">
-                                        <field name="module_quality_control_worksheet" widget="upgrade_boolean" class="col-lg-1 ml16 mr0"/>
-                                        <div class="col pl-0">
-                                            <label for="module_quality_control_worksheet"/>
-                                            <div class="text-muted">
-                                                Create customizable worksheets for your quality checks
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6 o_setting_box" id="annual_inventory_date" groups='stock.group_stock_manager'>
-                                <div class="o_setting_right_pane">
-                                    <label for="annual_inventory_day" string="Annual Inventory Day and Month"/>
-                                    <div class="text-muted">
-                                        Day and month that annual inventory counts should occur.
-                                    </div>
-                                    <div class="content-group">
-                                        <field name="annual_inventory_day" class="o_light_label" style="width: 30px;"/>
-                                        <field name="annual_inventory_month" class="o_light_label"/>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         <h2>Barcode</h2>
                         <div class="row mt16 o_settings_container" name="barcode_setting_container">
@@ -394,24 +362,6 @@
                                     <div class="content-group">
                                         <div class="mt8" attrs="{'invisible': [('group_stock_adv_location', '=', False)]}">
                                             <button name="%(stock.action_warehouse_form)d" icon="fa-arrow-right" type="action" string="Set Warehouse Routes" class="btn-link"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6 o_setting_box"
-                                id="categorize_locations"
-                                attrs="{'invisible': [('group_stock_multi_locations', '=', False)]}">
-                                <div class="o_setting_left_pane">
-                                    <field name="group_stock_storage_categories"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="group_stock_storage_categories"/>
-                                    <div class="text-muted">
-                                        Categorize your locations for smarter putaway rules
-                                    </div>
-                                    <div class="content-group">
-                                        <div class="mt8" attrs="{'invisible': [('group_stock_storage_categories', '=', False)]}">
-                                            <button name="%(stock.action_storage_category)d" icon="fa-arrow-right" type="action" string="Storage Categories" class="btn-link"/>
                                         </div>
                                     </div>
                                 </div>

@@ -1,21 +1,22 @@
-/** @odoo-module **/
+odoo.define('project.ProjectCalendarView', function (require) {
+"use strict";
 
-import CalendarController from 'web.CalendarController';
-import CalendarView from 'web.CalendarView';
-import viewRegistry from 'web.view_registry';
-import { ProjectControlPanel } from '@project/js/project_control_panel';
+const CalendarController = require('web.CalendarController');
+const CalendarView = require('web.CalendarView');
+const viewRegistry = require('web.view_registry');
 
 const ProjectCalendarController = CalendarController.extend({
     _renderButtonsParameters() {
-        return Object.assign({}, this._super(...arguments), {scaleDrop: true});
+        return _.extend({}, this._super(...arguments),  {scaleDrop: true});
     },
 });
 
-export const ProjectCalendarView = CalendarView.extend({
-    config: Object.assign({}, CalendarView.prototype.config, {
-        Controller: ProjectCalendarController,
-        ControlPanel: ProjectControlPanel,
-    }),
-});
+const ProjectCalendarView = CalendarView.extend({
+        config: _.extend({}, CalendarView.prototype.config, {
+            Controller: ProjectCalendarController,
+        }),
+    });
 
 viewRegistry.add('project_calendar', ProjectCalendarView);
+return ProjectCalendarView;
+});

@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/discuss/tests/discuss_pinned_tests.js', function (require) {
+'use strict';
 
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -232,4 +233,6 @@ QUnit.test('[technical] sidebar: channel group_based_subscription: mandatorily p
 
 });
 });
+});
+
 });

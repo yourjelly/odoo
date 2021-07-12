@@ -1037,7 +1037,7 @@ class TestSaleCouponProgramNumbers(TestSaleCouponCommon):
         self.conferenceChair.write({'list_price': 100, 'sale_ok': True})
 
         # create SOL
-        self.env['sale.order.line'].create({
+        sol1 = self.env['sale.order.line'].create({
             'product_id': self.largeCabinet.id,
             'name': 'Large Cabinet',
             'product_uom_qty': 1.0,

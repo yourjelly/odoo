@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import _
 from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.http import request
+from odoo.http import request, route
 
 
 class L10nARWebsiteSale(WebsiteSale):

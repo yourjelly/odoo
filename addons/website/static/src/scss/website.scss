@@ -74,8 +74,8 @@ $-seen-urls: ();
     @include print-variable('input-border-radius-sm', $input-border-radius-sm);
     @include print-variable('input-border-radius-lg', $input-border-radius-lg);
 
-    @include print-variable('color-palettes-name', $o-original-color-palette-name);
-
+    @include print-variable('number-of-color-palettes', length($o-color-palettes) - 1); // -1 since the last one is the user customized one
+    @include print-variable('color-palettes-number', $o-original-color-palette-number);
     @include print-variable('has-customized-colors', $o-has-customized-colors);
 
     // 6) Get list of colorpalette custom colors
@@ -173,13 +173,6 @@ $-seen-urls: ();
                 }
             }
         }
-    }
-}
-
-#oe_main_menu_navbar:not(.o_hidden) + #wrapwrap {
-    .o_header_affixed, .modal:not(.s_popup_bottom) {
-        // For these elements, in #wrapwrap, position top should be size of the navbar
-        top: $o-navbar-height;
     }
 }
 
@@ -359,9 +352,6 @@ font[class*='bg-'] {
     &.o_bg_img_opt_repeat {
         background-size: auto;
         background-repeat: repeat;
-    }
-    &.o_bg_img_center {
-        background-position: center;
     }
 
     // Compatibility <= 13.0, TODO remove?
@@ -771,6 +761,9 @@ $-transition-duration: 200ms;
             }
         }
     }
+}
+#oe_main_menu_navbar + #wrapwrap .o_header_affixed {
+    top: $o-navbar-height;
 }
 
 // Navbar
@@ -1268,6 +1261,9 @@ header {
     margin-right: 0.2em;
     border-radius: $rounded-pill;
 }
+span.list-inline-item.o_add_language:last-child {
+    display: none !important; // Hide the separator if it is the last list item
+}
 
 // Footer scrolltop button
 @if o-website-value('footer-scrolltop') {
@@ -1413,7 +1409,11 @@ $ribbon-padding: 100px;
     }
 }
 
-ul.o_checklist > li.o_checked::after {
-    left: - ($o-checklist-margin-left - $o-checklist-checkmark-width) - 1;
-    top: 0;
+// Snippet Showcase
+.s_showcase_icon {
+    // Avoid images stretched depending on title size (when icons
+    // are images an not Font Awesome icons). Because the default
+    // value of "align-self" is "strech". We put this code here to
+    // avoid having to create a new scss file in a stable version.
+    align-self: flex-start;
 }

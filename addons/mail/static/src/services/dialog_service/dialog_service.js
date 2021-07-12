@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/services/dialog_service/dialog_service.js', function (require) {
+'use strict';
 
-import { DialogManager } from '@mail/components/dialog_manager/dialog_manager';
+const components = {
+    DialogManager: require('mail/static/src/components/dialog_manager/dialog_manager.js'),
+};
 
-import AbstractService from 'web.AbstractService';
-import { bus, serviceRegistry } from 'web.core';
-
-const components = { DialogManager };
+const AbstractService = require('web.AbstractService');
+const { bus, serviceRegistry } = require('web.core');
 
 const DialogService = AbstractService.extend({
     /**
@@ -95,4 +96,6 @@ const DialogService = AbstractService.extend({
 
 serviceRegistry.add('dialog', DialogService);
 
-export default DialogService;
+return DialogService;
+
+});

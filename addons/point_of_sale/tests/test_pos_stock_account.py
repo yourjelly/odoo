@@ -210,12 +210,19 @@ class TestPoSStock(TestPoSCommon):
         group_owner = self.env.ref('stock.group_tracking_owner')
         self.env.user.write({'groups_id': [(4, group_owner.id)]})
         self.product4 = self.create_product('Product 3', self.categ_basic, 30.0, 15.0)
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        inventory = self.env['stock.inventory'].create({
+            'name': 'Inventory adjustment'
+        })
+        self.env['stock.inventory.line'].create({
             'product_id': self.product4.id,
-            'inventory_quantity': 10,
+            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+            'inventory_id': inventory.id,
+            'product_qty': 10,
+            'partner_id': self.partner_a.id,
             'location_id': self.stock_location_components.id,
-            'owner_id': self.partner_a.id,
-        }).action_apply_inventory()
+        })
+        inventory._action_start()
+        inventory.action_validate()
 
         self.open_new_session()
 
@@ -235,8 +242,8 @@ class TestPoSStock(TestPoSCommon):
         # picking and stock moves should be in done state
         for order in self.pos_session.order_ids:
             self.assertEqual(order.picking_ids[0].state, 'done', 'Picking should be in done state.')
-            self.assertTrue(all(state == 'done' for state in order.picking_ids[0].move_lines.mapped('state')), 'Move Lines should be in done state.')
-            self.assertTrue(self.partner_a == order.picking_ids[0].move_lines[0].move_line_ids[0].owner_id, 'Move Lines Owner should be taken into account.')
+            self.assertTrue(all(state == 'done' for state in order.picking_ids[0].move_lines.mapped('state')), 'Move Lines should be in done state.' )
+            self.assertTrue(self.partner_a == order.picking_ids[0].move_lines[0].move_line_ids[0].owner_id, 'Move Lines Owner should be taken into account.' )
 
         # close the session
         self.pos_session.action_pos_session_validate()

@@ -1,12 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+<template id="assets_wysiwyg" inherit_id="website.assets_wysiwyg" name="Blog posts snippet options">
+    <xpath expr="." position="inside">
+        <script type="text/javascript" src="/website_blog/static/src/snippets/s_latest_posts/options.js"/>
+    </xpath>
+</template>
+
+<template id="assets_editor" inherit_id="website.assets_editor" name="Blog Editor">
+    <xpath expr="." position="inside">
+        <script type="text/javascript" src="/website_blog/static/src/js/website_blog.editor.js"></script>
+        <script type="text/javascript" src="/website_blog/static/src/js/tours/website_blog.js"></script>
+    </xpath>
+</template>
+
+<template id="assets_frontend" inherit_id="website.assets_frontend" name="Blog Front-end assets">
+    <xpath expr="." position="inside">
+        <link rel="stylesheet" type="text/scss" href="/website_blog/static/src/scss/website_blog.scss"/>
+
+        <script type="text/javascript" src="/website_blog/static/src/js/contentshare.js"/>
+        <script type="text/javascript" src="/website_blog/static/src/js/website_blog.js"/>
+    </xpath>
+</template>
+
 <!-- ======   Overall pages layout   ===========================================
 ============================================================================ -->
 <template id="index" name="Blog Navigation">
     <t t-call="website.layout">
         <div id="wrap" class="js_blog website_blog">
-            <t t-out="0"/>
+            <t t-raw="0"/>
 
             <!-- Droppable-area shared across all blog's pages -->
             <t t-set="oe_structure_blog_footer_description">Visible in all blogs' pages</t>
@@ -472,7 +494,7 @@ list of filtered posts (by date or tag).
         <attribute name="name"/>
         <attribute name="t-att-data-module-id"/>
         <attribute name="t-att-data-module-shortdesc"/>
-        <attribute name="t-if">is_designer</attribute>
+        <attribute name="groups">website.group_website_designer</attribute>
     </xpath>
 </template>
 
@@ -492,6 +514,17 @@ list of filtered posts (by date or tag).
         <updated t-esc="str(post.post_date).replace(' ', 'T') + 'Z'"/>
     </entry>
 </feed>
+</template>
+
+<!-- Chatter templates -->
+<template id="blog_post_template_new_post">
+    <p>A new post <t t-esc="post.name" /> has been published on the <t t-esc="object.name" /> blog. Click here to access the blog :</p>
+    <p style="margin-left: 30px; margin-top: 10 px; margin-bottom: 10px;">
+        <a t-attf-href="/blog/#{slug(object)}/#{slug(post)}"
+            style="padding: 5px 10px; font-size: 12px; line-height: 18px; color: #FFFFFF; border-color:#875A7B; text-decoration: none; display: inline-block; margin-bottom: 0px; font-weight: 400; text-align: center; vertical-align: middle; cursor: pointer;background-color: #875A7B; border: 1px solid #875A7B; border-radius:3px">
+            Access post
+        </a>
+    </p>
 </template>
 
 </odoo>

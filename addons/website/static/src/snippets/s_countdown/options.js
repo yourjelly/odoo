@@ -23,12 +23,11 @@ options.registry.countdown = options.Class.extend({
      */
     endAction: function (previewMode, widgetValue, params) {
         this.$target[0].dataset.endAction = widgetValue;
-        if (widgetValue === 'message' || widgetValue === 'message_no_countdown') {
+        if (widgetValue === 'message') {
             if (!this.$target.find('.s_countdown_end_message').length) {
                 const message = this.endMessage || qweb.render('website.s_countdown.end_message');
                 this.$target.append(message);
             }
-            this.$target.toggleClass('hide-countdown', widgetValue === 'message_no_countdown');
         } else {
             const $message = this.$target.find('.s_countdown_end_message').detach();
             if ($message.length) {
@@ -77,7 +76,7 @@ options.registry.countdown = options.Class.extend({
 
         // End Action UI
         this.$el.find('.toggle-edit-message')
-            .toggleClass('d-none', dataset.endAction === 'nothing' || dataset.endAction === 'redirect');
+            .toggleClass('d-none', dataset.endAction !== 'message');
 
         // End Message UI
         this.updateUIEndMessage();

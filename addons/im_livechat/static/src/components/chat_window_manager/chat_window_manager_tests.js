@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/chat_window_manager/chat_window_manager_tests.js', function (require) {
+'use strict';
 
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('im_livechat', {}, function () {
 QUnit.module('components', {}, function () {
@@ -67,4 +68,6 @@ QUnit.test('closing a chat window with no message from admin side unpins it', as
 
 });
 });
+});
+
 });

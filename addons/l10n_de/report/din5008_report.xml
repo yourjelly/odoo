@@ -31,6 +31,12 @@
             <field name="header_spacing">45</field>
         </record>
 
+        <template id="assets_common" name="l10n_de_din5008_report" inherit_id="web.report_assets_common">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/scss" href="/l10n_de/static/src/scss/report_din5008.scss"/>
+            </xpath>
+        </template>
+
         <!-- New report layout for din5008 format -->
         <template id="external_layout_din5008">
             <div>
@@ -68,7 +74,7 @@
                                     </t>
                                     <hr class="company_invoice_line" />
                                     <div t-if="address">
-                                        <t t-out="address"/>
+                                        <t t-raw="address"/>
                                     </div>
                                     <div t-else="fallback_address">
                                         <t t-esc="fallback_address"
@@ -104,7 +110,7 @@
                         <span t-elif="'l10n_de_document_title' in o"><t t-esc="o.l10n_de_document_title"/></span>
                         <span t-else="" t-field="o.name"/>
                     </h2>
-                    <t t-out="0"/>
+                    <t t-raw="0"/>
                 </div>
 
                 <div t-attf-class="din_page footer o_company_#{company.id}_layout">
@@ -134,7 +140,7 @@
                                 </td>
                                 <td>
                                     <ul class="list-inline">
-                                        <li t-if="company.vat"><t t-esc="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
+                                        <li t-if="company.vat"><t t-esc="company.country_id.vat_label or 'Tax ID'"/>: <span t-field="company.vat"/></li>
                                         <li>HRB Nr: <span t-field="company.company_registry"/></li>
                                         <div t-field="company.report_footer"/>
                                     </ul>

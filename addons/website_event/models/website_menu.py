@@ -8,7 +8,8 @@ class WebsiteMenu(models.Model):
     _inherit = "website.menu"
 
     def unlink(self):
-        """ Override to synchronize event configuration fields with menu deletion. """
+        """ Override to synchronize event configuration fields with menu deletion.
+        This should be cleaned in upcoming versions. """    
         event_updates = {}
         website_event_menus = self.env['website.event.menu'].search([('menu_id', 'in', self.ids)])
         for event_menu in website_event_menus:
@@ -17,9 +18,7 @@ class WebsiteMenu(models.Model):
                 if event_menu.menu_type == menu_type:
                     to_update.append(fname)
 
-        # manually remove website_event_menus to call their ``unlink`` method. Otherwise
-        # super unlinks at db level and skip model-specific behavior.
-        website_event_menus.unlink()
+        # call super that resumes the unlink of menus entries (including website event menus)
         res = super(WebsiteMenu, self).unlink()
 
         # update events

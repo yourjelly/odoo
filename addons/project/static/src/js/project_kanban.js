@@ -1,11 +1,11 @@
-/** @odoo-module **/
+odoo.define('project.project_kanban', function (require) {
+'use strict';
 
-import KanbanController from 'web.KanbanController';
-import KanbanView from 'web.KanbanView';
-import KanbanColumn from 'web.KanbanColumn';
-import viewRegistry from 'web.view_registry';
-import KanbanRecord from 'web.KanbanRecord';
-import { ProjectControlPanel } from '@project/js/project_control_panel';
+var KanbanController = require('web.KanbanController');
+var KanbanView = require('web.KanbanView');
+var KanbanColumn = require('web.KanbanColumn');
+var view_registry = require('web.view_registry');
+var KanbanRecord = require('web.KanbanRecord');
 
 KanbanRecord.include({
     //--------------------------------------------------------------------------
@@ -27,20 +27,20 @@ KanbanRecord.include({
     },
 });
 
-export const ProjectKanbanController = KanbanController.extend({
-    custom_events: Object.assign({}, KanbanController.prototype.custom_events, {
+var ProjectKanbanController = KanbanController.extend({
+    custom_events: _.extend({}, KanbanController.prototype.custom_events, {
         'kanban_column_delete_wizard': '_onDeleteColumnWizard',
     }),
 
     _onDeleteColumnWizard: function (ev) {
         ev.stopPropagation();
         const self = this;
-        const columnId = ev.target.id;
-        const state = this.model.get(this.handle, {raw: true});
+        const column_id = ev.target.id;
+        var state = this.model.get(this.handle, {raw: true});
         this._rpc({
             model: 'project.task.type',
             method: 'unlink_wizard',
-            args: [columnId],
+            args: [column_id],
             context: state.getContext(),
         }).then(function (res) {
             self.do_action(res);
@@ -48,10 +48,9 @@ export const ProjectKanbanController = KanbanController.extend({
     }
 });
 
-const ProjectKanbanView = KanbanView.extend({
-    config: Object.assign({}, KanbanView.prototype.config, {
-        Controller: ProjectKanbanController,
-        ControlPanel: ProjectControlPanel,
+var ProjectKanbanView = KanbanView.extend({
+    config: _.extend({}, KanbanView.prototype.config, {
+        Controller: ProjectKanbanController
     }),
 });
 
@@ -66,4 +65,7 @@ KanbanColumn.include({
     }
 });
 
-viewRegistry.add('project_kanban', ProjectKanbanView);
+view_registry.add('project_kanban', ProjectKanbanView);
+
+return ProjectKanbanController;
+});

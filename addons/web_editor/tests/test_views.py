@@ -60,18 +60,5 @@ class TestViews(TransactionCase):
         self.assertEqual(base.inherit_children_ids.mode, 'extension')
         self.assertIn(
             '<p>Hello World!</p>',
-            base.inherit_children_ids.get_combined_arch(),
+            base.inherit_children_ids.read_combined(['arch'])['arch'],
         )
-
-    def test_find_available_name(self):
-        View = self.env['ir.ui.view']
-        used_names = ['Unrelated name']
-        initial_name = "Test name"
-        name = View._find_available_name(initial_name, used_names)
-        self.assertEqual(initial_name, name)
-        used_names.append(name)
-        name = View._find_available_name(initial_name, used_names)
-        self.assertEqual('Test name (2)', name)
-        used_names.append(name)
-        name = View._find_available_name(initial_name, used_names)
-        self.assertEqual('Test name (3)', name)

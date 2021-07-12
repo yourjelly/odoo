@@ -8,7 +8,6 @@ import odoo
 from odoo.tests import common, tagged
 from odoo.tools.misc import file_open, mute_logger
 from odoo.tools.translate import _, _lt, TranslationFileReader, TranslationModuleReader
-from odoo import Command
 
 
 TRANSLATED_TERM = _lt("Klingon")
@@ -177,7 +176,7 @@ class TestTermCount(common.TransactionCase):
         trans_count = self.env['ir.translation'].search_count([('lang', '=', 'tlh')])
         self.assertEqual(trans_count, 1, "The imported translations were not created")
 
-        self.env = self.env(context=dict(self.env.context, lang="tlh"))
+        self.env.context = dict(self.env.context, lang="tlh")
         self.assertEqual(_("Klingon"), "tlhIngan", "The code translation was not applied")
 
     def test_lazy_translation(self):
@@ -263,7 +262,7 @@ class TestTermCount(common.TransactionCase):
         export = self.env["base.language.export"].create({
             'lang': 'dot',
             'format': 'po',
-            'modules': [Command.set([module.id])]
+            'modules': [(6, 0, [module.id])]
         })
         export.act_getfile()
         po_file = export.data
@@ -365,7 +364,7 @@ class TestTranslationFlow(common.TransactionCase):
         export = self.env["base.language.export"].create({
             'lang': 'fr_FR',
             'format': 'po',
-            'modules': [Command.set([module.id])]
+            'modules': [(6, 0, [module.id])]
         })
         export.act_getfile()
         po_file = export.data
@@ -399,7 +398,7 @@ class TestTranslationFlow(common.TransactionCase):
         export = self.env["base.language.export"].create({
             'lang': 'fr_FR',
             'format': 'csv',
-            'modules': [Command.set([module.id])]
+            'modules': [(6, 0, [module.id])]
         })
         export.act_getfile()
         po_file = export.data

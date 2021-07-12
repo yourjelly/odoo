@@ -6,10 +6,10 @@ from odoo.tests.common import TransactionCase, Form
 
 class TestSaleMrpKitBom(TransactionCase):
 
-    def _create_product(self, name, product_type, price):
+    def _create_product(self, name, type, price):
         return self.env['product.product'].create({
             'name': name,
-            'type': product_type,
+            'type': type,
             'standard_price': price,
         })
 

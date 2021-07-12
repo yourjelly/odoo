@@ -90,8 +90,7 @@ class StockMove(models.Model):
         'mrp.unbuild', 'Disassembly Order', check_company=True)
     consume_unbuild_id = fields.Many2one(
         'mrp.unbuild', 'Consumed Disassembly Order', check_company=True)
-    allowed_operation_ids = fields.One2many(
-        'mrp.routing.workcenter', related='raw_material_production_id.bom_id.operation_ids')
+    allowed_operation_ids = fields.Many2many('mrp.routing.workcenter', compute='_compute_allowed_operation_ids')
     operation_id = fields.Many2one(
         'mrp.routing.workcenter', 'Operation To Consume', check_company=True,
         domain="[('id', 'in', allowed_operation_ids)]")
@@ -116,17 +115,28 @@ class StockMove(models.Model):
         for move in self:
             move.priority = move.raw_material_production_id.priority or move.priority or '0'
 
-    @api.depends('raw_material_production_id.picking_type_id', 'production_id.picking_type_id')
-    def _compute_picking_type_id(self):
-        super()._compute_picking_type_id()
-        for move in self:
-            if move.raw_material_production_id or move.production_id:
-                move.picking_type_id = (move.raw_material_production_id or move.production_id).picking_type_id
-
     @api.depends('raw_material_production_id.lot_producing_id')
     def _compute_order_finished_lot_ids(self):
         for move in self:
             move.order_finished_lot_ids = move.raw_material_production_id.lot_producing_id
+
+    @api.depends('raw_material_production_id.bom_id')
+    def _compute_allowed_operation_ids(self):
+        for move in self:
+            if (
+                not move.raw_material_production_id or
+                not move.raw_material_production_id.bom_id or not
+                move.raw_material_production_id.bom_id.operation_ids
+            ):
+                move.allowed_operation_ids = self.env['mrp.routing.workcenter']
+            else:
+                operation_domain = [
+                    ('id', 'in', move.raw_material_production_id.bom_id.operation_ids.ids),
+                    '|',
+                        ('company_id', '=', move.company_id.id),
+                        ('company_id', '=', False)
+                ]
+                move.allowed_operation_ids = self.env['mrp.routing.workcenter'].search(operation_domain)
 
     @api.depends('raw_material_production_id.is_locked', 'production_id.is_locked')
     def _compute_is_locked(self):
@@ -190,8 +200,8 @@ class StockMove(models.Model):
                     defaults['state'] = 'draft'
                 else:
                     defaults['state'] = 'done'
-                    defaults['additional'] = True
                 defaults['product_uom_qty'] = 0.0
+                defaults['additional'] = True
         return defaults
 
     def write(self, vals):
@@ -201,6 +211,13 @@ class StockMove(models.Model):
             move_line_vals = vals.pop('move_line_ids')
             super().write({'move_line_ids': move_line_vals})
         return super().write(vals)
+
+    def unlink(self):
+        # Avoid deleting move related to active MO
+        for move in self:
+            if move.production_id and move.production_id.state not in ('draft', 'cancel'):
+                raise UserError(_('Please cancel the Manufacture Order first.'))
+        return super(StockMove, self).unlink()
 
     def _action_assign(self):
         res = super(StockMove, self)._action_assign()
@@ -227,7 +244,7 @@ class StockMove(models.Model):
             if not move.picking_type_id or (move.production_id and move.production_id.product_id == move.product_id):
                 moves_ids_to_return.add(move.id)
                 continue
-            bom = self.env['mrp.bom'].sudo()._bom_find(move.product_id, company_id=move.company_id.id, bom_type='phantom')[move.product_id]
+            bom = self.env['mrp.bom'].sudo()._bom_find(product=move.product_id, company_id=move.company_id.id, bom_type='phantom')
             if not bom:
                 moves_ids_to_return.add(move.id)
                 continue
@@ -342,12 +359,14 @@ class StockMove(models.Model):
     def _prepare_merge_moves_distinct_fields(self):
         distinct_fields = super()._prepare_merge_moves_distinct_fields()
         distinct_fields.append('created_production_id')
+        distinct_fields.append('bom_line_id')
         return distinct_fields
 
     @api.model
     def _prepare_merge_move_sort_method(self, move):
         keys_sorted = super()._prepare_merge_move_sort_method(move)
         keys_sorted.append(move.created_production_id.id)
+        keys_sorted.append(move.bom_line_id.id)
         return keys_sorted
 
     def _compute_kit_quantities(self, product_id, kit_qty, kit_bom, filters):
@@ -412,10 +431,3 @@ class StockMove(models.Model):
             self.move_line_ids = self._set_quantity_done_prepare_vals(new_qty)
         else:
             self.quantity_done = new_qty
-
-    def _update_candidate_moves_list(self, candidate_moves_list):
-        super()._update_candidate_moves_list(candidate_moves_list)
-        for production in self.mapped('raw_material_production_id'):
-            candidate_moves_list.append(production.move_raw_ids)
-        for production in self.mapped('production_id'):
-            candidate_moves_list.append(production.move_finished_ids)

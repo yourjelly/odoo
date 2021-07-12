@@ -1,12 +1,13 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/discuss/discuss.js', function (require) {
+'use strict';
 
-import { Discuss } from '@mail/components/discuss/discuss';
+const components = {
+    Discuss: require('mail/static/src/components/discuss/discuss.js'),
+};
 
-import { patch } from 'web.utils';
+const { patch } = require('web.utils');
 
-const components = { Discuss };
-
-patch(components.Discuss.prototype, 'im_livechat/static/src/components/discuss/discuss.js', {
+patch(components.Discuss, 'im_livechat/static/src/components/discuss/discuss.js', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -22,5 +23,7 @@ patch(components.Discuss.prototype, 'im_livechat/static/src/components/discuss/d
             label: this.env._t("Livechat"),
         }];
     }
+
+});
 
 });

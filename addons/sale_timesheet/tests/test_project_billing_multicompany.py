@@ -17,6 +17,7 @@ class TestProjectBillingMulticompany(TestCommonSaleTimesheet):
             'name': "Non Billable Project",
             'allow_timesheets': True,
             'allow_billable': True,
+            'bill_type': 'customer_project',
             'company_id': cls.env.company.id,
         })
 

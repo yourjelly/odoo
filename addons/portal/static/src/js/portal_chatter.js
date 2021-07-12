@@ -52,7 +52,6 @@ var PortalChatter = publicWidget.Widget.extend({
             'hash': false,
             'pid': false,
             'domain': [],
-            'two_columns': false,
         });
 
         this.set('messages', []);
@@ -85,12 +84,18 @@ var PortalChatter = publicWidget.Widget.extend({
         // set options and parameters
         this.set('message_count', this.options['message_count']);
         this.set('messages', this.preprocessMessages(this.result['messages']));
-        // bind bus event: this (portal.chatter) and 'portal.rating.composer' in portal_rating
-        // are separate and sibling widgets, this event is to be triggered from portal.rating.composer,
-        // hence bus event is bound to achieve usage of the event in another widget.
-        core.bus.on('reload_chatter_content', this, this._reloadChatterContent);
 
-        return Promise.all([this._super.apply(this, arguments), this._reloadComposer()]);
+
+        var defs = [];
+        defs.push(this._super.apply(this, arguments));
+
+        // instanciate and insert composer widget
+        if (this.options['display_composer']) {
+            this._composer = new portalComposer.PortalComposer(this, this.options);
+            defs.push(this._composer.replace(this.$('.o_portal_chatter_composer')));
+        }
+
+        return Promise.all(defs);
     },
 
     //--------------------------------------------------------------------------
@@ -112,7 +117,6 @@ var PortalChatter = publicWidget.Widget.extend({
         }).then(function (result) {
             self.set('messages', self.preprocessMessages(result['messages']));
             self.set('message_count', result['message_count']);
-            return result;
         });
     },
     /**
@@ -133,29 +137,6 @@ var PortalChatter = publicWidget.Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Reloads chatter and message count after posting message
-     *
-     * @private
-     */
-    _reloadChatterContent: function (data) {
-        this.messageFetch();
-        this._reloadComposer();
-    },
-    /**
-     * Destroy current composer widget and initialize and insert new widget
-     *
-     * @private
-     */
-    _reloadComposer: async function () {
-        if (this._composer) {
-            this._composer.destroy();
-        }
-        if (this.options.display_composer) {
-            this._composer = new portalComposer.PortalComposer(this, this.options);
-            await this._composer.appendTo(this.$('.o_portal_chatter_composer'));
-        }
-    },
     /**
      * @private
      * @returns {Deferred}

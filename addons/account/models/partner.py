@@ -28,10 +28,9 @@ class AccountFiscalPosition(models.Model):
         default=lambda self: self.env.company)
     account_ids = fields.One2many('account.fiscal.position.account', 'position_id', string='Account Mapping', copy=True)
     tax_ids = fields.One2many('account.fiscal.position.tax', 'position_id', string='Tax Mapping', copy=True)
-    note = fields.Html('Notes', translate=True, help="Legal mentions that have to be printed on the invoices.")
+    note = fields.Text('Notes', translate=True, help="Legal mentions that have to be printed on the invoices.")
     auto_apply = fields.Boolean(string='Detect Automatically', help="Apply automatically this fiscal position.")
     vat_required = fields.Boolean(string='VAT required', help="Apply only if partner has a VAT number.")
-    company_country_id = fields.Many2one(string="Company Country", related='company_id.country_id')
     country_id = fields.Many2one('res.country', string='Country',
         help="Apply only if delivery country matches.")
     country_group_id = fields.Many2one('res.country.group', string='Country Group',
@@ -41,7 +40,6 @@ class AccountFiscalPosition(models.Model):
     zip_to = fields.Char(string='Zip Range To')
     # To be used in hiding the 'Federal States' field('attrs' in view side) when selected 'Country' has 0 states.
     states_count = fields.Integer(compute='_compute_states_count')
-    foreign_vat = fields.Char(string="Foreign Tax ID", help="The tax ID of your company in the region mapped by this fiscal position.")
 
     def _compute_states_count(self):
         for position in self:
@@ -53,20 +51,7 @@ class AccountFiscalPosition(models.Model):
             if position.zip_from and position.zip_to and position.zip_from > position.zip_to:
                 raise ValidationError(_('Invalid "Zip Range", please configure it properly.'))
 
-    @api.constrains('country_id', 'state_ids', 'foreign_vat')
-    def _validate_foreign_vat_country(self):
-        for record in self:
-            if record.foreign_vat and record.country_id == record.company_id.account_fiscal_country_id:
-                if record.foreign_vat == record.company_id.vat:
-                    raise ValidationError(_("You cannot create a fiscal position within your fiscal country with the same VAT number as the main one set on your company."))
-
-                if not record.state_ids:
-                    if record.company_id.account_fiscal_country_id.state_ids:
-                        raise ValidationError(_("You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state."))
-                    else:
-                        raise ValidationError(_("You cannot create a fiscal position with a foreign VAT within your fiscal country."))
-
-    def map_tax(self, taxes):
+    def map_tax(self, taxes, product=None, partner=None):
         if not self:
             return taxes
         result = self.env['account.tax']

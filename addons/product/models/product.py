@@ -9,7 +9,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 
 
-from odoo.tools import float_compare, float_round
+from odoo.tools import float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ProductCategory(models.Model):
 
     name = fields.Char('Name', index=True, required=True)
     complete_name = fields.Char(
-        'Complete Name', compute='_compute_complete_name', recursive=True,
+        'Complete Name', compute='_compute_complete_name',
         store=True)
     parent_id = fields.Many2one('product.category', 'Parent Category', index=True, ondelete='cascade')
     parent_path = fields.Char(index=True)
@@ -55,21 +55,17 @@ class ProductCategory(models.Model):
     def _check_category_recursion(self):
         if not self._check_recursion():
             raise ValidationError(_('You cannot create recursive categories.'))
+        return True
 
     @api.model
     def name_create(self, name):
         return self.create({'name': name}).name_get()[0]
 
-    def name_get(self):
-        if not self.env.context.get('hierarchical_naming', True):
-            return [(record.id, record.name) for record in self]
-        return super().name_get()
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_default_category(self):
+    def unlink(self):
         main_category = self.env.ref('product.product_category_all')
         if main_category in self:
             raise UserError(_("You cannot delete this product category, it is the default generic category."))
+        return super().unlink()
 
 
 class ProductProduct(models.Model):
@@ -77,7 +73,7 @@ class ProductProduct(models.Model):
     _description = "Product"
     _inherits = {'product.template': 'product_tmpl_id'}
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'priority desc, default_code, name, id'
+    _order = 'default_code, name, id'
 
     # price: total price, context dependent (partner, pricelist, quantity)
     price = fields.Float(
@@ -154,33 +150,30 @@ class ProductProduct(models.Model):
         for record in self:
             record.can_image_variant_1024_be_zoomed = record.image_variant_1920 and tools.is_image_size_above(record.image_variant_1920, record.image_variant_1024)
 
-    def _set_template_field(self, template_field, variant_field):
-        for record in self:
-            if (
-                # We are trying to remove a field from the variant even though it is already
-                # not set on the variant, remove it from the template instead.
-                (not record[template_field] and not record[variant_field])
-                # We are trying to add a field to the variant, but the template field is
-                # not set, write on the template instead.
-                or (record[template_field] and not record.product_tmpl_id[template_field])
-                # There is only one variant, always write on the template.
-                or self.search_count([
-                    ('product_tmpl_id', '=', record.product_tmpl_id.id),
-                    ('active', '=', True),
-                ]) <= 1
-            ):
-                record[variant_field] = False
-                record.product_tmpl_id[template_field] = record[template_field]
-            else:
-                record[variant_field] = record[template_field]
-
     def _compute_image_1920(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
             record.image_1920 = record.image_variant_1920 or record.product_tmpl_id.image_1920
 
     def _set_image_1920(self):
-        return self._set_template_field('image_1920', 'image_variant_1920')
+        for record in self:
+            if (
+                # We are trying to remove an image even though it is already
+                # not set, remove it from the template instead.
+                not record.image_1920 and not record.image_variant_1920 or
+                # We are trying to add an image, but the template image is
+                # not set, write on the template instead.
+                record.image_1920 and not record.product_tmpl_id.image_1920 or
+                # There is only one variant, always write on the template.
+                self.search_count([
+                    ('product_tmpl_id', '=', record.product_tmpl_id.id),
+                    ('active', '=', True),
+                ]) <= 1
+            ):
+                record.image_variant_1920 = False
+                record.product_tmpl_id.image_1920 = record.image_1920
+            else:
+                record.image_variant_1920 = record.image_1920
 
     def _compute_image_1024(self):
         """Get the image from the template if no image is set on the variant."""
@@ -723,58 +716,16 @@ class ProductProduct(models.Model):
 class ProductPackaging(models.Model):
     _name = "product.packaging"
     _description = "Product Packaging"
-    _order = 'product_id, sequence, id'
+    _order = 'sequence'
     _check_company_auto = True
 
-    name = fields.Char('Product Packaging', required=True)
+    name = fields.Char('Package Type', required=True)
     sequence = fields.Integer('Sequence', default=1, help="The first in the sequence is the default one.")
     product_id = fields.Many2one('product.product', string='Product', check_company=True)
-    qty = fields.Float('Contained Quantity', default=1, help="Quantity of products contained in the packaging.")
+    qty = fields.Float('Contained Quantity', help="Quantity of products contained in the packaging.")
     barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification. Scan this packaging barcode from a transfer in the Barcode app to move all the contained units")
     product_uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', index=True)
-
-    _sql_constraints = [
-        ('positive_qty', 'CHECK(qty > 0)', 'Contained Quantity should be positive.')
-    ]
-
-    def _check_qty(self, product_qty, uom_id, rounding_method="HALF-UP"):
-        """Check if product_qty in given uom is a multiple of the packaging qty.
-        If not, rounding the product_qty to closest multiple of the packaging qty
-        according to the rounding_method "UP", "HALF-UP or "DOWN".
-        """
-        self.ensure_one()
-        default_uom = self.product_id.uom_id
-        packaging_qty = default_uom._compute_quantity(self.qty, uom_id)
-        # We do not use the modulo operator to check if qty is a mltiple of q. Indeed the quantity
-        # per package might be a float, leading to incorrect results. For example:
-        # 8 % 1.6 = 1.5999999999999996
-        # 5.4 % 1.8 = 2.220446049250313e-16
-        if (
-            product_qty
-            and packaging_qty
-            and float_compare(
-                product_qty / packaging_qty,
-                float_round(product_qty / packaging_qty, precision_rounding=1.0),
-                precision_rounding=default_uom.rounding
-            )
-            != 0
-        ):
-            return float_round(
-                product_qty / packaging_qty, precision_rounding=1.0, rounding_method=rounding_method
-            ) * packaging_qty
-        return product_qty
-
-    def _find_suitable_product_packaging(self, product_qty, uom_id):
-        """ try find in `self` if a packaging's qty in given uom is a divisor of
-        the given product_qty. If so, return the one with greatest divisor.
-        """
-        packagings = self.sorted(lambda p: p.qty, reverse=True)
-        for packaging in packagings:
-            new_qty = packaging._check_qty(product_qty, uom_id)
-            if new_qty == product_qty:
-                return packaging
-        return self.env['product.packaging']
 
 
 class SupplierInfo(models.Model):

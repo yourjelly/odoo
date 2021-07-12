@@ -22,12 +22,4 @@ models which only purpose is to run tests.""",
     ],
     'installable': True,
     'application': False,
-    'assets': {
-        'web.assets_frontend': [
-            'test_website/static/src/**/*',
-        ],
-        'web.assets_tests': [
-            'test_website/static/tests/**/*',
-        ],
-    }
 }

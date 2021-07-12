@@ -8,7 +8,6 @@
                 <field name="name" string="Campaigns"/>
                 <field name="tag_ids"/>
                 <field name="user_id"/>
-                <field name="is_auto_campaign"/>
                 <group expand="0" string="Group By">
                     <filter string="Stage" name="group_stage_id"
                         context="{'group_by': 'stage_id'}"/>
@@ -31,7 +30,7 @@
                     <div class="oe_button_box d-flex justify-content-end" name="button_box">
                     </div>
                     <group id="top-group">
-                        <field class="o_text_overflow" name="name" string="Campaign Name" placeholder="e.g. Black Friday"/>
+                        <field name="name" string="Campaign Name" placeholder="e.g. Black Friday"/>
                         <field name="user_id" domain="[('share', '=', False)]"/>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                     </group>
@@ -62,7 +61,7 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field class="o_text_overflow" name="name" string="Campaign Name" placeholder="e.g. Black Friday"/>
+                    <field name="name" string="Campaign Name" placeholder="e.g. Black Friday"/>
                     <field name="user_id" domain="[('share', '=', False)]"/>
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                 </group>

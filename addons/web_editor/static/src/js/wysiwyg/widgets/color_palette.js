@@ -6,12 +6,10 @@ const core = require('web.core');
 const session = require('web.session');
 const {ColorpickerWidget} = require('web.Colorpicker');
 const Widget = require('web.Widget');
-const customColors = require('web_editor.custom_colors');
+const summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
 const weUtils = require('web_editor.utils');
 
 const qweb = core.qweb;
-
-let colorpickerArch;
 
 const ColorPaletteWidget = Widget.extend({
     // ! for xmlDependencies, see loadDependencies function
@@ -38,7 +36,7 @@ const ColorPaletteWidget = Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.customColorsArray = [].concat(...customColors);
+        this.summernoteCustomColorsArray = [].concat(...summernoteCustomColors);
         this.style = window.getComputedStyle(document.documentElement);
         this.options = _.extend({
             selectedColor: false,
@@ -69,7 +67,9 @@ const ColorPaletteWidget = Widget.extend({
         const res = this._super.apply(this, arguments);
 
         const $colorSection = this.$('.o_colorpicker_sections[data-color-tab="theme-colors"]');
-        const $clpicker = $(colorpickerArch || `<colorpicker><div class="o_colorpicker_section" data-name="common"></div></colorpicker>`);
+        const $clpicker = qweb.has_template('web_editor.colorpicker')
+            ? $(qweb.render('web_editor.colorpicker'))
+            : $(`<colorpicker><div class="o_colorpicker_section" data-name="common"></div></colorpicker>`);
         $clpicker.find('button').addClass('o_we_color_btn');
         $clpicker.appendTo($colorSection);
 
@@ -89,9 +89,9 @@ const ColorPaletteWidget = Widget.extend({
         // Render common colors
         if (!this.options.excluded.includes('common')) {
             const $commonColorSection = this.$('[data-name="common"]');
-            customColors.forEach((colorRow, i) => {
+            summernoteCustomColors.forEach((colorRow, i) => {
                 if (i === 0) {
-                    return; // Ignore the wysiwyg gray palette and use ours
+                    return; // Ignore the summernote gray palette and use ours
                 }
                 const $div = $('<div/>', {class: 'clearfix'}).appendTo($commonColorSection);
                 colorRow.forEach(color => {
@@ -136,15 +136,19 @@ const ColorPaletteWidget = Widget.extend({
         this._markSelectedColor();
 
         // Colorpicker
-        if (!this.options.excluded.includes('custom')) {
-            let defaultColor = this.selectedColor;
-            if (defaultColor && !ColorpickerWidget.isCSSColor(defaultColor)) {
-                defaultColor = weUtils.getCSSVariableValue(defaultColor, this.style);
-            }
-            this.colorPicker = new ColorpickerWidget(this, {
-                defaultColor: defaultColor,
-            });
-            await this.colorPicker.prependTo($colorSection);
+        let defaultColor = this.selectedColor;
+        if (defaultColor && !ColorpickerWidget.isCSSColor(defaultColor)) {
+            defaultColor = weUtils.getCSSVariableValue(defaultColor, this.style);
+        }
+        this.colorPicker = new ColorpickerWidget(this, {
+            defaultColor: defaultColor,
+        });
+        await this.colorPicker.prependTo($colorSection);
+
+        // TODO Added as a fix. In master, the widget should probably not be
+        // instantiated at all.
+        if (this.options.excluded.includes('custom')) {
+            this.colorPicker.$el.addClass('d-none');
         }
 
         return res;
@@ -176,7 +180,7 @@ const ColorPaletteWidget = Widget.extend({
             return;
         }
         this.el.querySelectorAll('.o_custom_color').forEach(el => el.remove());
-        const existingColors = new Set(this.customColorsArray.concat(
+        const existingColors = new Set(this.summernoteCustomColorsArray.concat(
             Object.keys(this.colorToColorNames)
         ));
         this.trigger_up('get_custom_colors', {
@@ -274,9 +278,7 @@ const ColorPaletteWidget = Widget.extend({
         }
         this._buildCustomColors();
         this._markSelectedColor();
-        if (this.colorPicker) {
-            this.colorPicker.setSelectedColor(colorInfo.color);
-        }
+        this.colorPicker.setSelectedColor(colorInfo.color);
     },
     /**
      * Mark the selected color
@@ -384,15 +386,17 @@ ColorPaletteWidget.loadDependencies = async function (rpcCapableObj) {
     const proms = [ajax.loadXML('/web_editor/static/src/xml/snippets.xml', qweb)];
 
     // Public user using the editor may have a colorpalette but with
-    // the default wysiwyg ones.
+    // the default summernote ones.
     if (!session.is_website_user) {
         // We can call the colorPalette multiple times but only need 1 rpc
-        if (!colorpickerTemplateProm && !colorpickerArch) {
+        if (!colorpickerTemplateProm && !qweb.has_template('web_editor.colorpicker')) {
             colorpickerTemplateProm = rpcCapableObj._rpc({
                 model: 'ir.ui.view',
-                method: 'render_public_asset',
-                args: ['web_editor.colorpicker', {}],
-            }).then(arch => colorpickerArch = arch);
+                method: 'read_template',
+                args: ['web_editor.colorpicker'],
+            }).then(template => {
+                return qweb.add_template('<templates>' + template + '</templates>');
+            });
         }
         proms.push(colorpickerTemplateProm);
     }

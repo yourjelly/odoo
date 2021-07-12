@@ -14,7 +14,7 @@ class EventRegistration(models.Model):
         groups='sales_team.group_sale_salesman',
         help="Leads generated from the registration.")
     lead_count = fields.Integer(
-        '# Leads', compute='_compute_lead_count', compute_sudo=True,
+        '# Leads', compute='_compute_lead_count', groups='sales_team.group_sale_salesman',
         help="Counter for the leads linked to this registration")
 
     @api.depends('lead_ids')
@@ -57,7 +57,7 @@ class EventRegistration(models.Model):
         """
         to_update, event_lead_rule_skip = False, self.env.context.get('event_lead_rule_skip')
         if not event_lead_rule_skip:
-            to_update = self.filtered(lambda reg: reg.lead_count)
+            to_update = self.filtered(lambda reg: reg.lead_ids)
         if to_update:
             lead_tracked_vals = to_update._get_lead_tracked_values()
 
@@ -132,7 +132,7 @@ class EventRegistration(models.Model):
             upd_description_fields = [field for field in self._get_lead_description_fields() if field in new_vals.keys()]
             if any(new_vals[field] != old_vals[field] for field in upd_description_fields):
                 for lead in leads_attendee:
-                    lead_values['description'] = "%s<br/>%s" % (
+                    lead_values['description'] = "%s\n%s" % (
                         lead.description,
                         registration._get_lead_description(_("Updated registrations"), line_counter=True)
                     )
@@ -148,7 +148,7 @@ class EventRegistration(models.Model):
                 if not lead.partner_id:
                     lead_values['description'] = lead.registration_ids._get_lead_description(_("Participants"), line_counter=True)
                 elif new_vals['partner_id'] != lead.partner_id.id:
-                    lead_values['description'] = lead.description + "<br/>" + lead.registration_ids._get_lead_description(_("Updated registrations"), line_counter=True, line_suffix=_("(updated)"))
+                    lead_values['description'] = lead.description + "\n" + lead.registration_ids._get_lead_description(_("Updated registrations"), line_counter=True, line_suffix=_("(updated)"))
             if lead_values:
                 lead.write(lead_values)
 
@@ -232,16 +232,17 @@ class EventRegistration(models.Model):
         """
         reg_lines = [
             registration._get_lead_description_registration(
+                prefix="%s. " % (index + 1) if line_counter else "",
                 line_suffix=line_suffix
-            ) for registration in self
+            ) for index, registration in enumerate(self)
         ]
-        return ("%s<br/>" % prefix if prefix else "") + (
-            "<ol>" if line_counter else "<ul>") + ("".join(reg_lines)) + ("</ol>" if line_counter else "</ul>")
+        return ("%s\n" % prefix if prefix else "") + ("\n".join(reg_lines))
 
-    def _get_lead_description_registration(self, line_suffix=''):
+    def _get_lead_description_registration(self, prefix='', line_suffix=''):
         """ Build the description line specific to a given registration. """
         self.ensure_one()
-        return "<li>%s (%s)%s</li>" % (
+        return "%s%s (%s)%s" % (
+            prefix or "",
             self.name or self.partner_id.name or self.email,
             " - ".join(self[field] for field in ('email', 'phone') if self[field]),
             " %s" % line_suffix if line_suffix else "",

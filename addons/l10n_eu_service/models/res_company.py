@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields, models, _
 from .eu_tax_map import EU_TAX_MAP
 
 
@@ -13,11 +13,11 @@ class Company(models.Model):
         ''' Identifies EU companies and calls the _map_eu_taxes function
         '''
         eu_countries = self.env.ref('base.europe').country_ids
-        companies = self.search([('account_fiscal_country_id', 'in', eu_countries.ids)])
+        companies = self.search([('account_tax_fiscal_country_id','in', eu_countries.ids)])
         companies._map_eu_taxes()
 
     def _map_eu_taxes(self):
-        '''Creates or updates Fiscal Positions for each EU country excluding the company's account_fiscal_country_id
+        '''Creates or updates Fiscal Positions for each EU country excluding the company's account_tax_fiscal_country_id
         '''
         eu_countries = self.env.ref('base.europe').country_ids
         oss_tax_groups = self.env['ir.model.data'].search([
@@ -28,10 +28,9 @@ class Company(models.Model):
             taxes = self.env['account.tax'].search([
                 ('type_tax_use', '=', 'sale'),
                 ('amount_type', '=', 'percent'),
-                ('company_id', '=', company.id),
-                ('country_id', '=', company.account_fiscal_country_id.id),
+                ('company_id','=', company.id),
                 ('tax_group_id', 'not in', oss_tax_groups.mapped('res_id'))])
-            for country in eu_countries - company.account_fiscal_country_id:
+            for country in eu_countries - company.account_tax_fiscal_country_id:
                 mapping = []
                 fpos = self.env['account.fiscal.position'].search([
                             ('country_id', '=', country.id),
@@ -49,13 +48,12 @@ class Company(models.Model):
                 foreign_taxes = {tax.amount: tax for tax in fpos.tax_ids.tax_dest_id if tax.amount_type == 'percent'}
 
                 for domestic_tax in taxes:
-                    tax_amount = EU_TAX_MAP.get((company.account_fiscal_country_id.code, domestic_tax.amount, country.code), False)
+                    tax_amount = EU_TAX_MAP.get((company.account_tax_fiscal_country_id.code, domestic_tax.amount, country.code), False)
                     if tax_amount and domestic_tax not in fpos.tax_ids.tax_src_id:
                         if not foreign_taxes.get(tax_amount, False):
-                            tax_group_fid = 'oss_tax_group_%s' % str(tax_amount).replace('.', '_')
-                            if not self.env['ir.model.data'].xmlid_to_object('l10n_eu_service.%s' % tax_group_fid):
+                            if not self.env['ir.model.data'].xmlid_to_object('l10n_eu_service.oss_tax_group_%s' % str(tax_amount).replace('.','_')):
                                 self.env['ir.model.data'].create({
-                                    'name': tax_group_fid,
+                                    'name': 'oss_tax_group_%s' % str(tax_amount).replace('.','_'),
                                     'module': 'l10n_eu_service',
                                     'model': 'account.tax.group',
                                     'res_id': self.env['account.tax.group'].create({'name': 'OSS %s%%' % tax_amount}).id,
@@ -68,7 +66,7 @@ class Company(models.Model):
                                 'refund_repartition_line_ids': refund_repartition_lines,
                                 'type_tax_use': 'sale',
                                 'description': "%s%%" % tax_amount,
-                                'tax_group_id': self.env.ref('l10n_eu_service.%s' % tax_group_fid).id,
+                                'tax_group_id': self.env.ref('l10n_eu_service.oss_tax_group_%s' % str(tax_amount).replace('.','_')).id,
                                 'sequence': 1000,
                                 'company_id': company.id,
                             })

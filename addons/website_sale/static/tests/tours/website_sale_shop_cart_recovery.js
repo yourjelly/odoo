@@ -4,7 +4,6 @@ odoo.define('website_sale.tour_shop_cart_recovery', function (require) {
 var localStorage = require('web.local_storage');
 var rpc = require('web.rpc');
 var tour = require('web_tour.tour');
-const tourUtils = require('website_sale.tour_utils');
 require('web.dom_ready');
 
 var orderIdKey = 'website_sale.tour_shop_cart_recovery.orderId';
@@ -23,7 +22,6 @@ tour.register('shop_cart_recovery', {
         content: "click add to cart",
         trigger: '#product_details #add_to_cart',
     },
-        tourUtils.goToCart(),
     {
         content: "check product is in cart, get cart id, logout, go to login",
         trigger: 'td.td-product_name:contains("Acoustic Bloc Screens")',
@@ -48,7 +46,7 @@ tour.register('shop_cart_recovery', {
     },
     {
         content: "click action",
-        trigger: '.o_dropdown_toggler:contains("Action")',
+        trigger: '.o_dropdown_toggler_btn:contains("Action")',
     },
     {
         content: "click Send a Cart Recovery Email",

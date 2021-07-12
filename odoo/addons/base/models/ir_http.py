@@ -191,8 +191,7 @@ class IrHttp(models.AbstractModel):
 
         # This is done first as the attachment path may
         # not match any HTTP controller
-        if (isinstance(exception, werkzeug.exceptions.HTTPException) and exception.code == 404) or \
-           (isinstance(exception, odoo.exceptions.AccessError)):
+        if isinstance(exception, werkzeug.exceptions.HTTPException) and exception.code == 404:
             serve = cls._serve_fallback(exception)
             if serve:
                 return serve

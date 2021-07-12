@@ -140,85 +140,64 @@ class ResPartner(models.Model):
 
     @api.constrains('vat', 'country_id')
     def check_vat(self):
+        if self.env.context.get('company_id'):
+            company = self.env['res.company'].browse(self.env.context['company_id'])
+        else:
+            company = self.env.company
+        eu_countries = self.env.ref('base.europe').country_ids
         for partner in self:
-            country = partner.commercial_partner_id.country_id
-            if partner.vat and self._run_vat_test(partner.vat, country) is False:
-                partner_label = _("partner [%s]", partner.name)
-                msg = partner._build_vat_error_message(country and country.code.lower() or None, partner.vat, partner_label)
+            if not partner.vat:
+                continue
+
+            if company.vat_check_vies and partner.commercial_partner_id.country_id in eu_countries:
+                # force full VIES online check
+                check_func = self.vies_vat_check
+            else:
+                # quick and partial off-line checksum validation
+                check_func = self.simple_vat_check
+
+            failed_check = False
+            #check with country code as prefix of the TIN
+            vat_country_code, vat_number = self._split_vat(partner.vat)
+            vat_guessed_country = self.env['res.country'].search([('code', '=', vat_country_code.upper())])
+            if vat_guessed_country:
+                failed_check = not check_func(vat_country_code, vat_number)
+
+            #if fails, check with country code from country
+            partner_country_code = partner.commercial_partner_id.country_id.code
+            if (not vat_guessed_country or failed_check) and partner_country_code:
+                failed_check = not check_func(partner_country_code.lower(), partner.vat)
+
+            # We allow any number if it doesn't start with a country code and the partner has no country.
+            # This is necessary to support an ORM limitation: setting vat and country_id together on a company
+            # triggers two distinct write on res.partner, one for each field, both triggering this constraint.
+            # If vat is set before country_id, the constraint must not break.
+
+            if failed_check:
+                country_code = partner_country_code or vat_country_code
+                msg = partner._construct_constraint_msg(country_code.lower() if country_code else None)
                 raise ValidationError(msg)
 
-    @api.model
-    def _run_vat_test(self, vat_number, default_country):
-        """ Checks a VAT number, either syntactically or using VIES, depending
-        on the active company's configuration.
-        A first check is made by using the first two characters of the VAT as
-        the country code. It it fails, a second one is made using default_country instead.
-
-        :param vat_number: a string with the VAT number to check.
-        :param default_country: a res.country object
-
-        :return: The country code (in lower case) of the country the VAT number
-                 was validated for, if it was validated. False if it could not be validated
-                 against the provided or guessed country. None if no country was available
-                 for the check, and no conclusion could be made with certainty.
-        """
-        # Get company
+    def _construct_constraint_msg(self, country_code):
+        self.ensure_one()
+        vat_no = "'CC##' (CC=Country Code, ##=VAT Number)"
+        vat_no = _ref_vat.get(country_code) or vat_no
         if self.env.context.get('company_id'):
             company = self.env['res.company'].browse(self.env.context['company_id'])
         else:
             company = self.env.company
-
-        # Get check function: either simple syntactic check or call to VIES service
-        eu_countries = self.env.ref('base.europe').country_ids
-        if company.vat_check_vies and default_country in eu_countries:
-            check_func = self.vies_vat_check
-        else:
-            check_func = self.simple_vat_check
-
-        check_result = None
-
-        # First check with country code as prefix of the TIN
-        vat_country_code, vat_number_split = self._split_vat(vat_number)
-        vat_guessed_country = self.env['res.country'].search([('code', '=', vat_country_code.upper())])
-        if vat_guessed_country:
-            check_result = check_func(vat_country_code, vat_number_split)
-            if check_result:
-                return vat_country_code
-
-        # If it fails, check with default_country (if it exists)
-        if default_country:
-            check_result = check_func(default_country.code.lower(), vat_number)
-            if check_result:
-                return default_country.code.lower()
-
-        # We allow any number if it doesn't start with a country code and the partner has no country.
-        # This is necessary to support an ORM limitation: setting vat and country_id together on a company
-        # triggers two distinct write on res.partner, one for each field, both triggering this constraint.
-        # If vat is set before country_id, the constraint must not break.
-        return check_result
-
-    @api.model
-    def _build_vat_error_message(self, country_code, wrong_vat, record_label):
-        if self.env.context.get('company_id'):
-            company = self.env['res.company'].browse(self.env.context['company_id'])
-        else:
-            company = self.env.company
-
-        expected_format = _ref_vat.get(country_code, "'CC##' (CC=Country Code, ##=VAT Number)")
-
         if company.vat_check_vies:
             return '\n' + _(
-                "The VAT number [%(wrong_vat)s] for %(record_label)s either failed the VIES VAT validation check or did not respect the expected format %(expected_format)s.",
-                wrong_vat=wrong_vat,
-                record_label=record_label,
-                expected_format=expected_format,
+                'The VAT number [%(vat)s] for partner [%(name)s] either failed the VIES VAT validation check or did not respect the expected format %(format)s.',
+                vat=self.vat,
+                name=self.name,
+                format=vat_no
             )
-
         return '\n' + _(
-            'The VAT number [%(wrong_vat)s] for record_label does not seem to be valid. \nNote: the expected format is %(expected_format)s',
-            wrong_vat=wrong_vat,
-            record_label=record_label,
-            expected_format=expected_format,
+            'The VAT number [%(vat)s] for partner [%(name)s] does not seem to be valid. \nNote: the expected format is %(format)s',
+            vat=self.vat,
+            name=self.name,
+            format=vat_no
         )
 
     __check_vat_ch_re = re.compile(r'E([0-9]{9}|-[0-9]{3}\.[0-9]{3}\.[0-9]{3})(MWST|TVA|IVA)$')
@@ -513,10 +492,7 @@ class ResPartner(models.Model):
         As of January 1st 2021, companies in Northern Ireland have a
         new VAT number starting with XI
         TODO: remove when stdnum is updated to 1.16 in supported distro"""
-        check_func = getattr(stdnum.util.get_cc_module('gb', 'vat'), 'is_valid', None)
-        if not check_func:
-            return len(vat) == 9
-        return check_func(vat)
+        return stdnum.util.get_cc_module('gb', 'vat').is_valid(vat) if stdnum else True
 
     def check_vat_in(self, vat):
         #reference from https://www.gstzen.in/a/format-of-a-gst-number-gstin.html

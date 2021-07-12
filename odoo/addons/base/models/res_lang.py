@@ -257,10 +257,6 @@ class Lang(models.Model):
         langs = self.with_context(active_test=True).search([])
         return sorted([(lang.code, lang.name) for lang in langs], key=itemgetter(1))
 
-    def action_archive(self):
-        self.ensure_one()
-        self.active = False
-
     def toggle_active(self):
         super().toggle_active()
         # Automatically load translation
@@ -294,8 +290,7 @@ class Lang(models.Model):
         self.clear_caches()
         return res
 
-    @api.ondelete(at_uninstall=True)
-    def _unlink_except_default_lang(self):
+    def unlink(self):
         for language in self:
             if language.code == 'en_US':
                 raise UserError(_("Base Language 'en_US' can not be deleted."))
@@ -304,9 +299,6 @@ class Lang(models.Model):
                 raise UserError(_("You cannot delete the language which is the user's preferred language."))
             if language.active:
                 raise UserError(_("You cannot delete the language which is Active!\nPlease de-activate the language first."))
-
-    def unlink(self):
-        for language in self:
             self.env['ir.translation'].search([('lang', '=', language.code)]).unlink()
         self.clear_caches()
         return super(Lang, self).unlink()

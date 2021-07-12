@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/Model', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { RecordDeletedError } from '@mail/model/model_errors';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { RecordDeletedError } = require('mail/static/src/model/model_errors.js');
 
 /**
  * This function generates a class that represent a model. Instances of such
@@ -231,6 +232,38 @@ function factory() {
             return _.uniqueId(`${this.modelName}_`);
         }
 
+        /**
+         * This function is called when this record has been explicitly updated
+         * with `.update()` or static method `.create()`, at the end of an
+         * record update cycle. This is a backward-compatible behaviour that
+         * is deprecated: you should use computed fields instead.
+         *
+         * @deprecated
+         * @abstract
+         * @private
+         * @param {Object} previous contains data that have been stored by
+         *   `_updateBefore()`. Useful to make extra update decisions based on
+         *   previous data.
+         */
+        _updateAfter(previous) {}
+
+        /**
+         * This function is called just at the beginning of an explicit update
+         * on this function, with `.update()` or static method `.create()`. This
+         * is useful to remember previous values of fields in `_updateAfter`.
+         * This is a backward-compatible behaviour that is deprecated: you
+         * should use computed fields instead.
+         *
+         * @deprecated
+         * @abstract
+         * @private
+         * @param {Object} data
+         * @returns {Object}
+         */
+        _updateBefore() {
+            return {};
+        }
+
     }
 
     /**
@@ -254,3 +287,5 @@ function factory() {
 }
 
 registerNewModel('mail.model', factory);
+
+});

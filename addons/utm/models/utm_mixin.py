@@ -37,8 +37,8 @@ class UtmMixin(models.AbstractModel):
                     Model = self.env[field.comodel_name]
                     records = Model.search([('name', '=', value)], limit=1)
                     if not records:
-                        if 'is_auto_campaign' in records._fields:
-                            records = Model.create({'name': value, 'is_auto_campaign': True})
+                        if 'is_website' in records._fields:
+                            records = Model.create({'name': value, 'is_website': True})
                         else:
                             records = Model.create({'name': value})
                     value = records.id

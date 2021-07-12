@@ -50,13 +50,6 @@ PortalChatter.include({
         this.set('rating_value', false);
         this.on("change:rating_value", this, this._onChangeRatingDomain);
     },
-    /**
-     * @override
-     */
-    start: function () {
-        this._super.apply(this, arguments);
-        this.on("change:rating_card_values", this, this._renderRatingCard);
-    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -112,43 +105,25 @@ PortalChatter.include({
 
     /**
      * @override
-     * @returns {Promise}
      */
-    _chatterInit: async function () {
-        const result = await this._super(...arguments);
-        this._updateRatingCardValues(result);
-        return result;
-    },
-    /**
-     * @override
-     * @param {Array} domain
-     * @returns {Promise}
-     */
-    messageFetch: async function (domain) {
-        const result = await this._super(...arguments);
-        this._updateRatingCardValues(result);
-        return result;
-    },
-    /**
-     * Calculates and Updates rating values i.e. average, percentage
-     *
-     * @private
-     */
-    _updateRatingCardValues: function (result) {
-        if (!result['rating_stats']) {
-            return;
-        }
-        const ratingData = {
-            'avg': Math.round(result['rating_stats']['avg'] * 100) / 100,
-            'percent': [],
-        };
-        _.each(_.keys(result['rating_stats']['percent']).reverse(), function (rating) {
-            ratingData['percent'].push({
-                'num': rating,
-                'percent': utils.round_precision(result['rating_stats']['percent'][rating], 0.01),
+    _chatterInit: function () {
+        var self = this;
+        return this._super.apply(this, arguments).then(function (result) {
+            if (!result['rating_stats']) {
+                return;
+            }
+            var ratingData = {
+                'avg': Math.round(result['rating_stats']['avg'] * 100) / 100,
+                'percent': [],
+            };
+            _.each(_.keys(result['rating_stats']['percent']).reverse(), function (rating) {
+                ratingData['percent'].push({
+                    'num': rating,
+                    'percent': utils.round_precision(result['rating_stats']['percent'][rating], 0.01),
+                });
             });
+            self.set('rating_card_values', ratingData);
         });
-        this.set('rating_card_values', ratingData);
     },
     /**
      * @override
@@ -162,14 +137,6 @@ PortalChatter.include({
     },
 
     /**
-     * render rating card
-     *
-     * @private
-     */
-    _renderRatingCard: function () {
-        this.$('.o_website_rating_card_container').replaceWith(qweb.render("portal_rating.rating_card", {widget: this}));
-    },
-    /**
      * Default rating data for publisher comment qweb template
      * @private
      * @param {Integer} messageIndex 
@@ -178,7 +145,7 @@ PortalChatter.include({
         return {
             mes_index: messageIndex,
             publisher_id: this.options.partner_id,
-            publisher_avatar: _.str.sprintf('/web/image/res.partner/%s/avatar_128/50x50', this.options.partner_id),
+            publisher_avatar: _.str.sprintf('/web/image/%s/%s/image_128/50x50', 'res.partner', this.options.partner_id),
             publisher_name: _t("Write your comment"),
             publisher_datetime: '',
             publisher_comment: '',
@@ -203,7 +170,7 @@ PortalChatter.include({
         if (rawRating.publisher_id && rawRating.publisher_id.length >= 2) {
             ratingData.publisher_id = rawRating.publisher_id[0];
             ratingData.publisher_name = rawRating.publisher_id[1];
-            ratingData.publisher_avatar = _.str.sprintf('/web/image/res.partner/%s/avatar_128/50x50', ratingData.publisher_id);
+            ratingData.publisher_avatar = _.str.sprintf('/web/image/%s/%s/image_128/50x50', 'res.partner', ratingData.publisher_id);
         }
         var commentData = _.extend(this._newPublisherCommentData(messageIndex), ratingData);
         return commentData;

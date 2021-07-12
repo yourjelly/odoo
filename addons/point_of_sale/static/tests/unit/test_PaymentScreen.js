@@ -1,4 +1,3 @@
-/*global Backbone */
 odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
     'use strict';
 
@@ -279,15 +278,15 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
 
         parent.line.setPaymentStatus('waiting');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(parent.el.querySelector('.paymentline i.fa-spinner'));
 
         parent.line.setPaymentStatus('waitingCancel');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(parent.el.querySelector('.paymentline i.fa-spinner'));
 
         parent.line.setPaymentStatus('reversing');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(parent.el.querySelector('.paymentline i.fa-spinner'));
 
         parent.line.setPaymentStatus('done');
         await testUtils.nextTick();

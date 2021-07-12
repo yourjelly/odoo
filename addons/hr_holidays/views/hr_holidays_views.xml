@@ -4,7 +4,7 @@
     <menuitem
         name="Time Off"
         id="menu_hr_holidays_root"
-        sequence="225"
+        sequence="95"
         web_icon="hr_holidays,static/description/icon.png"
         groups="base.group_user"/>
 
@@ -44,8 +44,7 @@
         id="menu_hr_holidays_approvals"
         name="Managers"
         parent="menu_hr_holidays_root"
-        sequence="3"
-        groups="hr_holidays.group_hr_holidays_responsible"/>
+        sequence="3"/>
 
     <menuitem
         id="menu_open_department_leave_approve"

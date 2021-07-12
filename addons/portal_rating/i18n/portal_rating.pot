@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.3\n"
+"Project-Id-Version: Odoo Server saas~13.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-11 09:26+0000\n"
-"PO-Revision-Date: 2021-05-11 09:26+0000\n"
+"POT-Creation-Date: 2020-09-01 07:29+0000\n"
+"PO-Revision-Date: 2020-09-01 07:29+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,24 @@ msgstr ""
 #. openerp-web
 #: code:addons/portal_rating/static/src/xml/portal_chatter.xml:0
 #, python-format
-msgid "#{widget.options['force_submit_url'] || '/mail/chatter_post'}"
+msgid ""
+"#{widget.options['force_submit_url'] ? widget.options['force_submit_url'] : "
+"'/mail/chatter_post'}"
+msgstr ""
+
+#. module: portal_rating
+#. openerp-web
+#: code:addons/portal_rating/static/src/xml/portal_rating_composer.xml:0
+#, python-format
+msgid "&times;"
+msgstr ""
+
+#. module: portal_rating
+#. openerp-web
+#: code:addons/portal_rating/static/src/xml/portal_rating_composer.xml:0
+#: code:addons/portal_rating/static/src/xml/portal_rating_composer.xml:0
+#, python-format
+msgid "Add a review"
 msgstr ""
 
 #. module: portal_rating
@@ -76,7 +93,6 @@ msgid "Details"
 msgstr ""
 
 #. module: portal_rating
-#: model:ir.model.fields,field_description:portal_rating.field_ir_http__display_name
 #: model:ir.model.fields,field_description:portal_rating.field_mail_message__display_name
 #: model:ir.model.fields,field_description:portal_rating.field_rating_rating__display_name
 msgid "Display Name"
@@ -90,12 +106,9 @@ msgid "Edit"
 msgstr ""
 
 #. module: portal_rating
-#: model:ir.model,name:portal_rating.model_ir_http
-msgid "HTTP Routing"
-msgstr ""
-
-#. module: portal_rating
 #. openerp-web
+#: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
+#: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #, python-format
@@ -131,7 +144,6 @@ msgid "I love it"
 msgstr ""
 
 #. module: portal_rating
-#: model:ir.model.fields,field_description:portal_rating.field_ir_http__id
 #: model:ir.model.fields,field_description:portal_rating.field_mail_message__id
 #: model:ir.model.fields,field_description:portal_rating.field_rating_rating__id
 msgid "ID"
@@ -151,7 +163,6 @@ msgid "It's okay"
 msgstr ""
 
 #. module: portal_rating
-#: model:ir.model.fields,field_description:portal_rating.field_ir_http____last_update
 #: model:ir.model.fields,field_description:portal_rating.field_mail_message____last_update
 #: model:ir.model.fields,field_description:portal_rating.field_rating_rating____last_update
 msgid "Last Modified on"
@@ -172,6 +183,8 @@ msgstr ""
 
 #. module: portal_rating
 #. openerp-web
+#: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
+#: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #: code:addons/portal_rating/static/src/xml/portal_tools.xml:0
 #, python-format
@@ -222,14 +235,6 @@ msgstr ""
 #: code:addons/portal_rating/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Update comment"
-msgstr ""
-
-#. module: portal_rating
-#. openerp-web
-#: code:addons/portal_rating/static/src/xml/portal_rating_composer.xml:0
-#: code:addons/portal_rating/static/src/xml/portal_rating_composer.xml:0
-#, python-format
-msgid "Write a review"
 msgstr ""
 
 #. module: portal_rating

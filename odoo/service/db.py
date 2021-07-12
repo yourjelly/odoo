@@ -103,9 +103,7 @@ def _create_empty_database(name):
         if cr.fetchall():
             raise DatabaseExists("database %r already exists!" % (name,))
         else:
-            # database-altering operations cannot be executed inside a transaction
-            cr.rollback()
-            cr._cnx.autocommit = True
+            cr.autocommit(True)     # avoid transaction block
 
             # 'C' collate is only safe with template0, but provides more useful indexes
             collate = sql.SQL("LC_COLLATE 'C'" if chosen_template == 'template0' else "")
@@ -137,8 +135,7 @@ def exp_duplicate_database(db_original_name, db_name):
     odoo.sql_db.close_db(db_original_name)
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
-        # database-altering operations cannot be executed inside a transaction
-        cr._cnx.autocommit = True
+        cr.autocommit(True)     # avoid transaction block
         _drop_conn(cr, db_original_name)
         cr.execute(sql.SQL("CREATE DATABASE {} ENCODING 'unicode' TEMPLATE {}").format(
             sql.Identifier(db_name),
@@ -182,8 +179,7 @@ def exp_drop(db_name):
 
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
-        # database-altering operations cannot be executed inside a transaction
-        cr._cnx.autocommit = True
+        cr.autocommit(True) # avoid transaction block
         _drop_conn(cr, db_name)
 
         try:
@@ -328,8 +324,7 @@ def exp_rename(old_name, new_name):
 
     db = odoo.sql_db.db_connect('postgres')
     with closing(db.cursor()) as cr:
-        # database-altering operations cannot be executed inside a transaction
-        cr._cnx.autocommit = True
+        cr.autocommit(True)     # avoid transaction block
         _drop_conn(cr, old_name)
         try:
             cr.execute(sql.SQL('ALTER DATABASE {} RENAME TO {}').format(sql.Identifier(old_name), sql.Identifier(new_name)))

@@ -22,7 +22,6 @@ odoo.define('pos_restaurant.TableGuestsButton', function(require) {
                 startingValue: this.nGuests,
                 cheap: true,
                 title: this.env._t('Guests ?'),
-                isInputSelected: true
             });
 
             if (confirmed) {

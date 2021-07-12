@@ -1,14 +1,17 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/composer/composer.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many, many2one, one2one } from '@mail/model/model_field';
-import { clear, insert, link, replace, unlink, unlinkAll } from '@mail/model/model_field_command';
-import emojis from '@mail/js/emojis';
-import {
+const emojis = require('mail.emojis');
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many, many2one, one2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
+const mailUtils = require('mail.utils');
+
+const {
     addLink,
     escapeAndCompactTextContent,
     parseAndTransform,
-} from '@mail/js/utils';
+} = require('mail.utils');
 
 function factory(dependencies) {
 
@@ -52,6 +55,12 @@ function factory(dependencies) {
         closeSuggestions() {
             this.update({ suggestionDelimiterPosition: clear() });
         }
+
+        /**
+         * @deprecated what this method used to do is now automatically computed
+         *  based on composer state
+         */
+        async detectSuggestionDelimiter() {}
 
         /**
          * Hides the composer, which only makes sense if the composer is
@@ -137,10 +146,10 @@ function factory(dependencies) {
             // the target partner.
             switch (this.activeSuggestedRecord.constructor.modelName) {
                 case 'mail.thread':
-                    Object.assign(updateData, { mentionedChannels: link(this.activeSuggestedRecord) });
+                    Object.assign(updateData, { mentionedChannels: [['link', this.activeSuggestedRecord]] });
                     break;
                 case 'mail.partner':
-                    Object.assign(updateData, { mentionedPartners: link(this.activeSuggestedRecord) });
+                    Object.assign(updateData, { mentionedPartners: [['link', this.activeSuggestedRecord]] });
                     break;
             }
             this.update(updateData);
@@ -159,7 +168,7 @@ function factory(dependencies) {
                     }
                 }
             }
-            return replace(recipients);
+            return [['replace', recipients]];
         }
 
         /**
@@ -170,7 +179,7 @@ function factory(dependencies) {
 
             const context = {
                 default_attachment_ids: attachmentIds,
-                default_body: escapeAndCompactTextContent(this.textInputContent),
+                default_body: mailUtils.escapeAndCompactTextContent(this.textInputContent),
                 default_is_log: this.isLog,
                 default_model: this.thread.model,
                 default_partner_ids: this.recipients.map(partner => partner.id),
@@ -218,6 +227,7 @@ function factory(dependencies) {
             let postData = {
                 attachment_ids: this.attachments.map(attachment => attachment.id),
                 body,
+                channel_ids: this.mentionedChannels.map(channel => channel.id),
                 message_type: 'comment',
                 partner_ids: this.recipients.map(partner => partner.id),
             };
@@ -272,10 +282,10 @@ function factory(dependencies) {
                         {},
                         this.env.models['mail.message'].convertData(messageData),
                         {
-                            originThread: insert({
+                            originThread: [['insert', {
                                 id: thread.id,
                                 model: thread.model,
-                            }),
+                            }]],
                         })
                     );
                     thread.loadNewMessages();
@@ -321,7 +331,7 @@ function factory(dependencies) {
         setFirstSuggestionActive() {
             const suggestedRecords = this.mainSuggestedRecords.concat(this.extraSuggestedRecords);
             const firstRecord = suggestedRecords[0];
-            this.update({ activeSuggestedRecord: link(firstRecord) });
+            this.update({ activeSuggestedRecord: [['link', firstRecord]] });
         }
 
         /**
@@ -331,7 +341,7 @@ function factory(dependencies) {
         setLastSuggestionActive() {
             const suggestedRecords = this.mainSuggestedRecords.concat(this.extraSuggestedRecords);
             const { length, [length - 1]: lastRecord } = suggestedRecords;
-            this.update({ activeSuggestedRecord: link(lastRecord) });
+            this.update({ activeSuggestedRecord: [['link', lastRecord]] });
         }
 
         /**
@@ -349,7 +359,7 @@ function factory(dependencies) {
                 return;
             }
             const nextRecord = suggestedRecords[activeElementIndex + 1];
-            this.update({ activeSuggestedRecord: link(nextRecord) });
+            this.update({ activeSuggestedRecord: [['link', nextRecord]] });
         }
 
         /**
@@ -367,12 +377,60 @@ function factory(dependencies) {
                 return;
             }
             const previousRecord = suggestedRecords[activeElementIndex - 1];
-            this.update({ activeSuggestedRecord: link(previousRecord) });
+            this.update({ activeSuggestedRecord: [['link', previousRecord]] });
         }
 
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.canned_response}
+         */
+        _computeActiveSuggestedCannedResponse() {
+            if (this.suggestionDelimiter === ':' && this.activeSuggestedRecord) {
+                return [['link', this.activeSuggestedRecord]];
+            }
+            return [['unlink']];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.thread}
+         */
+        _computeActiveSuggestedChannel() {
+            if (this.suggestionDelimiter === '#' && this.activeSuggestedRecord) {
+                return [['link', this.activeSuggestedRecord]];
+            }
+            return [['unlink']];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.channel_command}
+         */
+        _computeActiveSuggestedChannelCommand() {
+            if (this.suggestionDelimiter === '/' && this.activeSuggestedRecord) {
+                return [['link', this.activeSuggestedRecord]];
+            }
+            return [['unlink']];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.partner}
+         */
+        _computeActiveSuggestedPartner() {
+            if (this.suggestionDelimiter === '@' && this.activeSuggestedRecord) {
+                return [['link', this.activeSuggestedRecord]];
+            }
+            return [['unlink']];
+        }
 
         /**
          * Clears the active suggested record on closing mentions or adapt it if
@@ -386,7 +444,7 @@ function factory(dependencies) {
                 this.mainSuggestedRecords.length === 0 &&
                 this.extraSuggestedRecords.length === 0
             ) {
-                return unlink();
+                return [['unlink']];
             }
             if (
                 this.mainSuggestedRecords.includes(this.activeSuggestedRecord) ||
@@ -396,7 +454,27 @@ function factory(dependencies) {
             }
             const suggestedRecords = this.mainSuggestedRecords.concat(this.extraSuggestedRecords);
             const firstRecord = suggestedRecords[0];
-            return link(firstRecord);
+            return [['link', firstRecord]];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {string}
+         */
+        _computeActiveSuggestedRecordName() {
+            switch (this.suggestionDelimiter) {
+                case '@':
+                    return "activeSuggestedPartner";
+                case ':':
+                    return "activeSuggestedCannedResponse";
+                case '/':
+                    return "activeSuggestedChannelCommand";
+                case '#':
+                    return "activeSuggestedChannel";
+                default:
+                    return clear();
+            }
         }
 
         /**
@@ -411,6 +489,18 @@ function factory(dependencies) {
         }
 
         /**
+         * @deprecated
+         * @private
+         * @returns {mail.partner[]}
+         */
+        _computeExtraSuggestedPartners() {
+            if (this.suggestionDelimiter === '@') {
+                return [['replace', this.extraSuggestedRecords]];
+            }
+            return [['unlink-all']];
+        }
+
+        /**
          * Clears the extra suggested record on closing mentions, and ensures
          * the extra list does not contain any element already present in the
          * main list, which is a requirement for the navigation process.
@@ -420,9 +510,30 @@ function factory(dependencies) {
          */
         _computeExtraSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
-            return unlink(this.mainSuggestedRecords);
+            return [['unlink', this.mainSuggestedRecords]];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.model[]}
+         */
+        _computeExtraSuggestedRecordsList() {
+            return this.extraSuggestedRecords;
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {string}
+         */
+        _computeExtraSuggestedRecordsListName() {
+            if (this.suggestionDelimiter === '@') {
+                return "extraSuggestedPartners";
+            }
+            return clear();
         }
 
         /**
@@ -438,7 +549,19 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeHasUploadingAttachment() {
-            return this.attachments.some(attachment => attachment.isUploading);
+            return this.attachments.some(attachment => attachment.isTemporary);
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.model[]}
+         */
+        _computeMainSuggestedPartners() {
+            if (this.suggestionDelimiter === '@') {
+                return [['replace', this.mainSuggestedRecords]];
+            }
+            return [['unlink-all']];
         }
 
         /**
@@ -449,7 +572,36 @@ function factory(dependencies) {
          */
         _computeMainSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
-                return unlinkAll();
+                return [['unlink-all']];
+            }
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.model[]}
+         */
+        _computeMainSuggestedRecordsList() {
+            return this.mainSuggestedRecords;
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {string}
+         */
+        _computeMainSuggestedRecordsListName() {
+            switch (this.suggestionDelimiter) {
+                case '@':
+                    return "mainSuggestedPartners";
+                case ':':
+                    return "suggestedCannedResponses";
+                case '/':
+                    return "suggestedChannelCommands";
+                case '#':
+                    return "suggestedChannels";
+                default:
+                    return clear();
             }
         }
 
@@ -476,7 +628,7 @@ function factory(dependencies) {
                     unmentionedPartners.push(partner);
                 }
             }
-            return unlink(unmentionedPartners);
+            return [['unlink', unmentionedPartners]];
         }
 
         /**
@@ -502,7 +654,31 @@ function factory(dependencies) {
                     unmentionedChannels.push(channel);
                 }
             }
-            return unlink(unmentionedChannels);
+            return [['unlink', unmentionedChannels]];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.canned_response[]}
+         */
+        _computeSuggestedCannedResponses() {
+            if (this.suggestionDelimiter === ':') {
+                return [['replace', this.mainSuggestedRecords]];
+            }
+            return [['unlink-all']];
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.thread[]}
+         */
+        _computeSuggestedChannels() {
+            if (this.suggestionDelimiter === '#') {
+                return [['replace', this.mainSuggestedRecords]];
+            }
+            return [['unlink-all']];
         }
 
         /**
@@ -563,6 +739,18 @@ function factory(dependencies) {
                 return candidatePosition;
             }
             return clear();
+        }
+
+        /**
+         * @deprecated
+         * @private
+         * @returns {mail.channel_command[]}
+         */
+        _computeSuggestedChannelCommands() {
+            if (this.suggestionDelimiter === '/') {
+                return [['replace', this.mainSuggestedRecords]];
+            }
+            return [['unlink-all']];
         }
 
         /**
@@ -756,10 +944,10 @@ function factory(dependencies) {
          */
         _reset() {
             this.update({
-                attachments: unlinkAll(),
+                attachments: [['unlink-all']],
                 isLastStateChangeProgrammatic: true,
-                mentionedChannels: unlinkAll(),
-                mentionedPartners: unlinkAll(),
+                mentionedChannels: [['unlink-all']],
+                mentionedPartners: [['unlink-all']],
                 subjectContent: "",
                 textInputContent: '',
                 textInputCursorEnd: 0,
@@ -799,14 +987,91 @@ function factory(dependencies) {
             mainSuggestedRecords.length = Math.min(mainSuggestedRecords.length, limit);
             extraSuggestedRecords.length = Math.min(extraSuggestedRecords.length, limit - mainSuggestedRecords.length);
             this.update({
-                extraSuggestedRecords: replace(extraSuggestedRecords),
+                extraSuggestedRecords: [['replace', extraSuggestedRecords]],
                 hasToScrollToActiveSuggestion: true,
-                mainSuggestedRecords: replace(mainSuggestedRecords),
+                mainSuggestedRecords: [['replace', mainSuggestedRecords]],
             });
+        }
+
+        /**
+         * Validates user's current typing as a correct mention keyword in order
+         * to trigger mentions suggestions display.
+         * Returns the mention keyword without the suggestion delimiter if it
+         * has been validated and false if not.
+         *
+         * @deprecated
+         * @private
+         * @param {boolean} beginningOnly
+         * @returns {string|boolean}
+         */
+        _validateMentionKeyword(beginningOnly) {
+            // use position before suggestion delimiter because there should be whitespaces
+            // or line feed/carriage return before the suggestion delimiter
+            const beforeSuggestionDelimiterPosition = this.suggestionDelimiterPosition - 1;
+            if (beginningOnly && beforeSuggestionDelimiterPosition > 0) {
+                return false;
+            }
+            let searchStr = this.textInputContent.substring(
+                beforeSuggestionDelimiterPosition,
+                this.textInputCursorStart
+            );
+            // regex string start with suggestion delimiter or whitespace then suggestion delimiter
+            const pattern = "^" + this.suggestionDelimiter + "|^\\s" + this.suggestionDelimiter;
+            const regexStart = new RegExp(pattern, 'g');
+            // trim any left whitespaces or the left line feed/ carriage return
+            // at the beginning of the string
+            searchStr = searchStr.replace(/^\s\s*|^[\n\r]/g, '');
+            if (regexStart.test(searchStr) && searchStr.length) {
+                searchStr = searchStr.replace(pattern, '');
+                return !searchStr.includes(' ') && !/[\r\n]/.test(searchStr)
+                    ? searchStr.replace(this.suggestionDelimiter, '')
+                    : false;
+            }
+            return false;
         }
     }
 
     Composer.fields = {
+        /**
+         * Deprecated. Use `activeSuggestedRecord` instead.
+         */
+        activeSuggestedCannedResponse: many2one('mail.canned_response', {
+            compute: '_computeActiveSuggestedCannedResponse',
+            dependencies: [
+                'activeSuggestedRecord',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
+         * Deprecated. Use `activeSuggestedRecord` instead.
+         */
+        activeSuggestedChannel: many2one('mail.thread', {
+            compute: '_computeActiveSuggestedChannel',
+            dependencies: [
+                'activeSuggestedRecord',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
+         * Deprecated. Use `activeSuggestedRecord` instead.
+         */
+        activeSuggestedChannelCommand: many2one('mail.channel_command', {
+            compute: '_computeActiveSuggestedChannelCommand',
+            dependencies: [
+                'activeSuggestedRecord',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
+         * Deprecated. Use `activeSuggestedRecord` instead.
+         */
+        activeSuggestedPartner: many2one('mail.partner', {
+            compute: '_computeActiveSuggestedPartner',
+            dependencies: [
+                'activeSuggestedRecord',
+                'suggestionDelimiter',
+            ],
+        }),
         /**
          * Determines the suggested record that is currently active. This record
          * is highlighted in the UI and it will be the selected record if the
@@ -820,17 +1085,28 @@ function factory(dependencies) {
                 'mainSuggestedRecords',
             ],
         }),
+        /**
+         * Deprecated, suggestions should be used in a manner that does not
+         * depend on their type. Use `activeSuggestedRecord` directly instead.
+         */
+        activeSuggestedRecordName: attr({
+            compute: '_computeActiveSuggestedRecordName',
+            dependencies: [
+                'suggestionDelimiter',
+            ],
+        }),
         attachments: many2many('mail.attachment', {
             inverse: 'composers',
         }),
         /**
-         * This field watches the uploading status of attachments linked to this composer.
+         * This field watches the uploading (= temporary) status of attachments
+         * linked to this composer.
          *
          * Useful to determine whether there are some attachments that are being
          * uploaded.
          */
-        attachmentsAreUploading: attr({
-            related: 'attachments.isUploading',
+        attachmentsAreTemporary: attr({
+            related: 'attachments.isTemporary',
         }),
         canPostMessage: attr({
             compute: '_computeCanPostMessage',
@@ -851,6 +1127,16 @@ function factory(dependencies) {
             inverse: 'replyingToMessageOriginThreadComposer',
         }),
         /**
+         * Deprecated. Use `extraSuggestedRecords` instead.
+         */
+        extraSuggestedPartners: many2many('mail.partner', {
+            compute: '_computeExtraSuggestedPartners',
+            dependencies: [
+                'extraSuggestedRecords',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
          * Determines the extra records that are currently suggested.
          * Allows to have different model types of mentions through a dynamic
          * process. 2 arbitrary lists can be provided and the second is defined
@@ -865,6 +1151,25 @@ function factory(dependencies) {
             ],
         }),
         /**
+         * Deprecated. Use `extraSuggestedRecords` instead.
+         */
+        extraSuggestedRecordsList: attr({
+            compute: '_computeExtraSuggestedRecordsList',
+            dependencies: [
+                'extraSuggestedRecords',
+            ],
+        }),
+        /**
+         * Deprecated, suggestions should be used in a manner that does not
+         * depend on their type. Use `extraSuggestedRecords` directly instead.
+         */
+        extraSuggestedRecordsListName: attr({
+            compute: '_computeExtraSuggestedRecordsListName',
+            dependencies: [
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
          * This field determines whether some attachments linked to this
          * composer are being uploaded.
          */
@@ -872,7 +1177,7 @@ function factory(dependencies) {
             compute: '_computeHasUploadingAttachment',
             dependencies: [
                 'attachments',
-                'attachmentsAreUploading',
+                'attachmentsAreTemporary',
             ],
         }),
         hasFocus: attr({
@@ -918,6 +1223,16 @@ function factory(dependencies) {
          */
         isPostingMessage: attr(),
         /**
+         * Deprecated. Use `mainSuggestedRecords` instead.
+         */
+        mainSuggestedPartners: many2many('mail.partner', {
+            compute: '_computeMainSuggestedPartners',
+            dependencies: [
+                'mainSuggestedRecords',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
          * Determines the main records that are currently suggested.
          * Allows to have different model types of mentions through a dynamic
          * process. 2 arbitrary lists can be provided and the first is defined
@@ -928,6 +1243,25 @@ function factory(dependencies) {
             dependencies: [
                 'mainSuggestedRecords',
                 'suggestionDelimiterPosition',
+            ],
+        }),
+        /**
+         * Deprecated. Use `mainSuggestedRecords` instead.
+         */
+        mainSuggestedRecordsList: attr({
+            compute: '_computeMainSuggestedRecordsList',
+            dependencies: [
+                'mainSuggestedRecords',
+            ],
+        }),
+        /**
+         * Deprecated, suggestions should be used in a manner that does not
+         * depend on their type. Use `mainSuggestedRecords` directly instead.
+         */
+        mainSuggestedRecordsListName: attr({
+            compute: '_computeMainSuggestedRecordsListName',
+            dependencies: [
+                'suggestionDelimiter',
             ],
         }),
         mentionedChannels: many2many('mail.thread', {
@@ -960,7 +1294,6 @@ function factory(dependencies) {
                 'suggestionSearchTerm',
                 'thread',
             ],
-            isOnChange: true,
         }),
         /**
          * Determines the extra `mail.partner` (on top of existing followers)
@@ -995,6 +1328,36 @@ function factory(dependencies) {
          */
         subjectContent: attr({
             default: "",
+        }),
+        /**
+         * Deprecated. Use `mainSuggestedRecords` instead.
+         */
+        suggestedCannedResponses: many2many('mail.canned_response', {
+            compute: '_computeSuggestedCannedResponses',
+            dependencies: [
+                'mainSuggestedRecords',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
+         * Deprecated. Use `mainSuggestedRecords` instead.
+         */
+        suggestedChannelCommands: many2many('mail.channel_command', {
+            compute: '_computeSuggestedChannelCommands',
+            dependencies: [
+                'mainSuggestedRecords',
+                'suggestionDelimiter',
+            ],
+        }),
+        /**
+         * Deprecated. Use `mainSuggestedRecords` instead.
+         */
+        suggestedChannels: many2many('mail.thread', {
+            compute: '_computeSuggestedChannels',
+            dependencies: [
+                'mainSuggestedRecords',
+                'suggestionDelimiter',
+            ],
         }),
         /**
          * States which type of suggestion is currently in progress, if any.
@@ -1059,7 +1422,6 @@ function factory(dependencies) {
         }),
         thread: one2one('mail.thread', {
             inverse: 'composer',
-            required: true,
         }),
     };
 
@@ -1069,3 +1431,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.composer', factory);
+
+});

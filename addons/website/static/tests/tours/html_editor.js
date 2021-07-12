@@ -1,4 +1,3 @@
-/* global ace */
 odoo.define('website.test.html_editor', function (require) {
 'use strict';
 

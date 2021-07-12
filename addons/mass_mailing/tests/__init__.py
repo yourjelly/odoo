@@ -5,4 +5,3 @@ from . import common
 from . import test_mailing_internals
 from . import test_mailing_list
 from . import test_mailing_controllers
-from . import test_mailing_mailing_schedule_date

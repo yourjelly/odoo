@@ -48,15 +48,24 @@ def after_commit(func):
 
 @contextmanager
 def microsoft_calendar_token(user):
-    yield user._get_microsoft_calendar_token()
-
+    try:
+        yield user._get_microsoft_calendar_token()
+    except requests.HTTPError as e:
+        if e.response.status_code == 401:  # Invalid token.
+            # The transaction should be rolledback, but the user's tokens
+            # should be reset. The user will be asked to authenticate again next time.
+            # Rollback manually first to avoid concurrent access errors/deadlocks.
+            user.env.cr.rollback()
+            with user.pool.cursor() as cr:
+                env = user.env(cr=cr)
+                user.with_env(env)._set_microsoft_auth_tokens(False, False, 0)
+        raise e
 
 class MicrosoftSync(models.AbstractModel):
     _name = 'microsoft.calendar.sync'
     _description = "Synchronize a record with Microsoft Calendar"
 
     microsoft_id = fields.Char('Microsoft Calendar Id', copy=False)
-    # This field helps to known when a microsoft event need to be resynced
     need_sync_m = fields.Boolean(default=True, copy=False)
     active = fields.Boolean(default=True)
 
@@ -65,7 +74,7 @@ class MicrosoftSync(models.AbstractModel):
         if 'microsoft_id' in vals:
             self._from_microsoft_ids.clear_cache(self)
         synced_fields = self._get_microsoft_synced_fields()
-        if 'need_sync_m' not in vals and vals.keys() & synced_fields and not self.env.user.microsoft_synchronization_stopped:
+        if 'need_sync_m' not in vals and vals.keys() & synced_fields:
             fields_to_sync = [x for x in vals.keys() if x in synced_fields]
             if fields_to_sync:
                 vals['need_sync_m'] = True
@@ -86,9 +95,6 @@ class MicrosoftSync(models.AbstractModel):
     def create(self, vals_list):
         if any(vals.get('microsoft_id') for vals in vals_list):
             self._from_microsoft_ids.clear_cache(self)
-        if self.env.user.microsoft_synchronization_stopped:
-            for vals in vals_list:
-                vals.update({'need_sync_m': False})
         records = super().create(vals_list)
 
         microsoft_service = MicrosoftCalendarService(self.env['microsoft.service'])
@@ -96,13 +102,6 @@ class MicrosoftSync(models.AbstractModel):
         for record in records_to_sync:
             record._microsoft_insert(microsoft_service, record._microsoft_values(self._get_microsoft_synced_fields()), timeout=3)
         return records
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_synchronized(self):
-        if self.env.context.get('archive_on_error') and self._active_name:
-            return
-        if self.filtered('microsoft_id'):
-            raise UserError(_("You cannot delete a record synchronized with Microsoft Calendar, archive it instead."))
 
     def unlink(self):
         """We can't delete an event that is also in Microsoft Calendar. Otherwise we would
@@ -112,6 +111,8 @@ class MicrosoftSync(models.AbstractModel):
         if self.env.context.get('archive_on_error') and self._active_name:
             synced.write({self._active_name: False})
             self = self - synced
+        elif synced:
+            raise UserError(_("You cannot delete a record synchronized with Outlook Calendar, archive it instead."))
         return super().unlink()
 
     @api.model
@@ -255,9 +256,12 @@ class MicrosoftSync(models.AbstractModel):
             dict(self._microsoft_to_odoo_values(e, default_reminders, default_values), need_sync_m=False)
             for e in (new - new_recurrent)
         ]
-        new_odoo = self.create(odoo_values)
+        new_odoo = self.with_context(dont_notify=True).create(odoo_values)
 
-        synced_recurrent_records = self._sync_recurrence_microsoft2odoo(new_recurrent)
+        synced_recurrent_records = self.with_context(dont_notify=True)._sync_recurrence_microsoft2odoo(new_recurrent)
+        if not self._context.get("dont_notify"):
+            new_odoo._notify_attendees()
+            synced_recurrent_records._notify_attendees()
 
         cancelled = existing.cancelled()
         cancelled_odoo = self.browse(cancelled.odoo_ids(self.env))
@@ -316,17 +320,6 @@ class MicrosoftSync(models.AbstractModel):
                     'need_sync_m': False,
                 })
 
-    def _microsoft_attendee_answer(self, microsoft_service: MicrosoftCalendarService, microsoft_id, answer, params, timeout=TIMEOUT):
-        if not answer:
-            return
-        with microsoft_calendar_token(self.env.user.sudo()) as token:
-            if token:
-                self._ensure_attendees_have_email()
-                microsoft_service.answer(microsoft_id, answer, params, token=token, timeout=timeout)
-                self.write({
-                    'need_sync_m': False,
-                })
-
     def _get_microsoft_records_to_sync(self, full_sync=False):
         """Return records that should be synced from Odoo to Microsoft
 
@@ -373,9 +366,12 @@ class MicrosoftSync(models.AbstractModel):
         """
         raise NotImplementedError()
 
-    @api.model
-    def _restart_microsoft_sync(self):
-        """ Turns on the microsoft synchronization for all the events of
-        a given user.
+    def _notify_attendees(self):
+        """ Notify calendar event partners.
+        This is called when creating new calendar events in _sync_microsoft2odoo.
+        At the initialization of a synced calendar, Odoo requests all events for a specific
+        MicrosoftCalendar. Among those there will probably be lots of events that will never triggers a notification
+        (e.g. single events that occured in the past). Processing all these events through the notification procedure
+        of calendar.event.create is a possible performance bottleneck. This method aimed at alleviating that.
         """
         raise NotImplementedError()

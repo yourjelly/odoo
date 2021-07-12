@@ -4,7 +4,7 @@
     <!-- Main menu -->
     <menuitem name="Surveys"
       id="menu_surveys"
-      sequence="130"
+      sequence="70"
       groups="group_survey_user"
       web_icon="survey,static/description/icon.png"/>
 

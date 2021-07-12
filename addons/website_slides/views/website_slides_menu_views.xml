@@ -4,8 +4,7 @@
         id="website_slides_menu_root"
         web_icon="website_slides,static/description/icon.png"
         groups="website_slides.group_website_slides_officer"
-        action="slide_channel_action_overview"
-        sequence="100"/>
+        action="slide_channel_action_overview"/>
 
     <!-- Main top menu elements -->
     <menuitem name="Courses"
@@ -50,20 +49,15 @@
         parent="website_slides_menu_report"
         sequence="2"
         action="slide_slide_action_report"/>
-    <menuitem name="Attendees"
-        id="website_slides_menu_report_attendees"
-        parent="website_slides_menu_report"
-        sequence="5"
-        action="slide_channel_partner_action_report"/>
     <menuitem name="Reviews"
         id="website_slides_menu_report_reviews"
         parent="website_slides_menu_report"
-        sequence="10"
+        sequence="6"
         action="rating_rating_action_slide_channel_report"/>
     <menuitem name="Quizzes"
         id="website_slides_menu_report_quizzes"
         parent="website_slides_menu_report"
-        sequence="15"
+        sequence="7"
         action="slide_question_action_report"/>
 
     <!-- Settings sub-menu -->

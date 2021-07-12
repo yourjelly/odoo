@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/attachment_viewer/attachment_viewer.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many, many2one } from '@mail/model/model_field';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -54,3 +55,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.attachment_viewer', factory);
+
+});

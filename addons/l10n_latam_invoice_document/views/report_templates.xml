@@ -8,7 +8,7 @@
         </div>
         <div t-attf-class="header o_company_#{company.id}_layout" position="after">
             <div t-attf-class="header o_company_#{company.id}_layout" t-if="custom_header">
-                <t t-call="#{custom_header}"/>
+                <t t-if="custom_header" t-call="#{custom_header}"/>
             </div>
         </div>
 
@@ -19,12 +19,12 @@
 
         <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" position="after">
             <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" t-if="custom_footer">
-                <t t-out="custom_footer"/>
+                <t t-if="custom_footer" t-raw="custom_footer"/>
             </div>
         </div>
     </template>
 
-    <template id="external_layout_bold" inherit_id="web.external_layout_bold" >
+    <template id="external_layout_clean" inherit_id="web.external_layout_clean" >
         <!-- support for custom header -->
         <div t-attf-class="header o_company_#{company.id}_layout" position="attributes">
             <attribute name="t-if">not custom_header</attribute>
@@ -32,7 +32,7 @@
         <div t-attf-class="header o_company_#{company.id}_layout" position="after">
             <div t-attf-class="header o_company_#{company.id}_layout" t-if="custom_header">
                 <div class="o_clean_header">
-                    <t t-call="#{custom_header}"/>
+                    <t t-if="custom_header" t-call="#{custom_header}"/>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
         </div>
         <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout" position="after">
             <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout" t-if="custom_footer">
-                <t t-out="custom_footer"/>
+                <t t-if="custom_footer" t-raw="custom_footer"/>
             </div>
         </div>
     </template>
@@ -56,7 +56,7 @@
         <div t-attf-class="header o_company_#{company.id}_layout" position="after">
             <div t-attf-class="header o_company_#{company.id}_layout" t-if="custom_header">
                 <div class="o_boxed_header">
-                    <t t-call="#{custom_header}"/>
+                    <t t-if="custom_header" t-call="#{custom_header}"/>
                 </div>
             </div>
         </div>
@@ -67,12 +67,12 @@
         </div>
         <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" position="after">
             <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" t-if="custom_footer">
-                <t t-out="custom_footer"/>
+                <t t-if="custom_footer" t-raw="custom_footer"/>
             </div>
         </div>
     </template>
 
-    <template id="external_layout_striped" inherit_id="web.external_layout_striped" >
+    <template id="external_layout_background" inherit_id="web.external_layout_background" >
         <!-- support for custom header -->
         <div t-attf-class="o_company_#{company.id}_layout header" position="attributes">
             <attribute name="t-if">not custom_header</attribute>
@@ -80,7 +80,7 @@
         <div t-attf-class="o_company_#{company.id}_layout header" position="after">
             <div t-attf-class="o_company_#{company.id}_layout header" t-if="custom_header">
                 <div class="o_background_header">
-                    <t t-call="#{custom_header}"/>
+                    <t t-if="custom_header" t-call="#{custom_header}"/>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
         </div>
         <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="after">
             <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" t-if="custom_footer">
-                <t t-out="custom_footer"/>
+                <t t-if="custom_footer" t-raw="custom_footer"/>
             </div>
         </div>
     </template>

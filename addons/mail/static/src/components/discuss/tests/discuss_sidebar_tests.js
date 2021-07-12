@@ -1,13 +1,14 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/discuss/tests/discuss_sidebar_tests.js', function (require) {
+'use strict';
 
-import { makeDeferred } from '@mail/utils/deferred/deferred';
-import {
+const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     nextAnimationFrame,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -157,4 +158,6 @@ QUnit.test('sidebar channels should be ordered case insensitive alphabetically',
 
 });
 });
+});
+
 });

@@ -14,8 +14,6 @@ const FacebookPageWidget = publicWidget.Widget.extend({
     start: function () {
         var def = this._super.apply(this, arguments);
 
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
-
         var params = _.pick(this.$el.data(), 'href', 'height', 'tabs', 'small_header', 'hide_cover', 'show_facepile');
         if (!params.href) {
             return def;
@@ -25,6 +23,7 @@ const FacebookPageWidget = publicWidget.Widget.extend({
         var src = $.param.querystring('https://www.facebook.com/plugins/page.php', params);
         this.$iframe = $('<iframe/>', {
             src: src,
+            class: 'o_temp_auto_element',
             width: params.width,
             height: params.height,
             css: {
@@ -37,7 +36,6 @@ const FacebookPageWidget = publicWidget.Widget.extend({
         });
         this.$el.append(this.$iframe);
 
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
         return def;
     },
     /**
@@ -46,11 +44,9 @@ const FacebookPageWidget = publicWidget.Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
 
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
         if (this.$iframe) {
             this.$iframe.remove();
         }
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
     },
 });
 

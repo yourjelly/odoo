@@ -5,9 +5,9 @@ from collections import deque
 import io
 import json
 
-from odoo import http, _
-from odoo.http import content_disposition, request
-from odoo.tools import ustr, osutil
+from odoo import http
+from odoo.http import request
+from odoo.tools import ustr
 from odoo.tools.misc import xlsxwriter
 
 
@@ -18,7 +18,7 @@ class TableExporter(http.Controller):
         return xlsxwriter is not None
 
     @http.route('/web/pivot/export_xlsx', type='http', auth="user")
-    def export_xlsx(self, data, **kw):
+    def export_xlsx(self, data, token):
         jdata = json.loads(data)
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
@@ -102,10 +102,9 @@ class TableExporter(http.Controller):
 
         workbook.close()
         xlsx_data = output.getvalue()
-        filename = osutil.clean_filename(_("Pivot %(title)s (%(model_name)s)", title=jdata['title'], model_name=jdata['model']))
         response = request.make_response(xlsx_data,
             headers=[('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
-                    ('Content-Disposition', content_disposition(filename + '.xlsx'))],
-        )
+                    ('Content-Disposition', 'attachment; filename=table.xlsx')],
+            cookies={'fileToken': token})
 
         return response

@@ -7,7 +7,6 @@ from odoo.exceptions import UserError
 
 from unittest.mock import patch
 from datetime import timedelta
-from freezegun import freeze_time
 
 
 @tagged('post_install', '-at_install')
@@ -141,6 +140,17 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             self.tax_line_vals_2,
             self.term_line_vals_1,
         ], self.move_vals)
+
+    def test_out_invoice_onchange_invoice_date(self):
+        for tax_date, invoice_date, accounting_date in [
+            ('2019-03-31', '2019-05-12', '2019-05-12'),
+            ('2019-03-31', '2019-02-10', '2019-04-1'),
+            ('2019-05-31', '2019-06-15', '2019-06-15'),
+        ]:
+            self.invoice.company_id.tax_lock_date = tax_date
+            with Form(self.invoice) as move_form:
+                move_form.invoice_date = invoice_date
+            self.assertEqual(self.invoice.date, fields.Date.to_date(accounting_date))
 
     def test_out_invoice_line_onchange_product_1(self):
         move_form = Form(self.invoice)
@@ -2241,9 +2251,8 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 'amount_total': 1430.0,
             })
 
-    @freeze_time('2017-01-15')
     def test_out_invoice_post_2(self):
-        ''' Check the date will be set automatically at today due to the tax lock date. '''
+        ''' Check the date will be set automatically at the next available post date due to the tax lock date. '''
         # Create an invoice with rate 1/3.
         move = self.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -2287,7 +2296,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         })
 
         # Set the tax lock date:
-        # - The date must be set automatically at the date of today (2017-01-15).
+        # - The date must be set automatically at the date after the tax_lock_date.
         # - As the date changed, the currency rate has changed (1/3 => 1/2).
         move.company_id.tax_lock_date = fields.Date.from_string('2016-12-31')
 
@@ -2341,7 +2350,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             **self.move_vals,
             'payment_reference': move.name,
             'currency_id': self.currency_data['currency'].id,
-            'date': fields.Date.from_string('2017-01-15'),
+            'date': fields.Date.from_string('2017-01-01'),
             'amount_untaxed': 1200.0,
             'amount_tax': 230.0,
             'amount_total': 1430.0,

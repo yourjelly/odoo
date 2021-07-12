@@ -34,14 +34,14 @@ class TestQweb(TransactionCaseWithUserDemo):
         demo_env = self.env(user=demo)
 
         html = demo_env['ir.qweb']._render('website.test_template', {"user": demo}, website_id= website.id)
-        asset_data = etree.HTML(html).xpath('//*[@data-asset-bundle]')[0]
-        asset_xmlid = asset_data.attrib.get('data-asset-bundle')
+        asset_data = etree.HTML(html).xpath('//*[@data-asset-xmlid]')[0]
+        asset_xmlid = asset_data.attrib.get('data-asset-xmlid')
         asset_version = asset_data.attrib.get('data-asset-version')
 
         html = html.strip().decode('utf8')
         html = re.sub(r'\?unique=[^"]+', '', html).encode('utf8')
 
-        attachments = demo_env['ir.attachment'].search([('url', '=like', '/web/assets/%-%/website.test_bundle.%')])
+        attachments = demo_env['ir.attachment'].search([('url', '=like', '/web/content/%-%/website.test_bundle.%')])
         self.assertEqual(len(attachments), 2)
 
         format_data = {
@@ -53,27 +53,28 @@ class TestQweb(TransactionCaseWithUserDemo):
             "asset_xmlid": asset_xmlid,
             "asset_version": asset_version,
         }
-        self.assertHTMLEqual(html, ("""<!DOCTYPE html>
+
+        self.assertEqual(html, ("""<!DOCTYPE html>
 <html>
     <head>
-        <link type="text/css" rel="stylesheet" href="http://test.external.link/style1.css"/>
-        <link type="text/css" rel="stylesheet" href="http://test.external.link/style2.css"/>
-        <link type="text/css" rel="stylesheet" href="http://test.cdn%(css)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
+        <link rel="stylesheet" href="http://test.external.link/style1.css"/>
+        <link rel="stylesheet" href="http://test.external.link/style2.css"/>
+        <link type="text/css" rel="stylesheet" href="http://test.cdn%(css)s" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
         <meta/>
         <script type="text/javascript" src="http://test.external.link/javascript1.js"></script>
         <script type="text/javascript" src="http://test.external.link/javascript2.js"></script>
-        <script type="text/javascript" src="http://test.cdn%(js)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
+        <script type="text/javascript" src="http://test.cdn%(js)s" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
     </head>
     <body>
         <img src="http://test.external.link/img.png" loading="lazy"/>
         <img src="http://test.cdn/website/static/img.png" loading="lazy"/>
         <a href="http://test.external.link/link">x</a>
         <a href="http://test.cdn/web/content/local_link">x</a>
-        <span style="background-image: url(&#39;http://test.cdn/web/image/2&#39;)">xxx</span>
+        <span style="background-image: url('http://test.cdn/web/image/2')">xxx</span>
         <div widget="html"><span class="toto">
                 span<span class="fa"></span><img src="http://test.cdn/web/image/1" loading="lazy">
             </span></div>
-        <div widget="image"><img src="http://test.cdn/web/image/res.users/%(user_id)s/avatar_1920/%(filename)s" class="img img-fluid" alt="%(alt)s" loading="lazy"/></div>
+        <div widget="image"><img src="http://test.cdn/web/image/res.users/%(user_id)s/image_1920/%(filename)s" class="img img-fluid" alt="%(alt)s" loading="lazy"/></div>
     </body>
 </html>""" % format_data).encode('utf8'))
 

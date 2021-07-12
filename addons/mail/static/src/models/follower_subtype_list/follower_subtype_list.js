@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/follower_subtype_list/follower_subtype_list.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { many2one } from '@mail/model/model_field';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { many2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -17,3 +18,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.follower_subtype_list', factory);
+
+});

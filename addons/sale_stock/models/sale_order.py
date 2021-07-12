@@ -3,11 +3,13 @@
 
 import json
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from odoo import api, fields, models, _
-from odoo.tools import float_compare, float_round
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare, float_round
+from odoo.tools.float_utils import float_repr
+from odoo.tools.misc import format_date
 from odoo.exceptions import UserError
 
 
@@ -261,6 +263,7 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     qty_delivered_method = fields.Selection(selection_add=[('stock_move', 'Stock Moves')])
+    product_packaging = fields.Many2one( 'product.packaging', string='Package', default=False, check_company=True)
     route_id = fields.Many2one('stock.location.route', string='Route', domain=[('sale_selectable', '=', True)], ondelete='restrict', check_company=True)
     move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
     product_type = fields.Selection(related='product_id.type')
@@ -434,6 +437,14 @@ class SaleOrderLine(models.Model):
 
     @api.depends('order_id.state')
     def _compute_invoice_status(self):
+        def check_moves_state(moves):
+            # All moves states are either 'done' or 'cancel', and there is at least one 'done'
+            at_least_one_done = False
+            for move in moves:
+                if move.state not in ['done', 'cancel']:
+                    return False
+                at_least_one_done = at_least_one_done or move.state == 'done'
+            return at_least_one_done
         super(SaleOrderLine, self)._compute_invoice_status()
         for line in self:
             # We handle the following specific situation: a physical product is partially delivered,
@@ -445,7 +456,7 @@ class SaleOrderLine(models.Model):
                     and line.product_id.type in ['consu', 'product']\
                     and line.product_id.invoice_policy == 'delivery'\
                     and line.move_ids \
-                    and all(move.state in ['done', 'cancel'] for move in line.move_ids):
+                    and check_moves_state(line.move_ids):
                 line.invoice_status = 'invoiced'
 
     @api.depends('move_ids')
@@ -459,6 +470,11 @@ class SaleOrderLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id_set_customer_lead(self):
         self.customer_lead = self.product_id.sale_delay
+
+    @api.onchange('product_packaging')
+    def _onchange_product_packaging(self):
+        if self.product_packaging:
+            return self._check_package()
 
     @api.onchange('product_uom_qty')
     def _onchange_product_uom_qty(self):
@@ -501,7 +517,6 @@ class SaleOrderLine(models.Model):
             'partner_id': self.order_id.partner_shipping_id.id,
             'product_description_variants': self._get_sale_order_line_multiline_description_variants(),
             'company_id': self.order_id.company_id,
-            'product_packaging_id': self.product_packaging_id,
         })
         return values
 
@@ -582,15 +597,39 @@ class SaleOrderLine(models.Model):
                 line.name, line.order_id.name, line.order_id.company_id, values))
         if procurements:
             self.env['procurement.group'].run(procurements)
-
-        # This next block is currently needed only because the scheduler trigger is done by picking confirmation rather than stock.move confirmation
-        orders = self.mapped('order_id')
-        for order in orders:
-            pickings_to_confirm = order.picking_ids.filtered(lambda p: p.state not in ['cancel', 'done'])
-            if pickings_to_confirm:
-                # Trigger the Scheduler for Pickings
-                pickings_to_confirm.action_confirm()
         return True
+
+    def _check_package(self):
+        default_uom = self.product_id.uom_id
+        pack = self.product_packaging
+        qty = self.product_uom_qty
+        q = default_uom._compute_quantity(pack.qty, self.product_uom)
+        # We do not use the modulo operator to check if qty is a mltiple of q. Indeed the quantity
+        # per package might be a float, leading to incorrect results. For example:
+        # 8 % 1.6 = 1.5999999999999996
+        # 5.4 % 1.8 = 2.220446049250313e-16
+        if (
+            qty
+            and q
+            and float_compare(
+                qty / q, float_round(qty / q, precision_rounding=1.0), precision_rounding=0.001
+            )
+            != 0
+        ):
+            newqty = qty - (qty % q) + q
+            return {
+                'warning': {
+                    'title': _('Warning'),
+                    'message': _(
+                        "This product is packaged by %(pack_size).2f %(pack_name)s. You should sell %(quantity).2f %(unit)s.",
+                        pack_size=pack.qty,
+                        pack_name=default_uom.name,
+                        quantity=newqty,
+                        unit=self.product_uom.name
+                    ),
+                },
+            }
+        return {}
 
     def _update_line_quantity(self, values):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')

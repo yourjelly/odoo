@@ -14,8 +14,8 @@ _logger = logging.getLogger(__name__)
 
 TIMEOUT = 20
 
-DEFAULT_MICROSOFT_AUTH_ENDPOINT = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
-DEFAULT_MICROSOFT_TOKEN_ENDPOINT = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+MICROSOFT_AUTH_ENDPOINT = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+MICROSOFT_TOKEN_ENDPOINT = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 
 
 class MicrosoftService(models.AbstractModel):
@@ -24,14 +24,6 @@ class MicrosoftService(models.AbstractModel):
 
     def _get_calendar_scope(self):
         return 'offline_access openid Calendars.ReadWrite'
-
-    @api.model
-    def _get_auth_endpoint(self):
-        return self.env["ir.config_parameter"].sudo().get_param('microsoft_account.auth_endpoint', DEFAULT_MICROSOFT_AUTH_ENDPOINT)
-
-    @api.model
-    def _get_token_endpoint(self):
-        return self.env["ir.config_parameter"].sudo().get_param('microsoft_account.token_endpoint', DEFAULT_MICROSOFT_TOKEN_ENDPOINT)
 
     @api.model
     def generate_refresh_token(self, service, authorization_code):
@@ -57,7 +49,7 @@ class MicrosoftService(models.AbstractModel):
             'grant_type': "refresh_token"
         }
         try:
-            req = requests.post(self._get_token_endpoint(), data=data, headers=headers, timeout=TIMEOUT)
+            req = requests.post(MICROSOFT_TOKEN_ENDPOINT, data=data, headers=headers, timeout=TIMEOUT)
             req.raise_for_status()
             content = req.json()
         except IOError:
@@ -90,7 +82,7 @@ class MicrosoftService(models.AbstractModel):
             'prompt': 'consent',
             'access_type': 'offline'
         })
-        return "%s?%s" % (self._get_auth_endpoint(), encoded_params)
+        return "%s?%s" % (MICROSOFT_AUTH_ENDPOINT, encoded_params)
 
     @api.model
     def _get_microsoft_tokens(self, authorize_code, service):
@@ -113,7 +105,7 @@ class MicrosoftService(models.AbstractModel):
             'redirect_uri': base_url + '/microsoft_account/authentication'
         }
         try:
-            dummy, response, dummy = self._do_request(self._get_token_endpoint(), params=data, headers=headers, method='POST', preuri='')
+            dummy, response, dummy = self._do_request(MICROSOFT_TOKEN_ENDPOINT, params=data, headers=headers, method='POST', preuri='')
             access_token = response.get('access_token')
             refresh_token = response.get('refresh_token')
             ttl = response.get('expires_in')
@@ -152,8 +144,7 @@ class MicrosoftService(models.AbstractModel):
             if int(status) in (204, 404):  # Page not found, no response
                 response = False
             else:
-                # Some answers return empty content
-                response = res.content and res.json() or {}
+                response = res.json()
 
             try:
                 ask_time = datetime.strptime(res.headers.get('date'), "%a, %d %b %Y %H:%M:%S %Z")

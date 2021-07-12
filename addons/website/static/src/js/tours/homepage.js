@@ -41,6 +41,7 @@ wTourUtils.registerThemeHomepageTour('homepage', [
     wTourUtils.dragNDrop(snippets[5]),
     wTourUtils.clickOnSnippet(snippets[5], 'top'),
     wTourUtils.changeBackgroundColor(),
+    wTourUtils.clickOnSave(),
 ]);
 
 });

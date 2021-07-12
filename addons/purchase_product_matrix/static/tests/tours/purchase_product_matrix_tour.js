@@ -77,8 +77,7 @@ tour.register('purchase_matrix_tour', {
 },
 // Ensures the matrix is opened with the values, when adding the same product.
 {
-    trigger: "a:contains('Add a product')",
-    extra_trigger: '.o_form_editable',
+    trigger: "a:contains('Add a product')"
 }, {
     trigger: 'div[name="product_template_id"] input',
     run: function () {

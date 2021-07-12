@@ -4,6 +4,7 @@
 import re
 
 from odoo import api, fields, models
+from dateutil.relativedelta import relativedelta
 
 from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCalendarService
 
@@ -70,12 +71,6 @@ class RecurrenceRule(models.Model):
     def _get_microsoft_synced_fields(self):
         return {'rrule'} | self.env['calendar.event']._get_microsoft_synced_fields()
 
-    @api.model
-    def _restart_microsoft_sync(self):
-        self.env['calendar.recurrence'].search(self._get_microsoft_sync_domain()).write({
-            'need_sync_m': True,
-        })
-
     def _get_microsoft_sync_domain(self):
         return [('calendar_event_ids.user_id', '=', self.env.user.id)]
 
@@ -111,3 +106,13 @@ class RecurrenceRule(models.Model):
 
     def _ensure_attendees_have_email(self):
         self.calendar_event_ids.filtered(lambda e: e.active)._ensure_attendees_have_email()
+
+    def _notify_attendees(self):
+        recurrences = self.filtered(
+            lambda recurrence: recurrence.base_event_id.alarm_ids and (
+                not recurrence.until or recurrence.until >= fields.Date.today() - relativedelta(days=1)
+            ) and max(recurrence.calendar_event_ids.mapped('stop')) >= fields.Datetime.now()
+        )
+        partners = recurrences.base_event_id.partner_ids
+        if partners:
+            self.env['calendar.alarm_manager']._notify_next_alarm(partners.ids)

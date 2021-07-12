@@ -1,17 +1,18 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/chatter/chatter_tests', function (require) {
+'use strict';
 
-import { Chatter } from '@mail/components/chatter/chatter';
-import { Composer } from '@mail/components/composer/composer';
-import {
+const components = {
+    Chatter: require('mail/static/src/components/chatter/chatter.js'),
+    Composer: require('mail/static/src/components/composer/composer.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     nextAnimationFrame,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { Chatter, Composer };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -333,69 +334,6 @@ QUnit.test('composer show/hide on log note/send message [REQUIRE FOCUS]', async 
     );
 });
 
-QUnit.test('should display subject when subject is not the same as the thread name', async function (assert) {
-    assert.expect(2);
-
-    this.data['res.partner'].records.push({ id: 100 });
-    this.data['mail.message'].records.push({
-        body: "not empty",
-        model: 'res.partner',
-        res_id: 100,
-        subject: "Salutations, voyageur",
-    });
-    await this.start();
-    const thread = this.env.models['mail.thread'].create({
-        id: 100,
-        model: 'res.partner',
-        name: "voyageur",
-    });
-    const chatter = this.env.models['mail.chatter'].create({
-        threadId: 100,
-        threadModel: 'res.partner',
-    });
-    await this.createChatterComponent({ chatter });
-
-    assert.containsOnce(
-        document.body,
-        '.o_Message_subject',
-        "should display subject of the message"
-    );
-    assert.strictEqual(
-        document.querySelector('.o_Message_subject').textContent,
-        "Subject: Salutations, voyageur",
-        "Subject of the message should be 'Salutations, voyageur'"
-    );
-});
-
-QUnit.test('should not display subject when subject is the same as the thread name', async function (assert) {
-    assert.expect(1);
-
-    this.data['res.partner'].records.push({ id: 100 });
-    this.data['mail.message'].records.push({
-        body: "not empty",
-        model: 'res.partner',
-        res_id: 100,
-        subject: "Salutations, voyageur",
-    });
-    await this.start();
-    const thread = this.env.models['mail.thread'].create({
-        id: 100,
-        model: 'res.partner',
-        name: "Salutations, voyageur",
-    });
-    const chatter = this.env.models['mail.chatter'].create({
-        threadId: 100,
-        threadModel: 'res.partner',
-    });
-    await this.createChatterComponent({ chatter });
-
-    assert.containsNone(
-        document.body,
-        '.o_Message_subject',
-        "should not display subject of the message"
-    );
-});
-
 QUnit.test('should not display user notification messages in chatter', async function (assert) {
     assert.expect(1);
 
@@ -526,4 +464,6 @@ QUnit.test('do not post message with "Enter" keyboard shortcut', async function 
 
 });
 });
+});
+
 });

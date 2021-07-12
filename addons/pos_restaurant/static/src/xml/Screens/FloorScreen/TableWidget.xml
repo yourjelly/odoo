@@ -11,7 +11,7 @@
                 <t t-esc="props.table.name" />
             </span>
             <span class="table-seats">
-                <t t-esc="customerCountDisplay" />
+                <t t-esc="props.table.seats" />
             </span>
         </div>
     </t>

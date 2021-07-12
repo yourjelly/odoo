@@ -25,18 +25,19 @@ class MailComposeMessage(models.TransientModel):
                 self.env['ir.model'].sudo().search([('model', '=', self.model), ('is_mail_thread', '=', True)], limit=1):
             mass_mailing = self.mass_mailing_id
             if not mass_mailing:
+                reply_to_mode = 'email' if self.no_auto_thread else 'thread'
+                reply_to = self.reply_to if self.no_auto_thread else False
                 mass_mailing = self.env['mailing.mailing'].create({
-                    'campaign_id': self.campaign_id.id,
-                    'name': self.mass_mailing_name,
-                    'subject': self.subject,
-                    'state': 'done',
-                    'reply_to_mode': self.reply_to_mode,
-                    'reply_to': self.reply_to if self.reply_to_mode == 'new' else False,
-                    'sent_date': fields.Datetime.now(),
-                    'body_html': self.body,
-                    'mailing_model_id': self.env['ir.model']._get(self.model).id,
-                    'mailing_domain': self.active_domain,
-                    'attachment_ids': [(6, 0, self.attachment_ids.ids)],
+                        'campaign_id': self.campaign_id.id,
+                        'name': self.mass_mailing_name,
+                        'subject': self.subject,
+                        'state': 'done',
+                        'reply_to_mode': reply_to_mode,
+                        'reply_to': reply_to,
+                        'sent_date': fields.Datetime.now(),
+                        'body_html': self.body,
+                        'mailing_model_id': self.env['ir.model']._get(self.model).id,
+                        'mailing_domain': self.active_domain,
                 })
 
             # Preprocess res.partners to batch-fetch from db
@@ -77,7 +78,7 @@ class MailComposeMessage(models.TransientModel):
                     'email': mail_to or mail_values.get('email_to'),
                 }
                 if mail_values.get('body_html') and mass_mail_layout:
-                    mail_values['body_html'] = mass_mail_layout._render({'body': mail_values['body_html']}, engine='ir.qweb', minimal_qcontext=True).decode()
+                    mail_values['body_html'] = mass_mail_layout._render({'body': mail_values['body_html']}, engine='ir.qweb', minimal_qcontext=True)
                 # propagate ignored state to trace when still-born
                 if mail_values.get('state') == 'cancel':
                     trace_vals['ignored'] = fields.Datetime.now()
@@ -85,7 +86,7 @@ class MailComposeMessage(models.TransientModel):
                     'mailing_id': mass_mailing.id,
                     'mailing_trace_ids': [(0, 0, trace_vals)],
                     # email-mode: keep original message for routing
-                    'notification': mass_mailing.reply_to_mode == 'update',
+                    'notification': mass_mailing.reply_to_mode == 'thread',
                     'auto_delete': not mass_mailing.keep_archives,
                 })
         return res

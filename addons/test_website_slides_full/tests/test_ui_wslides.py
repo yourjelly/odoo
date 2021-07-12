@@ -26,10 +26,7 @@ class TestUi(TestUICommon):
 
         # Specify Accounting Data
         cash_journal = self.env['account.journal'].create({'name': 'Cash - Test', 'type': 'cash', 'code': 'CASH - Test'})
-        self.env['payment.acquirer'].search([('provider', '=', 'test')]).write({
-            'journal_id': cash_journal.id,
-            'state': 'test'
-        })
+        self.env['payment.acquirer'].search([('journal_id', '=', False)]).journal_id = cash_journal
         a_recv = self.env['account.account'].create({
             'code': 'X1012',
             'name': 'Debtors - (test)',
@@ -57,6 +54,7 @@ class TestUi(TestUICommon):
         furniture_survey = self.env['survey.survey'].create({
             'title': 'Furniture Creation Certification',
             'access_token': '5632a4d7-48cf-aaaa-8c52-2174d58cf50b',
+            'state': 'open',
             'access_mode': 'public',
             'users_can_go_back': True,
             'users_login_required': True,

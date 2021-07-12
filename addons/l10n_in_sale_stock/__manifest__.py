@@ -3,7 +3,6 @@
 
 {
     'name': "India Sales and Warehouse Management",
-    'icon': '/l10n_in/static/description/icon.png',
 
     'summary': """
         Define default sales journal on the warehouse""",

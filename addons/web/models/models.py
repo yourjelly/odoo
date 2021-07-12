@@ -755,13 +755,13 @@ class Base(models.AbstractModel):
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        companies = super().create(vals_list)
+    @api.model
+    def create(self, values):
+        res = super().create(values)
         style_fields = {'external_report_layout_id', 'font', 'primary_color', 'secondary_color'}
-        if any(not style_fields.isdisjoint(values) for values in vals_list):
+        if not style_fields.isdisjoint(values):
             self._update_asset_style()
-        return companies
+        return res
 
     def write(self, values):
         res = super().write(values)

@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/notification_alert/notification_alert.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
 const { Component } = owl;
 
-export class NotificationAlert extends Component {
+class NotificationAlert extends Component {
 
     /**
      * @override
@@ -37,7 +38,7 @@ export class NotificationAlert extends Component {
         return (
             windowNotification &&
             windowNotification.permission !== "granted" &&
-            !this.env.messaging.isNotificationPermissionDefault
+            !this.env.messaging.isNotificationPermissionDefault()
         );
     }
 
@@ -46,4 +47,8 @@ export class NotificationAlert extends Component {
 Object.assign(NotificationAlert, {
     props: {},
     template: 'mail.NotificationAlert',
+});
+
+return NotificationAlert;
+
 });

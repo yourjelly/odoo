@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestMailFullRecipients
+from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestRecipients
 
 
-class TestSmsTemplate(TestMailFullCommon, TestMailFullRecipients):
+class TestSmsTemplate(TestMailFullCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):
@@ -21,9 +21,6 @@ class TestSmsTemplate(TestMailFullCommon, TestMailFullRecipients):
 
     def test_sms_template_render(self):
         rendered_body = self.sms_template._render_template(self.sms_template.body, self.sms_template.model, self.test_record.ids)
-        self.assertEqual(rendered_body[self.test_record.id], 'Dear %s this is an SMS.' % self.test_record.display_name)
-
-        rendered_body = self.sms_template._render_field('body', self.test_record.ids)
         self.assertEqual(rendered_body[self.test_record.id], 'Dear %s this is an SMS.' % self.test_record.display_name)
 
     def test_sms_template_lang(self):

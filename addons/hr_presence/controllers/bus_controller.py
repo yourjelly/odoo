@@ -2,12 +2,12 @@
 
 from odoo import registry, SUPERUSER_ID
 from odoo.api import Environment
-from odoo.addons.bus.controllers import main
+from odoo.addons.bus.controllers.main import BusController
 from odoo.fields import Datetime
 from odoo.http import Controller, request, route
 
 
-class BusController(main.BusController):
+class BusController(BusController):
 
     @route('/longpolling/poll', type="json", auth="public")
     def poll(self, channels, last, options=None):

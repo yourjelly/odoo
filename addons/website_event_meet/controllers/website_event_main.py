@@ -5,10 +5,10 @@ from babel.dates import format_datetime
 
 from odoo import _
 from odoo.http import request
-from odoo.addons.website_event.controllers import main
+from odoo.addons.website_event.controllers.main import WebsiteEventController
 
 
-class WebsiteEventController(main.WebsiteEventController):
+class WebsiteEventController(WebsiteEventController):
     def _prepare_event_register_values(self, event, **post):
         values = super(WebsiteEventController, self)._prepare_event_register_values(event, **post)
 

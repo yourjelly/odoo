@@ -2,7 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
-from odoo import api, models
+from dateutil.relativedelta import relativedelta
+
+from odoo import api, fields, models
 
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 
@@ -70,12 +72,6 @@ class RecurrenceRule(models.Model):
     def _get_google_synced_fields(self):
         return {'rrule'}
 
-    @api.model
-    def _restart_google_sync(self):
-        self.env['calendar.recurrence'].search(self._get_sync_domain()).write({
-            'need_sync': True,
-        })
-
     def _write_from_google(self, gevent, vals):
         current_rrule = self.rrule
         # event_tz is written on event in Google but on recurrence in Odoo
@@ -92,11 +88,11 @@ class RecurrenceRule(models.Model):
             # We can't call _cancel because events without user_id would not be deleted
             (self.calendar_event_ids - base_event_id).google_id = False
             (self.calendar_event_ids - base_event_id).unlink()
-            base_event_id.with_context(dont_notify=True).write(dict(new_event_values, google_id=False, need_sync=False))
+            base_event_id.write(dict(new_event_values, google_id=False, need_sync=False))
             if self.rrule == current_rrule:
                 # if the rrule has changed, it will be recalculated below
                 # There is no detached event now
-                self.with_context(dont_notify=True)._apply_recurrence()
+                self._apply_recurrence()
         else:
             time_fields = (
                     self.env["calendar.event"]._get_time_fields()
@@ -138,14 +134,12 @@ class RecurrenceRule(models.Model):
             vals['event_tz'] = gevent.start.get('timeZone')
         recurrence = super(RecurrenceRule, self.with_context(dont_notify=True))._create_from_google(gevents, vals_list)
         recurrence.with_context(dont_notify=True)._apply_recurrence()
+        if not recurrence._context.get("dont_notify"):
+            recurrence._notify_attendees()
         return recurrence
 
     def _get_sync_domain(self):
-        # Empty rrule may exists in historical data. It is not a desired behavior but it could have been created with
-        # older versions of the module. When synced, these recurrency may come back from Google after database cleaning
-        # and trigger errors as the records are not properly populated.
-        # We also prevent sync of other user recurrent events.
-        return [('calendar_event_ids.user_id', '=', self.env.user.id), ('rrule', '!=', False)]
+        return [('calendar_event_ids.user_id', '=', self.env.user.id)]
 
     @api.model
     def _odoo_values(self, google_recurrence, default_reminders=()):
@@ -160,9 +154,10 @@ class RecurrenceRule(models.Model):
             return {}
         values = event._google_values()
         values['id'] = self.google_id
+
         if not self._is_allday():
-            values['start']['timeZone'] = self.event_tz or 'Etc/UTC'
-            values['end']['timeZone'] = self.event_tz or 'Etc/UTC'
+            values['start']['timeZone'] = self.event_tz
+            values['end']['timeZone'] = self.event_tz
 
         # DTSTART is not allowed by Google Calendar API.
         # Event start and end times are specified in the start and end fields.
@@ -180,3 +175,13 @@ class RecurrenceRule(models.Model):
             },
         }
         return values
+
+    def _notify_attendees(self):
+        recurrences = self.filtered(
+            lambda recurrence: recurrence.base_event_id.alarm_ids and (
+                not recurrence.until or recurrence.until >= fields.Date.today() - relativedelta(days=1)
+            ) and (max(recurrence.calendar_event_ids.mapped('stop')) >= fields.Datetime.now())
+        )
+        partners = recurrences.base_event_id.partner_ids
+        if partners:
+            self.env['calendar.alarm_manager']._notify_next_alarm(partners.ids)

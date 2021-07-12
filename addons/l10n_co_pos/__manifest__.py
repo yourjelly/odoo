@@ -3,7 +3,6 @@
 
 {
     'name': 'Colombian - Point of Sale',
-    'icon': '/l10n_co/static/description/icon.png',
     'version': '1.0',
     'description': """Colombian - Point of Sale""",
     'category': 'Accounting/Localizations/Point of Sale',
@@ -13,14 +12,10 @@
         'point_of_sale'
     ],
     'data': [
+        'views/templates.xml',
         'views/views.xml'
     ],
-    'assets': {
-        'point_of_sale.assets': [
-            'l10n_co_pos/static/src/js/**/*',
-        ],
-        'web.assets_qweb': [
-            'l10n_co_pos/static/src/xml/**/*',
-        ],
-    }
+    'qweb': [
+        'static/src/xml/pos.xml'
+    ],
 }

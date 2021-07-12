@@ -3,8 +3,8 @@ odoo.define('website.tour.rte', function (require) {
 
 var ajax = require('web.ajax');
 var session = require('web.session');
-var Wysiwyg = require('web_editor.wysiwyg');
 var tour = require('web_tour.tour');
+var Wysiwyg = require('web_editor.wysiwyg.root');
 
 var domReady = new Promise(function (resolve) {
     $(resolve);
@@ -74,7 +74,6 @@ tour.register('rte_translator', {
     trigger: '[data-oe-translation-id]',
 }, {
     content: "translate text",
-    extra_trigger: '.editor_started',
     trigger: '#wrap p font:first',
     run: function (action_helper) {
         action_helper.text('translated french text');
@@ -151,7 +150,7 @@ tour.register('rte_translator', {
     },
 }, {
     content: "underline",
-    trigger: '.oe-toolbar #underline',
+    trigger: '.note-air-popover button[data-event="underline"]',
 }, {
     content: "save new change",
     trigger: 'button[data-action=save]',

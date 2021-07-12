@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields
-from odoo.tests.common import TransactionCase, HttpCase, tagged, Form
+from odoo.tests.common import SavepointCase, HttpSavepointCase, tagged, Form
 
 import time
 import base64
 from lxml import etree
 
 @tagged('post_install', '-at_install')
-class AccountTestInvoicingCommon(TransactionCase):
-
-    @classmethod
-    def safe_copy(cls, record):
-        return record and record.copy()
+class AccountTestInvoicingCommon(SavepointCase):
 
     @classmethod
     def copy_account(cls, account):
@@ -63,9 +59,9 @@ class AccountTestInvoicingCommon(TransactionCase):
 
         # ==== Taxes ====
         cls.tax_sale_a = cls.company_data['default_tax_sale']
-        cls.tax_sale_b = cls.safe_copy(cls.company_data['default_tax_sale'])
+        cls.tax_sale_b = cls.company_data['default_tax_sale'].copy()
         cls.tax_purchase_a = cls.company_data['default_tax_purchase']
-        cls.tax_purchase_b = cls.safe_copy(cls.company_data['default_tax_purchase'])
+        cls.tax_purchase_b = cls.company_data['default_tax_purchase'].copy()
         cls.tax_armageddon = cls.setup_armageddon_tax('complex_tax', cls.company_data)
 
         # ==== Products ====
@@ -93,13 +89,16 @@ class AccountTestInvoicingCommon(TransactionCase):
         # ==== Fiscal positions ====
         cls.fiscal_pos_a = cls.env['account.fiscal.position'].create({
             'name': 'fiscal_pos_a',
-            'tax_ids': ([(0, None, {
+            'tax_ids': [
+                (0, None, {
                     'tax_src_id': cls.tax_sale_a.id,
                     'tax_dest_id': cls.tax_sale_b.id,
-            })] if cls.tax_sale_b else []) + ([(0, None, {
+                }),
+                (0, None, {
                     'tax_src_id': cls.tax_purchase_a.id,
                     'tax_dest_id': cls.tax_purchase_b.id,
-            })] if cls.tax_purchase_b else []),
+                }),
+            ],
             'account_ids': [
                 (0, None, {
                     'account_src_id': cls.product_a.property_account_income_id.id,
@@ -170,12 +169,6 @@ class AccountTestInvoicingCommon(TransactionCase):
             'rounding_method': 'DOWN',
         })
 
-        # ==== Payment methods ====
-        bank_journal = cls.company_data['default_journal_bank']
-
-        cls.inbound_payment_method = bank_journal.inbound_payment_method_line_ids[0].payment_method_id
-        cls.outbound_payment_method = bank_journal.outbound_payment_method_line_ids[0].payment_method_id
-
     @classmethod
     def setup_company_data(cls, company_name, chart_template=None, **kwargs):
         ''' Create a new company having the name passed as parameter.
@@ -205,7 +198,7 @@ class AccountTestInvoicingCommon(TransactionCase):
         })
         cls.env.user.company_ids |= company
 
-        chart_template.try_loading(company=company, install_demo=False)
+        chart_template.try_loading(company=company)
 
         # The currency could be different after the installation of the chart template.
         if kwargs.get('currency_id'):
@@ -339,7 +332,7 @@ class AccountTestInvoicingCommon(TransactionCase):
                     'amount_type': 'percent',
                     'amount': 10.0,
                     'tax_exigibility': 'on_payment',
-                    'cash_basis_transition_account_id': cls.safe_copy(company_data['default_account_tax_sale']).id,
+                    'cash_basis_transition_account_id': company_data['default_account_tax_sale'].copy().id,
                     'invoice_repartition_line_ids': [
                         (0, 0, {
                             'factor_percent': 100,
@@ -368,22 +361,20 @@ class AccountTestInvoicingCommon(TransactionCase):
         })
 
     @classmethod
-    def init_invoice(cls, move_type, partner=None, invoice_date=None, post=False, products=None, amounts=None, taxes=None, company=False):
-        move_form = Form(cls.env['account.move'] \
-                    .with_company(company or cls.env.company) \
-                    .with_context(default_move_type=move_type, account_predictive_bills_disable_prediction=True))
+    def init_invoice(cls, move_type, partner=None, invoice_date=None, post=False, products=[], amounts=[], taxes=None):
+        move_form = Form(cls.env['account.move'].with_context(default_move_type=move_type, account_predictive_bills_disable_prediction=True))
         move_form.invoice_date = invoice_date or fields.Date.from_string('2019-01-01')
         move_form.date = move_form.invoice_date
         move_form.partner_id = partner or cls.partner_a
 
-        for product in (products or []):
+        for product in products:
             with move_form.invoice_line_ids.new() as line_form:
                 line_form.product_id = product
                 if taxes:
                     line_form.tax_ids.clear()
                     line_form.tax_ids.add(taxes)
 
-        for amount in (amounts or []):
+        for amount in amounts:
             with move_form.invoice_line_ids.new() as line_form:
                 line_form.name = "test line"
                 # We use account_predictive_bills_disable_prediction context key so that
@@ -500,7 +491,7 @@ class AccountTestInvoicingCommon(TransactionCase):
 
 
 @tagged('post_install', '-at_install')
-class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, HttpCase):
+class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, HttpSavepointCase):
     pass
 
 
@@ -548,6 +539,12 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
         cls.diff_income_account = cls.company.income_currency_exchange_account_id
         cls.diff_expense_account = cls.company.expense_currency_exchange_account_id
 
+        cls.inbound_payment_method = cls.env['account.payment.method'].create({
+            'name': 'inbound',
+            'code': 'IN',
+            'payment_type': 'inbound',
+        })
+
         cls.expense_account = cls.company_data['default_account_expense']
         # cash basis intermediary account
         cls.tax_waiting_account = cls.env['account.account'].create({
@@ -576,8 +573,8 @@ class TestAccountReconciliationCommon(AccountTestInvoicingCommon):
         # Journals
         cls.purchase_journal = cls.company_data['default_journal_purchase']
         cls.cash_basis_journal = cls.env['account.journal'].create({
-            'name': 'Test CABA',
-            'code': 'tCABA',
+            'name': 'CABA',
+            'code': 'CABA',
             'type': 'general',
         })
         cls.general_journal = cls.company_data['default_journal_misc']

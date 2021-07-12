@@ -1,20 +1,21 @@
-/** @odoo-module **/
+odoo.define('mail.CustomFilterItem', function (require) {
+    "use strict";
 
-import CustomFilterItem from 'web.CustomFilterItem';
-import { patch } from 'web.utils';
+    const CustomFilterItem = require('web.CustomFilterItem');
 
-patch(CustomFilterItem.prototype, 'mail.CustomFilterItem', {
+    CustomFilterItem.patch('mail.CustomFilterItem', T => class extends T {
 
-    /**
-     * With the `mail` module installed, we want to filter out some of the
-     * available fields in 'Add custom filter' menu (@see CustomFilterItem).
-     * @override
-     */
-    _validateField(field) {
-        return this._super(...arguments) &&
-            field.relation !== 'mail.message' &&
-            field.name !== 'message_ids';
-    },
+        /**
+         * With the `mail` module installed, we want to filter out some of the
+         * available fields in 'Add custom filter' menu (@see CustomFilterItem).
+         * @override
+         */
+        _validateField(field) {
+            return super._validateField(...arguments) &&
+                field.relation !== 'mail.message' &&
+                field.name !== 'message_ids';
+        }
+    });
+
+    return CustomFilterItem;
 });
-
-export default CustomFilterItem;

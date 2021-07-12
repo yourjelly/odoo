@@ -6,7 +6,7 @@ import re
 
 from lxml import etree
 
-from odoo import api, models, _, Command
+from odoo import api, models, _
 from odoo.exceptions import AccessError, RedirectWarning, UserError
 from odoo.tools import ustr
 
@@ -475,8 +475,8 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 module = IrModule.sudo().search([('name', '=', name[7:])], limit=1)
                 modules.append((name, module))
             elif hasattr(field, 'config_parameter'):
-                if field.type not in ('boolean', 'integer', 'float', 'char', 'selection', 'many2one', 'datetime'):
-                    raise Exception("Field %s must have type 'boolean', 'integer', 'float', 'char', 'selection', 'many2one' or 'datetime'" % field)
+                if field.type not in ('boolean', 'integer', 'float', 'char', 'selection', 'many2one'):
+                    raise Exception("Field %s must have type 'boolean', 'integer', 'float', 'char', 'selection' or 'many2one'" % field)
                 configs.append((name, field.config_parameter))
             else:
                 others.append(name)
@@ -577,10 +577,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 if self[name] == current_settings[name]:
                     continue
                 if int(self[name]):
-                    groups.write({'implied_ids': [Command.link(implied_group.id)]})
+                    groups.write({'implied_ids': [(4, implied_group.id)]})
                 else:
-                    groups.write({'implied_ids': [Command.unlink(implied_group.id)]})
-                    implied_group.write({'users': [Command.unlink(user.id) for user in groups.users]})
+                    groups.write({'implied_ids': [(3, implied_group.id)]})
+                    implied_group.write({'users': [(3, user.id) for user in groups.users]})
 
         # config fields: store ir.config_parameters
         IrConfigParameter = self.env['ir.config_parameter'].sudo()

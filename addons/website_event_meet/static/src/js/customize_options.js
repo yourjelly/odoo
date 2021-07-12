@@ -61,7 +61,7 @@ EventSpecificOptions.include({
             }],
         });
 
-        location.reload();
+        this._reloadEventPage();
     },
 
 });

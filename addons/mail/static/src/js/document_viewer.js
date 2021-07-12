@@ -1,8 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail.DocumentViewer', function (require) {
+"use strict";
 
-import core from 'web.core';
-import Widget from 'web.Widget';
-import { hidePDFJSButtons } from '@web/legacy/js/libs/pdfjs';
+var core = require('web.core');
+var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
 
@@ -76,15 +76,6 @@ var DocumentViewer = Widget.extend({
         this._reset();
     },
     /**
-     * Do some actions after the widget is appended to the DOM
-     * @override
-     */
-    setElement: function () {
-        const result = this._super(...arguments);
-        this._hidePdfButtonsIfPresent();
-        return result;
-    },
-    /**
      * Open a modal displaying the active attachment
      * @override
      */
@@ -111,15 +102,6 @@ var DocumentViewer = Widget.extend({
     // Private
     //---------------------------------------------------------------------------
 
-    /**
-     * Hide some buttons in PDF.js
-     * @override
-     */
-    _hidePdfButtonsIfPresent: function () {
-        if (this.activeAttachment.mimetype === 'application/pdf') {
-            hidePDFJSButtons(this.el);
-        }
-    },
     /**
      * @private
      */
@@ -156,7 +138,6 @@ var DocumentViewer = Widget.extend({
             widget: this
         }));
         this.$('.o_viewer_img').on("load", _.bind(this._onImageLoaded, this));
-        this._hidePdfButtonsIfPresent();
         this.$('[data-toggle="tooltip"]').tooltip({delay: 0});
         this._reset();
     },
@@ -411,5 +392,5 @@ var DocumentViewer = Widget.extend({
         this._zoom(1);
     },
 });
-
-export default DocumentViewer;
+return DocumentViewer;
+});

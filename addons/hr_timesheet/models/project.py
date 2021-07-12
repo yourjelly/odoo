@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import re
+from lxml import etree
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
@@ -25,7 +27,6 @@ class Project(models.Model):
         compute='_compute_total_timesheet_time',
         help="Total number of time (in the proper UoM) recorded in the project, rounded to the unit.")
     encode_uom_in_days = fields.Boolean(compute='_compute_encode_uom_in_days')
-    is_internal_project = fields.Boolean(compute='_compute_is_internal_project', search='_search_is_internal_project')
 
     def _compute_encode_uom_in_days(self):
         self.encode_uom_in_days = self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day')
@@ -35,34 +36,11 @@ class Project(models.Model):
         without_account = self.filtered(lambda t: not t.analytic_account_id and t._origin)
         without_account.update({'allow_timesheets': False})
 
-    @api.depends('company_id')
-    def _compute_is_internal_project(self):
-        for project in self:
-            project.is_internal_project = bool(project.company_id.internal_project_id)
-
-    @api.model
-    def _search_is_internal_project(self, operator, value):
-        if not isinstance(value, bool):
-            raise ValueError('Invalid value: %s' % (value))
-        if operator not in ['=', '!=']:
-            raise ValueError('Invalid operator: %s' % (operator))
-
-        query = """
-            SELECT C.internal_project_id
-            FROM res_company C
-            WHERE C.internal_project_id IS NOT NULL
-        """
-        if (operator == '=' and value is True) or (operator == '!=' and value is False):
-            operator_new = 'inselect'
-        else:
-            operator_new = 'not inselect'
-        return [('id', operator_new, (query, ()))]
-
     @api.constrains('allow_timesheets', 'analytic_account_id')
     def _check_allow_timesheet(self):
         for project in self:
             if project.allow_timesheets and not project.analytic_account_id:
-                raise ValidationError(_('You cannot use timesheets without an analytic account.'))
+                raise ValidationError(_('To allow timesheet, your project %s should have an analytic account set.', project.name))
 
     @api.depends('timesheet_ids')
     def _compute_total_timesheet_time(self):
@@ -102,8 +80,7 @@ class Project(models.Model):
     def _init_data_analytic_account(self):
         self.search([('analytic_account_id', '=', False), ('allow_timesheets', '=', True)])._create_analytic_account()
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_contains_entries(self):
+    def unlink(self):
         """
         If some projects to unlink have some timesheets entries, these
         timesheets entries must be unlinked first.
@@ -119,11 +96,8 @@ class Project(models.Model):
             raise RedirectWarning(
                 warning_msg, self.env.ref('hr_timesheet.timesheet_action_project').id,
                 _('See timesheet entries'), {'active_ids': projects_with_timesheets.ids})
+        return super(Project, self).unlink()
 
-    def _convert_project_uom_to_timesheet_encode_uom(self, time):
-        uom_from = self.company_id.project_time_mode_id
-        uom_to = self.env.company.timesheet_encode_uom_id
-        return round(uom_from._compute_quantity(time, uom_to, raise_if_failure=False), 2)
 
 class Task(models.Model):
     _name = "project.task"
@@ -136,7 +110,7 @@ class Task(models.Model):
     total_hours_spent = fields.Float("Total Hours", compute='_compute_total_hours_spent', store=True, help="Time spent on this task, including its sub-tasks.")
     progress = fields.Float("Progress", compute='_compute_progress_hours', store=True, group_operator="avg", help="Display progress of current task.")
     overtime = fields.Float(compute='_compute_progress_hours', store=True)
-    subtask_effective_hours = fields.Float("Sub-tasks Hours Spent", compute='_compute_subtask_effective_hours', recursive=True, store=True, help="Time spent on the sub-tasks (and their own sub-tasks) of this task.")
+    subtask_effective_hours = fields.Float("Sub-tasks Hours Spent", compute='_compute_subtask_effective_hours', store=True, help="Time spent on the sub-tasks (and their own sub-tasks) of this task.")
     timesheet_ids = fields.One2many('account.analytic.line', 'task_id', 'Timesheets')
     encode_uom_in_days = fields.Boolean(compute='_compute_encode_uom_in_days', default=lambda self: self._uom_in_days())
 
@@ -183,12 +157,12 @@ class Task(models.Model):
 
     @api.depends('child_ids.effective_hours', 'child_ids.subtask_effective_hours')
     def _compute_subtask_effective_hours(self):
-        for task in self.with_context(active_test=False):
+        for task in self:
             task.subtask_effective_hours = sum(child_task.effective_hours + child_task.subtask_effective_hours for child_task in task.child_ids)
 
     def action_view_subtask_timesheet(self):
         self.ensure_one()
-        tasks = self.with_context(active_test=False)._get_all_subtasks()
+        tasks = self._get_all_subtasks()
         return {
             'type': 'ir.actions.act_window',
             'name': _('Timesheets'),
@@ -240,13 +214,21 @@ class Task(models.Model):
         result = super(Task, self)._fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         result['arch'] = self.env['account.analytic.line']._apply_timesheet_label(result['arch'])
 
-        if view_type in ['tree', 'pivot', 'graph'] and self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
-            result['arch'] = self.env['account.analytic.line']._apply_time_label(result['arch'], related_model=self._name)
-
+        if view_type == 'tree' and self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
+            result['arch'] = self._apply_time_label(result['arch'])
         return result
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_contains_entries(self):
+    @api.model
+    def _apply_time_label(self, view_arch):
+        doc = etree.XML(view_arch)
+        encoding_uom = self.env.company.timesheet_encode_uom_id
+        for node in doc.xpath("//field[@widget='timesheet_uom'][not(@string)] | //field[@widget='timesheet_uom_no_toggle'][not(@string)]"):
+            name_with_uom = re.sub(_('Hours') + "|Hours", encoding_uom.name or '', self._fields[node.get('name')]._description_string(self.env), flags=re.IGNORECASE)
+            node.set('string', name_with_uom)
+
+        return etree.tostring(doc, encoding='unicode')
+
+    def unlink(self):
         """
         If some tasks to unlink have some timesheets entries, these
         timesheets entries must be unlinked first.
@@ -262,6 +244,7 @@ class Task(models.Model):
             raise RedirectWarning(
                 warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id,
                 _('See timesheet entries'), {'active_ids': tasks_with_timesheets.ids})
+        return super(Task, self).unlink()
 
     def _convert_hours_to_days(self, time):
         uom_hour = self.env.ref('uom.product_uom_hour')

@@ -16,7 +16,7 @@ class ProductRibbon(models.Model):
     def name_get(self):
         return [(ribbon.id, '%s (#%d)' % (tools.html2plaintext(ribbon.html), ribbon.id)) for ribbon in self]
 
-    html = fields.Html(string='Ribbon html', required=True, translate=True, sanitize=False)
+    html = fields.Char(string='Ribbon html', required=True, translate=True)
     bg_color = fields.Char(string='Ribbon background color', required=False)
     text_color = fields.Char(string='Ribbon text color', required=False)
     html_class = fields.Char(string='Ribbon class', required=True, default='')
@@ -207,14 +207,6 @@ class ProductTemplate(models.Model):
 
     product_template_image_ids = fields.One2many('product.image', 'product_tmpl_id', string="Extra Product Media", copy=True)
 
-    def _get_website_accessory_product(self):
-        domain = self.env['website'].sale_product_domain()
-        return self.accessory_product_ids.filtered_domain(domain)
-
-    def _get_website_alternative_product(self):
-        domain = self.env['website'].sale_product_domain()
-        return self.alternative_product_ids.filtered_domain(domain)
-
     def _has_no_variant_attributes(self):
         """Return whether this `product.template` has at least one no_variant
         attribute.
@@ -300,17 +292,14 @@ class ProductTemplate(models.Model):
 
             tax_display = self.user_has_groups('account.group_show_line_subtotals_tax_excluded') and 'total_excluded' or 'total_included'
             fpos = self.env['account.fiscal.position'].sudo().get_fiscal_position(partner.id)
-            product_taxes = product.sudo().taxes_id.filtered(lambda x: x.company_id == company_id)
-            taxes = fpos.map_tax(product_taxes)
+            taxes = fpos.map_tax(product.sudo().taxes_id.filtered(lambda x: x.company_id == company_id), product, partner)
 
             # The list_price is always the price of one.
             quantity_1 = 1
-            combination_info['price'] = self.env['account.tax']._fix_tax_included_price_company(
-                combination_info['price'], product_taxes, taxes, company_id)
+            combination_info['price'] = self.env['account.tax']._fix_tax_included_price_company(combination_info['price'], product.sudo().taxes_id, taxes, company_id)
             price = taxes.compute_all(combination_info['price'], pricelist.currency_id, quantity_1, product, partner)[tax_display]
             if pricelist.discount_policy == 'without_discount':
-                combination_info['list_price'] = self.env['account.tax']._fix_tax_included_price_company(
-                    combination_info['list_price'], product_taxes, taxes, company_id)
+                combination_info['list_price'] = self.env['account.tax']._fix_tax_included_price_company(combination_info['list_price'], product.sudo().taxes_id, taxes, company_id)
                 list_price = taxes.compute_all(combination_info['list_price'], pricelist.currency_id, quantity_1, product, partner)[tax_display]
             else:
                 list_price = price

@@ -20,7 +20,7 @@ class StockValuationLayerRevaluation(models.TransientModel):
                 raise UserError(_("You cannot revalue a product with a standard cost method."))
             if product.quantity_svl <= 0:
                 raise UserError(_("You cannot revalue a product with an empty or negative stock."))
-            if 'account_journal_id' not in res and 'account_journal_id' in default_fields and product.categ_id.property_valuation == 'real_time':
+            if 'account_journal_id' not in res and 'account_journal_id' in default_fields and product.categ_id.property_valuation == 'real_time':               
                 accounts = product.product_tmpl_id.get_product_accounts()
                 res['account_journal_id'] = accounts['stock_journal'].id
         return res

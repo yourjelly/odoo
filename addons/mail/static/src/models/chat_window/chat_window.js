@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/chat_window/chat_window.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
-import { clear, create, link, unlink, update } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -130,17 +131,17 @@ function factory(dependencies) {
         }
 
         /**
-         * Swap this chat window with the previous one.
+         * Shift this chat window to the left on screen.
          */
-        shiftPrev() {
-            this.manager.shiftPrev(this);
+        shiftLeft() {
+            this.manager.shiftLeft(this);
         }
 
         /**
-         * Swap this chat window with the next one.
+         * Shift this chat window to the right on screen.
          */
-        shiftNext() {
-            this.manager.shiftNext(this);
+        shiftRight() {
+            this.manager.shiftRight(this);
         }
 
         /**
@@ -175,7 +176,7 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
-        _computeHasShiftPrev() {
+        _computeHasShiftLeft() {
             if (!this.manager) {
                 return false;
             }
@@ -191,7 +192,7 @@ function factory(dependencies) {
          * @private
          * @returns {boolean}
          */
-        _computeHasShiftNext() {
+        _computeHasShiftRight() {
             if (!this.manager) {
                 return false;
             }
@@ -242,21 +243,6 @@ function factory(dependencies) {
                 return this.thread.displayName;
             }
             return this.env._t("New message");
-        }
-
-        /**
-         * @private
-         * @returns {mail.thread_viewer}
-         */
-        _computeThreadViewer() {
-            const threadViewerData = {
-                hasThreadView: this.hasThreadView,
-                thread: this.thread ? link(this.thread) : unlink(),
-            };
-            if (!this.threadViewer) {
-                return create(threadViewerData);
-            }
-            return update(threadViewerData);
         }
 
         /**
@@ -372,13 +358,13 @@ function factory(dependencies) {
                 'thread',
             ],
         }),
-        hasShiftPrev: attr({
-            compute: '_computeHasShiftPrev',
+        hasShiftLeft: attr({
+            compute: '_computeHasShiftLeft',
             dependencies: ['managerAllOrderedVisible'],
             default: false,
         }),
-        hasShiftNext: attr({
-            compute: '_computeHasShiftNext',
+        hasShiftRight: attr({
+            compute: '_computeHasShiftRight',
             dependencies: ['managerAllOrderedVisible'],
             default: false,
         }),
@@ -461,14 +447,9 @@ function factory(dependencies) {
          * Determines the `mail.thread_viewer` managing the display of `this.thread`.
          */
         threadViewer: one2one('mail.thread_viewer', {
-            compute: '_computeThreadViewer',
-            dependencies: [
-                'hasThreadView',
-                'thread',
-            ],
+            default: [['create']],
+            inverse: 'chatWindow',
             isCausal: true,
-            readonly: true,
-            required: true,
         }),
         /**
          * This field handle the "order" (index) of the visible chatWindow inside the UI.
@@ -495,3 +476,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.chat_window', factory);
+
+});

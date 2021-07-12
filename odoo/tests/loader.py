@@ -50,25 +50,24 @@ def _get_tests_modules(path, module):
               if name.startswith('test_')]
     return result
 
-def make_suite(module_names, position='at_install'):
-    """ Creates a test suite for all the tests in the specified modules,
+def make_suite(module_name, position='at_install'):
+    mods = get_test_modules(module_name)
+    """ Creates a test suite for all the tests in the specified module,
     filtered by the provided ``position`` and the current test tags
 
-    :param list[str] module_names: modules to load tests from
+    :param str module_name: module to load tests from
     :param str position: "at_install" or "post_install"
     """
     config_tags = TagsSelector(tools.config['test_tags'])
     position_tag = TagsSelector(position)
-    tests = (
+    return OdooSuite(
         t
-        for module_name in module_names
-        for m in get_test_modules(module_name)
+        for m in mods
         for t in unwrap_suite(unittest.TestLoader().loadTestsFromModule(m))
         if position_tag.check(t) and config_tags.check(t)
     )
-    return OdooSuite(sorted(tests, key=lambda t: t.test_sequence))
 
-def run_suite(suite, module_name=None):
+def run_suite(suite, module_name):
     # avoid dependency hell
     from ..modules import module
     module.current_test = module_name

@@ -1,18 +1,18 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js', function (require) {
+'use strict';
 
-import * as mailUtils from '@mail/js/utils';
-
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { MessageAuthorPrefix } from '@mail/components/message_author_prefix/message_author_prefix';
-import { PartnerImStatusIcon } from '@mail/components/partner_im_status_icon/partner_im_status_icon';
+const components = {
+    MessageAuthorPrefix: require('mail/static/src/components/message_author_prefix/message_author_prefix.js'),
+    PartnerImStatusIcon: require('mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const mailUtils = require('mail.utils');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { MessageAuthorPrefix, PartnerImStatusIcon };
-
-export class ThreadNeedactionPreview extends Component {
+class ThreadNeedactionPreview extends Component {
 
     /**
      * @override
@@ -79,6 +79,18 @@ export class ThreadNeedactionPreview extends Component {
      *
      * @returns {string}
      */
+    get inlineLastNeedactionMessageBody() {
+        if (!this.thread.lastNeedactionMessage) {
+            return '';
+        }
+        return mailUtils.htmlToTextContentInline(this.thread.lastNeedactionMessage.prettyBody);
+    }
+
+    /**
+     * Get inline content of the last message of this conversation.
+     *
+     * @returns {string}
+     */
     get inlineLastNeedactionMessageAsOriginThreadBody() {
         if (!this.thread.lastNeedactionMessageAsOriginThread) {
             return '';
@@ -132,4 +144,8 @@ Object.assign(ThreadNeedactionPreview, {
         threadLocalId: String,
     },
     template: 'mail.ThreadNeedactionPreview',
+});
+
+return ThreadNeedactionPreview;
+
 });

@@ -159,8 +159,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         ])
         self.assertTrue(activity)
         self.assertIn(
-            '<p>partner_a modified receipt dates for the following products:</p>\n'
-            '<p> - product_a from 2020-06-06 to %s</p>' % fields.Date.today(),
+            '<p> partner_a modified receipt dates for the following products:</p><p> \xa0 - product_a from 2020-06-06 to %s </p>' % fields.Date.today(),
             activity.note,
         )
 
@@ -168,53 +167,9 @@ class TestPurchase(AccountTestInvoicingCommon):
         po._update_date_planned_for_lines([(po.order_line[1], fields.Datetime.today())])
         self.assertEqual(po.order_line[1].date_planned, fields.Datetime.today())
         self.assertIn(
-            '<p>partner_a modified receipt dates for the following products:</p>\n'
-            '<p> - product_a from 2020-06-06 to %(today)s</p>\n'
-            '<p> - product_b from 2020-06-06 to %(today)s</p>' % {'today': fields.Date.today()},
+            '<p> partner_a modified receipt dates for the following products:</p><p> \xa0 - product_a from 2020-06-06 to %s </p><p> \xa0 - product_b from 2020-06-06 to %s </p>' % (fields.Date.today(), fields.Date.today()),
             activity.note,
         )
-
-    def test_onchange_packaging_00(self):
-        """Create a PO and use packaging. Check we suggested suitable packaging
-        according to the product_qty. Also check product_qty or product_packaging
-        are correctly calculated when one of them changed.
-        """
-        packaging_single = self.env['product.packaging'].create({
-            'name': "I'm a packaging",
-            'product_id': self.product_a.id,
-            'qty': 1.0,
-        })
-        packaging_dozen = self.env['product.packaging'].create({
-            'name': "I'm also a packaging",
-            'product_id': self.product_a.id,
-            'qty': 12.0,
-        })
-
-        po = self.env['purchase.order'].create({
-            'partner_id': self.partner_a.id,
-        })
-        po_form = Form(po)
-        with po_form.order_line.new() as line:
-            line.product_id = self.product_a
-            line.product_qty = 1.0
-        po_form.save()
-        self.assertEqual(po.order_line.product_packaging_id, packaging_single)
-        self.assertEqual(po.order_line.product_packaging_qty, 1.0)
-        with po_form.order_line.edit(0) as line:
-            line.product_packaging_qty = 2.0
-        po_form.save()
-        self.assertEqual(po.order_line.product_qty, 2.0)
-
-
-        with po_form.order_line.edit(0) as line:
-            line.product_qty = 24.0
-        po_form.save()
-        self.assertEqual(po.order_line.product_packaging_id, packaging_dozen)
-        self.assertEqual(po.order_line.product_packaging_qty, 2.0)
-        with po_form.order_line.edit(0) as line:
-            line.product_packaging_qty = 1.0
-        po_form.save()
-        self.assertEqual(po.order_line.product_qty, 12)
 
     def test_with_different_uom(self):
         """ This test ensures that the unit price is correctly computed"""

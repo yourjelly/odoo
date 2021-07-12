@@ -1,13 +1,13 @@
 odoo.define('hr_holidays/static/src/components/thread_view/thread_view.js', function (require) {
 'use strict';
 
-const { ThreadView } = require('@mail/components/thread_view/thread_view');
+const components = {
+    ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
+};
 
 const { patch } = require('web.utils');
 
-const components = { ThreadView };
-
-patch(components.ThreadView.prototype, 'hr_holidays/static/src/components/thread_view/thread_view.js', {
+patch(components.ThreadView, 'hr_holidays/static/src/components/thread_view/thread_view.js', {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------

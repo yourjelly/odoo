@@ -5,7 +5,6 @@
 {
     'name': 'China - City Data',
     'version': '1.8',
-    'icon': '/l10n_cn/static/description/icon.png',
     'category': 'Accounting/Localizations',
     'author': 'Jeffery Chen Fan<jeffery9@gmail.com>',
     'description': """

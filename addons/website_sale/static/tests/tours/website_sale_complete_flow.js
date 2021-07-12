@@ -3,7 +3,6 @@ odoo.define('website_sale_tour.tour', function (require) {
 
     var tour = require("web_tour.tour");
     var rpc = require("web.rpc");
-    const tourUtils = require('website_sale.tour_utils');
 
     tour.register('website_sale_tour', {
         test: true,
@@ -27,7 +26,6 @@ odoo.define('website_sale_tour.tour', function (require) {
         content: "Click on add to cart",
         trigger: '#add_to_cart',
     },
-        tourUtils.goToCart(2),
     {
         content: "Check for 2 products in cart and proceed to checkout",
         extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
@@ -134,8 +132,8 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Pay Now",
-        // extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible:not(:disabled)',
+        extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
+        trigger: 'button[id="o_payment_form_pay"]:visible:not(:disabled)',
     },
     {
         content: "Sign up",
@@ -222,7 +220,6 @@ odoo.define('website_sale_tour.tour', function (require) {
         content: "Click on add to cart",
         trigger: '#add_to_cart',
     },
-        tourUtils.goToCart(2),
     {
         content: "Check for 2 products in cart and proceed to checkout",
         extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
@@ -283,7 +280,7 @@ odoo.define('website_sale_tour.tour', function (require) {
     {
         content: "Pay Now",
         extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible:not(:disabled)',
+        trigger: 'button[id="o_payment_form_pay"]:visible:not(:disabled)',
     },
     {
         content: "Open Dropdown for See quotation",
@@ -362,7 +359,6 @@ odoo.define('website_sale_tour.tour', function (require) {
         content: "Click on add to cart",
         trigger: '#add_to_cart',
     },
-        tourUtils.goToCart(),
     {
         content: "Proceed to checkout",
         trigger: 'a[href*="/shop/checkout"]',
@@ -388,6 +384,6 @@ odoo.define('website_sale_tour.tour', function (require) {
     {
         content: "Pay Now",
         extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible',
+        trigger: 'button[id="o_payment_form_pay"]:visible',
     }]);
 });

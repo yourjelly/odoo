@@ -74,7 +74,7 @@
             <field name="arch" type="xml">
                 <form string="Membership products">
                     <sheet>
-                        <label for="name" string="Product Name"/>
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
                             <field name="name"/>
                         </h1>

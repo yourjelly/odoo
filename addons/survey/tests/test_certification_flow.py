@@ -28,6 +28,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
                 'certification_mail_template_id': self.env.ref('survey.mail_template_certification').id,
                 'is_time_limited': True,
                 'time_limit': 10,
+                'state': 'open',
             })
 
             q01 = self._add_question(
@@ -134,6 +135,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
                 'title': 'User randomized Certification',
                 'questions_layout': 'page_per_section',
                 'questions_selection': 'random',
+                'state': 'open',
                 'scoring_type': 'scoring_without_answers',
             })
 
@@ -190,22 +192,10 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
             # Whatever which question was selected, the correct answer is the first one
             self._answer_question(question_ids, question_ids.suggested_answer_ids.ids[0], answer_token, csrf_token)
 
-        statistics = user_inputs._prepare_statistics()[user_inputs]
-        total_statistics = statistics['totals']
-        self.assertEqual(total_statistics, [
+        statistics = user_inputs._prepare_statistics()
+        self.assertEqual(statistics, [[
             {'text': 'Correct', 'count': 1},
             {'text': 'Partially', 'count': 0},
             {'text': 'Incorrect', 'count': 0},
             {'text': 'Unanswered', 'count': 0},
-        ], "With the configured randomization, there should be exactly 1 correctly answered question and none skipped.")
-
-        section_statistics = statistics['by_section']
-        self.assertEqual(section_statistics, {
-            'Page 1': {
-                'question_count': 1,
-                'correct': 1,
-                'partial': 0,
-                'incorrect': 0,
-                'skipped': 0,
-            }
-        }, "With the configured randomization, there should be exactly 1 correctly answered question in the 'Page 1' section.")
+        ]], "With the configured randomization, there should be exactly 1 correctly answered question and none skipped.")

@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import hashlib
+import hmac
 
 from werkzeug import urls
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_compare
-
-from odoo.addons.payment import utils as payment_utils
+from odoo.tools import ustr, consteq, float_compare
 
 
 class PaymentLinkWizard(models.TransientModel):
@@ -42,22 +43,6 @@ class PaymentLinkWizard(models.TransientModel):
     description = fields.Char('Payment Ref')
     access_token = fields.Char(compute='_compute_values')
     company_id = fields.Many2one('res.company', compute='_compute_company')
-    available_acquirer_ids = fields.Many2many(
-        comodel_name='payment.acquirer',
-        string="Payment Acquirers Available",
-        compute='_compute_available_acquirer_ids',
-        compute_sudo=True,
-    )
-    acquirer_id = fields.Many2one(
-        comodel_name='payment.acquirer',
-        string="Force Payment Acquirer",
-        domain="[('id', 'in', available_acquirer_ids)]",
-        help="Force the customer to pay via the specified payment acquirer. Leave empty to allow the customer to choose among all acquirers."
-    )
-    has_multiple_acquirers = fields.Boolean(
-        string="Has Multiple Acquirers",
-        compute='_compute_has_multiple_acquirers',
-    )
 
     @api.onchange('amount', 'description')
     def _onchange_amount(self):
@@ -66,12 +51,12 @@ class PaymentLinkWizard(models.TransientModel):
         if self.amount <= 0:
             raise ValidationError(_("The value of the payment amount must be positive."))
 
-    @api.depends('amount', 'description', 'partner_id', 'currency_id', 'acquirer_id')
+    @api.depends('amount', 'description', 'partner_id', 'currency_id')
     def _compute_values(self):
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         for payment_link in self:
-            payment_link.access_token = payment_utils.generate_access_token(
-                payment_link.partner_id.id, payment_link.amount, payment_link.currency_id.id
-            )
+            token_str = '%s%s%s' % (payment_link.partner_id.id, payment_link.amount, payment_link.currency_id.id)
+            payment_link.access_token = hmac.new(secret.encode('utf-8'), token_str.encode('utf-8'), hashlib.sha256).hexdigest()
         # must be called after token generation, obvsly - the link needs an up-to-date token
         self._generate_link()
 
@@ -81,30 +66,29 @@ class PaymentLinkWizard(models.TransientModel):
             record = self.env[link.res_model].browse(link.res_id)
             link.company_id = record.company_id if 'company_id' in record else False
 
-    @api.depends('company_id', 'partner_id', 'currency_id')
-    def _compute_available_acquirer_ids(self):
-        for link in self:
-            link.available_acquirer_ids = link.env['payment.acquirer']._get_compatible_acquirers(
-                company_id=link.company_id.id,
-                partner_id=link.partner_id.id,
-                currency_id=link.currency_id.id
-            )
-
-    @api.depends('available_acquirer_ids')
-    def _compute_has_multiple_acquirers(self):
-        for link in self:
-            link.has_multiple_acquirers = len(link.available_acquirer_ids) > 1
-
     def _generate_link(self):
         for payment_link in self:
-            related_document = self.env[payment_link.res_model].browse(payment_link.res_id)
-            base_url = related_document.get_base_url()  # Don't generate links for the wrong website
-            payment_link.link = f'{base_url}/payment/pay' \
-                   f'?reference={urls.url_quote(payment_link.description)}' \
-                   f'&amount={payment_link.amount}' \
-                   f'&currency_id={payment_link.currency_id.id}' \
-                   f'&partner_id={payment_link.partner_id.id}' \
-                   f'&company_id={payment_link.company_id.id}' \
-                   f'&invoice_id={payment_link.res_id}' \
-                   f'{"&acquirer_id=" + str(payment_link.acquirer_id.id) if payment_link.acquirer_id else "" }' \
-                   f'&access_token={payment_link.access_token}'
+            record = self.env[payment_link.res_model].browse(payment_link.res_id)
+            link = ('%s/website_payment/pay?reference=%s&amount=%s&currency_id=%s'
+                    '&partner_id=%s&access_token=%s') % (
+                        record.get_base_url(),
+                        urls.url_quote_plus(payment_link.description),
+                        payment_link.amount,
+                        payment_link.currency_id.id,
+                        payment_link.partner_id.id,
+                        payment_link.access_token
+                    )
+            if payment_link.company_id:
+                link += '&company_id=%s' % payment_link.company_id.id
+            if payment_link.res_model == 'account.move':
+                link += '&invoice_id=%s' % payment_link.res_id
+            payment_link.link = link
+
+    @api.model
+    def check_token(self, access_token, partner_id, amount, currency_id):
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        token_str = '%s%s%s' % (partner_id, amount, currency_id)
+        correct_token = hmac.new(secret.encode('utf-8'), token_str.encode('utf-8'), hashlib.sha256).hexdigest()
+        if consteq(ustr(access_token), correct_token):
+            return True
+        return False

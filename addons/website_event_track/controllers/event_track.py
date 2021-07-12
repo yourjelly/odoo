@@ -11,7 +11,7 @@ import babel.dates
 import base64
 import pytz
 
-from odoo import exceptions, http, fields, tools, _
+from odoo import exceptions, http, fields, _
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import is_html_empty, plaintext2html
@@ -27,7 +27,7 @@ class EventTrackController(http.Controller):
         search_domain_base = [
             ('event_id', '=', event.id),
         ]
-        if not request.env.user.has_group('event.group_event_registration_desk'):
+        if not request.env.user.has_group('event.group_event_user'):
             search_domain_base = expression.AND([
                 search_domain_base,
                 ['|', ('is_published', '=', True), ('is_accepted', '=', True)]
@@ -52,6 +52,9 @@ class EventTrackController(http.Controller):
           * 'search': search string;
           * 'tags': list of tag IDs for filtering;
         """
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         return request.render(
             "website_event_track.tracks_session",
             self._event_tracks_get_values(event, tag=tag, **searches)
@@ -96,7 +99,7 @@ class EventTrackController(http.Controller):
         now_tz = utc.localize(fields.Datetime.now().replace(microsecond=0), is_dst=False).astimezone(timezone(event.date_tz))
         today_tz = now_tz.date()
         event = event.with_context(tz=event.date_tz or 'UTC')
-        tracks_sudo = event.env['event.track'].sudo().search(search_domain, order='is_published desc, date asc')
+        tracks_sudo = event.env['event.track'].sudo().search(search_domain, order='date asc')
         tag_categories = request.env['event.track.tag.category'].sudo().search([])
 
         # filter on wishlist (as post processing due to costly search on is_reminder_on)
@@ -121,13 +124,6 @@ class EventTrackController(http.Controller):
             tracks_announced = tracks_announced.sorted('wishlisted_by_default', reverse=True)
             tracks_by_day.append({'date': False, 'name': _('Coming soon'), 'tracks': tracks_announced})
 
-        for tracks_group in tracks_by_day:
-            # the tracks group is folded if all tracks are done (and if it's not "today")
-            tracks_group['default_collapsed'] = (today_tz != tracks_group['date']) and all(
-                track.is_track_done and not track.is_track_live
-                for track in tracks_group['tracks']
-            )
-
         # return rendering values
         return {
             # event information
@@ -148,7 +144,7 @@ class EventTrackController(http.Controller):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
@@ -157,12 +153,15 @@ class EventTrackController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/agenda'''], type='http', auth="public", website=True, sitemap=False)
     def event_agenda(self, event, tag=None, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         event = event.with_context(tz=event.date_tz or 'UTC')
         vals = {
             'event': event,
             'main_object': event,
             'tag': tag,
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
         vals.update(self._prepare_calendar_values(event))
@@ -354,17 +353,17 @@ class EventTrackController(http.Controller):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
         }
 
     @http.route("/event/track/toggle_reminder", type="json", auth="public", website=True)
     def track_reminder_toggle(self, track_id, set_reminder_on):
         """ Set a reminder a track for current visitor. Track visitor is created or updated
-        if it already exists. Exception made if un-favoriting and no track_visitor
+        if it already exists. Exception made if un-wishlisting and no track_visitor
         record found (should not happen unless manually done).
 
         :param boolean set_reminder_on:
-          If True, set as a favorite, otherwise un-favorite track;
+          If True, set as a wishlist, otherwise un-wishlist track;
           If the track is a Key Track (wishlisted_by_default):
             if set_reminder_on = False, blacklist the track_partner
             otherwise, un-blacklist the track_partner
@@ -395,6 +394,9 @@ class EventTrackController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal'''], type='http', auth="public", website=True, sitemap=False)
     def event_track_proposal(self, event, **post):
+        if not event.can_access_from_current_website():
+            raise NotFound()
+
         return request.render("website_event_track.event_track_proposal", {'event': event, 'main_object': event})
 
     @http.route(['''/event/<model("event.event"):event>/track_proposal/post'''], type='http', auth="public", methods=['POST'], website=True)
@@ -402,77 +404,30 @@ class EventTrackController(http.Controller):
         if not event.can_access_from_current_website():
             raise NotFound()
 
-        # Only accept existing tag indices. Use search instead of browse + exists:
-        # this prevents users to register colorless tags if not allowed to (ACL).
-        input_tag_indices = [int(tag_id) for tag_id in post['tags'].split(',') if tag_id]
-        valid_tag_indices = request.env['event.track.tag'].search([('id', 'in', input_tag_indices)]).ids
+        tags = []
+        for tag in event.allowed_track_tag_ids:
+            if post.get('tag_' + str(tag.id)):
+                tags.append(tag.id)
 
-        contact = request.env['res.partner']
-        visitor_partner = request.env['website.visitor']._get_visitor_from_request().partner_id
-        # Contact name is required. Therefore, empty contacts are not considered here. At least one of contact_phone
-        # and contact_email must be filled. Email is verified. If the post tries to create contact with no valid entry,
-        # raise exception. If normalized email is the same as logged partner, use its partner_id on track instead.
-        # This prevents contact duplication. Otherwise, create new contact with contact additional info of post.
-        if post.get('add_contact_information'):
-            valid_contact_email = tools.email_normalize(post.get('contact_email'))
-            # Here, the phone is not formatted. To format it, one needs a country. Based on a country, from geoip for instance.
-            # The problem is that one could propose a track in country A with phone number of country B. Validity is therefore
-            # quite tricky. We accept any format of contact_phone. Could be improved with select country phone widget.
-            if valid_contact_email or post.get('contact_phone'):
-                if visitor_partner and valid_contact_email == visitor_partner.email_normalized:
-                    contact = visitor_partner
-                else:
-                    contact = request.env['res.partner'].sudo().create({
-                        'email': valid_contact_email,
-                        'name': post.get('contact_name'),
-                        'phone': post.get('contact_phone'),
-                    })
-            else:
-                raise exceptions.ValidationError(_("Format Error : please enter a valid contact phone or contact email."))
-        # If the speaker email is the same as logged user's, then also uses its partner on track, same as above.
-        else:
-            valid_speaker_email = tools.email_normalize(post['partner_email'])
-            if visitor_partner and valid_speaker_email == visitor_partner.email_normalized:
-                contact = visitor_partner
-
-        track = request.env['event.track'].with_context({'mail_create_nosubscribe': True}).sudo().create({
+        track = request.env['event.track'].sudo().create({
             'name': post['track_name'],
-            'partner_id': contact.id,
             'partner_name': post['partner_name'],
-            'partner_email': post['partner_email'],
-            'partner_phone': post['partner_phone'],
-            'partner_function': post['partner_function'],
-            'contact_phone': contact.phone,
-            'contact_email': contact.email,
+            'partner_email': post['email_from'],
+            'partner_phone': post['phone'],
+            'partner_biography': plaintext2html(post['biography']),
             'event_id': event.id,
-            'tag_ids': [(6, 0, valid_tag_indices)],
-            'description': plaintext2html(post['description']),
-            'partner_biography': plaintext2html(post['partner_biography']),
+            'tag_ids': [(6, 0, tags)],
             'user_id': False,
-            'image': base64.b64encode(post['image'].read()) if post.get('image') else False,
+            'description': plaintext2html(post['description']),
+            'image': base64.b64encode(post['image'].read()) if post.get('image') else False
         })
-
         if request.env.user != request.website.user_id:
             track.sudo().message_subscribe(partner_ids=request.env.user.partner_id.ids)
-
-        return request.redirect('/event/%s/track_proposal/success/%s' % (event.id, track.id))
-
-    @http.route(['/event/<model("event.event"):event>/track_proposal/success/<int:track_id>'], type='http', auth="public", methods=['GET'], website=True, sitemap=False)
-    def event_track_proposal_success(self, event, track_id):
-        track = request.env['event.track'].sudo().search([
-            ('id', '=', track_id),
-            ('partner_id', '=', request.env['website.visitor']._get_visitor_from_request().partner_id.id),
-            ('event_id', '=', event.id),
-        ])
-        if not event.can_access_from_current_website() or not track:
-            raise NotFound()
-
+        else:
+            partner = request.env['res.partner'].sudo().search([('email', '=', post['email_from'])])
+            if partner:
+                track.sudo().message_subscribe(partner_ids=partner.ids)
         return request.render("website_event_track.event_track_proposal", {'track': track, 'event': event})
-
-    # ACL : This route is necessary since rpc search_read method in js is not accessible to all users (e.g. public user).
-    @http.route(['''/event/track_tag/search_read'''], type='json', auth="public", website=True)
-    def website_event_track_fetch_tags(self, domain, fields):
-        return request.env['event.track.tag'].search_read(domain, fields)
 
     # ------------------------------------------------------------
     # TOOLS

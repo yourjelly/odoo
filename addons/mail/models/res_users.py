@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, exceptions, fields, models, modules, Command
+from odoo import _, api, exceptions, fields, models, modules
 from odoo.addons.base.models.res_users import is_selection_groups
 
 
@@ -57,13 +57,19 @@ GROUP BY channel_moderator.res_users_id""", [tuple(self.ids)])
         for user in self:
             user.moderation_counter = result.get(user.id, 0)
 
-    @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['notification_type']
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['notification_type']
+    def __init__(self, pool, cr):
+        """ Override of __init__ to add access rights on notification_email_send
+            fields. Access rights are disabled by default, but allowed on some
+            specific fields defined in self.SELF_{READ/WRITE}ABLE_FIELDS.
+        """
+        init_res = super(Users, self).__init__(pool, cr)
+        # duplicate list to avoid modifying the original reference
+        type(self).SELF_WRITEABLE_FIELDS = list(self.SELF_WRITEABLE_FIELDS)
+        type(self).SELF_WRITEABLE_FIELDS.extend(['notification_type'])
+        # duplicate list to avoid modifying the original reference
+        type(self).SELF_READABLE_FIELDS = list(self.SELF_READABLE_FIELDS)
+        type(self).SELF_READABLE_FIELDS.extend(['notification_type'])
+        return init_res
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -74,42 +80,38 @@ GROUP BY channel_moderator.res_users_id""", [tuple(self.ids)])
                 raise exceptions.RedirectWarning(msg, action.id, _('Go to the configuration panel'))
 
         users = super(Users, self).create(vals_list)
-        # Auto-subscribe to channels unless skip explicitly requested
-        if not self.env.context.get('mail_channel_nosubscribe'):
-            self.env['mail.channel'].search([('group_ids', 'in', users.groups_id.ids)])._subscribe_users_automatically()
+        # Auto-subscribe to channels
+        self.env['mail.channel'].search([('group_ids', 'in', users.groups_id.ids)])._subscribe_users()
         return users
 
     def write(self, vals):
         write_res = super(Users, self).write(vals)
         if 'active' in vals and not vals['active']:
-            self._unsubscribe_from_non_public_channels()
+            self._unsubscribe_from_channels()
         sel_groups = [vals[k] for k in vals if is_selection_groups(k) and vals[k]]
         if vals.get('groups_id'):
             # form: {'group_ids': [(3, 10), (3, 3), (4, 10), (4, 3)]} or {'group_ids': [(6, 0, [ids]}
             user_group_ids = [command[1] for command in vals['groups_id'] if command[0] == 4]
             user_group_ids += [id for command in vals['groups_id'] if command[0] == 6 for id in command[2]]
-            self.env['mail.channel'].search([('group_ids', 'in', user_group_ids)])._subscribe_users_automatically()
+            self.env['mail.channel'].search([('group_ids', 'in', user_group_ids)])._subscribe_users()
         elif sel_groups:
-            self.env['mail.channel'].search([('group_ids', 'in', sel_groups)])._subscribe_users_automatically()
+            self.env['mail.channel'].search([('group_ids', 'in', sel_groups)])._subscribe_users()
         return write_res
 
     def unlink(self):
-        self._unsubscribe_from_non_public_channels()
+        self._unsubscribe_from_channels()
         return super().unlink()
 
-    def _unsubscribe_from_non_public_channels(self):
+    def _unsubscribe_from_channels(self):
         """ This method un-subscribes users from private mail channels. Main purpose of this
             method is to prevent sending internal communication to archived / deleted users.
             We do not un-subscribes users from public channels because in most common cases,
             public channels are mailing list (e-mail based) and so users should always receive
             updates from public channels until they manually un-subscribe themselves.
         """
-        current_cp = self.env['mail.channel.partner'].sudo().search([
-            ('partner_id', 'in', self.partner_id.ids),
-        ])
-        current_cp.filtered(
-            lambda cp: cp.channel_id.public != 'public' and cp.channel_id.channel_type == 'channel'
-        ).unlink()
+        self.mapped('partner_id.channel_ids').filtered(lambda c: c.public != 'public' and c.channel_type == 'channel').write({
+            'channel_partner_ids': [(3, pid) for pid in self.mapped('partner_id').ids]
+        })
 
     @api.model
     def systray_get_activities(self):
@@ -170,5 +172,5 @@ class res_groups_mail_channel(models.Model):
             # form: {'group_ids': [(3, 10), (3, 3), (4, 10), (4, 3)]} or {'group_ids': [(6, 0, [ids]}
             user_ids = [command[1] for command in vals['users'] if command[0] == 4]
             user_ids += [id for command in vals['users'] if command[0] == 6 for id in command[2]]
-            self.env['mail.channel'].search([('group_ids', 'in', self._ids)])._subscribe_users_automatically()
+            self.env['mail.channel'].search([('group_ids', 'in', self._ids)])._subscribe_users()
         return write_res

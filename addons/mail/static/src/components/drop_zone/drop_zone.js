@@ -1,10 +1,11 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/drop_zone/drop_zone.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 
 const { Component, useState } = owl;
 
-export class DropZone extends Component {
+class DropZone extends Component {
 
     /**
      * @override
@@ -131,4 +132,8 @@ export class DropZone extends Component {
 Object.assign(DropZone, {
     props: {},
     template: 'mail.DropZone',
+});
+
+return DropZone;
+
 });

@@ -90,7 +90,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon):
         (self.comp1).write({'route_ids': [(4, resupply_sub_on_order_route.id, None)]})
         # Create a supplier and set it to component
         vendor = self.env['res.partner'].create({'name': 'AAA', 'email': 'from.test@example.com'})
-        self.env['product.supplierinfo'].create({
+        supplier_info1 = self.env['product.supplierinfo'].create({
             'name': vendor.id,
             'price': 50,
         })

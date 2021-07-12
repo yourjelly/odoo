@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
-    <t t-name="Many2ManyAttendeeTag" t-extend="FieldMany2ManyTagAvatar">
+    <t t-name="Many2ManyAttendeeTag" t-extend="FieldMany2ManyTag">
         <t t-jquery="span:first" t-operation="prepend">
-            <span t-if="attendeesData[el_index] and attendeesData[el_index].status and attendeesData[el_index].status !== 'needsAction'"
-                t-attf-class="o_calendar_invitation #{attendeesData[el_index].status}"/>
+            <span t-if="attendeesData[el_index]" t-attf-class="o_calendar_invitation #{attendeesData[el_index].status}"/>
         </t>
     </t>
 
@@ -54,22 +53,6 @@
                 </div>
             </div>
         </t>
-    </t>
-
-     <t t-name="Calendar.calendar_add_buttons">
-        <span class="o_calendar_create_buttons">
-            <button class="btn btn-primary o-calendar-button-new" aria-label="Add" title="Add">Add</button>
-        </span>
-    </t>
-
-    <t t-name="Calendar.calendar-box">
-        <div t-attf-class="#{record.is_highlighted ? 'o_event_hightlight' : ''} #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : 'o_calendar_color_1'} fc-event o_attendee_status_#{record.is_alone ? 'alone' : record.attendee_status} py-0" >
-            <div class="o_event_title mr-2">
-                <span t-if="record.is_alone" class="fa fa-exclamation-circle"/>
-                <t t-esc="record.display_name"/>
-            </div>
-            <span class="fc-time"/>
-        </div>
     </t>
 
 </template>

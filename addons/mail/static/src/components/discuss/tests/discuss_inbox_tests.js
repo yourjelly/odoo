@@ -1,14 +1,15 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/discuss/tests/discuss_inbox_tests.js', function (require) {
+'use strict';
 
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     nextAnimationFrame,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
-import Bus from 'web.Bus';
+const Bus = require('web.Bus');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -554,6 +555,7 @@ QUnit.test('subject should not be shown when subject is the same as the thread n
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -577,6 +579,7 @@ QUnit.test('subject should not be shown when subject is the same as the thread n
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -600,6 +603,7 @@ QUnit.test('subject should not be shown when subject differs from thread name on
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -623,6 +627,7 @@ QUnit.test('subject should not be shown when subject differs from thread name on
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -646,6 +651,7 @@ QUnit.test('subject should be shown when the thread name has an extra prefix com
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -669,6 +675,7 @@ QUnit.test('subject should not be shown when subject differs from thread name on
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -692,6 +699,7 @@ QUnit.test('subject should not be shown when subject differs from thread name on
 
     this.data['mail.message'].records.push({
         body: "not empty",
+        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         needaction: true,
@@ -712,4 +720,6 @@ QUnit.test('subject should not be shown when subject differs from thread name on
 
 });
 });
+});
+
 });

@@ -7,6 +7,5 @@
         <field name="transfer_account_code_prefix">1051</field>
         <field name="code_digits">7</field>
         <field name="currency_id" ref="base.PEN"/>
-        <field name="country_id" ref="base.pe"/>
     </record>
 </odoo>

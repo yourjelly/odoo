@@ -1,4 +1,5 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/component_hooks/use_refs/use_refs.js', function (require) {
+'use strict';
 
 const { Component } = owl;
 
@@ -8,9 +9,13 @@ const { Component } = owl;
  * @returns {function} returns object whose keys are t-ref values of active refs.
  *   and values are refs.
  */
-export function useRefs() {
+function useRefs() {
     const component = Component.current;
     return function () {
         return component.__owl__.refs || {};
     };
 }
+
+return useRefs;
+
+});

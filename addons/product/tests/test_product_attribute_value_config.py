@@ -6,11 +6,11 @@ from psycopg2 import IntegrityError
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 from odoo.tools import mute_logger
 
 
-class TestProductAttributeValueCommon(TransactionCase):
+class TestProductAttributeValueCommon(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super(TestProductAttributeValueCommon, cls).setUpClass()

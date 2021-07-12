@@ -31,7 +31,6 @@
             <field name="model">ir.model</field>
             <field name="arch" type="xml">
                 <form string="Model Description">
-                  <header><!-- used for override --></header>
                   <sheet>
                     <group>
                         <group>

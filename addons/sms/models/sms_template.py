@@ -29,16 +29,6 @@ class SMSTemplate(models.Model):
                                         help="Sidebar action to make this template available on records "
                                         "of the related document model")
 
-    # Overrides of mail.render.mixin
-    @api.depends('model')
-    def _compute_render_model(self):
-        for template in self:
-            template.render_model = template.model
-
-    # ------------------------------------------------------------
-    # CRUD
-    # ------------------------------------------------------------
-
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {},

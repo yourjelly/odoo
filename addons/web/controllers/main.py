@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import babel.messages.pofile
 import base64
 import copy
 import datetime
 import functools
+import glob
 import hashlib
 import io
 import itertools
+import jinja2
 import json
 import logging
 import operator
@@ -15,31 +18,29 @@ import os
 import re
 import sys
 import tempfile
-import unicodedata
-from collections import OrderedDict, defaultdict
 
-import babel.messages.pofile
-import jinja2
 import werkzeug
 import werkzeug.exceptions
 import werkzeug.utils
 import werkzeug.wrappers
 import werkzeug.wsgi
-from lxml import etree
-from markupsafe import Markup
+from collections import OrderedDict, defaultdict, Counter
 from werkzeug.urls import url_encode, url_decode, iri_to_uri
+from lxml import etree
+import unicodedata
+
 
 import odoo
 import odoo.modules.registry
 from odoo.api import call_kw, Environment
-from odoo.modules import get_module_path, get_resource_path, module
-from odoo.tools import image_process, html_escape, pycompat, ustr, apply_inheritance_specs, lazy_property, float_repr, osutil
+from odoo.modules import get_module_path, get_resource_path
+from odoo.tools import image_process, topological_sort, html_escape, pycompat, ustr, apply_inheritance_specs, lazy_property, float_repr
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.translate import _
-from odoo.tools.misc import str2bool, xlsxwriter, file_open, file_path
+from odoo.tools.misc import str2bool, xlsxwriter, file_open
 from odoo.tools.safe_eval import safe_eval, time
 from odoo import http, tools
-from odoo.http import content_disposition, dispatch_rpc, request, serialize_exception as _serialize_exception
+from odoo.http import content_disposition, dispatch_rpc, request, serialize_exception as _serialize_exception, Response
 from odoo.exceptions import AccessError, UserError, AccessDenied
 from odoo.models import check_method_name
 from odoo.service import db, security
@@ -182,9 +183,83 @@ def ensure_db(redirect='/web/database/selector'):
 
     request.session.db = db
 
+def module_installed(environment):
+    # Candidates module the current heuristic is the /static dir
+    loadable = list(http.addons_manifest)
+
+    # Retrieve database installed modules
+    # TODO The following code should move to ir.module.module.list_installed_modules()
+    Modules = environment['ir.module.module']
+    domain = [('state','=','installed'), ('name','in', loadable)]
+    modules = OrderedDict(
+        (module.name, module.dependencies_id.mapped('name'))
+        for module in Modules.search(domain)
+    )
+
+    sorted_modules = topological_sort(modules)
+    return sorted_modules
+
+def module_installed_bypass_session(dbname):
+    try:
+        registry = odoo.registry(dbname)
+        with registry.cursor() as cr:
+            return module_installed(
+                environment=Environment(cr, odoo.SUPERUSER_ID, {}))
+    except Exception:
+        pass
+    return {}
+
+def module_boot(db=None):
+    server_wide_modules = odoo.conf.server_wide_modules or []
+    serverside = ['base', 'web']
+    dbside = []
+    for i in server_wide_modules:
+        if i in http.addons_manifest and i not in serverside:
+            serverside.append(i)
+    monodb = db or db_monodb()
+    if monodb:
+        dbside = module_installed_bypass_session(monodb)
+        dbside = [i for i in dbside if i not in serverside]
+    addons = serverside + dbside
+    return addons
+
+
 def fs2web(path):
     """convert FS path into web path"""
     return '/'.join(path.split(os.path.sep))
+
+def manifest_glob(extension, addons=None, db=None, include_remotes=False):
+    if addons is None:
+        addons = module_boot(db=db)
+
+    r = []
+    for addon in addons:
+        manifest = http.addons_manifest.get(addon, None)
+        if not manifest:
+            continue
+        # ensure does not ends with /
+        addons_path = os.path.join(manifest['addons_path'], '')[:-1]
+        globlist = manifest.get(extension, [])
+        for pattern in globlist:
+            if pattern.startswith(('http://', 'https://', '//')):
+                if include_remotes:
+                    r.append((None, pattern, addon))
+            else:
+                for path in glob.glob(os.path.normpath(os.path.join(addons_path, addon, pattern))):
+                    r.append((path, fs2web(path[len(addons_path):]), addon))
+    return r
+
+
+def manifest_list(extension, mods=None, db=None, debug=None):
+    """ list resources to load specifying either:
+    mods: a comma separated string listing modules
+    db: a database name (return all installed modules in that database)
+    """
+    if debug is not None:
+        _logger.warning("odoo.addons.web.main.manifest_list(): debug parameter is deprecated")
+    mods = mods.split(',')
+    files = manifest_glob(extension, addons=mods, db=db, include_remotes=True)
+    return [wp for _fp, wp, addon in files]
 
 def get_last_modified(files):
     """ Returns the modification time of the most recently modified
@@ -476,9 +551,7 @@ class HomeStaticTemplateHelpers(object):
                 parent_tree = copy.deepcopy(self.template_dict[parent_addon][parent_name])
 
                 xpaths = list(template_tree)
-                # owl chokes on comments, disable debug comments for now
-                # pylint: disable=W0125
-                if False: # self.debug and inherit_mode == self.EXTENSION_MODE:
+                if self.debug and inherit_mode == self.EXTENSION_MODE:
                     for xpath in xpaths:
                         xpath.insert(0, etree.Comment(" Modified by %s from %s " % (template_name, addon)))
                 elif inherit_mode == self.PRIMARY_MODE:
@@ -511,13 +584,18 @@ class HomeStaticTemplateHelpers(object):
             if re.match(COMMENT_PATTERN, comment.text.strip()):
                 comment.getparent().remove(comment)
 
+    def _manifest_glob(self):
+        '''Proxy for manifest_glob
+        Usefull to make 'self' testable'''
+        return manifest_glob('qweb', self.addons, self.db)
+
     def _read_addon_file(self, file_path):
         """Reads the content of a file given by file_path
         Usefull to make 'self' testable
         :param str file_path:
         :returns: str
         """
-        with file_open(file_path, 'rb') as fp:
+        with open(file_path, 'rb') as fp:
             contents = fp.read()
         return contents
 
@@ -543,7 +621,7 @@ class HomeStaticTemplateHelpers(object):
                     xml = self._compute_xml_tree(addon, fname, contents)
 
                     if root is None:
-                        root = etree.Element('templates')
+                        root = etree.Element(xml.tag)
 
         for addon in self.template_dict.values():
             for template in addon.values():
@@ -551,35 +629,23 @@ class HomeStaticTemplateHelpers(object):
 
         return etree.tostring(root, encoding='utf-8') if root is not None else b'', checksum.hexdigest()[:64]
 
-    def _get_asset_paths(self, bundle):
-        """Proxy for ir_asset._get_asset_paths
-        Useful to make 'self' testable.
-        """
-        return request.env['ir.asset']._get_asset_paths(addons=self.addons, bundle=bundle, xml=True)
-
-    def _get_qweb_templates(self, bundle):
+    def _get_qweb_templates(self):
         """One and only entry point that gets and evaluates static qweb templates
 
         :rtype: (str, str)
         """
-        xml_paths = defaultdict(list)
-
-        # group paths by module, keeping them in order
-        for path, addon, _ in self._get_asset_paths(bundle):
-            addon_paths = xml_paths[addon]
-            if path not in addon_paths:
-                addon_paths.append(path)
-
-        content, checksum = self._concat_xml(xml_paths)
+        files = OrderedDict([(addon, list()) for addon in self.addons])
+        [files[f[2]].append(f[0]) for f in self._manifest_glob()]
+        content, checksum = self._concat_xml(files)
         return content, checksum
 
     @classmethod
-    def get_qweb_templates_checksum(cls, addons=None, db=None, debug=False, bundle=None):
-        return cls(addons, db, checksum_only=True, debug=debug)._get_qweb_templates(bundle)[1]
+    def get_qweb_templates_checksum(cls, addons, db=None, debug=False):
+        return cls(addons, db, checksum_only=True, debug=debug)._get_qweb_templates()[1]
 
     @classmethod
-    def get_qweb_templates(cls, addons=None, db=None, debug=False, bundle=None):
-        return cls(addons, db, debug=debug)._get_qweb_templates(bundle)[0]
+    def get_qweb_templates(cls, addons, db=None, debug=False):
+        return cls(addons, db, debug=debug)._get_qweb_templates()[0]
 
 
 class GroupsTreeNode:
@@ -845,7 +911,7 @@ class Home(http.Controller):
         :param unique: this parameters is not used, but mandatory: it is used by the HTTP stack to make a unique request
         :return: the menus (including the images in Base64)
         """
-        menus = request.env["ir.ui.menu"].load_web_menus(request.session.debug)
+        menus = request.env["ir.ui.menu"].load_menus(request.session.debug)
         body = json.dumps(menus, default=ustr)
         response = request.make_response(body, [
             # this method must specify a content-type application/json instead of using the default text/html set because
@@ -913,6 +979,14 @@ class Home(http.Controller):
 
 class WebClient(http.Controller):
 
+    @http.route('/web/webclient/csslist', type='json', auth="none")
+    def csslist(self, mods=None):
+        return manifest_list('css', mods=mods)
+
+    @http.route('/web/webclient/jslist', type='json', auth="none")
+    def jslist(self, mods=None):
+        return manifest_list('js', mods=mods)
+
     @http.route('/web/webclient/locale/<string:lang>', type='http', auth="none")
     def load_locale(self, lang):
         magic_file_finding = [lang.replace("_", '-').lower(), lang.split('_')[0]]
@@ -936,12 +1010,8 @@ class WebClient(http.Controller):
         ])
 
     @http.route('/web/webclient/qweb/<string:unique>', type='http', auth="none", cors="*")
-    def qweb(self, unique, mods=None, db=None, bundle=None):
-
-        if not request.db and mods is None:
-            mods = odoo.conf.server_wide_modules or []
-
-        content = HomeStaticTemplateHelpers.get_qweb_templates(mods, db, debug=request.session.debug, bundle=bundle)
+    def qweb(self, unique, mods=None, db=None):
+        content = HomeStaticTemplateHelpers.get_qweb_templates(mods, db, debug=request.session.debug)
 
         return request.make_response(content, [
                 ('Content-Type', 'text/xml'),
@@ -949,7 +1019,7 @@ class WebClient(http.Controller):
             ])
 
     @http.route('/web/webclient/bootstrap_translations', type='json', auth="none")
-    def bootstrap_translations(self, mods=None):
+    def bootstrap_translations(self, mods):
         """ Load local translations from *.po files, as a temporary solution
             until we have established a valid session. This is meant only
             for translating the login page and db management chrome, using
@@ -961,15 +1031,9 @@ class WebClient(http.Controller):
         request.session._fix_lang(context)
         lang = context['lang'].split('_')[0]
 
-        if mods is None:
-            mods = odoo.conf.server_wide_modules or []
-            if request.db:
-                mods = request.env.registry._init_modules | set(mods)
-
         translations_per_module = {}
         for addon_name in mods:
-            manifest = http.addons_manifest.get(addon_name)
-            if manifest and manifest.get('bootstrap'):
+            if http.addons_manifest[addon_name].get('bootstrap'):
                 addons_path = http.addons_manifest[addon_name]['addons_path']
                 f_name = os.path.join(addons_path, addon_name, "i18n", lang + ".po")
                 if not os.path.exists(f_name):
@@ -993,9 +1057,6 @@ class WebClient(http.Controller):
 
         if mods:
             mods = mods.split(',')
-        elif mods is None:
-            mods = list(request.env.registry._init_modules) + (odoo.conf.server_wide_modules or [])
-
         translations_per_module, lang_params = request.env["ir.translation"].get_translations_for_webclient(mods, lang)
 
         body = json.dumps({
@@ -1064,7 +1125,7 @@ class Database(http.Controller):
             monodb = db_monodb()
             if monodb:
                 d['databases'] = [monodb]
-        return Markup(env.get_template("database_manager.html").render(d))
+        return env.get_template("database_manager.html").render(d)
 
     @http.route('/web/database/selector', type='http', auth="none")
     def selector(self, **kw):
@@ -1224,7 +1285,7 @@ class Session(http.Controller):
     @http.route('/web/session/modules', type='json', auth="user")
     def modules(self):
         # return all installed modules. Web client is smart enough to not load a module twice
-        return list(request.env.registry._init_modules | set([module.current_test] if module.current_test else []))
+        return module_installed(environment=request.env(user=odoo.SUPERUSER_ID))
 
     @http.route('/web/session/save_session_action', type='json', auth="user")
     def save_session_action(self, the_action):
@@ -1376,7 +1437,7 @@ class Binary(http.Controller):
 
     @staticmethod
     def placeholder(image='placeholder.png'):
-        image_path = image.lstrip('/').split('/') if '/' in image else ['web', 'static', 'img', image]
+        image_path = image.lstrip('/').split('/') if '/' in image else ['web', 'static', 'src', 'img', image]
         with tools.file_open(get_resource_path(*image_path), 'rb') as fd:
             return fd.read()
 
@@ -1385,16 +1446,15 @@ class Binary(http.Controller):
         '/web/content/<string:xmlid>/<string:filename>',
         '/web/content/<int:id>',
         '/web/content/<int:id>/<string:filename>',
+        '/web/content/<int:id>-<string:unique>',
+        '/web/content/<int:id>-<string:unique>/<string:filename>',
+        '/web/content/<int:id>-<string:unique>/<path:extra>/<string:filename>',
         '/web/content/<string:model>/<int:id>/<string:field>',
         '/web/content/<string:model>/<int:id>/<string:field>/<string:filename>'], type='http', auth="public")
     def content_common(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename=None, filename_field='name', unique=None, mimetype=None,
                        download=None, data=None, token=None, access_token=None, **kw):
 
-        return self._get_content_common(xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
-            filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token, token=token)
-
-    def _get_content_common(self, xmlid, model, id, field, unique, filename, filename_field, download, mimetype, access_token, token):
         status, headers, content = request.env['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token)
@@ -1405,20 +1465,18 @@ class Binary(http.Controller):
             content_base64 = base64.b64decode(content)
             headers.append(('Content-Length', len(content_base64)))
             response = request.make_response(content_base64, headers)
+        if token:
+            response.set_cookie('fileToken', token)
         return response
 
-    @http.route(['/web/assets/debug/<string:filename>',
-        '/web/assets/debug/<path:extra>/<string:filename>',
-        '/web/assets/<int:id>/<string:filename>',
-        '/web/assets/<int:id>-<string:unique>/<string:filename>',
-        '/web/assets/<int:id>-<string:unique>/<path:extra>/<string:filename>'], type='http', auth="public")
-    def content_assets(self, id=None, filename=None, unique=None, extra=None, **kw):
-        id = id or request.env['ir.attachment'].sudo().search_read(
-            [('url', '=like', f'/web/assets/%/{extra}/{filename}' if extra else f'/web/assets/%/{filename}')],
-             fields=['id'], limit=1)[0]['id']
-
-        return self._get_content_common(xmlid=None, model='ir.attachment', id=id, field='datas', unique=unique, filename=filename,
-            filename_field='name', download=None, mimetype=None, access_token=None, token=None)
+    @http.route(['/web/partner_image',
+        '/web/partner_image/<int:rec_id>',
+        '/web/partner_image/<int:rec_id>/<string:field>',
+        '/web/partner_image/<int:rec_id>/<string:field>/<string:model>/'], type='http', auth="public")
+    def content_image_partner(self, rec_id, field='image_128', model='res.partner', **kwargs):
+        # other kwargs are ignored on purpose
+        return self._content_image(id=rec_id, model='res.partner', field=field,
+            placeholder='user_placeholder.jpg')
 
     @http.route(['/web/image',
         '/web/image/<string:xmlid>',
@@ -1450,7 +1508,7 @@ class Binary(http.Controller):
     def _content_image(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename_field='name', unique=None, filename=None, mimetype=None,
                        download=None, width=0, height=0, crop=False, quality=0, access_token=None,
-                       **kwargs):
+                       placeholder=None, **kwargs):
         status, headers, image_base64 = request.env['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype,
@@ -1458,17 +1516,25 @@ class Binary(http.Controller):
 
         return Binary._content_image_get_response(
             status, headers, image_base64, model=model, id=id, field=field, download=download,
-            width=width, height=height, crop=crop, quality=quality)
+            width=width, height=height, crop=crop, quality=quality,
+            placeholder=placeholder)
 
     @staticmethod
     def _content_image_get_response(
             status, headers, image_base64, model='ir.attachment', id=None,
             field='datas', download=None, width=0, height=0, crop=False,
-            quality=0):
+            quality=0, placeholder='placeholder.png'):
         if status in [301, 304] or (status != 200 and download):
             return request.env['ir.http']._response_by_status(status, headers, image_base64)
         if not image_base64:
-            placeholder_content = Binary.placeholder()
+            if placeholder is None and model in request.env:
+                # Try to browse the record in case a specific placeholder
+                # is supposed to be used. (eg: Unassigned users on a task)
+                record = request.env[model].browse(int(id)) if id else request.env[model]
+                placeholder_filename = record._get_placeholder_filename(field=field)
+                placeholder_content = Binary.placeholder(image=placeholder_filename)
+            else:
+                placeholder_content = Binary.placeholder()
             # Since we set a placeholder for any missing image, the status must be 200. In case one
             # wants to configure a specific 404 page (e.g. though nginx), a 404 status will cause
             # troubles.
@@ -1561,7 +1627,7 @@ class Binary(http.Controller):
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
-        placeholder = functools.partial(get_resource_path, 'web', 'static', 'img')
+        placeholder = functools.partial(get_resource_path, 'web', 'static', 'src', 'img')
         uid = None
         if request.session.db:
             dbname = request.session.db
@@ -1618,18 +1684,27 @@ class Binary(http.Controller):
         :return: base64 encoded fonts
         :rtype: list
         """
-        supported_exts = ('.ttf', '.otf', '.woff', '.woff2')
+
+
         fonts = []
-        fonts_directory = file_path(os.path.join('web', 'static', 'fonts', 'sign'))
         if fontname:
-            font_path = os.path.join(fonts_directory, fontname)
-            with file_open(font_path, 'rb', filter_ext=supported_exts) as font_file:
-                font = base64.b64encode(font_file.read())
-                fonts.append(font)
+            module_path = get_module_path('web')
+            fonts_folder_path = os.path.join(module_path, 'static/src/fonts/sign/')
+            module_resource_path = get_resource_path('web', 'static/src/fonts/sign/' + fontname)
+            if fonts_folder_path and module_resource_path:
+                fonts_folder_path = os.path.join(os.path.normpath(fonts_folder_path), '')
+                module_resource_path = os.path.normpath(module_resource_path)
+                if module_resource_path.startswith(fonts_folder_path):
+                    with file_open(module_resource_path, 'rb') as font_file:
+                        font = base64.b64encode(font_file.read())
+                        fonts.append(font)
         else:
-            font_filenames = sorted([fn for fn in os.listdir(fonts_directory) if fn.endswith(supported_exts)])
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            fonts_directory = os.path.join(current_dir, '..', 'static', 'src', 'fonts', 'sign')
+            font_filenames = sorted([fn for fn in os.listdir(fonts_directory) if fn.endswith(('.ttf', '.otf', '.woff', '.woff2'))])
+
             for filename in font_filenames:
-                font_file = file_open(os.path.join(fonts_directory, filename), 'rb', filter_ext=supported_exts)
+                font_file = open(os.path.join(fonts_directory, filename), 'rb')
                 font = base64.b64encode(font_file.read())
                 fonts.append(font)
         return fonts
@@ -1821,19 +1896,11 @@ class ExportFormat(object):
         """ Provides the format's content type """
         raise NotImplementedError()
 
-    @property
-    def extension(self):
-        raise NotImplementedError()
-
     def filename(self, base):
-        """ Creates a filename *without extension* for the item / format of
-        model ``base``.
+        """ Creates a valid filename for the format (with extension) from the
+         provided base name (exension-less)
         """
-        if base not in request.env:
-            return base
-
-        model_description = request.env['ir.model']._get(base).name
-        return f"{model_description} ({base})"
+        raise NotImplementedError()
 
     def from_data(self, fields, rows):
         """ Conversion method from Odoo's export data to whatever the
@@ -1849,7 +1916,7 @@ class ExportFormat(object):
     def from_group_data(self, fields, groups):
         raise NotImplementedError()
 
-    def base(self, data):
+    def base(self, data, token):
         params = json.loads(data)
         model, fields, ids, domain, import_compat = \
             operator.itemgetter('model', 'fields', 'ids', 'domain', 'import_compat')(params)
@@ -1884,28 +1951,25 @@ class ExportFormat(object):
             export_data = records.export_data(field_names).get('datas',[])
             response_data = self.from_data(columns_headers, export_data)
 
-        # TODO: call `clean_filename` directly in `content_disposition`?
         return request.make_response(response_data,
             headers=[('Content-Disposition',
-                            content_disposition(
-                                osutil.clean_filename(self.filename(model) + self.extension))),
+                            content_disposition(self.filename(model))),
                      ('Content-Type', self.content_type)],
-        )
+            cookies={'fileToken': token})
 
 class CSVExport(ExportFormat, http.Controller):
 
     @http.route('/web/export/csv', type='http', auth="user")
     @serialize_exception
-    def index(self, data):
-        return self.base(data)
+    def index(self, data, token):
+        return self.base(data, token)
 
     @property
     def content_type(self):
         return 'text/csv;charset=utf8'
 
-    @property
-    def extension(self):
-        return '.csv'
+    def filename(self, base):
+        return base + '.csv'
 
     def from_group_data(self, fields, groups):
         raise UserError(_("Exporting grouped data to csv is not supported."))
@@ -1932,16 +1996,15 @@ class ExcelExport(ExportFormat, http.Controller):
 
     @http.route('/web/export/xlsx', type='http', auth="user")
     @serialize_exception
-    def index(self, data):
-        return self.base(data)
+    def index(self, data, token):
+        return self.base(data, token)
 
     @property
     def content_type(self):
         return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-    @property
-    def extension(self):
-        return '.xlsx'
+    def filename(self, base):
+        return base + '.xlsx'
 
     def from_group_data(self, fields, groups):
         with GroupExportXlsxWriter(fields, groups.count) as xlsx_writer:
@@ -1983,7 +2046,7 @@ class ReportController(http.Controller):
             # Ignore 'lang' here, because the context in data is the one from the webclient *but* if
             # the user explicitely wants to change the lang, this mechanism overwrites it.
             data['context'] = json.loads(data['context'])
-            if data['context'].get('lang'):
+            if data['context'].get('lang') and not data.get('force_context_lang'):
                 del data['context']['lang']
             context.update(data['context'])
         if converter == 'html':
@@ -2031,18 +2094,16 @@ class ReportController(http.Controller):
         return request.make_response(barcode, headers=[('Content-Type', 'image/png')])
 
     @http.route(['/report/download'], type='http', auth="user")
-    def report_download(self, data, context=None):
+    def report_download(self, data, token, context=None):
         """This function is used by 'action_manager_report.js' in order to trigger the download of
         a pdf/controller report.
 
         :param data: a javascript array JSON.stringified containg report internal url ([0]) and
         type [1]
-        :returns: Response with an attachment header
-
+        :returns: Response with a filetoken cookie and an attachment header
         """
         requestcontent = json.loads(data)
         url, type = requestcontent[0], requestcontent[1]
-        reportname = '???'
         try:
             if type in ['qweb-pdf', 'qweb-text']:
                 converter = 'pdf' if type == 'qweb-pdf' else 'text'
@@ -2076,11 +2137,11 @@ class ReportController(http.Controller):
                         report_name = safe_eval(report.print_report_name, {'object': obj, 'time': time})
                         filename = "%s.%s" % (report_name, extension)
                 response.headers.add('Content-Disposition', content_disposition(filename))
+                response.set_cookie('fileToken', token)
                 return response
             else:
                 return
         except Exception as e:
-            _logger.exception("Error while generating report %s", reportname)
             se = _serialize_exception(e)
             error = {
                 'code': 200,

@@ -16,9 +16,8 @@ _logger = logging.getLogger(__name__)
 class SurveyUserInput(models.Model):
     """ Metadata for a set of one user's answers to a particular survey """
     _name = "survey.user_input"
-    _description = "Survey User Input"
-    _rec_name = "survey_id"
-    _order = "create_date desc"
+    _rec_name = 'survey_id'
+    _description = 'Survey User Input'
 
     # answer description
     survey_id = fields.Many2one('survey.survey', string='Survey', required=True, readonly=True, ondelete='cascade')
@@ -332,52 +331,11 @@ class SurveyUserInput(models.Model):
     # ------------------------------------------------------------
 
     def _prepare_statistics(self):
-        """ Prepares survey.user_input's statistics to display various charts on the frontend.
-        Returns a structure containing answers statistics "by section" and "totals" for every input in self.
-
-        e.g returned structure:
-        {
-            survey.user_input(1,): {
-                'by_section': {
-                    'Uncategorized': {
-                        'question_count': 2,
-                        'correct': 2,
-                        'partial': 0,
-                        'incorrect': 0,
-                        'skipped': 0,
-                    },
-                    'Mathematics': {
-                        'question_count': 3,
-                        'correct': 1,
-                        'partial': 1,
-                        'incorrect': 0,
-                        'skipped': 1,
-                    },
-                    'Geography': {
-                        'question_count': 4,
-                        'correct': 2,
-                        'partial': 0,
-                        'incorrect': 2,
-                        'skipped': 0,
-                    }
-                },
-                'totals' [{
-                    'text': 'Correct',
-                    'count': 5,
-                }, {
-                    'text': 'Partially',
-                    'count': 1,
-                }, {
-                    'text': 'Incorrect',
-                    'count': 2,
-                }, {
-                    'text': 'Unanswered',
-                    'count': 1,
-                }]
-            }
-        }"""
         res = dict((user_input, {
-            'by_section': {}
+            'correct': 0,
+            'incorrect': 0,
+            'partial': 0,
+            'skipped': 0,
         }) for user_input in self)
 
         scored_questions = self.mapped('predefined_question_ids').filtered(lambda question: question.is_scored_question)
@@ -385,47 +343,19 @@ class SurveyUserInput(models.Model):
         for question in scored_questions:
             if question.question_type in ['simple_choice', 'multiple_choice']:
                 question_correct_suggested_answers = question.suggested_answer_ids.filtered(lambda answer: answer.is_correct)
-
-            question_section = question.page_id.title or _('Uncategorized')
             for user_input in self:
                 user_input_lines = user_input.user_input_line_ids.filtered(lambda line: line.question_id == question)
                 if question.question_type in ['simple_choice', 'multiple_choice']:
-                    answer_result_key = self._choice_question_answer_result(user_input_lines, question_correct_suggested_answers)
+                    res[user_input][self._choice_question_answer_result(user_input_lines, question_correct_suggested_answers)] += 1
                 else:
-                    answer_result_key = self._simple_question_answer_result(user_input_lines)
+                    res[user_input][self._simple_question_answer_result(user_input_lines)] += 1
 
-                if question_section not in res[user_input]['by_section']:
-                    res[user_input]['by_section'][question_section] = {
-                        'question_count': 0,
-                        'correct': 0,
-                        'partial': 0,
-                        'incorrect': 0,
-                        'skipped': 0,
-                    }
-
-                res[user_input]['by_section'][question_section]['question_count'] += 1
-                res[user_input]['by_section'][question_section][answer_result_key] += 1
-
-        for user_input in self:
-            correct_count = 0
-            partial_count = 0
-            incorrect_count = 0
-            skipped_count = 0
-
-            for section_counts in res[user_input]['by_section'].values():
-                correct_count += section_counts.get('correct', 0)
-                partial_count += section_counts.get('partial', 0)
-                incorrect_count += section_counts.get('incorrect', 0)
-                skipped_count += section_counts.get('skipped', 0)
-
-            res[user_input]['totals'] = [
-                {'text': _("Correct"), 'count': correct_count},
-                {'text': _("Partially"), 'count': partial_count},
-                {'text': _("Incorrect"), 'count': incorrect_count},
-                {'text': _("Unanswered"), 'count': skipped_count}
-            ]
-
-        return res
+        return [[
+            {'text': _("Correct"), 'count': res[user_input]['correct']},
+            {'text': _("Partially"), 'count': res[user_input]['partial']},
+            {'text': _("Incorrect"), 'count': res[user_input]['incorrect']},
+            {'text': _("Unanswered"), 'count': res[user_input]['skipped']}
+        ] for user_input in self]
 
     def _choice_question_answer_result(self, user_input_lines, question_correct_suggested_answers):
         correct_user_input_lines = user_input_lines.filtered(lambda line: line.answer_is_correct and not line.skipped).mapped('suggested_answer_id')

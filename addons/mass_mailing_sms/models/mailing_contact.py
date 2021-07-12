@@ -10,5 +10,6 @@ class MailingContact(models.Model):
 
     mobile = fields.Char(string='Mobile')
 
-    def _phone_get_number_fields(self):
+    def _sms_get_number_fields(self):
+        # TDE note: should override _phone_get_number_fields but ok as sms is in dependencies
         return ['mobile']

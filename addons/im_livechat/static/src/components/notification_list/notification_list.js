@@ -1,13 +1,15 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/notification_list/notification_list.js', function (require) {
+'use strict';
 
-import { NotificationList } from '@mail/components/notification_list/notification_list';
-import { patch } from 'web.utils';
+const components = {
+    NotificationList: require('mail/static/src/components/notification_list/notification_list.js'),
+};
 
-const components = { NotificationList };
+const { patch } = require('web.utils');
 
 components.NotificationList._allowedFilters.push('livechat');
 
-patch(components.NotificationList.prototype, 'im_livechat/static/src/components/notification_list/notification_list.js', {
+patch(components.NotificationList, 'im_livechat/static/src/components/notification_list/notification_list.js', {
 
     //--------------------------------------------------------------------------
     // Public
@@ -28,5 +30,7 @@ patch(components.NotificationList.prototype, 'im_livechat/static/src/components/
         }
         return this._super(...arguments);
     },
+
+});
 
 });

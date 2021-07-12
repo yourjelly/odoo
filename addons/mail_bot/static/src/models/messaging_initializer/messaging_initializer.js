@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail_bot/static/src/models/messaging_initializer/messaging_initializer.js', function (require) {
+'use strict';
 
-import { registerInstancePatchModel } from '@mail/model/model_core';
+const { registerInstancePatchModel } = require('mail/static/src/model/model_core.js');
 
 registerInstancePatchModel('mail.messaging_initializer', 'mail_bot/static/src/models/messaging_initializer/messaging_initializer.js', {
     //--------------------------------------------------------------------------
@@ -31,4 +32,6 @@ registerInstancePatchModel('mail.messaging_initializer', 'mail_bot/static/src/mo
             this._initializeOdooBot();
         }
     },
+});
+
 });

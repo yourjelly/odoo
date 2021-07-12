@@ -3,7 +3,7 @@
 from odoo.tests import common
 
 
-class TestPurchaseRequisitionCommon(common.TransactionCase):
+class TestPurchaseRequisitionCommon(common.SavepointCase):
 
     @classmethod
     def setUpClass(cls):

@@ -19,8 +19,7 @@ publicWidget.registry.RegisterToasterWidget = publicWidget.Widget.extend({
             this.displayNotification({
                 title: _t("Register"),
                 message: message,
-                type: 'info',
-                messageIsHtml: true, // the message is coming from a QWeb template using safe instructions
+                type: 'info'
             });
         }
         return this._super.apply(this, arguments);

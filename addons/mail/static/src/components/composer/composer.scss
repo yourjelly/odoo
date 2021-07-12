@@ -16,11 +16,11 @@
         padding: map-get($spacers, 3) map-get($spacers, 3) map-get($spacers, 4) map-get($spacers, 1);
 
         &:not(.o-has-footer) {
-            padding-bottom: map-get($spacers, 4);
+            padding-bottom: 20px;
         }
 
         &:not(.o-has-header) {
-            padding-top: map-get($spacers, 4);
+            padding-top: 20px;
         }
     }
 }
@@ -30,7 +30,7 @@
         display: flex;
     }
     &:not(.o-composer-is-compact) {
-        margin-top: map-get($spacers, 2);
+        margin-top: 10px;
     }
 }
 
@@ -186,7 +186,7 @@
 }
 
 .o_Composer {
-    background-color: gray('100');
+    background-color: lighten(gray('300'), 7%);
 }
 
 .o_Composer_actionButton.o-last.o-has-current-partner-avatar.o-composer-is-compact {
@@ -202,7 +202,7 @@
 }
 
 .o_Composer_buttonDiscard {
-    border: $border-width solid lighten(gray('400'), 5%);
+    border: 1px solid lighten(gray('400'), 5%);
 }
 
 .o_Composer_buttons {
@@ -210,8 +210,8 @@
 }
 
 .o_Composer_coreMain:not(.o-composer-is-compact) {
-    background: $white;
-    border: $border-width solid $border-color;
+    background: white;
+    border: 1px solid lighten(gray('400'), 5%);
 
     // textarea should be all rounded but only when there is no subject field above
     &:not(.o-composer-is-extended) {
@@ -226,9 +226,11 @@
 .o_Composer_textInput {
     appearance: none;
     outline: none;
-    background-color: $white;
-    border: $border-width solid $border-color;
-    border-right: 0;
+    background-color: white;
+    border: 0;
+    border-top: 1px solid lighten(gray('400'), 5%);
+    border-bottom: 1px solid lighten(gray('400'), 5%);
+    border-left: 1px solid lighten(gray('400'), 5%);
 
     &:not(.o-composer-is-compact) {
         border: 0;
@@ -242,7 +244,7 @@
 
 .o_Composer_toolButton {
     border: 0; // overrides bootstrap btn
-    background-color: $white; // overrides bootstrap btn-light
+    background-color: white; // overrides bootstrap btn-light
     color: gray('600'); // overrides bootstrap btn-light
     border-radius: 50%;
 
@@ -252,9 +254,9 @@
 }
 
 .o_Composer_toolButtons {
-    background-color: $white;
-    border-top: $border-width solid $border-color;
-    border-bottom: $border-width solid $border-color;
+    background-color: white;
+    border-top: 1px solid lighten(gray('400'), 5%);
+    border-bottom: 1px solid lighten(gray('400'), 5%);
 
     &:not(.o-composer-is-compact) {
         border-bottom: 0;
@@ -262,10 +264,10 @@
     }
 
     &:last-child:not(.o-composer-has-current-partner-avatar) {
-        border-right: $border-width solid lighten(gray('400'), 5%);
+        border-right: 1px solid lighten(gray('400'), 5%);
     }
 }
 
 .o_Composer_toolButtonSeparator {
-    border-left: $border-width solid $border-color;
+    border-left: 1px solid lighten(gray('400'), 5%);
 }

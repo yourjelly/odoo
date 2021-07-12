@@ -1,9 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/model/model_manager.js', function (require) {
+'use strict';
 
-import { registry } from '@mail/model/model_core';
-import { ModelField } from '@mail/model/model_field';
-import { patchClassMethods, patchInstanceMethods } from '@mail/utils/utils';
-import { unlinkAll } from '@mail/model/model_field_command';
+const { registry } = require('mail/static/src/model/model_core.js');
+const ModelField = require('mail/static/src/model/model_field.js');
+const { patchClassMethods, patchInstanceMethods } = require('mail/static/src/utils/utils.js');
 
 /**
  * Inner separator used between bits of information in string that is used to
@@ -18,7 +18,7 @@ const DEPENDENT_INNER_SEPARATOR = "--//--//--";
  * `create()` or record method `update()`), this object processes them with
  * direct field & and computed field updates.
  */
-export class ModelManager {
+class ModelManager {
 
     //--------------------------------------------------------------------------
     // Public
@@ -54,16 +54,6 @@ export class ModelManager {
          */
         this._hasAnyChangeDuringCycle = false;
         /**
-         * States whether an update cycle is currently in progress. The update
-         * cycle is considered in progress while there are computed fields still
-         * to compute or required fields for which to verify the existence.
-         * Life cycle hooks such as `_created()` or "on change" computes are not
-         * considerer part of the update cycle by this variable.
-         * The main goal of this variable is to detect programming errors: to
-         * prevent from calling create/update/delete from inside a compute.
-         */
-        this._isInUpdateCycle = false;
-        /**
          * Set of records that have been updated during the current update
          * cycle. Useful to allow observers (typically components) to detect
          * whether specific records have been changed.
@@ -81,13 +71,11 @@ export class ModelManager {
          */
         this._toComputeFields = new Map();
         /**
-         * "on change" methods flagged to call during an update cycle. Similar
-         * to computes but called after all other computes are done, and does
-         * not actually assign any value to its respective field.
-         * This is deprecated but when it is necessary due to other limitations
-         * in code it is better using "on change" than polluting real computes.
+         * Map of "update after" on records that have been registered.
+         * These are processed after any explicit update and computed/related
+         * fields.
          */
-        this._toCallOnChange = new Map();
+        this._toUpdateAfters = new Map();
     }
 
     /**
@@ -318,10 +306,7 @@ export class ModelManager {
                             'default',
                             'dependencies',
                             'fieldType',
-                            'isOnChange',
-                            'readonly',
                             'related',
-                            'required',
                         ].includes(key)
                     );
                     if (invalidKeys.length > 0) {
@@ -337,11 +322,8 @@ export class ModelManager {
                             'fieldType',
                             'inverse',
                             'isCausal',
-                            'isOnChange',
-                            'readonly',
                             'related',
                             'relationType',
-                            'required',
                             'to',
                         ].includes(key)
                     );
@@ -353,9 +335,6 @@ export class ModelManager {
                     }
                     if (field.isCausal && !(['one2many', 'one2one'].includes(field.relationType))) {
                         throw new Error(`Relational field "${Model.modelName}/${fieldName}" has "isCausal" true with a relation of type "${field.relationType}" but "isCausal" is only supported for "one2many" and "one2one".`);
-                    }
-                    if (field.required && !(['one2one', 'many2one'].includes(field.relationType))) {
-                        throw new Error(`Relational field "${Model.modelName}/${fieldName}" has "required" true with a relation of type "${field.relationType}" but "required" is only supported for "one2one" and "many2one".`);
                     }
                 }
                 // 3. Computed field.
@@ -382,9 +361,6 @@ export class ModelManager {
                     if (unknownDependencies.length > 0) {
                         throw new Error(`Compute field "${Model.modelName}/${fieldName}" contains some unknown dependencies: "${unknownDependencies.join(", ")}".`);
                     }
-                }
-                if (field.isOnChange && !field.compute) {
-                    throw Error(`isOnChange field "${Model.modelName}/${fieldName}" must be a computed field.`);
                 }
                 // 4. Related field.
                 if (field.compute && field.related) {
@@ -600,7 +576,6 @@ export class ModelManager {
             });
             // Ensure X2many relations are Set initially (other fields can stay undefined).
             for (const field of Model.__fieldList) {
-                record.__values[field.fieldName] = undefined;
                 if (field.fieldType === 'relation') {
                     if (['one2many', 'many2many'].includes(field.relationType)) {
                         record.__values[field.fieldName] = new Set();
@@ -630,7 +605,7 @@ export class ModelManager {
                     this._registerToComputeField(record, field);
                 }
             }
-            this._update(record, data2, { allowWriteReadonly: true });
+            this._update(record, data2);
             /**
              * 5. Register post processing operation that are to be delayed at
              * the end of the update cycle.
@@ -656,16 +631,16 @@ export class ModelManager {
         for (const field of Model.__fieldList) {
             if (field.fieldType === 'relation') {
                 // ensure inverses are properly unlinked
-                field.parseAndExecuteCommands(record, unlinkAll(), { allowWriteReadonly: true });
+                field.parseAndExecuteCommands(record, [['unlink-all']]);
             }
         }
         this._hasAnyChangeDuringCycle = true;
         // TODO ideally deleting the record should be done at the top of the
         // method, and it shouldn't be needed to manually remove
-        // _toComputeFields, but it is not possible until related are also
-        // properly unlinked during `set`.
+        // _toComputeFields and _toUpdateAfters, but it is not possible until
+        // related are also properly unlinked during `set`
         this._toComputeFields.delete(record);
-        this._toCallOnChange.delete(record);
+        this._toUpdateAfters.delete(record);
         delete Model.__records[record.localId];
     }
 
@@ -676,30 +651,25 @@ export class ModelManager {
      * @private
      */
     _flushUpdateCycle(func) {
-        if (this._isInUpdateCycle) {
-            throw Error('Already in update cycle. You are probably trying to manually create/update/delete a record from inside a compute method, which is not supported.');
-        }
-        this._isInUpdateCycle = true;
         // Execution of computes
         while (this._toComputeFields.size > 0) {
             for (const [record, fields] of this._toComputeFields) {
-                // Delete at every step to detect if the change due to compute
-                // registered extra fields to compute.
+                // delete at every step to avoid recursion, indeed doCompute
+                // might trigger an update cycle itself
                 this._toComputeFields.delete(record);
                 if (!record.exists()) {
                     throw Error(`Cannot execute computes for already deleted record ${record.localId}.`);
                 }
                 while (fields.size > 0) {
                     for (const field of fields) {
-                        // Delete at every step to detect if the change due to
-                        // compute registered extra fields to compute.
+                        // delete at every step to avoid recursion
                         fields.delete(field);
                         if (field.compute) {
-                            this._update(record, { [field.fieldName]: record[field.compute]() }, { allowWriteReadonly: true });
+                            this._update(record, { [field.fieldName]: record[field.compute]() });
                             continue;
                         }
                         if (field.related) {
-                            this._update(record, { [field.fieldName]: field.computeRelated(record) }, { allowWriteReadonly: true });
+                            this._update(record, { [field.fieldName]: field.computeRelated(record) });
                             continue;
                         }
                         throw new Error("No compute method defined on this field definition");
@@ -707,28 +677,25 @@ export class ModelManager {
                 }
             }
         }
-        // Verify the existence of value for required fields (of non-deleted records).
-        for (const record of this._updatedRecords) {
-            if (!record.exists()) {
-                continue;
-            }
-            for (const required of record.constructor.__requiredFieldsList) {
-                if (record[required.fieldName] === undefined) {
-                    throw Error(`Field ${required.fieldName} of ${record.localId} is required.`);
+
+        // Execution of _updateAfter
+        while (this._toUpdateAfters.size > 0) {
+            for (const [record, previous] of this._toUpdateAfters) {
+                // delete at every step to avoid recursion, indeed _updateAfter
+                // might trigger an update cycle itself
+                this._toUpdateAfters.delete(record);
+                if (!record.exists()) {
+                    throw Error(`Cannot _updateAfter for already deleted record ${record.localId}.`);
                 }
+                record._updateAfter(previous);
             }
         }
-        // Increment record rev number (for useStore comparison)
-        for (const record of this._updatedRecords) {
-            record.__state++;
-        }
-        this._updatedRecords.clear();
-        this._isInUpdateCycle = false;
+
         // Execution of _created
         while (this._createdRecords.size > 0) {
             for (const record of this._createdRecords) {
-                // Delete at every step to avoid recursion, indeed _created
-                // might trigger an update cycle itself.
+                // delete at every step to avoid recursion, indeed _created
+                // might trigger an update cycle itself
                 this._createdRecords.delete(record);
                 if (!record.exists()) {
                     throw Error(`Cannot call _created for already deleted record ${record.localId}.`);
@@ -736,32 +703,13 @@ export class ModelManager {
                 record._created();
             }
         }
-        // Execution of "on change".
-        while (this._toCallOnChange.size > 0) {
-            for (const [record, fields] of this._toCallOnChange) {
-                // Delete at every step to detect if the change due to "on change"
-                // registered extra fields for which to call "on change".
-                this._toCallOnChange.delete(record);
-                if (!record.exists()) {
-                    throw Error(`Cannot execute 'on change' for already deleted record ${record.localId}.`);
-                }
-                while (fields.size > 0) {
-                    for (const field of fields) {
-                        // Delete at every step to detect if the change due to "on change"
-                        // registered extra fields for which to call "on change".
-                        fields.delete(field);
-                        if (field.compute) {
-                            const res = record[field.compute]();
-                            if (res !== undefined) {
-                                throw new Error("'on change' compute method is not supposed to return any value.");
-                            }
-                            continue;
-                        }
-                        throw new Error("No compute method defined on this field definition");
-                    }
-                }
-            }
+
+        // Increment record rev number (for useStore comparison)
+        for (const record of this._updatedRecords) {
+            record.__state++;
         }
+        this._updatedRecords.clear();
+
         // Trigger at most one useStore call per update cycle
         if (this._hasAnyChangeDuringCycle) {
             this.env.store.state.messagingRevNumber++;
@@ -1029,9 +977,6 @@ export class ModelManager {
             Model.__fieldMap = Model.__combinedFields;
             // List of all fields, for iterating.
             Model.__fieldList = Object.values(Model.__fieldMap);
-            Model.__requiredFieldsList = Model.__fieldList.filter(
-                field => field.required
-            );
             // Add field accessors.
             for (const field of Model.__fieldList) {
                 Object.defineProperty(Model.prototype, field.fieldName, {
@@ -1089,21 +1034,6 @@ export class ModelManager {
     }
 
     /**
-     * Register a pair record/field for the on change step of the update cycle
-     * in progress.
-     *
-     * @private
-     * @param {mail.model} record
-     * @param {ModelField} field
-     */
-    _registerToCallOnChange(record, field) {
-        if (!this._toCallOnChange.has(record)) {
-            this._toCallOnChange.set(record, new Set());
-        }
-        this._toCallOnChange.get(record).add(field);
-    }
-
-    /**
      * Register a pair record/field for the compute step of the update cycle in
      * progress.
      *
@@ -1112,11 +1042,6 @@ export class ModelManager {
      * @param {ModelField} field
      */
     _registerToComputeField(record, field) {
-        if (field.isOnChange) {
-            // Separate "on change" computes from real ones.
-            this._registerToCallOnChange(record, field);
-            return;
-        }
         if (!this._toComputeFields.has(record)) {
             this._toComputeFields.set(record, new Set());
         }
@@ -1128,14 +1053,17 @@ export class ModelManager {
      * @param {mail.model} record
      * @param {Object} data
      * @param {Object} [options]
-     * @param [options.allowWriteReadonly=false]
      * @returns {boolean} whether any value changed for the current record
      */
-    _update(record, data, options = {}) {
+    _update(record, data, options) {
         if (!record.exists()) {
             throw Error(`Cannot update already deleted record ${record.localId}.`);
         }
-        const { allowWriteReadonly = false } = options;
+        if (!this._toUpdateAfters.has(record)) {
+            // queue updateAfter before calling field.set to ensure previous
+            // contains the value at the start of update cycle
+            this._toUpdateAfters.set(record, record._updateBefore());
+        }
         const Model = record.constructor;
         let hasChanged = false;
         for (const fieldName of Object.keys(data)) {
@@ -1145,10 +1073,7 @@ export class ModelManager {
             }
             const field = Model.__fieldMap[fieldName];
             if (!field) {
-                throw new Error(`Cannot create/update record with data unrelated to a field. (record: "${record.localId}", non-field attempted update: "${fieldName}")`);
-            }
-            if (field.readonly && !allowWriteReadonly) {
-                throw new Error(`Can't update "${field.fieldName}" (record: "${record.localId}") because it's readonly.`);
+                throw new Error(`Cannot create/update record with data unrelated to a field. (model: "${Model.modelName}", non-field attempted update: "${fieldName}")`);
             }
             const newVal = data[fieldName];
             if (!field.parseAndExecuteCommands(record, newVal, options)) {
@@ -1166,3 +1091,7 @@ export class ModelManager {
     }
 
 }
+
+return ModelManager;
+
+});

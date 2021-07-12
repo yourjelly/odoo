@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import json as json_
 import re
-
-import markupsafe
 
 JSON_SCRIPTSAFE_MAPPER = {
     '&': r'\u0026',
@@ -11,16 +10,6 @@ JSON_SCRIPTSAFE_MAPPER = {
     '\u2028': r'\u2028',
     '\u2029': r'\u2029'
 }
-class _ScriptSafe(str):
-    def __html__(self):
-        # replacement can be done straight in the serialised JSON as the
-        # problematic characters are not JSON metacharacters (and can thus
-        # only occur in strings)
-        return markupsafe.Markup(re.sub(
-            r'[<>&\u2028\u2029]',
-            lambda m: JSON_SCRIPTSAFE_MAPPER[m[0]],
-            self,
-        ))
 class JSON:
     def loads(self, *args, **kwargs):
         return json_.loads(*args, **kwargs)
@@ -51,5 +40,12 @@ class JSON:
 
         Cf https://code.djangoproject.com/ticket/17419#comment:27
         """
-        return _ScriptSafe(json_.dumps(*args, **kwargs))
+        # replacement can be done straight in the serialised JSON as the
+        # problematic characters are not JSON metacharacters (and can thus
+        # only occur in strings)
+        return re.sub(
+            r'[<>&\u2028\u2029]',
+            lambda m: JSON_SCRIPTSAFE_MAPPER[m[0]],
+            json_.dumps(*args, **kwargs),
+        )
 scriptsafe = JSON()

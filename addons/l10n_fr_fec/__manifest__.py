@@ -4,8 +4,7 @@
 # Copyright (C) 2013-2015 Akretion (http://www.akretion.com)
 
 {
-    'name': 'France - FEC Export',
-    'icon': '/l10n_fr/static/description/icon.png',
+    'name': 'France - FEC',
     'category': 'Accounting/Localizations/Reporting',
     'summary': "Fichier d'Échange Informatisé (FEC) for France",
     'author': "Akretion,Odoo Community Association (OCA)",

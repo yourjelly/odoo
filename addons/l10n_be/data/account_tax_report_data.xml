@@ -9,7 +9,6 @@
         <field name="name">Opérations</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="sequence">1</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_title_operations_sortie" model="account.tax.report.line">
@@ -17,7 +16,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations"/>
         <field name="sequence">1</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_line_00" model="account.tax.report.line">
@@ -80,12 +78,10 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie"/>
         <field name="sequence">7</field>
-        <field name="formula"></field>
     </record>
 
     <record id="tax_report_line_46L" model="account.tax.report.line">
         <field name="name">46L - Livraisons biens intra-communautaires exemptées</field>
-        <field name="code">c46L</field>
         <field name="tag_name">46L</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie_46"/>
@@ -94,7 +90,6 @@
 
     <record id="tax_report_line_46T" model="account.tax.report.line">
         <field name="name">46T - Livraisons biens intra-communautaire exemptées</field>
-        <field name="code">c46T</field>
         <field name="tag_name">46T</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie_46"/>
@@ -116,12 +111,10 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie"/>
         <field name="sequence">9</field>
-        <field name="formula"></field>
     </record>
 
     <record id="tax_report_line_48s44" model="account.tax.report.line">
         <field name="name">48s44 - Notes de crédit aux opérations grilles [44]</field>
-        <field name="code">c48s44</field>
         <field name="tag_name">48s44</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie_48"/>
@@ -130,7 +123,6 @@
 
     <record id="tax_report_line_48s46L" model="account.tax.report.line">
         <field name="name">48s46L - Notes de crédit aux opérations grilles [46L]</field>
-        <field name="code">c48s46L</field>
         <field name="tag_name">48s46L</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie_48"/>
@@ -139,7 +131,6 @@
 
     <record id="tax_report_line_48s46T" model="account.tax.report.line">
         <field name="name">48s46T - Notes de crédit aux opérations grilles [46T]</field>
-        <field name="code">c48s46T</field>
         <field name="tag_name">48s46T</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_sortie_48"/>
@@ -160,7 +151,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations"/>
         <field name="sequence">2</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_line_81" model="account.tax.report.line">
@@ -170,7 +160,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">1</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_line_82" model="account.tax.report.line">
@@ -180,7 +169,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">2</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_line_83" model="account.tax.report.line">
@@ -190,7 +178,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">3</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_line_84" model="account.tax.report.line">
@@ -218,7 +205,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">6</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_line_87" model="account.tax.report.line">
@@ -228,7 +214,6 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">7</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_line_88" model="account.tax.report.line">
@@ -238,22 +223,20 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_operations_entree"/>
         <field name="sequence">8</field>
-        <field name="carry_over_condition_method">no_negative_amount_carry_over_condition</field>
     </record>
 
     <record id="tax_report_title_taxes" model="account.tax.report.line">
         <field name="name">Taxes</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="sequence">2</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_title_taxes_dues" model="account.tax.report.line">
         <field name="name">IV Dues</field>
+        <field name="code">tax_be_iv</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_taxes"/>
         <field name="sequence">1</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_line_54" model="account.tax.report.line">
@@ -312,10 +295,10 @@
 
     <record id="tax_report_title_taxes_deductibles" model="account.tax.report.line">
         <field name="name">V Déductibles</field>
+        <field name="code">tax_be_v</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_taxes"/>
         <field name="sequence">2</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_line_59" model="account.tax.report.line">
@@ -350,12 +333,11 @@
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_taxes"/>
         <field name="sequence">3</field>
-        <field name="formula">None</field>
     </record>
 
     <record id="tax_report_line_71" model="account.tax.report.line">
         <field name="name">71 - Taxes dues à l'état</field>
-        <field name="formula">(c54 + c55 + c56 + c57 + c61 + c63)&gt;(c59 + c62 + c64) and (c54 + c55 + c56 + c57 + c61 + c63)-(c59 + c62 + c64) or 0</field>
+        <field name="formula">tax_be_iv&gt;tax_be_v and tax_be_iv-tax_be_v or 0</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_taxes_soldes"/>
         <field name="sequence">1</field>
@@ -363,7 +345,7 @@
 
     <record id="tax_report_line_72" model="account.tax.report.line">
         <field name="name">72 - Somme due par l'état</field>
-        <field name="formula">(c54 + c55 + c56 + c57 + c61 + c63)&lt;(c59 + c62 + c64) and (c59 + c62 + c64)-(c54 + c55 + c56 + c57 + c61 + c63) or 0</field>
+        <field name="formula">tax_be_iv&lt;tax_be_v and tax_be_v-tax_be_iv or 0</field>
         <field name="report_id" ref="tax_report_vat"/>
         <field name="parent_id" ref="tax_report_title_taxes_soldes"/>
         <field name="sequence">2</field>

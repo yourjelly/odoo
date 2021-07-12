@@ -36,3 +36,4 @@ class TestEventQuestionCommon(TestEventCommon):
             'event_type_id': cls.event_type_complex.id,
             'once_per_order': True,
         })
+        cls.event_type_complex.write({'use_questions': True})

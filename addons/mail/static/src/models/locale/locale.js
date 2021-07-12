@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/locale/locale.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -47,3 +48,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.locale', factory);
+
+});

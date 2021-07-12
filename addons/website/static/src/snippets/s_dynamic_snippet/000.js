@@ -40,6 +40,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
         return this._super.apply(this, arguments).then(
             () => Promise.all([
                 this._fetchData(),
+                this._manageWarningMessageVisibility()
             ])
         );
     },
@@ -51,9 +52,8 @@ const DynamicSnippet = publicWidget.Widget.extend({
         return this._super.apply(this, arguments)
             .then(() => {
                 this._setupSizeChangedManagement(true);
-                this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
                 this._render();
-                this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
+                this._toggleVisibility(true);
             });
     },
     /**
@@ -61,11 +61,9 @@ const DynamicSnippet = publicWidget.Widget.extend({
      * @override
      */
     destroy: function () {
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
         this._toggleVisibility(false);
         this._setupSizeChangedManagement(false);
         this._clearContent();
-        this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerActive();
         this._super.apply(this, arguments);
     },
 
@@ -100,13 +98,6 @@ const DynamicSnippet = publicWidget.Widget.extend({
         return [];
     },
     /**
-     * Method to be overridden in child components in order to add custom parameters if needed.
-     * @private
-     */
-    _getRpcParameters: function () {
-        return {};
-    },
-    /**
      * Fetches the data.
      * @private
      */
@@ -115,13 +106,12 @@ const DynamicSnippet = publicWidget.Widget.extend({
             return this._rpc(
                 {
                     'route': '/website/snippet/filters',
-                    'params': Object.assign({
+                    'params': {
                         'filter_id': parseInt(this.$el.get(0).dataset.filterId),
                         'template_key': this.$el.get(0).dataset.templateKey,
                         'limit': parseInt(this.$el.get(0).dataset.numberOfRecords),
-                        'search_domain': this._getSearchDomain(),
-                        'with_sample': this.editableMode,
-                    }, this._getRpcParameters()),
+                        'search_domain': this._getSearchDomain()
+                    },
                 })
                 .then(
                     (data) => {
@@ -134,6 +124,23 @@ const DynamicSnippet = publicWidget.Widget.extend({
                 resolve();
             });
         }
+    },
+    /**
+     *
+     * @private
+     */
+    _mustMessageWarningBeHidden: function() {
+        return this._isConfigComplete() || !this.editableMode;
+    },
+    /**
+     *
+     * @private
+     */
+    _manageWarningMessageVisibility: async function () {
+        this.$el.find('.missing_option_warning').toggleClass(
+            'd-none',
+            this._mustMessageWarningBeHidden()
+        );
     },
     /**
      * Method to be overridden in child components in order to prepare content
@@ -170,11 +177,9 @@ const DynamicSnippet = publicWidget.Widget.extend({
      * @private
      */
     _render: function () {
-        if (this.data.length > 0 || this.editableMode) {
-            this.$el.removeClass('d-none');
+        if (this.data.length) {
             this._prepareContent();
         } else {
-            this.$el.addClass('d-none');
             this.renderedContent = '';
         }
         this._renderContent();

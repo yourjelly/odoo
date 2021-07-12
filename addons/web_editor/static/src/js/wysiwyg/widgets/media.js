@@ -128,8 +128,7 @@ var FileWidget = SearchableMediaWidget.extend({
     }),
     existingAttachmentsTemplate: undefined,
 
-    IMAGE_MIMETYPES: ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/svg+xml', 'image/gif'],
-    IMAGE_EXTENSIONS: ['.jpg', '.jpeg', '.jpe', '.png', '.svg', '.gif'],
+    IMAGE_MIMETYPES: ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/gif', 'image/png', 'image/svg+xml'],
     NUMBER_OF_ATTACHMENTS_TO_DISPLAY: 30,
     MAX_DB_ATTACHMENTS: 5,
 
@@ -380,7 +379,6 @@ var FileWidget = SearchableMediaWidget.extend({
             media.id, {
                 query: media.query || '',
                 is_dynamic_svg: !!media.isDynamicSVG,
-                dynamic_colors: media.dynamicColors,
             }
         ]));
         let mediaAttachments = [];
@@ -393,15 +391,10 @@ var FileWidget = SearchableMediaWidget.extend({
             });
         }
         const selected = this.selectedAttachments.concat(mediaAttachments).map(attachment => {
-            // Color-customize dynamic SVGs with the theme colors
+            // Color-customize dynamic SVGs with the primary theme color
             if (attachment.image_src && attachment.image_src.startsWith('/web_editor/shape/')) {
                 const colorCustomizedURL = new URL(attachment.image_src, window.location.origin);
-                colorCustomizedURL.searchParams.forEach((value, key) => {
-                    const match = key.match(/^c([1-5])$/);
-                    if (match) {
-                        colorCustomizedURL.searchParams.set(key, getCSSVariableValue(`o-color-${match[1]}`))
-                    }
-                })
+                colorCustomizedURL.searchParams.set('c1', getCSSVariableValue('o-color-1'));
                 attachment.image_src = colorCustomizedURL.pathname + colorCustomizedURL.search;
             }
             return attachment;
@@ -569,45 +562,38 @@ var FileWidget = SearchableMediaWidget.extend({
             return;
         }
 
+        var self = this;
         var uploadMutex = new concurrency.Mutex();
 
         // Upload the smallest file first to block the user the least possible.
         files = _.sortBy(files, 'size');
-        await this._setUpProgressToast(files);
-        this.hasError = false;
-        _.each(files, (file, index) => {
+        _.each(files, function (file) {
             // Upload one file at a time: no need to parallel as upload is
             // limited by bandwidth.
-            uploadMutex.exec(() => {
-                return utils.getDataURLFromFile(file).then(result => {
-                    return this._rpcShowProgress({
+            uploadMutex.exec(function () {
+                return utils.getDataURLFromFile(file).then(function (result) {
+                    return self._rpc({
                         route: '/web_editor/attachment/add_data',
                         params: {
                             'name': file.name,
                             'data': result.split(',')[1],
-                            'res_id': this.options.res_id,
-                            'res_model': this.options.res_model,
-                            'is_image': this.widgetType === 'image',
+                            'res_id': self.options.res_id,
+                            'res_model': self.options.res_model,
                             'width': 0,
                             'quality': 0,
-                        }
-                    }, index).then(attachment => {
-                        if (!attachment.error) {
-                            this._handleNewAttachment(attachment);
-                        }
+                        },
+                    }).then(function (attachment) {
+                        self._handleNewAttachment(attachment);
                     });
                 });
             });
         });
 
-        return uploadMutex.getUnlockedDef().then(() => {
-            if (!this.hasError) {
-                this._closeProgressToast();
+        return uploadMutex.getUnlockedDef().then(function () {
+            if (!self.options.multiImages && !self.noSave) {
+                self.trigger_up('save_request');
             }
-            if (!this.options.multiImages && !this.noSave) {
-                this.trigger_up('save_request');
-            }
-            this.noSave = false;
+            self.noSave = false;
         });
     },
     /**
@@ -653,7 +639,7 @@ var FileWidget = SearchableMediaWidget.extend({
         var emptyValue = (inputValue === '');
 
         var isURL = /^.+\..+$/.test(inputValue); // TODO improve
-        var isImage = _.any(this.IMAGE_EXTENSIONS, function (format) {
+        var isImage = _.any(['.gif', '.jpeg', '.jpe', '.jpg', '.png'], function (format) {
             return inputValue.endsWith(format);
         });
 
@@ -712,92 +698,6 @@ var FileWidget = SearchableMediaWidget.extend({
         this.numberOfAttachmentsToDisplay = this.NUMBER_OF_ATTACHMENTS_TO_DISPLAY;
         this._super.apply(this, arguments);
     },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Sets up a progress bar for every file being uploaded in a toast.
-     *
-     * @private
-     * @param {Object[]} files
-     */
-    _setUpProgressToast: async function (files) {
-        this.$progress = $('<div/>');
-        _.each(files, (file, index) => {
-            let fileSize = file.size;
-            if (!fileSize) {
-                fileSize = null;
-            } else if (fileSize < 1024) {
-                fileSize = fileSize.toFixed(2) + " bytes";
-            } else if (fileSize < 1048576) {
-                fileSize = (fileSize / 1024).toFixed(2) + " KB";
-            } else {
-                fileSize = (fileSize / 1048576).toFixed(2) + " MB";
-            }
-
-            this.$progress.append(QWeb.render('wysiwyg.widgets.upload.progressbar', {
-                fileId: index,
-                fileName: file.name,
-                fileSize: fileSize,
-            }));
-        });
-        this.connectionNotificationID = this.displayNotification({
-            type: 'info',
-            sticky: true,
-            contentEl: this.$progress,
-        });
-    },
-    /**
-     * Closes the toast holding the file(s) progress bar(s).
-     *
-     * @private
-     */
-    _closeProgressToast: function () {
-        this.call('notification', 'close', this.connectionNotificationID, false, 3000);
-    },
-    /**
-     * Calls a RPC and shows its progress status.
-     *
-     * @private
-     * @param {Object} params regular `_rpc()` parameters
-     * @param {integer} index file index to retrieve its related progress bar
-     * @returns {Promise}
-     */
-    _rpcShowProgress: function (params, index) {
-        let $progressBar = this.$progress.find(`.js_progressbar_${index}`);
-        return this._rpc(params, {
-            xhr: function () {
-                var xhr = $.ajaxSettings.xhr();
-                xhr.upload.onprogress = function (ev) {
-                    var prcComplete = ev.loaded / ev.total * 100;
-                    $progressBar.find('.progress-bar').css({
-                        width: parseInt(prcComplete) + '%',
-                    }).text(prcComplete.toFixed(2) + '%');
-                };
-                xhr.upload.onload = function () {
-                    // Don't show yet success as backend code only starts now
-                    $progressBar.find('.progress-bar').css({width: '100%'}).text('100%');
-                };
-                return xhr;
-            },
-        }).then(attachment => {
-            $progressBar.find('.fa-spinner, .progress').addClass('d-none');
-            if (attachment.error) {
-                this.hasError = true;
-                $progressBar.find('.js_progressbar_txt .text-danger').removeClass('d-none');
-                $progressBar.find('.js_progressbar_txt .text-danger .o_we_error_text').text(attachment.error);
-            } else {
-                $progressBar.find('.js_progressbar_txt .text-success').removeClass('d-none');
-            }
-            return attachment;
-        }).guardedCatch(() => {
-            this.hasError = true;
-            $progressBar.find('.fa-spinner, .progress').addClass('d-none');
-            $progressBar.find('.js_progressbar_txt .text-danger').removeClass('d-none');
-        });
-    },
 });
 
 /**
@@ -817,7 +717,6 @@ var ImageWidget = FileWidget.extend({
      */
     init: function (parent, media, options) {
         this.searchService = 'all';
-        this.widgetType = 'image';
         options = _.extend({
             accept: 'image/*',
             mimetypeDomain: [['mimetype', 'in', this.IMAGE_MIMETYPES]],
@@ -850,21 +749,13 @@ var ImageWidget = FileWidget.extend({
         }
         const result = await this._super(number, offset);
         // Color-substitution for dynamic SVG attachment
-        const primaryColors = {};
-        for (let color = 1; color <= 5; color++) {
-            primaryColors[color] = getCSSVariableValue('o-color-' + color);
-        }
+        const primaryColor = getCSSVariableValue('o-color-1');
         this.attachments.forEach(attachment => {
             if (attachment.image_src.startsWith('/')) {
                 const newURL = new URL(attachment.image_src, window.location.origin);
-                // Set the main colors of dynamic SVGs to o-color-1~5
+                // Set the main color of dynamic SVGs to o-color-1
                 if (attachment.image_src.startsWith('/web_editor/shape/')) {
-                    newURL.searchParams.forEach((value, key) => {
-                        const match = key.match(/^c([1-5])$/);
-                        if (match) {
-                            newURL.searchParams.set(key, primaryColors[match[1]]);
-                        }
-                    })
+                    newURL.searchParams.set('c1', primaryColor);
                 } else {
                     // Set height so that db images load faster
                     newURL.searchParams.set('height', 2 * this.MIN_ROW_HEIGHT);
@@ -912,10 +803,12 @@ var ImageWidget = FileWidget.extend({
      */
     _updateAddUrlUi: function (emptyValue, isURL, isImage) {
         this._super.apply(this, arguments);
+        this.$addUrlButton.text((isURL && !isImage) ? _t("Add as document") : _t("Add image"));
         const warning = isURL && !isImage;
         this.$urlWarning.toggleClass('d-none', !warning);
-        this.$addUrlButton.prop('disabled', warning || !isURL);
-        this.$urlSuccess.toggleClass('d-none', warning || !isURL);
+        if (warning) {
+            this.$urlSuccess.addClass('d-none');
+        }
     },
     /**
      * @override
@@ -996,25 +889,17 @@ var ImageWidget = FileWidget.extend({
             try {
                 const response = await fetch(mediaUrl);
                 if (response.headers.get('content-type') === 'image/svg+xml') {
-                    let svg = await response.text();
-                    const fileName = mediaUrl.split('/').pop();
-                    const dynamicColors = {};
-                    const combinedColorsRegex = new RegExp(Object.values(DEFAULT_PALETTE).join('|'), 'gi');
-                    svg = svg.replace(combinedColorsRegex, match => {
-                        const colorId = Object.keys(DEFAULT_PALETTE).find(key => DEFAULT_PALETTE[key] === match.toUpperCase());
-                        const colorKey = 'c' + colorId
-                        dynamicColors[colorKey] = getCSSVariableValue('o-color-' + colorId);
-                        return dynamicColors[colorKey];
-                    });
-                    if (Object.keys(dynamicColors).length) {
-                        const file = new File([svg], fileName, {
+                    const svg = await response.text();
+                    const colorRegex = new RegExp(DEFAULT_PALETTE['1'], 'gi');
+                    if (colorRegex.test(svg)) {
+                        const fileName = mediaUrl.split('/').pop();
+                        const file = new File([svg.replace(colorRegex, getCSSVariableValue('o-color-1'))], fileName, {
                             type: "image/svg+xml",
                         });
                         img.src = URL.createObjectURL(file);
                         const media = this.libraryMedia.find(media => media.id === parseInt(cell.dataset.mediaId));
                         if (media) {
                             media.isDynamicSVG = true;
-                            media.dynamicColors = dynamicColors;
                         }
                         // We changed the src: wait for the next load event to do the styling
                         return;
@@ -1070,7 +955,6 @@ var ImageWidget = FileWidget.extend({
     _onSearchInput: function (ev) {
         this.libraryMedia = [];
         this._super(...arguments);
-        this.$('.o_we_search_select').removeClass('d-none');
     },
     /**
      * @override
@@ -1105,6 +989,18 @@ var DocumentWidget = FileWidget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    _updateAddUrlUi: function (emptyValue, isURL, isImage) {
+        this._super.apply(this, arguments);
+        this.$addUrlButton.text((isURL && isImage) ? _t("Add as image") : _t("Add document"));
+        const warning = isURL && isImage;
+        this.$urlWarning.toggleClass('d-none', !warning);
+        if (warning) {
+            this.$urlSuccess.addClass('d-none');
+        }
+    },
     /**
      * @override
      */
@@ -1151,6 +1047,8 @@ var IconWidget = SearchableMediaWidget.extend({
                 this._highlightSelectedIcon();
             }
         }
+        // Kept for compat in stable, no longer in use: remove in master
+        this.nonIconClasses = _.without(classes, 'media_iframe_video', this.selectedIcon);
 
         return this._super.apply(this, arguments);
     },
@@ -1266,7 +1164,7 @@ var IconWidget = SearchableMediaWidget.extend({
 });
 
 /**
- * Let users choose a video, support embed iframe.
+ * Let users choose a video, support all summernote video, and embed iframe.
  */
 var VideoWidget = MediaWidget.extend({
     template: 'wysiwyg.widgets.video',
@@ -1274,7 +1172,6 @@ var VideoWidget = MediaWidget.extend({
         'change .o_video_dialog_options input': '_onUpdateVideoOption',
         'input textarea#o_video_text': '_onVideoCodeInput',
         'change textarea#o_video_text': '_onVideoCodeChange',
-        'click .o_sample_video': '_onSampleVideoClick',
     }),
 
     /**
@@ -1284,8 +1181,6 @@ var VideoWidget = MediaWidget.extend({
         this._super.apply(this, arguments);
         this.isForBgVideo = !!options.isForBgVideo;
         this._onVideoCodeInput = _.debounce(this._onVideoCodeInput, 1000);
-        // list of videoIds from vimeo.
-        this._vimeoPreviewIds = options.vimeoPreviewIds;
     },
     /**
      * @override
@@ -1308,23 +1203,6 @@ var VideoWidget = MediaWidget.extend({
 
             this._updateVideo();
         }
-
-        // loads the thumbnail of vimeo video previews.
-        this.$('.o_sample_video').each((index, node) => {
-            const $node = $(node);
-            const videoId = $node.attr('data-vimeo');
-            if (!videoId) {
-                return;
-            }
-            fetch(`https://vimeo.com/api/oembed.json?url=http%3A//vimeo.com/${videoId}`)
-                .then(response=>response.json())
-                .then((response) => {
-                    $node.append($('<img>', {
-                        src: response.thumbnail_url,
-                        class: 'mw-100 mh-100 p-1',
-                    }));
-                });
-        });
 
         return this._super.apply(this, arguments);
     },
@@ -1495,19 +1373,6 @@ var VideoWidget = MediaWidget.extend({
      */
     _onUpdateVideoOption: function () {
         this._updateVideo();
-    },
-    /**
-     * changes the video preview when clicking on the thumbnail of a suggested video
-     *
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onSampleVideoClick(ev) {
-        const vimeoId = ev.currentTarget.getAttribute('data-vimeo');
-        if (vimeoId) {
-            this.$('#o_video_text').val(`https://player.vimeo.com/video/${vimeoId}`);
-            this._updateVideo();
-        }
     },
     /**
      * Called when the video code (URL / Iframe) change is confirmed -> Updates

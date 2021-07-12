@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/follow_button/follow_button_tests.js', function (require) {
+'use strict';
 
-import { FollowButton } from '@mail/components/follow_button/follow_button';
-import {
+const components = {
+    FollowButton: require('mail/static/src/components/follow_button/follow_button.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { FollowButton };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -272,4 +273,6 @@ QUnit.test('click on "unfollow" button', async function (assert) {
 
 });
 });
+});
+
 });

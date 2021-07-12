@@ -1,18 +1,19 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/message_list/message_list.js', function (require) {
+'use strict';
 
-import { useRefs } from '@mail/component_hooks/use_refs/use_refs';
-import { useRenderedValues } from '@mail/component_hooks/use_rendered_values/use_rendered_values';
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { Message } from '@mail/components/message/message';
+const components = {
+    Message: require('mail/static/src/components/message/message.js'),
+};
+const useRefs = require('mail/static/src/component_hooks/use_refs/use_refs.js');
+const useRenderedValues = require('mail/static/src/component_hooks/use_rendered_values/use_rendered_values.js');
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { Message };
-
-export class MessageList extends Component {
+class MessageList extends Component {
 
     /**
      * @override
@@ -28,7 +29,6 @@ export class MessageList extends Component {
                 isDeviceMobile: this.env.messaging.device.isMobile,
                 thread,
                 threadCache,
-                threadCacheHasLoadingFailed: threadCache && threadCache.hasLoadingFailed,
                 threadCacheIsAllHistoryLoaded: threadCache && threadCache.isAllHistoryLoaded,
                 threadCacheIsLoaded: threadCache && threadCache.isLoaded,
                 threadCacheIsLoadingMore: threadCache && threadCache.isLoadingMore,
@@ -172,11 +172,6 @@ export class MessageList extends Component {
      * @returns {string}
      */
     getDateDay(message) {
-        if (!message.date) {
-            // Without a date, we assume that it's a today message. This is
-            // mainly done to avoid flicker inside the UI.
-            return this.env._t("Today");
-        }
         const date = message.date.format('YYYY-MM-DD');
         if (date === moment().format('YYYY-MM-DD')) {
             return this.env._t("Today");
@@ -298,10 +293,7 @@ export class MessageList extends Component {
         if (!this.props.hasSquashCloseMessages) {
             return false;
         }
-        if (!prevMessage.date && message.date) {
-            return false;
-        }
-        if (message.date && prevMessage.date && Math.abs(message.date.diff(prevMessage.date)) > 60000) {
+        if (Math.abs(message.date.diff(prevMessage.date)) > 60000) {
             // more than 1 min. elasped
             return false;
         }
@@ -512,20 +504,6 @@ export class MessageList extends Component {
 
     /**
      * @private
-     */
-    _onClickRetryLoadMoreMessages() {
-        if (!this.threadView) {
-            return;
-        }
-        if (!this.threadView.threadCache) {
-            return;
-        }
-        this.threadView.threadCache.update({ hasLoadingFailed: false });
-        this._loadMore();
-    }
-
-    /**
-     * @private
      * @param {ScrollEvent} ev
      */
     onScroll(ev) {
@@ -591,6 +569,11 @@ Object.assign(MessageList, {
         order: 'asc',
     },
     props: {
+        hasMessageCheckbox: Boolean,
+        hasSquashCloseMessages: Boolean,
+        haveMessagesMarkAsReadIcon: Boolean,
+        haveMessagesReplyIcon: Boolean,
+        hasScrollAdjust: Boolean,
         /**
          * Function returns the exact scrollable element from the parent
          * to manage proper scroll heights which affects the load more messages.
@@ -599,16 +582,19 @@ Object.assign(MessageList, {
             type: Function,
             optional: true,
         },
-        hasMessageCheckbox: Boolean,
-        hasSquashCloseMessages: Boolean,
-        haveMessagesMarkAsReadIcon: Boolean,
-        haveMessagesReplyIcon: Boolean,
-        hasScrollAdjust: Boolean,
         order: {
             type: String,
             validate: prop => ['asc', 'desc'].includes(prop),
         },
+        selectedMessageLocalId: {
+            type: String,
+            optional: true,
+        },
         threadViewLocalId: String,
     },
     template: 'mail.MessageList',
+});
+
+return MessageList;
+
 });

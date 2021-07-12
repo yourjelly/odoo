@@ -24,7 +24,7 @@ class AccountAnalyticLine(models.Model):
         domain = [('allow_timesheets', '=', True)]
         if not self.user_has_groups('hr_timesheet.group_timesheet_manager'):
             return expression.AND([domain,
-                ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
+                ['|', ('privacy_visibility', '!=', 'followers'), ('allowed_internal_user_ids', 'in', self.env.user.ids)]
             ])
         return domain
 
@@ -35,7 +35,7 @@ class AccountAnalyticLine(models.Model):
 
     def _domain_task_id(self):
         if not self.user_has_groups('hr_timesheet.group_hr_timesheet_approver'):
-            return ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
+            return ['|', ('privacy_visibility', '!=', 'followers'), ('allowed_user_ids', 'in', self.env.user.ids)]
         return []
 
     task_id = fields.Many2one(
@@ -134,25 +134,13 @@ class AccountAnalyticLine(models.Model):
             node.set('string', _('Duration (%s)') % (re.sub(r'[\(\)]', '', encoding_uom.name or '')))
         return etree.tostring(doc, encoding='unicode')
 
-    @api.model
-    def _apply_time_label(self, view_arch, related_model):
-        doc = etree.XML(view_arch)
-        Model = self.env[related_model]
-        encoding_uom = self.env.company.timesheet_encode_uom_id
-        for node in doc.xpath("//field[@widget='timesheet_uom'][not(@string)] | //field[@widget='timesheet_uom_no_toggle'][not(@string)]"):
-            name_with_uom = re.sub(_('Hours') + "|Hours", encoding_uom.name or '', Model._fields[node.get('name')]._description_string(self.env), flags=re.IGNORECASE)
-            node.set('string', name_with_uom)
-
-        return etree.tostring(doc, encoding='unicode')
-
     def _timesheet_get_portal_domain(self):
-        if self.env.user.has_group('hr_timesheet.group_hr_timesheet_user'):
-            # Then, he is internal user, and we take the domain for this current user
-            return self.env['ir.rule']._compute_domain(self._name)
         return ['&',
-                    '|',
+                    '|', '|', '|',
                     ('task_id.project_id.message_partner_ids', 'child_of', [self.env.user.partner_id.commercial_partner_id.id]),
                     ('task_id.message_partner_ids', 'child_of', [self.env.user.partner_id.commercial_partner_id.id]),
+                    ('task_id.project_id.allowed_portal_user_ids', 'child_of', [self.env.user.id]),
+                    ('task_id.allowed_user_ids', 'in', [self.env.user.id]),
                 ('task_id.project_id.privacy_visibility', '=', 'portal')]
 
     def _timesheet_preprocess(self, vals):
@@ -166,7 +154,7 @@ class AccountAnalyticLine(models.Model):
             vals['account_id'] = project.analytic_account_id.id
             vals['company_id'] = project.analytic_account_id.company_id.id or project.company_id.id
             if not project.analytic_account_id.active:
-                raise UserError(_('You cannot add timesheets to a project linked to an inactive analytic account.'))
+                raise UserError(_('The project you are timesheeting on is not linked to an active analytic account. Set one on the project configuration.'))
         # employee implies user
         if vals.get('employee_id') and not vals.get('user_id'):
             employee = self.env['hr.employee'].browse(vals['employee_id'])

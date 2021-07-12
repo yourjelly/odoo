@@ -280,7 +280,6 @@ class IrRule(models.Model):
 # 'global' is a Python keyword. Therefore, we add it to the class by assignment.
 # Note that the attribute '_module' is normally added by the class' metaclass.
 #
-global_ = fields.Boolean(compute='_compute_global', store=True,
-                         help="If no group is specified the rule is global and applied to everyone")
-setattr(IrRule, 'global', global_)
-global_.__set_name__(IrRule, 'global')
+setattr(IrRule, 'global',
+        fields.Boolean(compute='_compute_global', store=True, _module=IrRule._module,
+                       help="If no group is specified the rule is global and applied to everyone"))

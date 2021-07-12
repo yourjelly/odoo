@@ -12,12 +12,16 @@ class Project(models.Model):
 
     sale_line_id = fields.Many2one(
         'sale.order.line', 'Sales Order Item', copy=False,
-        compute="_compute_sale_line_id", store=True, readonly=False,
-        domain="[('is_service', '=', True), ('is_expense', '=', False), ('state', 'in', ['sale', 'done']), ('order_partner_id', '=?', partner_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('is_service', '=', True), ('is_expense', '=', False), ('order_id', '=', sale_order_id), ('state', 'in', ['sale', 'done']), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Sales order item to which the project is linked. Link the timesheet entry to the sales order item defined on the project. "
         "Only applies on tasks without sale order item defined, and if the employee is not in the 'Employee/Sales Order Item Mapping' of the project.")
-    sale_order_id = fields.Many2one(string='Sales Order', related='sale_line_id.order_id', help="Sales order to which the project is linked.")
-    project_overview = fields.Boolean('Show Project Overview', compute='_compute_project_overview')
+    sale_order_id = fields.Many2one('sale.order', 'Sales Order',
+        domain="[('order_line.product_id.type', '=', 'service'), ('partner_id', '=', partner_id), ('state', 'in', ['sale', 'done'])]",
+        copy=False, help="Sales order to which the project is linked.")
+
+    _sql_constraints = [
+        ('sale_order_required_if_sale_line', "CHECK((sale_line_id IS NOT NULL AND sale_order_id IS NOT NULL) OR (sale_line_id IS NULL))", 'The project should be linked to a sale order to select a sale order item.'),
+    ]
 
     @api.model
     def _map_tasks_default_valeus(self, task, project):
@@ -25,55 +29,32 @@ class Project(models.Model):
         defaults['sale_line_id'] = False
         return defaults
 
-    @api.depends('partner_id')
-    def _compute_sale_line_id(self):
-        self.filtered(
-            lambda p:
-                p.sale_line_id and (
-                    not p.partner_id or p.sale_line_id.order_partner_id.commercial_partner_id != p.partner_id.commercial_partner_id
-                )
-        ).update({'sale_line_id': False})
-
-    @api.depends('analytic_account_id')
-    def _compute_project_overview(self):
-        overview = self.env['project.project']
-        if self.user_has_groups('analytic.group_analytic_accounting'):
-            overview = self.filtered(lambda p: p.analytic_account_id)
-            overview.project_overview = True
-        (self - overview).project_overview = False
 
 class ProjectTask(models.Model):
     _inherit = "project.task"
 
-    sale_order_id = fields.Many2one('sale.order', 'Sales Order', compute='_compute_sale_order_id', store=True, help="Sales order to which the task is linked.")
+    sale_order_id = fields.Many2one('sale.order', 'Sales Order', help="Sales order to which the task is linked.")
     sale_line_id = fields.Many2one(
-        'sale.order.line', 'Sales Order Item', domain="[('company_id', '=', company_id), ('is_service', '=', True), ('order_partner_id', 'child_of', commercial_partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done'])]",
-        compute='_compute_sale_line', recursive=True, store=True, readonly=False, copy=False,
-        help="Sales Order Item to which the time spent on this task will be added, in order to be invoiced to your customer.")
+        'sale.order.line', 'Sales Order Item', domain="[('company_id', '=', company_id), ('is_service', '=', True), ('order_partner_id', 'child_of', commercial_partner_id), ('is_expense', '=', False), ('state', 'in', ['sale', 'done']), ('order_id', '=?', project_sale_order_id)]",
+        compute='_compute_sale_line', store=True, readonly=False, copy=False,
+        help="Sales order item to which the project is linked. Link the timesheet entry to the sales order item defined on the project. "
+        "Only applies on tasks without sale order item defined, and if the employee is not in the 'Employee/Sales Order Item Mapping' of the project.")
     project_sale_order_id = fields.Many2one('sale.order', string="Project's sale order", related='project_id.sale_order_id')
     invoice_count = fields.Integer("Number of invoices", related='sale_order_id.invoice_count')
     task_to_invoice = fields.Boolean("To invoice", compute='_compute_task_to_invoice', search='_search_task_to_invoice', groups='sales_team.group_sale_salesman_all_leads')
 
-    @api.depends('sale_line_id', 'project_id', 'commercial_partner_id')
-    def _compute_sale_order_id(self):
+    @api.depends('project_id.sale_line_id.order_partner_id')
+    def _compute_partner_id(self):
         for task in self:
-            sale_order_id = task.sale_order_id or self.env["sale.order"]
-            if task.sale_line_id:
-                sale_order_id = task.sale_line_id.sudo().order_id
-            elif task.project_id.sale_order_id:
-                sale_order_id = task.project_id.sale_order_id
-            if task.commercial_partner_id != sale_order_id.partner_id.commercial_partner_id:
-                sale_order_id = False
-            if sale_order_id and not task.partner_id:
-                task.partner_id = sale_order_id.partner_id
-            task.sale_order_id = sale_order_id
+            if not task.partner_id:
+                task.partner_id = task.project_id.sale_line_id.order_partner_id
+        super()._compute_partner_id()
 
     @api.depends('commercial_partner_id', 'sale_line_id.order_partner_id.commercial_partner_id', 'parent_id.sale_line_id', 'project_id.sale_line_id')
     def _compute_sale_line(self):
         for task in self:
             if not task.sale_line_id:
-                # if the display_project_id is set then it means the task is classic task or a subtask with another project than its parent.
-                task.sale_line_id = task.display_project_id.sale_line_id or task.parent_id.sale_line_id or task.project_id.sale_line_id
+                task.sale_line_id = task.parent_id.sale_line_id or task.project_id.sale_line_id
             # check sale_line_id and customer are coherent
             if task.sale_line_id.order_partner_id.commercial_partner_id != task.partner_id.commercial_partner_id:
                 task.sale_line_id = False
@@ -89,10 +70,10 @@ class ProjectTask(models.Model):
                         product_id=task.sale_line_id.product_id.display_name,
                     ))
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_linked_so(self):
+    def unlink(self):
         if any(task.sale_line_id for task in self):
             raise ValidationError(_('You have to unlink the task from the sale order item in order to delete it.'))
+        return super().unlink()
 
     # ---------------------------------------------------
     # Actions
@@ -145,6 +126,23 @@ class ProjectTask(models.Model):
             operator_new = 'not inselect'
         return [('sale_order_id', operator_new, (query, ()))]
 
+    def action_create_invoice(self):
+        # ensure the SO exists before invoicing, then confirm it
+        so_to_confirm = self.filtered(
+            lambda task: task.sale_order_id and task.sale_order_id.state in ['draft', 'sent']
+        ).mapped('sale_order_id')
+        so_to_confirm.action_confirm()
+
+        # redirect create invoice wizard (of the Sales Order)
+        action = self.env["ir.actions.actions"]._for_xml_id("sale.action_view_sale_advance_payment_inv")
+        context = literal_eval(action.get('context', "{}"))
+        context.update({
+            'active_id': self.sale_order_id.id if len(self) == 1 else False,
+            'active_ids': self.mapped('sale_order_id').ids,
+            'default_company_id': self.company_id.id,
+        })
+        action['context'] = context
+        return action
 
 class ProjectTaskRecurrence(models.Model):
     _inherit = 'project.task.recurrence'

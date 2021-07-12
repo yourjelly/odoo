@@ -34,10 +34,7 @@ class MailActivity(models.Model):
         if feedback:
             for event in events:
                 description = event.description
-                description = '%s<br />%s' % (
-                    description if not tools.is_html_empty(description) else '',
-                    _('Feedback: %(feedback)s', tools.plaintext2html(feedback)) if feedback else '',
-                )
+                description = '%s\n%s%s' % (description or '', _("Feedback: "), feedback)
                 event.write({'description': description})
         return messages, activities
 

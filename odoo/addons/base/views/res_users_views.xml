@@ -148,18 +148,17 @@
                         <div class="alert alert-info text-center mb-3" attrs="{'invisible': [('id', '>', 0)]}" role="alert">
                             You are inviting a new user.
                         </div>
-                        <field name="avatar_128" invisible="1"/>
-                        <field name="image_1920" widget='image' class="oe_avatar" options='{"zoom": true, "preview_image": "avatar_128"}'/>
+                        <field name="image_1920" widget='image' class="oe_avatar" options='{"zoom": true, "preview_image": "image_128"}'/>
                         <div class="oe_title">
-                            <label for="name"/>
-                            <h1><field name="name" placeholder="e.g. John Doe" required="1"/></h1>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name" required="1"/></h1>
                             <field name="email" invisible="1"/>
-                            <label for="login" string="Email Address"/>
+                            <label for="login" class="oe_edit_only" string="Email Address"/>
                             <h2>
                                 <field name="login"
-                                        placeholder="e.g. email@yourcompany.com"/>
+                                        placeholder="email@yourcompany.com"/>
                             </h2>
-                            <label for="company_id" groups="base.group_multi_company"/>
+                            <label for="company_id" class="oe_edit_only" groups="base.group_multi_company"/>
                             <field name="company_id" context="{'user_preference': 0}" groups="base.group_multi_company"/>
                         </div>
                         <group name="phone_numbers">
@@ -213,14 +212,13 @@
                             <field name="partner_id" required="0" readonly="1"/>
                           </div>
                         </div>
-                        <field name="avatar_128" invisible="1"/>
-                        <field name="image_1920" widget='image' class="oe_avatar" options='{"preview_image": "avatar_128"}'/>
+                        <field name="image_1920" widget='image' class="oe_avatar" options='{"preview_image": "image_128"}'/>
                         <div class="oe_title">
-                            <label for="name"/>
-                            <h1><field name="name" placeholder="e.g. John Doe" required="1"/></h1>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name" required="1"/></h1>
                             <field name="email" invisible="1"/>
-                            <label for="login" string="Email Address"/>
-                            <h2><field name="login" placeholder="e.g. email@yourcompany.com"/></h2>
+                            <label for="login" class="oe_edit_only" string="Email Address"/>
+                            <h2><field name="login"/></h2>
                             <group>
                                 <field name="partner_id" readonly="1" required="0" groups="base.group_no_one"
                                         attrs="{'invisible': [('id', '=', False)]}"/>
@@ -294,7 +292,7 @@
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_global_click">
                                 <div class="o_kanban_image">
-                                    <img alt="Avatar" t-att-src="kanban_image('res.users', 'avatar_128', record.id.raw_value)"/>
+                                    <img alt="Avatar" t-att-src="kanban_image('res.users', 'image_128', record.id.raw_value)"/>
                                 </div>
                                 <div class="oe_kanban_details">
                                     <ul>
@@ -427,8 +425,7 @@
             <field eval="18" name="priority"/>
             <field name="arch" type="xml">
                 <form string="Users">
-                    <field name="avatar_128" invisible="1"/>
-                    <field name="image_1920" readonly="0" widget='image' class="oe_right oe_avatar" options='{"preview_image": "avatar_128"}'/>
+                    <field name="image_1920" readonly="0" widget='image' class="oe_right oe_avatar" options='{"preview_image": "image_128"}'/>
                     <h1>
                         <field name="name" readonly="1" class="oe_inline"/>
                     </h1>
@@ -515,7 +512,7 @@
         <record model="ir.ui.view" id="view_apikeys">
             <field name="name">API Keys Listing</field>
             <field name="model">res.users.apikeys</field>
-            <field name="groups_id" eval="[Command.link(ref('base.group_system'))]"/>
+            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
             <field name="arch" type="xml">
                 <tree create="false" edit="false" delete="false" editable="bottom">
                     <field name="user_id"/>
@@ -530,7 +527,7 @@
             <field name="name">API Keys Listing</field>
             <field name="res_model">res.users.apikeys</field>
             <field name="view_mode">tree</field>
-            <field name="groups_id" eval="[Command.link(ref('base.group_system'))]"/>
+            <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
             <field name="view_id" ref="base.view_apikeys"/>
         </record>
 

@@ -46,7 +46,7 @@
             <xpath expr="/tree" position="attributes">
               <attribute name="default_order">website_sequence</attribute>
             </xpath>
-            <field name="priority" position="before">
+            <field name="sequence" position="replace">
                 <field name="website_sequence" widget="handle"/>
             </field>
             <field name="website_id" position="after">
@@ -55,28 +55,13 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="product_template_view_kanban_website_sale">
-        <field name="name">product.template.view.kanban.website_sale</field>
-        <field name="mode">primary</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_kanban_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="/kanban" position="attributes">
-              <attribute name="default_order">website_sequence</attribute>
-            </xpath>
-            <field name="id" position="after">
-                <field name="website_sequence"/>
-            </field>
-        </field>
-    </record>
-
     <record id="product_template_action_website" model="ir.actions.act_window">
         <field name="name">Products</field>
         <field name="res_model">product.template</field>
-        <field name="view_mode">tree,kanban,form,activity</field>
-        <field name="view_id"/>
+        <field name="view_mode">kanban,tree,form,activity</field>
+        <field name="view_id" ref="product_template_view_tree_website_sale"/>
         <field name="search_view_id" ref="product_template_search_view_website"/>
-        <field name="context">{'search_default_published': 1, 'tree_view_ref':'website_sale.product_template_view_tree_website_sale', 'kanban_view_ref':'website_sale.product_template_view_kanban_website_sale'}</field>
+        <field name="context">{'search_default_published': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new product
@@ -120,7 +105,7 @@
                         </group>
                     </group>
                     <group name="product_template_images" string="Extra Product Media">
-                        <field name="product_template_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" add-label="Add a Media" nolabel="1"/>
+                        <field name="product_template_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" options="{'create_text':'Add a Media'}" nolabel="1"/>
                     </group>
                 </page>
             </xpath>
@@ -134,31 +119,9 @@
         <field name="arch" type="xml">
             <sheet position="inside">
                 <group name="product_variant_images" string="Extra Variant Media">
-                    <field name="product_variant_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" add-label="Add a Media" nolabel="1"/>
+                    <field name="product_variant_image_ids" class="o_website_sale_image_list" context="{'default_name': name}" mode="kanban" options="{'create_text':'Add a Media'}" nolabel="1"/>
                 </group>
             </sheet>
-        </field>
-    </record>
-
-    <!-- Product ribbon -->
-    <record id="product_ribbon_form_view" model="ir.ui.view">
-        <field name="name">product.ribbon form view</field>
-        <field name="model">product.ribbon</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="html" widget="char"/>
-                            <field name="text_color"/>
-                        </group>
-                        <group>
-                            <field name="html_class"/>
-                            <field name="bg_color"/>
-                        </group>
-                    </group>
-                </sheet>
-            </form>
         </field>
     </record>
 

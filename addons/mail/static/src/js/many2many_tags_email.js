@@ -1,10 +1,11 @@
-/** @odoo-module **/
+odoo.define('mail.many2manytags', function (require) {
+"use strict";
 
-import BasicModel from 'web.BasicModel';
-import core from 'web.core';
-import form_common from 'web.view_dialogs';
-import field_registry from 'web.field_registry';
-import relational_fields from 'web.relational_fields';
+var BasicModel = require('web.BasicModel');
+var core = require('web.core');
+var form_common = require('web.view_dialogs');
+var field_registry = require('web.field_registry');
+var relational_fields = require('web.relational_fields');
 
 var M2MTags = relational_fields.FieldMany2ManyTags;
 var _t = core._t;
@@ -130,3 +131,5 @@ var FieldMany2ManyTagsEmail = M2MTags.extend({
 });
 
 field_registry.add('many2many_tags_email', FieldMany2ManyTagsEmail);
+
+});

@@ -1,12 +1,13 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/discuss/discuss_tests.js', function (require) {
+'use strict';
 
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     nextAnimationFrame,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('im_livechat', {}, function () {
 QUnit.module('components', {}, function () {
@@ -263,8 +264,8 @@ QUnit.test('livechats are sorted by last message date in the sidebar: most recen
     assert.expect(7);
 
     this.data['mail.message'].records.push(
-        { id: 11, model: "mail.channel", res_id: 11 }, // least recent message due to smaller id
-        { id: 12, model: "mail.channel", res_id: 12 }, // most recent message due to higher id
+        { id: 11, channel_ids: [11] }, // least recent message due to smaller id
+        { id: 12, channel_ids: [12] }, // most recent message due to higher id
     );
     this.data['mail.channel'].records.push(
         {
@@ -344,7 +345,7 @@ QUnit.test('livechats with no messages are sorted by creation date in the sideba
     assert.expect(5);
 
     this.data['mail.message'].records.push(
-        { id: 13, model: "mail.channel", res_id: 13 },
+        { id: 13, channel_ids: [13] },
     );
     this.data['mail.channel'].records.push(
         {
@@ -438,4 +439,6 @@ QUnit.test('invite button should be present on livechat', async function (assert
 
 });
 });
+});
+
 });

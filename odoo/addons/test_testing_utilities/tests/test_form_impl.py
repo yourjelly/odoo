@@ -9,7 +9,6 @@ business objects.
 from operator import itemgetter
 
 from odoo.tests.common import TransactionCase, Form
-from odoo import Command
 
 
 class TestBasic(TransactionCase):
@@ -234,7 +233,7 @@ class TestM2M(TransactionCase):
         Sub = self.env['test_testing_utilities.sub2']
         a = Sub.create({'name': 'a'})
         b = Sub.create({'name': 'b'})
-        c = Sub.create({'name': 'c', 'm2o_ids': [Command.set([r1.id, r2.id])]})
+        c = Sub.create({'name': 'c', 'm2o_ids': [(6, 0, [r1.id, r2.id])]})
         d = Sub.create({'name': 'd'})
 
         f = Form(self.env['test_testing_utilities.f'])
@@ -252,7 +251,7 @@ class TestM2M(TransactionCase):
         a = Sub.create({'name': 'a'})
         b = Sub.create({'name': 'b'})
         r = self.env['test_testing_utilities.g'].create({
-            'm2m': [Command.set(a.ids)]
+            'm2m': [(6, 0, a.ids)]
         })
 
         f = Form(r)
@@ -439,7 +438,7 @@ class TestO2M(TransactionCase):
         view) can't be written to
         """
         r = self.env['test_testing_utilities.parent'].create({
-            'subs': [Command.create({})]
+            'subs': [(0, 0, {})]
         })
         f = Form(r, view='test_testing_utilities.o2m_parent_readonly')
 
@@ -594,26 +593,26 @@ class TestNestedO2M(TransactionCase):
             # qty_producing=0 (onchange)
             # qty_produced=0 (computed)
             'move_raw_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': product2,
                     # quantity_done=0 (computed)
-                    'move_line_ids': [Command.create({
+                    'move_line_ids': [(0, 0, {
                         'product_id': product2,
                         'product_uom_qty': 1.0,
                         'qty_done': 0.0 # -> 1.0
                     })] # -> new line with qty=0, qty_done=2
                 }),
-                Command.create({
+                (0, 0, {
                     'product_id': product1,
                     'unit_factor': 4,
-                    'move_line_ids': [Command.create({
+                    'move_line_ids': [(0, 0, {
                         'product_id': product1,
                         'product_uom_qty': 4.0,
                         'qty_done': 0.0 # -> 4.0
                     })] # -> new line with qty=0, qty_done=8
                 })
             ],
-            'move_finished_ids': [Command.create({'product_id': product0})]
+            'move_finished_ids': [(0, 0, {'product_id': product0})]
             # -> new line with qty=0, qty_done=3
         })
         form = Form(obj)
@@ -639,26 +638,26 @@ class TestNestedO2M(TransactionCase):
             # qty_producing=0 (onchange)
             # qty_produced=0 (computed)
             'move_raw_ids': [
-                Command.create({
+                (0, 0, {
                     'product_id': product2,
                     # quantity_done=0 (computed)
-                    'move_line_ids': [Command.create({
+                    'move_line_ids': [(0, 0, {
                         'product_id': product2,
                         'product_uom_qty': 1.0,
                         'qty_done': 0.0 # -> 1.0
                     })] # -> new line with qty=0, qty_done=2
                 }),
-                Command.create({
+                (0, 0, {
                     'product_id': product1,
                     'unit_factor': 4,
-                    'move_line_ids': [Command.create({
+                    'move_line_ids': [(0, 0, {
                         'product_id': product1,
                         'product_uom_qty': 4.0,
                         'qty_done': 0.0 # -> 4.0
                     })] # -> new line with qty=0, qty_done=8
                 })
             ],
-            'move_finished_ids': [Command.create({'product_id': product0})]
+            'move_finished_ids': [(0, 0, {'product_id': product0})]
             # -> new line with qty=0, qty_done=3
         })
         form = Form(obj)
@@ -681,10 +680,10 @@ class TestNestedO2M(TransactionCase):
         r = self.env['o2m_changes_parent'].create({
             'name': "A",
             'line_ids': [
-                Command.create({
+                (0, 0, {
                     'name': 'line 1',
                     'v': 42,
-                    'line_ids': [Command.create({'v': 1, 'vv': 1})],
+                    'line_ids': [(0, 0, {'v': 1, 'vv': 1})],
                 })
             ]
         })
@@ -767,7 +766,7 @@ class TestEdition(TransactionCase):
         c = Sub.create({'name': 'c'})
 
         r = self.env['test_testing_utilities.f'].create({
-            'm2m': [Command.set((a | b | c).ids)]
+            'm2m': [(6, 0, (a | b | c).ids)]
         })
 
         with Form(r) as f:

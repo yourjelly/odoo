@@ -22,7 +22,7 @@ import pytz
 from lxml import etree
 from lxml.builder import E
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _, Command
+from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.http import request
@@ -56,7 +56,7 @@ def name_boolean_group(id):
     return 'in_group_' + str(id)
 
 def name_selection_groups(ids):
-    return 'sel_groups_' + '_'.join(str(it) for it in sorted(ids))
+    return 'sel_groups_' + '_'.join(str(it) for it in ids)
 
 def is_boolean_group(name):
     return name.startswith('in_group_')
@@ -78,11 +78,11 @@ def parse_m2m(commands):
     ids = []
     for command in commands:
         if isinstance(command, (tuple, list)):
-            if command[0] in (Command.UPDATE, Command.LINK):
+            if command[0] in (1, 4):
                 ids.append(command[1])
-            elif command[0] == Command.CLEAR:
+            elif command[0] == 5:
                 ids = []
-            elif command[0] == Command.SET:
+            elif command[0] == 6:
                 ids = list(command[2])
         else:
             ids.append(command)
@@ -261,28 +261,25 @@ class Users(models.Model):
     _inherits = {'res.partner': 'partner_id'}
     _order = 'name, login'
 
-    @property
-    def SELF_READABLE_FIELDS(self):
-        """ The list of fields a user can read on their own user record.
-        In order to add fields, please override this property on model extensions.
-        """
-        return [
-            'signature', 'company_id', 'login', 'email', 'name', 'image_1920',
-            'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz',
-            'tz_offset', 'groups_id', 'partner_id', '__last_update', 'action_id',
-            'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128',
-        ]
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        """ The list of fields a user can write on their own user record.
-        In order to add fields, please override this property on model extensions.
-        """
-        return ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'tz']
+    # User can write on a few of his own fields (but not his groups for example)
+    SELF_WRITEABLE_FIELDS = ['signature', 'action_id', 'company_id', 'email', 'name', 'image_1920', 'lang', 'tz']
+    # User can read a few of his own fields
+    SELF_READABLE_FIELDS = ['signature', 'company_id', 'login', 'email', 'name', 'image_1920', 'image_1024', 'image_512', 'image_256', 'image_128', 'lang', 'tz', 'tz_offset', 'groups_id', 'partner_id', '__last_update', 'action_id']
 
     def _default_groups(self):
         default_user_id = self.env['ir.model.data'].xmlid_to_res_id('base.default_user', raise_if_not_found=False)
         return self.env['res.users'].browse(default_user_id).sudo().groups_id if default_user_id else []
+
+    @api.model
+    def _get_default_image(self):
+        """ Get a default image when the user is created without image
+
+            Inspired to _get_default_image method in
+            https://github.com/odoo/odoo/blob/11.0/odoo/addons/base/res/res_partner.py
+        """
+        image_path = get_module_resource('base', 'static/img', 'avatar.png')
+        image = base64.b64encode(open(image_path, 'rb').read())
+        return image_process(image, colorize=True)
 
     partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', auto_join=True,
         string='Related Partner', help='Partner-related data of the user')
@@ -328,6 +325,7 @@ class Users(models.Model):
                                  compute='_compute_accesses_count', compute_sudo=True)
     groups_count = fields.Integer('# Groups', help='Number of groups that apply to the current user',
                                   compute='_compute_accesses_count', compute_sudo=True)
+    image_1920 = fields.Image(related='partner_id.image_1920', inherited=True, readonly=False, default=_get_default_image)
 
     _sql_constraints = [
         ('login_key', 'UNIQUE (login)',  'You can not have two users with the same login !')
@@ -460,14 +458,8 @@ class Users(models.Model):
 
     @api.constrains('company_id', 'company_ids')
     def _check_company(self):
-        for user in self:
-            if user.company_id not in user.company_ids:
-                raise ValidationError(
-                    _('Company %(company_name)s is not in the allowed companies for user %(user_name)s (%(company_allowed)s).',
-                      company_name=user.company_id.name,
-                      user_name=user.name,
-                      company_allowed=', '.join(user.mapped('company_ids.name')))
-                )
+        if any(user.company_id not in user.company_ids for user in self):
+            raise ValidationError(_('The chosen company is not in the allowed companies for this user'))
 
     @api.constrains('action_id')
     def _check_action_id(self):
@@ -521,9 +513,8 @@ class Users(models.Model):
 
     def read(self, fields=None, load='_classic_read'):
         if fields and self == self.env.user:
-            readable = self.SELF_READABLE_FIELDS
             for key in fields:
-                if not (key in readable or key.startswith('context_')):
+                if not (key in self.SELF_READABLE_FIELDS or key.startswith('context_')):
                     break
             else:
                 # safe fields only, so we read as super-user to bypass access rights
@@ -568,9 +559,8 @@ class Users(models.Model):
                 if not user.active and not user.partner_id.active:
                     user.partner_id.toggle_active()
         if self == self.env.user:
-            writeable = self.SELF_WRITEABLE_FIELDS
             for key in list(values):
-                if not (key in writeable or key.startswith('context_')):
+                if not (key in self.SELF_WRITEABLE_FIELDS or key.startswith('context_')):
                     break
             else:
                 if 'company_id' in values:
@@ -614,11 +604,11 @@ class Users(models.Model):
 
         return res
 
-    @api.ondelete(at_uninstall=True)
-    def _unlink_except_superuser(self):
+    def unlink(self):
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
         self.clear_caches()
+        return super(Users, self).unlink()
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
@@ -839,29 +829,6 @@ class Users(models.Model):
     # for a few places explicitly clearing the has_group cache
     has_group.clear_cache = _has_group.clear_cache
 
-    def _action_show(self):
-        """If self is a singleton, directly access the form view. If it is a recordset, open a tree view"""
-        view_id = self.env.ref('base.view_users_form').id
-        action = {
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.users',
-            'context': {'create': False},
-        }
-        if len(self) > 1:
-            action.update({
-                'name': _('Users'),
-                'view_mode': 'list,form',
-                'views': [[None, 'list'], [view_id, 'form']],
-                'domain': [('id', 'in', self.ids)],
-            })
-        else:
-            action.update({
-                'view_mode': 'form',
-                'views': [[view_id, 'form']],
-                'res_id': self.id,
-            })
-        return action
-
     def action_show_groups(self):
         self.ensure_one()
         return {
@@ -1025,6 +992,11 @@ class Users(models.Model):
         if hasattr(self, 'check_credentials'):
             _logger.warning("The check_credentials method of res.users has been renamed _check_credentials. One of your installed modules defines one, but it will not be called anymore.")
 
+    def _get_placeholder_filename(self, field=None):
+        image_fields = ['image_%s' % size for size in [1920, 1024, 512, 256, 128]]
+        if field in image_fields and not self:
+            return 'base/static/img/user-slash.png'
+        return super()._get_placeholder_filename(field=field)
 
     def _mfa_url(self):
         """ If an MFA method is enabled, returns the URL for its second step. """
@@ -1043,7 +1015,7 @@ class GroupsImplied(models.Model):
     implied_ids = fields.Many2many('res.groups', 'res_groups_implied_rel', 'gid', 'hid',
         string='Inherits', help='Users of this group automatically inherit those groups')
     trans_implied_ids = fields.Many2many('res.groups', string='Transitively inherits',
-        compute='_compute_trans_implied', recursive=True)
+        compute='_compute_trans_implied')
 
     @api.depends('implied_ids.trans_implied_ids')
     def _compute_trans_implied(self):
@@ -1114,10 +1086,10 @@ class UsersImplied(models.Model):
                 if not user.has_group('base.group_user') and user in users_before:
                     # if we demoted a user, we strip him of all its previous privileges
                     # (but we should not do it if we are simply adding a technical group to a portal user)
-                    vals = {'groups_id': [Command.clear()] + values['groups_id']}
+                    vals = {'groups_id': [(5, 0, 0)] + values['groups_id']}
                     super(UsersImplied, user).write(vals)
                 gs = set(concat(g.trans_implied_ids for g in user.groups_id))
-                vals = {'groups_id': [Command.link(g.id) for g in gs]}
+                vals = {'groups_id': [(4, g.id) for g in gs]}
                 super(UsersImplied, user).write(vals)
         return res
 
@@ -1352,9 +1324,9 @@ class UsersView(models.Model):
         if group_multi_company_id:
             for user in users:
                 if len(user.company_ids) <= 1 and group_multi_company_id in user.groups_id.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company_id)]})
+                    user.write({'groups_id': [(3, group_multi_company_id)]})
                 elif len(user.company_ids) > 1 and group_multi_company_id not in user.groups_id.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company_id)]})
+                    user.write({'groups_id': [(4, group_multi_company_id)]})
         return users
 
     def write(self, values):
@@ -1366,9 +1338,9 @@ class UsersView(models.Model):
         if group_multi_company:
             for user in self:
                 if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.unlink(group_multi_company.id)]})
+                    user.write({'groups_id': [(3, group_multi_company.id)]})
                 elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                    user.write({'groups_id': [Command.link(group_multi_company.id)]})
+                    user.write({'groups_id': [(4, group_multi_company.id)]})
         return res
 
     @api.model
@@ -1378,9 +1350,9 @@ class UsersView(models.Model):
         group_multi_company = self.env.ref('base.group_multi_company', False)
         if group_multi_company and 'company_ids' in values:
             if len(user.company_ids) <= 1 and user.id in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.unlink(group_multi_company.id)]})
+                user.update({'groups_id': [(3, group_multi_company.id)]})
             elif len(user.company_ids) > 1 and user.id not in group_multi_company.users.ids:
-                user.update({'groups_id': [Command.link(group_multi_company.id)]})
+                user.update({'groups_id': [(4, group_multi_company.id)]})
         return user
 
     def _remove_reified_groups(self, values):
@@ -1468,13 +1440,26 @@ class UsersView(models.Model):
     def fields_get(self, allfields=None, attributes=None):
         res = super(UsersView, self).fields_get(allfields, attributes=attributes)
         # add reified groups fields
-        for app, kind, gs, category_name in self.env['res.groups'].sudo().get_groups_by_application():
+        Group = self.env['res.groups'].sudo()
+        for app, kind, gs, category_name in Group.get_groups_by_application():
             if kind == 'selection':
                 # 'User Type' should not be 'False'. A user is either 'employee', 'portal' or 'public' (required).
                 selection_vals = [(False, '')]
                 if app.xml_id == 'base.module_category_user_type':
                     selection_vals = []
-                field_name = name_selection_groups(gs.ids)
+
+                # FIXME: in Accounting, the groups in the selection are not
+                # totally ordered, and their order therefore partially depends
+                # on their name, which is translated!  However, the group name
+                # used in the "user groups view" corresponds to the group order
+                # without translations.
+                field_name_gs = gs
+                if app.xml_id == 'base.module_category_accounting_accounting':
+                    # put field_name_gs in the same order as in the user form view
+                    order = {g: len(g.trans_implied_ids & gs) for g in gs}
+                    field_name_gs = gs.with_context(lang=None).sorted('name').sorted(order.get)
+
+                field_name = name_selection_groups(field_name_gs.ids)
                 if allfields and field_name not in allfields:
                     continue
                 # selection group field
@@ -1537,7 +1522,7 @@ class ChangePasswordWizard(models.TransientModel):
     def _default_user_ids(self):
         user_ids = self._context.get('active_model') == 'res.users' and self._context.get('active_ids') or []
         return [
-            Command.create({'user_id': user.id, 'user_login': user.login})
+            (0, 0, {'user_id': user.id, 'user_login': user.login})
             for user in self.env['res.users'].browse(user_ids)
         ]
 
@@ -1584,13 +1569,12 @@ class APIKeysUser(models.Model):
 
     api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys")
 
-    @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['api_key_ids']
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['api_key_ids']
+    def __init__(self, pool, cr):
+        init_res = super().__init__(pool, cr)
+        # duplicate list to avoid modifying the original reference
+        type(self).SELF_WRITEABLE_FIELDS = self.SELF_WRITEABLE_FIELDS + ['api_key_ids']
+        type(self).SELF_READABLE_FIELDS = self.SELF_READABLE_FIELDS + ['api_key_ids']
+        return init_res
 
     def _rpc_api_keys_only(self):
         """ To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA """
@@ -1726,6 +1710,4 @@ class APIKeyDescription(models.TransientModel):
 class APIKeyShow(models.AbstractModel):
     _name = _description = 'res.users.apikeys.show'
 
-    # the field 'id' is necessary for the onchange that returns the value of 'key'
-    id = fields.Id()
     key = fields.Char(readonly=True)

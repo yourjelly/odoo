@@ -78,9 +78,9 @@ Example configuration for the postfix mta running locally:
 odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWORD -d %(dbname)s"
         """ % conf
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(FetchmailServer, self).create(vals_list)
+    @api.model
+    def create(self, values):
+        res = super(FetchmailServer, self).create(values)
         self._update_cron()
         return res
 

@@ -14,20 +14,10 @@ pads (by default, http://etherpad.com/).
     """,
     'depends': ['web', 'base_setup'],
     'data': [
+        'views/pad.xml',
         'views/res_config_settings_views.xml',
     ],
     'demo': ['data/pad_demo.xml'],
     'web': True,
-    'assets': {
-        'web.assets_backend': [
-            'pad/static/src/css/etherpad.css',
-            'pad/static/src/js/pad.js',
-        ],
-        'web.qunit_suite_tests': [
-            'pad/static/tests/**/*',
-        ],
-        'web.assets_qweb': [
-            'pad/static/src/xml/**/*',
-        ],
-    }
+    'qweb': ['static/src/xml/pad.xml']
 }

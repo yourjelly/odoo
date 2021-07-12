@@ -20,23 +20,27 @@
     align-items: center;
     justify-content: center;
     flex: 1 1 auto;
-    max-width: map-get($sizes, 100);
+    max-width: 100%;
+}
+
+.o_ChatWindowHiddenMenu_dropdownToggleIcon {
+    margin-right: 1px;
 }
 
 .o_ChatWindowHiddenMenu_dropdownToggleItem {
-    margin: map-get($spacers, 0) map-get($spacers, 1);
+    margin: 0 3px;
 }
 
 .o_ChatWindowHiddenMenu_list {
     overflow: auto;
-    margin: map-get($spacers, 0);
-    padding: map-get($spacers, 0);
+    margin: 0;
+    padding: 0;
 }
 
 .o_ChatWindowHiddenMenu_listItem {
 
     &:not(:last-child) {
-        border-bottom: $border-width solid $border-color;
+        margin-bottom: 1px;
     }
 }
 
@@ -51,7 +55,7 @@
 .o_ChatWindowHiddenMenu_windowCounter {
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-left: map-get($spacers, 1);
+    margin-left: 1px;
 }
 
 // ------------------------------------------------------------------
@@ -61,7 +65,7 @@
 .o_ChatWindowHiddenMenu {
     background-color: gray('900');
     border-radius: 6px 6px 0 0;
-    color: $white;
+    color: white;
     cursor: pointer;
 }
 

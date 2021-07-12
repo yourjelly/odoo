@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/activity/activity/js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many, many2one } from '@mail/model/model_field';
-import { clear, insert, link, unlink, unlinkAll } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many, many2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -48,8 +49,8 @@ function factory(dependencies) {
             if ('date_deadline' in data) {
                 data2.dateDeadline = data.date_deadline;
             }
-            if ('chaining_type' in data) {
-                data2.chaining_type = data.chaining_type;
+            if ('force_next' in data) {
+                data2.force_next = data.force_next;
             }
             if ('icon' in data) {
                 data2.icon = data.icon;
@@ -70,51 +71,59 @@ function factory(dependencies) {
             // relation
             if ('activity_type_id' in data) {
                 if (!data.activity_type_id) {
-                    data2.type = unlinkAll();
+                    data2.type = [['unlink-all']];
                 } else {
-                    data2.type = insert({
-                        displayName: data.activity_type_id[1],
-                        id: data.activity_type_id[0],
-                    });
+                    data2.type = [
+                        ['insert', {
+                            displayName: data.activity_type_id[1],
+                            id: data.activity_type_id[0],
+                        }],
+                    ];
                 }
             }
             if ('create_uid' in data) {
                 if (!data.create_uid) {
-                    data2.creator = unlinkAll();
+                    data2.creator = [['unlink-all']];
                 } else {
-                    data2.creator = insert({
-                        id: data.create_uid[0],
-                        display_name: data.create_uid[1],
-                    });
+                    data2.creator = [
+                        ['insert', {
+                            id: data.create_uid[0],
+                            display_name: data.create_uid[1],
+                        }],
+                    ];
                 }
             }
             if ('mail_template_ids' in data) {
-                data2.mailTemplates = insert(data.mail_template_ids);
+                data2.mailTemplates = [['insert', data.mail_template_ids]];
             }
             if ('res_id' in data && 'res_model' in data) {
-                data2.thread = insert({
+                data2.thread = [['insert', {
                     id: data.res_id,
                     model: data.res_model,
-                });
+                }]];
             }
             if ('user_id' in data) {
                 if (!data.user_id) {
-                    data2.assignee = unlinkAll();
+                    data2.assignee = [['unlink-all']];
                 } else {
-                    data2.assignee = insert({
-                        id: data.user_id[0],
-                        display_name: data.user_id[1],
-                    });
+                    data2.assignee = [
+                        ['insert', {
+                            id: data.user_id[0],
+                            display_name: data.user_id[1],
+                        }],
+                    ];
                 }
             }
             if ('request_partner_id' in data) {
                 if (!data.request_partner_id) {
-                    data2.requestingPartner = unlink();
+                    data2.requestingPartner = [['unlink']];
                 } else {
-                    data2.requestingPartner = insert({
-                        id: data.request_partner_id[0],
-                        display_name: data.request_partner_id[1],
-                    });
+                    data2.requestingPartner = [
+                        ['insert', {
+                            id: data.request_partner_id[0],
+                            display_name: data.request_partner_id[1],
+                        }],
+                    ];
                 }
             }
 
@@ -240,7 +249,7 @@ function factory(dependencies) {
          * @returns {mail.messaging}
          */
         _computeMessaging() {
-            return link(this.env.messaging);
+            return [['link', this.env.messaging]];
         }
 
         /**
@@ -280,13 +289,11 @@ function factory(dependencies) {
          * In all other cases, this field value should not be trusted.
          */
         feedbackBackup: attr(),
-        chaining_type: attr({
-            default: 'suggest',
+        force_next: attr({
+            default: false,
         }),
         icon: attr(),
-        id: attr({
-            required: true,
-        }),
+        id: attr(),
         isCurrentPartnerAssignee: attr({
             compute: '_computeIsCurrentPartnerAssignee',
             default: false,
@@ -344,3 +351,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.activity', factory);
+
+});

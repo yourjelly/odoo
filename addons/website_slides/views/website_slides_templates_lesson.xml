@@ -204,6 +204,7 @@
 
 <!-- Slide: all its content, not fullscreen mode -->
 <template id="slide_content_detailed" name="Slide: Detailed Content">
+    <t t-set="is_training_channel" t-value="slide.channel_id.channel_type == 'training'"/>
     <div class="row align-items-center my-3">
         <div class="col-12 col-md order-2 order-md-1 d-flex">
             <div class="d-flex align-items-center">
@@ -243,7 +244,7 @@
                     <span class="d-none d-sm-inline-block">Next</span> <i class="fa fa-chevron-right ml-2"></i>
                 </a>
             </div>
-            <a class="btn btn-light border ml-2" role="button" t-att-href="'/slides/slide/%s?fullscreen=1' % (slug(slide))">
+            <a t-if="is_training_channel" class="btn btn-light border ml-2" role="button" t-att-href="'/slides/slide/%s?fullscreen=1' % (slug(slide))">
                 <i class="fa fa-desktop mr-2"/>
                 <span class="d-none d-sm-inline-block">Fullscreen</span>
             </a>
@@ -258,10 +259,10 @@
         <img t-if="slide.slide_type == 'infographic'"
             t-att-src="website.image_url(slide, 'image_1024')" class="img-fluid" style="width:100%" t-att-alt="slide.name"/>
         <div t-if="slide.slide_type in ('presentation', 'document')" class="embed-responsive embed-responsive-4by3 embed-responsive-item mb8" style="height: 600px;">
-            <t t-esc="slide.embed_code"/>
+            <t t-raw="slide.embed_code"/>
         </div>
         <div t-if="slide.slide_type == 'video' and slide.document_id" class="embed-responsive embed-responsive-16by9 embed-responsive-item mb8">
-            <t t-esc="slide.embed_code"/>
+            <t t-raw="slide.embed_code"/>
         </div>
         <div t-if="slide.slide_type == 'webpage'" class="bg-white p-3">
             <div t-field="slide.html_content"/>

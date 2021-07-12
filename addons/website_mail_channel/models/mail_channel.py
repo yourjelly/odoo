@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import hashlib
+import hmac
+
 from werkzeug import urls
 
-from odoo import models, tools
+from odoo import models
 from odoo.addons.http_routing.models.ir_http import slug
 
 
@@ -12,7 +15,7 @@ class MailGroup(models.Model):
 
     def _notify_email_header_dict(self):
         headers = super(MailGroup, self)._notify_email_header_dict()
-        base_url = self.get_base_url()
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         headers['List-Archive'] = '<%s/groups/%s>' % (base_url, slug(self))
         headers['List-Subscribe'] = '<%s/groups>' % (base_url)
         headers['List-Unsubscribe'] = '<%s/groups?unsubscribe>' % (base_url,)
@@ -45,19 +48,17 @@ class MailGroup(models.Model):
                 force_send=True,
                 email_values={
                     'recipient_ids': [(4, partner_id)],
-                    'email_from': website.company_id.email_formatted,
-                    'author_id': self.create_uid.partner_id.id,
-                    'message_type': 'user_notification',
-                },
-                notif_layout='mail.mail_notification_light',
+                    'email_from': website.company_id.email,
+                }
             )
 
         return True
 
     def _generate_action_token(self, partner_id, action='unsubscribe'):
         self.ensure_one()
+        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         data = '$'.join([
                 str(self.id),
                 str(partner_id),
                 action])
-        return tools.hmac(self.env(su=True), 'website_mail_channel-email-subscription', data)
+        return hmac.new(secret.encode('utf-8'), data.encode('utf-8'), hashlib.md5).hexdigest()

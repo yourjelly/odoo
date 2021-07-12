@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import http
-from odoo.addons.web.controllers import main
+from odoo.addons.web.controllers.main import Home
 from odoo.http import request
 
 
-class Home(main.Home):
+class Home(Home):
 
     @http.route()
     def index(self, *args, **kw):

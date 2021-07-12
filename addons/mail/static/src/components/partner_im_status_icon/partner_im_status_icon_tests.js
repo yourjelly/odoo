@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/partner_im_status_icon/partner_im_status_icon_tests.js', function (require) {
+'use strict';
 
-import { PartnerImStatusIcon } from '@mail/components/partner_im_status_icon/partner_im_status_icon';
-import {
+const components = {
+    PartnerImStatusIcon: require('mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { PartnerImStatusIcon };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -139,4 +140,6 @@ QUnit.test('change icon on change partner im_status', async function (assert) {
 
 });
 });
+});
+
 });

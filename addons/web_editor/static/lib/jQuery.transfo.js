@@ -127,7 +127,6 @@ OTHER DEALINGS IN THE SOFTWARE.
             var transfo = {};
             $this.data('transfo', transfo);
             transfo.settings = settings;
-            transfo.settings.document = transfo.settings.document || document;
 
             // generate all the controls markup
             var css = "box-sizing: border-box; position: absolute; background-color: #fff; border: 1px solid #ccc; width: 8px; height: 8px; margin-left: -4px; margin-top: -4px;";
@@ -158,7 +157,7 @@ OTHER DEALINGS IN THE SOFTWARE.
             _overwriteOptions ($this, transfo, settings);
 
             // append controls to container
-            $(transfo.settings.document.body).append(transfo.$markup);
+            $("body").append(transfo.$markup);
 
             // set transfo container and markup
             setTimeout(function () {
@@ -228,14 +227,14 @@ OTHER DEALINGS IN THE SOFTWARE.
         function _bind ($this, transfo) {
             function mousedown (event) {
                 _mouseDown($this, this, transfo, event);
-                $(transfo.settings.document).on("mousemove", mousemove).on("mouseup", mouseup);
+                $(document).on("mousemove", mousemove).on("mouseup", mouseup);
             }
             function mousemove (event) {
                 _mouseMove($this, this, transfo, event);
             }
             function mouseup (event) {
                 _mouseUp($this, this, transfo, event);
-                $(transfo.settings.document).off("mousemove", mousemove).off("mouseup", mouseup);
+                $(document).off("mousemove", mousemove).off("mouseup", mouseup);
             }
 
             transfo.$markup.off().on("mousedown", mousedown);

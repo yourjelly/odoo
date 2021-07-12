@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from markupsafe import Markup
-from dateutil.relativedelta import relativedelta
-
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.tools.float_utils import float_compare, float_round
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from odoo.exceptions import UserError
 
 from odoo.addons.purchase.models.purchase import PurchaseOrder as Purchase
@@ -35,7 +34,7 @@ class PurchaseOrder(models.Model):
     @api.depends('order_line.move_ids.picking_id')
     def _compute_picking(self):
         for order in self:
-            pickings = order.order_line.move_ids.picking_id
+            pickings = order.order_line.mapped('move_ids.picking_id')
             order.picking_ids = pickings
             order.picking_count = len(pickings)
 
@@ -242,12 +241,11 @@ class PurchaseOrder(models.Model):
         """
         validated_picking = self.picking_ids.filtered(lambda p: p.state == 'done')
         if validated_picking:
-            message = _("Those dates couldn’t be modified accordingly on the receipt %s which had already been validated.", validated_picking[0].name)
+            activity.note += _("<p>Those dates couldn’t be modified accordingly on the receipt %s which had already been validated.</p>") % validated_picking[0].name
         elif not self.picking_ids:
-            message = _("Corresponding receipt not found.")
+            activity.note += _("<p>Corresponding receipt not found.</p>")
         else:
-            message = _("Those dates have been updated accordingly on the receipt %s.", self.picking_ids[0].name)
-        activity.note += Markup('<p>{}</p>').format(message)
+            activity.note += _("<p>Those dates have been updated accordingly on the receipt %s.</p>") % self.picking_ids[0].name
 
     def _create_update_date_activity(self, updated_dates):
         activity = super()._create_update_date_activity(updated_dates)
@@ -257,7 +255,7 @@ class PurchaseOrder(models.Model):
         # remove old picking info to update it
         note_lines = activity.note.split('<p>')
         note_lines.pop()
-        activity.note = Markup('<p>').join(note_lines)
+        activity.note = '<p>'.join(note_lines)
         super()._update_update_date_activity(updated_dates, activity)
         self._add_picking_info(activity)
 
@@ -278,7 +276,6 @@ class PurchaseOrderLine(models.Model):
     move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
     product_description_variants = fields.Char('Custom Description')
     propagate_cancel = fields.Boolean('Propagate cancellation', default=True)
-    forecasted_issue = fields.Boolean(compute='_compute_forecasted_issue')
 
     def _compute_qty_received_method(self):
         super(PurchaseOrderLine, self)._compute_qty_received_method()
@@ -319,18 +316,6 @@ class PurchaseOrderLine(models.Model):
                 line._track_qty_received(total)
                 line.qty_received = total
 
-    @api.depends('product_uom_qty', 'date_planned')
-    def _compute_forecasted_issue(self):
-        for line in self:
-            warehouse = line.order_id.picking_type_id.warehouse_id
-            line.forecasted_issue = False
-            if line.product_id:
-                virtual_available = line.product_id.with_context(warehouse=warehouse.id, to_date=line.date_planned).virtual_available
-                if line.state == 'draft':
-                    virtual_available += line.product_uom_qty
-                if virtual_available < 0:
-                    line.forecasted_issue = True
-
     @api.model_create_multi
     def create(self, vals_list):
         lines = super(PurchaseOrderLine, self).create(vals_list)
@@ -347,20 +332,6 @@ class PurchaseOrderLine(models.Model):
         if 'product_qty' in values:
             self.filtered(lambda l: l.order_id.state == 'purchase')._create_or_update_picking()
         return result
-
-    def action_product_forecast_report(self):
-        self.ensure_one()
-        action = self.product_id.action_product_forecast_report()
-        action['context'] = {
-            'active_id': self.product_id.id,
-            'active_model': 'product.product',
-            'move_to_match_ids': self.move_ids.filtered(lambda m: m.product_id == self.product_id).ids,
-            'purchase_line_to_match_id': self.id,
-        }
-        warehouse = self.order_id.picking_type_id.warehouse_id
-        if warehouse:
-            action['context']['warehouse'] = warehouse.id
-        return action
 
     def unlink(self):
         self.move_ids._action_cancel()
@@ -474,6 +445,9 @@ class PurchaseOrderLine(models.Model):
     def _prepare_stock_move_vals(self, picking, price_unit, product_uom_qty, product_uom):
         self.ensure_one()
         product = self.product_id.with_context(lang=self.order_id.dest_address_id.lang or self.env.user.lang)
+        description_picking = product._get_description(self.order_id.picking_type_id)
+        if self.product_description_variants:
+            description_picking += "\n" + self.product_description_variants
         date_planned = self.date_planned or self.order_id.date_planned
         return {
             # truncate to 2000 to avoid triggering index limit error
@@ -494,12 +468,11 @@ class PurchaseOrderLine(models.Model):
             'picking_type_id': self.order_id.picking_type_id.id,
             'group_id': self.order_id.group_id.id,
             'origin': self.order_id.name,
-            'description_picking': product.description_pickingin or self.name,
+            'description_picking': description_picking,
             'propagate_cancel': self.propagate_cancel,
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
             'product_uom_qty': product_uom_qty,
             'product_uom': product_uom.id,
-            'product_packaging_id': self.product_packaging_id.id,
         }
 
     @api.model

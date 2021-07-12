@@ -116,7 +116,8 @@ class AuthSignupHome(Home):
                 qcontext['invalid_token'] = True
         return qcontext
 
-    def _prepare_signup_values(self, qcontext):
+    def do_signup(self, qcontext):
+        """ Shared helper that creates a res.partner out of a token """
         values = { key: qcontext.get(key) for key in ('login', 'name', 'password') }
         if not values:
             raise UserError(_("The form was not properly filled in."))
@@ -126,11 +127,6 @@ class AuthSignupHome(Home):
         lang = request.context.get('lang', '')
         if lang in supported_lang_codes:
             values['lang'] = lang
-        return values
-
-    def do_signup(self, qcontext):
-        """ Shared helper that creates a res.partner out of a token """
-        values = self._prepare_signup_values(qcontext)
         self._signup_with_values(qcontext.get('token'), values)
         request.env.cr.commit()
 

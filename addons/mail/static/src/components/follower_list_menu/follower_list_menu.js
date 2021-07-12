@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/follower_list_menu/follower_list_menu.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { Follower } from '@mail/components/follower/follower';
+const components = {
+    Follower: require('mail/static/src/components/follower/follower.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
 const { Component } = owl;
 const { useRef, useState } = owl.hooks;
 
-const components = { Follower };
-
-export class FollowerListMenu extends Component {
+class FollowerListMenu extends Component {
     /**
      * @override
      */
@@ -90,6 +91,16 @@ export class FollowerListMenu extends Component {
      * @private
      * @param {MouseEvent} ev
      */
+    _onClickAddChannels(ev) {
+        ev.preventDefault();
+        this._hide();
+        this.thread.promptAddChannelFollower();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
     _onClickAddFollowers(ev) {
         ev.preventDefault();
         this._hide();
@@ -136,4 +147,8 @@ Object.assign(FollowerListMenu, {
         threadLocalId: String,
     },
     template: 'mail.FollowerListMenu',
+});
+
+return FollowerListMenu;
+
 });

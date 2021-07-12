@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/country/country.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
-import { clear } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -40,9 +41,7 @@ function factory(dependencies) {
                 'code',
             ],
         }),
-        id: attr({
-            required: true,
-        }),
+        id: attr(),
         name: attr(),
     };
 
@@ -52,3 +51,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.country', factory);
+
+});

@@ -13,20 +13,20 @@
     }
 
     &:not(.o-empty) {
-        padding-bottom: map-get($spacers, 4);
+        padding-bottom: 15px;
     }
 }
 
 .o_MessageList_empty {
     flex: 1 1 auto;
-    height: map-get($sizes, 100);
-    width: map-get($sizes, 100);
+    height: 100%;
+    width: 100%;
     align-self: center;
     display: flex;
     flex-flow: column;
     align-items: center;
     justify-content: center;
-    padding: map-get($spacers, 4);
+    padding: 20px;
     line-height: 2.5rem;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .o_MessageList_isLoadingMoreIcon {
-    margin-right: map-get($spacers, 1);
+    margin-right: 3px;
 }
 
 .o_MessageList_loadMore {
@@ -45,12 +45,12 @@
 .o_MessageList_separator {
     display: flex;
     align-items: center;
-    padding: map-get($spacers, 0) map-get($spacers, 0);
+    padding: 0 0;
     flex: 0 0 auto;
 }
 
 .o_MessageList_separatorDate {
-    padding: map-get($spacers, 4) map-get($spacers, 0);
+    padding: 15px 0;
 }
 
 .o_MessageList_separatorLine {
@@ -60,12 +60,12 @@
 
 .o_MessageList_separatorNewMessages {
     // bug with safari: container does not auto-grow from child size
-    padding: map-get($spacers, 0) map-get($spacers, 0);
-    margin-right: map-get($spacers, 4);
+    padding: 0 0;
+    margin-right: 15px;
 }
 
 .o_MessageList_separatorLabel {
-    padding: map-get($spacers, 0) map-get($spacers, 3);
+    padding: 0 10px;
 }
 
 // ------------------------------------------------------------------
@@ -73,13 +73,11 @@
 // ------------------------------------------------------------------
 
 .o_MessageList {
-    background-color: $white;
+    background-color: white;
 }
 
 .o_MessageList_empty {
     text-align: center;
-    font-style: italic;
-    color: $text-muted;
 }
 
 .o_MessageList_emptyTitle {
@@ -89,7 +87,7 @@
     &.o-neutral-face-icon:before {
         @extend %o-nocontent-init-image;
         @include size(120px, 140px);
-        background: transparent url(/web/static/img/neutral_face.svg) no-repeat center;
+        background: transparent url(/web/static/src/img/neutral_face.svg) no-repeat center;
     }
 }
 
@@ -106,7 +104,7 @@
 }
 
 .o_MessageList_separatorLine {
-    border-color: $border-color;
+    border-color: gray('400');
 }
 
 .o_MessageList_separatorLineNewMessages {
@@ -119,7 +117,7 @@
 }
 
 .o_MessageList_separatorLabel {
-    background-color: $white;
+    background-color: white;
 }
 
 // ------------------------------------------------------------------

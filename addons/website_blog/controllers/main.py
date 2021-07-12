@@ -158,6 +158,9 @@ class WebsiteBlog(http.Controller):
     ], type='http', auth="public", website=True, sitemap=True)
     def blog(self, blog=None, tag=None, page=1, search=None, **opt):
         Blog = request.env['blog.blog']
+        if blog and not blog.can_access_from_current_website():
+            raise werkzeug.exceptions.NotFound()
+
         blogs = Blog.search(request.website.website_domain(), order="create_date asc, id asc")
 
         if not blog and len(blogs) == 1:
@@ -221,6 +224,9 @@ class WebsiteBlog(http.Controller):
          - 'nav_list': a dict [year][month] for archives navigation
          - 'next_post': next blog post, to direct the user towards the next interesting post
         """
+        if not blog.can_access_from_current_website():
+            raise werkzeug.exceptions.NotFound()
+
         BlogPost = request.env['blog.post']
         date_begin, date_end = post.get('date_begin'), post.get('date_end')
 
@@ -301,3 +307,14 @@ class WebsiteBlog(http.Controller):
         """
         new_blog_post = request.env['blog.post'].with_context(mail_create_nosubscribe=True).browse(int(blog_post_id)).copy()
         return werkzeug.utils.redirect("/blog/%s/%s?enable_editor=1" % (slug(new_blog_post.blog_id), slug(new_blog_post)))
+
+    @http.route(['/blog/render_latest_posts'], type='json', auth='public', website=True)
+    def render_latest_posts(self, template, domain, limit=None, order='published_date desc'):
+        dom = expression.AND([
+            [('website_published', '=', True), ('post_date', '<=', fields.Datetime.now())],
+            request.website.website_domain()
+        ])
+        if domain:
+            dom = expression.AND([dom, domain])
+        posts = request.env['blog.post'].search(dom, limit=limit, order=order)
+        return request.website.viewref(template)._render({'posts': posts})

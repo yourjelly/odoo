@@ -3,7 +3,6 @@
 from odoo.exceptions import UserError, AccessError
 from odoo.tests import common
 from odoo.tools import frozendict
-from odoo import Command
 
 
 class TestCompanyCheck(common.TransactionCase):
@@ -185,7 +184,7 @@ class TestCompanyCheck(common.TransactionCase):
         user = self.env['res.users'].create({
             'name': 'My Classic User',
             'login': 'My Classic User',
-            'groups_id': [Command.set(self.env.ref('base.group_user').ids)],
+            'groups_id': [(6, 0, self.env.ref('base.group_user').ids)],
         })
 
         with common.Form(self.env['test_new_api.model_private_address_onchange'].with_user(user)) as form:

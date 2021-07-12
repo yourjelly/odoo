@@ -45,42 +45,15 @@ class View(models.Model):
         for view in self:
             view.first_page_id = self.env['website.page'].search([('view_id', '=', view.id)], limit=1)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """
-        SOC for ir.ui.view creation. If a view is created without a website_id,
-        it should get one if one is present in the context. Also check that
-        an explicit website_id in create values matches the one in the context.
-        """
-        website_id = self.env.context.get('website_id', False)
-        if not website_id:
-            return super().create(vals_list)
-
-        for vals in vals_list:
-            if 'website_id' not in vals:
-                # Automatic addition of website ID during view creation if not
-                # specified but present in the context
-                vals['website_id'] = website_id
-            else:
-                # If website ID specified, automatic check that it is the same as
-                # the one in the context. Otherwise raise an error.
-                new_website_id = vals['website_id']
-                if not new_website_id:
-                    raise ValueError(f"Trying to create a generic view from a website {website_id} environment")
-                elif new_website_id != website_id:
-                    raise ValueError(f"Trying to create a view for website {new_website_id} from a website {website_id} environment")
-        return super().create(vals_list)
-
     def name_get(self):
-        if not (self._context.get('display_key') or self._context.get('display_website')):
+        if (not self._context.get('display_website') and not self.env.user.has_group('website.group_multi_website')) or \
+                not self._context.get('display_website'):
             return super(View, self).name_get()
 
         res = []
         for view in self:
             view_name = view.name
-            if self._context.get('display_key'):
-                view_name += ' <%s>' % view.key
-            if self._context.get('display_website') and view.website_id:
+            if view.website_id:
                 view_name += ' [%s]' % view.website_id.name
             res.append((view.id, view_name))
         return res
@@ -234,10 +207,6 @@ class View(models.Model):
             })
             page.menu_ids.filtered(lambda m: m.website_id.id == website.id).page_id = new_page.id
 
-    def _get_top_level_view(self):
-        self.ensure_one()
-        return self.inherit_id._get_top_level_view() if self.inherit_id else self
-
     @api.model
     def get_related_views(self, key, bundles=False):
         '''Make this only return most specific views for website.'''
@@ -294,8 +263,8 @@ class View(models.Model):
             return view_id if view_id._name == 'ir.ui.view' else self.env['ir.ui.view']
 
     @api.model
-    def _get_inheriting_views_domain(self):
-        domain = super(View, self)._get_inheriting_views_domain()
+    def _get_inheriting_views_arch_domain(self, model):
+        domain = super(View, self)._get_inheriting_views_arch_domain(model)
         current_website = self.env['website'].browse(self._context.get('website_id'))
         website_views_domain = current_website.website_domain()
         # when rendering for the website we have to include inactive views
@@ -305,11 +274,11 @@ class View(models.Model):
         return expression.AND([website_views_domain, domain])
 
     @api.model
-    def _get_inheriting_views(self):
+    def get_inheriting_views_arch(self, model):
         if not self._context.get('website_id'):
-            return super(View, self)._get_inheriting_views()
+            return super(View, self).get_inheriting_views_arch(model)
 
-        views = super(View, self.with_context(active_test=False))._get_inheriting_views()
+        views = super(View, self.with_context(active_test=False)).get_inheriting_views_arch(model)
         # prefer inactive website-specific views over active generic ones
         return views.filter_duplicate().filtered('active')
 
@@ -362,6 +331,24 @@ class View(models.Model):
                 raise ValueError('View %r in website %r not found' % (xml_id, self._context['website_id']))
             return view.id
         return super(View, self.sudo()).get_view_id(xml_id)
+
+    @api.model
+    def read_template(self, xml_id):
+        """ This method is deprecated
+        """
+        view = self._view_obj(self.get_view_id(xml_id))
+        if view.visibility and view._handle_visibility(do_raise=False):
+            self = self.sudo()
+        return super(View, self).read_template(xml_id)
+
+    def _get_original_view(self):
+        """Given a view, retrieve the original view it was COW'd from.
+        The given view might already be the original one. In that case it will
+        (and should) return itself.
+        """
+        self.ensure_one()
+        domain = [('key', '=', self.key), ('model_data_id', '!=', None)]
+        return self.with_context(active_test=False).search(domain, limit=1)  # Useless limit has multiple xmlid should not be possible
 
     def _handle_visibility(self, do_raise=True):
         """ Check the visibility set on the main view and raise 403 if you should not have access.

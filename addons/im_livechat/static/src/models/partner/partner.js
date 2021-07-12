@@ -1,6 +1,9 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/models/partner/partner.js', function (require) {
+'use strict';
 
-import { registerClassPatchModel } from '@mail/model/model_core';
+const {
+    registerClassPatchModel,
+} = require('mail/static/src/model/model_core.js');
 
 let nextPublicId = -1;
 
@@ -17,3 +20,4 @@ registerClassPatchModel('mail.partner', 'im_livechat/static/src/models/partner/p
     },
 });
 
+});

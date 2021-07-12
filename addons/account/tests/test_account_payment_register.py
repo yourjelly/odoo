@@ -18,8 +18,36 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'currency_subunit_label': "Broken Umbrella",
         }, rate2017=0.01)
 
-        cls.payment_debit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_debit_account_id.copy()
-        cls.payment_credit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_credit_account_id.copy()
+        cls.payment_debit_account_id = cls.company_data['default_journal_bank'].payment_debit_account_id.copy()
+        cls.payment_credit_account_id = cls.company_data['default_journal_bank'].payment_credit_account_id.copy()
+
+        cls.custom_payment_method_in = cls.env['account.payment.method'].create({
+            'name': 'custom_payment_method_in',
+            'code': 'CUSTOMIN',
+            'payment_type': 'inbound',
+        })
+        cls.manual_payment_method_in = cls.env.ref('account.account_payment_method_manual_in')
+
+        cls.custom_payment_method_out = cls.env['account.payment.method'].create({
+            'name': 'custom_payment_method_out',
+            'code': 'CUSTOMOUT',
+            'payment_type': 'outbound',
+        })
+        cls.manual_payment_method_out = cls.env.ref('account.account_payment_method_manual_out')
+
+        cls.company_data['default_journal_bank'].write({
+            'payment_debit_account_id': cls.payment_debit_account_id.id,
+            'payment_credit_account_id': cls.payment_credit_account_id.id,
+            'inbound_payment_method_ids': [(6, 0, (
+                cls.manual_payment_method_in.id,
+                cls.custom_payment_method_in.id,
+            ))],
+            'outbound_payment_method_ids': [(6, 0, (
+                cls.env.ref('account.account_payment_method_manual_out').id,
+                cls.custom_payment_method_out.id,
+                cls.manual_payment_method_out.id,
+            ))],
+        })
 
         # Customer invoices sharing the same batch.
         cls.out_invoice_1 = cls.env['account.move'].create({
@@ -87,12 +115,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'group_payment': True,
             'payment_difference_handling': 'open',
             'currency_id': self.currency_data['currency'].id,
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'INV/2017/01/0001 INV/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Receivable line:
@@ -121,12 +149,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'group_payment': True,
             'payment_difference_handling': 'open',
             'currency_id': self.currency_data['currency'].id,
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'INV/2017/01/0001 INV/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Receivable line:
@@ -156,12 +184,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.company_data['default_account_revenue'].id,
             'writeoff_label': 'writeoff',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'INV/2017/01/0001 INV/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Receivable line:
@@ -199,12 +227,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.company_data['default_account_revenue'].id,
             'writeoff_label': 'writeoff',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'INV/2017/01/0001 INV/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Receivable line:
@@ -242,12 +270,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.company_data['default_account_revenue'].id,
             'writeoff_label': 'writeoff',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'BILL/2017/01/0001 BILL/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Writeoff line:
@@ -285,12 +313,12 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'payment_difference_handling': 'reconcile',
             'writeoff_account_id': self.company_data['default_account_revenue'].id,
             'writeoff_label': 'writeoff',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         })._create_payments()
 
         self.assertRecordValues(payments, [{
             'ref': 'BILL/2017/01/0001 BILL/2017/01/0002',
-            'payment_method_id': self.inbound_payment_method.id,
+            'payment_method_id': self.custom_payment_method_in.id,
         }])
         self.assertRecordValues(payments.line_ids.sorted('balance'), [
             # Liquidity line:
@@ -329,11 +357,11 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         self.assertRecordValues(payments, [
             {
                 'ref': 'INV/2017/01/0001',
-                'payment_method_id': self.inbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_in.id,
             },
             {
                 'ref': 'INV/2017/01/0002',
-                'payment_method_id': self.inbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_in.id,
             },
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance'), [
@@ -385,11 +413,11 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         self.assertRecordValues(payments, [
             {
                 'ref': 'BILL/2017/01/0001 BILL/2017/01/0002',
-                'payment_method_id': self.outbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_out.id,
             },
             {
                 'ref': 'BILL/2017/01/0003',
-                'payment_method_id': self.outbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_out.id,
             },
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance'), [
@@ -441,15 +469,15 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         self.assertRecordValues(payments, [
             {
                 'ref': 'BILL/2017/01/0001',
-                'payment_method_id': self.outbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_out.id,
             },
             {
                 'ref': 'BILL/2017/01/0002',
-                'payment_method_id': self.outbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_out.id,
             },
             {
                 'ref': 'BILL/2017/01/0003',
-                'payment_method_id': self.outbound_payment_method.id,
+                'payment_method_id': self.manual_payment_method_out.id,
             },
         ])
         self.assertRecordValues(payments[0].line_ids.sorted('balance') + payments[1].line_ids.sorted('balance') + payments[2].line_ids.sorted('balance'), [

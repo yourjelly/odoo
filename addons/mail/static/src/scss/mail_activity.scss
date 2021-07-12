@@ -130,13 +130,13 @@
     }
 
     .o_activity_color_planned {
-        @extend .text-success;
+        color: darken(theme-color('success'), 10%);
     }
     .o_activity_color_overdue {
-        @extend .text-danger;
+        color: darken(theme-color('danger'), 10%);
     }
     .o_activity_color_today {
-        @extend .text-warning;
+        color: darken(theme-color('warning'), 10%);
     }
 }
 

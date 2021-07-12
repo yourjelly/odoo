@@ -32,7 +32,6 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
             self.surveyId = self.$el.data('surveyId');
             self.surveyAccessToken = self.$el.data('surveyAccessToken');
             self.isStartScreen = self.$el.data('isStartScreen');
-            self.isFirstQuestion = self.$el.data('isFirstQuestion');
             self.isLastQuestion = self.$el.data('isLastQuestion');
             // scoring props
             self.isScoredQuestion = self.$el.data('isScoredQuestion');
@@ -149,11 +148,13 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
 
         if (screenToDisplay === 'userInputs') {
             this._setShowInputs(true);
+            this.$('.o_survey_session_navigation_previous').removeClass('d-none');
         } else if (screenToDisplay === 'results') {
             this._setShowAnswers(true);
             // when showing results, stop refreshing answers
             clearInterval(this.resultsRefreshInterval);
             delete this.resultsRefreshInterval;
+            this.$('.o_survey_session_navigation_previous').removeClass('d-none');
         } else if (['leaderboard', 'leaderboardFinal'].includes(screenToDisplay)
                    && !['leaderboard', 'leaderboardFinal'].includes(this.currentScreen)) {
             if (this.isLastQuestion) {
@@ -184,6 +185,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
 
         if (screenToDisplay === 'question') {
             this._setShowInputs(false);
+            this.$('.o_survey_session_navigation_previous').addClass('d-none');
         } else if (screenToDisplay === 'userInputs') {
             this._setShowAnswers(false);
             // resume refreshing answers if necessary
@@ -191,17 +193,10 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
                 this.resultsRefreshInterval = setInterval(this._refreshResults.bind(this), 2000);
             }
         } else if (screenToDisplay === 'results') {
-            if (this.leaderBoard) {
-                this.leaderBoard.hideLeaderboard();
-            }
+            this.leaderBoard.hideLeaderboard();
             // when showing results, stop refreshing answers
             clearInterval(this.resultsRefreshInterval);
             delete this.resultsRefreshInterval;
-        } else if (screenToDisplay === 'previousQuestion') {
-            if (this.isFirstQuestion) {
-                return;  // nothing to go back to, we're on the first question
-            }
-            this._nextQuestion(true);
         }
 
         this.currentScreen = screenToDisplay;
@@ -277,16 +272,14 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
     _getPreviousScreen: function () {
         if (this.currentScreen === 'userInputs' && this.isScoredQuestion) {
             return 'question';
-        } else if ((this.currentScreen === 'results' && this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboard' && !this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboardFinal' && this.isScoredQuestion)) {
+        } else if (this.currentScreen === 'results' ||
+                  (this.currentScreen === 'leaderboard' && !this.isScoredQuestion)) {
             return 'userInputs';
-        } else if ((this.currentScreen === 'leaderboard' && this.isScoredQuestion) ||
-                  (this.currentScreen === 'leaderboardFinal' && !this.isScoredQuestion)){
+        } else if (this.currentScreen === 'leaderboard' && this.isScoredQuestion) {
             return 'results';
         }
 
-        return 'previousQuestion';
+        return this.currentScreen;
     },
 
     /**
@@ -301,7 +294,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
     * @param {MouseEvent} ev
     * @private
     */
-    _nextQuestion: function (goBack) {
+    _nextQuestion: function () {
         var self = this;
 
         this.isStartScreen = false;
@@ -316,10 +309,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
         });
 
         var nextQuestionPromise = this._rpc({
-            route: _.str.sprintf('/survey/session/next_question/%s', self.surveyAccessToken),
-            params: {
-                'go_back': goBack,
-            }
+            route: _.str.sprintf('/survey/session/next_question/%s', self.surveyAccessToken)
         });
 
         // avoid refreshing results while transitioning
@@ -328,28 +318,14 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
             delete this.resultsRefreshInterval;
         }
 
-        Promise.all([fadeOutPromise, nextQuestionPromise]).then(async function (results) {
+        Promise.all([fadeOutPromise, nextQuestionPromise]).then(function (results) {
             if (results[1]) {
                 var $renderedTemplate = $(results[1]);
                 self.$el.replaceWith($renderedTemplate);
-
-                // Ensure new question is fully loaded before force loading previous question screen.
-                await self.attachTo($renderedTemplate);
-                if (goBack) {
-                    // As we arrive on "question" screen, simulate going to the results screen or leaderboard.
-                    self._setShowInputs(true);
-                    self._setShowAnswers(true);
-                    if (self.sessionShowLeaderboard && self.isScoredQuestion) {
-                        self.currentScreen = 'leaderboard';
-                        self.leaderBoard.showLeaderboard(false, self.isScoredQuestion);
-                    } else {
-                        self.currentScreen = 'results';
-                        self._refreshResults();
-                    }
-                } else {
+                self.attachTo($renderedTemplate);
+                self.$el.fadeIn(self.fadeInOutTime, function () {
                     self._startTimer();
-                }
-                self.$el.fadeIn(self.fadeInOutTime);
+                });
             } else if (self.sessionShowLeaderboard) {
                 // Display last screen if leaderboard activated
                 self.isLastQuestion = true;
@@ -569,8 +545,6 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
         } else {
             this.currentScreen = 'question';
         }
-
-        this.$('.o_survey_session_navigation_previous').toggleClass('d-none', !!this.isFirstQuestion);
 
         this._setShowInputs(this.currentScreen === 'userInputs');
     },

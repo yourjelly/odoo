@@ -16,6 +16,8 @@ class Invite(models.TransientModel):
     @api.model
     def default_get(self, fields):
         result = super(Invite, self).default_get(fields)
+        if self._context.get('mail_invite_follower_channel_only'):
+            result['send_mail'] = False
         if 'message' not in fields:
             return result
 
@@ -41,6 +43,8 @@ class Invite(models.TransientModel):
     res_id = fields.Integer('Related Document ID', index=True, help='Id of the followed resource')
     partner_ids = fields.Many2many('res.partner', string='Recipients', help="List of partners that will be added as follower of the current document.",
                                    domain=[('type', '!=', 'private')])
+    channel_ids = fields.Many2many('mail.channel', string='Channels', help='List of channels that will be added as listeners of the current document.',
+                                   domain=[('channel_type', '=', 'channel')])
     message = fields.Html('Message')
     send_mail = fields.Boolean('Send Email', default=True, help="If checked, the partners will receive an email warning they have been added in the document's followers.")
 
@@ -54,7 +58,8 @@ class Invite(models.TransientModel):
 
             # filter partner_ids to get the new followers, to avoid sending email to already following partners
             new_partners = wizard.partner_ids - document.sudo().message_partner_ids
-            document.message_subscribe(partner_ids=new_partners.ids)
+            new_channels = wizard.channel_ids - document.message_channel_ids
+            document.message_subscribe(new_partners.ids, new_channels.ids)
 
             model_name = self.env['ir.model']._get(wizard.res_model).display_name
             # send an email if option checked and if a message exists (do not send void emails)
@@ -67,12 +72,12 @@ class Invite(models.TransientModel):
                     'reply_to': email_from,
                     'model': wizard.res_model,
                     'res_id': wizard.res_id,
-                    'reply_to_force_new': True,
+                    'no_auto_thread': True,
                     'add_sign': True,
                 })
                 partners_data = []
                 recipient_data = self.env['mail.followers']._get_recipient_data(document, 'comment', False, pids=new_partners.ids)
-                for pid, active, pshare, notif, groups in recipient_data:
+                for pid, cid, active, pshare, ctype, notif, groups in recipient_data:
                     pdata = {'id': pid, 'share': pshare, 'active': active, 'notif': 'email', 'groups': groups or []}
                     if not pshare and notif:  # has an user and is not shared, is therefore user
                         partners_data.append(dict(pdata, type='user'))
@@ -81,7 +86,7 @@ class Invite(models.TransientModel):
                     else:  # has no user, is therefore customer
                         partners_data.append(dict(pdata, type='customer'))
 
-                document._notify_record_by_email(message, partners_data, send_after_commit=False)
+                document._notify_record_by_email(message, {'partners': partners_data, 'channels': []}, send_after_commit=False)
                 # in case of failure, the web client must know the message was
                 # deleted to discard the related failure notification
                 self.env['bus.bus'].sendone(

@@ -122,16 +122,17 @@ class pos_order(models.Model):
                 res |= super(pos_order, order).write(vals_hashing)
         return res
 
-    @api.ondelete(at_uninstall=True)
-    def _unlink_except_pos_so(self):
+    def unlink(self):
         for order in self:
             if order.company_id._is_accounting_unalterable():
-                raise UserError(_("According to French law, you cannot delete a point of sale order."))
-
+                raise UserError(_("According to French law, you cannot delet a point of sale order."))
+        return super(pos_order, self).unlink()
+    
     def _export_for_ui(self, order):
         res = super()._export_for_ui(order)
         res['l10n_fr_hash'] = order.l10n_fr_hash
         return res
+
 
 class PosOrderLine(models.Model):
     _inherit = "pos.order.line"

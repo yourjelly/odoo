@@ -26,11 +26,17 @@ class TestWarehouse(common.TestMrpCommon):
             'name': 'Assembly Line 1',
             'resource_calendar_id': self.env.ref('resource.resource_calendar_std').id,
         })
-        self.env['stock.quant'].create({
-            'location_id': self.stock_location_14.id,
-            'product_id': self.graphics_card.id,
-            'inventory_quantity': 16.0
-        }).action_apply_inventory()
+        inventory = self.env['stock.inventory'].create({
+            'name': 'Initial inventory',
+            'line_ids': [(0, 0, {
+                'product_id': self.graphics_card.id,
+                'product_uom_id': self.graphics_card.uom_id.id,
+                'product_qty': 16.0,
+                'location_id': self.stock_location_14.id,
+            })]
+        })
+        inventory.action_start()
+        inventory.action_validate()
 
         self.bom_laptop = self.env['mrp.bom'].create({
             'product_tmpl_id': self.laptop.product_tmpl_id.id,
@@ -106,21 +112,22 @@ class TestWarehouse(common.TestMrpCommon):
             'company_id': self.env.company.id,
         })
 
-        # Inventory for Stick
-        self.env['stock.quant'].create({
-            'location_id': self.stock_location_14.id,
-            'product_id': self.product_4.id,
-            'inventory_quantity': 8,
-            'lot_id': lot_product_4.id
-        }).action_apply_inventory()
+        stock_inv_product_4 = self.env['stock.inventory'].create({
+            'name': 'Stock Inventory for Stick',
+            'product_ids': [(4, self.product_4.id)],
+            'line_ids': [
+                (0, 0, {'product_id': self.product_4.id, 'product_uom_id': self.product_4.uom_id.id, 'product_qty': 8, 'prod_lot_id': lot_product_4.id, 'location_id': self.stock_location_14.id}),
+            ]})
 
-        # Inventory for Stone Tools
-        self.env['stock.quant'].create({
-            'location_id': self.stock_location_14.id,
-            'product_id': self.product_2.id,
-            'inventory_quantity': 12,
-            'lot_id': lot_product_2.id
-        }).action_apply_inventory()
+        stock_inv_product_2 = self.env['stock.inventory'].create({
+            'name': 'Stock Inventory for Stone Tools',
+            'product_ids': [(4, self.product_2.id)],
+            'line_ids': [
+                (0, 0, {'product_id': self.product_2.id, 'product_uom_id': self.product_2.uom_id.id, 'product_qty': 12, 'prod_lot_id': lot_product_2.id, 'location_id': self.stock_location_14.id})
+            ]})
+        (stock_inv_product_4 | stock_inv_product_2)._action_start()
+        stock_inv_product_2.action_validate()
+        stock_inv_product_4.action_validate()
 
         #Create Manufacturing order.
         production_form = Form(self.env['mrp.production'])

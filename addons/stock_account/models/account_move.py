@@ -112,7 +112,7 @@ class AccountMove(models.Model):
             for line in move.invoice_line_ids:
 
                 # Filter out lines being not eligible for COGS.
-                if not line._eligible_for_cogs():
+                if line.product_id.type != 'product' or line.product_id.valuation != 'real_time':
                     continue
 
                 # Retrieve accounts needed to generate the COGS.
@@ -210,9 +210,6 @@ class AccountMove(models.Model):
                     # Reconcile.
                     product_account_moves.reconcile()
 
-    def _get_invoiced_lot_values(self):
-        return []
-
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
@@ -231,10 +228,6 @@ class AccountMoveLine(models.Model):
             if accounts['stock_input']:
                 return accounts['stock_input']
         return super(AccountMoveLine, self)._get_computed_account()
-
-    def _eligible_for_cogs(self):
-        self.ensure_one()
-        return self.product_id.type == 'product' and self.product_id.valuation == 'real_time'
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()

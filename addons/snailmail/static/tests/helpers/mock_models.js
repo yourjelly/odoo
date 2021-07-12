@@ -1,28 +1,32 @@
-/** @odoo-module **/
+odoo.define('snailmail/static/tests/helpers/mock_models.js', function (require) {
+'use strict';
 
-import { MockModels } from '@mail/../tests/helpers/mock_models';
-import { patch } from 'web.utils';
+const MockModels = require('mail/static/tests/helpers/mock_models.js');
 
-patch(MockModels, 'snailmail/static/tests/helpers/mock_models.js', {
+MockModels.patch('snailmail/static/tests/helpers/mock_models.js', T =>
+    class extends T {
 
-    //----------------------------------------------------------------------
-    // Public
-    //----------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // Public
+        //----------------------------------------------------------------------
 
-    /**
-     * @override
-     */
-    generateData() {
-        const data = this._super(...arguments);
-        Object.assign(data, {
-            'snailmail.letter': {
-                fields: {
-                    message_id: { string: 'Snailmail Status Message', type: 'many2one', relation: 'mail.message' },
+        /**
+         * @override
+         */
+        static generateData() {
+            const data = super.generateData(...arguments);
+            Object.assign(data, {
+                'snailmail.letter': {
+                    fields: {
+                        message_id: { string: 'Snailmail Status Message', type: 'many2one', relation: 'mail.message' },
+                    },
+                    records: [],
                 },
-                records: [],
-            },
-        });
-        return data;
-    },
+            });
+            return data;
+        }
+
+    }
+);
 
 });

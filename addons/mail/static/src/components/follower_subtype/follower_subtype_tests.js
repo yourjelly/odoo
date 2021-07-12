@@ -1,16 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/follower_subtype/follower_subtype_tests.js', function (require) {
+'use strict';
 
-import { FollowerSubtype } from '@mail/components/follower_subtype/follower_subtype';
-import { insert, link } from '@mail/model/model_field_command';
-import {
+const components = {
+    FollowerSubtype: require('mail/static/src/components/follower_subtype/follower_subtype.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { FollowerSubtype };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -53,11 +53,12 @@ QUnit.test('simplest layout of a followed subtype', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        partner: insert({
+        channel: [['insert', {
             id: 1,
+            model: 'mail.channel',
             name: "François Perusse",
-        }),
-        followedThread: link(thread),
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
@@ -70,8 +71,8 @@ QUnit.test('simplest layout of a followed subtype', async function (assert) {
         resModel: 'res.partner'
     });
     follower.update({
-        selectedSubtypes: link(followerSubtype),
-        subtypes: link(followerSubtype),
+        selectedSubtypes: [['link', followerSubtype]],
+        subtypes: [['link', followerSubtype]],
     });
     await this.createFollowerSubtypeComponent({
         follower,
@@ -113,11 +114,12 @@ QUnit.test('simplest layout of a not followed subtype', async function (assert) 
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        partner: insert({
+        channel: [['insert', {
             id: 1,
+            model: 'mail.channel',
             name: "François Perusse",
-        }),
-        followedThread: link(thread),
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
@@ -129,7 +131,7 @@ QUnit.test('simplest layout of a not followed subtype', async function (assert) 
         name: "Dummy test",
         resModel: 'res.partner'
     });
-    follower.update({ subtypes: link(followerSubtype) });
+    follower.update({ subtypes: [['link', followerSubtype]] });
     await this.createFollowerSubtypeComponent({
         follower,
         followerSubtype,
@@ -170,11 +172,12 @@ QUnit.test('toggle follower subtype checkbox', async function (assert) {
         model: 'res.partner',
     });
     const follower = this.env.models['mail.follower'].create({
-        partner: insert({
+        channel: [['insert', {
             id: 1,
+            model: 'mail.channel',
             name: "François Perusse",
-        }),
-        followedThread: link(thread),
+        }]],
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
@@ -186,7 +189,7 @@ QUnit.test('toggle follower subtype checkbox', async function (assert) {
         name: "Dummy test",
         resModel: 'res.partner'
     });
-    follower.update({ subtypes: link(followerSubtype) });
+    follower.update({ subtypes: [['link', followerSubtype]] });
     await this.createFollowerSubtypeComponent({
         follower,
         followerSubtype,
@@ -225,4 +228,6 @@ QUnit.test('toggle follower subtype checkbox', async function (assert) {
 
 });
 });
+});
+
 });

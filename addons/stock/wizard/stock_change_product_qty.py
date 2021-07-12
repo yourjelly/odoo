@@ -11,7 +11,8 @@ class ProductChangeQuantity(models.TransientModel):
 
     product_id = fields.Many2one('product.product', 'Product', required=True)
     product_tmpl_id = fields.Many2one('product.template', 'Template', required=True)
-    product_variant_count = fields.Integer('Variant Count', related='product_tmpl_id.product_variant_count')
+    product_variant_count = fields.Integer('Variant Count',
+        related='product_tmpl_id.product_variant_count', readonly=False)
     new_quantity = fields.Float(
         'New Quantity on Hand', default=1,
         digits='Product Unit of Measure', required=True,
@@ -39,5 +40,5 @@ class ProductChangeQuantity(models.TransientModel):
             'product_id': self.product_id.id,
             'location_id': warehouse.lot_stock_id.id,
             'inventory_quantity': self.new_quantity,
-        })._apply_inventory()
+        })
         return {'type': 'ir.actions.act_window_close'}

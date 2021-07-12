@@ -3,10 +3,10 @@
 
 from datetime import date, datetime, timedelta
 
-from odoo.tests.common import Form, TransactionCase
+from odoo.tests.common import Form, SavepointCase
 
 
-class TestReportsCommon(TransactionCase):
+class TestReportsCommon(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -78,7 +78,7 @@ class TestReports(TestReportsCommon):
             'product_id': product.id,
             'location_id': stock.id,
             'inventory_quantity': 50
-        }).action_apply_inventory()
+        })
         self.env['stock.move'].flush()
         report_records_today = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
@@ -200,12 +200,12 @@ class TestReports(TestReportsCommon):
             'product_id': product.id,
             'location_id': stock.id,
             'inventory_quantity': 50
-        }).action_apply_inventory()
+        })
         self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': product.id,
             'location_id': stock_without_wh.id,
             'inventory_quantity': 50
-        }).action_apply_inventory()
+        })
         move = self.env['stock.move'].create({
             'name': 'Move outside warehouse',
             'location_id': stock.id,
@@ -1041,135 +1041,3 @@ class TestReports(TestReportsCommon):
         delivery2_line = [l for l in lines if l['document_out'].id == delivery2.id][0]
         self.assertTrue(delivery2_line, 'No line for delivery 2')
         self.assertTrue(delivery2_line['replenishment_filled'])
-
-    def test_report_forecast_10_report_line_corresponding_to_picking_highlighted(self):
-        """ When accessing the report from a stock move, checks if the correct picking is highlighted in the report
-            and if the forecasted availability for incoming moves is correct
-        """
-        # Creation of one delivery with date 'today'
-        delivery_form = Form(self.env['stock.picking'])
-        delivery_form.partner_id = self.partner
-        delivery_form.picking_type_id = self.picking_type_out
-        delivery_form.scheduled_date = date.today()
-        with delivery_form.move_ids_without_package.new() as move:
-            move.product_id = self.product
-            move.product_uom_qty = 200
-        delivery1 = delivery_form.save()
-        delivery1.action_confirm()
-
-        # Creation of one receipt with date 'today + 1' and smaller qty than the delivery
-        receipt_form = Form(self.env['stock.picking'])
-        receipt_form.partner_id = self.partner
-        receipt_form.picking_type_id = self.picking_type_in
-        receipt_form.scheduled_date = date.today() + timedelta(days=1)
-        with receipt_form.move_ids_without_package.new() as move:
-            move.product_id = self.product
-            move.product_uom_qty = 150
-        receipt1 = receipt_form.save()
-        receipt1.action_confirm()
-        self.assertEqual(receipt1.move_lines.forecast_availability, -50.0)
-
-        # Creation of an identical receipt which should lead to a positive forecast availability
-        receipt2 = receipt1.copy()
-        receipt2.action_confirm()
-        for move in receipt2.move_lines:
-            move.quantity_done = 150
-        receipt2.button_validate()
-        self.assertEqual(receipt1.move_lines.forecast_availability, 100.0)
-
-        delivery2 = delivery1.copy()
-        delivery2.action_confirm()
-        receipt1.move_lines._compute_forecast_information()
-        self.assertEqual(receipt1.move_lines.forecast_availability, -100.0)
-
-        # Check for both deliveries and receipts if the highlight (is_matched) corresponds to the correct picking
-        for picking in [delivery1, delivery2, receipt1, receipt2]:
-            context = picking.move_lines[0].action_product_forecast_report()['context']
-            _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
-            for line in lines:
-                if picking in [line['document_in'], line['document_out']]:
-                    self.assertTrue(line['is_matched'], "The corresponding picking should be matched in the forecast report.")
-                else:
-                    self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the picking shoud not be matched.")
-
-    def test_report_forecast_11_non_reserved_order(self):
-        """ Creates deliveries with different operation type reservation methods.
-        Checks replenishment lines are correctly sorted by reservation_date:
-            'manual': always last (no reservation_date)
-            'at_confirm': reservation_date = time of creation
-            'by_date': reservation_date = scheduled_date - reservation_days_before(_priority)
-        """
-
-        picking_type_manual = self.picking_type_out.copy()
-        picking_type_by_date = picking_type_manual.copy()
-        picking_type_at_confirm = picking_type_manual.copy()
-        picking_type_manual.reservation_method = 'manual'
-        picking_type_manual.sequence_code = 'manual'
-        picking_type_by_date.reservation_method = 'by_date'
-        picking_type_by_date.sequence_code = 'by'
-        # artificially make non-priority moves reserve before priority moves to
-        # check order doesn't prioritize priority
-        picking_type_by_date.reservation_days_before = '6'
-        picking_type_by_date.reservation_days_before_priority = '4'
-        picking_type_at_confirm.reservation_method = 'at_confirm'
-        picking_type_at_confirm.sequence_code = 'confirm'
-
-        # 'manual' reservation => no reservation_date
-        delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
-        ), view='stock.view_picking_form')
-        delivery_form.partner_id = self.partner
-        delivery_form.picking_type_id = picking_type_manual
-        delivery_form.scheduled_date = datetime.now() - timedelta(days=10)
-        with delivery_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = 3
-        delivery_manual = delivery_form.save()
-        delivery_manual.action_confirm()
-
-        # 'by_date' reservation => reservation_date = 1 day before today
-        delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
-        ), view='stock.view_picking_form')
-        delivery_form.partner_id = self.partner
-        delivery_form.picking_type_id = picking_type_by_date
-        delivery_form.scheduled_date = datetime.now() + timedelta(days=5)
-        with delivery_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = 3
-        delivery_by_date = delivery_form.save()
-        delivery_by_date.action_confirm()
-
-        # 'by_date' reservation (priority) => reservation_date = 1 day after today
-        delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
-        ), view='stock.view_picking_form')
-        delivery_form.partner_id = self.partner
-        delivery_form.picking_type_id = picking_type_by_date
-        delivery_form.scheduled_date = datetime.now() + timedelta(days=5)
-        delivery_form.priority = '1'
-        with delivery_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = 3
-        delivery_by_date_priority = delivery_form.save()
-        delivery_by_date_priority.action_confirm()
-
-        # 'at_confirm' reservation => reservation_date = today
-        delivery_form = Form(self.env['stock.picking'].with_context(
-            force_detailed_view=True
-        ), view='stock.view_picking_form')
-        delivery_form.partner_id = self.partner
-        delivery_form.picking_type_id = picking_type_at_confirm
-        with delivery_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = 3
-        delivery_at_confirm = delivery_form.save()
-        delivery_at_confirm.action_confirm()
-
-        # Order should be: delivery_by_date, delivery_at_confirm, delivery_by_date_priority, delivery_manual
-        _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        self.assertEqual(len(lines), 4, "The report must have 4 lines.")
-        self.assertEqual(lines[0]['document_out'].id, delivery_by_date.id)
-        self.assertEqual(lines[1]['document_out'].id, delivery_at_confirm.id)
-        self.assertEqual(lines[2]['document_out'].id, delivery_by_date_priority.id)
-        self.assertEqual(lines[3]['document_out'].id, delivery_manual.id)

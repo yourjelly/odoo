@@ -1,8 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/user/user.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, one2one } from '@mail/model/model_field';
-import { insert, unlink } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, one2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -14,7 +14,7 @@ function factory(dependencies) {
         _willDelete() {
             if (this.env.messaging) {
                 if (this === this.env.messaging.currentUser) {
-                    this.env.messaging.update({ currentUser: unlink() });
+                    this.env.messaging.update({ currentUser: [['unlink']] });
                 }
             }
             return super._willDelete(...arguments);
@@ -36,14 +36,14 @@ function factory(dependencies) {
             }
             if ('partner_id' in data) {
                 if (!data.partner_id) {
-                    data2.partner = unlink();
+                    data2.partner = [['unlink']];
                 } else {
                     const partnerNameGet = data['partner_id'];
                     const partnerData = {
                         display_name: partnerNameGet[1],
                         id: partnerNameGet[0],
                     };
-                    data2.partner = insert(partnerData);
+                    data2.partner = [['insert', partnerData]];
                 }
             }
             return data2;
@@ -203,9 +203,7 @@ function factory(dependencies) {
     }
 
     User.fields = {
-        id: attr({
-            required: true,
-        }),
+        id: attr(),
         /**
          * Determines whether this user is an internal user. An internal user is
          * a member of the group `base.group_user`. This is the inverse of the
@@ -252,3 +250,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.user', factory);
+
+});

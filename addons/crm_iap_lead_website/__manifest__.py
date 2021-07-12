@@ -14,7 +14,6 @@
     ],
     'data': [
         'data/reveal_data.xml',
-        'security/ir_rules.xml',
         'security/ir.model.access.csv',
         'views/crm_lead_view.xml',
         'views/crm_reveal_views.xml',

@@ -46,7 +46,7 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
 
         if (this.mode === 'edit') {
             this.tagName = 'div';
-            this.className += ' dropdown open w-100';
+            this.className += ' dropdown open';
         }
 
         if (this.debounceSuggestions > 0) {

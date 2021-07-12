@@ -34,7 +34,7 @@ class TestStandardPerformance(UtilPerf):
     def test_10_perf_sql_img_controller(self):
         self.authenticate('demo', 'demo')
         url = '/web/image/res.users/2/image_256'
-        self.assertEqual(self._get_url_hot_query(url), 6)
+        self.assertEqual(self._get_url_hot_query(url), 7)
 
     def test_20_perf_sql_img_controller_bis(self):
         url = '/web/image/website/1/favicon'
@@ -115,8 +115,8 @@ class TestWebsitePerformance(UtilPerf):
 
         self.assertEqual(self._get_url_hot_query(self.page.url), 11)
 
-    def test_50_perf_sql_web_assets(self):
-        # assets route /web/assets/..
+    def test_50_perf_sql_web_content(self):
+        # assets route /web/content/..
         self.url_open('/')  # create assets attachments
-        assets_url = self.env['ir.attachment'].search([('url', '=like', '/web/assets/%/web.assets_common%.js')], limit=1).url
+        assets_url = self.env['ir.attachment'].search([('url', '=like', '/web/content/%/web.assets_common%.js')], limit=1).url
         self.assertEqual(self._get_url_hot_query(assets_url), 2)

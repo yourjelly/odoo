@@ -63,18 +63,13 @@ class IrConfigParameter(models.Model):
         :return: The value of the parameter, or ``default`` if it does not exist.
         :rtype: string
         """
-        self.check_access_rights('read')
         return self._get_param(key) or default
 
     @api.model
-    @ormcache('key')
+    @ormcache('self.env.uid', 'self.env.su', 'key')
     def _get_param(self, key):
-        # we bypass the ORM because get_param() is used in some field's depends,
-        # and must therefore work even when the ORM is not ready to work
-        self.flush(['key', 'value'])
-        self.env.cr.execute("SELECT value FROM ir_config_parameter WHERE key = %s", [key])
-        result = self.env.cr.fetchone()
-        return result and result[0]
+        params = self.search_read([('key', '=', key)], fields=['value'], limit=1)
+        return params[0]['value'] if params else None
 
     @api.model
     def set_param(self, key, value):

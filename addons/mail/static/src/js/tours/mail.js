@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail.tour', function (require) {
+"use strict";
 
-import core from 'web.core';
-import tour from 'web_tour.tour';
+var core = require('web.core');
+var tour = require('web_tour.tour');
 
 var _t = core._t;
 
@@ -54,3 +55,5 @@ tour.register('mail_tour', {
     content: _t("<p><b>Chat with coworkers</b> in real-time using direct messages.</p><p><i>You might need to invite users from the Settings app first.</i></p>"),
     position: 'bottom',
 }]);
+
+});

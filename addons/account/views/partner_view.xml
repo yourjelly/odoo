@@ -12,21 +12,17 @@
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
-                            <field name="states_count" invisible="1"/>
-                            <field name="company_country_id" invisible="1"/>
                             <field name="name"/>
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                         </group>
                         <group>
                             <field name="auto_apply"/>
+                            <field name="states_count" invisible="1"/>
                             <field name="vat_required" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
                             <field name="country_group_id" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
-                            <field name="foreign_vat"/>
-                            <field name="country_id"
-                                attrs="{'invisible': [('auto_apply', '!=', True), ('foreign_vat', '=', False)], 'required': [('foreign_vat', '!=', False)]}"
-                                options="{'no_open': True, 'no_create': True}"/>
+                            <field name="country_id" attrs="{'invisible': [('auto_apply', '!=', True)]}"/>
                             <field name="state_ids" widget="many2many_tags" domain="[('country_id', '=', country_id)]"
-                                attrs="{'invisible': ['|', '|', '&amp;', ('auto_apply', '!=', True), ('foreign_vat', '=', False), ('country_id', '=', False), ('states_count', '=', 0)]}"/>
+                                attrs="{'invisible': ['|', '|', ('auto_apply', '!=', True), ('country_id', '=', False), ('states_count', '=', 0)]}"/>
                             <label for="zip_from" string="Zip Range"
                                 attrs="{'invisible': ['|', ('auto_apply', '!=', True), ('country_id', '=', False)]}"/>
                             <div attrs="{'invisible': ['|', ('auto_apply', '!=', True), ('country_id', '=', False)]}">
@@ -43,22 +39,8 @@
                         <group>
                             <field name="tax_ids" widget="one2many" nolabel="1" context="{'append_type_to_tax_name': True}">
                                 <tree name="tax_map_tree" string="Tax Mapping" editable="bottom">
-                                    <field name="tax_src_id"
-                                        domain="[
-                                            ('type_tax_use', '!=', 'none'),
-                                            ('country_id', '=', parent.company_country_id),
-                                            '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)
-                                        ]"
-                                        context="{'append_type_to_tax_name': True}"
-                                    />
-
-                                    <field name="tax_dest_id"
-                                        domain="[
-                                            ('type_tax_use', '!=', 'none'),
-                                            ('country_id', '=', parent.country_id if parent.foreign_vat else parent.company_country_id),
-                                            '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
-                                        context="{'append_type_to_tax_name': True}"
-                                    />
+                                    <field name="tax_src_id" domain="[('type_tax_use', '!=', 'none'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]" context="{'append_type_to_tax_name': True}"/>
+                                    <field name="tax_dest_id" domain="[('type_tax_use', '!=', 'none'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]" context="{'append_type_to_tax_name': True}"/>
                                 </tree>
                                 <form name="tax_map_form" string="Tax Mapping">
                                     <group>
@@ -136,7 +118,7 @@
                         <separator string="Warning on the Invoice" colspan="4"/>
                         <field name="invoice_warn" nolabel="1" />
                         <field name="invoice_warn_msg" colspan="3" nolabel="1"
-                            attrs="{'required':[('invoice_warn','!=', False), ('invoice_warn','!=','no-message')], 'invisible':[('invoice_warn','in',(False,'no-message'))]}"/>
+                                attrs="{'required':[('invoice_warn', '!=', False), ('invoice_warn','!=','no-message')],'readonly':[('invoice_warn','=','no-message')]}"/>
                     </group>
                 </page>
             </field>
@@ -203,10 +185,10 @@
                     </group>
                 </xpath>
                 <group name="sale" position="inside">
-                    <field string="Payment Terms" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" groups="account.group_account_invoice,account.group_account_readonly"/>
+                    <field string="Payment Terms" name="property_payment_term_id" widget="selection" groups="account.group_account_invoice,account.group_account_readonly"/>
                 </group>
                 <group name="purchase" position="inside">
-                    <field string="Payment Terms" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" groups="account.group_account_invoice,account.group_account_readonly"/>
+                    <field string="Payment Terms" name="property_supplier_payment_term_id" widget="selection" groups="account.group_account_invoice,account.group_account_readonly"/>
                 </group>
             </field>
         </record>

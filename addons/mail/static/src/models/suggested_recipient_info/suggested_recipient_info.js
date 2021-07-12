@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/suggested_recipient_info/suggested_recipient_info.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one } from '@mail/model/model_field';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -111,3 +112,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.suggested_recipient_info', factory);
+
+});

@@ -5,11 +5,11 @@ from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCal
 from odoo.exceptions import ValidationError
 import pytz
 from datetime import datetime, date
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 from dateutil.relativedelta import relativedelta
 
 
-class TestSyncMicrosoft2Odoo(TransactionCase):
+class TestSyncMicrosoft2Odoo(SavepointCase):
 
     @property
     def now(self):

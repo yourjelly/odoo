@@ -69,8 +69,7 @@ tour.register('sale_matrix_tour', {
     run: 'click' // apply the matrix
 }, {
     trigger: ".o_form_editable .o_field_many2one[name='partner_id'] input",
-    // wait for qty to be 1
-    extra_trigger: '.o_sale_order .o_field_cell.o_data_cell.o_list_number:contains("1.00")',
+    extra_trigger: ".o_sale_order",
     run: 'text Agrolait'
 }, {
     trigger: ".ui-menu-item > a",
@@ -110,8 +109,7 @@ tour.register('sale_matrix_tour', {
 },
 // Ensures the matrix is opened with the values, when adding the same product.
 {
-    trigger: "a:contains('Add a product')",
-    extra_trigger: '.o_form_editable',
+    trigger: "a:contains('Add a product')"
 }, {
     trigger: 'div[name="product_template_id"] input',
     run: function () {

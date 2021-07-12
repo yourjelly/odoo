@@ -35,7 +35,4 @@ def to_text(source):
     if isinstance(source, bytes):
         return source.decode('utf-8')
 
-    if isinstance(source, str):
-        return source
-
     return str(source)

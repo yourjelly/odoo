@@ -6,7 +6,7 @@
     'category': 'Hidden',
     'sequence': 6,
     'summary': 'Connect the Web Client to Hardware Peripherals',
-    'website': 'https://www.odoo.com/app/iot',
+    'website': 'https://www.odoo.com/page/iot',
     'description': """
 Hardware Poxy
 =============

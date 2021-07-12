@@ -10,12 +10,13 @@ odoo.define('point_of_sale.test_popups', function(require) {
 
     QUnit.module('unit tests for Popups', {
         before() {
-            class Root extends PopupControllerMixin(PosComponent) { }
-            Root.template = xml`
+            class Root extends PopupControllerMixin(PosComponent) {
+                static template = xml`
                     <div>
                         <t t-if="popup.isShown" t-component="popup.component" t-props="popupProps" t-key="popup.name" />
                     </div>
                 `;
+            }
             Root.env = makePosTestEnv();
             this.Root = Root;
             Registries.Component.freeze();
@@ -75,13 +76,13 @@ odoo.define('point_of_sale.test_popups', function(require) {
         let promResponse, userResponse;
 
         // Step: show NumberPopup and confirm with empty buffer
-        promResponse = root.showPopup('NumberPopup', { startingValue: 1 });
+        promResponse = root.showPopup('NumberPopup', {});
         await testUtils.nextTick();
         testUtils.dom.triggerEvent(root.el.querySelector('.confirm'), 'mousedown');
         await testUtils.nextTick();
         userResponse = await promResponse;
         assert.strictEqual(userResponse.confirmed, true);
-        assert.strictEqual(userResponse.payload, "1");
+        assert.strictEqual(userResponse.payload, "");
 
         // Step: show NumberPopup and cancel
         promResponse = root.showPopup('NumberPopup', {});

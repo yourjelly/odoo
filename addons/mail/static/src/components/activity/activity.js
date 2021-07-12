@@ -1,27 +1,24 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/activity/activity.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { ActivityMarkDonePopover } from '@mail/components/activity_mark_done_popover/activity_mark_done_popover';
-import { FileUploader } from '@mail/components/file_uploader/file_uploader';
-import { MailTemplate } from '@mail/components/mail_template/mail_template';
+const components = {
+    ActivityMarkDonePopover: require('mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.js'),
+    FileUploader: require('mail/static/src/components/file_uploader/file_uploader.js'),
+    MailTemplate: require('mail/static/src/components/mail_template/mail_template.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
-import {
+const {
     auto_str_to_date,
     getLangDateFormat,
     getLangDatetimeFormat,
-} from 'web.time';
+} = require('web.time');
 
 const { Component, useState } = owl;
 const { useRef } = owl.hooks;
 
-const components = {
-    ActivityMarkDonePopover,
-    FileUploader,
-    MailTemplate,
-};
-
-export class Activity extends Component {
+class Activity extends Component {
 
     /**
      * @override
@@ -195,4 +192,8 @@ Object.assign(Activity, {
         activityLocalId: String,
     },
     template: 'mail.Activity',
+});
+
+return Activity;
+
 });

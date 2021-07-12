@@ -24,7 +24,6 @@ QUnit.module('HR Attendance', {
                     user_id: {string: 'user ID', type: 'integer'},
                     barcode: {string:'barcode', type: 'integer'},
                     hours_today: {string:'Hours today', type: 'float'},
-                    overtime: {string: 'Overtime', type: 'float'},
                 },
                 records: [{
                     id: 1,

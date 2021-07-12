@@ -1,4 +1,3 @@
-/* global ace */
 odoo.define('test_website.reset_views', function (require) {
 'use strict';
 

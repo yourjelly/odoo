@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/env/test_env.js', function (require) {
+'use strict';
 
-import { makeDeferred } from '@mail/utils/deferred/deferred';
-import { nextTick } from '@mail/utils/utils';
+const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
+const { nextTick } = require('mail/static/src/utils/utils.js');
 
 const { Store } = owl;
 const { EventBus } = owl.core;
@@ -139,7 +140,9 @@ function addTimeControlToEnv(providedEnv = {}) {
     return env;
 }
 
-export {
+return {
     addMessagingToEnv,
     addTimeControlToEnv,
-}
+};
+
+});

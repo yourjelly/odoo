@@ -1,8 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/message_seen_indicator/message_seen_indicator.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many, many2one, one2many } from '@mail/model/model_field';
-import { insert, replace, unlinkAll } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many, many2one, one2many } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -174,7 +174,7 @@ function factory(dependencies) {
          */
         _computePartnersThatHaveFetched() {
             if (!this.message || !this.thread || !this.thread.partnerSeenInfos) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
             const otherPartnersThatHaveFetched = this.thread.partnerSeenInfos
                 .filter(partnerSeenInfo =>
@@ -190,9 +190,9 @@ function factory(dependencies) {
                 )
                 .map(partnerSeenInfo => partnerSeenInfo.partner);
             if (otherPartnersThatHaveFetched.length === 0) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
-            return replace(otherPartnersThatHaveFetched);
+            return [['replace', otherPartnersThatHaveFetched]];
         }
 
         /**
@@ -204,7 +204,7 @@ function factory(dependencies) {
          */
         _computePartnersThatHaveSeen() {
             if (!this.message || !this.thread || !this.thread.partnerSeenInfos) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
             const otherPartnersThatHaveSeen = this.thread.partnerSeenInfos
                 .filter(partnerSeenInfo =>
@@ -219,9 +219,9 @@ function factory(dependencies) {
                     partnerSeenInfo.lastSeenMessage.id >= this.message.id)
                 .map(partnerSeenInfo => partnerSeenInfo.partner);
             if (otherPartnersThatHaveSeen.length === 0) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
-            return replace(otherPartnersThatHaveSeen);
+            return [['replace', otherPartnersThatHaveSeen]];
         }
 
         /**
@@ -229,7 +229,7 @@ function factory(dependencies) {
          * @returns {mail.message}
          */
         _computeMessage() {
-            return insert({ id: this.messageId });
+            return [['insert', { id: this.messageId }]];
         }
 
         /**
@@ -237,10 +237,10 @@ function factory(dependencies) {
          * @returns {mail.thread}
          */
         _computeThread() {
-            return insert({
+            return [['insert', {
                 id: this.channelId,
                 model: 'mail.channel',
-            });
+            }]];
         }
     }
 
@@ -262,9 +262,7 @@ function factory(dependencies) {
          * (required fields) should improve and let us just use the relational
          * fields.
          */
-        channelId: attr({
-            required: true,
-        }),
+        channelId: attr(),
         hasEveryoneFetched: attr({
             compute: '_computeHasEveryoneFetched',
             default: false,
@@ -323,9 +321,7 @@ function factory(dependencies) {
          * (required fields) should improve and let us just use the relational
          * fields.
          */
-        messageId: attr({
-            required: true,
-        }),
+        messageId: attr(),
         partnersThatHaveFetched: many2many('mail.partner', {
             compute: '_computePartnersThatHaveFetched',
             dependencies: ['messageAuthor', 'messageId', 'threadPartnerSeenInfos'],
@@ -358,3 +354,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.message_seen_indicator', factory);
+
+});

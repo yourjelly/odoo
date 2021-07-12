@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail.BasicView', function (require) {
+"use strict";
 
-import BasicView from 'web.BasicView';
+const BasicView = require('web.BasicView');
 
 const mailWidgets = ['kanban_activity'];
 
@@ -62,4 +63,6 @@ BasicView.include({
     _hasField(fieldName) {
         return !!this.fieldsInfo[this.viewType][fieldName];
     },
+});
+
 });

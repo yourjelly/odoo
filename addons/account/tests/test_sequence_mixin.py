@@ -3,7 +3,7 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import Form
 from odoo import fields, api, SUPERUSER_ID
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError
 from odoo.tools import mute_logger
 
 from dateutil.relativedelta import relativedelta
@@ -21,9 +21,9 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
         cls.test_move = cls.create_move()
 
     @classmethod
-    def create_move(cls, date=None, journal=None, name=None, post=False):
+    def create_move(cls, move_type=None, date=None, journal=None, name=None, post=False):
         move = cls.env['account.move'].create({
-            'move_type': 'entry',
+            'move_type': move_type or 'entry',
             'date': date or '2016-01-01',
             'line_ids': [
                 (0, None, {
@@ -164,9 +164,9 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
         })
         (invoice + invoice2).move_type = 'out_invoice'
         (refund + refund2).move_type = 'out_refund'
-        all_moves = (entry + entry2 + invoice + invoice2 + refund + refund2)
-        all_moves.name = False
-        all_moves.action_post()
+        all = (entry + entry2 + invoice + invoice2 + refund + refund2)
+        all.name = False
+        all.action_post()
         self.assertEqual(entry.name, 'MISC/2016/01/0002')
         self.assertEqual(entry2.name, 'MISC/2016/01/0003')
         self.assertEqual(invoice.name, 'INV/2016/01/0001')
@@ -223,22 +223,22 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
     def test_journal_override_sequence_regex(self):
         """There is a possibility to override the regex and change the order of the paramters."""
         self.create_move(date='2020-01-01', name='00000876-G 0002/2020')
-        next_move = self.create_move(date='2020-01-01')
-        next_move.action_post()
-        self.assertEqual(next_move.name, '00000876-G 0002/2021')  # Wait, I didn't want this!
+        next = self.create_move(date='2020-01-01')
+        next.action_post()
+        self.assertEqual(next.name, '00000876-G 0002/2021')  # Wait, I didn't want this!
 
-        next_move.button_draft()
-        next_move.name = False
-        next_move.journal_id.sequence_override_regex = r'^(?P<seq>\d*)(?P<suffix1>.*?)(?P<year>(\d{4})?)(?P<suffix2>)$'
-        next_move.action_post()
-        self.assertEqual(next_move.name, '00000877-G 0002/2020')  # Pfew, better!
-        next_move = self.create_move(date='2020-01-01')
-        next_move.action_post()
-        self.assertEqual(next_move.name, '00000878-G 0002/2020')
+        next.button_draft()
+        next.name = False
+        next.journal_id.sequence_override_regex = r'^(?P<seq>\d*)(?P<suffix1>.*?)(?P<year>(\d{4})?)(?P<suffix2>)$'
+        next.action_post()
+        self.assertEqual(next.name, '00000877-G 0002/2020')  # Pfew, better!
+        next = self.create_move(date='2020-01-01')
+        next.action_post()
+        self.assertEqual(next.name, '00000878-G 0002/2020')
 
-        next_move = self.create_move(date='2017-05-02')
-        next_move.action_post()
-        self.assertEqual(next_move.name, '00000001-G 0002/2017')
+        next = self.create_move(date='2017-05-02')
+        next.action_post()
+        self.assertEqual(next.name, '00000001-G 0002/2017')
 
     def test_journal_sequence_ordering(self):
         """Entries are correctly sorted when posting multiple at once."""
@@ -379,41 +379,8 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
 
             self.assertEqual(moves.mapped('name'), ['CT/2016/01/0001', 'CT/2016/01/0002', '/'])
             moves.button_draft()
-            moves.with_context(force_delete=True).unlink()
+            moves.posted_before = False
+            moves.unlink()
             journal.unlink()
             account.unlink()
             env0.cr.commit()
-
-    def test_sequence_deletion(self):
-        """The last element of a sequence chain should always be deletable if in draft state.
-
-        Trying to delete another part of the chain shouldn't work.
-        """
-        journal = self.env['account.journal'].create({
-            'name': 'Test sequences - deletion',
-            'code': 'SEQDEL',
-            'type': 'general',
-        })
-
-        move_1_1 = self.create_move('2021-01-01', journal, name='TOTO/2021/01/0001', post=True)
-        move_1_2 = self.create_move('2021-01-02', journal, post=True)
-        move_1_3 = self.create_move('2021-01-03', journal, post=True)
-        move_2_1 = self.create_move('2021-02-01', journal, post=True)
-        move_draft = self.create_move('2021-02-02', journal, post=False)
-        move_2_2 = self.create_move('2021-02-03', journal, post=True)
-        move_3_1 = self.create_move('2021-02-10', journal, name='TURLUTUTU/21/02/001', post=True)
-
-        # A draft move without any name can always be deleted.
-        move_draft.unlink()
-
-        # The moves that are not at the end of their sequence chain cannot be deleted
-        for move in (move_1_1, move_1_2, move_2_1):
-            with self.assertRaises(UserError):
-                move.button_draft()
-                move.unlink()
-
-        # The last element of each sequence chain should allow deletion.
-        # Everything should be deletable if we follow this order (a bit randomized on purpose)
-        for move in (move_1_3, move_1_2, move_3_1, move_2_2, move_2_1, move_1_1):
-            move.button_draft()
-            move.unlink()

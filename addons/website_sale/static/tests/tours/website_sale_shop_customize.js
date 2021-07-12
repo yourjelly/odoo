@@ -2,7 +2,6 @@ odoo.define('website_sale.tour_shop_customize', function (require) {
     'use strict';
 
     var tour = require("web_tour.tour");
-    const tourUtils = require('website_sale.tour_utils');
 
     tour.register('shop_customize', {
         test: true,
@@ -20,11 +19,11 @@ odoo.define('website_sale.tour_shop_customize', function (require) {
             {
                 content: "select product attribute Steel",
                 extra_trigger: 'body:not(:has(#customize-menu:visible .dropdown-menu:visible))',
-                trigger: 'form.js_attributes input:not(:checked) + label:contains(Steel - Test)',
+                trigger: 'form.js_attributes label:contains(Steel - Test) input:not(:checked)',
             },
             {
                 content: "check the selection",
-                trigger: 'form.js_attributes input:checked + label:contains(Steel - Test)',
+                trigger: 'form.js_attributes label:contains(Steel - Test) input:checked',
                 run: function () {}, // it's a check
             },
             {
@@ -120,7 +119,6 @@ odoo.define('website_sale.tour_shop_customize', function (require) {
                 trigger: '.my_cart_quantity:containsExact(1),.o_extra_menu_items .fa-plus',
                 run: function () {}, // it's a check
             },
-                tourUtils.goToCart(),
             {
                 content: "click on shop",
                 trigger: "a:contains(Continue Shopping)",

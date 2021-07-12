@@ -44,7 +44,7 @@
                   accurate to display it.
                   -->
               <span class="variant_price_extra" style="white-space: nowrap;">
-                  <t t-out="price"/>
+                  <t t-raw="price"/>
               </span>
           </span>
     </template>

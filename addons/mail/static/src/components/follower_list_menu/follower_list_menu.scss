@@ -6,12 +6,6 @@
     position: relative;
 }
 
-.o_FollowerListMenu_buttonFollowers {
-    &:focus {
-        background-color: gray('200');
-    }
-}
-
 .o_FollowerListMenu_dropdown {
     display: flex;
     flex-flow: column;

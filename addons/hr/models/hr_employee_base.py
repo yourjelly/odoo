@@ -27,8 +27,7 @@ class HrEmployeeBase(models.AbstractModel):
     work_phone = fields.Char('Work Phone', compute="_compute_phones", store=True, readonly=False)
     mobile_phone = fields.Char('Work Mobile')
     work_email = fields.Char('Work Email')
-    work_location_id = fields.Many2one('hr.work.location', 'Work Location', compute="_compute_work_location_id", store=True, readonly=False,
-    domain="[('address_id', '=', address_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    work_location = fields.Char('Work Location')
     user_id = fields.Many2one('res.users')
     resource_id = fields.Many2one('resource.resource')
     resource_calendar_id = fields.Many2one('resource.calendar', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
@@ -54,14 +53,6 @@ class HrEmployeeBase(models.AbstractModel):
         ('presence_absent', 'Absent'),
         ('presence_to_define', 'To define'),
         ('presence_undetermined', 'Undetermined')], compute='_compute_presence_icon')
-    employee_type = fields.Selection([
-        ('employee', 'Employee'),
-        ('student', 'Student'),
-        ('trainee', 'Trainee'),
-        ('contractor', 'Contractor'),
-        ('freelance', 'Freelancer'),
-        ], string='Employee Type', default='employee', required=True,
-        help="The employee type. Although the primary purpose may seem to categorize employees, this field has also an impact in the Contract History. Only Employee type is supposed to be under contract and will have a Contract History.")
 
     @api.depends('user_id.im_status')
     def _compute_presence_state(self):
@@ -163,11 +154,6 @@ class HrEmployeeBase(models.AbstractModel):
                     icon = 'presence_undetermined'
             employee.hr_icon_display = icon
 
-    @api.depends('address_id')
-    def _compute_work_location_id(self):
-        to_reset = self.filtered(lambda e: e.address_id != e.work_location_id.address_id)
-        to_reset.work_location_id = False
-
     @api.model
     def _get_employee_working_now(self):
         working_now = []
@@ -184,7 +170,7 @@ class HrEmployeeBase(models.AbstractModel):
                 to_datetime = utc.localize(stop_dt).astimezone(timezone(tz or 'UTC'))
                 # Getting work interval of the first is working. Functions called on resource_calendar_id
                 # are waiting for singleton
-                work_interval = res_employee_ids[0].resource_calendar_id._work_intervals_batch(from_datetime, to_datetime)[False]
+                work_interval = res_employee_ids[0].resource_calendar_id._work_intervals(from_datetime, to_datetime)
                 # Employee that is not supposed to work have empty items.
                 if len(work_interval._items) > 0:
                     # The employees should be working now according to their work schedule

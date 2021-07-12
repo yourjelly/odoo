@@ -7,7 +7,7 @@
         <field name="domain">[('event_track_wishlisted_ids', 'in', [active_id])]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Wait for visitors to add this track to their list of favorites
+                Wait for visitors to wishlist your tracks
             </p>
         </field>
     </record>
@@ -54,7 +54,7 @@
                                     </div>
                                     <div class="oe_kanban_bottom_right">
                                         <field name="kanban_state" widget="state_selection" groups="base.group_user"/>
-                                        <img t-att-src="kanban_image('res.partner', 'avatar_128', record.partner_id.raw_value)"
+                                        <img t-att-src="kanban_image('res.partner', 'image_128', record.partner_id.raw_value)"
                                             t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value"
                                             class="oe_kanban_avatar"/>
                                     </div>
@@ -75,8 +75,8 @@
             <calendar date_start="date" date_delay="duration" string="Event Tracks" color="location_id" event_limit="5">
                 <field name="location_id" filters="1"/>
                 <field name="event_id"/>
-                <field name="partner_id" avatar_field="avatar_128"/>
-                <field name="user_id" avatar_field="avatar_128"/>
+                <field name="partner_id" avatar_field="image_128"/>
+                <field name="user_id" avatar_field="image_128"/>
             </calendar>
         </field>
     </record>
@@ -133,8 +133,7 @@
                         <button name="%(website_event_track.website_visitor_action_from_track)d"
                             type="action"
                             class="oe_stat_button"
-                            icon="fa-bell"
-                            groups="event.group_event_user">
+                            icon="fa-bell">
                             <field name="wishlist_visitor_count" string="Wishlisted By" widget="statinfo"/>
                         </button>
                         <field name="is_published" widget="website_redirect_button"/>
@@ -143,7 +142,7 @@
                     <field name="kanban_state" widget="state_selection" class="ml-3 float-right"/>
                     <field name="website_image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
-                        <label for="name"/>
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
                             <field name="name" placeholder="e.g. Inspiring Business Talk"/>
                         </h1>
@@ -169,28 +168,22 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Speaker" name="speaker">
-                            <group string="Contact Details" class="display-flex justify-content-between">
+                        <page string="Speakers" name="speakers">
+                            <group class="display-flex justify-content-between">
                                 <group>
-                                    <field name="partner_id" context="{'default_phone': contact_phone, 'default_email': contact_email}"/>
-                                    <field name="contact_email" attrs="{'readonly': [('partner_id', '!=', False)]}"/>
-                                    <field name="contact_phone" class="o_force_ltr" attrs="{'readonly': [('partner_id', '!=', False)]}"/>
-                                </group>
-                            </group>
-                            <group string="Speaker Bio" class="display-flex justify-content-between">
-                                <group>
+                                    <field name="partner_id"
+                                        domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"
+                                        context="{'default_phone': partner_phone, 'default_email': partner_email}"/>
                                     <field name="partner_name"/>
                                     <field name="partner_email"/>
                                     <field name="partner_phone" class="o_force_ltr"/>
-                                    <field name="partner_function"/>
-                                    <field name="partner_company_name"/>
                                 </group>
                                 <group>
                                     <field name="image" nolabel="1" widget="image" class="oe_avatar"/>
                                 </group>
                             </group>
                             <group>
-                                <field name="partner_biography" string="Biography"/>
+                                <field name="partner_biography"/>
                             </group>
                         </page>
                         <page string="Description" name="description">
@@ -210,7 +203,7 @@
                                         attrs="{'invisible': [('website_cta', '=', False)]}"/>
                                     <div attrs="{'invisible': [('website_cta', '=', False)]}">
                                         <field name="website_cta_delay" class="oe_inline"
-                                            attrs="{'required': [('website_cta', '=', True)]}"/> minutes after track starts
+                                            attrs="{'required': [('website_cta', '=', True)]}"/> minutes after talk start
                                     </div>
                                 </group>
                             </group>
@@ -251,7 +244,7 @@
         <field name="name">event.track.graph</field>
         <field name="model">event.track</field>
         <field name="arch" type="xml">
-            <graph string="Tracks" type="bar" sample="1">
+            <graph string="Tracks" type="bar" orientation="horizontal" sample="1">
                 <field name="location_id"/>
                 <field name="duration" operator="+"/>
             </graph>
@@ -292,7 +285,7 @@
         <field name="domain">[('wishlist_visitor_ids', 'in', [active_id])]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
-                No track favorited by this visitor
+                No track wishlisted by this visitor
             </p>
         </field>
     </record>

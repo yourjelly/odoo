@@ -67,16 +67,15 @@ class ResPartnerBank(models.Model):
             raise UserError(_("Cannot compute the BBAN because the account number is not an IBAN."))
         return get_bban_from_iban(self.acc_number)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get('acc_number'):
-                try:
-                    validate_iban(vals['acc_number'])
-                    vals['acc_number'] = pretty_iban(normalize_iban(vals['acc_number']))
-                except ValidationError:
-                    pass
-        return super(ResPartnerBank, self).create(vals_list)
+    @api.model
+    def create(self, vals):
+        if vals.get('acc_number'):
+            try:
+                validate_iban(vals['acc_number'])
+                vals['acc_number'] = pretty_iban(normalize_iban(vals['acc_number']))
+            except ValidationError:
+                pass
+        return super(ResPartnerBank, self).create(vals)
 
     def write(self, vals):
         if vals.get('acc_number'):

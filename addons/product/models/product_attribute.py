@@ -32,7 +32,6 @@ class ProductAttribute(models.Model):
     product_tmpl_ids = fields.Many2many('product.template', string="Related Products", compute='_compute_products', store=True)
     display_type = fields.Selection([
         ('radio', 'Radio'),
-        ('pills', 'Pills'),
         ('select', 'Select'),
         ('color', 'Color')], default='radio', required=True, help="The display type used in the Product Configurator.")
 
@@ -73,14 +72,14 @@ class ProductAttribute(models.Model):
             self.invalidate_cache()
         return res
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_used_on_product(self):
+    def unlink(self):
         for pa in self:
             if pa.is_used_on_products:
                 raise UserError(
                     _("You cannot delete the attribute %s because it is used on the following products:\n%s") %
                     (pa.display_name, ", ".join(pa.product_tmpl_ids.mapped('display_name')))
                 )
+        return super(ProductAttribute, self).unlink()
 
 
 class ProductAttributeValue(models.Model):
@@ -145,14 +144,14 @@ class ProductAttributeValue(models.Model):
             self.invalidate_cache()
         return res
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_used_on_product(self):
+    def unlink(self):
         for pav in self:
             if pav.is_used_on_products:
                 raise UserError(
                     _("You cannot delete the value %s because it is used on the following products:\n%s") %
                     (pav.display_name, ", ".join(pav.pav_attribute_line_ids.product_tmpl_id.mapped('display_name')))
                 )
+        return super(ProductAttributeValue, self).unlink()
 
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pav: pav.attribute_id.create_variant != 'no_variant')

@@ -40,6 +40,112 @@ body.editor_enable.editor_has_snippets {
     }
 }
 
+// Ugly hack to force ugly rules... while waiting for new editor
+#oe_snippets#oe_snippets .o_we_snippet_text_tools {
+    $-text-tools-gap: 3px;
+    $-text-tools-header-height: 35px;
+
+    z-index: $o-we-zindex;
+    flex: 1 0 auto;
+    display: flex;
+    padding: $-text-tools-header-height $o-we-sidebar-content-padding-base ($o-we-sidebar-content-padding-base * 3) $o-we-sidebar-content-indent;
+    box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2);
+    overflow-y: auto;
+
+    .popover {
+        position: static !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        border: none !important;
+    }
+    .popover-body {
+        padding: 0 !important;
+        border: none !important;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: $-text-tools-gap;
+
+        > * {
+            margin: 0 0 $o-we-sidebar-content-field-spacing*.5 0;
+        }
+    }
+    .btn {
+        @extend %we-generic-button;
+        border-radius: 0;
+        padding: 0 $o-we-sidebar-content-field-button-group-button-spacing!important;
+        line-height: $o-we-sidebar-content-field-height + ($o-we-sidebar-content-field-border-width*2)!important;
+    }
+    // Achieve a "button-group effect" for siblings buttons.
+    .popover-body > .btn-group {
+        > .btn  {
+            border-radius: 0;
+        }
+        > .btn:first-of-type, > div:first-of-type .btn {
+            @include border-left-radius($o-we-sidebar-content-field-border-radius);
+        }
+        > .btn:last-of-type, > div:last-of-type .btn {
+            @include border-right-radius($o-we-sidebar-content-field-border-radius);
+        }
+    }
+    .btn-group {
+
+        &.note-color {
+            order: -3;
+
+            .note-back-color-preview {
+                margin-left: $-text-tools-gap;
+            }
+            .btn::after {
+                display: none;
+            }
+        }
+        &.note-style {
+            order: -2;
+
+            &, > div {
+                flex-grow: 1;
+            }
+        }
+        &.note-fontsize {
+            order: -1;
+        }
+        &.note-font [data-name="clear"] {
+            @include o-position-absolute(($-text-tools-header-height*-1) + 5px, 0);
+            background: 0;
+            border: 0;
+            @extend %we-generic-link;
+        }
+        &.note-para {
+            flex-grow: 1;
+            gap: $-text-tools-gap;
+            justify-content: space-between;
+
+            > * {
+                flex: 1 1 33%;
+            }
+        }
+        > .d-none + * {
+            margin-left: 0 !important;
+        }
+    }
+    .note-color {
+        .btn-group {
+            position: static;
+        }
+        .dropdown-menu { // Drop up
+            margin-top: $o-we-dropdown-spacing;
+        }
+    }
+    .note-popover ~ .note-popover,
+    .note-handle ~ .note-handle,
+    .note-dialog ~ .note-dialog {
+        // Prevent flickering of summernote when switching text tools...
+        display: none;
+    }
+}
+
 .oe_snippet {
     // No root because can be drag and drop (and the helper is in the body)
     position: relative;
@@ -118,7 +224,6 @@ body.editor_enable.editor_has_snippets {
             'info': $o-we-color-info,
             'warning': $o-we-color-warning,
             'danger': $o-we-color-danger,
-            'brand_primary': $o-brand-primary,
         );
 
         @each $name, $color in $-hover-colors {
@@ -128,15 +233,6 @@ body.editor_enable.editor_has_snippets {
 
             &.o_we_hover_#{$name}:hover {
                 color: $color;
-            }
-
-            &.o_we_bg_#{$name} {
-                color: white;
-                background-color: $color;
-
-                &:hover {
-                    background-color: darken($color, 7.5%);
-                }
             }
         }
     }
@@ -195,33 +291,6 @@ body.editor_enable.editor_has_snippets {
     }
 }
 
-%we-generic-text-input {
-    > div {
-        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-        border-radius: $o-we-sidebar-content-field-border-radius;
-        background-color: $o-we-sidebar-content-field-input-bg;
-
-        &:focus-within {
-            border-color: $o-we-sidebar-content-field-input-border-color;
-        }
-        input {
-            box-sizing: content-box;
-            padding: 0 $o-we-sidebar-content-field-clickable-spacing;
-            border: none;
-            border-radius: 0;
-            background-color: transparent;
-            color: inherit;
-
-            &:focus {
-                outline: none;
-            }
-        }
-        > we-button { // for input-group
-            border: none;
-        }
-    }
-}
-
 // SNIPPET PANEL
 #oe_snippets {
     @include o-w-preserve-btn;
@@ -250,47 +319,6 @@ body.editor_enable.editor_has_snippets {
     *::selection {
         background: lighten($o-we-accent, 9);
         color: $o-we-bg-darkest;
-    }
-
-    // EDITOR TOP BAR AND POPOVER
-    .o_we_website_top_actions {
-        display: flex;
-        justify-content: flex-start;
-        width: $o-we-sidebar-width;
-        height: $o-we-sidebar-top-height;
-        // Firefox css fix
-        min-height: $o-we-sidebar-top-height;
-        background-color: $o-we-sidebar-tabs-bg;
-
-        .btn-group, .btn {
-            height: 100%;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 0;
-            padding: 0.375rem 0.75rem;
-            font-size: $o-we-font-size;
-            font-family: $o-we-font-family;
-            font-weight: 400;
-            line-height: 1;
-
-            &.btn-primary {
-                @include button-variant($o-brand-primary, $o-brand-primary);
-            }
-            &.btn-secondary {
-                @include button-variant($o-we-sidebar-tabs-bg, $o-we-sidebar-tabs-bg);
-            }
-            &:focus, &:active, &:focus:active {
-                outline: none;
-                box-shadow: none;
-            }
-        }
-
-        .dropdown-menu {
-            left: auto;
-            right: 0;
-        }
     }
 
     #snippets_menu {
@@ -408,10 +436,10 @@ body.editor_enable.editor_has_snippets {
         #snippet_custom .oe_snippet {
             width: 100%;
 
-            &, .oe_snippet_thumbnail, .btn {
+            &, .oe_snippet_thumbnail, .o_delete_btn {
                 display: flex;
             }
-            .oe_snippet_thumbnail, .btn {
+            .oe_snippet_thumbnail, .o_delete_btn {
                 align-items: center;
             }
             .oe_snippet_thumbnail {
@@ -422,46 +450,20 @@ body.editor_enable.editor_has_snippets {
             }
             .oe_snippet_thumbnail_img {
                 flex-shrink: 0;
-                width: 41px;
-                height: 30px; // 82x60 -> 41x30
+                width: 40px;
+                height: 32px;
                 padding: 0;
             }
-            .btn {
+            .o_delete_btn {
                 @extend %we-generic-link;
                 padding-top: 0;
                 padding-bottom: 0;
-                padding-left: 0;
-            }
-            &:not(:hover) .btn {
-                display: none;
-            }
-            we-input.o_we_user_value_widget {
-                @extend %we-generic-text-input;
-                cursor: pointer;
-                > div {
-                    display: flex;
-                }
-                input {
-                    cursor: text;
-                }
-                we-button {
-                    @extend %we-generic-clickable;
-                    cursor: pointer;
-                    flex: 1 1 auto;
-                    line-height: 17px;
-                    text-align: center;
-
-                    &:hover {
-                        background-color: gray;
-                    }
-                }
             }
         }
     }
 
     > .o_we_customize_panel {
         position: relative;
-        flex: 1;
 
         @mixin we-icon-button($icon, $color: $o-we-sidebar-content-field-control-item-color, $align: right) {
             @extend %we-icon-button;
@@ -483,183 +485,8 @@ body.editor_enable.editor_has_snippets {
             width: $o-we-sidebar-content-available-room * .6;
         }
 
-        we-button, we-toggler, .oe-toolbar .btn {
+        we-button, we-toggler {
             @extend %we-generic-button;
-        }
-
-        .oe-toolbar {
-            position: relative;
-            border: none;
-            border-radius: unset;
-            background: transparent;
-            margin-top: 10px;
-            padding: 0 8px 0 13px;
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            width: 100%;
-
-            we-customizeblock-option {
-                color: #D9D9D9;
-                padding: 0;
-                /* Ensure an extra option in the toolbar takes its whole width. */
-                grid-column-end: span 5;
-
-                we-title {
-                    &.o_short_title {
-                        width: unset !important;
-                        padding-right: 0 !important;
-                    }
-                    &.o_long_title {
-                        width: fit-content !important;
-                        padding-right: 10px !important;
-                    }
-                }
-                .highlighted-text {
-                    color: white;
-                    font-weight: bold;
-                    padding: 1px;
-                }
-                .dropdown {
-                    position: unset;
-                    width: -webkit-fill-available;
-
-                    .dropdown-toggle {
-                        padding: 0;
-                        width: inherit;
-
-                        &::after {
-                            display: none;
-                        }
-                    }
-                    .dropdown-menu.show {
-                        position: absolute !important;
-
-                        we-button {
-                            text-align: left;
-                            font-family: Roboto, "Montserrat", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-                            font-size: 12px;
-                            font-weight: 400;
-                        }
-                    }
-                }
-                input::placeholder {
-                    font-style: italic;
-                }
-            }
-
-            &::before {
-                border: none !important;
-            }
-            .btn-group {
-                margin: 0 2px 5px 2px;
-
-                label {
-                    margin: 0;
-                }
-
-                .btn {
-                    color: white;
-                    box-sizing: border-box;
-                    padding: 2px 6px 2px 6px !important;
-                    height: 100%;
-
-                    &:focus, &:active, &:focus:active {
-                        background-color: black;
-                    }
-
-                    &.color-button {
-                        padding-top: 0 !important;
-                    }
-
-                    .color-indicator {
-                        border-bottom: 3px solid;
-
-                        &.fore-color {
-                            border-color: var(--fore-color);
-                        }
-                        &.hilite-color {
-                            border-color: var(--hilite-color);
-                        }
-                    }
-                }
-            }
-            .dropdown-menu {
-                .btn-group {
-                    margin: 0;
-                }
-                .dropdown-item, .dropdown-item > * {
-                    line-height: 34px !important;
-                }
-                .oe-tablepicker {
-                    margin-top: 2px;
-
-                    .oe-tablepicker-row {
-                        line-height: normal;
-
-                        .oe-tablepicker-cell {
-                            display: inline-block !important;
-                            width: 15px !important;
-                            height: 15px !important;
-                            background-color: white !important;
-                            margin-bottom: 0 !important;
-
-                            &.active {
-                                background: #01bad2 !important;
-                            }
-                        }
-                    }
-                }
-            }
-            we-input, we-input div, we-input input {
-                width: 100% !important;
-            }
-            #decoration {
-                grid-column-end: span 4;
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-            #colorInputButtonGroup {
-                grid-column-end: span 2;
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            #table {
-                grid-column-end: span 2;
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            #link {
-                grid-column-end: span 3;
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-            #media-description {
-                grid-column-end: span 2;
-            }
-            #image-shape {
-                grid-column-end: span 4;
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-            #image-width {
-                grid-column-end: span 5;
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-            #image-edit {
-                grid-column-end: span 3;
-                display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-
-                #media-replace {
-                    grid-column-end: span 2;
-                }
-            }
-            #fa-resize {
-                grid-column-end: span 5;
-                display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr));
-            }
         }
 
         we-button.o_we_link {
@@ -750,7 +577,7 @@ body.editor_enable.editor_has_snippets {
                         margin-left: $o-we-sidebar-content-field-multi-spacing;
                         padding: 0 $o-we-sidebar-content-field-multi-spacing;
 
-                        &.fa, &[data-img] {
+                        &.fa {
                             margin-left: $o-we-sidebar-content-field-label-spacing;
                         }
                     }
@@ -823,9 +650,8 @@ body.editor_enable.editor_has_snippets {
                 // Needed otherwise cannot work because of flex display
                 @include o-text-overflow(block);
                 min-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
-                &, > .fa {
-                    line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
-                }
+                line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
+
                 > img {
                     margin-bottom: 1px; // Not sure why but not really centered otherwise
                 }
@@ -937,7 +763,7 @@ body.editor_enable.editor_has_snippets {
                     line-height: $o-we-sidebar-content-field-dropdown-item-height;
                 }
 
-                > we-button {
+                we-button {
                     @include we-icon-button('', $align: left); // Always a padding on the left
                     border: none;
                     background: none;
@@ -1002,53 +828,22 @@ body.editor_enable.editor_has_snippets {
                 }
             }
             .o_we_pager_next, .o_we_pager_prev {
+                margin: 0.3em;
                 padding: $o-we-sidebar-content-field-label-spacing;
                 cursor: pointer;
+                border: $o-we-item-border-width solid currentColor;
+                border-radius: $o-we-item-border-radius;
             }
             we-select-page {
                 display: none;
                 width: 100%;
-                max-height: 600px;
+                // Cut the last visible option in the list to understand that we can scroll.
+                max-height: 75px * 7.5;
                 overflow-y: auto;
 
                 &.active {
                     display: block;
                 }
-            }
-        }
-        we-select.o_we_user_value_widget.o_we_select_grid {
-            we-select-page {
-
-                we-button img {
-                    height: $o-we-sidebar-content-field-dropdown-grid-item-height;
-                    width: $o-we-sidebar-content-field-dropdown-grid-item-width;
-                }
-                &.active {
-                    display: flex;
-                    flex-wrap: wrap;
-                    we-button {
-                        width: percentage(1 / 3);
-                        padding: 0;
-                        justify-content: center;
-                        img {
-                            padding: $o-we-sidebar-content-field-spacing;
-                        }
-                    }
-                    we-button.active {
-                        border: 2px solid $o-we-color-success !important;
-                    }
-                }
-            }
-            &.o_we_fake_transparent_background {
-                we-button {
-                    background-image: url(/web/static/img/transparent.png);
-                    background-size: 10px auto;
-                }
-            }
-        }
-        we-button.o_we_image_shape_remove {
-            div {
-                display: flex;
             }
         }
 
@@ -1089,23 +884,45 @@ body.editor_enable.editor_has_snippets {
 
         // Inputs
         we-input.o_we_user_value_widget {
-            @extend %we-generic-text-input;
+
             > div {
                 flex: 0 1 auto;
                 width: $o-we-sidebar-content-field-input-max-width;
+                border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+                border-radius: $o-we-sidebar-content-field-border-radius;
+                background-color: $o-we-sidebar-content-field-input-bg;
+
+                &:focus-within {
+                    border-color: $o-we-sidebar-content-field-input-border-color;
+                }
+
+                > we-button { // for input-group
+                    border: none;
+                }
             }
+
             &.o_we_large_input > div {
                 flex: 1 1 auto;
             }
+
             input {
+                box-sizing: content-box;
                 flex: 1 1 auto;
                 width: 0;
                 min-width: 2ch;
                 height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
+                padding: 0 $o-we-sidebar-content-field-clickable-spacing;
+                border: none;
+                border-radius: 0;
+                background-color: transparent;
+                color: inherit;
                 font-family: $o-we-sidebar-content-field-input-font-family;
 
                 &::placeholder {
                     color: $o-we-sidebar-content-field-control-item-color;
+                }
+                &:focus {
+                    outline: none;
                 }
             }
             span {
@@ -1323,51 +1140,6 @@ body.editor_enable.editor_has_snippets {
             }
         }
 
-        // Lists
-        we-list {
-            > div {
-                flex-flow: row wrap;
-            }
-            .o_we_table_wrapper {
-                width: 100%;
-                max-height: 200px;
-                overflow-y: auto;
-                margin-bottom: $o-we-sidebar-content-field-spacing / 2;
-
-                table {
-                    table-layout: auto;
-                    width: 100%;
-
-                    input {
-                        width: 100%;
-                        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-                        border-radius: $o-we-sidebar-content-field-border-radius;
-                        padding: 0 $o-we-sidebar-content-field-clickable-spacing;
-                        background-color: $o-we-sidebar-content-field-input-bg;
-                        color: inherit;
-                        font-family: $o-we-sidebar-content-field-input-font-family;
-                    }
-                    tr {
-                        border: none;
-                    }
-                    td {
-                        padding-bottom: $o-we-sidebar-content-field-spacing / 2;
-
-                        &:not(.o_we_list_record_name) {
-                            width: 1px;
-                        }
-
-                        we-button.o_we_checkbox_wrapper {
-                            margin: 0 0 0 0.3em;
-                        }
-                    }
-                }
-            }
-            .o_we_user_value_widget {
-                flex: 1 1 auto;
-            }
-        }
-
         // Multi widgets
         we-multi.o_we_user_value_widget {
             margin-top: 0;
@@ -1378,63 +1150,6 @@ body.editor_enable.editor_has_snippets {
                 > * {
                     flex: 1 1 auto; // Needed for colorpicker...
                 }
-            }
-        }
-
-        // Many2one search
-        .o_we_m2o_search {
-            background-color: $o-we-dropdown-item-bg;
-            flex-grow: 1 !important;
-            display: flex;
-            align-items: center;
-            margin-bottom: 1px;
-            border-radius: $o-we-sidebar-content-field-border-radius;
-            padding: .25em .5em;
-
-            &::before {
-                content: "\f002";
-                font-size: 1.2em;
-                padding-right: .5em;
-                font-family: FontAwesome;
-            }
-
-            input {
-                flex: 1 1 auto;
-                color: inherit;
-                border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-                border-radius: $o-we-sidebar-content-field-border-radius;
-                background-color: $o-we-sidebar-content-field-input-bg;
-                padding: 1px $o-we-sidebar-content-field-clickable-spacing;
-
-                &:focus {
-                    outline: none;
-                    border-color: $o-we-sidebar-content-field-input-border-color;
-                }
-                &::placeholder {
-                    color: $o-we-sidebar-content-field-control-item-color;
-                }
-            }
-        }
-
-        // Many2one search more indicator
-        .o_we_m2o_search_more {
-            color: var(--o-cc1-btn-primary);
-            margin-top: 1px;
-            width: 100%;
-            cursor: pointer;
-            padding-left: 2em;
-            line-height: $o-we-sidebar-content-field-height - 2 * $o-we-sidebar-content-field-border-width;
-        }
-
-        // Many2one create
-        .o_we_m2o_create {
-            margin-top: 1px;
-        }
-
-        // Many2many
-        .o_we_m2m {
-            we-list, we-list > div, we-list we-select {
-                margin-top: 0;
             }
         }
 
@@ -1521,7 +1236,7 @@ body.editor_enable.editor_has_snippets {
             > :first-child, .o_we_collapse_toggler {
                 margin-top: $-inner-spacing;
             }
-            we-toggler.o_we_collapse_toggler {
+            .o_we_collapse_toggler {
                 @include o-position-absolute($top: 0, $left: 0);
                 width: $o-we-sidebar-content-indent;
                 height: $o-we-sidebar-content-field-height;
@@ -1560,15 +1275,39 @@ body.editor_enable.editor_has_snippets {
         }
 
         .o_we_image_weight {
-            margin-left: $o-we-sidebar-content-field-label-spacing * 2;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin: $o-we-sidebar-content-field-spacing *.25 $o-we-item-border-width $o-we-sidebar-content-field-spacing*2;
+
+            b {
+                margin-left: $o-we-sidebar-content-field-label-spacing;
+                font: 1em/1 bold $o-we-sidebar-content-field-input-font-family;
+                color: $o-we-color-success;
+            }
+        }
+
+        .o_we_external_warning {
+            margin-top: $o-we-sidebar-content-field-spacing;
         }
 
         .o_we_tag {
+            padding: ($o-we-sidebar-content-field-label-spacing / 2) $o-we-sidebar-content-field-label-spacing;
+            border-radius: 5px;
             background-color: $o-we-bg-darkest;
-            white-space: nowrap;
-            padding: ($o-we-sidebar-content-field-label-spacing / 4) ($o-we-sidebar-content-field-label-spacing / 2);
-            border-radius: 3px;
-            font-size: 0.85em;
+
+            + .fa {
+                margin: 0 0 0 5px;
+            }
+        }
+        .o_we_tag_wrapper {
+            display: inline-flex;
+            margin: $o-we-sidebar-content-field-label-spacing ($o-we-sidebar-content-field-label-spacing / 2) 0 0;
+        }
+        .o_wblog_new_tag {
+            & div, & we-input {
+                width: 100% !important;
+            }
         }
     }
 
@@ -1706,11 +1445,27 @@ body.editor_enable.editor_has_snippets {
             border: 0;
             background-color: transparent;
             background-clip: padding-box;
+
+            // Borders instead of margins so that the user smoothly goes from
+            // one button to another without leaving them.
             border-top: $o-we-sidebar-content-field-spacing solid transparent;
             border-bottom: $o-we-sidebar-content-field-spacing solid transparent;
 
             + .o_we_color_combination_btn {
                 margin-top: $o-we-sidebar-content-field-spacing * -.5;
+            }
+
+            &.selected {
+                > .o_we_cc_preview_wrapper {
+                    box-shadow: 0 0 0 1px $o-we-color-success !important;
+                }
+                .o_we_color_combination_btn_title::before {
+                    content: "\f00c";
+                    margin-right: $o-we-sidebar-content-field-spacing;
+                    font-size: 0.8em;
+                    font-family: FontAwesome;
+                    color: $o-we-color-success;
+                }
             }
 
             .o_we_cc_preview_wrapper:after {
@@ -1950,23 +1705,21 @@ body.editor_enable.editor_has_snippets {
                 @include o-position-absolute($o-we-handles-offset-to-hide, $left: 50%);
                 transform: translate(-50%, -110%);
 
-                &.o_we_hidden_overlay_options {
-                    display: none;
-                }
-                &, > .o_overlay_move_options, .o_overlay_edit_options {
+                &, > .o_overlay_move_options {
                     display: flex;
                 }
-                > .o_overlay_move_options, .o_overlay_edit_options {
-                    > * {
+                > .o_overlay_move_options {
+                    > *, + * {
                         @extend %we-generic-button;
                         margin: 0 1px 0;
                         min-width: 22px;
                         padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
                         color: $o-we-fg-lighter;
-                        &.oe_snippet_remove {
-                            background-color: mix($o-we-color-danger, $o-we-sidebar-content-field-clickable-bg);
-                        }
                     }
+                }
+                > .oe_snippet_remove {
+                    margin-left: $o-we-sidebar-content-field-button-group-button-spacing;
+                    background-color: mix($o-we-color-danger, $o-we-sidebar-content-field-clickable-bg);;
                 }
                 > .o_overlay_move_options > .o_move_handle {
                     cursor: move;
@@ -1977,8 +1730,8 @@ body.editor_enable.editor_has_snippets {
                     background-repeat: no-repeat;
                 }
                 &:hover {
-                    > .o_overlay_move_options, .o_overlay_edit_options {
-                        > * {
+                    > .o_overlay_move_options {
+                        > *, + * {
                             @include o-hover-opacity(.6);
 
                             &:hover {
@@ -1986,6 +1739,10 @@ body.editor_enable.editor_has_snippets {
                                 background-color: $o-we-sidebar-content-field-pressed-bg;
                             }
                         }
+                    }
+                    > .oe_snippet_remove:hover {
+                        border-color: mix($o-we-color-danger, $o-we-sidebar-content-field-pressed-bg, .4);
+                        background-color: $o-we-color-danger;
                     }
                 }
             }
@@ -2169,21 +1926,6 @@ we-select.o_we_shape_menu {
             height: 75px;
         }
     }
-}
-.o_we_shape_animated_label {
-    @include o-position-absolute(0, 0);
-    padding: 0 6px;
-    background: $o-we-color-success;
-    color: white;
-
-    > span {
-        @include o-text-overflow(inline-block);
-        max-width: 0;
-    }
-}
-we-button:hover .o_we_shape_animated_label > span {
-    max-width: 150px;
-    transition: max-width 0.5s ease 0s;
 }
 
 .o_we_ui_loading {

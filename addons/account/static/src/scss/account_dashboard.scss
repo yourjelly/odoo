@@ -47,7 +47,7 @@
                 }
 
                 .fa-check {
-                    @extend .text-success;
+                    color: theme-color('success');
                 }
             }
 

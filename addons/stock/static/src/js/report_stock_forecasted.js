@@ -4,21 +4,11 @@ odoo.define('stock.ReplenishReport', function (require) {
 const clientAction = require('report.client_action');
 const core = require('web.core');
 const dom = require('web.dom');
-const GraphRenderer = require("web/static/src/js/views/graph/graph_renderer");
 const GraphView = require('web.GraphView');
 
 const qweb = core.qweb;
 const _t = core._t;
 
-class StockReportGraphRenderer extends GraphRenderer {}
-
-StockReportGraphRenderer.template = "stock.GraphRenderer";
-
-const StockReportGraphView = GraphView.extend({
-    config: Object.assign({}, GraphView.prototype.config, {
-        Renderer: StockReportGraphRenderer,
-    }),
-});
 
 const ReplenishReport = clientAction.extend({
     /**
@@ -33,31 +23,11 @@ const ReplenishReport = clientAction.extend({
         this.actionMethod = `action_product_${isTemplate ? 'tmpl_' : ''}forecast_report`;
         const reportName = `report_product_${isTemplate ? 'template' : 'product'}_replenishment`;
         this.report_url = `/report/html/stock.${reportName}/${this.productId}`;
+        if (this.context.warehouse) {
+            this.active_warehouse = {id: this.context.warehouse};
+        }
+        this.report_url += `?context=${JSON.stringify(this.context)}&force_context_lang=1`;
         this._title = action.name;
-    },
-
-    /**
-     * @override
-     */
-    willStart: function() {
-        var loadWarehouses = this._rpc({
-            model: 'report.stock.report_product_product_replenishment',
-            method: 'get_warehouses',
-        }).then((res) => {
-            this.warehouses = res;
-            if (this.context.warehouse) {
-                this.active_warehouse = this.warehouses.find(w => w.id == this.context.warehouse);
-            }
-            else {
-                this.active_warehouse = this.warehouses[0];
-                this.context.warehouse = this.active_warehouse.id;
-            }
-            this.report_url += `?context=${JSON.stringify(this.context)}`;
-        });
-        return Promise.all([
-            this._super.apply(this, arguments),
-            loadWarehouses
-        ]);
     },
 
     /**
@@ -66,8 +36,8 @@ const ReplenishReport = clientAction.extend({
     start: function () {
         return Promise.all([
             this._super(...arguments),
+            this._renderWarehouseFilters(),
         ]).then(() => {
-            this._renderWarehouseFilters();
             this._renderButtons();
         });
     },
@@ -78,10 +48,6 @@ const ReplenishReport = clientAction.extend({
     on_attach_callback: function () {
         this._super();
         this._createGraphView();
-        this.iframe.addEventListener("load",
-            () => this._bindAdditionalActionHandlers(),
-            { once: true }
-        );
     },
 
     //--------------------------------------------------------------------------
@@ -89,57 +55,71 @@ const ReplenishReport = clientAction.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * @private
-     * @param {Promise<GraphController>} graphPromise
-     * @returns {Promise}
+     * Instanciates a chart graph and moves it into the report (which is in the iframe).
      */
-    async _appendGraph(graphPromise) {
-        const graphController = await graphPromise;
-        const iframeDoc = this.iframe.contentDocument;
-        const reportGraphDiv = iframeDoc.querySelector(".o_report_graph");
-        dom.append(reportGraphDiv, graphController.el, {
-            in_DOM: true,
-            callbacks: [{ widget: graphController }],
-        });
-        // Hack to put the res_model on the url. This way, the report always know on with res_model it refers.
-        if (location.href.indexOf('active_model') === -1) {
-            const url = window.location.href + `&active_model=${this.resModel}`;
-            window.history.pushState({}, "", url);
-        }
-    },
+    _createGraphView: async function () {
+        let viewController;
+        const appendGraph = () => {
+            promController.then(() => {
+                this.iframe.removeEventListener('load', appendGraph);
+                const $reportGraphDiv = $(this.iframe).contents().find('.o_report_graph');
+                dom.append(this.$el, viewController.$el, {
+                    in_DOM: true,
+                    callbacks: [{widget: viewController}],
+                });
+                const renderer = viewController.renderer;
+                // Remove the graph control panel.
+                $('.o_control_panel:last').remove();
+                const $graphPanel = $('.o_graph_controller');
+                $graphPanel.appendTo($reportGraphDiv);
 
-    /**
-     * @private
-     * @returns {Promise<GraphController>}
-     */
-    async _createGraphController() {
-        const model = "report.stock.quantity";
-        const viewInfo = await this._rpc({
-            model,
-            method: "fields_view_get",
-            kwargs: { view_type: "graph" }
-        });
-        const params = {
-            domain: this._getReportDomain(),
-            modelName: model,
-            noContentHelp: _t("Try to add some incoming or outgoing transfers."),
-            withControlPanel: false,
+                if (!renderer.state.dataPoints.length) {
+                    // Changes the "No Data" helper message.
+                    const graphHelper = renderer.$('.o_view_nocontent');
+                    const newMessage = qweb.render('View.NoContentHelper', {
+                        description: _t("Try to add some incoming or outgoing transfers."),
+                    });
+                    graphHelper.replaceWith(newMessage);
+                } else {
+                    this.chart = renderer.chart;
+                    // Lame hack to fix the size of the graph.
+                    setTimeout(() => {
+                        this.chart.canvas.height = 300;
+                        this.chart.canvas.style.height = "300px";
+                        this.chart.resize();
+                    }, 1);
+                }
+            });
         };
-        const graphView = new StockReportGraphView(viewInfo, params);
-        const graphController = await graphView.getController(this);
-        await graphController.appendTo(document.createDocumentFragment());
-        return graphController;
-    },
+        // Wait the iframe fo append the graph chart and move it into the iframe.
+        this.iframe.addEventListener('load', appendGraph);
 
-    /**
-     * Instantiates a chart graph and moves it into the report's iframe.
-     */
-    _createGraphView() {
-        const graphPromise = this._createGraphController();
-        this.iframe.addEventListener("load",
-            () => this._appendGraph(graphPromise),
-            { once: true }
-        );
+        const model = 'report.stock.quantity';
+        const promController = this._rpc({
+            model: model,
+            method: 'fields_view_get',
+            kwargs: {
+                view_type: 'graph',
+            }
+        }).then(viewInfo => {
+            const params = {
+                modelName: model,
+                domain: this._getReportDomain(),
+                hasActionMenus: false,
+            };
+            const graphView = new GraphView(viewInfo, params);
+            return graphView.getController(this);
+        }).then(res => {
+            viewController = res;
+
+            // Hack to put the res_model on the url. This way, the report always know on with res_model it refers.
+            if (location.href.indexOf('active_model') === -1) {
+                const url = window.location.href + `&active_model=${this.resModel}`;
+                window.history.pushState({}, "", url);
+            }
+            const fragment = document.createDocumentFragment();
+            return viewController.appendTo(fragment);
+        });
     },
 
     /**
@@ -203,31 +183,30 @@ const ReplenishReport = clientAction.extend({
     },
 
     /**
-     * Renders the Warehouses filter
-     */
-    _renderWarehouseFilters: function () {
-        const $filters = $(qweb.render('warehouseFilter', {
-            active_warehouse: this.active_warehouse,
-            warehouses: this.warehouses,
-            displayWarehouseFilter: (this.warehouses.length > 1),
-        }));
-        // Bind handlers.
-        $filters.on('click', '.warehouse_filter', this._onClickFilter.bind(this));
-        this.$('.o_search_options').append($filters);
-    },
-
-    /**
-     * Bind additional action handlers (<button>, <a>)
-     * 
+     * TODO
      * @returns {Promise}
      */
-    _bindAdditionalActionHandlers: function () {
-        let rr = this.$el.find('iframe').contents().find('.o_report_replenishment');
-        rr.on('click', '.o_report_replenish_change_priority', this._onClickChangePriority.bind(this));
-        rr.on('mouseenter', '.o_report_replenish_change_priority', this._onMouseEnterPriority.bind(this));
-        rr.on('mouseleave', '.o_report_replenish_change_priority', this._onMouseLeavePriority.bind(this));
-        rr.on('click', '.o_report_replenish_unreserve', this._onClickUnreserve.bind(this));
-        rr.on('click', '.o_report_replenish_reserve', this._onClickReserve.bind(this));
+    _renderWarehouseFilters: function () {
+        return this._rpc({
+            model: 'report.stock.report_product_product_replenishment',
+            method: 'get_filter_state',
+        }).then((res) => {
+            const warehouses = res.warehouses;
+            const active_warehouse = (this.active_warehouse && this.active_warehouse.id) || res.active_warehouse;
+            if (active_warehouse) {
+                this.active_warehouse = _.findWhere(warehouses, {id: active_warehouse});
+            } else {
+                this.active_warehouse = warehouses[0];
+            }
+            const $filters = $(qweb.render('warehouseFilter', {
+                active_warehouse: this.active_warehouse,
+                warehouses: warehouses,
+                displayWarehouseFilter: (warehouses.length > 1),
+            }));
+            // Bind handlers.
+            $filters.on('click', '.warehouse_filter', this._onClickFilter.bind(this));
+            this.$('.o_search_options').append($filters);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -281,68 +260,9 @@ const ReplenishReport = clientAction.extend({
         const data = ev.target.dataset;
         const warehouse_id = Number(data.warehouseId);
         return this._reloadReport({warehouse: warehouse_id});
-    },
-
-    /**
-     * Change the priority of the specified model/id, then reload this report.
-     *
-     * @returns {Promise}
-     */
-    _onClickChangePriority: function(ev) {
-        const model = ev.target.getAttribute('model');
-        const modelId = parseInt(ev.target.getAttribute('model-id'));
-        const value = ev.target.classList.contains('zero')?'1':'0';
-        this._rpc( {
-            model: model,
-            args: [[modelId], {priority: value}],
-            method: 'write'
-        }).then((result) => {
-            return this._reloadReport();
-        });
-    },
-    _onMouseEnterPriority: function(ev) {
-        ev.target.classList.toggle('fa-star');
-        ev.target.classList.toggle('fa-star-o');
-    },
-    _onMouseLeavePriority: function(ev) {
-        ev.target.classList.toggle('fa-star');
-        ev.target.classList.toggle('fa-star-o');
-    },
-
-    /**
-     * Unreserve the specified model/id, then reload this report.
-     *
-     * @returns {Promise}
-     */
-    _onClickUnreserve: function(ev) {
-        const model = ev.target.getAttribute('model');
-        const modelId = parseInt(ev.target.getAttribute('model-id'));
-        return this._rpc( {
-            model,
-            args: [[modelId]],
-            method: 'do_unreserve'
-        }).then(() => this._reloadReport());
-    },
-
-    /**
-     * Reserve the specified model/id, then reload this report.
-     *
-     * @returns {Promise}
-     */
-    _onClickReserve: function(ev) {
-        const model = ev.target.getAttribute('model');
-        const modelId = parseInt(ev.target.getAttribute('model-id'));
-        return this._rpc( {
-            model,
-            args: [[modelId]],
-            method: 'action_assign'
-        }).then(() => this._reloadReport());
     }
-
 });
 
 core.action_registry.add('replenish_report', ReplenishReport);
-
-return(ReplenishReport);
 
 });

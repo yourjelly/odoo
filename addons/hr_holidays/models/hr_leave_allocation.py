@@ -28,7 +28,7 @@ class HolidaysAllocation(models.Model):
 
     def _default_holiday_status_id(self):
         if self.user_has_groups('hr_holidays.group_hr_holidays_user'):
-            domain = [('valid', '=', True), ('allocation_type', '!=', 'no')]
+            domain = [('valid', '=', True)]
         else:
             domain = [('valid', '=', True), ('allocation_type', '=', 'fixed_allocation')]
         return self.env['hr.leave.type'].search(domain, limit=1)
@@ -39,7 +39,6 @@ class HolidaysAllocation(models.Model):
         return [('valid', '=', True), ('allocation_type', '=', 'fixed_allocation')]
 
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False)
-    active = fields.Boolean(default=True)
     private_name = fields.Char('Allocation Description', groups='hr_holidays.group_hr_holidays_user')
     state = fields.Selection([
         ('draft', 'To Submit'),
@@ -62,14 +61,12 @@ class HolidaysAllocation(models.Model):
     holiday_status_id = fields.Many2one(
         "hr.leave.type", compute='_compute_from_employee_id', store=True, string="Time Off Type", required=True, readonly=False,
         states={'cancel': [('readonly', True)], 'refuse': [('readonly', True)], 'validate1': [('readonly', True)], 'validate': [('readonly', True)]},
-        domain=_holiday_status_id_domain, default=_default_holiday_status_id)
+        domain=_holiday_status_id_domain)
     employee_id = fields.Many2one(
         'hr.employee', compute='_compute_from_holiday_type', store=True, string='Employee', index=True, readonly=False, ondelete="restrict", tracking=True,
         states={'cancel': [('readonly', True)], 'refuse': [('readonly', True)], 'validate1': [('readonly', True)], 'validate': [('readonly', True)]})
-    employee_company_id = fields.Many2one(related='employee_id.company_id', readonly=True)
-    active_employee = fields.Boolean('Active Employee', related='employee_id.active', readonly=True)
     manager_id = fields.Many2one('hr.employee', compute='_compute_from_employee_id', store=True, string='Manager')
-    notes = fields.Html('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
+    notes = fields.Text('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     # duration
     number_of_days = fields.Float(
         'Number of Days', compute='_compute_from_holiday_status_id', store=True, readonly=False, tracking=True, default=1,
@@ -232,7 +229,7 @@ class HolidaysAllocation(models.Model):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
 
         for allocation in self:
-            if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
+            if is_officer or allocation.employee_id.user_id == self.env.user or allocation.manager_id == self.env.user:
                 allocation.name = allocation.sudo().private_name
             else:
                 allocation.name = '*****'
@@ -240,7 +237,7 @@ class HolidaysAllocation(models.Model):
     def _inverse_description(self):
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         for allocation in self:
-            if is_officer or allocation.employee_id.user_id == self.env.user or allocation.employee_id.leave_manager_id == self.env.user:
+            if is_officer or allocation.employee_id.user_id == self.env.user or allocation.manager_id == self.env.user:
                 allocation.sudo().private_name = allocation.name
 
     def _search_description(self, operator, value):
@@ -430,25 +427,19 @@ class HolidaysAllocation(models.Model):
                         date=allocation.holiday_status_id.validity_stop
                     ))
 
-    @api.model_create_multi
-    def create(self, vals_list):
+    @api.model
+    def create(self, values):
         """ Override to avoid automatic logging of creation """
-        for values in vals_list:
-            employee_id = values.get('employee_id', False)
-            if not values.get('department_id'):
-                values.update({'department_id': self.env['hr.employee'].browse(employee_id).department_id.id})
-        holidays = super(HolidaysAllocation, self.with_context(mail_create_nosubscribe=True)).create(vals_list)
-        for holiday in holidays:
-            partners_to_subscribe = set()
-            if holiday.employee_id.user_id:
-                partners_to_subscribe.add(holiday.employee_id.user_id.partner_id.id)
-            if holiday.validation_type == 'hr':
-                partners_to_subscribe.add(holiday.employee_id.parent_id.user_id.partner_id.id)
-                partners_to_subscribe.add(holiday.employee_id.leave_manager_id.partner_id.id)
-            holiday.message_subscribe(partner_ids=tuple(partners_to_subscribe))
-            if not self._context.get('import_file'):
-                holiday.activity_update()
-        return holidays
+        employee_id = values.get('employee_id', False)
+        if not values.get('department_id'):
+            values.update({'department_id': self.env['hr.employee'].browse(employee_id).department_id.id})
+        holiday = super(HolidaysAllocation, self.with_context(mail_create_nosubscribe=True)).create(values)
+        holiday.add_follower(employee_id)
+        if holiday.validation_type == 'hr':
+            holiday.message_subscribe(partner_ids=(holiday.employee_id.parent_id.user_id.partner_id | holiday.employee_id.leave_manager_id.partner_id).ids)
+        if not self._context.get('import_file'):
+            holiday.activity_update()
+        return holiday
 
     def write(self, values):
         employee_id = values.get('employee_id', False)
@@ -458,11 +449,11 @@ class HolidaysAllocation(models.Model):
         self.add_follower(employee_id)
         return result
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_if_correct_states(self):
+    def unlink(self):
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
             raise UserError(_('You cannot delete an allocation request which is in %s state.') % (state_description_values.get(holiday.state),))
+        return super(HolidaysAllocation, self).unlink()
 
     def _get_mail_redirect_suggested_company(self):
         return self.holiday_status_id.company_id
@@ -698,10 +689,10 @@ class HolidaysAllocation(models.Model):
 
         return [new_group] + groups
 
-    def message_subscribe(self, partner_ids=None, subtype_ids=None):
+    def message_subscribe(self, partner_ids=None, channel_ids=None, subtype_ids=None):
         # due to record rule can not allow to add follower and mention on validated leave so subscribe through sudo
         if self.state in ['validate', 'validate1']:
             self.check_access_rights('read')
             self.check_access_rule('read')
-            return super(HolidaysAllocation, self.sudo()).message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
-        return super(HolidaysAllocation, self).message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
+            return super(HolidaysAllocation, self.sudo()).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
+        return super(HolidaysAllocation, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)

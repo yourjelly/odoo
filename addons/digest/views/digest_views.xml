@@ -38,9 +38,9 @@
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <label for="name" string="Digest Name"/>
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" placeholder="e.g. Your Weekly Digest"/>
+                            <field name="name"/>
                         </h1>
                     </div>
                     <group>

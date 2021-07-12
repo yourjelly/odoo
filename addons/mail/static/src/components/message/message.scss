@@ -5,15 +5,12 @@
 .o_Message {
     display: flex;
     flex: 0 0 auto;
-
-    &:not(:first-child) {
-        margin-top: map-get($spacers, 1);
-    }
+    padding: map-get($spacers, 2);
 }
 
 .o_Message_authorAvatar {
-    height: map-get($sizes, 100);
-    width: map-get($sizes, 100);
+    height: 100%;
+    width: 100%;
     object-fit: cover;
 }
 
@@ -24,7 +21,6 @@
 }
 
 .o_Message_authorName {
-    color: $headings-color;
     margin-inline-end: map-get($spacers, 2);
 }
 
@@ -56,21 +52,19 @@
         // It's acceptable not to manage overflow of these tags for the moment.
         // It also excludes all div in li because 1st leaf and div child of list overflow
         // may impact the bullet point (at least it does on Safari).
-        max-width: map-get($sizes, 100);
+        max-width: 100%;
         overflow-x: auto;
     }
 
     img {
-        max-width: map-get($sizes, 100);
+        max-width: 100%;
         height: auto;
     }
 }
 
 .o_Message_core {
     min-width: 0; // allows this flex child to shrink more than its content
-    margin-top: map-get($spacers, 1);
-    margin-bottom: map-get($spacers, 1);
-    margin-inline-end: map-get($spacers, 4);
+    margin-inline-end: map-get($spacers, 3);
 }
 
 .o_Message_footer {
@@ -110,10 +104,6 @@
 .o_Message_headerDate {
     margin-inline-end: map-get($spacers, 2);
     font-size: 0.8em;
-}
-
-.o_Message_highlightIndicator {
-    width: $o-mail-discuss-message-highlight-indicator-width;
 }
 
 .o_Message_moderationAction {
@@ -161,8 +151,6 @@
     flex: 0 0 $o-mail-message-sidebar-width;
     max-width: $o-mail-message-sidebar-width;
     display: flex;
-    margin-top: map-get($spacers, 2);
-    margin-bottom: map-get($spacers, 2);
     margin-inline-end: map-get($spacers, 2);
     justify-content: center;
 
@@ -199,7 +187,7 @@
 // ------------------------------------------------------------------
 
 .o_Message {
-    background-color: $white;
+    background-color: white;
 
     &:hover, &.o-clicked {
 
@@ -217,14 +205,15 @@
     }
 
     .o_Message_partnerImStatusIcon {
-        color: $white;
+        color: white;
     }
 
     &.o-not-discussion {
-        background-color: gray('100');
+        background-color: lighten(gray('300'), 5%);
+        border-bottom: 1px solid darken(gray('300'), 5%);
 
         .o_Message_partnerImStatusIcon {
-            color: gray('100'); // same color as background of parent
+            color: lighten(gray('300'), 5%);
         }
 
         &.o-selected {
@@ -250,18 +239,10 @@
             display: flex;
         }
     }
-
-    &.o-has-message-selection:not(.o-selected) {
-        opacity: 0.5;
-    }
-
-    &.o-highlighted {
-        background-color: rgba($o-brand-primary, .1);
-    }
 }
 
 .o_Message_authorName {
-    font-weight: $font-weight-bold;
+    font-weight: bold;
 }
 
 .o_Message_authorRedirect {
@@ -323,10 +304,6 @@
     opacity: 0;
 }
 
-.o_Message_highlightIndicator.o-active {
-    background-color: $o-brand-primary;
-}
-
 .o_Message_originThread {
     font-size: 0.8em;
     color: gray('500');
@@ -345,7 +322,7 @@
 }
 
 .o_Message_moderationAction {
-    font-weight: $font-weight-bold;
+    font-weight: bold;
     font-style: italic;
 
     &.o-accept,
@@ -370,8 +347,8 @@
     font-style: italic;
 
     &.o-author {
-        color: o-text-color('danger');
-        font-weight: $font-weight-bold;
+        color: theme-color('danger');
+        font-weight: bold;
     }
 }
 
@@ -380,7 +357,7 @@
     cursor: pointer;
 
     &.o-error {
-        color: o-text-color('danger');
+        color: $red;
     }
 }
 

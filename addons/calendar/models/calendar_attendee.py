@@ -4,9 +4,7 @@ import uuid
 import base64
 import logging
 
-from collections import defaultdict
 from odoo import api, fields, models, _
-from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -17,7 +15,6 @@ class Attendee(models.Model):
     _name = 'calendar.attendee'
     _rec_name = 'common_name'
     _description = 'Calendar Attendee Information'
-    _order = 'create_date ASC'
 
     def _default_access_token(self):
         return uuid.uuid4().hex
@@ -29,30 +26,22 @@ class Attendee(models.Model):
         ('accepted', 'Accepted'),
     ]
 
-    # event
-    event_id = fields.Many2one('calendar.event', 'Meeting linked', required=True, ondelete='cascade')
-    recurrence_id = fields.Many2one('calendar.recurrence', related='event_id.recurrence_id')
-    # attendee
-    partner_id = fields.Many2one('res.partner', 'Attendee', required=True, readonly=True)
-    email = fields.Char('Email', related='partner_id.email', help="Email of Invited Person")
-    phone = fields.Char('Phone', related='partner_id.phone', help="Phone number of Invited Person")
-    common_name = fields.Char('Common name', compute='_compute_common_name', store=True)
-    access_token = fields.Char('Invitation Token', default=_default_access_token)
-    mail_tz = fields.Selection(_tz_get, compute='_compute_mail_tz', help='Timezone used for displaying time in the mail template')
-    # state
+    event_id = fields.Many2one(
+        'calendar.event', 'Meeting linked', required=True, ondelete='cascade')
+    partner_id = fields.Many2one('res.partner', 'Contact', required=True, readonly=True)
     state = fields.Selection(STATE_SELECTION, string='Status', readonly=True, default='needsAction',
                              help="Status of the attendee's participation")
+    common_name = fields.Char('Common name', compute='_compute_common_name', store=True)
+    email = fields.Char('Email', related='partner_id.email', help="Email of Invited Person")
     availability = fields.Selection(
-        [('free', 'Available'), ('busy', 'Busy')], 'Available/Busy', readonly=True)
+        [('free', 'Free'), ('busy', 'Busy')], 'Free/Busy', readonly=True)
+    access_token = fields.Char('Invitation Token', default=_default_access_token)
+    recurrence_id = fields.Many2one('calendar.recurrence', related='event_id.recurrence_id')
 
     @api.depends('partner_id', 'partner_id.name', 'email')
     def _compute_common_name(self):
         for attendee in self:
             attendee.common_name = attendee.partner_id.name or attendee.email
-
-    def _compute_mail_tz(self):
-        for attendee in self:
-            attendee.mail_tz = attendee.partner_id.tz
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -72,43 +61,60 @@ class Attendee(models.Model):
         self._unsubscribe_partner()
         return super().unlink()
 
-    @api.returns('self', lambda value: value.id)
-    def copy(self, default=None):
-        raise UserError(_('You cannot duplicate a calendar attendee.'))
-
     def _subscribe_partner(self):
-        mapped_followers = defaultdict(lambda: self.env['calendar.event'])
         for event in self.event_id:
             partners = (event.attendee_ids & self).partner_id - event.message_partner_ids
             # current user is automatically added as followers, don't add it twice.
             partners -= self.env.user.partner_id
-            mapped_followers[partners] |= event
-        for partners, events in mapped_followers.items():
-            events.message_subscribe(partner_ids=partners.ids)
+            event.message_subscribe(partner_ids=partners.ids)
 
     def _unsubscribe_partner(self):
         for event in self.event_id:
             partners = (event.attendee_ids & self).partner_id & event.message_partner_ids
             event.message_unsubscribe(partner_ids=partners.ids)
 
-    def _send_mail_to_attendees(self, mail_template, force_send=False):
-        """ Send mail for event invitation to event attendees.
-            :param mail_template: a mail.template record
-            :param force_send: if set to True, the mail(s) will be sent immediately (instead of the next queue processing)
-        """
-        if isinstance(mail_template, str):
-            raise ValueError('Template should be a template record, not an XML ID anymore.')
-        if self.env['ir.config_parameter'].sudo().get_param('calendar.block_mail') or self._context.get("no_mail_to_attendees"):
-            return False
-        if not mail_template:
-            _logger.warning("No template passed to %s notification process. Skipped.", self)
-            return False
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        raise UserError(_('You cannot duplicate a calendar attendee.'))
 
+    def _send_mail_to_attendees(self, template_xmlid, force_send=False, ignore_recurrence=False):
+        """ Send mail for event invitation to event attendees.
+            :param template_xmlid: xml id of the email template to use to send the invitation
+            :param force_send: if set to True, the mail(s) will be sent immediately (instead of the next queue processing)
+            :param ignore_recurrence: ignore event recurrence
+        """
+        res = False
+
+        if self.env['ir.config_parameter'].sudo().get_param('calendar.block_mail') or self._context.get("no_mail_to_attendees"):
+            return res
+
+        calendar_view = self.env.ref('calendar.view_calendar_event_calendar')
+        invitation_template = self.env.ref(template_xmlid, raise_if_not_found=False)
+        if not invitation_template:
+            _logger.warning("Template %s could not be found. %s not notified." % (template_xmlid, self))
+            return
         # get ics file for all meetings
         ics_files = self.mapped('event_id')._get_ics_file()
 
+        # prepare rendering context for mail template
+        colors = {
+            'needsAction': 'grey',
+            'accepted': 'green',
+            'tentative': '#FFFF00',
+            'declined': 'red'
+        }
+        rendering_context = dict(self._context)
+        rendering_context.update({
+            'colors': colors,
+            'ignore_recurrence': ignore_recurrence,
+            'action_id': self.env['ir.actions.act_window'].sudo().search([('view_id', '=', calendar_view.id)], limit=1).id,
+            'dbname': self._cr.dbname,
+            'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url', default='http://localhost:8069'),
+        })
+
         for attendee in self:
             if attendee.email and attendee.partner_id != self.env.user.partner_id:
+                # FIXME: is ics_file text or bytes?
                 event_id = attendee.event_id.id
                 ics_file = ics_files.get(event_id)
 
@@ -119,12 +125,19 @@ class Attendee(models.Model):
                                 'mimetype': 'text/calendar',
                                 'datas': base64.b64encode(ics_file)})
                     ]
-                body = mail_template._render_field(
-                    'body_html',
-                    attendee.ids,
-                    compute_lang=True,
-                    post_process=True)[attendee.id]
-                subject = mail_template._render_field(
+                try:
+                    body = invitation_template.with_context(rendering_context)._render_field(
+                        'body_html',
+                        attendee.ids,
+                        compute_lang=True,
+                        post_process=True)[attendee.id]
+                except UserError:   #TO BE REMOVED IN MASTER
+                    body = invitation_template.sudo().with_context(rendering_context)._render_field(
+                        'body_html',
+                        attendee.ids,
+                        compute_lang=True,
+                        post_process=True)[attendee.id]
+                subject = invitation_template._render_field(
                     'subject',
                     attendee.ids,
                     compute_lang=True)[attendee.id]

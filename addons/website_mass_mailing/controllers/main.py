@@ -4,10 +4,10 @@
 from odoo import _
 from odoo.http import route, request
 from odoo.osv import expression
-from odoo.addons.mass_mailing.controllers import main
+from odoo.addons.mass_mailing.controllers.main import MassMailController
 
 
-class MassMailController(main.MassMailController):
+class MassMailController(MassMailController):
 
     @route('/website_mass_mailing/is_subscriber', type='json', website=True, auth="public")
     def is_subscriber(self, list_id, **post):
@@ -26,7 +26,12 @@ class MassMailController(main.MassMailController):
 
     @route('/website_mass_mailing/subscribe', type='json', website=True, auth="public")
     def subscribe(self, list_id, email, **post):
-        if not request.env['ir.http']._verify_request_recaptcha_token('website_mass_mailing_subscribe'):
+        # FIXME the 14.0 was released with this but without the google_recaptcha
+        # module being added as a dependency of the website_mass_mailing module.
+        # This is to be fixed in master of course but in stable, we'll have to
+        # use this workaround.
+        if hasattr(request.env['ir.http'], '_verify_request_recaptcha_token') \
+                and not request.env['ir.http']._verify_request_recaptcha_token('website_mass_mailing_subscribe'):
             return {
                 'toast_type': 'danger',
                 'toast_content': _("Suspicious activity detected by Google reCaptcha."),

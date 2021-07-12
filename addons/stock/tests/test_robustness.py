@@ -2,10 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 
 
-class TestRobustness(TransactionCase):
+class TestRobustness(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super(TestRobustness, cls).setUpClass()

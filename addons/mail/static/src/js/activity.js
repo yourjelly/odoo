@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail.Activity', function (require) {
+"use strict";
 
-import * as mailUtils from '@mail/js/utils';
+var mailUtils = require('mail.utils');
 
-import AbstractField from 'web.AbstractField';
-import BasicModel from 'web.BasicModel';
-import config from 'web.config';
-import core from 'web.core';
-import field_registry from 'web.field_registry';
-import session from 'web.session';
-import framework from 'web.framework';
-import time from 'web.time';
+var AbstractField = require('web.AbstractField');
+var BasicModel = require('web.BasicModel');
+var config = require('web.config');
+var core = require('web.core');
+var field_registry = require('web.field_registry');
+var session = require('web.session');
+var framework = require('web.framework');
+var time = require('web.time');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -338,7 +339,7 @@ var BasicActivity = AbstractField.extend({
         var $markDoneBtn = $(ev.currentTarget);
         var activityID = $markDoneBtn.data('activity-id');
         var previousActivityTypeID = $markDoneBtn.data('previous-activity-type-id') || false;
-        var chainingTypeActivity = $markDoneBtn.data('chaining-type-activity');
+        var forceNextActivity = $markDoneBtn.data('force-next-activity');
 
         if ($markDoneBtn.data('toggle') === 'collapse') {
             var $actLi = $markDoneBtn.parents('.o_log_activity');
@@ -347,7 +348,7 @@ var BasicActivity = AbstractField.extend({
             if (!$panel.data('bs.collapse')) {
                 var $form = $(QWeb.render('mail.activity_feedback_form', {
                     previous_activity_type_id: previousActivityTypeID,
-                    chaining_type: chainingTypeActivity
+                    force_next: forceNextActivity
                 }));
                 $panel.append($form);
                 self._onMarkActivityDoneActions($markDoneBtn, $form, activityID);
@@ -387,7 +388,7 @@ var BasicActivity = AbstractField.extend({
                 content: function () {
                     var $popover = $(QWeb.render('mail.activity_feedback_form', {
                         previous_activity_type_id: previousActivityTypeID,
-                        chaining_type: chainingTypeActivity
+                        force_next: forceNextActivity
                     }));
                     self._onMarkActivityDoneActions($markDoneBtn, $popover, activityID);
                     return $popover;
@@ -862,4 +863,6 @@ field_registry
     .add('list_activity', ListActivity)
     .add('activity_exception', ActivityException);
 
-export default Activity;
+return Activity;
+
+});

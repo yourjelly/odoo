@@ -27,21 +27,15 @@ class MassMailingContactListRel(models.Model):
          'A mailing contact cannot subscribe to the same mailing list multiple times.')
     ]
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        now = fields.Datetime.now()
-        for vals in vals_list:
-            if 'opt_out' in vals and 'unsubscription_date' not in vals:
-                vals['unsubscription_date'] = now if vals['opt_out'] else False
-            if vals.get('unsubscription_date'):
-                vals['opt_out'] = True
-        return super().create(vals_list)
+    @api.model
+    def create(self, vals):
+        if 'opt_out' in vals:
+            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
+        return super(MassMailingContactListRel, self).create(vals)
 
     def write(self, vals):
-        if 'opt_out' in vals and 'unsubscription_date' not in vals:
-            vals['unsubscription_date'] = fields.Datetime.now() if vals['opt_out'] else False
-        if vals.get('unsubscription_date'):
-            vals['opt_out'] = True
+        if 'opt_out' in vals:
+            vals['unsubscription_date'] = vals['opt_out'] and fields.Datetime.now()
         return super(MassMailingContactListRel, self).write(vals)
 
 
@@ -54,7 +48,6 @@ class MassMailingContact(models.Model):
     _inherit = ['mail.thread.blacklist']
     _description = 'Mailing Contact'
     _order = 'email'
-    _mailing_enabled = True
 
     def default_get(self, fields):
         """ When coming from a mailing list we may have a default_list_ids context
@@ -175,12 +168,3 @@ class MassMailingContact(models.Model):
             'email_cc': False}
             for r in self
         }
-
-    def action_add_to_mailing_list(self):
-        ctx = dict(self.env.context, default_contact_ids=self.ids)
-        action = self.env["ir.actions.actions"]._for_xml_id("mass_mailing.mailing_contact_to_list_action")
-        action['view_mode'] = 'form'
-        action['target'] = 'new'
-        action['context'] = ctx
-
-        return action

@@ -91,6 +91,10 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon):
         # We should be able to call the 'record_components' button
         self.assertTrue(picking_receipt.display_action_record_components)
 
+        # Check the created manufacturing order
+        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        wh = picking_receipt.picking_type_id.warehouse_id
+
         lot_comp2 = self.env['stock.production.lot'].create({
             'name': 'lot_comp2',
             'product_id': self.comp2.id,

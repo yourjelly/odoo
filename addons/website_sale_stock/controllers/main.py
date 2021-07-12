@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-from odoo.addons.website_sale.controllers import main as website_sale_controller
+from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 from odoo import http,_
 from odoo.http import request
 from odoo.exceptions import ValidationError
 
 
-class PaymentPortal(website_sale_controller.PaymentPortal):
-
+class WebsiteSaleStock(WebsiteSale):
     @http.route()
-    def shop_payment_transaction(self, *args, **kwargs):
+    def payment_transaction(self, *args, **kwargs):
         """ Payment transaction override to double check cart quantities before
         placing the order
         """
@@ -29,4 +27,4 @@ class PaymentPortal(website_sale_controller.PaymentPortal):
                     ))
         if values:
             raise ValidationError('. '.join(values) + '.')
-        return super().shop_payment_transaction(*args, **kwargs)
+        return super(WebsiteSaleStock, self).payment_transaction(*args, **kwargs)

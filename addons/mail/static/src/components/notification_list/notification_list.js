@@ -1,22 +1,18 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/notification_list/notification_list.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { NotificationGroup } from '@mail/components/notification_group/notification_group';
-import { NotificationRequest } from '@mail/components/notification_request/notification_request';
-import { ThreadNeedactionPreview } from '@mail/components/thread_needaction_preview/thread_needaction_preview';
-import { ThreadPreview } from '@mail/components/thread_preview/thread_preview';
+const components = {
+    NotificationGroup: require('mail/static/src/components/notification_group/notification_group.js'),
+    NotificationRequest: require('mail/static/src/components/notification_request/notification_request.js'),
+    ThreadNeedactionPreview: require('mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js'),
+    ThreadPreview: require('mail/static/src/components/thread_preview/thread_preview.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 
 const { Component } = owl;
 
-const components = {
-    NotificationGroup,
-    NotificationRequest,
-    ThreadNeedactionPreview,
-    ThreadPreview,
-};
-
-export class NotificationList extends Component {
+class NotificationList extends Component {
 
     /**
      * @override
@@ -84,7 +80,7 @@ export class NotificationList extends Component {
                         return 1;
                     }
                     if (t1.lastNeedactionMessageAsOriginThread && t2.lastNeedactionMessageAsOriginThread) {
-                        return t1.lastNeedactionMessageAsOriginThread.id < t2.lastNeedactionMessageAsOriginThread.id ? 1 : -1;
+                        return t1.lastNeedactionMessageAsOriginThread.date.isBefore(t2.lastNeedactionMessageAsOriginThread.date) ? 1 : -1;
                     }
                     if (t1.lastNeedactionMessageAsOriginThread) {
                         return -1;
@@ -112,7 +108,7 @@ export class NotificationList extends Component {
                     return 1;
                 }
                 if (t1.lastMessage && t2.lastMessage) {
-                    return t1.lastMessage.id < t2.lastMessage.id ? 1 : -1;
+                    return t1.lastMessage.date.isBefore(t2.lastMessage.date) ? 1 : -1;
                 }
                 if (t1.lastMessage) {
                     return -1;
@@ -133,8 +129,9 @@ export class NotificationList extends Component {
         if (props.filter === 'all') {
             const notificationGroups = this.env.messaging.notificationGroupManager.groups;
             notifications = Object.values(notificationGroups)
-                .sort((group1, group2) => group1.sequence - group2.sequence)
-                .map(notificationGroup => {
+                .sort((group1, group2) =>
+                    group1.date.isAfter(group2.date) ? -1 : 1
+                ).map(notificationGroup => {
                     return {
                         notificationGroup,
                         uniqueId: notificationGroup.localId,
@@ -142,7 +139,7 @@ export class NotificationList extends Component {
                 }).concat(notifications);
         }
         // native notification request
-        if (props.filter === 'all' && this.env.messaging.isNotificationPermissionDefault) {
+        if (props.filter === 'all' && this.env.messaging.isNotificationPermissionDefault()) {
             notifications.unshift({
                 type: 'odoobotRequest',
                 uniqueId: 'odoobotRequest',
@@ -222,4 +219,8 @@ Object.assign(NotificationList, {
         },
     },
     template: 'mail.NotificationList',
+});
+
+return NotificationList;
+
 });

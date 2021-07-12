@@ -1,14 +1,15 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/chatter_container/chatter_container.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { Chatter } from '@mail/components/chatter/chatter';
-import { clear } from '@mail/model/model_field_command';
+const components = {
+    Chatter: require('mail/static/src/components/chatter/chatter.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 const { Component } = owl;
-
-const components = { Chatter };
 
 /**
  * This component abstracts chatter component to its parent, so that it can be
@@ -18,7 +19,7 @@ const components = { Chatter };
  * may attempt to create a chatter before messaging has been initialized, so
  * this component delays the mounting of chatter until it becomes initialized.
  */
-export class ChatterContainer extends Component {
+class ChatterContainer extends Component {
 
     /**
      * @override
@@ -130,4 +131,9 @@ Object.assign(ChatterContainer, {
         threadModel: String,
     },
     template: 'mail.ChatterContainer',
+});
+
+
+return ChatterContainer;
+
 });

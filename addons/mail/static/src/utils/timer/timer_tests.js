@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/utils/timer/timer_tests.js', function (require) {
+'use strict';
 
-import { afterEach, beforeEach, nextTick, start } from '@mail/utils/test_utils';
-import Timer from '@mail/utils/timer/timer';
+const { afterEach, beforeEach, nextTick, start } = require('mail/static/src/utils/test_utils.js');
+const Timer = require('mail/static/src/utils/timer/timer.js');
 
 const { TimerClearedError } = Timer;
 
@@ -421,4 +422,6 @@ QUnit.test('[with cancelation intercept] timer start then immediate reset (durat
 
 });
 });
+});
+
 });

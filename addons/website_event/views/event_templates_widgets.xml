@@ -13,7 +13,7 @@
                 <input t-if="search != 'search' and search_value != 'all'" type="hidden"
                     t-att-name="search" t-att-value="search_value"/>
             </t>
-            <t t-out="0"/>
+            <t t-raw="0"/>
         </form>
     </xpath>
 </template>
@@ -75,15 +75,6 @@
             <div class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_minutes">00</span><span class="o_countdown_metric">:</span></div>
             <div class="o_countdown_metric_container"><span class="o_countdown_remaining o_timer_seconds">00</span><span class="o_countdown_metric"></span></div>
         </span>
-    </div>
-</template>
-
-<template id="display_timer_alert_widget" name="Display Countdown widget">
-    <div class="o_we_track_timer alert alert-warning alert-dismissible fade show d-none mx-3 mt-3 mb-0" role="alert" t-att-data-time-to-live="time_to_live">
-        Starts <span />
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <i class="fa fa-times"/>
-        </button>
     </div>
 </template>
 

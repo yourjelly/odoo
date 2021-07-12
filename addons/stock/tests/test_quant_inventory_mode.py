@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 from odoo.exceptions import AccessError, UserError
 
 
-class TestEditableQuant(TransactionCase):
+class TestEditableQuant(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super(TestEditableQuant, cls).setUpClass()
@@ -63,7 +63,7 @@ class TestEditableQuant(TransactionCase):
             'product_id': self.product.id,
             'location_id': self.stock.id,
             'inventory_quantity': 24
-        }).action_apply_inventory()
+        })
         quants = self.env['stock.quant'].search([
             ('product_id', '=', self.product.id),
             ('quantity', '>', 0),
@@ -100,7 +100,6 @@ class TestEditableQuant(TransactionCase):
             'location_id': self.room1.id,
             'inventory_quantity': 24,
         })
-        second_quant.action_apply_inventory()
         quants = self.env['stock.quant'].search([
             ('product_id', '=', self.product.id),
             ('quantity', '>', 0),
@@ -116,10 +115,10 @@ class TestEditableQuant(TransactionCase):
         self.assertEqual(len(stock_move), 1)
 
     def test_create_quant_3(self):
-        """ Try to create a quant with `inventory_quantity` but without applying it.
-        Creates two quants:
+        """ Try to create a quant with `inventory_quantity` but not in inventory mode.
+        Creates two quants not in inventory mode:
           - One with `quantity` (this one must be OK)
-          - One with `inventory_quantity` (this one will have null quantity)
+          - One with `inventory_quantity` (this one must be null)
         """
         valid_quant = self.env['stock.quant'].create({
             'product_id': self.product.id,
@@ -153,7 +152,6 @@ class TestEditableQuant(TransactionCase):
             'location_id': self.room1.id,
             'inventory_quantity': 20,
         })
-        inventoried_quant.action_apply_inventory()
         with self.assertRaises(UserError):
             invalid_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
                 'product_id': self.product.id,
@@ -173,7 +171,6 @@ class TestEditableQuant(TransactionCase):
             'quantity': 12,
         })
         quant.inventory_quantity = 24
-        quant.action_apply_inventory()
         self.assertEqual(quant.quantity, 24)
         stock_move = self.env['stock.move'].search([
             ('product_id', '=', self.product.id),
@@ -190,7 +187,6 @@ class TestEditableQuant(TransactionCase):
             'quantity': 12,
         })
         quant.inventory_quantity = 8
-        quant.action_apply_inventory()
         self.assertEqual(quant.quantity, 8)
         stock_move = self.env['stock.move'].search([
             ('product_id', '=', self.product.id),
@@ -223,35 +219,4 @@ class TestEditableQuant(TransactionCase):
 
         # Try to write on quant with permission
         quant.with_user(user_admin).write({'inventory_quantity': 8})
-        quant.action_apply_inventory()
         self.assertEqual(quant.quantity, 8)
-
-    def test_sn_warning(self):
-        """ Checks that a warning is given when reusing an existing SN
-        in inventory mode.
-        """
-
-        sn1 = self.env['stock.production.lot'].create({
-            'name': 'serial1',
-            'product_id': self.product_tracked_sn.id,
-            'company_id': self.env.company.id,
-        })
-
-        self.Quant.create({
-            'product_id': self.product_tracked_sn.id,
-            'location_id': self.room1.id,
-            'inventory_quantity': 1,
-            'lot_id': sn1.id
-        }).action_apply_inventory()
-
-        dupe_sn = self.Quant.create({
-            'product_id': self.product_tracked_sn.id,
-            'location_id': self.room2.id,
-            'inventory_quantity': 1,
-            'lot_id': sn1.id
-        })
-        dupe_sn.action_apply_inventory()
-        warning = False
-        warning = dupe_sn._onchange_serial_number()
-        self.assertTrue(warning, 'Reuse of existing serial number not detected')
-        self.assertEqual(list(warning.keys())[0], 'warning', 'Warning message was not returned')

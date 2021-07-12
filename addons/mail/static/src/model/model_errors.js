@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/model/model_errors.js', function (require) {
+'use strict';
 
-export class RecordDeletedError extends Error {
+class RecordDeletedError extends Error {
 
     /**
      * @override
@@ -13,3 +14,9 @@ export class RecordDeletedError extends Error {
         this.name = 'RecordDeletedError';
     }
 }
+
+return {
+    RecordDeletedError,
+};
+
+});

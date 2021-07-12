@@ -1,9 +1,10 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/utils/deferred/deferred.js', function (require) {
+'use strict';
 
 /**
  * @returns {Deferred}
  */
-export function makeDeferred() {
+function makeDeferred() {
     let resolve;
     let reject;
     const prom = new Promise(function (res, rej) {
@@ -14,3 +15,7 @@ export function makeDeferred() {
     prom.reject = (...args) => reject(...args);
     return prom;
 }
+
+return { makeDeferred };
+
+});

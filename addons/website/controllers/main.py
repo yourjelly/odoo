@@ -5,20 +5,21 @@ import datetime
 import json
 import os
 import logging
+import pytz
 import requests
 import werkzeug.urls
 import werkzeug.utils
 import werkzeug.wrappers
 
 from itertools import islice
+from werkzeug import urls
 from xml.etree import ElementTree as ET
 
 import odoo
 
 from odoo import http, models, fields, _
 from odoo.http import request
-from odoo.osv import expression
-from odoo.tools import OrderedSet, escape_psql
+from odoo.tools import OrderedSet
 from odoo.addons.http_routing.models.ir_http import slug, slugify, _guess_mimetype
 from odoo.addons.web.controllers.main import Binary
 from odoo.addons.portal.controllers.portal import pager as portal_pager
@@ -112,7 +113,7 @@ class Website(Home):
             domain_to = parse(website._get_http_domain()).netloc
             if domain_from != domain_to:
                 # redirect to correct domain for a correct routing map
-                url_to = werkzeug.urls.url_join(website._get_http_domain(), '/website/force/%s?isredir=1&path=%s' % (website.id, safe_path))
+                url_to = urls.url_join(website._get_http_domain(), '/website/force/%s?isredir=1&path=%s' % (website.id, safe_path))
                 return request.redirect(url_to)
         website._force()
         return request.redirect(safe_path)
@@ -128,7 +129,7 @@ class Website(Home):
         """
         if not redirect and request.params.get('login_success'):
             if request.env['res.users'].browse(uid).has_group('base.group_user'):
-                redirect = '/web?' + request.httprequest.query_string.decode()
+                redirect = b'/web?' + request.httprequest.query_string
             else:
                 redirect = '/my'
         return super()._login_redirect(uid, redirect=redirect)
@@ -149,6 +150,7 @@ class Website(Home):
     @http.route('/website/lang/<lang>', type='http', auth="public", website=True, multilang=False)
     def change_lang(self, lang, r='/', **kwargs):
         """ :param lang: supposed to be value of `url_code` field """
+        r = request.website._get_relative_url(r)
         if lang == 'default':
             lang = request.website.default_lang_id.url_code
             r = '/%s%s' % (lang, r or '/')
@@ -250,16 +252,6 @@ class Website(Home):
         }
         return request.render('website.website_info', values)
 
-    @http.route(['/website/configurator', '/website/configurator/<int:step>'], type='http', auth="user", website=True, multilang=False)
-    def website_configurator(self, step=1, **kwargs):
-        if not request.env.user.has_group('website.group_website_designer'):
-            raise werkzeug.exceptions.NotFound()
-        website_id = request.env['website'].get_current_website()
-        if website_id.configurator_done is False:
-            return request.render('website.website_configurator', {'lang': request.env.user.lang})
-        else:
-            return request.redirect('/')
-
     @http.route(['/website/social/<string:social>'], type='http', auth="public", website=True, sitemap=False)
     def social(self, social, **kwargs):
         url = getattr(request.website, 'social_%s' % social, False)
@@ -307,33 +299,25 @@ class Website(Home):
         }
 
     @http.route('/website/snippet/filters', type='json', auth='public', website=True)
-    def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None, with_sample=False):
+    def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None):
         dynamic_filter = request.env['website.snippet.filter'].sudo().search(
             [('id', '=', filter_id)] + request.website.website_domain()
         )
-        return dynamic_filter and dynamic_filter.render(template_key, limit, search_domain, with_sample) or ''
+        return dynamic_filter and dynamic_filter.render(template_key, limit, search_domain) or ''
 
     @http.route('/website/snippet/options_filters', type='json', auth='user', website=True)
-    def get_dynamic_snippet_filters(self, model_name=None, search_domain=None):
-        domain = request.website.website_domain()
-        if search_domain:
-            domain = expression.AND([domain, search_domain])
-        if model_name:
-            domain = expression.AND([
-                domain,
-                ['|', ('filter_id.model_id', '=', model_name), ('action_server_id.model_id.model', '=', model_name)]
-            ])
+    def get_dynamic_snippet_filters(self):
         dynamic_filter = request.env['website.snippet.filter'].sudo().search_read(
-            domain, ['id', 'name', 'limit', 'model_name'], order='id asc'
+            request.website.website_domain(), ['id', 'name', 'limit']
         )
         return dynamic_filter
 
     @http.route('/website/snippet/filter_templates', type='json', auth='public', website=True)
-    def get_dynamic_snippet_templates(self, filter_name=False):
-        domain = [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']]
-        if filter_name:
-            domain.append(['key', 'ilike', escape_psql('_%s_' % filter_name)])
-        templates = request.env['ir.ui.view'].sudo().search_read(domain, ['key', 'name'])
+    def get_dynamic_snippet_templates(self, filter_id=False):
+        # todo: if filter_id.model -> filter template
+        templates = request.env['ir.ui.view'].sudo().search_read(
+            [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']], ['key', 'name']
+        )
         return templates
 
     # ------------------------------------------------------
@@ -359,7 +343,7 @@ class Website(Home):
             domain += ['|', ('name', 'ilike', search), ('url', 'ilike', search)]
 
         pages = Page.search(domain, order=sort_order)
-        if sortby != 'url' or not request.session.debug:
+        if sortby != 'url' or not request.env.user.has_group('website.group_multi_website'):
             pages = pages.filtered(pages._is_most_specific_page)
         pages_count = len(pages)
 
@@ -380,11 +364,10 @@ class Website(Home):
             'search': search,
             'sortby': sortby,
             'searchbar_sortings': searchbar_sortings,
-            'search_count': pages_count,
         }
         return request.render("website.list_website_pages", values)
 
-    @http.route(['/website/add', '/website/add/<path:path>'], type='http', auth="user", website=True, methods=['POST'])
+    @http.route(['/website/add/', '/website/add/<path:path>'], type='http', auth="user", website=True, methods=['POST'])
     def pagenew(self, path="", noredirect=False, add_menu=False, template=False, **kwargs):
         # for supported mimetype, get correct default template
         _, ext = os.path.splitext(path)

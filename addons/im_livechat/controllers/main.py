@@ -16,9 +16,9 @@ class LivechatController(http.Controller):
     @http.route('/im_livechat/external_lib.<any(css,js):ext>', type='http', auth='public')
     def livechat_lib(self, ext, **kwargs):
         # _get_asset return the bundle html code (script and link list) but we want to use the attachment content
-        bundle = 'im_livechat.external_lib'
-        files, _ = request.env["ir.qweb"]._get_asset_content(bundle, options=request.context)
-        asset = AssetsBundle(bundle, files)
+        xmlid = 'im_livechat.external_lib'
+        files, remains = request.env["ir.qweb"]._get_asset_content(xmlid, options=request.context)
+        asset = AssetsBundle(xmlid, files)
 
         mock_attachment = getattr(asset, ext)()
         if isinstance(mock_attachment, list):  # suppose that CSS asset will not required to be split in pages
@@ -101,7 +101,8 @@ class LivechatController(http.Controller):
 
     @http.route('/im_livechat/feedback', type='json', auth='public', cors="*")
     def feedback(self, uuid, rate, reason=None, **kwargs):
-        channel = request.env['mail.channel'].sudo().search([('uuid', '=', uuid)], limit=1)
+        Channel = request.env['mail.channel']
+        channel = Channel.sudo().search([('uuid', '=', uuid)], limit=1)
         if channel:
             # limit the creation : only ONE rating per session
             values = {
@@ -143,7 +144,8 @@ class LivechatController(http.Controller):
             :param uuid: (string) the UUID of the livechat channel
             :param is_typing: (boolean) tells whether the website user is typing or not.
         """
-        channel = request.env['mail.channel'].sudo().search([('uuid', '=', uuid)], limit=1)
+        Channel = request.env['mail.channel']
+        channel = Channel.sudo().search([('uuid', '=', uuid)], limit=1)
         channel.notify_typing(is_typing=is_typing)
 
     @http.route('/im_livechat/email_livechat_transcript', type='json', auth='public', cors="*")

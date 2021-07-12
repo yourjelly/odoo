@@ -1,4 +1,3 @@
-/* global timapi */
 odoo.define('pos_six.payment', function (require) {
 "use strict";
 
@@ -8,8 +7,8 @@ var PaymentInterface = require('point_of_sale.PaymentInterface');
 
 var _t = core._t;
 
-window.onTimApiReady = function () {};
-window.onTimApiPublishLogRecord = function (record) {
+onTimApiReady = function () {};
+onTimApiPublishLogRecord = function (record) {
     // Log only warning or errors
     if (record.matchesLevel(timapi.LogRecord.LogLevel.warning)) {
         timapi.log(String(record));

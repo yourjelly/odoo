@@ -1,10 +1,11 @@
-/** @odoo-module **/;
+odoo.define('mail/static/src/components/autocomplete_input/autocomplete_input.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
 
 const { Component } = owl;
 
-export class AutocompleteInput extends Component {
+class AutocompleteInput extends Component {
 
     constructor(...args) {
         super(...args);
@@ -166,4 +167,8 @@ Object.assign(AutocompleteInput, {
         },
     },
     template: 'mail.AutocompleteInput',
+});
+
+return AutocompleteInput;
+
 });

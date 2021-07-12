@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-""" This test ensure `inherit_id` update is correctly replicated on cow views.
+from odoo.tests import standalone
+
+"""
+This test ensure `inherit_id` update is correctly replicated on cow views.
 The view receiving the `inherit_id` update is either:
 1. in a module loaded before `website`. In that case, `website` code is not
    loaded yet, so we store the updates to replay the changes on the cow views
@@ -12,8 +15,6 @@ The view receiving the `inherit_id` update is either:
    `test_module_new_inherit_view_on_parent_already_forked` and
    `test_specific_view_module_update_inherit_change` in `website` module.
 """
-
-from odoo.tests import standalone
 
 
 @standalone('cow_views_inherit')

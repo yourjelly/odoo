@@ -1,4 +1,3 @@
-/* eslint-env node */
 /*
 The following script can be used to convert SVGs exported from illustrator into
 a format that's compatible with the shape system. It runs with nodejs. Some

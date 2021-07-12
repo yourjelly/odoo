@@ -41,38 +41,6 @@ body.o_connected_user {
     }
 }
 
-//FULLSCREEN INDICATION LAYOUT
-.o_fullscreen_indication {
-    display: flex;
-    position: absolute;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    margin-top: $o-navbar-height!important;
-    opacity: 0;
-    pointer-events: none;
-
-    p {
-        padding: 15px 30px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        span {
-            border: 1px solid white;
-            border-color: white;
-            border-radius: 5px;
-            padding: 7px 5px;
-            margin: 5px;
-        }
-    }
-    &.o_transition {
-        transition: opacity 400ms;
-    }
-    &.o_visible {
-        opacity: 1;
-    }
-}
-
 // MAIN MENU STYLE (added above navbar.scss)
 #oe_main_menu_navbar {
     @include o-w-preserve-dropdown-menus;
@@ -86,16 +54,9 @@ body.o_connected_user {
         text-decoration: none;
     }
     .dropdown-menu {
-        border-top: 0;
-        margin-top: 0;
-        background-clip: border-box;
         font-size: inherit;
         border-radius: 0;
         color: $dropdown-link-active-color;
-    }
-    #oe_applications .dropdown-menu {
-        // Compensate #oe_applications's padding
-        margin-left: $dropdown-item-padding-x * -0.5;
     }
 
     .o_menu_sections {
@@ -106,6 +67,8 @@ body.o_connected_user {
     }
     .o_menu_systray {
         > li > a {
+            padding: 0 $grid-gutter-width/2;
+
             &.css_edit_dynamic{
                 padding: 0 $grid-gutter-width/4;
             }
@@ -161,6 +124,13 @@ body.o_connected_user {
     &:after {
         transform: rotate(-45deg);
     }
+}
+
+// BLOCKING LOADER
+#o_website_page_loader {
+    @include o-position-absolute(0, 0, 0, 0);
+    z-index: $zindex-modal - 1;
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 // MODALS

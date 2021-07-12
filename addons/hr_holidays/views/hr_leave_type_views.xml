@@ -56,7 +56,6 @@
                                 attrs="{
                                 'invisible': [('leave_validation_type', 'in', ['no_validation', 'manager']), '|', ('allocation_type', '=', 'no'), ('allocation_validation_type', '=', 'manager')],
                                 'required': ['|', ('leave_validation_type', 'in', ['hr', 'both']), '&amp;', ('allocation_type', 'in', ['fixed_allocation', 'fixed']), ('allocation_validation_type', 'in', ['hr', 'both'])]}"/>
-                            <field name="support_document"/>
                         </group>
                         <group name="leave_validation" string="Time Off Requests">
                             <field name="leave_validation_type" string="Approval" widget="radio"/>
@@ -109,7 +108,6 @@
         <field name="model">hr.leave.type</field>
         <field name="arch" type="xml">
             <tree string="Time Off Type">
-                <field name="sequence" widget="handle"/>
                 <field name="display_name"/>
                 <field name="code"/>
                 <field name="allocation_type"/>

@@ -1,8 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/chatter/chatter.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2one } from '@mail/model/model_field';
-import { create, insert, link, unlink, update } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2one, one2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -91,21 +91,6 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @returns {mail.thread_viewer}
-         */
-        _computeThreadViewer() {
-            const threadViewerData = {
-                hasThreadView: this.hasThreadView,
-                thread: this.thread ? link(this.thread) : unlink(),
-            };
-            if (!this.threadViewer) {
-                return create(threadViewerData);
-            }
-            return update(threadViewerData);
-        }
-
-        /**
-         * @private
          */
         _onThreadIdOrThreadModelChanged() {
             if (this.threadId) {
@@ -114,13 +99,13 @@ function factory(dependencies) {
                 }
                 this.update({
                     isAttachmentBoxVisible: this.isAttachmentBoxVisibleInitially,
-                    thread: insert({
+                    thread: [['insert', {
                         // If the thread was considered to have the activity
                         // mixin once, it will have it forever.
                         hasActivities: this.hasActivities ? true : undefined,
                         id: this.threadId,
                         model: this.threadModel,
-                    }),
+                    }]],
                 });
                 if (this.hasActivities) {
                     this.thread.refreshActivities();
@@ -135,7 +120,7 @@ function factory(dependencies) {
             } else if (!this.thread || !this.thread.isTemporary) {
                 const currentPartner = this.env.messaging.currentPartner;
                 const message = this.env.models['mail.message'].create({
-                    author: link(currentPartner),
+                    author: [['link', currentPartner]],
                     body: this.env._t("Creating a new record..."),
                     id: getMessageNextTemporaryId(),
                     isTemporary: true,
@@ -143,15 +128,15 @@ function factory(dependencies) {
                 const nextId = getThreadNextTemporaryId();
                 this.update({
                     isAttachmentBoxVisible: false,
-                    thread: insert({
+                    thread: [['insert', {
                         areAttachmentsLoaded: true,
                         id: nextId,
                         isTemporary: true,
                         model: this.threadModel,
-                    }),
+                    }]],
                 });
                 for (const cache of this.thread.caches) {
-                    cache.update({ messages: link(message) });
+                    cache.update({ messages: [['link', message]] });
                 }
             }
         }
@@ -288,7 +273,6 @@ function factory(dependencies) {
                 'threadId',
                 'threadModel',
             ],
-            isOnChange: true,
         }),
         /**
          * Not a real field, used to trigger its compute method when one of the
@@ -299,7 +283,6 @@ function factory(dependencies) {
             dependencies: [
                 'threadIsLoadingAttachments',
             ],
-            isOnChange: true,
         }),
         /**
          * Determines the `mail.thread` that should be displayed by `this`.
@@ -335,14 +318,9 @@ function factory(dependencies) {
          * Determines the `mail.thread_viewer` managing the display of `this.thread`.
          */
         threadViewer: one2one('mail.thread_viewer', {
-            compute: '_computeThreadViewer',
-            dependencies: [
-                'hasThreadView',
-                'thread',
-            ],
+            default: [['create']],
+            inverse: 'chatter',
             isCausal: true,
-            readonly: true,
-            required: true,
         }),
     };
 
@@ -352,3 +330,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.chatter', factory);
+
+});

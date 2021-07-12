@@ -5,10 +5,10 @@
 
 from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounting_data
 from odoo.tests import Form, tagged
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase, TransactionCase
 
 
-class TestStockValuationCommon(TransactionCase):
+class TestStockValuationCommon(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super(TestStockValuationCommon, cls).setUpClass()
@@ -486,9 +486,9 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         self.assertEqual(self.product1.standard_price, 15)
 
     def test_rounding_slv_1(self):
-        self._make_in_move(self.product1, 1, unit_cost=1.00)
-        self._make_in_move(self.product1, 1, unit_cost=1.00)
-        self._make_in_move(self.product1, 1, unit_cost=1.01)
+        move1 = self._make_in_move(self.product1, 1, unit_cost=1.00)
+        move2 = self._make_in_move(self.product1, 1, unit_cost=1.00)
+        move3 = self._make_in_move(self.product1, 1, unit_cost=1.01)
 
         self.assertAlmostEqual(self.product1.value_svl, 3.01)
 

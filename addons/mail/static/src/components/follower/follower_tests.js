@@ -1,19 +1,19 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/follower/follower_tests.js', function (require) {
+'use strict';
 
-import { Follower } from '@mail/components/follower/follower';
-import { insert, link } from '@mail/model/model_field_command';
-import { makeDeferred } from '@mail/utils/deferred/deferred';
-import {
+const components = {
+    Follower: require('mail/static/src/components/follower/follower.js'),
+};
+const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
-import Bus from 'web.Bus';
-
-const components = { Follower };
+const Bus = require('web.Bus');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -52,11 +52,8 @@ QUnit.test('base rendering not editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        partner: insert({
-            id: 1,
-            name: "François Perusse",
-        }),
-        followedThread: link(thread),
+        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: false,
@@ -98,11 +95,8 @@ QUnit.test('base rendering editable', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        partner: insert({
-            id: 1,
-            name: "François Perusse",
-        }),
-        followedThread: link(thread),
+        channel: [['insert', { id: 1, model: 'mail.channel', name: "François Perusse" }]],
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
@@ -140,6 +134,63 @@ QUnit.test('base rendering editable', async function (assert) {
     );
 });
 
+QUnit.test('click on channel follower details', async function (assert) {
+    assert.expect(7);
+
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        assert.step('do_action');
+        assert.strictEqual(
+            payload.action.res_id,
+            10,
+            "The redirect action should redirect to the right res id (10)"
+        );
+        assert.strictEqual(
+            payload.action.res_model,
+            'mail.channel',
+            "The redirect action should redirect to the right res model (mail.channel)"
+        );
+        assert.strictEqual(
+            payload.action.type,
+            "ir.actions.act_window",
+            "The redirect action should be of type 'ir.actions.act_window'"
+        );
+    });
+    this.data['res.partner'].records.push({ id: 100 });
+    this.data['mail.channel'].records.push({ id: 10 });
+    await this.start({
+        env: { bus },
+    });
+    const thread = this.env.models['mail.thread'].create({
+        id: 100,
+        model: 'res.partner',
+    });
+    const follower = await this.env.models['mail.follower'].create({
+        channel: [['insert', { id: 10, model: 'mail.channel', name: "channel" }]],
+        followedThread: [['link', thread]],
+        id: 2,
+        isActive: true,
+        isEditable: true,
+    });
+    await this.createFollowerComponent(follower);
+    assert.containsOnce(
+        document.body,
+        '.o_Follower',
+        "should have follower component"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Follower_details',
+        "should display a details part"
+    );
+
+    document.querySelector('.o_Follower_details').click();
+    assert.verifySteps(
+        ['do_action'],
+        "clicking on channel should redirect to channel form view"
+    );
+});
+
 QUnit.test('click on partner follower details', async function (assert) {
     assert.expect(7);
 
@@ -173,15 +224,15 @@ QUnit.test('click on partner follower details', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        followedThread: link(thread),
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
-        partner: insert({
+        partner: [['insert', {
             email: "bla@bla.bla",
             id: this.env.messaging.currentPartner.id,
             name: "François Perusse",
-        }),
+        }]],
     });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
@@ -279,15 +330,15 @@ QUnit.test('edit follower and close subtype dialog', async function (assert) {
         model: 'res.partner',
     });
     const follower = await this.env.models['mail.follower'].create({
-        followedThread: link(thread),
+        followedThread: [['link', thread]],
         id: 2,
         isActive: true,
         isEditable: true,
-        partner: insert({
+        partner: [['insert', {
             email: "bla@bla.bla",
             id: this.env.messaging.currentPartner.id,
             name: "François Perusse",
-        }),
+        }]],
     });
     await this.createFollowerComponent(follower);
     assert.containsOnce(
@@ -324,4 +375,6 @@ QUnit.test('edit follower and close subtype dialog', async function (assert) {
 
 });
 });
+});
+
 });

@@ -7,7 +7,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
     const { onChangeOrder, useBarcodeReader } = require('point_of_sale.custom_hooks');
-    const { Gui } = require('point_of_sale.Gui');
     const { useState } = owl.hooks;
     const { parse } = require('web.field_utils');
 
@@ -34,13 +33,11 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 triggerAtInput: 'update-selected-orderline',
                 useWithBarcode: true,
             });
-            this.state = useState({ numpadMode: 'quantity' });
+            let status = this.showCashBoxOpening()
+            this.state = useState({ cashControl: status, numpadMode: 'quantity' });
             this.mobile_pane = this.props.mobile_pane || 'right';
         }
         mounted() {
-            if(this.env.pos.config.cash_control && this.env.pos.pos_session.state == 'opening_control') {
-                Gui.showPopup('CashOpeningPopup');
-            }
             this.env.pos.on('change:selectedClient', this.render, this);
         }
         willUnmount() {
@@ -59,6 +56,11 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         }
         get currentOrder() {
             return this.env.pos.get_order();
+        }
+        showCashBoxOpening() {
+            if(this.env.pos.config.cash_control && this.env.pos.pos_session.state == 'opening_control')
+                return true;
+            return false;
         }
         async _getAddProductOptions(product) {
             let price_extra = 0.0;

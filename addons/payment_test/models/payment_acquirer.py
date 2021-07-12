@@ -1,30 +1,48 @@
+# coding: utf-8
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from datetime import datetime
+from uuid import uuid4
+
+from odoo import api, exceptions, fields, models, _
 
 
-class PaymentAcquirer(models.Model):
+class PaymentAcquirerTest(models.Model):
     _inherit = 'payment.acquirer'
 
-    provider = fields.Selection(selection_add=[('test', 'Test')], ondelete={'test': 'set default'})
+    provider = fields.Selection(selection_add=[
+        ('test', 'Test')
+    ], ondelete={'test': 'set default'})
 
-    @api.depends('provider')
-    def _compute_view_configuration_fields(self):
-        """ Override of payment to hide the credentials page.
+    @api.model
+    def create(self, values):
+        if values.get('provider') == 'test' and 'state' in values and values.get('state') not in ('test', 'disabled'):
+            raise exceptions.UserError(_('This acquirer should not be used for other purposes than testing.'))
+        return super(PaymentAcquirerTest, self).create(values)
 
-        :return: None
-        """
-        super()._compute_view_configuration_fields()
-        self.filtered(lambda acq: acq.provider == 'test').show_credentials_page = False
+    def write(self, values):
+        if any(rec.provider == 'test' for rec in self) and 'state' in values and values.get('state') not in ('test', 'disabled'):
+            raise exceptions.UserError(_('This acquirer should not be used for other purposes than testing.'))
+        return super(PaymentAcquirerTest, self).write(values)
 
-    @api.constrains('state', 'provider')
-    def _check_acquirer_state(self):
-        if self.filtered(lambda a: a.provider == 'test' and a.state not in ('test', 'disabled')):
-            raise UserError(_("Test acquirers should never be enabled."))
+    @api.model
+    def test_s2s_form_process(self, data):
+        """ Return a minimal token to allow proceeding to transaction creation. """
+        payment_token = self.env['payment.token'].sudo().create({
+            'acquirer_ref': uuid4(),
+            'acquirer_id': int(data['acquirer_id']),
+            'partner_id': int(data['partner_id']),
+            'name': 'Test - XXXXXXXXXXXX%s - %s' % (data['cc_number'][-4:], data['cc_holder_name'])
+        })
+        return payment_token
 
-    def _get_default_payment_method(self):
-        self.ensure_one()
-        if self.provider != 'test':
-            return super()._get_default_payment_method()
-        return self.env.ref('payment_test.payment_method_test').id
+
+class PaymentTransactionTest(models.Model):
+    _inherit = 'payment.transaction'
+
+    def test_create(self, values):
+        """Automatically set the transaction as successful upon creation. """
+        return {'date': datetime.now(), 'state': 'done'}
+
+    def test_s2s_do_transaction(self, **kwargs):
+        self.execute_callback()

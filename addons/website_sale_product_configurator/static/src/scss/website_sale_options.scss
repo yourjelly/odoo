@@ -1,6 +1,6 @@
 .css_not_available.js_product {
-    .product_price {
-        display: none !important;
+    > *:nth-child(5) > * {
+        display: none;
     }
 }
 

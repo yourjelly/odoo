@@ -18,7 +18,6 @@ class LeaveReportCalendar(models.Model):
     tz = fields.Selection(_tz_get, string="Timezone", readonly=True)
     duration = fields.Float(string='Duration', readonly=True)
     employee_id = fields.Many2one('hr.employee', readonly=True)
-    department_id = fields.Many2one('hr.department', readonly=True)
     company_id = fields.Many2one('res.company', readonly=True)
     state = fields.Selection([
         ('draft', 'To Submit'),
@@ -28,8 +27,6 @@ class LeaveReportCalendar(models.Model):
         ('validate1', 'Second Approval'),
         ('validate', 'Approved')
     ], readonly=True)
-
-    is_hatched = fields.Boolean('Hatched', readonly=True)
 
     def init(self):
         tools.drop_view_if_exists(self._cr, 'hr_leave_report_calendar')
@@ -41,13 +38,11 @@ class LeaveReportCalendar(models.Model):
             hl.date_to AS stop_datetime,
             hl.employee_id AS employee_id,
             hl.state AS state,
-            hl.department_id AS department_id,
             em.company_id AS company_id,
             CASE
                 WHEN hl.holiday_type = 'employee' THEN rr.tz
                 ELSE %s
-            END AS tz,
-            state != 'validate' as is_hatched
+            END AS tz
         FROM hr_leave hl
             LEFT JOIN hr_employee em
                 ON em.id = hl.employee_id

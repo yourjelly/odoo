@@ -1046,42 +1046,6 @@ class TestTax(TestTaxCommon):
             res3
         )
 
-    def test_is_base_affected(self):
-        taxes = self.env['account.tax'].create([{
-            'name': 'test_is_base_affected%s' % i,
-            'amount_type': 'percent',
-            'amount': amount,
-            'include_base_amount': include_base_amount,
-            'is_base_affected': is_base_affected,
-            'sequence': i,
-        } for i, amount, include_base_amount, is_base_affected in [
-            (0, 6, True, True),
-            (1, 6, True, False),
-            (2, 10, False, True),
-        ]])
-
-        compute_all_results = taxes.compute_all(100.0)
-
-        # Check the balance of the generated move lines
-        self._check_compute_all_results(
-            123.2,      # 'total_included'
-            100.0,      # 'total_excluded'
-            [
-                # base, amount
-                # -------------------------
-                (100.0, 6.0),
-                (100.0, 6.0),
-                (112.0, 11.2),
-                # -------------------------
-            ],
-            compute_all_results,
-        )
-
-        # Check the tax_ids on tax lines
-        expected_tax_ids_list = [taxes[2].ids, taxes[2].ids, []]
-        tax_ids_list = [tax_line['tax_ids'] for tax_line in compute_all_results['taxes']]
-        self.assertEqual(tax_ids_list, expected_tax_ids_list, "Only a tax affected by previous taxes should have tax_ids set on its tax line when used after an 'include_base_amount' tax.")
-
     def test_mixing_price_included_excluded_with_affect_base(self):
         tax_10_fix = self.env['account.tax'].create({
             'name': "tax_10_fix",

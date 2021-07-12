@@ -1,9 +1,12 @@
+# -*- encoding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-# Original Copyright 2015 Eezee-It, modified and maintained by Odoo.
+
+# Copyright 2015 Eezee-It
 
 {
     'name': 'Worldline SIPS',
-    'version': '2.0',
+    'version': '1.1',
+    'author': 'Eezee-It',
     'category': 'Accounting/Payment Acquirers',
     'sequence': 385,
     'description': """
@@ -18,6 +21,8 @@ not guaranteed.""",
         'views/payment_sips_templates.xml',
         'data/payment_acquirer_data.xml',
     ],
+    'installable': True,
     'application': True,
+    'post_init_hook': 'create_missing_journal_for_acquirers',
     'uninstall_hook': 'uninstall_hook',
 }

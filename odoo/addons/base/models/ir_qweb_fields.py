@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 import base64
-import logging
 import re
 from collections import OrderedDict
 from io import BytesIO
-
+from odoo import api, fields, models, _, _lt
+from PIL import Image
 import babel
 import babel.dates
-from markupsafe import Markup as M, escape
-from PIL import Image
 from lxml import etree, html
+import math
 
-from odoo import api, fields, models, _, _lt
-from odoo.tools import posix_to_ldml, float_utils, format_date, format_duration, pycompat
+from odoo.tools import html_escape as escape, posix_to_ldml, float_utils, format_date, format_duration, pycompat
 from odoo.tools.mail import safe_attrs
 from odoo.tools.misc import get_lang, babel_locale_parse
 
+import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -26,7 +25,16 @@ def nl2br(string):
     :param str string:
     :rtype: unicode
     """
-    return pycompat.to_text(string).replace('\n', M('<br>\n'))
+    return pycompat.to_text(string).replace(u'\n', u'<br>\n')
+
+def html_escape(string, options):
+    """ Automatically escapes content unless options['html-escape']
+    is set to False
+
+    :param str string:
+    :param dict options:
+    """
+    return escape(string) if not options or options.get('html-escape', True) else string
 
 #--------------------------------------------------------------------
 # QWeb Fields converters
@@ -105,7 +113,7 @@ class FieldConverter(models.AbstractModel):
         Converts a single value to its HTML version/output
         :rtype: unicode
         """
-        return escape(pycompat.to_text(value))
+        return html_escape(pycompat.to_text(value), options)
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -276,7 +284,7 @@ class TextConverter(models.AbstractModel):
         """
         Escapes the value and converts newlines to br. This is bullshit.
         """
-        return nl2br(escape(value)) if value else ''
+        return nl2br(html_escape(value, options)) if value else ''
 
 
 class SelectionConverter(models.AbstractModel):
@@ -296,7 +304,7 @@ class SelectionConverter(models.AbstractModel):
     def value_to_html(self, value, options):
         if not value:
             return ''
-        return escape(pycompat.to_text(options['selection'][value]) or u'')
+        return html_escape(pycompat.to_text(options['selection'][value]) or u'', options)
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -317,7 +325,7 @@ class ManyToOneConverter(models.AbstractModel):
         value = value.sudo().display_name
         if not value:
             return False
-        return nl2br(escape(value))
+        return nl2br(html_escape(value, options)) if value else ''
 
 
 class ManyToManyConverter(models.AbstractModel):
@@ -330,7 +338,7 @@ class ManyToManyConverter(models.AbstractModel):
         if not value:
             return False
         text = ', '.join(value.sudo().mapped('display_name'))
-        return nl2br(escape(text))
+        return nl2br(html_escape(text, options))
 
 
 class HTMLConverter(models.AbstractModel):
@@ -452,7 +460,7 @@ class MonetaryConverter(models.AbstractModel):
         else:
             post = u'\N{NO-BREAK SPACE}{symbol}'.format(symbol=display_currency.symbol or '')
 
-        return M('{pre}<span class="oe_currency_value">{0}</span>{post}').format(formatted_amount, pre=pre, post=post)
+        return u'{pre}<span class="oe_currency_value">{0}</span>{post}'.format(formatted_amount, pre=pre, post=post)
 
     @api.model
     def record_to_html(self, record, field_name, options):
@@ -460,8 +468,8 @@ class MonetaryConverter(models.AbstractModel):
         #currency should be specified by monetary field
         field = record._fields[field_name]
 
-        if not options.get('display_currency') and field.type == 'monetary' and field.get_currency_field(record):
-            options['display_currency'] = record[field.get_currency_field(record)]
+        if not options.get('display_currency') and field.type == 'monetary' and field.currency_field:
+            options['display_currency'] = record[field.currency_field]
         if not options.get('display_currency'):
             # search on the model if they are a res.currency field to set as default
             fields = record._fields.items()
@@ -666,7 +674,7 @@ class BarcodeConverter(models.AbstractModel):
         if not img_element.get('alt'):
             img_element.set('alt', _('Barcode %s') % value)
         img_element.set('src', 'data:image/png;base64,%s' % base64.b64encode(barcode).decode())
-        return M(html.tostring(img_element, encoding='unicode'))
+        return html.tostring(img_element, encoding='unicode')
 
 
 class Contact(models.AbstractModel):
@@ -705,29 +713,14 @@ class Contact(models.AbstractModel):
         if not value:
             return ''
 
-        opf = options.get('fields') or ["name", "address", "phone", "mobile", "email"]
-        sep = options.get('separator')
-        template_options = options.get('template_options', {})
-        if sep:
-            opsep = escape(sep)
-        elif template_options.get('no_tag_br'):
-            # escaped joiners will auto-escape joined params
-            opsep = escape(', ')
-        else:
-            opsep = M('<br/>')
-
+        opf = options and options.get('fields') or ["name", "address", "phone", "mobile", "email"]
+        opsep = options and options.get('separator') or "\n"
         value = value.sudo().with_context(show_address=True)
         name_get = value.name_get()[0][1]
-        # Avoid having something like:
-        # name_get = 'Foo\n  \n' -> This is a res.partner with a name and no address
-        # That would return markup('<br/>') as address. But there is no address set.
-        if any(elem.strip() for elem in name_get.split("\n")[1:]):
-            address = opsep.join(name_get.split("\n")[1:]).strip()
-        else:
-            address = ''
+
         val = {
             'name': name_get.split("\n")[0],
-            'address': address,
+            'address': escape(opsep.join(name_get.split("\n")[1:])).strip(),
             'phone': value.phone,
             'mobile': value.mobile,
             'city': value.city,
@@ -740,7 +733,7 @@ class Contact(models.AbstractModel):
             'object': value,
             'options': options
         }
-        return self.env['ir.qweb']._render('base.contact', val, **template_options)
+        return self.env['ir.qweb']._render('base.contact', val, **options.get('template_options', dict()))
 
 
 class QwebView(models.AbstractModel):
@@ -750,12 +743,13 @@ class QwebView(models.AbstractModel):
 
     @api.model
     def record_to_html(self, record, field_name, options):
+        if not getattr(record, field_name):
+            return None
+
         view = getattr(record, field_name)
-        if not view:
-            return ''
 
         if view._name != "ir.ui.view":
-            _logger.warning("%s.%s must be a 'ir.ui.view', got %r.", record, field_name, view._name)
-            return ''
+            _logger.warning("%s.%s must be a 'ir.ui.view' model." % (record, field_name))
+            return None
 
-        return view._render(options.get('values', {}), engine='ir.qweb')
+        return pycompat.to_text(view._render(options.get('values', {}), engine='ir.qweb'))

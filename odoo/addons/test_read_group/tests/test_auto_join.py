@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from odoo.tests import common
-from odoo import Command
 
 
 class TestAutoJoin(common.TransactionCase):
@@ -9,9 +8,9 @@ class TestAutoJoin(common.TransactionCase):
     def test_auto_join(self):
         model = self.env['test_read_group.order']
         records = model.create([{
-            'line_ids': [Command.create({'value': 1}), Command.create({'value': 2})],
+            'line_ids': [(0, 0, {'value': 1}), (0, 0, {'value': 2})],
         }, {
-            'line_ids': [Command.create({'value': 1})],
+            'line_ids': [(0, 0, {'value': 1})],
         }])
 
         domain1 = [('id', 'in', records.ids), ('line_ids.value', '=', 1)]

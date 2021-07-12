@@ -1,8 +1,10 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/attachment_box/attachment_box_tests.js', function (require) {
+"use strict";
 
-import { AttachmentBox } from '@mail/components/attachment_box/attachment_box';
-import { insert } from '@mail/model/model_field_command';
-import {
+const components = {
+    AttachmentBox: require('mail/static/src/components/attachment_box/attachment_box.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
@@ -10,12 +12,9 @@ import {
     dragenterFiles,
     dropFiles,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
-import { file } from 'web.test_utils';
-
-const { createFile } = file;
-const components = { AttachmentBox };
+const { file: { createFile } } = require('web.test_utils');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -215,16 +214,16 @@ QUnit.test('view attachments', async function (assert) {
     });
     const thread = this.env.models['mail.thread'].create({
         attachments: [
-            insert({
+            ['insert', {
                 id: 143,
                 mimetype: 'text/plain',
                 name: 'Blah.txt'
-            }),
-            insert({
+            }],
+            ['insert', {
                 id: 144,
                 mimetype: 'text/plain',
                 name: 'Blu.txt'
-            })
+            }]
         ],
         id: 100,
         model: 'res.partner',
@@ -288,11 +287,13 @@ QUnit.test('remove attachment should ask for confirmation', async function (asse
 
     await this.start();
     const thread = this.env.models['mail.thread'].create({
-        attachments: insert({
-            id: 143,
-            mimetype: 'text/plain',
-            name: 'Blah.txt',
-        }),
+        attachments: [
+            ['insert', {
+                id: 143,
+                mimetype: 'text/plain',
+                name: 'Blah.txt'
+            }],
+        ],
         id: 100,
         model: 'res.partner',
     });
@@ -331,4 +332,6 @@ QUnit.test('remove attachment should ask for confirmation', async function (asse
 
 });
 });
+});
+
 });

@@ -1,17 +1,18 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/discuss_sidebar/discuss_sidebar.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { useUpdate } from '@mail/component_hooks/use_update/use_update';
-import { AutocompleteInput } from '@mail/components/autocomplete_input/autocomplete_input';
-import { DiscussSidebarItem } from '@mail/components/discuss_sidebar_item/discuss_sidebar_item';
+const components = {
+    AutocompleteInput: require('mail/static/src/components/autocomplete_input/autocomplete_input.js'),
+    DiscussSidebarItem: require('mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-const components = { AutocompleteInput, DiscussSidebarItem };
-
-export class DiscussSidebar extends Component {
+class DiscussSidebar extends Component {
 
     /**
      * @override
@@ -300,4 +301,8 @@ Object.assign(DiscussSidebar, {
     components,
     props: {},
     template: 'mail.DiscussSidebar',
+});
+
+return DiscussSidebar;
+
 });

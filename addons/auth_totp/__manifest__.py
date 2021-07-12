@@ -22,9 +22,4 @@ can setup API keys to replace their main password.
         'views/user_preferences.xml',
         'views/templates.xml',
     ],
-    'assets': {
-        'web.assets_tests': [
-            'auth_totp/static/**/*',
-        ],
-    },
 }

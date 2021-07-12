@@ -8,7 +8,6 @@ import odoo
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.tools import mute_logger
 from odoo.tests import common
-from odoo import Command
 
 
 class TestServerActionsBase(common.TransactionCase):
@@ -35,7 +34,6 @@ class TestServerActionsBase(common.TransactionCase):
         # Model data
         Model = self.env['ir.model']
         Fields = self.env['ir.model.fields']
-        self.comment_html = '<p>MyComment</p>'
         self.res_partner_model = Model.search([('model', '=', 'res.partner')])
         self.res_partner_name_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'name')])
         self.res_partner_city_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'city')])
@@ -55,7 +53,7 @@ class TestServerActionsBase(common.TransactionCase):
             'model_id': self.res_partner_model.id,
             'model_name': 'res.partner',
             'state': 'code',
-            'code': 'record.write({"comment": "%s"})' % self.comment_html,
+            'code': 'record.write({"comment": "MyComment"})',
         })
 
 
@@ -63,7 +61,7 @@ class TestServerActions(TestServerActionsBase):
 
     def test_00_action(self):
         self.action.with_context(self.context).run()
-        self.assertEqual(self.test_partner.comment, self.comment_html, 'ir_actions_server: invalid condition check')
+        self.assertEqual(self.test_partner.comment, 'MyComment', 'ir_actions_server: invalid condition check')
         self.test_partner.write({'comment': False})
 
         # Do: create contextual action
@@ -92,9 +90,9 @@ class TestServerActions(TestServerActionsBase):
             'state': 'object_create',
             'crud_model_id': self.res_country_model.id,
             'link_field_id': False,
-            'fields_lines': [Command.clear(),
-                             Command.create({'col1': self.res_country_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'}),
-                             Command.create({'col1': self.res_country_code_field.id, 'value': 'record.name[0:2]', 'evaluation_type': 'equation'})],
+            'fields_lines': [(5,),
+                             (0, 0, {'col1': self.res_country_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'}),
+                             (0, 0, {'col1': self.res_country_code_field.id, 'value': 'record.name[0:2]', 'evaluation_type': 'equation'})],
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -112,8 +110,8 @@ class TestServerActions(TestServerActionsBase):
             'state': 'object_create',
             'crud_model_id': self.action.model_id.id,
             'link_field_id': self.res_partner_parent_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name}),
-                             Command.create({'col1': self.res_partner_city_field.id, 'value': _city})],
+            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': _name}),
+                             (0, 0, {'col1': self.res_partner_city_field.id, 'value': _city})],
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -132,7 +130,7 @@ class TestServerActions(TestServerActionsBase):
             'state': 'object_create',
             'crud_model_id': self.action.model_id.id,
             'link_field_id': self.res_partner_children_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name})],
+            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': _name})],
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -149,7 +147,7 @@ class TestServerActions(TestServerActionsBase):
             'state': 'object_create',
             'crud_model_id': self.res_partner_category_model.id,
             'link_field_id': self.res_partner_category_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_category_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'})],
+            'fields_lines': [(0, 0, {'col1': self.res_partner_category_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'})],
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -164,7 +162,7 @@ class TestServerActions(TestServerActionsBase):
         # Do: update partner name
         self.action.write({
             'state': 'object_write',
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name})],
+            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': _name})],
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -189,8 +187,8 @@ class TestServerActions(TestServerActionsBase):
             'model_id': self.res_partner_model.id,
             'crud_model_id': self.res_partner_model.id,
             'state': 'object_create',
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': 'RaoulettePoiluchette'}),
-                             Command.create({'col1': self.res_partner_city_field.id, 'value': 'TestingCity'})],
+            'fields_lines': [(0, 0, {'col1': self.res_partner_name_field.id, 'value': 'RaoulettePoiluchette'}),
+                             (0, 0, {'col1': self.res_partner_city_field.id, 'value': 'TestingCity'})],
         })
         action3 = self.action.create({
             'name': 'Subaction3',
@@ -201,7 +199,7 @@ class TestServerActions(TestServerActionsBase):
         })
         self.action.write({
             'state': 'multi',
-            'child_ids': [Command.set([action1.id, action2.id, action3.id])],
+            'child_ids': [(6, 0, [action1.id, action2.id, action3.id])],
         })
 
         # Do: run the action
@@ -217,7 +215,7 @@ class TestServerActions(TestServerActionsBase):
         # Test loops
         with self.assertRaises(ValidationError):
             self.action.write({
-                'child_ids': [Command.set([self.action.id])]
+                'child_ids': [(6, 0, [self.action.id])]
             })
 
     def test_50_groups(self):
@@ -235,7 +233,7 @@ class TestServerActions(TestServerActionsBase):
         self.action.write({
             'model_id': self.res_country_model.id,
             'binding_model_id': self.res_country_model.id,
-            'groups_id': [Command.link(group0.id)],
+            'groups_id': [(4, group0.id, 0)],
             'code': 'record.write({"vat_label": "VatFromTest"})',
         })
 
@@ -248,7 +246,7 @@ class TestServerActions(TestServerActionsBase):
         self.assertFalse(self.test_country.vat_label)
 
         # add group to the user, and test again
-        self.env.user.write({'groups_id': [Command.link(group0.id)]})
+        self.env.user.write({'groups_id': [(4, group0.id)]})
 
         bindings = Actions.get_bindings('res.country')
         self.assertItemsEqual(bindings.get('action'), self.action.read())
@@ -321,16 +319,17 @@ class TestCustomFields(common.TransactionCase):
 
     def setUp(self):
         # check that the registry is properly reset
-        fnames = set(self.registry[self.MODEL]._fields)
-
+        registry = odoo.registry()
+        fnames = set(registry[self.MODEL]._fields)
         @self.addCleanup
         def check_registry():
-            assert set(self.registry[self.MODEL]._fields) == fnames
+            assert set(registry[self.MODEL]._fields) == fnames
 
-        self.addCleanup(self.registry.reset_changes)
-        self.addCleanup(self.registry.clear_caches)
+        super(TestCustomFields, self).setUp()
 
-        super().setUp()
+        # use a test cursor instead of a real cursor
+        self.registry.enter_test_mode(self.cr)
+        self.addCleanup(self.registry.leave_test_mode)
 
     def create_field(self, name, *, field_type='char'):
         """ create a custom field and return it """
@@ -511,7 +510,7 @@ class TestCustomFields(common.TransactionCase):
         })
         query_count = self.cr.sql_log_count - query_count
 
-        # create the related field, and assert it only takes 1 extra query
+        # create the related field, and assert it only takes 1 extra queries
         with self.assertQueryCount(query_count + 1):
             self.env['ir.model.fields'].create({
                 'model_id': self.env['ir.model']._get_id('res.partner'),
@@ -536,8 +535,8 @@ class TestCustomFields(common.TransactionCase):
             'field_description': "Custom Selection",
             'ttype': 'selection',
             'selection_ids': [
-                Command.create({'value': 'foo', 'name': 'Foo', 'sequence': 0}),
-                Command.create({'value': 'bar', 'name': 'Bar', 'sequence': 1}),
+                (0, 0, {'value': 'foo', 'name': 'Foo', 'sequence': 0}),
+                (0, 0, {'value': 'bar', 'name': 'Bar', 'sequence': 1}),
             ],
         })
 

@@ -1,11 +1,10 @@
-/** @odoo-module **/
+odoo.define('mail.field_emojis_common', function (require) {
+"use strict";
 
-import emojis from '@mail/js/emojis';
-import MailEmojisMixin from '@mail/js/emojis_mixin';
-
-import basicFields from 'web.basic_fields';
-import core from 'web.core';
-
+var basicFields = require('web.basic_fields');
+var core = require('web.core');
+var emojis = require('mail.emojis');
+var MailEmojisMixin = require('mail.emoji_mixin');
 var _onEmojiClickMixin = MailEmojisMixin._onEmojiClick;
 var QWeb = core.qweb;
 
@@ -19,7 +18,7 @@ var FieldEmojiCommon = {
      */
     init: function () {
         this._super.apply(this, arguments);
-        this._triggerOnchange = _.debounce(this._triggerOnchange, 2000);
+        this._triggerOnchange = _.throttle(this._triggerOnchange, 1000, {leading: false});
         this.emojis = emojis;
     },
 
@@ -91,7 +90,7 @@ var FieldEmojiCommon = {
 
     /**
      * Triggers the 'change' event to refresh the value.
-     * This method is debounced to run 2 seconds after typing ends.
+     * This method is throttled to run at most once every second.
      * (to avoid spamming the server while the user is typing his message)
      *
      * @private
@@ -106,7 +105,7 @@ var FieldEmojiCommon = {
      * Should be used inside 'on_attach_callback' because we need the element to be attached to the form first.
      * That's because the $emojisIcon element needs to be rendered outside of this $el
      * (which is an text element, that can't 'contain' any other elements).
-     *
+     * 
      * @private
      */
     _attachEmojisDropdown: function () {
@@ -132,4 +131,6 @@ var FieldEmojiCommon = {
     }
 };
 
-export default FieldEmojiCommon;
+return FieldEmojiCommon;
+
+});

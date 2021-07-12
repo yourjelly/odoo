@@ -18,6 +18,10 @@ class TaxReportTest(AccountTestInvoicingCommon):
             'name': "The Principality of Zeon",
             'code': 'ZZ',
         })
+        cls.test_country_3 = cls.env['res.country'].create({
+            'name': "Alagaësia",
+            'code': 'QQ',
+        })
 
         cls.tax_report_1 = cls.env['account.tax.report'].create({
             'name': "Tax report 1",
@@ -142,7 +146,6 @@ class TaxReportTest(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 25,
             'type_tax_use': 'sale',
-            'country_id': self.tax_report_1.country_id.id,
             'invoice_repartition_line_ids': [
                 (0,0, {
                     'factor_percent': 100,
@@ -167,9 +170,6 @@ class TaxReportTest(AccountTestInvoicingCommon):
                 }),
             ],
         })
-
-        # Make sure the fiscal country allows using this tax directly
-        self.env.company.account_fiscal_country_id = self.tax_report_1.country_id.id
 
         test_invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',

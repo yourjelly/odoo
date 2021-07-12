@@ -26,9 +26,4 @@
         </record>
     </data>
 
-    <record id="internal_project_default_stage" model="project.task.type">
-        <field name="sequence">1</field>
-        <field name="name">Internal</field>
-    </record>
-
 </odoo>

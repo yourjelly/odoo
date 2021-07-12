@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import io
-import json
 import logging
 import re
 import time
 import requests
-import werkzeug.urls
 import werkzeug.wrappers
 from PIL import Image, ImageFont, ImageDraw
 from lxml import etree
@@ -14,13 +12,12 @@ from base64 import b64decode, b64encode
 
 from odoo.http import request
 from odoo import http, tools, _, SUPERUSER_ID
-from odoo.addons.http_routing.models.ir_http import slug, unslug
+from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import UserError
 from odoo.modules.module import get_module_path, get_resource_path
 from odoo.tools.misc import file_open
-from odoo.tools.mimetypes import guess_mimetype
 
-from ..models.ir_attachment import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_IMAGE_MIMETYPES
+from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
 
 logger = logging.getLogger(__name__)
 DEFAULT_LIBRARY_ENDPOINT = 'https://media-api.odoo.com'
@@ -165,17 +162,11 @@ class Web_Editor(http.Controller):
         return True
 
     @http.route('/web_editor/attachment/add_data', type='json', auth='user', methods=['POST'], website=True)
-    def add_data(self, name, data, is_image, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
-        if is_image:
-            format_error_msg = _("Uploaded image's format is not supported. Try with: %s", ', '.join(SUPPORTED_IMAGE_EXTENSIONS))
-            try:
-                data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
-                mimetype = guess_mimetype(b64decode(data))
-                if mimetype not in SUPPORTED_IMAGE_MIMETYPES:
-                    return {'error': format_error_msg}
-            except ValueError as e:
-                return {'error': e.args[0]}
-
+    def add_data(self, name, data, quality=0, width=0, height=0, res_id=False, res_model='ir.ui.view', **kwargs):
+        try:
+            data = tools.image_process(data, size=(width, height), quality=quality, verify_resolution=True)
+        except UserError:
+            pass  # not an image
         self._clean_context()
         attachment = self._attachment_create(name=name, data=data, res_id=res_id, res_model=res_model)
         return attachment._get_media_info()
@@ -236,7 +227,7 @@ class Web_Editor(http.Controller):
             # Find attachment by url. There can be multiple matches because of default
             # snippet images referencing the same image in /static/, so we limit to 1
             attachment = request.env['ir.attachment'].search([
-                '|', ('url', '=like', src), ('url', '=like', '%s?%%' % src),
+                ('url', '=like', src),
                 ('mimetype', 'in', SUPPORTED_IMAGE_MIMETYPES),
             ], limit=1)
         if not attachment:
@@ -353,8 +344,7 @@ class Web_Editor(http.Controller):
         url_infos = dict()
         for v in views:
             for asset_call_node in etree.fromstring(v["arch"]).xpath("//t[@t-call-assets]"):
-                attr = asset_call_node.get(resources_type_info['t_call_assets_attribute'])
-                if attr and not json.loads(attr.lower()):
+                if asset_call_node.get(resources_type_info['t_call_assets_attribute']) == "false":
                     continue
                 asset_name = asset_call_node.get("t-call-assets")
 
@@ -385,7 +375,10 @@ class Web_Editor(http.Controller):
                 # scss data is returned sorted by bundle, with the bundles
                 # names and xmlids
                 if len(files_data):
-                    files_data_by_bundle.append([asset_name, files_data])
+                    files_data_by_bundle.append([
+                        {'xmlid': asset_name, 'name': request.env.ref(asset_name).name},
+                        files_data
+                    ])
 
         # Filter bundles/files:
         # - A file which appears in multiple bundles only appears in the
@@ -396,8 +389,8 @@ class Web_Editor(http.Controller):
             bundle_1 = files_data_by_bundle[i]
             for j in range(0, len(files_data_by_bundle)):
                 bundle_2 = files_data_by_bundle[j]
-                # In unwanted bundles, keep only the files which are in wanted bundles too (web._helpers)
-                if bundle_1[0] not in bundles_restriction and bundle_2[0] in bundles_restriction:
+                # In unwanted bundles, keep only the files which are in wanted bundles too (_assets_helpers)
+                if bundle_1[0]["xmlid"] not in bundles_restriction and bundle_2[0]["xmlid"] in bundles_restriction:
                     bundle_1[1] = [item_1 for item_1 in bundle_1[1] if item_1 in bundle_2[1]]
         for i in range(0, len(files_data_by_bundle)):
             bundle_1 = files_data_by_bundle[i]
@@ -410,7 +403,7 @@ class Web_Editor(http.Controller):
         # Only keep bundles which still have files and that were requested
         files_data_by_bundle = [
             data for data in files_data_by_bundle
-            if (len(data[1]) > 0 and (not bundles_restriction or data[0] in bundles_restriction))
+            if (len(data[1]) > 0 and (not bundles_restriction or data[0]["xmlid"] in bundles_restriction))
         ]
 
         # Fetch the arch of each kept file, in each bundle
@@ -435,7 +428,7 @@ class Web_Editor(http.Controller):
         return files_data_by_bundle
 
     @http.route("/web_editor/save_asset", type="json", auth="user", website=True)
-    def save_asset(self, url, bundle, content, file_type):
+    def save_asset(self, url, bundle_xmlid, content, file_type):
         """
         Save a given modification of a scss/js file.
 
@@ -443,18 +436,18 @@ class Web_Editor(http.Controller):
             url (str):
                 the original url of the scss/js file which has to be modified
 
-            bundle (str):
-                the name of the bundle in which the scss/js file addition can
+            bundle_xmlid (str):
+                the xmlid of the bundle in which the scss/js file addition can
                 be found
 
             content (str): the new content of the scss/js file
 
             file_type (str): 'scss' or 'js'
         """
-        request.env['web_editor.assets'].save_asset(url, bundle, content, file_type)
+        request.env['web_editor.assets'].save_asset(url, bundle_xmlid, content, file_type)
 
     @http.route("/web_editor/reset_asset", type="json", auth="user", website=True)
-    def reset_asset(self, url, bundle):
+    def reset_asset(self, url, bundle_xmlid):
         """
         The reset_asset route is in charge of reverting all the changes that
         were done to a scss/js file.
@@ -463,11 +456,11 @@ class Web_Editor(http.Controller):
             url (str):
                 the original URL of the scss/js file to reset
 
-            bundle (str):
-                the name of the bundle in which the scss/js file addition can
+            bundle_xmlid (str):
+                the xmlid of the bundle in which the scss/js file addition can
                 be found
         """
-        request.env['web_editor.assets'].reset_asset(url, bundle)
+        request.env['web_editor.assets'].reset_asset(url, bundle_xmlid)
 
     @http.route("/web_editor/public_render_template", type="json", auth="public", website=True)
     def public_render_template(self, args):
@@ -482,10 +475,17 @@ class Web_Editor(http.Controller):
         values = len_args > 1 and args[1] or {}
 
         View = request.env['ir.ui.view']
+        if xmlid in request.env['web_editor.assets']._get_public_asset_xmlids():
+            # For white listed assets, bypass access verification
+            # TODO in master this part should be removed and simply use the
+            # public group on the related views instead. And then let the normal
+            # flow handle the rendering.
+            return View.sudo()._render_template(xmlid, {k: values[k] for k in values if k in trusted_value_keys})
+        # Otherwise use normal flow
         return View.render_public_asset(xmlid, {k: values[k] for k in values if k in trusted_value_keys})
 
     @http.route('/web_editor/modify_image/<model("ir.attachment"):attachment>', type="json", auth="user", website=True)
-    def modify_image(self, attachment, res_model=None, res_id=None, name=None, data=None, original_id=None, mimetype=None):
+    def modify_image(self, attachment, res_model=None, res_id=None, name=None, data=None, original_id=None):
         """
         Creates a modified copy of an attachment and returns its image_src to be
         inserted into the DOM.
@@ -495,7 +495,6 @@ class Web_Editor(http.Controller):
             'datas': data,
             'type': 'binary',
             'res_model': res_model or 'ir.ui.view',
-            'mimetype': mimetype or attachment.mimetype,
         }
         if fields['res_model'] == 'ir.ui.view':
             fields['res_id'] = 0
@@ -528,11 +527,8 @@ class Web_Editor(http.Controller):
         """
         svg = None
         if module == 'illustration':
-            attachment = request.env['ir.attachment'].sudo().browse(unslug(filename)[1])
-            if (not attachment.exists()
-                    or attachment.type != 'binary'
-                    or not attachment.public
-                    or not attachment.url.startswith(request.httprequest.path)):
+            attachment = request.env['ir.attachment'].sudo().search([('url', '=like', request.httprequest.path), ('public', '=', True)], limit=1)
+            if not attachment:
                 raise werkzeug.exceptions.NotFound()
             svg = b64decode(attachment.datas).decode('utf-8')
         else:
@@ -599,7 +595,6 @@ class Web_Editor(http.Controller):
                 <media_id>: {
                     'query': 'space separated search terms',
                     'is_dynamic_svg': True/False,
-                    'dynamic_colors': maps color names to their color,
                 }, ...
             }
         """
@@ -631,8 +626,7 @@ class Web_Editor(http.Controller):
                 'res_id': 0,
             })
             if media[id]['is_dynamic_svg']:
-                colorParams = werkzeug.urls.url_encode(media[id]['dynamic_colors'])
-                attachment['url'] = '/web_editor/shape/illustration/%s?%s' % (slug(attachment), colorParams)
+                attachment['url'] = '/web_editor/shape/illustration/%s' % slug(attachment)
             attachments.append(attachment._get_media_info())
 
         return attachments

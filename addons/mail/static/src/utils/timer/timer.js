@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/utils/timer/timer.js', function (require) {
+'use strict';
 
-import { makeDeferred } from '@mail/utils/deferred/deferred';
+const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
 
 //------------------------------------------------------------------------------
 // Errors
@@ -159,4 +160,6 @@ Object.assign(Timer, {
     TimerClearedError,
 });
 
-export default Timer;
+return Timer;
+
+});

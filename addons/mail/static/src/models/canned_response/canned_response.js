@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/canned_response/canned_response.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr } from '@mail/model/model_field';
-import { cleanSearchTerm } from '@mail/utils/utils';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr } = require('mail/static/src/model/model_field.js');
+const { cleanSearchTerm } = require('mail/static/src/utils/utils.js');
 
 function factory(dependencies) {
 
@@ -102,3 +103,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.canned_response', factory);
+
+});

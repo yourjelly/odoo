@@ -1,7 +1,7 @@
 odoo.define("lunch/static/src/js/lunch_model_extension.js", function (require) {
     "use strict";
 
-    const ActionModel = require("web.ActionModel");
+    const ActionModel = require("web/static/src/js/views/action_model.js");
 
     class LunchModelExtension extends ActionModel.Extension {
 

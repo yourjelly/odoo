@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.crm.tests.common import TestCrmCommon
-from odoo.tests.common import users
+from odoo.tests.common import Form, users
 
 
 class TestCRMLead(TestCrmCommon):

@@ -9,13 +9,6 @@ from odoo import api, models, tools, _
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
 
-    def _valid_field_parameter(self, field, name):
-        # allow tracking on abstract models; see also 'mail.thread'
-        return (
-            name == 'tracking' and self._abstract
-            or super()._valid_field_parameter(field, name)
-        )
-
     # ------------------------------------------------------------
     # GENERIC MAIL FEATURES
     # ------------------------------------------------------------
@@ -53,8 +46,6 @@ class BaseModel(models.AbstractModel):
                     tracking_sequence = 100
                 tracking = self.env['mail.tracking.value'].create_tracking_values(initial_value, new_value, col_name, col_info, tracking_sequence, self._name)
                 if tracking:
-                    if tracking['field_type'] == 'monetary':
-                        tracking['currency_id'] = getattr(self, col_info.get('currency_field', ''), self.company_id.currency_id).id
                     tracking_value_ids.append([0, 0, tracking])
                 changes.add(col_name)
 
@@ -163,6 +154,11 @@ class BaseModel(models.AbstractModel):
     # ALIAS MANAGEMENT
     # ------------------------------------------------------------
 
+    def _alias_check_contact(self, message, message_dict, alias):
+        """ Deprecated, remove in v14+ """
+        error_msg = self._alias_get_error_message(message, message_dict, alias)
+        return error_msg if error_msg else True
+
     def _alias_get_error_message(self, message, message_dict, alias):
         """ Generic method that takes a record not necessarily inheriting from
         mail.alias.mixin. """
@@ -170,9 +166,10 @@ class BaseModel(models.AbstractModel):
         if alias.alias_contact == 'followers':
             if not self.ids:
                 return _('incorrectly configured alias (unknown reference record)')
-            if not hasattr(self, "message_partner_ids"):
+            if not hasattr(self, "message_partner_ids") or not hasattr(self, "message_channel_ids"):
                 return _('incorrectly configured alias')
-            if not author or author not in self.message_partner_ids:
+            accepted_partner_ids = self.message_partner_ids | self.message_channel_ids.mapped('channel_partner_ids')
+            if not author or author not in accepted_partner_ids:
                 return _('restricted to followers')
         elif alias.alias_contact == 'partners' and not author:
             return _('restricted to known authors')

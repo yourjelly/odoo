@@ -109,13 +109,20 @@ var VariantMixin = {
                         type: 'text',
                         'data-custom_product_template_attribute_value_id': attributeValueId,
                         'data-attribute_value_name': attributeValueName,
-                        class: 'variant_custom_value form-control mt-2'
+                        class: 'variant_custom_value form-control'
                     });
 
-                    $input.attr('placeholder', attributeValueName);
-                    $input.addClass('custom_value_radio');
-                    $variantContainer.append($input);
-                    $input[0].focus();
+                    var isRadioInput = $target.is('input[type=radio]') &&
+                        $target.closest('label.css_attribute_color').length === 0;
+
+                    if (isRadioInput && $customInput.data('is_single_and_custom') !== 'True') {
+                        $input.addClass('custom_value_radio');
+                        $target.closest('div').after($input);
+                    } else {
+                        $input.attr('placeholder', attributeValueName);
+                        $input.addClass('custom_value_own_line');
+                        $variantContainer.append($input);
+                    }
                 }
             } else {
                 $variantContainer.find('.variant_custom_value').remove();
@@ -333,7 +340,7 @@ var VariantMixin = {
             .data('attribute_exclusions');
 
         $parent
-            .find('option, input, label, .o_variant_pills')
+            .find('option, input, label')
             .removeClass('css_not_available')
             .attr('title', function () { return $(this).data('value_name') || ''; })
             .data('excluded-by', '');
@@ -407,7 +414,6 @@ var VariantMixin = {
             .find('option[value=' + attributeValueId + '], input[value=' + attributeValueId + ']');
         $input.addClass('css_not_available');
         $input.closest('label').addClass('css_not_available');
-        $input.closest('.o_variant_pills').addClass('css_not_available');
 
         if (excludedBy && attributeNames) {
             var $target = $input.is('option') ? $input : $input.closest('label').add($input);

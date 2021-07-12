@@ -43,7 +43,7 @@
     </nav>
 </template>
 
-<!-- Option: Tracks display: optional favorites -->
+<!-- Option: Tracks display: optional wishlist -->
 <template id="agenda_topbar_wishlist"
     inherit_id="website_event_track.agenda_topbar"
     name="Allow Wishlists"
@@ -65,10 +65,8 @@
         <div t-if="search_key" class="alert alert-info text-center">
             <p class="m-0">We did not find any track matching your <strong t-esc="search_key"/> search.</p>
         </div>
-        <div t-else="" class="alert alert-info text-center" groups="event.group_event_user">
-            <a target="_blank" t-att-href="'/web?#action=website_event_track.action_event_track_from_event&amp;active_id=%s' % event.id">
-                <p class="m-0">Schedule some tracks to get started</p>
-            </a>
+        <div t-else="" class="alert alert-info text-center" groups="event.group_event_manager">
+            <p class="m-0">Schedule some tracks to get started !</p>
         </div>
     </div>
 
@@ -156,16 +154,16 @@
 </template>
 
 <template id="agenda_main_track" name="Track Agenda: Track">
-    <div class="d-flex flex-column h-100" t-att-data-publish="track.website_published and 'on' or 'off'">
+    <div class="d-flex flex-column h-100">
         <div class="d-flex justify-content-end flex-wrap-reverse align-items-center o_weagenda_track_badges">
             <small t-if="track.is_track_live and not track.is_track_done and track.website_published"
-                class="mx-1 badge badge-danger rounded-sm">Live
+                class="mx-1 badge badge-danger">Live
             </small>
-            <small t-if="not track.website_published and is_event_user"
+            <small t-if="not track.website_published and user_event_manager and track.stage_id.is_accepted"
                    title="Unpublished"
-                   class="ml-1 mt-1 mt-md-0 badge badge-danger o_wevent_online_badge_unpublished">Unpublished</small>
+                   class="ml-1 badge badge-danger o_wevent_online_badge_unpublished">Unpublished</small>
             <small t-if="not track.stage_id.is_accepted" title="Not Accepted"
-                   class="ml-1 mt-1 mt-md-0 badge badge-danger o_wevent_online_badge_unpublished">Not Accepted</small>
+                   class="ml-1 badge badge-danger o_wevent_online_badge_unpublished">Not Accepted</small>
             <span t-if="option_track_wishlist">
                 <t t-call="website_event_track.track_widget_reminder">
                     <t t-set="reminder_light" t-value="True"/>
@@ -176,20 +174,14 @@
         </div>
 
         <div class="o_we_agenda_card_content d-flex flex-column justify-content-center my-1">
-            <div class="o_we_agenda_card_title">
-                <t t-if="track.website_published or is_event_user">
-                    <a t-att-href="'/event/%s/track/%s' % (slug(event), slug(track))" class="text-black text-bold">
-                        <t t-esc="track.name"/>
-                    </a>
-                </t>
-                <t t-else="">
-                    <span class="text-muted text-bold">
-                        <t t-esc="track.name"/>
-                    </span>
-                </t>
+            <div t-att-class="'text-black' if track.website_published or user_event_manager else 'text-muted'"
+                 t-att-onclick="'window.location=\'/event/%s/track/%s\'' % (slug(event), slug(track))
+                    if track.website_published or user_event_manager else ''">
+                <span class="o_we_agenda_card_title text-bold" t-esc="track.name"/>
             </div>
-            <div class="text-muted text-center" t-if="track.partner_tag_line">
-                <small t-esc="track.partner_tag_line"/>
+            <div class="text-muted text-center">
+                <small t-if="track.partner_id or track.partner_name">
+                    <t t-esc="track.partner_id.sudo().name or track.partner_name"/></small>
             </div>
             <div class="d-flex justify-content-center flex-wrap">
                 <t t-foreach="track.tag_ids" t-as="tag">

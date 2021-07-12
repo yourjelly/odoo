@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/tests/helpers/mock_server.js', function (require) {
+'use strict';
 
-import '@mail/../tests/helpers/mock_server'; // ensure mail overrides are applied first
+require('mail.MockServer'); // ensure mail overrides are applied first
 
-import MockServer from 'web.MockServer';
+const MockServer = require('web.MockServer');
 
 MockServer.include({
     //--------------------------------------------------------------------------
@@ -257,4 +258,6 @@ MockServer.include({
         this._mockMailChannel_broadcast([mailChannelId], [operator.partner_id]);
         return this._mockMailChannelChannelInfo([mailChannelId])[0];
     },
+});
+
 });

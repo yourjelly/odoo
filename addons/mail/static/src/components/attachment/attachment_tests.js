@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/attachment/attachment_tests.js', function (require) {
+'use strict';
 
-import { Attachment } from '@mail/components/attachment/attachment';
-import {
+const components = {
+    Attachment: require('mail/static/src/components/attachment/attachment.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { Attachment };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -756,4 +757,6 @@ QUnit.test('DOCX file is not viewable', async function (assert) {
 
 });
 });
+});
+
 });

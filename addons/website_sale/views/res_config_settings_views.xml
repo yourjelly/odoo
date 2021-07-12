@@ -59,20 +59,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-12 col-lg-6 o_setting_box" id="cart_redirect_setting">
-                        <div class="o_setting_left_pane">
-                            <field name="cart_add_on_page"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="cart_add_on_page"/>
-                            <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
-                            <div class="text-muted">
-                                No redirect when the user adds a product to cart.
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="col-12 col-lg-6 o_setting_box" id="comparator_option_setting">
                         <div class="o_setting_left_pane">
                             <field name="module_website_sale_comparison"/>
@@ -170,19 +156,6 @@
                             <label for="module_sale_coupon"/>
                             <div class="text-muted" id="website_sale_coupon">
                                 Manage promotion &amp; coupon programs
-                            </div>
-                        </div>
-                    </div>
-                     <div class="col-12 col-lg-6 o_setting_box"
-                        id="gift_card_programs"
-                        title="Can be used as payment toward future orders.">
-                        <div class="o_setting_left_pane">
-                            <field name="module_website_sale_gift_card" />
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="module_website_sale_gift_card"/>
-                            <div class="text-muted" id="website_sale_gift_card">
-                                Can be used as payment toward future orders.
                             </div>
                         </div>
                     </div>

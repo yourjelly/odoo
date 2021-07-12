@@ -13,20 +13,9 @@
                     <field name="direction" groups="base.group_no_one"/>
                     <field name="active"/>
                     <button name="%(base.action_view_base_language_install)d"
-                        string="Activate"
+                        string="Activate / Update"
                         type="action"
-                        icon="fa-check"
-                        attrs="{'invisible': [('active', '=', True)]}"/>
-                    <button name="%(base.action_view_base_language_install)d"
-                        string="Update"
-                        type="action"
-                        icon="fa-refresh"
-                        attrs="{'invisible': [('active', '!=', True)]}"/>
-                    <button name="action_archive"
-                        string="Disable"
-                        type="object"
-                        icon="fa-times"
-                        attrs="{'invisible': [('active', '!=', True)]}"/>
+                        icon="fa-refresh"/>
                 </tree>
             </field>
         </record>
@@ -46,8 +35,8 @@
                         </div>
                         <field name="flag_image" widget="image" class="oe_avatar"/>
                         <div class="oe_title">
-                            <label for="name"/>
-                            <h1><field name="name" placeholder="e.g. French"/></h1>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1><field name="name"/></h1>
                         </div>
                         <group col="3">
                             <group>

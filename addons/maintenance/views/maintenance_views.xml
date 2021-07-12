@@ -68,9 +68,9 @@
                         <field name="kanban_state" class="oe_inline" widget="state_selection"/>
                     </div>
                     <div class="oe_title">
-                        <label for="name" string="Request"/>
+                        <label for="name" class="oe_edit_only" string="Title"/>
                         <h1>
-                            <field name="name" placeholder="e.g. Screen not working"/>
+                            <field name="name" placeholder="Maintenance Request"/>
                         </h1>
                     </div>
                     <group>
@@ -345,8 +345,8 @@
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <div class="oe_title">
-                        <label for="name"/>
-                        <h1><field name="name" string="Name" placeholder="e.g. LED Monitor"/></h1>
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" string="Name" placeholder="Equipment Name"/></h1>
                     </div>
                     <group>
                         <group>
@@ -594,9 +594,9 @@
                     </button>
                 </div>
                 <div class="oe_title">
-                    <label for="name" string="Category Name"/>
+                    <label for="name" class="oe_edit_only" string="Category Name"/>
                     <h1>
-                        <field name="name" placeholder="e.g. Monitors"/>
+                        <field name="name"/>
                     </h1>
                 </div>
                 <group>
@@ -755,9 +755,9 @@
                 <sheet>
                 <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                 <div class="oe_title">
-                    <label for="name" string="Team Name"/>
+                    <label for="name" class="oe_edit_only" string="Team Name"/>
                     <h1>
-                        <field name="name" placeholder="e.g. Internal Maintenance"/>
+                        <field name="name"/>
                     </h1>
                 </div>
                 <group>
@@ -964,7 +964,7 @@
         id="menu_maintenance_title"
         name="Maintenance"
         web_icon="maintenance,static/description/icon.png"
-        sequence="160"/>
+        sequence="110"/>
 
     <menuitem
         id="menu_m_dashboard"

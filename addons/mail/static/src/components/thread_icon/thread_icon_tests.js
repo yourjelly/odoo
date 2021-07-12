@@ -1,15 +1,16 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/thread_icon/thread_icon_tests.js', function (require) {
+'use strict';
 
-import { ThreadIcon } from '@mail/components/thread_icon/thread_icon';
-import {
+const components = {
+    ThreadIcon: require('mail/static/src/components/thread_icon/thread_icon.js'),
+};
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
-
-const components = { ThreadIcon };
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -112,4 +113,6 @@ QUnit.test('chat: correspondent is typing', async function (assert) {
 
 });
 });
+});
+
 });

@@ -68,10 +68,6 @@
                     domain="[('opt_out', '=', False), ('is_blacklisted', '=', False), ('email_normalized', '!=', False)]"
                     invisible="not context.get('default_list_ids')"/>
                 <separator/>
-                <filter name="filter_bounce" string="Bounced" domain="[('message_bounce', '>', 0)]"/>
-                <filter name="filter_blacklisted" string="Blacklisted" domain="[('is_blacklisted','=',True)]" invisible="1"/>
-                <filter name="filter_opt_out" string="Opted-out" domain="[('opt_out', '=', True)]" invisible="1"/>
-                <separator/>
                 <filter string="Exclude Blacklisted Emails"
                     name="filter_not_email_bl"
                     domain="[('is_blacklisted', '=', False)]"/>
@@ -94,9 +90,6 @@
         <field name="priority">10</field>
         <field name="arch" type="xml">
             <tree string="Mailing List Contacts" sample="1">
-                <header>
-                    <button name="action_add_to_mailing_list" string="Add to List" type="object"/>
-                </header>
                 <field name="create_date"/>
                 <field name="name"/>
                 <field name="company_name"/>
@@ -158,12 +151,13 @@
             <form string="Mailing List Contacts">
                 <sheet>
                     <div class="oe_title">
-                        <label for="name" string="Contact Name"/>
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field class="o_text_overflow" name="name" placeholder="e.g. John Smith"/>
+                            <field name="name" placeholder="e.g. John Smith"/>
                         </h1>
+                        <label for="tag_ids" class="oe_edit_only"/>
                         <div>
-                            <field name="tag_ids" widget="many2many_tags" placeholder="Tags" style="width: 100%%"/>
+                            <field name="tag_ids" widget="many2many_tags" style="width: 100%%"/>
                         </div>
                     </div>
                     <group>
@@ -179,7 +173,7 @@
                             </div>
                             <field name="title_id"/>
                             <field name="company_name"/>
-                            <field name="country_id" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="country_id"/>
                         </group>
                         <group>
                             <field name="create_date" readonly="1"/>

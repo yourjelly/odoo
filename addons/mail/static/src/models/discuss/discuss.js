@@ -1,8 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/discuss.discuss.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
-import { clear, create, link, replace, unlink, unlinkAll, update } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -16,7 +17,7 @@ function factory(dependencies) {
          * @param {mail.thread} thread
          */
         cancelThreadRenaming(thread) {
-            this.update({ renamingThreads: unlink(thread) });
+            this.update({ renamingThreads: [['unlink', thread]] });
         }
 
         clearIsAddingItem() {
@@ -28,7 +29,7 @@ function factory(dependencies) {
         }
 
         clearReplyingToMessage() {
-            this.update({ replyingToMessage: unlinkAll() });
+            this.update({ replyingToMessage: [['unlink-all']] });
         }
 
         /**
@@ -182,7 +183,7 @@ function factory(dependencies) {
          */
         async openThread(thread) {
             this.update({
-                thread: link(thread),
+                thread: [['link', thread]],
             });
             this.focus();
             if (!this.isOpen) {
@@ -191,7 +192,7 @@ function factory(dependencies) {
                     options: {
                         active_id: this.threadToActiveId(this),
                         clear_breadcrumbs: false,
-                        on_reverse_breadcrumb: () => this.close(), // this is useless, close is called by destroy anyway
+                        on_reverse_breadcrumb: () => this.close(),
                     },
                 });
             }
@@ -203,7 +204,7 @@ function factory(dependencies) {
          */
         async renameThread(thread, newName) {
             await this.async(() => thread.rename(newName));
-            this.update({ renamingThreads: unlink(thread) });
+            this.update({ renamingThreads: [['unlink', thread]] });
         }
 
         /**
@@ -213,7 +214,7 @@ function factory(dependencies) {
          * @param {mail.message} message
          */
         replyToMessage(message) {
-            this.update({ replyingToMessage: link(message) });
+            this.update({ replyingToMessage: [['link', message]] });
             // avoid to reply to a note by a message and vice-versa.
             // subject to change later by allowing subtype choice.
             this.replyingToMessageOriginThreadComposer.update({
@@ -226,7 +227,7 @@ function factory(dependencies) {
          * @param {mail.thread} thread
          */
         setThreadRenaming(thread) {
-            this.update({ renamingThreads: link(thread) });
+            this.update({ renamingThreads: [['link', thread]] });
         }
 
         /**
@@ -321,9 +322,9 @@ function factory(dependencies) {
          */
         _computeReplyingToMessage() {
             if (!this.isOpen) {
-                return unlinkAll();
+                return [['unlink-all']];
             }
-            return;
+            return [];
         }
 
 
@@ -345,30 +346,14 @@ function factory(dependencies) {
                 // After loading Discuss from an arbitrary tab other then 'mailbox',
                 // switching to 'mailbox' requires to also set its inner-tab ;
                 // by default the 'inbox'.
-                return replace(this.env.messaging.inbox);
+                return [['replace', this.env.messaging.inbox]];
             }
             if (!thread || !thread.isPinned) {
-                return unlink();
+                return [['unlink']];
             }
-            return;
+            return [];
         }
 
-        /**
-         * @private
-         * @returns {mail.thread_viewer}
-         */
-        _computeThreadViewer() {
-            const threadViewerData = {
-                hasThreadView: this.hasThreadView,
-                selectedMessage: this.replyingToMessage ? link(this.replyingToMessage) : unlink(),
-                stringifiedDomain: this.stringifiedDomain,
-                thread: this.thread ? link(this.thread) : unlink(),
-            };
-            if (!this.threadViewer) {
-                return create(threadViewerData);
-            }
-            return update(threadViewerData);
-        }
     }
 
     Discuss.fields = {
@@ -516,11 +501,10 @@ function factory(dependencies) {
         }),
         /**
          * The composer to display for the reply feature in Inbox. It depends
-         * on the message set to be replied.
+         * on the message set to be replied, and should be considered read-only.
          */
         replyingToMessageOriginThreadComposer: one2one('mail.composer', {
             inverse: 'discussAsReplying',
-            readonly: true,
             related: 'replyingToMessageOriginThread.composer',
         }),
         /**
@@ -568,16 +552,9 @@ function factory(dependencies) {
          * Determines the `mail.thread_viewer` managing the display of `this.thread`.
          */
         threadViewer: one2one('mail.thread_viewer', {
-            compute: '_computeThreadViewer',
-            dependencies: [
-                'hasThreadView',
-                'replyingToMessage',
-                'stringifiedDomain',
-                'thread',
-            ],
+            default: [['create']],
+            inverse: 'discuss',
             isCausal: true,
-            readonly: true,
-            required: true,
         }),
     };
 
@@ -587,3 +564,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.discuss', factory);
+
+});

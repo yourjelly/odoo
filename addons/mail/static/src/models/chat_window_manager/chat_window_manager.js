@@ -1,8 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/chat_window_manager/chat_window_manager.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2one, one2many, one2one } from '@mail/model/model_field';
-import { link, replace, unlink } from '@mail/model/model_field_command';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -92,7 +92,7 @@ function factory(dependencies) {
             let newMessageChatWindow = this.newMessageChatWindow;
             if (!newMessageChatWindow) {
                 newMessageChatWindow = this.env.models['mail.chat_window'].create({
-                    manager: link(this),
+                    manager: [['link', this]],
                 });
             }
             newMessageChatWindow.makeActive();
@@ -121,8 +121,8 @@ function factory(dependencies) {
             if (!chatWindow) {
                 chatWindow = this.env.models['mail.chat_window'].create({
                     isFolded,
-                    manager: link(this),
-                    thread: link(thread),
+                    manager: [['link', this]],
+                    thread: [['link', thread]],
                 });
             } else {
                 chatWindow.update({ isFolded });
@@ -144,16 +144,15 @@ function factory(dependencies) {
         }
 
         /**
-         * Shift provided chat window to previous visible index, which swap visible order of this
-         * chat window and the preceding visible one
+         * Shift provided chat window to the left on screen.
          *
          * @param {mail.chat_window} chatWindow
          */
-        shiftPrev(chatWindow) {
+        shiftLeft(chatWindow) {
             const chatWindows = this.allOrdered;
             const index = chatWindows.findIndex(cw => cw === chatWindow);
             if (index === chatWindows.length - 1) {
-                // already first one
+                // already left-most
                 return;
             }
             const otherChatWindow = chatWindows[index + 1];
@@ -165,16 +164,15 @@ function factory(dependencies) {
         }
 
         /**
-         * Shift provided chat window to next visible index, which swap visible order of this
-         * chat window and the following visible one.
+         * Shift provided chat window to the right on screen.
          *
          * @param {mail.chat_window} chatWindow
          */
-        shiftNext(chatWindow) {
+        shiftRight(chatWindow) {
             const chatWindows = this.allOrdered;
             const index = chatWindows.findIndex(cw => cw === chatWindow);
             if (index === 0) {
-                // already last one
+                // already right-most
                 return;
             }
             const otherChatWindow = chatWindows[index - 1];
@@ -231,9 +229,9 @@ function factory(dependencies) {
          * @returns {mail.chat_window}
          */
         _computeAllOrdered() {
-            return replace(this._ordered.map(chatWindowLocalId =>
+            return [['replace', this._ordered.map(chatWindowLocalId =>
                 this.env.models['mail.chat_window'].get(chatWindowLocalId)
-            ));
+            )]];
         }
 
         /**
@@ -241,9 +239,9 @@ function factory(dependencies) {
          * @returns {mail.chat_window[]}
          */
         _computeAllOrderedHidden() {
-            return replace(this.visual.hidden.chatWindowLocalIds.map(chatWindowLocalId =>
+            return [['replace', this.visual.hidden.chatWindowLocalIds.map(chatWindowLocalId =>
                 this.env.models['mail.chat_window'].get(chatWindowLocalId)
-            ));
+            )]];
         }
 
         /**
@@ -251,9 +249,9 @@ function factory(dependencies) {
          * @returns {mail.chat_window[]}
          */
         _computeAllOrderedVisible() {
-            return replace(this.visual.visible.map(({ chatWindowLocalId }) =>
+            return [['replace', this.visual.visible.map(({ chatWindowLocalId }) =>
                 this.env.models['mail.chat_window'].get(chatWindowLocalId)
-            ));
+            )]];
         }
 
         /**
@@ -279,9 +277,9 @@ function factory(dependencies) {
         _computeLastVisible() {
             const { length: l, [l - 1]: lastVisible } = this.allOrderedVisible;
             if (!lastVisible) {
-                return unlink();
+                return [['unlink']];
             }
-            return link(lastVisible);
+            return [['link', lastVisible]];
         }
 
         /**
@@ -291,9 +289,9 @@ function factory(dependencies) {
         _computeNewMessageChatWindow() {
             const chatWindow = this.allOrdered.find(chatWindow => !chatWindow.thread);
             if (!chatWindow) {
-                return unlink();
+                return [['unlink']];
             }
-            return link(chatWindow);
+            return [['link', chatWindow]];
         }
 
         /**
@@ -485,3 +483,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.chat_window_manager', factory);
+
+});

@@ -2,7 +2,6 @@ odoo.define('test_website_slides_full.tour.slide.certification.member', function
 "use strict";
 
 var tour = require('web_tour.tour');
-const tourUtils = require('website_sale.tour_utils');
 
 /**
  * The purpose of this tour is to check the whole certification flow:
@@ -41,24 +40,34 @@ var initTourSteps = [{
 var buyCertificationSteps = [{
     content: 'eLearning: try to buy course',
     trigger: 'a:contains("Add to Cart")'
-}, 
-    tourUtils.goToCart(),
-{
+}, {
     content: 'eCommerce: Process Checkout',
     trigger: 'a:contains("Process Checkout")'
 }, {
     content: 'eCommerce: select Test payment acquirer',
-    trigger: '.o_payment_option_card:contains("Test")'
+    trigger: '.o_payment_acquirer_select:contains("Test")'
 }, {
     content: 'eCommerce: add card number',
-    trigger: 'input[name="customer_input"]',
+    trigger: 'input[name="cc_number"]',
     run: 'text 4242424242424242'
 }, {
+    content: 'eCommerce: add card holder name',
+    trigger: 'input[name="cc_holder_name"]',
+    run: 'text Marc Demo'
+}, {
+    content: 'eCommerce: add card expiry date',
+    trigger: 'input[name="cc_expiry"]',
+    run: 'text 11 / 50'
+}, {
+    content: 'eCommerce: add card cvc',
+    trigger: 'input[name="cvc"]',
+    run: 'text 999'
+}, {
     content: 'eCommerce: pay',
-    trigger: 'button[name="o_payment_submit_button"]'
+    trigger: '#o_payment_form_pay'
 }, {
     content: 'eCommerce: check that the payment is successful',
-    trigger: '.oe_website_sale_tx_status:contains("Your payment has been successfully processed.")',
+    trigger: '.oe_website_sale_tx_status:contains("Your payment has been successfully processed")',
     run: function () {}
 }, {
     content: 'eCommerce: go back to e-learning home page',

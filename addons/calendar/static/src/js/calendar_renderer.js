@@ -5,6 +5,7 @@ const CalendarRenderer = require('web.CalendarRenderer');
 const CalendarPopover = require('web.CalendarPopover');
 const session = require('web.session');
 
+
 const AttendeeCalendarPopover = CalendarPopover.extend({
     template: 'Calendar.attendee.status.popover',
     events: _.extend({}, CalendarPopover.prototype.events, {
@@ -34,21 +35,15 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
     /**
      * @return {boolean}
      */
-    isCurrentPartnerOrganizer() {
-        return this.event.extendedProps.record.partner_id[0] === session.partner_id;
-    },
-    /**
-     * @return {boolean}
-     */
     isCurrentPartnerAttendee() {
-        return this.event.extendedProps.record.partner_ids.includes(session.partner_id) && this.event.extendedProps.attendee_id === session.partner_id;
+        return this.event.extendedProps.record.partner_ids.includes(session.partner_id);
     },
     /**
      * @override
      * @return {boolean}
      */
     isEventDeletable() {
-        return this._super() && this.isCurrentPartnerAttendee();
+        return this._super() && (this._isEventPrivate() ? this.isCurrentPartnerAttendee() : true);
     },
     /**
      * @override
@@ -97,8 +92,6 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
             self.event.extendedProps.record.attendee_status = selectedStatus;  // FIXEME: Maybe we have to reload view
             self.$('.o-calendar-attendee-status-text').text(self.statusInfo[selectedStatus].text);
             self.$('.o-calendar-attendee-status-icon').removeClass(_.values(self.statusColors).join(' ')).addClass(self.statusInfo[selectedStatus].color);
-            self.$el.parent().hide();
-            self.trigger_up('render_event');
         });
     },
 });
@@ -106,35 +99,10 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
 
 const AttendeeCalendarRenderer = CalendarRenderer.extend({
 	config: _.extend({}, CalendarRenderer.prototype.config, {
-        CalendarPopover: AttendeeCalendarPopover,
-        eventTemplate: 'Calendar.calendar-box',
-    }),
-    /**
-     * Add the attendee-id attribute in order to distinct the events when there are
-     * several attendees in the event.
-     * @override
-     */
-    _addEventAttributes: function (element, event) {
-        this._super(...arguments);
-        element.attr('data-attendee-id', event.extendedProps.attendee_id);
-    },
-    /**
-     * If an attendee_id has been set on the event, we check also the attendee-id attribute
-     * to select the good event on which the CSS class will be applied.
-     * @override
-     */
-    _computeEventSelector: function (info) {
-        let selector = this._super(...arguments);
-        if (info.event.extendedProps.attendee_id) {
-            selector += `[data-attendee-id=${info.event.extendedProps.attendee_id}]`;
-        }
-        return selector;
-    },
+		CalendarPopover: AttendeeCalendarPopover,
+	}),
 });
 
-return {
-    AttendeeCalendarRenderer: AttendeeCalendarRenderer,
-    AttendeeCalendarPopover: AttendeeCalendarPopover,
-};
+return AttendeeCalendarRenderer
 
 });

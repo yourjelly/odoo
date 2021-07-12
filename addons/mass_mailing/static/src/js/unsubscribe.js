@@ -14,7 +14,7 @@ odoo.define('mass_mailing.unsubscribe', function (require) {
     var token = (location.search.split('token' + '=')[1] || '').split('&')[0];
 
     if (!$('.o_unsubscribe_form').length) {
-        return;
+        return Promise.reject("DOM doesn't contain '.o_unsubscribe_form'");
     }
     session.load_translations().then(function () {
         if (email != '' && email != undefined){

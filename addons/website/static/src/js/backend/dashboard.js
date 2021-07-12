@@ -1,4 +1,3 @@
-/* global google, gapi */
 odoo.define('website.backend.dashboard', function (require) {
 'use strict';
 
@@ -152,7 +151,7 @@ var Dashboard = AbstractAction.extend({
             },
         }).then(function (result) {
             if (result.error) {
-                self.displayNotification({ title: result.error.title, message: result.error.message, type: 'danger' });
+                self.do_warn(result.error.title, result.error.message);
                 return;
             }
             self.on_date_range_button('week');
@@ -685,7 +684,7 @@ var Dashboard = AbstractAction.extend({
 
     // Utility functions
     addLoader: function(selector) {
-        var loader = '<span class="fa fa-3x fa-spin fa-circle-o-notch fa-spin"/>';
+        var loader = '<span class="fa fa-3x fa-spin fa-spinner fa-pulse"/>';
         selector.html("<div class='o_loader'>" + loader + "</div>");
     },
     getValue: function(d) { return d[1]; },

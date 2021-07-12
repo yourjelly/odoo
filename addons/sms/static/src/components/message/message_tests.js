@@ -1,20 +1,19 @@
 odoo.define('sms/static/src/components/message/message_tests.js', function (require) {
 'use strict';
 
-const { Message } = require('@mail/components/message/message');
-const { create, insert, link } = require('@mail/model/model_field_command');
-const { makeDeferred } = require('@mail/utils/deferred/deferred');
+const components = {
+    Message: require('mail/static/src/components/message/message.js'),
+};
+const { makeDeferred } = require('mail/static/src/utils/deferred/deferred.js');
 const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} = require('@mail/utils/test_utils');
+} = require('mail/static/src/utils/test_utils.js');
 
 const Bus = require('web.Bus');
-
-const components = { Message };
 
 QUnit.module('sms', {}, function () {
 QUnit.module('components', {}, function () {
@@ -50,21 +49,21 @@ QUnit.test('Notification Sent', async function (assert) {
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: create({
+        thread: [['create', {
             id: 11,
             model: 'mail.channel',
-        }),
+        }]],
     });
     const message = this.env.models['mail.message'].create({
         id: 10,
         message_type: 'sms',
-        notifications: insert({
+        notifications: [['insert', {
             id: 11,
             notification_status: 'sent',
             notification_type: 'sms',
-            partner: insert({ id: 12, name: "Someone" }),
-        }),
-        originThread: link(threadViewer.thread)
+            partner: [['insert', { id: 12, name: "Someone" }]],
+        }]],
+        originThread: [['link', threadViewer.thread]]
     });
     await this.createMessageComponent(message, {
         threadViewLocalId: threadViewer.threadView.localId
@@ -144,20 +143,20 @@ QUnit.test('Notification Error', async function (assert) {
     await this.start({ env: { bus } });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: create({
+        thread: [['create', {
             id: 11,
             model: 'mail.channel',
-        }),
+        }]],
     });
     const message = this.env.models['mail.message'].create({
         id: 10,
         message_type: 'sms',
-        notifications: insert({
+        notifications: [['insert', {
             id: 11,
             notification_status: 'exception',
             notification_type: 'sms',
-        }),
-        originThread: link(threadViewer.thread)
+        }]],
+        originThread: [['link', threadViewer.thread]]
     });
     await this.createMessageComponent(message, {
         threadViewLocalId: threadViewer.threadView.localId

@@ -210,7 +210,7 @@ class AccountEdiFormat(models.Model):
         except Exception as e:
             _logger.exception("Error when converting the xml content to etree: %s", e)
             return None
-        if xml_tree is None or len(xml_tree) == 0:
+        if not len(xml_tree):
             return None
 
         return xml_tree
@@ -364,7 +364,7 @@ class AccountEdiFormat(models.Model):
                 # Comment. <2.1.1.11>
                 elements = body_tree.xpath('.//DatiGeneraliDocumento//Causale')
                 for element in elements:
-                    invoice_form.narration = '%s%s<br/>' % (invoice_form.narration or '', element.text)
+                    invoice_form.narration = '%s%s\n' % (invoice_form.narration or '', element.text)
 
                 # Informations relative to the purchase order, the contract, the agreement,
                 # the reception phase or invoices previously transmitted

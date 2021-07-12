@@ -8,7 +8,6 @@ import threading
 import time
 
 import odoo
-import odoo.service.server as servermod
 from odoo import api, fields, models, SUPERUSER_ID
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools import date_utils
@@ -101,9 +100,7 @@ class ImDispatch(object):
         self.channels = {}
         self.started = False
 
-    def poll(self, dbname, channels, last, options=None, timeout=None):
-        if timeout is None:
-            timeout = TIMEOUT
+    def poll(self, dbname, channels, last, options=None, timeout=TIMEOUT):
         if options is None:
             options = {}
         # Dont hang ctrl-c for a poll request, we need to bypass private
@@ -173,15 +170,6 @@ class ImDispatch(object):
                     for event in events:
                         event.set()
 
-    def wakeup_workers(self):
-        """
-        Wake up all http workers that are waiting for an event, useful
-        on server shutdown when they can't reveive anymore messages.
-        """
-        for events in self.channels.values():
-            for event in events:
-                event.set()
-
     def run(self):
         while True:
             try:
@@ -209,5 +197,3 @@ dispatch = None
 if not odoo.multi_process or odoo.evented:
     # We only use the event dispatcher in threaded and gevent mode
     dispatch = ImDispatch()
-    if servermod.server:
-        servermod.server.on_stop(dispatch.wakeup_workers)

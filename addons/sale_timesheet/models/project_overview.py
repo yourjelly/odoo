@@ -94,6 +94,7 @@ class Project(models.Model):
 
         # rates from non-invoiced timesheets that are linked to canceled so
         dashboard_values['rates']['canceled'] = float_round(100 * total_canceled_hours / (dashboard_total_hours or 1), precision_rounding=hour_rounding)
+        
         # profitability, using profitability SQL report
         field_map = {
             'amount_untaxed_invoiced': 'invoiced',
@@ -104,7 +105,7 @@ class Project(models.Model):
             'other_revenues': 'other_revenues'
             }
         profit = dict.fromkeys(list(field_map.values()) + ['other_revenues', 'total'], 0.0)
-        profitability_raw_data = self.env['project.profitability.report'].read_group([('project_id', 'in', self.ids)], ['project_id'] + list(field_map), ['project_id'])
+        profitability_raw_data = self.env['project.profitability.report'].read_group([('project_id', 'in', self.ids)], ['project_id'] + list(field_map), ['project_id'])   
         for data in profitability_raw_data:
             company_id = self.env['project.project'].browse(data.get('project_id')[0]).company_id
             from_currency = company_id.currency_id
@@ -112,7 +113,7 @@ class Project(models.Model):
                 value = data.get(field, 0.0)
                 if from_currency != currency:
                     value = from_currency._convert(value, currency, company_id, date.today())
-                profit[field_map[field]] += value
+                profit[field_map[field]] += value               
         profit['total'] = sum([profit[item] for item in profit.keys()])
         dashboard_values['profit'] = profit
 
@@ -392,7 +393,7 @@ class Project(models.Model):
                 task_order_line_ids = [ol['sale_line_id'][0] for ol in task_order_line_ids]
 
             if self.env.user.has_group('sales_team.group_sale_salesman'):
-                if self.pricing_type != 'task_rate' and self.allow_billable and not self.sale_order_id:
+                if self.bill_type == 'customer_project' and self.allow_billable and not self.sale_order_id:
                     actions.append({
                         'label': _("Create a Sales Order"),
                         'type': 'action',
@@ -496,24 +497,15 @@ class Project(models.Model):
 
             sale_orders = self.mapped('sale_line_id.order_id') | self.env['sale.order'].browse(task_so_ids)
             if sale_orders:
-                so_action = dict(
-                    context={'create': False, 'edit': False, 'delete': False},
-                    domain=[('id', 'in', sale_orders.ids)],
-                )
-
-                if len(sale_orders) == 1:
-                    so_action.update({
-                        'action': self.env.ref('sale.action_sale_order_form_view').sudo(),
-                        'res_id': sale_orders.id,
-                    })
-                else:
-                    so_action['action'] = self.env.ref('sale.action_orders').sudo()
-
                 stat_buttons.append({
                     'name': _('Sales Orders'),
                     'count': len(sale_orders),
                     'icon': 'fa fa-dollar',
-                    'action': _to_action_data(**so_action),
+                    'action': _to_action_data(
+                        action=self.env.ref('sale.action_orders').sudo(),
+                        domain=[('id', 'in', sale_orders.ids)],
+                        context={'create': False, 'edit': False, 'delete': False}
+                    )
                 })
 
                 invoice_ids = self.env['sale.order'].search_read([('id', 'in', sale_orders.ids)], ['invoice_ids'])
@@ -540,10 +532,6 @@ class Project(models.Model):
         else:
             timesheet_label = [_('Hours'), _('Recorded')]
 
-        default_project_ctx = {}
-        if len(self) == 1:
-            default_project_ctx = {'default_project_id': self.id}
-
         stat_buttons.append({
             'name': timesheet_label,
             'count': sum(self.mapped('total_timesheet_time')),
@@ -552,7 +540,6 @@ class Project(models.Model):
                 'account.analytic.line',
                 domain=[('project_id', 'in', self.ids)],
                 views=[(ts_tree.id, 'list'), (ts_form.id, 'form')],
-                context=default_project_ctx,
             )
         })
 

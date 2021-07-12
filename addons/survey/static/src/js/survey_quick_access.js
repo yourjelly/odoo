@@ -7,7 +7,6 @@ publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
     selector: '.o_survey_quick_access',
     events: {
         'click button[type="submit"]': '_onSubmit',
-        'input #session_code': '_onSessionCodeInput',
     },
 
         //--------------------------------------------------------------------------
@@ -36,10 +35,6 @@ publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
     // Handlers
     // -------------------------------------------------------------------------
 
-    _onSessionCodeInput: function () {
-        this.el.querySelectorAll('.o_survey_error > span').forEach((elem) => elem.classList.add('d-none'));
-    },
-
     _onKeyPress: function (event) {
         if (event.keyCode === 13) {  // Enter
             event.preventDefault();
@@ -54,23 +49,15 @@ publicWidget.registry.SurveyQuickAccessWidget = publicWidget.Widget.extend({
 
     _submitCode: function () {
         var self = this;
-        this.$('.o_survey_error > span').addClass("d-none");
-        const sessionCodeInputVal = this.$('input#session_code').val().trim();
-        if (!sessionCodeInputVal) {
-            self.$('.o_survey_session_error_invalid_code').removeClass("d-none");
-            return;
-        }
+        this.$('.o_survey_error').addClass("d-none");
+        var $sessionCodeInput = this.$('input#session_code');
         this._rpc({
-            route: `/survey/check_session_code/${sessionCodeInputVal}`,
+            route: `/survey/check_session_code/${$sessionCodeInput.val()}`,
         }).then(function (response) {
             if (response.survey_url) {
                 window.location = response.survey_url;
             } else {
-                if (response.error && response.error === 'survey_session_closed') {
-                    self.$('.o_survey_session_error_closed').removeClass("d-none");
-                } else {
-                    self.$('.o_survey_session_error_invalid_code').removeClass("d-none");
-                }
+                self.$('.o_survey_error').removeClass("d-none");
             }
         });
     },

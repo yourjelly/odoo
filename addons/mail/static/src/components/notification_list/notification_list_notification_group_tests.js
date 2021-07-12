@@ -1,17 +1,19 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/notification_list/notification_list_notification_group_tests.js', function (require) {
+'use strict';
 
-import { NotificationList } from '@mail/components/notification_list/notification_list';
-import {
+const components = {
+    NotificationList: require('mail/static/src/components/notification_list/notification_list.js'),
+};
+
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
-import Bus from 'web.Bus';
-
-const components = { NotificationList };
+const Bus = require('web.Bus');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -419,12 +421,13 @@ QUnit.test('different mail.channel are not grouped', async function (assert) {
     );
 });
 
-QUnit.test('multiple grouped notifications by document model, sorted by the most recent message of each group', async function (assert) {
+QUnit.test('multiple grouped notifications by document model, sorted by date desc', async function (assert) {
     assert.expect(9);
 
     this.data['mail.message'].records.push(
         // first message that is expected to have a failure
         {
+            date: moment.utc().format("YYYY-MM-DD HH:mm:ss"), // random date
             id: 11, // random unique id, will be used to link failure to message
             message_type: 'email', // message must be email (goal of the test)
             model: 'res.partner', // different model from second message
@@ -433,6 +436,8 @@ QUnit.test('multiple grouped notifications by document model, sorted by the most
         },
         // second message that is expected to have a failure
         {
+            // random date, later than first message
+            date: moment.utc().add(1, 'days').format("YYYY-MM-DD HH:mm:ss"),
             id: 12, // random unique id, will be used to link failure to message
             message_type: 'email', // message must be email (goal of the test)
             model: 'res.company', // different model from first message
@@ -536,4 +541,6 @@ QUnit.test('non-failure notifications are ignored', async function (assert) {
 
 });
 });
+});
+
 });

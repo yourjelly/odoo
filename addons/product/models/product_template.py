@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
     _name = "product.template"
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product Template"
-    _order = "priority desc, name"
+    _order = "name"
 
     @tools.ormcache()
     def _get_default_category_id(self):
@@ -36,7 +36,7 @@ class ProductTemplate(models.Model):
 
     name = fields.Char('Name', index=True, required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1, help='Gives the sequence order when displaying a product list')
-    description = fields.Html(
+    description = fields.Text(
         'Description', translate=True)
     description_purchase = fields.Text(
         'Purchase Description', translate=True)
@@ -139,11 +139,6 @@ class ProductTemplate(models.Model):
 
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed', store=True)
     has_configurable_attributes = fields.Boolean("Is a configurable product", compute='_compute_has_configurable_attributes', store=True)
-
-    priority = fields.Selection([
-        ('0', 'Normal'),
-        ('1', 'Favorite'),
-    ], default='0', string="Favorite")
 
     def _compute_item_count(self):
         for template in self:
@@ -296,7 +291,7 @@ class ProductTemplate(models.Model):
     @api.model
     def _get_length_uom_id_from_ir_config_parameter(self):
         """ Get the unit of measure to interpret the `length`, 'width', 'height' field.
-        By default, we considerer that length are expressed in millimeters. Users can configure
+        By default, we considerer that length are expressed in meters. Users can configure
         to express them in feet by adding an ir.config_parameter record with "product.volume_in_cubic_feet"
         as key and "1" as value.
         """
@@ -304,7 +299,7 @@ class ProductTemplate(models.Model):
         if product_length_in_feet_param == '1':
             return self.env.ref('uom.product_uom_foot')
         else:
-            return self.env.ref('uom.product_uom_millimeter')
+            return self.env.ref('uom.product_uom_meter')
 
     @api.model
     def _get_volume_uom_id_from_ir_config_parameter(self):
@@ -345,7 +340,8 @@ class ProductTemplate(models.Model):
     @api.depends('product_variant_ids.product_tmpl_id')
     def _compute_product_variant_count(self):
         for template in self:
-            template.product_variant_count = len(template.product_variant_ids)
+            # do not pollute variants to be prefetched when counting variants
+            template.product_variant_count = len(template.with_prefetch().product_variant_ids)
 
     @api.depends('product_variant_ids', 'product_variant_ids.default_code')
     def _compute_default_code(self):
@@ -377,6 +373,7 @@ class ProductTemplate(models.Model):
     def _check_uom(self):
         if any(template.uom_id and template.uom_po_id and template.uom_id.category_id != template.uom_po_id.category_id for template in self):
             raise ValidationError(_('The default Unit of Measure and the purchase Unit of Measure must be in the same category.'))
+        return True
 
     @api.onchange('uom_id')
     def _onchange_uom_id(self):
@@ -441,12 +438,6 @@ class ProductTemplate(models.Model):
                 'image_128',
                 'can_image_1024_be_zoomed',
             ])
-            # Touch all products that will fall back on the template field
-            # This is done because __last_update is used to compute the 'unique' SHA in image URLs
-            # for making sure that images are not retrieved from the browser cache after a change
-            # Performance discussion outcome:
-            # Actually touch all variants to avoid using filtered on the image_variant_1920 field
-            self.product_variant_ids.write({})
         return res
 
     @api.returns('self', lambda value: value.id)

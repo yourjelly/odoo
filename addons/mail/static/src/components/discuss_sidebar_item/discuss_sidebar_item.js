@@ -1,18 +1,19 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/discuss_sidebar_item/discuss_sidebar_item.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { EditableText } from '@mail/components/editable_text/editable_text';
-import { ThreadIcon } from '@mail/components/thread_icon/thread_icon';
-import { isEventHandled } from '@mail/utils/utils';
+const components = {
+    EditableText: require('mail/static/src/components/editable_text/editable_text.js'),
+    ThreadIcon: require('mail/static/src/components/thread_icon/thread_icon.js'),
+};
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const { isEventHandled } = require('mail/static/src/utils/utils.js');
 
-import Dialog from 'web.Dialog';
+const Dialog = require('web.Dialog');
 
 const { Component } = owl;
 
-const components = { EditableText, ThreadIcon };
-
-export class DiscussSidebarItem extends Component {
+class DiscussSidebarItem extends Component {
 
     /**
      * @override
@@ -212,4 +213,8 @@ Object.assign(DiscussSidebarItem, {
         threadLocalId: String,
     },
     template: 'mail.DiscussSidebarItem',
+});
+
+return DiscussSidebarItem;
+
 });

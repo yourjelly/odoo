@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/components/messaging_menu/messaging_menu_tests.js', function (require) {
+'use strict';
 
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
 
 QUnit.module('im_livechat', {}, function () {
 QUnit.module('components', {}, function () {
@@ -94,4 +95,6 @@ QUnit.test('livechats should be in "chat" filter', async function (assert) {
 
 });
 });
+});
+
 });

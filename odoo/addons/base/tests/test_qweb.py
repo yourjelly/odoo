@@ -12,7 +12,7 @@ from lxml.builder import E
 from odoo.modules import get_module_resource
 from odoo.tests.common import TransactionCase
 from odoo.addons.base.models.qweb import QWebException
-from odoo.tools import misc, mute_logger
+from odoo.tools import misc, ustr
 
 
 class TestQWebTField(TransactionCase):
@@ -82,7 +82,7 @@ class TestQWebTField(TransactionCase):
                 <t t-name="base.dummy">
                     <root>
                         <script type="application/javascript">
-                            var s = <t t-esc="json.dumps({'key': malicious})"/>;
+                            var s = <t t-raw="json.dumps({'key': malicious})"/>;
                         </script>
                     </root>
                 </t>
@@ -631,7 +631,6 @@ class TestQWeb(TransactionCase):
 
         return lambda: self.run_test_file(os.path.join(path, f))
 
-    @mute_logger('odoo.addons.base.models.qweb') # tests t-raw which is deprecated
     def run_test_file(self, path):
         self.env.user.tz = 'Europe/Brussels'
         doc = etree.parse(path).getroot()
@@ -644,12 +643,11 @@ class TestQWeb(TransactionCase):
             # OrderedDict to ensure JSON mappings are iterated in source order
             # so output is predictable & repeatable
             params = {} if param is None else json.loads(param.text, object_pairs_hook=collections.OrderedDict)
-            params.setdefault('__keep_empty_lines', True)
 
             result = doc.find('result[@id="{}"]'.format(template)).text
             self.assertEqual(
                 qweb._render(template, values=params, load=loader).strip(),
-                (result or u'').strip().replace('&quot;', '&#34;').encode('utf-8'),
+                (result or u'').strip().encode('utf-8'),
                 template
             )
 
@@ -725,36 +723,6 @@ class TestPageSplit(TransactionCase):
             rendered,
             E.div(E.table(E.tr(), E.tr(), E.tr()))
         )
-
-class TestEmptyLines(TransactionCase):
-    arch = '''<t t-name='test'>
-            
-                <div>
-                    
-                </div>
-                
-                
-            </t>'''
-
-    def test_no_empty_lines(self):
-        t = self.env['ir.ui.view'].create({
-            'name': 'test',
-            'type': 'qweb',
-            'arch_db': self.arch
-        })
-        rendered = str(self.env['ir.qweb']._render(t.id), 'utf-8')
-        self.assertFalse(re.compile('^\s+\n').match(rendered))
-        self.assertFalse(re.compile('\n\s+\n').match(rendered))
-
-    def test_keep_empty_lines(self):
-        t = self.env['ir.ui.view'].create({
-            'name': 'test',
-            'type': 'qweb',
-            'arch_db': self.arch
-        })
-        rendered = str(self.env['ir.qweb']._render(t.id, {'__keep_empty_lines': True}), 'utf-8')
-        self.assertTrue(re.compile('^\s+\n').match(rendered))
-        self.assertTrue(re.compile('\n\s+\n').match(rendered))
 
 def load_tests(loader, suite, _):
     # can't override TestQWeb.__dir__ because dir() called on *class* not

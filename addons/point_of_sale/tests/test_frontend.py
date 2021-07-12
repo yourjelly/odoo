@@ -4,44 +4,33 @@
 from odoo import tools
 from odoo.api import Environment
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
 from datetime import date, timedelta
 
 import odoo.tests
 
 
-class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
+class TestPointOfSaleHttpCommon(odoo.tests.HttpCase):
 
-    @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUp(self):
+        super().setUp()
+        env = self.env(user=self.env.ref('base.user_admin'))
 
-        env = cls.env
-        cls.env.user.groups_id += env.ref('point_of_sale.group_pos_manager')
         journal_obj = env['account.journal']
         account_obj = env['account.account']
-        main_company = cls.company_data['company']
+        main_company = env.ref('base.main_company')
+        self.main_pos_config = env.ref('point_of_sale.pos_config_main')
+
+        env['res.partner'].create({
+            'name': 'Deco Addict',
+        })
 
         account_receivable = account_obj.create({'code': 'X1012',
                                                  'name': 'Account Receivable - Test',
                                                  'user_type_id': env.ref('account.data_account_type_receivable').id,
                                                  'reconcile': True})
-        env.company.account_default_pos_receivable_account_id = account_receivable
-        env['ir.property']._set_default('property_account_receivable_id', 'res.partner', account_receivable, main_company)
-        # Pricelists are set below, do not take demo data into account
-        env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')]).unlink()
+        self.env.company.account_default_pos_receivable_account_id = account_receivable
 
-        env['pos.payment.method'].create({
-            'name': 'Bank',
-        })
-        cls.main_pos_config = env['pos.config'].create({
-            'name': 'Shop',
-            'barcode_nomenclature_id': env.ref('barcodes.default_barcode_nomenclature').id,
-        })
-
-        env['res.partner'].create({
-            'name': 'Deco Addict',
-        })
+        self.env['ir.property']._set_default('property_account_receivable_id', 'res.partner', account_receivable, main_company)
 
         cash_journal = journal_obj.create({
             'name': 'Cash Test',
@@ -52,10 +41,10 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         })
 
         # Archive all existing product to avoid noise during the tours
-        all_pos_product = env['product.product'].search([('available_in_pos', '=', True)])
-        discount = env.ref('point_of_sale.product_product_consumable')
-        cls.tip = env.ref('point_of_sale.product_product_tip')
-        (all_pos_product - discount - cls.tip)._write({'active': False})
+        all_pos_product = self.env['product.product'].search([('available_in_pos', '=', True)])
+        discount = self.env.ref('point_of_sale.product_product_consumable')
+        self.tip = self.env.ref('point_of_sale.product_product_tip')
+        (all_pos_product - discount - self.tip)._write({'active': False})
 
         # In DESKS categ: Desk Pad
         pos_categ_desks = env.ref('point_of_sale.pos_category_desks')
@@ -67,7 +56,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         pos_categ_chairs = env.ref('point_of_sale.pos_category_chairs')
 
         # test an extra price on an attribute
-        cls.whiteboard_pen = env['product.product'].create({
+        pear = env['product.product'].create({
             'name': 'Whiteboard Pen',
             'available_in_pos': True,
             'list_price': 1.20,
@@ -76,45 +65,45 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'to_weight': True,
             'pos_categ_id': pos_categ_misc.id,
         })
-        cls.wall_shelf = env['product.product'].create({
+        wall_shelf = env['product.product'].create({
             'name': 'Wall Shelf Unit',
             'available_in_pos': True,
             'list_price': 1.98,
             'taxes_id': False,
         })
-        cls.small_shelf = env['product.product'].create({
+        small_shelf = env['product.product'].create({
             'name': 'Small Shelf',
             'available_in_pos': True,
             'list_price': 2.83,
             'taxes_id': False,
         })
-        cls.magnetic_board = env['product.product'].create({
+        magnetic_board = env['product.product'].create({
             'name': 'Magnetic Board',
             'available_in_pos': True,
             'list_price': 1.98,
             'taxes_id': False,
         })
-        cls.monitor_stand = env['product.product'].create({
+        monitor_stand = env['product.product'].create({
             'name': 'Monitor Stand',
             'available_in_pos': True,
             'list_price': 3.19,
             'taxes_id': False,
         })
-        cls.desk_pad = env['product.product'].create({
+        desk_pad = env['product.product'].create({
             'name': 'Desk Pad',
             'available_in_pos': True,
             'list_price': 1.98,
             'taxes_id': False,
             'pos_categ_id': pos_categ_desks.id,
         })
-        cls.letter_tray = env['product.product'].create({
+        letter_tray = env['product.product'].create({
             'name': 'Letter Tray',
             'available_in_pos': True,
             'list_price': 4.80,
             'taxes_id': False,
             'pos_categ_id': pos_categ_chairs.id,
         })
-        cls.desk_organizer = env['product.product'].create({
+        desk_organizer = env['product.product'].create({
             'name': 'Desk Organizer',
             'available_in_pos': True,
             'list_price': 5.10,
@@ -135,7 +124,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'attribute_id': attribute.id,
         })
         line = env['product.template.attribute.line'].create({
-            'product_tmpl_id': cls.whiteboard_pen.product_tmpl_id.id,
+            'product_tmpl_id': pear.product_tmpl_id.id,
             'attribute_id': attribute.id,
             'value_ids': [(6, 0, attribute_value.ids)]
         })
@@ -212,12 +201,12 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 2,
                 'applied_on': '0_product_variant',
-                'product_id': cls.wall_shelf.id,
+                'product_id': wall_shelf.id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 13.95,  # test for issues like in 7f260ab517ebde634fc274e928eb062463f0d88f
                 'applied_on': '0_product_variant',
-                'product_id': cls.small_shelf.id,
+                'product_id': small_shelf.id,
             })],
         })
 
@@ -227,17 +216,17 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'percentage',
                 'percent_price': 100,
                 'applied_on': '0_product_variant',
-                'product_id': cls.wall_shelf.id,
+                'product_id': wall_shelf.id,
             }), (0, 0, {
                 'compute_price': 'percentage',
                 'percent_price': 99,
                 'applied_on': '0_product_variant',
-                'product_id': cls.small_shelf.id,
+                'product_id': small_shelf.id,
             }), (0, 0, {
                 'compute_price': 'percentage',
                 'percent_price': 0,
                 'applied_on': '0_product_variant',
-                'product_id': cls.magnetic_board.id,
+                'product_id': magnetic_board.id,
             })],
         })
 
@@ -248,33 +237,33 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'price_discount': 6,
                 'price_surcharge': 5,
                 'applied_on': '0_product_variant',
-                'product_id': cls.wall_shelf.id,
+                'product_id': wall_shelf.id,
             }), (0, 0, {
                 # .99 prices
                 'compute_price': 'formula',
                 'price_surcharge': -0.01,
                 'price_round': 1,
                 'applied_on': '0_product_variant',
-                'product_id': cls.small_shelf.id,
+                'product_id': small_shelf.id,
             }), (0, 0, {
                 'compute_price': 'formula',
                 'price_min_margin': 10,
                 'price_max_margin': 100,
                 'applied_on': '0_product_variant',
-                'product_id': cls.magnetic_board.id,
+                'product_id': magnetic_board.id,
             }), (0, 0, {
                 'compute_price': 'formula',
                 'price_surcharge': 10,
                 'price_max_margin': 5,
                 'applied_on': '0_product_variant',
-                'product_id': cls.monitor_stand.id,
+                'product_id': monitor_stand.id,
             }), (0, 0, {
                 'compute_price': 'formula',
                 'price_discount': -100,
                 'price_min_margin': 5,
                 'price_max_margin': 20,
                 'applied_on': '0_product_variant',
-                'product_id': cls.desk_pad.id,
+                'product_id': desk_pad.id,
             })],
         })
 
@@ -285,13 +274,13 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'fixed_price': 1,
                 'applied_on': '0_product_variant',
                 'min_quantity': 2,
-                'product_id': cls.wall_shelf.id,
+                'product_id': wall_shelf.id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 2,
                 'applied_on': '0_product_variant',
                 'min_quantity': 1,
-                'product_id': cls.wall_shelf.id,
+                'product_id': wall_shelf.id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 2,
@@ -307,7 +296,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
                 'compute_price': 'fixed',
                 'fixed_price': 1,
                 'applied_on': '1_product',
-                'product_tmpl_id': cls.wall_shelf.product_tmpl_id.id,
+                'product_tmpl_id': wall_shelf.product_tmpl_id.id,
             }), (0, 0, {
                 'compute_price': 'fixed',
                 'fixed_price': 2,
@@ -420,11 +409,22 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         excluded_pricelist = env['product.pricelist'].create({
             'name': 'Not loaded'
         })
-        res_partner_18 = env['res.partner'].create({
+        res_partner_18 = self.env['res.partner'].create({
             'name': 'Lumber Inc',
             'is_company': True,
         })
         res_partner_18.property_product_pricelist = excluded_pricelist
+
+        partner = self.env['res.partner'].create({
+            'name': 'TEST PARTNER',
+            'email': 'test@partner.com',
+        })
+
+        # set the company currency to USD, otherwise it will assume
+        # euro's. this will cause issues as the sales journal is in
+        # USD, because of this all products would have a different
+        # price
+        main_company.currency_id = env.ref('base.USD')
 
         test_sale_journal = journal_obj.create({'name': 'Sales Journal - Test',
                                                 'code': 'TSJ',
@@ -437,9 +437,9 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         src_tax = env['account.tax'].create({'name': "SRC", 'amount': 10})
         dst_tax = env['account.tax'].create({'name': "DST", 'amount': 5})
 
-        cls.letter_tray.taxes_id = [(6, 0, [src_tax.id])]
+        letter_tray.taxes_id = [(6, 0, [src_tax.id])]
 
-        cls.main_pos_config.write({
+        self.main_pos_config.write({
             'tax_regime_selection': True,
             'fiscal_position_ids': [(0, 0, {
                                             'name': "FP-POS-2M",
@@ -489,11 +489,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         # this you end up with js, css but no qweb.
         self.env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
 
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_pricelist', login="accountman")
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order', login="accountman")
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="accountman")
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="accountman")
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_pricelist', login="admin")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order', login="admin")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="admin")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="admin")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="admin")
 
         for order in self.env['pos.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
@@ -504,24 +504,22 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_02_pos_with_invoiced(self):
         self.main_pos_config.open_session_cb(check_coa=False)
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ChromeTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ChromeTour', login="admin")
         n_invoiced = self.env['pos.order'].search_count([('state', '=', 'invoiced')])
         n_paid = self.env['pos.order'].search_count([('state', '=', 'paid')])
         self.assertEqual(n_invoiced, 1, 'There should be 1 invoiced order.')
         self.assertEqual(n_paid, 2, 'There should be 2 paid order.')
 
     def test_03_order_management(self):
-        if hasattr(self.main_pos_config, 'module_pos_restaurant'):
-            self.main_pos_config.module_pos_restaurant = False
         self.main_pos_config.write({ 'manage_orders': True, 'module_account': True })
         self.main_pos_config.open_session_cb(check_coa=False)
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'OrderManagementScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'OrderManagementScreenTour', login="admin")
 
     def test_04_product_configurator(self):
         self.main_pos_config.write({ 'product_configurator': True })
         self.main_pos_config.open_session_cb(check_coa=False)
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config, 'ProductConfiguratorTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config, 'ProductConfiguratorTour', login="admin")
 
     def test_05_ticket_screen(self):
         self.main_pos_config.open_session_cb(check_coa=False)
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'TicketScreenTour', login="accountman")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'TicketScreenTour', login="admin")

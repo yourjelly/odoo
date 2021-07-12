@@ -1,4 +1,3 @@
-/* global display_identifier */
     $(function() {
         "use strict";
         // mergedHead will be turned to true the first time we receive something from a new host
@@ -42,11 +41,9 @@
 
                         // Here we execute the code coming from the pos, apparently $.parseHTML() executes scripts right away,
                         // Since we modify the dom afterwards, the script might not have any effect
-                        /* eslint-disable no-undef */
                         if (typeof foreign_js !== 'undefined' && $.isFunction(foreign_js)) {
                             foreign_js();
                         }
-                        /* eslint-enable no-undef */
                     }
                     longpolling();
                 },

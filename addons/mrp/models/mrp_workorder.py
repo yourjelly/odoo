@@ -29,11 +29,12 @@ class MrpWorkorder(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)], 'progress': [('readonly', True)]},
         group_expand='_read_group_workcenter_id', check_company=True)
     working_state = fields.Selection(
-        string='Workcenter Status', related='workcenter_id.working_state',
+        string='Workcenter Status', related='workcenter_id.working_state', readonly=False,
         help='Technical: used in views only')
     product_id = fields.Many2one(related='production_id.product_id', readonly=True, store=True, check_company=True)
     product_tracking = fields.Selection(related="product_id.tracking")
     product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True, readonly=True)
+    use_create_components_lots = fields.Boolean(related="production_id.picking_type_id.use_create_components_lots")
     production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, check_company=True, readonly=True)
     production_availability = fields.Selection(
         string='Stock Availability', readonly=True,
@@ -112,7 +113,7 @@ class MrpWorkorder(models.Model):
         string='Worksheet Type', related='operation_id.worksheet_type', readonly=True)
     worksheet_google_slide = fields.Char(
         'Worksheet URL', related='operation_id.worksheet_google_slide', readonly=True)
-    operation_note = fields.Html("Description", related='operation_id.note', readonly=True)
+    operation_note = fields.Text("Description", related='operation_id.note', readonly=True)
     move_raw_ids = fields.One2many(
         'stock.move', 'workorder_id', 'Raw Moves',
         domain=[('raw_material_production_id', '!=', False), ('production_id', '=', False)])
@@ -137,10 +138,15 @@ class MrpWorkorder(models.Model):
     next_work_order_id = fields.Many2one('mrp.workorder', "Next Work Order", check_company=True)
     scrap_ids = fields.One2many('stock.scrap', 'workorder_id')
     scrap_count = fields.Integer(compute='_compute_scrap_move_count', string='Scrap Move')
-    production_date = fields.Datetime('Production Date', related='production_id.date_planned_start', store=True)
+    production_date = fields.Datetime('Production Date', related='production_id.date_planned_start', store=True, readonly=False)
     json_popover = fields.Char('Popover Data JSON', compute='_compute_json_popover')
     show_json_popover = fields.Boolean('Show Popover?', compute='_compute_json_popover')
-    consumption = fields.Selection(related='production_id.consumption')
+    consumption = fields.Selection([
+        ('strict', 'Strict'),
+        ('warning', 'Warning'),
+        ('flexible', 'Flexible')],
+        required=True,
+    )
 
     @api.depends('production_state', 'date_planned_start', 'date_planned_finished')
     def _compute_json_popover(self):
@@ -613,7 +619,11 @@ class MrpWorkorder(models.Model):
 
     def action_cancel(self):
         self.leave_id.unlink()
-        return self.write({'state': 'cancel'})
+        return self.write({
+            'state': 'cancel',
+            'date_planned_start': False,
+            'date_planned_finished': False,
+        })
 
     def action_replan(self):
         """Replan a work order.
@@ -771,8 +781,7 @@ class MrpWorkorder(models.Model):
                 move_line.product_uom_qty += self.qty_producing
                 move_line.qty_done += self.qty_producing
             else:
-                quantity = self.product_uom_id._compute_quantity(self.qty_producing, self.product_id.uom_id, rounding_method='HALF-UP')
-                putaway_location = production_move.location_dest_id._get_putaway_strategy(self.product_id, quantity)
+                location_dest_id = production_move.location_dest_id._get_putaway_strategy(self.product_id).id or production_move.location_dest_id.id
                 move_line.create({
                     'move_id': production_move.id,
                     'product_id': production_move.product_id.id,
@@ -781,7 +790,7 @@ class MrpWorkorder(models.Model):
                     'product_uom_id': self.product_uom_id.id,
                     'qty_done': self.qty_producing,
                     'location_id': production_move.location_id.id,
-                    'location_dest_id': putaway_location.id,
+                    'location_dest_id': location_dest_id,
                 })
         else:
             rounding = production_move.product_uom.rounding

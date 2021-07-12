@@ -15,7 +15,7 @@ This module consists of:
  - Fiscal position for Palestina
  """,
     'website': 'http://www.odoo.com/accounting',
-    'depends': ['l10n_multilang'],
+    'depends': ['account'],
     'data': [
         'data/account_chart_template_data.xml',
         'data/account_account_tag.xml',

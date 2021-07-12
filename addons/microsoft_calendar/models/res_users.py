@@ -9,6 +9,7 @@ from datetime import timedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.loglevels import exception_to_unicode
+from odoo.addons.microsoft_account.models.microsoft_service import MICROSOFT_TOKEN_ENDPOINT
 from odoo.addons.microsoft_calendar.utils.microsoft_calendar import MicrosoftCalendarService, InvalidSyncToken
 
 _logger = logging.getLogger(__name__)
@@ -18,27 +19,18 @@ class User(models.Model):
     _inherit = 'res.users'
 
     microsoft_calendar_sync_token = fields.Char('Microsoft Next Sync Token', copy=False)
-    microsoft_synchronization_stopped = fields.Boolean('Outlook Synchronization stopped', copy=False)
-
-    @property
-    def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['microsoft_synchronization_stopped']
-
-    @property
-    def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['microsoft_synchronization_stopped']
 
     def _microsoft_calendar_authenticated(self):
         return bool(self.sudo().microsoft_calendar_rtoken)
 
     def _get_microsoft_calendar_token(self):
         self.ensure_one()
-        if self.microsoft_calendar_rtoken and not self._is_microsoft_calendar_valid():
+        if self._is_microsoft_calendar_valid():
             self._refresh_microsoft_calendar_token()
         return self.microsoft_calendar_token
 
     def _is_microsoft_calendar_valid(self):
-        return self.microsoft_calendar_token_validity and self.microsoft_calendar_token_validity >= (fields.Datetime.now() + timedelta(minutes=1))
+        return self.microsoft_calendar_token_validity and self.microsoft_calendar_token_validity < (fields.Datetime.now() + timedelta(minutes=1))
 
     def _refresh_microsoft_calendar_token(self):
         self.ensure_one()
@@ -58,31 +50,23 @@ class User(models.Model):
         }
 
         try:
-            endpoint = self.env['microsoft.service']._get_token_endpoint()
-            dummy, response, dummy = self.env['microsoft.service']._do_request(endpoint, params=data, headers=headers, method='POST', preuri='')
+            dummy, response, dummy = self.env['microsoft.service']._do_request(MICROSOFT_TOKEN_ENDPOINT, params=data, headers=headers, method='POST', preuri='')
             ttl = response.get('expires_in')
             self.write({
                 'microsoft_calendar_token': response.get('access_token'),
                 'microsoft_calendar_token_validity': fields.Datetime.now() + timedelta(seconds=ttl),
             })
         except requests.HTTPError as error:
-            if error.response.status_code in (400, 401):  # invalid grant
+            if error.response.status_code == 400:  # invalid grant
                 # Delete refresh token and make sure it's commited
-                self.env.cr.rollback()
-                self.write({
-                    'microsoft_calendar_rtoken': False,
-                    'microsoft_calendar_token': False,
-                    'microsoft_calendar_token_validity': False,
-                })
-                self.env.cr.commit()
+                with self.pool.cursor() as cr:
+                    self.env.user.with_env(self.env(cr=cr)).write({'microsoft_calendar_rtoken': False})
             error_key = error.response.json().get("error", "nc")
             error_msg = _("Something went wrong during your token generation. Maybe your Authorization Code is invalid or already expired [%s]", error_key)
             raise UserError(error_msg)
 
     def _sync_microsoft_calendar(self, calendar_service: MicrosoftCalendarService):
         self.ensure_one()
-        if self.microsoft_synchronization_stopped:
-            return False
         full_sync = not bool(self.microsoft_calendar_sync_token)
         with microsoft_calendar_token(self) as token:
             try:
@@ -110,23 +94,11 @@ class User(models.Model):
     @api.model
     def _sync_all_microsoft_calendar(self):
         """ Cron job """
-        users = self.env['res.users'].search([('microsoft_calendar_rtoken', '!=', False), ('microsoft_synchronization_stopped', '=', False)])
+        users = self.env['res.users'].search([('microsoft_calendar_rtoken', '!=', False)])
         microsoft = MicrosoftCalendarService(self.env['microsoft.service'])
         for user in users:
             _logger.info("Calendar Synchro - Starting synchronization for %s", user)
             try:
                 user.with_user(user).sudo()._sync_microsoft_calendar(microsoft)
-                self.env.cr.commit()
             except Exception as e:
                 _logger.exception("[%s] Calendar Synchro - Exception : %s !", user, exception_to_unicode(e))
-                self.env.cr.rollback()
-
-    def stop_microsoft_synchronization(self):
-        self.ensure_one()
-        self.microsoft_synchronization_stopped = True
-
-    def restart_microsoft_synchronization(self):
-        self.ensure_one()
-        self.microsoft_synchronization_stopped = False
-        self.env['calendar.recurrence']._restart_microsoft_sync()
-        self.env['calendar.event']._restart_microsoft_sync()

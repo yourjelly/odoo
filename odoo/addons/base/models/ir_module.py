@@ -149,7 +149,6 @@ STATES = [
     ('to install', 'To be installed'),
 ]
 
-
 class Module(models.Model):
     _name = "ir.module.module"
     _rec_name = "shortdesc"
@@ -179,10 +178,8 @@ class Module(models.Model):
             if not module.name:
                 module.description_html = False
                 continue
-            module_path = modules.get_module_path(module.name, display_warning=False)  # avoid to log warning for fake community module
-            if module_path:
-                path = modules.check_resource_path(module_path, 'static/description/index.html')
-            if module_path and path:
+            path = modules.get_module_resource(module.name, 'static/description/index.html')
+            if path:
                 with tools.file_open(path, 'rb') as desc_file:
                     doc = desc_file.read()
                     html = lxml.html.document_fromstring(doc)
@@ -314,13 +311,12 @@ class Module(models.Model):
         for module in self:
             module.has_iap = bool(module.id) and 'iap' in module.upstream_dependencies(exclude_states=('',)).mapped('name')
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_installed(self):
+    def unlink(self):
+        if not self:
+            return True
         for module in self:
             if module.state in ('installed', 'to upgrade', 'to remove', 'to install'):
                 raise UserError(_('You are trying to remove a module that is installed or will be installed.'))
-
-    def unlink(self):
         self.clear_caches()
         return super(Module, self).unlink()
 
@@ -380,10 +376,6 @@ class Module(models.Model):
         demo = False
 
         for module in self:
-            if module.state not in states_to_update:
-                demo = demo or module.demo
-                continue
-
             # determine dependency modules to update/others
             update_mods, ready_mods = self.browse(), self.browse()
             for dep in module.dependencies_id:
@@ -968,6 +960,7 @@ class Module(models.Model):
                     [('id', 'not in', excluded_category_ids)],
                 ])
 
+            Module = self.env['ir.module.module']
             records = self.env['ir.module.category'].search_read(domain, ['display_name'], order="sequence")
 
             values_range = OrderedDict()
@@ -980,7 +973,7 @@ class Module(models.Model):
                         kwargs.get('filter_domain', []),
                         [('category_id', 'child_of', record_id), ('category_id', 'not in', excluded_category_ids)]
                     ])
-                    record['__count'] = self.env['ir.module.module'].search_count(model_domain)
+                    record['__count'] = Module.search_count(model_domain)
                 values_range[record_id] = record
 
             return {

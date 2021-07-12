@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestMailFullRecipients
+from odoo.addons.test_mail_full.tests.common import TestMailFullCommon, TestRecipients
 
 
-class TestSMSPost(TestMailFullCommon, TestMailFullRecipients):
+class TestSMSPost(TestMailFullCommon, TestRecipients):
     """ TODO
 
       * add tests for new mail.message and mail.thread fields;
@@ -41,7 +41,7 @@ class TestSMSPost(TestMailFullCommon, TestMailFullRecipients):
 
         with self.with_user('employee'), self.mockSMSGateway():
             test_record = self.env['mail.test.sms'].browse(self.test_record.id)
-            test_record._notify_record_by_sms(messages, [{'id': self.partner_1.id, 'notif': 'sms'}], check_existing=True)
+            test_record._notify_record_by_sms(messages, {'partners': [{'id': self.partner_1.id, 'notif': 'sms'}]}, check_existing=True)
         self.assertSMSNotification([{'partner': self.partner_1}], self._test_body, messages)
 
     def test_message_sms_internals_sms_numbers(self):
@@ -251,7 +251,7 @@ class TestSMSPost(TestMailFullCommon, TestMailFullRecipients):
         self.assertSMSNotification([{'partner': self.partner_1, 'number': self.test_numbers_san[1]}], 'Dear %s this is an SMS.' % self.test_record.display_name, messages)
 
 
-class TestSMSPostException(TestMailFullCommon, TestMailFullRecipients):
+class TestSMSPostException(TestMailFullCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):

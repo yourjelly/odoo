@@ -1,4 +1,3 @@
-/* global html2canvas */
 odoo.define('point_of_sale.Printer', function (require) {
 "use strict";
 

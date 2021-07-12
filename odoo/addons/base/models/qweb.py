@@ -3,7 +3,6 @@ import ast
 import logging
 import os.path
 import re
-import reprlib
 import traceback
 
 from collections import OrderedDict
@@ -13,10 +12,10 @@ from itertools import tee, count
 from textwrap import dedent
 
 import itertools
-
-from lxml import etree
-from markupsafe import escape, Markup
+from lxml import etree, html
 from psycopg2.extensions import TransactionRollbackError
+import werkzeug
+from werkzeug.utils import escape as _escape
 
 from odoo.tools import pycompat, freehash
 from odoo.tools.safe_eval import check_values
@@ -161,6 +160,9 @@ class QWebException(Exception):
     def __repr__(self):
         return str(self)
 
+# Avoid DeprecationWarning while still remaining compatible with werkzeug pre-0.9
+escape = (lambda text: _escape(text, quote=True)) if parse_version(getattr(werkzeug, '__version__', '0.0')) < parse_version('0.9.0') else _escape
+
 def foreach_iterator(base_ctx, enum, name):
     ctx = base_ctx.copy()
     if not enum:
@@ -227,31 +229,12 @@ class frozendict(dict):
         return hash(frozenset((key, freehash(val)) for key, val in self.items()))
 
 
-class MarkupSafeBytes(bytes):
-    __slots__ = ()
-
-    def __new__(cls, source):
-        assert isinstance(source, bytes)
-        return super().__new__(cls, source)
-
-    def __html__(self):
-        return self.decode()
-
-    def __str__(self):
-        raise NotImplementedError(
-            "Bytes should not be stringified, only repr'd (tried to stringify %s)" % reprlib.repr(self)
-        )
-
-    def decode(self, encoding='utf-8', errors='strict'):
-        return Markup(super().decode(encoding, errors))
-
 ####################################
 ###             QWeb             ###
 ####################################
 
 
 class QWeb(object):
-    _empty_line = re.compile(r'\n\s*\n')
     __slots__ = ()
 
     _void_elements = frozenset([
@@ -260,7 +243,9 @@ class QWeb(object):
     _name_gen = count()
 
     def _render(self, template, values=None, **options):
-        """Render the template specified by the given name.
+        """ render(template, values, **options)
+
+        Render the template specified by the given name.
 
         :param template: template identifier
         :param dict values: template values to be used for rendering
@@ -268,17 +253,10 @@ class QWeb(object):
             * ``load`` (function) overrides the load method
             * ``profile`` (float) profile the rendering (use astor lib) (filter
               profile line with time ms >= profile)
-        :returns: bytes marked as markup-safe (decode to :class:`markupsafe.Markup`
-                  instead of `str`)
-        :rtype: MarkupSafeBytes
         """
-        values = values or {}
         body = []
-        self.compile(template, options)(self, body.append, values)
-        joined = u''.join(body)
-        if not values.get('__keep_empty_lines'):
-            joined = QWeb._empty_line.sub('\n', joined.strip())
-        return MarkupSafeBytes(joined.encode('utf8'))
+        self.compile(template, options)(self, body.append, values or {})
+        return u''.join(body).encode('utf8')
 
     def compile(self, template, options):
         """ Compile the given template into a rendering function::
@@ -534,16 +512,15 @@ class QWeb(object):
         imports and utilities), returned as a Python AST.
         Currently provides:
         * collections
+        * itertools
         Define:
-        * escape, Markup
+        * escape
         * to_text (empty string for a None or False, otherwise unicode string)
         """
         return ast.parse(dedent("""
             from collections import OrderedDict
-            from html import unescape # not sure whether this one or werkzeug's is better
-            from markupsafe import escape, Markup
             from odoo.tools.pycompat import to_text
-            from odoo.addons.base.models.qweb import foreach_iterator
+            from odoo.addons.base.models.qweb import escape, foreach_iterator
             """))
 
     def _create_def(self, options, body, prefix='fn', lineno=None):
@@ -670,7 +647,7 @@ class QWeb(object):
         options['iter_directives'] = iter(self._directives_eval_order() + [None])
 
         el.set('t-tag', el.tag)
-        if not ({'t-out', 't-esc', 't-raw', 't-field'} & set(el.attrib)):
+        if not (set(['t-esc', 't-raw', 't-field']) & set(el.attrib)):
             el.set('t-content', 'True')
 
         return body + self._compile_directives(el, options)
@@ -713,8 +690,11 @@ class QWeb(object):
         # t_attrs = self._post_processing_att(tagName, t_attrs, options)
         # for name, value in t_attrs.items():
         #     if value or isinstance(value, string_types)):
-        #         [...]
-        # always generates double-quoted attributes
+        #         append(u' ')
+        #         append(name)
+        #         append(u'="')
+        #         append(escape(pycompat.to_text((value)))
+        #         append(u'"')
         return [
             ast.Assign(
                 targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
@@ -760,27 +740,18 @@ class QWeb(object):
                         ]
                     ),
                     body=[
-                        # append(' ')
                         self._append(ast.Str(u' ')),
-                        # append(name)
-                        self._append(ast.Name('name', ast.Load())),
-                        # append('="')
+                        self._append(ast.Name(id='name', ctx=ast.Load())),
                         self._append(ast.Str(u'="')),
-                        # append(escape(str(...)))
                         self._append(ast.Call(
-                            func=ast.Name('escape', ast.Load()),
+                            func=ast.Name(id='escape', ctx=ast.Load()),
                             args=[ast.Call(
-                                # stringified because regular Markup processing
-                                # is invalid for attributes
-                                func=ast.Name('str', ast.Load()),
-                                args=[ast.BoolOp( # value or ''
-                                    op=ast.Or(),
-                                    values=[ast.Name('value', ast.Load()), ast.Str('')]
-                                )], keywords=[]
-                            )],
-                            keywords=[]
+                                func=ast.Name(id='to_text', ctx=ast.Load()),
+                                args=[ast.Name(id='value', ctx=ast.Load())], keywords=[],
+                                starargs=None, kwargs=None
+                            )], keywords=[],
+                            starargs=None, kwargs=None
                         )),
-                        # append('"')
                         self._append(ast.Str(u'"')),
                     ],
                     orelse=[]
@@ -807,7 +778,7 @@ class QWeb(object):
         return [
             'debug',
             'groups', 'foreach', 'if', 'elif', 'else',
-            'field', 'out', 'esc', 'raw',
+            'field', 'esc', 'raw',
             'tag',
             'call',
             'set',
@@ -1039,7 +1010,9 @@ class QWeb(object):
         return self._compile_tag(el, content, options, False)
 
     def _compile_directive_set(self, el, options):
+        body = []
         varname = el.attrib.pop('t-set')
+        varset = self._values_var(ast.Str(varname), ctx=ast.Store())
 
         if 't-value' in el.attrib:
             value = self._compile_expr(el.attrib.pop('t-value') or 'None')
@@ -1050,16 +1023,6 @@ class QWeb(object):
             body = self._compile_directive_content(el, options)
             if body:
                 def_name = self._create_def(options, body, prefix='set', lineno=el.sourceline)
-                # ''.join($varset)
-                joined = ast.Call(
-                    func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
-                    args=[ast.Name(id='content', ctx=ast.Load())], keywords=[]
-                )
-                # Markup(_): rendering of content is considered safe
-                safe = ast.Call(
-                    func=ast.Name(id='Markup', ctx=ast.Load()),
-                    args=[joined], keywords=[]
-                )
                 return [
                     # content = []
                     ast.Assign(
@@ -1075,8 +1038,15 @@ class QWeb(object):
                             ctx=ast.Load()
                         )
                     )),
-                    # $varset = _
-                    ast.Assign(targets=[self._values_var(ast.Str(varname), ctx=ast.Store())], value=safe)
+                    # $varset = u''.join($varset)
+                    ast.Assign(
+                        targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
+                        value=ast.Call(
+                            func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
+                            args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
+                            starargs=None, kwargs=None
+                        )
+                    )
                 ]
 
             else:
@@ -1193,11 +1163,8 @@ class QWeb(object):
         return el.tail is not None and [self._append(ast.Str(pycompat.to_text(el.tail)))] or []
 
     def _compile_directive_esc(self, el, options):
-        el.attrib['t-out'] = el.attrib.pop('t-esc')
-        return self._compile_directive_out(el, options)
-    def _compile_directive_out(self, el, options):
         field_options = self._compile_widget_options(el)
-        content = self._compile_widget(el, el.attrib.pop('t-out'), field_options)
+        content = self._compile_widget(el, el.attrib.pop('t-esc'), field_options)
         if not field_options:
             # if content is not False and if content is not None:
             #     content = escape(pycompat.to_text(content))
@@ -1220,13 +1187,6 @@ class QWeb(object):
         return content + self._compile_widget_value(el, options)
 
     def _compile_directive_raw(self, el, options):
-        _logger.warning(
-            "Found deprecated directive @t-raw=%r in template %r. Replace by "
-            "@t-out, and explicitely wrap content in `markupsafe.Markup` if "
-            "necessary (which likely is not the case)",
-            el.get('t-raw'),
-            options.get('template', '<unknown>'),
-        )
         field_options = self._compile_widget_options(el)
         content = self._compile_widget(el, el.attrib.pop('t-raw'), field_options)
         return content + self._compile_widget_value(el, options)
@@ -1234,7 +1194,7 @@ class QWeb(object):
     def _compile_widget(self, el, expression, field_options):
         if field_options:
             return [
-                # value = t-(out|esc|raw)
+                # value = t-(esc|raw)
                 ast.Assign(
                     targets=[ast.Name(id='content', ctx=ast.Store())],
                     value=self._compile_expr0(expression)
@@ -1266,7 +1226,7 @@ class QWeb(object):
             ]
 
         return [
-            # t_attrs, content, force_display = OrderedDict(), t-(out|esc|raw), None
+            # t_attrs, content, force_display = OrderedDict(), t-(esc|raw), None
             ast.Assign(
                 targets=[ast.Tuple(elts=[
                     ast.Name(id='t_attrs', ctx=ast.Store()),
@@ -1439,6 +1399,7 @@ class QWeb(object):
         call_options = el.attrib.pop('t-call-options', None)
         nsmap = options.get('nsmap')
 
+        _values = self._make_name('values_copy')
 
         content = [
             # values_copy = values.copy()
@@ -1707,20 +1668,17 @@ class QWeb(object):
     # compile expression
 
     def _compile_strexpr(self, expr):
+        # ensure result is unicode
         return ast.Call(
-            func=ast.Name(id='str', ctx=ast.Load()),
-            args=[
-                ast.Call(
-                    func=ast.Name(id='to_text', ctx=ast.Load()),
-                    args=[self._compile_expr(expr)], keywords=[],
-                )
-            ], keywords=[]
+            func=ast.Name(id='to_text', ctx=ast.Load()),
+            args=[self._compile_expr(expr)], keywords=[],
+            starargs=None, kwargs=None
         )
 
     def _compile_expr0(self, expr):
         if expr == "0":
             # u''.join(values.get(0, []))
-            joined = ast.Call(
+            return ast.Call(
                 func=ast.Attribute(
                     value=ast.Str(u''),
                     attr='join',
@@ -1739,24 +1697,18 @@ class QWeb(object):
                 ],
                 keywords=[], starargs=None, kwargs=None
             )
-            # Markup(...): 0 is a rendered body, so should be safe
-            return ast.Call(
-                func=ast.Name(id='Markup', ctx=ast.Load()),
-                args=[joined], keywords=[]
-            )
         return self._compile_expr(expr)
 
     def _compile_format(self, f):
         """ Parses the provided format string and compiles it to a single
         expression ast, uses string concatenation via "+".
         """
-        assert isinstance(f, str), "format strings can't be bytes"
         elts = []
         base_idx = 0
         for m in _FORMAT_REGEX.finditer(f):
             literal = f[base_idx:m.start()]
             if literal:
-                elts.append(ast.Str(literal))
+                elts.append(ast.Str(literal if isinstance(literal, str) else literal.decode('utf-8')))
 
             expr = m.group(1) or m.group(2)
             elts.append(self._compile_strexpr(expr))
@@ -1764,7 +1716,7 @@ class QWeb(object):
         # string past last regex match
         literal = f[base_idx:]
         if literal:
-            elts.append(ast.Str(literal))
+            elts.append(ast.Str(literal if isinstance(literal, str) else literal.decode('utf-8')))
 
         return reduce(lambda acc, it: ast.BinOp(
             left=acc,

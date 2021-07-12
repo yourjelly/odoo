@@ -67,7 +67,7 @@
                                     <a role="menuitem" type="object" name="open_action_with_context" context="{'action_name': 'action_bank_statement_line', 'search_default_journal': True}">Operations</a>
                                 </div>
                                 <div>
-                                    <a role="menuitem" type="object" name="open_collect_money">Cust. Payments</a>
+                                    <a role="menuitem" type="object" name="open_collect_money">Customer Payments</a>
                                 </div>
                                 <div>
                                     <a role="menuitem" type="object" name="open_spend_money">Vendor Payments</a>
@@ -93,7 +93,7 @@
                                     </t>
                                 </div>
                                 <div>
-                                    <a role="menuitem" type="object" name="create_customer_payment">Cust. Payment</a>
+                                    <a role="menuitem" type="object" name="create_customer_payment">Customer Payment</a>
                                 </div>
                                 <div>
                                     <a role="menuitem" type="object" name="create_supplier_payment">Vendor Payment</a>
@@ -298,18 +298,10 @@
                                 </button>
                             </t>
                             <t t-if="journal_type == 'purchase'">
-                                <field name="entries_count" invisible="1"/>
-                                <t t-if="record.entries_count.raw_value > 0">
-                                    <button class="btn btn-primary o_button_upload_bill oe_kanban_action_button" journal_type="purchase" groups="account.group_account_invoice">
-                                        <span>Upload</span>
-                                    </button>
-                                </t>
-                                <t t-else="">
-                                    <button type="object" name="action_create_vendor_bill" class="btn btn-primary oe_kanban_action_button" journal_type="purchase" groups="account.group_account_invoice">
-                                        <span>Upload</span>
-                                    </button>
-                                </t>
-                                <a type="object" name="action_create_new" class="o_invoice_new" groups="account.group_account_invoice">Create Manually</a>
+                                <button class="btn btn-primary o_button_upload_bill oe_kanban_action_button" journal_type="purchase" groups="account.group_account_invoice">
+                                    <span>Upload</span>
+                                </button>
+                                <a type="object" name="action_create_new" class="o_invoice_new" groups="account.group_account_invoice"><span>Create</span></a><span> Manually</span>
                             </t>
                         </div>
                         <div class="col-12 col-sm-7 o_kanban_primary_right">

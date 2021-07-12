@@ -1,14 +1,15 @@
-/** @odoo-module **/
+odoo.define('mail.systray.ActivityMenuTests', function (require) {
+"use strict";
 
-import ActivityMenu from '@mail/js/systray/systray_activity_menu';
-import {
+const {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} from '@mail/utils/test_utils';
+} = require('mail/static/src/utils/test_utils.js');
+var ActivityMenu = require('mail.systray.ActivityMenu');
 
-import testUtils from 'web.test_utils';
+var testUtils = require('web.test_utils');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('ActivityMenu', {
@@ -268,6 +269,8 @@ QUnit.test('activity menu widget: close on messaging menu click', async function
     );
 
     widget.destroy();
+});
+
 });
 
 });

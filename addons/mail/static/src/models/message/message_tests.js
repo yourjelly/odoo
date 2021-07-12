@@ -1,9 +1,9 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/message/message_tests.js', function (require) {
+'use strict';
 
-import { insert, insertAndReplace, link } from '@mail/model/model_field_command';
-import { afterEach, beforeEach, start } from '@mail/utils/test_utils';
+const { afterEach, beforeEach, start } = require('mail/static/src/utils/test_utils.js');
 
-import { str_to_datetime } from 'web.time';
+const { str_to_datetime } = require('web.time');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('models', {}, function () {
@@ -43,19 +43,19 @@ QUnit.test('create', async function (assert) {
         name: "General",
     });
     const message = this.env.models['mail.message'].create({
-        attachments: insertAndReplace({
+        attachments: [['insert-and-replace', {
             filename: "test.txt",
             id: 750,
             mimetype: 'text/plain',
             name: "test.txt",
-        }),
-        author: insert({ id: 5, display_name: "Demo" }),
+        }]],
+        author: [['insert', { id: 5, display_name: "Demo" }]],
         body: "<p>Test</p>",
         date: moment(str_to_datetime("2019-05-05 10:00:00")),
         id: 4000,
         isNeedaction: true,
         isStarred: true,
-        originThread: link(thread),
+        originThread: [['link', thread]],
     });
 
     assert.ok(this.env.models['mail.partner'].findFromIdentifyingData({ id: 5 }));
@@ -93,7 +93,7 @@ QUnit.test('create', async function (assert) {
     assert.ok(attachment);
     assert.strictEqual(attachment.filename, "test.txt");
     assert.strictEqual(attachment.id, 750);
-    assert.notOk(attachment.isUploading);
+    assert.notOk(attachment.isTemporary);
     assert.strictEqual(attachment.mimetype, 'text/plain');
     assert.strictEqual(attachment.name, "test.txt");
     const channel = this.env.models['mail.thread'].findFromIdentifyingData({
@@ -182,4 +182,6 @@ QUnit.test('message with body "test" should not be considered empty', async func
 
 });
 });
+});
+
 });

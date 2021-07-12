@@ -1,7 +1,8 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/models/mail_template/mail_template.js', function (require) {
+'use strict';
 
-import { registerNewModel } from '@mail/model/model_core';
-import { attr, many2many } from '@mail/model/model_field';
+const { registerNewModel } = require('mail/static/src/model/model_core.js');
+const { attr, many2many } = require('mail/static/src/model/model_field.js');
 
 function factory(dependencies) {
 
@@ -68,9 +69,7 @@ function factory(dependencies) {
         activities: many2many('mail.activity', {
             inverse: 'mailTemplates',
         }),
-        id: attr({
-            required: true,
-        }),
+        id: attr(),
         name: attr(),
     };
 
@@ -80,3 +79,5 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.mail_template', factory);
+
+});

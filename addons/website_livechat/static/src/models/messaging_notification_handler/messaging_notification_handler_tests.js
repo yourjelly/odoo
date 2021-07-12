@@ -6,7 +6,7 @@ const {
     afterNextRender,
     beforeEach,
     start,
-} = require('@mail/utils/test_utils');
+} = require('mail/static/src/utils/test_utils.js');
 
 const FormView = require('web.FormView');
 const {
@@ -39,8 +39,8 @@ QUnit.test('should open chat window on send chat request to website visitor', as
     assert.expect(3);
 
     this.data['website.visitor'].records.push({
-        display_name: "Visitor #11",
         id: 11,
+        name: "Visitor #11",
     });
     await this.start({
         data: this.data,

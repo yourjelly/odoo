@@ -2,15 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import SavepointCase
 
 
-class TestSalesCommon(TransactionCase):
+class TestSalesCommon(SavepointCase):
 
     @classmethod
     def setUpClass(cls):
         super(TestSalesCommon, cls).setUpClass()
-        cls.env['ir.config_parameter'].set_param('sales_team.membership_multi', False)
 
         # Salesmen organization
         # ------------------------------------------------------------
@@ -28,7 +27,6 @@ class TestSalesCommon(TransactionCase):
         # data----------------9999-----??
 
         cls.company_main = cls.env.user.company_id
-        cls.user_admin = cls.env.ref('base.user_admin')
         cls.user_sales_manager = mail_new_test_user(
             cls.env, login='user_sales_manager',
             name='Martin Sales Manager', email='crm_manager@test.example.com',
@@ -58,14 +56,7 @@ class TestSalesCommon(TransactionCase):
             'sequence': 5,
             'company_id': False,
             'user_id': cls.user_sales_manager.id,
-        })
-        cls.sales_team_1_m1 = cls.env['crm.team.member'].create({
-            'user_id': cls.user_sales_leads.id,
-            'crm_team_id': cls.sales_team_1.id,
-        })
-        cls.sales_team_1_m2 = cls.env['crm.team.member'].create({
-            'user_id': cls.user_admin.id,
-            'crm_team_id': cls.sales_team_1.id,
+            'member_ids': [(4, cls.user_sales_leads.id), (4, cls.user_admin.id)],
         })
 
 
@@ -74,12 +65,6 @@ class TestSalesMC(TestSalesCommon):
 
     @classmethod
     def setUpClass(cls):
-        """ Teams / Company
-
-          * sales_team_1: False
-          * team_c2: company_2
-          * team_mc: company_main
-        """
         super(TestSalesMC, cls).setUpClass()
         cls.company_2 = cls.env['res.company'].create({
             'name': 'New Test Company',
@@ -89,17 +74,5 @@ class TestSalesMC(TestSalesCommon):
         cls.team_c2 = cls.env['crm.team'].create({
             'name': 'C2 Team1',
             'sequence': 1,
-            'user_id': False,
             'company_id': cls.company_2.id,
-        })
-        cls.team_mc = cls.env['crm.team'].create({
-            'name': 'MainCompany Team',
-            'user_id': cls.user_admin.id,
-            'sequence': 3,
-            'company_id': cls.company_main.id
-        })
-
-        # admin and sale manager belong to new company also
-        (cls.user_admin | cls.user_sales_manager).write({
-            'company_ids': [(4, cls.company_2.id)]
         })

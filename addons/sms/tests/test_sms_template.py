@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase, users
+from odoo.tests.common import SavepointCase, users
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.exceptions import AccessError
 from odoo.tests import tagged
@@ -9,7 +9,7 @@ from odoo.tools import mute_logger
 
 
 @tagged('post_install')
-class TestSmsTemplateAccessRights(TransactionCase):
+class TestSmsTemplateAccessRights(SavepointCase):
 
     @classmethod
     def setUpClass(cls):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 from itertools import groupby
 
 from odoo import models
@@ -33,6 +33,10 @@ class LunchProduct(models.Model):
     _populate_dependencies = ['lunch.product.category', 'lunch.supplier']
 
     def _populate_factories(self):
+
+        def get_price(random=None, **kwargs):
+            return random.randint(1, 500) / 10
+
         category_ids = self.env.registry.populated_models['lunch.product.category']
         category_records = self.env['lunch.product.category'].browse(category_ids)
         category_by_company = {k: list(v) for k, v in groupby(category_records, key=lambda rec: rec['company_id'].id)}
@@ -47,7 +51,7 @@ class LunchProduct(models.Model):
         return [
             ('active', populate.iterate([True, False], [0.9, 0.1])),
             ('name', populate.constant('lunch_product_{counter}')),
-            ('price', populate.randfloat(0.1, 50)),
+            ('price', populate.compute(get_price)),
             ('supplier_id', populate.randomize(supplier_ids)),
             ('category_id', populate.compute(get_category)),
         ]
@@ -82,6 +86,9 @@ class LunchSupplier(models.Model):
         partner_ids = self.env.registry.populated_models['res.partner']
         user_ids = self.env.registry.populated_models['res.users']
 
+        def get_email_time(random=None, **kwargs):
+            return random.randint(0, 120) / 10
+
         def get_location_ids(random=None, **kwargs):
             nb_locations = random.randint(0, len(location_ids))
             return [(6, 0, random.choices(location_ids, k=nb_locations))]
@@ -91,20 +98,20 @@ class LunchSupplier(models.Model):
             ('active', populate.cartesian([True, False])),
             ('send_by', populate.cartesian(['phone', 'mail'])),
             ('delivery', populate.cartesian(['delivery', 'no_delivery'])),
-            ('mon', populate.iterate([True, False], [0.9, 0.1])),
-            ('tue', populate.iterate([True, False], [0.9, 0.1])),
-            ('wed', populate.iterate([True, False], [0.9, 0.1])),
-            ('thu', populate.iterate([True, False], [0.9, 0.1])),
-            ('fri', populate.iterate([True, False], [0.9, 0.1])),
-            ('sat', populate.iterate([False, True], [0.9, 0.1])),
-            ('sun', populate.iterate([False, True], [0.9, 0.1])),
+            ('recurrency_monday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_tuesday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_wednesday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_thursday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_friday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_saturday', populate.iterate([False, True], [0.9, 0.1])),
+            ('recurrency_sunday', populate.iterate([False, True], [0.9, 0.1])),
             ('available_location_ids', populate.iterate(
                 [[], [(6, 0, location_ids)]],
                 then=populate.compute(get_location_ids))),
             ('partner_id', populate.randomize(partner_ids)),
             ('responsible_id', populate.randomize(user_ids)),
             ('moment', populate.iterate(['am', 'pm'])),
-            ('automatic_email_time', populate.randfloat(0, 12)),
+            ('automatic_email_time', populate.compute(get_email_time)),
         ]
 
 
@@ -140,6 +147,13 @@ class LunchAlert(models.Model):
 
         location_ids = self.env.registry.populated_models['lunch.location']
 
+        def get_notification_time(random=None, **kwargs):
+            return random.randint(0, 120) / 10
+
+        def get_until_date(random=None, **kwargs):
+            delta = random.randint(-731, 731)
+            return datetime(2020, 1, 1) + timedelta(days=delta)
+
         def get_location_ids(random=None, **kwargs):
             nb_max = len(location_ids)
             start = random.randint(0, nb_max)
@@ -150,17 +164,17 @@ class LunchAlert(models.Model):
             ('active', populate.cartesian([True, False])),
             ('recipients', populate.cartesian(['everyone', 'last_week', 'last_month', 'last_year'])),
             ('mode', populate.iterate(['alert', 'chat'])),
-            ('mon', populate.iterate([True, False], [0.9, 0.1])),
-            ('tue', populate.iterate([True, False], [0.9, 0.1])),
-            ('wed', populate.iterate([True, False], [0.9, 0.1])),
-            ('thu', populate.iterate([True, False], [0.9, 0.1])),
-            ('fri', populate.iterate([True, False], [0.9, 0.1])),
-            ('sat', populate.iterate([False, True], [0.9, 0.1])),
-            ('sun', populate.iterate([False, True], [0.9, 0.1])),
+            ('recurrency_monday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_tuesday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_wednesday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_thursday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_friday', populate.iterate([True, False], [0.9, 0.1])),
+            ('recurrency_saturday', populate.iterate([False, True], [0.9, 0.1])),
+            ('recurrency_sunday', populate.iterate([False, True], [0.9, 0.1])),
             ('name', populate.constant('alert_{counter}')),
             ('message', populate.constant('<strong>alert message {counter}</strong>')),
-            ('notification_time', populate.randfloat(0, 12)),
+            ('notification_time', populate.compute(get_notification_time)),
             ('notification_moment', populate.iterate(['am', 'pm'])),
-            ('until', populate.randdatetime(relative_before=relativedelta(years=-2), relative_after=relativedelta(years=2))),
+            ('until', populate.compute(get_until_date)),
             ('location_ids', populate.compute(get_location_ids))
         ]

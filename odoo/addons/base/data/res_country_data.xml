@@ -350,7 +350,7 @@
         <record id="cy" model="res.country">
             <field name="name">Cyprus</field>
             <field name="code">cy</field>
-            <field name="currency_id" ref="EUR" />
+            <field name="currency_id" ref="CYP" />
             <field eval="357" name="phone_code" />
             <field name="vat_label">VAT</field>
         </record>
@@ -1295,7 +1295,7 @@
         <record id="sm" model="res.country">
             <field name="name">San Marino</field>
             <field name="code">sm</field>
-            <field name="currency_id" ref="EUR" />
+            <field name="currency_id" ref="ITL" />
             <field eval="378" name="phone_code" />
         </record>
         <record id="sn" model="res.country">
@@ -1307,7 +1307,7 @@
         <record id="so" model="res.country">
             <field name="name">Somalia</field>
             <field name="code">so</field>
-            <field name="currency_id" ref="SOS" />
+            <field name="currency_id" ref="SOD" />
             <field eval="252" name="phone_code" />
         </record>
         <record id="sr" model="res.country">
@@ -1591,7 +1591,7 @@
 
         <record id="europe" model="res.country.group">
             <field name="name">Europe</field>
-            <field name="country_ids" eval="[Command.set([
+            <field name="country_ids" eval="[(6,0,[
                 ref('at'),ref('be'),ref('bg'),ref('hr'),ref('cy'),
                 ref('cz'),ref('dk'),ref('ee'),ref('fi'),ref('fr'),
                 ref('de'),ref('gr'),ref('hu'),ref('ie'),ref('it'),
@@ -1602,7 +1602,7 @@
 
         <record id="south_america" model="res.country.group">
             <field name="name">South America</field>
-            <field name="country_ids" eval="[Command.set([
+            <field name="country_ids" eval="[(6,0,[
                 ref('ar'),ref('bo'),ref('br'),ref('cl'),ref('co'),
                 ref('ec'),ref('fk'),ref('gs'),ref('gf'),ref('gy'),
                 ref('py'),ref('pe'),ref('sr'),ref('uy'),ref('ve')])]"/>
@@ -1610,7 +1610,7 @@
 
         <record id="sepa_zone" model="res.country.group">
             <field name="name">SEPA Countries</field>
-            <field name="country_ids" eval="[Command.set([
+            <field name="country_ids" eval="[(6,0,[
                 ref('ad'),ref('at'),ref('ax'),ref('be'),ref('bg'),
                 ref('bl'),ref('ch'),ref('cy'),ref('cz'),ref('de'),
                 ref('dk'),ref('ee'),ref('es'),ref('fi'),ref('fr'),

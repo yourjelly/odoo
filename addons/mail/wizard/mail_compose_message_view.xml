@@ -4,7 +4,7 @@
         <record model="ir.ui.view" id="email_compose_message_wizard_form">
             <field name="name">mail.compose.message.form</field>
             <field name="model">mail.compose.message</field>
-            <field name="groups_id" eval="[Command.link(ref('base.group_user'))]"/>
+            <field name="groups_id" eval="[(4,ref('base.group_user'))]"/>
             <field name="arch" type="xml">
                 <form string="Compose Email">
                     <group>
@@ -62,11 +62,10 @@
                         <field name="notify"
                             attrs="{'invisible':[('composition_mode', '!=', 'mass_post')]}"/>
                         <!-- mass mailing -->
-                        <field name="reply_to_force_new" invisible="1"/>
-                        <field name="reply_to_mode" attrs="{'invisible':[('composition_mode', '!=', 'mass_mail')]}" widget="radio"/>
-                        <field name="reply_to" placeholder="Email address to which replies will be redirected"
-                            attrs="{'invisible':['|', ('reply_to_mode', '=', 'update'), ('composition_mode', '!=', 'mass_mail')],
-                                    'required':[('reply_to_mode', '!=', 'update'), ('composition_mode', '=', 'mass_mail')]}"/>
+                        <field name="no_auto_thread" attrs="{'invisible':[('composition_mode', '!=', 'mass_mail')]}"/>
+                        <field name="reply_to" placeholder="Email address to redirect replies..."
+                            attrs="{'invisible':['|', ('no_auto_thread', '=', False), ('composition_mode', '!=', 'mass_mail')],
+                                    'required':[('no_auto_thread', '=', True), ('composition_mode', '=', 'mass_mail')]}"/>
                     </group>
                     <field name="body" options="{'style-inline': true}"/>
                     <group col="4">

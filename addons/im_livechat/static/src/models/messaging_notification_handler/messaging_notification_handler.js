@@ -1,6 +1,7 @@
-/** @odoo-module **/
+odoo.define('im_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js', function (require) {
+'use strict';
 
-import { registerInstancePatchModel } from '@mail/model/model_core';
+const { registerInstancePatchModel } = require('mail/static/src/model/model_core.js');
 
 registerInstancePatchModel('mail.messaging_notification_handler', 'im_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js', {
 
@@ -36,4 +37,6 @@ registerInstancePatchModel('mail.messaging_notification_handler', 'im_livechat/s
             partner_name: partnerName,
         }));
     },
+});
+
 });

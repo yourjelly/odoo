@@ -180,7 +180,8 @@
                                 <div class="small mb-1"><strong class="text-muted">Salesperson</strong></div>
                                 <div class="row flex-nowrap">
                                     <div class="col flex-grow-0 pr-2">
-                                        <img class="rounded-circle mr4 float-left o_portal_contact_img" t-att-src="image_data_uri(sale_order.user_id.avatar_1024)" alt="Contact"/>
+                                        <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="sale_order.user_id.image_1024" t-att-src="image_data_uri(sale_order.user_id.image_1024)" alt="Contact"/>
+                                        <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="not sale_order.user_id.image_1024" src="/web/static/src/img/placeholder.png" alt="Contact"/>
                                     </div>
                                     <div class="col pl-0" style="min-width: 150px">
                                         <span t-field="sale_order.user_id" t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True}'/>
@@ -236,13 +237,16 @@
                                             <li t-if="sale_order.payment_term_id"><span>With payment terms:</span> <b t-field="sale_order.payment_term_id.note"/></li>
                                         </ul>
                                     </p>
-                                    <div t-if="acquirers or tokens" id="payment_method" class="text-left">
+                                    <div t-if="pms or acquirers" id="payment_method" class="text-left">
                                         <h3 class="mb24">Pay with</h3>
-                                        <t t-call="payment.checkout"/>
-                                    </div>
-                                    <div t-else="" class="alert alert-warning">
-                                        <strong>No suitable payment option could be found.</strong><br/>
-                                        If you believe that it is an error, please contact the website administrator.
+                                        <t t-call="payment.payment_tokens_list">
+                                            <t t-set="mode" t-value="'payment'"/>
+                                            <t t-set="submit_txt">Pay &amp; Confirm</t>
+                                            <t t-set="icon_class" t-value="'fa-lock'"/>
+                                            <t t-set="form_action" t-value="sale_order.get_portal_url(suffix='/transaction/token')"/>
+                                            <t t-set="prepare_tx_url" t-value="sale_order.get_portal_url(suffix='/transaction/')"/>
+                                            <t t-set="access_token" t-value="sale_order.access_token"/>
+                                        </t>
                                     </div>
                                 </main>
                             </div>
@@ -287,8 +291,9 @@
                     </div>
 
                     <t t-if="sale_order.transaction_ids">
-                        <t t-call="payment.transaction_status">
-                            <t t-set="tx" t-value="sale_order.get_portal_last_transaction()"/>
+                        <t t-call="payment.payment_confirmation_status">
+                            <t t-set="payment_tx_id" t-value="sale_order.get_portal_last_transaction()"/>
+                            <t t-set="reference" t-value="sale_order.reference"/>
                         </t>
                     </t>
 
@@ -359,8 +364,9 @@
             <div id="informations">
                 <div t-if="sale_order.transaction_ids and not invoices and sale_order.state in ('sent', 'sale') and portal_confirmation == 'pay' and not success and not error" t-att-data-order-id="sale_order.id">
                     <t t-if="sale_order.transaction_ids">
-                        <t t-call="payment.transaction_status">
-                            <t t-set="tx" t-value="sale_order.get_portal_last_transaction()"/>
+                        <t t-call="payment.payment_confirmation_status">
+                            <t t-set="payment_tx_id" t-value="sale_order.get_portal_last_transaction()"/>
+                            <t t-set="reference" t-value="sale_order.reference"/>
                         </t>
                     </t>
                 </div>
@@ -526,17 +532,10 @@
                 </div>
             </section>
 
-            <section id="terms" class="mt-5" t-if="not is_html_empty(sale_order.note)">
+            <section id="terms" class="mt-5" t-if="sale_order.note">
                 <h3 class="">Terms &amp; Conditions</h3>
                 <hr class="mt-0 mb-1"/>
-                <t t-if="sale_order.terms_type == 'html'">
-                    <!-- Note is plain text. This ensures a clickable link  -->
-                    <t t-set="tc_url" t-value="'%s/terms' % (sale_order.get_base_url())"/>
-                    <em>Terms &amp; Conditions: <a href="/terms"><t t-esc="tc_url"/></a></em>
-                </t>
-                <t t-else="">
-                    <em t-field="sale_order.note"/>
-                </t>
+                <em t-field="sale_order.note"/>
             </section>
 
             <section class="mt-5" t-if="sale_order.payment_term_id">

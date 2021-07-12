@@ -1,11 +1,12 @@
-/** @odoo-module **/
+odoo.define('mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.js', function (require) {
+'use strict';
 
-import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
-import { useStore } from '@mail/component_hooks/use_store/use_store';
-import { useUpdate } from '@mail/component_hooks/use_update/use_update';
+const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
 
-import { FormViewDialog } from 'web.view_dialogs';
-import { ComponentAdapter } from 'web.OwlCompatibility';
+const { FormViewDialog } = require('web.view_dialogs');
+const { ComponentAdapter } = require('web.OwlCompatibility');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
@@ -21,9 +22,11 @@ class FormViewDialogComponentAdapter extends ComponentAdapter {
 
 }
 
-const components = { FormViewDialogComponentAdapter };
+const components = {
+    FormViewDialogComponentAdapter,
+};
 
-export class ComposerSuggestedRecipient extends Component {
+class ComposerSuggestedRecipient extends Component {
 
     constructor(...args) {
         super(...args);
@@ -148,4 +151,8 @@ Object.assign(ComposerSuggestedRecipient, {
         suggestedRecipientInfoLocalId: String,
     },
     template: 'mail.ComposerSuggestedRecipient',
+});
+
+return ComposerSuggestedRecipient;
+
 });

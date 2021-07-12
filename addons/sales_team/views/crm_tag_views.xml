@@ -10,14 +10,16 @@
             <form string="Tags">
                 <sheet>
                     <div class="oe_title">
-                        <label for="name"/>
+                        <div class="oe_edit_only">
+                            <label for="name"/>
+                        </div>
                         <h1>
-                            <field name="name" placeholder="e.g. Services"/>
+                            <field name="name"/>
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="color" required="True" widget="color_picker"/>
+                            <field name="color" required="True"/>
                         </group>
                     </group>
                 </sheet>

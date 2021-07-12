@@ -557,7 +557,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         orders.append(self.create_ui_order_data([(self.product1, 10)], payments=[(self.bank_pm, 100)], customer=self.customer, is_invoiced=True, uid='00100-010-0011'))
 
         # sync orders
-        self.env['pos.order'].create_from_ui(orders)
+        order = self.env['pos.order'].create_from_ui(orders)
 
         # close the session
         self.pos_session.action_pos_session_validate()
@@ -589,6 +589,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         # Process one order with product3
         self.open_new_session()
         session = self.pos_session
+        orders = []
         order_data = self.create_ui_order_data([(self.product3, 1)])
         amount_paid = order_data['data']['amount_paid']
         self.env['pos.order'].create_from_ui([order_data])

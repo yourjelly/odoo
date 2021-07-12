@@ -449,6 +449,10 @@ var PagePropertiesDialog = weWidgets.Dialog.extend({
 });
 
 var MenuEntryDialog = weWidgets.LinkDialog.extend({
+    xmlDependencies: weWidgets.LinkDialog.prototype.xmlDependencies.concat(
+        ['/website/static/src/xml/website.contentMenu.xml']
+    ),
+
     /**
      * @constructor
      */
@@ -457,34 +461,16 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
             title: _t("Add a menu item"),
         }, options || {}), editable, _.extend({
             needLabel: true,
-            content: data.name || '',
+            text: data.name || '',
             isNewWindow: data.new_window,
         }, data || {}));
-
-        this.linkWidget.xmlDependencies = this.linkWidget.xmlDependencies.concat(['/website/static/src/xml/website.contentMenu.xml']);
-
-        const oldSave = this.linkWidget.save;
-        /**
-         * @override
-         */
-        this.linkWidget.save = () => {
-            var $e = this.$('#o_link_dialog_label_input');
-            if (!$e.val() || !$e[0].checkValidity()) {
-                $e.closest('.form-group').addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
-                $e.focus();
-                return;
-            }
-            oldSave.bind(this.linkWidget)();
-        };
 
         this.menuType = data.menuType;
     },
     /**
      * @override
      */
-    start: async function () {
-        const res = await this._super(...arguments);
-
+    start: function () {
         // Remove style related elements
         this.$('.o_link_dialog_preview').remove();
         this.$('input[name="is_new_window"], .link-style').closest('.form-group').remove();
@@ -501,7 +487,24 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
             $url.closest('.form-group').addClass('d-none');
         }
 
-        return res;
+        return this._super.apply(this, arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    save: function () {
+        var $e = this.$('#o_link_dialog_label_input');
+        if (!$e.val() || !$e[0].checkValidity()) {
+            $e.closest('.form-group').addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
+            $e.focus();
+            return;
+        }
+        return this._super.apply(this, arguments);
     },
 });
 
@@ -691,7 +694,7 @@ var EditMenuDialog = weWidgets.Dialog.extend({
             var newMenu = {
                 'fields': {
                     'id': _.uniqueId('new-'),
-                    'name': link.content,
+                    'name': link.text,
                     'url': link.url,
                     'new_window': link.isNewWindow,
                     'is_mega_menu': menuType === 'mega',
@@ -737,7 +740,7 @@ var EditMenuDialog = weWidgets.Dialog.extend({
             }, menu.fields));
             dialog.on('save', this, link => {
                 _.extend(menu.fields, {
-                    'name': link.content,
+                    'name': link.text,
                     'url': link.url,
                     'new_window': link.isNewWindow,
                 });
