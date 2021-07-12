@@ -76,6 +76,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/account_menuitem.xml',
         'views/account_analytic_default_view.xml',
         'wizard/account_tour_upload_bill.xml',
+        'data/ir_cron_data.xml',
     ],
     'demo': [
         'demo/account_demo.xml',

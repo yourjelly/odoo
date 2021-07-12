@@ -8,7 +8,7 @@
     'sequence': 40,
     'summary': 'User-friendly PoS interface for shops and restaurants',
     'description': "",
-    'depends': ['stock_account', 'barcodes', 'web_editor', 'digest'],
+    'depends': ['stock_account', 'barcodes', 'web_editor', 'digest','uom'],
     'data': [
         'security/point_of_sale_security.xml',
         'security/ir.model.access.csv',
