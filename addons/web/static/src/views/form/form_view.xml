@@ -5,7 +5,7 @@
       <div class="o_form_view">
           <ControlPanel
               t-props="props.info"
-              displayName="model.data.display_name"
+              displayName="model.root.data.display_name"
               display="{'top-right': false, 'bottom-right': false}"
           />
           <div class="o_content">

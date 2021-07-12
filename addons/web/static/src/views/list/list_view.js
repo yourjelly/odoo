@@ -5,7 +5,7 @@ import { XMLParser } from "@web/core/utils/xml";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { useModel } from "@web/views/helpers/model";
 import { useDebugMenu } from "../../core/debug/debug_menu";
-import { ListModel } from "./list_model";
+import { RelationalModel } from "../relational_model";
 import { ListRenderer } from "./list_renderer";
 
 class ListArchParser extends XMLParser {
@@ -42,12 +42,13 @@ class ListView extends owl.Component {
     static components = { ControlPanel, ListRenderer };
 
     setup() {
+        console.log(this.props);
         useDebugMenu("view", { component: this });
         this.archInfo = new ListArchParser().parse(this.props.arch, this.props.fields);
-        this.model = useModel(ListModel, {
+        this.model = useModel(RelationalModel, {
             resModel: this.props.resModel,
-            columns: this.archInfo.columns,
-            domain: this.props.domain
+            fields: this.props.fields,
+            activeFields: this.archInfo.columns.map((col) => col.name)
         });
     }
 }

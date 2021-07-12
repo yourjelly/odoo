@@ -27,7 +27,7 @@ export class ListRenderer extends Component {
     }
 
     openRecord(record) {
-        const resIds = this.props.model.data.map((record) => record.id);
+        const resIds = this.props.model.root.data.map((datapoint) => datapoint.resId);
         this.actionService.switchView("form", { resId: record.id, resIds });
     }
 }
