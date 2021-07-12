@@ -178,11 +178,14 @@ class ProfitabilityAnalysis(models.Model):
                                     LEFT JOIN account_analytic_account AA ON P.analytic_account_id = AA.id
                                     LEFT JOIN account_analytic_line AAL ON AAL.account_id = AA.id
                                 WHERE AAL.amount > 0.0 AND AAL.project_id IS NULL AND P.active = 't' AND P.allow_timesheets = 't'
-                                    AND AAL.product_id IN (
-                                        SELECT PP.id
-                                        FROM product_product PP
-                                        LEFT JOIN product_template PT ON PT.id = PP.product_tmpl_id
-                                        WHERE PT.service_tracking = 'no' AND PT.expense_policy = 'no'
+                                    AND NOT EXISTS (
+                                        SELECT SOL.id
+                                          FROM sale_order_line SOL
+                                          JOIN sale_order_line_invoice_rel SOINV
+                                            ON SOINV.order_line_id = SOL.id
+                                           AND SOINV.invoice_line_id = AAL.move_id -- AAL.move_id is an account.move.line id
+                                         WHERE SOL.qty_delivered_method = 'timesheet'
+                                            OR (SOL.qty_delivered_method = 'analytic' AND SOL.invoice_status != 'no')
                                     )
 
                                 UNION ALL
@@ -283,11 +286,11 @@ class ProfitabilityAnalysis(models.Model):
                                         ELSE 0.0
                                     END AS expense_amount_untaxed_invoiced,
                                     CASE
-                                        WHEN SOL.qty_delivered_method IN ('timesheet', 'manual') THEN (SOL.untaxed_amount_to_invoice / CASE COALESCE(S.currency_rate, 0) WHEN 0 THEN 1.0 ELSE S.currency_rate END)
+                                        WHEN SOL.qty_delivered_method = 'timesheet' THEN (SOL.untaxed_amount_to_invoice / CASE COALESCE(S.currency_rate, 0) WHEN 0 THEN 1.0 ELSE S.currency_rate END)
                                         ELSE 0.0
                                     END AS amount_untaxed_to_invoice,
                                     CASE
-                                        WHEN SOL.qty_delivered_method IN ('timesheet', 'manual') THEN (COALESCE(SOL.untaxed_amount_invoiced, AMOUNT_UNTAXED.downpayment_invoiced) / CASE COALESCE(S.currency_rate, 0) WHEN 0 THEN 1.0 ELSE S.currency_rate END)
+                                        WHEN SOL.qty_delivered_method = 'timesheet' THEN (COALESCE(SOL.untaxed_amount_invoiced, AMOUNT_UNTAXED.downpayment_invoiced) / CASE COALESCE(S.currency_rate, 0) WHEN 0 THEN 1.0 ELSE S.currency_rate END)
                                         ELSE 0.0
                                     END AS amount_untaxed_invoiced,
                                     S.date_order AS line_date
