@@ -1,6 +1,8 @@
 /** @odoo-module **/
 import { registry } from "../../core/registry";
 import { Domain } from "@web/core/domain";
+import { useService } from "@web/core/service_hook";
+import { makeContext } from "@web/core/context";
 
 const { Component } = owl;
 const { useSubEnv, useState } = owl.hooks;
@@ -255,6 +257,30 @@ export class FormCompiler {
 
         return { pageId, header, content, invisible };
     }
+
+    compileHeader(node, params) {
+        const statusBar = this.document.createElement("div");
+        statusBar.setAttribute("class", "o_form_statusbar");
+        for (let child of node.childNodes) {
+            this.appendChild(statusBar, this.compileNode(child, params));
+        }
+        return statusBar;
+    }
+
+    compileButton(node, params) {
+        const button = this.document.createElement("button");
+        button.textContent = node.getAttribute("string");
+
+        const buttonClickParams = {};
+        for (const attName of ["name", "type", "args", "context", "close", "special", "effect"]) {
+            const att = node.getAttribute(attName);
+            if (att) {
+                buttonClickParams[attName] = att;
+            }
+        }
+        button.setAttribute("t-on-click", `buttonClicked(${JSON.stringify(buttonClickParams)})`);
+        return button;
+    }
 }
 
 const templateIds = Object.create(null);
@@ -277,6 +303,7 @@ export class FormRenderer extends Component {
         this.state = useState({ activePage: null });
         useSubEnv({ model: this.props.model });
         this.record = this.props.model.root;
+        this.action = useService("action");
     }
 
     evalDomain(domain) {
@@ -290,6 +317,25 @@ export class FormRenderer extends Component {
                 return page;
             }
         }
+    }
+
+    async buttonClicked(params) {
+        const buttonContext = makeContext(params.context);
+        const envContext = null; //LPE FIXME record.context ?? new Context(payload.env.context).eval();
+
+        const { resModel, resId, resIds } = this.props.model;
+
+        const doActionParams = Object.assign({}, params, {
+            resModel,
+            resId,
+            resIds,
+            context: envContext,
+            buttonContext,
+            onclose: () => this.props.model.load(),
+        });
+
+        // LPE TODO: disable all buttons
+        this.action.doActionButton(doActionParams);
     }
 }
 

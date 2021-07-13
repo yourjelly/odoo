@@ -149,7 +149,7 @@ QUnit.module("Form Compiler", (hooks) => {
         });
     });
 
-    QUnit.test("compile notebook", async (assert) => {
+    QUnit.test("compile notebook with modifiers", async (assert) => {
         assert.expect(0);
 
         serverData.views = {
@@ -161,6 +161,26 @@ QUnit.module("Form Compiler", (hooks) => {
                             <page name="p2"><field name="display_name"/></page>
                         </notebook>
                     </sheet>
+                </form>`,
+        };
+
+        const form = await makeView({
+            serverData,
+            resModel: "partner",
+            type: "form",
+            resId: 1,
+        });
+    });
+
+    QUnit.debug("compile header and buttons", async (assert) => {
+        assert.expect(0);
+
+        serverData.views = {
+            "partner,1,form": /*xml*/ `
+                <form>
+                    <header>
+                         <button string="ActionButton" class="oe_highlight" name="action_button" type="object"/>
+                     </header>
                 </form>`,
         };
 
