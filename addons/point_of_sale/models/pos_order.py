@@ -532,7 +532,7 @@ class PosOrder(models.Model):
     def _apply_invoice_payments(self):
         for order in self:
             receivable_account = order.partner_id.commercial_partner_id.property_account_receivable_id
-            payment_moves = order.payment_ids._create_payment_moves()
+            payment_moves = order.payment_ids.filtered(lambda payment: not payment.payment_method_id.is_pay_later)._create_payment_moves()
             invoice_receivable = order.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account)
             payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account)
             (invoice_receivable | payment_receivables).reconcile()

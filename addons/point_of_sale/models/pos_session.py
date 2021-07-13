@@ -485,6 +485,7 @@ class PosSession(models.Model):
             # Separate cash payments for cash reconciliation later.
             order_is_invoiced = order.is_invoiced
             for payment in order.payment_ids:
+                if payment.payment_method_id.is_pay_later: continue
                 amount, date = payment.amount, payment.payment_date
                 key = payment.payment_method_id
                 if payment.payment_method_id.is_cash_count:

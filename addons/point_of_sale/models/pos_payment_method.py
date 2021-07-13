@@ -42,6 +42,7 @@ class PosPaymentMethod(models.Model):
     hide_use_payment_terminal = fields.Boolean(compute='_compute_hide_use_payment_terminal', help='Technical field which is used to '
                                                'hide use_payment_terminal when no payment interfaces are installed.')
     active = fields.Boolean(default=True)
+    is_pay_later = fields.Boolean(string='Pay Later')
 
     @api.depends('is_cash_count')
     def _compute_hide_use_payment_terminal(self):

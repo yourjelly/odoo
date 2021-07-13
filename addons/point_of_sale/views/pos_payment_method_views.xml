@@ -18,6 +18,7 @@
                             <field name="receivable_account_id" groups="account.group_account_readonly" />
                             <field name="is_cash_count" />
                             <field name="cash_journal_id" attrs="{'invisible': [('is_cash_count', '=', False)], 'required': [('is_cash_count', '=', True)]}" />
+                            <field name="is_pay_later" />
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />
                         </group>
                         <group>
@@ -38,6 +39,7 @@
                 <field name="name" />
                 <field name="receivable_account_id" groups="account.group_account_readonly"/>
                 <field name="is_cash_count" />
+                <field name="is_pay_later" />
                 <field name="use_payment_terminal" attrs="{'invisible': [('hide_use_payment_terminal', '=', True)]}" />
                 <field name="company_id" groups="base.group_multi_company" />
             </tree>
