@@ -88,15 +88,15 @@ export class FormCompiler {
         return modifiers.invisible;
     }
 
-    applyInvisible(invisible, transformed) {
+    applyInvisible(invisible, compiled) {
         if (!invisible) {
-            return transformed;
+            return compiled;
         }
         if (typeof invisible === "boolean") {
             return;
         }
-        transformed.setAttribute("t-if", `!evalDomain(${JSON.stringify(invisible)})`);
-        return transformed;
+        compiled.setAttribute("t-if", `!evalDomain(${JSON.stringify(invisible)})`);
+        return compiled;
     }
 
     compile(xmlNode) {
@@ -112,10 +112,40 @@ export class FormCompiler {
         }
         const tag = node.tagName.charAt(0).toUpperCase() + node.tagName.substring(1);
         const compiler = this[`compile${tag}`];
+
+        let compiledNode;
         if (compiler) {
-            return compiler.call(this, node, params);
+            compiledNode = compiler.call(this, node, params);
+        } else {
+            compiledNode = this.compileGenericNode(node, params);
         }
-        return node;
+        this.copyAttributes(node, compiledNode);
+        return compiledNode;
+    }
+
+    copyAttributes(node, compiled) {
+        if (node.tagName === "button") {
+            return;
+        }
+        const classes = node.getAttribute("class");
+        if (classes) {
+            compiled.classList.add(...classes.split(" "));
+        }
+
+        for (const attName of ["style", "placeholder"]) {
+            const att = node.getAttribute(attName);
+            if (att) {
+                compiled.setAttribute(attName, att);
+            }
+        }
+    }
+
+    compileGenericNode(node, params) {
+        const compiled = this.document.createElement(node.tagName);
+        for (let child of node.childNodes) {
+            this.appendChild(compiled, this.compileNode(child, params));
+        }
+        return compiled;
     }
 
     compileForm(node, params) {

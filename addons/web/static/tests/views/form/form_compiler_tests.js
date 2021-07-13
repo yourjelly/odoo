@@ -94,7 +94,7 @@ QUnit.module("Form Compiler", (hooks) => {
         assert.expect(0);
 
         serverData.views = {
-            "partner,1,form": `<form><div>lol</div></form>`,
+            "partner,1,form": `<form><div class="someClass">lol</div></form>`,
         };
 
         const form = await makeView({
@@ -172,7 +172,7 @@ QUnit.module("Form Compiler", (hooks) => {
         });
     });
 
-    QUnit.debug("compile header and buttons", async (assert) => {
+    QUnit.test("compile header and buttons", async (assert) => {
         assert.expect(0);
 
         serverData.views = {
