@@ -73,9 +73,10 @@ class TestL10nBeEdi(AccountEdiTestCommon):
         cls.expected_invoice_efff_values = '''
             <Invoice>
                 <UBLVersionID>2.0</UBLVersionID>
-                <ID>INV/2017/01/0001</ID>
+                <ID>INV/2017/00001</ID>
                 <IssueDate>2017-01-01</IssueDate>
                 <InvoiceTypeCode>380</InvoiceTypeCode>
+                <Note></Note>
                 <DocumentCurrencyCode>Gol</DocumentCurrencyCode>
                 <AccountingSupplierParty>
                     <Party>
@@ -107,7 +108,7 @@ class TestL10nBeEdi(AccountEdiTestCommon):
                 </AccountingCustomerParty>
                 <PaymentMeans>
                     <PaymentMeansCode listID="UN/ECE 4461">31</PaymentMeansCode>
-                    <InstructionID>INV/2017/01/0001</InstructionID>
+                    <InstructionID>INV/2017/00001</InstructionID>
                     <PaymentDueDate>2017-01-01</PaymentDueDate>
                 </PaymentMeans>
                 <TaxTotal>
