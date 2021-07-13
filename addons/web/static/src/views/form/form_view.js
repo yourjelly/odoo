@@ -20,7 +20,7 @@ class FormArchParser extends XMLParser {
                 _fields.add(node.getAttribute("name"));
             }
         });
-        return { fields: [..._fields], xmlDoc };
+        return { fields: [..._fields], arch, xmlDoc };
     }
 }
 
@@ -41,7 +41,7 @@ class FormView extends owl.Component {
             resId: this.props.resId,
             resIds: this.props.resIds,
             fields: this.props.fields,
-            activeFields: this.archInfo.fields,
+            activeFields: this.archInfo.fields
         });
     }
 }

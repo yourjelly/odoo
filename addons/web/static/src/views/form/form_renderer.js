@@ -257,15 +257,23 @@ class FormCompiler {
     }
 }
 
+const templateIds = Object.create(null);
+let nextId = 1;
+
 export class FormRenderer extends Component {
     static template = owl.tags.xml`<t t-call="{{ owlifiedArch }}" />`;
 
     setup() {
-        const formCompiler = new FormCompiler(this.env.qweb);
-        const tmpl = formCompiler.compile(this.props.info.xmlDoc).outerHTML;
-        console.log(tmpl);
-        this.env.qweb.addTemplate("formProut", tmpl);
-        this.owlifiedArch = "formProut";
+        let templateId = templateIds[this.props.info.arch];
+        if (!templateId) {
+            const formCompiler = new FormCompiler(this.env.qweb);
+            const tmpl = formCompiler.compile(this.props.info.xmlDoc).outerHTML;
+            templateId = `__form__${nextId++}`;
+            this.env.qweb.addTemplate(templateId, tmpl);
+            templateIds[this.props.info.arch] = templateId;
+            console.log(tmpl);
+        }
+        this.owlifiedArch = templateId;
         this.state = useState({ activePage: null });
         useSubEnv({ model: this.props.model });
         this.record = this.props.model.root;
