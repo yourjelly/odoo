@@ -49,7 +49,7 @@ class FieldMany2one extends Component {
 
 fieldRegistry.add("many2one", FieldMany2one);
 
-class FormCompiler {
+export class FormCompiler {
     constructor(qweb) {
         this.qweb = qweb;
         const parser = new DOMParser();
