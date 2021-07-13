@@ -7,20 +7,28 @@
     'category': 'Productivity/Discuss',
     'summary': 'Add OdooBot in discussions',
     'description': "",
-    'website': 'https://www.odoo.com/page/discuss',
+    'website': 'https://www.odoo.com/app/discuss',
     'depends': ['mail'],
     'auto_install': True,
     'installable': True,
     'application': False,
     'data': [
-        'views/assets.xml',
         'views/res_users_views.xml',
         'data/mailbot_data.xml',
     ],
     'demo': [
         'data/mailbot_demo.xml',
     ],
-    'qweb': [
-        'static/src/bugfix/bugfix.xml',
-    ],
+    'assets': {
+        'web.assets_backend': [
+            'mail_bot/static/src/models/messaging_initializer/messaging_initializer.js',
+            'mail_bot/static/src/scss/odoobot_style.scss',
+        ],
+        'web.tests_assets': [
+            'mail_bot/static/tests/**/*',
+        ],
+        'web.qunit_suite_tests': [
+            'mail_bot/static/src/models/messaging_initializer/messaging_initializer_tests.js',
+        ],
+    }
 }

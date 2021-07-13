@@ -1,5 +1,4 @@
-odoo.define('mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
 const { useState, onMounted, onWillUnmount } = owl.hooks;
 
@@ -10,7 +9,7 @@ const { useState, onMounted, onWillUnmount } = owl.hooks;
  *
  * @returns {Object}
  */
-function useDragVisibleDropZone() {
+export function useDragVisibleDropZone() {
     /**
      * Determine whether the drop zone should be visible or not.
      * Note that this is an observed value, and primitive types such as
@@ -87,7 +86,3 @@ function useDragVisibleDropZone() {
 
     return isVisible;
 }
-
-return useDragVisibleDropZone;
-
-});

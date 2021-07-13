@@ -21,7 +21,7 @@ class Digest(models.Model):
                 FROM account_move_line line
                 JOIN account_move move ON move.id = line.move_id
                 JOIN account_account account ON account.id = line.account_id
-                WHERE line.company_id = %s AND line.date >= %s AND line.date < %s
+                WHERE line.company_id = %s AND line.date > %s::DATE AND line.date <= %s::DATE
                 AND account.internal_group = 'income'
                 AND move.state = 'posted'
             ''', [company.id, start, end])

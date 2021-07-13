@@ -5,7 +5,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
-    const { CrashManager } = require('web.CrashManager');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const PosComponent = require('point_of_sale.PosComponent');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
@@ -13,12 +12,22 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
     const contexts = require('point_of_sale.PosContext');
+    const { registry } = require("@web/core/registry");
 
     // This is kind of a trick.
     // We get a reference to the whole exports so that
     // when we create an instance of one of the classes,
     // we instantiate the extended one.
     const models = require('point_of_sale.models');
+
+    let chromeInstance;
+    function posErrorHandler() {
+        if (chromeInstance) {
+            return chromeInstance.handleError(...arguments);
+        }
+        return false;
+    }
+    registry.category("error_handlers").add("posErrorHandler", posErrorHandler, { sequence: 0 });
 
     /**
      * Chrome is the root component of the PoS App.
@@ -34,6 +43,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('loading-skip-callback', () => this._loadingSkipCallback());
             useListener('play-sound', this._onPlaySound);
             useListener('set-sync-status', this._onSetSyncStatus);
+            useListener('show-notification', this._onShowNotification);
+            useListener('close-notification', this._onCloseNotification);
             NumberBuffer.activate();
 
             this.chromeContext = useContext(contexts.chrome);
@@ -43,6 +54,11 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 debugWidgetIsShown: true,
                 hasBigScrollBars: false,
                 sound: { src: null },
+                notification: {
+                    isShown: false,
+                    message: '',
+                    duration: 2000,
+                }
             });
 
             this.loading = useState({
@@ -86,9 +102,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
         // GETTERS //
 
         get clientScreenButtonIsShown() {
-            return (
-                this.env.pos.config.use_proxy && this.env.pos.config.iface_customer_facing_display
-            );
+            return this.env.pos.config.iface_customer_facing_display;
         }
         /**
          * Startup screen can be based on pos config so the startup screen
@@ -180,6 +194,17 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     exitButtonIsShown: true,
                 });
             }
+        }
+        handleError(env, error, originalError) {
+            if (this.env.pos && originalError && originalError.message) {
+                const { type, message, data } = originalError.message;
+                this.showPopup('ErrorTracebackPopup', {
+                    title: type,
+                    body: message + '\n' + data.debug + '\n',
+                });
+                return true;
+            }
+            return false;
         }
 
         // EVENT HANDLERS //
@@ -299,6 +324,15 @@ odoo.define('point_of_sale.Chrome', function(require) {
         _onSetSyncStatus({ detail: { status, pending }}) {
             this.env.pos.set('synch', { status, pending });
         }
+        _onShowNotification({ detail: { message, duration } }) {
+            this.state.notification.isShown = true;
+            this.state.notification.message = message;
+            this.state.notification.duration = duration;
+        }
+        _onCloseNotification() {
+            this.state.notification.isShown = false;
+            this.state.notification.message = '';
+        }
 
         // TO PASS AS PARAMETERS //
 
@@ -338,6 +372,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 body: this.env._t(
                     'Would you like to load demo data?'
                 ),
+                confirmText: this.env._t('Yes'),
+                cancelText: this.env._t('No')
             });
             if (confirmed) {
                 await this.rpc({
@@ -377,27 +413,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             }
 
             this._disableBackspaceBack();
-            this._replaceCrashmanager();
-        }
-        // replaces the error handling of the existing crashmanager which
-        // uses jquery dialog to display the error, to use the pos popup
-        // instead
-        _replaceCrashmanager() {
-            var self = this;
-            CrashManager.include({
-                show_error: function (error) {
-                    if (self.env.pos) {
-                        // self == this component
-                        self.showPopup('ErrorTracebackPopup', {
-                            title: error.type,
-                            body: error.message + '\n' + error.data.debug + '\n',
-                        });
-                    } else {
-                        // this == CrashManager instance
-                        this._super(error);
-                    }
-                },
-            });
+            chromeInstance = this;
         }
         // prevent backspace from performing a 'back' navigation
         _disableBackspaceBack() {

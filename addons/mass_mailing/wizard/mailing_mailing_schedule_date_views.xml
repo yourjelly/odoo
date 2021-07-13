@@ -11,7 +11,7 @@
                     </group>
                 </group>
                 <footer>
-                    <button string="Schedule" name="set_schedule_date" type="object" class="btn-primary"/>
+                    <button string="Schedule" name="action_schedule_date" type="object" class="btn-primary"/>
                     <button string="Discard " class="btn-secondary" special="cancel" />
                 </footer>
             </form>

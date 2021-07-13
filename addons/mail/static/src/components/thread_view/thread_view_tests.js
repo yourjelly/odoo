@@ -1,17 +1,17 @@
-odoo.define('mail/static/src/components/thread_view/thread_view_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
-};
-const {
+import { ThreadView } from '@mail/components/thread_view/thread_view';
+import { insert, link } from '@mail/model/model_field_command';
+import {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     dragenterFiles,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
+
+const components = { ThreadView };
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -62,29 +62,33 @@ QUnit.module('thread_view_tests.js', {
 QUnit.test('dragover files on thread with composer', async function (assert) {
     assert.expect(1);
 
-    await this.start();
-    const thread = this.env.models['mail.thread'].create({
+    this.data['res.partner'].records.push(
+        {
+            email: "john@example.com",
+            id: 9,
+            name: "John",
+        },
+        {
+            email: "fred@example.com",
+            id: 10,
+            name: "Fred",
+        },
+    );
+    this.data['mail.channel'].records.push({
         channel_type: 'channel',
         id: 100,
-        members: [['insert', [
-            {
-                email: "john@example.com",
-                id: 9,
-                name: "John",
-            },
-            {
-                email: "fred@example.com",
-                id: 10,
-                name: "Fred",
-            },
-        ]]],
-        model: 'mail.channel',
+        members: [this.data.currentPartnerId, 9, 10],
         name: "General",
         public: 'public',
     });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 100,
+        model: 'mail.channel',
+    });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     await afterNextRender(() =>
@@ -102,34 +106,37 @@ QUnit.test('message list desc order', async function (assert) {
     for (let i = 0; i <= 60; i++) {
         this.data['mail.message'].records.push({
             body: "not empty",
-            channel_ids: [100],
             model: 'mail.channel',
             res_id: 100,
         });
     }
-    await this.start();
-    const thread = this.env.models['mail.thread'].create({
+    this.data['res.partner'].records.push(
+        {
+            email: "john@example.com",
+            id: 9,
+            name: "John",
+        },
+        {
+            email: "fred@example.com",
+            id: 10,
+            name: "Fred",
+        },
+    );
+    this.data['mail.channel'].records.push({
         channel_type: 'channel',
         id: 100,
-        members: [['insert', [
-            {
-                email: "john@example.com",
-                id: 9,
-                name: "John",
-            },
-            {
-                email: "fred@example.com",
-                id: 10,
-                name: "Fred",
-            },
-        ]]],
-        model: 'mail.channel',
+        members: [this.data.currentPartnerId,9,10],
         name: "General",
         public: 'public',
     });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 100,
+        model: 'mail.channel',
+    });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -196,34 +203,37 @@ QUnit.test('message list asc order', async function (assert) {
     for (let i = 0; i <= 60; i++) {
         this.data['mail.message'].records.push({
             body: "not empty",
-            channel_ids: [100],
             model: 'mail.channel',
             res_id: 100,
         });
     }
-    await this.start();
-    const thread = this.env.models['mail.thread'].create({
+    this.data['res.partner'].records.push(
+        {
+            email: "john@example.com",
+            id: 9,
+            name: "John",
+        },
+        {
+            email: "fred@example.com",
+            id: 10,
+            name: "Fred",
+        },
+    );
+    this.data['mail.channel'].records.push({
         channel_type: 'channel',
         id: 100,
-        members: [['insert', [
-            {
-                email: "john@example.com",
-                id: 9,
-                name: "John",
-            },
-            {
-                email: "fred@example.com",
-                id: 10,
-                name: "Fred",
-            },
-        ]]],
-        model: 'mail.channel',
+        members: [this.data.currentPartnerId,9,10],
         name: "General",
         public: 'public',
     });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 100,
+        model: 'mail.channel',
+    });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -337,7 +347,7 @@ QUnit.test('mark channel as fetched when a new message is loaded and as seen whe
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     await afterNextRender(async () => this.env.services.rpc({
@@ -411,7 +421,7 @@ QUnit.test('mark channel as fetched and seen when a new message is loaded if com
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -442,28 +452,29 @@ QUnit.test('mark channel as fetched and seen when a new message is loaded if com
     );
 });
 
-QUnit.test('show message subject if thread is mailing channel', async function (assert) {
+QUnit.test('show message subject when subject is not the same as the thread name', async function (assert) {
     assert.expect(3);
 
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 100,
+        name: "General",
+        public: 'public',
+    });
     this.data['mail.message'].records.push({
         body: "not empty",
-        channel_ids: [100],
         model: 'mail.channel',
         res_id: 100,
         subject: "Salutations, voyageur",
     });
     await this.start();
-    const thread = this.env.models['mail.thread'].create({
-        channel_type: 'channel',
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
         id: 100,
-        mass_mailing: true,
         model: 'mail.channel',
-        name: "General",
-        public: 'public',
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView);
 
@@ -484,6 +495,39 @@ QUnit.test('show message subject if thread is mailing channel', async function (
     );
 });
 
+QUnit.test('do not show message subject when subject is the same as the thread name', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 100,
+        name: "Salutations, voyageur",
+        public: 'public',
+    });
+    this.data['mail.message'].records.push({
+        body: "not empty",
+        model: 'mail.channel',
+        res_id: 100,
+        subject: "Salutations, voyageur",
+    });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 100,
+        model: 'mail.channel',
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: [['link', thread]],
+    });
+    await this.createThreadViewComponent(threadViewer.threadView);
+
+    assert.containsNone(
+        document.body,
+        '.o_Message_subject',
+        "should not display subject of the message"
+    );
+});
+
 QUnit.test('[technical] new messages separator on posting message', async function (assert) {
     // technical as we need to remove focus from text input to avoid `channel_seen` call
     assert.expect(4);
@@ -498,8 +542,9 @@ QUnit.test('[technical] new messages separator on posting message', async functi
     }];
     this.data['mail.message'].records.push({
         body: "first message",
-        channel_ids: [20],
         id: 10,
+        model: "mail.channel",
+        res_id: 20,
     });
     await this.start();
     const thread = this.env.models['mail.thread'].findFromIdentifyingData({
@@ -508,7 +553,7 @@ QUnit.test('[technical] new messages separator on posting message', async functi
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -567,8 +612,9 @@ QUnit.test('new messages separator on receiving new message [REQUIRE FOCUS]', as
     });
     this.data['mail.message'].records.push({
         body: "blah",
-        channel_ids: [20],
         id: 1,
+        model: "mail.channel",
+        res_id: 20,
     });
     await this.start();
     const thread = this.env.models['mail.thread'].findFromIdentifyingData({
@@ -577,7 +623,7 @@ QUnit.test('new messages separator on receiving new message [REQUIRE FOCUS]', as
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -670,7 +716,7 @@ QUnit.test('new messages separator on posting message', async function (assert) 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -709,7 +755,6 @@ QUnit.test('basic rendering of canceled notification', async function (assert) {
     this.data['res.partner'].records.push({ id: 12, name: "Someone" });
     this.data['mail.message'].records.push({
         body: "not empty",
-        channel_ids: [11],
         id: 10,
         message_type: 'email',
         model: 'mail.channel',
@@ -727,10 +772,10 @@ QUnit.test('basic rendering of canceled notification', async function (assert) {
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -810,7 +855,8 @@ QUnit.test('should scroll to bottom on receiving new message if the list is init
     for (let i = 0; i <= 10; i++) {
         this.data['mail.message'].records.push({
             body: "not empty",
-            channel_ids: [20],
+            model: "mail.channel",
+            res_id: 20,
         });
     }
     await this.start();
@@ -820,7 +866,7 @@ QUnit.test('should scroll to bottom on receiving new message if the list is init
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-component-message-list-scrolled',
@@ -881,7 +927,8 @@ QUnit.test('should not scroll on receiving new message if the list is initially 
     for (let i = 0; i <= 10; i++) {
         this.data['mail.message'].records.push({
             body: "not empty",
-            channel_ids: [20],
+            model: "mail.channel",
+            res_id: 20,
         });
     }
     await this.start();
@@ -891,7 +938,7 @@ QUnit.test('should not scroll on receiving new message if the list is initially 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.afterEvent({
         eventName: 'o-component-message-list-scrolled',
@@ -958,14 +1005,15 @@ QUnit.test("delete all attachments of message without content should no longer d
     this.data['mail.message'].records.push(
         {
             attachment_ids: [143],
-            channel_ids: [11],
             id: 101,
+            model: "mail.channel",
+            res_id: 11,
         }
     );
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1016,14 +1064,15 @@ QUnit.test('delete all attachments of a message with some text content should st
         {
             attachment_ids: [143],
             body: "Some content",
-            channel_ids: [11],
             id: 101,
+            model: "mail.channel",
+            res_id: 11,
         },
     );
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1073,8 +1122,9 @@ QUnit.test('delete all attachments of a message with tracking fields should stil
     this.data['mail.message'].records.push(
         {
             attachment_ids: [143],
-            channel_ids: [11],
             id: 101,
+            model: "mail.channel",
+            res_id: 11,
             tracking_value_ids: [6]
         },
     );
@@ -1088,7 +1138,7 @@ QUnit.test('delete all attachments of a message with tracking fields should stil
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', { id: 11, model: 'mail.channel' }]],
+        thread: insert({ id: 11, model: 'mail.channel' }),
     });
     // wait for messages of the thread to be loaded
     await this.afterEvent({
@@ -1142,7 +1192,7 @@ QUnit.test('Post a message containing an email address followed by a mention on 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1185,7 +1235,7 @@ QUnit.test(`Mention a partner with special character (e.g. apostrophe ')`, async
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1233,7 +1283,7 @@ QUnit.test('mention 2 different partners that have the same name', async functio
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1285,7 +1335,7 @@ QUnit.test('mention a channel with space in the name', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1329,7 +1379,7 @@ QUnit.test('mention a channel with "&" in the name', async function (assert) {
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1373,7 +1423,7 @@ QUnit.test('mention a channel on a second line when the first line contains #', 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1417,7 +1467,7 @@ QUnit.test('mention a channel when replacing the space after the mention by anot
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
@@ -1477,7 +1527,7 @@ QUnit.test('mention 2 different channels that have the same name', async functio
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1522,10 +1572,10 @@ QUnit.test('show empty placeholder when thread contains no message', async funct
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1559,17 +1609,18 @@ QUnit.test('show empty placeholder when thread contains only empty messages', as
     this.data['mail.channel'].records.push({ id: 11 });
     this.data['mail.message'].records.push(
         {
-            channel_ids: [11],
             id: 101,
+            model: "mail.channel",
+            res_id: 11,
         },
     );
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1607,18 +1658,19 @@ QUnit.test('message with subtype should be displayed (and not considered as empt
     });
     this.data['mail.message'].records.push(
         {
-            channel_ids: [11],
             id: 101,
+            model: "mail.channel",
+            res_id: 11,
             subtype_id: 10,
         },
     );
     await this.start();
     const threadViewer = await this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1659,21 +1711,23 @@ QUnit.test('[technical] message list with a full page of empty messages should s
     for (let i = 0; i <= 30; i++) {
         this.data['mail.message'].records.push({
             body: "not empty",
-            channel_ids: [11],
+            model: "mail.channel",
+            res_id: 11,
         });
     }
     for (let i = 0; i <= 30; i++) {
         this.data['mail.message'].records.push({
-            channel_ids: [11],
+            model: "mail.channel",
+            res_id: 11,
         });
     }
     await this.start();
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['insert', {
+        thread: insert({
             id: 11,
             model: 'mail.channel',
-        }]],
+        }),
     });
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
@@ -1733,7 +1787,7 @@ QUnit.test('first unseen message should be directly preceded by the new message 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     // send a command that leads to receiving a transient message
@@ -1787,7 +1841,7 @@ QUnit.test('composer should be focused automatically after clicking on the send 
     });
     const threadViewer = this.env.models['mail.thread_viewer'].create({
         hasThreadView: true,
-        thread: [['link', thread]],
+        thread: link(thread),
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     document.querySelector('.o_ComposerTextInput_textarea').focus();
@@ -1802,8 +1856,322 @@ QUnit.test('composer should be focused automatically after clicking on the send 
     );
 });
 
-});
-});
+QUnit.test('failure on loading messages should display error', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                throw new Error();
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView);
+
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadView_loadingFailed',
+        "should show loading error message"
+    );
 });
 
+QUnit.test('failure on loading messages should prompt retry button', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                throw new Error();
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView);
+
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadView_loadingFailedRetryButton',
+        "should show a button to allow user to retry loading"
+    );
+});
+
+QUnit.test('failure on loading more messages should not alter message list display', async function (assert) {
+    assert.expect(1);
+
+    // first call needs to be successful as it is the initial loading of messages
+    // second call comes from load more and needs to fail in order to show the error alert
+    // any later call should work so that retry button and load more clicks would now work
+    let messageFetchShouldFail = false;
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    this.data['mail.message'].records.push(...[...Array(60).keys()].map(id => {
+        return {
+            body: 'coucou',
+            id,
+            model: "mail.channel",
+            res_id: 20,
+        };
+    }));
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                if (messageFetchShouldFail) {
+                    throw new Error();
+                }
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
+
+    messageFetchShouldFail = true;
+    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+    assert.containsN(
+        document.body,
+        '.o_Message',
+        30,
+        "should still show 30 messages as load more has failed"
+    );
+});
+
+QUnit.test('failure on loading more messages should display error and prompt retry button', async function (assert) {
+    assert.expect(3);
+
+    // first call needs to be successful as it is the initial loading of messages
+    // second call comes from load more and needs to fail in order to show the error alert
+    // any later call should work so that retry button and load more clicks would now work
+    let messageFetchShouldFail = false;
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    this.data['mail.message'].records.push(...[...Array(60).keys()].map(id => {
+        return {
+            body: 'coucou',
+            id,
+            model: "mail.channel",
+            res_id: 20,
+        };
+    }));
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                if (messageFetchShouldFail) {
+                    throw new Error();
+                }
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
+
+    messageFetchShouldFail = true;
+    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadView_alertLoadingFailed',
+        "should show loading error message"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_ThreadView_alertLoadingFailedRetryButton',
+        "should show loading error message button"
+    );
+    assert.containsNone(
+        document.body,
+        '.o_MessageList_loadMore',
+        "should not show load more buttton"
+    );
+});
+
+QUnit.test('Retry loading more messages on failed load more messages should load more messages', async function (assert) {
+    assert.expect(0);
+
+    // first call needs to be successful as it is the initial loading of messages
+    // second call comes from load more and needs to fail in order to show the error alert
+    // any later call should work so that retry button and load more clicks would now work
+    let messageFetchShouldFail = false;
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    this.data['mail.message'].records = [...Array(90).keys()].map(id => {
+        return {
+            body: 'coucou',
+            id,
+            model: "mail.channel",
+            res_id: 20,
+        };
+    });
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                if (messageFetchShouldFail) {
+                    throw new Error();
+                }
+            }
+            return this._super(...arguments);
+        },
+    });
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
+    messageFetchShouldFail = true;
+    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+
+    messageFetchShouldFail = false;
+    await this.afterEvent({
+        eventName: 'o-thread-view-hint-processed',
+        func: () => document.querySelector('.o_ThreadView_alertLoadingFailedRetryButton').click(),
+        message: "should wait until channel 20 loaded more messages after clicked on load more",
+        predicate: ({ hint, threadViewer }) => {
+            return (
+                hint.type === 'more-messages-loaded' &&
+                threadViewer.thread.model === 'mail.channel' &&
+                threadViewer.thread.id === 20
+            );
+        },
+    });
+});
+
+QUnit.test("highlight the message mentioning the current user inside the channel", async function (assert) {
+    assert.expect(1);
+
+    this.data['res.partner'].records.push({
+        display_name: "Test Partner",
+        id: 7,
+    });
+    this.data['res.users'].records.push({ partner_id: 7 });
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    this.data['mail.message'].records.push({
+        author_id: 7,
+        body: "hello @Admin",
+        id: 100,
+        model: 'mail.channel',
+        partner_ids: [this.data.currentPartnerId],
+        res_id: 20,
+    });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView);
+    assert.hasClass(
+        document.querySelector(`.o_MessageList .o_Message`),
+        'o-highlighted',
+        "message should be highlighted"
+    );
+});
+
+QUnit.test("not highlighting the message if not mentioning the current user inside the channel", async function (assert) {
+    assert.expect(1);
+
+    this.data['res.partner'].records.push({
+        display_name: "testPartner",
+        email: "testPartner@odoo.com",
+        id: 7,
+    });
+    this.data['res.users'].records.push({ partner_id: 7 });
+    this.data['mail.channel'].records.push({
+        channel_type: 'channel',
+        id: 20,
+        is_pinned: true,
+        name: "General",
+    });
+    this.data['mail.message'].records.push({
+        author_id: this.data.currentPartnerId,
+        body: "hello @testPartner",
+        id: 100,
+        model: 'mail.channel',
+        partner_ids: [7],
+        res_id: 20,
+    });
+    await this.start();
+    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
+        id: 20,
+        model: 'mail.channel'
+    });
+    const threadViewer = this.env.models['mail.thread_viewer'].create({
+        hasThreadView: true,
+        thread: link(thread),
+    });
+    await this.createThreadViewComponent(threadViewer.threadView);
+    assert.doesNotHaveClass(
+        document.querySelector(`.o_MessageList .o_Message`),
+        'o-highlighted',
+        "message should not be highlighted"
+    );
+});
+
+});
+});
 });

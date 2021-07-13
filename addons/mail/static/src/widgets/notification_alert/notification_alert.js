@@ -1,21 +1,19 @@
-odoo.define('mail/static/src/widgets/notification_alert/notification_alert.js', function (require) {
-"use strict";
+/** @odoo-module **/
 
-const components = {
-    NotificationAlert: require('mail/static/src/components/notification_alert/notification_alert.js'),
-};
+import { NotificationAlert } from '@mail/components/notification_alert/notification_alert';
 
-const { ComponentWrapper, WidgetAdapterMixin } = require('web.OwlCompatibility');
+import { ComponentWrapper, WidgetAdapterMixin } from 'web.OwlCompatibility';
+import Widget from 'web.Widget';
+import widgetRegistry from 'web.widget_registry';
 
-const Widget = require('web.Widget');
-const widgetRegistry = require('web.widget_registry');
+const components = { NotificationAlert };
 
 class NotificationAlertWrapper extends ComponentWrapper {}
 
 // -----------------------------------------------------------------------------
 // Display Notification alert on user preferences form view
 // -----------------------------------------------------------------------------
-const NotificationAlert = Widget.extend(WidgetAdapterMixin, {
+const NotificationAlertWidget = Widget.extend(WidgetAdapterMixin, {
     /**
      * @override
      */
@@ -38,8 +36,6 @@ const NotificationAlert = Widget.extend(WidgetAdapterMixin, {
     },
 });
 
-widgetRegistry.add('notification_alert', NotificationAlert);
+widgetRegistry.add('notification_alert', NotificationAlertWidget);
 
-return NotificationAlert;
-
-});
+export default NotificationAlertWidget;

@@ -10,19 +10,6 @@ from werkzeug.utils import redirect
 from odoo import http
 from odoo.http import request
 from odoo.addons.sale.controllers.portal import CustomerPortal
-from odoo.addons.website_sale.controllers.main import WebsiteSale
-
-
-class WebsiteSaleDigitalConfirmation(WebsiteSale):
-    @http.route([
-        '/shop/confirmation',
-    ], type='http', auth="public", website=True)
-    def payment_confirmation(self, **post):
-        response = super(WebsiteSaleDigitalConfirmation, self).payment_confirmation(**post)
-        order_lines = response.qcontext['order'].order_line
-        digital_content = any(x.product_id.type == 'digital' for x in order_lines)
-        response.qcontext.update(digital=digital_content)
-        return response
 
 
 class WebsiteSaleDigital(CustomerPortal):

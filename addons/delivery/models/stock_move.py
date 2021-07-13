@@ -19,7 +19,8 @@ class StockMove(models.Model):
 
     def _get_new_picking_values(self):
         vals = super(StockMove, self)._get_new_picking_values()
-        vals['carrier_id'] = self.mapped('sale_line_id.order_id.carrier_id').id
+        carrier_id = self.group_id.sale_id.carrier_id.id
+        vals['carrier_id'] = self.rule_id.propagate_carrier and carrier_id
         return vals
 
     def _key_assign_picking(self):
@@ -36,7 +37,7 @@ class StockMoveLine(models.Model):
         for move_line in self:
             if move_line.move_id.sale_line_id:
                 unit_price = move_line.move_id.sale_line_id.price_reduce_taxinc
-                qty = move_line.product_uom_id._compute_quantity(move_line.move_id.sale_line_id.product_qty, move_line.move_id.sale_line_id.product_uom)
+                qty = move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.move_id.sale_line_id.product_uom)
             else:
                 unit_price = move_line.product_id.list_price
                 qty = move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.product_id.uom_id)

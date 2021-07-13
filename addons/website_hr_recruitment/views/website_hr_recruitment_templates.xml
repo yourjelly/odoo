@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="assets_frontend" inherit_id="website.assets_frontend" name="Website Hr Recruitment Assets Frontend">
-    <xpath expr="//link[last()]" position="after">
-        <link rel="stylesheet" type="text/scss" href="/website_hr_recruitment/static/src/scss/website_hr_recruitment.scss"/>
-    </xpath>
-</template>
-
 <template id="job_edit_options" inherit_id="website.user_navbar" name="Edit Job Options">
     <xpath expr="//li[@id='edit-page-menu']" position="after">
         <t t-if="main_object._name == 'hr.job'" t-set="action" t-value="'hr_recruitment.action_hr_job'"/>
@@ -58,10 +52,10 @@
                                     <h5 t-if="job.no_of_recruitment &gt; 1">
                                         <t t-esc="job.no_of_recruitment"/> open positions
                                     </h5>
-                                    <p t-if="editable"
+                                    <div t-if="editable"
                                        t-field="job.description"
                                        class="mt16 mb0 css_non_editable_mode_hidden"/>
-                                    <p t-esc="len((job.description or '').split(' ')) > 35 and '%s ...' % ' '.join(job.description.split(' ')[:35]) or job.description"
+                                    <div t-esc="len((job.description or '').split(' ')) > 35 and '%s ...' % ' '.join(job.description.split(' ')[:35]) or job.description"
                                         class="mt16 mb0 css_editable_mode_hidden"
                                     />
                                     <div class="o_job_infos mt16">
@@ -489,7 +483,7 @@
                                         <h3 class="mb32 text-center">Your application has been sent to:</h3>
                                     </div>
                                     <div class="col-lg-1 offset-lg-4">
-                                        <p t-field="responsible.image_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded-circle d-block mx-auto o_image_64_cover'}"/>
+                                        <p t-field="responsible.avatar_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded-circle d-block mx-auto o_image_64_cover'}"/>
                                     </div>
                                     <div class="col-lg-5 o_responsible_data">
                                         <h4 class="mt0" t-field="responsible.name"/>
@@ -608,19 +602,7 @@
         <attribute name="name"/>
         <attribute name="t-att-data-module-id"/>
         <attribute name="t-att-data-module-shortdesc"/>
-        <attribute name="groups">hr_recruitment.group_hr_recruitment_manager</attribute>
-    </xpath>
-</template>
-
-<template id="website_hr_recuitment_assets_editor" name="Website HR Recruitment Assets Editor" inherit_id="website.assets_editor">
-    <xpath expr="." position="inside">
-        <script type="text/javascript" src="/website_hr_recruitment/static/src/js/website_hr_recruitment_editor.js"></script>
-    </xpath>
-</template>
-
-<template id="assets_tests" name="Website HR Recruitment Assets Tests" inherit_id="web.assets_tests">
-    <xpath expr="." position="inside">
-        <script type="text/javascript" src="/website_hr_recruitment/static/tests/tours/website_hr_recruitment.js"></script>
+        <attribute name="t-if">is_designer</attribute>
     </xpath>
 </template>
 

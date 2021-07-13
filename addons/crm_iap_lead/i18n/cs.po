@@ -3,20 +3,18 @@
 # 	* crm_iap_lead
 # 
 # Translators:
-# Martin Trigaux, 2020
-# Jan Horzinka <jan.horzinka@centrum.cz>, 2020
-# Michal Veselý <michal@veselyberanek.net>, 2020
-# trendspotter, 2020
-# karolína schusterová <karolina.schusterova@vdp.sk>, 2021
-# Rastislav Brencic <rastislav.brencic@azet.sk>, 2021
+# Martin Trigaux, 2019
+# Jan Horzinka <jan.horzinka@centrum.cz>, 2019
+# Michal Veselý <michal@veselyberanek.net>, 2019
+# trendspotter <j.podhorecky@volny.cz>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~13.5\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 07:28+0000\n"
-"PO-Revision-Date: 2020-09-07 08:11+0000\n"
-"Last-Translator: Rastislav Brencic <rastislav.brencic@azet.sk>, 2021\n"
+"POT-Creation-Date: 2019-08-26 08:16+0000\n"
+"PO-Revision-Date: 2019-08-26 09:09+0000\n"
+"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,19 +26,34 @@ msgstr ""
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #, python-format
 msgid "%d credits will be consumed to find %d companies."
-msgstr "%d kredity budou spotřebovány k nalezení %d společnosti."
+msgstr ""
 
 #. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
+msgid "(Time Now)"
+msgstr "(Čas teď)"
+
+#. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "<b>Contacts</b>"
 msgstr "<b>Kontakty</b>"
+
+#. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
+msgid "<b>Phone :</b>"
+msgstr "<b>Telefon :</b>"
+
+#. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
+msgid "<b>Timezone : </b>"
+msgstr "<b>Časové pásmo : </b>"
 
 #. module: crm_iap_lead
 #: model:mail.template,body_html:crm_iap_lead.lead_generation_no_credits
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p>Dear,</p>\n"
-"    <p>There are no more credits on your IAP Lead Generation account.<br/>\n"
+"    <p>There is no more credits on your IAP Lead Generation account.<br/>\n"
 "    You can charge your IAP Lead Generation account in the settings of the CRM app.<br/></p>\n"
 "    <p>Best regards,</p>\n"
 "    <p>Odoo S.A.</p>\n"
@@ -57,11 +70,6 @@ msgid ""
 "            No leads could be generated according to your search criteria\n"
 "        </p>"
 msgstr ""
-"<p class=\"o_view_nocontent_empty_folder\">\n"
-"            Nebyly nalezeny žádní potenciální zákazníci \n"
-"        </p><p>\n"
-"            Podle vašich vyhledávacích kritérií nelze generovat žádné potenciální zákazníky\n"
-"        </p>"
 
 #. module: crm_iap_lead
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
@@ -76,23 +84,18 @@ msgstr ""
 
 #. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
-msgid "<span class=\"col-md-6\">Extra contacts per Company</span>"
-msgstr "<span class=\"col-md-6\">Extra kontakty za společnost</span>"
-
-#. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid "<span class=\"o_stat_text\">Leads</span>"
-msgstr "<span class=\"o_stat_text\">Potenciální zákazníci</span>"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid "<span class=\"o_stat_text\">Opportunities</span>"
-msgstr "<span class=\"o_stat_text\">Příležitosti</span>"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_238
 msgid "Automobiles & Components"
-msgstr "Automobily a komponenty"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_157
@@ -102,7 +105,7 @@ msgstr "Banky"
 #. module: crm_iap_lead
 #: model:ir.model,name:crm_iap_lead.model_crm_iap_lead_mining_request
 msgid "CRM Lead Mining Request"
-msgstr "CRM požadavek na těžbu potenciálni zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
@@ -127,18 +130,19 @@ msgstr "Komerční a profesionální služby"
 
 #. module: crm_iap_lead
 #: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__search_type__companies
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid "Companies"
 msgstr "Společnosti"
 
 #. module: crm_iap_lead
 #: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__search_type__people
 msgid "Companies and their Contacts"
-msgstr "Společnosti a jejich kontakty"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__company_size_max
 msgid "Company Size Max"
-msgstr "Velikost společnosti max"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_167
@@ -153,7 +157,7 @@ msgstr "Spotřební sektor"
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_239
 msgid "Consumer Durables & Apparel"
-msgstr "Spotřební zboží a oděvy"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_150
@@ -166,6 +170,11 @@ msgid "Consumer Staples"
 msgstr "Spotřební zboží"
 
 #. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
+msgid "Contacts"
+msgstr "Kontakty"
+
+#. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__country_ids
 msgid "Countries"
 msgstr "Státy"
@@ -174,7 +183,7 @@ msgstr "Státy"
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #, python-format
 msgid "Create a Lead Mining Request"
-msgstr "Vytvořit žádost o těžbu potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_helpers__create_uid
@@ -195,22 +204,11 @@ msgid "Created on"
 msgstr "Vytvořeno"
 
 #. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
-msgid "Default Tags"
-msgstr "Výchozí tagy"
-
-#. module: crm_iap_lead
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__display_lead_label
-msgid "Display Lead Label"
-msgstr "Zobrazit štítek elektrody"
-
-#. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_helpers__display_name
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_industry__display_name
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__display_name
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_role__display_name
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_seniority__display_name
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_lead__display_name
 msgid "Display Name"
 msgstr "Zobrazované jméno"
 
@@ -242,7 +240,7 @@ msgid "Draft"
 msgstr "Návrh"
 
 #. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "Email"
 msgstr "E-mail"
 
@@ -261,12 +259,12 @@ msgstr "Chyba"
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__contact_filter_type
 msgid "Filter on"
-msgstr "Filtr zapnutý"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__filter_on_size
 msgid "Filter on Size"
-msgstr "Filtr podle velikosti"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_153
@@ -286,23 +284,20 @@ msgstr "Od"
 #. module: crm_iap_lead
 #. openerp-web
 #: code:addons/crm_iap_lead/static/src/xml/leads_tree_generate_leads_views.xml:0
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 #, python-format
 msgid "Generate Leads"
-msgstr "Generovat potenciální zákazníky"
+msgstr ""
 
 #. module: crm_iap_lead
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #, python-format
 msgid "Generate new leads based on their country, industry, size, etc."
 msgstr ""
-"Generujte nové potenciální zákazníky podle jejich země, odvětví, velikosti, "
-"atd."
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_ids
 msgid "Generated Lead / Opportunity"
-msgstr "Generovaný potenciální zákazník / příležitost"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_search
@@ -317,7 +312,7 @@ msgstr "Zařízení a služby zdravotní péče"
 #. module: crm_iap_lead
 #: model:ir.model,name:crm_iap_lead.model_crm_iap_lead_helpers
 msgid "Helper methods for crm_iap_lead modules"
-msgstr "Pomocné metody pro moduly crm_iap_lead"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_155
@@ -327,7 +322,7 @@ msgstr "Domácnosti a osobní produkty"
 #. module: crm_iap_lead
 #: model:mail.template,subject:crm_iap_lead.lead_generation_no_credits
 msgid "IAP Lead Generation Notification"
-msgstr "Oznámení o generování potenciálních zákazníků IAP"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_helpers__id
@@ -335,7 +330,6 @@ msgstr "Oznámení o generování potenciálních zákazníků IAP"
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__id
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_role__id
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_seniority__id
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_lead__id
 msgid "ID"
 msgstr "ID"
 
@@ -352,12 +346,12 @@ msgstr "Průmysl"
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__industry_ids
 msgid "Industries"
-msgstr "Průmysl"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model,name:crm_iap_lead.model_crm_iap_lead_industry
 msgid "Industry Tag"
-msgstr "Průmyslové tagy"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_69
@@ -370,7 +364,6 @@ msgstr "Pojištění"
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request____last_update
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_role____last_update
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_seniority____last_update
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_lead____last_update
 msgid "Last Modified on"
 msgstr "Naposled změněno"
 
@@ -393,56 +386,63 @@ msgid "Last Updated on"
 msgstr "Naposled upraveno"
 
 #. module: crm_iap_lead
+#: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__lead_type__lead
+msgid "Lead"
+msgstr "Zájemce"
+
+#. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_contacts_credits
 msgid "Lead Contacts Credits"
-msgstr "Kredity kontaktů potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_credits
 msgid "Lead Credits"
-msgstr "Potenciální zákazník kredity"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.ui.menu,name:crm_iap_lead.crm_menu_lead_generation
 msgid "Lead Generation"
-msgstr "Vytváření potenciální zákazník"
+msgstr ""
+
+#. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
+msgid "Lead Information"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_lead__lead_mining_request_id
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_search
 msgid "Lead Mining Request"
-msgstr "Žádosti o těžbu potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.actions.act_window,name:crm_iap_lead.crm_iap_lead_mining_request_action
 #: model:ir.ui.menu,name:crm_iap_lead.crm_iap_lead_mining_request_menu_action
 msgid "Lead Mining Requests"
-msgstr "Žádosti o těžbu potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_total_credits
 msgid "Lead Total Credits"
-msgstr "Celkem kredity potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model,name:crm_iap_lead.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr "Potenciální zákazník / příležitost"
+msgstr "zájem / příležitost"
 
 #. module: crm_iap_lead
-#: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__lead_type__lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_search
 msgid "Leads"
-msgstr "Potenciální zákazníci"
+msgstr "Zájemci"
 
 #. module: crm_iap_lead
-#. openerp-web
-#: code:addons/crm_iap_lead/static/src/js/tours/crm_iap_lead.js:0
-#, python-format
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid ""
-"Looking for more opportunities ?<br>Try the <b>Lead Generation</b> tool."
+"Make sure you know if you have to be GDPR compliant for storing personal "
+"data."
 msgstr ""
-"Hledáte více příležitostí?<br>Vyzkoušejte <b>Vedoucí generace</b> nástroj."
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_148
@@ -456,7 +456,7 @@ msgstr "Media"
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_seniority__name
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "Name"
 msgstr "Název"
 
@@ -475,39 +475,34 @@ msgid "New"
 msgstr "Nové"
 
 #. module: crm_iap_lead
-#. openerp-web
-#: code:addons/crm_iap_lead/static/src/js/tours/crm_iap_lead.js:0
-#, python-format
-msgid "Now, just let the magic happen!"
-msgstr "Teď už nechte kouzlo dokončit!"
-
-#. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__contact_number
 msgid "Number of Contacts"
 msgstr "Počet kontaktů"
 
 #. module: crm_iap_lead
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_count
+#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__leads_count
 msgid "Number of Generated Leads"
-msgstr "Počet generovaných ptenciálních zákazníku"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__lead_number
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_tree
 msgid "Number of Leads"
-msgstr "Počet potenciální zákazníci"
+msgstr ""
 
 #. module: crm_iap_lead
-#: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__lead_type__opportunity
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_search
 msgid "Opportunities"
 msgstr "Příležitosti"
 
 #. module: crm_iap_lead
-#: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
-#, python-format
+#: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__lead_type__opportunity
+msgid "Opportunity"
+msgstr "Příležitost"
+
+#. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "Opportunity created by Odoo Lead Generation"
-msgstr "Příležitost vytvořená generací Odoo potenciální zákazník"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__role_ids
@@ -522,7 +517,7 @@ msgstr "Role lidí"
 #. module: crm_iap_lead
 #: model:ir.model,name:crm_iap_lead.model_crm_iap_lead_seniority
 msgid "People Seniority"
-msgstr "Lidé seniority"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_161
@@ -530,7 +525,7 @@ msgid "Pharmaceuticals, Biotechnology & Life Sciences"
 msgstr "Léčiva, biotechnologie a přírodní vědy"
 
 #. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "Phone"
 msgstr "Telefon"
 
@@ -545,9 +540,14 @@ msgid "Real Estate"
 msgstr "Nemovitost"
 
 #. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
+msgid "Request"
+msgstr "Požadavek"
+
+#. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__name
 msgid "Request Number"
-msgstr "Číslo požadavku"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_152
@@ -567,6 +567,11 @@ msgid "Reveal"
 msgstr "Odhalit"
 
 #. module: crm_iap_lead
+#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_lead__reveal_id
+msgid "Reveal ID"
+msgstr "Reveal ID"
+
+#. module: crm_iap_lead
 #: model:ir.model.fields.selection,name:crm_iap_lead.selection__crm_iap_lead_mining_request__contact_filter_type__role
 msgid "Role"
 msgstr "Role"
@@ -574,12 +579,12 @@ msgstr "Role"
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_role__name
 msgid "Role Name"
-msgstr "Název role"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.constraint,message:crm_iap_lead.constraint_crm_iap_lead_role_name_uniq
 msgid "Role name already exists!"
-msgstr "Název role již existuje!"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__team_id
@@ -632,17 +637,17 @@ msgstr "Odeslat"
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_industry__name
 msgid "Tag Name"
-msgstr "Název tagu"
+msgstr "Název značky"
 
 #. module: crm_iap_lead
 #: model:ir.model.constraint,message:crm_iap_lead.constraint_crm_iap_lead_industry_name_uniq
 msgid "Tag name already exists!"
-msgstr "Název značky již existuje!"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__tag_ids
 msgid "Tags"
-msgstr "Tagy"
+msgstr "Štítky"
 
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__search_type
@@ -655,6 +660,11 @@ msgid "Technology Hardware & Equipment"
 msgstr "Technologie Hardware a vybavení"
 
 #. module: crm_iap_lead
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
+msgid "Technology Used :"
+msgstr "Použitá technologie:"
+
+#. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_149
 msgid "Telecommunication Services"
 msgstr "Telekomunikační služby"
@@ -663,10 +673,10 @@ msgstr "Telekomunikační služby"
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #, python-format
 msgid "This makes a total of %d credits for this request."
-msgstr "To je celkem %d kredity za tento požadavek."
+msgstr ""
 
 #. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.lead_message_template
 msgid "Title"
 msgstr "Název"
 
@@ -688,25 +698,11 @@ msgid ""
 "Up to %d additional credits will be consumed to identify %d contacts per "
 "company."
 msgstr ""
-"Až do %d další kredity budou spotřebovány k identifikaci %d kontakty na "
-"společnost."
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_138
 msgid "Utilities"
-msgstr "Utility"
-
-#. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
-msgid "What do you need ?"
-msgstr "Co potřebuješ ?"
-
-#. module: crm_iap_lead
-#. openerp-web
-#: code:addons/crm_iap_lead/static/src/js/tours/crm_iap_lead.js:0
-#, python-format
-msgid "Which Industry do you want to target?"
-msgstr "Na které odvětví chcete cílit?"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_1
@@ -726,7 +722,7 @@ msgstr "konzultace"
 #. module: crm_iap_lead
 #: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_4
 msgid "customer_service"
-msgstr "služby zákazníkům"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.seniority,name:crm_iap_lead.crm_iap_lead_seniority_1
@@ -741,7 +737,7 @@ msgstr "vzdělání"
 #. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid "employees"
-msgstr "zaměstnanci"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_6
@@ -821,7 +817,7 @@ msgstr "vztah s veřejností"
 #. module: crm_iap_lead
 #: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_19
 msgid "real_estate"
-msgstr "nemovitost"
+msgstr ""
 
 #. module: crm_iap_lead
 #: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_20

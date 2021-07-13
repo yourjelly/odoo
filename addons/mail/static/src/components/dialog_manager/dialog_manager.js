@@ -1,15 +1,14 @@
-odoo.define('mail/static/src/components/dialog_manager/dialog_manager.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    Dialog: require('mail/static/src/components/dialog/dialog.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { Dialog } from '@mail/components/dialog/dialog';
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
 
 const { Component } = owl;
 
-class DialogManager extends Component {
+const components = { Dialog };
+
+export class DialogManager extends Component {
 
     /**
      * @override
@@ -62,8 +61,4 @@ Object.assign(DialogManager, {
     components,
     props: {},
     template: 'mail.DialogManager',
-});
-
-return DialogManager;
-
 });

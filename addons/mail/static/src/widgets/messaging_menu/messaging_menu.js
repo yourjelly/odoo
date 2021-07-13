@@ -1,17 +1,14 @@
-odoo.define('mail/static/src/widgets/messaging_menu/messaging_menu.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    MessagingMenu: require('mail/static/src/components/messaging_menu/messaging_menu.js'),
-};
+import { MessagingMenu } from '@mail/components/messaging_menu/messaging_menu';
 
-const SystrayMenu = require('web.SystrayMenu');
-const Widget = require('web.Widget');
+import SystrayMenu from 'web.SystrayMenu';
+import Widget from 'web.Widget';
 
 /**
  * Odoo Widget, necessary to instantiate component.
  */
-const MessagingMenu = Widget.extend({
+const MessagingMenuWidget = Widget.extend({
     template: 'mail.widgets.MessagingMenu',
     /**
      * @override
@@ -30,8 +27,7 @@ const MessagingMenu = Widget.extend({
         this._super(...arguments);
     },
     async on_attach_callback() {
-        const MessagingMenuComponent = components.MessagingMenu;
-        this.component = new MessagingMenuComponent(null);
+        this.component = new MessagingMenu(null);
         await this.component.mount(this.el);
         // unwrap
         this.el.parentNode.insertBefore(this.component.el, this.el);
@@ -46,11 +42,9 @@ const MessagingMenu = Widget.extend({
 const activityMenuIndex = SystrayMenu.Items.findIndex(SystrayMenuItem =>
     SystrayMenuItem.prototype.name === 'activity_menu');
 if (activityMenuIndex > 0) {
-    SystrayMenu.Items.splice(activityMenuIndex, 0, MessagingMenu);
+    SystrayMenu.Items.splice(activityMenuIndex, 0, MessagingMenuWidget);
 } else {
-    SystrayMenu.Items.push(MessagingMenu);
+    SystrayMenu.Items.push(MessagingMenuWidget);
 }
 
-return MessagingMenu;
-
-});
+export default MessagingMenuWidget;

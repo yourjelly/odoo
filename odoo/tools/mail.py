@@ -4,17 +4,19 @@
 import base64
 import collections
 import logging
-from lxml.html import clean
 import random
 import re
 import socket
 import threading
 import time
-
 from email.utils import getaddresses
-from lxml import etree
-from werkzeug import urls
+from urllib.parse import urlparse
+
 import idna
+import markupsafe
+from lxml import etree
+from lxml.html import clean
+from werkzeug import urls
 
 import odoo
 from odoo.loglevels import ustr
@@ -39,6 +41,7 @@ safe_attrs = clean.defs.safe_attrs | frozenset(
      'data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-type', 'data-oe-expression', 'data-oe-translation-id', 'data-oe-nodeid',
      'data-publish', 'data-id', 'data-res_id', 'data-interval', 'data-member_id', 'data-scroll-background-ratio', 'data-view-id',
      'data-class', 'data-mimetype', 'data-original-src', 'data-original-id', 'data-gl-filter', 'data-quality', 'data-resize-width',
+     'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
      ])
 
 
@@ -248,7 +251,7 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
     if cleaned.startswith(u'<div>') and cleaned.endswith(u'</div>'):
         cleaned = cleaned[5:-6]
 
-    return cleaned
+    return markupsafe.Markup(cleaned)
 
 # ----------------------------------------------------------
 # HTML/Text management
@@ -268,16 +271,16 @@ def validate_url(url):
 
 
 def is_html_empty(html_content):
-    """Check if a html content is empty. If there are only formatting tags or
-    a void content return True. Famous use case if a '<p><br></p>' added by
-    some web editor.
+    """Check if a html content is empty. If there are only formatting tags with style
+    attributes or a void content  return True. Famous use case if a
+    '<p style="..."><br></p>' added by some web editor.
 
     :param str html_content: html content, coming from example from an HTML field
     :returns: bool, True if no content found or if containing only void formatting tags
     """
     if not html_content:
         return True
-    tag_re = re.compile(r'\<\s*\/?(?:p|div|span|br|b|i)\s*/?\s*\>')
+    tag_re = re.compile(r'\<\s*\/?(?:p|div|span|br|b|i|font)(?:(?=\s+\w*)[^/>]*|\s*)/?\s*\>')
     return not bool(re.sub(tag_re, '', html_content).strip())
 
 
@@ -371,8 +374,7 @@ def plaintext2html(text, container_tag=False):
     text = misc.html_escape(ustr(text))
 
     # 1. replace \n and \r
-    text = text.replace('\n', '<br/>')
-    text = text.replace('\r', '<br/>')
+    text = re.sub(r'(\r\n|\r|\n)', '<br/>', text)
 
     # 2. clickable links
     text = html_keep_url(text)
@@ -380,16 +382,16 @@ def plaintext2html(text, container_tag=False):
     # 3-4: form paragraphs
     idx = 0
     final = '<p>'
-    br_tags = re.compile(r'(([<]\s*[bB][rR]\s*\/?[>]\s*){2,})')
+    br_tags = re.compile(r'(([<]\s*[bB][rR]\s*/?[>]\s*){2,})')
     for item in re.finditer(br_tags, text):
         final += text[idx:item.start()] + '</p><p>'
         idx = item.end()
     final += text[idx:] + '</p>'
 
     # 5. container
-    if container_tag:
+    if container_tag: # FIXME: validate that container_tag is just a simple tag?
         final = '<%s>%s</%s>' % (container_tag, final, container_tag)
-    return ustr(final)
+    return markupsafe.Markup(final)
 
 def append_content_to_html(html, content, plaintext=True, preserve=False, container_tag=False):
     """ Append extra content at the end of an HTML snippet, trying
@@ -426,20 +428,17 @@ def append_content_to_html(html, content, plaintext=True, preserve=False, contai
     if insert_location == -1:
         insert_location = html.find('</html>')
     if insert_location == -1:
-        return '%s%s' % (html, content)
-    return '%s%s%s' % (html[:insert_location], content, html[insert_location:])
+        return markupsafe.Markup('%s%s' % (html, content))
+    return markupsafe.Markup('%s%s%s' % (html[:insert_location], content, html[insert_location:]))
 
 
 def prepend_html_content(html_body, html_content):
     """Prepend some HTML content at the beginning of an other HTML content."""
-    html_content = re.sub(r'(?i)(</?(?:html|body|head|!\s*DOCTYPE)[^>]*>)', '', html_content)
+    html_content = type(html_content)(re.sub(r'(?i)(</?(?:html|body|head|!\s*DOCTYPE)[^>]*>)', '', html_content))
     html_content = html_content.strip()
 
-    insert_index = next(re.finditer(r'<body[^>]*>', html_body), None)
-    if insert_index is None:
-        insert_index = next(re.finditer(r'<html[^>]*>', html_body), None)
-
-    insert_index = insert_index.end() if insert_index else 0
+    body_match = re.search(r'<body[^>]*>', html_body) or re.search(r'<html[^>]*>', html_body)
+    insert_index = body_match.end() if body_match else 0
 
     return html_body[:insert_index] + html_content + html_body[insert_index:]
 
@@ -512,7 +511,7 @@ def email_send(email_from, email_to, subject, body, email_cc=None, email_bcc=Non
     return res
 
 def email_split_tuples(text):
-    """ Return a list of (name, email) addresse tuples found in ``text``"""
+    """ Return a list of (name, email) address tuples found in ``text``"""
     if not text:
         return []
     return [(addr[0], addr[1]) for addr in getaddresses([text])
@@ -550,22 +549,31 @@ def email_normalize(text):
         return False
     return emails[0].lower()
 
+
+def email_domain_extract(email):
+    """ Extract the company domain to be used by IAP services notably. Domain
+    is extracted from email information e.g:
+        - info@proximus.be -> proximus.be
+    """
+    normalized_email = email_normalize(email)
+    if normalized_email:
+        return normalized_email.split('@')[1]
+    return False
+
+def url_domain_extract(url):
+    """ Extract the company domain to be used by IAP services notably. Domain
+    is extracted from an URL e.g:
+        - www.info.proximus.be -> proximus.be
+    """
+    parser_results = urlparse(url)
+    company_hostname = parser_results.hostname
+    if company_hostname and '.' in company_hostname:
+        return '.'.join(company_hostname.split('.')[-2:])  # remove subdomains
+    return False
+
 def email_escape_char(email_address):
     """ Escape problematic characters in the given email address string"""
     return email_address.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
-
-
-def email_domain_extract(email):
-    """Return the domain of the given email."""
-    if not email:
-        return
-
-    email_split = getaddresses([email])
-    if not email_split or not email_split[0]:
-        return
-
-    _, _, domain = email_split[0][1].rpartition('@')
-    return domain
 
 # was mail_thread.decode_header()
 def decode_message_header(message, header, separator=' '):

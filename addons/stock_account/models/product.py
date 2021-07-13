@@ -380,6 +380,8 @@ class ProductProduct(models.Model):
         if not svls_to_vacuum:
             return
 
+        as_svls = []
+
         domain = [
             ('company_id', '=', company.id),
             ('product_id', '=', self.id),
@@ -449,20 +451,19 @@ class ProductProduct(models.Model):
             }
             vacuum_svl = self.env['stock.valuation.layer'].sudo().create(vals)
 
-            # Create the account move.
             if self.valuation != 'real_time':
                 continue
-            vacuum_svl.stock_move_id._account_entry_move(
-                vacuum_svl.quantity, vacuum_svl.description, vacuum_svl.id, vacuum_svl.value
-            )
-            # Create the related expense entry
-            self._create_fifo_vacuum_anglo_saxon_expense_entry(vacuum_svl, svl_to_vacuum)
+            as_svls.append((vacuum_svl, svl_to_vacuum))
 
         # If some negative stock were fixed, we need to recompute the standard price.
         product = self.with_company(company.id)
         if product.cost_method == 'average' and not float_is_zero(product.quantity_svl, precision_rounding=self.uom_id.rounding):
             product.sudo().with_context(disable_auto_svl=True).write({'standard_price': product.value_svl / product.quantity_svl})
 
+        self.env['stock.valuation.layer'].browse(x[0].id for x in as_svls)._validate_accounting_entries()
+
+        for vacuum_svl, svl_to_vacuum in as_svls:
+            self._create_fifo_vacuum_anglo_saxon_expense_entry(vacuum_svl, svl_to_vacuum)
 
     def _create_fifo_vacuum_anglo_saxon_expense_entry(self, vacuum_svl, svl_to_vacuum):
         """ When product is delivered and invoiced while you don't have units in stock anymore, there are chances of that
@@ -568,13 +569,13 @@ class ProductProduct(models.Model):
         product_accounts = {product.id: product.product_tmpl_id.get_product_accounts() for product in stock_valuation_layers.mapped('product_id')}
         for out_stock_valuation_layer in stock_valuation_layers:
             product = out_stock_valuation_layer.product_id
-            expense_account = product._get_product_accounts()['expense']
-            if not expense_account:
-                raise UserError(_('Please define an expense account for this product: "%s" (id:%d) - or for its category: "%s".') % (product.name, product.id, self.name))
+            stock_input_account = product_accounts[product.id].get('stock_input')
+            if not stock_input_account:
+                raise UserError(_('You don\'t have any stock input account defined on your product category. You must define one before processing this operation.'))
             if not product_accounts[product.id].get('stock_valuation'):
                 raise UserError(_('You don\'t have any stock valuation account defined on your product category. You must define one before processing this operation.'))
 
-            debit_account_id = expense_account.id
+            debit_account_id = stock_input_account.id
             credit_account_id = product_accounts[product.id]['stock_valuation'].id
             value = out_stock_valuation_layer.value
             move_vals = {
@@ -658,7 +659,7 @@ class ProductProduct(models.Model):
         """
         self.ensure_one()
         if not qty_to_invoice:
-            return 0.0
+            return 0
 
         returned_quantities = defaultdict(float)
         for move in stock_moves:

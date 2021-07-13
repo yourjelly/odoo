@@ -9,6 +9,7 @@ import pprint
 import sys
 import threading
 import time
+import traceback
 import warnings
 
 from . import release
@@ -54,7 +55,7 @@ class PostgreSQLHandler(logging.Handler):
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, _NOTHING, DEFAULT = range(10)
 #The background is set with 40 plus the number of the color, and the foreground with 30
-#These are the sequences need to get colored ouput
+#These are the sequences needed to get colored output
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
@@ -124,7 +125,7 @@ def init_logger():
     logging.setLogRecordFactory(record_factory)
 
     # enable deprecation warnings (disabled by default)
-    warnings.filterwarnings('default', category=DeprecationWarning)
+    warnings.simplefilter('default', category=DeprecationWarning)
     # ignore deprecation warnings from invalid escape (there's a ton and it's
     # pretty likely a super low-value signal)
     warnings.filterwarnings('ignore', r'^invalid escape sequence \\.', category=DeprecationWarning)
@@ -140,6 +141,11 @@ def init_logger():
         'requests_toolbelt', # importing ABC from collections (fixed in 0.9)
     ]:
         warnings.filterwarnings('ignore', category=DeprecationWarning, module=module)
+
+    # the SVG guesser thing always compares str and bytes, ignore it
+    warnings.filterwarnings('ignore', category=BytesWarning, module='odoo.tools.image')
+    # reportlab does a bunch of bytes/str mixing in a hashmap
+    warnings.filterwarnings('ignore', category=BytesWarning, module='reportlab.platypus.paraparser')
 
     from .tools.translate import resetlocale
     resetlocale()
@@ -240,6 +246,29 @@ PSEUDOCONFIG_MAPPER = {
 logging.RUNBOT = 25
 logging.addLevelName(logging.RUNBOT, "INFO") # displayed as info in log
 logging.captureWarnings(True)
+# must be after `loggin.captureWarnings` so we override *that* instead of the
+# other way around
+showwarning = warnings.showwarning
+IGNORE = {
+    'Comparison between bytes and int', # a.foo != False or some shit, we don't care
+}
+def showwarning_with_traceback(message, category, filename, lineno, file=None, line=None):
+    if category is BytesWarning and message.args[0] in IGNORE:
+        return
+
+    # find the stack frame maching (filename, lineno)
+    filtered = []
+    for frame in traceback.extract_stack():
+        if 'importlib' not in frame.filename:
+            filtered.append(frame)
+        if frame.filename == filename and frame.lineno == lineno:
+            break
+    return showwarning(
+        message, category, filename, lineno,
+        file=file,
+        line=''.join(traceback.format_list(filtered))
+    )
+warnings.showwarning = showwarning_with_traceback
 
 def runbot(self, message, *args, **kws):
     self.log(logging.RUNBOT, message, *args, **kws)

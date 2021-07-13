@@ -1,18 +1,17 @@
-odoo.define('mail/static/src/components/thread_view/thread_view.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    Composer: require('mail/static/src/components/composer/composer.js'),
-    MessageList: require('mail/static/src/components/message_list/message_list.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { useUpdate } from '@mail/component_hooks/use_update/use_update';
+import { Composer } from '@mail/components/composer/composer';
+import { MessageList } from '@mail/components/message_list/message_list';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class ThreadView extends Component {
+const components = { Composer, MessageList };
+
+export class ThreadView extends Component {
 
     /**
      * @param {...any} args
@@ -134,6 +133,7 @@ class ThreadView extends Component {
             isDeviceMobile: this.env.messaging.device.isMobile,
             thread,
             threadCacheIsLoaded: threadCache && threadCache.isLoaded,
+            threadCacheHasLoadingFailed: threadCache && threadCache.hasLoadingFailed,
             threadIsTemporary: thread && thread.isTemporary,
             threadMassMailing: thread && thread.mass_mailing,
             threadModel: thread && thread.model,
@@ -141,6 +141,23 @@ class ThreadView extends Component {
             threadView,
             threadViewIsLoading: threadView && threadView.isLoading,
         };
+    }
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onClickRetryLoadMessages() {
+        if (!this.threadView) {
+            return;
+        }
+        if (!this.threadView.threadCache) {
+            return;
+        }
+        this.threadView.threadCache.update({ hasLoadingFailed: false });
     }
 
 }
@@ -163,6 +180,14 @@ Object.assign(ThreadView, {
         composerAttachmentsDetailsMode: {
             type: String,
             validate: prop => ['auto', 'card', 'hover', 'none'].includes(prop),
+        },
+        /**
+         * Function returns the exact scrollable element from the parent
+         * to manage proper scroll heights which affects the load more messages.
+         */
+        getScrollableElement: {
+            type: Function,
+            optional: true,
         },
         hasComposer: Boolean,
         hasComposerCurrentPartnerAvatar: {
@@ -198,25 +223,9 @@ Object.assign(ThreadView, {
             type: String,
             validate: prop => ['asc', 'desc'].includes(prop),
         },
-        selectedMessageLocalId: {
-            type: String,
-            optional: true,
-        },
-        /**
-         * Function returns the exact scrollable element from the parent
-         * to manage proper scroll heights which affects the load more messages.
-         */
-        getScrollableElement: {
-            type: Function,
-            optional: true,
-        },
         showComposerAttachmentsExtensions: Boolean,
         showComposerAttachmentsFilenames: Boolean,
         threadViewLocalId: String,
     },
     template: 'mail.ThreadView',
-});
-
-return ThreadView;
-
 });

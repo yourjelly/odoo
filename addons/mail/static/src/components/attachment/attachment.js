@@ -1,16 +1,14 @@
-odoo.define('mail/static/src/components/attachment/attachment.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-
-const components = {
-    AttachmentDeleteConfirmDialog: require('mail/static/src/components/attachment_delete_confirm_dialog/attachment_delete_confirm_dialog.js'),
-};
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { AttachmentDeleteConfirmDialog } from '@mail/components/attachment_delete_confirm_dialog/attachment_delete_confirm_dialog';
 
 const { Component, useState } = owl;
 
-class Attachment extends Component {
+const components = { AttachmentDeleteConfirmDialog };
+
+export class Attachment extends Component {
 
     /**
      * @override
@@ -45,13 +43,12 @@ class Attachment extends Component {
     }
 
     /**
-     * Return the url of the attachment. Temporary attachments, a.k.a. uploading
-     * attachments, do not have an url.
+     * Return the url of the attachment. Uploading attachments do not have an url.
      *
      * @returns {string}
      */
     get attachmentUrl() {
-        if (this.attachment.isTemporary) {
+        if (this.attachment.isUploading) {
             return '';
         }
         return this.env.session.url('/web/content', {
@@ -120,7 +117,7 @@ class Attachment extends Component {
      */
     _onClickDownload(ev) {
         ev.stopPropagation();
-        window.location = `/web/content/ir.attachment/${this.attachment.id}/datas?download=true`;
+        this.env.services.navigate(`/web/content/ir.attachment/${this.attachment.id}/datas`, { download: true });
     }
 
     /**
@@ -197,8 +194,4 @@ Object.assign(Attachment, {
         showFilename: Boolean,
     },
     template: 'mail.Attachment',
-});
-
-return Attachment;
-
 });

@@ -3,27 +3,25 @@
 # 	* hr_attendance
 # 
 # Translators:
-# Martin Trigaux, 2020
-# Dariusz Żbikowski <darek@krokus.com.pl>, 2020
-# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2020
-# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2020
-# Tomasz Leppich <t.leppich@gmail.com>, 2020
-# Piotr Szlązak <szlazakpiotr@gmail.com>, 2020
-# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2020
-# Andrzej Donczew <a.donczew@hadron.eu.com>, 2020
-# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2020
-# Paweł Wodyński <pw@myodoo.pl>, 2020
-# Maksym <ms@myodoo.pl>, 2020
-# Natalia Gros <nag@odoo.com>, 2020
-# Piotr Strębski <strebski@gmail.com>, 2021
+# Martin Trigaux, 2019
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2019
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2019
+# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2019
+# Tomasz Leppich <t.leppich@gmail.com>, 2019
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2019
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2019
+# Andrzej Donczew <a.donczew@hadron.eu.com>, 2019
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2019
+# Maksym <ms@myodoo.pl>, 2019
+# Natalia Gros <nag@odoo.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~13.5\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 07:28+0000\n"
-"PO-Revision-Date: 2020-09-07 08:12+0000\n"
-"Last-Translator: Piotr Strębski <strebski@gmail.com>, 2021\n"
+"POT-Creation-Date: 2019-08-26 08:16+0000\n"
+"PO-Revision-Date: 2019-08-26 09:10+0000\n"
+"Last-Translator: Natalia Gros <nag@odoo.com>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -106,8 +104,9 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 msgid ""
-"<span id=\"oe_hr_attendance_status\" class=\"fa fa-circle oe_hr_attendance_status_orange\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
-"                                    </span>"
+"<span id=\"oe_hr_attendance_status\" class=\"fa fa-circle "
+"oe_hr_attendance_status_red\" role=\"img\" aria-label=\"Not available\" "
+"title=\"Not available\"/>"
 msgstr ""
 
 #. module: hr_attendance
@@ -174,7 +173,6 @@ msgstr "Obecności"
 
 #. module: hr_attendance
 #. openerp-web
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_user_view_form
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_employee_form_inherit_hr_attendance
@@ -306,7 +304,7 @@ msgstr "Konfiguracja"
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid "Create a new employee"
-msgstr "Utwórz nowego pracownika"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__create_uid
@@ -316,7 +314,7 @@ msgstr "Utworzona przez"
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__create_date
 msgid "Created on"
-msgstr "Utworzono"
+msgstr "Data utworzenia"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__department_id
@@ -325,9 +323,6 @@ msgstr "Dział"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__display_name
-#: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_base__display_name
-#: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings__display_name
-#: model:ir.model.fields,field_description:hr_attendance.field_res_users__display_name
 msgid "Display Name"
 msgstr "Nazwa wyświetlana"
 
@@ -399,7 +394,6 @@ msgstr "Cieszę się, że wróciłeś, minęło trochę czasu!"
 
 #. module: hr_attendance
 #. openerp-web
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
@@ -513,9 +507,6 @@ msgstr "Szukaj obecności"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__id
-#: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_base__id
-#: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings__id
-#: model:ir.model.fields,field_description:hr_attendance.field_res_users__id
 msgid "ID"
 msgstr "ID"
 
@@ -523,7 +514,7 @@ msgstr "ID"
 #. openerp-web
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #, python-format
-msgid "Identify Manually"
+msgid "Identify"
 msgstr ""
 
 #. module: hr_attendance
@@ -541,12 +532,7 @@ msgid "Invalid request, please return to the main menu."
 msgstr "Nieprawidłowe żądanie, proszę wrócić do menu głównego."
 
 #. module: hr_attendance
-#: model:res.groups,name:hr_attendance.group_hr_attendance_kiosk
-msgid "Kiosk Attendance"
-msgstr ""
-
-#. module: hr_attendance
-#: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance_kiosk_no_user_mode
+#: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance_kiosk_mode
 msgid "Kiosk Mode"
 msgstr "Tryb pracy kiosku"
 
@@ -559,9 +545,6 @@ msgstr "Ostatnia obecność"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance____last_update
-#: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_base____last_update
-#: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings____last_update
-#: model:ir.model.fields,field_description:hr_attendance.field_res_users____last_update
 msgid "Last Modified on"
 msgstr "Data ostatniej modyfikacji"
 
@@ -584,6 +567,13 @@ msgstr "Menedżer"
 #: model:res.groups,name:hr_attendance.group_hr_attendance
 msgid "Manual Attendance"
 msgstr "Ręczna obecność"
+
+#. module: hr_attendance
+#. openerp-web
+#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
+#, python-format
+msgid "Manually"
+msgstr "Ręcznie"
 
 #. module: hr_attendance
 #: model:ir.actions.client,name:hr_attendance.hr_attendance_action_greeting_message
@@ -611,16 +601,10 @@ msgid "No attendance records to display"
 msgstr ""
 
 #. module: hr_attendance
-#: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action_graph
-#: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action_graph_filtered
-msgid "No data yet!"
-msgstr "Brak danych!"
-
-#. module: hr_attendance
 #: code:addons/hr_attendance/models/hr_employee.py:0
 #, python-format
-msgid "No employee corresponding to Badge ID '%(barcode)s.'"
-msgstr ""
+msgid "No employee corresponding to barcode %(barcode)s"
+msgstr "Brak pracownika odpowiadającego kodowi kresowemu %(barcode)s"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_user_view_form
@@ -633,7 +617,7 @@ msgstr "Nie dostępny/e"
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #, python-format
 msgid "OK"
-msgstr "OK"
+msgstr "Ok"
 
 #. module: hr_attendance
 #: model:res.groups,name:hr_attendance.group_hr_attendance_user
@@ -682,8 +666,6 @@ msgstr "Ustawienia"
 #. openerp-web
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #, python-format
 msgid "Sign in"
 msgstr "Wejście"
@@ -693,18 +675,9 @@ msgstr "Wejście"
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #: code:addons/hr_attendance/static/src/xml/attendance.xml:0
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
-#: code:addons/hr_attendance/static/src/xml/attendance.xml:0
 #, python-format
 msgid "Sign out"
 msgstr "Wyjście"
-
-#. module: hr_attendance
-#: code:addons/hr_attendance/models/hr_employee.py:0
-#, python-format
-msgid "Such grouping is not allowed."
-msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_action
@@ -718,12 +691,6 @@ msgstr "Tutaj będą wyświetlane frekwencje pracowników."
 #, python-format
 msgid "The early bird catches the worm"
 msgstr "Kto rano wstaje temu Pan Bóg daje"
-
-#. module: hr_attendance
-#: model:res.groups,comment:hr_attendance.group_hr_attendance_kiosk
-msgid ""
-"The user will be able to open the kiosk mode and validate the employee PIN."
-msgstr ""
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance

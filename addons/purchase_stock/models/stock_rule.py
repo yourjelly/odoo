@@ -141,16 +141,16 @@ class StockRule(models.Model):
                         procurement.values, po))
             self.env['purchase.order.line'].sudo().create(po_line_values)
 
-    def _get_lead_days(self, product):
+    def _get_lead_days(self, product, **values):
         """Add the company security lead time, days to purchase and the supplier
         delay to the cumulative delay and cumulative description. The days to
         purchase and company lead time are always displayed for onboarding
         purpose in order to indicate that those options are available.
         """
-        delay, delay_description = super()._get_lead_days(product)
+        delay, delay_description = super()._get_lead_days(product, **values)
         bypass_delay_description = self.env.context.get('bypass_delay_description')
         buy_rule = self.filtered(lambda r: r.action == 'buy')
-        seller = product.with_company(buy_rule.company_id)._select_seller()
+        seller = 'supplierinfo' in values and values['supplierinfo'] or product.with_company(buy_rule.company_id)._select_seller()
         if not buy_rule or not seller:
             return delay, delay_description
         buy_rule.ensure_one()
@@ -310,10 +310,9 @@ class StockRule(models.Model):
         )
         if values.get('orderpoint_id'):
             procurement_date = fields.Date.to_date(values['date_planned']) - relativedelta(days=int(values['supplier'].delay) + company_id.po_lead)
-            delta_days = int(self.env['ir.config_parameter'].get_param('purchase_stock.delta_days_merge') or 0)
             domain += (
-                ('date_order', '<=', datetime.combine(procurement_date + relativedelta(days=delta_days), datetime.max.time())),
-                ('date_order', '>=', datetime.combine(procurement_date - relativedelta(days=delta_days), datetime.min.time()))
+                ('date_order', '<=', datetime.combine(procurement_date, datetime.max.time())),
+                ('date_order', '>=', datetime.combine(procurement_date, datetime.min.time()))
             )
         if group:
             domain += (('group_id', '=', group.id),)

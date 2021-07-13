@@ -1,8 +1,8 @@
-odoo.define('mail/static/src/models/notification_group_manager/notification_group_manager.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { one2many } = require('mail/static/src/model/model_field.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { one2many } from '@mail/model/model_field';
+import { link } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -32,33 +32,14 @@ function factory(dependencies) {
                     res_model: thread.model,
                     res_model_name: thread.model_name,
                 });
-                group.update({ notifications: [['link', notification]] });
-                // keep res_id only if all notifications are for the same record
-                // set null if multiple records are present in the group
-                let res_id = group.res_id;
-                if (group.res_id === undefined) {
-                    res_id = thread.id;
-                } else if (group.res_id !== thread.id) {
-                    res_id = null;
-                }
-                // keep only the most recent date from all notification messages
-                let date = group.date;
-                if (!date) {
-                    date = notification.message.date;
-                } else {
-                    date = moment.max(group.date, notification.message.date);
-                }
-                group.update({
-                    date,
-                    res_id,
-                });
+                group.update({ notifications: link(notification) });
                 // avoid linking the same group twice when adding a notification
                 // to an existing group
                 if (!groups.includes(group)) {
                     groups.push(group);
                 }
             });
-            this.update({ groups: [['link', groups]] });
+            this.update({ groups: link(groups) });
         }
 
     }
@@ -73,5 +54,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.notification_group_manager', factory);
-
-});

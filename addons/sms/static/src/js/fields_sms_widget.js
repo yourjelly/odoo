@@ -3,7 +3,7 @@ odoo.define('sms.sms_widget', function (require) {
 
 var core = require('web.core');
 var fieldRegistry = require('web.field_registry');
-var FieldTextEmojis = require('mail.field_text_emojis');
+var FieldTextEmojis = require('@mail/js/field_text_emojis')[Symbol.for("default")];
 
 var _t = core._t;
 /**
@@ -24,7 +24,7 @@ var SmsWidget = FieldTextEmojis.extend({
         this.encoding = 'GSM7';
         this.enableEmojis = !!this.nodeOptions.enable_emojis;
     },
-    
+
     /**
      * @override
      *"This will add the emoji dropdown to a target field (controlled by the "enableEmojis" attribute)
@@ -154,7 +154,7 @@ var SmsWidget = FieldTextEmojis.extend({
     _onBlur: function () {
         var content = this._getValue();
         if( !content.trim().length && content.length > 0) {
-            this.do_warn(_t("Your SMS Text Message must include at least one non-whitespace character"));
+            this.displayNotification({ title: _t("Your SMS Text Message must include at least one non-whitespace character"), type: 'danger' });
             this.$input.val(content.trim());
             this._updateSMSInfo();
         }

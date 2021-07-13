@@ -35,7 +35,7 @@ class FetchmailServer(models.Model):
             ('move_id', "!=", False),
             ('edi_format_id.code', '=', 'fattura_pa'),
             ('attachment_id.name', '=', att_name),
-        ] 
+        ]
         if send_state:
             conditions.append(('move_id.l10n_it_send_state', '=', send_state))
 

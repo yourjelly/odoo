@@ -30,6 +30,9 @@ class StockPickingBatch(models.Model):
     show_check_availability = fields.Boolean(
         compute='_compute_move_ids',
         help='Technical field used to compute whether the check availability button should be shown.')
+    show_validate = fields.Boolean(
+        compute='_compute_show_validate',
+        help='Technical field used to decide whether the validate button should be shown.')
     allowed_picking_ids = fields.One2many('stock.picking', compute='_compute_allowed_picking_ids')
     move_ids = fields.One2many(
         'stock.move', string="Stock moves", compute='_compute_move_ids')
@@ -58,10 +61,6 @@ class StockPickingBatch(models.Model):
     @api.depends('company_id', 'picking_type_id', 'state')
     def _compute_allowed_picking_ids(self):
         allowed_picking_states = ['waiting', 'confirmed', 'assigned']
-        cancelled_batchs = self.env['stock.picking.batch'].search_read(
-            [('state', '=', 'cancel')], ['id']
-        )
-        cancelled_batch_ids = [batch['id'] for batch in cancelled_batchs]
 
         for batch in self:
             domain_states = list(allowed_picking_states)
@@ -72,11 +71,6 @@ class StockPickingBatch(models.Model):
                 ('company_id', '=', batch.company_id.id),
                 ('immediate_transfer', '=', False),
                 ('state', 'in', domain_states),
-                '|',
-                '|',
-                ('batch_id', '=', False),
-                ('batch_id', '=', batch.id),
-                ('batch_id', 'in', cancelled_batch_ids),
             ]
             if batch.picking_type_id:
                 domain += [('picking_type_id', '=', batch.picking_type_id.id)]
@@ -88,6 +82,11 @@ class StockPickingBatch(models.Model):
             batch.move_ids = batch.picking_ids.move_lines
             batch.move_line_ids = batch.picking_ids.move_line_ids
             batch.show_check_availability = any(m.state not in ['assigned', 'done'] for m in batch.move_ids)
+
+    @api.depends('picking_ids', 'picking_ids.show_validate')
+    def _compute_show_validate(self):
+        for batch in self:
+            batch.show_validate = any(picking.show_validate for picking in batch.picking_ids)
 
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_state(self):
@@ -140,10 +139,10 @@ class StockPickingBatch(models.Model):
                 batch_without_picking_type.picking_type_id = picking.picking_type_id.id
         return res
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_draft(self):
         if any(batch.state != 'draft' for batch in self):
             raise UserError(_("You can only delete draft batch transfers."))
-        return super().unlink()
 
     def onchange(self, values, field_name, field_onchange):
         """Override onchange to NOT to update all scheduled_date on pickings when
@@ -177,6 +176,10 @@ class StockPickingBatch(models.Model):
     def action_print(self):
         self.ensure_one()
         return self.env.ref('stock_picking_batch.action_report_picking_batch').report_action(self)
+
+    def action_set_quantities_to_reservation(self):
+        self.ensure_one()
+        self.picking_ids.filtered("show_validate").action_set_quantities_to_reservation()
 
     def action_done(self):
         self.ensure_one()
@@ -232,7 +235,7 @@ class StockPickingBatch(models.Model):
                 raise UserError(_(
                     "The following transfers cannot be added to batch transfer %s. "
                     "Please check their states and operation types, if they aren't immediate "
-                    "transfers or if they're not already part of another batch transfer.\n\n"
+                    "transfers.\n\n"
                     "Incompatibilities: %s", batch.name, ', '.join(erroneous_pickings.mapped('name'))))
 
     def _track_subtype(self, init_values):

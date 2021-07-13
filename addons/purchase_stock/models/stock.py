@@ -184,13 +184,18 @@ class Orderpoint(models.Model):
 
     show_supplier = fields.Boolean('Show supplier column', compute='_compute_show_suppplier')
     supplier_id = fields.Many2one(
-        'product.supplierinfo', string='Vendor', check_company=True,
+        'product.supplierinfo', string='Product Supplier', check_company=True,
         domain="['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]")
+    vendor_id = fields.Many2one(related='supplier_id.name', string="Vendor", store=True)
 
     @api.depends('product_id.purchase_order_line_ids', 'product_id.purchase_order_line_ids.state')
     def _compute_qty(self):
         """ Extend to add more depends values """
         return super()._compute_qty()
+
+    @api.depends('supplier_id')
+    def _compute_lead_days(self):
+        return super()._compute_lead_days()
 
     @api.depends('route_id')
     def _compute_show_suppplier(self):
@@ -214,6 +219,12 @@ class Orderpoint(models.Model):
         result['domain'] = "[('id','in',%s)]" % (purchase_ids.ids)
 
         return result
+
+    def _get_lead_days_values(self):
+        values = super()._get_lead_days_values()
+        if self.supplier_id:
+            values['supplierinfo'] = self.supplier_id
+        return values
 
     def _get_replenishment_order_notification(self):
         self.ensure_one()

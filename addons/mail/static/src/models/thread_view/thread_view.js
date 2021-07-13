@@ -1,10 +1,9 @@
-odoo.define('mail/static/src/models/thread_view/thread_view.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { RecordDeletedError } = require('mail/static/src/model/model_errors.js');
-const { attr, many2many, many2one, one2one } = require('mail/static/src/model/model_field.js');
-const { clear } = require('mail/static/src/model/model_field_command.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { RecordDeletedError } from '@mail/model/model_errors';
+import { attr, many2many, many2one, one2one } from '@mail/model/model_field';
+import { clear, link, unlink } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -59,7 +58,7 @@ function factory(dependencies) {
          */
         handleVisibleMessage(message) {
             if (!this.lastVisibleMessage || this.lastVisibleMessage.id < message.id) {
-                this.update({ lastVisibleMessage: [['link', message]] });
+                this.update({ lastVisibleMessage: link(message) });
             }
         }
 
@@ -72,7 +71,7 @@ function factory(dependencies) {
          * @returns {mail.messaging}
          */
         _computeMessaging() {
-            return [['link', this.env.messaging]];
+            return link(this.env.messaging);
         }
 
         /**
@@ -170,7 +169,7 @@ function factory(dependencies) {
                     isMarkAllAsReadRequested: true,
                 });
             }
-            this.update({ lastVisibleMessage: [['unlink']] });
+            this.update({ lastVisibleMessage: unlink() });
         }
 
         /**
@@ -312,6 +311,7 @@ function factory(dependencies) {
             dependencies: [
                 'threadCache'
             ],
+            isOnChange: true,
         }),
         /**
          * Not a real field, used to trigger `_onThreadCacheIsLoadingChanged`
@@ -325,6 +325,7 @@ function factory(dependencies) {
                 'threadCache',
                 'threadCacheIsLoading',
             ],
+            isOnChange: true,
         }),
         /**
          * Determines the domain to apply when fetching messages for `this.thread`.
@@ -351,6 +352,7 @@ function factory(dependencies) {
          */
         thread: many2one('mail.thread', {
             inverse: 'threadViews',
+            readonly: true,
             related: 'threadViewer.thread',
         }),
         /**
@@ -358,6 +360,7 @@ function factory(dependencies) {
          */
         threadCache: many2one('mail.thread_cache', {
             inverse: 'threadViews',
+            readonly: true,
             related: 'threadViewer.threadCache',
         }),
         threadCacheInitialScrollHeight: attr({
@@ -419,12 +422,14 @@ function factory(dependencies) {
                 'lastVisibleMessage',
                 'threadCache',
             ],
+            isOnChange: true,
         }),
         /**
          * Determines the `mail.thread_viewer` currently managing `this`.
          */
         threadViewer: one2one('mail.thread_viewer', {
             inverse: 'threadView',
+            readonly: true,
         }),
         uncheckedMessages: many2many('mail.message', {
             related: 'threadCache.uncheckedMessages',
@@ -437,5 +442,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.thread_view', factory);
-
-});

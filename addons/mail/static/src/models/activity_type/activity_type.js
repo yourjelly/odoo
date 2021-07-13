@@ -1,8 +1,7 @@
-odoo.define('mail/static/src/models/activity_type/activity_type.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, one2many } = require('mail/static/src/model/model_field.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { attr, one2many } from '@mail/model/model_field';
 
 function factory(dependencies) {
 
@@ -26,7 +25,9 @@ function factory(dependencies) {
             inverse: 'type',
         }),
         displayName: attr(),
-        id: attr(),
+        id: attr({
+            required: true,
+        }),
     };
 
     ActivityType.modelName = 'mail.activity_type';
@@ -35,5 +36,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.activity_type', factory);
-
-});

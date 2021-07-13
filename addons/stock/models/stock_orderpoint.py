@@ -6,7 +6,6 @@ from collections import defaultdict
 from datetime import datetime, time
 from dateutil import relativedelta
 from itertools import groupby
-from json import dumps
 from psycopg2 import OperationalError
 
 from odoo import SUPERUSER_ID, _, api, fields, models, registry
@@ -92,7 +91,6 @@ class StockWarehouseOrderpoint(models.Model):
     allowed_location_ids = fields.One2many(comodel_name='stock.location', compute='_compute_allowed_location_ids')
 
     rule_ids = fields.Many2many('stock.rule', string='Rules used', compute='_compute_rules')
-    json_lead_days_popover = fields.Char(compute='_compute_json_popover')
     lead_days_date = fields.Date(compute='_compute_lead_days')
     allowed_route_ids = fields.Many2many('stock.location.route', compute='_compute_allowed_route_ids')
     route_id = fields.Many2one(
@@ -104,6 +102,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     _sql_constraints = [
         ('qty_multiple_check', 'CHECK( qty_multiple >= 0 )', 'Qty Multiple must be greater than or equal to zero.'),
+        ('product_location_check', 'unique (product_id, location_id, company_id)', 'The combination of product and location must be unique.'),
     ]
 
     @api.depends('warehouse_id')
@@ -127,35 +126,13 @@ class StockWarehouseOrderpoint(models.Model):
         self.allowed_route_ids = route_by_product.ids
 
     @api.depends('rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
-    def _compute_json_popover(self):
-        for orderpoint in self:
-            if not orderpoint.product_id or not orderpoint.location_id:
-                orderpoint.json_lead_days_popover = False
-                continue
-            dummy, lead_days_description = orderpoint.rule_ids._get_lead_days(orderpoint.product_id)
-            orderpoint.json_lead_days_popover = dumps({
-                'title': _('Replenishment'),
-                'icon': 'fa-area-chart',
-                'popoverTemplate': 'stock.leadDaysPopOver',
-                'lead_days_date': fields.Date.to_string(orderpoint.lead_days_date),
-                'lead_days_description': lead_days_description,
-                'today': fields.Date.to_string(fields.Date.today()),
-                'trigger': orderpoint.trigger,
-                'qty_forecast': orderpoint.qty_forecast,
-                'qty_to_order': orderpoint.qty_to_order,
-                'product_min_qty': orderpoint.product_min_qty,
-                'product_max_qty': orderpoint.product_max_qty,
-                'product_uom_name': orderpoint.product_uom_name,
-                'virtual': orderpoint.trigger == 'manual' and orderpoint.create_uid.id == SUPERUSER_ID,
-            })
-
-    @api.depends('rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_lead_days(self):
         for orderpoint in self:
             if not orderpoint.product_id or not orderpoint.location_id:
                 orderpoint.lead_days_date = False
                 continue
-            lead_days, dummy = orderpoint.rule_ids._get_lead_days(orderpoint.product_id)
+            values = orderpoint._get_lead_days_values()
+            lead_days, dummy = orderpoint.rule_ids._get_lead_days(orderpoint.product_id, **values)
             lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days)
             orderpoint.lead_days_date = lead_days_date
 
@@ -175,7 +152,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.onchange('location_id')
     def _onchange_location_id(self):
-        warehouse = self.location_id.get_warehouse().id
+        warehouse = self.location_id.warehouse_id.id
         if warehouse:
             self.warehouse_id = warehouse
 
@@ -199,6 +176,11 @@ class StockWarehouseOrderpoint(models.Model):
                 ('company_id', '=', self.company_id.id)
             ], limit=1)
 
+    @api.onchange('route_id')
+    def _onchange_route_id(self):
+        if self.route_id:
+            self.qty_multiple = self._get_qty_multiple_to_order()
+
     def write(self, vals):
         if 'company_id' in vals:
             for orderpoint in self:
@@ -206,9 +188,31 @@ class StockWarehouseOrderpoint(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super().write(vals)
 
+    def action_product_forecast_report(self):
+        self.ensure_one()
+        action = self.product_id.action_product_forecast_report()
+        action['context'] = {
+            'active_id': self.product_id.id,
+            'active_model': 'product.product',
+        }
+        warehouse = self.warehouse_id
+        if warehouse:
+            action['context']['warehouse'] = warehouse.id
+        return action
+
     @api.model
     def action_open_orderpoints(self):
         return self._get_orderpoint_action()
+
+    def action_stock_replenishment_info(self):
+        self.ensure_one()
+        action = self.env['ir.actions.actions']._for_xml_id('stock.action_stock_replenishment_info')
+        action['name'] = _('Replenishment Information for %s in %s', self.product_id.display_name, self.warehouse_id.display_name)
+        res = self.env['stock.replenishment.info'].create({
+            'orderpoint_id': self.id,
+        })
+        action['res_id'] = res.id
+        return action
 
     def action_replenish(self):
         self._procure_orderpoint_confirm(company_id=self.env.company)
@@ -236,7 +240,9 @@ class StockWarehouseOrderpoint(models.Model):
             product_context = frozendict({**self.env.context, **orderpoint_context})
             orderpoints_contexts[product_context] |= orderpoint
         for orderpoint_context, orderpoints_by_context in orderpoints_contexts.items():
-            products_qty = orderpoints_by_context.product_id.with_context(orderpoint_context)._product_available()
+            products_qty = {
+                p['id']: p for p in orderpoints_by_context.product_id.with_context(orderpoint_context).read(['qty_available', 'virtual_available'])
+            }
             products_qty_in_progress = orderpoints_by_context._quantity_in_progress()
             for orderpoint in orderpoints_by_context:
                 orderpoint.qty_on_hand = products_qty[orderpoint.product_id.id]['qty_available']
@@ -258,6 +264,12 @@ class StockWarehouseOrderpoint(models.Model):
                     qty_to_order += orderpoint.qty_multiple - remainder
             orderpoint.qty_to_order = qty_to_order
 
+    def _get_qty_multiple_to_order(self):
+        """ Calculates the minimum quantity that can be ordered according to the PO UoM or BoM
+        """
+        self.ensure_one()
+        return 0
+
     def _set_default_route_id(self):
         """ Write the `route_id` field on `self`. This method is intendend to be called on the
         orderpoints generated when openning the replenish report.
@@ -273,6 +285,10 @@ class StockWarehouseOrderpoint(models.Model):
                 continue
             orderpoints = self.filtered(lambda o: o.location_id.id == g['location_id'][0])
             orderpoints.route_id = g['route_id']
+
+    def _get_lead_days_values(self):
+        self.ensure_one()
+        return dict()
 
     def _get_product_context(self):
         """Used to call `virtual_available` when running an orderpoint."""
@@ -323,16 +339,15 @@ class StockWarehouseOrderpoint(models.Model):
         # Recompute the forecasted quantity for missing product today but at this time
         # with their real lead days.
         key_to_remove = []
-
-        # group product by lead_days and warehouse in order to read virtual_available
-        # in batch
         pwh_per_day = defaultdict(list)
-        for (product, warehouse), quantity in to_refill.items():
+        for (product, warehouse) in to_refill.keys():
             product = self.env['product.product'].browse(product).with_prefetch(all_product_ids)
             warehouse = self.env['stock.warehouse'].browse(warehouse).with_prefetch(all_warehouse_ids)
             rules = product._get_rules_from_location(warehouse.lot_stock_id)
             lead_days = rules.with_context(bypass_delay_description=True)._get_lead_days(product)[0]
             pwh_per_day[(lead_days, warehouse)].append(product.id)
+        # group product by lead_days and warehouse in order to read virtual_available
+        # in batch
         for (days, warehouse), p_ids in pwh_per_day.items():
             products = self.env['product.product'].browse(p_ids)
             qties = products.with_context(
@@ -405,8 +420,8 @@ class StockWarehouseOrderpoint(models.Model):
 
         orderpoints = self.env['stock.warehouse.orderpoint'].with_user(SUPERUSER_ID).create(orderpoint_values_list)
         for orderpoint in orderpoints:
-            orderpoint.route_id = orderpoint.product_id.route_ids[:1]
-        orderpoints.filtered(lambda o: not o.route_id)._set_default_route_id()
+            orderpoint.route_id = orderpoint.product_id.route_ids[:1] or orderpoint._set_default_route_id()
+            orderpoint.qty_multiple = orderpoint._get_qty_multiple_to_order()
         return action
 
     @api.model
@@ -457,7 +472,7 @@ class StockWarehouseOrderpoint(models.Model):
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))
             orderpoints_batch = self.env['stock.warehouse.orderpoint'].browse(orderpoints_batch)
-            orderpoints_exceptions = []
+            all_orderpoints_exceptions = []
             while orderpoints_batch:
                 procurements = []
                 for orderpoint in orderpoints_batch:
@@ -473,8 +488,10 @@ class StockWarehouseOrderpoint(models.Model):
                     with self.env.cr.savepoint():
                         self.env['procurement.group'].with_context(from_orderpoint=True).run(procurements, raise_user_error=raise_user_error)
                 except ProcurementException as errors:
+                    orderpoints_exceptions = []
                     for procurement, error_msg in errors.procurement_exceptions:
                         orderpoints_exceptions += [(procurement.values.get('orderpoint_id'), error_msg)]
+                    all_orderpoints_exceptions += orderpoints_exceptions
                     failed_orderpoints = self.env['stock.warehouse.orderpoint'].concat(*[o[0] for o in orderpoints_exceptions])
                     if not failed_orderpoints:
                         _logger.error('Unable to process orderpoints')
@@ -492,7 +509,7 @@ class StockWarehouseOrderpoint(models.Model):
                     break
 
             # Log an activity on product template for failed orderpoints.
-            for orderpoint, error_msg in orderpoints_exceptions:
+            for orderpoint, error_msg in all_orderpoints_exceptions:
                 existing_activity = self.env['mail.activity'].search([
                     ('res_id', '=', orderpoint.product_id.product_tmpl_id.id),
                     ('res_model_id', '=', self.env.ref('product.model_product_template').id),

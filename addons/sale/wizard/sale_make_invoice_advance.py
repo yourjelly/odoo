@@ -106,10 +106,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     def _get_advance_details(self, order):
         context = {'lang': order.partner_id.lang}
         if self.advance_payment_method == 'percentage':
-            if all(self.product_id.taxes_id.mapped('price_include')):
-                amount = order.amount_total * self.amount / 100
-            else:
-                amount = order.amount_untaxed * self.amount / 100
+            amount = order.amount_untaxed * self.amount / 100
             name = _("Down payment of %s%%") % (self.amount)
         else:
             amount = self.fixed_amount
@@ -173,7 +170,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 if self.product_id.type != 'service':
                     raise UserError(_("The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
                 taxes = self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
-                tax_ids = order.fiscal_position_id.map_tax(taxes, self.product_id, order.partner_shipping_id).ids
+                tax_ids = order.fiscal_position_id.map_tax(taxes).ids
                 analytic_tag_ids = []
                 for line in order.order_line:
                     analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.analytic_tag_ids]

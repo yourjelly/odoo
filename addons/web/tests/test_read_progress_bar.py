@@ -16,8 +16,8 @@ class TestReadProgressBar(common.TransactionCase):
         """
         context = {"lang": "en_US"}
         groupby = "date:week"
-        self.Model.create({'date': '2021-05-02', 'name': "testWeekGrouping_first"}) # Sunday
-        self.Model.create({'date': '2021-05-09', 'name': "testWeekGrouping_second"}) # Sunday
+        self.Model.create({'date': '2021-05-02', 'name': "testWeekGrouping_first"})  # Sunday
+        self.Model.create({'date': '2021-05-09', 'name': "testWeekGrouping_second"})  # Sunday
         progress_bar = {
             'field': 'name',
             'colors': {
@@ -25,7 +25,7 @@ class TestReadProgressBar(common.TransactionCase):
                 "testWeekGrouping_second": 'danger',
             }
         }
-        
+
         groups = self.Model.with_context(context).read_group(
             [('name', "like", "testWeekGrouping%")], fields=['date', 'name'], groupby=[groupby])
         progressbars = self.Model.with_context(context).read_progress_bar(
@@ -36,8 +36,8 @@ class TestReadProgressBar(common.TransactionCase):
         # format the read_progress_bar result to get a dictionary under this format : {record_name: group_name}
         # original format (after read_progress_bar) is : {group_name: {record_name: count}}
         pg_groups = {
-            next(record_name for record_name, count in data.items() if count): group_name \
-                for group_name, data in progressbars.items()
+            next(record_name for record_name, count in data.items() if count): group_name
+            for group_name, data in progressbars.items()
         }
 
         self.assertEqual(groups[0][groupby], pg_groups["testWeekGrouping_first"])

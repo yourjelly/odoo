@@ -43,22 +43,16 @@ class TestMrpOrder(TestMrpCommon):
         consume strictly what's needed. """
         self.product_1.type = 'product'
         self.product_2.type = 'product'
-        inventory = self.env['stock.inventory'].create({
-            'name': 'Initial inventory',
-            'line_ids': [(0, 0, {
-                'product_id': self.product_1.id,
-                'product_uom_id': self.product_1.uom_id.id,
-                'product_qty': 500,
-                'location_id': self.warehouse_1.lot_stock_id.id
-            }), (0, 0, {
-                'product_id': self.product_2.id,
-                'product_uom_id': self.product_2.uom_id.id,
-                'product_qty': 500,
-                'location_id': self.warehouse_1.lot_stock_id.id
-            })]
-        })
-        inventory.action_start()
-        inventory.action_validate()
+        self.env['stock.quant'].create({
+            'location_id': self.warehouse_1.lot_stock_id.id,
+            'product_id': self.product_1.id,
+            'inventory_quantity': 500
+        }).action_apply_inventory()
+        self.env['stock.quant'].create({
+            'location_id': self.warehouse_1.lot_stock_id.id,
+            'product_id': self.product_2.id,
+            'inventory_quantity': 500
+        }).action_apply_inventory()
 
         test_date_planned = Dt.now() - timedelta(days=1)
         test_quantity = 2.0
@@ -107,7 +101,7 @@ class TestMrpOrder(TestMrpCommon):
         backorder.save().action_close_mo()
         self.assertEqual(man_order.state, 'done', "Production order should be done.")
 
-    def test_production_avialability(self):
+    def test_production_availability(self):
         """ Checks the availability of a production order through mutliple calls to `action_assign`.
         """
         self.bom_3.bom_line_ids.filtered(lambda x: x.product_id == self.product_5).unlink()
@@ -132,7 +126,7 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': self.product_2.id,
             'inventory_quantity': 2.0,
             'location_id': self.stock_location_14.id
-        })
+        }).action_apply_inventory()
 
         production_2.action_assign()
         # check sub product availability state is partially available
@@ -143,17 +137,16 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': self.product_2.id,
             'inventory_quantity': 5.0,
             'location_id': self.stock_location_14.id
-        })
+        }).action_apply_inventory()
 
         production_2.action_assign()
         # check sub product availability state is assigned
         self.assertEqual(production_2.reservation_state, 'assigned', 'Production order should be availability for assigned state')
 
-    def test_split_move_line(self):
-        """ Consume more component quantity than the initial demand.
-        It should create extra move and share the quantity between the two stock
-        moves """
-        mo, bom, p_final, p1, p2 = self.generate_mo(qty_base_1=10, qty_final=1, qty_base_2=1)
+    def test_over_consumption(self):
+        """ Consume more component quantity than the initial demand. No split on moves.
+        """
+        mo, _bom, _p_final, _p1, _p2 = self.generate_mo(qty_base_1=10, qty_final=1, qty_base_2=1)
         mo.action_assign()
         # check is_quantity_done_editable
         mo_form = Form(mo)
@@ -175,10 +168,49 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.move_raw_ids[0].quantity_done, 2)
         self.assertEqual(mo.move_raw_ids[1].quantity_done, 11)
         mo.button_mark_done()
-        self.assertEqual(len(mo.move_raw_ids), 4)
-        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 4)
-        self.assertEqual(mo.move_raw_ids.mapped('quantity_done'), [1, 10, 1, 1])
-        self.assertEqual(mo.move_raw_ids.mapped('move_line_ids.qty_done'), [1, 10, 1, 1])
+        self.assertEqual(len(mo.move_raw_ids), 2)
+        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 2)
+        self.assertEqual(mo.move_raw_ids.mapped('quantity_done'), [2, 11])
+        self.assertEqual(mo.move_raw_ids.mapped('move_line_ids.qty_done'), [2, 11])
+
+    def test_under_consumption(self):
+        """ Consume less component quantity than the initial demand.
+            Before done:
+                p1, to consume = 1, consumed = 0
+                p2, to consume = 10, consumed = 5
+            After done:
+                p1, to consume = 1, consumed = 0, state = cancel
+                p2, to consume = 5, consumed = 5, state = done
+                p2, to consume = 5, consumed = 0, state = cancel
+        """
+        mo, _bom, _p_final, _p1, _p2 = self.generate_mo(qty_base_1=10, qty_final=1, qty_base_2=1)
+        mo.action_assign()
+        # check is_quantity_done_editable
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
+        mo = mo_form.save()
+        details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.qty_done = 0
+        details_operation_form.save()
+        details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.qty_done = 5
+        details_operation_form.save()
+
+        self.assertEqual(len(mo.move_raw_ids), 2)
+        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 2)
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.mapped('qty_done'), [0])
+        self.assertEqual(mo.move_raw_ids[1].move_line_ids.mapped('qty_done'), [5])
+        self.assertEqual(mo.move_raw_ids[0].quantity_done, 0)
+        self.assertEqual(mo.move_raw_ids[1].quantity_done, 5)
+        mo.button_mark_done()
+        self.assertEqual(len(mo.move_raw_ids), 3)
+        self.assertEqual(len(mo.move_raw_ids.mapped('move_line_ids')), 1)
+        self.assertEqual(mo.move_raw_ids.mapped('quantity_done'), [0, 5, 0])
+        self.assertEqual(mo.move_raw_ids.mapped('product_uom_qty'), [1, 5, 5])
+        self.assertEqual(mo.move_raw_ids.mapped('state'), ['cancel', 'done', 'cancel'])
+        self.assertEqual(mo.move_raw_ids.mapped('move_line_ids.qty_done'), [5])
 
     def test_update_quantity_1(self):
         """ Build 5 final products with different consumed lots,
@@ -1667,6 +1699,48 @@ class TestMrpOrder(TestMrpCommon):
         # thus creating an extra line with 'product_uom_qty': 0.5
         self.assertEqual(len(mo_product_final_form.move_raw_ids.move_line_ids), 1, 'One move line should exist for the MO.')
 
+    def test_mo_sn_warning(self):
+        """ Checks that when a MO where the final product is tracked by serial, a warning pops up if
+        the `lot_producting_id` has previously been used already (i.e. dupe SN). Also checks if a
+        scrap linked to a MO has its sn warning correctly pop up.
+        """
+        self.stock_location = self.env.ref('stock.stock_location_stock')
+        mo, _, p_final, _, _ = self.generate_mo(tracking_final='serial', qty_base_1=1, qty_final=1)
+        self.assertEqual(len(mo), 1, 'MO should have been created')
+
+        sn1 = self.env['stock.production.lot'].create({
+            'name': 'serial1',
+            'product_id': p_final.id,
+            'company_id': self.env.company.id,
+        })
+
+        self.env['stock.quant']._update_available_quantity(p_final, self.stock_location, 1, lot_id=sn1)
+        mo.lot_producing_id = sn1
+
+        warning = False
+        warning = mo._onchange_lot_producing()
+        self.assertTrue(warning, 'Reuse of existing serial number not detected')
+        self.assertEqual(list(warning.keys())[0], 'warning', 'Warning message was not returned')
+
+        mo.action_generate_serial()
+        sn2 = mo.lot_producing_id
+        mo.button_mark_done()
+
+        # scrap linked to MO but with wrong SN location
+        scrap = self.env['stock.scrap'].create({
+            'product_id': p_final.id,
+            'product_uom_id': self.uom_unit.id,
+            'production_id': mo.id,
+            'location_id': self.stock_location_14.id,
+            'lot_id': sn2.id
+        })
+
+        warning = False
+        warning = scrap._onchange_serial_number()
+        self.assertTrue(warning, 'Use of wrong serial number location not detected')
+        self.assertEqual(list(warning.keys())[0], 'warning', 'Warning message was not returned')
+        self.assertEqual(scrap.location_id, mo.location_dest_id, 'Location was not auto-corrected')
+
     def test_multi_button_plan(self):
         """ Test batch methods (confirm/validate) of the MO with the same bom """
         self.bom_2.type = "normal"  # avoid to get the operation of the kit bom
@@ -1750,3 +1824,42 @@ class TestMrpOrder(TestMrpCommon):
         tuesday = date_planned + timedelta(days=1)
         self.assertEqual(mo.workorder_ids[1].date_planned_start, tuesday.replace(hour=1))
         self.assertEqual(mo.workorder_ids[1].date_planned_finished, tuesday.replace(hour=2))
+
+    def test_backorder_with_overconsumption(self):
+        """ Check that the components of the backorder have the correct quantities
+        when there is overconsumption in the initial MO
+        """
+        mo, _, _, _, _ = self.generate_mo(qty_final=30, qty_base_1=2, qty_base_2=3)
+        mo.action_confirm()
+        mo.qty_producing = 10
+        mo.move_raw_ids[0].quantity_done = 90
+        mo.move_raw_ids[1].quantity_done = 70
+        action = mo.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
+        backorder.save().action_backorder()
+        mo_backorder = mo.procurement_group_id.mrp_production_ids[-1]
+
+        # Check quantities of the original MO
+        self.assertEqual(mo.product_uom_qty, 10.0)
+        self.assertEqual(mo.qty_produced, 10.0)
+        move_prod_1 = self.env['stock.move'].search([
+            ('product_id', '=', mo.bom_id.bom_line_ids[0].product_id.id),
+            ('raw_material_production_id', '=', mo.id)])
+        move_prod_2 = self.env['stock.move'].search([
+            ('product_id', '=', mo.bom_id.bom_line_ids[1].product_id.id),
+            ('raw_material_production_id', '=', mo.id)])
+        self.assertEqual(sum(move_prod_1.mapped('quantity_done')), 90.0)
+        self.assertEqual(sum(move_prod_1.mapped('product_uom_qty')), 90.0)
+        self.assertEqual(sum(move_prod_2.mapped('quantity_done')), 70.0)
+        self.assertEqual(sum(move_prod_2.mapped('product_uom_qty')), 70.0)
+
+        # Check quantities of the backorder MO
+        self.assertEqual(mo_backorder.product_uom_qty, 20.0)
+        move_prod_1_bo = self.env['stock.move'].search([
+            ('product_id', '=', mo.bom_id.bom_line_ids[0].product_id.id),
+            ('raw_material_production_id', '=', mo_backorder.id)])
+        move_prod_2_bo = self.env['stock.move'].search([
+            ('product_id', '=', mo.bom_id.bom_line_ids[1].product_id.id),
+            ('raw_material_production_id', '=', mo_backorder.id)])
+        self.assertEqual(sum(move_prod_1_bo.mapped('product_uom_qty')), 60.0)
+        self.assertEqual(sum(move_prod_2_bo.mapped('product_uom_qty')), 40.0)

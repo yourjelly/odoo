@@ -2,8 +2,18 @@
 <odoo>
 <!-- Snippets & Themes Menu -->
 <template id="email_designer_snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
+    <xpath expr="//div[hasclass('o_we_website_top_actions')]" position="inside">
+        <div class="email_designer_top_actions">
+            <button class="o_codeview_btn btn btn-primary">
+                <i class="fa fa-code"></i>
+            </button>
+            <button class="o_fullscreen_btn btn btn-primary">
+                <img src="/web_editor/font_to_img/61541/rgb(255,255,255)/16" alt="Fullscreen"/>
+            </button>
+        </div>
+    </xpath>
     <xpath expr="//div[@id='snippets_menu']" position="inside">
-        <button type="button" disabled="disabled">Select a template</button>
+        <button type="button" class="o_we_select_template text-uppercase"><span>Select a template</span></button>
     </xpath>
     <xpath expr="//t[@id='default_snippets']" position="replace">
         <t id="default_snippets">
@@ -566,7 +576,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <td class="o_mail_no_colorpicker">
                             <div class="bg-o-color-2">
                                 &amp;nbsp;
                             </div>
@@ -599,7 +609,7 @@
                                 Use This Promo Code BEFORE 1st of August
                             </p>
                             <p class="o_mail_h_padding text-center">
-                                <span style="line-height: 30px;"><small>CODE: </small></span><strong class="o_code h3">45A9E77DGW8455</strong>
+                                <span style="line-height: 30px;"><small>CODE: </small></span><strong class="o_code h3 oe_unremovable">45A9E77DGW8455</strong>
                             </p>
                             <p class="text-center">
                                 and save $20 on your next order!
@@ -819,7 +829,7 @@
 <!-- Snippet themes Options -->
 <template id="snippet_options">
     <t t-call="web_editor.snippet_options"/>
-    <t t-raw="0"/>
+    <t t-out="0"/>
 
     <div data-js="mass_mailing_sizing_x"
         data-selector="img, .mv, .col_mv, td, th"
@@ -851,22 +861,14 @@
         data-drop-near="[data-oe-field='body_html']:not(:has(.o_layout)) > *, .oe_structure > *"
         data-drop-in="[data-oe-field='body_html']:not(:has(.o_layout)), .oe_structure"/>
 
-    <!-- TODO remove in master, the option has been disabled in 14.0 because -->
-    <!-- of tricky problems to resolve that require refactoring -->
-    <div t-if="False"
-         data-js="SnippetSave"
-         t-att-data-selector="mailing_content_selector">
-        <we-button class="fa fa-fw fa-save"
-                   title="Save the block to use it elsewhere"
-                   data-save-snippet=""
-                   data-no-preview="true"/>
-    </div>
-
     <div data-js="sizing_y"
         data-selector=".note-editable > div:not(.o_layout), .note-editable .oe_structure > div, td, th"
         data-exclude=".o_mail_no_resize, .o_mail_no_options"/>
 
-    <div data-selector=".note-editable > div:not(.o_layout), .note-editable .oe_structure > div, td, th"
+    <div data-selector=".note-editable > div:not(.o_layout),
+        .note-editable .oe_structure > div:not(:has(> .o_mail_snippet_general)),
+        .note-editable .oe_structure > div > .o_mail_snippet_general,
+        td, td.o_mail_no_colorpicker div:first-child, th"
          data-exclude=".o_mail_no_colorpicker, .o_mail_no_options">
         <we-colorpicker string="Background Color"
             data-select-style="true"

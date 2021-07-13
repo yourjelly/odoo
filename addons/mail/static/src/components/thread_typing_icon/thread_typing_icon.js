@@ -1,11 +1,10 @@
-odoo.define('mail/static/src/components/thread_typing_icon/thread_typing_icon.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 
 const { Component } = owl;
 
-class ThreadTypingIcon extends Component {
+export class ThreadTypingIcon extends Component {
 
     constructor(...args) {
         super(...args);
@@ -34,8 +33,4 @@ Object.assign(ThreadTypingIcon, {
         }
     },
     template: 'mail.ThreadTypingIcon',
-});
-
-return ThreadTypingIcon;
-
 });

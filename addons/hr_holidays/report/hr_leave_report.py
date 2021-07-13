@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, tools, exceptions, _
+from odoo import api, fields, models, tools, _
 from odoo.osv import expression
 
 
@@ -12,6 +12,7 @@ class LeaveReport(models.Model):
     _order = "date_from DESC, employee_id"
 
     employee_id = fields.Many2one('hr.employee', string="Employee", readonly=True)
+    active_employee = fields.Boolean(related='employee_id.active', readonly=True)
     name = fields.Char('Description', readonly=True)
     number_of_days = fields.Float('Number of Days', readonly=True)
     leave_type = fields.Selection([
@@ -95,17 +96,12 @@ class LeaveReport(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'hr.leave.report',
             'view_mode': 'tree,pivot,form',
-            'search_view_id': self.env.ref('hr_holidays.view_hr_holidays_filter_report').id,
+            'search_view_id': [self.env.ref('hr_holidays.view_hr_holidays_filter_report').id],
             'domain': domain,
             'context': {
                 'search_default_group_type': True,
                 'search_default_year': True,
                 'search_default_validated': True,
+                'search_default_active_employee': True,
             }
         }
-
-    @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        if not self.user_has_groups('hr_holidays.group_hr_holidays_user') and 'name' in groupby:
-            raise exceptions.UserError(_('Such grouping is not allowed.'))
-        return super(LeaveReport, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)

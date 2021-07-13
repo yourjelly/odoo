@@ -1,11 +1,10 @@
-odoo.define('mail/static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
 
 const { Component } = owl;
 
-class MobileMessagingNavbar extends Component {
+export class MobileMessagingNavbar extends Component {
 
     constructor(...args) {
         super(...args);
@@ -54,8 +53,4 @@ Object.assign(MobileMessagingNavbar, {
         },
     },
     template: 'mail.MobileMessagingNavbar',
-});
-
-return MobileMessagingNavbar;
-
 });

@@ -168,7 +168,6 @@ class TestMessagePost(TestMailCommon, TestRecipients):
         self.assertEqual(msg.body, _body)
         self.assertEqual(msg.partner_ids, self.partner_1 | self.partner_2)
         self.assertEqual(msg.notified_partner_ids, self.user_admin.partner_id | self.partner_1 | self.partner_2)
-        self.assertEqual(msg.channel_ids, self.env['mail.channel'])
 
         # notifications emails should have been deleted
         self.assertFalse(self.env['mail.mail'].sudo().search([('mail_message_id', '=', msg.id)]),
@@ -315,6 +314,17 @@ class TestMessagePost(TestMailCommon, TestRecipients):
 
         self.assertEqual(new_note.subtype_id, self.env.ref('mail.mt_note'))
         self.assertEqual(new_note.body, '<p>Labrador</p>')
+        self.assertEqual(new_note.author_id, self.user_employee.partner_id)
+        self.assertEqual(new_note.email_from, formataddr((self.user_employee.name, self.user_employee.email)))
+        self.assertEqual(new_note.notified_partner_ids, self.env['res.partner'])
+
+    def test_post_log_with_view(self):
+        new_note = self.test_record.with_user(self.user_employee)._message_log_with_view(
+            'test_mail.mail_template_simple_test', values={'partner': self.user_employee.partner_id}
+        )
+
+        self.assertEqual(new_note.subtype_id, self.env.ref('mail.mt_note'))
+        self.assertTrue('<p>Hello %s,</p>' % self.user_employee.name in new_note.body)
         self.assertEqual(new_note.author_id, self.user_employee.partner_id)
         self.assertEqual(new_note.email_from, formataddr((self.user_employee.name, self.user_employee.email)))
         self.assertEqual(new_note.notified_partner_ids, self.env['res.partner'])

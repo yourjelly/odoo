@@ -27,6 +27,7 @@ import tempfile
 import threading
 import time
 import unittest
+import warnings
 from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime, date
@@ -35,6 +36,7 @@ from unittest.mock import patch
 from xmlrpc import client as xmlrpclib
 
 import requests
+import werkzeug.urls
 import werkzeug.urls
 from decorator import decorator
 from lxml import etree, html
@@ -45,7 +47,7 @@ from odoo.models import BaseModel
 from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
 from odoo.service import security
 from odoo.sql_db import Cursor
-from odoo.tools import float_compare, single_email_re
+from odoo.tools import float_compare, single_email_re, profiler
 from odoo.tools.misc import find_in_path
 from odoo.tools.safe_eval import safe_eval
 
@@ -131,20 +133,53 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
 
     groups_id = [(6, 0, [env.ref(g.strip()).id for g in groups.split(',')])]
     create_values = dict(kwargs, login=login, groups_id=groups_id)
+    # automatically generate a name as "Login (groups)" to ease user comprehension
     if not create_values.get('name'):
         create_values['name'] = '%s (%s)' % (login, groups)
-    if not create_values.get('email'):
+    # generate email if not given as most test require an email
+    if 'email' not in create_values:
         if single_email_re.match(login):
             create_values['email'] = login
         else:
             create_values['email'] = '%s.%s@example.com' % (login[0], login[0])
+    # ensure company_id + allowed company constraint works if not given at create
+    if 'company_id' in create_values and 'company_ids' not in create_values:
+        create_values['company_ids'] = [(4, create_values['company_id'])]
 
     return env['res.users'].with_context(**context).create(create_values)
+
+
+class RecordCapturer:
+    def __init__(self, model, domain):
+        self._model = model
+        self._domain = domain
+
+    def __enter__(self):
+        self._before = self._model.search(self._domain)
+        self._after = None
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if exc_type is None:
+            self._after = self._model.search(self._domain) - self._before
+
+    @property
+    def records(self):
+        if self._after is None:
+            return self._model.search(self._domain) - self._before
+        return self._after
 
 # ------------------------------------------------------------
 # Main classes
 # ------------------------------------------------------------
 class OdooSuite(unittest.suite.TestSuite):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from odoo.http import root
+        if not root._loaded:
+            root.load_addons()
+            root._loaded = True
 
     if sys.version_info < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
@@ -240,8 +275,45 @@ class OdooSuite(unittest.suite.TestSuite):
                                                                     info=exc)
 
 
-class TreeCase(unittest.TestCase):
+class MetaCase(type):
+    """ Metaclass of test case classes to assign default 'test_tags':
+        'standard', 'at_install' and the name of the module.
+    """
+    def __init__(cls, name, bases, attrs):
+        super(MetaCase, cls).__init__(name, bases, attrs)
+        # assign default test tags
+        if cls.__module__.startswith('odoo.addons.'):
+            cls.test_tags = {'standard', 'at_install'}
+            cls.test_module = cls.__module__.split('.')[2]
+            cls.test_class = cls.__name__
+            cls.test_sequence = 0
 
+
+def _normalize_arch_for_assert(arch_string, parser_method="xml"):
+    """Takes some xml and normalize it to make it comparable to other xml
+    in particular, blank text is removed, and the output is pretty-printed
+    :param arch_string: the string representing an XML arch
+    :type arch_string: str
+    :param parser_method: an string representing which lxml.Parser class to use
+        when normalizing both archs. Takes either "xml" or "html"
+    :type parser_method: str
+    :return: the normalized arch
+    :rtype str:
+    """
+    Parser = None
+    if parser_method == 'xml':
+        Parser = etree.XMLParser
+    elif parser_method == 'html':
+        Parser = etree.HTMLParser
+    parser = Parser(remove_blank_text=True)
+    arch_string = etree.fromstring(arch_string, parser=parser)
+    return etree.tostring(arch_string, pretty_print=True, encoding='unicode')
+
+
+class BaseCase(unittest.TestCase, metaclass=MetaCase):
+    """ Subclass of TestCase for Odoo-specific code. This class is abstract and
+    expects self.registry, self.cr and self.uid to be initialized by subclasses.
+    """
     if sys.version_info < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
         _class_cleanups = []
@@ -264,49 +336,16 @@ class TreeCase(unittest.TestCase):
                 except Exception as exc:
                     cls.tearDown_exceptions.append(sys.exc_info())
 
+    longMessage = True      # more verbose error message by default: https://www.odoo.com/r/Vmh
+    warm = True             # False during warm-up phase (see :func:`warmup`)
+
     def __init__(self, methodName='runTest'):
-        super(TreeCase, self).__init__(methodName)
+        super().__init__(methodName)
         self.addTypeEqualityFunc(etree._Element, self.assertTreesEqual)
         self.addTypeEqualityFunc(html.HtmlElement, self.assertTreesEqual)
 
-    def assertTreesEqual(self, n1, n2, msg=None):
-        self.assertIsNotNone(n1, msg)
-        self.assertIsNotNone(n2, msg)
-        self.assertEqual(n1.tag, n2.tag, msg)
-        # Because lxml.attrib is an ordereddict for which order is important
-        # to equality, even though *we* don't care
-        self.assertEqual(dict(n1.attrib), dict(n2.attrib), msg)
-
-        self.assertEqual((n1.text or u'').strip(), (n2.text or u'').strip(), msg)
-        self.assertEqual((n1.tail or u'').strip(), (n2.tail or u'').strip(), msg)
-
-        for c1, c2 in izip_longest(n1, n2):
-            self.assertTreesEqual(c1, c2, msg)
-
-
-class MetaCase(type):
-    """ Metaclass of test case classes to assign default 'test_tags':
-        'standard', 'at_install' and the name of the module.
-    """
-    def __init__(cls, name, bases, attrs):
-        super(MetaCase, cls).__init__(name, bases, attrs)
-        # assign default test tags
-        if cls.__module__.startswith('odoo.addons.'):
-            cls.test_tags = {'standard', 'at_install'}
-            cls.test_module = cls.__module__.split('.')[2]
-            cls.test_class = cls.__name__
-
-
-class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
-    """
-    Subclass of TestCase for common OpenERP-specific code.
-
-    This class is abstract and expects self.registry, self.cr and self.uid to be
-    initialized by subclasses.
-    """
-
-    longMessage = True      # more verbose error message by default: https://www.odoo.com/r/Vmh
-    warm = True             # False during warm-up phase (see :func:`warmup`)
+    def shortDescription(self):
+        return None
 
     def cursor(self):
         return self.registry.cursor()
@@ -343,6 +382,12 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
         """
         assert "." in xid, "this method requires a fully qualified parameter, in the following form: 'module.identifier'"
         return self.env.ref(xid)
+
+    def patch(self, obj, key, val):
+        """ Do the patch ``setattr(obj, key, val)``, and prepare cleanup. """
+        patcher = patch.object(obj, key, val)   # this is unittest.mock.patch
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     @contextmanager
     def with_user(self, login):
@@ -406,7 +451,9 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
 
         self.assertEqual(
             len(actual_queries), len(expected),
-            "%d queries done, %d expected" % (len(actual_queries), len(expected)),
+            "\n---- actual queries:\n%s\n---- expected queries:\n%s" % (
+                "\n".join(actual_queries), "\n".join(expected),
+            )
         )
         for actual_query, expect_query in zip(actual_queries, expected):
             self.assertEqual(
@@ -493,7 +540,7 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
                 field_type = field.type
                 if field_type == 'monetary':
                     # Compare monetary field.
-                    currency_field_name = record._fields[field_name].currency_field
+                    currency_field_name = record._fields[field_name].get_currency_field(record)
                     record_currency = record[currency_field_name]
                     if field_name not in candidate:
                         diff[field_name] = (record_value, None)
@@ -570,45 +617,117 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
 
         self.fail('\n'.join(errors))
 
-    def shortDescription(self):
-        return None
-
     # turns out this thing may not be quite as useful as we thought...
     def assertItemsEqual(self, a, b, msg=None):
         self.assertCountEqual(a, b, msg=None)
 
+    def assertTreesEqual(self, n1, n2, msg=None):
+        self.assertIsNotNone(n1, msg)
+        self.assertIsNotNone(n2, msg)
+        self.assertEqual(n1.tag, n2.tag, msg)
+        # Because lxml.attrib is an ordereddict for which order is important
+        # to equality, even though *we* don't care
+        self.assertEqual(dict(n1.attrib), dict(n2.attrib), msg)
+
+        self.assertEqual((n1.text or u'').strip(), (n2.text or u'').strip(), msg)
+        self.assertEqual((n1.tail or u'').strip(), (n2.tail or u'').strip(), msg)
+
+        for c1, c2 in izip_longest(n1, n2):
+            self.assertTreesEqual(c1, c2, msg)
+
+    def _assertXMLEqual(self, original, expected, parser="xml"):
+        """Asserts that two xmls archs are equal
+        :param original: the xml arch to test
+        :type original: str
+        :param expected: the xml arch of reference
+        :type expected: str
+        :param parser: an string representing which lxml.Parser class to use
+            when normalizing both archs. Takes either "xml" or "html"
+        :type parser: str
+        """
+        if original:
+            original = _normalize_arch_for_assert(original, parser)
+        if expected:
+            expected = _normalize_arch_for_assert(expected, parser)
+        self.assertEqual(original, expected)
+
+    def assertXMLEqual(self, original, expected):
+        return self._assertXMLEqual(original, expected)
+
+    def assertHTMLEqual(self, original, expected):
+        return self._assertXMLEqual(original, expected, 'html')
+
+    def profile(self, **kwargs):
+        test_method = getattr(self, '_testMethodName', 'Unknown test method')
+        if not hasattr(self, 'profile_session'):
+            self.profile_session = profiler.make_session(test_method)
+        return profiler.Profiler(
+            description='%s %s %s' % (test_method, self.env.user.name, 'warm' if self.warm else 'cold'),
+            db=self.env.cr.dbname,
+            profile_session=self.profile_session,
+            **kwargs)
+
+savepoint_seq = itertools.count()
+
 
 class TransactionCase(BaseCase):
-    """ TestCase in which each test method is run in its own transaction,
-    and with its own cursor. The transaction is rolled back and the cursor
-    is closed after each test.
+    """ Test class in which all test methods are run in a single transaction,
+    but each test method is run in a sub-transaction managed by a savepoint.
+    The transaction's cursor is always closed without committing.
+
+    The data setup common to all methods should be done in the class method
+    `setUpClass`, so that it is done once for all test methods. This is useful
+    for test cases containing fast tests but with significant database setup
+    common to all cases (complex in-db test data).
+
+    After being run, each test method cleans up the record cache and the
+    registry cache. However, there is no cleanup of the registry models and
+    fields. If a test modifies the registry (custom models and/or fields), it
+    should prepare the necessary cleanup (`self.registry.reset_changes()`).
     """
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.registry = odoo.registry(get_db_name())
+        cls.addClassCleanup(cls.registry.reset_changes)
+        cls.addClassCleanup(cls.registry.clear_caches)
+
+        cls.cr = cls.registry.cursor()
+        cls.addClassCleanup(cls.cr.close)
+
+        cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+        cls.addClassCleanup(cls.env.reset)
 
     def setUp(self):
-        super(TransactionCase, self).setUp()
-        self.registry = odoo.registry(get_db_name())
-        self.addCleanup(self.registry.reset_changes)
+        super().setUp()
+
+        # restore environments after the test to avoid invoking flush() with an
+        # invalid environment (inexistent user id) from another test
+        envs = self.env.all.envs
+        self.addCleanup(envs.update, list(envs))
+        self.addCleanup(envs.clear)
+
         self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.env.clear)
 
-        #: current transaction's cursor
-        self.cr = self.cursor()
-        self.addCleanup(self.cr.close)
+        # flush everything in setUpClass before introducing a savepoint
+        self.env['base'].flush()
 
-        #: :class:`~odoo.api.Environment` for the current test case
-        self.env = api.Environment(self.cr, odoo.SUPERUSER_ID, {})
-        self.addCleanup(self.env.reset)
+        self._savepoint_id = next(savepoint_seq)
+        self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
+        self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
 
-        self.patch(type(self.env['res.partner']), '_get_gravatar_image', lambda *a: False)
+        self.patch(self.registry['res.partner'], '_get_gravatar_image', lambda *a: False)
 
-    def patch(self, obj, key, val):
-        """ Do the patch ``setattr(obj, key, val)``, and prepare cleanup. """
-        old = getattr(obj, key)
-        setattr(obj, key, val)
-        self.addCleanup(setattr, obj, key, old)
 
-    def patch_order(self, model, order):
-        """ Patch the order of the given model (name), and prepare cleanup. """
-        self.patch(type(self.env[model]), '_order', order)
+class SavepointCase(TransactionCase):
+    @classmethod
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        warnings.warn(
+            "Deprecated class SavepointCase has been merged into TransactionCase",
+            DeprecationWarning, stacklevel=2,
+        )
 
 
 class SingleTransactionCase(BaseCase):
@@ -616,6 +735,11 @@ class SingleTransactionCase(BaseCase):
     the transaction is started with the first test method and rolled back at
     the end of the last.
     """
+    @classmethod
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        if issubclass(cls, TransactionCase):
+            _logger.warning("%s inherits from both TransactionCase and SingleTransactionCase")
 
     @classmethod
     def setUpClass(cls):
@@ -633,35 +757,6 @@ class SingleTransactionCase(BaseCase):
     def setUp(self):
         super(SingleTransactionCase, self).setUp()
         self.env.user.flush()
-
-
-savepoint_seq = itertools.count()
-class SavepointCase(SingleTransactionCase):
-    """ Similar to :class:`SingleTransactionCase` in that all test methods
-    are run in a single transaction *but* each test case is run inside a
-    rollbacked savepoint (sub-transaction).
-
-    Useful for test cases containing fast tests but with significant database
-    setup common to all cases (complex in-db test data): :meth:`~.setUpClass`
-    can be used to generate db test data once, then all test cases use the
-    same data without influencing one another but without having to recreate
-    the test data either.
-    """
-    def setUp(self):
-        super().setUp()
-
-        # restore environments after the test to avoid invoking flush() with an
-        # invalid environment (inexistent user id) from another test
-        envs = self.env.all.envs
-        self.addCleanup(envs.update, list(envs))
-        self.addCleanup(envs.clear)
-
-        self.addCleanup(self.registry.clear_caches)
-        self.addCleanup(self.env.clear)
-
-        self._savepoint_id = next(savepoint_seq)
-        self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
-        self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
 
 
 class ChromeBrowserException(Exception):
@@ -956,11 +1051,22 @@ class ChromeBrowser():
             res['success'] = 'test successful' in message
 
         if res.get('method') == 'Runtime.exceptionThrown':
-            exception_details = res['params']['exceptionDetails']
-            descr = exception_details.get('exception', {}).get('description')
-            self.take_screenshot()
-            self._save_screencast()
-            raise ChromeBrowserException(descr or pprint.pformat(exception_details))
+            details = res['params']['exceptionDetails']
+            message = details['text']
+            exception = details.get('exception')
+            if exception:
+                message += str(self._from_remoteobject(exception))
+            details['type'] = 'trace' # fake this so _format_stack works
+            stack = ''.join(self._format_stack(details))
+            if stack:
+                message += '\n' + stack
+
+            if raise_log_error:
+                self.take_screenshot()
+                self._save_screencast()
+                raise ChromeBrowserException(message)
+            else:
+                self._logger.getChild('browser').error(message)
 
         return res
 
@@ -968,7 +1074,7 @@ class ChromeBrowser():
         'debug': logging.DEBUG,
         'log': logging.INFO,
         'info': logging.INFO,
-        'warning': logging.INFO, # logging.WARNING,
+        'warning': logging.WARNING,
         'error': logging.ERROR,
         # TODO: what do with
         # dir, dirxml, table, trace, clear, startGroup, startGroupCollapsed,
@@ -1254,7 +1360,8 @@ class ChromeBrowser():
         return replacer
 
 
-class HttpCaseCommon(BaseCase):
+class HttpCase(TransactionCase):
+    """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
     registry_test_mode = True
     browser = None
     browser_size = '1366x768'
@@ -1268,6 +1375,14 @@ class HttpCaseCommon(BaseCase):
         self.xmlrpc_object = xmlrpclib.ServerProxy(url_8 + 'object')
         cls = type(self)
         cls._logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        ICP = cls.env['ir.config_parameter']
+        ICP.set_param('web.base.url', cls.base_url())
+        ICP.flush()
 
     def setUp(self):
         super().setUp()
@@ -1290,10 +1405,12 @@ class HttpCaseCommon(BaseCase):
             cls.browser.stop()
             cls.browser = None
 
-    def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True):
+    def url_open(self, url, data=None, files=None, timeout=10, headers=None, allow_redirects=True, head=False):
         self.env['base'].flush()
         if url.startswith('/'):
             url = "http://%s:%s%s" % (HOST, odoo.tools.config['http_port'], url)
+        if head:
+            return self.opener.head(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=False)
         if data or files:
             return self.opener.post(url, data=data, files=files, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
         return self.opener.get(url, timeout=timeout, headers=headers, allow_redirects=allow_redirects)
@@ -1384,16 +1501,8 @@ class HttpCaseCommon(BaseCase):
 
         try:
             self.authenticate(login, login)
-            base_url = "http://%s:%s" % (HOST, odoo.tools.config['http_port'])
-            ICP = self.env['ir.config_parameter']
-            ICP.set_param('web.base.url', base_url)
-            # flush updates to the database before launching the client side,
-            # otherwise they simply won't be visible
-            ICP.flush()
-            if re.match('[a-z]*:', url_path or ''): # about:, http:, ...
-                url = url_path
-            else:
-                url = "%s%s" % (base_url, url_path or '/')
+            self.env['base'].flush()
+            url = werkzeug.urls.url_join(self.base_url(), url_path)
             self._logger.info('Open "%s" in browser', url)
 
             if self.browser.screencasts_dir:
@@ -1425,6 +1534,10 @@ class HttpCaseCommon(BaseCase):
             self.browser.clear()
             self._wait_remaining_requests()
 
+    @classmethod
+    def base_url(cls):
+        return "http://%s:%s" % (HOST, odoo.tools.config['http_port'])
+
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
@@ -1440,14 +1553,15 @@ class HttpCaseCommon(BaseCase):
         return res
 
 
-class HttpCase(HttpCaseCommon, TransactionCase):
-    """ Transactional HTTP TestCase with url_open and Chrome headless helpers.
-    """
-    pass
-
-
-class HttpSavepointCase(HttpCaseCommon, SavepointCase):
-    pass
+# kept for backward compatibility
+class HttpSavepointCase(HttpCase):
+    @classmethod
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        warnings.warn(
+            "Deprecated class HttpSavepointCase has been merged into HttpCase",
+            DeprecationWarning, stacklevel=2,
+        )
 
 
 def users(*logins):

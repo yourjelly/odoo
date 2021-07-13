@@ -87,7 +87,6 @@ class TestSaleProject(TestReporting):
            'product_id': self.product_expense.id,
            'product_uom_id': self.product_expense.uom_id.id,
         })
-        
         view_id = self.env.ref('sale_timesheet.project_timesheet_action_client_timesheet_plan').id
         vals = self.env['project.project']._qweb_prepare_qcontext(view_id, [['id', '=', project_so.id]])
 

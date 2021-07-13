@@ -3,7 +3,7 @@
 
 from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.tests import Form
-from odoo.tests.common import SavepointCase
+from odoo.tests.common import TransactionCase
 
 
 class TestMrpProductionBackorder(TestMrpCommon):
@@ -55,7 +55,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
                 'product_id': product.id,
                 'inventory_quantity': 100,
                 'location_id': production.location_src_id.id,
-            })
+            })._apply_inventory()
         production.action_assign()
         self.assertEqual(production.state, 'confirmed')
         self.assertEqual(production.reserve_visible, False)
@@ -281,7 +281,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertEqual(len(production.procurement_group_id.mrp_production_ids), nb_product_todo)
 
 
-class TestMrpWorkorderBackorder(SavepointCase):
+class TestMrpWorkorderBackorder(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestMrpWorkorderBackorder, cls).setUpClass()

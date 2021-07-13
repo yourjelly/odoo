@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~13.5\n"
+"Project-Id-Version: Odoo Server saas~14.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 07:28+0000\n"
-"PO-Revision-Date: 2020-09-01 07:28+0000\n"
+"POT-Creation-Date: 2021-05-11 09:26+0000\n"
+"PO-Revision-Date: 2021-05-11 09:26+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -39,28 +39,6 @@ msgid ""
 msgstr ""
 
 #. module: crm_iap_lead
-#: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
-#, python-format
-msgid ""
-"<p class=\"o_view_nocontent_empty_folder\">\n"
-"            No leads found\n"
-"        </p><p>\n"
-"            No leads could be generated according to your search criteria\n"
-"        </p>"
-msgstr ""
-
-#. module: crm_iap_lead
-#: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
-#, python-format
-msgid ""
-"<p class=\"o_view_nocontent_empty_folder\">\n"
-"            No opportunities found\n"
-"        </p><p>\n"
-"            No opportunities could be generated according to your search criteria\n"
-"        </p>"
-msgstr ""
-
-#. module: crm_iap_lead
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 msgid "<span class=\"col-md-6\">Extra contacts per Company</span>"
 msgstr ""
@@ -83,6 +61,11 @@ msgstr ""
 #. module: crm_iap_lead
 #: model:crm.iap.lead.industry,name:crm_iap_lead.crm_iap_lead_industry_157
 msgid "Banks"
+msgstr ""
+
+#. module: crm_iap_lead
+#: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_1
+msgid "CEO"
 msgstr ""
 
 #. module: crm_iap_lead
@@ -271,6 +254,7 @@ msgstr ""
 
 #. module: crm_iap_lead
 #. openerp-web
+#: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #: code:addons/crm_iap_lead/static/src/xml/leads_tree_generate_leads_views.xml:0
 #: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
 #, python-format
@@ -336,6 +320,11 @@ msgstr ""
 #. module: crm_iap_lead
 #: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_mining_request__industry_ids
 msgid "Industries"
+msgstr ""
+
+#. module: crm_iap_lead
+#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_industry__name
+msgid "Industry"
 msgstr ""
 
 #. module: crm_iap_lead
@@ -613,11 +602,6 @@ msgid "Submit"
 msgstr ""
 
 #. module: crm_iap_lead
-#: model:ir.model.fields,field_description:crm_iap_lead.field_crm_iap_lead_industry__name
-msgid "Tag Name"
-msgstr ""
-
-#. module: crm_iap_lead
 #: model:ir.model.constraint,message:crm_iap_lead.constraint_crm_iap_lead_industry_name_uniq
 msgid "Tag name already exists!"
 msgstr ""
@@ -646,11 +630,6 @@ msgstr ""
 #: code:addons/crm_iap_lead/models/crm_iap_lead_mining_request.py:0
 #, python-format
 msgid "This makes a total of %d credits for this request."
-msgstr ""
-
-#. module: crm_iap_lead
-#: model_terms:ir.ui.view,arch_db:crm_iap_lead.enrich_company
-msgid "Title"
 msgstr ""
 
 #. module: crm_iap_lead
@@ -690,8 +669,8 @@ msgid "Which Industry do you want to target?"
 msgstr ""
 
 #. module: crm_iap_lead
-#: model:crm.iap.lead.role,name:crm_iap_lead.crm_iap_lead_role_1
-msgid "ceo"
+#: model_terms:ir.ui.view,arch_db:crm_iap_lead.crm_iap_lead_mining_request_form
+msgid "Your request did not return any result. No credits were used."
 msgstr ""
 
 #. module: crm_iap_lead

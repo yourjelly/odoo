@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.api import model
+from odoo.tools import email_normalize
 from odoo.tools.sql import existing_tables
 import pytz
 import logging
@@ -68,8 +69,10 @@ class GoogleEvent(abc.Set):
 
     @property
     def rrule(self):
-        if self.recurrence and 'RRULE:' in self.recurrence[0]:  # LUL TODO what if there are something else in the list?
-            return self.recurrence[0][6:]  # skip "RRULE:" in the rrule string
+        if self.recurrence:
+            # Find the rrule in the list
+            rrule = next(rr for rr in self.recurrence if 'RRULE:' in rr)
+            return rrule[6:] # skip "RRULE:" in the rrule string
 
     def odoo_id(self, env):
         self.odoo_ids(env)  # load ids
@@ -144,7 +147,8 @@ class GoogleEvent(abc.Set):
             return env.user
         elif self.organizer and self.organizer.get('email'):
             # In Google: 1 email = 1 user; but in Odoo several users might have the same email :/
-            return env['res.users'].search([('email', '=', self.organizer.get('email'))], limit=1)
+            org_email = email_normalize(self.organizer.get('email'))
+            return env['res.users'].search([('email_normalized', '=', org_email)], limit=1)
         else:
             return env['res.users']
 
@@ -170,8 +174,8 @@ class GoogleEvent(abc.Set):
     def is_cancelled(self):
         return self.status == 'cancelled'
 
-    def is_recurrence_outlier(self):
-        return bool(self.originalStartTime)
+    def is_recurrence_follower(self):
+        return bool(not self.originalStartTime or self.originalStartTime == self.start)
 
     def cancelled(self):
         return self.filter(lambda e: e.status == 'cancelled')

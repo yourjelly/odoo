@@ -1,12 +1,11 @@
-odoo.define('mail/static/src/components/discuss/tests/discuss_domain_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {
+import {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -82,10 +81,12 @@ QUnit.test('discuss should keep filter domain on changing thread', async functio
     this.data['mail.channel'].records.push({ id: 20 });
     this.data['mail.message'].records.push({
         body: "test",
-        channel_ids: [20],
+        model: "mail.channel",
+        res_id: 20,
     }, {
         body: "not empty",
-        channel_ids: [20],
+        model: "mail.channel",
+        res_id: 20,
     });
     await this.start();
     const channel = this.env.models['mail.thread'].findFromIdentifyingData({
@@ -403,6 +404,4 @@ QUnit.test('select all and unselect all buttons should work on filtered thread',
 
 });
 });
-});
-
 });

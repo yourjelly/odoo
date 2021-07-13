@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# pylint: disable=C0302
 
 """
 The EU_TAX_MAP dictionary contains a basic Tax Mapping for EU countries. It answers the question:

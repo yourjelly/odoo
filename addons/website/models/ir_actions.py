@@ -28,7 +28,7 @@ class ServerAction(models.Model):
             action.xml_id = res.get(action.id)
 
     def _compute_website_url(self, website_path, xml_id):
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = self.get_base_url()
         link = website_path or xml_id or (self.id and '%d' % self.id) or ''
         if base_url and link:
             path = '%s/%s' % ('/website/action', link)
@@ -60,18 +60,3 @@ class ServerAction(models.Model):
         """
         res = super(ServerAction, self)._run_action_code_multi(eval_context)
         return eval_context.get('response', res)
-
-
-class IrActionsTodo(models.Model):
-    _name = 'ir.actions.todo'
-    _inherit = 'ir.actions.todo'
-
-    def action_launch(self):
-        res = super().action_launch()  # do ensure_one()
-
-        if self.id == self.env.ref('website.theme_install_todo').id:
-            # Pick a theme consume all ir.actions.todo by default (due to lower sequence).
-            # Once done, we re-enable the main ir.act.todo: open_menu
-            self.env.ref('base.open_menu').action_open()
-
-        return res

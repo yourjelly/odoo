@@ -34,6 +34,7 @@ class AccountAccountType(models.Model):
 
 class AccountAccount(models.Model):
     _name = "account.account"
+    _inherit = ['mail.thread']
     _description = "Account"
     _order = "is_off_balance, code, company_id"
     _check_company_auto = True
@@ -54,29 +55,30 @@ class AccountAccount(models.Model):
                                                            ('user_type_id', '=', data_unaffected_earnings.id)])
                 raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)', [a.code for a in account_unaffected_earnings]))
 
-    name = fields.Char(string="Account Name", required=True, index=True)
+    name = fields.Char(string="Account Name", required=True, index=True, tracking=True)
     currency_id = fields.Many2one('res.currency', string='Account Currency',
-        help="Forces all moves for this account to have this account currency.")
-    code = fields.Char(size=64, required=True, index=True)
-    deprecated = fields.Boolean(index=True, default=False)
+        help="Forces all moves for this account to have this account currency.", tracking=True)
+    code = fields.Char(size=64, required=True, index=True, tracking=True)
+    deprecated = fields.Boolean(index=True, default=False, tracking=True)
     used = fields.Boolean(compute='_compute_used', search='_search_used')
-    user_type_id = fields.Many2one('account.account.type', string='Type', required=True,
+    user_type_id = fields.Many2one('account.account.type', string='Type', required=True, tracking=True,
         help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.")
     internal_type = fields.Selection(related='user_type_id.type', string="Internal Type", store=True, readonly=True)
     internal_group = fields.Selection(related='user_type_id.internal_group', string="Internal Group", store=True, readonly=True)
     #has_unreconciled_entries = fields.Boolean(compute='_compute_has_unreconciled_entries',
     #    help="The account has at least one unreconciled debit and credit since last time the invoices & payments matching was performed.")
-    reconcile = fields.Boolean(string='Allow Reconciliation', default=False,
+    reconcile = fields.Boolean(string='Allow Reconciliation', default=False, tracking=True,
         help="Check this box if this account allows invoices & payments matching of journal items.")
     tax_ids = fields.Many2many('account.tax', 'account_account_tax_default_rel',
         'account_id', 'tax_id', string='Default Taxes',
         check_company=True,
         context={'append_type_to_tax_name': True})
-    note = fields.Text('Internal Notes')
+    note = fields.Text('Internal Notes', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
         default=lambda self: self.env.company)
     tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
-    group_id = fields.Many2one('account.group', compute='_compute_account_group', store=True, readonly=True)
+    group_id = fields.Many2one('account.group', compute='_compute_account_group', store=True, readonly=True,
+                               help="Account prefixes can determine account groups.")
     root_id = fields.Many2one('account.root', compute='_compute_account_root', store=True)
     allowed_journal_ids = fields.Many2many('account.journal', string="Allowed Journals", help="Define in which journals this account can be used. If empty, can be used in all journals.")
 
@@ -85,6 +87,9 @@ class AccountAccount(models.Model):
     opening_balance = fields.Monetary(string="Opening Balance", compute='_compute_opening_debit_credit', help="Opening balance value for this account.")
 
     is_off_balance = fields.Boolean(compute='_compute_is_off_balance', default=False, store=True, readonly=True)
+
+    current_balance = fields.Float(compute='_compute_current_balance')
+    related_taxes_amount = fields.Integer(compute='_compute_related_taxes_amount')
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
@@ -126,22 +131,57 @@ class AccountAccount(models.Model):
         self.env['account.journal'].flush([
             'currency_id',
             'default_account_id',
-            'payment_debit_account_id',
-            'payment_credit_account_id',
             'suspense_account_id',
         ])
+        self.env['account.payment.method'].flush(['payment_type'])
+        self.env['account.payment.method.line'].flush(['payment_method_id', 'payment_account_id'])
+
         self._cr.execute('''
-            SELECT account.id, journal.id
-            FROM account_account account
-            JOIN res_company company ON company.id = account.company_id
-            JOIN account_journal journal ON
-                journal.default_account_id = account.id
-            WHERE account.id IN %s
-            AND journal.type IN ('bank', 'cash')
-            AND journal.currency_id IS NOT NULL
+            SELECT 
+                account.id, 
+                journal.id
+            FROM account_journal journal
+            JOIN res_company company ON company.id = journal.company_id
+            JOIN account_account account ON account.id = journal.default_account_id
+            WHERE journal.currency_id IS NOT NULL
             AND journal.currency_id != company.currency_id
             AND account.currency_id != journal.currency_id
-        ''', [tuple(self.ids)])
+            AND account.id IN %(accounts)s
+            
+            UNION ALL
+            
+            SELECT 
+                account.id, 
+                journal.id
+            FROM account_journal journal
+            JOIN res_company company ON company.id = journal.company_id
+            JOIN account_payment_method_line apml ON apml.journal_id = journal.id
+            JOIN account_payment_method apm on apm.id = apml.payment_method_id
+            JOIN account_account account ON account.id = COALESCE(apml.payment_account_id, company.account_journal_payment_debit_account_id)
+            WHERE journal.currency_id IS NOT NULL
+            AND journal.currency_id != company.currency_id
+            AND account.currency_id != journal.currency_id
+            AND apm.payment_type = 'inbound'
+            AND account.id IN %(accounts)s
+            
+            UNION ALL
+            
+            SELECT 
+                account.id, 
+                journal.id
+            FROM account_journal journal
+            JOIN res_company company ON company.id = journal.company_id
+            JOIN account_payment_method_line apml ON apml.journal_id = journal.id
+            JOIN account_payment_method apm on apm.id = apml.payment_method_id
+            JOIN account_account account ON account.id = COALESCE(apml.payment_account_id, company.account_journal_payment_credit_account_id)
+            WHERE journal.currency_id IS NOT NULL
+            AND journal.currency_id != company.currency_id
+            AND account.currency_id != journal.currency_id
+            AND apm.payment_type = 'outbound'
+            AND account.id IN %(accounts)s
+        ''', {
+            'accounts': tuple(self.ids)
+        })
         res = self._cr.fetchone()
         if res:
             account = self.env['account.account'].browse(res[0])
@@ -195,14 +235,18 @@ class AccountAccount(models.Model):
             return
 
         self.flush(['reconcile'])
+        self.env['account.payment.method.line'].flush(['journal_id', 'payment_account_id'])
+
         self._cr.execute('''
             SELECT journal.id
             FROM account_journal journal
-            WHERE journal.payment_credit_account_id in %(credit_account)s
-            OR journal.payment_debit_account_id in %(debit_account)s ;
+            JOIN res_company company on journal.company_id = company.id
+            LEFT JOIN account_payment_method_line apml ON journal.id = apml.journal_id
+            WHERE company.account_journal_payment_credit_account_id in %(accounts)s
+            OR company.account_journal_payment_debit_account_id in %(accounts)s
+            OR apml.payment_account_id in %(accounts)s
         ''', {
-            'credit_account': tuple(accounts.ids),
-            'debit_account': tuple(accounts.ids)
+            'accounts': tuple(accounts.ids),
         })
 
         rows = self._cr.fetchall()
@@ -253,6 +297,26 @@ class AccountAccount(models.Model):
             if not rec:
                 return new_code
         raise UserError(_('Cannot generate an unused account code.'))
+
+    def _compute_current_balance(self):
+        balances = {
+            read['account_id'][0]: read['balance']
+            for read in self.env['account.move.line'].read_group(
+                domain=[('account_id', 'in', self.ids)],
+                fields=['balance', 'account_id'],
+                groupby=['account_id'],
+            )
+        }
+        for record in self:
+            record.current_balance = balances.get(record.id, 0)
+
+    def _compute_related_taxes_amount(self):
+        for record in self:
+            record.related_taxes_amount = self.env['account.tax'].search_count([
+                '|',
+                ('invoice_repartition_line_ids.account_id', '=', record.id),
+                ('refund_repartition_line_ids.account_id', '=', record.id),
+            ])
 
     def _compute_opening_debit_credit(self):
         self.opening_debit = 0
@@ -481,9 +545,13 @@ class AccountAccount(models.Model):
 
         return super(AccountAccount, self).write(vals)
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_contains_journal_items(self):
         if self.env['account.move.line'].search([('account_id', 'in', self.ids)], limit=1):
             raise UserError(_('You cannot perform this action on an account that contains journal items.'))
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_account_set_on_customer(self):
         #Checking whether the account is set as a property to any Partner or not
         values = ['account.account,%s' % (account_id,) for account_id in self.ids]
         partner_prop_acc = self.env['ir.property'].sudo().search([('value_reference', 'in', values)], limit=1)
@@ -492,7 +560,6 @@ class AccountAccount(models.Model):
             raise UserError(
                 _('You cannot remove/deactivate the account %s which is set on a customer or vendor.', account_name)
             )
-        return super(AccountAccount, self).unlink()
 
     def action_read_account(self):
         self.ensure_one()
@@ -508,6 +575,22 @@ class AccountAccount(models.Model):
     def action_duplicate_accounts(self):
         for account in self.browse(self.env.context['active_ids']):
             account.copy()
+
+    def action_open_related_taxes(self):
+        related_taxes_ids = self.env['account.tax'].search([
+            '|',
+            ('invoice_repartition_line_ids.account_id', '=', self.id),
+            ('refund_repartition_line_ids.account_id', '=', self.id),
+        ]).ids
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Taxes'),
+            'res_model': 'account.tax',
+            'view_type': 'list',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', related_taxes_ids)],
+        }
 
 
 class AccountGroup(models.Model):

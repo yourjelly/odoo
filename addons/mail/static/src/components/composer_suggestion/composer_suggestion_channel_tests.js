@@ -1,15 +1,14 @@
-odoo.define('mail/static/src/components/composer_suggestion/composer_suggestion_channel_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ComposerSuggestion: require('mail/static/src/components/composer_suggestion/composer_suggestion.js'),
-};
-const {
+import { ComposerSuggestion } from '@mail/components/composer_suggestion/composer_suggestion';
+import {
     afterEach,
     beforeEach,
     createRootComponent,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
+
+const components = { ComposerSuggestion };
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -47,16 +46,11 @@ QUnit.test('channel mention suggestion displayed', async function (assert) {
         id: 20,
         model: 'mail.channel',
     });
-    const channel = this.env.models['mail.thread'].create({
-        id: 7,
-        name: "General",
-        model: 'mail.channel',
-    });
     await this.createComposerSuggestion({
         composerLocalId: thread.composer.localId,
         isActive: true,
         modelName: 'mail.thread',
-        recordLocalId: channel.localId,
+        recordLocalId: thread.localId,
     });
 
     assert.containsOnce(
@@ -69,22 +63,20 @@ QUnit.test('channel mention suggestion displayed', async function (assert) {
 QUnit.test('channel mention suggestion correct data', async function (assert) {
     assert.expect(3);
 
-    this.data['mail.channel'].records.push({ id: 20 });
+    this.data['mail.channel'].records.push({
+        id: 20,
+        name: "General",
+    });
     await this.start();
     const thread = this.env.models['mail.thread'].findFromIdentifyingData({
         id: 20,
-        model: 'mail.channel',
-    });
-    const channel = this.env.models['mail.thread'].create({
-        id: 7,
-        name: "General",
         model: 'mail.channel',
     });
     await this.createComposerSuggestion({
         composerLocalId: thread.composer.localId,
         isActive: true,
         modelName: 'mail.thread',
-        recordLocalId: channel.localId,
+        recordLocalId: thread.localId,
     });
 
     assert.containsOnce(
@@ -113,16 +105,11 @@ QUnit.test('channel mention suggestion active', async function (assert) {
         id: 20,
         model: 'mail.channel',
     });
-    const channel = this.env.models['mail.thread'].create({
-        id: 7,
-        name: "General",
-        model: 'mail.channel',
-    });
     await this.createComposerSuggestion({
         composerLocalId: thread.composer.localId,
         isActive: true,
         modelName: 'mail.thread',
-        recordLocalId: channel.localId,
+        recordLocalId: thread.localId,
     });
 
     assert.containsOnce(
@@ -139,6 +126,4 @@ QUnit.test('channel mention suggestion active', async function (assert) {
 
 });
 });
-});
-
 });

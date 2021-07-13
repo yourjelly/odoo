@@ -1,15 +1,14 @@
-odoo.define('mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ThreadTypingIcon: require('mail/static/src/components/thread_typing_icon/thread_typing_icon.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { ThreadTypingIcon } from '@mail/components/thread_typing_icon/thread_typing_icon';
 
 const { Component } = owl;
 
-class ThreadTextualTypingStatus extends Component {
+const components = { ThreadTypingIcon };
+
+export class ThreadTextualTypingStatus extends Component {
 
     /**
      * @override
@@ -45,8 +44,4 @@ Object.assign(ThreadTextualTypingStatus, {
         threadLocalId: String,
     },
     template: 'mail.ThreadTextualTypingStatus',
-});
-
-return ThreadTextualTypingStatus;
-
 });

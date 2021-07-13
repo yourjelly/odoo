@@ -1,12 +1,16 @@
-odoo.define('mail.activity_view_tests', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var ActivityView = require('mail.ActivityView');
-var testUtils = require('web.test_utils');
-const ActivityRenderer = require('mail.ActivityRenderer');
-const domUtils = require('web.dom');
+import ActivityRenderer from '@mail/js/views/activity/activity_renderer';
+import ActivityView from '@mail/js/views/activity/activity_view';
+import testUtils from 'web.test_utils';
+import domUtils from 'web.dom';
 
-var createActionManager = testUtils.createActionManager;
+import { legacyExtraNextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
+import { patch, unpatch } from 'web.utils';
+import { registry } from "@web/core/registry";
+
+let serverData;
 
 var createView = testUtils.createView;
 
@@ -111,6 +115,7 @@ QUnit.module('activity view', {
                 ],
             },
         };
+        serverData = { models: this.data };
     }
 });
 
@@ -353,49 +358,62 @@ QUnit.test('activity view: activity widget', async function (assert) {
 
     activity.destroy();
 });
-QUnit.test('activity view: no group_by_menu and no comparison_menu', async function (assert) {
+
+QUnit.test("activity view: no group_by_menu and no comparison_menu", async function (assert) {
     assert.expect(4);
 
-    var actionManager = await createActionManager({
-        actions: [{
+    serverData.actions = {
+        1: {
             id: 1,
-            name: 'Task Action',
-            res_model: 'task',
-            type: 'ir.actions.act_window',
-            views: [[false, 'activity']],
-        }],
-        archs: {
-            'task,false,activity': '<activity string="Task">' +
-                                    '<templates>' +
-                                        '<div t-name="activity-box">' +
-                                            '<field name="foo"/>' +
-                                        '</div>' +
-                                    '</templates>' +
-                                '</activity>',
-            'task,false,search': '<search></search>',
+            name: "Task Action",
+            res_model: "task",
+            type: "ir.actions.act_window",
+            views: [[false, "activity"]],
         },
-        data: this.data,
-        session: {
-            user_context: {lang: 'zz_ZZ'},
-        },
-        mockRPC: function(route, args) {
-            if (args.method === 'get_activity_data') {
-                assert.deepEqual(args.kwargs.context, {lang: 'zz_ZZ'},
-                    'The context should have been passed');
-            }
-            return this._super.apply(this, arguments);
-        },
-    });
+    };
 
-    await actionManager.doAction(1);
+    serverData.views = {
+        "task,false,activity":
+            '<activity string="Task">' +
+            "<templates>" +
+            '<div t-name="activity-box">' +
+            '<field name="foo"/>' +
+            "</div>" +
+            "</templates>" +
+            "</activity>",
+        "task,false,search": "<search></search>",
+    };
 
-    assert.containsN(actionManager, '.o_search_options .o_dropdown button:visible', 2,
-        "only two elements should be available in view search");
-    assert.isVisible(actionManager.$('.o_search_options .o_dropdown.o_filter_menu > button'),
-        "filter should be available in view search");
-    assert.isVisible(actionManager.$('.o_search_options .o_dropdown.o_favorite_menu > button'),
-        "favorites should be available in view search");
-    actionManager.destroy();
+    const mockRPC = (route, args) => {
+        if (args.method === "get_activity_data") {
+            assert.strictEqual(
+                args.kwargs.context.lang,
+                "zz_ZZ",
+                "The context should have been passed"
+            );
+        }
+    };
+
+    patchWithCleanup(odoo.session_info.user_context, { lang: "zz_ZZ" });
+
+    const webClient = await createWebClient({ serverData, mockRPC , legacyParams: {withLegacyMockServer: true}});
+
+    await doAction(webClient, 1);
+
+    assert.containsN(
+        webClient,
+        ".o_search_options .o_dropdown button:visible",
+        2,
+        "only two elements should be available in view search"
+    );
+    assert.isVisible(
+        $(webClient.el).find(".o_search_options .o_dropdown.o_filter_menu > button"),
+        "filter should be available in view search"
+    );
+    assert.isVisible(
+        $(webClient.el).find(".o_search_options .o_dropdown.o_favorite_menu > button"),
+        "favorites should be available in view search"
+    );
 });
 
 QUnit.test('activity view: search more to schedule an activity for a record of a respecting model', async function (assert) {
@@ -461,63 +479,109 @@ QUnit.test('activity view: search more to schedule an activity for a record of a
     activity.destroy();
 });
 
-QUnit.test('Activity view: discard an activity creation dialog', async function (assert) {
+QUnit.test("Activity view: discard an activity creation dialog", async function (assert) {
     assert.expect(2);
 
-    var actionManager = await createActionManager({
-        actions: [{
+    serverData.actions = {
+        1: {
+            id: 1,
+            name: "Task Action",
+            res_model: "task",
+            type: "ir.actions.act_window",
+            views: [[false, "activity"]],
+        },
+    };
+
+    serverData.views = {
+        "task,false,activity": `
+        <activity string="Task">
+            <templates>
+                <div t-name="activity-box">
+                    <field name="foo"/>
+                </div>
+            </templates>
+        </activity>`,
+        "task,false,search": "<search></search>",
+        "mail.activity,false,form": `
+        <form>
+            <field name="display_name"/>
+            <footer>
+                <button string="Discard" class="btn-secondary" special="cancel"/>
+            </footer>
+        </form>`,
+    };
+
+    const mockRPC = (route, args) => {
+        if (args.method === "check_access_rights") {
+            return true;
+        }
+    };
+
+    const webClient = await createWebClient({ serverData, mockRPC, legacyParams: {withLegacyMockServer: true} });
+    await doAction(webClient, 1);
+
+    await testUtils.dom.click(
+        $(webClient.el).find(".o_activity_view .o_data_row .o_activity_empty_cell")[0]
+    );
+    await legacyExtraNextTick();
+    assert.containsOnce($, ".modal.o_technical_modal", "Activity Modal should be opened");
+
+    await testUtils.dom.click($('.modal.o_technical_modal button[special="cancel"]'));
+    await legacyExtraNextTick();
+    assert.containsNone($, ".modal.o_technical_modal", "Activity Modal should be closed");
+});
+
+QUnit.test('Activity view: many2one_avatar_user widget in activity view', async function (assert) {
+    assert.expect(3);
+
+    const taskModel = serverData.models.task;
+
+    serverData.models['res.users'] = {
+        fields: {
+            display_name: { string: "Displayed name", type: "char" },
+            avatar_128: { string: "Image 128", type: 'image' },
+        },
+        records: [{
+            id: 1,
+            display_name: "first user",
+            avatar_128: "Atmaram Bhide",
+        }],
+    };
+    taskModel.fields.user_id = { string: "Related User", type: "many2one", relation: 'res.users' };
+    taskModel.records[0].user_id = 1;
+
+    serverData.actions = {
+        1: {
             id: 1,
             name: 'Task Action',
             res_model: 'task',
             type: 'ir.actions.act_window',
             views: [[false, 'activity']],
-        }],
-        archs: {
-            'task,false,activity': `
-                <activity string="Task">
-                    <templates>
-                        <div t-name="activity-box">
-                            <field name="foo"/>
-                        </div>
-                    </templates>
-                </activity>`,
-            'task,false,search': '<search></search>',
-            'mail.activity,false,form': `
-                <form>
-                    <field name="display_name"/>
-                    <footer>
-                        <button string="Discard" class="btn-secondary" special="cancel"/>
-                    </footer>
-                </form>`
-        },
-        data: this.data,
-        intercepts: {
-            do_action(ev) {
-                actionManager.doAction(ev.data.action, ev.data.options);
-            }
-        },
-        async mockRPC(route, args) {
-            if (args.method === 'check_access_rights') {
-                return true;
-            }
-            return this._super(...arguments);
-        },
-    });
-    await actionManager.doAction(1);
+        }
+    };
 
-    await testUtils.dom.click(actionManager.$('.o_activity_view .o_data_row .o_activity_empty_cell')[0]);
-    assert.containsOnce(
-        $,
-        '.modal.o_technical_modal.show',
-        "Activity Modal should be opened");
+    serverData.views = {
+        'task,false,activity': `
+            <activity string="Task">
+                <templates>
+                    <div t-name="activity-box">
+                        <field name="user_id" widget="many2one_avatar_user"/>
+                        <field name="foo"/>
+                    </div>
+                </templates>
+            </activity>`,
+        'task,false,search': '<search></search>'
+    };
 
-    await testUtils.dom.click($('.modal.o_technical_modal.show button[special="cancel"]'));
-    assert.containsNone(
-        $,
-        '.modal.o_technical_modal.show',
-        "Activity Modal should be closed");
+    const webClient = await createWebClient({ serverData, legacyParams: { withLegacyMockServer: true } });
+    await doAction(webClient, 1);
 
-    actionManager.destroy();
+    await legacyExtraNextTick();
+    assert.containsN(webClient, '.o_m2o_avatar', 2);
+    assert.containsOnce(webClient, 'tr[data-res-id=13] .o_m2o_avatar > img[src="/web/image/res.users/1/avatar_128"]',
+        "should have m2o avatar image");
+    assert.containsNone(webClient, '.o_m2o_avatar > span',
+        "should not have text on many2one_avatar_user if onlyImage node option is passed");
 });
 
 QUnit.test("Activity view: on_destroy_callback doesn't crash", async function (assert) {
@@ -527,36 +591,33 @@ QUnit.test("Activity view: on_destroy_callback doesn't crash", async function (a
         View: ActivityView,
         model: 'task',
         data: this.data,
-        arch: '<activity string="Task">' +
-                '<templates>' +
-                    '<div t-name="activity-box">' +
-                        '<field name="foo"/>' +
-                    '</div>' +
-                '</templates>'+
-            '</activity>',
+        arch: `<activity string="Task">
+                <templates>
+                    <div t-name="activity-box">
+                        <field name="foo"/>
+                    </div>
+                </templates>
+            </activity>`,
     };
 
-    ActivityRenderer.patch('test_mounted_unmounted', T => 
-        class extends T {
-            mounted() {
-                assert.step('mounted');
-            }
-            willUnmount() {
-                assert.step('willUnmount');
-            }
+    patchWithCleanup(ActivityRenderer.prototype, {
+        mounted() {
+            assert.step('mounted');
+        },
+        willUnmount() {
+            assert.step('willUnmount');
+        }
     });
 
     const activity = await createView(params);
-    domUtils.detach([{widget: activity}]);
+    domUtils.detach([{ widget: activity }]);
 
     assert.verifySteps([
-        'mounted', 
+        'mounted',
         'willUnmount'
     ]);
 
-    ActivityRenderer.unpatch('test_mounted_unmounted');
     activity.destroy();
 });
 
-});
 });

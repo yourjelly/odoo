@@ -5,9 +5,10 @@ import base64
 import inspect
 import logging
 import hashlib
+import requests
 import re
 
-
+from lxml import etree
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
 from werkzeug.exceptions import NotFound
@@ -16,11 +17,13 @@ from odoo import api, fields, models, tools
 from odoo.addons.http_routing.models.ir_http import slugify, _guess_mimetype, url_for
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.portal.controllers.portal import pager
-from odoo.exceptions import UserError
+from odoo.addons.iap.tools import iap_tools
+from odoo.exceptions import UserError, AccessError
 from odoo.http import request
 from odoo.modules.module import get_resource_path
 from odoo.osv.expression import FALSE_DOMAIN
 from odoo.tools.translate import _
+from odoo.tools import pycompat
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +33,19 @@ DEFAULT_CDN_FILTERS = [
     "^/web/(css|js)/",
     "^/web/image",
     "^/web/content",
+    "^/web/assets",
     # retrocompatibility
     "^/website/image/",
 ]
+
+DEFAULT_ENDPOINT = 'https://website.api.odoo.com'
 
 
 class Website(models.Model):
 
     _name = "website"
     _description = "Website"
+    _order = "sequence, id"
 
     @api.model
     def website_domain(self, website_id=False):
@@ -53,8 +60,8 @@ class Website(models.Model):
         return def_lang_id or self._active_languages()[0]
 
     name = fields.Char('Website Name', required=True)
-    domain = fields.Char('Website Domain',
-        help='Will be prefixed by http in canonical URLs if no scheme is specified')
+    sequence = fields.Integer(default=10)
+    domain = fields.Char('Website Domain', help='E.g. https://www.mydomain.com')
     country_group_ids = fields.Many2many('res.country.group', 'website_country_group_rel', 'website_id', 'country_group_id',
                                          string='Country Groups', help='Used when multiple websites have the same domain.')
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.company, required=True)
@@ -62,6 +69,7 @@ class Website(models.Model):
     default_lang_id = fields.Many2one('res.lang', string="Default Language", default=_default_language, required=True)
     auto_redirect_lang = fields.Boolean('Autoredirect Language', default=True, help="Should users be redirected to their browser's language")
     cookies_bar = fields.Boolean('Cookies Bar', help="Display a customizable cookies bar on your website.")
+    configurator_done = fields.Boolean(help='True if configurator has been completed or ignored')
 
     def _default_social_facebook(self):
         return self.env.ref('base.main_company').social_facebook
@@ -82,7 +90,7 @@ class Website(models.Model):
         return self.env.ref('base.main_company').social_twitter
 
     def _default_logo(self):
-        image_path = get_resource_path('website', 'static/src/img', 'website_logo.png')
+        image_path = get_resource_path('website', 'static/src/img', 'website_logo.svg')
         with tools.file_open(image_path, 'rb') as f:
             return base64.b64encode(f.read())
 
@@ -110,13 +118,13 @@ class Website(models.Model):
     partner_id = fields.Many2one(related='user_id.partner_id', string='Public Partner', readonly=False)
     menu_id = fields.Many2one('website.menu', compute='_compute_menu', string='Main Menu')
     homepage_id = fields.Many2one('website.page', string='Homepage')
-    custom_code_head = fields.Text('Custom <head> code')
-    custom_code_footer = fields.Text('Custom end of <body> code')
+    custom_code_head = fields.Html('Custom <head> code', sanitize=False)
+    custom_code_footer = fields.Html('Custom end of <body> code', sanitize=False)
 
-    robots_txt = fields.Text('Robots.txt', translate=False, groups='website.group_website_designer')
+    robots_txt = fields.Html('Robots.txt', translate=False, groups='website.group_website_designer', sanitize=False)
 
     def _default_favicon(self):
-        img_path = get_resource_path('web', 'static/src/img/favicon.ico')
+        img_path = get_resource_path('web', 'static/img/favicon.ico')
         with tools.file_open(img_path, 'rb') as f:
             return base64.b64encode(f.read())
 
@@ -163,28 +171,17 @@ class Website(models.Model):
     def _get_menu_ids(self):
         return self.env['website.menu'].search([('website_id', '=', self.id)]).ids
 
-    def _bootstrap_snippet_filters(self):
-        ir_filter = self.env.ref('website.dynamic_snippet_country_filter', raise_if_not_found=False)
-        if ir_filter:
-            self.env['website.snippet.filter'].create({
-                'field_names': 'name,code,image_url:image,phone_code:char',
-                'filter_id': ir_filter.id,
-                'limit': 16,
-                'name': _('Countries'),
-                'website_id': self.id,
-            })
-
     @api.model
     def create(self, vals):
-        self._handle_favicon(vals)
+        self._handle_create_write(vals)
 
         if 'user_id' not in vals:
             company = self.env['res.company'].browse(vals.get('company_id'))
             vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
 
         res = super(Website, self).create(vals)
+        res.company_id._compute_website_id()
         res._bootstrap_homepage()
-        res._bootstrap_snippet_filters()
 
         if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
@@ -195,7 +192,8 @@ class Website(models.Model):
 
     def write(self, values):
         public_user_to_change_websites = self.env['website']
-        self._handle_favicon(values)
+        original_company = self.company_id
+        self._handle_create_write(values)
 
         self.clear_caches()
 
@@ -206,9 +204,14 @@ class Website(models.Model):
                 super(Website, public_user_to_change_websites).write(dict(values, user_id=company and company._get_public_user().id))
 
         result = super(Website, self - public_user_to_change_websites).write(values)
+
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
             # invalidate the caches from static node at compile time
             self.env['ir.qweb'].clear_caches()
+
+        # invalidate cache for `company.website_id` to be recomputed
+        if 'sequence' in values or 'company_id' in values:
+            (original_company | self.company_id)._compute_website_id()
 
         if 'cookies_bar' in values:
             existing_policy_page = self.env['website.page'].search([
@@ -233,14 +236,29 @@ class Website(models.Model):
         return result
 
     @api.model
+    def _handle_create_write(self, vals):
+        self._handle_favicon(vals)
+        self._handle_domain(vals)
+
+    @api.model
     def _handle_favicon(self, vals):
         if 'favicon' in vals:
             vals['favicon'] = tools.image_process(vals['favicon'], size=(256, 256), crop='center', output_format='ICO')
 
-    def unlink(self):
+    @api.model
+    def _handle_domain(self, vals):
+        if 'domain' in vals and vals['domain']:
+            if not vals['domain'].startswith('http'):
+                vals['domain'] = 'https://%s' % vals['domain']
+            vals['domain'] = vals['domain'].rstrip('/')
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_last_remaining_website(self):
         website = self.search([('id', 'not in', self.ids)], limit=1)
         if not website:
             raise UserError(_('You must keep at least one website.'))
+
+    def unlink(self):
         # Do not delete invoices, delete what's strictly necessary
         attachments_to_unlink = self.env['ir.attachment'].search([
             ('website_id', 'in', self.ids),
@@ -250,12 +268,242 @@ class Website(models.Model):
             ('url', 'ilike', '.assets\\_'),
         ])
         attachments_to_unlink.unlink()
-        return super(Website, self).unlink()
+        companies = self.company_id
+        res = super(Website, self).unlink()
+        companies._compute_website_id()
+        return res
 
-    def create_and_redirect_to_theme(self):
+    def create_and_redirect_configurator(self):
         self._force()
-        action = self.env.ref('website.theme_install_kanban_action')
-        return action.read()[0]
+        configurator_action_todo = self.env.ref('website.website_configurator_todo')
+        return configurator_action_todo.action_launch()
+
+    # ----------------------------------------------------------
+    # Configurator
+    # ----------------------------------------------------------
+    def _website_api_rpc(self, route, params):
+        IrConfigParameter = self.env['ir.config_parameter'].sudo()
+        website_api_endpoint = IrConfigParameter.get_param('website.website_api_endpoint', DEFAULT_ENDPOINT)
+        endpoint = website_api_endpoint + route
+        return iap_tools.iap_jsonrpc(endpoint, params=params)
+
+    def get_cta_data(self, website_purpose, website_type):
+        return {'cta_btn_text': False, 'cta_btn_href': '/contactus'}
+
+    @api.model
+    def configurator_init(self):
+        r = dict()
+        company_id = self.get_current_website().company_id
+        configurator_features = self.env['website.configurator.feature'].search([])
+        r['features'] = [{
+            'id': feature.id,
+            'name': feature.name,
+            'description': feature.description,
+            'type': feature.type,
+            'icon': feature.icon,
+            'website_types_preselection': feature.website_types_preselection,
+            'module_state': feature.module_id.state,
+        } for feature in configurator_features]
+        r['logo'] = False
+        if company_id.logo and company_id.logo != company_id._get_logo():
+            r['logo'] = company_id.logo.decode('utf-8')
+        try:
+            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.user.lang})
+            r['industries'] = result['industries']
+        except AccessError as e:
+            logger.warning(e.args[0])
+        return r
+
+    @api.model
+    def configurator_recommended_themes(self, industry_id, palette):
+        domain = [('name', '=like', 'theme%'), ('name', 'not in', ['theme_default', 'theme_common'])]
+        client_themes = request.env['ir.module.module'].search(domain).mapped('name')
+        params = {
+            'palette': palette,
+            'client_themes': client_themes,
+        }
+        return self._website_api_rpc('/api/website/1/configurator/recommended_themes/%s' % industry_id, params)
+
+    @api.model
+    def configurator_skip(self):
+        website = self.get_current_website()
+        website.configurator_done = True
+
+    @api.model
+    def configurator_apply(self, **kwargs):
+        def set_colors(selected_palette):
+            if isinstance(selected_palette, list):
+                url = '/website/static/src/scss/options/colors/user_color_palette.scss'
+                values = {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
+            else:
+                url = '/website/static/src/scss/options/user_values.scss'
+                values = {'color-palettes-name': "'%s'" % selected_palette}
+            self.env['web_editor.assets'].make_scss_customization(url, values)
+
+        def set_features(selected_features):
+            feature_ids = self.env['website.configurator.feature'].browse(selected_features)
+            pages_views = {}
+            modules = self.env['ir.module.module']
+            for feature_id in feature_ids:
+                if feature_id.type == 'app' and feature_id.module_id and feature_id.module_id.state != 'installed':
+                    modules += feature_id.module_id
+                if feature_id.type == 'page' and feature_id.page_view_id:
+                    result = self.env['website'].new_page(name=feature_id.name, add_menu=True, template=feature_id.page_view_id.key)
+                    pages_views[feature_id.iap_page_code] = result['view_id']
+
+            modules.button_immediate_install()
+
+            # Force to refresh env after install of modules
+            self._cr.commit()
+            api.Environment.reset()
+            self.env = api.Environment(modules._cr, modules._uid, modules._context)
+            return pages_views
+
+        def configure_page(page_code, snippet_list, pages_views, cta_data):
+            if page_code == 'homepage':
+                page_view_id = website.homepage_id.view_id
+            else:
+                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
+            rendered_snippets = []
+            nb_snippets = len(snippet_list)
+            for i, snippet in enumerate(snippet_list, start=1):
+                try:
+                    view_id = self.env['website'].with_context(website_id=website.id).viewref(snippet)
+                    if view_id:
+                        el = etree.fromstring(view_id._render(values=cta_data))
+
+                        # Add the data-snippet attribute to identify the snippet
+                        # for compatibility code
+                        el.attrib['data-snippet'] = snippet.split('.', 1)[-1]
+
+                        # Tweak the shape of the first snippet to connect it
+                        # properly with the header color in some themes
+                        if i == 1:
+                            shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                            if shape_el:
+                                shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+
+                        # Tweak the shape of the last snippet to connect it
+                        # properly with the footer color in some themes
+                        if i == nb_snippets:
+                            shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                            if shape_el:
+                                shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
+                        rendered_snippet = pycompat.to_text(etree.tostring(el))
+                        rendered_snippets.append(rendered_snippet)
+                except ValueError as e:
+                    logger.warning(e)
+            page_view_id.save(value=''.join(rendered_snippets), xpath="(//div[hasclass('oe_structure')])[last()]")
+
+        def set_images(images):
+            for image in images:
+                try:
+                    response = requests.get(image['url'], timeout=3)
+                    response.raise_for_status()
+                except Exception as e:
+                    logger.warning("Failed to download image: %s.\n%s", image['url'], e)
+                else:
+                    self.env['ir.attachment'].create({
+                        'name': image['name'],
+                        'website_id': website.id,
+                        'key': image['name'],
+                        'type': 'binary',
+                        'raw': response.content,
+                    })
+
+        website = self.get_current_website()
+
+        theme = self.env['ir.module.module'].search([('name', '=', kwargs['theme_name'])])
+        url = theme.button_choose_theme()
+
+        # Force to refresh env after install of module
+        self._cr.commit()
+        api.Environment.reset()
+        self.env = api.Environment(theme._cr, theme._uid, theme._context)
+
+        website.configurator_done = True
+
+        # Enable tour
+        tour_asset_id = self.env.ref('website.configurator_tour')
+        tour_asset_id.copy({'key': tour_asset_id.key, 'website_id': website.id, 'active': True})
+
+        # logo was generated as base64 url
+        logo = kwargs.get('logo')
+        if logo:
+            website.logo = logo.split(',', 1)[1]
+
+        # palette
+        palette = kwargs.get('selected_palette')
+        if palette:
+            set_colors(palette)
+
+        # modules
+        pages_views = set_features(kwargs.get('selected_features'))
+        # We need to refresh the environment of website because set_features installed some new module
+        # and we need the overrides of these new menus e.g. for .get_cta_data()
+        website = self.env['website'].browse(website.id)
+
+        # Load suggestion from iap for selected pages
+        requested_pages = list(pages_views.keys())
+        requested_pages.append('homepage')
+        params = {
+            'theme': kwargs.get('theme_name'),
+            'pages': requested_pages,
+        }
+        custom_resources = self._website_api_rpc('/api/website/1/configurator/custom_resources/%s' % kwargs.get('industry_id'), params)
+
+        # Update CTA
+        cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
+        if cta_data['cta_btn_text']:
+            xpath_view = 'website.snippets'
+            parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
+            self.env['ir.ui.view'].create({
+                'name': parent_view.key + ' CTA',
+                'key': parent_view.key + "_cta",
+                'inherit_id': parent_view.id,
+                'website_id': website.id,
+                'type': 'qweb',
+                'priority': 32,
+                'arch_db': """
+                    <data>
+                        <xpath expr="//t[@t-set='cta_btn_href']" position="replace">
+                            <t t-set="cta_btn_href">%s</t>
+                        </xpath>
+                        <xpath expr="//t[@t-set='cta_btn_text']" position="replace">
+                            <t t-set="cta_btn_text">%s</t>
+                        </xpath>
+                    </data>
+                """ % (cta_data['cta_btn_href'], cta_data['cta_btn_text'])
+            })
+            header_ids = [
+                'website.template_header_default_oe_structure_header_default_1',
+                'website.template_header_hamburger_oe_structure_header_hamburger_1',
+                'website.template_header_slogan_oe_structure_header_slogan_2',
+                'website.template_header_boxed_oe_structure_header_boxed_2',
+                'website.template_header_image_oe_structure_header_image_2',
+            ]
+            for header_id in header_ids:
+                try:
+                    view_id = self.env['website'].viewref(header_id)
+                    if view_id:
+                        el = etree.fromstring(view_id.arch_db)
+                        btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
+                        if btn_cta_el:
+                            btn_cta_el[0].attrib['href'] = cta_data['cta_btn_href']
+                            btn_cta_el[0].text = cta_data['cta_btn_text']
+                        view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(el)})
+                except ValueError as e:
+                    logger.warning(e)
+
+        # Update pages
+        pages = custom_resources.get('pages', {})
+        for page_code, snippet_list in pages.items():
+            configure_page(page_code, snippet_list, pages_views, cta_data)
+
+        images = custom_resources.get('images', [])
+        set_images(images)
+
+        return url
 
     # ----------------------------------------------------------
     # Page Management
@@ -266,12 +514,13 @@ class Website(models.Model):
         if not standard_homepage:
             return
 
+        # keep strange indentation in python file, to get it correctly in database
         new_homepage_view = '''<t name="Homepage" t-name="website.homepage%s">
-        <t t-call="website.layout">
-            <t t-set="pageName" t-value="'homepage'"/>
-            <div id="wrap" class="oe_structure oe_empty"/>
-            </t>
-        </t>''' % (self.id)
+    <t t-call="website.layout">
+        <t t-set="pageName" t-value="'homepage'"/>
+        <div id="wrap" class="oe_structure oe_empty"/>
+    </t>
+</t>''' % (self.id)
         standard_homepage.with_context(website_id=self.id).arch_db = new_homepage_view
 
         homepage_page = Page.search([
@@ -768,7 +1017,7 @@ class Website(models.Model):
                 endpoint.routing['auth'] in ('none', 'public') and
                 endpoint.routing.get('website', False) and
                 all(hasattr(converter, 'generate') for converter in converters)):
-                return False
+            return False
 
         # dont't list routes without argument having no default value or converter
         sign = inspect.signature(endpoint.method.original_func)
@@ -945,23 +1194,15 @@ class Website(models.Model):
 
     def _get_http_domain(self):
         """Get the domain of the current website, prefixed by http if no
-        scheme is specified and withtout trailing /.
+        scheme is specified.
 
         Empty string if no domain is specified on the website.
         """
         self.ensure_one()
         if not self.domain:
             return ''
-
-        domain = self.domain
-        if not self.domain.startswith('http'):
-            domain = 'http://%s' % domain
-
-        return domain.rstrip('/')
-
-    def get_base_url(self):
-        self.ensure_one()
-        return self._get_http_domain() or super(BaseModel, self).get_base_url()
+        res = urls.url_parse(self.domain)
+        return 'http://' + self.domain if not res.scheme else self.domain
 
     def _get_canonical_url_localized(self, lang, canonical_params):
         """Returns the canonical URL for the current request with translatable
@@ -1023,31 +1264,3 @@ class Website(models.Model):
 
     def _get_cached(self, field):
         return self._get_cached_values()[field]
-
-    def _get_relative_url(self, url):
-        return urls.url_parse(url).replace(scheme='', netloc='').to_url()
-
-
-class BaseModel(models.AbstractModel):
-    _inherit = 'base'
-
-    def get_base_url(self):
-        """
-        Returns baseurl about one given record.
-        If a website_id field exists in the current record we use the url
-        from this website as base url.
-
-        :return: the base url for this record
-        :rtype: string
-
-        """
-        self.ensure_one()
-        if 'website_id' in self and self.website_id.domain:
-            return self.website_id._get_http_domain()
-        else:
-            return super(BaseModel, self).get_base_url()
-
-    def get_website_meta(self):
-        # dummy version of 'get_website_meta' above; this is a graceful fallback
-        # for models that don't inherit from 'website.seo.metadata'
-        return {}

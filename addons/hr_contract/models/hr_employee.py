@@ -10,12 +10,13 @@ class Employee(models.Model):
 
     vehicle = fields.Char(string='Company Vehicle', groups="hr.group_hr_user")
     contract_ids = fields.One2many('hr.contract', 'employee_id', string='Employee Contracts')
-    contract_id = fields.Many2one('hr.contract', string='Current Contract',
-        groups="hr.group_hr_user",domain="[('company_id', '=', company_id)]", help='Current contract of the employee')
+    contract_id = fields.Many2one(
+        'hr.contract', string='Current Contract', groups="hr.group_hr_user",
+        domain="[('company_id', '=', company_id), ('employee_id', '=', id)]", help='Current contract of the employee')
     calendar_mismatch = fields.Boolean(related='contract_id.calendar_mismatch')
     contracts_count = fields.Integer(compute='_compute_contracts_count', string='Contract Count')
     contract_warning = fields.Boolean(string='Contract Warning', store=True, compute='_compute_contract_warning', groups="hr.group_hr_user")
-    first_contract_date = fields.Date(compute='_compute_first_contract_date', groups="hr.group_hr_user")
+    first_contract_date = fields.Date(compute='_compute_first_contract_date', groups="hr.group_hr_user", store=True)
 
     def _get_first_contracts(self):
         self.ensure_one()
@@ -66,7 +67,7 @@ class Employee(models.Model):
         """
         Returns the contracts of all employees between date_from and date_to
         """
-        return self.search([])._get_contracts(date_from, date_to, states=states)
+        return self.search(['|', ('active', '=', True), ('active', '=', False)])._get_contracts(date_from, date_to, states=states)
 
     def write(self, vals):
         res = super(Employee, self).write(vals)
@@ -75,3 +76,9 @@ class Employee(models.Model):
                 employee.resource_calendar_id.transfer_leaves_to(employee.contract_id.resource_calendar_id, employee.resource_id)
                 employee.resource_calendar_id = employee.contract_id.resource_calendar_id
         return res
+
+    def action_open_contract_history(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id('hr_contract.hr_contract_history_view_form_action')
+        action['res_id'] = self.id
+        return action

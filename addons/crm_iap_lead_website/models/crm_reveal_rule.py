@@ -52,7 +52,7 @@ class CRMRevealRule(models.Model):
     lead_for = fields.Selection([('companies', 'Companies'), ('people', 'Companies and their Contacts')], string='Data Tracking', required=True, default='companies', help='Choose whether to track companies only or companies and their contacts')
     lead_type = fields.Selection([('lead', 'Lead'), ('opportunity', 'Opportunity')], string='Type', required=True, default='opportunity')
     suffix = fields.Char(string='Suffix', help='This will be appended in name of generated lead so you can identify lead/opportunity is generated with this rule')
-    team_id = fields.Many2one('crm.team', string='Sales Team')
+    team_id = fields.Many2one('crm.team', string='Sales Team', ondelete="set null")
     tag_ids = fields.Many2many('crm.tag', string='Tags')
     user_id = fields.Many2one('res.users', string='Salesperson')
     priority = fields.Selection(crm_stage.AVAILABLE_PRIORITIES, string='Priority')
@@ -82,11 +82,11 @@ class CRMRevealRule(models.Model):
                 (self._cr.dbname, 'res.partner', self.env.user.partner_id.id),
                 {'type': 'simple_notification', 'title': _('Missing Library'), 'message': message, 'sticky': True, 'warning': True})
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         self.clear_caches() # Clear the cache in order to recompute _get_active_rules
         self._assert_geoip()
-        return super(CRMRevealRule, self).create(vals)
+        return super().create(vals_list)
 
     def write(self, vals):
         fields_set = {

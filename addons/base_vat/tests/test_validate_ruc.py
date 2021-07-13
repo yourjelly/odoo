@@ -1,12 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo.tests.common import SavepointCase, tagged
+from odoo.tests.common import TransactionCase, tagged
 from odoo.exceptions import ValidationError
 from unittest.mock import patch
 
 import stdnum.eu.vat
 
 
-class TestStructure(SavepointCase):
+class TestStructure(TransactionCase):
     @classmethod
     def setUpClass(cls):
         def check_vies(vat_number):
@@ -55,12 +55,15 @@ class TestStructure(SavepointCase):
         # reactivate it and correct the vat number
         with patch('odoo.addons.base_vat.models.res_partner.check_vies', type(self)._vies_check_func):
             self.env.user.company_id.vat_check_vies = True
+            with self.assertRaises(ValidationError), self.env.cr.savepoint():
+                company.vat = "BE0987654321"  # VIES refused, don't fallback on other check
+            company.vat = "BE0477472701"
 
     def test_vat_syntactic_validation(self):
         """ Tests VAT validation (both successes and failures), with the different country
         detection cases possible.
         """
-        test_partner =self.env['res.partner'].create({'name': "John Dex"})
+        test_partner = self.env['res.partner'].create({'name': "John Dex"})
 
         # VAT starting with country code: use the starting country code
         test_partner.write({'vat': 'BE0477472701', 'country_id': self.env.ref('base.fr').id})

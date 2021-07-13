@@ -383,8 +383,9 @@ var LivechatButton = Widget.extend({
                 attachment_ids: [],
                 author_id: this._livechat.getOperatorPID(),
                 body: this.options.default_message,
-                channel_ids: [this._livechat.getID()],
                 date: time.datetime_to_str(new Date()),
+                model: "mail.channel",
+                res_id: this._livechat.getID(),
             }, { prepend: true });
         }
     },
@@ -504,11 +505,13 @@ var Feedback = Widget.extend({
             rate: this.rating,
             reason: reason,
         };
-        this.dp.add(session.rpc('/im_livechat/feedback', args)).then(function () {
+        this.dp.add(session.rpc('/im_livechat/feedback', args)).then(function (response) {
             var emoji = RATING_TO_EMOJI[self.rating] || "??";
-            var content = _.str.sprintf(_t("Rating: %s"), emoji);
-            if (reason) {
-                content += " \n" + reason;
+            if (!reason) {
+                var content = _.str.sprintf(_t("Rating: %s"), emoji);
+            }
+            else {
+                var content = "Rating reason: \n" + reason;
             }
             self.trigger('send_message', { content: content, isFeedback: true });
         });
@@ -554,6 +557,7 @@ var Feedback = Widget.extend({
 
         // only display textearea if bad smiley selected
         if (this.rating !== 5) {
+            this._sendFeedback();
             this.$('.o_livechat_rating_reason').show();
         } else {
             this.$('.o_livechat_rating_reason').hide();
@@ -833,7 +837,7 @@ var WebsiteLivechatMessage = AbstractMessage.extend({
     getAvatarSource: function () {
         var source = this._serverURL;
         if (this.hasAuthor()) {
-            source += '/web/partner_image/' + this.getAuthorID();
+            source += '/web/image/res.partner/' + this.getAuthorID() + '/avatar_128';
         } else {
             source += '/mail/static/src/img/smiley/avatar.jpg';
         }
@@ -1537,7 +1541,7 @@ return ThreadTypingMixin;
 odoo.define('im_livechat.legacy.mail.model.AbstractMessage', function (require) {
 "use strict";
 
-var mailUtils = require('mail.utils');
+var mailUtils = require('@mail/js/utils');
 
 var Class = require('web.Class');
 var core = require('web.core');
@@ -1630,7 +1634,7 @@ var AbstractMessage = Class.extend({
      */
     getAvatarSource: function () {
         if (this.hasAuthor()) {
-            return '/web/image/res.partner/' + this.getAuthorID() + '/image_128';
+            return '/web/image/res.partner/' + this.getAuthorID() + '/avatar_128';
         }
     },
     /**
@@ -2011,7 +2015,7 @@ var _t = core._t;
 
 /**
  * This is an abstract widget for rendering thread windows.
- * AbstractThreadWindow is kept for legacy reasons. 
+ * AbstractThreadWindow is kept for legacy reasons.
  */
 var AbstractThreadWindow = Widget.extend({
     template: 'im_livechat.legacy.mail.AbstractThreadWindow',
@@ -2839,7 +2843,7 @@ odoo.define('im_livechat.legacy.mail.widget.Thread', function (require) {
 "use strict";
 
 var DocumentViewer = require('im_livechat.legacy.mail.DocumentViewer');
-var mailUtils = require('mail.utils');
+var mailUtils = require('@mail/js/utils');
 
 var core = require('web.core');
 var time = require('web.time');
@@ -3526,6 +3530,7 @@ odoo.define('im_livechat.legacy.mail.DocumentViewer', function (require) {
 
 var core = require('web.core');
 var Widget = require('web.Widget');
+var { hidePDFJSButtons } = require('@web/legacy/js/libs/pdfjs');
 
 var QWeb = core.qweb;
 
@@ -3654,6 +3659,9 @@ var DocumentViewer = Widget.extend({
         this.$('.o_viewer_content').html(QWeb.render('im_livechat.legacy.mail.DocumentViewer.Content', {
             widget: this
         }));
+        if (this.activeAttachment.fileType === 'application/pdf') {
+            hidePDFJSButtons(this.$('.o_viewer_content')[0]);
+        }
         this.$('.o_viewer_img').on("load", _.bind(this._onImageLoaded, this));
         this.$('[data-toggle="tooltip"]').tooltip({ delay: 0 });
         this._reset();
@@ -3911,3 +3919,4 @@ var DocumentViewer = Widget.extend({
 });
 return DocumentViewer;
 });
+

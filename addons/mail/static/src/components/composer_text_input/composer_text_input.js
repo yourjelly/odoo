@@ -1,19 +1,17 @@
-odoo.define('mail/static/src/components/composer_text_input/composer_text_input.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
-
-const components = {
-    ComposerSuggestionList: require('mail/static/src/components/composer_suggestion_list/composer_suggestion_list.js'),
-};
-const { markEventHandled } = require('mail/static/src/utils/utils.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { useUpdate } from '@mail/component_hooks/use_update/use_update';
+import { ComposerSuggestionList } from '@mail/components/composer_suggestion_list/composer_suggestion_list';
+import { markEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class ComposerTextInput extends Component {
+const components = { ComposerSuggestionList };
+
+export class ComposerTextInput extends Component {
 
     /**
      * @override
@@ -28,15 +26,20 @@ class ComposerTextInput extends Component {
         useStore(props => {
             const composer = this.env.models['mail.composer'].get(props.composerLocalId);
             const thread = composer && composer.thread;
+            const correspondent = thread ? thread.correspondent : undefined;
             return {
                 composerHasFocus: composer && composer.hasFocus,
                 composerHasSuggestions: composer && composer.hasSuggestions,
+                composerIsLastStateChangeProgrammatic: composer && composer.isLastStateChangeProgrammatic,
                 composerIsLog: composer && composer.isLog,
                 composerTextInputContent: composer && composer.textInputContent,
                 composerTextInputCursorEnd: composer && composer.textInputCursorEnd,
                 composerTextInputCursorStart: composer && composer.textInputCursorStart,
                 composerTextInputSelectionDirection: composer && composer.textInputSelectionDirection,
+                correspondent,
+                correspondentNameOrDisplayName: correspondent && correspondent.nameOrDisplayName,
                 isDeviceMobile: this.env.messaging.device.isMobile,
+                threadDisplayName: thread && thread.displayName,
                 threadModel: thread && thread.model,
             };
         });
@@ -80,13 +83,19 @@ class ComposerTextInput extends Component {
         if (!this.composer) {
             return "";
         }
-        if (this.composer.thread && this.composer.thread.model !== 'mail.channel') {
-            if (this.composer.isLog) {
-                return this.env._t("Log an internal note...");
-            }
-            return this.env._t("Send a message to followers...");
+        if (!this.composer.thread) {
+            return "";
         }
-        return this.env._t("Write something...");
+        if (this.composer.thread.model === 'mail.channel') {
+            if (this.composer.thread.correspondent) {
+                return _.str.sprintf("Message %s...", this.composer.thread.correspondent.nameOrDisplayName);
+            }
+            return _.str.sprintf("Message #%s...", this.composer.thread.displayName);
+        }
+        if (this.composer.isLog) {
+            return this.env._t("Log an internal note...");
+        }
+        return this.env._t("Send a message to followers...");
     }
 
     focus() {
@@ -412,8 +421,4 @@ Object.assign(ComposerTextInput, {
         },
     },
     template: 'mail.ComposerTextInput',
-});
-
-return ComposerTextInput;
-
 });

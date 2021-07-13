@@ -8,11 +8,6 @@ from odoo.exceptions import UserError
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    module_procurement_jit = fields.Selection([
-        ('1', 'Immediately after sales order confirmation'),
-        ('0', 'Manually or based on automatic scheduler')
-        ], "Reservation", default='0',
-        help="Reserving products manually in delivery orders or by running the scheduler is advised to better manage priorities in case of long customer lead times or/and frequent stock-outs.")
     module_product_expiry = fields.Boolean("Expiration Dates",
         help="Track following dates on lots & serial numbers: best before, removal, end of life, alert. \n Such dates are set automatically at lot/serial number creation based on values set on the product (in days).")
     group_stock_production_lot = fields.Boolean("Lots & Serial Numbers",
@@ -40,13 +35,20 @@ class ResConfigSettings(models.TransientModel):
     module_delivery_usps = fields.Boolean("USPS Connector")
     module_delivery_bpost = fields.Boolean("bpost Connector")
     module_delivery_easypost = fields.Boolean("Easypost Connector")
+    module_quality_control = fields.Boolean("Quality")
+    module_quality_control_worksheet = fields.Boolean("Quality Worksheet")
     group_stock_multi_locations = fields.Boolean('Storage Locations', implied_group='stock.group_stock_multi_locations',
         help="Store products in specific locations of your warehouse (e.g. bins, racks) and to track inventory accordingly.")
+    group_stock_storage_categories = fields.Boolean(
+        'Storage Categories', implied_group='stock.group_stock_storage_categories')
+    annual_inventory_month = fields.Selection(related='company_id.annual_inventory_month', readonly=False)
+    annual_inventory_day = fields.Integer(related='company_id.annual_inventory_day', readonly=False)
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
         if not self.group_stock_multi_locations:
             self.group_stock_adv_location = False
+            self.group_stock_storage_categories = False
 
     @api.onchange('group_stock_production_lot')
     def _onchange_group_stock_production_lot(self):
@@ -59,15 +61,25 @@ class ResConfigSettings(models.TransientModel):
             self.group_stock_multi_locations = True
 
     def set_values(self):
-        if self.module_procurement_jit == '0':
-            self.env['ir.config_parameter'].sudo().set_param('stock.picking_no_auto_reserve', True)
-        else:
-            self.env['ir.config_parameter'].sudo().set_param('stock.picking_no_auto_reserve', False)
         warehouse_grp = self.env.ref('stock.group_stock_multi_warehouses')
         location_grp = self.env.ref('stock.group_stock_multi_locations')
         base_user = self.env.ref('base.group_user')
         if not self.group_stock_multi_locations and location_grp in base_user.implied_ids and warehouse_grp in base_user.implied_ids:
             raise UserError(_("You can't desactivate the multi-location if you have more than once warehouse by company"))
+
+        # Deactivate putaway rules with storage category when not in storage category
+        # group. Otherwise, active them.
+        storage_cate_grp = self.env.ref('stock.group_stock_storage_categories')
+        PutawayRule = self.env['stock.putaway.rule']
+        if self.group_stock_storage_categories and storage_cate_grp not in base_user.implied_ids:
+            putaway_rules = PutawayRule.search([
+                ('active', '=', False),
+                ('storage_category_id', '!=', False)
+            ])
+            putaway_rules.write({'active': True})
+        elif not self.group_stock_storage_categories and storage_cate_grp in base_user.implied_ids:
+            putaway_rules = PutawayRule.search([('storage_category_id', '!=', False)])
+            putaway_rules.write({'active': False})
 
         res = super(ResConfigSettings, self).set_values()
 
@@ -96,4 +108,5 @@ class ResConfigSettings(models.TransientModel):
                 ('show_operations', '=', False)
             ])
             picking_types.sudo().write({'show_operations': True})
+
         return res

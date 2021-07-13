@@ -1,4 +1,9 @@
 .o_kanban_view.o_kanban_dashboard.o_project_kanban {
+
+    .o_project_kanban_main {
+        max-width: 300px;
+    }
+
     .o_project_kanban_boxes {
         display: flex;
         flex-flow: row wrap;
@@ -9,6 +14,11 @@
             text-align: center;
             padding: 0 0 0 0;
             margin: 0 5px;
+
+            &:first-child {
+                 margin: 0 5px 0 0;
+                 padding-left: 12px
+             }
 
             .o_value {
                 font-weight: 800;
@@ -33,6 +43,21 @@
                     }
                 }
             }
+        }
+    }
+
+    @include media-breakpoint-down(sm) {
+        .o_view_nocontent {
+            top: 15%;
+        }
+    }
+
+    .o_kanban_record {
+        div[name="is_favorite"] .fa-star-o {
+            visibility: hidden;
+        }
+        &:hover div[name="is_favorite"] .fa-star-o {
+            visibility: visible;
         }
     }
 }

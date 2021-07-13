@@ -38,6 +38,31 @@ class ResConfigSettings(models.TransientModel):
     purchase_tax_id = fields.Many2one('account.tax', string="Default Purchase Tax", related='company_id.account_purchase_tax_id', readonly=False)
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method', string='Tax calculation rounding method', readonly=False)
+    account_journal_suspense_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Suspense Account',
+        readonly=False,
+        related='company_id.account_journal_suspense_account_id',
+        domain=lambda self: "[('deprecated', '=', False), ('company_id', '=', company_id), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('user_type_id', '=', %s)]" % self.env.ref('account.data_account_type_current_liabilities').id,
+        help='Account used as automatic counterpart to bank/cash transactions')
+    account_journal_payment_debit_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Outstanding Receipts Account',
+        readonly=False,
+        related='company_id.account_journal_payment_debit_account_id',
+        domain=lambda self: "[('deprecated', '=', False), ('company_id', '=', company_id), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('user_type_id', '=', %s)]" % self.env.ref('account.data_account_type_current_assets').id,
+        help='Account used as automatic counterpart account to payments received')
+    account_journal_payment_credit_account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Outstanding Payments Account',
+        readonly=False,
+        related='company_id.account_journal_payment_credit_account_id',
+        domain=lambda self: "[('deprecated', '=', False), ('company_id', '=', company_id), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('user_type_id', '=', %s)]" % self.env.ref('account.data_account_type_current_assets').id,
+        help='Account used as automatic counterpart account to payments sent')
+    transfer_account_id = fields.Many2one('account.account', string="Internal Transfer Account",
+        related='company_id.transfer_account_id', readonly=False,
+        domain=lambda self: [('reconcile', '=', True), ('user_type_id.id', '=', self.env.ref('account.data_account_type_current_assets').id)],
+        help="Intermediary account used to transfer money from one bank/cash account to another bank/cash account")
     module_account_accountant = fields.Boolean(string='Accounting')
     group_analytic_accounting = fields.Boolean(string='Analytic Accounting',
         implied_group='analytic.group_analytic_accounting')
@@ -73,8 +98,8 @@ class ResConfigSettings(models.TransientModel):
              '-This installs the account_batch_payment module.')
     module_account_sepa = fields.Boolean(string='SEPA Credit Transfer (SCT)')
     module_account_sepa_direct_debit = fields.Boolean(string='Use SEPA Direct Debit')
-    module_account_plaid = fields.Boolean(string="Plaid Connector")
-    module_account_yodlee = fields.Boolean("Bank Interface - Sync your bank feeds automatically")
+    module_l10n_fr_fec_import = fields.Boolean("Import FEC files",
+        help='Allows you to import FEC files.\n' '-This installs the l10n_fr_fec_import module.')
     module_account_bank_statement_import_qif = fields.Boolean("Import .qif files")
     module_account_bank_statement_import_ofx = fields.Boolean("Import in .ofx format")
     module_account_bank_statement_import_csv = fields.Boolean("Import in .csv format")
@@ -99,13 +124,19 @@ class ResConfigSettings(models.TransientModel):
     invoice_is_print = fields.Boolean(string='Print', related='company_id.invoice_is_print', readonly=False)
     invoice_is_email = fields.Boolean(string='Send Email', related='company_id.invoice_is_email', readonly=False)
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm', related='company_id.incoterm_id', help='International Commercial Terms are a series of predefined commercial terms used in international transactions.', readonly=False)
-    invoice_terms = fields.Text(related='company_id.invoice_terms', string="Terms & Conditions", readonly=False)
+    invoice_terms = fields.Html(related='company_id.invoice_terms', string="Terms & Conditions", readonly=False)
+    invoice_terms_html = fields.Html(related='company_id.invoice_terms_html', string="Terms & Conditions as a Web page",
+                                     readonly=False)
+    terms_type = fields.Selection(
+        related='company_id.terms_type', readonly=False)
+    preview_ready = fields.Boolean(string="Display preview button", compute='_compute_terms_preview')
+
     use_invoice_terms = fields.Boolean(
         string='Default Terms & Conditions',
         config_parameter='account.use_invoice_terms')
 
     # Technical field to hide country specific fields from accounting configuration
-    country_code = fields.Char(related='company_id.country_id.code', readonly=True)
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()
@@ -143,11 +174,6 @@ class ResConfigSettings(models.TransientModel):
         if self.module_account_budget:
             self.group_analytic_accounting = True
 
-    @api.onchange('module_account_yodlee')
-    def onchange_account_yodlee(self):
-        if self.module_account_yodlee:
-            self.module_account_plaid = True
-
     @api.onchange('tax_exigibility')
     def _onchange_tax_exigibility(self):
         res = {}
@@ -162,3 +188,10 @@ class ResConfigSettings(models.TransientModel):
                              'Modify your taxes first before disabling this setting.')
             }
         return res
+
+    @api.depends('terms_type')
+    def _compute_terms_preview(self):
+        for setting in self:
+            # We display the preview button only if the terms_type is html in the setting but also on the company
+            # to avoid landing on an error page (see terms.py controller)
+            setting.preview_ready = self.env.company.terms_type == 'html' and setting.terms_type == 'html'

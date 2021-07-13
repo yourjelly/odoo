@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 import pytz
 
-from odoo import api, exceptions, fields, models, _
+from odoo import api, exceptions, fields, models, _, Command
 from odoo.osv import expression
 
 from odoo.tools.misc import clean_context
@@ -40,7 +40,7 @@ class MailActivityType(models.Model):
     active = fields.Boolean(default=True)
     create_uid = fields.Many2one('res.users', index=True)
     delay_count = fields.Integer(
-        'Scheduled Date', default=0,
+        'Schedule', default=0,
         help='Number of days/week/month before executing the action. It allows to plan the action deadline.')
     delay_unit = fields.Selection([
         ('days', 'days'),
@@ -48,7 +48,7 @@ class MailActivityType(models.Model):
         ('months', 'months')], string="Delay units", help="Unit of delay", required=True, default='days')
     delay_label = fields.Char(compute='_compute_delay_label')
     delay_from = fields.Selection([
-        ('current_date', 'after validation date'),
+        ('current_date', 'after completion date'),
         ('previous_activity', 'after previous activity deadline')], string="Delay Type", help="Type of delay", required=True, default='previous_activity')
     icon = fields.Char('Icon', help="Font awesome icon e.g. fa-tasks")
     decoration_type = fields.Selection([
@@ -60,24 +60,30 @@ class MailActivityType(models.Model):
         domain=['&', ('is_mail_thread', '=', True), ('transient', '=', False)],
         help='Specify a model if the activity should be specific to a model'
              ' and not available when managing activities for other models.')
-    default_next_type_id = fields.Many2one('mail.activity.type', 'Default Next Activity',
-        domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]", ondelete='restrict')
-    force_next = fields.Boolean("Trigger Next Activity", default=False)
-    next_type_ids = fields.Many2many(
-        'mail.activity.type', 'mail_activity_rel', 'activity_id', 'recommended_id',
+    triggered_next_type_id = fields.Many2one(
+        'mail.activity.type', string='Trigger', compute='_compute_triggered_next_type_id',
+        inverse='_inverse_triggered_next_type_id', store=True, readonly=False,
+        domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]", ondelete='restrict',
+        help="Automatically schedule this activity once the current one is marked as done.")
+    chaining_type = fields.Selection([
+        ('suggest', 'Suggest Next Activity'), ('trigger', 'Trigger Next Activity')
+    ], string="Chaining Type", required=True, default="suggest")
+    suggested_next_type_ids = fields.Many2many(
+        'mail.activity.type', 'mail_activity_rel', 'activity_id', 'recommended_id', string='Suggest',
         domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]",
-        string='Recommended Next Activities')
+        compute='_compute_suggested_next_type_ids', inverse='_inverse_suggested_next_type_ids', store=True, readonly=False,
+        help="Suggest these activities once the current one is marked as done.")
     previous_type_ids = fields.Many2many(
         'mail.activity.type', 'mail_activity_rel', 'recommended_id', 'activity_id',
         domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]",
         string='Preceding Activities')
     category = fields.Selection([
         ('default', 'None'), ('upload_file', 'Upload Document')
-    ], default='default', string='Action to Perform',
+    ], default='default', string='Action',
         help='Actions may trigger specific behavior like opening calendar view or automatically mark as done when a document is uploaded')
     mail_template_ids = fields.Many2many('mail.template', string='Email templates')
     default_user_id = fields.Many2one("res.users", string="Default User")
-    default_description = fields.Html(string="Default Description", translate=True)
+    default_note = fields.Html(string="Default Note", translate=True)
 
     #Fields for display purpose only
     initial_res_model_id = fields.Many2one('ir.model', 'Initial model', compute="_compute_initial_res_model_id", store=False,
@@ -100,6 +106,32 @@ class MailActivityType(models.Model):
         for activity_type in self:
             unit = selection_description_values[activity_type.delay_unit]
             activity_type.delay_label = '%s %s' % (activity_type.delay_count, unit)
+
+    @api.depends('chaining_type')
+    def _compute_suggested_next_type_ids(self):
+        """suggested_next_type_ids and triggered_next_type_id should be mutually exclusive"""
+        for activity_type in self:
+            if activity_type.chaining_type == 'trigger':
+                activity_type.suggested_next_type_ids = False
+
+    def _inverse_suggested_next_type_ids(self):
+        for activity_type in self:
+            if activity_type.suggested_next_type_ids:
+                activity_type.chaining_type = 'suggest'
+
+    @api.depends('chaining_type')
+    def _compute_triggered_next_type_id(self):
+        """suggested_next_type_ids and triggered_next_type_id should be mutually exclusive"""
+        for activity_type in self:
+            if activity_type.chaining_type == 'suggest':
+                activity_type.triggered_next_type_id = False
+
+    def _inverse_triggered_next_type_id(self):
+        for activity_type in self:
+            if activity_type.triggered_next_type_id:
+                activity_type.chaining_type = 'trigger'
+            else:
+                activity_type.chaining_type = 'suggest'
 
 
 class MailActivity(models.Model):
@@ -179,20 +211,20 @@ class MailActivity(models.Model):
         compute='_compute_has_recommended_activities',
         help='Technical field for UX purpose')
     mail_template_ids = fields.Many2many(related='activity_type_id.mail_template_ids', readonly=True)
-    force_next = fields.Boolean(related='activity_type_id.force_next', readonly=True)
+    chaining_type = fields.Selection(related='activity_type_id.chaining_type', readonly=True)
     # access
     can_write = fields.Boolean(compute='_compute_can_write', help='Technical field to hide buttons if the current user has no access.')
 
     @api.onchange('previous_activity_type_id')
     def _compute_has_recommended_activities(self):
         for record in self:
-            record.has_recommended_activities = bool(record.previous_activity_type_id.next_type_ids)
+            record.has_recommended_activities = bool(record.previous_activity_type_id.suggested_next_type_ids)
 
     @api.onchange('previous_activity_type_id')
     def _onchange_previous_activity_type_id(self):
         for record in self:
-            if record.previous_activity_type_id.default_next_type_id:
-                record.activity_type_id = record.previous_activity_type_id.default_next_type_id
+            if record.previous_activity_type_id.triggered_next_type_id:
+                record.activity_type_id = record.previous_activity_type_id.triggered_next_type_id
 
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
@@ -237,8 +269,8 @@ class MailActivity(models.Model):
                 self.summary = self.activity_type_id.summary
             self.date_deadline = self._calculate_date_deadline(self.activity_type_id)
             self.user_id = self.activity_type_id.default_user_id or self.env.user
-            if self.activity_type_id.default_description:
-                self.note = self.activity_type_id.default_description
+            if self.activity_type_id.default_note:
+                self.note = self.activity_type_id.default_note
 
     def _calculate_date_deadline(self, activity_type):
         # Date.context_today is correct because date_deadline is a Date and is meant to be
@@ -326,8 +358,8 @@ class MailActivity(models.Model):
                 model.check_access_rights('read')
             except exceptions.AccessError:
                 raise exceptions.UserError(
-                    _('Assigned user %s has no access to the document and is not able to handle this activity.') %
-                    activity.user_id.display_name)
+                    _('Assigned user %s has no access to the document and is not able to handle this activity.',
+                      activity.user_id.display_name))
             else:
                 try:
                     target_user = activity.user_id
@@ -339,41 +371,53 @@ class MailActivity(models.Model):
                     model.browse(activity.res_id).check_access_rule('read')
                 except exceptions.AccessError:
                     raise exceptions.UserError(
-                        _('Assigned user %s has no access to the document and is not able to handle this activity.') %
-                        activity.user_id.display_name)
+                        _('Assigned user %s has no access to the document and is not able to handle this activity.',
+                          activity.user_id.display_name))
 
     # ------------------------------------------------------
     # ORM overrides
     # ------------------------------------------------------
 
-    @api.model
-    def create(self, values):
-        activity = super(MailActivity, self).create(values)
-        need_sudo = False
-        try:  # in multicompany, reading the partner might break
-            partner_id = activity.user_id.partner_id.id
-        except exceptions.AccessError:
-            need_sudo = True
-            partner_id = activity.user_id.sudo().partner_id.id
+    @api.model_create_multi
+    def create(self, vals_list):
+        activities = super(MailActivity, self).create(vals_list)
+        for activity in activities:
+            need_sudo = False
+            try:  # in multicompany, reading the partner might break
+                partner_id = activity.user_id.partner_id.id
+            except exceptions.AccessError:
+                need_sudo = True
+                partner_id = activity.user_id.sudo().partner_id.id
 
-        # send a notification to assigned user; in case of manually done activity also check
-        # target has rights on document otherwise we prevent its creation. Automated activities
-        # are checked since they are integrated into business flows that should not crash.
-        if activity.user_id != self.env.user:
-            if not activity.automated:
-                activity._check_access_assignation()
-            if not self.env.context.get('mail_activity_quick_update', False):
-                if need_sudo:
-                    activity.sudo().action_notify()
-                else:
-                    activity.action_notify()
+            # send a notification to assigned user; in case of manually done activity also check
+            # target has rights on document otherwise we prevent its creation. Automated activities
+            # are checked since they are integrated into business flows that should not crash.
+            if activity.user_id != self.env.user:
+                if not activity.automated:
+                    activity._check_access_assignation()
+                if not self.env.context.get('mail_activity_quick_update', False):
+                    if need_sudo:
+                        activity.sudo().action_notify()
+                    else:
+                        activity.action_notify()
 
-        self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[partner_id])
-        if activity.date_deadline <= fields.Date.today():
-            self.env['bus.bus'].sendone(
-                (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
-                {'type': 'activity_updated', 'activity_created': True})
-        return activity
+            self.env[activity.res_model].browse(activity.res_id).message_subscribe(partner_ids=[partner_id])
+            if activity.date_deadline <= fields.Date.today():
+                self.env['bus.bus'].sendone(
+                    (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
+                    {'type': 'activity_updated', 'activity_created': True})
+        return activities
+
+    def read(self, fields=None, load='_classic_read'):
+        """ When reading specific fields, read calls _read that manually applies ir rules
+        (_apply_ir_rules), instead of calling check_access_rule.
+
+        Meaning that our custom rules enforcing from '_filter_access_rules' and
+        '_filter_access_rules_python' are bypassed in that case.
+        To make sure we apply our custom security rules, we force a call to 'check_access_rule'. """
+
+        self.check_access_rule('read')
+        return super(MailActivity, self).read(fields=fields, load=load)
 
     def write(self, values):
         if values.get('user_id'):
@@ -408,6 +452,93 @@ class MailActivity(models.Model):
                     (self._cr.dbname, 'res.partner', activity.user_id.partner_id.id),
                     {'type': 'activity_updated', 'activity_deleted': True})
         return super(MailActivity, self).unlink()
+
+    @api.model
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        """ Override that adds specific access rights of mail.activity, to remove
+        ids uid could not see according to our custom rules. Please refer to
+        _filter_access_rules_remaining for more details about those rules.
+
+        The method is inspired by what has been done on mail.message. """
+
+        # Rules do not apply to administrator
+        if self.env.is_superuser():
+            return super(MailActivity, self)._search(
+                args, offset=offset, limit=limit, order=order,
+                count=count, access_rights_uid=access_rights_uid)
+        # Perform a super with count as False, to have the ids, not a counter
+        ids = super(MailActivity, self)._search(
+            args, offset=offset, limit=limit, order=order,
+            count=False, access_rights_uid=access_rights_uid)
+        if not ids and count:
+            return 0
+        elif not ids:
+            return ids
+
+        # check read access rights before checking the actual rules on the given ids
+        super(MailActivity, self.with_user(access_rights_uid or self._uid)).check_access_rights('read')
+
+        self.flush(['res_model', 'res_id'])
+        activities_to_check = []
+        for sub_ids in self._cr.split_for_in_conditions(ids):
+            self._cr.execute("""
+                SELECT DISTINCT activity.id, activity.res_model, activity.res_id
+                FROM "%s" activity
+                WHERE activity.id = ANY (%%(ids)s)""" % self._table, dict(ids=list(sub_ids)))
+            activities_to_check = self._cr.dictfetchall()
+
+        activity_to_documents = {}
+        for activity in activities_to_check:
+            activity_to_documents.setdefault(activity['res_model'], list()).append(activity['res_id'])
+
+        allowed_ids = []
+        for doc_model, doc_ids in activity_to_documents.items():
+            # fall back on related document access right checks. Use the same as defined for mail.thread
+            # if available; otherwise fall back on read
+            if hasattr(self.env[doc_model], '_mail_post_access'):
+                doc_operation = self.env[doc_model]._mail_post_access
+            else:
+                doc_operation = 'read'
+            DocumentModel = self.env[doc_model].with_user(access_rights_uid or self._uid)
+            right = DocumentModel.check_access_rights(doc_operation, raise_exception=False)
+            if right:
+                valid_docs = DocumentModel.browse(doc_ids)._filter_access_rules(doc_operation)
+                allowed_ids += [
+                    activity['id'] for activity in activities_to_check
+                    if activity['res_model'] == doc_model and activity['res_id'] in valid_docs.ids]
+
+        if count:
+            return len(allowed_ids)
+        else:
+            # re-construct a list based on ids, because 'allowed_ids' does not keep the original order
+            id_list = [id for id in ids if id in allowed_ids]
+            return id_list
+
+    @api.model
+    def _read_group_raw(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        """ The base _read_group_raw method implementation computes a where based on a given domain
+        (_where_calc) and manually applies ir rules (_apply_ir_rules).
+
+        Meaning that our custom rules enforcing from '_filter_access_rules' and
+        '_filter_access_rules_python' are bypassed in that case.
+
+        This overrides re-uses the _search implementation to force the read group domain to allowed
+        ids only, that are computed based on our custom rules (see _filter_access_rules_remaining
+        for more details). """
+
+        # Rules do not apply to administrator
+        if not self.env.is_superuser():
+            allowed_ids = self._search(domain, count=False)
+            if allowed_ids:
+                domain = expression.AND([domain, [('id', 'in', allowed_ids)]])
+            else:
+                # force void result if no allowed ids found
+                domain = expression.AND([domain, [(0, '=', 1)]])
+
+        return super(MailActivity, self)._read_group_raw(
+            domain=domain, fields=fields, groupby=groupby, offset=offset,
+            limit=limit, orderby=orderby, lazy=lazy,
+        )
 
     def name_get(self):
         res = []
@@ -520,7 +651,7 @@ class MailActivity(models.Model):
 
         for activity in self:
             # extract value to generate next activities
-            if activity.force_next:
+            if activity.chaining_type == 'trigger':
                 Activity = self.env['mail.activity'].with_context(activity_previous_deadline=activity.date_deadline)  # context key is required in the onchange to set deadline
                 vals = Activity.default_get(Activity.fields_get())
 
@@ -546,7 +677,7 @@ class MailActivity(models.Model):
                 },
                 subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_activities'),
                 mail_activity_type_id=activity.activity_type_id.id,
-                attachment_ids=[(4, attachment_id) for attachment_id in attachment_ids] if attachment_ids else [],
+                attachment_ids=[Command.link(attachment_id) for attachment_id in attachment_ids] if attachment_ids else [],
             )
 
             # Moving the attachments in the message
@@ -669,6 +800,7 @@ class MailActivityMixin(models.AbstractModel):
         ('today', 'Today'),
         ('planned', 'Planned')], string='Activity State',
         compute='_compute_activity_state',
+        search='_search_activity_state',
         groups="base.group_user",
         help='Status based on activities\nOverdue: Due date is already passed\n'
              'Today: Activity date is today\nPlanned: Future activities.')
@@ -738,6 +870,71 @@ class MailActivityMixin(models.AbstractModel):
                 record.activity_state = 'planned'
             else:
                 record.activity_state = False
+
+    def _search_activity_state(self, operator, value):
+        all_states = {'overdue', 'today', 'planned', False}
+        if operator == '=':
+            search_states = {value}
+        elif operator == '!=':
+            search_states = all_states - {value}
+        elif operator == 'in':
+            search_states = set(value)
+        elif operator == 'not in':
+            search_states = all_states - set(value)
+
+        reverse_search = False
+        if False in search_states:
+            # If we search "activity_state = False", they might be a lot of records
+            # (million for some models), so instead of returning the list of IDs
+            # [(id, 'in', ids)] we will reverse the domain and return something like
+            # [(id, 'not in', ids)], so the list of ids is as small as possible
+            reverse_search = True
+            search_states = all_states - search_states
+
+        # Use number in the SQL query for performance purpose
+        integer_state_value = {
+            'overdue': -1,
+            'today': 0,
+            'planned': 1,
+            False: None,
+        }
+
+        search_states_int = {integer_state_value.get(s or False) for s in search_states}
+
+        query = """
+          SELECT res_id
+            FROM (
+                SELECT res_id,
+                       -- Global activity state
+                       MIN(
+                            -- Compute the state of each individual activities
+                            -- -1: overdue
+                            --  0: today
+                            --  1: planned
+                           SIGN(EXTRACT(day from (
+                                mail_activity.date_deadline - DATE_TRUNC('day', %(today_utc)s AT TIME ZONE res_partner.tz)
+                           )))
+                        )::INT AS activity_state
+                  FROM mail_activity
+             LEFT JOIN res_users
+                    ON res_users.id = mail_activity.user_id
+             LEFT JOIN res_partner
+                    ON res_partner.id = res_users.partner_id
+                 WHERE mail_activity.res_model = %(res_model_table)s
+              GROUP BY res_id
+            ) AS res_record
+          WHERE %(search_states_int)s @> ARRAY[activity_state]
+        """
+
+        self._cr.execute(
+            query,
+            {
+                'today_utc': pytz.UTC.localize(datetime.utcnow()),
+                'res_model_table': self._name,
+                'search_states_int': list(search_states_int)
+            },
+        )
+        return [('id', 'not in' if reverse_search else 'in', [r[0] for r in self._cr.fetchall()])]
 
     @api.depends('activity_ids.date_deadline')
     def _compute_activity_date_deadline(self):
@@ -884,7 +1081,7 @@ class MailActivityMixin(models.AbstractModel):
                 'activity_type_id': activity_type and activity_type.id,
                 'summary': summary or activity_type.summary,
                 'automated': True,
-                'note': note or activity_type.default_description,
+                'note': note or activity_type.default_note,
                 'date_deadline': date_deadline,
                 'res_model_id': model_id,
                 'res_id': record.id,

@@ -98,7 +98,7 @@ class AccountMove(models.Model):
 
     @api.onchange('l10n_latam_document_type_id', 'l10n_latam_document_number')
     def _inverse_l10n_latam_document_number(self):
-        for rec in self.filtered(lambda x: x.l10n_latam_document_type_id):
+        for rec in self.filtered(lambda x: x.l10n_latam_document_type_id and (x.l10n_latam_manual_document_number or not x.highest_name)):
             if not rec.l10n_latam_document_number:
                 rec.name = '/'
             else:
@@ -203,7 +203,7 @@ class AccountMove(models.Model):
             internal_types = ['credit_note']
         else:
             internal_types = ['invoice', 'debit_note']
-        return [('internal_type', 'in', internal_types), ('country_id', '=', self.company_id.country_id.id)]
+        return [('internal_type', 'in', internal_types), ('country_id', '=', self.company_id.account_fiscal_country_id.id)]
 
     @api.depends('journal_id', 'partner_id', 'company_id', 'move_type')
     def _compute_l10n_latam_available_document_types(self):
@@ -213,10 +213,10 @@ class AccountMove(models.Model):
 
     @api.depends('l10n_latam_available_document_type_ids', 'debit_origin_id')
     def _compute_l10n_latam_document_type(self):
-        debit_note = self.debit_origin_id
         for rec in self.filtered(lambda x: x.state == 'draft'):
+            debit_note = rec.debit_origin_id
             document_types = rec.l10n_latam_available_document_type_ids._origin
-            document_types = debit_note and document_types.filtered(lambda x: x.internal_type == 'debit_note') or document_types
+            document_types = document_types.filtered(lambda x: x.internal_type == 'debit_note') if debit_note else document_types
             rec.l10n_latam_document_type_id = document_types and document_types[0].id
 
     def _compute_invoice_taxes_by_group(self):

@@ -2,13 +2,17 @@
     position: relative;
     word-wrap: break-word;
 
+    .odoo-editor #codeview-btn-group {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
     .note-editable {
-        min-height: 330px;
         font: inherit !important;
         font-family: inherit !important;
         line-height: inherit !important;
         color: inherit !important;
-        overflow: visible;
 
         p, div {
             font-family: 'Lucida Grande', Helvetica, Verdana, Arial, sans-serif;

@@ -16,7 +16,6 @@ class TestSurveyFlowWithConditions(common.TestSurveyCommon, HttpCase):
                 'questions_layout': 'page_per_section',
                 'scoring_type': 'scoring_with_answers',
                 'scoring_success_min': 85.0,
-                'state': 'open',
             })
 
             page_0 = self.env['survey.question'].with_user(self.survey_manager).create({
@@ -60,7 +59,7 @@ class TestSurveyFlowWithConditions(common.TestSurveyCommon, HttpCase):
                     {'value': 'Answer 4', 'is_correct': True, 'answer_score': 1.0}
                 ])
 
-            q04 = self._add_question(
+            self._add_question(  # q04
                 page_0, 'Question 4', 'simple_choice',
                 sequence=2,
                 constr_mandatory=True, constr_error_msg='Please select an answer', survey_id=survey.id,

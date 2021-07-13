@@ -121,7 +121,7 @@ class MockEmail(common.BaseCase):
             msg_id = "<%.7f-test@iron.sky>" % (time.time())
 
         mail = self.format(template, to=to, subject=subject, cc=cc, return_path=return_path, extra=extra, email_from=email_from, msg_id=msg_id)
-        self.env['mail.thread'].with_context(mail_channel_noautofollow=True).message_process(model, mail)
+        self.env['mail.thread'].message_process(model, mail)
         return self.env[target_model].search([(target_field, '=', subject)])
 
     def gateway_reply_wrecord(self, template, record, use_in_reply_to=True):
@@ -862,11 +862,14 @@ class MailCase(MockEmail):
                 self.assertEqual(tracking.new_value_integer, new_value and new_value.id or False)
                 self.assertEqual(tracking.old_value_char, old_value and old_value.display_name or '')
                 self.assertEqual(tracking.new_value_char, new_value and new_value.display_name or '')
+            elif value_type in ('monetary'):
+                self.assertEqual(tracking.old_value_monetary, old_value)
+                self.assertEqual(tracking.new_value_monetary, new_value)
             else:
                 self.assertEqual(1, 0)
 
 
-class MailCommon(common.SavepointCase, MailCase):
+class MailCommon(common.TransactionCase, MailCase):
     """ Almost-void class definition setting the savepoint case + mock of mail.
     Used mainly for class inheritance in other applications and test modules. """
 
@@ -881,6 +884,9 @@ class MailCommon(common.SavepointCase, MailCase):
         cls.partner_admin = cls.env.ref('base.partner_admin')
         cls.company_admin = cls.user_admin.company_id
         cls.company_admin.write({'email': 'company@example.com'})
+        # have root available at hand, just in case
+        cls.user_root = cls.env.ref('base.user_root')
+        cls.partner_root = cls.user_root.partner_id
 
         # test standard employee
         cls.user_employee = mail_new_test_user(
@@ -892,7 +898,6 @@ class MailCommon(common.SavepointCase, MailCase):
             signature='--\nErnest'
         )
         cls.partner_employee = cls.user_employee.partner_id
-        cls.partner_employee.flush()
 
     @classmethod
     def _create_portal_user(cls):

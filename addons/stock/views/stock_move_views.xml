@@ -34,10 +34,10 @@
                     <field name="date" groups="base.group_no_one" decoration-danger="(state not in ('cancel','done')) and date > current_date" />
                     <field name="reference"/>
                     <field name="picking_type_id" invisible="1"/>
-                    <field name="create_date" invisible="1" groups="base.group_no_one"/>
                     <field name="product_id"/>
                     <field name="location_id" options="{'no_create': True}" string="From"/>
                     <field name="location_dest_id" options="{'no_create': True}" string="To"/>
+                    <field name="product_packaging_id" optional="hide" groups="product.group_stock_packaging"/>
                     <field name="product_uom_qty"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="company_id" groups="base.group_multi_company"/>
@@ -91,7 +91,7 @@
                     <field name="product_uom_qty"/>
                     <field name="quantity_done"/>
                     <field name="reserved_availability"/>
-                    <field name="inventory_id"/>
+                    <field name="is_inventory"/>
                     <field name="state"/>
                     <field name="name"/>
                     <field name="product_uom"/>
@@ -109,11 +109,11 @@
                                             attrs="{'invisible': [('show_details_visible', '=', False)]}" options='{"warn": true}'/>
                                 </div>
                                 <div class="o_kanban_record_body">
-                                    <div attrs="{'invisible': [('inventory_id', '=', False)]}">
+                                    <div attrs="{'invisible': [('is_inventory', '=', False)]}">
                                         <span>Initial Demand <field name="product_uom_qty"/></span><br/>
                                         <span>Quantity Done <field name="quantity_done"/></span>
                                     </div>
-                                    <div attrs="{'invisible': [('inventory_id', '!=', False)]}">
+                                    <div attrs="{'invisible': [('is_inventory', '!=', False)]}">
                                         <span>Quantity Done <field name="quantity_done"/>/<field name="reserved_availability"/></span>
                                     </div>
                                 </div>
@@ -136,6 +136,7 @@
                     <field name="location_id" invisible="1"/>
                     <field name="location_dest_id" invisible="1"/>
                     <field name="picking_id" invisible="1"/>
+                    <field name="picking_type_id" invisible="1"/>
                     <field name="is_locked" invisible="1"/>
                     <field name="picking_type_entire_packs" invisible="1"/>
                     <field name="display_assign_serial" invisible="1"/>
@@ -352,6 +353,7 @@
                     <separator/>
                     <filter string="Incoming" name="incoming" domain="[('location_id.usage', 'not in', ('internal', 'transit')), ('location_dest_id.usage', 'in', ('internal', 'transit'))]"/>
                     <filter string="Outgoing" name="outgoing" domain="[('location_id.usage', 'in', ('internal', 'transit')), ('location_dest_id.usage', 'not in', ('internal', 'transit'))]"/>
+                    <filter string="Inventory" name="inventory" domain="[('is_inventory', '=', True)]"/>
                     <separator/>
                     <filter string="Date" name="today" date="date" help="Scheduled or processing date"/>
                     <group expand="0" string="Group By">
@@ -441,7 +443,6 @@
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                     <field name="location_id" options="{'no_create': True}" invisible="1"/>
                     <field name="location_dest_id" invisible="1"/>
-                    <field name="create_date" invisible="1"/>
                     <field name="state" optional="show"/>
                     <field name="company_id" invisible="1"/>
                 </tree>

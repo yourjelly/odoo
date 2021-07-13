@@ -9,7 +9,7 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
-    
+
     @api.model
     def _get_line_batch_key(self, line):
         # OVERRIDE to set the bank account defined on the employee

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 import uuid
 from collections import defaultdict
 
@@ -10,6 +11,9 @@ from odoo import api, fields, models, tools, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import AccessError
 from odoo.osv import expression
+from odoo.tools import is_html_empty
+
+_logger = logging.getLogger(__name__)
 
 
 class ChannelUsersRelation(models.Model):
@@ -23,6 +27,12 @@ class ChannelUsersRelation(models.Model):
     completed_slides_count = fields.Integer('# Completed Slides')
     partner_id = fields.Many2one('res.partner', index=True, required=True, ondelete='cascade')
     partner_email = fields.Char(related='partner_id.email', readonly=True)
+    # channel-related information (for UX purpose)
+    channel_user_id = fields.Many2one('res.users', string='Responsible', related='channel_id.user_id')
+    channel_type = fields.Selection(related='channel_id.channel_type')
+    channel_visibility = fields.Selection(related='channel_id.visibility')
+    channel_enroll = fields.Selection(related='channel_id.enroll')
+    channel_website_id = fields.Many2one('website', string='Website', related='channel_id.website_id')
 
     def _recompute_completion(self):
         read_group_res = self.env['slide.slide.partner'].sudo().read_group(
@@ -38,21 +48,16 @@ class ChannelUsersRelation(models.Model):
             mapped_data.setdefault(item['channel_id'][0], dict())
             mapped_data[item['channel_id'][0]][item['partner_id'][0]] = item['__count']
 
-        partner_karma = dict.fromkeys(self.mapped('partner_id').ids, 0)
+        completed_records = self.env['slide.channel.partner']
         for record in self:
             record.completed_slides_count = mapped_data.get(record.channel_id.id, dict()).get(record.partner_id.id, 0)
             record.completion = 100.0 if record.completed else round(100.0 * record.completed_slides_count / (record.channel_id.total_slides or 1))
             if not record.completed and record.channel_id.active and record.completed_slides_count >= record.channel_id.total_slides:
-                record.completed = True
-                partner_karma[record.partner_id.id] += record.channel_id.karma_gen_channel_finish
+                completed_records += record
 
-        partner_karma = {partner_id: karma_to_add
-                         for partner_id, karma_to_add in partner_karma.items() if karma_to_add > 0}
-
-        if partner_karma:
-            users = self.env['res.users'].sudo().search([('partner_id', 'in', list(partner_karma.keys()))])
-            for user in users:
-                users.add_karma(partner_karma[user.partner_id.id])
+        if completed_records:
+            completed_records._set_as_completed()
+            completed_records._send_completed_mail()
 
     def unlink(self):
         """
@@ -70,6 +75,58 @@ class ChannelUsersRelation(models.Model):
         if removed_slide_partner_domain:
             self.env['slide.slide.partner'].search(removed_slide_partner_domain).unlink()
         return super(ChannelUsersRelation, self).unlink()
+
+    def _set_as_completed(self):
+        """ Set record as completed and compute karma gains """
+        partner_karma = dict.fromkeys(self.mapped('partner_id').ids, 0)
+        for record in self:
+            record.completed = True
+            partner_karma[record.partner_id.id] += record.channel_id.karma_gen_channel_finish
+
+        partner_karma = {
+            partner_id: karma_to_add
+            for partner_id, karma_to_add in partner_karma.items() if karma_to_add > 0
+        }
+
+        if partner_karma:
+            users = self.env['res.users'].sudo().search([('partner_id', 'in', list(partner_karma.keys()))])
+            for user in users:
+                users.add_karma(partner_karma[user.partner_id.id])
+
+    def _send_completed_mail(self):
+        """ Send an email to the attendee when he has successfully completed a course. """
+        template_to_records = dict()
+        for record in self:
+            template = record.channel_id.completed_template_id
+            if template:
+                records = template_to_records.setdefault(template, self.env['slide.channel.partner'])
+                records += record
+
+        for template, records in template_to_records.items():
+            record_email_values = template.generate_email(self.ids, ['subject', 'body_html', 'email_from', 'partner_to'])
+
+        mail_mail_values = []
+        for record in self:
+            email_values = record_email_values.get(record.id)
+            if not email_values or not email_values.get('partner_ids'):
+                continue
+
+            email_values.update(
+                author_id=record.channel_id.user_id.partner_id.id or self.env.company.partner_id.id,
+                auto_delete=True,
+                recipient_ids=[(4, pid) for pid in email_values['partner_ids']],
+            )
+            email_values['body_html'] = template._render_encapsulate(
+                'mail.mail_notification_light', email_values['body_html'],
+                add_context={
+                    'message': self.env['mail.message'].sudo().new(dict(body=email_values['body_html'], record_name=record.channel_id.name)),
+                    'model_description': _('Completed Course')  # tde fixme: translate into partner lang
+                }
+            )
+            mail_mail_values.append(email_values)
+
+        if mail_mail_values:
+            self.env['mail.mail'].sudo().create(mail_mail_values)
 
 
 class Channel(models.Model):
@@ -92,8 +149,8 @@ class Channel(models.Model):
     # description
     name = fields.Char('Name', translate=True, required=True)
     active = fields.Boolean(default=True, tracking=100)
-    description = fields.Text('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
-    description_short = fields.Text('Short Description', translate=True, help="The description that is displayed on the course card")
+    description = fields.Html('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
+    description_short = fields.Html('Short Description', translate=True, help="The description that is displayed on the course card")
     description_html = fields.Html('Detailed Description', translate=tools.html_translate, sanitize_attributes=False, sanitize_form=False)
     channel_type = fields.Selection([
         ('training', 'Training'), ('documentation', 'Documentation')],
@@ -146,12 +203,15 @@ class Channel(models.Model):
              " * post comment and review on training course;")
     publish_template_id = fields.Many2one(
         'mail.template', string='New Content Email',
-        help="Email template to send slide publication through email",
+        help="Email attendees once a new content is published",
         default=lambda self: self.env['ir.model.data'].xmlid_to_res_id('website_slides.slide_template_published'))
     share_template_id = fields.Many2one(
         'mail.template', string='Share Template',
         help="Email template used when sharing a slide",
         default=lambda self: self.env['ir.model.data'].xmlid_to_res_id('website_slides.slide_template_shared'))
+    completed_template_id = fields.Many2one(
+        'mail.template', string='Completion Email', help="Email attendees once they've finished the course",
+        default=lambda self: self.env['ir.model.data'].xmlid_to_res_id('website_slides.mail_template_channel_completed'))
     enroll = fields.Selection([
         ('public', 'Public'), ('invite', 'On Invitation')],
         default='public', string='Enroll Policy', required=True,
@@ -396,7 +456,7 @@ class Channel(models.Model):
             vals['channel_partner_ids'] = [(0, 0, {
                 'partner_id': self.env.user.partner_id.id
             })]
-        if vals.get('description') and not vals.get('description_short'):
+        if not is_html_empty(vals.get('description')) and  is_html_empty(vals.get('description_short')):
             vals['description_short'] = vals['description']
         channel = super(Channel, self.with_context(mail_create_nosubscribe=True)).create(vals)
 
@@ -409,7 +469,7 @@ class Channel(models.Model):
 
     def write(self, vals):
         # If description_short wasn't manually modified, there is an implicit link between this field and description.
-        if vals.get('description') and not vals.get('description_short') and self.description == self.description_short:
+        if not is_html_empty(vals.get('description')) and is_html_empty(vals.get('description_short')) and self.description == self.description_short:
             vals['description_short'] = vals.get('description')
 
         res = super(Channel, self).write(vals)
@@ -464,21 +524,22 @@ class Channel(models.Model):
     # Business / Actions
     # ---------------------------------------------------------
 
-    def action_redirect_to_members(self, state=None):
+    def action_redirect_to_members(self, completed=False):
+        """ Redirects to attendees of the course. If completed is True, a filter
+        will be added in action that will display only attendees who have completed
+        the course. """
         action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
-        action['domain'] = [('channel_id', 'in', self.ids)]
+        action_ctx = {'active_test': False}
+        if completed:
+            action_ctx['search_default_filter_completed'] = 1
         if len(self) == 1:
             action['display_name'] = _('Attendees of %s', self.name)
-            action['context'] = {'active_test': False, 'default_channel_id': self.id}
-        if state:
-            action['domain'] += [('completed', '=', state == 'completed')]
+            action_ctx['search_default_channel_id'] = self.id
+        action['context'] = action_ctx
         return action
 
-    def action_redirect_to_running_members(self):
-        return self.action_redirect_to_members('running')
-
     def action_redirect_to_done_members(self):
-        return self.action_redirect_to_members('completed')
+        return self.action_redirect_to_members(completed=True)
 
     def action_channel_invite(self):
         self.ensure_one()

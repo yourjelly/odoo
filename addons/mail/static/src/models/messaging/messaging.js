@@ -1,8 +1,8 @@
-odoo.define('mail/static/src/models/messaging/messaging.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2many, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
+import { create, replace } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -32,16 +32,6 @@ function factory(dependencies) {
         //----------------------------------------------------------------------
         // Public
         //----------------------------------------------------------------------
-
-        /**
-         * @returns {boolean}
-         */
-        isNotificationPermissionDefault() {
-            const windowNotification = this.env.browser.Notification;
-            return windowNotification
-                ? windowNotification.permission === 'default'
-                : false;
-        }
 
         /**
          * Open the form view of the record with provided id and model.
@@ -143,9 +133,42 @@ function factory(dependencies) {
             return this.env.messaging.openDocument({ id, model });
         }
 
+        /**
+         * Refreshes the value of `isNotificationPermissionDefault`.
+         *
+         * Must be called in flux-specific way because the browser does not
+         * provide an API to detect when this value changes.
+         */
+        refreshIsNotificationPermissionDefault() {
+            this.update({ isNotificationPermissionDefault: this._computeIsNotificationPermissionDefault() });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
+
+        /**
+         * @private
+         */
+        _computeAllChannels() {
+            return replace(this.allThreads.filter(thread => thread.model === 'mail.channel'));
+        }
+
+        /**
+         * @private
+         */
+        _computeAllPinnedChannels() {
+            return replace(this.allChannels.filter(channel => channel.isPinned));
+        }
+
+        /**
+         * @private
+         * @returns {boolean}
+         */
+        _computeIsNotificationPermissionDefault() {
+            const browserNotification = this.env.browser.Notification;
+            return browserNotification ? browserNotification.permission === 'default' : false;
+        }
 
         /**
          * @private
@@ -160,27 +183,72 @@ function factory(dependencies) {
     }
 
     Messaging.fields = {
+        /**
+         * States all known channels.
+         */
+        allChannels: one2many('mail.thread', {
+            compute: '_computeAllChannels',
+            dependencies: [
+                'allThreads',
+                'allThreadsModel',
+            ],
+            readonly: true,
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allChannelsIsPinned: attr({
+            related: 'allChannels.isPinned',
+        }),
+        /**
+         * States all known pinned channels.
+         */
+        allPinnedChannels: one2many('mail.thread', {
+            compute: '_computeAllPinnedChannels',
+            dependencies: [
+                'allChannels',
+                'allChannelsIsPinned',
+            ],
+            readonly: true,
+        }),
+        /**
+         * States all known threads.
+         */
+        allThreads: one2many('mail.thread', {
+            inverse: 'messaging',
+            readonly: true,
+        }),
+        /**
+         * Serves as compute dependency.
+         */
+        allThreadsModel: attr({
+            related: 'allThreads.model',
+        }),
         cannedResponses: one2many('mail.canned_response'),
         chatWindowManager: one2one('mail.chat_window_manager', {
-            default: [['create']],
+            default: create(),
             inverse: 'messaging',
             isCausal: true,
+            readonly: true,
         }),
         commands: one2many('mail.channel_command'),
         currentPartner: one2one('mail.partner'),
         currentUser: one2one('mail.user'),
         device: one2one('mail.device', {
-            default: [['create']],
+            default: create(),
             isCausal: true,
+            readonly: true,
         }),
         dialogManager: one2one('mail.dialog_manager', {
-            default: [['create']],
+            default: create(),
             isCausal: true,
+            readonly: true,
         }),
         discuss: one2one('mail.discuss', {
-            default: [['create']],
+            default: create(),
             inverse: 'messaging',
             isCausal: true,
+            readonly: true,
         }),
         /**
          * Mailbox History.
@@ -191,47 +259,52 @@ function factory(dependencies) {
          */
         inbox: one2one('mail.thread'),
         initializer: one2one('mail.messaging_initializer', {
-            default: [['create']],
+            default: create(),
             inverse: 'messaging',
             isCausal: true,
+            readonly: true,
         }),
         isInitialized: attr({
             default: false,
         }),
+        /**
+         * States whether browser Notification Permission is currently in its
+         * 'default' state. This means it is allowed to make a request to the
+         * user to enable notifications.
+         */
+        isNotificationPermissionDefault: attr({
+            compute: '_computeIsNotificationPermissionDefault',
+        }),
         locale: one2one('mail.locale', {
-            default: [['create']],
+            default: create(),
             isCausal: true,
+            readonly: true,
         }),
         messagingMenu: one2one('mail.messaging_menu', {
-            default: [['create']],
+            default: create(),
             inverse: 'messaging',
             isCausal: true,
+            readonly: true,
         }),
         /**
          * Mailbox Moderation.
          */
         moderation: one2one('mail.thread'),
         notificationGroupManager: one2one('mail.notification_group_manager', {
-            default: [['create']],
+            default: create(),
             isCausal: true,
+            readonly: true,
         }),
         notificationHandler: one2one('mail.messaging_notification_handler', {
-            default: [['create']],
+            default: create(),
             inverse: 'messaging',
             isCausal: true,
+            readonly: true,
         }),
         outOfFocusUnreadMessageCounter: attr({
             default: 0,
         }),
         partnerRoot: many2one('mail.partner'),
-        /**
-         * Determines which partner should be considered the public partner,
-         * which is a special partner notably used in livechat.
-         *
-         * @deprecated in favor of `publicPartners` because in multi-website
-         * setup there might be a different public partner per website.
-         */
-        publicPartner: many2one('mail.partner'),
         /**
          * Determines which partners should be considered the public partners,
          * which are special partners notably used in livechat.
@@ -249,5 +322,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.messaging', factory);
-
-});

@@ -28,7 +28,7 @@ WebsiteNewMenu.include({
         return wUtils.prompt({
             id: "editor_new_product",
             window_title: _t("New Product"),
-            input: _t("Name"),
+            input: _t("Product Name"),
         }).then(function (result) {
             if (!result.val) {
                 return;
@@ -54,11 +54,11 @@ odoo.define('website_sale.editor', function (require) {
 
 var options = require('web_editor.snippets.options');
 var publicWidget = require('web.public.widget');
-const {Class: EditorMenuBar} = require('web_editor.editor');
-const {qweb} = require('web.core');
+const Wysiwyg = require('web_editor.wysiwyg');
+const {qweb, _t} = require('web.core');
 
-EditorMenuBar.include({
-    custom_events: Object.assign(EditorMenuBar.prototype.custom_events, {
+Wysiwyg.include({
+    custom_events: Object.assign(Wysiwyg.prototype.custom_events, {
         get_ribbons: '_onGetRibbons',
         get_ribbon_classes: '_onGetRibbonClasses',
         delete_ribbon: '_onDeleteRibbon',
@@ -88,7 +88,7 @@ EditorMenuBar.include({
     /**
      * @override
      */
-    async save() {
+    async _saveViewBlocks() {
         const _super = this._super.bind(this);
         await this._saveRibbons();
         return _super(...arguments);

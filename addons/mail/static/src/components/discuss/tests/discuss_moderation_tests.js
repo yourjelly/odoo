@@ -1,12 +1,11 @@
-odoo.define('mail/static/src/components/discuss/tests/discuss_moderation_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {
+import {
     afterEach,
     afterNextRender,
     beforeEach,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -988,7 +987,6 @@ QUnit.test('as moderator, new pending moderation message posted by someone else'
     const messageData = {
         author_id: [10, 'john doe'], // random id, different than current partner
         body: "not empty",
-        channel_ids: [], // server do NOT return channel_id of the message if pending moderation
         id: 1, // random unique id
         model: 'mail.channel', // expected value to link message to channel
         moderation_status: 'pending_moderation', // message is expected to be pending
@@ -1175,6 +1173,4 @@ QUnit.test('accept multiple moderation messages after having accepted other mess
 
 });
 });
-});
-
 });

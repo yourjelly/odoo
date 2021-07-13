@@ -77,20 +77,15 @@ options.registry.Channel = options.Class.extend({
     /**
      * @override
      */
-    _renderCustomXML(uiFragment) {
-        // TODO remove this part in master 
-        const createChannelEl = uiFragment.querySelector('we-button[data-create-channel]');
-        createChannelEl.dataset.name = 'create_mail_channel_opt';
-
-        return this._getPublicChannels().then(channels => {
-            const menuEl = uiFragment.querySelector('.select_discussion_list');
-            for (const channel of channels) {
-                const el = document.createElement('we-button');
-                el.dataset.selectDataAttribute = channel[0];
-                el.textContent = channel[1];
-                menuEl.appendChild(el);
-            }
-        });
+    async _renderCustomXML(uiFragment) {
+        const channels = await this._getPublicChannels();
+        const menuEl = uiFragment.querySelector('.select_discussion_list');
+        for (const channel of channels) {
+            const el = document.createElement('we-button');
+            el.dataset.selectDataAttribute = channel[0];
+            el.textContent = channel[1];
+            menuEl.appendChild(el);
+        }
     },
     /**
      * @private

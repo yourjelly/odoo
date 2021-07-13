@@ -1,19 +1,18 @@
-odoo.define('mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ActivityMarkDonePopover: require('mail/static/src/components/activity_mark_done_popover/activity_mark_done_popover.js'),
-};
-
-const {
+import { ActivityMarkDonePopover } from '@mail/components/activity_mark_done_popover/activity_mark_done_popover';
+import { insert } from '@mail/model/model_field_command';
+import {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
 
-const Bus = require('web.Bus');
+import Bus from 'web.Bus';
+
+const components = { ActivityMarkDonePopover };
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -50,7 +49,7 @@ QUnit.test('activity mark done popover simplest layout', async function (assert)
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -93,9 +92,9 @@ QUnit.test('activity with force next mark done popover simplest layout', async f
     const activity = this.env.models['mail.activity'].create({
         canWrite: true,
         category: 'not_upload_file',
-        force_next: true,
+        chaining_type: 'trigger',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -156,7 +155,7 @@ QUnit.test('activity mark done popover mark done without feedback', async functi
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -192,7 +191,7 @@ QUnit.test('activity mark done popover mark done with feedback', async function 
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -236,7 +235,7 @@ QUnit.test('activity mark done popover mark done and schedule next', async funct
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -277,7 +276,7 @@ QUnit.test('[technical] activity mark done & schedule next with new action', asy
         canWrite: true,
         category: 'not_upload_file',
         id: 12,
-        thread: [['insert', { id: 42, model: 'res.partner' }]],
+        thread: insert({ id: 42, model: 'res.partner' }),
     });
     await this.createActivityMarkDonePopoverComponent(activity);
 
@@ -292,6 +291,4 @@ QUnit.test('[technical] activity mark done & schedule next with new action', asy
 
 });
 });
-});
-
 });

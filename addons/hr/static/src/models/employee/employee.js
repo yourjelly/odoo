@@ -1,8 +1,9 @@
 odoo.define('hr/static/src/models/employee/employee.js', function (require) {
 'use strict';
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, one2one } = require('mail/static/src/model/model_field.js');
+const { registerNewModel } = require('@mail/model/model_core');
+const { attr, one2one } = require('@mail/model/model_field');
+const { insert, unlink } = require('@mail/model/model_field_command');
 
 function factory(dependencies) {
 
@@ -25,7 +26,7 @@ function factory(dependencies) {
             if ('user_id' in data) {
                 data2.hasCheckedUser = true;
                 if (!data.user_id) {
-                    data2.user = [['unlink']];
+                    data2.user = unlink();
                 } else {
                     const partnerNameGet = data['user_partner_id'];
                     const partnerData = {
@@ -35,10 +36,10 @@ function factory(dependencies) {
                     const userNameGet = data['user_id'];
                     const userData = {
                         id: userNameGet[0],
-                        partner: [['insert', partnerData]],
+                        partner: insert(partnerData),
                         display_name: userNameGet[1],
                     };
-                    data2.user = [['insert', userData]];
+                    data2.user = insert(userData);
                 }
             }
             return data2;
@@ -178,7 +179,9 @@ function factory(dependencies) {
         /**
          * Unique identifier for this employee.
          */
-        id: attr(),
+        id: attr({
+            required: true,
+        }),
         /**
          * Partner related to this employee.
          */

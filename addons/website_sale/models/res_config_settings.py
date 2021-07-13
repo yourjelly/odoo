@@ -25,6 +25,8 @@ class ResConfigSettings(models.TransientModel):
     module_website_sale_wishlist = fields.Boolean("Wishlists")
     module_website_sale_comparison = fields.Boolean("Product Comparison Tool")
     module_website_sale_stock = fields.Boolean("Inventory", help='Installs the "Website Delivery Information" application')
+    module_website_sale_gift_card = fields.Boolean("Gift Card")
+
 
     module_account = fields.Boolean("Invoicing")
 
@@ -32,6 +34,7 @@ class ResConfigSettings(models.TransientModel):
                                                   related='website_id.cart_recovery_mail_template_id', readonly=False)
     cart_abandoned_delay = fields.Float("Abandoned Delay", help="Number of hours after which the cart is considered abandoned.",
                                         related='website_id.cart_abandoned_delay', readonly=False)
+    cart_add_on_page = fields.Boolean("Stay on page after adding to cart", related='website_id.cart_add_on_page', readonly=False)
 
     @api.model
     def get_values(self):

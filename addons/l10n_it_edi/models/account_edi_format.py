@@ -5,11 +5,9 @@ from odoo import api, models, fields, _
 from odoo.tests.common import Form
 from odoo.exceptions import UserError
 from odoo.tools import float_repr
-from odoo.addons.l10n_it_edi.tools.remove_signature import remove_signature
 
-from lxml import etree
-from datetime import date, datetime
 import re
+from datetime import date, datetime
 import logging
 import base64
 
@@ -198,39 +196,6 @@ class AccountEdiFormat(models.Model):
                 return self._import_fattura_pa(tree, invoice)
         return super()._update_invoice_from_xml_tree(filename, tree, invoice)
 
-    def _decode_p7m_to_xml(self, filename, content):
-        decoded_content = remove_signature(content)
-        if not decoded_content:
-            return None
-
-        try:
-            # Some malformed XML are accepted by FatturaPA, this expends compatibility
-            parser = etree.XMLParser(recover=True)
-            xml_tree = etree.fromstring(decoded_content, parser)
-        except Exception as e:
-            _logger.exception("Error when converting the xml content to etree: %s", e)
-            return None
-        if not len(xml_tree):
-            return None
-
-        return xml_tree
-
-    def _create_invoice_from_binary(self, filename, content, extension):
-        self.ensure_one()
-        if extension.lower() == '.xml.p7m':
-            decoded_content = self._decode_p7m_to_xml(filename, content)
-            if decoded_content is not None and self._is_fattura_pa(filename, decoded_content):
-                return self._import_fattura_pa(decoded_content, self.env['account.move'])
-        return super()._create_invoice_from_binary(filename, content, extension)
-
-    def _update_invoice_from_binary(self, filename, content, extension, invoice):
-        self.ensure_one()
-        if extension.lower() == '.xml.p7m':
-            decoded_content = self._decode_p7m_to_xml(filename, content)
-            if decoded_content is not None and self._is_fattura_pa(filename, decoded_content):
-                return self._import_fattura_pa(decoded_content, invoice)
-        return super()._update_invoice_from_binary(filename, content, extension, invoice)
-
     def _import_fattura_pa(self, tree, invoice):
         """ Decodes a fattura_pa invoice into an invoice.
 
@@ -364,7 +329,7 @@ class AccountEdiFormat(models.Model):
                 # Comment. <2.1.1.11>
                 elements = body_tree.xpath('.//DatiGeneraliDocumento//Causale')
                 for element in elements:
-                    invoice_form.narration = '%s%s\n' % (invoice_form.narration or '', element.text)
+                    invoice_form.narration = '%s%s<br/>' % (invoice_form.narration or '', element.text)
 
                 # Informations relative to the purchase order, the contract, the agreement,
                 # the reception phase or invoices previously transmitted

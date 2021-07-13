@@ -10,7 +10,7 @@ from operator import itemgetter
 
 from psycopg2 import sql
 
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import pycompat, unique
@@ -150,7 +150,7 @@ class IrModel(models.Model):
     def _default_field_id(self):
         if self.env.context.get('install_mode'):
             return []                   # no default field when importing
-        return [(0, 0, {'name': 'x_name', 'field_description': 'Name', 'ttype': 'char', 'copied': True})]
+        return [Command.create({'name': 'x_name', 'field_description': 'Name', 'ttype': 'char', 'copied': True})]
 
     name = fields.Char(string='Model Description', translate=True, required=True)
     model = fields.Char(default='x_', required=True, index=True)
@@ -272,20 +272,19 @@ class IrModel(models.Model):
                         WHERE type IN ('model', 'model_terms') AND name LIKE %s
                     """, [model.model + ',%'])
             else:
-                # do not warn in the case of a test module
-                module = self.env.context.get('module', '')
-                if not module.startswith('test_'):
-                    _logger.warning('The model %s could not be dropped because it did not exist in the registry.', model.model)
+                _logger.runbot('The model %s could not be dropped because it did not exist in the registry.', model.model)
         return True
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
         # Prevent manual deletion of module tables
-        if not self._context.get(MODULE_UNINSTALL_FLAG):
-            for model in self:
-                if model.state != 'manual':
-                    raise UserError(_("Model '%s' contains module data and cannot be removed.", model.name))
-                # prevent screwing up fields that depend on these models' fields
-                model.field_id._prepare_update()
+        for model in self:
+            if model.state != 'manual':
+                raise UserError(_("Model '%s' contains module data and cannot be removed.", model.name))
+
+    def unlink(self):
+        # prevent screwing up fields that depend on these models' fields
+        self.field_id._prepare_update()
 
         # delete fields whose comodel is being removed
         self.env['ir.model.fields'].search([('relation', 'in', self.mapped('model'))]).unlink()
@@ -767,7 +766,7 @@ class IrModelFields(models.Model):
                 for dep in model._dependent_fields(field):
                     if dep.manual:
                         failed_dependencies.append((field, dep))
-                for inverse in model._field_inverses.get(field, ()):
+                for inverse in model.pool.field_inverses[field]:
                     if inverse.manual and inverse.type == 'one2many':
                         failed_dependencies.append((field, inverse))
 
@@ -812,19 +811,21 @@ class IrModelFields(models.Model):
             # the registry has been modified, restore it
             self.pool.setup_models(self._cr)
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
+        # Prevent manual deletion of module columns
+        if any(field.state != 'manual' for field in self):
+            raise UserError(_("This column contains module data and cannot be removed!"))
+
     def unlink(self):
         if not self:
             return True
-
-        # Prevent manual deletion of module columns
-        if not self._context.get(MODULE_UNINSTALL_FLAG) and \
-                any(field.state != 'manual' for field in self):
-            raise UserError(_("This column contains module data and cannot be removed!"))
 
         # prevent screwing up fields that depend on these fields
         self._prepare_update()
 
         # determine registry fields corresponding to self
+        triggers = self.pool.field_triggers
         fields = []
         for record in self:
             try:
@@ -848,7 +849,7 @@ class IrModelFields(models.Model):
                 if field is not None:
                     discard_fields(subtree)
 
-        discard_fields(self.pool.field_triggers)
+        discard_fields(triggers)
         self.pool.registry_invalidated = True
 
         # The field we just deleted might be inherited, and the registry is
@@ -1001,7 +1002,7 @@ class IrModelFields(models.Model):
             'store': bool(field.store),
             'copied': bool(field.copy),
             'on_delete': field.ondelete if field.type == 'many2one' else None,
-            'related': ".".join(field.related) if field.related else None,
+            'related': field.related or None,
             'readonly': bool(field.readonly),
             'required': bool(field.required),
             'selectable': bool(field.search or field.store),
@@ -1356,7 +1357,8 @@ class IrModelSelection(models.Model):
 
         return result
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_manual(self):
         # Prevent manual deletion of module columns
         if (
             self.pool.ready
@@ -1366,6 +1368,7 @@ class IrModelSelection(models.Model):
                               'Please modify them through Python code, '
                               'preferably through a custom addon!'))
 
+    def unlink(self):
         self._process_ondelete()
         result = super().unlink()
 
@@ -1386,7 +1389,7 @@ class IrModelSelection(models.Model):
             try:
                 with self.env.cr.savepoint():
                     records.write({fname: value})
-            except Exception as e:
+            except Exception:
                 # going through the ORM failed, probably because of an exception
                 # in an override or possibly a constraint.
                 _logger.runbot(
@@ -1581,7 +1584,7 @@ class IrModelConstraint(models.Model):
         constraint_module = {
             constraint[0]: cls._module
             for cls in reversed(type(model).mro())
-            if not getattr(cls, 'pool', None)
+            if models.is_definition_class(cls)
             for constraint in getattr(cls, '_local_sql_constraints', ())
         }
 
@@ -2269,12 +2272,6 @@ class IrModelData(models.Model):
             if record.exists():
                 module = xmlid.split('.', 1)[0]
                 record = record.with_context(module=module)
-                if record._name == 'ir.model.fields' and not module.startswith('test_'):
-                    _logger.warning(
-                        "Deleting field %s.%s (hint: fields should be"
-                        " explicitly removed by an upgrade script)",
-                        record.model, record.name,
-                    )
                 record.unlink()
             else:
                 bad_imd_ids.append(id)

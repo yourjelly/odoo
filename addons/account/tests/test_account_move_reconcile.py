@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=C0326
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import Form
@@ -68,7 +69,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         cls.tax_tags = cls.env['account.account.tag'].create({
             'name': 'tax_tag_%s' % str(i),
             'applicability': 'taxes',
-            'country_id': cls.fake_country.id,
+            'country_id': cls.company_data['company'].account_fiscal_country_id.id,
         } for i in range(8))
 
         cls.cash_basis_tax_a_third_amount = cls.env['account.tax'].create({
@@ -214,10 +215,10 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             FROM account_account_tag_account_move_line_rel rel
             JOIN account_move_line line ON line.id = rel.account_move_line_id
             WHERE line.tax_exigible IS TRUE
-            AND line.company_id IN %(company_ids)s
+              AND line.company_id = ANY(%(company_ids)s)
             GROUP BY rel.account_account_tag_id
         ''', {
-            'company_ids': tuple(self.env.companies.ids),
+            'company_ids': self.env.companies.ids,
         })
 
         for tag_id, total_balance in self.cr.fetchall():

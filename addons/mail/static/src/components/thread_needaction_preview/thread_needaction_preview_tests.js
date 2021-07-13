@@ -1,19 +1,17 @@
-odoo.define('mail/static/src/components/thread_needaction_preview/thread_needaction_preview_tests.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ThreadNeedactionPreview: require('mail/static/src/components/thread_needaction_preview/thread_needaction_preview.js'),
-};
-
-const {
+import { ThreadNeedactionPreview } from '@mail/components/thread_needaction_preview/thread_needaction_preview';
+import {
     afterEach,
     afterNextRender,
     beforeEach,
     createRootComponent,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} from '@mail/utils/test_utils';
 
-const Bus = require('web.Bus');
+import Bus from 'web.Bus';
+
+const components = { ThreadNeedactionPreview };
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -361,49 +359,6 @@ QUnit.test('preview should display last needaction message preview even if there
     );
 });
 
-QUnit.test('needaction preview should only show on its origin thread', async function (assert) {
-    assert.expect(2);
-
-    this.data['mail.channel'].records.push({ id: 12 });
-    this.data['mail.message'].records.push({
-        channel_ids: [12],
-        id: 21,
-        model: 'res.partner',
-        needaction: true,
-        needaction_partner_ids: [this.data.currentPartnerId],
-        res_id: 11,
-    });
-    this.data['mail.notification'].records.push({
-        mail_message_id: 21,
-        notification_status: 'sent',
-        notification_type: 'inbox',
-        res_partner_id: this.data.currentPartnerId,
-    });
-    await this.start({ hasMessagingMenu: true });
-    await afterNextRender(() => this.afterEvent({
-        eventName: 'o-thread-cache-loaded-messages',
-        func: () => document.querySelector('.o_MessagingMenu_toggler').click(),
-        message: "should wait until inbox loaded initial needaction messages",
-        predicate: ({ threadCache }) => {
-            return threadCache.thread.model === 'mail.box' && threadCache.thread.id === 'inbox';
-        },
-    }));
-    assert.containsOnce(
-        document.body,
-        '.o_ThreadNeedactionPreview',
-        "should have only one preview"
-    );
-    const thread = this.env.models['mail.thread'].findFromIdentifyingData({
-        id: 11,
-        model: 'res.partner',
-    });
-    assert.containsOnce(
-        document.body,
-        `.o_ThreadNeedactionPreview[data-thread-local-id="${thread.localId}"]`,
-        "preview should be on the origin thread"
-    );
-});
-
 QUnit.test('chat window header should not have unread counter for non-channel thread', async function (assert) {
     assert.expect(2);
 
@@ -452,6 +407,4 @@ QUnit.test('chat window header should not have unread counter for non-channel th
 
 });
 });
-});
-
 });

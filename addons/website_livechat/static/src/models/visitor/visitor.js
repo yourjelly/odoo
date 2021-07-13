@@ -1,8 +1,9 @@
 odoo.define('website_livechat/static/src/models/partner/partner.js', function (require) {
 'use strict';
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2one, one2many } = require('mail/static/src/model/model_field.js');
+const { registerNewModel } = require('@mail/model/model_core');
+const { attr, many2one, one2many } = require('@mail/model/model_field');
+const { insert, link, unlink } = require('@mail/model/model_field_command');
 
 function factory(dependencies) {
 
@@ -18,12 +19,12 @@ function factory(dependencies) {
             const data2 = {};
             if ('country_id' in data) {
                 if (data.country_id) {
-                    data2.country = [['insert', {
+                    data2.country = insert({
                         id: data.country_id,
                         code: data.country_code,
-                    }]];
+                    });
                 } else {
-                    data2.country = [['unlink']];
+                    data2.country = unlink();
                 }
             }
             if ('history' in data) {
@@ -32,21 +33,21 @@ function factory(dependencies) {
             if ('is_connected' in data) {
                 data2.is_connected = data.is_connected;
             }
-            if ('lang' in data) {
-                data2.lang = data.lang;
+            if ('lang_name' in data) {
+                data2.lang_name = data.lang_name;
             }
-            if ('name' in data) {
-                data2.name = data.name;
+            if ('display_name' in data) {
+                data2.display_name = data.display_name;
             }
             if ('partner_id' in data) {
                 if (data.partner_id) {
-                    data2.partner = [['insert', { id: data.partner_id }]];
+                    data2.partner = insert({ id: data.partner_id });
                 } else {
-                    data2.partner = [['unlink']];
+                    data2.partner = unlink();
                 }
             }
-            if ('website' in data) {
-                data2.website = data.website;
+            if ('website_name' in data) {
+                data2.website_name = data.website_name;
             }
             return data2;
         }
@@ -72,12 +73,12 @@ function factory(dependencies) {
          */
         _computeCountry() {
             if (this.partner && this.partner.country) {
-                return [['link', this.partner.country]];
+                return link(this.partner.country);
             }
             if (this.country) {
-                return [['link', this.country]];
+                return link(this.country);
             }
-            return [['unlink']];
+            return unlink();
         }
 
         /**
@@ -88,7 +89,7 @@ function factory(dependencies) {
             if (this.partner) {
                 return this.partner.nameOrDisplayName;
             }
-            return this.name;
+            return this.display_name;
         }
     }
 
@@ -114,6 +115,10 @@ function factory(dependencies) {
             ],
         }),
         /**
+         * Display name of the visitor.
+         */
+        display_name: attr(),
+        /**
          * Browsing history of the visitor as a string.
          */
         history: attr(),
@@ -124,15 +129,11 @@ function factory(dependencies) {
         /**
          * Name of the language of the visitor. (Ex: "English")
          */
-        lang: attr(),
-        /**
-         * Name of the visitor.
-         */
-        name: attr(),
+        lang_name: attr(),
         nameOrDisplayName: attr({
             compute: '_computeNameOrDisplayName',
             dependencies: [
-                'name',
+                'display_name',
                 'partnerNameOrDisplayName',
             ],
         }),
@@ -156,7 +157,7 @@ function factory(dependencies) {
         /**
          * Name of the website on which the visitor is connected. (Ex: "Website 1")
          */
-        website: attr(),
+        website_name: attr(),
     };
 
     Visitor.modelName = 'website_livechat.visitor';

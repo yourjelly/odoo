@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo import http
-from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.website_sale.controllers import main
 from odoo.http import request
 
 
-class WebsiteSale(WebsiteSale):
+class WebsiteSale(main.WebsiteSale):
 
     @http.route(['/shop/pricelist'])
     def pricelist(self, promo, **post):
@@ -16,11 +16,11 @@ class WebsiteSale(WebsiteSale):
             request.session['error_promo_code'] = coupon_status['error']
         return request.redirect(post.get('r', '/shop/cart'))
 
-    @http.route(['/shop/payment'], type='http', auth="public", website=True)
-    def payment(self, **post):
+    @http.route()
+    def shop_payment(self, **post):
         order = request.website.sale_get_order()
         order.recompute_coupon_lines()
-        return super(WebsiteSale, self).payment(**post)
+        return super(WebsiteSale, self).shop_payment(**post)
 
     @http.route(['/shop/cart'], type='http', auth="public", website=True)
     def cart(self, **post):

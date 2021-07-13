@@ -3,7 +3,7 @@
 
 import datetime
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, Command
 from odoo.exceptions import AccessError, ValidationError
 
 
@@ -19,7 +19,8 @@ class Category(models.Model):
     parent = fields.Many2one('test_new_api.category', ondelete='cascade')
     parent_path = fields.Char(index=True)
     root_categ = fields.Many2one(_name, compute='_compute_root_categ')
-    display_name = fields.Char(compute='_compute_display_name', inverse='_inverse_display_name')
+    display_name = fields.Char(compute='_compute_display_name', recursive=True,
+                               inverse='_inverse_display_name')
     dummy = fields.Char(store=False)
     discussions = fields.Many2many('test_new_api.discussion', 'test_new_api_discussion_category',
                                    'category', 'discussion')
@@ -227,6 +228,7 @@ class Multi(models.Model):
     partner = fields.Many2one('res.partner')
     lines = fields.One2many('test_new_api.multi.line', 'multi')
     partners = fields.One2many(related='partner.child_ids')
+    tags = fields.Many2many('test_new_api.multi.tag', domain=[('name', 'ilike', 'a')])
 
     @api.onchange('name')
     def _onchange_name(self):
@@ -453,8 +455,6 @@ class Move(models.Model):
 
     line_ids = fields.One2many('test_new_api.move_line', 'move_id', domain=[('visible', '=', True)])
     quantity = fields.Integer(compute='_compute_quantity', store=True)
-    tag_id = fields.Many2one('test_new_api.multi.tag')
-    tag_name = fields.Char(related='tag_id.name')
 
     @api.depends('line_ids.quantity')
     def _compute_quantity(self):
@@ -469,14 +469,6 @@ class MoveLine(models.Model):
     move_id = fields.Many2one('test_new_api.move', required=True, ondelete='cascade')
     visible = fields.Boolean(default=True)
     quantity = fields.Integer()
-
-
-class Payment(models.Model):
-    _name = 'test_new_api.payment'
-    _description = 'Payment inherits from Move'
-    _inherits = {'test_new_api.move': 'move_id'}
-
-    move_id = fields.Many2one('test_new_api.move', required=True, ondelete='cascade')
 
 
 class CompanyDependent(models.Model):
@@ -509,8 +501,8 @@ class ComputeRecursive(models.Model):
 
     name = fields.Char(required=True)
     parent = fields.Many2one('test_new_api.recursive', ondelete='cascade')
-    full_name = fields.Char(compute='_compute_full_name')
-    display_name = fields.Char(compute='_compute_display_name', store=True)
+    full_name = fields.Char(compute='_compute_full_name', recursive=True)
+    display_name = fields.Char(compute='_compute_display_name', recursive=True, store=True)
 
     @api.depends('name', 'parent.full_name')
     def _compute_full_name(self):
@@ -536,7 +528,7 @@ class ComputeRecursiveTree(models.Model):
     name = fields.Char(required=True)
     parent_id = fields.Many2one('test_new_api.recursive.tree', ondelete='cascade')
     children_ids = fields.One2many('test_new_api.recursive.tree', 'parent_id')
-    display_name = fields.Char(compute='_compute_display_name', store=True)
+    display_name = fields.Char(compute='_compute_display_name', recursive=True, store=True)
 
     @api.depends('name', 'children_ids.display_name')
     def _compute_display_name(self):
@@ -618,7 +610,7 @@ class ComputeOnchange(models.Model):
             if any(line.foo == record.foo for line in record.line_ids):
                 continue
             # add a line with the same value as 'foo'
-            record.line_ids = [(0, 0, {'foo': record.foo})]
+            record.line_ids = [Command.create({'foo': record.foo})]
 
     @api.depends('foo')
     def _compute_tag_ids(self):
@@ -1295,6 +1287,26 @@ class ComputeEditableLine(models.Model):
     def _compute_edit(self):
         for line in self:
             line.edit = line.value
+
+
+class ConstrainedUnlinks(models.Model):
+    _name = 'test_new_api.model_constrained_unlinks'
+    _description = 'Model with unlink override that is constrained'
+
+    foo = fields.Char()
+    bar = fields.Integer()
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_bar_gt_five(self):
+        for rec in self:
+            if rec.bar and rec.bar > 5:
+                raise ValueError("Nooooooooo bar can't be greater than five!!")
+
+    @api.ondelete(at_uninstall=True)
+    def _unlink_except_prosciutto(self):
+        for rec in self:
+            if rec.foo and rec.foo == 'prosciutto':
+                raise ValueError("You didn't say if you wanted it crudo or cotto...")
 
 
 class TriggerLeft(models.Model):

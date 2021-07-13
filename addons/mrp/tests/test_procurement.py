@@ -60,7 +60,7 @@ class TestProcurement(TestMrpCommon):
             'product_id': self.product_2.id,
             'inventory_quantity': 48,
             'location_id': self.warehouse.lot_stock_id.id,
-        })
+        }).action_apply_inventory()
         produce_product_4.action_assign()
         self.assertEqual(produce_product_4.product_qty, 8, "Wrong quantity of finish product.")
         self.assertEqual(produce_product_4.product_uom_id, self.uom_dozen, "Wrong quantity of finish product.")
@@ -84,7 +84,7 @@ class TestProcurement(TestMrpCommon):
             'product_id': self.product_2.id,
             'inventory_quantity': 12,
             'location_id': self.warehouse.lot_stock_id.id,
-        })
+        }).action_apply_inventory()
         production_product_6.action_assign()
 
         # ------------------------------------
@@ -300,7 +300,7 @@ class TestProcurement(TestMrpCommon):
 
     def test_procurement_with_empty_bom(self):
         """Ensure that a procurement request using a product with an empty BoM
-        will create a MO in draft state that could be completed afterwards.
+        will create an empty MO in confirmed state that can be completed afterwards.
         """
         self.warehouse = self.env.ref('stock.warehouse0')
         route_manufacture = self.warehouse.manufacture_pull_id.route_id.id
@@ -330,7 +330,7 @@ class TestProcurement(TestMrpCommon):
         production = self.env['mrp.production'].search([('product_id', '=', product.id)])
         self.assertTrue(production)
         self.assertFalse(production.move_raw_ids)
-        self.assertEqual(production.state, 'draft')
+        self.assertEqual(production.state, 'confirmed')
 
         comp1 = self.env['product.product'].create({
             'name': 'egg',
@@ -353,7 +353,8 @@ class TestProcurement(TestMrpCommon):
         2. There is not enough of a manufactured component to assign the created MO => auto-create 2nd MO
         3. Add an extra manufactured component (not in stock) to 1st MO => auto-create 3rd MO
         4. When 2nd MO is completed => auto-assign to 1st MO
-        5. When 1st MO is completed => auto-assign to picking """
+        5. When 1st MO is completed => auto-assign to picking
+        6. Additionally check that a MO that has component in stock auto-reserves when MO is confirmed (since default setting = 'at_confirm')"""
 
         self.warehouse = self.env.ref('stock.warehouse0')
         route_manufacture = self.warehouse.manufacture_pull_id.route_id
@@ -373,7 +374,7 @@ class TestProcurement(TestMrpCommon):
             'type': 'consu',
         })
 
-        self.env['mrp.bom'].create({
+        bom1 = self.env['mrp.bom'].create({
             'product_id': product_1.id,
             'product_tmpl_id': product_1.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -452,6 +453,8 @@ class TestProcurement(TestMrpCommon):
                 'product_uom': product_1.uom_id.id,
                 'product_uom_qty': 10.00,
                 'procure_method': 'make_to_stock',
+                'location_id': self.warehouse.lot_stock_id.id,
+                'location_dest_id': self.ref('stock.stock_location_customers'),
             })],
         })
         pick_output.action_confirm()  # should trigger orderpoint to create and confirm 1st MO
@@ -504,3 +507,15 @@ class TestProcurement(TestMrpCommon):
         mo.button_mark_done()
 
         self.assertEqual(pick_output.move_ids_without_package.reserved_availability, 10, "Completed products should have been auto-reserved in picking")
+
+        # make sure next MO auto-reserves components now that they are in stock since
+        # default reservation_method = 'at_confirm'
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.product_id = product_1
+        mo_form.bom_id = bom1
+        mo_form.product_qty = 5
+        mo_form.product_uom_id = product_1.uom_id
+        mo_assign_at_confirm = mo_form.save()
+        mo_assign_at_confirm.action_confirm()
+
+        self.assertEqual(mo_assign_at_confirm.move_raw_ids.reserved_availability, 5, "Components should have been auto-reserved")

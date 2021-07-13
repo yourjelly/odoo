@@ -16,10 +16,12 @@ from functools import partial
 import odoo
 from odoo import api, models
 from odoo import registry, SUPERUSER_ID
+from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools.safe_eval import safe_eval
 from odoo.osv.expression import FALSE_DOMAIN
-from odoo.addons.http_routing.models.ir_http import ModelConverter, _guess_mimetype
+from odoo.addons.http_routing.models import ir_http
+from odoo.addons.http_routing.models.ir_http import _guess_mimetype
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 
 logger = logging.getLogger(__name__)
@@ -76,10 +78,7 @@ class Http(models.AbstractModel):
             if isinstance(kw[arg], models.BaseModel):
                 kw[arg] = kw[arg].with_context(slug_matching=True)
         qs = request.httprequest.query_string.decode('utf-8')
-        try:
-            return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
-        except odoo.exceptions.MissingError:
-            raise werkzeug.exceptions.NotFound()
+        return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
 
     @classmethod
     def _match(cls, path_info, key=None):
@@ -158,6 +157,22 @@ class Http(models.AbstractModel):
             request.env['website.visitor']._handle_webpage_dispatch(response, website_page)
 
         return False
+
+    @classmethod
+    def _postprocess_args(cls, arguments, rule):
+        processing = super()._postprocess_args(arguments, rule)
+        if processing:
+            return processing
+
+        for record in arguments.values():
+            if isinstance(record, models.BaseModel) and hasattr(record, 'can_access_from_current_website'):
+                try:
+                    if not record.can_access_from_current_website():
+                        return request.env['ir.http']._handle_exception(werkzeug.exceptions.NotFound())
+                except AccessError:
+                    # record.website_id might not be readable as unpublished `event.event` due to ir.rule,
+                    # return 403 instead of using `sudo()` for perfs as this is low level
+                    return request.env['ir.http']._handle_exception(werkzeug.exceptions.Forbidden())
 
     @classmethod
     def _dispatch(cls):
@@ -255,7 +270,13 @@ class Http(models.AbstractModel):
 
         # redirect withtout trailing /
         if not page and req_page != "/" and req_page.endswith("/"):
-            return request.redirect(req_page[:-1])
+            # mimick `_postprocess_args()` redirect
+            path = request.httprequest.path[:-1]
+            if request.lang != cls._get_default_lang():
+                path = '/' + request.lang.url_code + path
+            if request.httprequest.query_string:
+                path += '?' + request.httprequest.query_string.decode('utf-8')
+            return werkzeug.utils.redirect(path, code=301)
 
         if page:
             # prefetch all menus (it will prefetch website.page too)
@@ -358,7 +379,7 @@ class Http(models.AbstractModel):
                 # There might be 2 cases where the exception code can't be found
                 # in the view, either the error is in a child view or the code
                 # contains branding (<div t-att-data="request.browse('ok')"/>).
-                et = etree.fromstring(view.with_context(inherit_branding=False).read_combined(['arch'])['arch'])
+                et = view.with_context(inherit_branding=False)._get_combined_arch()
                 node = et.xpath(exception.path)
                 line = node is not None and etree.tostring(node[0], encoding='unicode')
                 if line:
@@ -422,7 +443,7 @@ class Http(models.AbstractModel):
         return session_info
 
 
-class ModelConverter(ModelConverter):
+class ModelConverter(ir_http.ModelConverter):
 
     def to_url(self, value):
         if value.env.context.get('slug_matching'):

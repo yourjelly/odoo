@@ -5,7 +5,7 @@ const {
     afterEach,
     beforeEach,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} = require('@mail/utils/test_utils');
 
 QUnit.module('website_livechat', {}, function () {
 QUnit.module('components', {}, function () {
@@ -42,8 +42,8 @@ QUnit.test('rendering of visitor banner', async function (assert) {
         display_name: 'Visitor #11',
         history: 'Home → Contact',
         is_connected: true,
-        lang: "English",
-        website: "General website",
+        lang_name: "English",
+        website_name: "General website",
     });
     this.data['mail.channel'].records.push({
         channel_type: 'livechat',
@@ -139,8 +139,8 @@ QUnit.test('livechat with non-logged visitor should show visitor banner', async 
         display_name: 'Visitor #11',
         history: 'Home → Contact',
         is_connected: true,
-        lang: "English",
-        website: "General website",
+        lang_name: "English",
+        website_name: "General website",
     });
     this.data['mail.channel'].records.push({
         channel_type: 'livechat',
@@ -180,9 +180,9 @@ QUnit.test('livechat with logged visitor should show visitor banner', async func
         display_name: 'Visitor #11',
         history: 'Home → Contact',
         is_connected: true,
-        lang: "English",
+        lang_name: "English",
         partner_id: 12,
-        website: "General website",
+        website_name: "General website",
     });
     this.data['mail.channel'].records.push({
         channel_type: 'livechat',

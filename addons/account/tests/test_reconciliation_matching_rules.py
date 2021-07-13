@@ -597,7 +597,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
                     'debit': 10,
                 }),
                 (0, 0, {
-                    'account_id': self.bank_journal.payment_credit_account_id.id,
+                    'account_id': self.bank_journal.company_id.account_journal_payment_credit_account_id.id,
                     'partner_id': partner.id,
                     'name': 'I\'m gonna cut you into little pieces',
                     'credit': 10,
@@ -605,7 +605,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             ],
         })
 
-        payment_bnk_line = move.line_ids.filtered(lambda l: l.account_id == self.bank_journal.payment_credit_account_id)
+        payment_bnk_line = move.line_ids.filtered(lambda l: l.account_id == self.bank_journal.company_id.account_journal_payment_credit_account_id)
 
         move.action_post()
         move_reversed = move._reverse_moves()
@@ -972,7 +972,7 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
 
         pmt_line_1 = create_payment_line(500, 'a1b2c3', payment_partner)
         pmt_line_2 = create_payment_line(500, 'a1b2c3', payment_partner)
-        pmt_line_3 = create_payment_line(500, 'd1e2f3', payment_partner)
+        create_payment_line(500, 'd1e2f3', payment_partner)
 
         self.bank_line_1.write({
             'amount': 1000,

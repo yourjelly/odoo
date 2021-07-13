@@ -16,7 +16,8 @@ class AccountPaymentRegister(models.TransientModel):
         super()._compute_payment_method_id()
         for record in self:
             preferred = record.partner_id.with_company(record.company_id).property_payment_method_id
-            if record.payment_type == 'outbound' and preferred in record.journal_id.outbound_payment_method_ids:
+            if (record.payment_type == 'outbound'
+                    and preferred in record.journal_id.outbound_payment_method_line_ids.mapped('payment_method_id')):
                 record.payment_method_id = preferred
 
 class AccountPayment(models.Model):
@@ -38,6 +39,7 @@ class AccountPayment(models.Model):
         help="The selected journal is configured to print check numbers. If your pre-printed check paper already has numbers "
              "or if the current numbering is wrong, you can change it in the journal configuration page.",
     )
+    payment_method_id = fields.Many2one(index=True)
 
     @api.constrains('check_number', 'journal_id')
     def _constrains_check_number(self):
@@ -103,7 +105,8 @@ class AccountPayment(models.Model):
         super()._compute_payment_method_id()
         for record in self:
             preferred = record.partner_id.with_company(record.company_id).property_payment_method_id
-            if record.payment_type == 'outbound' and preferred in record.journal_id.outbound_payment_method_ids:
+            if (record.payment_type == 'outbound'
+                    and preferred in record.journal_id.outbound_payment_method_line_ids.mapped('payment_method_id')):
                 record.payment_method_id = preferred
 
     def action_post(self):
@@ -291,31 +294,3 @@ class AccountPayment(models.Model):
                 i += num_stub_lines
 
         return stub_pages
-
-    def _check_make_stub_line(self, invoice):
-        """ Return the dict used to display an invoice/refund in the stub
-        """
-        # DEPRECATED: TO BE REMOVED IN MASTER
-        # Find the account.partial.reconcile which are common to the invoice and the payment
-        if invoice.move_type in ['in_invoice', 'out_refund']:
-            invoice_sign = 1
-            invoice_payment_reconcile = invoice.line_ids.mapped('matched_debit_ids').filtered(lambda r: r.debit_move_id in self.line_ids)
-        else:
-            invoice_sign = -1
-            invoice_payment_reconcile = invoice.line_ids.mapped('matched_credit_ids').filtered(lambda r: r.credit_move_id in self.line_ids)
-
-        if self.currency_id != self.journal_id.company_id.currency_id:
-            amount_paid = abs(sum(invoice_payment_reconcile.mapped('amount_currency')))
-        else:
-            amount_paid = abs(sum(invoice_payment_reconcile.mapped('amount')))
-
-        amount_residual = invoice_sign * invoice.amount_residual
-
-        return {
-            'due_date': format_date(self.env, invoice.invoice_date_due),
-            'number': invoice.ref and invoice.name + ' - ' + invoice.ref or invoice.name,
-            'amount_total': formatLang(self.env, invoice_sign * invoice.amount_total, currency_obj=invoice.currency_id),
-            'amount_residual': formatLang(self.env, amount_residual, currency_obj=invoice.currency_id) if amount_residual * 10**4 != 0 else '-',
-            'amount_paid': formatLang(self.env, invoice_sign * amount_paid, currency_obj=self.currency_id),
-            'currency': invoice.currency_id,
-        }

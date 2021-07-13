@@ -1,17 +1,15 @@
-odoo.define('mail/static/src/components/composer_suggested_recipient_list/composer_suggested_recipient_list.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { ComposerSuggestedRecipient } from '@mail/components/composer_suggested_recipient/composer_suggested_recipient';
 
 const { Component } = owl;
 const { useState } = owl.hooks;
 
-const components = {
-    ComposerSuggestedRecipient: require('mail/static/src/components/composer_suggested_recipient/composer_suggested_recipient.js'),
-};
+const components = { ComposerSuggestedRecipient };
 
-class ComposerSuggestedRecipientList extends Component {
+export class ComposerSuggestedRecipientList extends Component {
 
     /**
      * @override
@@ -71,7 +69,4 @@ Object.assign(ComposerSuggestedRecipientList, {
         threadLocalId: String,
     },
     template: 'mail.ComposerSuggestedRecipientList',
-});
-
-return ComposerSuggestedRecipientList;
 });

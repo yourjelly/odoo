@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import re
+
 from odoo import api, fields, models, _
 from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import AccessError, UserError
@@ -42,6 +44,54 @@ class PhoneMixin(models.AbstractModel):
         string='Blacklisted Phone Is Mobile', compute="_compute_blacklisted", compute_sudo=True, store=False, groups="base.group_user",
         help="Indicates if a blacklisted sanitized phone number is a mobile number. Helps distinguish which number is blacklisted \
             when there is both a mobile and phone field in a model.")
+    phone_mobile_search = fields.Char("Phone/Mobile", store=False, search='_search_phone_mobile_search')
+
+    def _search_phone_mobile_search(self, operator, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise UserError(_('Please enter at least 3 characters when searching a Phone/Mobile number.'))
+
+        pattern = r'[\s\\./\(\)\-]'
+        if value.startswith('+') or value.startswith('00'):
+            # searching on +32485112233 should also finds 0032485112233 (and vice versa)
+            # we therefore remove it from input value and search for both of them in db
+            query = f"""
+                SELECT model.id
+                FROM {self._table} model
+                WHERE
+                    model.phone IS NOT NULL AND (
+                        REGEXP_REPLACE(model.phone, %s, '', 'g') ILIKE %s OR
+                        REGEXP_REPLACE(model.phone, %s, '', 'g') ILIKE %s
+                    ) OR
+                    model.mobile IS NOT NULL AND (
+                        REGEXP_REPLACE(model.mobile, %s, '', 'g') ILIKE %s OR
+                        REGEXP_REPLACE(model.mobile, %s, '', 'g') ILIKE %s
+                    );
+            """
+            term = re.sub(pattern, '', value[1 if value.startswith('+') else 2:]) + '%'
+            self._cr.execute(query, (
+                pattern, '00' + term,
+                pattern, '+' + term,
+                pattern, '00' + term,
+                pattern, '+' + term
+            ))
+        else:
+            query = f"""
+                SELECT model.id
+                FROM {self._table} model
+                WHERE
+                    REGEXP_REPLACE(model.phone, %s, '', 'g') ILIKE %s OR
+                    REGEXP_REPLACE(model.mobile, %s, '', 'g') ILIKE %s;
+            """
+            term = '%' + re.sub(pattern, '', value) + '%'
+            self._cr.execute(query, (
+                pattern, term,
+                pattern, term
+            ))
+        res = self._cr.fetchall()
+        if not res:
+            return [(0, '=', 1)]
+        return [('id', 'in', [r[0] for r in res])]
 
     @api.depends(lambda self: self._phone_get_sanitize_triggers())
     def _compute_phone_sanitized(self):

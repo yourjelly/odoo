@@ -52,10 +52,11 @@ class BadgeUser(models.Model):
 
         return True
 
-    @api.model
-    def create(self, vals):
-        self.env['gamification.badge'].browse(vals['badge_id']).check_granting()
-        return super(BadgeUser, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self.env['gamification.badge'].browse(vals['badge_id']).check_granting()
+        return super().create(vals_list)
 
 
 class GamificationBadge(models.Model):
@@ -73,7 +74,7 @@ class GamificationBadge(models.Model):
 
     name = fields.Char('Badge', required=True, translate=True)
     active = fields.Boolean('Active', default=True)
-    description = fields.Text('Description', translate=True)
+    description = fields.Html('Description', translate=True)
     level = fields.Selection([
         ('bronze', 'Bronze'), ('silver', 'Silver'), ('gold', 'Gold')],
         string='Forum Badge Level', default='bronze')

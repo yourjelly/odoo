@@ -14,16 +14,18 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
 
     /**
      * Create a widget and a TourManager instance with a list of given Tour objects.
-     * @see TourManager.register() for more details on the Tours registry system.
-     * @param {Object} params
+     * @see `TourManager.register()` for more details on the Tours registry system.
+     * @param {Object} params aside from the parameters defined below, passed
+     *                        to {@see addMockEnvironment}.
      * @param {string[]} [params.consumed_tours]
-     * @param {boolean} [params.debug]
+     * @param {boolean} [params.debug] also passed along
+     * @param {boolean} [params.disabled]
      * @param {string} params.template inner HTML content of the widget
      * @param {Object[]} params.tours { {string} name, {Object} option, {Object[]} steps }
      */
-    async function createTourManager({ consumed_tours, debug, template, tours }) {
-        const parent = await testUtils.createParent({ debug });
-        const tourManager = new TourManager(parent, consumed_tours);
+    async function createTourManager({ consumed_tours, disabled, template, tours, ...params }) {
+        const parent = await testUtils.createParent(params);
+        const tourManager = new TourManager(parent, consumed_tours, disabled);
         tourManager.running_step_delay = 0;
         for (const { name, options, steps } of tours) {
             tourManager.register(name, options, steps);
@@ -33,25 +35,15 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
             tourManager.destroy = _destroy;
             parent.destroy();
         };
-        await parent.prependTo(testUtils.prepareTarget(debug));
+        await parent.prependTo(testUtils.prepareTarget(params.debug));
         parent.el.innerHTML = template;
-        testUtils.mock.patch(TourManager, {
-            // Since the `tour_disable.js` script automatically sets tours as consumed
-            // as soon as they are registered, we override the "is consumed" to
-            // assert that the tour is in the `consumed_tours` param key.
-            _isTourConsumed: name => (consumed_tours || []).includes(name),
-        });
         await tourManager._register_all(true);
         // Wait for possible tooltips to be loaded and appended.
         await testUtils.nextTick();
         return tourManager;
     }
 
-    QUnit.module("Tours", {
-        afterEach() {
-            testUtils.mock.unpatch(TourManager);
-        },
-    }, function () {
+    QUnit.module("Tours", function () {
 
         QUnit.module("Tour manager");
 
@@ -84,6 +76,7 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
             assert.expect(5);
 
             const tourManager = await createTourManager({
+                data: { 'web_tour.tour': {  fields: {}, consume() {} } },
                 template: `
                     <button class="btn anchor1">Anchor</button>
                     <button class="btn anchor2">Anchor</button>
@@ -200,6 +193,27 @@ odoo.define('web_tour.tour_manager_tests', async function (require) {
 
             kanban.destroy();
             tourManager.destroy();
+        });
+
+        QUnit.test("Automatic tour disabling", async function (assert) {
+            assert.expect(2);
+
+            const options = {
+                template: `<button class="btn anchor">Anchor</button>`,
+                tours: [{ name: "Tour", options: {}, steps: [{ trigger: '.anchor' }] }],
+            };
+
+            const enabledTM = await createTourManager({ disabled: false, ...options });
+
+            assert.containsOnce(document.body, '.o_tooltip:visible');
+
+            enabledTM.destroy();
+
+            const disabledTM = await createTourManager({ disabled: true, ...options });
+
+            assert.containsNone(document.body, '.o_tooltip:visible');
+
+            disabledTM.destroy();
         });
     });
 });

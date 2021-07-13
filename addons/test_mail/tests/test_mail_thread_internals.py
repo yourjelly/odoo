@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from unittest.mock import patch
+from unittest.mock import DEFAULT
 from werkzeug.urls import url_parse, url_decode
 
+from odoo import exceptions
+from odoo.addons.test_mail.models.test_mail_models import MailTestSimple
 from odoo.addons.test_mail.tests.common import TestMailCommon, TestRecipients
 from odoo.tests.common import tagged, HttpCase
 from odoo.tools import mute_logger
@@ -20,7 +24,6 @@ class TestChatterTweaks(TestMailCommon, TestRecipients):
         self.test_record.with_user(self.user_employee).with_context({'mail_create_nosubscribe': True}).message_post(
             body='Test Body', message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertEqual(self.test_record.message_follower_ids.mapped('partner_id'), original.mapped('partner_id'))
-        self.assertEqual(self.test_record.message_follower_ids.mapped('channel_id'), original.mapped('channel_id'))
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_post_no_subscribe_recipients(self):
@@ -28,7 +31,6 @@ class TestChatterTweaks(TestMailCommon, TestRecipients):
         self.test_record.with_user(self.user_employee).with_context({'mail_create_nosubscribe': True}).message_post(
             body='Test Body', message_type='comment', subtype_xmlid='mail.mt_comment', partner_ids=[self.partner_1.id, self.partner_2.id])
         self.assertEqual(self.test_record.message_follower_ids.mapped('partner_id'), original.mapped('partner_id'))
-        self.assertEqual(self.test_record.message_follower_ids.mapped('channel_id'), original.mapped('channel_id'))
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_post_subscribe_recipients(self):
@@ -36,7 +38,6 @@ class TestChatterTweaks(TestMailCommon, TestRecipients):
         self.test_record.with_user(self.user_employee).with_context({'mail_create_nosubscribe': True, 'mail_post_autofollow': True}).message_post(
             body='Test Body', message_type='comment', subtype_xmlid='mail.mt_comment', partner_ids=[self.partner_1.id, self.partner_2.id])
         self.assertEqual(self.test_record.message_follower_ids.mapped('partner_id'), original.mapped('partner_id') | self.partner_1 | self.partner_2)
-        self.assertEqual(self.test_record.message_follower_ids.mapped('channel_id'), original.mapped('channel_id'))
 
     def test_chatter_mail_create_nolog(self):
         """ Test disable of automatic chatter message at create """
@@ -107,7 +108,66 @@ class TestDiscuss(TestMailCommon, TestRecipients):
     @classmethod
     def setUpClass(cls):
         super(TestDiscuss, cls).setUpClass()
-        cls.test_record = cls.env['mail.test.simple'].with_context(cls._test_context).create({'name': 'Test', 'email_from': 'ignasse@example.com'})
+        cls.test_record = cls.env['mail.test.simple'].with_context(cls._test_context).create({
+            'name': 'Test',
+            'email_from': 'ignasse@example.com'
+        })
+
+    @mute_logger('openerp.addons.mail.models.mail_mail')
+    def test_mark_all_as_read(self):
+        def _employee_crash(*args, **kwargs):
+            """ If employee is test employee, consider he has no access on document """
+            recordset = args[0]
+            if recordset.env.uid == self.user_employee.id and not recordset.env.su:
+                if kwargs.get('raise_exception', True):
+                    raise exceptions.AccessError('Hop hop hop Ernest, please step back.')
+                return False
+            return DEFAULT
+
+        with patch.object(MailTestSimple, 'check_access_rights', autospec=True, side_effect=_employee_crash):
+            with self.assertRaises(exceptions.AccessError):
+                self.env['mail.test.simple'].with_user(self.user_employee).browse(self.test_record.ids).read(['name'])
+
+            employee_partner = self.env['res.partner'].with_user(self.user_employee).browse(self.partner_employee.ids)
+
+            # mark all as read clear needactions
+            msg1 = self.test_record.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment', partner_ids=[employee_partner.id])
+            self._reset_bus()
+            with self.assertBus(
+                    [(self.cr.dbname, 'res.partner', employee_partner.id)],
+                    message_items=[
+                        {'type': 'mark_as_read',
+                         'message_ids': [msg1.id],
+                         'needaction_inbox_counter': 0}
+                    ]):
+                employee_partner.env['mail.message'].mark_all_as_read(domain=[])
+            na_count = employee_partner.get_needaction_count()
+            self.assertEqual(na_count, 0, "mark all as read should conclude all needactions")
+
+            # mark all as read also clear inaccessible needactions
+            msg2 = self.test_record.message_post(body='Zest', message_type='comment', subtype_xmlid='mail.mt_comment', partner_ids=[employee_partner.id])
+            needaction_accessible = len(employee_partner.env['mail.message'].search([['needaction', '=', True]]))
+            self.assertEqual(needaction_accessible, 1, "a new message to a partner is readable to that partner")
+
+            msg2.sudo().partner_ids = self.env['res.partner']
+            employee_partner.env['mail.message'].search([['needaction', '=', True]])
+            needaction_length = len(employee_partner.env['mail.message'].search([['needaction', '=', True]]))
+            self.assertEqual(needaction_length, 1, "message should still be readable when notified")
+
+            na_count = employee_partner.get_needaction_count()
+            self.assertEqual(na_count, 1, "message not accessible is currently still counted")
+
+            self._reset_bus()
+            with self.assertBus(
+                    [(self.cr.dbname, 'res.partner', employee_partner.id)],
+                    message_items=[
+                        {'type': 'mark_as_read',
+                         'message_ids': [msg2.id],
+                         'needaction_inbox_counter': 0}
+                    ]):
+                employee_partner.env['mail.message'].mark_all_as_read(domain=[])
+            na_count = employee_partner.get_needaction_count()
+            self.assertEqual(na_count, 0, "mark all read should conclude all needactions even inacessible ones")
 
     def test_set_message_done_user(self):
         with self.assertSinglePostNotifications([{'partner': self.partner_employee, 'type': 'inbox'}], message_info={'content': 'Test'}):

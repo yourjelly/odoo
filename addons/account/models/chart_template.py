@@ -49,6 +49,7 @@ class AccountGroupTemplate(models.Model):
 
 class AccountAccountTemplate(models.Model):
     _name = "account.account.template"
+    _inherit = ['mail.thread']
     _description = 'Templates for Accounts'
     _order = "code"
 
@@ -105,10 +106,16 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', help="The country this chart of accounts belongs to. None if it's generic.")
+
     account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
+    account_journal_payment_debit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Receipts Account')
+    account_journal_payment_credit_account_id = fields.Many2one('account.account.template', string='Journal Outstanding Payments Account')
+
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
+
     property_account_receivable_id = fields.Many2one('account.account.template', string='Receivable Account')
     property_account_payable_id = fields.Many2one('account.account.template', string='Payable Account')
     property_account_expense_categ_id = fields.Many2one('account.account.template', string='Category of Expense Account')
@@ -170,9 +177,14 @@ class AccountChartTemplate(models.Model):
             'company_id': company.id,
         })
 
-    def try_loading(self, company=False):
+    def try_loading(self, company=False, install_demo=True):
         """ Installs this chart of accounts for the current company if not chart
         of accounts had been created for it yet.
+
+        :param company (Model<res.company>): the company we try to load the chart template on.
+            If not provided, it is retrieved from the context.
+        :param install_demo (bool): whether or not we should load demo data right after loading the
+            chart template.
         """
         # do not use `request.env` here, it can cause deadlocks
         if not company:
@@ -184,7 +196,27 @@ class AccountChartTemplate(models.Model):
         if not company.chart_template_id and not self.existing_accounting(company):
             for template in self:
                 template.with_context(default_company_id=company.id)._load(15.0, 15.0, company)
+            # Install the demo data when the first localization is instanciated on the company
+            if install_demo and self.env.ref('base.module_account').demo:
+                self.with_context(
+                    default_company_id=company.id,
+                    allowed_company_ids=[company.id],
+                )._create_demo_data()
 
+    def _create_demo_data(self):
+        try:
+            with self.env.cr.savepoint():
+                demo_data = self._get_demo_data()
+                for model, data in demo_data:
+                    created = self.env[model]._load_records([{
+                        'xml_id': "account.%s" % xml_id if '.' not in xml_id else xml_id,
+                        'values': record,
+                        'noupdate': True,
+                    } for xml_id, record in data.items()])
+                    self._post_create_demo_data(created)
+        except Exception:
+            # Do not rollback installation of CoA if demo data failed
+            _logger.exception('Error while loading accounting demo data')
 
     def _load(self, sale_tax_rate, purchase_tax_rate, company):
         """ Installs this chart of accounts on the current company, replacing
@@ -218,11 +250,11 @@ class AccountChartTemplate(models.Model):
             ).unlink()
 
             # delete account, journal, tax, fiscal position and reconciliation model
-            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.move', 'account.journal', 'account.group']
+            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.move.line', 'account.move', 'account.journal', 'account.tax', 'account.group']
             for model in models_to_delete:
                 res = self.env[model].sudo().search([('company_id', '=', company.id)])
                 if len(res):
-                    res.unlink()
+                    res.with_context(force_delete=True).unlink()
             existing_accounts.unlink()
 
         company.write({'currency_id': self.currency_id.id,
@@ -253,6 +285,25 @@ class AccountChartTemplate(models.Model):
         # Set default cash difference account on company
         if not company.account_journal_suspense_account_id:
             company.account_journal_suspense_account_id = self._create_liquidity_journal_suspense_account(company, self.code_digits)
+
+        account_type_current_assets = self.env.ref('account.data_account_type_current_assets')
+        if not company.account_journal_payment_debit_account_id:
+            company.account_journal_payment_debit_account_id = self.env['account.account'].create({
+                'name': _("Outstanding Receipts"),
+                'code': self.env['account.account']._search_new_account_code(company, self.code_digits, company.bank_account_code_prefix or ''),
+                'reconcile': True,
+                'user_type_id': account_type_current_assets.id,
+                'company_id': company.id,
+            })
+
+        if not company.account_journal_payment_credit_account_id:
+            company.account_journal_payment_credit_account_id = self.env['account.account'].create({
+                'name': _("Outstanding Payments"),
+                'code': self.env['account.account']._search_new_account_code(company, self.code_digits, company.bank_account_code_prefix or ''),
+                'reconcile': True,
+                'user_type_id': account_type_current_assets.id,
+                'company_id': company.id,
+            })
 
         if not company.default_cash_difference_expense_account_id:
             company.default_cash_difference_expense_account_id = self.env['account.account'].create({
@@ -286,6 +337,10 @@ class AccountChartTemplate(models.Model):
         company.account_sale_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('sale', 'all')), ('company_id', '=', company.id)], limit=1).id
         company.account_purchase_tax_id = self.env['account.tax'].search([('type_tax_use', 'in', ('purchase', 'all')), ('company_id', '=', company.id)], limit=1).id
 
+        if self.country_id:
+            # If this CoA is made for only one country, set it as the fiscal country of the company.
+            company.account_fiscal_country_id = self.country_id
+
         return {}
 
     @api.model
@@ -294,11 +349,11 @@ class AccountChartTemplate(models.Model):
         the provided company (meaning hence that its chart of accounts cannot
         be changed anymore).
         """
-        model_to_check = ['account.move.line', 'account.payment', 'account.bank.statement']
+        model_to_check = ['account.payment', 'account.bank.statement']
         for model in model_to_check:
             if self.env[model].sudo().search([('company_id', '=', company_id.id)], limit=1):
                 return True
-        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('name', '!=', '/')], limit=1):
+        if self.env['account.move'].sudo().search([('company_id', '=', company_id.id), ('state', '!=', 'draft')], limit=1):
             return True
         return False
 
@@ -595,6 +650,8 @@ class AccountChartTemplate(models.Model):
             'default_cash_difference_income_account_id': self.default_cash_difference_income_account_id.id,
             'default_cash_difference_expense_account_id': self.default_cash_difference_expense_account_id.id,
             'account_journal_suspense_account_id': self.account_journal_suspense_account_id.id,
+            'account_journal_payment_debit_account_id': self.account_journal_payment_debit_account_id.id,
+            'account_journal_payment_credit_account_id': self.account_journal_payment_credit_account_id.id,
             'account_cash_basis_base_account_id': self.property_cash_basis_base_account_id.id,
             'account_default_pos_receivable_account_id': self.default_pos_receivable_account_id.id,
             'income_currency_exchange_account_id': self.income_currency_exchange_account_id.id,
@@ -867,7 +924,11 @@ class AccountTaxTemplate(models.Model):
     price_include = fields.Boolean(string='Included in Price', default=False,
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Subsequent Taxes', default=False,
-        help="If set, taxes which are computed after this one will be computed based on the price tax included.")
+        help="If set, taxes with a higher sequence than this one will be affected by it, provided they accept it.")
+    is_base_affected = fields.Boolean(
+        string="Base Affected by Previous Taxes",
+        default=True,
+        help="If set, taxes with a lower sequence might affect this one, provided they try to do it.")
     analytic = fields.Boolean(string="Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line.template", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
     refund_repartition_line_ids = fields.One2many(string="Repartition for Refund Invoices", comodel_name="account.tax.repartition.line.template", inverse_name="refund_tax_id", copy=True, help="Repartition when the tax is used on a refund")
@@ -917,6 +978,7 @@ class AccountTaxTemplate(models.Model):
             'description': self.description,
             'price_include': self.price_include,
             'include_base_amount': self.include_base_amount,
+            'is_base_affected': self.is_base_affected,
             'analytic': self.analytic,
             'children_tax_ids': [(6, 0, children_ids)],
             'tax_exigibility': self.tax_exigibility,
@@ -958,6 +1020,15 @@ class AccountTaxTemplate(models.Model):
             for template in templates:
                 if all(child.id in tax_template_to_tax for child in template.children_tax_ids):
                     vals = template._get_tax_vals(company, tax_template_to_tax)
+
+                    if self.chart_template_id.country_id:
+                        vals['country_id'] = self.chart_template_id.country_id.id
+                    elif company.account_fiscal_country_id:
+                        vals['country_id'] = company.account_fiscal_country_id.id
+                    else:
+                        # Will happen for generic CoAs such as syscohada (they are available for multiple countries, and don't have any country_id)
+                        raise UserError(_("Please first define a fiscal country for company %s.", company.name))
+
                     tax_template_vals.append((template, vals))
                 else:
                     # defer the creation of this tax to the next batch

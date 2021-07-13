@@ -5,13 +5,14 @@
 <template id="snippets" inherit_id="web_editor.snippets" primary="True" groups="base.group_user">
     <xpath expr="//div[@id='snippets_menu']" position="inside">
         <button type="button" tabindex="3" class="o_we_customize_theme_btn text-uppercase"
-                data-title="Customize your theme"
                 groups="website.group_website_designer" accesskey="2">
-            <span>Options</span>
+            <span>Theme</span>
         </button>
     </xpath>
     <xpath expr="//t[@id='default_snippets']" position="replace">
         <t id="default_snippets">
+            <t t-set="cta_btn_text" t-value="False"/>
+            <t t-set="cta_btn_href">/contactus</t>
             <div id="snippet_mega_menu" class="o_panel d-none">
                 <div class="o_panel_header">Mega Menu</div>
                 <div class="o_panel_body">
@@ -109,11 +110,12 @@
                 <div class="o_panel_header">Dynamic Content</div>
                 <div class="o_panel_body">
                     <t id="form_form_hook"/>
-                    <t t-snippet="website.s_google_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
+                    <t t-set="google_maps_api_key" t-value="request.env['website'].get_current_website().google_maps_api_key"/>
+                    <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg"/>
+                    <t t-if="debug or google_maps_api_key" t-snippet="website.s_google_map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_snippet.svg"/>
                     <t t-if="debug" t-snippet="website.s_dynamic_snippet_carousel" t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_carousel.svg"/>
                     <t id="sale_products_hook"/>
-                    <t id="sale_recently_viewed_product_hook"/>
                     <t id="sale_product_search_section_hook"/>
                     <t id="blog_posts_hook"/>
                     <t id="event_local_events_hook"/>
@@ -127,6 +129,7 @@
                     </t>
                     <t id="mail_channel_discussion_group_hook"/>
                     <t id="twitter_favorite_tweets_hook"/>
+                    <t t-snippet="website.s_embed_code" t-thumbnail="/website/static/src/img/snippets_thumbs/s_embed_code.svg"/>
                 </div>
             </div>
 
@@ -373,11 +376,10 @@
          data-selector="section"
          data-target="> .carousel">
         <we-select string="Style">
+            <we-button data-select-class="s_carousel_default">Default</we-button>
             <we-button data-select-class="s_carousel_bordered">Bordered</we-button>
             <we-button data-select-class="s_carousel_boxed">Boxed</we-button>
             <we-button data-select-class="s_carousel_rounded">Rounded</we-button>
-            <we-divider/>
-            <we-button data-select-class="s_carousel_default">Default</we-button>
         </we-select>
         <we-select string="Transition">
             <we-button data-select-class="slide">Slide</we-button>
@@ -448,7 +450,7 @@
     <t t-set="only_bg_image_exclude" t-value="''"/>
 
     <t t-set="both_bg_color_image_selector" t-value="'section, .carousel-item, .s_masonry_block .row > div, .s_color_blocks_2 .row > div, .parallax'"/>
-    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map'"/>
+    <t t-set="both_bg_color_image_exclude" t-value="base_only_bg_image_selector + ', .s_carousel_wrapper, .s_color_blocks_2, .s_image_gallery .carousel-item, .s_google_map, .s_map, [data-snippet] .row > div *'"/>
 
     <t t-call="web_editor.snippet_options_background_options">
         <t t-set="selector" t-value="both_bg_color_image_selector"/>
@@ -482,9 +484,11 @@
     </div>
 
     <!-- Mobile display options -->
-    <div data-js="MobileVisibility" data-option-name="showMobile" data-selector="section .row > div"
+    <div data-js="MobileVisibility" data-selector="section, section .row > div"
          data-exclude=".s_col_no_resize.row > div">
-        <we-checkbox string="Shown On Mobile" data-show-on-mobile="true" data-no-preview="true"/>
+        <we-button class="o_we_link o_we_mobile" data-show-on-mobile="true" data-no-preview="true"
+                   data-img="/website/static/src/img/snippets_options/mobile_invisible.svg"
+                   data-active-img="/website/static/src/img/snippets_options/mobile_visible.svg"/>
     </div>
 
     <div data-js="sizing_y"
@@ -501,10 +505,10 @@
         t-att-data-selector="so_snippet_addition_selector"
         data-drop-in=":not(p).oe_structure:not(.oe_structure_solo), :not(p)[data-oe-type=html], :not(p).oe_structure.oe_structure_solo:not(:has(> section, > div))"/>
 
-    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge</t>
+    <t t-set="so_content_addition_selector" t-translation="off">blockquote, .s_card:not(.s_timeline_card), .s_alert, .o_facebook_page, .s_share, .s_rating, .s_hr, .s_google_map, .s_map, .s_countdown, .s_chart, .s_text_highlight, .s_progress_bar, .s_badge</t>
     <div id="so_content_addition"
         t-att-data-selector="so_content_addition_selector"
-        t-attf-data-drop-near="p, h1, h2, h3, .row > div > img, #{so_content_addition_selector}"
+        t-attf-data-drop-near="p, h1, h2, h3, ul, ol, .row > div > img, #{so_content_addition_selector}"
         data-drop-in=".content, nav"/>
 
     <div data-js="SnippetSave"
@@ -517,7 +521,7 @@
     </div>
 
     <div data-js="menu_data"
-         data-selector="#top_menu li > a"
+         data-selector="#top_menu li > a, [data-content_menu_id] li > a"
          data-exclude=".dropdown-toggle, li.o_header_menu_button a, [data-toggle], .o_offcanvas_logo"
          data-no-check="true"/>
 
@@ -986,7 +990,7 @@
 
     <!-- Stretch section -->
     <div data-js="ContainerWidth" data-selector="section, .s_carousel .carousel-item, s_quotes_carousel .carousel-item"
-        data-target="> .container, > .container-fluid, > .o_container_small">
+        data-exclude="[data-snippet] .row > div *" data-target="> .container, > .container-fluid, > .o_container_small">
         <we-button-group string="Content Width">
             <we-button data-select-class="o_container_small"
                        data-img="/website/static/src/img/snippets_options/content_width_small.svg"
@@ -1001,16 +1005,16 @@
     </div>
 
     <!-- Min height of section -->
-    <div data-option-name="minHeight" data-selector="section">
+    <div data-option-name="minHeight" data-selector="section" data-exclude="[data-snippet] .row > div *">
         <we-button-group string="Height">
-            <we-button data-select-class="" title="Fit content">Auto</we-button>
+            <we-button data-name="minheight_auto_opt" data-select-class="" title="Fit content">Auto</we-button>
             <we-button data-select-class="o_half_screen_height" title="Half screen">50%</we-button>
             <we-button data-select-class="o_full_screen_height" title="Full screen">100%</we-button>
         </we-button-group>
     </div>
 
     <!-- Scroll to next section button (only for full height) -->
-    <div data-js="ScrollButton" data-selector="section">
+    <div data-js="ScrollButton" data-selector="section" data-exclude="[data-snippet] .row > div *">
         <we-checkbox string="Scroll down button"
                      data-toggle-button="true"
                      data-no-preview="true"
@@ -1089,7 +1093,7 @@
                             data-use-css-color="true"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"
                             data-use-css-color="true"/>
-            <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-number"/>
+            <we-select data-icon="fa-lightbulb-o" class="o_we_theme_colors_select" data-variable="color-palettes-name"/>
         </we-row>
     </div>
     <div data-js="OptionsTab" data-selector="theme-options" data-no-check="true">
@@ -1208,6 +1212,18 @@
             <we-colorpicker title="Warning" data-customize-website-color="" data-color-type="theme" data-color="warning"/>
             <we-colorpicker title="Error" data-customize-website-color="" data-color-type="theme" data-color="danger"/>
         </we-row>
+        <we-collapse>
+            <we-row string="Grays" class="o_we_gray_preview o_we_collapse_toggler">
+                <t t-foreach="9" t-as="i">
+                    <t t-set="grayCode" t-value="str((9 - i) * 100)"/>
+                    <span t-attf-title="Gray #{grayCode}"
+                          t-attf-variable="#{grayCode}"
+                          t-attf-class="o_we_user_value_widget o_we_gray_preview bg-#{grayCode}"/>
+                </t>
+            </we-row>
+            <we-range string="⌙ Hue" class="o_we_slider_tint" data-customize-gray="" data-param="gray-hue" data-min="0" data-max="359.9" data-step="0.1"/>
+            <we-range string="⌙ Saturation" data-customize-gray="" data-param="gray-extra-saturation" data-step="0.1"/>
+        </we-collapse>
     </div>
     <div data-js="OptionsTab" data-selector="website-settings" data-no-check="true">
         <we-row string="Theme">

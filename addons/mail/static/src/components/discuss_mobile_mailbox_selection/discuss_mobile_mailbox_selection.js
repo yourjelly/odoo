@@ -1,12 +1,11 @@
-odoo.define('mail/static/src/components/discuss_mobile_mailbox_selection/discuss_mobile_mailbox_selection.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
 
 const { Component } = owl;
 
-class DiscussMobileMailboxSelection extends Component {
+export class DiscussMobileMailboxSelection extends Component {
 
     /**
      * @override
@@ -88,8 +87,4 @@ class DiscussMobileMailboxSelection extends Component {
 Object.assign(DiscussMobileMailboxSelection, {
     props: {},
     template: 'mail.DiscussMobileMailboxSelection',
-});
-
-return DiscussMobileMailboxSelection;
-
 });

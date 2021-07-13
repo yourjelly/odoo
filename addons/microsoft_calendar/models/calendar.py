@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import html2plaintext, is_html_empty, plaintext2html
 
 ATTENDEE_CONVERTER_O2M = {
     'needsAction': 'notresponded',
@@ -35,6 +36,12 @@ class Meeting(models.Model):
         return {'name', 'description', 'allday', 'start', 'date_end', 'stop',
                 'user_id', 'privacy',
                 'attendee_ids', 'alarm_ids', 'location', 'show_as', 'active'}
+
+    @api.model
+    def _restart_microsoft_sync(self):
+        self.env['calendar.event'].search(self._get_microsoft_sync_domain()).write({
+            'need_sync_m': True,
+        })
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -81,7 +88,7 @@ class Meeting(models.Model):
         values = {
             **default_values,
             'name': microsoft_event.subject or _("(No title)"),
-            'description': microsoft_event.bodyPreview,
+            'description': plaintext2html(microsoft_event.bodyPreview),
             'location': microsoft_event.location and microsoft_event.location.get('displayName') or False,
             'user_id': microsoft_event.owner(self.env).id,
             'privacy': sensitivity_o2m.get(microsoft_event.sensitivity, self.default_get(['privacy'])['privacy']),
@@ -134,21 +141,22 @@ class Meeting(models.Model):
         elif self.env.user.partner_id.email not in emails:
             commands_attendee += [(0, 0, {'state': 'accepted', 'partner_id': self.env.user.partner_id.id})]
             commands_partner += [(4, self.env.user.partner_id.id)]
+        partners = self.env['mail.thread']._mail_find_partner_from_emails(emails, records=self, force_create=True)
         attendees_by_emails = {a.email: a for a in existing_attendees}
-        for attendee in microsoft_attendees:
-            email = attendee.get('emailAddress').get('address')
-            state = ATTENDEE_CONVERTER_M2O.get(attendee.get('status').get('response'))
+        for attendee in zip(emails, partners, microsoft_attendees):
+            email = attendee[0]
+            state = ATTENDEE_CONVERTER_M2O.get(attendee[2].get('status').get('response'))
 
             if email in attendees_by_emails:
                 # Update existing attendees
                 commands_attendee += [(1, attendees_by_emails[email].id, {'state': state})]
             else:
                 # Create new attendees
-                partner = self.env['res.partner'].find_or_create(email)
+                partner = attendee[1]
                 commands_attendee += [(0, 0, {'state': state, 'partner_id': partner.id})]
                 commands_partner += [(4, partner.id)]
-                if attendee.get('emailAddress').get('name') and not partner.name:
-                    partner.name = attendee.get('emailAddress').get('name')
+                if attendee[2].get('emailAddress').get('name') and not partner.name:
+                    partner.name = attendee[2].get('emailAddress').get('name')
         for odoo_attendee in attendees_by_emails.values():
             # Remove old attendees
             if odoo_attendee.email not in emails:
@@ -241,7 +249,7 @@ class Meeting(models.Model):
 
         if 'description' in fields_to_sync:
             values['body'] = {
-                'content': self.description or '',
+                'content': html2plaintext(self.description) if not is_html_empty(self.description) else '',
                 'contentType': "text",
             }
 
@@ -306,13 +314,13 @@ class Meeting(models.Model):
             if recurrence.month_by == 'day' or recurrence.rrule_type == 'weekly':
                 pattern['daysOfWeek'] = [
                     weekday_name for weekday_name, weekday in {
-                        'monday': recurrence.mo,
-                        'tuesday': recurrence.tu,
-                        'wednesday': recurrence.we,
-                        'thursday': recurrence.th,
-                        'friday': recurrence.fr,
-                        'saturday': recurrence.sa,
-                        'sunday': recurrence.su,
+                        'monday': recurrence.mon,
+                        'tuesday': recurrence.tue,
+                        'wednesday': recurrence.wed,
+                        'thursday': recurrence.thu,
+                        'friday': recurrence.fri,
+                        'saturday': recurrence.sat,
+                        'sunday': recurrence.sun,
                     }.items() if weekday]
                 pattern['firstDayOfWeek'] = 'sunday'
 
@@ -402,10 +410,3 @@ class Meeting(models.Model):
         super(Meeting, my_cancelled_records)._cancel_microsoft()
         attendees = (self - my_cancelled_records).attendee_ids.filtered(lambda a: a.partner_id == user.partner_id)
         attendees.state = 'declined'
-
-    def _notify_attendees(self):
-        # filter events before notifying attendees through calendar_alarm_manager
-        need_notifs = self.filtered(lambda event: event.alarm_ids and event.stop >= fields.Datetime.now())
-        partners = need_notifs.partner_ids
-        if partners:
-            self.env['calendar.alarm_manager']._notify_next_alarm(partners.ids)

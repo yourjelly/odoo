@@ -7,6 +7,7 @@ from odoo import _, api, fields, tools, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import OrderedSet
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 
 
 class StockMoveLine(models.Model):
@@ -58,15 +59,16 @@ class StockMoveLine(models.Model):
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     picking_type_use_create_lots = fields.Boolean(related='picking_id.picking_type_id.use_create_lots', readonly=True)
     picking_type_use_existing_lots = fields.Boolean(related='picking_id.picking_type_id.use_existing_lots', readonly=True)
+    picking_type_entire_packs = fields.Boolean(related='picking_id.picking_type_id.show_entire_packs', readonly=True)
     state = fields.Selection(related='move_id.state', store=True, related_sudo=False)
-    is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable', readonly=False)
+    is_initial_demand_editable = fields.Boolean(related='move_id.is_initial_demand_editable')
+    is_inventory = fields.Boolean(related='move_id.is_inventory')
     is_locked = fields.Boolean(related='move_id.is_locked', default=True, readonly=True)
     consume_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'consume_line_id', 'produce_line_id', help="Technical link to see who consumed what. ")
     produce_line_ids = fields.Many2many('stock.move.line', 'stock_move_line_consume_rel', 'produce_line_id', 'consume_line_id', help="Technical link to see which line was produced with this. ")
     reference = fields.Char(related='move_id.reference', store=True, related_sudo=False, readonly=False)
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     origin = fields.Char(related='move_id.origin', string='Source')
-    picking_type_entire_packs = fields.Boolean(related='picking_id.picking_type_id.show_entire_packs', readonly=True)
     description_picking = fields.Text(string="Description picking")
 
     @api.depends('picking_id.picking_type_id', 'product_id.tracking')
@@ -108,14 +110,21 @@ class StockMoveLine(models.Model):
 
     @api.constrains('qty_done')
     def _check_positive_qty_done(self):
-        if any([ml.qty_done < 0 for ml in self]):
+        if any(ml.qty_done < 0 for ml in self):
             raise ValidationError(_('You can not enter negative quantities.'))
+
+    @api.onchange('result_package_id')
+    def _onchange_result_package_id(self):
+        if self.result_package_id:
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations'):
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, package=self.result_package_id)
 
     @api.onchange('product_id', 'product_uom_id')
     def _onchange_product_id(self):
         if self.product_id:
-            if not self.id and self.user_has_groups('stock.group_stock_multi_locations'):
-                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id) or self.location_dest_id
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and not self.result_package_id:
+                qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, qty_done)
             if self.picking_id:
                 product = self.product_id.with_context(lang=self.picking_id.partner_id.lang or self.env.user.lang)
                 self.description_picking = product._get_description(self.picking_id.picking_type_id)
@@ -132,6 +141,7 @@ class StockMoveLine(models.Model):
         help him. This includes:
             - automatically switch `qty_done` to 1.0
             - warn if he has already encoded `lot_name` in another move line
+            - warn (and update if appropriate) if the SN is in a different source location than selected
         """
         res = {}
         if self.product_id.tracking == 'serial':
@@ -146,17 +156,25 @@ class StockMoveLine(models.Model):
                     if counter.get(self.lot_name) and counter[self.lot_name] > 1:
                         message = _('You cannot use the same serial number twice. Please correct the serial numbers encoded.')
                     elif not self.lot_id:
-                        counter = self.env['stock.production.lot'].search_count([
-                            ('company_id', '=', self.company_id.id),
-                            ('product_id', '=', self.product_id.id),
-                            ('name', '=', self.lot_name),
-                        ])
-                        if counter > 0:
-                            message = _('Existing Serial number (%s). Please correct the serial number encoded.') % self.lot_name
+                        lots = self.env['stock.production.lot'].search([('product_id', '=', self.product_id.id),
+                                                                        ('name', '=', self.lot_name),
+                                                                        ('company_id', '=', self.company_id.id)])
+                        quants = lots.quant_ids.filtered(lambda q: q.quantity != 0 and q.location_id.usage in ['customer', 'internal', 'transit'])
+                        if quants:
+                            message = _('Serial number (%s) already exists in location(s): %s. Please correct the serial number encoded.', self.lot_name, ', '.join(quants.location_id.mapped('display_name')))
                 elif self.lot_id:
                     counter = Counter([line.lot_id.id for line in move_lines_to_check])
                     if counter.get(self.lot_id.id) and counter[self.lot_id.id] > 1:
                         message = _('You cannot use the same serial number twice. Please correct the serial numbers encoded.')
+                    else:
+                        # check if in correct source location
+                        message, recommended_location = self.env['stock.quant']._check_serial_number(self.product_id,
+                                                                                                     self.lot_id,
+                                                                                                     self.company_id,
+                                                                                                     self.location_id,
+                                                                                                     self.picking_id.location_id)
+                        if recommended_location:
+                            self.location_id = recommended_location
             if message:
                 res['warning'] = {'title': _('Warning'), 'message': message}
         return res
@@ -167,11 +185,15 @@ class StockMoveLine(models.Model):
         help him. This onchange will warn him if he set `qty_done` to a non-supported value.
         """
         res = {}
-        if self.qty_done and self.product_id.tracking == 'serial':
+        if self.qty_done:
             qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
-            if float_compare(qty_done, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0:
-                message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
-                res['warning'] = {'title': _('Warning'), 'message': message}
+            if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and not self.result_package_id:
+                self.location_dest_id = self.location_dest_id._get_putaway_strategy(self.product_id, qty_done)
+            if self.product_id.tracking == 'serial':
+                qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
+                if float_compare(qty_done, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0:
+                    message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
+                    res['warning'] = {'title': _('Warning'), 'message': message}
         return res
 
     def init(self):
@@ -307,7 +329,14 @@ class StockMoveLine(models.Model):
 
                 # Unreserve the old charateristics of the move line.
                 if not ml._should_bypass_reservation(ml.location_id):
-                    Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                    try:
+                        Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                    except UserError:
+                        # If we were not able to unreserve on tracked quants, we can use untracked ones.
+                        if ml.lot_id:
+                            Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                        else:
+                            raise
 
                 # Reserve the maximum available of the new charateristics of the move line.
                 if not ml._should_bypass_reservation(updates.get('location_id', ml.location_id)):
@@ -317,7 +346,14 @@ class StockMoveLine(models.Model):
                                                              package_id=updates.get('package_id', ml.package_id), owner_id=updates.get('owner_id', ml.owner_id), strict=True)
                         reserved_qty = sum([x[1] for x in q])
                     except UserError:
-                        pass
+                        if updates.get('lot_id'):
+                            # If we were not able to reserve on tracked quants, we can use untracked ones.
+                            try:
+                                q = Quant._update_reserved_quantity(ml.product_id, updates.get('location_id', ml.location_id), new_product_uom_qty, lot_id=False,
+                                                                     package_id=updates.get('package_id', ml.package_id), owner_id=updates.get('owner_id', ml.owner_id), strict=True)
+                                reserved_qty = sum([x[1] for x in q])
+                            except UserError:
+                                pass
                     if reserved_qty != new_product_uom_qty:
                         new_product_uom_qty = ml.product_id.uom_id._compute_quantity(reserved_qty, ml.product_uom_id, rounding_method='HALF-UP')
                         moves_to_recompute_state |= ml.move_id
@@ -393,14 +429,24 @@ class StockMoveLine(models.Model):
 
         return res
 
-    def unlink(self):
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_done_or_cancel(self):
         for ml in self:
             if ml.state in ('done', 'cancel'):
                 raise UserError(_('You can not delete product moves if the picking is done. You can only correct the done quantities.'))
+
+    def unlink(self):
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for ml in self:
             # Unlinking a move line should unreserve.
             if ml.product_id.type == 'product' and not ml._should_bypass_reservation(ml.location_id) and not float_is_zero(ml.product_qty, precision_digits=precision):
-                self.env['stock.quant']._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                try:
+                    self.env['stock.quant']._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                except UserError:
+                    if ml.lot_id:
+                        self.env['stock.quant']._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                    elif not self.env.context.get(MODULE_UNINSTALL_FLAG, False):
+                        raise   # pylint: disable=raise-unlink-override
         moves = self.mapped('move_id')
         res = super(StockMoveLine, self).unlink()
         if moves:
@@ -466,7 +512,7 @@ class StockMoveLine(models.Model):
                             # checkboxes on the picking type, he's allowed to enter tracked
                             # products without a `lot_id`.
                             continue
-                    elif ml.move_id.inventory_id:
+                    elif ml.is_inventory:
                         # If an inventory adjustment is linked, the user is allowed to enter
                         # tracked products without a `lot_id`.
                         continue
@@ -475,7 +521,7 @@ class StockMoveLine(models.Model):
                         ml_ids_tracked_without_lot.add(ml.id)
             elif qty_done_float_compared < 0:
                 raise UserError(_('No negative quantities allowed'))
-            else:
+            elif not ml.is_inventory:
                 ml_ids_to_delete.add(ml.id)
 
         if ml_ids_tracked_without_lot:
@@ -501,11 +547,13 @@ class StockMoveLine(models.Model):
                 if not ml._should_bypass_reservation(ml.location_id) and float_compare(ml.qty_done, ml.product_uom_qty, precision_rounding=rounding) > 0:
                     qty_done_product_uom = ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id, rounding_method='HALF-UP')
                     extra_qty = qty_done_product_uom - ml.product_qty
-                    ml_to_ignore = self.env['stock.move.line'].browse(ml_ids_to_ignore)
-                    ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_to_ignore=ml_to_ignore)
+                    ml._free_reservation(ml.product_id, ml.location_id, extra_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, ml_ids_to_ignore=ml_ids_to_ignore)
                 # unreserve what's been reserved
                 if not ml._should_bypass_reservation(ml.location_id) and ml.product_id.type == 'product' and ml.product_qty:
-                    Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                    try:
+                        Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
+                    except UserError:
+                        Quant._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
 
                 # move what's been actually done
                 quantity = ml.product_uom_id._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
@@ -576,18 +624,18 @@ class StockMoveLine(models.Model):
             data['owner_name'] = self.env['res.partner'].browse(vals.get('owner_id')).name
         record.message_post_with_view(template, values={'move': move, 'vals': dict(vals, **data)}, subtype_id=self.env.ref('mail.mt_note').id)
 
-    def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, ml_to_ignore=None):
+    def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, ml_ids_to_ignore=None):
         """ When editing a done move line or validating one with some forced quantities, it is
         possible to impact quants that were not reserved. It is therefore necessary to edit or
         unlink the move lines that reserved a quantity now unavailable.
 
-        :param ml_to_ignore: recordset of `stock.move.line` that should NOT be unreserved
+        :param ml_ids_to_ignore: OrderedSet of `stock.move.line` ids that should NOT be unreserved
         """
         self.ensure_one()
 
-        if ml_to_ignore is None:
-            ml_to_ignore = self.env['stock.move.line']
-        ml_to_ignore |= self
+        if ml_ids_to_ignore is None:
+            ml_ids_to_ignore = OrderedSet()
+        ml_ids_to_ignore |= self.ids
 
         # Check the available quantity, with the `strict` kw set to `True`. If the available
         # quantity is greather than the quantity now unavailable, there is nothing to do.
@@ -605,8 +653,9 @@ class StockMoveLine(models.Model):
                 ('owner_id', '=', owner_id.id if owner_id else False),
                 ('package_id', '=', package_id.id if package_id else False),
                 ('product_qty', '>', 0.0),
-                ('id', 'not in', ml_to_ignore.ids),
+                ('id', 'not in', tuple(ml_ids_to_ignore)),
             ]
+
             # We take the current picking first, then the pickings with the latest scheduled date
             current_picking_first = lambda cand: (
                 cand.picking_id != self.move_id.picking_id,
@@ -659,20 +708,66 @@ class StockMoveLine(models.Model):
         returns: dictionary {product_id+name+description+uom: {product, name, description, qty_done, product_uom}, ...}
         """
         aggregated_move_lines = {}
-        for move_line in self:
-            name = move_line.product_id.display_name
-            description = move_line.move_id.description_picking
-            if description == name or description == move_line.product_id.name:
+
+        def get_aggregated_properties(move_line=False, move=False):
+            move = move or move_line.move_id
+            uom = move_line and move_line.product_uom_id or move.product_uom
+            name = move.product_id.display_name
+            description = move.description_picking
+            if description == name or description == move.product_id.name:
                 description = False
-            uom = move_line.product_uom_id
-            line_key = str(move_line.product_id.id) + "_" + name + (description or "") + "uom " + str(uom.id)
+            product = move.product_id
+            line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
+            return (line_key, name, description, uom)
+
+        # Loops to get backorders, backorders' backorders, and so and so...
+        backorders = self.env['stock.picking']
+        pickings = self.picking_id
+        while pickings.backorder_ids:
+            backorders |= pickings.backorder_ids
+            pickings = pickings.backorder_ids
+
+        for move_line in self:
+            line_key, name, description, uom = get_aggregated_properties(move_line=move_line)
 
             if line_key not in aggregated_move_lines:
+                qty_ordered = move_line.move_id.product_uom_qty
+                if backorders:
+                    # Filters on the aggregation key (product, description and uom) to add the
+                    # quantities delayed to backorders to retrieve the original ordered qty.
+                    following_move_lines = backorders.move_line_ids.filtered(
+                        lambda ml: get_aggregated_properties(move=ml.move_id)[0] == line_key
+                    )
+                    qty_ordered += sum(following_move_lines.move_id.mapped('product_uom_qty'))
                 aggregated_move_lines[line_key] = {'name': name,
                                                    'description': description,
                                                    'qty_done': move_line.qty_done,
+                                                   'qty_ordered': qty_ordered,
                                                    'product_uom': uom.name,
                                                    'product': move_line.product_id}
             else:
                 aggregated_move_lines[line_key]['qty_done'] += move_line.qty_done
+
+        # Does the same for empty move line to retrieve the ordered qty. for partially done moves
+        # (as they are splitted when the transfer is done and empty moves don't have move lines).
+        pickings = (self.picking_id | backorders)
+        for empty_move in pickings.move_lines.filtered(
+            lambda m: m.state == "cancel" and m.product_uom_qty
+            and float_is_zero(m.quantity_done, precision_rounding=m.product_uom.rounding)
+        ):
+            line_key, name, description, uom = get_aggregated_properties(move=empty_move)
+
+            if line_key not in aggregated_move_lines:
+                qty_ordered = empty_move.product_uom_qty
+                aggregated_move_lines[line_key] = {
+                    'name': name,
+                    'description': description,
+                    'qty_done': False,
+                    'qty_ordered': qty_ordered,
+                    'product_uom': uom.name,
+                    'product': empty_move.product_id,
+                }
+            else:
+                aggregated_move_lines[line_key]['qty_ordered'] += empty_move.product_uom_qty
+
         return aggregated_move_lines

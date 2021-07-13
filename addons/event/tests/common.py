@@ -8,7 +8,7 @@ from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests import common
 
 
-class TestEventCommon(common.SavepointCase):
+class TestEventCommon(common.TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -26,6 +26,13 @@ class TestEventCommon(common.SavepointCase):
             tz='Europe/Brussels', notification_type='inbox',
             company_id=cls.env.ref("base.main_company").id,
             groups='base.group_user',
+        )
+        cls.user_eventregistrationdesk = mail_new_test_user(
+            cls.env, login='user_eventregistrationdesk',
+            name='Ursule EventRegistration', email='ursule.eventregistration@test.example.com',
+            tz='Europe/Brussels', notification_type='inbox',
+            company_id=cls.env.ref("base.main_company").id,
+            groups='base.group_user,event.group_event_registration_desk',
         )
         cls.user_eventuser = mail_new_test_user(
             cls.env, login='user_eventuser',
@@ -62,16 +69,13 @@ class TestEventCommon(common.SavepointCase):
             'auto_confirm': True,
             'has_seats_limitation': True,
             'seats_max': 30,
-            'use_timezone': True,
             'default_timezone': 'Europe/Paris',
-            'use_ticket': True,
             'event_type_ticket_ids': [(0, 0, {
                     'name': 'First Ticket',
                 }), (0, 0, {
                     'name': 'Second Ticket',
                 })
             ],
-            'use_mail_schedule': True,
             'event_type_mail_ids': [
                 (0, 0, {  # right at subscription
                     'interval_unit': 'now',

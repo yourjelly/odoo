@@ -1,9 +1,8 @@
-odoo.define('im_livechat/static/src/widgets/discuss/discuss.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const Discuss = require('mail/static/src/widgets/discuss/discuss.js');
+import DiscussWidget from '@mail/widgets/discuss/discuss';
 
-Discuss.include({
+DiscussWidget.include({
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
@@ -20,6 +19,4 @@ Discuss.include({
         }
         return this._super();
     },
-});
-
 });

@@ -70,6 +70,7 @@ $-editor-messages-margin-x: 2%;
     &[placeholder]:empty:not(:focus):before {
         content: attr(placeholder);
         opacity: 0.3;
+        pointer-events: none;
     }
 
     &.oe_structure.oe_empty, &[data-oe-type=html], .oe_structure.oe_empty {
@@ -146,7 +147,7 @@ table.editorbar-panel {
 }
 
 // fontawesome
-.note-editable .fa {
+#wrap.o_editable .fa {
     cursor: pointer;
 }
 

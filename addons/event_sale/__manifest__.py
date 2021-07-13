@@ -4,7 +4,7 @@
     'name': 'Events Sales',
     'version': '1.2',
     'category': 'Marketing/Events',
-    'website': 'https://www.odoo.com/page/events',
+    'website': 'https://www.odoo.com/app/events',
     'description': """
 Creating registration with sales orders.
 ========================================
@@ -20,7 +20,6 @@ this event.
 """,
     'depends': ['event', 'sale_management'],
     'data': [
-        'views/assets.xml',
         'views/event_ticket_views.xml',
         'views/event_registration_views.xml',
         'views/event_views.xml',
@@ -36,5 +35,16 @@ this event.
     ],
     'demo': ['data/event_demo.xml'],
     'installable': True,
-    'auto_install': True
+    'auto_install': True,
+    'assets': {
+        'web.assets_backend': [
+            'event_sale/static/src/**/*',
+        ],
+        'web.assets_tests': [
+            'event_sale/static/tests/tours/**/*',
+        ],
+        'web.qunit_suite_tests': [
+            'event_sale/static/tests/event_configurator.test.js',
+        ],
+    }
 }

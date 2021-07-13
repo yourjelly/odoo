@@ -3,7 +3,7 @@
 from odoo.tests import common
 
 
-class TestStockCommon(common.SavepointCase):
+class TestStockCommon(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestStockCommon, cls).setUpClass()
@@ -16,13 +16,12 @@ class TestStockCommon(common.SavepointCase):
         cls.StockQuantObj = cls.env['stock.quant']
         cls.PickingObj = cls.env['stock.picking']
         cls.MoveObj = cls.env['stock.move']
-        cls.InvObj = cls.env['stock.inventory']
-        cls.InvLineObj = cls.env['stock.inventory.line']
         cls.LotObj = cls.env['stock.production.lot']
 
         # Model Data
         cls.picking_type_in = cls.ModelDataObj.xmlid_to_res_id('stock.picking_type_in')
         cls.picking_type_out = cls.ModelDataObj.xmlid_to_res_id('stock.picking_type_out')
+        cls.env['stock.picking.type'].browse(cls.picking_type_out).reservation_method = 'manual'
         cls.supplier_location = cls.ModelDataObj.xmlid_to_res_id('stock.stock_location_suppliers')
         cls.stock_location = cls.ModelDataObj.xmlid_to_res_id('stock.stock_location_stock')
         pack_location = cls.env.ref('stock.location_pack_zone')

@@ -12,6 +12,7 @@ const weUtils = require('web_editor.utils');
 const {
     normalizeColor,
     getBgImageURL,
+    DEFAULT_PALETTE,
 } = weUtils;
 var weWidgets = require('wysiwyg.widgets');
 const {
@@ -181,6 +182,20 @@ function createPropertyProxy(obj, propertyName, value) {
             return Reflect.set(...arguments);
         },
     });
+}
+/**
+ * Creates and registers a UserValueWidget by tag-name
+ *
+ * @param {string} widgetName
+ * @param {SnippetOptionWidget|UserValueWidget|null} parent
+ * @param {string} title
+ * @param {Object} options
+ * @returns {UserValueWidget}
+ */
+function registerUserValueWidget(widgetName, parent, title, options, $target) {
+    const widget = new userValueWidgetsRegistry[widgetName](parent, title, options, $target);
+    parent.registerSubWidget(widget);
+    return widget;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -473,7 +488,7 @@ const UserValueWidget = Widget.extend({
         // If the widget has no associated method, it should not notify user
         // value changes
         if (!this._methodsNames.length) {
-            return;
+            console.warn('UserValueWidget with no methods notifying value change');
         }
 
         // In the case we notify a change update, force a preview update if it
@@ -648,6 +663,25 @@ const ButtonUserValueWidget = UserValueWidget.extend({
 
         return this._super(...arguments);
     },
+    /**
+     * @override
+     */
+    async willStart() {
+        await this._super(...arguments);
+        if (this.options.dataAttributes.activeImg) {
+            this.activeImgEl = await _buildImgElement(this.options.dataAttributes.activeImg);
+        }
+    },
+    /**
+     * @override
+     */
+    _makeDescriptive() {
+        const $el = this._super(...arguments);
+        if (this.activeImgEl) {
+            this.containerEl.appendChild(this.activeImgEl);
+        }
+        return $el;
+    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -689,6 +723,10 @@ const ButtonUserValueWidget = UserValueWidget.extend({
                 return;
             }
             active = (this.getActiveValue(methodName) === value);
+        }
+        if (this.imgEl && this.activeImgEl) {
+            this.imgEl.classList.toggle('d-none', active);
+            this.activeImgEl.classList.toggle('d-none', !active);
         }
         this.el.classList.toggle('active', active);
     },
@@ -764,7 +802,7 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
 
         this.menuEl = document.createElement('we-selection-items');
         if (this.options && this.options.childNodes) {
-            this.options.childNodes.forEach(node => this.menuEl.appendChild(node));
+            this.options.childNodes.forEach(node => node && this.menuEl.appendChild(node));
         }
         this.containerEl.appendChild(this.menuEl);
     },
@@ -813,7 +851,7 @@ const BaseSelectionUserValueWidget = UserValueWidget.extend({
             if (widget.isActive()) {
                 // Only one select item can be true at a time, we consider the
                 // last one if multiple would be active.
-                return;
+                break;
             }
         }
         await _super(...arguments);
@@ -934,17 +972,13 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
             this.menuTogglerEl.appendChild(this.menuTogglerItemEl);
         }
     },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
     /**
-     * @private
-     * @param {Event} ev
+     * @override
      */
-    _shouldIgnoreClick(ev) {
-        return !!ev.target.closest('[role="button"]');
+    enable() {
+        if (!this.menuTogglerEl.classList.contains('active')) {
+            this.menuTogglerEl.click();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -957,7 +991,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      * @private
      */
     _onClick: function (ev) {
-        if (this._shouldIgnoreClick(ev)) {
+        if (ev.target.closest('[role="button"]')) {
             return;
         }
 
@@ -1401,12 +1435,6 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         }
         return this.colorPalette.appendTo(document.createDocumentFragment());
     },
-    /**
-     * @override
-     */
-    _shouldIgnoreClick(ev) {
-        return ev.originalEvent.__isColorpickerClick || this._super(...arguments);
-    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1460,6 +1488,17 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
     _onEnterKey: function () {
         this.close();
     },
+    /**
+     * @override
+     */
+    _onClick: function (ev) {
+        // Do not close the colorpalette on colorpicker click
+        if (ev.originalEvent.__isColorpickerClick) {
+            ev.stopPropagation();
+            return;
+        }
+        return this._super(...arguments);
+    },
 });
 
 const MediapickerUserValueWidget = UserValueWidget.extend({
@@ -1473,15 +1512,14 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
      */
     async start() {
         await this._super(...arguments);
-        const iconEl = document.createElement('i');
         if (this.options.dataAttributes.buttonStyle) {
+            const iconEl = document.createElement('i');
             iconEl.classList.add('fa', 'fa-fw', 'fa-camera');
+            $(this.containerEl).prepend(iconEl);
         } else {
-            iconEl.classList.add('fa', 'fa-fw', 'fa-refresh', 'mr-1');
-            this.el.classList.add('o_we_no_toggle');
-            this.containerEl.textContent = _t("Replace media");
+            this.el.classList.add('o_we_no_toggle', 'o_we_bg_success');
+            this.containerEl.textContent = _t("Replace");
         }
-        $(this.containerEl).prepend(iconEl);
     },
 
     //--------------------------------------------------------------------------
@@ -1507,6 +1545,8 @@ const MediapickerUserValueWidget = UserValueWidget.extend({
             noIcons: true,
             noDocuments: true,
             isForBgVideo: true,
+            vimeoPreviewIds: ['299225971', '414790269', '420192073', '368484050', '334729960', '417478345',
+                '312451183', '415226028', '367762632', '340475898', '374265101', '370467553'],
             'res_model': $editable.data('oe-model'),
             'res_id': $editable.data('oe-id'),
         }, el).open();
@@ -1584,7 +1624,9 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
         'blur input': '_onInputBlur',
         'change.datetimepicker': '_onDateTimePickerChange',
         'error.datetimepicker': '_onDateTimePickerError',
+        'input input': '_onDateInputInput',
     },
+    defaultFormat: time.getLangDatetimeFormat(),
 
     /**
      * @override
@@ -1615,16 +1657,17 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
                 close: 'fa fa-check primary',
             },
             locale: moment.locale(),
-            format: time.getLangDatetimeFormat(),
+            format: this.defaultFormat,
             sideBySide: true,
             buttons: {
+                showClear: true,
                 showClose: true,
                 showToday: true,
             },
             widgetParent: 'body',
 
             // Open the datetimepicker on focus not on click. This allows to
-            // take care of a bug which is due to the summernote editor:
+            // take care of a bug which is due to the wysiwyg editor:
             // sometimes, the datetimepicker loses the focus then get it back
             // in the same execution flow. This was making the datepicker close
             // for no apparent reason. Now, it only closes then reopens directly
@@ -1653,6 +1696,14 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     /**
      * @override
      */
+    getMethodsParams: function () {
+        return _.extend(this._super(...arguments), {
+            format: this.defaultFormat,
+        });
+    },
+    /**
+     * @override
+     */
     isPreviewed: function () {
         return this._super(...arguments) || !!$(this.inputEl).data('datetimepicker').widget;
     },
@@ -1661,9 +1712,12 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
      */
     async setValue() {
         await this._super(...arguments);
-        let momentObj = moment.unix(this._value);
-        if (!momentObj.isValid()) {
-            momentObj = moment();
+        let momentObj = null;
+        if (this._value) {
+            momentObj = moment.unix(this._value);
+            if (!momentObj.isValid()) {
+                momentObj = moment();
+            }
         }
         this.__libInput++;
         $(this.inputEl).datetimepicker('date', momentObj);
@@ -1683,9 +1737,10 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
             return;
         }
         if (!ev.date || !ev.date.isValid()) {
-            return;
+            this._value = '';
+        } else {
+            this._value = ev.date.unix().toString();
         }
-        this._value = ev.date.unix().toString();
         this._onUserValuePreview(ev);
     },
     /**
@@ -1695,12 +1750,355 @@ const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
     _onDateTimePickerError: function (ev) {
         ev.stopPropagation();
     },
+    /**
+     * Handles the clear button of the datepicker.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onDateInputInput(ev) {
+        if (!this.inputEl.value) {
+            this._value = '';
+            this._onUserValuePreview(ev);
+        }
+    },
+});
+
+const DatePickerUserValueWidget = DatetimePickerUserValueWidget.extend({
+    defaultFormat: time.getLangDateFormat(),
+});
+
+const ListUserValueWidget = UserValueWidget.extend({
+    tagName: 'we-list',
+    events: {
+        'click we-button.o_we_select_remove_option': '_onRemoveItemClick',
+        'click we-button.o_we_list_add_optional': '_onAddCustomItemClick',
+        'click we-button.o_we_list_add_existing': '_onAddExistingItemClick',
+        'click we-select.o_we_user_value_widget.o_we_add_list_item': '_onAddItemSelectClick',
+        'click we-button.o_we_checkbox_wrapper': '_onAddItemCheckboxClick',
+        'change table input': '_onListItemChange',
+    },
+
+    /**
+     * @override
+     */
+    willStart() {
+        if (this.options.createWidget) {
+            this.createWidget = this.options.createWidget;
+            this.createWidget.setParent(this);
+            this.registerSubWidget(this.createWidget);
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    start() {
+        this.addItemTitle = this.el.dataset.addItemTitle || _t("Add");
+        if (this.el.dataset.availableRecords) {
+            this.records = JSON.parse(this.el.dataset.availableRecords);
+        } else {
+            this.isCustom = !this.el.dataset.notEditable;
+        }
+        if (this.el.dataset.defaults || this.el.dataset.hasDefault) {
+            this.hasDefault = this.el.dataset.hasDefault || 'unique';
+            this.selected = this.el.dataset.defaults ? JSON.parse(this.el.dataset.defaults) : [];
+        }
+        this.listTable = document.createElement('table');
+        const tableWrapper = document.createElement('div');
+        tableWrapper.classList.add('o_we_table_wrapper');
+        tableWrapper.appendChild(this.listTable);
+        this.containerEl.appendChild(tableWrapper);
+        this.el.classList.add('o_we_fw');
+        this._makeListItemsSortable();
+        if (this.createWidget) {
+            return this.createWidget.appendTo(this.containerEl);
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    getMethodsParams() {
+        return _.extend(this._super(...arguments), {
+            records: this.records,
+        });
+    },
+    /**
+     * @override
+     */
+    setValue() {
+        this._super(...arguments);
+        const currentValues = JSON.parse(this._value);
+        this.listTable.innerHTML = '';
+        if (this.addItemButton) {
+            this.addItemButton.remove();
+        }
+
+        if (this.createWidget) {
+            const selectedIds = currentValues.map(({ id }) => id)
+                .filter(id => typeof id === 'number');
+            this.createWidget.options.domain = ['!', ['id', 'in', selectedIds]];
+            this.createWidget.setValue('');
+            this.createWidget.inputEl.value = '';
+            $(this.createWidget.inputEl).trigger('input');
+        } else {
+            if (this.isCustom) {
+                this.addItemButton = document.createElement('we-button');
+                this.addItemButton.textContent = this.addItemTitle;
+                this.addItemButton.classList.add('o_we_list_add_optional');
+            } else {
+                // TODO use a real select widget ?
+                this.addItemButton = document.createElement('we-select');
+                this.addItemButton.classList.add('o_we_user_value_widget', 'o_we_add_list_item');
+                const divEl = document.createElement('div');
+                this.addItemButton.appendChild(divEl);
+                const togglerEl = document.createElement('we-toggler');
+                togglerEl.textContent = this.addItemTitle;
+                divEl.appendChild(togglerEl);
+                this.selectMenuEl = document.createElement('we-selection-items');
+                divEl.appendChild(this.selectMenuEl);
+            }
+            this.containerEl.appendChild(this.addItemButton);
+        }
+        currentValues.forEach(value => {
+            if (typeof value === 'object') {
+                this._addItemToTable(value.id, value.display_name);
+            } else {
+                this._addItemToTable(value, value);
+            }
+        });
+        if (!this.createWidget && !this.isCustom) {
+            this._reloadSelectDropdown(currentValues);
+        }
+        this._makeListItemsSortable();
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        if (this.createWidget && this.createWidget.getMethodsNames().includes(methodName)) {
+            return this.createWidget.getValue(methodName);
+        }
+        return this._value;
+    },
+
+    //----------------------------------------------------------------------
+    // Private
+    //----------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {string || integer} id
+     * @param {string} text
+     */
+    _addItemToTable(id, text = _t("Item")) {
+        const trEl = document.createElement('tr');
+        if (!this.el.dataset.unsortable) {
+            const draggableEl = document.createElement('we-button');
+            draggableEl.classList.add('o_we_drag_handle', 'o_we_link', 'fa', 'fa-fw', 'fa-arrows');
+            draggableEl.dataset.noPreview = 'true';
+            const draggableTdEl = document.createElement('td');
+            draggableTdEl.appendChild(draggableEl);
+            trEl.appendChild(draggableTdEl);
+        }
+        const inputEl = document.createElement('input');
+        inputEl.type = 'text';
+        if (text) {
+            inputEl.value = text;
+        }
+        if (id) {
+            inputEl.name = id;
+        }
+        inputEl.disabled = !this.isCustom;
+        const buttonEl = document.createElement('we-button');
+        buttonEl.classList.add('o_we_select_remove_option', 'o_we_link', 'o_we_text_danger', 'fa', 'fa-fw', 'fa-minus');
+        buttonEl.dataset.removeOption = id;
+        const inputTdEl = document.createElement('td');
+        inputTdEl.classList.add('o_we_list_record_name');
+        inputTdEl.appendChild(inputEl);
+        trEl.appendChild(inputTdEl);
+        if (this.hasDefault) {
+            const checkboxEl = document.createElement('we-button');
+            checkboxEl.classList.add('o_we_user_value_widget', 'o_we_checkbox_wrapper');
+            if (this.selected.includes(id)) {
+                checkboxEl.classList.add('active');
+            }
+            const div = document.createElement('div');
+            const checkbox = document.createElement('we-checkbox');
+            div.appendChild(checkbox);
+            checkboxEl.appendChild(div);
+            checkboxEl.appendChild(checkbox);
+            const checkboxTdEl = document.createElement('td');
+            checkboxTdEl.appendChild(checkboxEl);
+            trEl.appendChild(checkboxTdEl);
+        }
+        const buttonTdEl = document.createElement('td');
+        buttonTdEl.appendChild(buttonEl);
+        trEl.appendChild(buttonTdEl);
+        this.listTable.appendChild(trEl);
+    },
+    /**
+     * @private
+     */
+    _makeListItemsSortable() {
+        if (this.el.dataset.unsortable) {
+            return;
+        }
+        $(this.listTable).sortable({
+            axis: 'y',
+            handle: '.o_we_drag_handle',
+            items: 'tr',
+            cursor: 'move',
+            opacity: 0.6,
+            stop: (event, ui) => {
+                this._notifyCurrentState();
+            },
+        });
+    },
+    /**
+     * @private
+     */
+    _notifyCurrentState() {
+        const values = [...this.listTable.querySelectorAll('input')].map(el => {
+            const id = this.isCustom ? el.value : el.name;
+            const idInt = parseInt(id);
+            return {
+                id: isNaN(idInt) ? id : idInt,
+                name: el.value,
+                display_name: el.value,
+            };
+        });
+        if (this.hasDefault) {
+            const checkboxes = [...this.listTable.querySelectorAll('we-button.o_we_checkbox_wrapper.active')];
+            this.selected = checkboxes.map(el => {
+                const input = el.parentElement.previousSibling.firstChild;
+                const id = input.name || input.value;
+                const idInt = parseInt(id);
+                return isNaN(idInt) ? id : idInt;
+            });
+            values.forEach(v => {
+                v.selected = this.selected.includes(v.id);
+            });
+        }
+        this._value = JSON.stringify(values);
+        this.notifyValueChange(false);
+        if (!this.createWidget && !this.isCustom) {
+            this._reloadSelectDropdown(values);
+        }
+    },
+    /**
+     * @private
+     * @param {Array} currentValues
+     */
+    _reloadSelectDropdown(currentValues) {
+        this.selectMenuEl.innerHTML = '';
+        this.records.forEach(el => {
+            if (!currentValues.find(v => v.id === el.id)) {
+                const option = document.createElement('we-button');
+                option.classList.add('o_we_list_add_existing');
+                option.dataset.addOption = el.id;
+                option.dataset.noPreview = 'true';
+                const divEl = document.createElement('div');
+                divEl.textContent = el.display_name;
+                option.appendChild(divEl);
+                this.selectMenuEl.appendChild(option);
+            }
+        });
+        if (!this.selectMenuEl.children.length) {
+            const title = document.createElement('we-title');
+            title.textContent = _t("No more records");
+            this.selectMenuEl.appendChild(title);
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onAddCustomItemClick() {
+        this._addItemToTable();
+        this._notifyCurrentState();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddExistingItemClick(ev) {
+        const value = ev.currentTarget.dataset.addOption;
+        this._addItemToTable(value, ev.currentTarget.textContent);
+        this._notifyCurrentState();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddItemSelectClick(ev) {
+        ev.currentTarget.querySelector('we-toggler').classList.toggle('active');
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddItemCheckboxClick: function (ev) {
+        const isActive = ev.currentTarget.classList.contains('active');
+        if (this.hasDefault === 'unique') {
+            this.listTable.querySelectorAll('we-button.o_we_checkbox_wrapper.active').forEach(el => el.classList.remove('active'));
+        }
+        ev.currentTarget.classList.toggle('active', !isActive);
+        this._notifyCurrentState();
+    },
+    /**
+     * @private
+     */
+    _onListItemChange() {
+        this._notifyCurrentState();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onRemoveItemClick(ev) {
+        const minElements = this.el.dataset.allowEmpty ? 0 : 1;
+        if (ev.target.closest('table').querySelectorAll('tr').length > minElements) {
+            ev.target.closest('tr').remove();
+            this._notifyCurrentState();
+        }
+    },
+    /**
+     * @override
+     */
+    _onUserValueNotification(ev) {
+        const { widget, previewMode, prepare } = ev.data;
+        if (widget && widget === this.createWidget) {
+            if (widget.options.createMethod && widget.getValue(widget.options.createMethod)) {
+                return this._super(ev);
+            }
+            ev.stopPropagation();
+            if (previewMode) {
+                return;
+            }
+            prepare();
+            const { id, display_name } = JSON.parse(widget.getMethodsParams('addRecord').recordData);
+            this._addItemToTable(id, display_name);
+            this._notifyCurrentState();
+        }
+        return this._super(ev);
+    },
 });
 
 const RangeUserValueWidget = UnitUserValueWidget.extend({
     tagName: 'we-range',
     events: {
         'change input': '_onInputChange',
+        'input input': '_onInputInput',
     },
 
     /**
@@ -1717,9 +2115,7 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
             [min, max] = [max, min];
             this.input.classList.add('o_we_inverted_range');
         }
-        this.input.setAttribute('min', min);
-        this.input.setAttribute('max', max);
-        this.input.setAttribute('step', step);
+        this._setInputAttributes(min, max, step);
         this.containerEl.appendChild(this.input);
     },
 
@@ -1730,9 +2126,31 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     /**
      * @override
      */
+    loadMethodsData(validMethodNames) {
+        this._super(...arguments);
+        for (const methodName of this._methodsNames) {
+            const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+            if (possibleValues.length > 1) {
+                this._setInputAttributes(0, possibleValues.length - 1, 1);
+                break;
+            }
+        }
+    },
+    /**
+     * @override
+     */
     async setValue(value, methodName) {
         await this._super(...arguments);
-        this.input.value = this._value;
+        const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+        this.input.value = possibleValues.length > 1 ? possibleValues.indexOf(value) : this._value;
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        const value = this._super(...arguments);
+        const possibleValues = this._methodsParams.optionsPossibleValues[methodName];
+        return possibleValues.length > 1 ? possibleValues[+value] : value;
     },
 
     //--------------------------------------------------------------------------
@@ -1745,6 +2163,22 @@ const RangeUserValueWidget = UnitUserValueWidget.extend({
     _onInputChange(ev) {
         this._value = ev.target.value;
         this._onUserValueChange(ev);
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onInputInput(ev) {
+        this._value = ev.target.value;
+        this._onUserValuePreview(ev);
+    },
+    /**
+     * @private
+     */
+    _setInputAttributes(min, max, step) {
+        this.input.setAttribute('min', min);
+        this.input.setAttribute('max', max);
+        this.input.setAttribute('step', step);
     },
 });
 
@@ -1794,12 +2228,6 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * @override
-     */
-    _shouldIgnoreClick(ev) {
-        return !!ev.target.closest('.o_we_pager_header') || this._super(...arguments);
-    },
-    /**
      * Updates the pager's page number display.
      *
      * @private
@@ -1843,6 +2271,448 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const Many2oneUserValueWidget = SelectUserValueWidget.extend({
+    className: (SelectUserValueWidget.prototype.className || '') + ' o_we_many2one',
+    events: Object.assign({}, SelectUserValueWidget.prototype.events, {
+        'input .o_we_m2o_search input': '_onSearchInput',
+        'keydown .o_we_m2o_search input': '_onSearchKeydown',
+        'click .o_we_m2o_search_more': '_onSearchMoreClick',
+    }),
+    // Data-attributes that will be read into `this.options` on init and not
+    // transfered to inner buttons.
+    configAttributes: ['model', 'fields', 'limit', 'domain', 'callWith', 'createMethod'],
+
+    /**
+     * @override
+     */
+    init(parent, title, options, $target) {
+        this.afterSearch = [];
+        this.displayNameCache = {};
+        const {dataAttributes} = options;
+        Object.assign(options, {
+            limit: '5',
+            fields: '[]',
+            domain: '[]',
+            callWith: 'id',
+        });
+        this.configAttributes.forEach(attr => {
+            if (dataAttributes.hasOwnProperty(attr)) {
+                options[attr] = dataAttributes[attr];
+                delete dataAttributes[attr];
+            }
+        });
+        options.limit = parseInt(options.limit);
+        options.fields = JSON.parse(options.fields);
+        if (!options.fields.includes('display_name')) {
+            options.fields.push('display_name');
+        }
+        options.domain = JSON.parse(options.domain);
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+
+        this.inputEl = document.createElement('input');
+        this.inputEl.setAttribute('placeholder', _t("Search for records..."));
+        const searchEl = document.createElement('div');
+        searchEl.classList.add('o_we_m2o_search');
+        searchEl.appendChild(this.inputEl);
+        this.menuEl.appendChild(searchEl);
+
+        this.searchMore = document.createElement('div');
+        this.searchMore.classList.add('o_we_m2o_search_more');
+        this.searchMore.textContent = _t("Search more...");
+        this.searchMore.title = _t("Search to show more records");
+
+        if (this.options.createMethod) {
+            this.createInput = new InputUserValueWidget(this, undefined, {
+                classes: ['o_we_large_input'],
+                dataAttributes: { noPreview: 'true' },
+            }, this.$target);
+            this.createButton = new ButtonUserValueWidget(this, undefined, {
+                classes: ['flex-grow-0'],
+                dataAttributes: {
+                    noPreview: 'true',
+                    [this.options.createMethod]: '', // Value through getValue.
+                },
+                childNodes: [document.createTextNode(_t("Create"))],
+            }, this.$target);
+            // Override isActive so it doesn't show up in toggler
+            this.createButton.isActive = () => false;
+
+            await Promise.all([
+                this.createInput.appendTo(document.createDocumentFragment()),
+                this.createButton.appendTo(document.createDocumentFragment()),
+            ]);
+            this.registerSubWidget(this.createInput);
+            this.registerSubWidget(this.createButton);
+            this.createWidget = _buildRowElement('', {
+                classes: ['o_we_full_row', 'o_we_m2o_create', 'p-1'],
+                childNodes: [this.createInput.el, this.createButton.el],
+            });
+        }
+
+        return this._search('');
+    },
+    /**
+     * @override
+     */
+    async setValue(value, methodName) {
+        await this._super(...arguments);
+        if (this.menuTogglerEl.textContent === '/') {
+            // The currently selected value is not present in the search, need to read
+            // its display name.
+            if (value !== '') {
+                // FIXME: value may not be an id if callWith is specified!
+                this.menuTogglerEl.textContent = await this._getDisplayName(parseInt(value));
+            } else {
+                this.menuTogglerEl.textContent = _t("Choose a record...");
+            }
+        }
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        if (methodName === this.options.createMethod && this.createInput) {
+            return this.createInput._value;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Prevents double widget instanciation for we-buttons that have been
+     * created manually by _search (container widgets will have their innner
+     * html searched for userValueWidgets to instanciate during option startup)
+     *
+     * @override
+     */
+    isContainer() {
+        return false;
+    },
+    /**
+     * @override
+     */
+    open() {
+        if (this.createInput) {
+            this.createInput.setValue('');
+        }
+        return this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Searches the database for corresponding records and updates the dropdown
+     *
+     * @private
+     */
+    async _search(needle) {
+        this._userValueWidgets = this._userValueWidgets.filter(widget => !widget.isDestroyed());
+        // Remove select options
+        this._userValueWidgets
+            .filter(widget => {
+                return widget instanceof ButtonUserValueWidget &&
+                    widget.el.parentElement.matches('we-selection-items');
+            }).forEach(button => {
+                if (button.isPreviewed()) {
+                    button.notifyValueChange('reset');
+                }
+                button.destroy();
+            });
+        const recTuples = await this._rpc({
+            model: this.options.model,
+            method: 'name_search',
+            kwargs: {
+                name: needle,
+                args: this.options.domain,
+                operator: "ilike",
+                limit: this.options.limit + 1,
+            },
+        });
+        const records = await this._rpc({
+            model: this.options.model,
+            method: 'read',
+            args: [recTuples.map(([id, _name]) => id), this.options.fields],
+        });
+        records.forEach(record => {
+            this.displayNameCache[record.id] = record.display_name;
+        });
+
+        await Promise.all(records.slice(0, this.options.limit).map(async record => {
+            // Copy over the data-attributes from the main element, and default the value
+            // to the callWith field of the record so that if it's a method, it will
+            // be called with that value
+            const buttonDataAttributes = Object.assign({}, this.options.dataAttributes);
+            Object.keys(buttonDataAttributes).forEach(key => {
+                buttonDataAttributes[key] = buttonDataAttributes[key] || record[this.options.callWith];
+            });
+            // REMARK: this syntax is very similar to React.createComponent, maybe we could
+            // write a transformer like there is for JSX?
+            const buttonWidget = new ButtonUserValueWidget(this, undefined, {
+                dataAttributes: Object.assign({recordData: JSON.stringify(record)}, buttonDataAttributes),
+                childNodes: [document.createTextNode(record.display_name)],
+            }, this.$target);
+            this.registerSubWidget(buttonWidget);
+            await buttonWidget.appendTo(this.menuEl);
+            if (this._methodsNames) {
+                buttonWidget.loadMethodsData(this._methodsNames);
+            }
+        }));
+        // Load methodsData for new buttons if possible. It will not be possible
+        // when the widget is first created (as this._methodsNames will be undefined)
+        // but the snippetOption lifecycle will load the methods data explicitely
+        // just after creating the widget
+        if (this._methodsNames) {
+            this._methodsNames.forEach(methodName => {
+                this.setValue(this._value, methodName);
+            });
+        }
+
+        const hasMore = records.length > this.options.limit;
+        if (hasMore) {
+            this.menuEl.appendChild(this.searchMore);
+            this.searchMore.classList.remove('d-none');
+        } else {
+            this.searchMore.classList.add('d-none');
+        }
+
+        if (this.createWidget) {
+            this.menuEl.appendChild(this.createWidget);
+        }
+
+        this.waitingForSearch = false;
+        this.afterSearch.forEach(cb => cb());
+        this.afterSearch = [];
+    },
+    /**
+     * Returns the display name for a given record.
+     *
+     * @private
+     */
+    async _getDisplayName(recordId) {
+        if (!this.displayNameCache.hasOwnProperty(recordId)) {
+            this.displayNameCache[recordId] = (await this._rpc({
+                model: this.options.model,
+                method: 'read',
+                args: [[recordId], ['display_name']],
+            }))[0].display_name;
+        }
+        return this.displayNameCache[recordId];
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _onClick(ev) {
+        // Prevent dropdown from closing if you click on the search or has_more
+        if (ev.target.closest('.o_we_m2o_search_more, .o_we_m2o_search, .o_we_m2o_create') &&
+                !ev.target.closest('we-button')) {
+            ev.stopPropagation();
+            return;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Handles changes to the search bar.
+     *
+     * @private
+     */
+    _onSearchInput(ev) {
+        // maybe there is a concurrency primitive we can use instead of manual record-keeping?
+        // Basically we want to queue the enter action to go after the current search if there
+        // is one that is ongoing (ie currently waiting for the debounce or RPC)
+        clearTimeout(this.searchIntent);
+        this.waitingForSearch = true;
+        this.searchIntent = setTimeout(() => {
+            this._search(ev.target.value);
+        }, 500);
+    },
+    /**
+     * Selects the first option when pressing enter in the search input.
+     *
+     * @private
+     */
+    _onSearchKeydown(ev) {
+        if (ev.which !== $.ui.keyCode.ENTER) {
+            return;
+        }
+        const action = () => {
+            const firstButton = this.menuEl.querySelector(':scope > we-button');
+            if (firstButton) {
+                firstButton.click();
+            }
+        };
+        if (this.waitingForSearch) {
+            this.afterSearch.push(action);
+        } else {
+            action();
+        }
+    },
+    /**
+     * Focuses the search input when clicking on the "Search more..." button.
+     *
+     * @private
+     */
+    _onSearchMoreClick(ev) {
+        this.inputEl.focus();
+    },
+    /**
+     * @override
+     */
+    _onUserValueNotification(ev) {
+        const { widget } = ev.data;
+        if (widget && widget === this.createInput) {
+            ev.stopPropagation();
+            return;
+        }
+        if (widget && widget === this.createButton) {
+            if (!this.createInput._value) {
+                ev.stopPropagation();
+            }
+            return;
+        }
+        if (widget !== this.createButton && this.createInput) {
+            this.createInput._value = '';
+        }
+        return this._super(ev);
+    },
+});
+
+const Many2manyUserValueWidget = UserValueWidget.extend({
+    configAttributes: ['model', 'recordId', 'm2oField', 'createMethod'],
+
+    /**
+     * @override
+     */
+    init(parent, title, options, $target) {
+        const { dataAttributes } = options;
+        this.configAttributes.forEach(attr => {
+            if (dataAttributes.hasOwnProperty(attr)) {
+                options[attr] = dataAttributes[attr];
+                delete dataAttributes[attr];
+            }
+        });
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async willStart() {
+        await this._super(...arguments);
+        const { model, recordId, m2oField } = this.options;
+        const [record] = await this._rpc({
+            model: model,
+            method: 'read',
+            args: [[parseInt(recordId)], [m2oField]],
+        });
+        const selectedRecordIds = record[m2oField];
+        // TODO: handle no record
+        const [modelData] = await this._rpc({
+            model: 'ir.model.fields',
+            method: 'search_read',
+            args: [[['model', '=', model], ['name', '=', m2oField]], ['relation', 'field_description']],
+        });
+        // TODO: simultaneously fly both RPCs
+        this.m2oModel = modelData.relation;
+        this.m2oName = modelData.field_description; // Use as string attr?
+
+        const selectedRecords = await this._rpc({
+            model: this.m2oModel,
+            method: 'read',
+            args: [selectedRecordIds, ['display_name']],
+        });
+        // TODO: reconcile the fact that this widget sets its own initial value
+        // instead of it coming through setValue(_computeWidgetState)
+        this._value = JSON.stringify(selectedRecords);
+    },
+    /**
+     * @override
+     */
+    async start() {
+        this.el.classList.add('o_we_m2m');
+        const m2oDataAttributes = Object.entries(this.options.dataAttributes).filter(([attrName]) => {
+            return Many2oneUserValueWidget.prototype.configAttributes.includes(attrName);
+        });
+        m2oDataAttributes.push(
+            ['model', this.m2oModel],
+            ['addRecord', ''],
+            ['createMethod', this.options.createMethod],
+        );
+        // Don't register this one as a subWidget because it will be a subWidget
+        // of the listWidget
+        this.createWidget = new Many2oneUserValueWidget(null, undefined, {
+            dataAttributes: Object.fromEntries(m2oDataAttributes),
+        }, this.$target);
+
+        this.listWidget = registerUserValueWidget('we-list', this, undefined, {
+            dataAttributes: { unsortable: 'true', notEditable: 'true', allowEmpty: 'true' },
+            createWidget: this.createWidget,
+        }, this.$target);
+        await this.listWidget.appendTo(this.containerEl);
+
+        // Make this.el the select's offsetParent so the we-selection-items has
+        // the correct width
+        this.listWidget.el.querySelector('we-select').style.position = 'static';
+        this.el.style.position = 'relative';
+    },
+    /**
+     * @override
+     */
+    loadMethodsData(validMethodNames, ...rest) {
+        // TODO: check that addRecord is still needed.
+        this._super(['addRecord', ...validMethodNames], ...rest);
+        this._methodsNames = this._methodsNames.filter(name => name !== 'addRecord');
+    },
+    /**
+     * @override
+     */
+    setValue(value, methodName) {
+        if (methodName === this.options.createMethod) {
+            return this.createWidget.setValue(value, methodName);
+        }
+        if (!value) {
+            // TODO: why do we need this.
+            value = this._value;
+        }
+        this._super(value, methodName);
+        this.listWidget.setValue(this._value);
+    },
+    /**
+     * @override
+     */
+    getValue(methodName) {
+        return this.listWidget.getValue(methodName);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _onUserValueNotification(ev) {
+        const { widget, previewMode } = ev.data;
+        if (!widget) {
+            return this._super(ev);
+        }
+        if (widget === this.listWidget) {
+            ev.stopPropagation();
+            this._value = widget._value;
+            this.notifyValueChange(previewMode);
+        }
+    },
+});
+
 const userValueWidgetsRegistry = {
     'we-button': ButtonUserValueWidget,
     'we-checkbox': CheckboxUserValueWidget,
@@ -1852,10 +2722,14 @@ const userValueWidgetsRegistry = {
     'we-multi': MultiUserValueWidget,
     'we-colorpicker': ColorpickerUserValueWidget,
     'we-datetimepicker': DatetimePickerUserValueWidget,
+    'we-datepicker': DatePickerUserValueWidget,
+    'we-list': ListUserValueWidget,
     'we-imagepicker': ImagepickerUserValueWidget,
     'we-videopicker': VideopickerUserValueWidget,
     'we-range': RangeUserValueWidget,
     'we-select-pager': SelectPagerUserValueWidget,
+    'we-many2one': Many2oneUserValueWidget,
+    'we-many2many': Many2manyUserValueWidget,
 };
 
 /**
@@ -1880,11 +2754,24 @@ const SnippetOptionWidget = Widget.extend({
      */
     isTopOption: false,
     /**
+     * Indicates if the option should be the first one displayed in the button
+     * group at the top of the options panel, next to the clone/remove button.
+     *
+     * @type {boolean}
+     */
+    isTopFirstOption: false,
+    /**
      * Forces the target to not be possible to remove.
      *
      * @type {boolean}
      */
     forceNoDeleteButton: false,
+    /**
+     * The option needs the handles overlay to be displayed on the snippet.
+     *
+     * @type {boolean}
+     */
+    displayOverlayOptions: false,
 
     /**
      * The option `$el` is supposed to be the associated DOM UI element.
@@ -1998,6 +2885,14 @@ const SnippetOptionWidget = Widget.extend({
      * @return {Promise|undefined}
      */
     cleanForSave: async function () {},
+    /**
+     * Adds the given widget to the known list of user value widgets
+     *
+     * @param {UserValueWidget} widget
+     */
+    registerSubWidget(widget) {
+        this._userValueWidgets.push(widget);
+    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -2054,7 +2949,27 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectAttribute: function (previewMode, widgetValue, params) {
         const value = this._selectAttributeHelper(widgetValue, params);
-        this.$target[0].setAttribute(params.attributeName, value);
+        if (value) {
+            this.$target[0].setAttribute(params.attributeName, value);
+        } else {
+            this.$target[0].removeAttribute(params.attributeName);
+        }
+    },
+    /**
+     * Default option method which allows to select a value and set it on the
+     * associated snippet as a property. The name of the property is
+     * given by the propertyName parameter.
+     *
+     * @param {boolean} previewMode - @see this.selectClass
+     * @param {string} widgetValue
+     * @param {Object} params
+     */
+    selectProperty: function (previewMode, widgetValue, params) {
+        if (!params.propertyName) {
+            throw new Error('Property name missing');
+        }
+        const value = this._selectValueHelper(widgetValue, params);
+        this.$target[0][params.propertyName] = value;
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -2066,7 +2981,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {Promise|undefined}
      */
-    selectStyle: function (previewMode, widgetValue, params) {
+    selectStyle: async function (previewMode, widgetValue, params) {
         // Disable all transitions for the duration of the method as many
         // comparisons will be done on the element to know if applying a
         // property has an effect or not. Also, changing a css property via the
@@ -2526,23 +3441,6 @@ const SnippetOptionWidget = Widget.extend({
     },
     /**
      * @private
-     * @param {string} widgetName
-     * @param {UserValueWidget|this|null} parent
-     * @param {string} title
-     * @param {Object} options
-     * @returns {UserValueWidget}
-     */
-    _registerUserValueWidget: function (widgetName, parent, title, options) {
-        const widget = new userValueWidgetsRegistry[widgetName](parent, title, options, this.$target);
-        if (!parent || parent === this) {
-            this._userValueWidgets.push(widget);
-        } else {
-            parent.registerSubWidget(widget);
-        }
-        return widget;
-    },
-    /**
-     * @private
      * @param {HTMLElement} uiFragment
      * @returns {Promise}
      */
@@ -2613,7 +3511,7 @@ const SnippetOptionWidget = Widget.extend({
             }
 
             const infos = this._extraInfoFromDescriptionElement(el);
-            const widget = this._registerUserValueWidget(widgetName, parentWidget || this, infos.title, infos.options);
+            const widget = registerUserValueWidget(widgetName, parentWidget || this, infos.title, infos.options, this.$target);
             return widget.insertAfter(el).then(() => {
                 // Remove the original element afterwards as the insertion
                 // operation may move some of its inner content during
@@ -2680,6 +3578,10 @@ const SnippetOptionWidget = Widget.extend({
     _select: async function (previewMode, widget) {
         let $applyTo = null;
 
+        if (previewMode === true) {
+            this.options.wysiwyg.odooEditor.automaticStepUnactive('preview_option');
+        }
+
         // Call each option method sequentially
         for (const methodName of widget.getMethodsNames()) {
             const widgetValue = widget.getValue(methodName);
@@ -2699,6 +3601,10 @@ const SnippetOptionWidget = Widget.extend({
             }
         }
 
+        if (previewMode === 'reset' || previewMode === false) {
+            this.options.wysiwyg.odooEditor.automaticStepActive('preview_option');
+        }
+
         // We trigger the event on elements targeted by apply-to if any as
         // this.$target could not be in an editable element while the elements
         // targeted by apply-to are.
@@ -2707,14 +3613,22 @@ const SnippetOptionWidget = Widget.extend({
     /**
      * Used to handle attribute or data attribute value change
      *
-     * @param {string} value
-     * @param {Object} params
-     * @returns {string|undefined}
+     * @see this._selectValueHelper for parameters
      */
     _selectAttributeHelper(value, params) {
         if (!params.attributeName) {
             throw new Error('Attribute name missing');
         }
+        return this._selectValueHelper(value, params);
+    },
+    /**
+     * Used to handle value of a select
+     *
+     * @param {string} value
+     * @param {Object} params
+     * @returns {string|undefined}
+     */
+    _selectValueHelper(value, params) {
         if (params.saveUnit && !params.withUnit) {
             // Values that come with an unit are saved without unit as
             // data-attribute unless told otherwise.
@@ -2732,7 +3646,7 @@ const SnippetOptionWidget = Widget.extend({
      */
     _toggleCollapseEl(collapseEl, show) {
         collapseEl.classList.toggle('active', show);
-        collapseEl.querySelector('.o_we_collapse_toggler').classList.toggle('active', show);
+        collapseEl.querySelector('we-toggler.o_we_collapse_toggler').classList.toggle('active', show);
     },
 
     //--------------------------------------------------------------------------
@@ -2744,7 +3658,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Event} ev
      */
     _onCollapseTogglerClick(ev) {
-        const currentCollapseEl = ev.currentTarget.parentNode;
+        const currentCollapseEl = ev.currentTarget.closest('we-collapse');
         this._toggleCollapseEl(currentCollapseEl);
         for (const collapseEl of currentCollapseEl.querySelectorAll('we-collapse')) {
             this._toggleCollapseEl(collapseEl, false);
@@ -2787,10 +3701,18 @@ const SnippetOptionWidget = Widget.extend({
             requiresReload = !!reloadMessage;
             if (requiresReload) {
                 const save = await new Promise(resolve => {
-                    Dialog.confirm(this, _t("This change needs to reload the page, this will save all your changes and reload the page, are you sure you want to proceed?") + ' '
+                    Dialog.confirm(this, _t("To apply this change, we need to save all your previous modifications and reload the page.") + ' '
                             + (typeof reloadMessage === 'string' ? reloadMessage : ''), {
-                        confirm_callback: () => resolve(true),
-                        cancel_callback: () => resolve(false),
+                        buttons: [{
+                            text: _t('Save and Reload'),
+                            classes: 'btn-primary',
+                            close: true,
+                            click: () => resolve(true),
+                        }, {
+                            text: _t("Cancel"),
+                            close: true,
+                            click: () => resolve(false)
+                        }],
                     });
                 });
                 if (!save) {
@@ -2808,6 +3730,9 @@ const SnippetOptionWidget = Widget.extend({
 
         // Ask a mutexed snippet update according to the widget value change
         const shouldRecordUndo = (!previewMode && !ev.data.isSimulatedEvent);
+        if (shouldRecordUndo) {
+            this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
+        }
         this.trigger_up('snippet_edition_request', {exec: async () => {
             // If some previous snippet edition in the mutex removed the target from
             // the DOM, the widget can be destroyed, in that case the edition request
@@ -2842,14 +3767,15 @@ const SnippetOptionWidget = Widget.extend({
                 return;
             }
 
+            // Call widget option methods and update $target
+            await this._select(previewMode, widget);
+
             // If it is not preview mode, the user selected the option for good
             // (so record the action)
             if (shouldRecordUndo) {
-                this.trigger_up('request_history_undo_record', {$target: this.$target});
+                this.options.wysiwyg.odooEditor.historyStep();
             }
 
-            // Call widget option methods and update $target
-            await this._select(previewMode, widget);
             if (previewMode) {
                 return;
             }
@@ -2922,6 +3848,8 @@ const registry = {};
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 registry.sizing = SnippetOptionWidget.extend({
+    displayOverlayOptions: true,
+
     /**
      * @override
      */
@@ -3009,7 +3937,7 @@ registry.sizing = SnippetOptionWidget.extend({
             };
             var bodyMouseUp = function () {
                 $body.off('mousemove', bodyMouseMove);
-                $(window).off('mouseup', bodyMouseUp);
+                $body.off('mouseup', bodyMouseUp);
                 $body.removeClass(cursor);
                 $handle.removeClass('o_active');
 
@@ -3023,14 +3951,11 @@ registry.sizing = SnippetOptionWidget.extend({
                     return;
                 }
                 setTimeout(function () {
-                    self.trigger_up('request_history_undo_record', {
-                        $target: self.$target,
-                        event: 'resize_' + XY,
-                    });
+                    self.options.wysiwyg.odooEditor.historyStep();
                 }, 0);
             };
             $body.on('mousemove', bodyMouseMove);
-            $(window).on('mouseup', bodyMouseUp);
+            $body.on('mouseup', bodyMouseUp);
         });
 
         return def;
@@ -3178,12 +4103,217 @@ registry['sizing_y'] = registry.sizing.extend({
     },
 });
 
+/**
+ * Allows for media to be replaced.
+ */
+registry.ReplaceMedia = SnippetOptionWidget.extend({
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Replaces the media.
+     *
+     * @see this.selectClass for parameters
+     */
+    async replaceMedia() {
+        // TODO for now, this simulates a double click on the media,
+        // to be refactored when the new editor is merged
+        this.$target.dblclick();
+    },
+});
+
+/**
+ * General options that are common to a font awesome icon and an image.
+ */
+registry.StaticMediaTools = SnippetOptionWidget.extend({
+    currentShapes: {},
+    alignments: {
+        left: ['float-left'],
+        center: ['d-block', 'mx-auto'],
+        right: ['float-right'],
+    },
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    toggleShapeRounded(previewMode) {
+        this._toggleShape(previewMode, 'rounded');
+    },
+    toggleShapeCircle(previewMode) {
+        this._toggleShape(previewMode, 'rounded-circle');
+    },
+    toggleShapeShadow(previewMode) {
+        this._toggleShape(previewMode, 'shadow');
+    },
+    toggleShapeThumbnail(previewMode) {
+        this._toggleShape(previewMode, 'img-thumbnail');
+    },
+    setPadding(previewMode, padding) {
+        this.$target.css('padding', padding);
+    },
+    align(previewMode, alignment, params) {
+        if (previewMode === true) {
+            this.currentAlignment = this._getAlignment();
+        }
+        const targetAlignment = previewMode === 'reset' ? this.currentAlignment : alignment;
+        for (const value of params.possibleValues) {
+            this.$target.toggleClass(this.alignments[value] || '', value === targetAlignment);
+        }
+        if (previewMode === false) {
+            this.currentAlignment = alignment;
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        if (['toggleShapeRounded', 'toggleShapeCircle', 'toggleShapeShadow', 'toggleShapeThumbnail'].includes(methodName)) {
+            return params.possibleValues.find(c => this.$target.hasClass(c)) || '';
+        } else if (methodName === 'setPadding') {
+            return this.$target.css('padding');
+        } else if (methodName === 'align') {
+            return this._getAlignment();
+        }
+        return this._super(...arguments);
+    },
+    _getAlignment() {
+        for (const [alignment, [alignClass]] of Object.entries(this.alignments)) {
+            if (this.$target.hasClass(alignClass)) {
+                return alignment;
+            }
+        }
+        return '';
+    },
+    _toggleShape(previewMode, shape) {
+        if (previewMode === true) {
+            this.currentShapes[shape] = this.$target.hasClass(shape);
+            this.$target.toggleClass(shape, true);
+        } else if (previewMode === 'reset') {
+            this.$target.toggleClass(shape, this.currentShapes[shape]);
+        } else if (previewMode === false) {
+            this.$target.toggleClass(shape, !this.currentShapes[shape]);
+            this.currentShapes[shape] = this.$target.hasClass(shape);
+        }
+    },
+});
+
+/**
+ * General options of a font awesome icon.
+ */
+registry.FontawesomeTools = SnippetOptionWidget.extend({
+    setSize(previewMode, size, params) {
+        if (previewMode === true) {
+            this.currentSize = params.possibleValues.find(c => this.$target.hasClass(c)) || '';
+        }
+        for (const value of params.possibleValues) {
+            if (previewMode === 'reset') {
+                this.$target.toggleClass(value, value === this.currentSize);
+            } else {
+                this.$target.toggleClass(value, value === size)
+            }
+        }
+        if (previewMode === false) {
+            this.currentSize = size;
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        if (methodName === 'setSize') {
+            return params.possibleValues.find(c => this.$target.hasClass(c)) || '';
+        } else if (methodName === 'align') {
+            return this._getAlignment();
+        }
+        return this._super(...arguments);
+    },
+});
+
+/**
+ * General options of an image.
+ */
+registry.ImageTools = SnippetOptionWidget.extend({
+    setWidth(previewMode, width) {
+        if (previewMode === true) {
+            this.currentWidth = this.$target.css('width');
+        }
+        if (previewMode === 'reset') {
+            this.$target.css('width', this.currentWidth);
+        } else {
+            this.$target.css('width', width);
+        }
+        if (previewMode === false) {
+            this.currentWidth = width;
+        }
+    },
+    setAlt(previewMode, alt) {
+        this.$target.attr('alt', alt);
+    },
+    setTitle(previewMode, title) {
+        this.$target.attr('title', title);
+    },
+    crop() {
+        new weWidgets.ImageCropWidget(this, this.$target[0]).appendTo(this.options.wysiwyg.$editable);
+    },
+    transform() {
+        if (this.$target.data('transfo-destroy')) {
+            this.$target.removeData('transfo-destroy');
+            return;
+        }
+        const document = this.$target[0].ownerDocument
+        this.$target.transfo({ document });
+        const mousedown = mousedownEvent => {
+            if (!$(mousedownEvent.target).closest('.transfo-container').length) {
+                this.$target.transfo('destroy');
+                $(document).off('mousedown', mousedown);
+            }
+            if ($(mousedownEvent.target).closest('#image-transform').length) {
+                this.$target
+                    .data('transfo-destroy', true)
+                    .attr('style', (this.$target.attr('style') || '')
+                    .replace(/[^;]*transform[\w:]*;?/g, ''));
+            }
+            this.$target.trigger('content_changed');
+        };
+        $(document).on('mousedown', mousedown);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        if (methodName === 'setWidth') {
+            return this.$target[0].style.width || '';
+        } else if (methodName === 'setAlt') {
+            return this.$target.attr('alt');
+        } else if (methodName === 'setTitle') {
+            return this.$target.attr('title');
+        }
+        return this._super(...arguments);
+    },
+});
+
 /*
  * Abstract option to be extended by the ImageOptimize and BackgroundOptimize
  * options that handles all the common parts.
  */
 const ImageHandlerOption = SnippetOptionWidget.extend({
-
     /**
      * @override
      */
@@ -3191,6 +4321,36 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         const _super = this._super.bind(this);
         await this._loadImageInfo();
         return _super(...arguments);
+    },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        const weightEl = document.createElement('span');
+        weightEl.classList.add('o_we_image_weight', 'o_we_tag', 'd-none');
+        weightEl.title = _t("Size");
+        this.$weight = $(weightEl);
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async updateUI() {
+        await this._super(...arguments);
+
+        if (this._filesize === undefined) {
+            await this._applyOptions(false);
+        }
+        if (this._filesize !== undefined) {
+            this.$weight.text(`${this._filesize.toFixed(1)} kb`);
+            this.$weight.removeClass('d-none');
+            this._relocateWeightEl();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -3207,7 +4367,10 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
     /**
      * @see this.selectClass for parameters
      */
-    setQuality(previewMode, widgetValue, params) {
+    async setQuality(previewMode, widgetValue, params) {
+        if (previewMode) {
+            return;
+        }
         this._getImg().dataset.quality = widgetValue;
         return this._applyOptions();
     },
@@ -3284,37 +4447,24 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         return this._super(...arguments);
     },
     /**
+     * @abstract
+     */
+    _relocateWeightEl() {},
+    /**
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        const isLocalURL = href => new URL(href, window.location.origin).origin === window.location.origin;
-
         const img = this._getImg();
-        if (!this.originalSrc || !['image/png', 'image/jpeg'].includes(img.dataset.mimetype)) {
-            return [...uiFragment.childNodes].forEach(node => {
-                if (node.matches('.o_we_external_warning')) {
-                    node.classList.remove('d-none');
-                    if (isLocalURL(img.getAttribute('src'))) {
-                        const title = node.querySelector('we-title');
-                        title.textContent = ` ${_t("Quality options unavailable")}`;
-                        $(title).prepend('<i class="fa fa-warning" />');
-                        if (img.dataset.mimetype) {
-                            title.setAttribute('title', _t("Only PNG and JPEG images support quality options and image filtering"));
-                        } else {
-                            title.setAttribute('title', _t("Due to technical limitations, you can only change optimization settings on this image by choosing it again in the media-dialog or reuploading it (double click on the image)"));
-                        }
-                    }
-                } else {
-                    node.remove();
-                }
-            });
+        if (!this.originalSrc || !['image/png', 'image/jpeg'].includes(this._getImageMimetype(img))) {
+            [...uiFragment.childNodes].forEach(node => node.remove());
+            return;
         }
         const $select = $(uiFragment).find('we-select[data-name=width_select_opt]');
         (await this._computeAvailableWidths()).forEach(([value, label]) => {
             $select.append(`<we-button data-select-width="${value}">${label}</we-button>`);
         });
 
-        if (img.dataset.mimetype !== 'image/jpeg') {
+        if (this._getImageMimetype(img) !== 'image/jpeg') {
             uiFragment.querySelector('we-range[data-set-quality]').remove();
         }
     },
@@ -3347,23 +4497,29 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * Applies all selected options on the original image.
      *
      * @private
+     * @param {boolean} [update=true] If this is false, this does not actually
+     *     modifies the image but only simulates the modifications on it to
+     *     be able to update the filesize UI.
      */
-    async _applyOptions() {
+    async _applyOptions(update = true) {
         const img = this._getImg();
-        if (!['image/jpeg', 'image/png'].includes(img.dataset.mimetype)) {
+        if (!update && !(img && img.complete)) {
+            return;
+        }
+        if (!['image/jpeg', 'image/png'].includes(this._getImageMimetype(img))) {
             this.originalId = null;
             return;
         }
-        const dataURL = await applyModifications(img);
-        const weight = dataURL.split(',')[1].length / 4 * 3;
-        const $weight = this.$el.find('.o_we_image_weight');
-        $weight.find('> small').text(_t("New size"));
-        $weight.find('b').text(`${(weight / 1024).toFixed(1)} kb`);
-        $weight.removeClass('d-none');
-        img.classList.add('o_modified_image_to_save');
-        const loadedImg = await loadImage(dataURL, img);
-        this._applyImage(loadedImg);
-        return loadedImg;
+        const dataURL = await applyModifications(img, {mimetype: this._getImageMimetype(img)});
+        this._filesize = dataURL.split(',')[1].length / 4 * 3 / 1024;
+
+        if (update) {
+            img.classList.add('o_modified_image_to_save');
+            const loadedImg = await loadImage(dataURL, img);
+            this._applyImage(loadedImg);
+            return loadedImg;
+        }
+        return img;
     },
     /**
      * Loads the image's attachment info.
@@ -3417,12 +4573,44 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
      * @param {HTMLImageElement} img
      */
     _applyImage(img) {},
+    /**
+     * @private
+     * @param {HTMLImageElement} img
+     * @returns {String} The right mimetype used to apply options on image.
+     */
+    _getImageMimetype(img) {
+        return img.dataset.mimetype;
+    },
 });
+
+/**
+ * @param {Element} containerEl
+ * @returns {Element}
+ */
+const _addAnimatedShapeLabel = function addAnimatedShapeLabel(containerEl) {
+    const labelEl = document.createElement('span');
+    labelEl.classList.add('o_we_shape_animated_label');
+    const labelStr = _t("Animated");
+    labelEl.textContent = labelStr[0];
+    const spanEl = document.createElement('span');
+    spanEl.textContent = labelStr.substr(1);
+    labelEl.appendChild(spanEl);
+    containerEl.classList.add('position-relative');
+    containerEl.appendChild(labelEl);
+    return labelEl;
+};
 
 /**
  * Controls image width and quality.
  */
 registry.ImageOptimize = ImageHandlerOption.extend({
+    /**
+     * @constructor
+     */
+    init() {
+        this.shapeCache = {};
+        return this._super(...arguments);
+    },
     /**
      * @override
      */
@@ -3440,9 +4628,159 @@ registry.ImageOptimize = ImageHandlerOption.extend({
     },
 
     //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @see this.selectClass for parameters
+     */
+    async setImgShape(previewMode, widgetValue, params) {
+        const img = this._getImg();
+        const saveData = previewMode === false;
+        if (widgetValue) {
+            await this._loadShape(widgetValue);
+            if (previewMode === 'reset' && img.dataset.shapeColors) {
+                // When we reset the shape we need to reapply the colors the
+                // user had selected.
+                await this._applyShapeAndColors(false, img.dataset.shapeColors.split(';'));
+            } else {
+                // If the preview mode === false we want to save the colors
+                // as the user chose their shape
+                await this._applyShapeAndColors(saveData);
+                if (saveData && img.dataset.mimetype !== 'image/svg+xml') {
+                    img.dataset.originalMimetype = img.dataset.mimetype;
+                    img.dataset.mimetype = 'image/svg+xml';
+                }
+            }
+        } else {
+            // Re-applying the modifications and deleting the shapes
+            img.src = await applyModifications(img, {mimetype: this._getImageMimetype(img)});
+            delete img.dataset.shape;
+            delete img.dataset.shapeColors;
+            delete img.dataset.fileName;
+            if (saveData) {
+                img.dataset.mimetype = img.dataset.originalMimetype;
+                delete img.dataset.originalMimetype;
+            }
+        }
+        img.classList.add('o_modified_image_to_save');
+    },
+    /**
+     * Handles color assignment on the shape. Widget is a color picker.
+     * If no value, we reset to the current color palette.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setImgShapeColor(previewMode, widgetValue, params) {
+        const img = this._getImg();
+        const newColorId = parseInt(params.colorId);
+        const oldColors = img.dataset.shapeColors.split(';');
+        const newColors = oldColors.slice(0);
+        newColors[newColorId] = this._getCSSColorValue(widgetValue === '' ? `o-color-${(newColorId + 1)}` : widgetValue);
+        await this._applyShapeAndColors(true, newColors);
+        img.classList.add('o_modified_image_to_save');
+    },
+
+    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    async _applyOptions() {
+        const img = await this._super(...arguments);
+        if (img && img.dataset.shape) {
+            // Reapplying the shape
+            await this._loadShape(img.dataset.shape);
+            await this._applyShapeAndColors(true, (img.dataset.shapeColors && img.dataset.shapeColors.split(';')));
+        }
+        return img;
+    },
+    /**
+     * Loads the shape into cache if not already and sets it in the dataset of
+     * the img
+     *
+     * @param {string} shapeName identifier of the shape
+     */
+    async _loadShape(shapeName) {
+        const [module, directory, fileName] = shapeName.split('/');
+        let shape = this.shapeCache[fileName];
+        if (!shape) {
+            const shapeURL = `/${module}/static/image_shapes/${directory}/${fileName}.svg`;
+            shape = await (await fetch(shapeURL)).text();
+            this.shapeCache[fileName] = shape;
+        }
+        this._getImg().dataset.shape = shapeName;
+    },
+
+    /**
+     * Applies the shape in img.dataset.shape and replaces the previous hex
+     * color values with new ones or current theme
+     * ones then calls _writeShape()
+     *
+     * @param {boolean} save true if the colors need to be saved in the
+     * data-attribute
+     * @param {string[]} [newColors] Array of HEX color code, default
+     * theme colors are applied if not supplied
+     */
+    async _applyShapeAndColors(save, newColors) {
+        const img = this._getImg();
+        let shape = this.shapeCache[img.dataset.shape.split('/')[2]];
+
+        // Map the default palette colors to an array if the shape includes them
+        // If they do not map a NULL, this way we know if a default color is in
+        // the shape
+        const oldColors = Object.values(DEFAULT_PALETTE).map(color => shape.includes(color) ? color : null);
+        if (!newColors) {
+            // If we do not have newColors, we still replace the default
+            // shape's colors by the current palette's
+            newColors = oldColors.map((color, i) => color !== null ? this._getCSSColorValue(`o-color-${(i + 1)}`) : null);
+        }
+        newColors.forEach((color, i) => shape = shape.replace(new RegExp(oldColors[i], 'g'), color));
+        await this._writeShape(shape);
+        if (save) {
+            img.dataset.shapeColors = newColors.join(';');
+        }
+    },
+    /**
+     * Sets the image in the supplied SVG and replace the src with a dataURL
+     *
+     * @param {string} svgText svg file as text
+     * @returns {Promise} resolved once the svg is properly loaded
+     * in the document
+     */
+    async _writeShape(svgText) {
+        const img = this._getImg();
+
+        const svg = new DOMParser().parseFromString(svgText, 'image/svg+xml').documentElement;
+        // We will store the image in base64 inside the SVG.
+        // applyModifications will return a dataURL with the current filters
+        // and size options.
+        const imgDataURL = await applyModifications(img, {mimetype: this._getImageMimetype(img)});
+        svg.removeChild(svg.querySelector('#preview'));
+        svg.querySelector('image').setAttribute('xlink:href', imgDataURL);
+        // Force natural width & height (note: loading the original image is
+        // needed for Safari where natural width & height of SVG does not return
+        // the correct values).
+        const originalImage = await loadImage(img.src);
+        svg.setAttribute('width', originalImage.naturalWidth);
+        svg.setAttribute('height', originalImage.naturalHeight);
+        // Transform the current SVG in a base64 file to be saved by the server
+        const blob = new Blob([svg.outerHTML], {
+            type: 'image/svg+xml',
+        });
+
+        const reader = new FileReader();
+        const readPromise = new Promise(resolve => {
+            reader.addEventListener('load', () => resolve(reader.result));
+        });
+        reader.readAsDataURL(blob);
+        const dataURL = await readPromise;
+        const imgFilename = (img.dataset.originalSrc.split('/').pop()).split('.')[0];
+        img.dataset.fileName = `${imgFilename}.svg`;
+        return loadImage(dataURL, img);
+    },
     /**
      * @override
      */
@@ -3468,6 +4806,85 @@ registry.ImageOptimize = ImageHandlerOption.extend({
     _getImg() {
         return this.$target[0];
     },
+    /**
+     * @override
+     */
+    _relocateWeightEl() {
+        const leftPanelEl = this.$overlay.data('$optionsSection')[0];
+        const titleTextEl = leftPanelEl.querySelector('we-title > span');
+        this.$weight.appendTo(titleTextEl);
+    },
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        if (widgetName.startsWith('img-shape-color')) {
+            const img = this._getImg();
+            const shapeName = img.dataset.shape;
+            if (!shapeName) {
+                return false;
+            }
+            const colors = img.dataset.shapeColors.split(';');
+            return colors[parseInt(params.colorId)];
+        }
+        return this._super();
+    },
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        switch (methodName) {
+            case 'setImgShape':
+                return this._getImg().dataset.shape || '';
+            case 'setImgShapeColor': {
+                const img = this._getImg();
+                return (img.dataset.shapeColors && img.dataset.shapeColors.split(';')[parseInt(params.colorId)]) || '';
+            }
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Appends the SVG as an image.
+     * Due to the nature of image_shapes' SVGs, it is easier to render them as
+     * img compared to appending their content to the DOM
+     * (which is what the current data-img does)
+     *
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        await this._super(...arguments);
+        uiFragment.querySelectorAll('we-select-page we-button[data-set-img-shape]').forEach(btn => {
+            const image = document.createElement('img');
+            const [moduleName, directory, shapeName] = btn.dataset.setImgShape.split('/');
+            image.src = `/${moduleName}/static/image_shapes/${directory}/${shapeName}.svg`;
+            $(btn).prepend(image);
+
+            if (btn.dataset.animated) {
+                _addAnimatedShapeLabel(btn);
+            }
+        });
+    },
+    /**
+     * @override
+     */
+    _getImageMimetype(img) {
+        if (img.dataset.shape) {
+            return img.dataset.originalMimetype;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Gets the CSS value of a color variable name so it can be used on shapes.
+     *
+     * @param {string} color
+     * @returns {string}
+     */
+    _getCSSColorValue(color) {
+        if (ColorpickerWidget.isCSSColor(color)) {
+            return color;
+        }
+        return weUtils.getCSSVariableValue(color);
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -3481,7 +4898,12 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      */
     async _onImageChanged(ev) {
         this.trigger_up('snippet_edition_request', {exec: async () => {
+            const img = this._getImg();
             await this._autoOptimizeImage();
+            if (img.dataset.shape) {
+                img.dataset.originalMimetype = img.dataset.mimetype;
+                img.dataset.mimetype = 'image/svg+xml';
+            }
             this.trigger_up('cover_update');
         }});
     },
@@ -3492,6 +4914,11 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      * @param {Event} ev
      */
     async _onImageCropped(ev) {
+        const img = this._getImg();
+        if (img.dataset.shape) {
+            await this._loadShape(img.dataset.shape);
+            await this._applyShapeAndColors(true, (img.dataset.shapeColors && img.dataset.shapeColors.split(';')));
+        }
         await this._rerenderXML();
     },
 });
@@ -3564,6 +4991,22 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         // Don't set the src if not relative (ie, not local image: cannot be modified)
         this.img.src = src.startsWith('/') ? src : '';
         return await this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _relocateWeightEl() {
+        this.trigger_up('option_update', {
+            optionNames: ['BackgroundImage'],
+            name: 'add_size_indicator',
+            data: this.$weight,
+        });
+        // Hack to align on the right
+        this.$weight.css({
+            'width': '200px', // Make parent row grow by faking a width
+            'flex': '0 0 0', // But force no forced width
+            'margin-left': 'auto',
+        });
     },
     /**
      * @override
@@ -3770,7 +5213,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
                 return;
         }
         const newURL = new URL(currentSrc, window.location.origin);
-        newURL.searchParams.set('c1', normalizeColor(widgetValue));
+        newURL.searchParams.set(params.colorName, normalizeColor(widgetValue));
         const src = newURL.pathname + newURL.search;
         await loadImage(src);
         this.$target.css('background-image', `url('${src}')`);
@@ -3783,6 +5226,16 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    notify(name, data) {
+        if (name === 'add_size_indicator') {
+            this._requestUserValueWidgets('bg_image_opt')[0].$el.after(data);
+        } else {
+            this._super(...arguments);
+        }
+    },
     /**
      * @override
      */
@@ -3807,12 +5260,12 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     /**
      * @override
      */
-    _computeWidgetState: function (methodName) {
+    _computeWidgetState: function (methodName, params) {
         switch (methodName) {
             case 'background':
                 return getBgImageURL(this.$target[0]);
             case 'dynamicColor':
-                return new URL(getBgImageURL(this.$target[0]), window.location.origin).searchParams.get('c1');
+                return new URL(getBgImageURL(this.$target[0]), window.location.origin).searchParams.get(params.colorName);
         }
         return this._super(...arguments);
     },
@@ -3820,7 +5273,10 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
      * @override
      */
     _computeWidgetVisibility(widgetName, params) {
-        if (widgetName === 'dynamic_color_opt') {
+        if ('colorName' in params) {
+            const src = new URL(getBgImageURL(this.$target[0]), window.location.origin);
+            return src.searchParams.has(params.colorName);
+        } else if (widgetName === 'dynamic_color_opt') {
             const src = new URL(getBgImageURL(this.$target[0]), window.location.origin);
             return src.origin === window.location.origin && src.pathname.startsWith('/web_editor/shape/');
         }
@@ -3833,10 +5289,10 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     _setBackground(backgroundURL) {
         if (backgroundURL) {
             this.$target.css('background-image', `url('${backgroundURL}')`);
-            this.$target.addClass('oe_img_bg');
+            this.$target.addClass('oe_img_bg o_bg_img_center');
         } else {
             this.$target.css('background-image', '');
-            this.$target.removeClass('oe_img_bg');
+            this.$target.removeClass('oe_img_bg o_bg_img_center');
         }
     },
 });
@@ -3867,7 +5323,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     shape(previewMode, widgetValue, params) {
         this._handlePreviewState(previewMode, () => {
-            return {shape: widgetValue, colors: this._getDefaultColors(), flip: []};
+            return {shape: widgetValue, colors: this._getImplicitColors(widgetValue, this._getShapeData().colors), flip: []};
         });
     },
     /**
@@ -3938,7 +5394,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     _renderCustomXML(uiFragment) {
         Object.keys(this._getDefaultColors()).map(colorName => {
             uiFragment.querySelector('[data-name="colors"]')
-                .prepend($(`<we-colorpicker data-color="true" data-color-name="${colorName}">`)[0]);
+                .prepend($(`<we-colorpicker data-color="true" data-color-name="${colorName}"></we-colorpicker>`)[0]);
         });
 
         uiFragment.querySelectorAll('we-select-pager we-button[data-shape]').forEach(btn => {
@@ -3947,6 +5403,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             const btnContentInnerDiv = document.createElement('div');
             btnContentInnerDiv.classList.add('o_we_shape');
             btnContent.appendChild(btnContentInnerDiv);
+
+            if (btn.dataset.animated) {
+                _addAnimatedShapeLabel(btnContent);
+            }
 
             const {shape} = btn.dataset;
             const shapeEl = btnContent.querySelector('.o_we_shape');
@@ -3982,6 +5442,40 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         });
     },
     /**
+     * Inserts or removes the given container at the right position in the
+     * document.
+     *
+     * @param {HTMLElement} [newContainer] container to insert, null to remove
+     */
+    _insertShapeContainer(newContainer) {
+        const target = this.$target[0];
+
+        const shapeContainer = target.querySelector(':scope > .o_we_shape');
+        if (shapeContainer) {
+            shapeContainer.remove();
+        }
+        if (newContainer) {
+            const preShapeLayerElement = this._getLastPreShapeLayerElement();
+            if (preShapeLayerElement) {
+                $(preShapeLayerElement).after(newContainer);
+            } else {
+                this.$target.prepend(newContainer);
+            }
+        }
+        return newContainer;
+    },
+    /**
+     * Creates and inserts a container for the shape with the right classes.
+     *
+     * @param {string} shape the shape name for which to create a container
+     */
+    _createShapeContainer(shape) {
+        const shapeContainer = this._insertShapeContainer(document.createElement('div'));
+        this.$target[0].style.position = 'relative';
+        shapeContainer.className = `o_we_shape o_${shape.replace(/\//g, '_')}`;
+        return shapeContainer;
+    },
+    /**
      * Handles everything related to saving state before preview and restoring
      * it after a preview or locking in the changes when not in preview.
      *
@@ -3990,25 +5484,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     _handlePreviewState(previewMode, computeShapeData) {
         const target = this.$target[0];
-        const insertShapeContainer = newContainer => {
-            const shapeContainer = target.querySelector(':scope > .o_we_shape');
-            if (shapeContainer) {
-                shapeContainer.remove();
-            }
-            if (newContainer) {
-                const preShapeLayerElement = this._getLastPreShapeLayerElement();
-                if (preShapeLayerElement) {
-                    $(preShapeLayerElement).after(newContainer);
-                } else {
-                    this.$target.prepend(newContainer);
-                }
-            }
-            return newContainer;
-        };
 
         let changedShape = false;
         if (previewMode === 'reset') {
-            insertShapeContainer(this.prevShapeContainer);
+            this._insertShapeContainer(this.prevShapeContainer);
             if (this.prevShape) {
                 target.dataset.oeShapeData = this.prevShape;
             } else {
@@ -4038,16 +5517,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const {shape, colors, flip = []} = json ? JSON.parse(json) : {};
         let shapeContainer = target.querySelector(':scope > .o_we_shape');
         if (!shape) {
-            return insertShapeContainer(null);
+            return this._insertShapeContainer(null);
         }
         // When changing shape we want to reset the shape container (for transparency color)
         if (changedShape) {
-            shapeContainer = insertShapeContainer(null);
-        }
-        if (!shapeContainer) {
-            shapeContainer = insertShapeContainer(document.createElement('div'));
-            target.style.position = 'relative';
-            shapeContainer.className = `o_we_shape o_${shape.replace(/\//g, '_')}`;
+            shapeContainer = this._createShapeContainer(shape);
         }
         // Compat: remove old flip classes as flipping is now done inside the svg
         shapeContainer.classList.remove('o_we_flip_x', 'o_we_flip_y');
@@ -4086,7 +5560,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const defaultColors = this._getDefaultColors();
         const shapeData = Object.assign(this._getShapeData(), newData);
         const areColorsDefault = Object.entries(shapeData.colors).every(([colorName, colorValue]) => {
-            return colorValue.toLowerCase() === defaultColors[colorName].toLowerCase();
+            return defaultColors[colorName] && colorValue.toLowerCase() === defaultColors[colorName].toLowerCase();
         });
         if (areColorsDefault) {
             delete shapeData.colors;
@@ -4137,7 +5611,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     _getShapeData(target = this.$target[0]) {
         const defaultData = {
             shape: '',
-            colors: this._getDefaultColors(),
+            colors: this._getDefaultColors($(target)),
             flip: [],
         };
         const json = target.dataset.oeShapeData;
@@ -4147,9 +5621,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * Returns the default colors for the currently selected shape.
      *
      * @private
+     * @param {jQueryElement} [$target=this.$target] the target on which to read
+     *   the shape data.
      */
-    _getDefaultColors() {
-        const $shapeContainer = this.$target.find('> .o_we_shape')
+    _getDefaultColors($target = this.$target) {
+        const $shapeContainer = $target.find('> .o_we_shape')
             .clone()
             .addClass('d-none')
             // Needs to be in document for bg-image class to take effect
@@ -4163,6 +5639,44 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         const url = new URL(shapeSrc, window.location.origin);
         return Object.fromEntries(url.searchParams.entries());
+    },
+    /**
+     * Returns the default colors for the a shape in the selector.
+     *
+     * @private
+     * @param {String} shapeId identifier of the shape
+     */
+    _getShapeDefaultColors(shapeId) {
+        const $shapeContainer = this.$el.find(".o_we_shape_menu we-button[data-shape='" + shapeId + "'] div.o_we_shape");
+        const shapeContainer = $shapeContainer[0];
+        const shapeSrc = shapeContainer && getBgImageURL(shapeContainer);
+        const url = new URL(shapeSrc, window.location.origin);
+        return Object.fromEntries(url.searchParams.entries());
+    },
+    /**
+     * Returns the implicit colors for the currently selected shape.
+     *
+     * The implicit colors are use upon shape selection. They are computed as:
+     * - the default colors
+     * - patched with each set of colors of previous siblings shape
+     * - patched with the colors of the previously selected shape
+     * - filtered to only keep the colors involved in the current shape
+     *
+     * @private
+     * @param {String} shape identifier of the selected shape
+     * @param {Object} previousColors colors of the shape before its replacement
+     */
+    _getImplicitColors(shape, previousColors) {
+        const defaultColors = this._getShapeDefaultColors(shape);
+        let colors = previousColors || {};
+        let sibling = this.$target[0].previousElementSibling;
+        while (sibling) {
+            colors = Object.assign(this._getShapeData(sibling).colors || {}, colors);
+            sibling = sibling.previousElementSibling;
+        }
+        const defaultKeys = Object.keys(defaultColors);
+        colors = Object.assign(defaultColors, colors);
+        return _.pick(colors, defaultKeys);
     },
     /**
      * Toggles whether there is a shape or not, to be called from bg toggler.
@@ -4186,7 +5700,12 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             } else {
                 shapeToSelect = possibleShapes[1];
             }
-            return this._handlePreviewState(false, () => ({shape: shapeToSelect}));
+            this.trigger_up('snippet_edition_request', {exec: () => {
+                // options for shape will only be available after _toggleShape() returned
+                this._requestUserValueWidgets('bg_shape_opt')[0].enable();
+            }});
+            this._createShapeContainer(shapeToSelect);
+            return this._handlePreviewState(false, () => ({shape: shapeToSelect, colors: this._getImplicitColors(shapeToSelect)}));
         }
     },
 });
@@ -4535,59 +6054,62 @@ registry.ColoredLevelBackground = registry.BackgroundToggler.extend({
  * @todo replace this mechanism with real backend m2o field ?
  */
 registry.many2one = SnippetOptionWidget.extend({
-    xmlDependencies: ['/web_editor/static/src/xml/snippets.xml'],
     /**
      * @override
      */
-    start: function () {
-        var self = this;
-        this.trigger_up('getRecordInfo', _.extend(this.options, {
-            callback: function (recordInfo) {
-                _.defaults(self.options, recordInfo);
-            },
-        }));
-
-        this.Model = this.$target.data('oe-many2one-model');
-        this.ID = +this.$target.data('oe-many2one-id');
-
-        // create search button and bind search bar
-        this.$btn = $(qweb.render('web_editor.many2one.button'))
-            .prependTo(this.$el);
-
-        this.$ul = this.$btn.find('ul');
-        this.$search = this.$ul.find('li:first');
-        this.$search.find('input').on('mousedown click mouseup keyup keydown', function (e) {
-            e.stopPropagation();
-        });
-
-        // move menu item
-        setTimeout(function () {
-            self.$btn.find('a').on('click', function (e) {
-                self._clear();
-            });
-        }, 0);
-
-        // bind search input
-        this.$search.find('input')
-            .focus()
-            .on('keyup', function (e) {
-                self.$overlay.removeClass('o_overlay_hidden');
-                self._findExisting($(this).val());
-            });
-
-        // bind result
-        this.$ul.on('click', 'li:not(:first) a', function (e) {
-            self._selectRecord($(e.currentTarget));
-        });
-
-        return this._super.apply(this, arguments);
+    async willStart() {
+        const {oeMany2oneModel, oeMany2oneId} = this.$target[0].dataset;
+        this.fields = ['name', 'display_name'];
+        return Promise.all([
+            this._super(...arguments),
+            this._rpc({
+                model: oeMany2oneModel,
+                method: 'read',
+                args: [[parseInt(oeMany2oneId)], this.fields],
+            }).then(([initialRecord]) => {
+                this.initialRecord = initialRecord;
+            }),
+        ]);
     },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
     /**
-     * @override
+     * @see this.selectClass for params
      */
-    onFocus: function () {
-        this.$target.attr('contentEditable', 'false');
-        this._clear();
+    async changeRecord(previewMode, widgetValue, params) {
+        const target = this.$target[0];
+        if (previewMode === 'reset') {
+            // Have to set the jQ data because it's used to update the record in other
+            // parts of the page, but have to set the dataset because used for saving.
+            this.$target.data('oeMany2oneId', this.prevId);
+            target.dataset.oeMany2oneId = this.prevId;
+            this.$target.empty().append(this.$prevContents);
+            return this._rerenderContacts(this.prevId, this.prevRecordName);
+        }
+
+        const record = JSON.parse(params.recordData);
+        if (previewMode === true) {
+            this.prevId = parseInt(target.dataset.oeMany2oneId);
+            this.$prevContents = this.$target.contents();
+            this.prevRecordName = this.prevRecordName || this.initialRecord.name;
+        }
+
+        this.$target.data('oeMany2oneId', record.id);
+        target.dataset.oeMany2oneId = record.id;
+
+        if (target.dataset.oeType !== 'contact') {
+            target.textContent = record.name;
+        }
+        await this._rerenderContacts(record.id, record.name);
+
+        if (previewMode === false) {
+            this.prevId = record.id;
+            this.$prevContents = this.$target.contents();
+            this.prevRecordName = record.name;
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -4595,102 +6117,68 @@ registry.many2one = SnippetOptionWidget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Removes the input value and suggestions.
-     *
-     * @private
+     * @override
      */
-    _clear: function () {
-        var self = this;
-        this.$search.siblings().remove();
-        self.$search.find('input').val('');
-        setTimeout(function () {
-            self.$search.find('input').focus();
-        }, 0);
+    _computeWidgetState(methodName, params) {
+        if (methodName === 'changeRecord') {
+            return this.$target[0].dataset.oeMany2oneId;
+        }
+        return this._super(...arguments);
     },
     /**
-     * Find existing record with the given name and suggest them.
-     *
-     * @private
-     * @param {string} name
-     * @returns {Promise}
+     * @override
      */
-    _findExisting: function (name) {
-        var self = this;
-        var domain = [];
-        if (!name || !name.length) {
-            self.$search.siblings().remove();
-            return;
-        }
-        if (isNaN(+name)) {
-            if (this.Model !== 'res.partner') {
-                domain.push(['name', 'ilike', name]);
-            } else {
-                domain.push('|', ['name', 'ilike', name], ['email', 'ilike', name]);
-            }
-        } else {
-            domain.push(['id', '=', name]);
-        }
+    async _renderCustomXML(uiFragment) {
+        const many2oneWidget = document.createElement('we-many2one');
+        many2oneWidget.dataset.changeRecord = '';
 
-        return this._rpc({
-            model: this.Model,
+        const model = this.$target[0].dataset.oeMany2oneModel;
+        const [{name: modelName}] = await this._rpc({
+            model: 'ir.model',
             method: 'search_read',
-            args: [domain, this.Model === 'res.partner' ? ['name', 'display_name', 'city', 'country_id'] : ['name', 'display_name']],
-            kwargs: {
-                order: [{name: 'name', asc: false}],
-                limit: 5,
-                context: this.options.context,
-            },
-        }).then(function (result) {
-            self.$search.siblings().remove();
-            self.$search.after(qweb.render('web_editor.many2one.search', {contacts: result}));
+            args: [[['model', '=', model]], ['name']],
         });
+        many2oneWidget.setAttribute('String', modelName);
+        many2oneWidget.dataset.model = model;
+        many2oneWidget.dataset.fields = JSON.stringify(this.fields);
+        uiFragment.appendChild(many2oneWidget);
     },
     /**
-     * Selects the given suggestion and displays it the proper way.
-     *
      * @private
-     * @param {jQuery} $li
      */
-    _selectRecord: function ($li) {
-        var self = this;
-
-        this.ID = +$li.data('id');
-        this.$target.attr('data-oe-many2one-id', this.ID).data('oe-many2one-id', this.ID);
-
-        this.trigger_up('request_history_undo_record', {$target: this.$target});
-        this.$target.trigger('content_changed');
-
-        if (self.$target.data('oe-type') === 'contact') {
-            $('[data-oe-contact-options]')
-                .filter('[data-oe-model="' + self.$target.data('oe-model') + '"]')
-                .filter('[data-oe-id="' + self.$target.data('oe-id') + '"]')
-                .filter('[data-oe-field="' + self.$target.data('oe-field') + '"]')
-                .filter('[data-oe-contact-options!="' + self.$target.data('oe-contact-options') + '"]')
-                .add(self.$target)
-                .attr('data-oe-many2one-id', self.ID).data('oe-many2one-id', self.ID)
-                .each(function () {
-                    var $node = $(this);
-                    var options = $node.data('oe-contact-options');
-                    self._rpc({
+    async _rerenderContacts(contactId, defaultText) {
+        // Rerender this same field in other places in the page (with different
+        // contact-options). Many2ones with the same contact options will just
+        // copy the HTML of the current m2o on content_changed. Not sure why we
+        // only do this for contacts, or why we do this here instead of in the
+        // wysiwyg like we do for replacing text on content_changed
+        const selector = [
+            `[data-oe-model="${this.$target.data('oe-model')}"]`,
+            `[data-oe-id="${this.$target.data('oe-id')}"]`,
+            `[data-oe-field="${this.$target.data('oe-field')}"]`,
+            `[data-oe-contact-options!='${this.$target[0].dataset.oeContactOptions}']`,
+        ].join('');
+        let $toRerender = $(selector);
+        if (this.$target[0].dataset.oeType === 'contact') {
+            $toRerender = $toRerender.add(this.$target);
+        }
+        await Promise.all($toRerender
+            .attr('data-oe-many2one-id', contactId).data('oe-many2one-id', contactId)
+            .map(async (i, node) => {
+                if (node.dataset.oeType === 'contact') {
+                    const html = await this._rpc({
                         model: 'ir.qweb.field.contact',
                         method: 'get_record_to_html',
-                        args: [[self.ID]],
-                        kwargs: {
-                            options: options,
-                            context: self.options.context,
-                        },
-                    }).then(function (html) {
-                        $node.html(html);
+                        args: [[contactId]],
+                        kwargs: {options: JSON.parse(node.dataset.oeContactOptions)},
                     });
-                });
-        } else {
-            self.$target.text($li.data('name'));
-        }
-
-        this._clear();
-    }
+                    $(node).html(html);
+                } else {
+                    node.textContent = defaultText;
+                }
+            }));
+    },
 });
-
 /**
  * Allows to display a warning message on outdated snippets.
  */
@@ -4730,77 +6218,57 @@ registry.SnippetSave = SnippetOptionWidget.extend({
      */
     saveSnippet: function (previewMode, widgetValue, params) {
         return new Promise(resolve => {
-            const dialog = new Dialog(this, {
-                title: _t("Save Your Block"),
-                size: 'small',
-                $content: $(qweb.render('web_editor.dialog.save_snippet', {
-                    currentSnippetName: _.str.sprintf(_t("Custom %s"), this.data.snippetName),
-                })),
-                buttons: [{
-                    text: _t("Save"),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: async () => {
-                        const save = await new Promise(resolve => {
-                            Dialog.confirm(this, _t("To save a snippet, we need to save all your previous modifications and reload the page."), {
-                                buttons: [
-                                    {
-                                        text: _t("Save and Reload"),
-                                        classes: 'btn-primary',
-                                        close: true,
-                                        click: () => resolve(true),
-                                    }, {
-                                        text: _t("Cancel"),
-                                        close: true,
-                                        click: () => resolve(false),
-                                    }
-                                ]
+            Dialog.confirm(this, _t("To save a snippet, we need to save all your previous modifications and reload the page."), {
+                cancel_callback: () => resolve(false),
+                buttons: [
+                    {
+                        text: _t("Save and Reload"),
+                        classes: 'btn-primary',
+                        close: true,
+                        click: () => {
+                            const snippetKey = this.$target[0].dataset.snippet;
+                            let thumbnailURL;
+                            this.trigger_up('snippet_thumbnail_url_request', {
+                                key: snippetKey,
+                                onSuccess: url => thumbnailURL = url,
                             });
-                        });
-                        if (!save) {
-                            return;
+                            let context;
+                            this.trigger_up('context_get', {
+                                callback: ctx => context = ctx,
+                            });
+                            this.trigger_up('request_save', {
+                                reloadEditor: true,
+                                onSuccess: async () => {
+                                    const defaultSnippetName = _.str.sprintf(_t("Custom %s"), this.data.snippetName);
+                                    const targetCopyEl = this.$target[0].cloneNode(true);
+                                    delete targetCopyEl.dataset.name;
+                                    // By the time onSuccess is called after request_save, the
+                                    // current widget has been destroyed and is orphaned, so this._rpc
+                                    // will not work as it can't trigger_up. For this reason, we need
+                                    // to bypass the service provider and use the global RPC directly
+                                    await rpc.query({
+                                        model: 'ir.ui.view',
+                                        method: 'save_snippet',
+                                        kwargs: {
+                                            'name': defaultSnippetName,
+                                            'arch': targetCopyEl.outerHTML,
+                                            'template_key': this.options.snippets,
+                                            'snippet_key': snippetKey,
+                                            'thumbnail_url': thumbnailURL,
+                                            'context': context,
+                                        },
+                                    });
+                                },
+                            });
+                            resolve(true);
                         }
-                        const snippetKey = this.$target[0].dataset.snippet;
-                        let thumbnailURL;
-                        this.trigger_up('snippet_thumbnail_url_request', {
-                            key: snippetKey,
-                            onSuccess: url => thumbnailURL = url,
-                        });
-                        let context;
-                        this.trigger_up('context_get', {
-                            callback: ctx => context = ctx,
-                        });
-                        this.trigger_up('request_save', {
-                            reloadEditor: true,
-                            onSuccess: async () => {
-                                const snippetName = dialog.el.querySelector('.o_we_snippet_name_input').value;
-                                const targetCopyEl = this.$target[0].cloneNode(true);
-                                delete targetCopyEl.dataset.name;
-                                // By the time onSuccess is called after request_save, the
-                                // current widget has been destroyed and is orphaned, so this._rpc
-                                // will not work as it can't trigger_up. For this reason, we need
-                                // to bypass the service provider and use the global RPC directly
-                                await rpc.query({
-                                    model: 'ir.ui.view',
-                                    method: 'save_snippet',
-                                    kwargs: {
-                                        'name': snippetName,
-                                        'arch': targetCopyEl.outerHTML,
-                                        'template_key': this.options.snippets,
-                                        'snippet_key': snippetKey,
-                                        'thumbnail_url': thumbnailURL,
-                                        'context': context,
-                                    },
-                                });
-                            },
-                        });
-                    },
-                }, {
-                    text: _t("Discard"),
-                    close: true,
-                }],
-            }).open();
-            dialog.on('closed', this, () => resolve());
+                    }, {
+                        text: _t("Cancel"),
+                        close: true,
+                        click: () => resolve(false),
+                    }
+                ]
+            });
         });
     },
 });
@@ -4844,7 +6312,7 @@ registry.DynamicSvg = SnippetOptionWidget.extend({
                 return;
         }
         const newURL = new URL(target.src, window.location.origin);
-        newURL.searchParams.set('c1', normalizeColor(widgetValue));
+        newURL.searchParams.set(params.colorName, normalizeColor(widgetValue));
         const src = newURL.pathname + newURL.search;
         await loadImage(src);
         target.src = src;
@@ -4863,7 +6331,16 @@ registry.DynamicSvg = SnippetOptionWidget.extend({
     _computeWidgetState(methodName, params) {
         switch (methodName) {
             case 'color':
-                return new URL(this.$target[0].src, window.location.origin).searchParams.get('c1');
+                return new URL(this.$target[0].src, window.location.origin).searchParams.get(params.colorName);
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _computeWidgetVisibility(widgetName, params) {
+        if ('colorName' in params) {
+            return new URL(this.$target[0].src, window.location.origin).searchParams.get(params.colorName);
         }
         return this._super(...arguments);
     },
@@ -4900,6 +6377,8 @@ return {
     buildTitleElement: _buildTitleElement,
     buildRowElement: _buildRowElement,
     buildCollapseElement: _buildCollapseElement,
+
+    addAnimatedShapeLabel: _addAnimatedShapeLabel,
 
     // Other names for convenience
     Class: SnippetOptionWidget,

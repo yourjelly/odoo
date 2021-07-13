@@ -257,6 +257,7 @@ class Cursor(BaseCursor):
         self._default_log_exceptions = True
 
         self.cache = {}
+        self._now = None
 
     def __build_dict(self, row):
         return {d.name: row[i] for i, d in enumerate(self._obj.description)}
@@ -283,6 +284,10 @@ class Cursor(BaseCursor):
             _logger.warning(msg)
             self._close(True)
 
+    def _format(self, query, params=None):
+        encoding = psycopg2.extensions.encodings[self.connection.encoding]
+        return self._obj.mogrify(query, params).decode(encoding, 'replace')
+
     @check
     def execute(self, query, params=None, log_exceptions=None):
         if params and not isinstance(params, (tuple, list, dict)):
@@ -290,9 +295,8 @@ class Cursor(BaseCursor):
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
         if self.sql_log:
-            encoding = psycopg2.extensions.encodings[self.connection.encoding]
-            _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
-        now = time.time()
+            _logger.debug("query: %s", self._format(query, params))
+        start = time.time()
         try:
             params = params or None
             res = self._obj.execute(query, params)
@@ -303,10 +307,15 @@ class Cursor(BaseCursor):
 
         # simple query count is always computed
         self.sql_log_count += 1
-        delay = (time.time() - now)
-        if hasattr(threading.current_thread(), 'query_count'):
-            threading.current_thread().query_count += 1
-            threading.current_thread().query_time += delay
+        delay = (time.time() - start)
+        current_thread = threading.current_thread()
+        if hasattr(current_thread, 'query_count'):
+            current_thread.query_count += 1
+            current_thread.query_time += delay
+
+        # optional hooks for performance and tracing analysis
+        for hook in getattr(current_thread, 'query_hooks', ()):
+            hook(self, query, params, start, delay)
 
         # advanced stats only if sql_log is enabled
         if self.sql_log:
@@ -397,11 +406,16 @@ class Cursor(BaseCursor):
     @check
     def autocommit(self, on):
         if on:
+            warnings.warn(
+                "Since Odoo 13.0, the ORM delays UPDATE queries for "
+                "performance reasons. Since then, using the ORM with "
+                " autocommit(True) is unsafe, as computed fields may not be "
+                "fully computed at commit.", DeprecationWarning, stacklevel=2)
             isolation_level = ISOLATION_LEVEL_AUTOCOMMIT
         else:
             # If a serializable cursor was requested, we
             # use the appropriate PotsgreSQL isolation level
-            # that maps to snaphsot isolation.
+            # that maps to snapshot isolation.
             # For all supported PostgreSQL versions (8.3-9.x),
             # this is currently the ISOLATION_REPEATABLE_READ.
             # See also the docstring of this class.
@@ -444,6 +458,7 @@ class Cursor(BaseCursor):
         flush_env(self)
         self.precommit.run()
         result = self._cnx.commit()
+        self._now = None
         self.prerollback.clear()
         self.postrollback.clear()
         self.postcommit.run()
@@ -457,6 +472,7 @@ class Cursor(BaseCursor):
         self.postcommit.clear()
         self.prerollback.run()
         result = self._cnx.rollback()
+        self._now = None
         self.postrollback.run()
         return result
 
@@ -467,6 +483,13 @@ class Cursor(BaseCursor):
     @property
     def closed(self):
         return self._closed
+
+    def now(self):
+        """ Return the transaction's timestamp ``NOW() AT TIME ZONE 'UTC'``. """
+        if self._now is None:
+            self.execute("SELECT (now() AT TIME ZONE 'UTC')")
+            self._now = self.fetchone()[0]
+        return self._now
 
 
 class TestCursor(BaseCursor):

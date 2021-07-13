@@ -3,16 +3,16 @@
 # 	* fetchmail
 # 
 # Translators:
-# Martin Trigaux, 2020
-# Alina Lisnenko <alinasemeniuk1@gmail.com>, 2021
+# Martin Trigaux, 2019
+# Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~13.5\n"
+"Project-Id-Version: Odoo Server saas~12.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-01 07:29+0000\n"
-"PO-Revision-Date: 2020-09-07 08:12+0000\n"
-"Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2021\n"
+"POT-Creation-Date: 2019-08-26 08:16+0000\n"
+"PO-Revision-Date: 2019-08-26 09:10+0000\n"
+"Last-Translator: Alina Lisnenko <alinasemeniuk1@gmail.com>, 2019\n"
 "Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,16 +39,6 @@ msgstr "Розширено"
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_form
 msgid "Advanced Options"
 msgstr "Розширені налаштування"
-
-#. module: fetchmail
-#: code:addons/fetchmail/models/fetchmail.py:0
-#, python-format
-msgid ""
-"An SSL exception occurred. Check SSL/TLS configuration on server port.\n"
-" %s"
-msgstr ""
-"Виникла помилка SSL. Перевірте налаштування SSL/TLS на порті сервера.\n"
-" %s"
 
 #. module: fetchmail
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_search
@@ -94,7 +84,7 @@ msgstr "Створив"
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__create_date
 msgid "Created on"
-msgstr "Створено"
+msgstr "Створено на"
 
 #. module: fetchmail
 #: model:ir.model.fields,help:fetchmail.field_fetchmail_server__priority
@@ -103,9 +93,8 @@ msgstr "Визначає порядок обробки, нижчі значен�
 
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__display_name
-#: model:ir.model.fields,field_description:fetchmail.field_mail_mail__display_name
 msgid "Display Name"
-msgstr "Відобразити назву"
+msgstr "Назва для відображення"
 
 #. module: fetchmail
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_tree
@@ -124,7 +113,6 @@ msgstr "Ім'я хосту або IP поштовго сервера"
 
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__id
-#: model:ir.model.fields,field_description:fetchmail.field_mail_mail__id
 msgid "ID"
 msgstr "ID"
 
@@ -146,7 +134,7 @@ msgstr "Якщо вимагається SSL."
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_mail_mail__fetchmail_server_id
 msgid "Inbound Mail Server"
-msgstr "Сервер вхідної пошти"
+msgstr "Вхідний поштовий сервер"
 
 #. module: fetchmail
 #: model_terms:ir.ui.view,arch_db:fetchmail.res_config_settings_view_form
@@ -158,23 +146,13 @@ msgstr "Сервери вхідної пошти"
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_form
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_search
 msgid "Incoming Mail Server"
-msgstr "Сервер вхідної пошти"
+msgstr "Вхідний поштовий сервер"
 
 #. module: fetchmail
 #: model:ir.actions.act_window,name:fetchmail.action_email_server_tree
 #: model:ir.ui.menu,name:fetchmail.menu_action_fetchmail_server_tree
 msgid "Incoming Mail Servers"
 msgstr "Сервери вхідної пошти"
-
-#. module: fetchmail
-#: code:addons/fetchmail/models/fetchmail.py:0
-#, python-format
-msgid ""
-"Invalid server name !\n"
-" %s"
-msgstr ""
-"Недійсна назва сервера!\n"
-" %s"
 
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__attach
@@ -193,9 +171,8 @@ msgstr "Дата останнього отримання"
 
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server____last_update
-#: model:ir.model.fields,field_description:fetchmail.field_mail_mail____last_update
 msgid "Last Modified on"
-msgstr "Останні зміни"
+msgstr "Останні зміни на"
 
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__write_uid
@@ -233,17 +210,7 @@ msgstr "Повідомлення"
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__name
 msgid "Name"
-msgstr "Назва"
-
-#. module: fetchmail
-#: code:addons/fetchmail/models/fetchmail.py:0
-#, python-format
-msgid ""
-"No response received. Check server information.\n"
-" %s"
-msgstr ""
-"Відповіді не отримано. Перевірте інформацію сервера.\n"
-" %s"
+msgstr "Ім'я"
 
 #. module: fetchmail
 #: model:ir.model.fields.selection,name:fetchmail.selection__fetchmail_server__state__draft
@@ -347,16 +314,6 @@ msgid "Server Type"
 msgstr "Тип сервера"
 
 #. module: fetchmail
-#: code:addons/fetchmail/models/fetchmail.py:0
-#, python-format
-msgid ""
-"Server replied with following exception:\n"
-" %s"
-msgstr ""
-"Сервер відповів з наступною помилкою:\n"
-" %s"
-
-#. module: fetchmail
 #: model_terms:ir.ui.view,arch_db:fetchmail.view_email_server_search
 msgid "Server type IMAP."
 msgstr "Тип сервера IMAP."
@@ -379,7 +336,7 @@ msgstr "Перевірити та підтвердити"
 #. module: fetchmail
 #: model:ir.model.fields,field_description:fetchmail.field_fetchmail_server__user
 msgid "Username"
-msgstr "Ім'я користувача"
+msgstr "Ім'я користувач"
 
 #. module: fetchmail
 #: model:ir.model.fields,help:fetchmail.field_fetchmail_server__original

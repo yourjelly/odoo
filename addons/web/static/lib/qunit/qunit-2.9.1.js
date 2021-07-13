@@ -8,10 +8,13 @@
  *
  * Date: 2019-01-07T16:37Z
  */
+
 (function (global$1) {
   'use strict';
 
   global$1 = global$1 && global$1.hasOwnProperty('default') ? global$1['default'] : global$1;
+
+  const debug = odoo.debug;
 
   var window$1 = global$1.window;
   var self$1 = global$1.self;
@@ -21,6 +24,7 @@
 
   var document$1 = window$1 && window$1.document;
   var navigator = window$1 && window$1.navigator;
+  var lastError = null;
 
   var localSessionStorage = function () {
   	var x = "qunit-test-string";
@@ -3031,6 +3035,7 @@
   		try {
   			runTest(this);
   		} catch (e) {
+  			lastError = e;
   			this.pushFailure("Died on test #" + (this.assertions.length + 1) + " " + this.stack + ": " + (e.message || e), extractStacktrace(e, 0));
 
   			// Else next test will carry the responsibility
@@ -3373,6 +3378,7 @@
   					then.call(promise, function () {
   						resume();
   					}, function (error) {
+  						lastError = error;
   						message = "Promise rejected " + (!phase ? "during" : phase.replace(/Each$/, "")) + " \"" + test.testName + "\": " + (error && error.message || error);
   						test.pushFailure(message, extractStacktrace(error, 0));
 
@@ -5331,7 +5337,18 @@
   		assertLi.className = details.result ? "pass" : "fail";
   		assertLi.innerHTML = message;
   		assertList.appendChild(assertLi);
-  	});
+
+      // Odoo Customisation!!!
+      // Crappy hack to display traceback with sourcemaps if debug=assets
+      if (lastError && QUnit.annotateTraceback && debug && debug.includes("assets")) {
+          const pre = assertLi.querySelector("pre");
+
+          QUnit.annotateTraceback(lastError).then(traceback => {
+            pre.innerText = traceback;
+          });
+          lastError = null;
+      }
+    });
 
   	QUnit.testDone(function (details) {
   		var testTitle,

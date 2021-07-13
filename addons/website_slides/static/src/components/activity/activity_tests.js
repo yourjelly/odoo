@@ -1,16 +1,16 @@
 odoo.define('website_slides/static/src/tests/activity_tests.js', function (require) {
 'use strict';
 
-const components = {
-    Activity: require('mail/static/src/components/activity/activity.js'),
-};
-
+const { Activity } = require('@mail/components/activity/activity');
+const { insert } = require('@mail/model/model_field_command');
 const {
     afterEach,
     beforeEach,
     createRootComponent,
     start,
-} = require('mail/static/src/utils/test_utils.js');
+} = require('@mail/utils/test_utils');
+
+const components = { Activity };
 
 QUnit.module('website_slides', {}, function () {
 QUnit.module('components', {}, function () {
@@ -57,18 +57,18 @@ QUnit.test('grant course access', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         id: 100,
         canWrite: true,
-        thread: [['insert', {
+        thread: insert({
             id: 100,
             model: 'slide.channel',
-        }]],
-        requestingPartner: [['insert', {
+        }),
+        requestingPartner: insert({
             id: 5,
             displayName: "Pauvre pomme",
-        }]],
-        type: [['insert', {
+        }),
+        type: insert({
             id: 1,
             displayName: "Access Request",
-        }]],
+        }),
     });
     await this.createActivityComponent(activity);
 
@@ -97,18 +97,18 @@ QUnit.test('refuse course access', async function (assert) {
     const activity = this.env.models['mail.activity'].create({
         id: 100,
         canWrite: true,
-        thread: [['insert', {
+        thread: insert({
             id: 100,
             model: 'slide.channel',
-        }]],
-        requestingPartner: [['insert', {
+        }),
+        requestingPartner: insert({
             id: 5,
             displayName: "Pauvre pomme",
-        }]],
-        type: [['insert', {
+        }),
+        type: insert({
             id: 1,
             displayName: "Access Request",
-        }]],
+        }),
     });
     await this.createActivityComponent(activity);
 

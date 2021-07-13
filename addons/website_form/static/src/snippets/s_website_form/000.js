@@ -11,6 +11,29 @@ odoo.define('website_form.s_website_form', function (require) {
     var _t = core._t;
     var qweb = core.qweb;
 
+    publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
+        selector: '.s_website_form form, form.s_website_form', // !compatibility
+        disabledInEditableMode: false,
+        /**
+         * @override
+         */
+        start: function () {
+            if (this.editableMode) {
+                // We do not initialize the datetime picker in edit mode but want the dates to be formated
+                const dateTimeFormat = time.getLangDatetimeFormat();
+                const dateFormat = time.getLangDateFormat();
+                this.$target[0].querySelectorAll('.s_website_form_input.datetimepicker-input').forEach(el => {
+                    const value = el.getAttribute('value');
+                    if (value) {
+                        const format = el.closest('.s_website_form_field').dataset.type === 'date' ? dateFormat : dateTimeFormat;
+                        el.value = moment.unix(value).format(format);
+                    }
+                });
+            }
+            return this._super(...arguments);
+        },
+    });
+
     publicWidget.registry.s_website_form = publicWidget.Widget.extend({
         selector: '.s_website_form form, form.s_website_form', // !compatibility
         xmlDependencies: ['/website_form/static/src/xml/website_form.xml'],
@@ -49,15 +72,21 @@ odoo.define('website_form.s_website_form', function (require) {
                     previous: 'fa fa-chevron-left',
                     up: 'fa fa-chevron-up',
                     down: 'fa fa-chevron-down',
-                    },
+                },
                 locale: moment.locale(),
                 format: time.getLangDatetimeFormat(),
+                extraFormats: ['X'],
             };
-            this.$target.find('.s_website_form_datetime, .o_website_form_datetime').datetimepicker(datepickers_options); // !compatibility
+            const $datetimes = this.$target.find('.s_website_form_datetime, .o_website_form_datetime'); // !compatibility
+            $datetimes.datetimepicker(datepickers_options);
 
             // Adapt options to date-only pickers
             datepickers_options.format = time.getLangDateFormat();
-            this.$target.find('.s_website_form_date, .o_website_form_date').datetimepicker(datepickers_options); // !compatibility
+            const $dates = this.$target.find('.s_website_form_date, .o_website_form_date'); // !compatibility
+            $dates.datetimepicker(datepickers_options);
+
+            this.$allDates = $datetimes.add($dates);
+            this.$allDates.addClass('s_website_form_datepicker_initialized');
 
             // Display form values from tag having data-for attribute
             // It's necessary to handle field values generated on server-side
@@ -87,6 +116,21 @@ odoo.define('website_form.s_website_form', function (require) {
             // Empty imputs
             this.$target[0].reset();
 
+            // Apply default values
+            const dateTimeFormat = time.getLangDatetimeFormat();
+            const dateFormat = time.getLangDateFormat();
+            this.$target[0].querySelectorAll('input[type="text"], input[type="email"], input[type="number"]').forEach(el => {
+                let value = el.getAttribute('value');
+                if (value) {
+                    if (el.classList.contains('datetimepicker-input')) {
+                        const format = el.closest('.s_website_form_field').dataset.type === 'date' ? dateFormat : dateTimeFormat;
+                        value = moment.unix(value).format(format);
+                    }
+                    el.value = value;
+                }
+            });
+            this.$target[0].querySelectorAll('textarea').forEach(el => el.value = el.textContent);
+
             // Remove saving of the error colors
             this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
 
@@ -96,14 +140,18 @@ odoo.define('website_form.s_website_form', function (require) {
             // Remove the success message and display the form
             this.$target.removeClass('d-none');
             this.$target.parent().find('.s_website_form_end_message').addClass('d-none');
+
+            // Reinitialize dates
+            this.$allDates.removeClass('s_website_form_datepicker_initialized');
         },
 
         send: async function (e) {
             e.preventDefault(); // Prevent the default submit behavior
              // Prevent users from crazy clicking
-            this.$target.find('.s_website_form_send, .o_website_form_send')
-                .addClass('disabled')    // !compatibility
-                .attr('disabled', 'disabled');
+            const $button = this.$target.find('.s_website_form_send, .o_website_form_send');
+            $button.addClass('disabled') // !compatibility
+                   .attr('disabled', 'disabled');
+            this.restoreBtnLoading = dom.addButtonLoadingEffect($button[0]);
 
             var self = this;
 
@@ -215,8 +263,11 @@ odoo.define('website_form.s_website_form', function (require) {
                     self.$target[0].reset();
                 }
             })
-            .guardedCatch(function () {
-                self.update_status('error');
+            .guardedCatch(error => {
+                this.update_status(
+                    'error',
+                    error.status && error.status === 413 ? _t("Uploaded file is too large.") : "",
+                );
             });
         },
 
@@ -315,6 +366,7 @@ odoo.define('website_form.s_website_form', function (require) {
                 this.$target.find('.s_website_form_send, .o_website_form_send')
                     .removeAttr('disabled')
                     .removeClass('disabled'); // !compatibility
+                this.restoreBtnLoading();
             }
             var $result = this.$('#s_website_form_result, #o_website_form_result'); // !compatibility
 

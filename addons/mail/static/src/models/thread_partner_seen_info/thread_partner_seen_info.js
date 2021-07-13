@@ -1,8 +1,8 @@
-odoo.define('mail/static/src/models/thread_partner_seen_info/thread_partner_seen_info.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2one } = require('mail/static/src/model/model_field.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { attr, many2one } from '@mail/model/model_field';
+import { insert } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -25,7 +25,7 @@ function factory(dependencies) {
          * @returns {mail.partner|undefined}
          */
         _computePartner() {
-            return [['insert', { id: this.partnerId }]];
+            return insert({ id: this.partnerId });
         }
 
         /**
@@ -33,10 +33,10 @@ function factory(dependencies) {
          * @returns {mail.thread|undefined}
          */
         _computeThread() {
-            return [['insert', {
+            return insert({
                 id: this.channelId,
                 model: 'mail.channel',
-            }]];
+            });
         }
 
     }
@@ -59,7 +59,9 @@ function factory(dependencies) {
          * (required fields) should improve and let us just use the relational
          * fields.
          */
-        channelId: attr(),
+        channelId: attr({
+            required: true,
+        }),
         lastFetchedMessage: many2one('mail.message'),
         lastSeenMessage: many2one('mail.message'),
         /**
@@ -87,7 +89,9 @@ function factory(dependencies) {
          * (required fields) should improve and let us just use the relational
          * fields.
          */
-        partnerId: attr(),
+        partnerId: attr({
+            required: true,
+        }),
         /**
          * Thread (channel) that this seen info is related to.
          *
@@ -105,5 +109,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.thread_partner_seen_info', factory);
-
-});

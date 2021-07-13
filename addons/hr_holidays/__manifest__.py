@@ -6,8 +6,8 @@
     'version': '1.5',
     'category': 'Human Resources/Time Off',
     'sequence': 85,
-    'summary': 'Allocate time off and follow time off requests',
-    'website': 'https://www.odoo.com/page/leaves',
+    'summary': 'Allocate PTOs and follow leaves requests',
+    'website': 'https://www.odoo.com/app/time-off',
     'description': """
 Manage time off requests and allocations
 =====================================
@@ -49,20 +49,37 @@ A synchronization with an internal agenda (Meetings of the CRM module) is also p
         'report/hr_leave_report_calendar.xml',
 
         'views/hr_views.xml',
-        'views/hr_leave_template.xml',
         'views/hr_holidays_views.xml',
     ],
     'demo': [
         'data/hr_holidays_demo.xml',
     ],
-    'qweb': [
-        'static/src/bugfix/bugfix.xml',
-        'static/src/components/partner_im_status_icon/partner_im_status_icon.xml',
-        'static/src/components/thread_icon/thread_icon.xml',
-        'static/src/components/thread_view/thread_view.xml',
-        'static/src/xml/*.xml',
-    ],
     'installable': True,
     'application': True,
     'auto_install': False,
+    'assets': {
+        'web.assets_backend': [
+            'hr_holidays/static/src/js/time_off_calendar.js',
+            'hr_holidays/static/src/js/leave_stats_widget.js',
+            'hr_holidays/static/src/components/thread_view/thread_view.js',
+            'hr_holidays/static/src/models/partner/partner.js',
+            'hr_holidays/static/src/scss/time_off.scss',
+            'hr_holidays/static/src/components/thread_view/thread_view.scss',
+        ],
+        'web.tests_assets': [
+            'hr_holidays/static/tests/helpers/**/*',
+        ],
+        'web.qunit_suite_tests': [
+            'hr_holidays/static/src/components/partner_im_status_icon/partner_im_status_icon_tests.js',
+            'hr_holidays/static/src/components/thread_icon/thread_icon_tests.js',
+            'hr_holidays/static/src/components/thread_view/thread_view_tests.js',
+            'hr_holidays/static/tests/test_leave_stats_widget.js',
+        ],
+        'web.assets_qweb': [
+            'hr_holidays/static/src/components/partner_im_status_icon/partner_im_status_icon.xml',
+            'hr_holidays/static/src/components/thread_icon/thread_icon.xml',
+            'hr_holidays/static/src/components/thread_view/thread_view.xml',
+            'hr_holidays/static/src/xml/*.xml',
+        ],
+    }
 }

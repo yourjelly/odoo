@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
 import logging
-
 
 from odoo import api, fields, models, _
 from odoo.http import request
 from odoo.osv import expression
 from odoo.exceptions import AccessError
+from odoo.tools.json import scriptsafe as json_safe
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +101,7 @@ class WebsiteCoverPropertiesMixin(models.AbstractModel):
     _name = 'website.cover_properties.mixin'
     _description = 'Cover Properties Website Mixin'
 
-    cover_properties = fields.Text('Cover Properties', default=lambda s: json.dumps(s._default_cover_properties()))
+    cover_properties = fields.Text('Cover Properties', default=lambda s: json_safe.dumps(s._default_cover_properties()))
 
     def _default_cover_properties(self):
         return {
@@ -112,6 +111,21 @@ class WebsiteCoverPropertiesMixin(models.AbstractModel):
             "resize_class": "o_half_screen_height",
         }
 
+    def _get_background(self, height=None, width=None):
+        self.ensure_one()
+        properties = json_safe.loads(self.cover_properties)
+        img = properties.get('background-image', "none")
+
+        if img.startswith('url(/web/image/'):
+            suffix = ""
+            if height is not None:
+                suffix += "&height=%s" % height
+            if width is not None:
+                suffix += "&width=%s" % width
+            if suffix:
+                suffix = '?' not in img and "?%s" % suffix or suffix
+                img = img[:-1] + suffix + ')'
+        return img
 
 class WebsiteMultiMixin(models.AbstractModel):
 
@@ -129,7 +143,7 @@ class WebsiteMultiMixin(models.AbstractModel):
     def can_access_from_current_website(self, website_id=False):
         can_access = True
         for record in self:
-            if (website_id or record.website_id.id) not in (False, request.website.id):
+            if (website_id or record.website_id.id) not in (False, request.env['website'].get_current_website().id):
                 can_access = False
                 continue
         return can_access

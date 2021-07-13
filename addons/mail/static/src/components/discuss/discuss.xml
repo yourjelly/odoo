@@ -9,7 +9,7 @@
             }"
         >
             <t t-if="!env.isMessagingInitialized()">
-                <div class="o_Discuss_messagingNotInitialized"><i class="o_Discuss_messagingNotInitializedIcon fa fa-spinner fa-spin"/>Please wait...</div>
+                <div class="o_Discuss_messagingNotInitialized"><i class="o_Discuss_messagingNotInitializedIcon fa fa-circle-o-notch fa-spin"/>Please wait...</div>
             </t>
             <t t-else="">
                 <t t-if="!env.messaging.device.isMobile">
@@ -61,7 +61,6 @@
                 haveMessagesMarkAsReadIcon="discuss.thread === env.messaging.inbox"
                 haveMessagesReplyIcon="discuss.thread === env.messaging.inbox"
                 isDoFocus="discuss.isDoFocus"
-                selectedMessageLocalId="discuss.replyingToMessage and discuss.replyingToMessage.localId"
                 threadViewLocalId="discuss.threadView.localId"
                 t-on-o-focusin-composer="_onFocusinComposer"
                 t-on-o-rendered="_onThreadRendered"

@@ -1,9 +1,11 @@
-odoo.define('mail/static/src/models/partner/partner.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { attr, many2many, many2one, one2many, one2one } = require('mail/static/src/model/model_field.js');
-const { cleanSearchTerm } = require('mail/static/src/utils/utils.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { attr, many2many, many2one, one2many, one2one } from '@mail/model/model_field';
+import { insert, link, unlinkAll } from '@mail/model/model_field_command';
+import { cleanSearchTerm } from '@mail/utils/utils';
+
+import utils from 'web.utils';
 
 function factory(dependencies) {
 
@@ -26,12 +28,12 @@ function factory(dependencies) {
             }
             if ('country' in data) {
                 if (!data.country) {
-                    data2.country = [['unlink-all']];
+                    data2.country = unlinkAll();
                 } else {
-                    data2.country = [['insert', {
+                    data2.country = insert({
                         id: data.country[0],
                         name: data.country[1],
-                    }]];
+                    });
                 }
             }
             if ('display_name' in data) {
@@ -53,7 +55,7 @@ function factory(dependencies) {
             // relation
             if ('user_id' in data) {
                 if (!data.user_id) {
-                    data2.user = [['unlink-all']];
+                    data2.user = unlinkAll();
                 } else {
                     let user = {};
                     if (Array.isArray(data.user_id)) {
@@ -67,7 +69,7 @@ function factory(dependencies) {
                         };
                     }
                     user.isInternalUser = data.is_internal_user;
-                    data2.user = [['insert', user]];
+                    data2.user = insert(user);
                 }
             }
 
@@ -90,10 +92,7 @@ function factory(dependencies) {
             if (isNonPublicChannel) {
                 kwargs.channel_id = thread.id;
             }
-            const [
-                mainSuggestedPartners,
-                extraSuggestedPartners,
-            ] = await this.env.services.rpc(
+            const suggestedPartners = await this.env.services.rpc(
                 {
                     model: 'res.partner',
                     method: 'get_mention_suggestions',
@@ -101,12 +100,11 @@ function factory(dependencies) {
                 },
                 { shadow: true },
             );
-            const partnersData = mainSuggestedPartners.concat(extraSuggestedPartners);
-            const partners = this.env.models['mail.partner'].insert(partnersData.map(data =>
+            const partners = this.env.models['mail.partner'].insert(suggestedPartners.map(data =>
                 this.env.models['mail.partner'].convertData(data)
             ));
             if (isNonPublicChannel) {
-                thread.update({ members: [['link', partners]] });
+                thread.update({ members: link(partners) });
             }
         }
 
@@ -226,7 +224,7 @@ function factory(dependencies) {
             }, { shadow: true }));
             this.update({ hasCheckedUser: true });
             if (userIds.length > 0) {
-                this.update({ user: [['insert', { id: userIds[0] }]] });
+                this.update({ user: insert({ id: userIds[0] }) });
             }
         }
 
@@ -372,7 +370,10 @@ function factory(dependencies) {
          * @returns {string}
          */
         _computeAvatarUrl() {
-            return `/web/image/res.partner/${this.id}/image_128`;
+            if (this === this.env.messaging.partnerRoot) {
+                return '/mail/static/src/img/odoobot.png';
+            }
+            return `/web/image/res.partner/${this.id}/avatar_128`;
         }
 
         /**
@@ -429,7 +430,7 @@ function factory(dependencies) {
          * @returns {mail.messaging}
          */
         _computeMessaging() {
-            return [['link', this.env.messaging]];
+            return link(this.env.messaging);
         }
 
         /**
@@ -450,10 +451,12 @@ function factory(dependencies) {
             compute: '_computeAvatarUrl',
             dependencies: [
                 'id',
+                'messagingPartnerRoot',
             ],
         }),
         correspondentThreads: one2many('mail.thread', {
             inverse: 'correspondent',
+            readonly: true,
         }),
         country: many2one('mail.country'),
         display_name: attr({
@@ -475,7 +478,9 @@ function factory(dependencies) {
         hasCheckedUser: attr({
             default: false,
         }),
-        id: attr(),
+        id: attr({
+            required: true,
+        }),
         im_status: attr(),
         memberThreads: many2many('mail.thread', {
             inverse: 'members',
@@ -488,6 +493,9 @@ function factory(dependencies) {
          */
         messaging: many2one('mail.messaging', {
             compute: '_computeMessaging',
+        }),
+        messagingPartnerRoot: many2one('mail.partner', {
+            related: 'messaging.partnerRoot',
         }),
         model: attr({
             default: 'res.partner',
@@ -523,5 +531,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.partner', factory);
-
-});

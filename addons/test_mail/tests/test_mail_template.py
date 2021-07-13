@@ -93,7 +93,7 @@ class TestMailTemplate(TestMailCommon, TestRecipients):
             'name': 'test_layout',
             'key': 'test_layout',
             'type': 'qweb',
-            'arch_db': '<body><t t-raw="message.body"/> English Layout <t t-esc="model_description"/></body>'
+            'arch_db': '<body><t t-out="message.body"/> English Layout <t t-esc="model_description"/></body>'
         })
         self.env['ir.model.data'].create({
             'name': 'test_layout',

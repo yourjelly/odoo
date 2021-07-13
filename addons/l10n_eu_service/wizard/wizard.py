@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, Warning
+from odoo.exceptions import Warning
 
 
 class l10n_eu_service(models.TransientModel):
@@ -36,7 +36,7 @@ class l10n_eu_service(models.TransientModel):
     def _default_done_country_ids(self):
         user = self.env.user
         eu_country_group = self._get_eu_res_country_group()
-        return eu_country_group.country_ids - self._default_todo_country_ids() - user.company_id.country_id
+        return eu_country_group.country_ids - self._default_todo_country_ids() - user.company_id.account_fiscal_country_id
 
     def _default_todo_country_ids(self):
         user = self.env.user
@@ -45,7 +45,7 @@ class l10n_eu_service(models.TransientModel):
             [('country_id', 'in', eu_country_group.country_ids.ids),
              ('vat_required', '=', False), ('auto_apply', '=', True),
              ('company_id', '=', user.company_id.id)])
-        return eu_country_group.country_ids - eu_fiscal.mapped('country_id') - user.company_id.country_id
+        return eu_country_group.country_ids - eu_fiscal.mapped('country_id') - user.company_id.account_fiscal_country_id
 
     company_id = fields.Many2one(
         'res.company', string='Company', required=True, default=_get_default_company_id)
@@ -69,12 +69,6 @@ class l10n_eu_service(models.TransientModel):
     todo_country_ids = fields.Many2many(
         'res.country', 'l10n_eu_service_country_rel_todo', default=_default_todo_country_ids,
         string='EU Customers From', required=True)
-
-    @api.model
-    def load_views(self, views, options=None):
-        # This wizard is outdated; it shouldn't be used anymore. Users might still be able to open it using the
-        # link in the settings if they didn't update the module. If they try, we tell them.
-        raise UserError(_("Starting July 1st 2021, OSS regulation has replaced MOSS. Please first upgrade 'l10n_eu_service' module in the Apps menu, then go back to this setting and click on 'Refresh tax mapping'."))
 
     def _get_repartition_line_copy_values(self, original_rep_lines):
         return [(0, 0, {

@@ -342,4 +342,3 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
                 'coupon_code': 'test'
             }).process_coupon()
         self.assertEqual(len(order.order_line), 2, "You should get a discount line")
-

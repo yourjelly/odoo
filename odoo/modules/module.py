@@ -218,12 +218,14 @@ def get_resource_path(module, *args):
     TODO make it available inside on osv object (self.get_resource_path)
     """
     mod_path = get_module_path(module)
-    if not mod_path: return False
+    if not mod_path:
+        return False
+    return check_resource_path(mod_path, *args)
+
+def check_resource_path(mod_path, *args):
     resource_path = opj(mod_path, *args)
-    if os.path.isdir(mod_path):
-        # the module is a directory - ignore zip behavior
-        if os.path.exists(resource_path):
-            return resource_path
+    if os.path.exists(resource_path):
+        return resource_path
     return False
 
 # backwards compatibility
@@ -233,7 +235,7 @@ def get_resource_from_path(path):
     """Tries to extract the module name and the resource's relative path
     out of an absolute resource path.
 
-    If operation is successfull, returns a tuple containing the module name, the relative path
+    If operation is successful, returns a tuple containing the module name, the relative path
     to the resource using '/' as filesystem seperator[1] and the same relative path using
     os.path.sep seperators.
 
@@ -273,6 +275,14 @@ def module_manifest(path):
     for manifest_name in MANIFEST_NAMES:
         if os.path.isfile(opj(path, manifest_name)):
             return opj(path, manifest_name)
+
+def read_manifest(addons_path, module):
+    mod_path = opj(addons_path, module)
+    manifest_path = module_manifest(mod_path)
+    if manifest_path:
+        with tools.file_open(manifest_path, 'r') as fd:
+            manifest_data = fd.read()
+        return ast.literal_eval(manifest_data)
 
 def get_module_root(path):
     """
@@ -345,23 +355,22 @@ def load_information_from_description_file(module, mod_path=None):
                 with tools.file_open(readme_path[0]) as fd:
                     info['description'] = fd.read()
 
-        # auto_install is set to `False` if disabled, and a set of
-        # auto_install dependencies otherwise. That way, we can set
-        # auto_install: [] to always auto_install a module regardless of its
-        # dependencies
-        auto_install = info.get('auto_install', info.get('active', False))
-        if isinstance(auto_install, collections.abc.Iterable):
-            info['auto_install'] = set(auto_install)
+
+        # auto_install is either `False` (by default) in which case the module
+        # is opt-in, either a list of dependencies in which case the module is
+        # automatically installed if all dependencies are (special case: [] to
+        # always install the module), either `True` to auto-install the module
+        # in case all dependencies declared in `depends` are installed.
+        if isinstance(info['auto_install'], collections.abc.Iterable):
+            info['auto_install'] = set(info['auto_install'])
             non_dependencies = info['auto_install'].difference(info['depends'])
             assert not non_dependencies,\
                 "auto_install triggers must be dependencies, found " \
                 "non-dependencies [%s] for module %s" % (
                     ', '.join(non_dependencies), module
                 )
-        elif auto_install:
+        elif info['auto_install']:
             info['auto_install'] = set(info['depends'])
-        else:
-            info['auto_install'] = False
 
         info['version'] = adapt_version(info['version'])
         return info

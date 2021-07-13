@@ -1,8 +1,8 @@
-odoo.define('mail/static/src/models/dialog_manager/dialog_manager.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { registerNewModel } = require('mail/static/src/model/model_core.js');
-const { one2many } = require('mail/static/src/model/model_field.js');
+import { registerNewModel } from '@mail/model/model_core';
+import { one2many } from '@mail/model/model_field';
+import { link } from '@mail/model/model_field_command';
 
 function factory(dependencies) {
 
@@ -26,8 +26,8 @@ function factory(dependencies) {
             }
             const record = Model.create(recordData);
             const dialog = this.env.models['mail.dialog'].create({
-                manager: [['link', this]],
-                record: [['link', record]],
+                manager: link(this),
+                record: link(record),
             });
             return dialog;
         }
@@ -48,5 +48,3 @@ function factory(dependencies) {
 }
 
 registerNewModel('mail.dialog_manager', factory);
-
-});

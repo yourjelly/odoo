@@ -40,7 +40,7 @@ class Event(models.Model):
              "of the event on the website.")
     menu_id = fields.Many2one('website.menu', 'Event Menu', copy=False)
     menu_register_cta = fields.Boolean(
-        'Add Register Button', compute='_compute_menu_register_cta',
+        'Extra Register Button', compute='_compute_menu_register_cta',
         readonly=False, store=True)
     community_menu = fields.Boolean(
         "Community Menu", compute="_compute_community_menu",
@@ -159,11 +159,11 @@ class Event(models.Model):
     # CRUD
     # ------------------------------------------------------------
 
-    @api.model
-    def create(self, vals):
-        res = super(Event, self).create(vals)
-        res._update_website_menus()
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        events = super().create(vals_list)
+        events._update_website_menus()
+        return events
 
     def write(self, vals):
         menus_state_by_field = self._split_menus_state_by_field()
@@ -315,8 +315,9 @@ class Event(models.Model):
 
         :param menu_type: type of menu. Mainly used for inheritance purpose
           allowing more fine-grain tuning of menus. """
+        self.check_access_rights('write')
         if not url:
-            self.env['ir.ui.view'].with_context(_force_unlink=True).search([('name', '=', name + ' ' + self.name)]).unlink()
+            self.env['ir.ui.view'].with_context(_force_unlink=True).sudo().search([('name', '=', name + ' ' + self.name)]).unlink()
             page_result = self.env['website'].sudo().new_page(name + ' ' + self.name, template=xml_id, ispage=False)
             url = "/event/" + slug(self) + "/page" + page_result['url']  # url contains starting "/"
         website_menu = self.env['website.menu'].sudo().create({

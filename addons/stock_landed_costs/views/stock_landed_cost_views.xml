@@ -21,9 +21,9 @@
                                 attrs="{'invisible': ['|' , ('state', 'not in', ['done']), ('stock_valuation_layer_ids', '=', [])]}"/>
                         </div>
                         <div class="oe_title">
-                            <label for="name" class="oe_edit_only" string="Landed Cost"/>
+                            <label for="name" string="Landed Cost"/>
                             <h1>
-                                <field name="name" placeholder="Landed Cost Name"/>
+                                <field name="name"/>
                             </h1>
                         </div>
                         <group>
@@ -121,7 +121,7 @@
             <field name="name">stock.landed.cost.tree</field>
             <field name="model">stock.landed.cost</field>
             <field name="arch" type="xml">
-                <tree string="Landed Costs">
+                <tree string="Landed Costs" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
                     <field name="name" decoration-bf="1"/>
                     <field name="date"/>
                     <field name="company_id" groups="base.group_multi_company"/>

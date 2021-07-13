@@ -1,12 +1,11 @@
-odoo.define('mail/static/src/components/editable_text/editable_text.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const { markEventHandled } = require('mail/static/src/utils/utils.js');
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { markEventHandled } from '@mail/utils/utils';
 
 const { Component } = owl;
 
-class EditableText extends Component {
+export class EditableText extends Component {
 
     constructor(...args) {
         super(...args);
@@ -84,8 +83,4 @@ Object.assign(EditableText, {
         value: String,
     },
     template: 'mail.EditableText',
-});
-
-return EditableText;
-
 });

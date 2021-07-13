@@ -1,15 +1,14 @@
-odoo.define('mail/static/src/components/composer_suggestion_list/composer_suggestion_list.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ComposerSuggestion: require('mail/static/src/components/composer_suggestion/composer_suggestion.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { ComposerSuggestion } from '@mail/components/composer_suggestion/composer_suggestion';
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
 
 const { Component } = owl;
 
-class ComposerSuggestionList extends Component {
+const components = { ComposerSuggestion };
+
+export class ComposerSuggestionList extends Component {
 
     /**
      * @override
@@ -66,8 +65,4 @@ Object.assign(ComposerSuggestionList, {
         isBelow: Boolean,
     },
     template: 'mail.ComposerSuggestionList',
-});
-
-return ComposerSuggestionList;
-
 });

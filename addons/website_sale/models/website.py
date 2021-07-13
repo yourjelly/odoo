@@ -29,7 +29,7 @@ class Website(models.Model):
             return None
 
     salesteam_id = fields.Many2one('crm.team',
-        string='Sales Team',
+        string='Sales Team', ondelete="set null",
         default=_get_default_website_team)
     pricelist_ids = fields.One2many('product.pricelist', compute="_compute_pricelist_ids",
                                     string='Price list available for this Ecommerce/Website')
@@ -49,6 +49,8 @@ class Website(models.Model):
     shop_ppr = fields.Integer(default=4, string="Number of grid columns on the shop")
 
     shop_extra_field_ids = fields.One2many('website.sale.extra.field', 'website_id', string='E-Commerce Extra Fields')
+
+    cart_add_on_page = fields.Boolean("Stay on page after adding to cart", default=True)
 
     @api.depends('all_pricelist_ids')
     def _compute_pricelist_ids(self):
@@ -386,18 +388,6 @@ class Website(models.Model):
         suggested_controllers = super(Website, self).get_suggested_controllers()
         suggested_controllers.append((_('eCommerce'), url_for('/shop'), 'website_sale'))
         return suggested_controllers
-
-    def _bootstrap_snippet_filters(self):
-        super(Website, self)._bootstrap_snippet_filters()
-        action = self.env.ref('website_sale.dynamic_snippet_products_action', raise_if_not_found=False)
-        if action:
-            self.env['website.snippet.filter'].create({
-                'action_server_id': action.id,
-                'field_names': 'display_name,description_sale,image_512,list_price',
-                'limit': 16,
-                'name': _('Products'),
-                'website_id': self.id,
-            })
 
 
 class WebsiteSaleExtraField(models.Model):

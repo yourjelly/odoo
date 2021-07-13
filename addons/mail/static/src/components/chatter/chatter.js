@@ -1,21 +1,26 @@
-odoo.define('mail/static/src/components/chatter/chatter.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    ActivityBox: require('mail/static/src/components/activity_box/activity_box.js'),
-    AttachmentBox: require('mail/static/src/components/attachment_box/attachment_box.js'),
-    ChatterTopbar: require('mail/static/src/components/chatter_topbar/chatter_topbar.js'),
-    Composer: require('mail/static/src/components/composer/composer.js'),
-    ThreadView: require('mail/static/src/components/thread_view/thread_view.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { useUpdate } from '@mail/component_hooks/use_update/use_update';
+import { ActivityBox } from '@mail/components/activity_box/activity_box';
+import { AttachmentBox } from '@mail/components/attachment_box/attachment_box';
+import { ChatterTopbar } from '@mail/components/chatter_topbar/chatter_topbar';
+import { Composer } from '@mail/components/composer/composer';
+import { ThreadView } from '@mail/components/thread_view/thread_view';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class Chatter extends Component {
+const components = {
+    ActivityBox,
+    AttachmentBox,
+    ChatterTopbar,
+    Composer,
+    ThreadView,
+};
+
+export class Chatter extends Component {
 
     /**
      * @override
@@ -143,8 +148,4 @@ Object.assign(Chatter, {
         chatterLocalId: String,
     },
     template: 'mail.Chatter',
-});
-
-return Chatter;
-
 });

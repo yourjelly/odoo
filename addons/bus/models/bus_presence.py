@@ -40,9 +40,12 @@ class BusPresence(models.Model):
         # This method is called in method _poll() and cursor is closed right
         # after; see bus/controllers/main.py.
         try:
-            self._update(inactivity_period)
-            # commit on success
-            self.env.cr.commit()
+            # Hide transaction serialization errors, which can be ignored, the presence update is not essential
+            # The errors are supposed from presence.write(...) call only
+            with tools.mute_logger('odoo.sql_db'):
+                self._update(inactivity_period)
+                # commit on success
+                self.env.cr.commit()
         except OperationalError as e:
             if e.pgcode in PG_CONCURRENCY_ERRORS_TO_RETRY:
                 # ignore concurrency error
@@ -65,7 +68,4 @@ class BusPresence(models.Model):
         else:  # update the last_presence if necessary, and write values
             if presence.last_presence < last_presence:
                 values['last_presence'] = last_presence
-            # Hide transaction serialization errors, which can be ignored, the presence update is not essential
-            with tools.mute_logger('odoo.sql_db'):
-                presence.write(values)
-                presence.flush()
+            presence.write(values)

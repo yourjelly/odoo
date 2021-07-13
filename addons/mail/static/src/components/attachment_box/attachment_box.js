@@ -1,19 +1,19 @@
-odoo.define('mail/static/src/components/attachment_box/attachment_box.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    AttachmentList: require('mail/static/src/components/attachment_list/attachment_list.js'),
-    DropZone: require('mail/static/src/components/drop_zone/drop_zone.js'),
-    FileUploader: require('mail/static/src/components/file_uploader/file_uploader.js'),
-};
-const useDragVisibleDropZone = require('mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js');
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
+import { useDragVisibleDropZone } from '@mail/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone';
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { AttachmentList } from '@mail/components/attachment_list/attachment_list';
+import { DropZone } from '@mail/components/drop_zone/drop_zone';
+import { FileUploader } from '@mail/components/file_uploader/file_uploader';
+import { link } from '@mail/model/model_field_command';
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
 
-class AttachmentBox extends Component {
+const components = { AttachmentList, DropZone, FileUploader };
+
+export class AttachmentBox extends Component {
 
     /**
      * @override
@@ -54,7 +54,7 @@ class AttachmentBox extends Component {
      */
     get newAttachmentExtraData() {
         return {
-            originThread: [['link', this.thread]],
+            originThread: link(this.thread),
         };
     }
 
@@ -117,8 +117,4 @@ Object.assign(AttachmentBox, {
         threadLocalId: String,
     },
     template: 'mail.AttachmentBox',
-});
-
-return AttachmentBox;
-
 });

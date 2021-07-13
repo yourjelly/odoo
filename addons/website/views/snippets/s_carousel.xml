@@ -3,17 +3,18 @@
 
 <template id="s_carousel" name="Carousel">
     <section class="s_carousel_wrapper" data-vxml="001">
-        <div id="myCarousel" class="s_carousel s_carousel_default carousel slide" data-interval="10000">
+        <t t-set="uniq" t-value="datetime.datetime.now().microsecond"/>
+        <div t-attf-id="myCarousel{{uniq}}" class="s_carousel s_carousel_default carousel slide" data-interval="10000">
             <!-- Indicators -->
             <ol class="carousel-indicators">
-                <li data-target="#myCarousel" data-slide-to="0" class="active"/>
-                <li data-target="#myCarousel" data-slide-to="1"/>
-                <li data-target="#myCarousel" data-slide-to="2"/>
+                <li t-attf-data-target="#myCarousel{{uniq}}" data-slide-to="0" class="active"/>
+                <li t-attf-data-target="#myCarousel{{uniq}}" data-slide-to="1"/>
+                <li t-attf-data-target="#myCarousel{{uniq}}" data-slide-to="2"/>
             </ol>
             <!-- Content -->
             <div class="carousel-inner">
                 <!-- #01 -->
-                <div class="carousel-item active oe_img_bg pt152 pb152" style="background-image: url('/web/image/website.s_carousel_default_image_1');" data-name="Slide">
+                <div class="carousel-item active oe_img_bg o_bg_img_center pt152 pb152" style="background-image: url('/web/image/website.s_carousel_default_image_1');" data-name="Slide">
                     <div class="container">
                         <div class="row content">
                             <div class="carousel-content col-lg-6">
@@ -27,7 +28,7 @@
                     </div>
                 </div>
                 <!-- #02 -->
-                <div class="carousel-item oe_img_bg pt96 pb96" style="background-image: url('/web/image/website.s_carousel_default_image_2');" data-name="Slide">
+                <div class="carousel-item oe_img_bg o_bg_img_center pt96 pb96" style="background-image: url('/web/image/website.s_carousel_default_image_2');" data-name="Slide">
                     <div class="container">
                         <div class="row content">
                             <div class="carousel-content col-lg-8 offset-lg-2 bg-black-50 text-center pt48 pb40">
@@ -42,7 +43,7 @@
                     </div>
                 </div>
                 <!-- #03 -->
-                <div class="carousel-item oe_img_bg pt128 pb128" style="background-image: url('/web/image/website.s_carousel_default_image_3');" data-name="Slide">
+                <div class="carousel-item oe_img_bg o_bg_img_center pt128 pb128" style="background-image: url('/web/image/website.s_carousel_default_image_3');" data-name="Slide">
                     <div class="container">
                         <div class="row content">
                             <div class="carousel-content col-lg-6 offset-lg-6">
@@ -56,11 +57,11 @@
                 </div>
             </div>
             <!-- Controls -->
-            <a class="carousel-control-prev o_not_editable" contenteditable="false" href="#myCarousel" data-slide="prev" role="img" aria-label="Previous" title="Previous">
+            <a class="carousel-control-prev o_not_editable" contenteditable="false" t-attf-href="#myCarousel{{uniq}}" data-slide="prev" role="img" aria-label="Previous" title="Previous">
                 <span class="carousel-control-prev-icon"/>
                 <span class="sr-only">Previous</span>
             </a>
-            <a class="carousel-control-next o_not_editable" contenteditable="false" href="#myCarousel" data-slide="next" role="img" aria-label="Next" title="Next">
+            <a class="carousel-control-next o_not_editable" contenteditable="false" t-attf-href="#myCarousel{{uniq}}" data-slide="next" role="img" aria-label="Next" title="Next">
                 <span class="carousel-control-next-icon"/>
                 <span class="sr-only">Next</span>
             </a>

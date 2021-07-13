@@ -1,19 +1,20 @@
-odoo.define('mail/static/src/components/messaging_menu/messaging_menu.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const components = {
-    AutocompleteInput: require('mail/static/src/components/autocomplete_input/autocomplete_input.js'),
-    MobileMessagingNavbar: require('mail/static/src/components/mobile_messaging_navbar/mobile_messaging_navbar.js'),
-    NotificationList: require('mail/static/src/components/notification_list/notification_list.js'),
-};
-const useShouldUpdateBasedOnProps = require('mail/static/src/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props.js');
-const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
-
-const patchMixin = require('web.patchMixin');
+import { useShouldUpdateBasedOnProps } from '@mail/component_hooks/use_should_update_based_on_props/use_should_update_based_on_props';
+import { useStore } from '@mail/component_hooks/use_store/use_store';
+import { AutocompleteInput } from '@mail/components/autocomplete_input/autocomplete_input';
+import { MobileMessagingNavbar } from '@mail/components/mobile_messaging_navbar/mobile_messaging_navbar';
+import { NotificationList } from '@mail/components/notification_list/notification_list';
 
 const { Component } = owl;
 
-class MessagingMenu extends Component {
+const components = {
+    AutocompleteInput,
+    MobileMessagingNavbar,
+    NotificationList,
+};
+
+export class MessagingMenu extends Component {
 
     /**
      * @override
@@ -227,8 +228,4 @@ Object.assign(MessagingMenu, {
     components,
     props: {},
     template: 'mail.MessagingMenu',
-});
-
-return patchMixin(MessagingMenu);
-
 });

@@ -29,6 +29,13 @@ class SaleOrder(models.Model):
     website_id = fields.Many2one('website', string='Website', readonly=True,
                                  help='Website through which this order was placed.')
 
+    @api.model
+    def _default_note_url(self):
+        website = self.env['website'].get_current_website()
+        if website:
+            return website.get_base_url()
+        return super()._default_note_url()
+
     @api.depends('order_line')
     def _compute_website_order_line(self):
         for order in self:
@@ -38,7 +45,7 @@ class SaleOrder(models.Model):
     def _compute_cart_info(self):
         for order in self:
             order.cart_quantity = int(sum(order.mapped('website_order_line.product_uom_qty')))
-            order.only_services = all(l.product_id.type in ('service', 'digital') for l in order.website_order_line)
+            order.only_services = all(l.product_id.type == 'service' for l in order.website_order_line)
 
     @api.depends('website_id', 'date_order', 'order_line', 'state', 'partner_id')
     def _compute_abandoned_cart(self):
@@ -55,15 +62,19 @@ class SaleOrder(models.Model):
                 order.is_abandoned_cart = False
 
     def _search_abandoned_cart(self, operator, value):
-        abandoned_delay = self.website_id and self.website_id.cart_abandoned_delay or 1.0
-        abandoned_datetime = fields.Datetime.to_string(datetime.utcnow() - relativedelta(hours=abandoned_delay))
-        abandoned_domain = expression.normalize_domain([
-            ('date_order', '<=', abandoned_datetime),
-            ('website_id', '!=', False),
+        website_ids = self.env['website'].search_read(fields=['id', 'cart_abandoned_delay', 'partner_id'])
+        deadlines = [[
+            '&', '&',
+            ('website_id', '=', website_id['id']),
+            ('date_order', '<=', fields.Datetime.to_string(datetime.utcnow() - relativedelta(hours=website_id['cart_abandoned_delay'] or 1.0))),
+            ('partner_id', '!=', website_id['partner_id'][0])
+        ] for website_id in website_ids]
+        abandoned_domain = [
             ('state', '=', 'draft'),
-            ('partner_id', '!=', self.env.ref('base.public_partner').id),
             ('order_line', '!=', False)
-        ])
+        ]
+        abandoned_domain.extend(expression.OR(deadlines))
+        abandoned_domain = expression.normalize_domain(abandoned_domain)
         # is_abandoned domain possibilities
         if (operator not in expression.NEGATIVE_TERM_OPERATORS and value) or (operator in expression.NEGATIVE_TERM_OPERATORS and not value):
             return abandoned_domain
@@ -290,8 +301,7 @@ class SaleOrder(models.Model):
             accessory_products = self.env['product.product']
             for line in order.website_order_line.filtered(lambda l: l.product_id):
                 combination = line.product_id.product_template_attribute_value_ids + line.product_no_variant_attribute_value_ids
-                accessory_products |= line.product_id.accessory_product_ids.filtered(lambda product:
-                    product.website_published and
+                accessory_products |= line.product_id.product_tmpl_id._get_website_accessory_product().filtered(lambda product:
                     product not in products and
                     product._is_variant_possible(parent_combination=combination) and
                     (product.company_id == line.company_id or not product.company_id)

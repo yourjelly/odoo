@@ -990,30 +990,73 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
         self.assertEqual(inv_1.state, 'posted', 'A posted invoice state should remain posted')
         self.assertEqual(inv_2.state, 'cancel', 'A drafted invoice state should be cancelled')
 
-    def test_15_cancel_delivery(self):
-        """
-        Suppose the option "Lock Confirmed Sales" enabled and a product with the invoicing policy set to "Delivered
-        quantities". When cancelling the delivery of such a product, the invoice status of the associated SO should be
-        'Nothing to Invoice'
-        """
-        self.env['ir.config_parameter'].set_param('sale.auto_done_setting', True)
+    def test_reservation_method_w_sale(self):
+        picking_type_out = self.company_data['default_warehouse'].out_type_id
+        # make sure generated picking will auto-assign
+        picking_type_out.reservation_method = 'at_confirm'
+        product = self.company_data['product_delivery_no']
+        product.type = 'product'
+        self.env['stock.quant']._update_available_quantity(product, self.company_data['default_warehouse'].lot_stock_id, 20)
 
-        product = self.product_a
-        partner = self.partner_a
+        sale_order1 = self._get_new_sale_order(amount=10.0)
+        # Validate the sale order, picking should automatically assign stock
+        sale_order1.action_confirm()
+        picking1 = sale_order1.picking_ids
+        self.assertTrue(picking1)
+        self.assertEqual(picking1.state, 'assigned')
+        picking1.unlink()
+
+        # make sure generated picking will does not auto-assign
+        picking_type_out.reservation_method = 'manual'
+        sale_order2 = self._get_new_sale_order(amount=10.0)
+        # Validate the sale order, picking should not automatically assign stock
+        sale_order2.action_confirm()
+        picking2 = sale_order2.picking_ids
+        self.assertTrue(picking2)
+        self.assertEqual(picking2.state, 'confirmed')
+        picking2.unlink()
+
+        # make sure generated picking auto-assigns according to (picking) scheduled date
+        picking_type_out.reservation_method = 'by_date'
+        picking_type_out.reservation_days_before = 2
+        # too early for scheduled date => don't auto-assign
+        sale_order3 = self._get_new_sale_order(amount=10.0)
+        sale_order3.commitment_date = datetime.now() + timedelta(days=10)
+        sale_order3.action_confirm()
+        picking3 = sale_order3.picking_ids
+        self.assertTrue(picking3)
+        self.assertEqual(picking3.state, 'confirmed')
+        picking3.unlink()
+        # within scheduled date + reservation days before => auto-assign
+        sale_order4 = self._get_new_sale_order(amount=10.0)
+        sale_order4.commitment_date = datetime.now() + timedelta(days=1)
+        sale_order4.action_confirm()
+        self.assertTrue(sale_order4.picking_ids)
+        self.assertEqual(sale_order4.picking_ids.state, 'assigned')
+
+    def test_packaging_propagation(self):
+        """Create a SO with lines using packaging, check the packaging propagate
+        to its move.
+        """
+        product = self.env['product.product'].create({
+            'name': 'Product with packaging',
+            'type': 'product',
+        })
+
+        packaging = self.env['product.packaging'].create({
+            'name': 'box',
+            'product_id': product.id,
+        })
+
         so = self.env['sale.order'].create({
-            'partner_id': partner.id,
-            'partner_invoice_id': partner.id,
-            'partner_shipping_id': partner.id,
-            'order_line': [(0, 0, {
-                'name': product.name,
-                'product_id': product.id,
-                'product_uom_qty': 2,
-                'product_uom': product.uom_id.id,
-                'price_unit': product.list_price
-            })],
-            'pricelist_id': self.env.ref('product.list0').id,
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                (0, 0, {
+                    'product_id': product.id,
+                    'product_uom_qty': 1.0,
+                    'product_uom': product.uom_id.id,
+                    'product_packaging_id': packaging.id,
+                })],
         })
         so.action_confirm()
-        so.picking_ids.action_cancel()
-
-        self.assertEqual(so.invoice_status, 'no')
+        self.assertEqual(so.order_line.move_ids.product_packaging_id, packaging)

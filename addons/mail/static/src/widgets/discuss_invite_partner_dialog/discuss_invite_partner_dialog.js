@@ -1,8 +1,7 @@
-odoo.define('mail/static/src/widgets/discuss_invite_partner_dialog/discuss_invite_partner_dialog.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const core = require('web.core');
-const Dialog = require('web.Dialog');
+import core from 'web.core';
+import Dialog from 'web.Dialog';
 
 const _lt = core._lt;
 const QWeb = core.qweb;
@@ -114,11 +113,10 @@ const PartnerInviteDialog = Dialog.extend({
         );
         this.env.services['notification'].notify({
             message: notification,
-            type: 'warning',
+            type: 'info',
+            messageIsHtml: true, // dynamic parts of the message are escaped above
         });
     },
 });
 
-return PartnerInviteDialog;
-
-});
+export default PartnerInviteDialog;

@@ -29,7 +29,7 @@ class TestMassMailing(TestMassMailCommon):
             'name': 'TestName',
             'subject': 'TestSubject',
             'body_html': 'Hello ${object.name}',
-            'reply_to_mode': 'email',
+            'reply_to_mode': 'new',
             'reply_to': '%s@%s' % (self.test_alias.alias_name, self.test_alias.alias_domain),
             'keep_archives': True,
             'mailing_model_id': self.env['ir.model']._get('res.partner').id,
@@ -129,7 +129,7 @@ class TestMassMailing(TestMassMailCommon):
         mailing.write({
             'mailing_domain': [('id', 'in', recipients.ids)],
             'keep_archives': False,
-            'reply_to_mode': 'email',
+            'reply_to_mode': 'new',
             'reply_to': self.test_alias.display_name,
         })
 
@@ -155,7 +155,7 @@ class TestMassMailing(TestMassMailCommon):
         mailing.write({
             'mailing_domain': [('id', 'in', recipients.ids)],
             'keep_archives': False,
-            'reply_to_mode': 'thread',
+            'reply_to_mode': 'update',
             'reply_to': self.test_alias.display_name,
         })
 
@@ -191,7 +191,7 @@ class TestMassMailing(TestMassMailCommon):
             'name': 'UTMTest',
             'subject': subject,
             'body_html': '<p>Hello ${object.name}</p>',
-            'reply_to_mode': 'email',
+            'reply_to_mode': 'new',
             'reply_to': '%s@%s' % (self.test_alias.alias_name, self.test_alias.alias_domain),
             'keep_archives': True,
             'mailing_model_id': self.env['ir.model']._get('mailing.list').id,
@@ -310,10 +310,13 @@ class TestMassMailing(TestMassMailCommon):
         # contact_1 is optout but same email is not optout from the same list
         # contact 3 is optout in list 1 but not in list 2
         # contact 5 is optout
-        Sub = self.env['mailing.contact.subscription']
-        Sub.search([('contact_id', '=', mailing_contact_1.id), ('list_id', '=', mailing_list_1.id)]).write({'opt_out': True})
-        Sub.search([('contact_id', '=', mailing_contact_3.id), ('list_id', '=', mailing_list_1.id)]).write({'opt_out': True})
-        Sub.search([('contact_id', '=', mailing_contact_5.id), ('list_id', '=', mailing_list_1.id)]).write({'opt_out': True})
+        subs = self.env['mailing.contact.subscription'].search([
+            '|', '|',
+            '&', ('contact_id', '=', mailing_contact_1.id), ('list_id', '=', mailing_list_1.id),
+            '&', ('contact_id', '=', mailing_contact_3.id), ('list_id', '=', mailing_list_1.id),
+            '&', ('contact_id', '=', mailing_contact_5.id), ('list_id', '=', mailing_list_1.id)
+        ])
+        subs.write({'opt_out': True})
 
         # create mass mailing record
         mailing = self.env['mailing.mailing'].create({

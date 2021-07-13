@@ -70,6 +70,10 @@ html, body {
     height: 100%;
 }
 
+*[contenteditable=true] {
+    outline: none;
+}
+
 .css_non_editable_mode_hidden {
     display: none !important;
 }
@@ -117,10 +121,11 @@ ul.o_checklist {
     list-style: none;
 
     >li {
+        list-style: none;
         position: relative;
         margin-left: $o-checklist-margin-left;
 
-        &::before {
+        &:not(.oe-nested)::before {
             content: '';
             position: absolute;
             left: - $o-checklist-margin-left;
@@ -477,16 +482,18 @@ a.o_underline {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 
     & > h2 {
         max-width: 500px;
         text-align: center;
+        margin-left: 150px;
     }
 
     &::before {
+        transform: scale(-1, 1);
         content: "";
-        @include o-position-absolute($top: 0, $right: 50px);
+        @include o-position-absolute($top: 0, $left: 50px);
         width: 100px;
         height: 150px;
         opacity: .5;

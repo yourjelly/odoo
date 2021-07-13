@@ -3,17 +3,10 @@ odoo.define('mass_mailing.website_integration', function (require) {
 
 var config = require('web.config');
 var core = require('web.core');
-const dom = require('web.dom');
 var Dialog = require('web.Dialog');
 var utils = require('web.utils');
 var publicWidget = require('web.public.widget');
-const session = require('web.session');
-
-// FIXME the 14.0 was released with this but without the google_recaptcha
-// module being added as a dependency of the website_mass_mailing module. This
-// is to be fixed in master of course but in stable, we'll have to use a
-// workaround.
-// const {ReCaptcha} = require('google_recaptcha.ReCaptchaV3');
+const {ReCaptcha} = require('google_recaptcha.ReCaptchaV3');
 
 var _t = core._t;
 
@@ -29,16 +22,13 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
      */
     init: function () {
         this._super(...arguments);
-        const ReCaptchaService = odoo.__DEBUG__.services['google_recaptcha.ReCaptchaV3'];
-        this._recaptcha = ReCaptchaService && new ReCaptchaService.ReCaptcha() || null;
+        this._recaptcha = new ReCaptcha();
     },
     /**
      * @override
      */
     willStart: function () {
-        if (this._recaptcha) {
-            this._recaptcha.loadLibs();
-        }
+        this._recaptcha.loadLibs();
         return this._super(...arguments);
     },
     /**
@@ -47,40 +37,6 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
     start: function () {
         var self = this;
         var def = this._super.apply(this, arguments);
-
-        if (!this._recaptcha && this.editableMode && session.is_admin) {
-            this.displayNotification({
-                type: 'info',
-                message: _t("Do you want to install Google reCAPTCHA to secure your newsletter subscriptions?"),
-                sticky: true,
-                buttons: [{text: _t("Install now"), primary: true, click: async () => {
-                    dom.addButtonLoadingEffect($('.o_notification .btn-primary')[0]);
-
-                    const record = await this._rpc({
-                        model: 'ir.module.module',
-                        method: 'search_read',
-                        domain: [['name', '=', 'google_recaptcha']],
-                        fields: ['id'],
-                        limit: 1,
-                    });
-                    await this._rpc({
-                        model: 'ir.module.module',
-                        method: 'button_immediate_install',
-                        args: [[record[0]['id']]],
-                    });
-
-                    this.displayNotification({
-                        type: 'info',
-                        message: _t("Google reCAPTCHA is now installed! You can configure it from your website settings."),
-                        sticky: true,
-                        buttons: [{text: _t("Website settings"), primary: true, click: async () => {
-                            window.open('/web#action=website.action_website_configuration', '_blank');
-                        }}],
-                    });
-                }}],
-            });
-        }
-
         this.$popup = this.$target.closest('.o_newsletter_modal');
         if (this.$popup.length) {
             // No need to check whether the user subscribed or not if the input
@@ -123,29 +79,23 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
             return false;
         }
         this.$target.removeClass('o_has_error').find('.form-control').removeClass('is-invalid');
-        let tokenObj = null;
-        if (this._recaptcha) {
-            tokenObj = await this._recaptcha.getToken('website_mass_mailing_subscribe');
-            if (tokenObj.error) {
-                self.displayNotification({
-                    type: 'danger',
-                    title: _t("Error"),
-                    message: tokenObj.error,
-                    sticky: true,
-                });
-                return false;
-            }
-        }
-        const params = {
-            'list_id': this.$target.data('list-id'),
-            'email': $email.length ? $email.val() : false,
-        };
-        if (this._recaptcha) {
-            params['recaptcha_token_response'] = tokenObj.token;
+        const tokenObj = await this._recaptcha.getToken('website_mass_mailing_subscribe');
+        if (tokenObj.error) {
+            self.displayNotification({
+                type: 'danger',
+                title: _t("Error"),
+                message: tokenObj.error,
+                sticky: true,
+            });
+            return false;
         }
         this._rpc({
             route: '/website_mass_mailing/subscribe',
-            params: params,
+            params: {
+                'list_id': this.$target.data('list-id'),
+                'email': $email.length ? $email.val() : false,
+                recaptcha_token_response: tokenObj.token,
+            },
         }).then(function (result) {
             let toastType = result.toast_type;
             if (toastType === 'success') {
