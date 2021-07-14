@@ -24,9 +24,8 @@ class Attachment(models.Model):
             'module_name': {
                 'urls_info': [{
                     'url': '',
-                    'file_name': '', # name of desired XSD file downloaded from 'url'
+                    'file_name': '', # name of desired XSD file to be extracted from ZIP/RAR file from 'url'
                     'to_modify': False, # True if downloaded XSDs needs post-processing (see l10n_lu_saft for example)
-                    'to_unzip': False, # True if XSD needs to be extracted from downloaded zip
                 }]
             }
         """
@@ -118,10 +117,10 @@ class Attachment(models.Model):
             for url_info in values.get('urls_info', []):
                 url = url_info['url']
                 to_modify = url_info.get('to_modify')
-                to_unzip = url_info.get('to_unzip')
+                file_name = url_info.get('file_name') or ''
                 # step 1: Extract filename from URL and check if it was already stored in attachment.
-                file_name = url_info.get('file_name') or url.split('/')[-1]
-                xsd_fname = 'xsd_cached_%s' % file_name.replace('.', '_')
+                fname = file_name or url.split('/')[-1]
+                xsd_fname = 'xsd_cached_%s' % fname.replace('.', '_')
                 attachment = self.env.ref('%s.%s' % (module_name, xsd_fname), False)
                 if attachment:
                     continue
@@ -137,7 +136,7 @@ class Attachment(models.Model):
                         a ZIP file then extract the desired XSD file and return its content.
                 '''
                 content = response.content
-                if to_unzip:
+                if file_name:
                     content = self._extract_xsd_from_archive(content, file_name, url, module_name)
                 # step 4: Post process XSD to add some content in it.
                 if to_modify:
@@ -151,7 +150,6 @@ class Attachment(models.Model):
                 # step 6: Create the attachment and ir.model.data entry.
                 attachment = self.create({
                     'name': xsd_fname,
-                    'mimetype': 'text/xml',
                     'datas': base64.encodebytes(content),
                 })
                 self.env['ir.model.data'].create({
