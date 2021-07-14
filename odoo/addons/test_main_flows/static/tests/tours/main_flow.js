@@ -677,7 +677,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Ove
     position: "bottom"
 }, {
     mobile: true,
-    trigger: ".o_menu_sections li:contains('Reordering Rules')",
+    trigger: ".o_menu_sections li.o_dropdown_item:contains('Reordering Rules')",
     content: _t("Click on Product Section"),
     position: "bottom"
 }, {
