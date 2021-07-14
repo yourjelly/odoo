@@ -151,7 +151,12 @@
                                     <em class="font-weight-normal text-muted" t-if="tasks[0].sudo().partner_id"><span t-field="tasks[0].sudo().project_id.label_tasks"/> for customer:</em>
                                     <span class="text-truncate" t-field="tasks[0].sudo().partner_id.name"/></th>
                                 <th t-if="groupby != 'project'" class="text-center" name="portal_my_tasks_project_th">Project</th>
+                                <th>Planned Hours</th>
+                                <th>Hours Recorded</th>
+                                <th>Remaining Hours</th>
                                 <th t-if="groupby != 'stage'" class="text-center">Stage</th>
+                                <th>Invoiced</th>
+                                <th>To Invoice</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -166,9 +171,14 @@
                                     <td t-if="groupby != 'project'" class="text-center">
                                         <span class="badge badge-pill badge-info" title="Current project of the task" t-esc="task.project_id.name" />
                                     </td>
+                                    <td t-esc="task.planned_hours"/>
+                                    <td t-esc="task.effective_hours"/>
+                                    <td t-esc="max(task.remaining_hours, 0)"/>
                                     <td t-if="groupby != 'stage'" class="text-center">
                                         <span class="badge badge-pill badge-info" title="Current stage of the task" t-esc="task.stage_id.name" />
                                     </td>
+                                    <td></td><!-- todo -->
+                                    <td></td><!-- todo -->
                                 </tr>
                             </t>
                         </tbody>

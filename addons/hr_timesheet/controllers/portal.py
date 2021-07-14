@@ -165,4 +165,10 @@ class TimesheetCustomerPortal(CustomerPortal):
             'filterby': filterby,
             'is_uom_day': request.env['account.analytic.line']._is_timesheet_encode_uom_day(),
         })
+
+        if 'sale_order_id_ref' in kw:
+            values['sale_order_id_ref'] = kw['sale_order_id_ref']
+        if 'invoice_id_ref' in kw:
+            values['invoice_id_ref'] = kw['invoice_id_ref']
+
         return request.render("hr_timesheet.portal_my_timesheets", values)
