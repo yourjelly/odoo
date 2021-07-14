@@ -13,11 +13,11 @@ class MailRenderMixin(models.AbstractModel):
         rendered = super(MailRenderMixin, self)._render_template_postprocess(rendered)
 
         # apply shortener after
-        if self.env.context.get('post_convert_links'):
+        if self.env.context.get("post_convert_links"):
             for res_id, html in rendered.items():
                 rendered[res_id] = self._shorten_links(
                     html,
-                    self.env.context['post_convert_links'],
-                    blacklist=['/unsubscribe_from_list', '/view']
+                    self.env.context["post_convert_links"],
+                    blacklist=["/unsubscribe_from_list", "/view"],
                 )
         return rendered

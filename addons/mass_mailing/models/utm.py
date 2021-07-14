@@ -5,28 +5,38 @@ from odoo import api, fields, models
 
 
 class UtmCampaign(models.Model):
-    _inherit = 'utm.campaign'
+    _inherit = "utm.campaign"
 
     mailing_mail_ids = fields.One2many(
-        'mailing.mailing', 'campaign_id',
-        domain=[('mailing_type', '=', 'mail')],
-        string='Mass Mailings')
-    mailing_mail_count = fields.Integer('Number of Mass Mailing', compute="_compute_mailing_mail_count")
+        "mailing.mailing",
+        "campaign_id",
+        domain=[("mailing_type", "=", "mail")],
+        string="Mass Mailings",
+    )
+    mailing_mail_count = fields.Integer(
+        "Number of Mass Mailing", compute="_compute_mailing_mail_count"
+    )
     # stat fields
-    received_ratio = fields.Integer(compute="_compute_statistics", string='Received Ratio')
-    opened_ratio = fields.Integer(compute="_compute_statistics", string='Opened Ratio')
-    replied_ratio = fields.Integer(compute="_compute_statistics", string='Replied Ratio')
-    bounced_ratio = fields.Integer(compute="_compute_statistics", string='Bounced Ratio')
+    received_ratio = fields.Integer(
+        compute="_compute_statistics", string="Received Ratio"
+    )
+    opened_ratio = fields.Integer(compute="_compute_statistics", string="Opened Ratio")
+    replied_ratio = fields.Integer(
+        compute="_compute_statistics", string="Replied Ratio"
+    )
+    bounced_ratio = fields.Integer(
+        compute="_compute_statistics", string="Bounced Ratio"
+    )
 
-    @api.depends('mailing_mail_ids')
+    @api.depends("mailing_mail_ids")
     def _compute_mailing_mail_count(self):
         if self.ids:
-            mailing_data = self.env['mailing.mailing'].read_group(
-                [('campaign_id', 'in', self.ids)],
-                ['campaign_id'],
-                ['campaign_id']
+            mailing_data = self.env["mailing.mailing"].read_group(
+                [("campaign_id", "in", self.ids)], ["campaign_id"], ["campaign_id"]
             )
-            mapped_data = {m['campaign_id'][0]: m['campaign_id_count'] for m in mailing_data}
+            mapped_data = {
+                m["campaign_id"][0]: m["campaign_id_count"] for m in mailing_data
+            }
         else:
             mapped_data = dict()
         for campaign in self:
@@ -35,15 +45,16 @@ class UtmCampaign(models.Model):
     def _compute_statistics(self):
         """ Compute statistics of the mass mailing campaign """
         default_vals = {
-            'received_ratio': 0,
-            'opened_ratio': 0,
-            'replied_ratio': 0,
-            'bounced_ratio': 0
+            "received_ratio": 0,
+            "opened_ratio": 0,
+            "replied_ratio": 0,
+            "bounced_ratio": 0,
         }
         if not self.ids:
             self.update(default_vals)
             return
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            """
             SELECT
                 c.id as campaign_id,
                 COUNT(s.id) AS expected,
@@ -62,26 +73,25 @@ class UtmCampaign(models.Model):
                 c.id IN %s
             GROUP BY
                 c.id
-        """, (tuple(self.ids), ))
+        """,
+            (tuple(self.ids),),
+        )
 
         all_stats = self.env.cr.dictfetchall()
-        stats_per_campaign = {
-            stats['campaign_id']: stats
-            for stats in all_stats
-        }
+        stats_per_campaign = {stats["campaign_id"]: stats for stats in all_stats}
 
         for campaign in self:
             stats = stats_per_campaign.get(campaign.id)
             if not stats:
                 vals = default_vals
             else:
-                total = (stats['expected'] - stats['ignored']) or 1
-                delivered = stats['sent'] - stats['bounced']
+                total = (stats["expected"] - stats["ignored"]) or 1
+                delivered = stats["sent"] - stats["bounced"]
                 vals = {
-                    'received_ratio': 100.0 * delivered / total,
-                    'opened_ratio': 100.0 * stats['opened'] / total,
-                    'replied_ratio': 100.0 * stats['replied'] / total,
-                    'bounced_ratio': 100.0 * stats['bounced'] / total
+                    "received_ratio": 100.0 * delivered / total,
+                    "opened_ratio": 100.0 * stats["opened"] / total,
+                    "replied_ratio": 100.0 * stats["replied"] / total,
+                    "bounced_ratio": 100.0 * stats["bounced"] / total,
                 }
 
             campaign.update(vals)
@@ -91,8 +101,10 @@ class UtmCampaign(models.Model):
         build for each mailing. """
         res = dict.fromkeys(self.ids, {})
         for campaign in self:
-            domain = [('campaign_id', '=', campaign.id)]
+            domain = [("campaign_id", "=", campaign.id)]
             if model:
-                domain += [('model', '=', model)]
-            res[campaign.id] = set(self.env['mailing.trace'].search(domain).mapped('res_id'))
+                domain += [("model", "=", model)]
+            res[campaign.id] = set(
+                self.env["mailing.trace"].search(domain).mapped("res_id")
+            )
         return res

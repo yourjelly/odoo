@@ -11,7 +11,11 @@ import time
 from odoo import http
 from odoo.addons.hw_drivers.controllers.proxy import proxy_drivers
 from odoo.addons.hw_drivers.event_manager import event_manager
-from odoo.addons.hw_drivers.iot_handlers.drivers.SerialBaseDriver import SerialDriver, SerialProtocol, serial_connection
+from odoo.addons.hw_drivers.iot_handlers.drivers.SerialBaseDriver import (
+    SerialDriver,
+    SerialProtocol,
+    serial_connection,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -20,7 +24,11 @@ _logger = logging.getLogger(__name__)
 ACTIVE_SCALE = None
 new_weight_event = threading.Event()
 
-ScaleProtocol = namedtuple('ScaleProtocol', SerialProtocol._fields + ('zeroCommand', 'tareCommand', 'clearCommand', 'autoResetWeight'))
+ScaleProtocol = namedtuple(
+    "ScaleProtocol",
+    SerialProtocol._fields
+    + ("zeroCommand", "tareCommand", "clearCommand", "autoResetWeight"),
+)
 
 # 8217 Mettler-Toledo (Weight-only) Protocol, as described in the scale's Service Manual.
 #    e.g. here: https://www.manualslib.com/manual/861274/Mettler-Toledo-Viva.html?page=51#manual
@@ -29,7 +37,7 @@ ScaleProtocol = namedtuple('ScaleProtocol', SerialProtocol._fields + ('zeroComma
 # We use the default serial protocol settings, the scale's settings can be configured in the
 # scale's menu anyway.
 Toledo8217Protocol = ScaleProtocol(
-    name='Toledo 8217',
+    name="Toledo 8217",
     baudrate=9600,
     bytesize=serial.SEVENBITS,
     stopbits=serial.STOPBITS_ONE,
@@ -41,11 +49,11 @@ Toledo8217Protocol = ScaleProtocol(
     commandDelay=0.2,
     measureDelay=0.5,
     newMeasureDelay=0.2,
-    commandTerminator=b'',
-    measureCommand=b'W',
-    zeroCommand=b'Z',
-    tareCommand=b'T',
-    clearCommand=b'C',
+    commandTerminator=b"",
+    measureCommand=b"W",
+    zeroCommand=b"Z",
+    tareCommand=b"T",
+    clearCommand=b"C",
     emptyAnswerValid=False,
     autoResetWeight=False,
 )
@@ -55,7 +63,7 @@ Toledo8217Protocol = ScaleProtocol(
 #          https://www.manualslib.com/manual/879782/Adam-Equipment-Cbd-4.html?page=32#manual
 # Only the baudrate and label format seem to be configurable in the AZExtra series.
 ADAMEquipmentProtocol = ScaleProtocol(
-    name='Adam Equipment',
+    name="Adam Equipment",
     baudrate=4800,
     bytesize=serial.EIGHTBITS,
     stopbits=serial.STOPBITS_ONE,
@@ -71,9 +79,9 @@ ADAMEquipmentProtocol = ScaleProtocol(
     # Adding an extra delay gives the operator a chance to remove the products
     # before the scale starts beeping. Could not find a way to disable the beeps.
     newMeasureDelay=5,
-    measureCommand=b'P',
-    zeroCommand=b'Z',
-    tareCommand=b'T',
+    measureCommand=b"P",
+    zeroCommand=b"Z",
+    tareCommand=b"T",
     clearCommand=None,  # No clear command -> Tare again
     emptyAnswerValid=True,  # AZExtra does not answer unless a new non-zero weight has been detected
     autoResetWeight=True,  # AZExtra will not return 0 after removing products
@@ -82,20 +90,21 @@ ADAMEquipmentProtocol = ScaleProtocol(
 
 # Ensures compatibility with older versions of Odoo
 class ScaleReadOldRoute(http.Controller):
-    @http.route('/hw_proxy/scale_read', type='json', auth='none', cors='*')
+    @http.route("/hw_proxy/scale_read", type="json", auth="none", cors="*")
     def scale_read(self):
         if ACTIVE_SCALE:
-            return {'weight': ACTIVE_SCALE._scale_read_old_route()}
+            return {"weight": ACTIVE_SCALE._scale_read_old_route()}
         return None
 
 
 class ScaleDriver(SerialDriver):
     """Abstract base class for scale drivers."""
+
     last_sent_value = None
 
     def __init__(self, identifier, device):
         super(ScaleDriver, self).__init__(identifier, device)
-        self.device_type = 'scale'
+        self.device_type = "scale"
         self._set_actions()
         self._is_reading = True
 
@@ -103,7 +112,7 @@ class ScaleDriver(SerialDriver):
         # Only the last scale connected is kept
         global ACTIVE_SCALE
         ACTIVE_SCALE = self
-        proxy_drivers['scale'] = ACTIVE_SCALE
+        proxy_drivers["scale"] = ACTIVE_SCALE
 
     # Ensures compatibility with older versions of Odoo
     # and allows using the `ProxyDevice` in the point of sale to retrieve the status
@@ -111,19 +120,21 @@ class ScaleDriver(SerialDriver):
         """Allows `hw_proxy.Proxy` to retrieve the status of the scales"""
 
         status = self._status
-        return {'status': status['status'], 'messages': [status['message_title'], ]}
+        return {"status": status["status"], "messages": [status["message_title"],]}
 
     def _set_actions(self):
         """Initializes `self._actions`, a map of action keys sent by the frontend to backend action methods."""
 
-        self._actions.update({
-            'read_once': self._read_once_action,
-            'set_zero': self._set_zero_action,
-            'set_tare': self._set_tare_action,
-            'clear_tare': self._clear_tare_action,
-            'start_reading': self._start_reading_action,
-            'stop_reading': self._stop_reading_action,
-        })
+        self._actions.update(
+            {
+                "read_once": self._read_once_action,
+                "set_zero": self._set_zero_action,
+                "set_tare": self._set_tare_action,
+                "clear_tare": self._clear_tare_action,
+                "start_reading": self._start_reading_action,
+                "stop_reading": self._stop_reading_action,
+            }
+        )
 
     def _start_reading_action(self, data):
         """Starts asking for the scale value."""
@@ -144,18 +155,22 @@ class ScaleDriver(SerialDriver):
         """Reads the scale current weight value and pushes it to the frontend."""
 
         self._read_weight()
-        self.last_sent_value = self.data['value']
+        self.last_sent_value = self.data["value"]
         event_manager.device_changed(self)
 
     def _set_zero_action(self, data):
         """Makes the weight currently applied to the scale the new zero."""
 
-        self._connection.write(self._protocol.zeroCommand + self._protocol.commandTerminator)
+        self._connection.write(
+            self._protocol.zeroCommand + self._protocol.commandTerminator
+        )
 
     def _set_tare_action(self, data):
         """Sets the scale's current weight value as tare weight."""
 
-        self._connection.write(self._protocol.tareCommand + self._protocol.commandTerminator)
+        self._connection.write(
+            self._protocol.tareCommand + self._protocol.commandTerminator
+        )
 
     @staticmethod
     def _get_raw_response(connection):
@@ -174,7 +189,7 @@ class ScaleDriver(SerialDriver):
                 break
             else:
                 answer.append(bytes(char))
-        return b''.join(answer)
+        return b"".join(answer)
 
     def _read_weight(self):
         """Asks for a new weight from the scale, checks if it is valid and, if it is, makes it the current value."""
@@ -184,35 +199,36 @@ class ScaleDriver(SerialDriver):
         answer = self._get_raw_response(self._connection)
         match = re.search(self._protocol.measureRegexp, answer)
         if match:
-            self.data = {
-                'value': float(match.group(1)),
-                'status': self._status
-            }
+            self.data = {"value": float(match.group(1)), "status": self._status}
 
     # Ensures compatibility with older versions of Odoo
     def _scale_read_old_route(self):
         """Used when the iot app is not installed"""
         with self._device_lock:
             self._read_weight()
-        return self.data['value']
+        return self.data["value"]
 
     def _take_measure(self):
         """Reads the device's weight value, and pushes that value to the frontend."""
 
         with self._device_lock:
             self._read_weight()
-            if self.data['value'] != self.last_sent_value or self._status['status'] == self.STATUS_ERROR:
-                self.last_sent_value = self.data['value']
+            if (
+                self.data["value"] != self.last_sent_value
+                or self._status["status"] == self.STATUS_ERROR
+            ):
+                self.last_sent_value = self.data["value"]
                 event_manager.device_changed(self)
 
 
 class Toledo8217Driver(ScaleDriver):
     """Driver for the Toldedo 8217 serial scale."""
+
     _protocol = Toledo8217Protocol
 
     def __init__(self, identifier, device):
         super(Toledo8217Driver, self).__init__(identifier, device)
-        self.device_manufacturer = 'Toledo'
+        self.device_manufacturer = "Toledo"
 
     @classmethod
     def supported(cls, device):
@@ -227,17 +243,21 @@ class Toledo8217Driver(ScaleDriver):
         protocol = cls._protocol
 
         try:
-            with serial_connection(device['identifier'], protocol, is_probing=True) as connection:
-                connection.write(b'Ehello' + protocol.commandTerminator)
+            with serial_connection(
+                device["identifier"], protocol, is_probing=True
+            ) as connection:
+                connection.write(b"Ehello" + protocol.commandTerminator)
                 time.sleep(protocol.commandDelay)
                 answer = connection.read(8)
-                if answer == b'\x02E\rhello':
-                    connection.write(b'F' + protocol.commandTerminator)
+                if answer == b"\x02E\rhello":
+                    connection.write(b"F" + protocol.commandTerminator)
                     return True
         except serial.serialutil.SerialTimeoutException:
             pass
         except Exception:
-            _logger.exception('Error while probing %s with protocol %s' % (device, protocol.name))
+            _logger.exception(
+                "Error while probing %s with protocol %s" % (device, protocol.name)
+            )
         return False
 
 
@@ -251,7 +271,7 @@ class AdamEquipmentDriver(ScaleDriver):
         super(AdamEquipmentDriver, self).__init__(identifier, device)
         self._is_reading = False
         self._last_weight_time = 0
-        self.device_manufacturer = 'Adam'
+        self.device_manufacturer = "Adam"
 
     def _check_last_weight_time(self):
         """The ADAM doesn't make the difference between a value of 0 and "the same value as last time":
@@ -263,9 +283,9 @@ class AdamEquipmentDriver(ScaleDriver):
 
         TIME_WEIGHT_KEPT = 10
 
-        if self.data['value'] is None:
+        if self.data["value"] is None:
             if time.time() - self._last_weight_time > TIME_WEIGHT_KEPT:
-                self.data['value'] = 0
+                self.data["value"] = 0
         else:
             self._last_weight_time = time.time()
 
@@ -276,8 +296,11 @@ class AdamEquipmentDriver(ScaleDriver):
             with self._device_lock:
                 self._read_weight()
                 self._check_last_weight_time()
-                if self.data['value'] != self.last_sent_value or self._status['status'] == self.STATUS_ERROR:
-                    self.last_sent_value = self.data['value']
+                if (
+                    self.data["value"] != self.last_sent_value
+                    or self._status["status"] == self.STATUS_ERROR
+                ):
+                    self.last_sent_value = self.data["value"]
                     event_manager.device_changed(self)
         else:
             time.sleep(0.5)
@@ -290,7 +313,7 @@ class AdamEquipmentDriver(ScaleDriver):
         with self._device_lock:
             self._read_weight()
             self._check_last_weight_time()
-        return self.data['value']
+        return self.data["value"]
 
     @classmethod
     def supported(cls, device):
@@ -305,12 +328,16 @@ class AdamEquipmentDriver(ScaleDriver):
         protocol = cls._protocol
 
         try:
-            with serial_connection(device['identifier'], protocol, is_probing=True) as connection:
+            with serial_connection(
+                device["identifier"], protocol, is_probing=True
+            ) as connection:
                 connection.write(protocol.measureCommand + protocol.commandTerminator)
                 # Checking whether writing to the serial port using the Adam protocol raises a timeout exception is about the only thing we can do.
                 return True
         except serial.serialutil.SerialTimeoutException:
             pass
         except Exception:
-            _logger.exception('Error while probing %s with protocol %s' % (device, protocol.name))
+            _logger.exception(
+                "Error while probing %s with protocol %s" % (device, protocol.name)
+            )
         return False

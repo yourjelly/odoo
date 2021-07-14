@@ -14,25 +14,26 @@ class HrExpenseRefuseWizard(models.TransientModel):
     _name = "hr.expense.refuse.wizard"
     _description = "Expense Refuse Reason Wizard"
 
-    reason = fields.Char(string='Reason', required=True)
-    hr_expense_ids = fields.Many2many('hr.expense')
-    hr_expense_sheet_id = fields.Many2one('hr.expense.sheet')
+    reason = fields.Char(string="Reason", required=True)
+    hr_expense_ids = fields.Many2many("hr.expense")
+    hr_expense_sheet_id = fields.Many2one("hr.expense.sheet")
 
     @api.model
     def default_get(self, fields):
         res = super(HrExpenseRefuseWizard, self).default_get(fields)
-        active_ids = self.env.context.get('active_ids', [])
-        refuse_model = self.env.context.get('hr_expense_refuse_model')
-        if refuse_model == 'hr.expense':
-            res.update({
-                'hr_expense_ids': active_ids,
-                'hr_expense_sheet_id': False,
-            })
-        elif refuse_model == 'hr.expense.sheet':
-            res.update({
-                'hr_expense_sheet_id': active_ids[0] if active_ids else False,
-                'hr_expense_ids': [],
-            })
+        active_ids = self.env.context.get("active_ids", [])
+        refuse_model = self.env.context.get("hr_expense_refuse_model")
+        if refuse_model == "hr.expense":
+            res.update(
+                {"hr_expense_ids": active_ids, "hr_expense_sheet_id": False,}
+            )
+        elif refuse_model == "hr.expense.sheet":
+            res.update(
+                {
+                    "hr_expense_sheet_id": active_ids[0] if active_ids else False,
+                    "hr_expense_ids": [],
+                }
+            )
         return res
 
     def expense_refuse_reason(self):
@@ -42,4 +43,4 @@ class HrExpenseRefuseWizard(models.TransientModel):
         if self.hr_expense_sheet_id:
             self.hr_expense_sheet_id.refuse_sheet(self.reason)
 
-        return {'type': 'ir.actions.act_window_close'}
+        return {"type": "ir.actions.act_window_close"}

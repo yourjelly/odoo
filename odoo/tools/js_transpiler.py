@@ -50,12 +50,15 @@ def transpile_javascript(url, content):
     return content
 
 
-URL_RE = re.compile(r"""
+URL_RE = re.compile(
+    r"""
     /?(?P<module>\S+)    # /module name
     /([\S/]*/)?static/   # ... /static/
     (?P<type>src|tests|lib)  # src, test, or lib file
     (?P<url>/[\S/]*)     # URL (/...)
-    """, re.VERBOSE)
+    """,
+    re.VERBOSE,
+)
 
 
 def url_to_module_path(url):
@@ -76,18 +79,21 @@ def url_to_module_path(url):
     match = URL_RE.match(url)
     if match:
         url = match["url"]
-        if url.endswith(('/index.js', '/index')):
-            url, _ = url.rsplit('/', 1)
-        if url.endswith('.js'):
+        if url.endswith(("/index.js", "/index")):
+            url, _ = url.rsplit("/", 1)
+        if url.endswith(".js"):
             url = url[:-3]
         if match["type"] == "src":
-            return "@%s%s" % (match['module'], url)
+            return "@%s%s" % (match["module"], url)
         elif match["type"] == "lib":
-            return "@%s/../lib%s" % (match['module'], url)
+            return "@%s/../lib%s" % (match["module"], url)
         else:
-            return "@%s/../tests%s" % (match['module'], url)
+            return "@%s/../tests%s" % (match["module"], url)
     else:
-        raise ValueError("The js file %r must be in the folder '/static/src' or '/static/lib' or '/static/test'" % url)
+        raise ValueError(
+            "The js file %r must be in the folder '/static/src' or '/static/lib' or '/static/test'"
+            % url
+        )
 
 
 def wrap_with_odoo_define(module_path, content):
@@ -104,13 +110,16 @@ return __exports;
 """
 
 
-EXPORT_FCT_OR_CLASS_RE = re.compile(r"""
+EXPORT_FCT_OR_CLASS_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                          # space and empty line
     export\s+                               # export
     (?P<type>(async\s+)?function|class)\s+  # async function or function or class
     (?P<identifier>\w+)                     # name of the class or the function
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_export_function_or_class(content):
@@ -139,13 +148,16 @@ def convert_export_function_or_class(content):
     return EXPORT_FCT_OR_CLASS_RE.sub(repl, content)
 
 
-EXPORT_FCT_OR_CLASS_DEFAULT_RE = re.compile(r"""
+EXPORT_FCT_OR_CLASS_DEFAULT_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                          # space and empty line
     export\s+default\s+                     # export default
     (?P<type>(async\s+)?function|class)\s+  # async function or function or class
     (?P<identifier>\w+)                     # name of the class or the function
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_export_function_or_class_default(content):
@@ -174,13 +186,16 @@ def convert_export_function_or_class_default(content):
     return EXPORT_FCT_OR_CLASS_DEFAULT_RE.sub(repl, content)
 
 
-EXPORT_VAR_RE = re.compile(r"""
+EXPORT_VAR_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)              # space and empty line
     export\s+                   # export
     (?P<type>let|const|var)\s+  # let or cont or var
     (?P<identifier>\w+)         # variable name
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_variable_export(content):
@@ -200,13 +215,16 @@ def convert_variable_export(content):
     return EXPORT_VAR_RE.sub(repl, content)
 
 
-EXPORT_DEFAULT_VAR_RE = re.compile(r"""
+EXPORT_DEFAULT_VAR_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)              # space and empty line
     export\s+default\s+         # export default
     (?P<type>let|const|var)\s+  # let or const or var
     (?P<identifier>\w+)\s*      # variable name
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_variable_export_default(content):
@@ -225,12 +243,15 @@ def convert_variable_export_default(content):
     return EXPORT_DEFAULT_VAR_RE.sub(repl, content)
 
 
-EXPORT_OBJECT_RE = re.compile(r"""
+EXPORT_OBJECT_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                      # space and empty line
     export\s*                           # export
     (?P<object>{[\w\s,]+})              # { a, b, c as x, ... }
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_object_export(content):
@@ -244,21 +265,32 @@ def convert_object_export(content):
         // after
         Object.assign(__exports, { a, b, x: c })
     """
+
     def repl(matchobj):
-        object_process = "{" + ", ".join([convert_as(val) for val in matchobj["object"][1:-1].split(",")]) + "}"
+        object_process = (
+            "{"
+            + ", ".join(
+                [convert_as(val) for val in matchobj["object"][1:-1].split(",")]
+            )
+            + "}"
+        )
         space = matchobj["space"]
         return f"{space}Object.assign(__exports, {object_process})"
+
     return EXPORT_OBJECT_RE.sub(repl, content)
 
 
-EXPORT_FROM_RE = re.compile(r"""
+EXPORT_FROM_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                      # space and empty line
     export\s*                           # export
     (?P<object>{[\w\s,]+})\s*           # { a, b, c as x, ... }
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path.js")
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_from_export(content):
@@ -272,24 +304,42 @@ def convert_from_export(content):
         // after
         { a, b, c } = {require("some/path.js"); Object.assign(__exports, { a, b, x: c });}
     """
+
     def repl(matchobj):
-        object_clean = "{" + ",".join([remove_as(val) for val in matchobj["object"][1:-1].split(",")]) + "}"
-        object_process = "{" + ", ".join([convert_as(val) for val in matchobj["object"][1:-1].split(",")]) + "}"
-        return "%(space)s{const %(object_clean)s = require(%(path)s);Object.assign(__exports, %(object_process)s)}" % {
-            'object_clean': object_clean,
-            'object_process': object_process,
-            'space': matchobj['space'],
-            'path': matchobj['path'],
-        }
+        object_clean = (
+            "{"
+            + ",".join([remove_as(val) for val in matchobj["object"][1:-1].split(",")])
+            + "}"
+        )
+        object_process = (
+            "{"
+            + ", ".join(
+                [convert_as(val) for val in matchobj["object"][1:-1].split(",")]
+            )
+            + "}"
+        )
+        return (
+            "%(space)s{const %(object_clean)s = require(%(path)s);Object.assign(__exports, %(object_process)s)}"
+            % {
+                "object_clean": object_clean,
+                "object_process": object_process,
+                "space": matchobj["space"],
+                "path": matchobj["path"],
+            }
+        )
+
     return EXPORT_FROM_RE.sub(repl, content)
 
 
-EXPORT_STAR_FROM_RE = re.compile(r"""
+EXPORT_STAR_FROM_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                      # space and empty line
     export\s*\*\s*from\s*               # export * from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path.js")
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_star_from_export(content):
@@ -307,12 +357,15 @@ def convert_star_from_export(content):
     return EXPORT_STAR_FROM_RE.sub(repl, content)
 
 
-EXPORT_DEFAULT_RE = re.compile(r"""
+EXPORT_DEFAULT_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)      # space and empty line
     export\s+default    # export default
     (\s+\w+\s*=)?       # something (optional)
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_default_export(content):
@@ -342,14 +395,17 @@ def convert_default_export(content):
     return EXPORT_DEFAULT_RE.sub(repl, new_content)
 
 
-IMPORT_BASIC_RE = re.compile(r"""
+IMPORT_BASIC_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                      # space and empty line
     import\s+                           # import
     (?P<object>{(\s*\w+\s*,?\s*)+})\s*  # { a, b, c as x, ... }
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path")
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_basic_import(content):
@@ -363,20 +419,25 @@ def convert_basic_import(content):
         // after
         const {a, b, c: x} = require("some/path")
     """
+
     def repl(matchobj):
         new_object = matchobj["object"].replace(" as ", ": ")
         return f"{matchobj['space']}const {new_object} = require({matchobj['path']})"
+
     return IMPORT_BASIC_RE.sub(repl, content)
 
 
-IMPORT_LEGACY_DEFAULT_RE = re.compile(r"""
+IMPORT_LEGACY_DEFAULT_RE = re.compile(
+    r"""
     ^
     (?P<space>\s*)                                      # space and empty line
     import\s+                                           # import
     (?P<identifier>\w+)\s*                              # default variable name
     from\s*                                             # from
     (?P<path>(?P<quote>["'`])([^@\."'`][^"'`]*)(?P=quote))  # legacy alias file ("addon_name.module_name" or "some/path")
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_legacy_default_import(content):
@@ -396,14 +457,17 @@ def convert_legacy_default_import(content):
     return IMPORT_LEGACY_DEFAULT_RE.sub(repl, content)
 
 
-IMPORT_DEFAULT = re.compile(r"""
+IMPORT_DEFAULT = re.compile(
+    r"""
     ^
     (?P<space>\s*)                      # space and empty line
     import\s+                           # import
     (?P<identifier>\w+)\s*              # default variable name
     from\s*                             # from
     (?P<path>(?P<quote>["'`])([^"'`]+)(?P=quote))   # "file path" ("some/path")
-    """, re.MULTILINE | re.VERBOSE)
+    """,
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_default_import(content):
@@ -417,13 +481,18 @@ def convert_default_import(content):
         // after
         const something = require("some/path")[Symbol.for("default")]
     """
-    repl = r"""\g<space>const \g<identifier> = require(\g<path>)[Symbol.for("default")]"""
+    repl = (
+        r"""\g<space>const \g<identifier> = require(\g<path>)[Symbol.for("default")]"""
+    )
     return IMPORT_DEFAULT.sub(repl, content)
 
 
-RELATIVE_REQUIRE_RE = re.compile(r"""
+RELATIVE_REQUIRE_RE = re.compile(
+    r"""
     require\((?P<quote>["'`])([^@"'`]+)(?P=quote)\)  # require("some/path")
-    """, re.VERBOSE)
+    """,
+    re.VERBOSE,
+)
 
 
 def convert_relative_require(url, content):
@@ -453,13 +522,16 @@ def convert_relative_require(url, content):
     return new_content
 
 
-IMPORT_STAR = re.compile(r"""
+IMPORT_STAR = re.compile(
+    r"""
     ^(?P<space>\s*)       # indentation
     import\s+\*\s+as\s+   # import * as
     (?P<identifier>\w+)   # alias
     \s*from\s*            # from
     (?P<path>[^;\n]+)     # path
-""", re.MULTILINE | re.VERBOSE)
+""",
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_star_import(content):
@@ -477,11 +549,14 @@ def convert_star_import(content):
     return IMPORT_STAR.sub(repl, content)
 
 
-IMPORT_UNNAMED_RELATIVE_RE = re.compile(r"""
+IMPORT_UNNAMED_RELATIVE_RE = re.compile(
+    r"""
     ^(?P<space>\s*)     # indentation
     import\s+           # import
     (?P<path>[^;\n]+)   # relative path
-""", re.MULTILINE | re.VERBOSE)
+""",
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def convert_unnamed_relative_import(content):
@@ -499,12 +574,15 @@ def convert_unnamed_relative_import(content):
     return IMPORT_UNNAMED_RELATIVE_RE.sub(repl, content)
 
 
-URL_INDEX_RE = re.compile(r"""
+URL_INDEX_RE = re.compile(
+    r"""
     require\s*                 # require
     \(\s*                      # (
     (?P<path>(?P<quote>["'`])([^"'`]*/index/?)(?P=quote))  # path ended by /index or /index/
     \s*\)                      # )
-""", re.MULTILINE | re.VERBOSE)
+""",
+    re.MULTILINE | re.VERBOSE,
+)
 
 
 def remove_index(content):
@@ -513,10 +591,12 @@ def remove_index(content):
     We want to be able to import a module just trough its directory name if it contains an index.js.
     So we no longer need to specify the index.js in the paths.
     """
+
     def repl(matchobj):
         path = matchobj["path"]
         new_path = path[: path.rfind("/index")] + path[0]
         return f"require({new_path})"
+
     return URL_INDEX_RE.sub(repl, content)
 
 
@@ -530,17 +610,22 @@ def relative_path_to_module_path(url, path_rel):
     url_split = url.split("/")
     path_rel_split = path_rel.split("/")
     nb_back = len([v for v in path_rel_split if v == ".."]) + 1
-    result = "/".join(url_split[:-nb_back] + [v for v in path_rel_split if not v in ["..", "."]])
+    result = "/".join(
+        url_split[:-nb_back] + [v for v in path_rel_split if not v in ["..", "."]]
+    )
     return url_to_module_path(result)
 
 
-ODOO_MODULE_RE = re.compile(r"""
+ODOO_MODULE_RE = re.compile(
+    r"""
     \s*                                       # some starting space
     \/(\*|\/).*\s*                            # // or /*
     @odoo-module                              # @odoo-module
     (\s+alias=(?P<alias>[\w.]+))?             # alias=web.AbstractAction (optional)
     (\s+default=(?P<default>False|false|0))?  # default=False or false or 0 (optional)
-""", re.VERBOSE)
+""",
+    re.VERBOSE,
+)
 
 
 def is_odoo_module(content):
@@ -594,16 +679,22 @@ def get_aliased_odoo_define_content(module_path, content):
     """
     matchobj = ODOO_MODULE_RE.match(content)
     if matchobj:
-        alias = matchobj['alias']
+        alias = matchobj["alias"]
         if alias:
-            if matchobj['default']:
+            if matchobj["default"]:
                 return """\nodoo.define(`%s`, function(require) {
                         return require('%s');
-                        });\n""" % (alias, module_path)
+                        });\n""" % (
+                    alias,
+                    module_path,
+                )
             else:
                 return """\nodoo.define(`%s`, function(require) {
                         return require('%s')[Symbol.for("default")];
-                        });\n""" % (alias, module_path)
+                        });\n""" % (
+                    alias,
+                    module_path,
+                )
 
 
 def convert_as(val):

@@ -12,21 +12,21 @@ class SaleOrder(models.Model):
         as a member of the channel(s) on which this product is configured (see slide.channel.product_id). """
         result = super(SaleOrder, self)._action_confirm()
 
-        so_lines = self.env['sale.order.line'].search(
-            [('order_id', 'in', self.ids)]
+        so_lines = self.env["sale.order.line"].search([("order_id", "in", self.ids)])
+        products = so_lines.mapped("product_id")
+        related_channels = self.env["slide.channel"].search(
+            [("product_id", "in", products.ids)]
         )
-        products = so_lines.mapped('product_id')
-        related_channels = self.env['slide.channel'].search(
-            [('product_id', 'in', products.ids)]
-        )
-        channel_products = related_channels.mapped('product_id')
+        channel_products = related_channels.mapped("product_id")
 
-        channels_per_so = {sale_order: self.env['slide.channel'] for sale_order in self}
+        channels_per_so = {sale_order: self.env["slide.channel"] for sale_order in self}
         for so_line in so_lines:
             if so_line.product_id in channel_products:
                 for related_channel in related_channels:
                     if related_channel.product_id == so_line.product_id:
-                        channels_per_so[so_line.order_id] = channels_per_so[so_line.order_id] | related_channel
+                        channels_per_so[so_line.order_id] = (
+                            channels_per_so[so_line.order_id] | related_channel
+                        )
 
         for sale_order, channels in channels_per_so.items():
             channels._action_add_members(sale_order.partner_id)

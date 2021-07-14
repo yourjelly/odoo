@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
-    _inherit = 'payment.transaction'
+    _inherit = "payment.transaction"
 
     def _send_payment_request(self):
         """ Override of payment to simulate a payment request.
@@ -21,13 +21,13 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._send_payment_request()
-        if self.provider != 'test':
+        if self.provider != "test":
             return
 
         # The payment request response would normally transit through the controller but in the end,
         # all that interests us is the reference. To avoid making a localhost request, we bypass the
         # controller and handle the fake feedback data directly.
-        self._handle_feedback_data('test', {'reference': self.reference})
+        self._handle_feedback_data("test", {"reference": self.reference})
 
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):
@@ -40,11 +40,11 @@ class PaymentTransaction(models.Model):
         :raise: ValidationError if the data match no transaction
         """
         tx = super()._get_tx_from_feedback_data(provider, data)
-        if provider != 'test':
+        if provider != "test":
             return tx
 
-        reference = data.get('reference')
-        tx = self.search([('reference', '=', reference), ('provider', '=', 'test')])
+        reference = data.get("reference")
+        tx = self.search([("reference", "=", reference), ("provider", "=", "test")])
         if not tx:
             raise ValidationError(
                 "Test: " + _("No transaction found matching reference %s.", reference)
@@ -66,12 +66,16 @@ class PaymentTransaction(models.Model):
 
         self._set_done()  # Dummy transactions are always successful
         if self.tokenize:
-            cc_number = payment_utils.build_token_name(payment_details_short=data['cc_summary'])
-            token = self.env['payment.token'].create({
-                'acquirer_id': self.acquirer_id.id,
-                'name': f"TEST {cc_number}",
-                'partner_id': self.partner_id.id,
-                'acquirer_ref': 'fake acquirer reference',
-                'verified': True,
-            })
+            cc_number = payment_utils.build_token_name(
+                payment_details_short=data["cc_summary"]
+            )
+            token = self.env["payment.token"].create(
+                {
+                    "acquirer_id": self.acquirer_id.id,
+                    "name": f"TEST {cc_number}",
+                    "partner_id": self.partner_id.id,
+                    "acquirer_ref": "fake acquirer reference",
+                    "verified": True,
+                }
+            )
             self.token_id = token.id

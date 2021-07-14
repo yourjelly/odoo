@@ -10,17 +10,28 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 class ServerAction(models.Model):
     """ Add website option in server actions. """
 
-    _name = 'ir.actions.server'
-    _inherit = 'ir.actions.server'
+    _name = "ir.actions.server"
+    _inherit = "ir.actions.server"
 
-    xml_id = fields.Char('External ID', compute='_compute_xml_id', help="ID of the action if defined in a XML file")
-    website_path = fields.Char('Website Path')
-    website_url = fields.Char('Website Url', compute='_get_website_url', help='The full URL to access the server action through the website.')
-    website_published = fields.Boolean('Available on the Website', copy=False,
-                                       help='A code server action can be executed from the website, using a dedicated '
-                                            'controller. The address is <base>/website/action/<website_path>. '
-                                            'Set this field as True to allow users to run this action. If it '
-                                            'is set to False the action cannot be run through the website.')
+    xml_id = fields.Char(
+        "External ID",
+        compute="_compute_xml_id",
+        help="ID of the action if defined in a XML file",
+    )
+    website_path = fields.Char("Website Path")
+    website_url = fields.Char(
+        "Website Url",
+        compute="_get_website_url",
+        help="The full URL to access the server action through the website.",
+    )
+    website_published = fields.Boolean(
+        "Available on the Website",
+        copy=False,
+        help="A code server action can be executed from the website, using a dedicated "
+        "controller. The address is <base>/website/action/<website_path>. "
+        "Set this field as True to allow users to run this action. If it "
+        "is set to False the action cannot be run through the website.",
+    )
 
     def _compute_xml_id(self):
         res = self.get_external_id()
@@ -29,17 +40,19 @@ class ServerAction(models.Model):
 
     def _compute_website_url(self, website_path, xml_id):
         base_url = self.get_base_url()
-        link = website_path or xml_id or (self.id and '%d' % self.id) or ''
+        link = website_path or xml_id or (self.id and "%d" % self.id) or ""
         if base_url and link:
-            path = '%s/%s' % ('/website/action', link)
+            path = "%s/%s" % ("/website/action", link)
             return urls.url_join(base_url, path)
-        return ''
+        return ""
 
-    @api.depends('state', 'website_published', 'website_path', 'xml_id')
+    @api.depends("state", "website_published", "website_path", "xml_id")
     def _get_website_url(self):
         for action in self:
-            if action.state == 'code' and action.website_published:
-                action.website_url = action._compute_website_url(action.website_path, action.xml_id)
+            if action.state == "code" and action.website_published:
+                action.website_url = action._compute_website_url(
+                    action.website_path, action.xml_id
+                )
             else:
                 action.website_url = False
 
@@ -47,9 +60,9 @@ class ServerAction(models.Model):
     def _get_eval_context(self, action):
         """ Override to add the request object in eval_context. """
         eval_context = super(ServerAction, self)._get_eval_context(action)
-        if action.state == 'code':
-            eval_context['request'] = request
-            eval_context['json'] = json_scriptsafe
+        if action.state == "code":
+            eval_context["request"] = request
+            eval_context["json"] = json_scriptsafe
         return eval_context
 
     @api.model
@@ -59,4 +72,4 @@ class ServerAction(models.Model):
             priority over action, avoid using both.
         """
         res = super(ServerAction, self)._run_action_code_multi(eval_context)
-        return eval_context.get('response', res)
+        return eval_context.get("response", res)

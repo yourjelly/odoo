@@ -14,26 +14,31 @@ class AccountReconcileModel(models.Model):
     _inherit = "account.reconcile.model"
 
     _populate_sizes = {
-        'small': 5,
-        'medium': 100,
-        'large': 1000,
+        "small": 5,
+        "medium": 100,
+        "large": 1000,
     }
 
-    _populate_dependencies = ['res.company']
+    _populate_dependencies = ["res.company"]
 
     def _populate_factories(self):
         def get_name(counter, **kwargs):
-            return 'model_%s' % counter
+            return "model_%s" % counter
 
-        company_ids = self.env['res.company'].search([
-            ('chart_template_id', '!=', False),
-            ('id', 'in', self.env.registry.populated_models['res.company']),
-        ])
+        company_ids = self.env["res.company"].search(
+            [
+                ("chart_template_id", "!=", False),
+                ("id", "in", self.env.registry.populated_models["res.company"]),
+            ]
+        )
         return [
-            ('company_id', populate.cartesian(company_ids.ids)),
-            ('rule_type', populate.cartesian(['writeoff_button', 'writeoff_suggestion'])),
+            ("company_id", populate.cartesian(company_ids.ids)),
+            (
+                "rule_type",
+                populate.cartesian(["writeoff_button", "writeoff_suggestion"]),
+            ),
             # ('auto_reconcile', populate.cartesian([True, False], [0.1, 0.9])),
-            ('name', populate.compute(get_name)),
+            ("name", populate.compute(get_name)),
         ]
 
 
@@ -43,12 +48,12 @@ class AccountReconcileModelLine(models.Model):
     _inherit = "account.reconcile.model.line"
 
     _populate_sizes = {
-        'small': 10,
-        'medium': 200,
-        'large': 2000,
+        "small": 10,
+        "medium": 200,
+        "large": 2000,
     }
 
-    _populate_dependencies = ['account.reconcile.model']
+    _populate_dependencies = ["account.reconcile.model"]
 
     def _populate_factories(self):
         def search_account_ids(company_id, type=None, group=None):
@@ -62,12 +67,12 @@ class AccountReconcileModelLine(models.Model):
                                 asset, liability, equity, off_balance, False.
             :return (Model<account.account>): the recordset of accounts found.
             """
-            domain = [('company_id', '=', company_id)]
+            domain = [("company_id", "=", company_id)]
             if type:
-                domain += [('internal_type', '=', type)]
+                domain += [("internal_type", "=", type)]
             if group:
-                domain += [('internal_group', '=', group)]
-            return self.env['account.account'].search(domain)
+                domain += [("internal_group", "=", group)]
+            return self.env["account.account"].search(domain)
 
         def get_amount(random, values, **kwargs):
             """Get an amount dending on the amount_type.
@@ -79,12 +84,12 @@ class AccountReconcileModelLine(models.Model):
                 If amount type is percentage, a random number between 1 and 100
                 Else, amount_type is regex, a random regex out of 2
             """
-            if values['amount_type'] == 'fixed':
-                return '%s' % random.randint(1, 1000)
-            elif values['amount_type'] == 'percentage':
-                return '%s' % random.randint(1, 100)
+            if values["amount_type"] == "fixed":
+                return "%s" % random.randint(1, 1000)
+            elif values["amount_type"] == "percentage":
+                return "%s" % random.randint(1, 100)
             else:
-                return random.choice([r'^invoice \d+ (\d+)$', r'xd no-(\d+)'])
+                return random.choice([r"^invoice \d+ (\d+)$", r"xd no-(\d+)"])
 
         def get_account(random, values, **kwargs):
             """Get a random account depending on the company.
@@ -93,12 +98,21 @@ class AccountReconcileModelLine(models.Model):
             :param values (dict): the values already selected for the record.
             :return (int): the id of the account randomly selected
             """
-            company_id = self.env['account.reconcile.model'].browse(values['model_id']).company_id.id
+            company_id = (
+                self.env["account.reconcile.model"]
+                .browse(values["model_id"])
+                .company_id.id
+            )
             return random.choice(search_account_ids(company_id).ids)
 
         return [
-            ('model_id', populate.cartesian(self.env.registry.populated_models['account.reconcile.model'])),
-            ('amount_type', populate.randomize(['fixed', 'percentage', 'regex'])),
-            ('amount_string', populate.compute(get_amount)),
-            ('account_id', populate.compute(get_account)),
+            (
+                "model_id",
+                populate.cartesian(
+                    self.env.registry.populated_models["account.reconcile.model"]
+                ),
+            ),
+            ("amount_type", populate.randomize(["fixed", "percentage", "regex"])),
+            ("amount_string", populate.compute(get_amount)),
+            ("account_id", populate.compute(get_account)),
         ]

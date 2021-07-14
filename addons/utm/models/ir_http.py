@@ -4,7 +4,7 @@ from odoo import models
 
 
 class IrHttp(models.AbstractModel):
-    _inherit = 'ir.http'
+    _inherit = "ir.http"
 
     @classmethod
     def get_utm_domain_cookies(cls):
@@ -19,8 +19,11 @@ class IrHttp(models.AbstractModel):
             return response
 
         domain = cls.get_utm_domain_cookies()
-        for var, dummy, cook in request.env['utm.mixin'].tracking_fields():
-            if var in request.params and request.httprequest.cookies.get(var) != request.params[var]:
+        for var, dummy, cook in request.env["utm.mixin"].tracking_fields():
+            if (
+                var in request.params
+                and request.httprequest.cookies.get(var) != request.params[var]
+            ):
                 response.set_cookie(cook, request.params[var], domain=domain)
         return response
 

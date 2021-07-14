@@ -6,62 +6,66 @@ from odoo.addons.test_mass_mailing.tests import common
 
 
 class TestLinkTracker(common.TestMassMailCommon):
-
     def setUp(self):
         super(TestLinkTracker, self).setUp()
 
-        self.link = self.env['link.tracker'].search_or_create({
-            'url': 'https://www.example.com'
-        })
+        self.link = self.env["link.tracker"].search_or_create(
+            {"url": "https://www.example.com"}
+        )
 
-        self.click = self.env['link.tracker.click'].create({
-            'link_id': self.link.id,
-            'ip': '100.00.00.00',
-            'country_id': self.env.ref('base.fr').id,
-        })
+        self.click = self.env["link.tracker.click"].create(
+            {
+                "link_id": self.link.id,
+                "ip": "100.00.00.00",
+                "country_id": self.env.ref("base.fr").id,
+            }
+        )
 
     def test_add_link(self):
         code = self.link.code
         self.assertEqual(self.link.count, 1)
 
         # click from a new IP should create a new entry
-        click = self.env['link.tracker.click'].sudo().add_click(
-            code,
-            ip='100.00.00.01',
-            country_code='BEL'
+        click = (
+            self.env["link.tracker.click"]
+            .sudo()
+            .add_click(code, ip="100.00.00.01", country_code="BEL")
         )
-        self.assertEqual(click.ip, '100.00.00.01')
-        self.assertEqual(click.country_id, self.env.ref('base.be'))
+        self.assertEqual(click.ip, "100.00.00.01")
+        self.assertEqual(click.country_id, self.env.ref("base.be"))
         self.assertEqual(self.link.count, 2)
 
         # click from same IP (even another country) does not create a new entry
-        click = self.env['link.tracker.click'].sudo().add_click(
-            code,
-            ip='100.00.00.01',
-            country_code='FRA'
+        click = (
+            self.env["link.tracker.click"]
+            .sudo()
+            .add_click(code, ip="100.00.00.01", country_code="FRA")
         )
         self.assertEqual(click, None)
         self.assertEqual(self.link.count, 2)
 
-    @users('user_marketing')
+    @users("user_marketing")
     def test_add_link_mail_stat(self):
-        record = self.env['mailing.test.blacklist'].create({})
+        record = self.env["mailing.test.blacklist"].create({})
         code = self.link.code
         self.assertEqual(self.link.count, 1)
-        stat = self.env['mailing.trace'].create({
-            'mass_mailing_id': self.mailing_bl.id,
-            'model': record._name,
-            'res_id': record.id,
-        })
+        stat = self.env["mailing.trace"].create(
+            {
+                "mass_mailing_id": self.mailing_bl.id,
+                "model": record._name,
+                "res_id": record.id,
+            }
+        )
         self.assertFalse(stat.opened)
         self.assertFalse(stat.clicked)
 
         # click from a new IP should create a new entry and update stat when provided
-        click = self.env['link.tracker.click'].sudo().add_click(
-            code,
-            ip='100.00.00.01',
-            country_code='BEL',
-            mailing_trace_id=stat.id
+        click = (
+            self.env["link.tracker.click"]
+            .sudo()
+            .add_click(
+                code, ip="100.00.00.01", country_code="BEL", mailing_trace_id=stat.id
+            )
         )
         self.assertEqual(self.link.count, 2)
         self.assertEqual(click.mass_mailing_id, self.mailing_bl)

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Slovak - Accounting',
-    'version': '1.0',
-    'author': '26HOUSE',
-    'website': 'http://www.26house.com',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Slovak - Accounting",
+    "version": "1.0",
+    "author": "26HOUSE",
+    "website": "http://www.26house.com",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 Slovakia accounting chart and localization: Chart of Accounts 2020, basic VAT rates + 
 fiscal positions.
 
@@ -21,20 +21,16 @@ Tento modul definuje:
 Pre viac informácií kontaktujte info@26house.com alebo navštívte https://www.26house.com.
     
     """,
-    'depends': [
-        'account',
-        'base_iban',
-        'base_vat',
+    "depends": ["account", "base_iban", "base_vat",],
+    "data": [
+        "data/l10n_sk_coa_data.xml",
+        "data/account.account.template.csv",
+        "data/account.group.template.csv",
+        "data/l10n_sk_coa_post_data.xml",
+        "data/account_data.xml",
+        "data/account_tax_data.xml",
+        "data/account_fiscal_position_data.xml",
+        "data/account_chart_template_data.xml",
     ],
-    'data': [
-          'data/l10n_sk_coa_data.xml',
-          'data/account.account.template.csv',
-          'data/account.group.template.csv',
-          'data/l10n_sk_coa_post_data.xml',
-          'data/account_data.xml',
-          'data/account_tax_data.xml',
-          'data/account_fiscal_position_data.xml',
-          'data/account_chart_template_data.xml'
-    ],
-    'demo': ['data/demo_company.xml'],
+    "demo": ["data/demo_company.xml"],
 }

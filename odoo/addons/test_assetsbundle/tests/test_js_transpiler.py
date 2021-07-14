@@ -6,13 +6,15 @@ from odoo.tests.common import TransactionCase
 from odoo.tools import transpile_javascript
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestJsTranspiler(TransactionCase):
     maxDiff = None
 
     def test_01_alias(self):
         input_content = """/** @odoo-module alias=test_assetsbundle.Alias **/"""
-        result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/alias.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/alias', function (require) {
 'use strict';
@@ -29,8 +31,12 @@ odoo.define(`test_assetsbundle.Alias`, function(require) {
         self.assertEqual(result, expected_result)
 
     def test_02_default(self):
-        input_content = """/** @odoo-module alias=test_assetsbundle.Alias default=False **/"""
-        result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
+        input_content = (
+            """/** @odoo-module alias=test_assetsbundle.Alias default=False **/"""
+        )
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/alias.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/alias', function (require) {
 'use strict';
@@ -46,8 +52,12 @@ odoo.define(`test_assetsbundle.Alias`, function(require) {
 
         self.assertEqual(result, expected_result)
 
-        input_content = """/** @odoo-module alias=test_assetsbundle.Alias default=0 **/"""
-        result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
+        input_content = (
+            """/** @odoo-module alias=test_assetsbundle.Alias default=0 **/"""
+        )
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/alias.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/alias', function (require) {
 'use strict';
@@ -63,8 +73,12 @@ odoo.define(`test_assetsbundle.Alias`, function(require) {
 
         self.assertEqual(result, expected_result)
 
-        input_content = """/** @odoo-module alias=test_assetsbundle.Alias default=false **/"""
-        result = transpile_javascript("/test_assetsbundle/static/src/alias.js", input_content)
+        input_content = (
+            """/** @odoo-module alias=test_assetsbundle.Alias default=false **/"""
+        )
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/alias.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/alias', function (require) {
 'use strict';
@@ -91,7 +105,9 @@ export class Boat extends Vehicule {}
 
 export const Ferrari = class Ferrari extends Car {};
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/classes.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/classes.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/classes', function (require) {
 'use strict';
@@ -144,7 +160,9 @@ const aaa = "keep!";
   comments
  */
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/comments.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/comments.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/comments', function (require) {
 'use strict';
@@ -204,7 +222,9 @@ export default function sayHelloDefault() {
   console.log("Hello Default");
 }
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/functions.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/functions.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/functions', function (require) {
 'use strict';
@@ -260,7 +280,9 @@ const test = `import { Line14, Notification } from "../src/Dialog";`
 import Line15 from "test/Dialog";
 import Line16 from "test.Dialog.error";
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/import.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/import.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/import', function (require) {
 'use strict';
@@ -306,7 +328,9 @@ import * as b from "@tests/dir";
 import c from "@tests/dir/index/";
 
 import d from "@tests";"""
-        result = transpile_javascript("/test_assetsbundle/static/src/index.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/index.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle', function (require) {
 'use strict';
@@ -348,7 +372,9 @@ export {c as cc, d, e as ee} from "@tests/Dialog";
 
 export * from "@tests/Dialog";
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/list.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/list.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/list', function (require) {
 'use strict';
@@ -382,7 +408,6 @@ return __exports;
 
         self.assertEqual(result, expected_result)
 
-
     def test_09_variables(self):
         input_content = """export const v = 5;
 
@@ -395,7 +420,9 @@ export default 100;
 
 export default a;
 """
-        result = transpile_javascript("/test_assetsbundle/static/src/variables.js", input_content)
+        result = transpile_javascript(
+            "/test_assetsbundle/static/src/variables.js", input_content
+        )
 
         expected_result = """odoo.define('@test_assetsbundle/variables', function (require) {
 'use strict';

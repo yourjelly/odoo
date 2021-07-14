@@ -8,16 +8,21 @@ from odoo.tools.translate import encode, xml_translate, html_translate
 
 
 def edit_translation_mapping(data):
-    data = dict(data, model=data['name'].partition(',')[0], value=data['value'] or data['src'])
-    return '<span data-oe-model="%(model)s" data-oe-translation-id="%(id)s" data-oe-translation-state="%(state)s">%(value)s</span>' % data
+    data = dict(
+        data, model=data["name"].partition(",")[0], value=data["value"] or data["src"]
+    )
+    return (
+        '<span data-oe-model="%(model)s" data-oe-translation-id="%(id)s" data-oe-translation-state="%(state)s">%(value)s</span>'
+        % data
+    )
 
 
 class IrTranslation(models.Model):
-    _inherit = 'ir.translation'
+    _inherit = "ir.translation"
 
     @api.model
     def _get_terms_mapping(self, field, records):
-        if self._context.get('edit_translations'):
+        if self._context.get("edit_translations"):
             self.insert_missing(field, records)
             return edit_translation_mapping
         return super(IrTranslation, self)._get_terms_mapping(field, records)
@@ -26,21 +31,21 @@ class IrTranslation(models.Model):
         """ Convert the HTML fragment ``value`` to XML if necessary, and write
         it as the value of translation ``self``.
         """
-        assert len(self) == 1 and self.type == 'model_terms'
-        mname, fname = self.name.split(',')
+        assert len(self) == 1 and self.type == "model_terms"
+        mname, fname = self.name.split(",")
         field = self.env[mname]._fields[fname]
         if field.translate == xml_translate:
             # wrap value inside a div and parse it as HTML
             div = "<div>%s</div>" % encode(value)
-            root = etree.fromstring(div, etree.HTMLParser(encoding='utf-8'))
+            root = etree.fromstring(div, etree.HTMLParser(encoding="utf-8"))
             # root is html > body > div
             # serialize div as XML and discard surrounding tags
-            value = etree.tostring(root[0][0], encoding='utf-8')[5:-6]
+            value = etree.tostring(root[0][0], encoding="utf-8")[5:-6]
         elif field.translate == html_translate:
             # wrap value inside a div and parse it as HTML
             div = "<div>%s</div>" % encode(value)
-            root = etree.fromstring(div, etree.HTMLParser(encoding='utf-8'))
+            root = etree.fromstring(div, etree.HTMLParser(encoding="utf-8"))
             # root is html > body > div
             # serialize div as HTML and discard surrounding tags
-            value = etree.tostring(root[0][0], encoding='utf-8', method='html')[5:-6]
-        return self.write({'value': value})
+            value = etree.tostring(root[0][0], encoding="utf-8", method="html")[5:-6]
+        return self.write({"value": value})

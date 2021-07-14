@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
-    _inherit = 'payment.transaction'
+    _inherit = "payment.transaction"
 
     def _get_specific_processing_values(self, processing_values):
         """ Override of payment to return an access token as acquirer-specific processing values.
@@ -26,12 +26,12 @@ class PaymentTransaction(models.Model):
         :rtype: dict
         """
         res = super()._get_specific_processing_values(processing_values)
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return res
 
         return {
-            'access_token': payment_utils.generate_access_token(
-                processing_values['reference'], processing_values['partner_id']
+            "access_token": payment_utils.generate_access_token(
+                processing_values["reference"], processing_values["partner_id"]
             )
         }
 
@@ -46,8 +46,10 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
-        if self.acquirer_id.capture_manually or self.operation == 'validation':
-            return authorize_API.authorize(self.amount, self.reference, opaque_data=opaque_data)
+        if self.acquirer_id.capture_manually or self.operation == "validation":
+            return authorize_API.authorize(
+                self.amount, self.reference, opaque_data=opaque_data
+            )
         else:
             return authorize_API.auth_and_capture(
                 self.amount, self.reference, opaque_data=opaque_data
@@ -62,27 +64,33 @@ class PaymentTransaction(models.Model):
         :raise: UserError if the transaction is not linked to a token
         """
         super()._send_payment_request()
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return
 
         if not self.token_id.authorize_profile:
-            raise UserError("Authorize.Net: " + _("The transaction is not linked to a token."))
+            raise UserError(
+                "Authorize.Net: " + _("The transaction is not linked to a token.")
+            )
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
         if self.acquirer_id.capture_manually:
-            res_content = authorize_API.authorize(self.amount, self.reference, token=self.token_id)
+            res_content = authorize_API.authorize(
+                self.amount, self.reference, token=self.token_id
+            )
             _logger.info("authorize request response:\n%s", pprint.pformat(res_content))
         else:
             res_content = authorize_API.auth_and_capture(
                 self.amount, self.reference, token=self.token_id
             )
-            _logger.info("auth_and_capture request response:\n%s", pprint.pformat(res_content))
+            _logger.info(
+                "auth_and_capture request response:\n%s", pprint.pformat(res_content)
+            )
 
         # As the API has no redirection flow, we always know the reference of the transaction.
         # Still, we prefer to simulate the matching of the transaction by crafting dummy feedback
         # data in order to go through the centralized `_handle_feedback_data` method.
-        feedback_data = {'reference': self.reference, 'response': res_content}
-        self._handle_feedback_data('authorize', feedback_data)
+        feedback_data = {"reference": self.reference, "response": res_content}
+        self._handle_feedback_data("authorize", feedback_data)
 
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):
@@ -94,14 +102,17 @@ class PaymentTransaction(models.Model):
         :rtype: recordset of `payment.transaction`
         """
         tx = super()._get_tx_from_feedback_data(provider, data)
-        if provider != 'authorize':
+        if provider != "authorize":
             return tx
 
-        reference = data.get('reference')
-        tx = self.search([('reference', '=', reference), ('provider', '=', 'authorize')])
+        reference = data.get("reference")
+        tx = self.search(
+            [("reference", "=", reference), ("provider", "=", "authorize")]
+        )
         if not tx:
             raise ValidationError(
-                "Authorize.Net: " + _("No transaction found matching reference %s.", reference)
+                "Authorize.Net: "
+                + _("No transaction found matching reference %s.", reference)
             )
         return tx
 
@@ -114,39 +125,42 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._process_feedback_data(data)
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return
 
-        response_content = data.get('response')
+        response_content = data.get("response")
 
-        self.acquirer_reference = response_content.get('x_trans_id')
-        status_code = response_content.get('x_response_code', '3')
-        if status_code == '1':  # Approved
-            status_type = response_content.get('x_type').lower()
-            if status_type in ('auth_capture', 'prior_auth_capture'):
+        self.acquirer_reference = response_content.get("x_trans_id")
+        status_code = response_content.get("x_response_code", "3")
+        if status_code == "1":  # Approved
+            status_type = response_content.get("x_type").lower()
+            if status_type in ("auth_capture", "prior_auth_capture"):
                 self._set_done()
                 if self.tokenize and not self.token_id:
                     self._authorize_tokenize()
-            elif status_type == 'auth_only':
+            elif status_type == "auth_only":
                 self._set_authorized()
                 if self.tokenize and not self.token_id:
                     self._authorize_tokenize()
-            elif status_type == 'void':
+            elif status_type == "void":
                 self._set_canceled()
-        elif status_code == '2':  # Declined
+        elif status_code == "2":  # Declined
             self._set_canceled()
-        elif status_code == '4':  # Held for Review
+        elif status_code == "4":  # Held for Review
             self._set_pending()
         else:  # Error / Unknown code
-            error_code = response_content.get('x_response_reason_text')
+            error_code = response_content.get("x_response_reason_text")
             _logger.info(
                 "received data with invalid status code %s and error code %s",
-                status_code, error_code
+                status_code,
+                error_code,
             )
             self._set_error(
-                "Authorize.Net: " + _(
-                    "Received data with status code \"%(status)s\" and error code \"%(error)s\"",
-                    status=status_code, error=error_code
+                "Authorize.Net: "
+                + _(
+                    'Received data with status code "%(status)s" and error code "%(error)s"',
+                    status=status_code,
+                    error=error_code,
                 )
             )
 
@@ -163,21 +177,27 @@ class PaymentTransaction(models.Model):
         cust_profile = authorize_API.create_customer_profile(
             self.partner_id, self.acquirer_reference
         )
-        _logger.info("create_customer_profile request response:\n%s", pprint.pformat(cust_profile))
+        _logger.info(
+            "create_customer_profile request response:\n%s",
+            pprint.pformat(cust_profile),
+        )
         if cust_profile:
-            token = self.env['payment.token'].create({
-                'acquirer_id': self.acquirer_id.id,
-                'name': cust_profile.get('name'),
-                'partner_id': self.partner_id.id,
-                'acquirer_ref': cust_profile.get('payment_profile_id'),
-                'authorize_profile': cust_profile.get('profile_id'),
-            })
-            self.write({
-                'token_id': token.id,
-                'tokenize': False,
-            })
+            token = self.env["payment.token"].create(
+                {
+                    "acquirer_id": self.acquirer_id.id,
+                    "name": cust_profile.get("name"),
+                    "partner_id": self.partner_id.id,
+                    "acquirer_ref": cust_profile.get("payment_profile_id"),
+                    "authorize_profile": cust_profile.get("profile_id"),
+                }
+            )
+            self.write(
+                {"token_id": token.id, "tokenize": False,}
+            )
             _logger.info(
-                "created token with id %s for partner with id %s", token.id, self.partner_id.id
+                "created token with id %s for partner with id %s",
+                token.id,
+                self.partner_id.id,
             )
 
     def _send_refund_request(self):
@@ -188,7 +208,7 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._send_refund_request()
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
@@ -198,8 +218,8 @@ class PaymentTransaction(models.Model):
         # As the API has no redirection flow, we always know the reference of the transaction.
         # Still, we prefer to simulate the matching of the transaction by crafting dummy feedback
         # data in order to go through the centralized `_handle_feedback_data` method.
-        feedback_data = {'reference': self.reference, 'response': res_content}
-        self._handle_feedback_data('authorize', feedback_data)
+        feedback_data = {"reference": self.reference, "response": res_content}
+        self._handle_feedback_data("authorize", feedback_data)
 
     def _send_capture_request(self):
         """ Override of payment to send a capture request to Authorize.
@@ -209,7 +229,7 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._send_capture_request()
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
@@ -219,8 +239,8 @@ class PaymentTransaction(models.Model):
         # As the API has no redirection flow, we always know the reference of the transaction.
         # Still, we prefer to simulate the matching of the transaction by crafting dummy feedback
         # data in order to go through the centralized `_handle_feedback_data` method.
-        feedback_data = {'reference': self.reference, 'response': res_content}
-        self._handle_feedback_data('authorize', feedback_data)
+        feedback_data = {"reference": self.reference, "response": res_content}
+        self._handle_feedback_data("authorize", feedback_data)
 
     def _send_void_request(self):
         """ Override of payment to send a void request to Authorize.
@@ -230,7 +250,7 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._send_void_request()
-        if self.provider != 'authorize':
+        if self.provider != "authorize":
             return
 
         authorize_API = AuthorizeAPI(self.acquirer_id)
@@ -239,5 +259,5 @@ class PaymentTransaction(models.Model):
         # As the API has no redirection flow, we always know the reference of the transaction.
         # Still, we prefer to simulate the matching of the transaction by crafting dummy feedback
         # data in order to go through the centralized `_handle_feedback_data` method.
-        feedback_data = {'reference': self.reference, 'response': res_content}
-        self._handle_feedback_data('authorize', feedback_data)
+        feedback_data = {"reference": self.reference, "response": res_content}
+        self._handle_feedback_data("authorize", feedback_data)

@@ -9,15 +9,36 @@ from odoo.exceptions import UserError
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    landed_cost_ok = fields.Boolean('Is a Landed Cost', help='Indicates whether the product is a landed cost.')
-    split_method_landed_cost = fields.Selection(SPLIT_METHOD, string="Default Split Method",
-                                                help="Default Split Method when used for Landed Cost")
+    landed_cost_ok = fields.Boolean(
+        "Is a Landed Cost", help="Indicates whether the product is a landed cost."
+    )
+    split_method_landed_cost = fields.Selection(
+        SPLIT_METHOD,
+        string="Default Split Method",
+        help="Default Split Method when used for Landed Cost",
+    )
 
     def write(self, vals):
         for product in self:
-            if (('type' in vals and vals['type'] != 'service') or ('landed_cost_ok' in vals and not vals['landed_cost_ok'])) and product.type == 'service' and product.landed_cost_ok:
-                if self.env['account.move.line'].search_count([('product_id', 'in', product.product_variant_ids.ids), ('is_landed_costs_line', '=', True)]):
-                    raise UserError(_("You cannot change the product type or disable landed cost option because the product is used in an account move line."))
-                vals['landed_cost_ok'] = False
+            if (
+                (
+                    ("type" in vals and vals["type"] != "service")
+                    or ("landed_cost_ok" in vals and not vals["landed_cost_ok"])
+                )
+                and product.type == "service"
+                and product.landed_cost_ok
+            ):
+                if self.env["account.move.line"].search_count(
+                    [
+                        ("product_id", "in", product.product_variant_ids.ids),
+                        ("is_landed_costs_line", "=", True),
+                    ]
+                ):
+                    raise UserError(
+                        _(
+                            "You cannot change the product type or disable landed cost option because the product is used in an account move line."
+                        )
+                    )
+                vals["landed_cost_ok"] = False
 
         return super().write(vals)

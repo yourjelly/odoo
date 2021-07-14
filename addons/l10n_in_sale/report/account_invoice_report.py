@@ -14,7 +14,7 @@ class L10nInAccountInvoiceReport(models.Model):
             """
             LEFT JOIN res_partner dp ON dp.id = am.partner_shipping_id
             LEFT JOIN res_country_state ps ON ps.id = dp.state_id
-            """
+            """,
         )
 
     def _where(self):

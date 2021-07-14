@@ -21,12 +21,12 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     _populate_sizes = {
-        'small': 1000,
-        'medium': 10000,
-        'large': 500000,
+        "small": 1000,
+        "medium": 10000,
+        "large": 500000,
     }
 
-    _populate_dependencies = ['res.partner', 'account.journal']
+    _populate_dependencies = ["res.partner", "account.journal"]
 
     def _populate_factories(self):
         @lru_cache()
@@ -41,12 +41,12 @@ class AccountMove(models.Model):
                                 asset, liability, equity, off_balance, False.
             :return (Model<account.account>): the recordset of accounts found.
             """
-            domain = [('company_id', '=', company_id)]
+            domain = [("company_id", "=", company_id)]
             if type:
-                domain += [('internal_type', '=', type)]
+                domain += [("internal_type", "=", type)]
             if group:
-                domain += [('internal_group', '=', group)]
-            return self.env['account.account'].search(domain)
+                domain += [("internal_group", "=", group)]
+            return self.env["account.account"].search(domain)
 
         @lru_cache()
         def search_journal_ids(company_id, journal_type):
@@ -58,10 +58,11 @@ class AccountMove(models.Model):
                                        Valid values are sale, purchase, cash, bank and general.
             :return (list<int>): the ids of the journals of a company and a certain type
             """
-            return self.env['account.journal'].search([
-                ('company_id', '=', company_id),
-                ('type', '=', journal_type),
-            ]).ids
+            return (
+                self.env["account.journal"]
+                .search([("company_id", "=", company_id), ("type", "=", journal_type),])
+                .ids
+            )
 
         @lru_cache()
         def search_partner_ids(company_id):
@@ -71,10 +72,18 @@ class AccountMove(models.Model):
             :param company_id (int): the company to search partners for.
             :return (list<int>): the ids of partner the company has access to.
             """
-            return self.env['res.partner'].search([
-                '|', ('company_id', '=', company_id), ('company_id', '=', False),
-                ('id', 'in', self.env.registry.populated_models['res.partner']),
-            ]).ids
+            return (
+                self.env["res.partner"]
+                .search(
+                    [
+                        "|",
+                        ("company_id", "=", company_id),
+                        ("company_id", "=", False),
+                        ("id", "in", self.env.registry.populated_models["res.partner"]),
+                    ]
+                )
+                .ids
+            )
 
         def get_invoice_date(values, **kwargs):
             """Get the invoice date date.
@@ -83,8 +92,8 @@ class AccountMove(models.Model):
             :return (datetime.date, bool): the accounting date if it is an invoice (or similar) document
                                            or False otherwise.
             """
-            if values['move_type'] in self.get_invoice_types(include_receipts=True):
-                return values['date']
+            if values["move_type"] in self.get_invoice_types(include_receipts=True):
+                return values["date"]
             return False
 
         def get_lines(random, values, **kwargs):
@@ -95,36 +104,54 @@ class AccountMove(models.Model):
             :param values (dict): the values already selected for the record.
             :return list: list of ORM create commands for the field line_ids
             """
-            def get_line(account, label, balance=None, balance_sign=False, exclude_from_invoice_tab=False):
+
+            def get_line(
+                account,
+                label,
+                balance=None,
+                balance_sign=False,
+                exclude_from_invoice_tab=False,
+            ):
                 company_currency = account.company_id.currency_id
-                currency = self.env['res.currency'].browse(currency_id)
+                currency = self.env["res.currency"].browse(currency_id)
                 balance = balance or balance_sign * round(random.uniform(0, 1000))
-                amount_currency = company_currency._convert(balance, currency, account.company_id, date)
-                return (0, 0, {
-                    'name': 'label_%s' % label,
-                    'debit': balance > 0 and balance or 0,
-                    'credit': balance < 0 and -balance or 0,
-                    'account_id': account.id,
-                    'partner_id': partner_id,
-                    'currency_id': currency_id,
-                    'amount_currency': amount_currency,
-                    'exclude_from_invoice_tab': exclude_from_invoice_tab,
-                })
-            move_type = values['move_type']
-            date = values['date']
-            company_id = values['company_id']
-            currency_id = values['currency_id']
-            partner_id = values['partner_id']
+                amount_currency = company_currency._convert(
+                    balance, currency, account.company_id, date
+                )
+                return (
+                    0,
+                    0,
+                    {
+                        "name": "label_%s" % label,
+                        "debit": balance > 0 and balance or 0,
+                        "credit": balance < 0 and -balance or 0,
+                        "account_id": account.id,
+                        "partner_id": partner_id,
+                        "currency_id": currency_id,
+                        "amount_currency": amount_currency,
+                        "exclude_from_invoice_tab": exclude_from_invoice_tab,
+                    },
+                )
+
+            move_type = values["move_type"]
+            date = values["date"]
+            company_id = values["company_id"]
+            currency_id = values["currency_id"]
+            partner_id = values["partner_id"]
 
             # Determine the right sets of accounts depending on the move_type
             if move_type in self.get_sale_types(include_receipts=True):
-                account_ids = search_account_ids(company_id, 'other', 'income')
-                balance_account_ids = search_account_ids(company_id, 'receivable', 'asset')
+                account_ids = search_account_ids(company_id, "other", "income")
+                balance_account_ids = search_account_ids(
+                    company_id, "receivable", "asset"
+                )
             elif move_type in self.get_purchase_types(include_receipts=True):
-                account_ids = search_account_ids(company_id, 'other', 'expense')
-                balance_account_ids = search_account_ids(company_id, 'payable', 'liability')
+                account_ids = search_account_ids(company_id, "other", "expense")
+                balance_account_ids = search_account_ids(
+                    company_id, "payable", "liability"
+                )
             else:
-                account_ids = search_account_ids(company_id, 'other', 'asset')
+                account_ids = search_account_ids(company_id, "other", "asset")
                 balance_account_ids = account_ids
 
             # Determine the right balance sign depending on the move_type
@@ -137,20 +164,28 @@ class AccountMove(models.Model):
                 balance_sign = False
 
             # Add a random number of lines (between 1 and 20)
-            lines = [get_line(
-                account=random.choice(account_ids),
-                label=i,
-                balance_sign=balance_sign or (i % 2) or -1,  # even -> negative, odd -> positive if balance_sign=False
-            ) for i in range(random.randint(1, 20))]
+            lines = [
+                get_line(
+                    account=random.choice(account_ids),
+                    label=i,
+                    balance_sign=balance_sign
+                    or (i % 2)
+                    or -1,  # even -> negative, odd -> positive if balance_sign=False
+                )
+                for i in range(random.randint(1, 20))
+            ]
 
             # Add a last line containing the balance.
             # For invoices, etc., it will be on the receivable/payable account.
-            lines += [get_line(
-                account=random.choice(balance_account_ids),
-                balance=sum(l[2]['credit'] - l[2]['debit'] for l in lines),
-                label='balance',
-                exclude_from_invoice_tab=move_type in self.get_invoice_types(include_receipts=True),
-            )]
+            lines += [
+                get_line(
+                    account=random.choice(balance_account_ids),
+                    balance=sum(l[2]["credit"] - l[2]["debit"] for l in lines),
+                    label="balance",
+                    exclude_from_invoice_tab=move_type
+                    in self.get_invoice_types(include_receipts=True),
+                )
+            ]
 
             return lines
 
@@ -161,14 +196,14 @@ class AccountMove(models.Model):
             :param values (dict): the values already selected for the record.
             :return (int): the id of the journal randomly selected
             """
-            move_type = values['move_type']
-            company_id = values['company_id']
+            move_type = values["move_type"]
+            company_id = values["company_id"]
             if move_type in self.get_sale_types(include_receipts=True):
-                journal_type = 'sale'
+                journal_type = "sale"
             elif move_type in self.get_purchase_types(include_receipts=True):
-                journal_type = 'purchase'
+                journal_type = "purchase"
             else:
-                journal_type = 'general'
+                journal_type = "general"
             journal = search_journal_ids(company_id, journal_type)
             return random.choice(journal)
 
@@ -184,40 +219,64 @@ class AccountMove(models.Model):
             :return (int, bool): the id of the partner randomly selected if it is an invoice document
                                  False if it is a Journal Entry.
             """
-            move_type = values['move_type']
-            company_id = values['company_id']
+            move_type = values["move_type"]
+            company_id = values["company_id"]
             partner_ids = search_partner_ids(company_id)
 
             if move_type in self.get_sale_types(include_receipts=True):
-                return random.choice(partner_ids[:math.ceil(len(partner_ids)/5*2)])
+                return random.choice(partner_ids[: math.ceil(len(partner_ids) / 5 * 2)])
             if move_type in self.get_purchase_types(include_receipts=True):
-                return random.choice(partner_ids[math.floor(len(partner_ids)/5*2):])
+                return random.choice(
+                    partner_ids[math.floor(len(partner_ids) / 5 * 2) :]
+                )
             return False
 
-        company_ids = self.env['res.company'].search([
-            ('chart_template_id', '!=', False),
-            ('id', 'in', self.env.registry.populated_models['res.company']),
-        ])
+        company_ids = self.env["res.company"].search(
+            [
+                ("chart_template_id", "!=", False),
+                ("id", "in", self.env.registry.populated_models["res.company"]),
+            ]
+        )
 
         return [
-            ('move_type', populate.randomize(
-                ['entry', 'in_invoice', 'out_invoice', 'in_refund', 'out_refund', 'in_receipt', 'out_receipt'],
-                [0.2, 0.3, 0.3, 0.07, 0.07, 0.03, 0.03],
-            )),
-            ('company_id', populate.randomize(company_ids.ids)),
-            ('currency_id', populate.randomize(self.env['res.currency'].search([
-                ('active', '=', True),
-            ]).ids)),
-            ('journal_id', populate.compute(get_journal)),
-            ('date', populate.randdatetime(relative_before=relativedelta(years=-4), relative_after=relativedelta(years=1))),
-            ('invoice_date', populate.compute(get_invoice_date)),
-            ('partner_id', populate.compute(get_partner)),
-            ('line_ids', populate.compute(get_lines)),
+            (
+                "move_type",
+                populate.randomize(
+                    [
+                        "entry",
+                        "in_invoice",
+                        "out_invoice",
+                        "in_refund",
+                        "out_refund",
+                        "in_receipt",
+                        "out_receipt",
+                    ],
+                    [0.2, 0.3, 0.3, 0.07, 0.07, 0.03, 0.03],
+                ),
+            ),
+            ("company_id", populate.randomize(company_ids.ids)),
+            (
+                "currency_id",
+                populate.randomize(
+                    self.env["res.currency"].search([("active", "=", True),]).ids
+                ),
+            ),
+            ("journal_id", populate.compute(get_journal)),
+            (
+                "date",
+                populate.randdatetime(
+                    relative_before=relativedelta(years=-4),
+                    relative_after=relativedelta(years=1),
+                ),
+            ),
+            ("invoice_date", populate.compute(get_invoice_date)),
+            ("partner_id", populate.compute(get_partner)),
+            ("line_ids", populate.compute(get_lines)),
         ]
 
     def _populate(self, size):
         records = super()._populate(size)
-        _logger.info('Posting Journal Entries')
+        _logger.info("Posting Journal Entries")
         to_post = records.filtered(lambda r: r.date < fields.Date.today())
         to_post.action_post()
 

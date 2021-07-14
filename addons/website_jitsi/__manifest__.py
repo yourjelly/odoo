@@ -4,25 +4,23 @@
 
 {
     "name": "Website Jitsi",
-    'category': 'Hidden',
-    'version': '1.0',
+    "category": "Hidden",
+    "version": "1.0",
     "summary": "Create Jitsi room on website.",
-    'website': 'https://www.odoo.com/app/events',
+    "website": "https://www.odoo.com/app/events",
     "description": "Create Jitsi room on website.",
-    "depends": [
-        "website"
-    ],
+    "depends": ["website"],
     "data": [
-        'views/chat_room_templates.xml',
-        'views/chat_room_views.xml',
-        'views/res_config_settings.xml',
-        'security/ir.model.access.csv',
+        "views/chat_room_templates.xml",
+        "views/chat_room_views.xml",
+        "views/res_config_settings.xml",
+        "security/ir.model.access.csv",
     ],
-    'application': False,
-    'assets': {
-        'web.assets_frontend': [
-            'website_jitsi/static/src/css/chat_room.css',
-            'website_jitsi/static/src/js/chat_room.js',
+    "application": False,
+    "assets": {
+        "web.assets_frontend": [
+            "website_jitsi/static/src/css/chat_room.css",
+            "website_jitsi/static/src/js/chat_room.js",
         ],
-    }
+    },
 }

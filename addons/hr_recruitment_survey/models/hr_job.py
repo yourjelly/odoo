@@ -7,26 +7,28 @@ class Job(models.Model):
     _inherit = "hr.job"
 
     survey_id = fields.Many2one(
-        'survey.survey', "Interview Form",
-        help="Choose an interview form for this job position and you will be able to print/answer this interview from all applicants who apply for this job")
+        "survey.survey",
+        "Interview Form",
+        help="Choose an interview form for this job position and you will be able to print/answer this interview from all applicants who apply for this job",
+    )
 
     def action_print_survey(self):
         return self.survey_id.action_print_survey()
 
     def action_new_survey(self):
         self.ensure_one()
-        survey = self.env['survey.survey'].create({
-            'title': _("Interview Form : %s") % self.name,
-        })
-        self.write({'survey_id': survey.id})
+        survey = self.env["survey.survey"].create(
+            {"title": _("Interview Form : %s") % self.name,}
+        )
+        self.write({"survey_id": survey.id})
 
         action = {
-                'name': _('Survey'),
-                'view_mode': 'form,tree',
-                'res_model': 'survey.survey',
-                'type': 'ir.actions.act_window',
-                'context': {'form_view_initial_mode': 'edit'},
-                'res_id': survey.id,
-            }
+            "name": _("Survey"),
+            "view_mode": "form,tree",
+            "res_model": "survey.survey",
+            "type": "ir.actions.act_window",
+            "context": {"form_view_initial_mode": "edit"},
+            "res_id": survey.id,
+        }
 
         return action

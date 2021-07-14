@@ -11,18 +11,24 @@ class SaleReport(models.Model):
     @api.model
     def _get_done_states(self):
         done_states = super(SaleReport, self)._get_done_states()
-        done_states.extend(['pos_done', 'invoiced'])
+        done_states.extend(["pos_done", "invoiced"])
         return done_states
 
-    state = fields.Selection(selection_add=[('pos_draft', 'New'),
-                                            ('paid', 'Paid'),
-                                            ('pos_done', 'Posted'),
-                                            ('invoiced', 'Invoiced')], string='Status', readonly=True)
+    state = fields.Selection(
+        selection_add=[
+            ("pos_draft", "New"),
+            ("paid", "Paid"),
+            ("pos_done", "Posted"),
+            ("invoiced", "Invoiced"),
+        ],
+        string="Status",
+        readonly=True,
+    )
 
-    def _query(self, with_clause='', fields={}, groupby='', from_clause=''):
+    def _query(self, with_clause="", fields={}, groupby="", from_clause=""):
         res = super(SaleReport, self)._query(with_clause, fields, groupby, from_clause)
 
-        select_ = '''
+        select_ = """
             MIN(l.id) AS id,
             l.product_id AS product_id,
             t.uom_id AS product_uom,
@@ -58,12 +64,12 @@ class SaleReport(models.Model):
             l.discount as discount,
             sum((l.price_unit * l.discount * l.qty / 100.0 / CASE COALESCE(pos.currency_rate, 0) WHEN 0 THEN 1.0 ELSE pos.currency_rate END)) as discount_amount,
             NULL as order_id
-        '''
+        """
 
         for field in fields.keys():
-            select_ += ', NULL AS %s' % (field)
+            select_ += ", NULL AS %s" % (field)
 
-        from_ = '''
+        from_ = """
             pos_order_line l
                   join pos_order pos on (l.order_id=pos.id)
                   left join res_partner partner ON (pos.partner_id = partner.id OR pos.partner_id = NULL)
@@ -73,9 +79,9 @@ class SaleReport(models.Model):
                     LEFT JOIN pos_session session ON (session.id = pos.session_id)
                     LEFT JOIN pos_config config ON (config.id = session.config_id)
                 left join product_pricelist pp on (pos.pricelist_id = pp.id)
-        '''
+        """
 
-        groupby_ = '''
+        groupby_ = """
             l.order_id,
             l.product_id,
             l.price_unit,
@@ -96,7 +102,7 @@ class SaleReport(models.Model):
             partner.commercial_partner_id,
             u.factor,
             pos.crm_team_id
-        '''
-        current = '(SELECT %s FROM %s GROUP BY %s)' % (select_, from_, groupby_)
+        """
+        current = "(SELECT %s FROM %s GROUP BY %s)" % (select_, from_, groupby_)
 
-        return '%s UNION ALL %s' % (res, current)
+        return "%s UNION ALL %s" % (res, current)

@@ -13,10 +13,12 @@ _logger = logging.getLogger(__name__)
 
 
 class PaypalController(http.Controller):
-    _return_url = '/payment/paypal/dpn/'
-    _notify_url = '/payment/paypal/ipn/'
+    _return_url = "/payment/paypal/dpn/"
+    _notify_url = "/payment/paypal/ipn/"
 
-    @http.route(_return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False)
+    @http.route(
+        _return_url, type="http", auth="public", methods=["GET", "POST"], csrf=False
+    )
     def paypal_dpn(self, **data):
         """ Route used by the PDT notification.
 
@@ -30,21 +32,29 @@ class PaypalController(http.Controller):
             pass  # The transaction has been moved to state 'error'. Redirect to /payment/status.
         else:
             if data:
-                request.env['payment.transaction'].sudo()._handle_feedback_data('paypal', data)
+                request.env["payment.transaction"].sudo()._handle_feedback_data(
+                    "paypal", data
+                )
             else:
                 pass  # The customer has cancelled the payment, don't do anything
-        return request.redirect('/payment/status')
+        return request.redirect("/payment/status")
 
-    @http.route(_notify_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False)
+    @http.route(
+        _notify_url, type="http", auth="public", methods=["GET", "POST"], csrf=False
+    )
     def paypal_ipn(self, **data):
         """ Route used by the IPN. """
         _logger.info("beginning IPN with post data:\n%s", pprint.pformat(data))
         try:
             self._validate_data_authenticity(**data)
-            request.env['payment.transaction'].sudo()._handle_feedback_data('paypal', data)
+            request.env["payment.transaction"].sudo()._handle_feedback_data(
+                "paypal", data
+            )
         except ValidationError:  # Acknowledge the notification to avoid getting spammed
-            _logger.exception("unable to handle the IPN data; skipping to acknowledge the notif")
-        return ''
+            _logger.exception(
+                "unable to handle the IPN data; skipping to acknowledge the notif"
+            )
+        return ""
 
     def _validate_data_authenticity(self, **data):
         """ Validate the authenticity of data received through DPN or IPN
@@ -75,28 +85,32 @@ class PaypalController(http.Controller):
         :return: None
         :raise: ValidationError if the authenticity could not be verified
         """
-        tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
-            'paypal', data
+        tx_sudo = (
+            request.env["payment.transaction"]
+            .sudo()
+            ._get_tx_from_feedback_data("paypal", data)
         )
         acquirer_sudo = tx_sudo.acquirer_id
 
         # Request PayPal for an authenticity check
-        data['cmd'] = '_notify-validate'
+        data["cmd"] = "_notify-validate"
         response = requests.post(acquirer_sudo._paypal_get_api_url(), data, timeout=60)
         response.raise_for_status()
 
         # Inspect the response code and raise if not 'VERIFIED'.
         response_code = response.text
-        if response_code == 'VERIFIED':
+        if response_code == "VERIFIED":
             _logger.info("authenticity of notification data verified")
         else:
-            if response_code == 'INVALID':
-                error_message = "PayPal: " + _("Notification data were not acknowledged.")
+            if response_code == "INVALID":
+                error_message = "PayPal: " + _(
+                    "Notification data were not acknowledged."
+                )
             else:
                 error_message = "PayPal: " + _(
                     "Received unrecognized authentication check response code: received %s, "
                     "expected VERIFIED or INVALID.",
-                    response_code
+                    response_code,
                 )
             tx_sudo._set_error(error_message)
             raise ValidationError(error_message)

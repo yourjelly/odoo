@@ -30,8 +30,12 @@ class TestAccountMove(AccountTestInvoicingCommon):
                 "supplier_taxes_id": [(5, 0, 0)],
                 "lst_price": 100.0,
                 "standard_price": 10.0,
-                "property_account_income_id": cls.company_data["default_account_revenue"].id,
-                "property_account_expense_id": cls.company_data["default_account_expense"].id,
+                "property_account_income_id": cls.company_data[
+                    "default_account_revenue"
+                ].id,
+                "property_account_expense_id": cls.company_data[
+                    "default_account_expense"
+                ].id,
             }
         )
         cls.product_A.categ_id.write(
@@ -48,7 +52,9 @@ class TestAccountMove(AccountTestInvoicingCommon):
     def test_standard_perpetual_01_mc_01(self):
         rate = self.currency_data["rates"].sorted()[0].rate
 
-        move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
+        move_form = Form(
+            self.env["account.move"].with_context(default_move_type="out_invoice")
+        )
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.currency_data["currency"]
         with move_form.invoice_line_ids.new() as line_form:
@@ -66,14 +72,18 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_total)
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_residual)
         self.assertEqual(len(invoice.mapped("line_ids")), 4)
-        self.assertEqual(len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2)
+        self.assertEqual(
+            len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2
+        )
         self.assertEqual(len(invoice.mapped("line_ids.currency_id")), 2)
 
     def test_fifo_perpetual_01_mc_01(self):
         self.product_A.categ_id.property_cost_method = "fifo"
         rate = self.currency_data["rates"].sorted()[0].rate
 
-        move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
+        move_form = Form(
+            self.env["account.move"].with_context(default_move_type="out_invoice")
+        )
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.currency_data["currency"]
         with move_form.invoice_line_ids.new() as line_form:
@@ -91,14 +101,18 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_total)
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_residual)
         self.assertEqual(len(invoice.mapped("line_ids")), 4)
-        self.assertEqual(len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2)
+        self.assertEqual(
+            len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2
+        )
         self.assertEqual(len(invoice.mapped("line_ids.currency_id")), 2)
 
     def test_average_perpetual_01_mc_01(self):
         self.product_A.categ_id.property_cost_method = "average"
         rate = self.currency_data["rates"].sorted()[0].rate
 
-        move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
+        move_form = Form(
+            self.env["account.move"].with_context(default_move_type="out_invoice")
+        )
         move_form.partner_id = self.partner_a
         move_form.currency_id = self.currency_data["currency"]
         with move_form.invoice_line_ids.new() as line_form:
@@ -116,5 +130,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_total)
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_residual)
         self.assertEqual(len(invoice.mapped("line_ids")), 4)
-        self.assertEqual(len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2)
+        self.assertEqual(
+            len(invoice.mapped("line_ids").filtered("is_anglo_saxon_line")), 2
+        )
         self.assertEqual(len(invoice.mapped("line_ids.currency_id")), 2)

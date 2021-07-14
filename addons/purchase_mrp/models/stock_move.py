@@ -5,10 +5,12 @@ from odoo import models
 
 
 class StockMove(models.Model):
-    _inherit = 'stock.move'
+    _inherit = "stock.move"
 
     def _prepare_phantom_move_values(self, bom_line, product_qty, quantity_done):
-        vals = super(StockMove, self)._prepare_phantom_move_values(bom_line, product_qty, quantity_done)
+        vals = super(StockMove, self)._prepare_phantom_move_values(
+            bom_line, product_qty, quantity_done
+        )
         if self.purchase_line_id:
-            vals['purchase_line_id'] = self.purchase_line_id.id
+            vals["purchase_line_id"] = self.purchase_line_id.id
         return vals

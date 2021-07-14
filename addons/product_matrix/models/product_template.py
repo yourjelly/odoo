@@ -6,26 +6,35 @@ from odoo import models
 
 
 class ProductTemplate(models.Model):
-    _inherit = 'product.template'
+    _inherit = "product.template"
 
     def _get_template_matrix(self, **kwargs):
         self.ensure_one()
-        company_id = kwargs.get('company_id', None) or self.company_id or self.env.company
-        currency_id = kwargs.get('currency_id', None) or self.currency_id
-        display_extra = kwargs.get('display_extra_price', False)
+        company_id = (
+            kwargs.get("company_id", None) or self.company_id or self.env.company
+        )
+        currency_id = kwargs.get("currency_id", None) or self.currency_id
+        display_extra = kwargs.get("display_extra_price", False)
         attribute_lines = self.valid_product_template_attribute_line_ids
 
-        Attrib = self.env['product.template.attribute.value']
-        first_line_attributes = attribute_lines[0].product_template_value_ids._only_active()
-        attribute_ids_by_line = [line.product_template_value_ids._only_active().ids for line in attribute_lines]
+        Attrib = self.env["product.template.attribute.value"]
+        first_line_attributes = attribute_lines[
+            0
+        ].product_template_value_ids._only_active()
+        attribute_ids_by_line = [
+            line.product_template_value_ids._only_active().ids
+            for line in attribute_lines
+        ]
 
         header = [{"name": self.display_name}] + [
             attr._grid_header_cell(
                 fro_currency=self.currency_id,
                 to_currency=currency_id,
                 company=company_id,
-                display_extra=display_extra
-            ) for attr in first_line_attributes]
+                display_extra=display_extra,
+            )
+            for attr in first_line_attributes
+        ]
 
         result = [[]]
         for pool in attribute_ids_by_line:
@@ -40,18 +49,21 @@ class ProductTemplate(models.Model):
                 fro_currency=self.currency_id,
                 to_currency=currency_id,
                 company=company_id,
-                display_extra=display_extra)
+                display_extra=display_extra,
+            )
             result = [row_header_cell]
 
             for cell in row:
                 combination = Attrib.browse(cell)
                 is_possible_combination = self._is_combination_possible(combination)
                 cell.sort()
-                result.append({
-                    "ptav_ids": cell,
-                    "qty": 0,
-                    "is_possible_combination": is_possible_combination
-                })
+                result.append(
+                    {
+                        "ptav_ids": cell,
+                        "qty": 0,
+                        "is_possible_combination": is_possible_combination,
+                    }
+                )
             matrix.append(result)
 
         return {
@@ -75,18 +87,22 @@ class ProductTemplateAttributeValue(models.Model):
         :rtype: dict
         """
         header_cell = {
-            'name': ' • '.join([attr.name for attr in self]) if self else " "
+            "name": " • ".join([attr.name for attr in self]) if self else " "
         }  # The " " is to avoid having 'Not available' if the template has only one attribute line.
-        extra_price = sum(self.mapped('price_extra')) if display_extra else 0
+        extra_price = sum(self.mapped("price_extra")) if display_extra else 0
         if extra_price:
-            sign = '+ ' if extra_price > 0 else '- '
-            header_cell.update({
-                "price": sign + self.env['ir.qweb.field.monetary'].value_to_html(
-                    extra_price, {
-                        'from_currency': fro_currency,
-                        'display_currency': to_currency,
-                        'company_id': company.id,
-                        }
+            sign = "+ " if extra_price > 0 else "- "
+            header_cell.update(
+                {
+                    "price": sign
+                    + self.env["ir.qweb.field.monetary"].value_to_html(
+                        extra_price,
+                        {
+                            "from_currency": fro_currency,
+                            "display_currency": to_currency,
+                            "company_id": company.id,
+                        },
                     )
-            })
+                }
+            )
         return header_cell

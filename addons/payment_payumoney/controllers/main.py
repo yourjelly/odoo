@@ -10,10 +10,16 @@ _logger = logging.getLogger(__name__)
 
 
 class PayUMoneyController(http.Controller):
-    _return_url = '/payment/payumoney/return'
+    _return_url = "/payment/payumoney/return"
 
-    @http.route(_return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False)
+    @http.route(
+        _return_url, type="http", auth="public", methods=["GET", "POST"], csrf=False
+    )
     def payumoney_return(self, **data):
-        _logger.info("entering handle_feedback_data with data:\n%s", pprint.pformat(data))
-        request.env['payment.transaction'].sudo()._handle_feedback_data('payumoney', data)
-        return request.redirect('/payment/status')
+        _logger.info(
+            "entering handle_feedback_data with data:\n%s", pprint.pformat(data)
+        )
+        request.env["payment.transaction"].sudo()._handle_feedback_data(
+            "payumoney", data
+        )
+        return request.redirect("/payment/status")

@@ -5,6 +5,7 @@ import binascii
 import io
 
 from PIL import Image, ImageOps
+
 # We can preload Ico too because it is considered safe
 from PIL import IcoImagePlugin
 
@@ -21,25 +22,25 @@ Image._initialized = 2
 # Maps only the 6 first bits of the base64 data, accurate enough
 # for our purpose and faster than decoding the full blob first
 FILETYPE_BASE64_MAGICWORD = {
-    b'/': 'jpg',
-    b'R': 'gif',
-    b'i': 'png',
-    b'P': 'svg+xml',
+    b"/": "jpg",
+    b"R": "gif",
+    b"i": "png",
+    b"P": "svg+xml",
 }
 
 EXIF_TAG_ORIENTATION = 0x112
 # The target is to have 1st row/col to be top/left
 # Note: rotate is counterclockwise
 EXIF_TAG_ORIENTATION_TO_TRANSPOSE_METHODS = {  # Initial side on 1st row/col:
-    0: [],                                          # reserved
-    1: [],                                          # top/left
-    2: [Image.FLIP_LEFT_RIGHT],                     # top/right
-    3: [Image.ROTATE_180],                          # bottom/right
-    4: [Image.FLIP_TOP_BOTTOM],                     # bottom/left
-    5: [Image.FLIP_LEFT_RIGHT, Image.ROTATE_90],    # left/top
-    6: [Image.ROTATE_270],                          # right/top
-    7: [Image.FLIP_TOP_BOTTOM, Image.ROTATE_90],    # right/bottom
-    8: [Image.ROTATE_90],                           # left/bottom
+    0: [],  # reserved
+    1: [],  # top/left
+    2: [Image.FLIP_LEFT_RIGHT],  # top/right
+    3: [Image.ROTATE_180],  # bottom/right
+    4: [Image.FLIP_TOP_BOTTOM],  # bottom/left
+    5: [Image.FLIP_LEFT_RIGHT, Image.ROTATE_90],  # left/top
+    6: [Image.ROTATE_270],  # right/top
+    7: [Image.FLIP_TOP_BOTTOM, Image.ROTATE_90],  # right/bottom
+    8: [Image.ROTATE_90],  # left/bottom
 }
 
 # Arbitrary limit to fit most resolutions, including Nokia Lumia 1020 photo,
@@ -47,8 +48,7 @@ EXIF_TAG_ORIENTATION_TO_TRANSPOSE_METHODS = {  # Initial side on 1st row/col:
 IMAGE_MAX_RESOLUTION = 45e6
 
 
-class ImageProcess():
-
+class ImageProcess:
     def __init__(self, base64_source, verify_resolution=True):
         """Initialize the `base64_source` image for processing.
 
@@ -71,7 +71,7 @@ class ImageProcess():
         self.base64_source = base64_source or False
         self.operationsCount = 0
 
-        if not base64_source or base64_source[:1] in (b'P', 'P'):
+        if not base64_source or base64_source[:1] in (b"P", "P"):
             # don't process empty source or SVG
             self.image = False
         else:
@@ -80,15 +80,20 @@ class ImageProcess():
             # Original format has to be saved before fixing the orientation or
             # doing any other operations because the information will be lost on
             # the resulting image.
-            self.original_format = (self.image.format or '').upper()
+            self.original_format = (self.image.format or "").upper()
 
             self.image = image_fix_orientation(self.image)
 
             w, h = self.image.size
             if verify_resolution and w * h > IMAGE_MAX_RESOLUTION:
-                raise ValueError(_("Image size excessive, uploaded images must be smaller than %s million pixels.", str(IMAGE_MAX_RESOLUTION / 10e6)))
+                raise ValueError(
+                    _(
+                        "Image size excessive, uploaded images must be smaller than %s million pixels.",
+                        str(IMAGE_MAX_RESOLUTION / 10e6),
+                    )
+                )
 
-    def image_base64(self, quality=0, output_format=''):
+    def image_base64(self, quality=0, output_format=""):
         """Return the base64 encoded image resulting of all the image processing
         operations that have been applied previously.
 
@@ -121,30 +126,38 @@ class ImageProcess():
             return self.base64_source
 
         output_format = output_format.upper() or self.original_format
-        if output_format == 'BMP':
-            output_format = 'PNG'
-        elif output_format not in ['PNG', 'JPEG', 'GIF', 'ICO']:
-            output_format = 'JPEG'
+        if output_format == "BMP":
+            output_format = "PNG"
+        elif output_format not in ["PNG", "JPEG", "GIF", "ICO"]:
+            output_format = "JPEG"
 
-        if not self.operationsCount and output_format == self.original_format and not quality:
+        if (
+            not self.operationsCount
+            and output_format == self.original_format
+            and not quality
+        ):
             return self.base64_source
 
-        opt = {'format': output_format}
+        opt = {"format": output_format}
 
-        if output_format == 'PNG':
-            opt['optimize'] = True
+        if output_format == "PNG":
+            opt["optimize"] = True
             if quality:
-                if output_image.mode != 'P':
+                if output_image.mode != "P":
                     # Floyd Steinberg dithering by default
-                    output_image = output_image.convert('RGBA').convert('P', palette=Image.WEB, colors=256)
-        if output_format == 'JPEG':
-            opt['optimize'] = True
-            opt['quality'] = quality or 95
-        if output_format == 'GIF':
-            opt['optimize'] = True
-            opt['save_all'] = True
+                    output_image = output_image.convert("RGBA").convert(
+                        "P", palette=Image.WEB, colors=256
+                    )
+        if output_format == "JPEG":
+            opt["optimize"] = True
+            opt["quality"] = quality or 95
+        if output_format == "GIF":
+            opt["optimize"] = True
+            opt["save_all"] = True
 
-        if output_image.mode not in ["1", "L", "P", "RGB", "RGBA"] or (output_format == 'JPEG' and output_image.mode == 'RGBA'):
+        if output_image.mode not in ["1", "L", "P", "RGB", "RGBA"] or (
+            output_format == "JPEG" and output_image.mode == "RGBA"
+        ):
             output_image = output_image.convert("RGB")
 
         return image_to_base64(output_image, **opt)
@@ -172,7 +185,7 @@ class ImageProcess():
         :return: self to allow chaining
         :rtype: ImageProcess
         """
-        if self.image and self.original_format != 'GIF' and (max_width or max_height):
+        if self.image and self.original_format != "GIF" and (max_width or max_height):
             w, h = self.image.size
             asked_width = max_width or (w * max_height) // h
             asked_height = max_height or (h * max_width) // w
@@ -218,7 +231,7 @@ class ImageProcess():
         :return: self to allow chaining
         :rtype: ImageProcess
         """
-        if self.image and self.original_format != 'GIF' and max_width and max_height:
+        if self.image and self.original_format != "GIF" and max_width and max_height:
             w, h = self.image.size
             # We want to keep as much of the image as possible -> at least one
             # of the 2 crop dimensions always has to be the same value as the
@@ -240,7 +253,9 @@ class ImageProcess():
             h_offset = int((h - new_h) * center_y)
 
             if new_w != w or new_h != h:
-                self.image = self.image.crop((x_offset, h_offset, x_offset + new_w, h_offset + new_h))
+                self.image = self.image.crop(
+                    (x_offset, h_offset, x_offset + new_w, h_offset + new_h)
+                )
                 if self.image.width != w or self.image.height != h:
                     self.operationsCount += 1
 
@@ -254,19 +269,38 @@ class ImageProcess():
         """
         if self.image:
             original = self.image
-            color = (randrange(32, 224, 24), randrange(32, 224, 24), randrange(32, 224, 24))
-            self.image = Image.new('RGB', original.size)
+            color = (
+                randrange(32, 224, 24),
+                randrange(32, 224, 24),
+                randrange(32, 224, 24),
+            )
+            self.image = Image.new("RGB", original.size)
             self.image.paste(color, box=(0, 0) + original.size)
             self.image.paste(original, mask=original)
             self.operationsCount += 1
         return self
 
 
-def image_process(base64_source, size=(0, 0), verify_resolution=False, quality=0, crop=None, colorize=False, output_format=''):
+def image_process(
+    base64_source,
+    size=(0, 0),
+    verify_resolution=False,
+    quality=0,
+    crop=None,
+    colorize=False,
+    output_format="",
+):
     """Process the `base64_source` image by executing the given operations and
     return the result as a base64 encoded image.
     """
-    if not base64_source or ((not size or (not size[0] and not size[1])) and not verify_resolution and not quality and not crop and not colorize and not output_format):
+    if not base64_source or (
+        (not size or (not size[0] and not size[1]))
+        and not verify_resolution
+        and not quality
+        and not crop
+        and not colorize
+        and not output_format
+    ):
         # for performance: don't do anything if the image is falsy or if
         # no operations have been requested
         return base64_source
@@ -276,11 +310,16 @@ def image_process(base64_source, size=(0, 0), verify_resolution=False, quality=0
         if crop:
             center_x = 0.5
             center_y = 0.5
-            if crop == 'top':
+            if crop == "top":
                 center_y = 0
-            elif crop == 'bottom':
+            elif crop == "bottom":
                 center_y = 1
-            image.crop_resize(max_width=size[0], max_height=size[1], center_x=center_x, center_y=center_y)
+            image.crop_resize(
+                max_width=size[0],
+                max_height=size[1],
+                center_x=center_x,
+                center_y=center_y,
+            )
         else:
             image.resize(max_width=size[0], max_height=size[1])
     if colorize:
@@ -291,6 +330,7 @@ def image_process(base64_source, size=(0, 0), verify_resolution=False, quality=0
 # ----------------------------------------
 # Misc image tools
 # ---------------------------------------
+
 
 def average_dominant_color(colors, mitigate=175, max_margin=140):
     """This function is used to calculate the dominant colors when given a list of colors
@@ -320,16 +360,22 @@ def average_dominant_color(colors, mitigate=175, max_margin=140):
     dominant_set = [dominant_color]
     remaining = []
 
-    margins = [max_margin * (1 - dominant_color[0] /
-                             sum([col[0] for col in colors]))] * 3
+    margins = [
+        max_margin * (1 - dominant_color[0] / sum([col[0] for col in colors]))
+    ] * 3
 
     colors.remove(dominant_color)
 
     for color in colors:
         rgb = color[1]
-        if (rgb[0] < dominant_rgb[0] + margins[0] and rgb[0] > dominant_rgb[0] - margins[0] and
-            rgb[1] < dominant_rgb[1] + margins[1] and rgb[1] > dominant_rgb[1] - margins[1] and
-                rgb[2] < dominant_rgb[2] + margins[2] and rgb[2] > dominant_rgb[2] - margins[2]):
+        if (
+            rgb[0] < dominant_rgb[0] + margins[0]
+            and rgb[0] > dominant_rgb[0] - margins[0]
+            and rgb[1] < dominant_rgb[1] + margins[1]
+            and rgb[1] > dominant_rgb[1] - margins[1]
+            and rgb[2] < dominant_rgb[2] + margins[2]
+            and rgb[2] > dominant_rgb[2] - margins[2]
+        ):
             dominant_set.append(color)
         else:
             remaining.append(color)
@@ -345,7 +391,11 @@ def average_dominant_color(colors, mitigate=175, max_margin=140):
     final_dominant = []
     brightest = max(dominant_avg)
     for color in range(3):
-        value = dominant_avg[color] / (brightest / mitigate) if brightest > mitigate else dominant_avg[color]
+        value = (
+            dominant_avg[color] / (brightest / mitigate)
+            if brightest > mitigate
+            else dominant_avg[color]
+        )
         final_dominant.append(int(value))
 
     return tuple(final_dominant), remaining
@@ -378,12 +428,16 @@ def image_fix_orientation(image):
         or the source image if no operation was applied
     :rtype: PIL.Image
     """
-    getexif = getattr(image, 'getexif', None) or getattr(image, '_getexif', None)  # support PIL < 6.0
+    getexif = getattr(image, "getexif", None) or getattr(
+        image, "_getexif", None
+    )  # support PIL < 6.0
     if getexif:
         exif = getexif()
         if exif:
             orientation = exif.get(EXIF_TAG_ORIENTATION, 0)
-            for method in EXIF_TAG_ORIENTATION_TO_TRANSPOSE_METHODS.get(orientation, []):
+            for method in EXIF_TAG_ORIENTATION_TO_TRANSPOSE_METHODS.get(
+                orientation, []
+            ):
                 image = image.transpose(method)
             return image
     return image
@@ -403,7 +457,11 @@ def base64_to_image(base64_source):
     try:
         return Image.open(io.BytesIO(base64.b64decode(base64_source)))
     except (OSError, binascii.Error):
-        raise UserError(_("This file could not be decoded as an image file. Please try with a different file."))
+        raise UserError(
+            _(
+                "This file could not be decoded as an image file. Please try with a different file."
+            )
+        )
 
 
 def image_to_base64(image, format, **params):
@@ -429,12 +487,15 @@ def is_image_size_above(base64_source_1, base64_source_2):
     """
     if not base64_source_1 or not base64_source_2:
         return False
-    if base64_source_1[:1] in (b'P', 'P') or base64_source_2[:1] in (b'P', 'P'):
+    if base64_source_1[:1] in (b"P", "P") or base64_source_2[:1] in (b"P", "P"):
         # False for SVG
         return False
     image_source = image_fix_orientation(base64_to_image(base64_source_1))
     image_target = image_fix_orientation(base64_to_image(base64_source_2))
-    return image_source.width > image_target.width or image_source.height > image_target.height
+    return (
+        image_source.width > image_target.width
+        or image_source.height > image_target.height
+    )
 
 
 def image_guess_size_from_field_name(field_name):
@@ -448,7 +509,7 @@ def image_guess_size_from_field_name(field_name):
     :return: the guessed size
     :rtype: tuple (width, height)
     """
-    suffix = '1024' if field_name == 'image' else field_name.split('_')[-1]
+    suffix = "1024" if field_name == "image" else field_name.split("_")[-1]
     try:
         return (int(suffix), int(suffix))
     except ValueError:
@@ -460,8 +521,8 @@ def image_data_uri(base64_source):
     (https://tools.ietf.org/html/rfc2397) for all kind of supported images
     (PNG, GIF, JPG and SVG), defaulting on PNG type if not mimetype detected.
     """
-    return 'data:image/%s;base64,%s' % (
-        FILETYPE_BASE64_MAGICWORD.get(base64_source[:1], 'png'),
+    return "data:image/%s;base64,%s" % (
+        FILETYPE_BASE64_MAGICWORD.get(base64_source[:1], "png"),
         base64_source.decode(),
     )
 
@@ -489,19 +550,19 @@ def get_lightness(rgb):
 
 def hex_to_rgb(hx):
     """Converts an hexadecimal string (starting with '#') to a RGB tuple"""
-    return tuple([int(hx[i:i+2], 16) for i in range(1, 6, 2)])
+    return tuple([int(hx[i : i + 2], 16) for i in range(1, 6, 2)])
 
 
 def rgb_to_hex(rgb):
     """Converts a RGB tuple or list to an hexadecimal string"""
-    return '#' + ''.join([(hex(c).split('x')[-1].zfill(2)) for c in rgb])
+    return "#" + "".join([(hex(c).split("x")[-1].zfill(2)) for c in rgb])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import sys
 
-    assert len(sys.argv)==3, 'Usage to Test: image.py SRC.png DEST.png'
+    assert len(sys.argv) == 3, "Usage to Test: image.py SRC.png DEST.png"
 
-    img = base64.b64encode(open(sys.argv[1],'rb').read())
+    img = base64.b64encode(open(sys.argv[1], "rb").read())
     new = image_process(img, size=(128, 100))
-    open(sys.argv[2], 'wb').write(base64.b64decode(new))
+    open(sys.argv[2], "wb").write(base64.b64decode(new))

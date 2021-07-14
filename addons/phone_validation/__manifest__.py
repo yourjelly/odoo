@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Phone Numbers Validation',
-    'version': '2.1',
-    'summary': 'Validate and format phone numbers',
-    'sequence': '9999',
-    'category': 'Hidden',
-    'description': """
+    "name": "Phone Numbers Validation",
+    "version": "2.1",
+    "summary": "Validate and format phone numbers",
+    "sequence": "9999",
+    "category": "Hidden",
+    "description": """
 Phone Numbers Validation
 ========================
 
@@ -19,14 +19,11 @@ blacklisted phone numbers.
 
 It adds mail.thread.phone mixin that handles sanitation and blacklist of
 records numbers. """,
-    'data': [
-        'security/ir.model.access.csv',
-        'views/phone_blacklist_views.xml',
-        'wizard/phone_blacklist_remove_view.xml',
+    "data": [
+        "security/ir.model.access.csv",
+        "views/phone_blacklist_views.xml",
+        "wizard/phone_blacklist_remove_view.xml",
     ],
-    'depends': [
-        'base',
-        'mail',
-    ],
-    'auto_install': True,
+    "depends": ["base", "mail",],
+    "auto_install": True,
 }

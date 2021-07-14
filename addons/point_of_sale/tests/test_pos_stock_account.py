@@ -5,31 +5,39 @@ from odoo import tools
 import odoo
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 
-@odoo.tests.tagged('post_install', '-at_install')
+
+@odoo.tests.tagged("post_install", "-at_install")
 class TestPoSStock(TestPoSCommon):
     """ Tests for anglo saxon accounting scenario.
     """
+
     def setUp(self):
         super(TestPoSStock, self).setUp()
 
         self.config = self.basic_config
-        self.product1 = self.create_product('Product 1', self.categ_anglo, 10.0, 5.0)
-        self.product2 = self.create_product('Product 2', self.categ_anglo, 20.0, 10.0)
-        self.product3 = self.create_product('Product 3', self.categ_basic, 30.0, 15.0)
+        self.product1 = self.create_product("Product 1", self.categ_anglo, 10.0, 5.0)
+        self.product2 = self.create_product("Product 2", self.categ_anglo, 20.0, 10.0)
+        self.product3 = self.create_product("Product 3", self.categ_basic, 30.0, 15.0)
         # start inventory with 10 items for each product
-        self.adjust_inventory([self.product1, self.product2, self.product3], [10, 10, 10])
+        self.adjust_inventory(
+            [self.product1, self.product2, self.product3], [10, 10, 10]
+        )
 
         # change cost(standard_price) of anglo products
         # then set inventory from 10 -> 15
-        self.product1.write({'standard_price': 6.0})
-        self.product2.write({'standard_price': 6.0})
-        self.adjust_inventory([self.product1, self.product2, self.product3], [15, 15, 15])
+        self.product1.write({"standard_price": 6.0})
+        self.product2.write({"standard_price": 6.0})
+        self.adjust_inventory(
+            [self.product1, self.product2, self.product3], [15, 15, 15]
+        )
 
         # change cost(standard_price) of anglo products
         # then set inventory from 15 -> 25
-        self.product1.write({'standard_price': 13.0})
-        self.product2.write({'standard_price': 13.0})
-        self.adjust_inventory([self.product1, self.product2, self.product3], [25, 25, 25])
+        self.product1.write({"standard_price": 13.0})
+        self.product2.write({"standard_price": 13.0})
+        self.adjust_inventory(
+            [self.product1, self.product2, self.product3], [25, 25, 25]
+        )
 
         self.output_account = self.categ_anglo.property_stock_account_output_categ_id
         self.expense_account = self.categ_anglo.property_account_expense_categ_id
@@ -71,18 +79,34 @@ class TestPoSStock(TestPoSCommon):
 
         # create orders
         orders = []
-        orders.append(self.create_ui_order_data([(self.product1, 10), (self.product2, 10)]))
-        orders.append(self.create_ui_order_data([(self.product2, 7), (self.product3, 7)]))
-        orders.append(self.create_ui_order_data([(self.product1, 6), (self.product2, 6), (self.product3, 6)]))
+        orders.append(
+            self.create_ui_order_data([(self.product1, 10), (self.product2, 10)])
+        )
+        orders.append(
+            self.create_ui_order_data([(self.product2, 7), (self.product3, 7)])
+        )
+        orders.append(
+            self.create_ui_order_data(
+                [(self.product1, 6), (self.product2, 6), (self.product3, 6)]
+            )
+        )
 
         # sync orders
-        order = self.env['pos.order'].create_from_ui(orders)
+        order = self.env["pos.order"].create_from_ui(orders)
 
         # check values before closing the session
         self.assertEqual(3, self.pos_session.order_count)
         orders_total = sum(order.amount_total for order in self.pos_session.order_ids)
-        self.assertAlmostEqual(orders_total, self.pos_session.total_payments_amount, msg='Total order amount should be equal to the total payment amount.')
-        self.assertAlmostEqual(orders_total, 1010.0, msg='The orders\'s total amount should equal the computed.')
+        self.assertAlmostEqual(
+            orders_total,
+            self.pos_session.total_payments_amount,
+            msg="Total order amount should be equal to the total payment amount.",
+        )
+        self.assertAlmostEqual(
+            orders_total,
+            1010.0,
+            msg="The orders's total amount should equal the computed.",
+        )
 
         # check product qty_available after syncing the order
         self.assertEqual(self.product1.qty_available, 9)
@@ -91,8 +115,16 @@ class TestPoSStock(TestPoSCommon):
 
         # picking and stock moves should be in done state
         for order in self.pos_session.order_ids:
-            self.assertEqual(order.picking_ids[0].state, 'done', 'Picking should be in done state.')
-            self.assertTrue(all(state == 'done' for state in order.picking_ids[0].move_lines.mapped('state')), 'Move Lines should be in done state.' )
+            self.assertEqual(
+                order.picking_ids[0].state, "done", "Picking should be in done state."
+            )
+            self.assertTrue(
+                all(
+                    state == "done"
+                    for state in order.picking_ids[0].move_lines.mapped("state")
+                ),
+                "Move Lines should be in done state.",
+            )
 
         # close the session
         self.pos_session.action_pos_session_validate()
@@ -100,20 +132,47 @@ class TestPoSStock(TestPoSCommon):
         # check values after the session is closed
         account_move = self.pos_session.move_id
 
-        sales_line = account_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
-        self.assertAlmostEqual(sales_line.balance, -orders_total, msg='Sales line balance should be equal to total orders amount.')
+        sales_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.sale_account
+        )
+        self.assertAlmostEqual(
+            sales_line.balance,
+            -orders_total,
+            msg="Sales line balance should be equal to total orders amount.",
+        )
 
-        receivable_line_cash = account_move.line_ids.filtered(lambda line: line.account_id in self.pos_receivable_account + self.env['account.account'].search([('name', '=', 'Account Receivable (PoS)')]) and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 1010.0, msg='Cash receivable should be equal to the total cash payments.')
+        receivable_line_cash = account_move.line_ids.filtered(
+            lambda line: line.account_id
+            in self.pos_receivable_account
+            + self.env["account.account"].search(
+                [("name", "=", "Account Receivable (PoS)")]
+            )
+            and self.cash_pm.name in line.name
+        )
+        self.assertAlmostEqual(
+            receivable_line_cash.balance,
+            1010.0,
+            msg="Cash receivable should be equal to the total cash payments.",
+        )
 
-        expense_line = account_move.line_ids.filtered(lambda line: line.account_id == self.expense_account)
+        expense_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.expense_account
+        )
         self.assertAlmostEqual(expense_line.balance, 327.0)
 
-        output_line = account_move.line_ids.filtered(lambda line: line.account_id == self.output_account)
+        output_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.output_account
+        )
         self.assertAlmostEqual(output_line.balance, -327.0)
 
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
-        self.assertTrue(output_line.full_reconcile_id, msg='The stock output account line should be fully-reconciled.')
+        self.assertTrue(
+            receivable_line_cash.full_reconcile_id,
+            msg="Cash receivable line should be fully-reconciled.",
+        )
+        self.assertTrue(
+            output_line.full_reconcile_id,
+            msg="The stock output account line should be fully-reconciled.",
+        )
 
     def test_02_orders_with_invoice(self):
         """
@@ -140,24 +199,38 @@ class TestPoSStock(TestPoSCommon):
 
         # create orders
         orders = []
-        orders.append(self.create_ui_order_data([(self.product1, 10), (self.product2, 10)]))
-        orders.append(self.create_ui_order_data([(self.product2, 7), (self.product3, 7)]))
+        orders.append(
+            self.create_ui_order_data([(self.product1, 10), (self.product2, 10)])
+        )
+        orders.append(
+            self.create_ui_order_data([(self.product2, 7), (self.product3, 7)])
+        )
         invoiced_uid = self.create_random_uid()
-        orders.append(self.create_ui_order_data(
-            [(self.product1, 6), (self.product2, 6), (self.product3, 6)],
-            is_invoiced=True,
-            customer=self.customer,
-            uid=invoiced_uid,
-        ))
+        orders.append(
+            self.create_ui_order_data(
+                [(self.product1, 6), (self.product2, 6), (self.product3, 6)],
+                is_invoiced=True,
+                customer=self.customer,
+                uid=invoiced_uid,
+            )
+        )
 
         # sync orders
-        order = self.env['pos.order'].create_from_ui(orders)
+        order = self.env["pos.order"].create_from_ui(orders)
 
         # check values before closing the session
         self.assertEqual(3, self.pos_session.order_count)
         orders_total = sum(order.amount_total for order in self.pos_session.order_ids)
-        self.assertAlmostEqual(orders_total, self.pos_session.total_payments_amount, msg='Total order amount should be equal to the total payment amount.')
-        self.assertAlmostEqual(orders_total, 1010.0, msg='The orders\'s total amount should equal the computed.')
+        self.assertAlmostEqual(
+            orders_total,
+            self.pos_session.total_payments_amount,
+            msg="Total order amount should be equal to the total payment amount.",
+        )
+        self.assertAlmostEqual(
+            orders_total,
+            1010.0,
+            msg="The orders's total amount should equal the computed.",
+        )
 
         # check product qty_available after syncing the order
         self.assertEqual(self.product1.qty_available, 9)
@@ -166,8 +239,16 @@ class TestPoSStock(TestPoSCommon):
 
         # picking and stock moves should be in done state
         for order in self.pos_session.order_ids:
-            self.assertEqual(order.picking_ids[0].state, 'done', 'Picking should be in done state.')
-            self.assertTrue(all(state == 'done' for state in order.picking_ids[0].move_lines.mapped('state')), 'Move Lines should be in done state.' )
+            self.assertEqual(
+                order.picking_ids[0].state, "done", "Picking should be in done state."
+            )
+            self.assertTrue(
+                all(
+                    state == "done"
+                    for state in order.picking_ids[0].move_lines.mapped("state")
+                ),
+                "Move Lines should be in done state.",
+            )
 
         # close the session
         self.pos_session.action_pos_session_validate()
@@ -175,47 +256,86 @@ class TestPoSStock(TestPoSCommon):
         # check values after the session is closed
         account_move = self.pos_session.move_id
 
-        sales_line = account_move.line_ids.filtered(lambda line: line.account_id == self.sale_account)
+        sales_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.sale_account
+        )
         self.assertAlmostEqual(sales_line.balance, -650.0)
 
-        receivable_line = account_move.line_ids.filtered(lambda line: line.account_id == self.receivable_account)
-        self.assertAlmostEqual(receivable_line.balance, -360.0, msg='Receivable line balance should equal the negative of total amount of invoiced orders.')
+        receivable_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.receivable_account
+        )
+        self.assertAlmostEqual(
+            receivable_line.balance,
+            -360.0,
+            msg="Receivable line balance should equal the negative of total amount of invoiced orders.",
+        )
 
-        receivable_line_cash = account_move.line_ids.filtered(lambda line: line.account_id in self.pos_receivable_account + self.env['account.account'].search([('name', '=', 'Account Receivable (PoS)')]) and self.cash_pm.name in line.name)
-        self.assertAlmostEqual(receivable_line_cash.balance, 1010.0, msg='Cash receivable should be equal to the total cash payments.')
+        receivable_line_cash = account_move.line_ids.filtered(
+            lambda line: line.account_id
+            in self.pos_receivable_account
+            + self.env["account.account"].search(
+                [("name", "=", "Account Receivable (PoS)")]
+            )
+            and self.cash_pm.name in line.name
+        )
+        self.assertAlmostEqual(
+            receivable_line_cash.balance,
+            1010.0,
+            msg="Cash receivable should be equal to the total cash payments.",
+        )
 
-        expense_line = account_move.line_ids.filtered(lambda line: line.account_id == self.expense_account)
+        expense_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.expense_account
+        )
         self.assertAlmostEqual(expense_line.balance, 206.0)
 
-        output_line = account_move.line_ids.filtered(lambda line: line.account_id == self.output_account)
+        output_line = account_move.line_ids.filtered(
+            lambda line: line.account_id == self.output_account
+        )
         self.assertAlmostEqual(output_line.balance, -206.0)
 
         # check order journal entry
-        invoiced_order = self.pos_session.order_ids.filtered(lambda order: invoiced_uid in order.pos_reference)
-        invoiced_output_account_lines = invoiced_order.account_move.line_ids.filtered(lambda line: line.account_id == self.output_account)
-        self.assertAlmostEqual(sum(invoiced_output_account_lines.mapped('balance')), -121.0)
+        invoiced_order = self.pos_session.order_ids.filtered(
+            lambda order: invoiced_uid in order.pos_reference
+        )
+        invoiced_output_account_lines = invoiced_order.account_move.line_ids.filtered(
+            lambda line: line.account_id == self.output_account
+        )
+        self.assertAlmostEqual(
+            sum(invoiced_output_account_lines.mapped("balance")), -121.0
+        )
 
         # The stock output account move lines of the invoiced order should be properly reconciled
-        for move_line in invoiced_order.account_move.line_ids.filtered(lambda line: line.account_id == self.output_account):
+        for move_line in invoiced_order.account_move.line_ids.filtered(
+            lambda line: line.account_id == self.output_account
+        ):
             self.assertTrue(move_line.full_reconcile_id)
 
-        self.assertTrue(receivable_line_cash.full_reconcile_id, msg='Cash receivable line should be fully-reconciled.')
-        self.assertTrue(output_line.full_reconcile_id, msg='The stock output account line should be fully-reconciled.')
+        self.assertTrue(
+            receivable_line_cash.full_reconcile_id,
+            msg="Cash receivable line should be fully-reconciled.",
+        )
+        self.assertTrue(
+            output_line.full_reconcile_id,
+            msg="The stock output account line should be fully-reconciled.",
+        )
 
     def test_03_order_product_w_owner(self):
         """
         Test order via POS a product having stock owner.
         """
 
-        group_owner = self.env.ref('stock.group_tracking_owner')
-        self.env.user.write({'groups_id': [(4, group_owner.id)]})
-        self.product4 = self.create_product('Product 3', self.categ_basic, 30.0, 15.0)
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
-            'product_id': self.product4.id,
-            'inventory_quantity': 10,
-            'location_id': self.stock_location_components.id,
-            'owner_id': self.partner_a.id,
-        }).action_apply_inventory()
+        group_owner = self.env.ref("stock.group_tracking_owner")
+        self.env.user.write({"groups_id": [(4, group_owner.id)]})
+        self.product4 = self.create_product("Product 3", self.categ_basic, 30.0, 15.0)
+        self.env["stock.quant"].with_context(inventory_mode=True).create(
+            {
+                "product_id": self.product4.id,
+                "inventory_quantity": 10,
+                "location_id": self.stock_location_components.id,
+                "owner_id": self.partner_a.id,
+            }
+        ).action_apply_inventory()
 
         self.open_new_session()
 
@@ -224,7 +344,7 @@ class TestPoSStock(TestPoSCommon):
         orders.append(self.create_ui_order_data([(self.product4, 1)]))
 
         # sync orders
-        order = self.env['pos.order'].create_from_ui(orders)
+        order = self.env["pos.order"].create_from_ui(orders)
 
         # check values before closing the session
         self.assertEqual(1, self.pos_session.order_count)
@@ -234,9 +354,21 @@ class TestPoSStock(TestPoSCommon):
 
         # picking and stock moves should be in done state
         for order in self.pos_session.order_ids:
-            self.assertEqual(order.picking_ids[0].state, 'done', 'Picking should be in done state.')
-            self.assertTrue(all(state == 'done' for state in order.picking_ids[0].move_lines.mapped('state')), 'Move Lines should be in done state.')
-            self.assertTrue(self.partner_a == order.picking_ids[0].move_lines[0].move_line_ids[0].owner_id, 'Move Lines Owner should be taken into account.')
+            self.assertEqual(
+                order.picking_ids[0].state, "done", "Picking should be in done state."
+            )
+            self.assertTrue(
+                all(
+                    state == "done"
+                    for state in order.picking_ids[0].move_lines.mapped("state")
+                ),
+                "Move Lines should be in done state.",
+            )
+            self.assertTrue(
+                self.partner_a
+                == order.picking_ids[0].move_lines[0].move_line_ids[0].owner_id,
+                "Move Lines Owner should be taken into account.",
+            )
 
         # close the session
         self.pos_session.action_pos_session_validate()

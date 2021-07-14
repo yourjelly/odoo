@@ -4,7 +4,8 @@ import threading
 
 from .func import synchronized
 
-__all__ = ['LRU']
+__all__ = ["LRU"]
+
 
 class LRU(object):
     """
@@ -12,6 +13,7 @@ class LRU(object):
 
     Original Copyright 2003 Josiah Carlson, later rebuilt on OrderedDict.
     """
+
     def __init__(self, count, pairs=()):
         self._lock = threading.RLock()
         self.count = max(count, 1)
@@ -51,7 +53,7 @@ class LRU(object):
         return len(self.d)
 
     @synchronized()
-    def pop(self,key):
+    def pop(self, key):
         return self.d.pop(key)
 
     @synchronized()

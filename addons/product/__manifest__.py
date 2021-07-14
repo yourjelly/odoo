@@ -2,11 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Products & Pricelists',
-    'version': '1.2',
-    'category': 'Sales/Sales',
-    'depends': ['base', 'mail', 'uom'],
-    'description': """
+    "name": "Products & Pricelists",
+    "version": "1.2",
+    "category": "Sales/Sales",
+    "depends": ["base", "mail", "uom"],
+    "description": """
 This is the base module for managing products and pricelists in Odoo.
 ========================================================================
 
@@ -26,36 +26,28 @@ Pricelists preferences by product and/or partners.
 
 Print product labels with barcode.
     """,
-    'data': [
-        'data/product_data.xml',
-        'security/product_security.xml',
-        'security/ir.model.access.csv',
-        'views/res_config_settings_views.xml',
-        'views/product_attribute_views.xml',
-        'views/product_views.xml',
-        'views/product_template_views.xml',
-        'views/product_pricelist_views.xml',
-        'views/res_partner_views.xml',
-        'report/product_reports.xml',
-        'report/product_product_templates.xml',
-        'report/product_template_templates.xml',
-        'report/product_packaging.xml',
-        'report/product_pricelist_report_templates.xml'
+    "data": [
+        "data/product_data.xml",
+        "security/product_security.xml",
+        "security/ir.model.access.csv",
+        "views/res_config_settings_views.xml",
+        "views/product_attribute_views.xml",
+        "views/product_views.xml",
+        "views/product_template_views.xml",
+        "views/product_pricelist_views.xml",
+        "views/res_partner_views.xml",
+        "report/product_reports.xml",
+        "report/product_product_templates.xml",
+        "report/product_template_templates.xml",
+        "report/product_packaging.xml",
+        "report/product_pricelist_report_templates.xml",
     ],
-    'demo': [
-        'data/product_demo.xml',
-    ],
-    'installable': True,
-    'auto_install': False,
-    'assets': {
-        'web.assets_backend': [
-            'product/static/src/js/**/*',
-        ],
-        'web.qunit_suite_tests': [
-            'product/static/tests/**/*',
-        ],
-        'web.assets_qweb': [
-            'product/static/src/xml/**/*',
-        ],
-    }
+    "demo": ["data/product_demo.xml",],
+    "installable": True,
+    "auto_install": False,
+    "assets": {
+        "web.assets_backend": ["product/static/src/js/**/*",],
+        "web.qunit_suite_tests": ["product/static/tests/**/*",],
+        "web.assets_qweb": ["product/static/src/xml/**/*",],
+    },
 }

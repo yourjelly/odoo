@@ -32,17 +32,26 @@ class OdooEdiProxyAuth(requests.auth.AuthBase):
             body = body.decode()
         body = json.loads(body)
 
-        message = '%s|%s|%s|%s|%s' % (
+        message = "%s|%s|%s|%s|%s" % (
             msg_timestamp,  # timestamp
             parsed_url.path,  # url path
             self.id_client,
-            json.dumps(werkzeug.urls.url_decode(parsed_url.query), sort_keys=True),  # url query params sorted by key
-            json.dumps(body, sort_keys=True))  # http request body
-        h = hmac.new(base64.b64decode(self.refresh_token), message.encode(), digestmod=hashlib.sha256)
+            json.dumps(
+                werkzeug.urls.url_decode(parsed_url.query), sort_keys=True
+            ),  # url query params sorted by key
+            json.dumps(body, sort_keys=True),
+        )  # http request body
+        h = hmac.new(
+            base64.b64decode(self.refresh_token),
+            message.encode(),
+            digestmod=hashlib.sha256,
+        )
 
-        request.headers.update({
-            'odoo-edi-client-id': self.id_client,
-            'odoo-edi-signature': h.hexdigest(),
-            'odoo-edi-timestamp': msg_timestamp,
-        })
+        request.headers.update(
+            {
+                "odoo-edi-client-id": self.id_client,
+                "odoo-edi-signature": h.hexdigest(),
+                "odoo-edi-timestamp": msg_timestamp,
+            }
+        )
         return request

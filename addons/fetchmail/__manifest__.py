@@ -1,12 +1,12 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Email Gateway',
-    'version': '1.0',
-    'depends': ['mail'],
-    'category': 'Hidden/Tools',
-    'description': """
+    "name": "Email Gateway",
+    "version": "1.0",
+    "depends": ["mail"],
+    "category": "Hidden/Tools",
+    "description": """
 Retrieve incoming email on POP/IMAP servers.
 ============================================
 
@@ -34,14 +34,14 @@ same *conversation* document.
 For more specific needs, you may also assign custom-defined actions
 (technically: Server Actions) to be triggered for each incoming mail.
     """,
-    'data': [
-        'data/fetchmail_data.xml',
-        'security/ir.model.access.csv',
-        'views/fetchmail_views.xml',
-        'views/mail_mail_views.xml',
-        'views/res_config_settings_views.xml',
+    "data": [
+        "data/fetchmail_data.xml",
+        "security/ir.model.access.csv",
+        "views/fetchmail_views.xml",
+        "views/mail_mail_views.xml",
+        "views/res_config_settings_views.xml",
     ],
-    'demo': [],
-    'installable': True,
-    'auto_install': True,
+    "demo": [],
+    "installable": True,
+    "auto_install": True,
 }

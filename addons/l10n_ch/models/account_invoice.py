@@ -12,54 +12,103 @@ from odoo.tools.misc import mod10r
 l10n_ch_ISR_NUMBER_LENGTH = 27
 l10n_ch_ISR_ID_NUM_LENGTH = 6
 
+
 class AccountMove(models.Model):
-    _inherit = 'account.move'
+    _inherit = "account.move"
 
-    l10n_ch_isr_subscription = fields.Char(compute='_compute_l10n_ch_isr_subscription', help='ISR subscription number identifying your company or your bank to generate ISR.')
-    l10n_ch_isr_subscription_formatted = fields.Char(compute='_compute_l10n_ch_isr_subscription', help="ISR subscription number your company or your bank, formated with '-' and without the padding zeros, to generate ISR report.")
+    l10n_ch_isr_subscription = fields.Char(
+        compute="_compute_l10n_ch_isr_subscription",
+        help="ISR subscription number identifying your company or your bank to generate ISR.",
+    )
+    l10n_ch_isr_subscription_formatted = fields.Char(
+        compute="_compute_l10n_ch_isr_subscription",
+        help="ISR subscription number your company or your bank, formated with '-' and without the padding zeros, to generate ISR report.",
+    )
 
-    l10n_ch_isr_number = fields.Char(compute='_compute_l10n_ch_isr_number', store=True, help='The reference number associated with this invoice')
-    l10n_ch_isr_number_spaced = fields.Char(compute='_compute_l10n_ch_isr_number_spaced', help="ISR number split in blocks of 5 characters (right-justified), to generate ISR report.")
+    l10n_ch_isr_number = fields.Char(
+        compute="_compute_l10n_ch_isr_number",
+        store=True,
+        help="The reference number associated with this invoice",
+    )
+    l10n_ch_isr_number_spaced = fields.Char(
+        compute="_compute_l10n_ch_isr_number_spaced",
+        help="ISR number split in blocks of 5 characters (right-justified), to generate ISR report.",
+    )
 
-    l10n_ch_isr_optical_line = fields.Char(compute="_compute_l10n_ch_isr_optical_line", help='Optical reading line, as it will be printed on ISR')
+    l10n_ch_isr_optical_line = fields.Char(
+        compute="_compute_l10n_ch_isr_optical_line",
+        help="Optical reading line, as it will be printed on ISR",
+    )
 
-    l10n_ch_isr_valid = fields.Boolean(compute='_compute_l10n_ch_isr_valid', help='Boolean value. True iff all the data required to generate the ISR are present')
+    l10n_ch_isr_valid = fields.Boolean(
+        compute="_compute_l10n_ch_isr_valid",
+        help="Boolean value. True iff all the data required to generate the ISR are present",
+    )
 
-    l10n_ch_isr_sent = fields.Boolean(default=False, help="Boolean value telling whether or not the ISR corresponding to this invoice has already been printed or sent by mail.")
-    l10n_ch_currency_name = fields.Char(related='currency_id.name', readonly=True, string="Currency Name", help="The name of this invoice's currency") #This field is used in the "invisible" condition field of the 'Print ISR' button.
-    l10n_ch_isr_needs_fixing = fields.Boolean(compute="_compute_l10n_ch_isr_needs_fixing", help="Used to show a warning banner when the vendor bill needs a correct ISR payment reference. ")
+    l10n_ch_isr_sent = fields.Boolean(
+        default=False,
+        help="Boolean value telling whether or not the ISR corresponding to this invoice has already been printed or sent by mail.",
+    )
+    l10n_ch_currency_name = fields.Char(
+        related="currency_id.name",
+        readonly=True,
+        string="Currency Name",
+        help="The name of this invoice's currency",
+    )  # This field is used in the "invisible" condition field of the 'Print ISR' button.
+    l10n_ch_isr_needs_fixing = fields.Boolean(
+        compute="_compute_l10n_ch_isr_needs_fixing",
+        help="Used to show a warning banner when the vendor bill needs a correct ISR payment reference. ",
+    )
 
-    @api.depends('partner_bank_id.l10n_ch_isr_subscription_eur', 'partner_bank_id.l10n_ch_isr_subscription_chf')
+    @api.depends(
+        "partner_bank_id.l10n_ch_isr_subscription_eur",
+        "partner_bank_id.l10n_ch_isr_subscription_chf",
+    )
     def _compute_l10n_ch_isr_subscription(self):
         """ Computes the ISR subscription identifying your company or the bank that allows to generate ISR. And formats it accordingly"""
+
         def _format_isr_subscription(isr_subscription):
-            #format the isr as per specifications
+            # format the isr as per specifications
             currency_code = isr_subscription[:2]
             middle_part = isr_subscription[2:-1]
             trailing_cipher = isr_subscription[-1]
-            middle_part = re.sub('^0*', '', middle_part)
-            return currency_code + '-' + middle_part + '-' + trailing_cipher
+            middle_part = re.sub("^0*", "", middle_part)
+            return currency_code + "-" + middle_part + "-" + trailing_cipher
 
         def _format_isr_subscription_scanline(isr_subscription):
             # format the isr for scanline
-            return isr_subscription[:2] + isr_subscription[2:-1].rjust(6, '0') + isr_subscription[-1:]
+            return (
+                isr_subscription[:2]
+                + isr_subscription[2:-1].rjust(6, "0")
+                + isr_subscription[-1:]
+            )
 
         for record in self:
             record.l10n_ch_isr_subscription = False
             record.l10n_ch_isr_subscription_formatted = False
             if record.partner_bank_id:
-                if record.currency_id.name == 'EUR':
-                    isr_subscription = record.partner_bank_id.l10n_ch_isr_subscription_eur
-                elif record.currency_id.name == 'CHF':
-                    isr_subscription = record.partner_bank_id.l10n_ch_isr_subscription_chf
+                if record.currency_id.name == "EUR":
+                    isr_subscription = (
+                        record.partner_bank_id.l10n_ch_isr_subscription_eur
+                    )
+                elif record.currency_id.name == "CHF":
+                    isr_subscription = (
+                        record.partner_bank_id.l10n_ch_isr_subscription_chf
+                    )
                 else:
-                    #we don't format if in another currency as EUR or CHF
+                    # we don't format if in another currency as EUR or CHF
                     continue
 
                 if isr_subscription:
-                    isr_subscription = isr_subscription.replace("-", "")  # In case the user put the -
-                    record.l10n_ch_isr_subscription = _format_isr_subscription_scanline(isr_subscription)
-                    record.l10n_ch_isr_subscription_formatted = _format_isr_subscription(isr_subscription)
+                    isr_subscription = isr_subscription.replace(
+                        "-", ""
+                    )  # In case the user put the -
+                    record.l10n_ch_isr_subscription = _format_isr_subscription_scanline(
+                        isr_subscription
+                    )
+                    record.l10n_ch_isr_subscription_formatted = _format_isr_subscription(
+                        isr_subscription
+                    )
 
     def _get_isrb_id_number(self):
         """Hook to fix the lack of proper field for ISR-B Customer ID"""
@@ -70,9 +119,9 @@ class AccountMove(models.Model):
         # - validation of format xx-yyyyy-c
         # - validation of checksum
         self.ensure_one()
-        return self.partner_bank_id.l10n_ch_postal or ''
+        return self.partner_bank_id.l10n_ch_postal or ""
 
-    @api.depends('name', 'partner_bank_id.l10n_ch_postal')
+    @api.depends("name", "partner_bank_id.l10n_ch_postal")
     def _compute_l10n_ch_isr_number(self):
         """Generates the ISR or QRR reference
 
@@ -119,11 +168,14 @@ class AccountMove(models.Model):
                 (3) 1: control digit for identification number and reference
         """
         for record in self:
-            if (record.partner_bank_id.l10n_ch_qr_iban or record.l10n_ch_isr_subscription) and record.name:
+            if (
+                record.partner_bank_id.l10n_ch_qr_iban
+                or record.l10n_ch_isr_subscription
+            ) and record.name:
                 id_number = record._get_isrb_id_number()
                 if id_number:
                     id_number = id_number.zfill(l10n_ch_ISR_ID_NUM_LENGTH)
-                invoice_ref = re.sub('[^\d]', '', record.name)
+                invoice_ref = re.sub("[^\d]", "", record.name)
                 # keep only the last digits if it exceed boundaries
                 full_len = len(id_number) + len(invoice_ref)
                 ref_payload_len = l10n_ch_ISR_NUMBER_LENGTH - 1
@@ -135,21 +187,23 @@ class AccountMove(models.Model):
             else:
                 record.l10n_ch_isr_number = False
 
-    @api.depends('l10n_ch_isr_number')
+    @api.depends("l10n_ch_isr_number")
     def _compute_l10n_ch_isr_number_spaced(self):
         def _space_isr_number(isr_number):
             to_treat = isr_number
-            res = ''
+            res = ""
             while to_treat:
                 res = to_treat[-5:] + res
                 to_treat = to_treat[:-5]
                 if to_treat:
-                    res = ' ' + res
+                    res = " " + res
             return res
 
         for record in self:
             if record.l10n_ch_isr_number:
-                record.l10n_ch_isr_number_spaced = _space_isr_number(record.l10n_ch_isr_number)
+                record.l10n_ch_isr_number_spaced = _space_isr_number(
+                    record.l10n_ch_isr_number
+                )
             else:
                 record.l10n_ch_isr_number_spaced = False
 
@@ -157,10 +211,10 @@ class AccountMove(models.Model):
         """Prepare amount string for ISR optical line"""
         self.ensure_one()
         currency_code = None
-        if self.currency_id.name == 'CHF':
-            currency_code = '01'
-        elif self.currency_id.name == 'EUR':
-            currency_code = '03'
+        if self.currency_id.name == "CHF":
+            currency_code = "01"
+        elif self.currency_id.name == "EUR":
+            currency_code = "03"
         units, cents = float_split_str(self.amount_residual, 2)
         amount_to_display = units + cents
         amount_ref = amount_to_display.zfill(10)
@@ -169,9 +223,12 @@ class AccountMove(models.Model):
         return optical_amount
 
     @api.depends(
-        'currency_id.name', 'amount_residual', 'name',
-        'partner_bank_id.l10n_ch_isr_subscription_eur',
-        'partner_bank_id.l10n_ch_isr_subscription_chf')
+        "currency_id.name",
+        "amount_residual",
+        "name",
+        "partner_bank_id.l10n_ch_isr_subscription_eur",
+        "partner_bank_id.l10n_ch_isr_subscription_chf",
+    )
     def _compute_l10n_ch_isr_optical_line(self):
         """ Compute the optical line to print on the bottom of the ISR.
 
@@ -218,33 +275,47 @@ class AccountMove(models.Model):
             (7) 010234567: subscription number (01-23456-7)
         """
         for record in self:
-            record.l10n_ch_isr_optical_line = ''
-            if record.l10n_ch_isr_number and record.l10n_ch_isr_subscription and record.currency_id.name:
+            record.l10n_ch_isr_optical_line = ""
+            if (
+                record.l10n_ch_isr_number
+                and record.l10n_ch_isr_subscription
+                and record.currency_id.name
+            ):
                 # Final assembly (the space after the '+' is no typo, it stands in the specs.)
-                record.l10n_ch_isr_optical_line = '{amount}>{reference}+ {creditor}>'.format(
+                record.l10n_ch_isr_optical_line = "{amount}>{reference}+ {creditor}>".format(
                     amount=record._get_l10n_ch_isr_optical_amount(),
                     reference=record.l10n_ch_isr_number,
                     creditor=record.l10n_ch_isr_subscription,
                 )
 
     @api.depends(
-        'move_type', 'name', 'currency_id.name',
-        'partner_bank_id.l10n_ch_isr_subscription_eur',
-        'partner_bank_id.l10n_ch_isr_subscription_chf')
+        "move_type",
+        "name",
+        "currency_id.name",
+        "partner_bank_id.l10n_ch_isr_subscription_eur",
+        "partner_bank_id.l10n_ch_isr_subscription_chf",
+    )
     def _compute_l10n_ch_isr_valid(self):
         """Returns True if all the data required to generate the ISR are present"""
         for record in self:
-            record.l10n_ch_isr_valid = record.move_type == 'out_invoice' and\
-                record.name and \
-                record.l10n_ch_isr_subscription and \
-                record.l10n_ch_currency_name in ['EUR', 'CHF']
+            record.l10n_ch_isr_valid = (
+                record.move_type == "out_invoice"
+                and record.name
+                and record.l10n_ch_isr_subscription
+                and record.l10n_ch_currency_name in ["EUR", "CHF"]
+            )
 
-    @api.depends('move_type', 'partner_bank_id', 'payment_reference')
+    @api.depends("move_type", "partner_bank_id", "payment_reference")
     def _compute_l10n_ch_isr_needs_fixing(self):
         for inv in self:
-            if inv.move_type == 'in_invoice' and inv.company_id.account_fiscal_country_id.code == "CH":
+            if (
+                inv.move_type == "in_invoice"
+                and inv.company_id.account_fiscal_country_id.code == "CH"
+            ):
                 partner_bank = inv.partner_bank_id
-                needs_isr_ref = partner_bank.l10n_ch_qr_iban or partner_bank._is_isr_issuer()
+                needs_isr_ref = (
+                    partner_bank.l10n_ch_qr_iban or partner_bank._is_isr_issuer()
+                )
                 if needs_isr_ref and not inv._has_isr_ref():
                     inv.l10n_ch_isr_needs_fixing = True
                     continue
@@ -262,8 +333,8 @@ class AccountMove(models.Model):
         ref = self.payment_reference or self.ref
         if not ref:
             return False
-        ref = ref.replace(' ', '')
-        if re.match(r'^(\d{2,27})$', ref):
+        ref = ref.replace(" ", "")
+        if re.match(r"^(\d{2,27})$", ref):
             return ref == mod10r(ref[:-1])
         return False
 
@@ -284,40 +355,54 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.l10n_ch_isr_valid:
             self.l10n_ch_isr_sent = True
-            return self.env.ref('l10n_ch.l10n_ch_isr_report').report_action(self)
+            return self.env.ref("l10n_ch.l10n_ch_isr_report").report_action(self)
         else:
-            raise ValidationError(_("""You cannot generate an ISR yet.\n
+            raise ValidationError(
+                _(
+                    """You cannot generate an ISR yet.\n
                                    For this, you need to :\n
                                    - set a valid postal account number (or an IBAN referencing one) for your company\n
                                    - define its bank\n
                                    - associate this bank with a postal reference for the currency used in this invoice\n
-                                   - fill the 'bank account' field of the invoice with the postal to be used to receive the related payment. A default account will be automatically set for all invoices created after you defined a postal account for your company."""))
+                                   - fill the 'bank account' field of the invoice with the postal to be used to receive the related payment. A default account will be automatically set for all invoices created after you defined a postal account for your company."""
+                )
+            )
 
     def print_ch_qr_bill(self):
         """ Triggered by the 'Print QR-bill' button.
         """
         self.ensure_one()
 
-        if not self.partner_bank_id._eligible_for_qr_code('ch_qr', self.partner_id, self.currency_id):
-            raise UserError(_("Cannot generate the QR-bill. Please check you have configured the address of your company and debtor. If you are using a QR-IBAN, also check the invoice's payment reference is a QR reference."))
+        if not self.partner_bank_id._eligible_for_qr_code(
+            "ch_qr", self.partner_id, self.currency_id
+        ):
+            raise UserError(
+                _(
+                    "Cannot generate the QR-bill. Please check you have configured the address of your company and debtor. If you are using a QR-IBAN, also check the invoice's payment reference is a QR reference."
+                )
+            )
 
         self.l10n_ch_isr_sent = True
-        return self.env.ref('l10n_ch.l10n_ch_qr_report').report_action(self)
+        return self.env.ref("l10n_ch.l10n_ch_qr_report").report_action(self)
 
     def action_invoice_sent(self):
         # OVERRIDE
         rslt = super(AccountMove, self).action_invoice_sent()
 
         if self.l10n_ch_isr_valid:
-            rslt['context']['l10n_ch_mark_isr_as_sent'] = True
+            rslt["context"]["l10n_ch_mark_isr_as_sent"] = True
 
         return rslt
 
-    @api.returns('mail.message', lambda value: value.id)
+    @api.returns("mail.message", lambda value: value.id)
     def message_post(self, **kwargs):
-        if self.env.context.get('l10n_ch_mark_isr_as_sent'):
-            self.filtered(lambda inv: not inv.l10n_ch_isr_sent).write({'l10n_ch_isr_sent': True})
-        return super(AccountMove, self.with_context(mail_post_autofollow=True)).message_post(**kwargs)
+        if self.env.context.get("l10n_ch_mark_isr_as_sent"):
+            self.filtered(lambda inv: not inv.l10n_ch_isr_sent).write(
+                {"l10n_ch_isr_sent": True}
+            )
+        return super(
+            AccountMove, self.with_context(mail_post_autofollow=True)
+        ).message_post(**kwargs)
 
     def _get_invoice_reference_ch_invoice(self):
         """ This sets ISR reference number which is generated based on customer's `Bank Account` and set it as
@@ -338,10 +423,12 @@ class AccountMove(models.Model):
         """ Makes the provided QRR reference human-friendly, spacing its elements
         by blocks of 5 from right to left.
         """
-        spaced_qrr_ref = ''
-        i = len(qrr_ref) # i is the index after the last index to consider in substrings
+        spaced_qrr_ref = ""
+        i = len(
+            qrr_ref
+        )  # i is the index after the last index to consider in substrings
         while i > 0:
-            spaced_qrr_ref = qrr_ref[max(i-5, 0) : i] + ' ' + spaced_qrr_ref
+            spaced_qrr_ref = qrr_ref[max(i - 5, 0) : i] + " " + spaced_qrr_ref
             i -= 5
 
         return spaced_qrr_ref

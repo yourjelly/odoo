@@ -8,42 +8,45 @@ from dateutil.relativedelta import relativedelta
 from . import ustr
 from .func import lazy
 
+
 def get_month(date):
-    ''' Compute the month dates range on which the 'date' parameter belongs to.
+    """ Compute the month dates range on which the 'date' parameter belongs to.
 
     :param date: A datetime.datetime or datetime.date object.
     :return: A tuple (date_from, date_to) having the same object type as the 'date' parameter.
-    '''
+    """
     date_from = type(date)(date.year, date.month, 1)
-    date_to = type(date)(date.year, date.month, calendar.monthrange(date.year, date.month)[1])
+    date_to = type(date)(
+        date.year, date.month, calendar.monthrange(date.year, date.month)[1]
+    )
     return date_from, date_to
 
 
 def get_quarter_number(date):
-    ''' Get the number of the quarter on which the 'date' parameter belongs to.
+    """ Get the number of the quarter on which the 'date' parameter belongs to.
 
     :param date: A datetime.datetime or datetime.date object.
     :return: A [1-4] integer.
-    '''
+    """
     return math.ceil(date.month / 3)
 
 
 def get_quarter(date):
-    ''' Compute the quarter dates range on which the 'date' parameter belongs to.
+    """ Compute the quarter dates range on which the 'date' parameter belongs to.
 
     :param date: A datetime.datetime or datetime.date object.
     :return: A tuple (date_from, date_to) having the same object type as the 'date' parameter.
-    '''
+    """
     quarter_number = get_quarter_number(date)
     month_from = ((quarter_number - 1) * 3) + 1
     date_from = type(date)(date.year, month_from, 1)
-    date_to = (date_from + relativedelta(months=2))
+    date_to = date_from + relativedelta(months=2)
     date_to = date_to.replace(day=calendar.monthrange(date_to.year, date_to.month)[1])
     return date_from, date_to
 
 
 def get_fiscal_year(date, day=31, month=12):
-    ''' Compute the fiscal year dates range on which the 'date' parameter belongs to.
+    """ Compute the fiscal year dates range on which the 'date' parameter belongs to.
     A fiscal year is the period used by governments for accounting purposes and vary between countries.
 
     By default, calling this method with only one parameter gives the calendar year because the ending date of the
@@ -53,7 +56,7 @@ def get_fiscal_year(date, day=31, month=12):
     :param day:     The day of month the fiscal year ends.
     :param month:   The month of year the fiscal year ends.
     :return: A tuple (date_from, date_to) having the same object type as the 'date' parameter.
-    '''
+    """
     max_day = calendar.monthrange(date.year, month)[1]
     date_to = type(date)(date.year, month, min(day, max_day))
 
@@ -89,11 +92,11 @@ def get_timedelta(qty, granularity):
 
     """
     switch = {
-        'hour': relativedelta(hours=qty),
-        'day': relativedelta(days=qty),
-        'week': relativedelta(weeks=qty),
-        'month': relativedelta(months=qty),
-        'year': relativedelta(years=qty),
+        "hour": relativedelta(hours=qty),
+        "day": relativedelta(days=qty),
+        "week": relativedelta(weeks=qty),
+        "month": relativedelta(months=qty),
+        "year": relativedelta(years=qty),
     }
     return switch[granularity]
 
@@ -117,17 +120,20 @@ def start_of(value, granularity):
         result = get_quarter(value)[0]
     elif granularity == "month":
         result = value.replace(day=1)
-    elif granularity == 'week':
+    elif granularity == "week":
         # `calendar.weekday` uses ISO8601 for start of week reference, this means that
         # by default MONDAY is the first day of the week and SUNDAY is the last.
-        result = value - relativedelta(days=calendar.weekday(value.year, value.month, value.day))
+        result = value - relativedelta(
+            days=calendar.weekday(value.year, value.month, value.day)
+        )
     elif granularity == "day":
         result = value
     elif granularity == "hour" and is_datetime:
         return datetime.combine(value, time.min).replace(hour=value.hour)
     elif is_datetime:
         raise ValueError(
-            "Granularity must be year, quarter, month, week, day or hour for value %s" % value
+            "Granularity must be year, quarter, month, week, day or hour for value %s"
+            % value
         )
     else:
         raise ValueError(
@@ -156,17 +162,20 @@ def end_of(value, granularity):
         result = get_quarter(value)[1]
     elif granularity == "month":
         result = value + relativedelta(day=1, months=1, days=-1)
-    elif granularity == 'week':
+    elif granularity == "week":
         # `calendar.weekday` uses ISO8601 for start of week reference, this means that
         # by default MONDAY is the first day of the week and SUNDAY is the last.
-        result = value + relativedelta(days=6-calendar.weekday(value.year, value.month, value.day))
+        result = value + relativedelta(
+            days=6 - calendar.weekday(value.year, value.month, value.day)
+        )
     elif granularity == "day":
         result = value
     elif granularity == "hour" and is_datetime:
         return datetime.combine(value, time.max).replace(hour=value.hour)
     elif is_datetime:
         raise ValueError(
-            "Granularity must be year, quarter, month, week, day or hour for value %s" % value
+            "Granularity must be year, quarter, month, week, day or hour for value %s"
+            % value
         )
     else:
         raise ValueError(
@@ -199,11 +208,13 @@ def subtract(value, *args, **kwargs):
     """
     return value - relativedelta(*args, **kwargs)
 
+
 def json_default(obj):
     """
     Properly serializes date and datetime objects.
     """
     from odoo import fields
+
     if isinstance(obj, datetime):
         return fields.Datetime.to_string(obj)
     if isinstance(obj, date):
@@ -231,7 +242,9 @@ def date_range(start, end, step=relativedelta(months=1)):
 
     if are_others:
         if start.tzinfo.zone != end.tzinfo.zone:
-            raise ValueError("Timezones of start argument and end argument seem inconsistent")
+            raise ValueError(
+                "Timezones of start argument and end argument seem inconsistent"
+            )
 
     if not are_naive and not are_utc and not are_others:
         raise ValueError("Timezones of start argument and end argument mismatch")

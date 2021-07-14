@@ -20,7 +20,7 @@ class TestProjectConfig(TestProjectCommon):
             ("group_subtask_project", "allow_subtasks"),
             ("group_project_recurring_tasks", "allow_recurring_tasks"),
             ("group_project_rating", "rating_active"),
-            )
+        )
 
         # Start with a known value on feature flags to ensure validity of tests
         cls._set_feature_status(is_enabled=False)
@@ -31,7 +31,8 @@ class TestProjectConfig(TestProjectCommon):
         project app config to is_enabled (boolean).
         """
         features_config = cls.Settings.create(
-            {feature[0]: is_enabled for feature in cls.features})
+            {feature[0]: is_enabled for feature in cls.features}
+        )
         features_config.execute()
 
     def test_existing_projects_enable_features(self):
@@ -43,7 +44,8 @@ class TestProjectConfig(TestProjectCommon):
             self.assertTrue(
                 self.project_pigs[project_flag],
                 "Existing project failed to adopt activation of "
-                f"{config_flag}/{project_flag} feature")
+                f"{config_flag}/{project_flag} feature",
+            )
 
     def test_new_projects_enable_features(self):
         """Check that after the user enables features in the module
@@ -51,11 +53,12 @@ class TestProjectConfig(TestProjectCommon):
         enabled as well.
         """
         self._set_feature_status(is_enabled=True)
-        project_cows = self.Project.create({
-            "name": "Cows",
-            "partner_id": self.partner_1.id})
+        project_cows = self.Project.create(
+            {"name": "Cows", "partner_id": self.partner_1.id}
+        )
         for config_flag, project_flag in self.features:
             self.assertTrue(
                 project_cows[project_flag],
                 f"Newly created project failed to adopt activation of "
-                f"{config_flag}/{project_flag} feature")
+                f"{config_flag}/{project_flag} feature",
+            )

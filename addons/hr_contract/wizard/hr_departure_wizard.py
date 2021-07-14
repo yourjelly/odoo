@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 
 
 class HrDepartureWizard(models.TransientModel):
-    _inherit = 'hr.departure.wizard'
+    _inherit = "hr.departure.wizard"
 
     set_date_end = fields.Boolean(string="Set Contract End Date", default=True)
 
@@ -15,10 +15,16 @@ class HrDepartureWizard(models.TransientModel):
         and cancel all draft contracts"""
         current_contract = self.employee_id.contract_id
         if current_contract and current_contract.date_start > self.departure_date:
-            raise UserError(_("Departure date can't be earlier than the start date of current contract."))
+            raise UserError(
+                _(
+                    "Departure date can't be earlier than the start date of current contract."
+                )
+            )
 
         super(HrDepartureWizard, self).action_register_departure()
         if self.set_date_end:
-            self.employee_id.contract_ids.filtered(lambda c: c.state == 'draft').write({'state': 'cancel'})
+            self.employee_id.contract_ids.filtered(lambda c: c.state == "draft").write(
+                {"state": "cancel"}
+            )
             if current_contract:
-                self.employee_id.contract_id.write({'date_end': self.departure_date})
+                self.employee_id.contract_id.write({"date_end": self.departure_date})

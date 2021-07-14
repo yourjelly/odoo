@@ -3,10 +3,20 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
-class ResPartnerBank(models.Model):
-    _inherit = 'res.partner.bank'
 
-    def build_qr_code_url(self, amount, free_communication, structured_communication, currency, debtor_partner, qr_method=None, silent_errors=True):
+class ResPartnerBank(models.Model):
+    _inherit = "res.partner.bank"
+
+    def build_qr_code_url(
+        self,
+        amount,
+        free_communication,
+        structured_communication,
+        currency,
+        debtor_partner,
+        qr_method=None,
+        silent_errors=True,
+    ):
         """ Returns the QR-code report URL to pay to this account with the given parameters,
         or None if no QR-code could be generated.
 
@@ -24,24 +34,55 @@ class ResPartnerBank(models.Model):
         self.ensure_one()
 
         if not currency:
-            raise UserError(_("Currency must always be provided in order to generate a QR-code"))
+            raise UserError(
+                _("Currency must always be provided in order to generate a QR-code")
+            )
 
         available_qr_methods = self.get_available_qr_methods_in_sequence()
-        candidate_methods = qr_method and [(qr_method, dict(available_qr_methods)[qr_method])] or available_qr_methods
+        candidate_methods = (
+            qr_method
+            and [(qr_method, dict(available_qr_methods)[qr_method])]
+            or available_qr_methods
+        )
         for candidate_method, candidate_name in candidate_methods:
             if self._eligible_for_qr_code(candidate_method, debtor_partner, currency):
-                error_message = self._check_for_qr_code_errors(candidate_method, amount, currency, debtor_partner, free_communication, structured_communication)
+                error_message = self._check_for_qr_code_errors(
+                    candidate_method,
+                    amount,
+                    currency,
+                    debtor_partner,
+                    free_communication,
+                    structured_communication,
+                )
 
                 if not error_message:
-                    return self._get_qr_code_url(candidate_method, amount, currency, debtor_partner, free_communication, structured_communication)
+                    return self._get_qr_code_url(
+                        candidate_method,
+                        amount,
+                        currency,
+                        debtor_partner,
+                        free_communication,
+                        structured_communication,
+                    )
 
                 elif not silent_errors:
-                    error_header = _("The following error prevented '%s' QR-code to be generated though it was detected as eligible: ", candidate_name)
-                    raise UserError( error_header + error_message)
+                    error_header = _(
+                        "The following error prevented '%s' QR-code to be generated though it was detected as eligible: ",
+                        candidate_name,
+                    )
+                    raise UserError(error_header + error_message)
 
         return None
 
-    def _get_qr_code_url(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
+    def _get_qr_code_url(
+        self,
+        qr_method,
+        amount,
+        currency,
+        debtor_partner,
+        free_communication,
+        structured_communication,
+    ):
         """ Hook for extension, to support the different QR generation methods.
         This function uses the provided qr_method to try generation a QR-code for
         the given data. It it succeeds, it returns the report URL to make this
@@ -76,7 +117,6 @@ class ResPartnerBank(models.Model):
         all_available.sort(key=lambda x: x[2])
         return [(code, name) for (code, name, sequence) in all_available]
 
-
     def _eligible_for_qr_code(self, qr_method, debtor_partner, currency):
         """ Tells whether or not the criteria to apply QR-generation
         method qr_method are met for a payment on this account, in the
@@ -86,7 +126,15 @@ class ResPartnerBank(models.Model):
         """
         return False
 
-    def _check_for_qr_code_errors(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
+    def _check_for_qr_code_errors(
+        self,
+        qr_method,
+        amount,
+        currency,
+        debtor_partner,
+        free_communication,
+        structured_communication,
+    ):
         """ Checks the data before generating a QR-code for the specified qr_method
         (this method must have been checked for eligbility by _eligible_for_qr_code() first).
 

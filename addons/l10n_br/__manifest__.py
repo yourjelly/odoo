@@ -4,9 +4,9 @@
 # Copyright (C) 2009  Renato Lima - Akretion
 
 {
-    'name': 'Brazilian - Accounting',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Brazilian - Accounting",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 Base module for the Brazilian localization
 ==========================================
 
@@ -43,18 +43,16 @@ accounting SPED, fiscal SPED and PAF ECF that are still missing as September
 2011). Those modules are also strictly licensed under AGPL V3 and today don't
 come with any additional paid permission for online use of 'private modules'.
 """,
-    'author': 'Akretion, Odoo Brasil',
-    'website': 'http://openerpbrasil.org',
-    'depends': ['account'],
-    'data': [
-        'data/l10n_br_chart_data.xml',
-        'data/account.account.template.csv',
-        'data/account_data.xml',
-        'data/account_tax_report_data.xml',
-        'data/account_tax_template_data.xml',
-        'views/account_view.xml',
+    "author": "Akretion, Odoo Brasil",
+    "website": "http://openerpbrasil.org",
+    "depends": ["account"],
+    "data": [
+        "data/l10n_br_chart_data.xml",
+        "data/account.account.template.csv",
+        "data/account_data.xml",
+        "data/account_tax_report_data.xml",
+        "data/account_tax_template_data.xml",
+        "views/account_view.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

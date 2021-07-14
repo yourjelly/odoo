@@ -3,6 +3,7 @@
 
 class Error(Exception):
     """ Base class for ESC/POS errors """
+
     def __init__(self, msg, status=None):
         Exception.__init__(self)
         self.msg = msg
@@ -12,6 +13,7 @@ class Error(Exception):
 
     def __str__(self):
         return self.msg
+
 
 # Result/Exit codes
 # 0  = success
@@ -32,6 +34,7 @@ class BarcodeTypeError(Error):
     def __str__(self):
         return "No Barcode type is defined"
 
+
 class BarcodeSizeError(Error):
     def __init__(self, msg=""):
         Error.__init__(self, msg)
@@ -40,6 +43,7 @@ class BarcodeSizeError(Error):
 
     def __str__(self):
         return "Barcode size is out of range"
+
 
 class BarcodeCodeError(Error):
     def __init__(self, msg=""):
@@ -50,6 +54,7 @@ class BarcodeCodeError(Error):
     def __str__(self):
         return "Code was not supplied"
 
+
 class ImageSizeError(Error):
     def __init__(self, msg=""):
         Error.__init__(self, msg)
@@ -58,6 +63,7 @@ class ImageSizeError(Error):
 
     def __str__(self):
         return "Image height is longer than 255px and can't be printed"
+
 
 class TextError(Error):
     def __init__(self, msg=""):
@@ -78,6 +84,7 @@ class CashDrawerError(Error):
     def __str__(self):
         return "Valid pin must be set to send pulse"
 
+
 class NoStatusError(Error):
     def __init__(self, msg=""):
         Error.__init__(self, msg)
@@ -86,6 +93,7 @@ class NoStatusError(Error):
 
     def __str__(self):
         return "Impossible to get status from the printer: " + str(self.msg)
+
 
 class TicketNotPrinted(Error):
     def __init__(self, msg=""):
@@ -96,6 +104,7 @@ class TicketNotPrinted(Error):
     def __str__(self):
         return "A part of the ticket was not been printed: " + str(self.msg)
 
+
 class NoDeviceError(Error):
     def __init__(self, msg=""):
         Error.__init__(self, msg)
@@ -104,6 +113,7 @@ class NoDeviceError(Error):
 
     def __str__(self):
         return str(self.msg)
+
 
 class HandleDeviceError(Error):
     def __init__(self, msg=""):

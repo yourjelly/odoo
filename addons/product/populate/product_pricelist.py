@@ -14,10 +14,12 @@ class Pricelist(models.Model):
     def _populate(self, size):
 
         # Reflect the settings with data created
-        self.env['res.config.settings'].create({
-            'group_product_pricelist': True,  # Activate pricelist
-            'group_sale_pricelist': True,  # Activate advanced pricelist
-        }).execute()
+        self.env["res.config.settings"].create(
+            {
+                "group_product_pricelist": True,  # Activate pricelist
+                "group_sale_pricelist": True,  # Activate advanced pricelist
+            }
+        ).execute()
 
         return super()._populate(size)
 
@@ -25,11 +27,24 @@ class Pricelist(models.Model):
         company_ids = self.env.registry.populated_models["res.company"]
 
         return [
-            ("company_id", populate.iterate(company_ids + [False for i in range(len(company_ids))])),
-            ("name", populate.constant('product_pricelist_{counter}')),
-            ("currency_id", populate.randomize(self.env["res.currency"].search([("active", "=", True)]).ids)),
+            (
+                "company_id",
+                populate.iterate(
+                    company_ids + [False for i in range(len(company_ids))]
+                ),
+            ),
+            ("name", populate.constant("product_pricelist_{counter}")),
+            (
+                "currency_id",
+                populate.randomize(
+                    self.env["res.currency"].search([("active", "=", True)]).ids
+                ),
+            ),
             ("sequence", populate.randomize([False] + [i for i in range(1, 101)])),
-            ("discount_policy", populate.randomize(["with_discount", "without_discount"])),
+            (
+                "discount_policy",
+                populate.randomize(["with_discount", "without_discount"]),
+            ),
             ("active", populate.randomize([True, False], [0.8, 0.2])),
         ]
 
@@ -37,7 +52,11 @@ class Pricelist(models.Model):
 class PricelistItem(models.Model):
     _inherit = "product.pricelist.item"
     _populate_sizes = {"small": 500, "medium": 5_000, "large": 50_000}
-    _populate_dependencies = ["product.product", "product.template", "product.pricelist"]
+    _populate_dependencies = [
+        "product.product",
+        "product.template",
+        "product.pricelist",
+    ]
 
     def _populate_factories(self):
         pricelist_ids = self.env.registry.populated_models["product.pricelist"]
@@ -90,21 +109,29 @@ class PricelistItem(models.Model):
                 False
 
         def get_date_end(values, counter, random):
-            if values['date_start']:  # 50 % of chance to have validation dates
-                return values['date_start'] + timedelta(days=random.randint(5, 100))
+            if values["date_start"]:  # 50 % of chance to have validation dates
+                return values["date_start"] + timedelta(days=random.randint(5, 100))
             else:
                 False
 
         return [
             ("pricelist_id", populate.randomize(pricelist_ids)),
-            ("applied_on", populate.randomize(
-                ["3_global", "2_product_category", "1_product", "0_product_variant"],
-                [5, 3, 2, 1],
-            )),
-            ("compute_price", populate.randomize(
-                ["fixed", "percentage", "formula"],
-                [5, 3, 1],
-            )),
+            (
+                "applied_on",
+                populate.randomize(
+                    [
+                        "3_global",
+                        "2_product_category",
+                        "1_product",
+                        "0_product_variant",
+                    ],
+                    [5, 3, 2, 1],
+                ),
+            ),
+            (
+                "compute_price",
+                populate.randomize(["fixed", "percentage", "formula"], [5, 3, 1],),
+            ),
             ("_price", get_prices),
             ("_target", get_target_info),
             ("min_quantity", populate.randint(0, 50)),

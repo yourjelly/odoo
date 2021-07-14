@@ -28,9 +28,9 @@ def chain_factories(field_factories, model_name):
 
 def root_factory():
     """ Return a generator with empty values dictionaries (except for the flag ``__complete``). """
-    yield {'__complete': False}
+    yield {"__complete": False}
     while True:
-        yield {'__complete': True}
+        yield {"__complete": True}
 
 
 def randomize(vals, weights=None, seed=False, formatter=format_str, counter_offset=0):
@@ -45,12 +45,14 @@ def randomize(vals, weights=None, seed=False, formatter=format_str, counter_offs
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def generate(iterator, field_name, model_name):
-        r = Random('%s+field+%s' % (model_name, seed or field_name))
+        r = Random("%s+field+%s" % (model_name, seed or field_name))
         for counter, values in enumerate(iterator):
             val = r.choices(vals, weights)[0]
             values[field_name] = formatter(val, counter + counter_offset, values)
             yield values
+
     return generate
 
 
@@ -66,16 +68,18 @@ def cartesian(vals, weights=None, seed=False, formatter=format_str, then=None):
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def generate(iterator, field_name, model_name):
         counter = 0
         for values in iterator:
-            if values['__complete']:
+            if values["__complete"]:
                 break  # will consume and lose an element, (complete so a filling element). If it is a problem, use peekable instead.
             for val in vals:
                 yield {**values, field_name: formatter(val, counter, values)}
             counter += 1
         factory = then or randomize(vals, weights, seed, formatter, counter)
         yield from factory(iterator, field_name, model_name)
+
     return generate
 
 
@@ -92,16 +96,18 @@ def iterate(vals, weights=None, seed=False, formatter=format_str, then=None):
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def generate(iterator, field_name, model_name):
         counter = 0
-        for val in vals: # iteratable order is important, shortest first
+        for val in vals:  # iteratable order is important, shortest first
             values = next(iterator)
             values[field_name] = formatter(val, counter, values)
-            values['__complete'] = False
+            values["__complete"] = False
             yield values
             counter += 1
         factory = then or randomize(vals, weights, seed, formatter, counter)
         yield from factory(iterator, field_name, model_name)
+
     return generate
 
 
@@ -112,10 +118,12 @@ def constant(val, formatter=format_str):
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def generate(iterator, field_name, _):
         for counter, values in enumerate(iterator):
             values[field_name] = formatter(val, counter, values)
             yield values
+
     return generate
 
 
@@ -129,13 +137,16 @@ def compute(function, seed=None):
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def generate(iterator, field_name, model_name):
-        r = Random('%s+field+%s' % (model_name, seed or field_name))
+        r = Random("%s+field+%s" % (model_name, seed or field_name))
         for counter, values in enumerate(iterator):
             val = function(values=values, counter=counter, random=r)
             values[field_name] = val
             yield values
+
     return generate
+
 
 def randint(a, b, seed=None):
     """ Return a factory for an iterator of values dicts that sets the field
@@ -146,19 +157,27 @@ def randint(a, b, seed=None):
     :returns: function of the form (iterator, field_name, model_name) -> values
     :rtype: function (iterator, str, str) -> dict
     """
+
     def get_rand_int(random=None, **kwargs):
         return random.randint(a, b)
+
     return compute(get_rand_int, seed=seed)
+
 
 def randfloat(a, b, seed=None):
     """ Return a factory for an iterator of values dicts that sets the field
     to a random float between a and b included in each input dict.
     """
+
     def get_rand_float(random=None, **kwargs):
         return random.uniform(a, b)
+
     return compute(get_rand_float, seed=seed)
 
-def randdatetime(*, base_date=None, relative_before=None, relative_after=None, seed=None):
+
+def randdatetime(
+    *, base_date=None, relative_before=None, relative_after=None, seed=None
+):
     """ Return a factory for an iterator of values dicts that sets the field
     to a random datetime between relative_before and relative_after, relatively to
     base_date
@@ -171,9 +190,20 @@ def randdatetime(*, base_date=None, relative_before=None, relative_after=None, s
     :return (generator): iterator for random dates inside the defined range
     """
     base_date = base_date or datetime(2020, 1, 1)
-    seconds_before = relative_before and ((base_date + relative_before) - base_date).total_seconds() or 0
-    seconds_after = relative_after and ((base_date + relative_after) - base_date).total_seconds() or 0
+    seconds_before = (
+        relative_before
+        and ((base_date + relative_before) - base_date).total_seconds()
+        or 0
+    )
+    seconds_after = (
+        relative_after
+        and ((base_date + relative_after) - base_date).total_seconds()
+        or 0
+    )
 
     def get_rand_datetime(random=None, **kwargs):
-        return base_date + relativedelta(seconds=random.randint(seconds_before, seconds_after))
+        return base_date + relativedelta(
+            seconds=random.randint(seconds_before, seconds_after)
+        )
+
     return compute(get_rand_datetime, seed=seed)

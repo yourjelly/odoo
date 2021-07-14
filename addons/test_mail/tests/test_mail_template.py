@@ -8,114 +8,154 @@ from odoo.tools import mute_logger
 
 
 class TestMailTemplate(TestMailCommon, TestRecipients):
-
     @classmethod
     def setUpClass(cls):
         super(TestMailTemplate, cls).setUpClass()
-        cls.test_record = cls.env['mail.test.simple'].with_context(cls._test_context).create({'name': 'Test', 'email_from': 'ignasse@example.com'})
+        cls.test_record = (
+            cls.env["mail.test.simple"]
+            .with_context(cls._test_context)
+            .create({"name": "Test", "email_from": "ignasse@example.com"})
+        )
 
-        cls.user_employee.write({
-            'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
-        })
+        cls.user_employee.write(
+            {"groups_id": [(4, cls.env.ref("base.group_partner_manager").id)],}
+        )
 
-        cls._attachments = [{
-            'name': 'first.txt',
-            'datas': base64.b64encode(b'My first attachment'),
-            'res_model': 'res.partner',
-            'res_id': cls.user_admin.partner_id.id
-        }, {
-            'name': 'second.txt',
-            'datas': base64.b64encode(b'My second attachment'),
-            'res_model': 'res.partner',
-            'res_id': cls.user_admin.partner_id.id
-        }]
+        cls._attachments = [
+            {
+                "name": "first.txt",
+                "datas": base64.b64encode(b"My first attachment"),
+                "res_model": "res.partner",
+                "res_id": cls.user_admin.partner_id.id,
+            },
+            {
+                "name": "second.txt",
+                "datas": base64.b64encode(b"My second attachment"),
+                "res_model": "res.partner",
+                "res_id": cls.user_admin.partner_id.id,
+            },
+        ]
 
-        cls.email_1 = 'test1@example.com'
-        cls.email_2 = 'test2@example.com'
+        cls.email_1 = "test1@example.com"
+        cls.email_2 = "test2@example.com"
         cls.email_3 = cls.partner_1.email
-        cls._create_template('mail.test.simple', {
-            'attachment_ids': [(0, 0, cls._attachments[0]), (0, 0, cls._attachments[1])],
-            'partner_to': '%s,%s' % (cls.partner_2.id, cls.user_admin.partner_id.id),
-            'email_to': '%s, %s' % (cls.email_1, cls.email_2),
-            'email_cc': '%s' % cls.email_3,
-        })
+        cls._create_template(
+            "mail.test.simple",
+            {
+                "attachment_ids": [
+                    (0, 0, cls._attachments[0]),
+                    (0, 0, cls._attachments[1]),
+                ],
+                "partner_to": "%s,%s"
+                % (cls.partner_2.id, cls.user_admin.partner_id.id),
+                "email_to": "%s, %s" % (cls.email_1, cls.email_2),
+                "email_cc": "%s" % cls.email_3,
+            },
+        )
 
         # admin should receive emails
-        cls.user_admin.write({'notification_type': 'email'})
+        cls.user_admin.write({"notification_type": "email"})
         # Force the attachments of the template to be in the natural order.
-        cls.email_template.invalidate_cache(['attachment_ids'], ids=cls.email_template.ids)
+        cls.email_template.invalidate_cache(
+            ["attachment_ids"], ids=cls.email_template.ids
+        )
 
-    @mute_logger('odoo.addons.mail.models.mail_mail')
+    @mute_logger("odoo.addons.mail.models.mail_mail")
     def test_template_send_email(self):
         mail_id = self.email_template.send_mail(self.test_record.id)
-        mail = self.env['mail.mail'].sudo().browse(mail_id)
-        self.assertEqual(mail.subject, 'About %s' % self.test_record.name)
+        mail = self.env["mail.mail"].sudo().browse(mail_id)
+        self.assertEqual(mail.subject, "About %s" % self.test_record.name)
         self.assertEqual(mail.email_to, self.email_template.email_to)
         self.assertEqual(mail.email_cc, self.email_template.email_cc)
-        self.assertEqual(mail.recipient_ids, self.partner_2 | self.user_admin.partner_id)
+        self.assertEqual(
+            mail.recipient_ids, self.partner_2 | self.user_admin.partner_id
+        )
 
-    @mute_logger('odoo.addons.mail.models.mail_mail')
+    @mute_logger("odoo.addons.mail.models.mail_mail")
     def test_template_translation(self):
-        self.env['res.lang']._activate_lang('es_ES')
-        self.env.ref('base.module_base')._update_translations(['es_ES'])
+        self.env["res.lang"]._activate_lang("es_ES")
+        self.env.ref("base.module_base")._update_translations(["es_ES"])
 
-        partner = self.env['res.partner'].create({'name': "test", 'lang': 'es_ES'})
-        email_template = self.env['mail.template'].create({
-            'name': 'TestTemplate',
-            'subject': 'English Subject',
-            'body_html': '<p>English Body</p>',
-            'model_id': self.env['ir.model']._get(partner._name).id,
-            'lang': '${object.lang}'
-        })
+        partner = self.env["res.partner"].create({"name": "test", "lang": "es_ES"})
+        email_template = self.env["mail.template"].create(
+            {
+                "name": "TestTemplate",
+                "subject": "English Subject",
+                "body_html": "<p>English Body</p>",
+                "model_id": self.env["ir.model"]._get(partner._name).id,
+                "lang": "${object.lang}",
+            }
+        )
         # Make sure Spanish translations have not been altered
-        description_translations = self.env['ir.translation'].search([('module', '=', 'base'), ('src', '=', partner._description), ('lang', '=', 'es_ES')])
-        description_translations.update({'value': 'Spanish description'})
+        description_translations = self.env["ir.translation"].search(
+            [
+                ("module", "=", "base"),
+                ("src", "=", partner._description),
+                ("lang", "=", "es_ES"),
+            ]
+        )
+        description_translations.update({"value": "Spanish description"})
 
-        self.env['ir.translation'].create({
-            'type': 'model',
-            'name': 'mail.template,subject',
-            'module': 'mail',
-            'lang': 'es_ES',
-            'res_id': email_template.id,
-            'value': 'Spanish Subject',
-            'state': 'translated',
-        })
-        self.env['ir.translation'].create({
-            'type': 'model',
-            'name': 'mail.template,body_html',
-            'module': 'mail',
-            'lang': 'es_ES',
-            'res_id': email_template.id,
-            'value': '<p>Spanish Body</p>',
-            'state': 'translated',
-        })
-        view = self.env['ir.ui.view'].create({
-            'name': 'test_layout',
-            'key': 'test_layout',
-            'type': 'qweb',
-            'arch_db': '<body><t t-out="message.body"/> English Layout <t t-esc="model_description"/></body>'
-        })
-        self.env['ir.model.data'].create({
-            'name': 'test_layout',
-            'module': 'test_mail',
-            'model': 'ir.ui.view',
-            'res_id': view.id
-        })
-        self.env['ir.translation'].create({
-            'type': 'model_terms',
-            'name': 'ir.ui.view,arch_db',
-            'module': 'test_mail',
-            'lang': 'es_ES',
-            'res_id': view.id,
-            'src': 'English Layout',
-            'value': 'Spanish Layout',
-            'state': 'translated',
-        })
+        self.env["ir.translation"].create(
+            {
+                "type": "model",
+                "name": "mail.template,subject",
+                "module": "mail",
+                "lang": "es_ES",
+                "res_id": email_template.id,
+                "value": "Spanish Subject",
+                "state": "translated",
+            }
+        )
+        self.env["ir.translation"].create(
+            {
+                "type": "model",
+                "name": "mail.template,body_html",
+                "module": "mail",
+                "lang": "es_ES",
+                "res_id": email_template.id,
+                "value": "<p>Spanish Body</p>",
+                "state": "translated",
+            }
+        )
+        view = self.env["ir.ui.view"].create(
+            {
+                "name": "test_layout",
+                "key": "test_layout",
+                "type": "qweb",
+                "arch_db": '<body><t t-out="message.body"/> English Layout <t t-esc="model_description"/></body>',
+            }
+        )
+        self.env["ir.model.data"].create(
+            {
+                "name": "test_layout",
+                "module": "test_mail",
+                "model": "ir.ui.view",
+                "res_id": view.id,
+            }
+        )
+        self.env["ir.translation"].create(
+            {
+                "type": "model_terms",
+                "name": "ir.ui.view,arch_db",
+                "module": "test_mail",
+                "lang": "es_ES",
+                "res_id": view.id,
+                "src": "English Layout",
+                "value": "Spanish Layout",
+                "state": "translated",
+            }
+        )
 
-        mail_id = email_template.send_mail(partner.id, notif_layout='test_mail.test_layout')
-        mail = self.env['mail.mail'].sudo().browse(mail_id)
-        self.assertEqual(mail.subject, 'Spanish Subject')
-        self.assertEqual(mail.body_html, '<body><p>Spanish Body</p> Spanish Layout Spanish description</body>')
+        mail_id = email_template.send_mail(
+            partner.id, notif_layout="test_mail.test_layout"
+        )
+        mail = self.env["mail.mail"].sudo().browse(mail_id)
+        self.assertEqual(mail.subject, "Spanish Subject")
+        self.assertEqual(
+            mail.body_html,
+            "<body><p>Spanish Body</p> Spanish Layout Spanish description</body>",
+        )
 
     def test_template_add_context_action(self):
         self.email_template.create_action()
@@ -125,8 +165,8 @@ class TestMailTemplate(TestMailCommon, TestRecipients):
 
         # check those records
         action = self.email_template.ref_ir_act_window
-        self.assertEqual(action.name, 'Send Mail (%s)' % self.email_template.name)
-        self.assertEqual(action.binding_model_id.model, 'mail.test.simple')
+        self.assertEqual(action.name, "Send Mail (%s)" % self.email_template.name)
+        self.assertEqual(action.binding_model_id.model, "mail.test.simple")
 
     # def test_template_scheduled_date(self):
     #     from unittest.mock import patch

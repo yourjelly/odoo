@@ -4,58 +4,74 @@ from freezegun import freeze_time
 
 
 class TestUBL(AccountEdiTestCommon):
-
     @classmethod
-    def setUpClass(cls, chart_template_ref='l10n_nl.l10nnl_chart_template', edi_format_ref='l10n_nl_edi.edi_nlcius_1'):
-        super().setUpClass(chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref)
+    def setUpClass(
+        cls,
+        chart_template_ref="l10n_nl.l10nnl_chart_template",
+        edi_format_ref="l10n_nl_edi.edi_nlcius_1",
+    ):
+        super().setUpClass(
+            chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref
+        )
 
-        cls.company_data['company'].partner_id.write({
-            'street': 'Archefstraat 42',
-            'zip': '1000',
-            'city': 'Amsterdam',
-            'country_id': cls.env.ref('base.nl').id,
-            'l10n_nl_kvk': '82777822',
-            'vat': 'NL000099998B57',
-        })
+        cls.company_data["company"].partner_id.write(
+            {
+                "street": "Archefstraat 42",
+                "zip": "1000",
+                "city": "Amsterdam",
+                "country_id": cls.env.ref("base.nl").id,
+                "l10n_nl_kvk": "82777822",
+                "vat": "NL000099998B57",
+            }
+        )
 
-        cls.partner_a.write({
-            'l10n_nl_kvk': '77777677',
-            'country_id': cls.env.ref('base.be').id,
-            'vat': 'BE0477472701',
-        })
+        cls.partner_a.write(
+            {
+                "l10n_nl_kvk": "77777677",
+                "country_id": cls.env.ref("base.be").id,
+                "vat": "BE0477472701",
+            }
+        )
 
-        bank_account = cls.env['res.partner.bank'].create({
-            'acc_number': 'BE93999574162167',
-            'partner_id': cls.partner_a.id,
-        })
+        bank_account = cls.env["res.partner.bank"].create(
+            {"acc_number": "BE93999574162167", "partner_id": cls.partner_a.id,}
+        )
 
-        cls.tax_sale_b.write({
-            'amount': 15
-        })
+        cls.tax_sale_b.write({"amount": 15})
 
-        cls.invoice = cls.env['account.move'].create({
-            'partner_id': cls.partner_a.id,
-            'move_type': 'out_invoice',
-            'partner_bank_id': bank_account.id,
-            'invoice_date_due': '2020-12-16',
-            'invoice_line_ids': [
-                (0, 0, {
-                    'product_id': cls.product_a.id,
-                    'quantity': 150,
-                    'price_unit': 250,
-                    'discount': 10,
-                    'tax_ids': [(6, 0, cls.tax_sale_a.ids)],
-                }),
-                (0, 0, {
-                    'product_id': cls.product_b.id,
-                    'quantity': 12,
-                    'price_unit': 100,
-                    'tax_ids': [(6, 0, cls.tax_sale_b.ids)],
-                }),
-            ]
-        })
+        cls.invoice = cls.env["account.move"].create(
+            {
+                "partner_id": cls.partner_a.id,
+                "move_type": "out_invoice",
+                "partner_bank_id": bank_account.id,
+                "invoice_date_due": "2020-12-16",
+                "invoice_line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": cls.product_a.id,
+                            "quantity": 150,
+                            "price_unit": 250,
+                            "discount": 10,
+                            "tax_ids": [(6, 0, cls.tax_sale_a.ids)],
+                        },
+                    ),
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": cls.product_b.id,
+                            "quantity": 12,
+                            "price_unit": 100,
+                            "tax_ids": [(6, 0, cls.tax_sale_b.ids)],
+                        },
+                    ),
+                ],
+            }
+        )
 
-        cls.expected_invoice_values = '''
+        cls.expected_invoice_values = """
             <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
                 <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0</cbc:CustomizationID>
                 <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
@@ -202,17 +218,23 @@ class TestUBL(AccountEdiTestCommon):
                     </cac:Price>
                 </cac:InvoiceLine>
             </Invoice>
-        '''
+        """
 
     def test_nlcius_import(self):
-        invoice = self.env['account.move'].with_context(default_move_type='in_invoice').create({})
-        invoice_count = len(self.env['account.move'].search([]))
-        self.update_invoice_from_file('l10n_nl_edi', 'test_xml_file', 'nlcius_test.xml', invoice)
-        self.assertEqual(len(self.env['account.move'].search([])), invoice_count)
+        invoice = (
+            self.env["account.move"]
+            .with_context(default_move_type="in_invoice")
+            .create({})
+        )
+        invoice_count = len(self.env["account.move"].search([]))
+        self.update_invoice_from_file(
+            "l10n_nl_edi", "test_xml_file", "nlcius_test.xml", invoice
+        )
+        self.assertEqual(len(self.env["account.move"].search([])), invoice_count)
         self.assertEqual(invoice.amount_total, 387.2)
         self.assertEqual(invoice.amount_tax, 67.2)
         self.assertEqual(invoice.partner_id, self.partner_a)
 
-    @freeze_time('2020-12-16')
+    @freeze_time("2020-12-16")
     def test_nlcius_export(self):
         self.assert_generated_file_equal(self.invoice, self.expected_invoice_values)

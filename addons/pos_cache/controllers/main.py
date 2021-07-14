@@ -5,7 +5,6 @@ from odoo.http import request
 
 
 class PosCache(PosController):
-
     @http.route()
     def load_onboarding_data(self):
         super().load_onboarding_data()

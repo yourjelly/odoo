@@ -19,13 +19,20 @@ import psycopg2
 import odoo
 from .. import SUPERUSER_ID
 from odoo.sql_db import TestCursor
-from odoo.tools import (config, existing_tables, ignore,
-                        lazy_classproperty, lazy_property, sql,
-                        Collector, OrderedSet)
+from odoo.tools import (
+    config,
+    existing_tables,
+    ignore,
+    lazy_classproperty,
+    lazy_property,
+    sql,
+    Collector,
+    OrderedSet,
+)
 from odoo.tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
-_schema = logging.getLogger('odoo.schema')
+_schema = logging.getLogger("odoo.schema")
 
 
 class Registry(Mapping):
@@ -35,23 +42,24 @@ class Registry(Mapping):
     There is one registry instance per database.
 
     """
+
     _lock = threading.RLock()
     _saved_lock = None
 
     @lazy_classproperty
     def registries(cls):
         """ A mapping from database names to registries. """
-        size = config.get('registry_lru_size', None)
+        size = config.get("registry_lru_size", None)
         if not size:
             # Size the LRU depending of the memory limits
-            if os.name != 'posix':
+            if os.name != "posix":
                 # cannot specify the memory limit soft on windows...
                 size = 42
             else:
                 # A registry takes 10MB of memory on average, so we reserve
                 # 10Mb (registry) + 5Mb (working memory) per registry
                 avgsz = 15 * 1024 * 1024
-                size = int(config['limit_memory_soft'] / avgsz)
+                size = int(config["limit_memory_soft"] / avgsz)
         return LRU(size)
 
     def __new__(cls, db_name):
@@ -85,12 +93,14 @@ class Registry(Mapping):
                     registry.setup_signaling()
                     # This should be a method on Registry
                     try:
-                        odoo.modules.load_modules(registry._db, force_demo, status, update_module)
+                        odoo.modules.load_modules(
+                            registry._db, force_demo, status, update_module
+                        )
                     except Exception:
                         odoo.modules.reset_modules_state(db_name)
                         raise
                 except Exception:
-                    _logger.error('Failed to load registry')
+                    _logger.error("Failed to load registry")
                     del cls.registries[db_name]
                     raise
 
@@ -107,7 +117,7 @@ class Registry(Mapping):
         return registry
 
     def init(self, db_name):
-        self.models = {}    # model name/model instance mapping
+        self.models = {}  # model name/model instance mapping
         self._sql_constraints = set()
         self._init = True
         self._assertion_report = odoo.tests.runner.OdooTestResult()
@@ -118,7 +128,7 @@ class Registry(Mapping):
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
-        self.updated_modules = []       # installed/updated modules
+        self.updated_modules = []  # installed/updated modules
         self.loaded_xmlids = set()
 
         self.db_name = db_name
@@ -129,8 +139,8 @@ class Registry(Mapping):
         self.test_lock = None
 
         # Indicates that the registry is
-        self.loaded = False             # whether all modules are loaded
-        self.ready = False              # whether everything is set up
+        self.loaded = False  # whether all modules are loaded
+        self.ready = False  # whether everything is set up
 
         # field dependencies
         self.field_depends = Collector()
@@ -200,8 +210,8 @@ class Registry(Mapping):
         """ Return the models corresponding to ``model_names`` and all those
         that inherit/inherits from them.
         """
-        assert all(kind in ('_inherit', '_inherits') for kind in kinds)
-        funcs = [attrgetter(kind + '_children') for kind in kinds]
+        assert all(kind in ("_inherit", "_inherits") for kind in kinds)
+        funcs = [attrgetter(kind + "_children") for kind in kinds]
 
         models = OrderedSet()
         queue = deque(model_names)
@@ -237,7 +247,7 @@ class Registry(Mapping):
             model = cls._build_model(self, cr)
             model_names.append(model._name)
 
-        return self.descendants(model_names, '_inherit', '_inherits')
+        return self.descendants(model_names, "_inherit", "_inherits")
 
     def setup_models(self, cr):
         """ Complete the setup of models.
@@ -260,12 +270,13 @@ class Registry(Mapping):
         if env.all.tocompute:
             _logger.error(
                 "Remaining fields to compute before setting up registry: %s",
-                env.all.tocompute, stack_info=True,
+                env.all.tocompute,
+                stack_info=True,
             )
 
         # add manual models
         if self._init_modules:
-            env['ir.model']._add_manual_models()
+            env["ir.model"]._add_manual_models()
 
         # prepare the setup on all models
         models = list(env.values())
@@ -300,7 +311,7 @@ class Registry(Mapping):
         if self.ready:
             for model in env.values():
                 model._register_hook()
-            env['base'].flush()
+            env["base"].flush()
 
     @lazy_property
     def field_computed(self):
@@ -314,8 +325,11 @@ class Registry(Mapping):
                     group.append(field)
             for fields in groups.values():
                 if len({field.compute_sudo for field in fields}) > 1:
-                    _logger.warning("%s: inconsistent 'compute_sudo' for computed fields: %s",
-                                    model_name, ", ".join(field.name for field in fields))
+                    _logger.warning(
+                        "%s: inconsistent 'compute_sudo' for computed fields: %s",
+                        model_name,
+                        ", ".join(field.name for field in fields),
+                    )
         return computed
 
     @lazy_property
@@ -343,8 +357,12 @@ class Registry(Mapping):
         def concat(seq1, seq2):
             if seq1 and seq2:
                 f1, f2 = seq1[-1], seq2[0]
-                if f1.type == 'one2many' and f2.type == 'many2one' and \
-                        f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
+                if (
+                    f1.type == "one2many"
+                    and f2.type == "many2one"
+                    and f1.model_name == f2.comodel_name
+                    and f1.inverse_name == f2.name
+                ):
                     return concat(seq1[:-1], seq2[1:])
             return seq1 + seq2
 
@@ -403,9 +421,11 @@ class Registry(Mapping):
         if not model_names:
             return
 
-        if 'module' in context:
-            _logger.info('module %s: creating or updating database tables', context['module'])
-        elif context.get('models_to_check', False):
+        if "module" in context:
+            _logger.info(
+                "module %s: creating or updating database tables", context["module"]
+            )
+        elif context.get("models_to_check", False):
             _logger.info("verifying fields for every extended model")
 
         env = odoo.api.Environment(cr, SUPERUSER_ID, context)
@@ -420,10 +440,10 @@ class Registry(Mapping):
                 model._auto_init()
                 model.init()
 
-            env['ir.model']._reflect_models(model_names)
-            env['ir.model.fields']._reflect_fields(model_names)
-            env['ir.model.fields.selection']._reflect_selections(model_names)
-            env['ir.model.constraint']._reflect_constraints(model_names)
+            env["ir.model"]._reflect_models(model_names)
+            env["ir.model.fields"]._reflect_fields(model_names)
+            env["ir.model.fields.selection"]._reflect_selections(model_names)
+            env["ir.model.constraint"]._reflect_constraints(model_names)
 
             self._ordinary_tables = None
 
@@ -434,7 +454,7 @@ class Registry(Mapping):
             self.check_indexes(cr, model_names)
             self.check_foreign_keys(cr)
 
-            env['base'].flush()
+            env["base"].flush()
 
             # make sure all tables are present
             self.check_tables_exist(cr)
@@ -447,7 +467,12 @@ class Registry(Mapping):
     def check_indexes(self, cr, model_names):
         """ Create or drop column indexes for the given models. """
         expected = [
-            ("%s_%s_index" % (Model._table, field.name), Model._table, field.name, field.index)
+            (
+                "%s_%s_index" % (Model._table, field.name),
+                Model._table,
+                field.name,
+                field.index,
+            )
             for model_name in model_names
             for Model in [self.models[model_name]]
             if Model._auto and not Model._abstract
@@ -457,22 +482,29 @@ class Registry(Mapping):
         if not expected:
             return
 
-        cr.execute("SELECT indexname FROM pg_indexes WHERE indexname IN %s",
-                   [tuple(row[0] for row in expected)])
+        cr.execute(
+            "SELECT indexname FROM pg_indexes WHERE indexname IN %s",
+            [tuple(row[0] for row in expected)],
+        )
         existing = {row[0] for row in cr.fetchall()}
 
         for indexname, tablename, columnname, index in expected:
             if index and indexname not in existing:
                 try:
                     with cr.savepoint(flush=False):
-                        sql.create_index(cr, indexname, tablename, ['"%s"' % columnname])
+                        sql.create_index(
+                            cr, indexname, tablename, ['"%s"' % columnname]
+                        )
                 except psycopg2.OperationalError:
                     _schema.error("Unable to add index for %s", self)
             elif not index and indexname in existing:
-                _schema.info("Keep unexpected index %s on table %s", indexname, tablename)
+                _schema.info(
+                    "Keep unexpected index %s on table %s", indexname, tablename
+                )
 
-    def add_foreign_key(self, table1, column1, table2, column2, ondelete,
-                        model, module, force=True):
+    def add_foreign_key(
+        self, table1, column1, table2, column2, ondelete, model, module, force=True
+    ):
         """ Specify an expected foreign key. """
         key = (table1, column1)
         val = (table2, column2, ondelete, model, module)
@@ -510,13 +542,21 @@ class Registry(Mapping):
             spec = existing.get(key)
             if spec is None:
                 sql.add_foreign_key(cr, table1, column1, table2, column2, ondelete)
-                conname = sql.get_foreign_keys(cr, table1, column1, table2, column2, ondelete)[0]
-                model.env['ir.model.constraint']._reflect_constraint(model, conname, 'f', None, module)
+                conname = sql.get_foreign_keys(
+                    cr, table1, column1, table2, column2, ondelete
+                )[0]
+                model.env["ir.model.constraint"]._reflect_constraint(
+                    model, conname, "f", None, module
+                )
             elif (spec[1], spec[2], spec[3]) != (table2, column2, deltype):
                 sql.drop_constraint(cr, table1, spec[0])
                 sql.add_foreign_key(cr, table1, column1, table2, column2, ondelete)
-                conname = sql.get_foreign_keys(cr, table1, column1, table2, column2, ondelete)[0]
-                model.env['ir.model.constraint']._reflect_constraint(model, conname, 'f', None, module)
+                conname = sql.get_foreign_keys(
+                    cr, table1, column1, table2, column2, ondelete
+                )[0]
+                model.env["ir.model.constraint"]._reflect_constraint(
+                    model, conname, "f", None, module
+                )
 
     def check_tables_exist(self, cr):
         """
@@ -537,9 +577,11 @@ class Registry(Mapping):
             for name in missing:
                 _logger.info("Recreate table of model %s.", name)
                 env[name].init()
-            env['base'].flush()
+            env["base"].flush()
             # check again, and log errors if tables are still missing
-            missing_tables = set(table2model).difference(existing_tables(cr, table2model))
+            missing_tables = set(table2model).difference(
+                existing_tables(cr, table2model)
+            )
             for table in missing_tables:
                 _logger.error("Model %s has no table.", table2model[table])
 
@@ -583,19 +625,30 @@ class Registry(Mapping):
             # must be reloaded.
             # The `base_cache_signaling` sequence indicates when all caches must
             # be invalidated (i.e. cleared).
-            cr.execute("SELECT sequence_name FROM information_schema.sequences WHERE sequence_name='base_registry_signaling'")
+            cr.execute(
+                "SELECT sequence_name FROM information_schema.sequences WHERE sequence_name='base_registry_signaling'"
+            )
             if not cr.fetchall():
-                cr.execute("CREATE SEQUENCE base_registry_signaling INCREMENT BY 1 START WITH 1")
+                cr.execute(
+                    "CREATE SEQUENCE base_registry_signaling INCREMENT BY 1 START WITH 1"
+                )
                 cr.execute("SELECT nextval('base_registry_signaling')")
-                cr.execute("CREATE SEQUENCE base_cache_signaling INCREMENT BY 1 START WITH 1")
+                cr.execute(
+                    "CREATE SEQUENCE base_cache_signaling INCREMENT BY 1 START WITH 1"
+                )
                 cr.execute("SELECT nextval('base_cache_signaling')")
 
-            cr.execute(""" SELECT base_registry_signaling.last_value,
+            cr.execute(
+                """ SELECT base_registry_signaling.last_value,
                                   base_cache_signaling.last_value
-                           FROM base_registry_signaling, base_cache_signaling""")
+                           FROM base_registry_signaling, base_cache_signaling"""
+            )
             self.registry_sequence, self.cache_sequence = cr.fetchone()
-            _logger.debug("Multiprocess load registry signaling: [Registry: %s] [Cache: %s]",
-                          self.registry_sequence, self.cache_sequence)
+            _logger.debug(
+                "Multiprocess load registry signaling: [Registry: %s] [Cache: %s]",
+                self.registry_sequence,
+                self.cache_sequence,
+            )
 
     def check_signaling(self):
         """ Check whether the registry has changed, and performs all necessary
@@ -605,12 +658,19 @@ class Registry(Mapping):
             return self
 
         with closing(self.cursor()) as cr:
-            cr.execute(""" SELECT base_registry_signaling.last_value,
+            cr.execute(
+                """ SELECT base_registry_signaling.last_value,
                                   base_cache_signaling.last_value
-                           FROM base_registry_signaling, base_cache_signaling""")
+                           FROM base_registry_signaling, base_cache_signaling"""
+            )
             r, c = cr.fetchone()
-            _logger.debug("Multiprocess signaling check: [Registry - %s -> %s] [Cache - %s -> %s]",
-                          self.registry_sequence, r, self.cache_sequence, c)
+            _logger.debug(
+                "Multiprocess signaling check: [Registry - %s -> %s] [Cache - %s -> %s]",
+                self.registry_sequence,
+                r,
+                self.cache_sequence,
+                c,
+            )
             # Check if the model registry must be reloaded
             if self.registry_sequence != r:
                 _logger.info("Reloading the model registry after database signaling.")
@@ -640,7 +700,9 @@ class Registry(Mapping):
         # no need to notify cache invalidation in case of registry invalidation,
         # because reloading the registry implies starting with an empty cache
         elif self.cache_invalidated and not self.in_test_mode():
-            _logger.info("At least one model cache has been invalidated, signaling through the database.")
+            _logger.info(
+                "At least one model cache has been invalidated, signaling through the database."
+            )
             with closing(self.cursor()) as cr:
                 cr.execute("select nextval('base_cache_signaling')")
                 self.cache_sequence = cr.fetchone()[0]
@@ -703,11 +765,15 @@ class Registry(Mapping):
 
 class DummyRLock(object):
     """ Dummy reentrant lock, to be used while running rpc and js tests """
+
     def acquire(self):
         pass
+
     def release(self):
         pass
+
     def __enter__(self):
         self.acquire()
+
     def __exit__(self, type, value, traceback):
         self.release()

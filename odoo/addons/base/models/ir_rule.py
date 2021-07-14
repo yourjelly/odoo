@@ -10,26 +10,37 @@ from odoo.tools import config
 from odoo.tools.safe_eval import safe_eval, time
 
 _logger = logging.getLogger(__name__)
+
+
 class IrRule(models.Model):
-    _name = 'ir.rule'
-    _description = 'Record Rule'
-    _order = 'model_id DESC,id'
-    _MODES = ['read', 'write', 'create', 'unlink']
+    _name = "ir.rule"
+    _description = "Record Rule"
+    _order = "model_id DESC,id"
+    _MODES = ["read", "write", "create", "unlink"]
 
     name = fields.Char(index=True)
-    active = fields.Boolean(default=True, help="If you uncheck the active field, it will disable the record rule without deleting it (if you delete a native record rule, it may be re-created when you reload the module).")
-    model_id = fields.Many2one('ir.model', string='Model', index=True, required=True, ondelete="cascade")
-    groups = fields.Many2many('res.groups', 'rule_group_rel', 'rule_group_id', 'group_id', ondelete='restrict')
-    domain_force = fields.Text(string='Domain')
-    perm_read = fields.Boolean(string='Apply for Read', default=True)
-    perm_write = fields.Boolean(string='Apply for Write', default=True)
-    perm_create = fields.Boolean(string='Apply for Create', default=True)
-    perm_unlink = fields.Boolean(string='Apply for Delete', default=True)
+    active = fields.Boolean(
+        default=True,
+        help="If you uncheck the active field, it will disable the record rule without deleting it (if you delete a native record rule, it may be re-created when you reload the module).",
+    )
+    model_id = fields.Many2one(
+        "ir.model", string="Model", index=True, required=True, ondelete="cascade"
+    )
+    groups = fields.Many2many(
+        "res.groups", "rule_group_rel", "rule_group_id", "group_id", ondelete="restrict"
+    )
+    domain_force = fields.Text(string="Domain")
+    perm_read = fields.Boolean(string="Apply for Read", default=True)
+    perm_write = fields.Boolean(string="Apply for Write", default=True)
+    perm_create = fields.Boolean(string="Apply for Create", default=True)
+    perm_unlink = fields.Boolean(string="Apply for Delete", default=True)
 
     _sql_constraints = [
-        ('no_access_rights',
-         'CHECK (perm_read!=False or perm_write!=False or perm_create!=False or perm_unlink!=False)',
-         'Rule must have at least one checked access right !'),
+        (
+            "no_access_rights",
+            "CHECK (perm_read!=False or perm_write!=False or perm_create!=False or perm_unlink!=False)",
+            "Rule must have at least one checked access right !",
+        ),
     ]
 
     def _eval_context_for_combinations(self):
@@ -37,8 +48,7 @@ class IrRule(models.Model):
            ir.rule domains, when the goal is to obtain python lists
            that are easier to parse and combine, but not to
            actually execute them."""
-        return {'user': tools.unquote('user'),
-                'time': tools.unquote('time')}
+        return {"user": tools.unquote("user"), "time": tools.unquote("time")}
 
     @api.model
     def _eval_context(self):
@@ -51,28 +61,30 @@ class IrRule(models.Model):
         # use an empty context for 'user' to make the domain evaluation
         # independent from the context
         return {
-            'user': self.env.user.with_context({}),
-            'time': time,
-            'company_ids': self.env.companies.ids,
-            'company_id': self.env.company.id,
+            "user": self.env.user.with_context({}),
+            "time": time,
+            "company_ids": self.env.companies.ids,
+            "company_id": self.env.company.id,
         }
 
-    @api.depends('groups')
+    @api.depends("groups")
     def _compute_global(self):
         for rule in self:
-            rule['global'] = not rule.groups
+            rule["global"] = not rule.groups
 
-    @api.constrains('model_id')
+    @api.constrains("model_id")
     def _check_model_name(self):
         # Don't allow rules on rules records (this model).
         if any(rule.model_id.model == self._name for rule in self):
-            raise ValidationError(_('Rules can not be applied on the Record Rules model.'))
+            raise ValidationError(
+                _("Rules can not be applied on the Record Rules model.")
+            )
 
     def _compute_domain_keys(self):
         """ Return the list of context keys to use for caching ``_compute_domain``. """
-        return ['allowed_company_ids']
+        return ["allowed_company_ids"]
 
-    def _get_failing(self, for_records, mode='read'):
+    def _get_failing(self, for_records, mode="read"):
         """ Returns the rules for the mode for the current user which fail on
         the specified records.
 
@@ -87,31 +99,38 @@ class IrRule(models.Model):
 
         # first check if the group rules fail for any record (aka if
         # searching on (records, group_rules) filters out some of the records)
-        group_rules = all_rules.filtered(lambda r: r.groups and r.groups & self.env.user.groups_id)
-        group_domains = expression.OR([
-            safe_eval(r.domain_force, eval_context) if r.domain_force else []
-            for r in group_rules
-        ])
+        group_rules = all_rules.filtered(
+            lambda r: r.groups and r.groups & self.env.user.groups_id
+        )
+        group_domains = expression.OR(
+            [
+                safe_eval(r.domain_force, eval_context) if r.domain_force else []
+                for r in group_rules
+            ]
+        )
         # if all records get returned, the group rules are not failing
-        if Model.search_count(expression.AND([[('id', 'in', for_records.ids)], group_domains])) == len(for_records):
+        if Model.search_count(
+            expression.AND([[("id", "in", for_records.ids)], group_domains])
+        ) == len(for_records):
             group_rules = self.browse(())
 
         # failing rules are previously selected group rules or any failing global rule
         def is_failing(r, ids=for_records.ids):
             dom = safe_eval(r.domain_force, eval_context) if r.domain_force else []
-            return Model.search_count(expression.AND([
-                [('id', 'in', ids)],
-                expression.normalize_domain(dom)
-            ])) < len(ids)
+            return Model.search_count(
+                expression.AND([[("id", "in", ids)], expression.normalize_domain(dom)])
+            ) < len(ids)
 
-        return all_rules.filtered(lambda r: r in group_rules or (not r.groups and is_failing(r))).with_user(self.env.user)
+        return all_rules.filtered(
+            lambda r: r in group_rules or (not r.groups and is_failing(r))
+        ).with_user(self.env.user)
 
-    def _get_rules(self, model_name, mode='read'):
+    def _get_rules(self, model_name, mode="read"):
         """ Returns all the rules matching the model for the mode for the
         current user.
         """
         if mode not in self._MODES:
-            raise ValueError('Invalid mode: %r' % (mode,))
+            raise ValueError("Invalid mode: %r" % (mode,))
 
         if self.env.su:
             return self.browse(())
@@ -123,15 +142,22 @@ class IrRule(models.Model):
                                   WHERE gu.uid=%s)
                          OR r.global)
                     ORDER BY r.id
-                """.format(mode=mode)
+                """.format(
+            mode=mode
+        )
         self._cr.execute(query, (model_name, self._uid))
         return self.browse(row[0] for row in self._cr.fetchall())
 
     @api.model
     @tools.conditional(
-        'xml' not in config['dev_mode'],
-        tools.ormcache('self.env.uid', 'self.env.su', 'model_name', 'mode',
-                       'tuple(self._compute_domain_context_values())'),
+        "xml" not in config["dev_mode"],
+        tools.ormcache(
+            "self.env.uid",
+            "self.env.su",
+            "model_name",
+            "mode",
+            "tuple(self._compute_domain_context_values())",
+        ),
     )
     def _compute_domain(self, model_name, mode="read"):
         rules = self._get_rules(model_name, mode=mode)
@@ -141,11 +167,13 @@ class IrRule(models.Model):
         # browse user and rules as SUPERUSER_ID to avoid access errors!
         eval_context = self._eval_context()
         user_groups = self.env.user.groups_id
-        global_domains = []                     # list of domains
-        group_domains = []                      # list of domains
+        global_domains = []  # list of domains
+        group_domains = []  # list of domains
         for rule in rules.sudo():
             # evaluate the domain for the current user
-            dom = safe_eval(rule.domain_force, eval_context) if rule.domain_force else []
+            dom = (
+                safe_eval(rule.domain_force, eval_context) if rule.domain_force else []
+            )
             dom = expression.normalize_domain(dom)
             if not rule.groups:
                 global_domains.append(dom)
@@ -173,7 +201,7 @@ class IrRule(models.Model):
         self.clear_caches()
 
     @api.model
-    def domain_get(self, model_name, mode='read'):
+    def domain_get(self, model_name, mode="read"):
         # this method is now unsafe, since it returns a list of tables which
         # does not contain the joins present in the generated Query object
         warnings.warn(
@@ -215,26 +243,52 @@ class IrRule(models.Model):
         return res
 
     def _make_access_error(self, operation, records):
-        _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self._uid, records._name)
+        _logger.info(
+            "Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s",
+            operation,
+            records.ids[:6],
+            self._uid,
+            records._name,
+        )
 
         model = records._name
-        description = self.env['ir.model']._get(model).name or model
+        description = self.env["ir.model"]._get(model).name or model
         msg_heads = {
             # Messages are declared in extenso so they are properly exported in translation terms
-            'read':   _("Due to security restrictions, you are not allowed to access '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'write':  _("Due to security restrictions, you are not allowed to modify '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'create': _("Due to security restrictions, you are not allowed to create '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model),
-            'unlink': _("Due to security restrictions, you are not allowed to delete '%(document_kind)s' (%(document_model)s) records.", document_kind=description, document_model=model)
+            "read": _(
+                "Due to security restrictions, you are not allowed to access '%(document_kind)s' (%(document_model)s) records.",
+                document_kind=description,
+                document_model=model,
+            ),
+            "write": _(
+                "Due to security restrictions, you are not allowed to modify '%(document_kind)s' (%(document_model)s) records.",
+                document_kind=description,
+                document_model=model,
+            ),
+            "create": _(
+                "Due to security restrictions, you are not allowed to create '%(document_kind)s' (%(document_model)s) records.",
+                document_kind=description,
+                document_model=model,
+            ),
+            "unlink": _(
+                "Due to security restrictions, you are not allowed to delete '%(document_kind)s' (%(document_model)s) records.",
+                document_kind=description,
+                document_model=model,
+            ),
         }
         operation_error = msg_heads[operation]
-        resolution_info = _("Contact your administrator to request access if necessary.")
+        resolution_info = _(
+            "Contact your administrator to request access if necessary."
+        )
 
-        if not self.env.user.has_group('base.group_no_one') or not self.env.user.has_group('base.group_user'):
+        if not self.env.user.has_group(
+            "base.group_no_one"
+        ) or not self.env.user.has_group("base.group_user"):
             msg = """{operation_error}
 
 {resolution_info}""".format(
-                operation_error=operation_error,
-                resolution_info=resolution_info)
+                operation_error=operation_error, resolution_info=resolution_info
+            )
             return AccessError(msg)
 
         # This extended AccessError is only displayed in debug mode.
@@ -243,16 +297,20 @@ class IrRule(models.Model):
         # so it is relatively safe here to include the list of rules and record names.
         rules = self._get_failing(records, mode=operation).sudo()
 
-        records_description = ', '.join(['%s (id=%s)' % (rec.display_name, rec.id) for rec in records[:6].sudo()])
+        records_description = ", ".join(
+            ["%s (id=%s)" % (rec.display_name, rec.id) for rec in records[:6].sudo()]
+        )
         failing_records = _("Records: %s", records_description)
 
-        user_description = '%s (id=%s)' % (self.env.user.name, self.env.user.id)
+        user_description = "%s (id=%s)" % (self.env.user.name, self.env.user.id)
         failing_user = _("User: %s", user_description)
 
-        rules_description = '\n'.join('- %s' % rule.name for rule in rules)
-        failing_rules = _("This restriction is due to the following rules:\n%s", rules_description)
-        if any('company_id' in (r.domain_force or []) for r in rules):
-            failing_rules += "\n\n" + _('Note: this might be a multi-company issue.')
+        rules_description = "\n".join("- %s" % rule.name for rule in rules)
+        failing_rules = _(
+            "This restriction is due to the following rules:\n%s", rules_description
+        )
+        if any("company_id" in (r.domain_force or []) for r in rules):
+            failing_rules += "\n\n" + _("Note: this might be a multi-company issue.")
 
         msg = """{operation_error}
 
@@ -262,11 +320,12 @@ class IrRule(models.Model):
 {failing_rules}
 
 {resolution_info}""".format(
-                operation_error=operation_error,
-                failing_records=failing_records,
-                failing_user=failing_user,
-                failing_rules=failing_rules,
-                resolution_info=resolution_info)
+            operation_error=operation_error,
+            failing_records=failing_records,
+            failing_user=failing_user,
+            failing_rules=failing_rules,
+            resolution_info=resolution_info,
+        )
 
         # clean up the cache of records prefetched with display_name above
         for record in records[:6]:
@@ -280,7 +339,10 @@ class IrRule(models.Model):
 # 'global' is a Python keyword. Therefore, we add it to the class by assignment.
 # Note that the attribute '_module' is normally added by the class' metaclass.
 #
-global_ = fields.Boolean(compute='_compute_global', store=True,
-                         help="If no group is specified the rule is global and applied to everyone")
-setattr(IrRule, 'global', global_)
-global_.__set_name__(IrRule, 'global')
+global_ = fields.Boolean(
+    compute="_compute_global",
+    store=True,
+    help="If no group is specified the rule is global and applied to everyone",
+)
+setattr(IrRule, "global", global_)
+global_.__set_name__(IrRule, "global")

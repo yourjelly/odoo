@@ -5,42 +5,72 @@ from odoo.exceptions import ValidationError
 
 class AccountTaxReport(models.Model):
     _name = "account.tax.report"
-    _description = 'Account Tax Report'
-    _order = 'country_id, name'
+    _description = "Account Tax Report"
+    _order = "country_id, name"
 
     name = fields.Char(string="Name", required=True, help="Name of this tax report")
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True, default=lambda x: x.env.company.country_id.id, help="Country for which this report is available.")
-    line_ids = fields.One2many(string="Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', help="Content of this tax report")
-    root_line_ids = fields.One2many(string="Root Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', domain=[('parent_id', '=', None)], help="Subset of line_ids, containing the lines at the root of the report.")
+    country_id = fields.Many2one(
+        string="Country",
+        comodel_name="res.country",
+        required=True,
+        default=lambda x: x.env.company.country_id.id,
+        help="Country for which this report is available.",
+    )
+    line_ids = fields.One2many(
+        string="Report Lines",
+        comodel_name="account.tax.report.line",
+        inverse_name="report_id",
+        help="Content of this tax report",
+    )
+    root_line_ids = fields.One2many(
+        string="Root Report Lines",
+        comodel_name="account.tax.report.line",
+        inverse_name="report_id",
+        domain=[("parent_id", "=", None)],
+        help="Subset of line_ids, containing the lines at the root of the report.",
+    )
 
     def write(self, vals):
         # Overridden so that we change the country _id of the existing tags
         # when writing the country_id of the report, or create new tags
         # for the new country if the tags are shared with some other report.
 
-        if 'country_id' in vals:
+        if "country_id" in vals:
             tags_cache = {}
-            for record in self.filtered(lambda x: x.country_id.id != vals['country_id']):
+            for record in self.filtered(
+                lambda x: x.country_id.id != vals["country_id"]
+            ):
                 for line in record.line_ids:
                     if line.tag_ids:
-                        #The tags for this country may have been created by a previous line in this loop
-                        cache_key = (vals['country_id'], line.tag_name)
+                        # The tags for this country may have been created by a previous line in this loop
+                        cache_key = (vals["country_id"], line.tag_name)
                         if cache_key not in tags_cache:
-                            tags_cache[cache_key] = self.env['account.account.tag']._get_tax_tags(line.tag_name, vals['country_id'])
+                            tags_cache[cache_key] = self.env[
+                                "account.account.tag"
+                            ]._get_tax_tags(line.tag_name, vals["country_id"])
 
                         new_tags = tags_cache[cache_key]
 
                         if new_tags:
                             line._remove_tags_used_only_by_self()
-                            line.write({'tag_ids': [(6, 0, new_tags.ids)]})
+                            line.write({"tag_ids": [(6, 0, new_tags.ids)]})
 
-                        elif line.mapped('tag_ids.tax_report_line_ids.report_id').filtered(lambda x: x not in self):
+                        elif line.mapped(
+                            "tag_ids.tax_report_line_ids.report_id"
+                        ).filtered(lambda x: x not in self):
                             line._remove_tags_used_only_by_self()
-                            line.write({'tag_ids': [(5, 0, 0)] + line._get_tags_create_vals(line.tag_name, vals['country_id'])})
+                            line.write(
+                                {
+                                    "tag_ids": [(5, 0, 0)]
+                                    + line._get_tags_create_vals(
+                                        line.tag_name, vals["country_id"]
+                                    )
+                                }
+                            )
                             tags_cache[cache_key] = line.tag_ids
 
                         else:
-                            line.tag_ids.write({'country_id': vals['country_id']})
+                            line.tag_ids.write({"country_id": vals["country_id"]})
 
         return super(AccountTaxReport, self).write(vals)
 
@@ -49,16 +79,25 @@ class AccountTaxReport(models.Model):
         # the copy of the lines hierarchy properly (all the parent_id fields
         # need to be reassigned to the corresponding copies).
 
-        copy_default = {k:v for k, v in default.items() if k != 'line_ids'} if default else None
-        copied_report = super(AccountTaxReport, self).copy(default=copy_default) #This copies the report without its lines
+        copy_default = (
+            {k: v for k, v in default.items() if k != "line_ids"} if default else None
+        )
+        copied_report = super(AccountTaxReport, self).copy(
+            default=copy_default
+        )  # This copies the report without its lines
 
-        lines_map = {} # maps original lines to their copies (using ids)
+        lines_map = {}  # maps original lines to their copies (using ids)
         lines_to_treat = list(self.line_ids.filtered(lambda x: not x.parent_id))
         while lines_to_treat:
             line = lines_to_treat.pop()
             lines_to_treat += list(line.children_line_ids)
 
-            copy = line.copy({'parent_id': lines_map.get(line.parent_id.id, None), 'report_id': copied_report.id})
+            copy = line.copy(
+                {
+                    "parent_id": lines_map.get(line.parent_id.id, None),
+                    "report_id": copied_report.id,
+                }
+            )
             lines_map[line.id] = copy.id
 
         return copied_report
@@ -68,10 +107,17 @@ class AccountTaxReport(models.Model):
         ar all directly followed by their children.
         """
         self.ensure_one()
-        lines_to_treat = list(self.line_ids.filtered(lambda x: not x.parent_id).sorted(lambda x: x.sequence)) # Used as a stack, whose index 0 is the top
+        lines_to_treat = list(
+            self.line_ids.filtered(lambda x: not x.parent_id).sorted(
+                lambda x: x.sequence
+            )
+        )  # Used as a stack, whose index 0 is the top
         while lines_to_treat:
             to_yield = lines_to_treat[0]
-            lines_to_treat = list(to_yield.children_line_ids.sorted(lambda x: x.sequence)) + lines_to_treat[1:]
+            lines_to_treat = (
+                list(to_yield.children_line_ids.sorted(lambda x: x.sequence))
+                + lines_to_treat[1:]
+            )
             yield to_yield
 
     def get_checks_to_perform(self, amounts, carried_over):
@@ -87,86 +133,133 @@ class AccountTaxReport(models.Model):
 
     def validate_country_id(self):
         for record in self:
-            if any(line.tag_ids.mapped('country_id') != record.country_id for line in record.line_ids):
-                raise ValidationError(_("The tags associated with tax report line objects should all have the same country set as the tax report containing these lines."))
+            if any(
+                line.tag_ids.mapped("country_id") != record.country_id
+                for line in record.line_ids
+            ):
+                raise ValidationError(
+                    _(
+                        "The tags associated with tax report line objects should all have the same country set as the tax report containing these lines."
+                    )
+                )
 
 
 class AccountTaxReportLine(models.Model):
     _name = "account.tax.report.line"
-    _description = 'Account Tax Report Line'
-    _order = 'sequence'
+    _description = "Account Tax Report Line"
+    _order = "sequence"
     _parent_store = True
 
-    name = fields.Char(string="Name", required=True, help="Complete name for this report line, to be used in report.")
-    tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', relation='account_tax_report_line_tags_rel', help="Tax tags populating this line")
-    report_action_id = fields.Many2one(string="Report Action", comodel_name='ir.actions.act_window', help="The optional action to call when clicking on this line in accounting reports.")
-    children_line_ids = fields.One2many(string="Children Lines", comodel_name='account.tax.report.line', inverse_name='parent_id', help="Lines that should be rendered as children of this one")
-    parent_id = fields.Many2one(string="Parent Line", comodel_name='account.tax.report.line')
-    sequence = fields.Integer(string='Sequence', required=True,
-        help="Sequence determining the order of the lines in the report (smaller ones come first). This order is applied locally per section (so, children of the same line are always rendered one after the other).")
+    name = fields.Char(
+        string="Name",
+        required=True,
+        help="Complete name for this report line, to be used in report.",
+    )
+    tag_ids = fields.Many2many(
+        string="Tags",
+        comodel_name="account.account.tag",
+        relation="account_tax_report_line_tags_rel",
+        help="Tax tags populating this line",
+    )
+    report_action_id = fields.Many2one(
+        string="Report Action",
+        comodel_name="ir.actions.act_window",
+        help="The optional action to call when clicking on this line in accounting reports.",
+    )
+    children_line_ids = fields.One2many(
+        string="Children Lines",
+        comodel_name="account.tax.report.line",
+        inverse_name="parent_id",
+        help="Lines that should be rendered as children of this one",
+    )
+    parent_id = fields.Many2one(
+        string="Parent Line", comodel_name="account.tax.report.line"
+    )
+    sequence = fields.Integer(
+        string="Sequence",
+        required=True,
+        help="Sequence determining the order of the lines in the report (smaller ones come first). This order is applied locally per section (so, children of the same line are always rendered one after the other).",
+    )
     parent_path = fields.Char(index=True)
-    report_id = fields.Many2one(string="Tax Report", required=True, comodel_name='account.tax.report', ondelete='cascade', help="The parent tax report of this line")
+    report_id = fields.Many2one(
+        string="Tax Report",
+        required=True,
+        comodel_name="account.tax.report",
+        ondelete="cascade",
+        help="The parent tax report of this line",
+    )
 
     # helper to create tags (positive and negative) on report line creation
-    tag_name = fields.Char(string="Tag Name", help="Short name for the tax grid corresponding to this report line. Leave empty if this report line should not correspond to any such grid.")
+    tag_name = fields.Char(
+        string="Tag Name",
+        help="Short name for the tax grid corresponding to this report line. Leave empty if this report line should not correspond to any such grid.",
+    )
 
     # fields used in specific localization reports, where a report line isn't simply the given by the sum of account.move.line with selected tags
-    code = fields.Char(string="Code", help="Optional unique code to refer to this line in total formulas")
-    formula = fields.Char(string="Formula", help="Python expression used to compute the value of a total line. This field is mutually exclusive with tag_name, setting it turns the line to a total line. Tax report line codes can be used as variables in this expression to refer to the balance of the corresponding lines in the report. A formula cannot refer to another line using a formula.")
+    code = fields.Char(
+        string="Code",
+        help="Optional unique code to refer to this line in total formulas",
+    )
+    formula = fields.Char(
+        string="Formula",
+        help="Python expression used to compute the value of a total line. This field is mutually exclusive with tag_name, setting it turns the line to a total line. Tax report line codes can be used as variables in this expression to refer to the balance of the corresponding lines in the report. A formula cannot refer to another line using a formula.",
+    )
 
     # fields used to carry over amounts between periods
 
     # The selection should be filled in localizations using the system
     carry_over_condition_method = fields.Selection(
-        selection=[('no_negative_amount_carry_over_condition', 'No negative amount')],
+        selection=[("no_negative_amount_carry_over_condition", "No negative amount")],
         string="Carryover method",
-        help="The method used to determine if this line should be carried over."
+        help="The method used to determine if this line should be carried over.",
     )
     carry_over_destination_line_id = fields.Many2one(
         string="Carryover to",
         comodel_name="account.tax.report.line",
-        domain=[('tag_name', '!=', False)],
+        domain=[("tag_name", "!=", False)],
         help="The line to which the value of this line will be carried over to if needed."
-             " If left empty the line will carry over to itself."
+        " If left empty the line will carry over to itself.",
     )
     carryover_line_ids = fields.One2many(
         string="Carryover lines",
-        comodel_name='account.tax.carryover.line',
-        inverse_name='tax_report_line_id',
+        comodel_name="account.tax.carryover.line",
+        inverse_name="tax_report_line_id",
     )
 
     @api.model
     def create(self, vals):
         # Manage tags
-        tag_name = vals.get('tag_name', '')
-        if tag_name and vals.get('report_id'):
-            report = self.env['account.tax.report'].browse(vals['report_id'])
+        tag_name = vals.get("tag_name", "")
+        if tag_name and vals.get("report_id"):
+            report = self.env["account.tax.report"].browse(vals["report_id"])
             country = report.country_id
 
-            existing_tags = self.env['account.account.tag']._get_tax_tags(tag_name, country.id)
+            existing_tags = self.env["account.account.tag"]._get_tax_tags(
+                tag_name, country.id
+            )
 
             if existing_tags:
                 # We connect the new report line to the already existing tags
-                vals['tag_ids'] = [(6, 0, existing_tags.ids)]
+                vals["tag_ids"] = [(6, 0, existing_tags.ids)]
             else:
                 # We create new ones
-                vals['tag_ids'] = self._get_tags_create_vals(tag_name, country.id)
+                vals["tag_ids"] = self._get_tags_create_vals(tag_name, country.id)
 
         return super(AccountTaxReportLine, self).create(vals)
 
     @api.model
     def _get_tags_create_vals(self, tag_name, country_id):
         minus_tag_vals = {
-          'name': '-' + tag_name,
-          'applicability': 'taxes',
-          'tax_negate': True,
-          'country_id': country_id,
+            "name": "-" + tag_name,
+            "applicability": "taxes",
+            "tax_negate": True,
+            "country_id": country_id,
         }
         plus_tag_vals = {
-          'name': '+' + tag_name,
-          'applicability': 'taxes',
-          'tax_negate': False,
-          'country_id': country_id,
+            "name": "+" + tag_name,
+            "applicability": "taxes",
+            "tax_negate": False,
+            "country_id": country_id,
         }
         return [(0, 0, minus_tag_vals), (0, 0, plus_tag_vals)]
 
@@ -177,10 +270,10 @@ class AccountTaxReportLine(models.Model):
         # tag_name, and perform it only after having generated/retrieved the tags.
         # Otherwise, tag_name and tags' name would not match, breaking
         # _validate_tags constaint.
-        postpone_tag_name = 'tag_name' in vals and not 'tag_ids' in vals
+        postpone_tag_name = "tag_name" in vals and not "tag_ids" in vals
 
         if postpone_tag_name:
-            tag_name_postponed = vals.pop('tag_name')
+            tag_name_postponed = vals.pop("tag_name")
 
         rslt = super(AccountTaxReportLine, self).write(vals)
 
@@ -191,58 +284,95 @@ class AccountTaxReportLine(models.Model):
 
             records_by_country = {}
             for record in self.filtered(lambda x: x.tag_name != tag_name_postponed):
-                records_by_country[record.report_id.country_id.id] = records_by_country.get(record.report_id.country_id.id, self.env['account.tax.report.line']) + record
+                records_by_country[record.report_id.country_id.id] = (
+                    records_by_country.get(
+                        record.report_id.country_id.id,
+                        self.env["account.tax.report.line"],
+                    )
+                    + record
+                )
 
             for country_id, records in records_by_country.items():
                 if tag_name_postponed:
-                    record_tag_names = records.mapped('tag_name')
+                    record_tag_names = records.mapped("tag_name")
                     if len(record_tag_names) == 1 and record_tag_names[0]:
                         # If all the records already have the same tag_name before writing,
                         # we simply want to change the name of the existing tags
-                        to_update = records.mapped('tag_ids.tax_report_line_ids')
-                        tags_to_update = to_update.mapped('tag_ids')
-                        minus_child_tags = tags_to_update.filtered(lambda x: x.tax_negate)
-                        minus_child_tags.write({'name': '-' + tag_name_postponed})
-                        plus_child_tags = tags_to_update.filtered(lambda x: not x.tax_negate)
-                        plus_child_tags.write({'name': '+' + tag_name_postponed})
-                        super(AccountTaxReportLine, to_update).write({'tag_name': tag_name_postponed})
+                        to_update = records.mapped("tag_ids.tax_report_line_ids")
+                        tags_to_update = to_update.mapped("tag_ids")
+                        minus_child_tags = tags_to_update.filtered(
+                            lambda x: x.tax_negate
+                        )
+                        minus_child_tags.write({"name": "-" + tag_name_postponed})
+                        plus_child_tags = tags_to_update.filtered(
+                            lambda x: not x.tax_negate
+                        )
+                        plus_child_tags.write({"name": "+" + tag_name_postponed})
+                        super(AccountTaxReportLine, to_update).write(
+                            {"tag_name": tag_name_postponed}
+                        )
 
                     else:
-                        existing_tags = self.env['account.account.tag']._get_tax_tags(tag_name_postponed, country_id)
+                        existing_tags = self.env["account.account.tag"]._get_tax_tags(
+                            tag_name_postponed, country_id
+                        )
                         records_to_link = records
-                        tags_to_remove = self.env['account.account.tag']
+                        tags_to_remove = self.env["account.account.tag"]
 
                         if not existing_tags and records_to_link:
                             # If the tag does not exist yet, we first create it by
                             # linking it to the first report line of the record set
                             first_record = records_to_link[0]
                             tags_to_remove += first_record.tag_ids
-                            first_record.write({'tag_name': tag_name_postponed, 'tag_ids': [(5, 0, 0)] + self._get_tags_create_vals(tag_name_postponed, country_id)})
+                            first_record.write(
+                                {
+                                    "tag_name": tag_name_postponed,
+                                    "tag_ids": [(5, 0, 0)]
+                                    + self._get_tags_create_vals(
+                                        tag_name_postponed, country_id
+                                    ),
+                                }
+                            )
                             existing_tags = first_record.tag_ids
                             records_to_link -= first_record
 
                         # All the lines sharing their tags must always be synchronized,
-                        tags_to_remove += records_to_link.mapped('tag_ids')
-                        records_to_link = tags_to_remove.mapped('tax_report_line_ids')
-                        tags_to_remove.mapped('tax_report_line_ids')._remove_tags_used_only_by_self()
-                        records_to_link.write({'tag_name': tag_name_postponed, 'tag_ids': [(2, tag.id) for tag in tags_to_remove] + [(6, 0, existing_tags.ids)]})
+                        tags_to_remove += records_to_link.mapped("tag_ids")
+                        records_to_link = tags_to_remove.mapped("tax_report_line_ids")
+                        tags_to_remove.mapped(
+                            "tax_report_line_ids"
+                        )._remove_tags_used_only_by_self()
+                        records_to_link.write(
+                            {
+                                "tag_name": tag_name_postponed,
+                                "tag_ids": [(2, tag.id) for tag in tags_to_remove]
+                                + [(6, 0, existing_tags.ids)],
+                            }
+                        )
 
                 else:
                     # tag_name was set empty, so we remove the tags on current lines
                     # If some tags are still referenced by other report lines,
                     # we keep them ; else, we delete them from DB
-                    line_tags = records.mapped('tag_ids')
-                    other_lines_same_tag = line_tags.mapped('tax_report_line_ids').filtered(lambda x: x not in records)
+                    line_tags = records.mapped("tag_ids")
+                    other_lines_same_tag = line_tags.mapped(
+                        "tax_report_line_ids"
+                    ).filtered(lambda x: x not in records)
                     if not other_lines_same_tag:
                         self._delete_tags_from_taxes(line_tags.ids)
                     orm_cmd_code = other_lines_same_tag and 3 or 2
-                    records.write({'tag_name': None, 'tag_ids': [(orm_cmd_code, tag.id) for tag in line_tags]})
+                    records.write(
+                        {
+                            "tag_name": None,
+                            "tag_ids": [(orm_cmd_code, tag.id) for tag in line_tags],
+                        }
+                    )
 
         return rslt
 
     def unlink(self):
         self._remove_tags_used_only_by_self()
-        children = self.mapped('children_line_ids')
+        children = self.mapped("children_line_ids")
         if children:
             children.unlink()
         return super(AccountTaxReportLine, self).unlink()
@@ -252,9 +382,9 @@ class AccountTaxReportLine(models.Model):
         tags from the provided tax report lines that are not linked
         to any other tax report lines.
         """
-        all_tags = self.mapped('tag_ids')
+        all_tags = self.mapped("tag_ids")
         tags_to_unlink = all_tags.filtered(lambda x: not (x.tax_report_line_ids - self))
-        self.write({'tag_ids': [(3, tag.id, 0) for tag in tags_to_unlink]})
+        self.write({"tag_ids": [(3, tag.id, 0) for tag in tags_to_unlink]})
         self._delete_tags_from_taxes(tags_to_unlink.ids)
 
     @api.model
@@ -267,52 +397,72 @@ class AccountTaxReportLine(models.Model):
             # Nothing to do, then!
             return
 
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            """
             delete from account_account_tag_account_tax_repartition_line_rel
             where account_account_tag_id in %(tag_ids_to_delete)s;
 
             delete from account_account_tag_account_move_line_rel
             where account_account_tag_id in %(tag_ids_to_delete)s;
-        """, {'tag_ids_to_delete': tuple(tag_ids_to_delete)})
+        """,
+            {"tag_ids_to_delete": tuple(tag_ids_to_delete)},
+        )
 
-        self.env['account.move.line'].invalidate_cache(fnames=['tax_tag_ids'])
-        self.env['account.tax.repartition.line'].invalidate_cache(fnames=['tag_ids'])
+        self.env["account.move.line"].invalidate_cache(fnames=["tax_tag_ids"])
+        self.env["account.tax.repartition.line"].invalidate_cache(fnames=["tag_ids"])
 
-        self.env['account.account.tag'].browse(tag_ids_to_delete).unlink()
+        self.env["account.account.tag"].browse(tag_ids_to_delete).unlink()
 
-    @api.constrains('formula', 'tag_name')
+    @api.constrains("formula", "tag_name")
     def _validate_formula(self):
         for record in self:
             if record.formula and record.tag_name:
-                raise ValidationError(_("Tag name and formula are mutually exclusive, they should not be set together on the same tax report line."))
+                raise ValidationError(
+                    _(
+                        "Tag name and formula are mutually exclusive, they should not be set together on the same tax report line."
+                    )
+                )
 
-    @api.constrains('tag_name', 'tag_ids')
+    @api.constrains("tag_name", "tag_ids")
     def _validate_tags(self):
         for record in self.filtered(lambda x: x.tag_ids):
             neg_tags = record.tag_ids.filtered(lambda x: x.tax_negate)
             pos_tags = record.tag_ids.filtered(lambda x: not x.tax_negate)
 
-            if (len(neg_tags) != 1 or len(pos_tags) != 1):
-                raise ValidationError(_("If tags are defined for a tax report line, only two are allowed on it: a positive and a negative one."))
+            if len(neg_tags) != 1 or len(pos_tags) != 1:
+                raise ValidationError(
+                    _(
+                        "If tags are defined for a tax report line, only two are allowed on it: a positive and a negative one."
+                    )
+                )
 
-            if neg_tags.name != '-'+record.tag_name or pos_tags.name != '+'+record.tag_name:
-                raise ValidationError(_("The tags linked to a tax report line should always match its tag name."))
+            if (
+                neg_tags.name != "-" + record.tag_name
+                or pos_tags.name != "+" + record.tag_name
+            ):
+                raise ValidationError(
+                    _(
+                        "The tags linked to a tax report line should always match its tag name."
+                    )
+                )
 
     def action_view_carryover_lines(self):
-        ''' Action when clicking on the "View carryover lines" in the carryover info popup.
+        """ Action when clicking on the "View carryover lines" in the carryover info popup.
 
         :return:    An action showing the account.tax.carryover.lines for the current tax report line.
-        '''
+        """
         self.ensure_one()
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Carryover Lines For %s', self.name),
-            'res_model': 'account.tax.carryover.line',
-            'view_type': 'list',
-            'view_mode': 'list',
-            'views': [[self.env.ref('account.account_tax_carryover_line_tree').id, 'list'],
-                      [False, 'form']],
-            'domain': [('id', 'in', self.carryover_line_ids.ids)],
+            "type": "ir.actions.act_window",
+            "name": _("Carryover Lines For %s", self.name),
+            "res_model": "account.tax.carryover.line",
+            "view_type": "list",
+            "view_mode": "list",
+            "views": [
+                [self.env.ref("account.account_tax_carryover_line_tree").id, "list"],
+                [False, "form"],
+            ],
+            "domain": [("id", "in", self.carryover_line_ids.ids)],
         }
 
     def _get_carryover_bounds(self, options, line_amount, carried_over_amount):
@@ -338,7 +488,9 @@ class AccountTaxReportLine(models.Model):
 
         return None
 
-    def no_negative_amount_carry_over_condition(self, options, line_amount, carried_over_amount):
+    def no_negative_amount_carry_over_condition(
+        self, options, line_amount, carried_over_amount
+    ):
         # The bounds are (0, None).
         # Lines below 0 will be set to 0 and reduce the balance of the carryover.
         # Lines above 0 will never be carried over

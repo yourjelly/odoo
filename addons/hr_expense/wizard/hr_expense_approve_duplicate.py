@@ -13,17 +13,19 @@ class HrExpenseApproveDuplicate(models.TransientModel):
     _name = "hr.expense.approve.duplicate"
     _description = "Expense Approve Duplicate"
 
-    sheet_ids = fields.Many2many('hr.expense.sheet')
-    expense_ids = fields.Many2many('hr.expense', readonly=True)
+    sheet_ids = fields.Many2many("hr.expense.sheet")
+    expense_ids = fields.Many2many("hr.expense", readonly=True)
 
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
 
-        if 'sheet_ids' in fields:
-            res['sheet_ids'] = [(6, 0, self.env.context.get('default_sheet_ids', []))]
-        if 'duplicate_expense_ids' in fields:
-            res['expense_ids'] = [(6, 0, self.env.context.get('default_expense_ids', []))]
+        if "sheet_ids" in fields:
+            res["sheet_ids"] = [(6, 0, self.env.context.get("default_sheet_ids", []))]
+        if "duplicate_expense_ids" in fields:
+            res["expense_ids"] = [
+                (6, 0, self.env.context.get("default_expense_ids", []))
+            ]
 
         return res
 
@@ -31,4 +33,4 @@ class HrExpenseApproveDuplicate(models.TransientModel):
         self.sheet_ids._do_approve()
 
     def action_refuse(self):
-        self.sheet_ids.refuse_sheet(_('Duplicate Expense'))
+        self.sheet_ids.refuse_sheet(_("Duplicate Expense"))

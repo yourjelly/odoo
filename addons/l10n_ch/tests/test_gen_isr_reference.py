@@ -4,7 +4,7 @@
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import common, Form
 
-QR_IBAN = 'CH21 3080 8001 2345 6782 7'
+QR_IBAN = "CH21 3080 8001 2345 6782 7"
 ISR_SUBS_NUMBER = "01-162-8"
 
 
@@ -16,10 +16,7 @@ class TestGenISRReference(AccountTestInvoicingCommon):
         super().setUpClass(chart_template_ref=chart_template_ref)
         cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
         cls.bank = cls.env["res.bank"].create(
-            {
-                "name": "Alternative Bank Schweiz AG",
-                "bic": "ALSWCH21XXX",
-            }
+            {"name": "Alternative Bank Schweiz AG", "bic": "ALSWCH21XXX",}
         )
         cls.bank_acc_isr = cls.env["res.partner.bank"].create(
             {
@@ -36,7 +33,9 @@ class TestGenISRReference(AccountTestInvoicingCommon):
                 "partner_id": cls.partner_a.id,
             }
         )
-        cls.invoice = cls.init_invoice("out_invoice", products=cls.product_a+cls.product_b)
+        cls.invoice = cls.init_invoice(
+            "out_invoice", products=cls.product_a + cls.product_b
+        )
 
     def test_isr(self):
 

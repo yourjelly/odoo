@@ -5,7 +5,7 @@ from odoo import api, models
 
 
 class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+    _inherit = "account.move.line"
 
     def _sale_can_be_reinvoice(self):
         """ determine if the generated analytic line should be reinvoiced or not.
@@ -13,7 +13,10 @@ class AccountMoveLine(models.Model):
         """
         self.ensure_one()
         if self.expense_id:  # expense flow is different from vendor bill reinvoice flow
-            return self.expense_id.product_id.expense_policy in ['sales_price', 'cost'] and self.expense_id.sale_order_id
+            return (
+                self.expense_id.product_id.expense_policy in ["sales_price", "cost"]
+                and self.expense_id.sale_order_id
+            )
         return super(AccountMoveLine, self)._sale_can_be_reinvoice()
 
     def _sale_determine_order(self):
@@ -25,7 +28,9 @@ class AccountMoveLine(models.Model):
 
         mapping_from_expense = {}
         for move_line in self.filtered(lambda move_line: move_line.expense_id):
-            mapping_from_expense[move_line.id] = move_line.expense_id.sale_order_id or None
+            mapping_from_expense[move_line.id] = (
+                move_line.expense_id.sale_order_id or None
+            )
 
         mapping_from_invoice.update(mapping_from_expense)
         return mapping_from_invoice
@@ -35,5 +40,5 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         res = super()._sale_prepare_sale_line_values(order, price)
         if self.expense_id:
-            res.update({'product_uom_qty': self.expense_id.quantity})
+            res.update({"product_uom_qty": self.expense_id.quantity})
         return res

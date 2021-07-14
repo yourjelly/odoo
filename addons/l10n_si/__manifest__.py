@@ -8,12 +8,9 @@
     "version": "1.1",
     "author": "Mentis d.o.o.",
     "website": "http://www.mentis.si",
-    'category': 'Accounting/Localizations/Account Charts',
+    "category": "Accounting/Localizations/Account Charts",
     "description": "Kontni načrt za gospodarske družbe",
-    "depends": [
-        "account",
-        "base_iban",
-    ],
+    "depends": ["account", "base_iban",],
     "data": [
         "data/l10n_si_chart_data.xml",
         "data/account.account.template.csv",
@@ -26,7 +23,5 @@
         "data/account.fiscal.position.tax.template.csv",
         "data/account_chart_template_data.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

@@ -5,9 +5,9 @@ from odoo import api, fields, models
 
 
 class PurchaseOrder(models.Model):
-    _inherit = 'purchase.order'
+    _inherit = "purchase.order"
 
-    @api.onchange('requisition_id')
+    @api.onchange("requisition_id")
     def _onchange_requisition_id(self):
         super(PurchaseOrder, self)._onchange_requisition_id()
         if self.requisition_id:

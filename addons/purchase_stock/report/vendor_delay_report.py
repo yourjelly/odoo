@@ -11,17 +11,18 @@ class VendorDelayReport(models.Model):
     _description = "Vendor Delay Report"
     _auto = False
 
-    partner_id = fields.Many2one('res.partner', 'Vendor', readonly=True)
-    product_id = fields.Many2one('product.product', 'Product', readonly=True)
-    category_id = fields.Many2one('product.category', 'Product Category', readonly=True)
-    date = fields.Datetime('Effective Date', readonly=True)
-    qty_total = fields.Float('Total Quantity', readonly=True)
-    qty_on_time = fields.Float('On-Time Quantity', readonly=True)
-    on_time_rate = fields.Float('On-Time Delivery Rate', readonly=True)
+    partner_id = fields.Many2one("res.partner", "Vendor", readonly=True)
+    product_id = fields.Many2one("product.product", "Product", readonly=True)
+    category_id = fields.Many2one("product.category", "Product Category", readonly=True)
+    date = fields.Datetime("Effective Date", readonly=True)
+    qty_total = fields.Float("Total Quantity", readonly=True)
+    qty_on_time = fields.Float("On-Time Quantity", readonly=True)
+    on_time_rate = fields.Float("On-Time Delivery Rate", readonly=True)
 
     def init(self):
-        tools.drop_view_if_exists(self.env.cr, 'vendor_delay_report')
-        self.env.cr.execute("""
+        tools.drop_view_if_exists(self.env.cr, "vendor_delay_report")
+        self.env.cr.execute(
+            """
 CREATE OR replace VIEW vendor_delay_report AS(
 SELECT m.id                     AS id,
        m.date                   AS date,
@@ -49,25 +50,44 @@ FROM   stock_move m
          ON pc.id = pt.categ_id
 WHERE  m.state = 'done'
 GROUP  BY m.id
-)""")
+)"""
+        )
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        if 'on_time_rate' not in fields:
-            res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+    def read_group(
+        self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True
+    ):
+        if "on_time_rate" not in fields:
+            res = super().read_group(
+                domain,
+                fields,
+                groupby,
+                offset=offset,
+                limit=limit,
+                orderby=orderby,
+                lazy=lazy,
+            )
             return res
 
-        fields.remove('on_time_rate')
-        if 'qty_total' not in fields:
-            fields.append('qty_total')
-        if 'qty_on_time' not in fields:
-            fields.append('qty_on_time')
-        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        fields.remove("on_time_rate")
+        if "qty_total" not in fields:
+            fields.append("qty_total")
+        if "qty_on_time" not in fields:
+            fields.append("qty_on_time")
+        res = super().read_group(
+            domain,
+            fields,
+            groupby,
+            offset=offset,
+            limit=limit,
+            orderby=orderby,
+            lazy=lazy,
+        )
         for group in res:
-            if group['qty_total'] == 0:
+            if group["qty_total"] == 0:
                 on_time_rate = 100
             else:
-                on_time_rate = group['qty_on_time'] / group['qty_total'] * 100
-            group.update({'on_time_rate': on_time_rate})
+                on_time_rate = group["qty_on_time"] / group["qty_total"] * 100
+            group.update({"on_time_rate": on_time_rate})
 
         return res

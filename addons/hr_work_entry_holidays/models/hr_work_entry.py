@@ -5,10 +5,10 @@ from odoo import fields, models
 
 
 class HrWorkEntry(models.Model):
-    _inherit = 'hr.work.entry'
+    _inherit = "hr.work.entry"
 
-    leave_id = fields.Many2one('hr.leave', string='Time Off')
-    leave_state = fields.Selection(related='leave_id.state')
+    leave_id = fields.Many2one("hr.leave", string="Time Off")
+    leave_state = fields.Selection(related="leave_id.state")
 
     def _get_duration(self, date_start, date_stop):
         if not date_start or not date_stop:
@@ -17,19 +17,24 @@ class HrWorkEntry(models.Model):
             calendar = self.contract_id.resource_calendar_id
             employee = self.contract_id.employee_id
             contract_data = employee._get_work_days_data_batch(
-                date_start, date_stop, compute_leaves=False, calendar=calendar)[employee.id]
-            return contract_data.get('hours', 0)
+                date_start, date_stop, compute_leaves=False, calendar=calendar
+            )[employee.id]
+            return contract_data.get("hours", 0)
         return super()._get_duration(date_start, date_stop)
 
     def write(self, vals):
-        if 'state' in vals and vals['state'] == 'cancelled':
-            self.mapped('leave_id').filtered(lambda l: l.state != 'refuse').action_refuse()
+        if "state" in vals and vals["state"] == "cancelled":
+            self.mapped("leave_id").filtered(
+                lambda l: l.state != "refuse"
+            ).action_refuse()
         return super().write(vals)
 
     def _reset_conflicting_state(self):
         super()._reset_conflicting_state()
-        attendances = self.filtered(lambda w: w.work_entry_type_id and not w.work_entry_type_id.is_leave)
-        attendances.write({'leave_id': False})
+        attendances = self.filtered(
+            lambda w: w.work_entry_type_id and not w.work_entry_type_id.is_leave
+        )
+        attendances.write({"leave_id": False})
 
     def _check_if_error(self):
         res = super()._check_if_error()
@@ -40,8 +45,8 @@ class HrWorkEntry(models.Model):
         if not self:
             return False
 
-        self.flush(['date_start', 'date_stop', 'employee_id'])
-        self.env['hr.leave'].flush(['date_from', 'date_to', 'state', 'employee_id'])
+        self.flush(["date_start", "date_stop", "employee_id"])
+        self.env["hr.leave"].flush(["date_from", "date_to", "state", "employee_id"])
 
         query = """
             SELECT
@@ -59,23 +64,22 @@ class HrWorkEntry(models.Model):
         self.env.cr.execute(query, [tuple(self.ids)])
         conflicts = self.env.cr.dictfetchall()
         for res in conflicts:
-            self.browse(res.get('work_entry_id')).write({
-                'state': 'conflict',
-                'leave_id': res.get('leave_id')
-            })
+            self.browse(res.get("work_entry_id")).write(
+                {"state": "conflict", "leave_id": res.get("leave_id")}
+            )
         return bool(conflicts)
 
     def action_approve_leave(self):
         self.ensure_one()
         if self.leave_id:
             # Already confirmed once
-            if self.leave_id.state == 'validate1':
+            if self.leave_id.state == "validate1":
                 self.leave_id.action_validate()
             # Still in confirmed state
             else:
                 self.leave_id.action_approve()
                 # If double validation, still have to validate it again
-                if self.leave_id.validation_type == 'both':
+                if self.leave_id.validation_type == "both":
                     self.leave_id.action_validate()
 
     def action_refuse_leave(self):
@@ -86,9 +90,12 @@ class HrWorkEntry(models.Model):
 
 
 class HrWorkEntryType(models.Model):
-    _inherit = 'hr.work.entry.type'
-    _description = 'HR Work Entry Type'
+    _inherit = "hr.work.entry.type"
+    _description = "HR Work Entry Type"
 
     leave_type_ids = fields.One2many(
-        'hr.leave.type', 'work_entry_type_id', string='Time Off Type',
-        help="Every new time off type in this list will be reported as select work entry in payslip.")
+        "hr.leave.type",
+        "work_entry_type_id",
+        string="Time Off Type",
+        help="Every new time off type in this list will be reported as select work entry in payslip.",
+    )

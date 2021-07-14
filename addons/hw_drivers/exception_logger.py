@@ -14,10 +14,11 @@ class ExceptionLogger:
         self.logger = logging.getLogger()
 
     def write(self, message):
-        if message != '\n':
+        if message != "\n":
             self.logger.error(message)
 
     def flush(self):
         pass
+
 
 sys.stderr = ExceptionLogger()

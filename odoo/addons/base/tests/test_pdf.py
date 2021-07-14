@@ -12,8 +12,8 @@ class TestPdf(TransactionCase):
 
     def setUp(self):
         super().setUp()
-        file_path = get_module_resource('base', 'tests', 'minimal.pdf')
-        self.file = open(file_path, 'rb').read()
+        file_path = get_module_resource("base", "tests", "minimal.pdf")
+        self.file = open(file_path, "rb").read()
         self.minimal_reader_buffer = io.BytesIO(self.file)
         self.minimal_pdf_reader = pdf.OdooPdfFileReader(self.minimal_reader_buffer)
 
@@ -23,7 +23,7 @@ class TestPdf(TransactionCase):
 
         pdf_writer = pdf.PdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
+        pdf_writer.addAttachment("test_attachment.txt", b"My awesome attachment")
 
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 1)
@@ -35,11 +35,13 @@ class TestPdf(TransactionCase):
         pdf_writer = pdf.OdooPdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
 
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
+        pdf_writer.addAttachment("test_attachment.txt", b"My awesome attachment")
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 1)
 
-        pdf_writer.addAttachment('another_attachment.txt', b'My awesome OTHER attachment')
+        pdf_writer.addAttachment(
+            "another_attachment.txt", b"My awesome OTHER attachment"
+        )
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 2)
 
@@ -47,8 +49,10 @@ class TestPdf(TransactionCase):
         pdf_writer = pdf.OdooPdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
 
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
-        pdf_writer.addAttachment('another_attachment.txt', b'My awesome OTHER attachment')
+        pdf_writer.addAttachment("test_attachment.txt", b"My awesome attachment")
+        pdf_writer.addAttachment(
+            "another_attachment.txt", b"My awesome OTHER attachment"
+        )
 
         pdf_writer.encrypt("", "foo")
 
@@ -85,8 +89,8 @@ class TestPdf(TransactionCase):
         reader_buffer = io.BytesIO(branded_content)
         pdf_reader = pdf.PdfFileReader(reader_buffer)
         pdf_info = pdf_reader.getDocumentInfo()
-        self.assertEqual(pdf_info['/Producer'], 'Odoo')
-        self.assertEqual(pdf_info['/Creator'], 'Odoo')
+        self.assertEqual(pdf_info["/Producer"], "Odoo")
+        self.assertEqual(pdf_info["/Creator"], "Odoo")
         reader_buffer.close()
 
     def tearDown(self):

@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Hardware Proxy',
-    'category': 'Hidden',
-    'sequence': 6,
-    'summary': 'Connect the Web Client to Hardware Peripherals',
-    'website': 'https://www.odoo.com/app/iot',
-    'description': """
+    "name": "Hardware Proxy",
+    "category": "Hidden",
+    "sequence": 6,
+    "summary": "Connect the Web Client to Hardware Peripherals",
+    "website": "https://www.odoo.com/app/iot",
+    "description": """
 Hardware Poxy
 =============
 
@@ -17,5 +17,5 @@ This modules only contains the enabling framework. The actual devices drivers
 are found in other modules that must be installed separately.
 
 """,
-    'installable': False,
+    "installable": False,
 }

@@ -30,91 +30,176 @@ import odoo
 
 unsafe_eval = eval
 
-__all__ = ['test_expr', 'safe_eval', 'const_eval']
+__all__ = ["test_expr", "safe_eval", "const_eval"]
 
 # The time module is usually already provided in the safe_eval environment
 # but some code, e.g. datetime.datetime.now() (Windows/Python 2.5.2, bug
 # lp:703841), does import time.
-_ALLOWED_MODULES = ['_strptime', 'math', 'time']
+_ALLOWED_MODULES = ["_strptime", "math", "time"]
 
-_UNSAFE_ATTRIBUTES = ['f_builtins', 'f_globals', 'f_locals', 'gi_frame',
-                      'co_code', 'func_globals']
+_UNSAFE_ATTRIBUTES = [
+    "f_builtins",
+    "f_globals",
+    "f_locals",
+    "gi_frame",
+    "co_code",
+    "func_globals",
+]
+
 
 def to_opcodes(opnames, _opmap=opmap):
     for x in opnames:
         if x in _opmap:
             yield _opmap[x]
+
+
 # opcodes which absolutely positively must not be usable in safe_eval,
 # explicitly subtracted from all sets of valid opcodes just in case
-_BLACKLIST = set(to_opcodes([
-    # can't provide access to accessing arbitrary modules
-    'IMPORT_STAR', 'IMPORT_NAME', 'IMPORT_FROM',
-    # could allow replacing or updating core attributes on models & al, setitem
-    # can be used to set field values
-    'STORE_ATTR', 'DELETE_ATTR',
-    # no reason to allow this
-    'STORE_GLOBAL', 'DELETE_GLOBAL',
-]))
+_BLACKLIST = set(
+    to_opcodes(
+        [
+            # can't provide access to accessing arbitrary modules
+            "IMPORT_STAR",
+            "IMPORT_NAME",
+            "IMPORT_FROM",
+            # could allow replacing or updating core attributes on models & al, setitem
+            # can be used to set field values
+            "STORE_ATTR",
+            "DELETE_ATTR",
+            # no reason to allow this
+            "STORE_GLOBAL",
+            "DELETE_GLOBAL",
+        ]
+    )
+)
 # opcodes necessary to build literal values
-_CONST_OPCODES = set(to_opcodes([
-    # stack manipulations
-    'POP_TOP', 'ROT_TWO', 'ROT_THREE', 'ROT_FOUR', 'DUP_TOP', 'DUP_TOP_TWO',
-    'LOAD_CONST',
-    'RETURN_VALUE', # return the result of the literal/expr evaluation
-    # literal collections
-    'BUILD_LIST', 'BUILD_MAP', 'BUILD_TUPLE', 'BUILD_SET',
-    # 3.6: literal map with constant keys https://bugs.python.org/issue27140
-    'BUILD_CONST_KEY_MAP',
-    'LIST_EXTEND', 'SET_UPDATE',
-])) - _BLACKLIST
+_CONST_OPCODES = (
+    set(
+        to_opcodes(
+            [
+                # stack manipulations
+                "POP_TOP",
+                "ROT_TWO",
+                "ROT_THREE",
+                "ROT_FOUR",
+                "DUP_TOP",
+                "DUP_TOP_TWO",
+                "LOAD_CONST",
+                "RETURN_VALUE",  # return the result of the literal/expr evaluation
+                # literal collections
+                "BUILD_LIST",
+                "BUILD_MAP",
+                "BUILD_TUPLE",
+                "BUILD_SET",
+                # 3.6: literal map with constant keys https://bugs.python.org/issue27140
+                "BUILD_CONST_KEY_MAP",
+                "LIST_EXTEND",
+                "SET_UPDATE",
+            ]
+        )
+    )
+    - _BLACKLIST
+)
 
 # operations which are both binary and inplace, same order as in doc'
 _operations = [
-    'POWER', 'MULTIPLY', # 'MATRIX_MULTIPLY', # matrix operator (3.5+)
-    'FLOOR_DIVIDE', 'TRUE_DIVIDE', 'MODULO', 'ADD',
-    'SUBTRACT', 'LSHIFT', 'RSHIFT', 'AND', 'XOR', 'OR',
+    "POWER",
+    "MULTIPLY",  # 'MATRIX_MULTIPLY', # matrix operator (3.5+)
+    "FLOOR_DIVIDE",
+    "TRUE_DIVIDE",
+    "MODULO",
+    "ADD",
+    "SUBTRACT",
+    "LSHIFT",
+    "RSHIFT",
+    "AND",
+    "XOR",
+    "OR",
 ]
 # operations on literal values
-_EXPR_OPCODES = _CONST_OPCODES.union(to_opcodes([
-    'UNARY_POSITIVE', 'UNARY_NEGATIVE', 'UNARY_NOT', 'UNARY_INVERT',
-    *('BINARY_' + op for op in _operations), 'BINARY_SUBSCR',
-    *('INPLACE_' + op for op in _operations),
-    'BUILD_SLICE',
-    # comprehensions
-    'LIST_APPEND', 'MAP_ADD', 'SET_ADD',
-    'COMPARE_OP',
-    # specialised comparisons
-    'IS_OP', 'CONTAINS_OP',
-    'DICT_MERGE', 'DICT_UPDATE',
-])) - _BLACKLIST
+_EXPR_OPCODES = (
+    _CONST_OPCODES.union(
+        to_opcodes(
+            [
+                "UNARY_POSITIVE",
+                "UNARY_NEGATIVE",
+                "UNARY_NOT",
+                "UNARY_INVERT",
+                *("BINARY_" + op for op in _operations),
+                "BINARY_SUBSCR",
+                *("INPLACE_" + op for op in _operations),
+                "BUILD_SLICE",
+                # comprehensions
+                "LIST_APPEND",
+                "MAP_ADD",
+                "SET_ADD",
+                "COMPARE_OP",
+                # specialised comparisons
+                "IS_OP",
+                "CONTAINS_OP",
+                "DICT_MERGE",
+                "DICT_UPDATE",
+            ]
+        )
+    )
+    - _BLACKLIST
+)
 
-_SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
-    'POP_BLOCK', 'POP_EXCEPT',
-
-    # note: removed in 3.8
-    'SETUP_LOOP', 'SETUP_EXCEPT', 'BREAK_LOOP', 'CONTINUE_LOOP',
-
-    'EXTENDED_ARG',  # P3.6 for long jump offsets.
-    'MAKE_FUNCTION', 'CALL_FUNCTION', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_EX',
-    # Added in P3.7 https://bugs.python.org/issue26110
-    'CALL_METHOD', 'LOAD_METHOD',
-
-    'GET_ITER', 'FOR_ITER', 'YIELD_VALUE',
-    'JUMP_FORWARD', 'JUMP_ABSOLUTE',
-    'JUMP_IF_FALSE_OR_POP', 'JUMP_IF_TRUE_OR_POP', 'POP_JUMP_IF_FALSE', 'POP_JUMP_IF_TRUE',
-    'SETUP_FINALLY', 'END_FINALLY',
-    # Added in 3.8 https://bugs.python.org/issue17611
-    'BEGIN_FINALLY', 'CALL_FINALLY', 'POP_FINALLY',
-
-    'RAISE_VARARGS', 'LOAD_NAME', 'STORE_NAME', 'DELETE_NAME', 'LOAD_ATTR',
-    'LOAD_FAST', 'STORE_FAST', 'DELETE_FAST', 'UNPACK_SEQUENCE',
-    'STORE_SUBSCR',
-    'LOAD_GLOBAL',
-
-    'RERAISE', 'JUMP_IF_NOT_EXC_MATCH',
-])) - _BLACKLIST
+_SAFE_OPCODES = (
+    _EXPR_OPCODES.union(
+        to_opcodes(
+            [
+                "POP_BLOCK",
+                "POP_EXCEPT",
+                # note: removed in 3.8
+                "SETUP_LOOP",
+                "SETUP_EXCEPT",
+                "BREAK_LOOP",
+                "CONTINUE_LOOP",
+                "EXTENDED_ARG",  # P3.6 for long jump offsets.
+                "MAKE_FUNCTION",
+                "CALL_FUNCTION",
+                "CALL_FUNCTION_KW",
+                "CALL_FUNCTION_EX",
+                # Added in P3.7 https://bugs.python.org/issue26110
+                "CALL_METHOD",
+                "LOAD_METHOD",
+                "GET_ITER",
+                "FOR_ITER",
+                "YIELD_VALUE",
+                "JUMP_FORWARD",
+                "JUMP_ABSOLUTE",
+                "JUMP_IF_FALSE_OR_POP",
+                "JUMP_IF_TRUE_OR_POP",
+                "POP_JUMP_IF_FALSE",
+                "POP_JUMP_IF_TRUE",
+                "SETUP_FINALLY",
+                "END_FINALLY",
+                # Added in 3.8 https://bugs.python.org/issue17611
+                "BEGIN_FINALLY",
+                "CALL_FINALLY",
+                "POP_FINALLY",
+                "RAISE_VARARGS",
+                "LOAD_NAME",
+                "STORE_NAME",
+                "DELETE_NAME",
+                "LOAD_ATTR",
+                "LOAD_FAST",
+                "STORE_FAST",
+                "DELETE_FAST",
+                "UNPACK_SEQUENCE",
+                "STORE_SUBSCR",
+                "LOAD_GLOBAL",
+                "RERAISE",
+                "JUMP_IF_NOT_EXC_MATCH",
+            ]
+        )
+    )
+    - _BLACKLIST
+)
 
 _logger = logging.getLogger(__name__)
+
 
 def assert_no_dunder_name(code_obj, expr):
     """ assert_no_dunder_name(code_obj, expr) -> None
@@ -137,7 +222,8 @@ def assert_no_dunder_name(code_obj, expr):
     """
     for name in code_obj.co_names:
         if "__" in name or name in _UNSAFE_ATTRIBUTES:
-            raise NameError('Access to forbidden name %r (%r)' % (name, expr))
+            raise NameError("Access to forbidden name %r (%r)" % (name, expr))
+
 
 def assert_valid_codeobj(allowed_codes, code_obj, expr):
     """ Asserts that the provided code object validates against the bytecode
@@ -163,11 +249,15 @@ def assert_valid_codeobj(allowed_codes, code_obj, expr):
     # when loading /web according to line_profiler
     code_codes = {i.opcode for i in dis.get_instructions(code_obj)}
     if not allowed_codes >= code_codes:
-        raise ValueError("forbidden opcode(s) in %r: %s" % (expr, ', '.join(opname[x] for x in (code_codes - allowed_codes))))
+        raise ValueError(
+            "forbidden opcode(s) in %r: %s"
+            % (expr, ", ".join(opname[x] for x in (code_codes - allowed_codes)))
+        )
 
     for const in code_obj.co_consts:
         if isinstance(const, CodeType):
-            assert_valid_codeobj(allowed_codes, const, 'lambda')
+            assert_valid_codeobj(allowed_codes, const, "lambda")
+
 
 def test_expr(expr, allowed_codes, mode="eval"):
     """test_expr(expression, allowed_codes[, mode]) -> code_object
@@ -178,7 +268,7 @@ def test_expr(expr, allowed_codes, mode="eval"):
     Otherwise raise a ValueError, a Syntax Error or TypeError accordingly.
     """
     try:
-        if mode == 'eval':
+        if mode == "eval":
             # eval() does not like leading/trailing whitespace
             expr = expr.strip()
         code_obj = compile(expr, "", mode)
@@ -211,6 +301,7 @@ def const_eval(expr):
     c = test_expr(expr, _CONST_OPCODES)
     return unsafe_eval(c)
 
+
 def expr_eval(expr):
     """expr_eval(expression) -> value
 
@@ -232,6 +323,7 @@ def expr_eval(expr):
     c = test_expr(expr, _EXPR_OPCODES)
     return unsafe_eval(c)
 
+
 def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if globals is None:
         globals = {}
@@ -242,45 +334,56 @@ def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if name in _ALLOWED_MODULES:
         return __import__(name, globals, locals, level)
     raise ImportError(name)
+
+
 _BUILTINS = {
-    '__import__': _import,
-    'True': True,
-    'False': False,
-    'None': None,
-    'bytes': bytes,
-    'str': str,
-    'unicode': str,
-    'bool': bool,
-    'int': int,
-    'float': float,
-    'enumerate': enumerate,
-    'dict': dict,
-    'list': list,
-    'tuple': tuple,
-    'map': map,
-    'abs': abs,
-    'min': min,
-    'max': max,
-    'sum': sum,
-    'reduce': functools.reduce,
-    'filter': filter,
-    'sorted': sorted,
-    'round': round,
-    'len': len,
-    'repr': repr,
-    'set': set,
-    'all': all,
-    'any': any,
-    'ord': ord,
-    'chr': chr,
-    'divmod': divmod,
-    'isinstance': isinstance,
-    'range': range,
-    'xrange': range,
-    'zip': zip,
-    'Exception': Exception,
+    "__import__": _import,
+    "True": True,
+    "False": False,
+    "None": None,
+    "bytes": bytes,
+    "str": str,
+    "unicode": str,
+    "bool": bool,
+    "int": int,
+    "float": float,
+    "enumerate": enumerate,
+    "dict": dict,
+    "list": list,
+    "tuple": tuple,
+    "map": map,
+    "abs": abs,
+    "min": min,
+    "max": max,
+    "sum": sum,
+    "reduce": functools.reduce,
+    "filter": filter,
+    "sorted": sorted,
+    "round": round,
+    "len": len,
+    "repr": repr,
+    "set": set,
+    "all": all,
+    "any": any,
+    "ord": ord,
+    "chr": chr,
+    "divmod": divmod,
+    "isinstance": isinstance,
+    "range": range,
+    "xrange": range,
+    "zip": zip,
+    "Exception": Exception,
 }
-def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=False, locals_builtins=False):
+
+
+def safe_eval(
+    expr,
+    globals_dict=None,
+    locals_dict=None,
+    mode="eval",
+    nocopy=False,
+    locals_builtins=False,
+):
     """safe_eval(expression[, globals[, locals[, mode[, nocopy]]]]) -> result
 
     System-restricted Python expression evaluation
@@ -304,11 +407,13 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
     # by taking a copy.
     if not nocopy:
         # isinstance() does not work below, we want *exactly* the dict class
-        if (globals_dict is not None and type(globals_dict) is not dict) \
-                or (locals_dict is not None and type(locals_dict) is not dict):
+        if (globals_dict is not None and type(globals_dict) is not dict) or (
+            locals_dict is not None and type(locals_dict) is not dict
+        ):
             _logger.warning(
                 "Looks like you are trying to pass a dynamic environment, "
-                "you should probably pass nocopy=True to safe_eval().")
+                "you should probably pass nocopy=True to safe_eval()."
+            )
         if globals_dict is not None:
             globals_dict = dict(globals_dict)
         if locals_dict is not None:
@@ -320,7 +425,7 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
     if globals_dict is None:
         globals_dict = {}
 
-    globals_dict['__builtins__'] = _BUILTINS
+    globals_dict["__builtins__"] = _BUILTINS
     if locals_builtins:
         if locals_dict is None:
             locals_dict = {}
@@ -343,20 +448,29 @@ def safe_eval(expr, globals_dict=None, locals_dict=None, mode="eval", nocopy=Fal
     except ZeroDivisionError:
         raise
     except Exception as e:
-        raise ValueError('%s: "%s" while evaluating\n%r' % (ustr(type(e)), ustr(e), expr))
+        raise ValueError(
+            '%s: "%s" while evaluating\n%r' % (ustr(type(e)), ustr(e), expr)
+        )
+
+
 def test_python_expr(expr, mode="eval"):
     try:
         test_expr(expr, _SAFE_OPCODES, mode=mode)
     except (SyntaxError, TypeError, ValueError) as err:
         if len(err.args) >= 2 and len(err.args[1]) >= 4:
             error = {
-                'message': err.args[0],
-                'filename': err.args[1][0],
-                'lineno': err.args[1][1],
-                'offset': err.args[1][2],
-                'error_line': err.args[1][3],
+                "message": err.args[0],
+                "filename": err.args[1][0],
+                "lineno": err.args[1][1],
+                "offset": err.args[1][2],
+                "error_line": err.args[1][3],
             }
-            msg = "%s : %s at line %d\n%s" % (type(err).__name__, error['message'], error['lineno'], error['error_line'])
+            msg = "%s : %s at line %d\n%s" % (
+                type(err).__name__,
+                error["message"],
+                error["lineno"],
+                error["error_line"],
+            )
         else:
             msg = ustr(err)
         return msg
@@ -368,7 +482,8 @@ def check_values(d):
         return d
     for v in d.values():
         if isinstance(v, types.ModuleType):
-            raise TypeError(f"""Module {v} can not be used in evaluation contexts
+            raise TypeError(
+                f"""Module {v} can not be used in evaluation contexts
 
 Prefer providing only the items necessary for your intended use.
 
@@ -377,8 +492,10 @@ If a "module" is necessary for backwards compatibility, use
 whitelisting allowed attributes.
 
 Pre-wrapped modules are provided as attributes of `odoo.tools.safe_eval`.
-""")
+"""
+            )
     return d
+
 
 class wrap_module:
     def __init__(self, module, attributes):
@@ -391,7 +508,7 @@ class wrap_module:
                                     corresponding item is a submodule
         """
         # builtin modules don't have a __file__ at all
-        modfile = getattr(module, '__file__', '(built-in)')
+        modfile = getattr(module, "__file__", "(built-in)")
         self._repr = f"<wrapped {module.__name__!r} ({modfile})>"
         for attrib in attributes:
             target = getattr(module, attrib)
@@ -402,18 +519,27 @@ class wrap_module:
     def __repr__(self):
         return self._repr
 
+
 # dateutil submodules are lazy so need to import them for them to "exist"
 import dateutil
-mods = ['parser', 'relativedelta', 'rrule', 'tz']
+
+mods = ["parser", "relativedelta", "rrule", "tz"]
 for mod in mods:
-    __import__('dateutil.%s' % mod)
-datetime = wrap_module(__import__('datetime'), ['date', 'datetime', 'time', 'timedelta', 'timezone', 'tzinfo', 'MAXYEAR', 'MINYEAR'])
-dateutil = wrap_module(dateutil, {
-    mod: getattr(dateutil, mod).__all__
-    for mod in mods
-})
-json = wrap_module(__import__('json'), ['loads', 'dumps'])
-time = wrap_module(__import__('time'), ['time', 'strptime', 'strftime'])
-pytz = wrap_module(__import__('pytz'), [
-    'utc', 'UTC', 'timezone',
-])
+    __import__("dateutil.%s" % mod)
+datetime = wrap_module(
+    __import__("datetime"),
+    [
+        "date",
+        "datetime",
+        "time",
+        "timedelta",
+        "timezone",
+        "tzinfo",
+        "MAXYEAR",
+        "MINYEAR",
+    ],
+)
+dateutil = wrap_module(dateutil, {mod: getattr(dateutil, mod).__all__ for mod in mods})
+json = wrap_module(__import__("json"), ["loads", "dumps"])
+time = wrap_module(__import__("time"), ["time", "strptime", "strftime"])
+pytz = wrap_module(__import__("pytz"), ["utc", "UTC", "timezone",])

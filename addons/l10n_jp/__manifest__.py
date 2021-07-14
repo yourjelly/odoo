@@ -4,10 +4,10 @@
 # Copyright (C) Quartile Limited
 
 {
-    'name': 'Japan - Accounting',
-    'version': '2.2',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Japan - Accounting",
+    "version": "2.2",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 
 Overview:
 ---------
@@ -26,21 +26,19 @@ circumstances, you might not need to use those at all.
 [1] See https://github.com/odoo/odoo/pull/6470 for detail.
 
     """,
-    'author': 'Quartile Limited',
-    'website': 'https://www.quartile.co/',
-    'depends': ['account'],
-    'data': [
-        'data/l10n_jp_chart_data.xml',
-        'data/account.account.template.csv',
-        'data/account.tax.group.csv',
-        'data/account_tax_report_data.xml',
-        'data/account_tax_template_data.xml',
-        'data/account_chart_template_data.xml',
-        'data/account.fiscal.position.template.csv',
-        'data/account.fiscal.position.tax.template.csv',
-        'data/account_chart_template_configure_data.xml',
+    "author": "Quartile Limited",
+    "website": "https://www.quartile.co/",
+    "depends": ["account"],
+    "data": [
+        "data/l10n_jp_chart_data.xml",
+        "data/account.account.template.csv",
+        "data/account.tax.group.csv",
+        "data/account_tax_report_data.xml",
+        "data/account_tax_template_data.xml",
+        "data/account_chart_template_data.xml",
+        "data/account.fiscal.position.template.csv",
+        "data/account.fiscal.position.tax.template.csv",
+        "data/account_chart_template_configure_data.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

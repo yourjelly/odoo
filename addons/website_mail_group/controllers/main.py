@@ -7,16 +7,16 @@ from odoo.http import request
 
 
 class WebsiteMailGroup(http.Controller):
-    @http.route('/groups/is_member', type='json', auth='public', website=True)
+    @http.route("/groups/is_member", type="json", auth="public", website=True)
     def groups_is_member(self, group_id=0, email=None, **kw):
         """Return the email of the member if found, otherwise None."""
-        group = request.env['mail.group'].browse(int(group_id)).exists()
+        group = request.env["mail.group"].browse(int(group_id)).exists()
         if not group:
             return
 
         try:
-            group.check_access_rights('read')
-            group.check_access_rule('read')
+            group.check_access_rights("read")
+            group.check_access_rule("read")
         except AccessError:
             return
 
@@ -29,6 +29,6 @@ class WebsiteMailGroup(http.Controller):
         member = group.sudo()._find_member(email, partner_id)
 
         return {
-            'is_member': bool(member),
-            'email': member.email if member else email,
+            "is_member": bool(member),
+            "email": member.email if member else email,
         }

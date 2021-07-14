@@ -16,46 +16,53 @@ _logger = logging.getLogger(__name__)
 
 
 class Team(models.Model):
-    _inherit = 'crm.team.member'
+    _inherit = "crm.team.member"
 
     # assignment
     assignment_enabled = fields.Boolean(related="crm_team_id.assignment_enabled")
-    assignment_domain = fields.Char('Assignment Domain', tracking=True)
-    assignment_optout = fields.Boolean('Skip auto assignment')
-    assignment_max = fields.Integer('Average Leads Capacity (on 30 days)', default=30)
+    assignment_domain = fields.Char("Assignment Domain", tracking=True)
+    assignment_optout = fields.Boolean("Skip auto assignment")
+    assignment_max = fields.Integer("Average Leads Capacity (on 30 days)", default=30)
     lead_month_count = fields.Integer(
-        'Leads (30 days)', compute='_compute_lead_month_count',
-        help='Lead assigned to this member those last 30 days')
+        "Leads (30 days)",
+        compute="_compute_lead_month_count",
+        help="Lead assigned to this member those last 30 days",
+    )
 
-    @api.depends('user_id', 'crm_team_id')
+    @api.depends("user_id", "crm_team_id")
     def _compute_lead_month_count(self):
         for member in self:
             if member.user_id.id and member.crm_team_id.id:
-                member.lead_month_count = self.env['crm.lead'].with_context(active_test=False).search_count(
-                    member._get_lead_month_domain()
+                member.lead_month_count = (
+                    self.env["crm.lead"]
+                    .with_context(active_test=False)
+                    .search_count(member._get_lead_month_domain())
                 )
             else:
                 member.lead_month_count = 0
 
-    @api.constrains('assignment_domain')
+    @api.constrains("assignment_domain")
     def _constrains_assignment_domain(self):
         for member in self:
             try:
-                domain = literal_eval(member.assignment_domain or '[]')
+                domain = literal_eval(member.assignment_domain or "[]")
                 if domain:
-                    self.env['crm.lead'].search(domain, limit=1)
+                    self.env["crm.lead"].search(domain, limit=1)
             except Exception:
-                raise exceptions.ValidationEreror(_(
-                    'Member assignment domain for user %(user)s and team %(team)s is incorrectly formatted',
-                    user=member.user_id.name, team=member.crm_team_id.name
-                ))
+                raise exceptions.ValidationEreror(
+                    _(
+                        "Member assignment domain for user %(user)s and team %(team)s is incorrectly formatted",
+                        user=member.user_id.name,
+                        team=member.crm_team_id.name,
+                    )
+                )
 
     def _get_lead_month_domain(self):
         limit_date = fields.Datetime.now() - datetime.timedelta(days=30)
         return [
-            ('user_id', '=', self.user_id.id),
-            ('team_id', '=', self.crm_team_id.id),
-            ('date_open', '>=', limit_date),
+            ("user_id", "=", self.user_id.id),
+            ("team_id", "=", self.crm_team_id.id),
+            ("date_open", ">=", limit_date),
         ]
 
     # ------------------------------------------------------------
@@ -117,28 +124,42 @@ class Team(models.Model):
         """
         if work_days < 0.2 or work_days > 30:
             raise ValueError(
-                _('Leads team allocation should be done for at least 0.2 or maximum 30 work days, not %.2f.', work_days)
+                _(
+                    "Leads team allocation should be done for at least 0.2 or maximum 30 work days, not %.2f.",
+                    work_days,
+                )
             )
 
         members_data, population, weights = dict(), list(), list()
-        members = self.filtered(lambda member: not member.assignment_optout and member.assignment_max > 0)
+        members = self.filtered(
+            lambda member: not member.assignment_optout and member.assignment_max > 0
+        )
         if not members:
             return members_data
 
         # prepare a global lead count based on total leads to assign to salespersons
         lead_limit = sum(
-            member._get_assignment_quota(work_days=work_days)
-            for member in members
+            member._get_assignment_quota(work_days=work_days) for member in members
         )
 
         # could probably be optimized
         for member in members:
-            lead_domain = expression.AND([
-                literal_eval(member.assignment_domain or '[]'),
-                ['&', '&', ('user_id', '=', False), ('date_open', '=', False), ('team_id', '=', member.crm_team_id.id)]
-            ])
+            lead_domain = expression.AND(
+                [
+                    literal_eval(member.assignment_domain or "[]"),
+                    [
+                        "&",
+                        "&",
+                        ("user_id", "=", False),
+                        ("date_open", "=", False),
+                        ("team_id", "=", member.crm_team_id.id),
+                    ],
+                ]
+            )
 
-            leads = self.env["crm.lead"].search(lead_domain, order='probability DESC', limit=lead_limit)
+            leads = self.env["crm.lead"].search(
+                lead_domain, order="probability DESC", limit=lead_limit
+            )
 
             to_assign = member._get_assignment_quota(work_days=work_days)
             members_data[member.id] = {
@@ -154,23 +175,35 @@ class Team(models.Model):
         leads_done_ids = set()
         counter = 0
         # auto-commit except in testing mode
-        auto_commit = not getattr(threading.currentThread(), 'testing', False)
-        commit_bundle_size = int(self.env['ir.config_parameter'].sudo().get_param('crm.assignment.commit.bundle', 100))
+        auto_commit = not getattr(threading.currentThread(), "testing", False)
+        commit_bundle_size = int(
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("crm.assignment.commit.bundle", 100)
+        )
         while population:
             counter += 1
             member_id = random.choices(population, weights=weights, k=1)[0]
             member_index = population.index(member_id)
             member_data = members_data[member_id]
 
-            lead = next((lead for lead in member_data['leads'] if lead.id not in leads_done_ids), False)
+            lead = next(
+                (
+                    lead
+                    for lead in member_data["leads"]
+                    if lead.id not in leads_done_ids
+                ),
+                False,
+            )
             if lead:
                 leads_done_ids.add(lead.id)
                 members_data[member_id]["assigned"] += lead
                 weights[member_index] = weights[member_index] - 1
 
-                lead.with_context(mail_auto_subscribe_no_notify=True).convert_opportunity(
-                    lead.partner_id.id,
-                    user_ids=member_data['team_member'].user_id.ids
+                lead.with_context(
+                    mail_auto_subscribe_no_notify=True
+                ).convert_opportunity(
+                    lead.partner_id.id, user_ids=member_data["team_member"].user_id.ids
                 )
 
                 if auto_commit and counter % commit_bundle_size == 0:
@@ -193,9 +226,16 @@ class Team(models.Model):
             (member_info["team_member"], {"assigned": member_info["assigned"]})
             for member_id, member_info in members_data.items()
         )
-        _logger.info('Assigned %s leads to %s salesmen', len(leads_done_ids), len(members))
+        _logger.info(
+            "Assigned %s leads to %s salesmen", len(leads_done_ids), len(members)
+        )
         for member, member_info in result_data.items():
-            _logger.info('-> member %s: assigned %d leads (%s)', member.id, len(member_info["assigned"]), member_info["assigned"])
+            _logger.info(
+                "-> member %s: assigned %d leads (%s)",
+                member.id,
+                len(member_info["assigned"]),
+                member_info["assigned"],
+            )
         return result_data
 
     def _get_assignment_quota(self, work_days=1):
@@ -208,5 +248,7 @@ class Team(models.Model):
         """
         assign_ratio = work_days / 30.0
         to_assign = self.assignment_max * assign_ratio
-        compensation = max(0, self.assignment_max - (self.lead_month_count + to_assign)) * 0.2
+        compensation = (
+            max(0, self.assignment_max - (self.lead_month_count + to_assign)) * 0.2
+        )
         return round(to_assign + compensation)

@@ -15,27 +15,35 @@ _logger = logging.getLogger(__name__)
 
 class IrModuleModule(models.Model):
     _name = "ir.module.module"
-    _description = 'Module'
+    _description = "Module"
     _inherit = _name
 
     # The order is important because of dependencies (page need view, menu need page)
-    _theme_model_names = OrderedDict([
-        ('ir.ui.view', 'theme.ir.ui.view'),
-        ('ir.asset', 'theme.ir.asset'),
-        ('website.page', 'theme.website.page'),
-        ('website.menu', 'theme.website.menu'),
-        ('ir.attachment', 'theme.ir.attachment'),
-    ])
+    _theme_model_names = OrderedDict(
+        [
+            ("ir.ui.view", "theme.ir.ui.view"),
+            ("ir.asset", "theme.ir.asset"),
+            ("website.page", "theme.website.page"),
+            ("website.menu", "theme.website.menu"),
+            ("ir.attachment", "theme.ir.attachment"),
+        ]
+    )
     _theme_translated_fields = {
-        'theme.ir.ui.view': [('theme.ir.ui.view,arch', 'ir.ui.view,arch_db')],
-        'theme.website.menu': [('theme.website.menu,name', 'website.menu,name')],
+        "theme.ir.ui.view": [("theme.ir.ui.view,arch", "ir.ui.view,arch_db")],
+        "theme.website.menu": [("theme.website.menu,name", "website.menu,name")],
     }
 
-    image_ids = fields.One2many('ir.attachment', 'res_id',
-                                domain=[('res_model', '=', _name), ('mimetype', '=like', 'image/%')],
-                                string='Screenshots', readonly=True)
+    image_ids = fields.One2many(
+        "ir.attachment",
+        "res_id",
+        domain=[("res_model", "=", _name), ("mimetype", "=like", "image/%")],
+        string="Screenshots",
+        readonly=True,
+    )
     # for kanban view
-    is_installed_on_current_website = fields.Boolean(compute='_compute_is_installed_on_current_website')
+    is_installed_on_current_website = fields.Boolean(
+        compute="_compute_is_installed_on_current_website"
+    )
 
     def _compute_is_installed_on_current_website(self):
         """
@@ -46,7 +54,9 @@ class IrModuleModule(models.Model):
             which would be confusing for the user.
         """
         for module in self:
-            module.is_installed_on_current_website = module == self.env['website'].get_current_website().theme_id
+            module.is_installed_on_current_website = (
+                module == self.env["website"].get_current_website().theme_id
+            )
 
     def write(self, vals):
         """
@@ -76,16 +86,23 @@ class IrModuleModule(models.Model):
                     -> We want to upgrade every website using this theme.
         """
         for module in self:
-            if module.name.startswith('theme_') and vals.get('state') == 'installed':
-                _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
+            if module.name.startswith("theme_") and vals.get("state") == "installed":
+                _logger.info(
+                    "Module %s has been loaded as theme template (%s)"
+                    % (module.name, module.state)
+                )
 
-                if module.state in ['to install', 'to upgrade']:
+                if module.state in ["to install", "to upgrade"]:
                     websites_to_update = module._theme_get_stream_website_ids()
 
-                    if module.state == 'to upgrade' and request:
-                        Website = self.env['website']
+                    if module.state == "to upgrade" and request:
+                        Website = self.env["website"]
                         current_website = Website.get_current_website()
-                        websites_to_update = current_website if current_website in websites_to_update else Website
+                        websites_to_update = (
+                            current_website
+                            if current_website in websites_to_update
+                            else Website
+                        )
 
                     for website in websites_to_update:
                         module._theme_load(website)
@@ -101,12 +118,18 @@ class IrModuleModule(models.Model):
             :return: recordset of theme template models (of type defined by ``model_name``)
         """
         theme_model_name = self._theme_model_names[model_name]
-        IrModelData = self.env['ir.model.data']
+        IrModelData = self.env["ir.model.data"]
         records = self.env[theme_model_name]
 
         for module in self:
-            imd_ids = IrModelData.search([('module', '=', module.name), ('model', '=', theme_model_name)]).mapped('res_id')
-            records |= self.env[theme_model_name].with_context(active_test=False).browse(imd_ids)
+            imd_ids = IrModelData.search(
+                [("module", "=", module.name), ("model", "=", theme_model_name)]
+            ).mapped("res_id")
+            records |= (
+                self.env[theme_model_name]
+                .with_context(active_test=False)
+                .browse(imd_ids)
+            )
         return records
 
     def _update_records(self, model_name, website):
@@ -140,31 +163,41 @@ class IrModuleModule(models.Model):
 
         remaining = self._get_module_data(model_name)
         last_len = -1
-        while (len(remaining) != last_len):
+        while len(remaining) != last_len:
             last_len = len(remaining)
             for rec in remaining:
                 rec_data = rec._convert_to_base_model(website)
                 if not rec_data:
-                    _logger.info('Record queued: %s' % rec.display_name)
+                    _logger.info("Record queued: %s" % rec.display_name)
                     continue
 
-                find = rec.with_context(active_test=False).mapped('copy_ids').filtered(lambda m: m.website_id == website)
+                find = (
+                    rec.with_context(active_test=False)
+                    .mapped("copy_ids")
+                    .filtered(lambda m: m.website_id == website)
+                )
 
                 # special case for attachment
                 # if module B override attachment from dependence A, we update it
-                if not find and model_name == 'ir.attachment':
-                    find = rec.copy_ids.search([('key', '=', rec.key), ('website_id', '=', website.id)])
+                if not find and model_name == "ir.attachment":
+                    find = rec.copy_ids.search(
+                        [("key", "=", rec.key), ("website_id", "=", website.id)]
+                    )
 
                 if find:
-                    imd = self.env['ir.model.data'].search([('model', '=', find._name), ('res_id', '=', find.id)])
+                    imd = self.env["ir.model.data"].search(
+                        [("model", "=", find._name), ("res_id", "=", find.id)]
+                    )
                     if imd and imd.noupdate:
-                        _logger.info('Noupdate set for %s (%s)' % (find, imd))
+                        _logger.info("Noupdate set for %s (%s)" % (find, imd))
                     else:
                         # at update, ignore active field
-                        if 'active' in rec_data:
-                            rec_data.pop('active')
-                        if model_name == 'ir.ui.view' and (find.arch_updated or find.arch == rec_data['arch']):
-                            rec_data.pop('arch')
+                        if "active" in rec_data:
+                            rec_data.pop("active")
+                        if model_name == "ir.ui.view" and (
+                            find.arch_updated or find.arch == rec_data["arch"]
+                        ):
+                            rec_data.pop("arch")
                         find.update(rec_data)
                         self._post_copy(rec, find)
                 else:
@@ -174,7 +207,7 @@ class IrModuleModule(models.Model):
                 remaining -= rec
 
         if len(remaining):
-            error = 'Error - Remaining: %s' % remaining.mapped('display_name')
+            error = "Error - Remaining: %s" % remaining.mapped("display_name")
             _logger.error(error)
             raise MissingError(error)
 
@@ -184,13 +217,15 @@ class IrModuleModule(models.Model):
         self.ensure_one()
         translated_fields = self._theme_translated_fields.get(old_rec._name, [])
         for (src_field, dst_field) in translated_fields:
-            self._cr.execute("""INSERT INTO ir_translation (lang, src, name, res_id, state, value, type, module)
+            self._cr.execute(
+                """INSERT INTO ir_translation (lang, src, name, res_id, state, value, type, module)
                                 SELECT t.lang, t.src, %s, %s, t.state, t.value, t.type, t.module
                                 FROM ir_translation t
                                 WHERE name = %s
                                   AND res_id = %s
                                 ON CONFLICT DO NOTHING""",
-                             (dst_field, new_rec.id, src_field, old_rec.id))
+                (dst_field, new_rec.id, src_field, old_rec.id),
+            )
 
     def _theme_load(self, website):
         """
@@ -200,12 +235,17 @@ class IrModuleModule(models.Model):
             :param website: ``website`` model on which to load the themes
         """
         for module in self:
-            _logger.info('Load theme %s for website %s from template.' % (module.mapped('name'), website.id))
+            _logger.info(
+                "Load theme %s for website %s from template."
+                % (module.mapped("name"), website.id)
+            )
 
             for model_name in self._theme_model_names:
                 module._update_records(model_name, website)
 
-            self.env['theme.utils'].with_context(website_id=website.id)._post_copy(module)
+            self.env["theme.utils"].with_context(website_id=website.id)._post_copy(
+                module
+            )
 
     def _theme_unload(self, website):
         """
@@ -216,11 +256,20 @@ class IrModuleModule(models.Model):
             :param website: ``website`` model on which to unload the themes
         """
         for module in self:
-            _logger.info('Unload theme %s for website %s from template.' % (self.mapped('name'), website.id))
+            _logger.info(
+                "Unload theme %s for website %s from template."
+                % (self.mapped("name"), website.id)
+            )
 
             for model_name in self._theme_model_names:
                 template = self._get_module_data(model_name)
-                models = template.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).mapped('copy_ids').filtered(lambda m: m.website_id == website)
+                models = (
+                    template.with_context(
+                        **{"active_test": False, MODULE_UNINSTALL_FLAG: True}
+                    )
+                    .mapped("copy_ids")
+                    .filtered(lambda m: m.website_id == website)
+                )
                 models.unlink()
                 self._theme_cleanup(model_name, website)
 
@@ -246,15 +295,19 @@ class IrModuleModule(models.Model):
         self.ensure_one()
         model = self.env[model_name]
 
-        if model_name in ('website.page', 'website.menu'):
+        if model_name in ("website.page", "website.menu"):
             return model
         # use active_test to also unlink archived models
         # and use MODULE_UNINSTALL_FLAG to also unlink inherited models
-        orphans = model.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).search([
-            ('key', '=like', self.name + '.%'),
-            ('website_id', '=', website.id),
-            ('theme_template_id', '=', False),
-        ])
+        orphans = model.with_context(
+            **{"active_test": False, MODULE_UNINSTALL_FLAG: True}
+        ).search(
+            [
+                ("key", "=like", self.name + ".%"),
+                ("website_id", "=", website.id),
+                ("theme_template_id", "=", False),
+            ]
+        )
         orphans.unlink()
 
     def _theme_get_upstream(self):
@@ -264,7 +317,9 @@ class IrModuleModule(models.Model):
             :return: recordset of themes ``ir.module.module``
         """
         self.ensure_one()
-        return self.upstream_dependencies(exclude_states=('',)).filtered(lambda x: x.name.startswith('theme_'))
+        return self.upstream_dependencies(exclude_states=("",)).filtered(
+            lambda x: x.name.startswith("theme_")
+        )
 
     def _theme_get_downstream(self):
         """
@@ -276,7 +331,9 @@ class IrModuleModule(models.Model):
             :return: recordset of themes ``ir.module.module``
         """
         self.ensure_one()
-        return self.downstream_dependencies().filtered(lambda x: x.name.startswith(self.name))
+        return self.downstream_dependencies().filtered(
+            lambda x: x.name.startswith(self.name)
+        )
 
     def _theme_get_stream_themes(self):
         """
@@ -301,19 +358,20 @@ class IrModuleModule(models.Model):
             :return: recordset of websites ``website``
         """
         self.ensure_one()
-        websites = self.env['website']
-        for website in websites.search([('theme_id', '!=', False)]):
+        websites = self.env["website"]
+        for website in websites.search([("theme_id", "!=", False)]):
             if self in website.theme_id._theme_get_stream_themes():
                 websites |= website
         return websites
 
     def _theme_upgrade_upstream(self):
         """ Upgrade the upstream dependencies of a theme, and install it if necessary. """
+
         def install_or_upgrade(theme):
-            if theme.state != 'installed':
+            if theme.state != "installed":
                 theme.button_install()
             themes = theme + theme._theme_get_upstream()
-            themes.filtered(lambda m: m.state == 'installed').button_upgrade()
+            themes.filtered(lambda m: m.state == "installed").button_upgrade()
 
         self._button_immediate_function(install_or_upgrade)
 
@@ -329,7 +387,9 @@ class IrModuleModule(models.Model):
         # _theme_remove is the entry point of any change of theme for a website
         # (either removal or installation of a theme and its dependencies). In
         # either case, we need to reset some default configuration before.
-        self.env['theme.utils'].with_context(website_id=website.id)._reset_default_config()
+        self.env["theme.utils"].with_context(
+            website_id=website.id
+        )._reset_default_config()
 
         if not website.theme_id:
             return
@@ -351,7 +411,7 @@ class IrModuleModule(models.Model):
             :return: dict with the next action to execute
         """
         self.ensure_one()
-        website = self.env['website'].get_current_website()
+        website = self.env["website"].get_current_website()
 
         self._theme_remove(website)
 
@@ -361,19 +421,23 @@ class IrModuleModule(models.Model):
         # this will install 'self' if it is not installed yet
         self._theme_upgrade_upstream()
 
-        active_todo = self.env['ir.actions.todo'].search([('state', '=', 'open')], limit=1)
+        active_todo = self.env["ir.actions.todo"].search(
+            [("state", "=", "open")], limit=1
+        )
         result = None
         if active_todo:
             result = active_todo.action_launch()
         else:
             result = website.button_go_website(mode_edit=True)
-        if result.get('url') and 'enable_editor' in result['url']:
-            result['url'] = result['url'].replace('enable_editor', 'with_loader=1&enable_editor')
+        if result.get("url") and "enable_editor" in result["url"]:
+            result["url"] = result["url"].replace(
+                "enable_editor", "with_loader=1&enable_editor"
+            )
         return result
 
     def button_remove_theme(self):
         """Remove the current theme of the current website."""
-        website = self.env['website'].get_current_website()
+        website = self.env["website"].get_current_website()
         self._theme_remove(website)
 
     def button_refresh_theme(self):
@@ -383,7 +447,7 @@ class IrModuleModule(models.Model):
             To refresh it, we only need to upgrade the modules.
             Indeed the (re)loading of the theme will be done automatically on ``write``.
         """
-        website = self.env['website'].get_current_website()
+        website = self.env["website"].get_current_website()
         website.theme_id._theme_upgrade_upstream()
 
     @api.model
@@ -394,49 +458,72 @@ class IrModuleModule(models.Model):
 
     @api.model
     def update_theme_images(self):
-        IrAttachment = self.env['ir.attachment']
-        existing_urls = IrAttachment.search_read([['res_model', '=', self._name], ['type', '=', 'url']], ['url'])
-        existing_urls = {url_wrapped['url'] for url_wrapped in existing_urls}
+        IrAttachment = self.env["ir.attachment"]
+        existing_urls = IrAttachment.search_read(
+            [["res_model", "=", self._name], ["type", "=", "url"]], ["url"]
+        )
+        existing_urls = {url_wrapped["url"] for url_wrapped in existing_urls}
 
-        themes = self.env['ir.module.module'].with_context(active_test=False).search([
-            ('category_id', 'child_of', self.env.ref('base.module_category_theme').id),
-        ], order='name')
+        themes = (
+            self.env["ir.module.module"]
+            .with_context(active_test=False)
+            .search(
+                [
+                    (
+                        "category_id",
+                        "child_of",
+                        self.env.ref("base.module_category_theme").id,
+                    ),
+                ],
+                order="name",
+            )
+        )
 
         for theme in themes:
             terp = self.get_module_info(theme.name)
-            images = terp.get('images', [])
+            images = terp.get("images", [])
             for image in images:
-                image_path = '/' + os.path.join(theme.name, image)
+                image_path = "/" + os.path.join(theme.name, image)
                 if image_path not in existing_urls:
                     image_name = os.path.basename(image_path)
-                    IrAttachment.create({
-                        'type': 'url',
-                        'name': image_name,
-                        'url': image_path,
-                        'res_model': self._name,
-                        'res_id': theme.id,
-                    })
+                    IrAttachment.create(
+                        {
+                            "type": "url",
+                            "name": image_name,
+                            "url": image_path,
+                            "res_model": self._name,
+                            "res_id": theme.id,
+                        }
+                    )
 
     def get_themes_domain(self):
         """Returns the 'ir.module.module' search domain matching all available themes."""
+
         def get_id(model_id):
-            return self.env['ir.model.data'].xmlid_to_res_id(model_id)
+            return self.env["ir.model.data"].xmlid_to_res_id(model_id)
+
         return [
-            ('category_id', 'not in', [
-                get_id('base.module_category_hidden'),
-                get_id('base.module_category_theme_hidden'),
-            ]),
-            '|',
-            ('category_id', '=', get_id('base.module_category_theme')),
-            ('category_id.parent_id', '=', get_id('base.module_category_theme'))
+            (
+                "category_id",
+                "not in",
+                [
+                    get_id("base.module_category_hidden"),
+                    get_id("base.module_category_theme_hidden"),
+                ],
+            ),
+            "|",
+            ("category_id", "=", get_id("base.module_category_theme")),
+            ("category_id.parent_id", "=", get_id("base.module_category_theme")),
         ]
 
     def _check(self):
         super()._check()
-        View = self.env['ir.ui.view']
-        website_views_to_adapt = getattr(self.pool, 'website_views_to_adapt', [])
+        View = self.env["ir.ui.view"]
+        website_views_to_adapt = getattr(self.pool, "website_views_to_adapt", [])
         if website_views_to_adapt:
             for view_replay in website_views_to_adapt:
                 cow_view = View.browse(view_replay[0])
-                View._load_records_write_on_cow(cow_view, view_replay[1], view_replay[2])
+                View._load_records_write_on_cow(
+                    cow_view, view_replay[1], view_replay[2]
+                )
             self.pool.website_views_to_adapt.clear()

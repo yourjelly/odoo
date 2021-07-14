@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Events Sales',
-    'version': '1.2',
-    'category': 'Marketing/Events',
-    'website': 'https://www.odoo.com/app/events',
-    'description': """
+    "name": "Events Sales",
+    "version": "1.2",
+    "category": "Marketing/Events",
+    "website": "https://www.odoo.com/app/events",
+    "description": """
 Creating registration with sales orders.
 ========================================
 
@@ -18,33 +18,29 @@ that product, you will be able to choose an existing event of that category and
 when you confirm your sales order it will automatically create a registration for
 this event.
 """,
-    'depends': ['event', 'sale_management'],
-    'data': [
-        'views/event_ticket_views.xml',
-        'views/event_registration_views.xml',
-        'views/event_views.xml',
-        'views/product_views.xml',
-        'views/sale_order_views.xml',
-        'data/event_sale_data.xml',
-        'data/mail_data.xml',
-        'report/event_event_templates.xml',
-        'security/ir.model.access.csv',
-        'security/event_security.xml',
-        'wizard/event_edit_registration.xml',
-        'wizard/event_configurator_views.xml',
+    "depends": ["event", "sale_management"],
+    "data": [
+        "views/event_ticket_views.xml",
+        "views/event_registration_views.xml",
+        "views/event_views.xml",
+        "views/product_views.xml",
+        "views/sale_order_views.xml",
+        "data/event_sale_data.xml",
+        "data/mail_data.xml",
+        "report/event_event_templates.xml",
+        "security/ir.model.access.csv",
+        "security/event_security.xml",
+        "wizard/event_edit_registration.xml",
+        "wizard/event_configurator_views.xml",
     ],
-    'demo': ['data/event_demo.xml'],
-    'installable': True,
-    'auto_install': True,
-    'assets': {
-        'web.assets_backend': [
-            'event_sale/static/src/**/*',
+    "demo": ["data/event_demo.xml"],
+    "installable": True,
+    "auto_install": True,
+    "assets": {
+        "web.assets_backend": ["event_sale/static/src/**/*",],
+        "web.assets_tests": ["event_sale/static/tests/tours/**/*",],
+        "web.qunit_suite_tests": [
+            "event_sale/static/tests/event_configurator.test.js",
         ],
-        'web.assets_tests': [
-            'event_sale/static/tests/tours/**/*',
-        ],
-        'web.qunit_suite_tests': [
-            'event_sale/static/tests/event_configurator.test.js',
-        ],
-    }
+    },
 }

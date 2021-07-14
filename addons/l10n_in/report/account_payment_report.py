@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#az Part of Odoo. See LICENSE file for full copyright and licensing details.
+# az Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, tools
 
@@ -8,19 +8,22 @@ class L10nInPaymentReport(models.AbstractModel):
     _name = "l10n_in.payment.report"
     _description = "Indian accounting payment report"
 
-    account_move_id = fields.Many2one('account.move', string="Account Move")
-    payment_id = fields.Many2one('account.payment', string='Payment')
-    currency_id = fields.Many2one('res.currency', string="Currency")
+    account_move_id = fields.Many2one("account.move", string="Account Move")
+    payment_id = fields.Many2one("account.payment", string="Payment")
+    currency_id = fields.Many2one("res.currency", string="Currency")
     amount = fields.Float(string="Amount")
     payment_amount = fields.Float(string="Payment Amount")
-    partner_id = fields.Many2one('res.partner', string="Customer")
-    payment_type = fields.Selection([('outbound', 'Send Money'), ('inbound', 'Receive Money')], string='Payment Type')
-    journal_id = fields.Many2one('account.journal', string="Journal")
+    partner_id = fields.Many2one("res.partner", string="Customer")
+    payment_type = fields.Selection(
+        [("outbound", "Send Money"), ("inbound", "Receive Money")],
+        string="Payment Type",
+    )
+    journal_id = fields.Many2one("account.journal", string="Journal")
     company_id = fields.Many2one(related="journal_id.company_id", string="Company")
     place_of_supply = fields.Char(string="Place of Supply")
     supply_type = fields.Char(string="Supply Type")
 
-    l10n_in_tax_id = fields.Many2one('account.tax', string="Tax")
+    l10n_in_tax_id = fields.Many2one("account.tax", string="Tax")
     tax_rate = fields.Float(string="Rate")
     igst_amount = fields.Float(compute="_compute_tax_amount", string="IGST amount")
     cgst_amount = fields.Float(compute="_compute_tax_amount", string="CGST amount")
@@ -28,31 +31,46 @@ class L10nInPaymentReport(models.AbstractModel):
     cess_amount = fields.Float(compute="_compute_tax_amount", string="CESS amount")
     gross_amount = fields.Float(compute="_compute_tax_amount", string="Gross advance")
 
-    def _compute_l10n_in_tax(self, taxes, price_unit, currency=None, quantity=1.0, product=None, partner=None):
+    def _compute_l10n_in_tax(
+        self, taxes, price_unit, currency=None, quantity=1.0, product=None, partner=None
+    ):
         """common method to compute gst tax amount base on tax group"""
-        res = {'igst_amount': 0.0, 'sgst_amount': 0.0, 'cgst_amount': 0.0, 'cess_amount': 0.0}
-        AccountTaxRepartitionLine = self.env['account.tax.repartition.line']
-        tax_report_line_igst = self.env.ref('l10n_in.tax_report_line_igst', False)
-        tax_report_line_cgst = self.env.ref('l10n_in.tax_report_line_cgst', False)
-        tax_report_line_sgst = self.env.ref('l10n_in.tax_report_line_sgst', False)
-        tax_report_line_cess = self.env.ref('l10n_in.tax_report_line_cess', False)
-        filter_tax = taxes.filtered(lambda t: t.type_tax_use != 'none')
-        tax_compute = filter_tax.compute_all(price_unit, currency=currency, quantity=quantity, product=product, partner=partner)
-        for tax_data in tax_compute['taxes']:
-            tax_report_lines = AccountTaxRepartitionLine.browse(tax_data['tax_repartition_line_id']).mapped('tag_ids.tax_report_line_ids')
+        res = {
+            "igst_amount": 0.0,
+            "sgst_amount": 0.0,
+            "cgst_amount": 0.0,
+            "cess_amount": 0.0,
+        }
+        AccountTaxRepartitionLine = self.env["account.tax.repartition.line"]
+        tax_report_line_igst = self.env.ref("l10n_in.tax_report_line_igst", False)
+        tax_report_line_cgst = self.env.ref("l10n_in.tax_report_line_cgst", False)
+        tax_report_line_sgst = self.env.ref("l10n_in.tax_report_line_sgst", False)
+        tax_report_line_cess = self.env.ref("l10n_in.tax_report_line_cess", False)
+        filter_tax = taxes.filtered(lambda t: t.type_tax_use != "none")
+        tax_compute = filter_tax.compute_all(
+            price_unit,
+            currency=currency,
+            quantity=quantity,
+            product=product,
+            partner=partner,
+        )
+        for tax_data in tax_compute["taxes"]:
+            tax_report_lines = AccountTaxRepartitionLine.browse(
+                tax_data["tax_repartition_line_id"]
+            ).mapped("tag_ids.tax_report_line_ids")
             if tax_report_line_sgst in tax_report_lines:
-                res['sgst_amount'] += tax_data['amount']
+                res["sgst_amount"] += tax_data["amount"]
             if tax_report_line_cgst in tax_report_lines:
-                res['cgst_amount'] += tax_data['amount']
+                res["cgst_amount"] += tax_data["amount"]
             if tax_report_line_igst in tax_report_lines:
-                res['igst_amount'] += tax_data['amount']
+                res["igst_amount"] += tax_data["amount"]
             if tax_report_line_cess in tax_report_lines:
-                res['cess_amount'] += tax_data['amount']
+                res["cess_amount"] += tax_data["amount"]
         res.update(tax_compute)
         return res
 
-    #TO BE OVERWRITTEN
-    @api.depends('currency_id')
+    # TO BE OVERWRITTEN
+    @api.depends("currency_id")
     def _compute_tax_amount(self):
         """Calculate tax amount base on default tax set in company"""
 
@@ -103,23 +121,26 @@ class L10nInPaymentReport(models.AbstractModel):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE or REPLACE VIEW %s AS (
-            %s %s %s)""" % (self._table, self._select(), self._from(), self._where()))
+        self.env.cr.execute(
+            """CREATE or REPLACE VIEW %s AS (
+            %s %s %s)"""
+            % (self._table, self._select(), self._from(), self._where())
+        )
 
 
 class AdvancesPaymentReport(models.Model):
     _name = "l10n_in.advances.payment.report"
-    _inherit = 'l10n_in.payment.report'
+    _inherit = "l10n_in.payment.report"
     _description = "Advances Payment Analysis"
     _auto = False
 
     date = fields.Date(string="Payment Date")
     reconcile_amount = fields.Float(string="Reconcile amount in Payment month")
 
-    @api.depends('payment_amount', 'reconcile_amount', 'currency_id')
+    @api.depends("payment_amount", "reconcile_amount", "currency_id")
     def _compute_tax_amount(self):
         """Calculate tax amount base on default tax set in company"""
-        account_move_line = self.env['account.move.line']
+        account_move_line = self.env["account.move.line"]
         for record in self:
             base_amount = record.payment_amount - record.reconcile_amount
             taxes_data = self._compute_l10n_in_tax(
@@ -127,12 +148,13 @@ class AdvancesPaymentReport(models.Model):
                 price_unit=base_amount,
                 currency=record.currency_id or None,
                 quantity=1,
-                partner=record.partner_id or None)
-            record.igst_amount = taxes_data['igst_amount']
-            record.cgst_amount = taxes_data['cgst_amount']
-            record.sgst_amount = taxes_data['sgst_amount']
-            record.cess_amount = taxes_data['cess_amount']
-            record.gross_amount = taxes_data['total_excluded']
+                partner=record.partner_id or None,
+            )
+            record.igst_amount = taxes_data["igst_amount"]
+            record.cgst_amount = taxes_data["cgst_amount"]
+            record.sgst_amount = taxes_data["sgst_amount"]
+            record.cess_amount = taxes_data["cess_amount"]
+            record.gross_amount = taxes_data["total_excluded"]
 
     def _select(self):
         select_str = super(AdvancesPaymentReport, self)._select()
@@ -151,27 +173,28 @@ class AdvancesPaymentReport(models.Model):
 
 class L10nInAdvancesPaymentAdjustmentReport(models.Model):
     _name = "l10n_in.advances.payment.adjustment.report"
-    _inherit = 'l10n_in.payment.report'
+    _inherit = "l10n_in.payment.report"
     _description = "Advances Payment Adjustment Analysis"
     _auto = False
 
-    date = fields.Date('Reconcile Date')
+    date = fields.Date("Reconcile Date")
 
-    @api.depends('amount', 'currency_id', 'partner_id')
+    @api.depends("amount", "currency_id", "partner_id")
     def _compute_tax_amount(self):
-        account_move_line = self.env['account.move.line']
+        account_move_line = self.env["account.move.line"]
         for record in self:
             taxes_data = self._compute_l10n_in_tax(
                 taxes=record.l10n_in_tax_id,
                 price_unit=record.amount,
                 currency=record.currency_id or None,
                 quantity=1,
-                partner=record.partner_id or None)
-            record.igst_amount = taxes_data['igst_amount']
-            record.cgst_amount = taxes_data['cgst_amount']
-            record.sgst_amount = taxes_data['sgst_amount']
-            record.cess_amount = taxes_data['cess_amount']
-            record.gross_amount = taxes_data['total_excluded']
+                partner=record.partner_id or None,
+            )
+            record.igst_amount = taxes_data["igst_amount"]
+            record.cgst_amount = taxes_data["cgst_amount"]
+            record.sgst_amount = taxes_data["sgst_amount"]
+            record.cess_amount = taxes_data["cess_amount"]
+            record.gross_amount = taxes_data["total_excluded"]
 
     def _select(self):
         select_str = super(L10nInAdvancesPaymentAdjustmentReport, self)._select()

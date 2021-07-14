@@ -16,22 +16,29 @@ _logger = logging.getLogger(__name__)
 
 
 class OgoneController(http.Controller):
-    _hosted_payment_page_return_url = '/payment/ogone/hostedpaymentpage'
-    _flexcheckout_return_url = '/payment/ogone/flexcheckout'
-    _directlink_return_url = '/payment/ogone/directlink'
+    _hosted_payment_page_return_url = "/payment/ogone/hostedpaymentpage"
+    _flexcheckout_return_url = "/payment/ogone/flexcheckout"
+    _directlink_return_url = "/payment/ogone/directlink"
     _backward_compatibility_urls = [
-        '/payment/ogone/accept', '/payment/ogone/test/accept',
-        '/payment/ogone/decline', '/payment/ogone/test/decline',
-        '/payment/ogone/exception', '/payment/ogone/test/exception',
-        '/payment/ogone/cancel', '/payment/ogone/test/cancel',
-        '/payment/ogone/validate/accept',
-        '/payment/ogone/validate/decline',
-        '/payment/ogone/validate/exception',
+        "/payment/ogone/accept",
+        "/payment/ogone/test/accept",
+        "/payment/ogone/decline",
+        "/payment/ogone/test/decline",
+        "/payment/ogone/exception",
+        "/payment/ogone/test/exception",
+        "/payment/ogone/cancel",
+        "/payment/ogone/test/cancel",
+        "/payment/ogone/validate/accept",
+        "/payment/ogone/validate/decline",
+        "/payment/ogone/validate/exception",
     ]  # Facilitates the migration of users who registered the URLs in Ogone's backend prior to 14.3
 
     @http.route(
-        _hosted_payment_page_return_url, type='http', auth='public', methods=['GET', 'POST'],
-        csrf=False
+        _hosted_payment_page_return_url,
+        type="http",
+        auth="public",
+        methods=["GET", "POST"],
+        csrf=False,
     )  # 'GET' or 'POST' depending on the configuration in Ogone backend
     def ogone_return_from_hosted_payment_page(self, **feedback_data):
         """ Process the data returned by Ogone after redirection to the Hosted Payment Page.
@@ -43,13 +50,19 @@ class OgoneController(http.Controller):
         self._verify_signature(feedback_data, data)
 
         # Handle the feedback data
-        data['FEEDBACK_TYPE'] = 'hosted_payment_page'
-        _logger.info("entering _handle_feedback_data with data:\n%s", pprint.pformat(data))
-        request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', data)
-        return werkzeug.utils.redirect('/payment/status')
+        data["FEEDBACK_TYPE"] = "hosted_payment_page"
+        _logger.info(
+            "entering _handle_feedback_data with data:\n%s", pprint.pformat(data)
+        )
+        request.env["payment.transaction"].sudo()._handle_feedback_data("ogone", data)
+        return werkzeug.utils.redirect("/payment/status")
 
     @http.route(
-        _flexcheckout_return_url, type='http', auth='public', methods=['GET', 'POST'], csrf=False
+        _flexcheckout_return_url,
+        type="http",
+        auth="public",
+        methods=["GET", "POST"],
+        csrf=False,
     )  # 'GET' or 'POST' depending on the configuration in Ogone backend
     def ogone_return_from_flexcheckout(self, **feedback_data):
         """ Process the data returned by Ogone after redirection to Flexcheckout.
@@ -61,24 +74,33 @@ class OgoneController(http.Controller):
         self._verify_signature(feedback_data, data)
 
         # Create a token from the feedback data
-        data['FEEDBACK_TYPE'] = 'flexcheckout'
-        _logger.info("entering _handle_feedback_data with data:\n%s", pprint.pformat(data))
-        tx_sudo = request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', data)
+        data["FEEDBACK_TYPE"] = "flexcheckout"
+        _logger.info(
+            "entering _handle_feedback_data with data:\n%s", pprint.pformat(data)
+        )
+        tx_sudo = (
+            request.env["payment.transaction"]
+            .sudo()
+            ._handle_feedback_data("ogone", data)
+        )
 
         # Process the payment through the token
         tree = tx_sudo._ogone_send_order_request(request_3ds_authentication=True)
         feedback_data = {
-            'FEEDBACK_TYPE': 'directlink',
-            'ORDERID': tree.get('orderID'),
-            'tree': tree,
+            "FEEDBACK_TYPE": "directlink",
+            "ORDERID": tree.get("orderID"),
+            "tree": tree,
         }
         _logger.info(
-            "entering _handle_feedback_data with data:\n%s", pprint.pformat(feedback_data)
+            "entering _handle_feedback_data with data:\n%s",
+            pprint.pformat(feedback_data),
         )
-        request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', feedback_data)
+        request.env["payment.transaction"].sudo()._handle_feedback_data(
+            "ogone", feedback_data
+        )
 
         # Handle the response
-        redirect_html_element = tree.find('HTML_ANSWER')
+        redirect_html_element = tree.find("HTML_ANSWER")
         if redirect_html_element:
             # Ogone has inserted an HTML_ANSWER element in its response XML tree. This means that a
             # redirection to DirectLink's authentication page is required, as FlexCheckout is not
@@ -90,16 +112,21 @@ class OgoneController(http.Controller):
             # with the (now authenticated) payment request.
             redirect_html = ustr(base64.b64decode(redirect_html_element.text))
             return request.render(
-                'payment_ogone.directlink_feedback', {'redirect_html': redirect_html}
+                "payment_ogone.directlink_feedback", {"redirect_html": redirect_html}
             )
         else:
-            if tx_sudo.state in ('cancel', 'error'):
-                tx_sudo.token_id.active = False  # The initial payment failed, archive the token
-            return request.redirect('/payment/status')
+            if tx_sudo.state in ("cancel", "error"):
+                tx_sudo.token_id.active = (
+                    False  # The initial payment failed, archive the token
+                )
+            return request.redirect("/payment/status")
 
     @http.route(
-        [_directlink_return_url] + _backward_compatibility_urls, type='http', auth='public',
-        methods=['GET', 'POST'], csrf=False
+        [_directlink_return_url] + _backward_compatibility_urls,
+        type="http",
+        auth="public",
+        methods=["GET", "POST"],
+        csrf=False,
     )  # 'GET' or 'POST' depending on the configuration in Ogone backend
     def ogone_return_from_directlink(self, **feedback_data):
         """ Process the data returned by Ogone after redirection to Directlink authentication page.
@@ -119,12 +146,20 @@ class OgoneController(http.Controller):
         self._verify_signature(feedback_data, data)
 
         # Handle the feedback data
-        data['FEEDBACK_TYPE'] = 'directlink'
-        _logger.info("entering _handle_feedback_data with data:\n%s", pprint.pformat(data))
-        tx_sudo = request.env['payment.transaction'].sudo()._handle_feedback_data('ogone', data)
-        if tx_sudo.state in ('cancel', 'error'):
-            tx_sudo.token_id.active = False  # The initial payment failed, archive the token
-        return request.redirect('/payment/status')
+        data["FEEDBACK_TYPE"] = "directlink"
+        _logger.info(
+            "entering _handle_feedback_data with data:\n%s", pprint.pformat(data)
+        )
+        tx_sudo = (
+            request.env["payment.transaction"]
+            .sudo()
+            ._handle_feedback_data("ogone", data)
+        )
+        if tx_sudo.state in ("cancel", "error"):
+            tx_sudo.token_id.active = (
+                False  # The initial payment failed, archive the token
+            )
+        return request.redirect("/payment/status")
 
     def _homogenize_data(self, data):
         """ Format keys to follow an homogenized convention inspired by Ogone Directlink API.
@@ -137,7 +172,7 @@ class OgoneController(http.Controller):
         1) Uppercase key strings: 'Something' -> 'SOMETHING', 'something' -> 'SOMETHING'
         2) Remove the prefix: 'CARD.SOMETHING' -> 'SOMETHING', 'ALIAS.SOMETHING' -> 'SOMETHING'
         """
-        return {re.sub(r'.*\.', '', k.upper()): v for k, v in data.items()}
+        return {re.sub(r".*\.", "", k.upper()): v for k, v in data.items()}
 
     def _verify_signature(self, sign_data, data):
         """ Check that the signature computed from the feedback matches the received one.
@@ -147,16 +182,22 @@ class OgoneController(http.Controller):
         :return: None
         :raise: ValidationError if the signatures don't match
         """
-        acquirer_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
-            'ogone', data
-        ).acquirer_id  # Find the acquirer based on the transaction
-        received_signature = data.get('SHASIGN')
+        acquirer_sudo = (
+            request.env["payment.transaction"]
+            .sudo()
+            ._get_tx_from_feedback_data("ogone", data)
+            .acquirer_id
+        )  # Find the acquirer based on the transaction
+        received_signature = data.get("SHASIGN")
         expected_signature = acquirer_sudo._ogone_generate_signature(sign_data)
         if received_signature != expected_signature.upper():
             raise ValidationError(
-                "Ogone: " + _(
+                "Ogone: "
+                + _(
                     "Received data with invalid signature. expected: %(exp)s ; received: %(rec)s ; "
                     "data:\n%(data)s",
-                    exp=expected_signature, rec=received_signature, data=pprint.pformat(sign_data)
+                    exp=expected_signature,
+                    rec=received_signature,
+                    data=pprint.pformat(sign_data),
                 )
             )

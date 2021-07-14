@@ -5,7 +5,7 @@ from odoo.http import request
 
 
 class WabsitePage(models.AbstractModel):
-    _inherit = 'website.page'
+    _inherit = "website.page"
 
     def _get_cache_key(self, req):
         cart = request.website.sale_get_order()

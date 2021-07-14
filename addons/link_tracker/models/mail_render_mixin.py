@@ -33,16 +33,26 @@ class MailRenderMixin(models.AbstractModel):
 
         :return: updated html
         """
-        base_url = base_url or self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        short_schema = base_url + '/r/'
+        base_url = base_url or self.env["ir.config_parameter"].sudo().get_param(
+            "web.base.url"
+        )
+        short_schema = base_url + "/r/"
         for match in re.findall(tools.HTML_TAG_URL_REGEX, html):
             href = markupsafe.Markup(match[0])
             long_url = match[1]
-            label = (match[3] or '').strip()
+            label = (match[3] or "").strip()
 
-            if not blacklist or not [s for s in blacklist if s in long_url] and not long_url.startswith(short_schema):
-                create_vals = dict(link_tracker_vals, url=utils.unescape(long_url), label=utils.unescape(label))
-                link = self.env['link.tracker'].search_or_create(create_vals)
+            if (
+                not blacklist
+                or not [s for s in blacklist if s in long_url]
+                and not long_url.startswith(short_schema)
+            ):
+                create_vals = dict(
+                    link_tracker_vals,
+                    url=utils.unescape(long_url),
+                    label=utils.unescape(label),
+                )
+                link = self.env["link.tracker"].search_or_create(create_vals)
                 if link.short_url:
                     new_href = href.replace(long_url, link.short_url)
                     html = html.replace(href, new_href)
@@ -50,26 +60,32 @@ class MailRenderMixin(models.AbstractModel):
         return html
 
     @api.model
-    def _shorten_links_text(self, content, link_tracker_vals, blacklist=None, base_url=None):
+    def _shorten_links_text(
+        self, content, link_tracker_vals, blacklist=None, base_url=None
+    ):
         """ Shorten links in a string content. Works like ``_shorten_links`` but
         targetting string content, not html.
 
         :return: updated content
         """
-        base_url = base_url or self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        shortened_schema = base_url + '/r/'
-        unsubscribe_schema = base_url + '/sms/'
+        base_url = base_url or self.env["ir.config_parameter"].sudo().get_param(
+            "web.base.url"
+        )
+        shortened_schema = base_url + "/r/"
+        unsubscribe_schema = base_url + "/sms/"
         for original_url in re.findall(tools.TEXT_URL_REGEX, content):
             # don't shorten already-shortened links or links towards unsubscribe page
-            if original_url.startswith(shortened_schema) or original_url.startswith(unsubscribe_schema):
+            if original_url.startswith(shortened_schema) or original_url.startswith(
+                unsubscribe_schema
+            ):
                 continue
             # support blacklist items in path, like /u/
-            parsed = urls.url_parse(original_url, scheme='http')
+            parsed = urls.url_parse(original_url, scheme="http")
             if blacklist and any(item in parsed.path for item in blacklist):
                 continue
 
-            create_vals = dict(link_tracker_vals, url= utils.unescape(original_url))
-            link = self.env['link.tracker'].search_or_create(create_vals)
+            create_vals = dict(link_tracker_vals, url=utils.unescape(original_url))
+            link = self.env["link.tracker"].search_or_create(create_vals)
             if link.short_url:
                 content = content.replace(original_url, link.short_url, 1)
 

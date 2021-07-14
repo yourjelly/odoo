@@ -5,14 +5,22 @@ from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
-    _inherit = 'res.config.settings'
+    _inherit = "res.config.settings"
 
     module_project_forecast = fields.Boolean(string="Planning")
     module_hr_timesheet = fields.Boolean(string="Task Logs")
-    group_subtask_project = fields.Boolean("Sub-tasks", implied_group="project.group_subtask_project")
-    group_project_rating = fields.Boolean("Customer Ratings", implied_group='project.group_project_rating')
-    group_project_recurring_tasks = fields.Boolean("Recurring Tasks", implied_group="project.group_project_recurring_tasks")
-    group_project_task_dependencies = fields.Boolean("Task Dependencies", implied_group="project.group_project_task_dependencies")
+    group_subtask_project = fields.Boolean(
+        "Sub-tasks", implied_group="project.group_subtask_project"
+    )
+    group_project_rating = fields.Boolean(
+        "Customer Ratings", implied_group="project.group_project_rating"
+    )
+    group_project_recurring_tasks = fields.Boolean(
+        "Recurring Tasks", implied_group="project.group_project_recurring_tasks"
+    )
+    group_project_task_dependencies = fields.Boolean(
+        "Task Dependencies", implied_group="project.group_project_task_dependencies"
+    )
 
     @api.model
     def _get_basic_project_domain(self):
@@ -29,8 +37,10 @@ class ResConfigSettings(models.TransientModel):
             "group_subtask_project": "allow_subtasks",
             "group_project_task_dependencies": "allow_task_dependencies",
         }
-        config_feature_vals = {config_flag: self[config_flag]
-                               for config_flag in global_features.keys() | basic_project_features.keys()}
+        config_feature_vals = {
+            config_flag: self[config_flag]
+            for config_flag in global_features.keys() | basic_project_features.keys()
+        }
 
         def update_projects(projects, features):
             for (config_flag, project_flag) in features.items():
@@ -42,6 +52,9 @@ class ResConfigSettings(models.TransientModel):
         # update for all projects
         update_projects(projects, global_features)
         # update for basic projects
-        update_projects(projects.filtered_domain(self._get_basic_project_domain()), basic_project_features)
+        update_projects(
+            projects.filtered_domain(self._get_basic_project_domain()),
+            basic_project_features,
+        )
 
         super(ResConfigSettings, self).set_values()

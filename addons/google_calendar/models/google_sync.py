@@ -44,44 +44,51 @@ def after_commit(func):
 
     return wrapped
 
+
 @contextmanager
 def google_calendar_token(user):
     yield user._get_google_calendar_token()
 
 
 class GoogleSync(models.AbstractModel):
-    _name = 'google.calendar.sync'
+    _name = "google.calendar.sync"
     _description = "Synchronize a record with Google Calendar"
 
-    google_id = fields.Char('Google Calendar Id', copy=False)
+    google_id = fields.Char("Google Calendar Id", copy=False)
     need_sync = fields.Boolean(default=True, copy=False)
     active = fields.Boolean(default=True)
 
     def write(self, vals):
-        google_service = GoogleCalendarService(self.env['google.service'])
-        if 'google_id' in vals:
+        google_service = GoogleCalendarService(self.env["google.service"])
+        if "google_id" in vals:
             self._from_google_ids.clear_cache(self)
         synced_fields = self._get_google_synced_fields()
-        if 'need_sync' not in vals and vals.keys() & synced_fields and not self.env.user.google_synchronization_stopped:
-            vals['need_sync'] = True
+        if (
+            "need_sync" not in vals
+            and vals.keys() & synced_fields
+            and not self.env.user.google_synchronization_stopped
+        ):
+            vals["need_sync"] = True
 
         result = super().write(vals)
-        for record in self.filtered('need_sync'):
+        for record in self.filtered("need_sync"):
             if record.google_id:
-                record._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
+                record._google_patch(
+                    google_service, record.google_id, record._google_values(), timeout=3
+                )
 
         return result
 
     @api.model_create_multi
     def create(self, vals_list):
-        if any(vals.get('google_id') for vals in vals_list):
+        if any(vals.get("google_id") for vals in vals_list):
             self._from_google_ids.clear_cache(self)
         if self.env.user.google_synchronization_stopped:
             for vals in vals_list:
-                vals.update({'need_sync': False})
+                vals.update({"need_sync": False})
         records = super().create(vals_list)
 
-        google_service = GoogleCalendarService(self.env['google.service'])
+        google_service = GoogleCalendarService(self.env["google.service"])
         records_to_sync = records.filtered(lambda r: r.need_sync and r.active)
         for record in records_to_sync:
             record._google_insert(google_service, record._google_values(), timeout=3)
@@ -91,9 +98,9 @@ class GoogleSync(models.AbstractModel):
         """We can't delete an event that is also in Google Calendar. Otherwise we would
         have no clue that the event must must deleted from Google Calendar at the next sync.
         """
-        synced = self.filtered('google_id')
+        synced = self.filtered("google_id")
         # LUL TODO find a way to get rid of this context key
-        if self.env.context.get('archive_on_error') and self._active_name:
+        if self.env.context.get("archive_on_error") and self._active_name:
             synced.write({self._active_name: False})
             self = self - synced
         elif synced:
@@ -105,11 +112,11 @@ class GoogleSync(models.AbstractModel):
         return super().unlink()
 
     @api.model
-    @ormcache_context('google_ids', keys=('active_test',))
+    @ormcache_context("google_ids", keys=("active_test",))
     def _from_google_ids(self, google_ids):
         if not google_ids:
             return self.browse()
-        return self.search([('google_id', 'in', google_ids)])
+        return self.search([("google_id", "in", google_ids)])
 
     def _sync_odoo2google(self, google_service: GoogleCalendarService):
         if not self:
@@ -120,14 +127,16 @@ class GoogleSync(models.AbstractModel):
             records_to_sync = self
         cancelled_records = self - records_to_sync
 
-        updated_records = records_to_sync.filtered('google_id')
+        updated_records = records_to_sync.filtered("google_id")
         new_records = records_to_sync - updated_records
-        for record in cancelled_records.filtered('google_id'):
+        for record in cancelled_records.filtered("google_id"):
             record._google_delete(google_service, record.google_id)
         for record in new_records:
             record._google_insert(google_service, record._google_values())
         for record in updated_records:
-            record._google_patch(google_service, record.google_id, record._google_values())
+            record._google_patch(
+                google_service, record.google_id, record._google_values()
+            )
 
     def _cancel(self):
         self.google_id = False
@@ -145,10 +154,11 @@ class GoogleSync(models.AbstractModel):
         new = google_events - existing - google_events.cancelled()
 
         odoo_values = [
-            dict(self._odoo_values(e, default_reminders), need_sync=False)
-            for e in new
+            dict(self._odoo_values(e, default_reminders), need_sync=False) for e in new
         ]
-        new_odoo = self.with_context(dont_notify=True)._create_from_google(new, odoo_values)
+        new_odoo = self.with_context(dont_notify=True)._create_from_google(
+            new, odoo_values
+        )
         cancelled = existing.cancelled()
         cancelled_odoo = self.browse(cancelled.odoo_ids(self.env))
         cancelled_odoo._cancel()
@@ -159,9 +169,15 @@ class GoogleSync(models.AbstractModel):
             updated = parse(gevent.updated)
             odoo_record = self.browse(gevent.odoo_id(self.env))
             # Migration from 13.4 does not fill write_date. Therefore, we force the update from Google.
-            if not odoo_record.write_date or updated >= pytz.utc.localize(odoo_record.write_date):
-                vals = dict(self._odoo_values(gevent, default_reminders), need_sync=False)
-                odoo_record.with_context(dont_notify=True)._write_from_google(gevent, vals)
+            if not odoo_record.write_date or updated >= pytz.utc.localize(
+                odoo_record.write_date
+            ):
+                vals = dict(
+                    self._odoo_values(gevent, default_reminders), need_sync=False
+                )
+                odoo_record.with_context(dont_notify=True)._write_from_google(
+                    gevent, vals
+                )
                 synced_records |= odoo_record
 
         return synced_records
@@ -170,48 +186,76 @@ class GoogleSync(models.AbstractModel):
         # We only handle the most problematic errors of sync events.
         if http_error.response.status_code in (403, 400):
             response = http_error.response.json()
-            if self._name == 'calendar.event':
-                start = self.start and self.start.strftime('%Y-%m-%d at %H:%M') or _("undefined time")
+            if self._name == "calendar.event":
+                start = (
+                    self.start
+                    and self.start.strftime("%Y-%m-%d at %H:%M")
+                    or _("undefined time")
+                )
                 event_ids = self.id
                 name = self.name
                 error_log = "Error while syncing event: "
                 event = self
             else:
                 # calendar recurrence is triggering the error
-                event = self.base_event_id or self._get_first_event(include_outliers=True)
-                start = event.start and event.start.strftime('%Y-%m-%d at %H:%M') or _("undefined time")
-                event_ids = _("%(id)s and %(length)s following", id=event.id, length=len(self.calendar_event_ids.ids))
+                event = self.base_event_id or self._get_first_event(
+                    include_outliers=True
+                )
+                start = (
+                    event.start
+                    and event.start.strftime("%Y-%m-%d at %H:%M")
+                    or _("undefined time")
+                )
+                event_ids = _(
+                    "%(id)s and %(length)s following",
+                    id=event.id,
+                    length=len(self.calendar_event_ids.ids),
+                )
                 name = event.name
                 # prevent to sync other events
                 self.calendar_event_ids.need_sync = False
-                error_log = "Error while syncing recurrence [{id} - {name} - {rrule}]: ".format(id=self.id, name=self.name, rrule=self.rrule)
+                error_log = "Error while syncing recurrence [{id} - {name} - {rrule}]: ".format(
+                    id=self.id, name=self.name, rrule=self.rrule
+                )
 
             # We don't have right access on the event or the request paramaters were bad.
             # https://developers.google.com/calendar/v3/errors#403_forbidden_for_non-organizer
-            if http_error.response.status_code == 403 and "forbiddenForNonOrganizer" in http_error.response.text:
-                reason = _("you don't seem to have permission to modify this event on Google Calendar")
+            if (
+                http_error.response.status_code == 403
+                and "forbiddenForNonOrganizer" in http_error.response.text
+            ):
+                reason = _(
+                    "you don't seem to have permission to modify this event on Google Calendar"
+                )
             else:
-                reason = _("Google gave the following explanation: %s", response['error'].get('message'))
+                reason = _(
+                    "Google gave the following explanation: %s",
+                    response["error"].get("message"),
+                )
 
-            error_log += "The event (%(id)s - %(name)s at %(start)s) could not be synced. It will not be synced while " \
-                         "it is not updated. Reason: %(reason)s" % {'id': event_ids, 'start': start, 'name': name,
-                                                                    'reason': reason}
+            error_log += (
+                "The event (%(id)s - %(name)s at %(start)s) could not be synced. It will not be synced while "
+                "it is not updated. Reason: %(reason)s"
+                % {"id": event_ids, "start": start, "name": name, "reason": reason}
+            )
             _logger.error(error_log)
 
             body = _(
                 "The following event could not be synced with Google Calendar. </br>"
                 "It will not be synced as long at it is not updated.</br>"
-                "%(reason)s", reason=reason)
+                "%(reason)s",
+                reason=reason,
+            )
 
             if event:
                 event.message_post(
-                    body=body,
-                    message_type='comment',
-                    subtype_xmlid='mail.mt_note',
+                    body=body, message_type="comment", subtype_xmlid="mail.mt_note",
                 )
 
     @after_commit
-    def _google_delete(self, google_service: GoogleCalendarService, google_id, timeout=TIMEOUT):
+    def _google_delete(
+        self, google_service: GoogleCalendarService, google_id, timeout=TIMEOUT
+    ):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 google_service.delete(google_id, token=token, timeout=timeout)
@@ -220,29 +264,36 @@ class GoogleSync(models.AbstractModel):
                 self.exists().with_context(dont_notify=True).need_sync = False
 
     @after_commit
-    def _google_patch(self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT):
+    def _google_patch(
+        self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT
+    ):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
-                    google_service.patch(google_id, values, token=token, timeout=timeout)
+                    google_service.patch(
+                        google_id, values, token=token, timeout=timeout
+                    )
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
                 self.need_sync = False
 
     @after_commit
-    def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
+    def _google_insert(
+        self, google_service: GoogleCalendarService, values, timeout=TIMEOUT
+    ):
         if not values:
             return
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
-                    google_id = google_service.insert(values, token=token, timeout=timeout)
+                    google_id = google_service.insert(
+                        values, token=token, timeout=timeout
+                    )
                     # Everything went smoothly
-                    self.with_context(dont_notify=True).write({
-                        'google_id': google_id,
-                        'need_sync': False,
-                    })
+                    self.with_context(dont_notify=True).write(
+                        {"google_id": google_id, "need_sync": False,}
+                    )
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
@@ -256,12 +307,23 @@ class GoogleSync(models.AbstractModel):
         """
         domain = self._get_sync_domain()
         if not full_sync:
-            is_active_clause = (self._active_name, '=', True) if self._active_name else expression.TRUE_LEAF
-            domain = expression.AND([domain, [
-                '|',
-                    '&', ('google_id', '=', False), is_active_clause,
-                    ('need_sync', '=', True),
-            ]])
+            is_active_clause = (
+                (self._active_name, "=", True)
+                if self._active_name
+                else expression.TRUE_LEAF
+            )
+            domain = expression.AND(
+                [
+                    domain,
+                    [
+                        "|",
+                        "&",
+                        ("google_id", "=", False),
+                        is_active_clause,
+                        ("need_sync", "=", True),
+                    ],
+                ]
+            )
         # We want to limit to 200 event sync per transaction, it shouldn't be a problem for the day to day
         # but it allows to run the first synchro within an acceptable time without timeout.
         # If there is a lot of event to synchronize to google the first time,

@@ -8,6 +8,7 @@ from odoo.tools.misc import hmac as hmac_tool
 
 # Access token management
 
+
 def generate_access_token(*values):
     """ Generate an access token based on the provided values.
 
@@ -20,8 +21,8 @@ def generate_access_token(*values):
     :return: The generated access token
     :rtype: str
     """
-    token_str = '|'.join(str(val) for val in values)
-    access_token = hmac_tool(request.env(su=True), 'generate_access_token', token_str)
+    token_str = "|".join(str(val) for val in values)
+    access_token = hmac_tool(request.env(su=True), "generate_access_token", token_str)
     return access_token
 
 
@@ -42,7 +43,8 @@ def check_access_token(access_token, *values):
 
 # Transaction values formatting
 
-def singularize_reference_prefix(prefix='tx', separator='-', max_length=None):
+
+def singularize_reference_prefix(prefix="tx", separator="-", max_length=None):
     """ Make the prefix more unique by suffixing it with the current datetime.
 
     When the prefix is a placeholder that would be part of a large sequence of references sharing
@@ -60,11 +62,13 @@ def singularize_reference_prefix(prefix='tx', separator='-', max_length=None):
     :rtype: str
     """
     if prefix is None:
-        prefix = 'tx'
+        prefix = "tx"
     if max_length:
         DATETIME_LENGTH = 14
-        assert max_length >= 1 + len(separator) + DATETIME_LENGTH  # 1 char + separator + datetime
-        prefix = prefix[:max_length-len(separator)-DATETIME_LENGTH]
+        assert (
+            max_length >= 1 + len(separator) + DATETIME_LENGTH
+        )  # 1 char + separator + datetime
+        prefix = prefix[: max_length - len(separator) - DATETIME_LENGTH]
     return f'{prefix}{separator}{fields.Datetime.now().strftime("%Y%m%d%H%M%S")}'
 
 
@@ -87,7 +91,7 @@ def to_major_currency_units(minor_amount, currency, arbitrary_decimal_number=Non
         decimal_number = currency.decimal_places
     else:
         decimal_number = arbitrary_decimal_number
-    return float_round(minor_amount, 0) / (10**decimal_number)
+    return float_round(minor_amount, 0) / (10 ** decimal_number)
 
 
 def to_minor_currency_units(major_amount, currency, arbitrary_decimal_number=None):
@@ -110,10 +114,11 @@ def to_minor_currency_units(major_amount, currency, arbitrary_decimal_number=Non
     else:
         currency.ensure_one()
         decimal_number = currency.decimal_places
-    return int(float_round(major_amount, decimal_number) * (10**decimal_number))
+    return int(float_round(major_amount, decimal_number) * (10 ** decimal_number))
 
 
 # Token values formatting
+
 
 def build_token_name(payment_details_short=None, final_length=16):
     """ Pad plain payment details with leading X's to build a token name of the desired length.
@@ -123,11 +128,12 @@ def build_token_name(payment_details_short=None, final_length=16):
     :return: The padded token name
     :rtype: str
     """
-    payment_details_short = payment_details_short or '????'
+    payment_details_short = payment_details_short or "????"
     return f"{'X' * (final_length - len(payment_details_short))}{payment_details_short}"
 
 
 # Partner values formatting
+
 
 def format_partner_address(address1="", address2=""):
     """ Format a two-parts partner address into a one-line address string.
@@ -154,5 +160,6 @@ def split_partner_name(partner_name):
 
 # Security
 
+
 def get_customer_ip_address():
-    return request and request.httprequest.remote_addr or ''
+    return request and request.httprequest.remote_addr or ""

@@ -7,7 +7,7 @@ from odoo.addons.hw_drivers.interface import Interface
 
 
 class USBInterface(Interface):
-    connection_type = 'usb'
+    connection_type = "usb"
 
     def get_devices(self):
         """
@@ -23,7 +23,7 @@ class USBInterface(Interface):
         for dev in devs:
             identifier = "usb_%04x:%04x" % (dev.idVendor, dev.idProduct)
             if identifier in usb_devices:
-                identifier += '_%s' % cpt
+                identifier += "_%s" % cpt
                 cpt += 1
             usb_devices[identifier] = dev
         return usb_devices

@@ -14,10 +14,12 @@ logger = logging.getLogger(__name__)
 
 class SeoMetadata(models.AbstractModel):
 
-    _name = 'website.seo.metadata'
-    _description = 'SEO metadata'
+    _name = "website.seo.metadata"
+    _description = "SEO metadata"
 
-    is_seo_optimized = fields.Boolean("SEO optimized", compute='_compute_is_seo_optimized')
+    is_seo_optimized = fields.Boolean(
+        "SEO optimized", compute="_compute_is_seo_optimized"
+    )
     website_meta_title = fields.Char("Website meta title", translate=True)
     website_meta_description = fields.Text("Website meta description", translate=True)
     website_meta_keywords = fields.Char("Website meta keywords", translate=True)
@@ -26,7 +28,11 @@ class SeoMetadata(models.AbstractModel):
 
     def _compute_is_seo_optimized(self):
         for record in self:
-            record.is_seo_optimized = record.website_meta_title and record.website_meta_description and record.website_meta_keywords
+            record.is_seo_optimized = (
+                record.website_meta_title
+                and record.website_meta_description
+                and record.website_meta_keywords
+            )
 
     def _default_website_meta(self):
         """ This method will return default meta information. It return the dict
@@ -40,30 +46,36 @@ class SeoMetadata(models.AbstractModel):
         self.ensure_one()
         company = request.website.company_id.sudo()
         title = (request.website or company).name
-        if 'name' in self:
-            title = '%s | %s' % (self.name, title)
-        img_field = 'social_default_image' if request.website.has_social_default_image else 'logo'
+        if "name" in self:
+            title = "%s | %s" % (self.name, title)
+        img_field = (
+            "social_default_image"
+            if request.website.has_social_default_image
+            else "logo"
+        )
         img = request.website.image_url(request.website, img_field)
         # Default meta for OpenGraph
         default_opengraph = {
-            'og:type': 'website',
-            'og:title': title,
-            'og:site_name': company.name,
-            'og:url': request.httprequest.url,
-            'og:image': img,
+            "og:type": "website",
+            "og:title": title,
+            "og:site_name": company.name,
+            "og:url": request.httprequest.url,
+            "og:image": img,
         }
         # Default meta for Twitter
         default_twitter = {
-            'twitter:card': 'summary_large_image',
-            'twitter:title': title,
-            'twitter:image': img + '/300x300',
+            "twitter:card": "summary_large_image",
+            "twitter:title": title,
+            "twitter:image": img + "/300x300",
         }
         if company.social_twitter:
-            default_twitter['twitter:site'] = "@%s" % company.social_twitter.split('/')[-1]
+            default_twitter["twitter:site"] = (
+                "@%s" % company.social_twitter.split("/")[-1]
+            )
 
         return {
-            'default_opengraph': default_opengraph,
-            'default_twitter': default_twitter
+            "default_opengraph": default_opengraph,
+            "default_twitter": default_twitter,
         }
 
     def get_website_meta(self):
@@ -75,33 +87,39 @@ class SeoMetadata(models.AbstractModel):
             override `_default_website_meta` method instead of this method. This
             method only replaces user custom values in defaults.
         """
-        root_url = request.httprequest.url_root.strip('/')
+        root_url = request.httprequest.url_root.strip("/")
         default_meta = self._default_website_meta()
-        opengraph_meta, twitter_meta = default_meta['default_opengraph'], default_meta['default_twitter']
+        opengraph_meta, twitter_meta = (
+            default_meta["default_opengraph"],
+            default_meta["default_twitter"],
+        )
         if self.website_meta_title:
-            opengraph_meta['og:title'] = self.website_meta_title
-            twitter_meta['twitter:title'] = self.website_meta_title
+            opengraph_meta["og:title"] = self.website_meta_title
+            twitter_meta["twitter:title"] = self.website_meta_title
         if self.website_meta_description:
-            opengraph_meta['og:description'] = self.website_meta_description
-            twitter_meta['twitter:description'] = self.website_meta_description
-        meta_image = self.website_meta_og_img or opengraph_meta['og:image']
-        if meta_image.startswith('/'):
+            opengraph_meta["og:description"] = self.website_meta_description
+            twitter_meta["twitter:description"] = self.website_meta_description
+        meta_image = self.website_meta_og_img or opengraph_meta["og:image"]
+        if meta_image.startswith("/"):
             meta_image = "%s%s" % (root_url, meta_image)
-        opengraph_meta['og:image'] = meta_image
-        twitter_meta['twitter:image'] = meta_image
+        opengraph_meta["og:image"] = meta_image
+        twitter_meta["twitter:image"] = meta_image
         return {
-            'opengraph_meta': opengraph_meta,
-            'twitter_meta': twitter_meta,
-            'meta_description': default_meta.get('default_meta_description')
+            "opengraph_meta": opengraph_meta,
+            "twitter_meta": twitter_meta,
+            "meta_description": default_meta.get("default_meta_description"),
         }
 
 
 class WebsiteCoverPropertiesMixin(models.AbstractModel):
 
-    _name = 'website.cover_properties.mixin'
-    _description = 'Cover Properties Website Mixin'
+    _name = "website.cover_properties.mixin"
+    _description = "Cover Properties Website Mixin"
 
-    cover_properties = fields.Text('Cover Properties', default=lambda s: json_safe.dumps(s._default_cover_properties()))
+    cover_properties = fields.Text(
+        "Cover Properties",
+        default=lambda s: json_safe.dumps(s._default_cover_properties()),
+    )
 
     def _default_cover_properties(self):
         return {
@@ -114,23 +132,24 @@ class WebsiteCoverPropertiesMixin(models.AbstractModel):
     def _get_background(self, height=None, width=None):
         self.ensure_one()
         properties = json_safe.loads(self.cover_properties)
-        img = properties.get('background-image', "none")
+        img = properties.get("background-image", "none")
 
-        if img.startswith('url(/web/image/'):
+        if img.startswith("url(/web/image/"):
             suffix = ""
             if height is not None:
                 suffix += "&height=%s" % height
             if width is not None:
                 suffix += "&width=%s" % width
             if suffix:
-                suffix = '?' not in img and "?%s" % suffix or suffix
-                img = img[:-1] + suffix + ')'
+                suffix = "?" not in img and "?%s" % suffix or suffix
+                img = img[:-1] + suffix + ")"
         return img
+
 
 class WebsiteMultiMixin(models.AbstractModel):
 
-    _name = 'website.multi.mixin'
-    _description = 'Multi Website Mixin'
+    _name = "website.multi.mixin"
+    _description = "Multi Website Mixin"
 
     website_id = fields.Many2one(
         "website",
@@ -143,7 +162,10 @@ class WebsiteMultiMixin(models.AbstractModel):
     def can_access_from_current_website(self, website_id=False):
         can_access = True
         for record in self:
-            if (website_id or record.website_id.id) not in (False, request.env['website'].get_current_website().id):
+            if (website_id or record.website_id.id) not in (
+                False,
+                request.env["website"].get_current_website().id,
+            ):
                 can_access = False
                 continue
         return can_access
@@ -152,37 +174,48 @@ class WebsiteMultiMixin(models.AbstractModel):
 class WebsitePublishedMixin(models.AbstractModel):
 
     _name = "website.published.mixin"
-    _description = 'Website Published Mixin'
+    _description = "Website Published Mixin"
 
-    website_published = fields.Boolean('Visible on current website', related='is_published', readonly=False)
-    is_published = fields.Boolean('Is Published', copy=False, default=lambda self: self._default_is_published(), index=True)
-    can_publish = fields.Boolean('Can Publish', compute='_compute_can_publish')
-    website_url = fields.Char('Website URL', compute='_compute_website_url', help='The full URL to access the document through the website.')
+    website_published = fields.Boolean(
+        "Visible on current website", related="is_published", readonly=False
+    )
+    is_published = fields.Boolean(
+        "Is Published",
+        copy=False,
+        default=lambda self: self._default_is_published(),
+        index=True,
+    )
+    can_publish = fields.Boolean("Can Publish", compute="_compute_can_publish")
+    website_url = fields.Char(
+        "Website URL",
+        compute="_compute_website_url",
+        help="The full URL to access the document through the website.",
+    )
 
-    @api.depends_context('lang')
+    @api.depends_context("lang")
     def _compute_website_url(self):
         for record in self:
-            record.website_url = '#'
+            record.website_url = "#"
 
     def _default_is_published(self):
         return False
 
     def website_publish_button(self):
         self.ensure_one()
-        return self.write({'website_published': not self.website_published})
+        return self.write({"website_published": not self.website_published})
 
     def open_website_url(self):
         return {
-            'type': 'ir.actions.act_url',
-            'url': self.website_url,
-            'target': 'self',
+            "type": "ir.actions.act_url",
+            "url": self.website_url,
+            "target": "self",
         }
 
     @api.model_create_multi
     def create(self, vals_list):
         records = super(WebsitePublishedMixin, self).create(vals_list)
         is_publish_modified = any(
-            [set(v.keys()) & {'is_published', 'website_published'} for v in vals_list]
+            [set(v.keys()) & {"is_published", "website_published"} for v in vals_list]
         )
         if is_publish_modified and any(not record.can_publish for record in records):
             raise AccessError(self._get_can_publish_error_message())
@@ -190,7 +223,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         return records
 
     def write(self, values):
-        if 'is_published' in values and any(not record.can_publish for record in self):
+        if "is_published" in values and any(not record.can_publish for record in self):
             raise AccessError(self._get_can_publish_error_message())
 
         return super(WebsitePublishedMixin, self).write(values)
@@ -214,22 +247,27 @@ class WebsitePublishedMixin(models.AbstractModel):
 
 class WebsitePublishedMultiMixin(WebsitePublishedMixin):
 
-    _name = 'website.published.multi.mixin'
-    _inherit = ['website.published.mixin', 'website.multi.mixin']
-    _description = 'Multi Website Published Mixin'
+    _name = "website.published.multi.mixin"
+    _inherit = ["website.published.mixin", "website.multi.mixin"]
+    _description = "Multi Website Published Mixin"
 
-    website_published = fields.Boolean(compute='_compute_website_published',
-                                       inverse='_inverse_website_published',
-                                       search='_search_website_published',
-                                       related=False, readonly=False)
+    website_published = fields.Boolean(
+        compute="_compute_website_published",
+        inverse="_inverse_website_published",
+        search="_search_website_published",
+        related=False,
+        readonly=False,
+    )
 
-    @api.depends('is_published', 'website_id')
-    @api.depends_context('website_id')
+    @api.depends("is_published", "website_id")
+    @api.depends_context("website_id")
     def _compute_website_published(self):
-        current_website_id = self._context.get('website_id')
+        current_website_id = self._context.get("website_id")
         for record in self:
             if current_website_id:
-                record.website_published = record.is_published and (not record.website_id or record.website_id.id == current_website_id)
+                record.website_published = record.is_published and (
+                    not record.website_id or record.website_id.id == current_website_id
+                )
             else:
                 record.website_published = record.is_published
 
@@ -238,17 +276,21 @@ class WebsitePublishedMultiMixin(WebsitePublishedMixin):
             record.is_published = record.website_published
 
     def _search_website_published(self, operator, value):
-        if not isinstance(value, bool) or operator not in ('=', '!='):
-            logger.warning('unsupported search on website_published: %s, %s', operator, value)
+        if not isinstance(value, bool) or operator not in ("=", "!="):
+            logger.warning(
+                "unsupported search on website_published: %s, %s", operator, value
+            )
             return [()]
 
         if operator in expression.NEGATIVE_TERM_OPERATORS:
             value = not value
 
-        current_website_id = self._context.get('website_id')
-        is_published = [('is_published', '=', value)]
+        current_website_id = self._context.get("website_id")
+        is_published = [("is_published", "=", value)]
         if current_website_id:
-            on_current_website = self.env['website'].website_domain(current_website_id)
-            return (['!'] if value is False else []) + expression.AND([is_published, on_current_website])
+            on_current_website = self.env["website"].website_domain(current_website_id)
+            return (["!"] if value is False else []) + expression.AND(
+                [is_published, on_current_website]
+            )
         else:  # should be in the backend, return things that are published anywhere
             return is_published

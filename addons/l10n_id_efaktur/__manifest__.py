@@ -2,10 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Indonesia E-faktur',
-    'icon': '/l10n_id/static/description/icon.png',
-    'version': '1.0',
-    'description': """
+    "name": "Indonesia E-faktur",
+    "icon": "/l10n_id/static/description/icon.png",
+    "version": "1.0",
+    "description": """
         E-Faktur Menu(Indonesia)
         Format : 010.000-16.00000001
         * 2 (dua) digit pertama adalah Kode Transaksi
@@ -28,16 +28,16 @@
         the replaced invoice and the new one and you can reset an invoice
         you have not already sent to the government to reuse its number.
     """,
-    'category': 'Accounting/Localizations/EDI',
-    'depends': ['l10n_id'],
-    'data': [
-            'security/ir.model.access.csv',
-            'views/account_move_views.xml',
-            'views/efaktur_views.xml',
-            'views/res_config_settings_views.xml',
-            'views/res_partner_views.xml',
+    "category": "Accounting/Localizations/EDI",
+    "depends": ["l10n_id"],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/account_move_views.xml",
+        "views/efaktur_views.xml",
+        "views/res_config_settings_views.xml",
+        "views/res_partner_views.xml",
     ],
-    'demo': [],
-    'installable': True,
-    'auto_install': True,
+    "demo": [],
+    "installable": True,
+    "auto_install": True,
 }

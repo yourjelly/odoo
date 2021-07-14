@@ -22,6 +22,7 @@ from odoo.tools import pycompat, freehash
 from odoo.tools.safe_eval import check_values
 
 import builtins
+
 builtin_defaults = {name: getattr(builtins, name) for name in dir(builtins)}
 
 try:
@@ -65,37 +66,44 @@ class Contextifier(ast.NodeTransformer):
             # values.get(name)
             ast.Call(
                 func=ast.Attribute(
-                    value=ast.Name(id='values', ctx=ast.Load()),
-                    attr='get',
-                    ctx=ast.Load()
+                    value=ast.Name(id="values", ctx=ast.Load()),
+                    attr="get",
+                    ctx=ast.Load(),
                 ),
-                args=[ast.Str(node.id)], keywords=[],
-                starargs=None, kwargs=None
+                args=[ast.Str(node.id)],
+                keywords=[],
+                starargs=None,
+                kwargs=None,
             ),
-            node
+            node,
         )
 
     def visit_Lambda(self, node):
         args = node.args
         # assume we don't have any tuple parameter, just names
         names = [arg.arg for arg in args.args]
-        if args.vararg: names.append(args.vararg)
-        if args.kwarg: names.append(args.kwarg)
+        if args.vararg:
+            names.append(args.vararg)
+        if args.kwarg:
+            names.append(args.kwarg)
         # remap defaults in case there's any
-        return ast.copy_location(ast.Lambda(
-            args=ast.arguments(
-                args=args.args,
-                defaults=[self.visit(default) for default in args.defaults],
-                vararg=args.vararg,
-                kwarg=args.kwarg,
-                # assume we don't have any, not sure it's even possible to
-                # handle that cross-version
-                kwonlyargs=[],
-                kw_defaults=[],
-                posonlyargs=[],
+        return ast.copy_location(
+            ast.Lambda(
+                args=ast.arguments(
+                    args=args.args,
+                    defaults=[self.visit(default) for default in args.defaults],
+                    vararg=args.vararg,
+                    kwarg=args.kwarg,
+                    # assume we don't have any, not sure it's even possible to
+                    # handle that cross-version
+                    kwonlyargs=[],
+                    kw_defaults=[],
+                    posonlyargs=[],
+                ),
+                body=Contextifier(self._safe_names + tuple(names)).visit(node.body),
             ),
-            body=Contextifier(self._safe_names + tuple(names)).visit(node.body)
-        ), node)
+            node,
+        )
 
     # "lambda problem" also exists with comprehensions
     def _visit_comp(self, node):
@@ -118,14 +126,17 @@ class Contextifier(ast.NodeTransformer):
             # map transformation of comprehensions
             if isinstance(value, list):
                 setattr(newnode, field, [transformer.visit(v) for v in value])
-            else: # set transformation of key/value/expr fields
+            else:  # set transformation of key/value/expr fields
                 setattr(newnode, field, transformer.visit(value))
         return newnode
+
     visit_GeneratorExp = visit_ListComp = visit_SetComp = visit_DictComp = _visit_comp
 
 
 class QWebException(Exception):
-    def __init__(self, message, error=None, path=None, html=None, name=None, astmod=None):
+    def __init__(
+        self, message, error=None, path=None, html=None, name=None, astmod=None
+    ):
         self.error = error
         self.message = message
         self.path = path
@@ -142,7 +153,11 @@ class QWebException(Exception):
             self.code = None
 
         if self.error:
-            self.message = "%s\n%s: %s" % (self.message, self.error.__class__.__name__, self.error)
+            self.message = "%s\n%s: %s" % (
+                self.message,
+                self.error.__class__.__name__,
+                self.error,
+            )
         if self.name:
             self.message = "%s\nTemplate: %s" % (self.message, self.name)
         if self.path:
@@ -161,6 +176,7 @@ class QWebException(Exception):
     def __repr__(self):
         return str(self)
 
+
 def foreach_iterator(base_ctx, enum, name):
     ctx = base_ctx.copy()
     if not enum:
@@ -174,13 +190,13 @@ def foreach_iterator(base_ctx, enum, name):
         enum = enum.items()
     else:
         enum = zip(*tee(enum))
-    value_key = '%s_value' % name
-    index_key = '%s_index' % name
-    first_key = '%s_first' % name
-    last_key = '%s_last' % name
-    parity_key = '%s_parity' % name
-    even_key = '%s_even' % name
-    odd_key = '%s_odd' % name
+    value_key = "%s_value" % name
+    index_key = "%s_index" % name
+    first_key = "%s_first" % name
+    last_key = "%s_last" % name
+    parity_key = "%s_parity" % name
+    even_key = "%s_even" % name
+    odd_key = "%s_odd" % name
     for index, (item, value) in enumerate(enum):
         ctx[name] = item
         ctx[value_key] = value
@@ -189,11 +205,11 @@ def foreach_iterator(base_ctx, enum, name):
         if size is not None:
             ctx[last_key] = index + 1 == size
         if index % 2:
-            ctx[parity_key] = 'odd'
+            ctx[parity_key] = "odd"
             ctx[even_key] = False
             ctx[odd_key] = True
         else:
-            ctx[parity_key] = 'even'
+            ctx[parity_key] = "even"
             ctx[even_key] = True
             ctx[odd_key] = False
         yield ctx
@@ -202,27 +218,37 @@ def foreach_iterator(base_ctx, enum, name):
     for k in list(base_ctx):
         base_ctx[k] = ctx[k]
 
+
 _FORMAT_REGEX = re.compile(
     # ( ruby-style )|(  jinja-style  )
-    r'(?:#\{(.+?)\})|(?:\{\{(.+?)\}\})')
+    r"(?:#\{(.+?)\})|(?:\{\{(.+?)\}\})"
+)
 
 
 class frozendict(dict):
     """ An implementation of an immutable dictionary. """
+
     def __delitem__(self, key):
         raise NotImplementedError("'__delitem__' not supported on frozendict")
+
     def __setitem__(self, key, val):
         raise NotImplementedError("'__setitem__' not supported on frozendict")
+
     def clear(self):
         raise NotImplementedError("'clear' not supported on frozendict")
+
     def pop(self, key, default=None):
         raise NotImplementedError("'pop' not supported on frozendict")
+
     def popitem(self):
         raise NotImplementedError("'popitem' not supported on frozendict")
+
     def setdefault(self, key, default=None):
         raise NotImplementedError("'setdefault' not supported on frozendict")
+
     def update(self, *args, **kwargs):
         raise NotImplementedError("'update' not supported on frozendict")
+
     def __hash__(self):
         return hash(frozenset((key, freehash(val)) for key, val in self.items()))
 
@@ -239,11 +265,13 @@ class MarkupSafeBytes(bytes):
 
     def __str__(self):
         raise NotImplementedError(
-            "Bytes should not be stringified, only repr'd (tried to stringify %s)" % reprlib.repr(self)
+            "Bytes should not be stringified, only repr'd (tried to stringify %s)"
+            % reprlib.repr(self)
         )
 
-    def decode(self, encoding='utf-8', errors='strict'):
+    def decode(self, encoding="utf-8", errors="strict"):
         return Markup(super().decode(encoding, errors))
+
 
 ####################################
 ###             QWeb             ###
@@ -251,12 +279,29 @@ class MarkupSafeBytes(bytes):
 
 
 class QWeb(object):
-    _empty_line = re.compile(r'\n\s*\n')
+    _empty_line = re.compile(r"\n\s*\n")
     __slots__ = ()
 
-    _void_elements = frozenset([
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen',
-        'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr'])
+    _void_elements = frozenset(
+        [
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "keygen",
+            "link",
+            "menuitem",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr",
+        ]
+    )
     _name_gen = count()
 
     def _render(self, template, values=None, **options):
@@ -275,10 +320,10 @@ class QWeb(object):
         values = values or {}
         body = []
         self.compile(template, options)(self, body.append, values)
-        joined = u''.join(body)
-        if not values.get('__keep_empty_lines'):
-            joined = QWeb._empty_line.sub('\n', joined.strip())
-        return MarkupSafeBytes(joined.encode('utf8'))
+        joined = u"".join(body)
+        if not values.get("__keep_empty_lines"):
+            joined = QWeb._empty_line.sub("\n", joined.strip())
+        return MarkupSafeBytes(joined.encode("utf8"))
 
     def compile(self, template, options):
         """ Compile the given template into a rendering function::
@@ -295,34 +340,42 @@ class QWeb(object):
         options = frozendict(options)
 
         element, document = self.get_template(template, options)
-        name = element.get('t-name', 'unknown')
+        name = element.get("t-name", "unknown")
 
-        _options['template'] = template
-        _options['ast_calls'] = []
-        _options['root'] = element.getroottree()
-        _options['last_path_node'] = None
-        if not options.get('nsmap'):
-            _options['nsmap'] = {}
+        _options["template"] = template
+        _options["ast_calls"] = []
+        _options["root"] = element.getroottree()
+        _options["last_path_node"] = None
+        if not options.get("nsmap"):
+            _options["nsmap"] = {}
 
         # generate ast
 
         astmod = self._base_module()
         try:
             body = self._compile_node(element, _options)
-            ast_calls = _options['ast_calls']
-            _options['ast_calls'] = []
-            def_name = self._create_def(_options, body, prefix='template_%s' % name.replace('.', '_'))
-            _options['ast_calls'] += ast_calls
+            ast_calls = _options["ast_calls"]
+            _options["ast_calls"] = []
+            def_name = self._create_def(
+                _options, body, prefix="template_%s" % name.replace(".", "_")
+            )
+            _options["ast_calls"] += ast_calls
         except QWebException as e:
             raise e
         except Exception as e:
-            path = _options['last_path_node']
+            path = _options["last_path_node"]
             element, document = self.get_template(template, options)
-            node = element.getroottree().xpath(path) if ':' not in path else None
-            raise QWebException("Error when compiling AST", e, path, node and etree.tostring(node[0], encoding='unicode'), name)
-        astmod.body.extend(_options['ast_calls'])
+            node = element.getroottree().xpath(path) if ":" not in path else None
+            raise QWebException(
+                "Error when compiling AST",
+                e,
+                path,
+                node and etree.tostring(node[0], encoding="unicode"),
+                name,
+            )
+        astmod.body.extend(_options["ast_calls"])
 
-        if 'profile' in options:
+        if "profile" in options:
             self._profiling(astmod, _options)
 
         ast.fix_missing_locations(astmod)
@@ -332,20 +385,26 @@ class QWeb(object):
         try:
             # noinspection PyBroadException
             ns = {}
-            unsafe_eval(compile(astmod, '<template>', 'exec'), ns)
+            unsafe_eval(compile(astmod, "<template>", "exec"), ns)
             compiled = ns[def_name]
         except QWebException as e:
             raise e
         except Exception as e:
-            path = _options['last_path_node']
+            path = _options["last_path_node"]
             element, document = self.get_template(template, options)
             node = element.getroottree().xpath(path)
-            raise QWebException("Error when compiling AST", e, path, node and etree.tostring(node[0], encoding='unicode'), name)
+            raise QWebException(
+                "Error when compiling AST",
+                e,
+                path,
+                node and etree.tostring(node[0], encoding="unicode"),
+                name,
+            )
 
         # return the wrapped function
 
         def _compiled_fn(self, append, values):
-            log = {'last_path_node': None}
+            log = {"last_path_node": None}
             new = self.default_values()
             new.update(values)
             check_values(new)
@@ -354,16 +413,22 @@ class QWeb(object):
             except (QWebException, TransactionRollbackError) as e:
                 raise e
             except Exception as e:
-                path = log['last_path_node']
+                path = log["last_path_node"]
                 element, document = self.get_template(template, options)
-                node = element.getroottree().xpath(path) if ':' not in path else None
-                raise QWebException("Error to render compiling AST", e, path, node and etree.tostring(node[0], encoding='unicode'), name)
+                node = element.getroottree().xpath(path) if ":" not in path else None
+                raise QWebException(
+                    "Error to render compiling AST",
+                    e,
+                    path,
+                    node and etree.tostring(node[0], encoding="unicode"),
+                    name,
+                )
 
         return _compiled_fn
 
     def default_values(self):
         """ Return attributes added to the values for each computed template. """
-        return {'format': self.format}
+        return {"format": self.format}
 
     def get_template(self, template, options):
         """ Retrieve the given template, and return it as a pair ``(element,
@@ -376,27 +441,29 @@ class QWeb(object):
             return (document, template)
         else:
             try:
-                document = options.get('load', self._load)(template, options)
+                document = options.get("load", self._load)(template, options)
             except QWebException as e:
                 raise e
             except Exception as e:
-                template = options.get('caller_template', template)
-                path = options.get('last_path_node')
-                raise QWebException("load could not load template", e, path, name=template)
+                template = options.get("caller_template", template)
+                path = options.get("last_path_node")
+                raise QWebException(
+                    "load could not load template", e, path, name=template
+                )
 
         if document is None:
             raise QWebException("Template not found", name=template)
 
         if isinstance(document, etree._Element):
             element = document
-            document = etree.tostring(document, encoding='utf-8')
-        elif not document.strip().startswith('<') and os.path.exists(document):
+            document = etree.tostring(document, encoding="utf-8")
+        elif not document.strip().startswith("<") and os.path.exists(document):
             element = etree.parse(document).getroot()
         else:
             element = etree.fromstring(document)
 
         for node in element:
-            if node.get('t-name') == str(template):
+            if node.get("t-name") == str(template):
                 return (node, document)
         return (element, document)
 
@@ -407,7 +474,7 @@ class QWeb(object):
     # public method for template dynamic values
 
     def format(self, value, formating, *args, **kwargs):
-        format = getattr(self, '_format_func_%s' % formating, None)
+        format = getattr(self, "_format_func_%s" % formating, None)
         if not format:
             raise ValueError("Unknown format '%s'" % (formating,))
         return format(value, *args, **kwargs)
@@ -422,90 +489,115 @@ class QWeb(object):
         code_line = astor.to_source(astmod)
 
         # code = $code_lines.split(u"\n")
-        astmod.body.insert(0, ast.Assign(
-            targets=[ast.Name(id='code', ctx=ast.Store())],
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Str(code_line),
-                    attr='split',
-                    ctx=ast.Load()
+        astmod.body.insert(
+            0,
+            ast.Assign(
+                targets=[ast.Name(id="code", ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Str(code_line), attr="split", ctx=ast.Load()
+                    ),
+                    args=[ast.Str("\n")],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
                 ),
-                args=[ast.Str("\n")], keywords=[],
-                starargs=None, kwargs=None
-            )
-        ))
-        code_line = [[l, False] for l in code_line.split('\n')]
+            ),
+        )
+        code_line = [[l, False] for l in code_line.split("\n")]
 
         # profiling = {}
-        astmod.body.insert(0, ast.Assign(
-            targets=[ast.Name(id='profiling', ctx=ast.Store())],
-            value=ast.Dict(keys=[], values=[])
-        ))
+        astmod.body.insert(
+            0,
+            ast.Assign(
+                targets=[ast.Name(id="profiling", ctx=ast.Store())],
+                value=ast.Dict(keys=[], values=[]),
+            ),
+        )
         astmod.body.insert(0, ast.parse("from time import time").body[0])
 
         line_id = [0]
+
         def prof(code, time):
             line_id[0] += 1
 
             # profiling.setdefault($line_id, time() - $time)
-            return ast.Expr(ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id='profiling', ctx=ast.Load()),
-                    attr='setdefault',
-                    ctx=ast.Load()
-                ),
-                args=[
-                    ast.Num(line_id[0]),
-                    ast.BinOp(
-                        left=ast.Call(
-                            func=ast.Name(id='time', ctx=ast.Load()),
-                            args=[],
-                            keywords=[], starargs=None, kwargs=None
+            return ast.Expr(
+                ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="profiling", ctx=ast.Load()),
+                        attr="setdefault",
+                        ctx=ast.Load(),
+                    ),
+                    args=[
+                        ast.Num(line_id[0]),
+                        ast.BinOp(
+                            left=ast.Call(
+                                func=ast.Name(id="time", ctx=ast.Load()),
+                                args=[],
+                                keywords=[],
+                                starargs=None,
+                                kwargs=None,
+                            ),
+                            op=ast.Sub(),
+                            right=ast.Name(id=time, ctx=ast.Load()),
                         ),
-                        op=ast.Sub(),
-                        right=ast.Name(id=time, ctx=ast.Load())
-                    )
-                ],
-                keywords=[], starargs=None, kwargs=None
-            ))
+                    ],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                )
+            )
 
         def profile(body):
             profile_body = []
             for code in body:
-                time = self._make_name('time')
+                time = self._make_name("time")
 
                 # $time = time()
                 profile_body.append(
                     ast.Assign(
                         targets=[ast.Name(id=time, ctx=ast.Store())],
                         value=ast.Call(
-                            func=ast.Name(id='time', ctx=ast.Load()),
+                            func=ast.Name(id="time", ctx=ast.Load()),
                             args=[],
-                            keywords=[], starargs=None, kwargs=None
-                        )
+                            keywords=[],
+                            starargs=None,
+                            kwargs=None,
+                        ),
                     )
                 )
                 profile_body.append(code)
                 profline = prof(code, time)
                 # log body of if, else and loop
-                if hasattr(code, 'body'):
+                if hasattr(code, "body"):
                     code.body = [profline] + profile(code.body)
-                    if hasattr(code, 'orelse'):
+                    if hasattr(code, "orelse"):
                         code.orelse = [profline] + profile(code.orelse)
                 profile_body.append(profline)
 
             return profile_body
 
-        for call in options['ast_calls']:
+        for call in options["ast_calls"]:
             call.body = profile(call.body)
 
-        options['ast_calls'][0].body = ast.parse(dedent("""
+        options["ast_calls"][0].body = (
+            ast.parse(
+                dedent(
+                    """
             global profiling
             profiling = {}
-            """)).body + options['ast_calls'][0].body
+            """
+                )
+            ).body
+            + options["ast_calls"][0].body
+        )
 
-        p = float(options.get('profile'))
-        options['ast_calls'][0].body.extend(ast.parse(dedent("""
+        p = float(options.get("profile"))
+        options["ast_calls"][0].body.extend(
+            ast.parse(
+                dedent(
+                    """
             total = 0
             prof_total = 0
             code_profile = []
@@ -527,7 +619,11 @@ class QWeb(object):
                 elif dt < 0 and %s <= 0:
                     print ("     ?\t", line)
             print ("'%s' Total: %%d/%%d" %% (round(prof_total*1000), round(total*1000)))
-            """ % (p, p, p, p, str(options['template']).replace('"', ' ')))).body)
+            """
+                    % (p, p, p, p, str(options["template"]).replace('"', " "))
+                )
+            ).body
+        )
 
     def _base_module(self):
         """ Base module supporting qweb template functions (provides basic
@@ -538,65 +634,86 @@ class QWeb(object):
         * escape, Markup
         * to_text (empty string for a None or False, otherwise unicode string)
         """
-        return ast.parse(dedent("""
+        return ast.parse(
+            dedent(
+                """
             from collections import OrderedDict
             from html import unescape # not sure whether this one or werkzeug's is better
             from markupsafe import escape, Markup
             from odoo.tools.pycompat import to_text
             from odoo.addons.base.models.qweb import foreach_iterator
-            """))
+            """
+            )
+        )
 
-    def _create_def(self, options, body, prefix='fn', lineno=None):
+    def _create_def(self, options, body, prefix="fn", lineno=None):
         """ Generate (and globally store) a rendering function definition AST
         and return its name. The function takes parameters ``self``, ``append``,
         ``values``, ``options``, and ``log``. If ``body`` is empty, the function
         simply returns ``None``.
         """
-        #assert body, "To create a compiled function 'body' ast list can't be empty"
+        # assert body, "To create a compiled function 'body' ast list can't be empty"
 
         name = self._make_name(prefix)
 
         # def $name(self, append, values, options, log)
         fn = ast.FunctionDef(
             name=name,
-            args=ast.arguments(args=[
-                ast.arg(arg='self', annotation=None),
-                ast.arg(arg='append', annotation=None),
-                ast.arg(arg='values', annotation=None),
-                ast.arg(arg='options', annotation=None),
-                ast.arg(arg='log', annotation=None),
-            ], defaults=[], vararg=None, kwarg=None, posonlyargs=[], kwonlyargs=[], kw_defaults=[]),
+            args=ast.arguments(
+                args=[
+                    ast.arg(arg="self", annotation=None),
+                    ast.arg(arg="append", annotation=None),
+                    ast.arg(arg="values", annotation=None),
+                    ast.arg(arg="options", annotation=None),
+                    ast.arg(arg="log", annotation=None),
+                ],
+                defaults=[],
+                vararg=None,
+                kwarg=None,
+                posonlyargs=[],
+                kwonlyargs=[],
+                kw_defaults=[],
+            ),
             body=body or [ast.Return()],
-            decorator_list=[])
+            decorator_list=[],
+        )
         if lineno is not None:
             fn.lineno = lineno
 
-        options['ast_calls'].append(fn)
+        options["ast_calls"].append(fn)
 
         return name
 
-    def _call_def(self, name, append='append', values='values'):
+    def _call_def(self, name, append="append", values="values"):
         # $name(self, append, values, options, log)
         return ast.Call(
             func=ast.Name(id=name, ctx=ast.Load()),
             args=[
-                ast.Name(id='self', ctx=ast.Load()),
-                ast.Name(id=append, ctx=ast.Load()) if isinstance(append, str) else append,
+                ast.Name(id="self", ctx=ast.Load()),
+                ast.Name(id=append, ctx=ast.Load())
+                if isinstance(append, str)
+                else append,
                 ast.Name(id=values, ctx=ast.Load()),
-                ast.Name(id='options', ctx=ast.Load()),
-                ast.Name(id='log', ctx=ast.Load()),
+                ast.Name(id="options", ctx=ast.Load()),
+                ast.Name(id="log", ctx=ast.Load()),
             ],
-            keywords=[], starargs=None, kwargs=None
+            keywords=[],
+            starargs=None,
+            kwargs=None,
         )
 
     def _append(self, item):
         assert isinstance(item, ast.expr)
         # append(ast item)
-        return ast.Expr(ast.Call(
-            func=ast.Name(id='append', ctx=ast.Load()),
-            args=[item], keywords=[],
-            starargs=None, kwargs=None
-        ))
+        return ast.Expr(
+            ast.Call(
+                func=ast.Name(id="append", ctx=ast.Load()),
+                args=[item],
+                keywords=[],
+                starargs=None,
+                kwargs=None,
+            )
+        )
 
     def _extend(self, items):
         # for x in iterator:
@@ -605,39 +722,45 @@ class QWeb(object):
         return ast.For(
             target=ast.Name(id=var, ctx=ast.Store()),
             iter=items,
-            body=[ast.Expr(ast.Call(
-                func=ast.Name(id='append', ctx=ast.Load()),
-                args=[ast.Name(id=var, ctx=ast.Load())], keywords=[],
-                starargs=None, kwargs=None
-            ))],
-            orelse=[]
+            body=[
+                ast.Expr(
+                    ast.Call(
+                        func=ast.Name(id="append", ctx=ast.Load()),
+                        args=[ast.Name(id=var, ctx=ast.Load())],
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
+                    )
+                )
+            ],
+            orelse=[],
         )
 
     def _if_content_is_not_Falsy(self, body, orelse):
         return ast.If(
-                # if content is not None and content is not False
-                test=ast.BoolOp(
-                    op=ast.And(),
-                    values=[
-                        ast.Compare(
-                            left=ast.Name(id='content', ctx=ast.Load()),
-                            ops=[ast.IsNot()],
-                            comparators=[ast.Constant(None)]
-                        ),
-                        ast.Compare(
-                            left=ast.Name(id='content', ctx=ast.Load()),
-                            ops=[ast.IsNot()],
-                            comparators=[ast.Constant(False)]
-                        )
-                    ]
-                ),
-                # append(escape($content))
-                body=body or [ast.Pass()],
-                # append(body default value)
-                orelse=orelse,
-            )
+            # if content is not None and content is not False
+            test=ast.BoolOp(
+                op=ast.And(),
+                values=[
+                    ast.Compare(
+                        left=ast.Name(id="content", ctx=ast.Load()),
+                        ops=[ast.IsNot()],
+                        comparators=[ast.Constant(None)],
+                    ),
+                    ast.Compare(
+                        left=ast.Name(id="content", ctx=ast.Load()),
+                        ops=[ast.IsNot()],
+                        comparators=[ast.Constant(False)],
+                    ),
+                ],
+            ),
+            # append(escape($content))
+            body=body or [ast.Pass()],
+            # append(body default value)
+            orelse=orelse,
+        )
 
-    def _make_name(self, prefix='var'):
+    def _make_name(self, prefix="var"):
         return "%s_%s" % (prefix, next(self._name_gen))
 
     def _compile_node(self, el, options):
@@ -645,17 +768,22 @@ class QWeb(object):
 
         :return: list of AST nodes
         """
-        path = options['root'].getpath(el)
-        if options['last_path_node'] != path:
-            options['last_path_node'] = path
+        path = options["root"].getpath(el)
+        if options["last_path_node"] != path:
+            options["last_path_node"] = path
             # options['last_path_node'] = $path
-            body = [ast.Assign(
-                targets=[ast.Subscript(
-                    value=ast.Name(id='log', ctx=ast.Load()),
-                    slice=ast.Index(ast.Str('last_path_node')),
-                    ctx=ast.Store())],
-                value=ast.Str(path)
-            )]
+            body = [
+                ast.Assign(
+                    targets=[
+                        ast.Subscript(
+                            value=ast.Name(id="log", ctx=ast.Load()),
+                            slice=ast.Index(ast.Str("last_path_node")),
+                            ctx=ast.Store(),
+                        )
+                    ],
+                    value=ast.Str(path),
+                )
+            ]
         else:
             body = []
 
@@ -667,11 +795,11 @@ class QWeb(object):
             return self._compile_static_node(el, options)
 
         # create an iterator on directives to compile in order
-        options['iter_directives'] = iter(self._directives_eval_order() + [None])
+        options["iter_directives"] = iter(self._directives_eval_order() + [None])
 
-        el.set('t-tag', el.tag)
-        if not ({'t-out', 't-esc', 't-raw', 't-field'} & set(el.attrib)):
-            el.set('t-content', 'True')
+        el.set("t-tag", el.tag)
+        if not ({"t-out", "t-esc", "t-raw", "t-field"} & set(el.attrib)):
+            el.set("t-content", "True")
 
         return body + self._compile_directives(el, options)
 
@@ -682,31 +810,34 @@ class QWeb(object):
         :return: list of AST nodes
         """
         # compile the first directive present on the element
-        for directive in options['iter_directives']:
-            if ('t-' + directive) in el.attrib:
-                mname = directive.replace('-', '_')
-                compile_handler = getattr(self, '_compile_directive_%s' % mname, None)
+        for directive in options["iter_directives"]:
+            if ("t-" + directive) in el.attrib:
+                mname = directive.replace("-", "_")
+                compile_handler = getattr(self, "_compile_directive_%s" % mname, None)
 
-                interpret_handler = 'render_tag_%s' % mname
+                interpret_handler = "render_tag_%s" % mname
                 if hasattr(self, interpret_handler):
                     _logger.warning(
                         "Directive '%s' must be AST-compiled. Dynamic interpreter %s will ignored",
-                        mname, interpret_handler
+                        mname,
+                        interpret_handler,
                     )
 
                 return compile_handler(el, options)
 
         # all directives have been compiled, there should be none left
-        if any(att.startswith('t-') for att in el.attrib):
-            raise NameError("Unknown directive on %s" % etree.tostring(el, encoding='unicode'))
+        if any(att.startswith("t-") for att in el.attrib):
+            raise NameError(
+                "Unknown directive on %s" % etree.tostring(el, encoding="unicode")
+            )
         return []
 
     def _values_var(self, varname, ctx):
         # # values[$varname]
         return ast.Subscript(
-            value=ast.Name(id='values', ctx=ast.Load()),
+            value=ast.Name(id="values", ctx=ast.Load()),
             slice=ast.Index(varname),
-            ctx=ctx
+            ctx=ctx,
         )
 
     def _append_attributes(self):
@@ -717,76 +848,99 @@ class QWeb(object):
         # always generates double-quoted attributes
         return [
             ast.Assign(
-                targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
+                targets=[ast.Name(id="t_attrs", ctx=ast.Store())],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='_post_processing_att',
-                        ctx=ast.Load()
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="_post_processing_att",
+                        ctx=ast.Load(),
                     ),
                     args=[
-                        ast.Name(id='tagName', ctx=ast.Load()),
-                        ast.Name(id='t_attrs', ctx=ast.Load()),
-                        ast.Name(id='options', ctx=ast.Load()),
-                    ], keywords=[],
-                    starargs=None, kwargs=None
-                )
+                        ast.Name(id="tagName", ctx=ast.Load()),
+                        ast.Name(id="t_attrs", ctx=ast.Load()),
+                        ast.Name(id="options", ctx=ast.Load()),
+                    ],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
             ),
             ast.For(
-                target=ast.Tuple(elts=[ast.Name(id='name', ctx=ast.Store()), ast.Name(id='value', ctx=ast.Store())], ctx=ast.Store()),
+                target=ast.Tuple(
+                    elts=[
+                        ast.Name(id="name", ctx=ast.Store()),
+                        ast.Name(id="value", ctx=ast.Store()),
+                    ],
+                    ctx=ast.Store(),
+                ),
                 iter=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='t_attrs', ctx=ast.Load()),
-                        attr='items',
-                        ctx=ast.Load()
-                        ),
-                    args=[], keywords=[],
-                    starargs=None, kwargs=None
-                ),
-                body=[ast.If(
-                    test=ast.BoolOp(
-                        op=ast.Or(),
-                        values=[
-                            ast.Name(id='value', ctx=ast.Load()),
-                            ast.Call(
-                                func=ast.Name(id='isinstance', ctx=ast.Load()),
-                                args=[
-                                    ast.Name(id='value', ctx=ast.Load()),
-                                    ast.Name(id='str', ctx=ast.Load())
-                                ],
-                                keywords=[],
-                                starargs=None, kwargs=None
-                            )
-                        ]
+                        value=ast.Name(id="t_attrs", ctx=ast.Load()),
+                        attr="items",
+                        ctx=ast.Load(),
                     ),
-                    body=[
-                        # append(' ')
-                        self._append(ast.Str(u' ')),
-                        # append(name)
-                        self._append(ast.Name('name', ast.Load())),
-                        # append('="')
-                        self._append(ast.Str(u'="')),
-                        # append(escape(str(...)))
-                        self._append(ast.Call(
-                            func=ast.Name('escape', ast.Load()),
-                            args=[ast.Call(
-                                # stringified because regular Markup processing
-                                # is invalid for attributes
-                                func=ast.Name('str', ast.Load()),
-                                args=[ast.BoolOp( # value or ''
-                                    op=ast.Or(),
-                                    values=[ast.Name('value', ast.Load()), ast.Str('')]
-                                )], keywords=[]
-                            )],
-                            keywords=[]
-                        )),
-                        # append('"')
-                        self._append(ast.Str(u'"')),
-                    ],
-                    orelse=[]
-                )],
-                orelse=[]
-            )
+                    args=[],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
+                body=[
+                    ast.If(
+                        test=ast.BoolOp(
+                            op=ast.Or(),
+                            values=[
+                                ast.Name(id="value", ctx=ast.Load()),
+                                ast.Call(
+                                    func=ast.Name(id="isinstance", ctx=ast.Load()),
+                                    args=[
+                                        ast.Name(id="value", ctx=ast.Load()),
+                                        ast.Name(id="str", ctx=ast.Load()),
+                                    ],
+                                    keywords=[],
+                                    starargs=None,
+                                    kwargs=None,
+                                ),
+                            ],
+                        ),
+                        body=[
+                            # append(' ')
+                            self._append(ast.Str(u" ")),
+                            # append(name)
+                            self._append(ast.Name("name", ast.Load())),
+                            # append('="')
+                            self._append(ast.Str(u'="')),
+                            # append(escape(str(...)))
+                            self._append(
+                                ast.Call(
+                                    func=ast.Name("escape", ast.Load()),
+                                    args=[
+                                        ast.Call(
+                                            # stringified because regular Markup processing
+                                            # is invalid for attributes
+                                            func=ast.Name("str", ast.Load()),
+                                            args=[
+                                                ast.BoolOp(  # value or ''
+                                                    op=ast.Or(),
+                                                    values=[
+                                                        ast.Name("value", ast.Load()),
+                                                        ast.Str(""),
+                                                    ],
+                                                )
+                                            ],
+                                            keywords=[],
+                                        )
+                                    ],
+                                    keywords=[],
+                                )
+                            ),
+                            # append('"')
+                            self._append(ast.Str(u'"')),
+                        ],
+                        orelse=[],
+                    )
+                ],
+                orelse=[],
+            ),
         ]
 
     # order
@@ -805,20 +959,27 @@ class QWeb(object):
         then this method should return ``['foreach', 'if']``.
         """
         return [
-            'debug',
-            'groups', 'foreach', 'if', 'elif', 'else',
-            'field', 'out', 'esc', 'raw',
-            'tag',
-            'call',
-            'set',
-            'content',
+            "debug",
+            "groups",
+            "foreach",
+            "if",
+            "elif",
+            "else",
+            "field",
+            "out",
+            "esc",
+            "raw",
+            "tag",
+            "call",
+            "set",
+            "content",
         ]
 
     def _is_static_node(self, el, options):
         """ Test whether the given element is purely static, i.e., does not
         require dynamic rendering for its attributes.
         """
-        return not any(att.startswith('t-') for att in el.attrib)
+        return not any(att.startswith("t-") for att in el.attrib)
 
     # compile
 
@@ -834,26 +995,31 @@ class QWeb(object):
             unqualified_el_tag = etree.QName(el.tag).localname
             el_tag = unqualified_el_tag
             if el.prefix:
-                el_tag = '%s:%s' % (el.prefix, el_tag)
+                el_tag = "%s:%s" % (el.prefix, el_tag)
 
             attrib = {}
             # If `el` introduced new namespaces, write them as attribute by using the
             # `attrib` dict.
-            for ns_prefix, ns_definition in set(el.nsmap.items()) - set(options['nsmap'].items()):
+            for ns_prefix, ns_definition in set(el.nsmap.items()) - set(
+                options["nsmap"].items()
+            ):
                 if ns_prefix is None:
-                    attrib['xmlns'] = ns_definition
+                    attrib["xmlns"] = ns_definition
                 else:
-                    attrib['xmlns:%s' % ns_prefix] = ns_definition
+                    attrib["xmlns:%s" % ns_prefix] = ns_definition
 
             # Etree will also remove the ns prefixes indirection in the attributes. As we only have
             # the namespace definition, we'll use an nsmap where the keys are the definitions and
             # the values the prefixes in order to get back the right prefix and restore it.
-            ns = itertools.chain(options['nsmap'].items(), el.nsmap.items())
+            ns = itertools.chain(options["nsmap"].items(), el.nsmap.items())
             nsprefixmap = {v: k for k, v in ns}
             for key, value in el.attrib.items():
                 attrib_qname = etree.QName(key)
                 if attrib_qname.namespace:
-                    attrib['%s:%s' % (nsprefixmap[attrib_qname.namespace], attrib_qname.localname)] = value
+                    attrib[
+                        "%s:%s"
+                        % (nsprefixmap[attrib_qname.namespace], attrib_qname.localname)
+                    ] = value
                 else:
                     attrib[key] = value
 
@@ -863,18 +1029,30 @@ class QWeb(object):
             # since `options['nsmap']` is a dict (and therefore mutable) and we do **not**
             # want changes done in deeper recursion to bevisible in earlier ones, we'll pass
             # a copy before continuing the recursion and restore the original afterwards.
-            original_nsmap = dict(options['nsmap'])
-            options['nsmap'].update(el.nsmap)
+            original_nsmap = dict(options["nsmap"])
+            options["nsmap"].update(el.nsmap)
             content = self._compile_directive_content(el, options)
-            options['nsmap'] = original_nsmap
+            options["nsmap"] = original_nsmap
 
-        if unqualified_el_tag == 't':
+        if unqualified_el_tag == "t":
             return content
-        tag = u'<%s%s' % (el_tag, u''.join([u' %s="%s"' % (name, escape(pycompat.to_text(value))) for name, value in attrib.items()]))
+        tag = u"<%s%s" % (
+            el_tag,
+            u"".join(
+                [
+                    u' %s="%s"' % (name, escape(pycompat.to_text(value)))
+                    for name, value in attrib.items()
+                ]
+            ),
+        )
         if unqualified_el_tag in self._void_elements:
-            return [self._append(ast.Str(tag + '/>'))] + content
+            return [self._append(ast.Str(tag + "/>"))] + content
         else:
-            return [self._append(ast.Str(tag + '>'))] + content + [self._append(ast.Str('</%s>' % el_tag))]
+            return (
+                [self._append(ast.Str(tag + ">"))]
+                + content
+                + [self._append(ast.Str("</%s>" % el_tag))]
+            )
 
     def _compile_static_attributes(self, el, options):
         """ Compile the static attributes of the given element into a list of
@@ -882,14 +1060,19 @@ class QWeb(object):
         # Etree will also remove the ns prefixes indirection in the attributes. As we only have
         # the namespace definition, we'll use an nsmap where the keys are the definitions and
         # the values the prefixes in order to get back the right prefix and restore it.
-        nsprefixmap = {v: k for k, v in itertools.chain(options['nsmap'].items(), el.nsmap.items())}
+        nsprefixmap = {
+            v: k for k, v in itertools.chain(options["nsmap"].items(), el.nsmap.items())
+        }
 
         nodes = []
         for key, value in el.attrib.items():
-            if not key.startswith('t-'):
+            if not key.startswith("t-"):
                 attrib_qname = etree.QName(key)
                 if attrib_qname.namespace:
-                    key = '%s:%s' % (nsprefixmap[attrib_qname.namespace], attrib_qname.localname)
+                    key = "%s:%s" % (
+                        nsprefixmap[attrib_qname.namespace],
+                        attrib_qname.localname,
+                    )
                 nodes.append((key, ast.Str(value)))
         return nodes
 
@@ -901,76 +1084,98 @@ class QWeb(object):
         """
         nodes = []
         for name, value in el.attrib.items():
-            if name.startswith('t-attf-'):
+            if name.startswith("t-attf-"):
                 nodes.append((name[7:], self._compile_format(value)))
-            elif name.startswith('t-att-'):
+            elif name.startswith("t-att-"):
                 nodes.append((name[6:], self._compile_expr(value)))
-            elif name == 't-att':
+            elif name == "t-att":
                 # self._get_dynamic_att($tag, $value, options, values)
-                nodes.append(ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='_get_dynamic_att',
-                        ctx=ast.Load()
-                    ),
-                    args=[
-                        ast.Str(el.tag),
-                        self._compile_expr(value),
-                        ast.Name(id='options', ctx=ast.Load()),
-                        ast.Name(id='values', ctx=ast.Load()),
-                    ], keywords=[],
-                    starargs=None, kwargs=None
-                ))
+                nodes.append(
+                    ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="self", ctx=ast.Load()),
+                            attr="_get_dynamic_att",
+                            ctx=ast.Load(),
+                        ),
+                        args=[
+                            ast.Str(el.tag),
+                            self._compile_expr(value),
+                            ast.Name(id="options", ctx=ast.Load()),
+                            ast.Name(id="values", ctx=ast.Load()),
+                        ],
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
+                    )
+                )
         return nodes
 
     def _compile_all_attributes(self, el, options, attr_already_created=False):
         """ Compile the attributes of the given elements into a list of AST nodes. """
         body = []
-        if any(name.startswith('t-att') or not name.startswith('t-') for name, value in el.attrib.items()):
+        if any(
+            name.startswith("t-att") or not name.startswith("t-")
+            for name, value in el.attrib.items()
+        ):
             if not attr_already_created:
                 attr_already_created = True
                 body.append(
                     # t_attrs = OrderedDict()
                     ast.Assign(
-                        targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
+                        targets=[ast.Name(id="t_attrs", ctx=ast.Store())],
                         value=ast.Call(
-                            func=ast.Name(id='OrderedDict', ctx=ast.Load()),
+                            func=ast.Name(id="OrderedDict", ctx=ast.Load()),
                             args=[],
-                            keywords=[], starargs=None, kwargs=None
-                        )
+                            keywords=[],
+                            starargs=None,
+                            kwargs=None,
+                        ),
                     )
                 )
 
-            items = self._compile_static_attributes(el, options) + self._compile_dynamic_attributes(el, options)
+            items = self._compile_static_attributes(
+                el, options
+            ) + self._compile_dynamic_attributes(el, options)
             for item in items:
                 if isinstance(item, tuple):
                     # t_attrs[$name] = $value
-                    body.append(ast.Assign(
-                        targets=[ast.Subscript(
-                            value=ast.Name(id='t_attrs', ctx=ast.Load()),
-                            slice=ast.Index(ast.Str(item[0])),
-                            ctx=ast.Store()
-                        )],
-                        value=item[1]
-                    ))
+                    body.append(
+                        ast.Assign(
+                            targets=[
+                                ast.Subscript(
+                                    value=ast.Name(id="t_attrs", ctx=ast.Load()),
+                                    slice=ast.Index(ast.Str(item[0])),
+                                    ctx=ast.Store(),
+                                )
+                            ],
+                            value=item[1],
+                        )
+                    )
                 elif item:
                     # t_attrs.update($item)
-                    body.append(ast.Expr(ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id='t_attrs', ctx=ast.Load()),
-                            attr='update',
-                            ctx=ast.Load()
-                        ),
-                        args=[item],
-                        keywords=[],
-                        starargs=None, kwargs=None
-                    )))
+                    body.append(
+                        ast.Expr(
+                            ast.Call(
+                                func=ast.Attribute(
+                                    value=ast.Name(id="t_attrs", ctx=ast.Load()),
+                                    attr="update",
+                                    ctx=ast.Load(),
+                                ),
+                                args=[item],
+                                keywords=[],
+                                starargs=None,
+                                kwargs=None,
+                            )
+                        )
+                    )
 
         if attr_already_created:
             # tagName = $el.tag
-            body.append(ast.Assign(
-                targets=[ast.Name(id='tagName', ctx=ast.Store())],
-                value=ast.Str(el.tag))
+            body.append(
+                ast.Assign(
+                    targets=[ast.Name(id="tagName", ctx=ast.Store())],
+                    value=ast.Str(el.tag),
+                )
             )
             body.extend(self._append_attributes())
 
@@ -988,105 +1193,140 @@ class QWeb(object):
             unqualified_el_tag = etree.QName(el.tag).localname
             el_tag = unqualified_el_tag
             if el.prefix:
-                el_tag = '%s:%s' % (el.prefix, el_tag)
+                el_tag = "%s:%s" % (el.prefix, el_tag)
 
             # If `el` introduced new namespaces, write them as attribute by using the
             # `extra_attrib` dict.
-            for ns_prefix, ns_definition in set(el.nsmap.items()) - set(options['nsmap'].items()):
+            for ns_prefix, ns_definition in set(el.nsmap.items()) - set(
+                options["nsmap"].items()
+            ):
                 if ns_prefix is None:
-                    extra_attrib['xmlns'] = ns_definition
+                    extra_attrib["xmlns"] = ns_definition
                 else:
-                    extra_attrib['xmlns:%s' % ns_prefix] = ns_definition
+                    extra_attrib["xmlns:%s" % ns_prefix] = ns_definition
 
-        if unqualified_el_tag == 't':
+        if unqualified_el_tag == "t":
             return content
 
-        body = [self._append(ast.Str(u'<%s%s' % (el_tag, u''.join([u' %s="%s"' % (name, escape(pycompat.to_text(value))) for name, value in extra_attrib.items()]))))]
+        body = [
+            self._append(
+                ast.Str(
+                    u"<%s%s"
+                    % (
+                        el_tag,
+                        u"".join(
+                            [
+                                u' %s="%s"' % (name, escape(pycompat.to_text(value)))
+                                for name, value in extra_attrib.items()
+                            ]
+                        ),
+                    )
+                )
+            )
+        ]
         body.extend(self._compile_all_attributes(el, options, attr_already_created))
         if unqualified_el_tag in self._void_elements:
-            body.append(self._append(ast.Str(u'/>')))
+            body.append(self._append(ast.Str(u"/>")))
             body.extend(content)
         else:
-            body.append(self._append(ast.Str(u'>')))
+            body.append(self._append(ast.Str(u">")))
             body.extend(content)
-            body.append(self._append(ast.Str(u'</%s>' % el_tag)))
+            body.append(self._append(ast.Str(u"</%s>" % el_tag)))
         return body
 
     # compile directives
 
     def _compile_directive_debug(self, el, options):
-        debugger = el.attrib.pop('t-debug')
+        debugger = el.attrib.pop("t-debug")
         body = self._compile_directives(el, options)
-        if options['dev_mode']:
-            body = ast.parse("__import__('%s').set_trace()" % re.sub(r'[^a-zA-Z]', '', debugger)).body + body  # pdb, ipdb, pudb, ...
+        if options["dev_mode"]:
+            body = (
+                ast.parse(
+                    "__import__('%s').set_trace()" % re.sub(r"[^a-zA-Z]", "", debugger)
+                ).body
+                + body
+            )  # pdb, ipdb, pudb, ...
         else:
-            _logger.warning("@t-debug in template is only available in dev mode options")
+            _logger.warning(
+                "@t-debug in template is only available in dev mode options"
+            )
         return body
 
     def _compile_directive_tag(self, el, options):
-        el.attrib.pop('t-tag', None)
+        el.attrib.pop("t-tag", None)
 
         # Update the dict of inherited namespaces before continuing the recursion. Note:
         # since `options['nsmap']` is a dict (and therefore mutable) and we do **not**
         # want changes done in deeper recursion to bevisible in earlier ones, we'll pass
         # a copy before continuing the recursion and restore the original afterwards.
-        original_nsmap = dict(options['nsmap'])
+        original_nsmap = dict(options["nsmap"])
         if el.nsmap:
-            options['nsmap'].update(el.nsmap)
+            options["nsmap"].update(el.nsmap)
         content = self._compile_directives(el, options)
         if el.nsmap:
-            options['nsmap'] = original_nsmap
+            options["nsmap"] = original_nsmap
         return self._compile_tag(el, content, options, False)
 
     def _compile_directive_set(self, el, options):
-        varname = el.attrib.pop('t-set')
+        varname = el.attrib.pop("t-set")
 
-        if 't-value' in el.attrib:
-            value = self._compile_expr(el.attrib.pop('t-value') or 'None')
-        elif 't-valuef' in el.attrib:
-            value = self._compile_format(el.attrib.pop('t-valuef'))
+        if "t-value" in el.attrib:
+            value = self._compile_expr(el.attrib.pop("t-value") or "None")
+        elif "t-valuef" in el.attrib:
+            value = self._compile_format(el.attrib.pop("t-valuef"))
         else:
             # set the content as value
             body = self._compile_directive_content(el, options)
             if body:
-                def_name = self._create_def(options, body, prefix='set', lineno=el.sourceline)
+                def_name = self._create_def(
+                    options, body, prefix="set", lineno=el.sourceline
+                )
                 # ''.join($varset)
                 joined = ast.Call(
-                    func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
-                    args=[ast.Name(id='content', ctx=ast.Load())], keywords=[]
+                    func=ast.Attribute(value=ast.Str(u""), attr="join", ctx=ast.Load()),
+                    args=[ast.Name(id="content", ctx=ast.Load())],
+                    keywords=[],
                 )
                 # Markup(_): rendering of content is considered safe
                 safe = ast.Call(
-                    func=ast.Name(id='Markup', ctx=ast.Load()),
-                    args=[joined], keywords=[]
+                    func=ast.Name(id="Markup", ctx=ast.Load()),
+                    args=[joined],
+                    keywords=[],
                 )
                 return [
                     # content = []
                     ast.Assign(
-                        targets=[ast.Name(id='content', ctx=ast.Store())],
-                        value=ast.List(elts=[], ctx=ast.Load())
+                        targets=[ast.Name(id="content", ctx=ast.Store())],
+                        value=ast.List(elts=[], ctx=ast.Load()),
                     ),
                     # set(self, $varset.append)
-                    ast.Expr(self._call_def(
-                        def_name,
-                        append=ast.Attribute(
-                            value=ast.Name(id='content', ctx=ast.Load()),
-                            attr='append',
-                            ctx=ast.Load()
+                    ast.Expr(
+                        self._call_def(
+                            def_name,
+                            append=ast.Attribute(
+                                value=ast.Name(id="content", ctx=ast.Load()),
+                                attr="append",
+                                ctx=ast.Load(),
+                            ),
                         )
-                    )),
+                    ),
                     # $varset = _
-                    ast.Assign(targets=[self._values_var(ast.Str(varname), ctx=ast.Store())], value=safe)
+                    ast.Assign(
+                        targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
+                        value=safe,
+                    ),
                 ]
 
             else:
-                value = ast.Str(u'')
+                value = ast.Str(u"")
 
         # $varset = $value
-        return [ast.Assign(
-            targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
-            value=value
-        )]
+        return [
+            ast.Assign(
+                targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
+                value=value,
+            )
+        ]
 
     def _compile_directive_content(self, el, options):
         body = []
@@ -1102,23 +1342,23 @@ class QWeb(object):
         return body
 
     def _compile_directive_else(self, el, options):
-        if el.attrib.pop('t-else') == '_t_skip_else_':
+        if el.attrib.pop("t-else") == "_t_skip_else_":
             return []
-        if not options.pop('t_if', None):
+        if not options.pop("t_if", None):
             raise ValueError("t-else directive must be preceded by t-if directive")
         compiled = self._compile_directives(el, options)
-        el.attrib['t-else'] = '_t_skip_else_'
+        el.attrib["t-else"] = "_t_skip_else_"
         return compiled
 
     def _compile_directive_elif(self, el, options):
-        _elif = el.attrib.pop('t-elif')
-        if _elif == '_t_skip_else_':
+        _elif = el.attrib.pop("t-elif")
+        if _elif == "_t_skip_else_":
             return []
-        if not options.pop('t_if', None):
+        if not options.pop("t_if", None):
             raise ValueError("t-elif directive must be preceded by t-if directive")
-        el.attrib['t-if'] = _elif
+        el.attrib["t-if"] = _elif
         compiled = self._compile_directive_if(el, options)
-        el.attrib['t-elif'] = '_t_skip_else_'
+        el.attrib["t-elif"] = "_t_skip_else_"
         return compiled
 
     def _compile_directive_if(self, el, options):
@@ -1129,12 +1369,14 @@ class QWeb(object):
             comments_to_remove.append(next_el)
             next_el = next_el.getnext()
 
-        if next_el is not None and {'t-else', 't-elif'} & set(next_el.attrib):
+        if next_el is not None and {"t-else", "t-elif"} & set(next_el.attrib):
             parent = el.getparent()
             for comment in comments_to_remove:
                 parent.remove(comment)
             if el.tail and not el.tail.isspace():
-                raise ValueError("Unexpected non-whitespace characters between t-if and t-else directives")
+                raise ValueError(
+                    "Unexpected non-whitespace characters between t-if and t-else directives"
+                )
             el.tail = None
             orelse = self._compile_node(next_el, dict(options, t_if=True))
         return [
@@ -1143,9 +1385,9 @@ class QWeb(object):
             # else:
             #    $t-else
             ast.If(
-                test=self._compile_expr(el.attrib.pop('t-if')),
+                test=self._compile_expr(el.attrib.pop("t-if")),
                 body=self._compile_directives(el, options) or [ast.Pass()],
-                orelse=orelse
+                orelse=orelse,
             )
         ]
 
@@ -1156,67 +1398,96 @@ class QWeb(object):
             ast.If(
                 test=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='user_has_groups',
-                        ctx=ast.Load()
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="user_has_groups",
+                        ctx=ast.Load(),
                     ),
-                    args=[ast.Str(el.attrib.pop('t-groups'))], keywords=[],
-                    starargs=None, kwargs=None
+                    args=[ast.Str(el.attrib.pop("t-groups"))],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
                 ),
                 body=self._compile_directives(el, options) or [ast.Pass()],
-                orelse=[]
+                orelse=[],
             )
         ]
 
     def _compile_directive_foreach(self, el, options):
-        expr = self._compile_expr(el.attrib.pop('t-foreach'))
-        varname = el.attrib.pop('t-as').replace('.', '_')
-        values = self._make_name('values')
+        expr = self._compile_expr(el.attrib.pop("t-foreach"))
+        varname = el.attrib.pop("t-as").replace(".", "_")
+        values = self._make_name("values")
 
         # create function $foreach
-        def_name = self._create_def(options, self._compile_directives(el, options), prefix='foreach', lineno=el.sourceline)
+        def_name = self._create_def(
+            options,
+            self._compile_directives(el, options),
+            prefix="foreach",
+            lineno=el.sourceline,
+        )
 
         # for $values in foreach_iterator(values, $expr, $varname):
         #     $foreach(self, append, $values, options)
-        return [ast.For(
-            target=ast.Name(id=values, ctx=ast.Store()),
-            iter=ast.Call(
-                func=ast.Name(id='foreach_iterator', ctx=ast.Load()),
-                args=[ast.Name(id='values', ctx=ast.Load()), expr, ast.Str(varname)],
-                keywords=[], starargs=None, kwargs=None
-            ),
-            body=[ast.Expr(self._call_def(def_name, values=values))],
-            orelse=[]
-        )]
+        return [
+            ast.For(
+                target=ast.Name(id=values, ctx=ast.Store()),
+                iter=ast.Call(
+                    func=ast.Name(id="foreach_iterator", ctx=ast.Load()),
+                    args=[
+                        ast.Name(id="values", ctx=ast.Load()),
+                        expr,
+                        ast.Str(varname),
+                    ],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
+                body=[ast.Expr(self._call_def(def_name, values=values))],
+                orelse=[],
+            )
+        ]
 
     def _compile_tail(self, el):
-        return el.tail is not None and [self._append(ast.Str(pycompat.to_text(el.tail)))] or []
+        return (
+            el.tail is not None
+            and [self._append(ast.Str(pycompat.to_text(el.tail)))]
+            or []
+        )
 
     def _compile_directive_esc(self, el, options):
-        el.attrib['t-out'] = el.attrib.pop('t-esc')
+        el.attrib["t-out"] = el.attrib.pop("t-esc")
         return self._compile_directive_out(el, options)
+
     def _compile_directive_out(self, el, options):
         field_options = self._compile_widget_options(el)
-        content = self._compile_widget(el, el.attrib.pop('t-out'), field_options)
+        content = self._compile_widget(el, el.attrib.pop("t-out"), field_options)
         if not field_options:
             # if content is not False and if content is not None:
             #     content = escape(pycompat.to_text(content))
-            content.append(self._if_content_is_not_Falsy([
-                ast.Assign(
-                    targets=[ast.Name(id='content', ctx=ast.Store())],
-                    value=ast.Call(
-                        func=ast.Name(id='escape', ctx=ast.Load()),
-                        args=[ast.Call(
-                            func=ast.Name(id='to_text', ctx=ast.Load()),
-                            args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
-                            starargs=None, kwargs=None
-                        )],
-                        keywords=[],
-                        starargs=None, kwargs=None
-                    )
-                )],
-                []
-            ))
+            content.append(
+                self._if_content_is_not_Falsy(
+                    [
+                        ast.Assign(
+                            targets=[ast.Name(id="content", ctx=ast.Store())],
+                            value=ast.Call(
+                                func=ast.Name(id="escape", ctx=ast.Load()),
+                                args=[
+                                    ast.Call(
+                                        func=ast.Name(id="to_text", ctx=ast.Load()),
+                                        args=[ast.Name(id="content", ctx=ast.Load())],
+                                        keywords=[],
+                                        starargs=None,
+                                        kwargs=None,
+                                    )
+                                ],
+                                keywords=[],
+                                starargs=None,
+                                kwargs=None,
+                            ),
+                        )
+                    ],
+                    [],
+                )
+            )
         return content + self._compile_widget_value(el, options)
 
     def _compile_directive_raw(self, el, options):
@@ -1224,11 +1495,11 @@ class QWeb(object):
             "Found deprecated directive @t-raw=%r in template %r. Replace by "
             "@t-out, and explicitely wrap content in `markupsafe.Markup` if "
             "necessary (which likely is not the case)",
-            el.get('t-raw'),
-            options.get('template', '<unknown>'),
+            el.get("t-raw"),
+            options.get("template", "<unknown>"),
         )
         field_options = self._compile_widget_options(el)
-        content = self._compile_widget(el, el.attrib.pop('t-raw'), field_options)
+        content = self._compile_widget(el, el.attrib.pop("t-raw"), field_options)
         return content + self._compile_widget_value(el, options)
 
     def _compile_widget(self, el, expression, field_options):
@@ -1236,52 +1507,69 @@ class QWeb(object):
             return [
                 # value = t-(out|esc|raw)
                 ast.Assign(
-                    targets=[ast.Name(id='content', ctx=ast.Store())],
-                    value=self._compile_expr0(expression)
+                    targets=[ast.Name(id="content", ctx=ast.Store())],
+                    value=self._compile_expr0(expression),
                 ),
                 # t_attrs, content, force_display = self._get_widget(value, expression, tagName, field options, template options, values)
                 ast.Assign(
-                    targets=[ast.Tuple(elts=[
-                        ast.Name(id='t_attrs', ctx=ast.Store()),
-                        ast.Name(id='content', ctx=ast.Store()),
-                        ast.Name(id='force_display', ctx=ast.Store())
-                    ], ctx=ast.Store())],
+                    targets=[
+                        ast.Tuple(
+                            elts=[
+                                ast.Name(id="t_attrs", ctx=ast.Store()),
+                                ast.Name(id="content", ctx=ast.Store()),
+                                ast.Name(id="force_display", ctx=ast.Store()),
+                            ],
+                            ctx=ast.Store(),
+                        )
+                    ],
                     value=ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id='self', ctx=ast.Load()),
-                            attr='_get_widget',
-                            ctx=ast.Load()
+                            value=ast.Name(id="self", ctx=ast.Load()),
+                            attr="_get_widget",
+                            ctx=ast.Load(),
                         ),
                         args=[
-                            ast.Name(id='content', ctx=ast.Load()),
+                            ast.Name(id="content", ctx=ast.Load()),
                             ast.Str(expression),
                             ast.Str(el.tag),
                             field_options,
-                            ast.Name(id='options', ctx=ast.Load()),
-                            ast.Name(id='values', ctx=ast.Load()),
+                            ast.Name(id="options", ctx=ast.Load()),
+                            ast.Name(id="values", ctx=ast.Load()),
                         ],
-                        keywords=[], starargs=None, kwargs=None
-                    )
-                )
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
+                    ),
+                ),
             ]
 
         return [
             # t_attrs, content, force_display = OrderedDict(), t-(out|esc|raw), None
             ast.Assign(
-                targets=[ast.Tuple(elts=[
-                    ast.Name(id='t_attrs', ctx=ast.Store()),
-                    ast.Name(id='content', ctx=ast.Store()),
-                    ast.Name(id='force_display', ctx=ast.Store()),
-                ], ctx=ast.Store())],
-                value=ast.Tuple(elts=[
-                    ast.Call(
-                        func=ast.Name(id='OrderedDict', ctx=ast.Load()),
-                        args=[],
-                        keywords=[], starargs=None, kwargs=None
-                    ),
-                    self._compile_expr0(expression),
-                    ast.Constant(None),
-                ], ctx=ast.Load())
+                targets=[
+                    ast.Tuple(
+                        elts=[
+                            ast.Name(id="t_attrs", ctx=ast.Store()),
+                            ast.Name(id="content", ctx=ast.Store()),
+                            ast.Name(id="force_display", ctx=ast.Store()),
+                        ],
+                        ctx=ast.Store(),
+                    )
+                ],
+                value=ast.Tuple(
+                    elts=[
+                        ast.Call(
+                            func=ast.Name(id="OrderedDict", ctx=ast.Load()),
+                            args=[],
+                            keywords=[],
+                            starargs=None,
+                            kwargs=None,
+                        ),
+                        self._compile_expr0(expression),
+                        ast.Constant(None),
+                    ],
+                    ctx=ast.Load(),
+                ),
             )
         ]
 
@@ -1289,19 +1577,21 @@ class QWeb(object):
         """
         compile t-options and add to the dict the t-options-xxx values
         """
-        options = el.attrib.pop('t-options', None)
+        options = el.attrib.pop("t-options", None)
         # the options can be None, a dict {}, or the method dict()
-        ast_options = options and self._compile_expr(options) or ast.Dict(keys=[], values=[])
+        ast_options = (
+            options and self._compile_expr(options) or ast.Dict(keys=[], values=[])
+        )
 
         # convert ast.Call from dict() into ast.Dict
         if isinstance(ast_options, ast.Call):
             ast_options = ast.Dict(
                 keys=[ast.Str(k.arg) for k in ast_options.keywords],
-                values=[k.value for k in ast_options.keywords]
+                values=[k.value for k in ast_options.keywords],
             )
 
         for complete_key in OrderedDict(el.attrib):
-            if complete_key.startswith('t-options-'):
+            if complete_key.startswith("t-options-"):
                 key = complete_key[10:]
                 value = self._compile_expr(el.attrib.pop(complete_key))
 
@@ -1321,31 +1611,49 @@ class QWeb(object):
     def _compile_directive_field(self, el, options):
         """ Compile something like ``<span t-field="record.phone">+1 555 555 8069</span>`` """
         node_name = el.tag
-        assert node_name not in ("table", "tbody", "thead", "tfoot", "tr", "td",
-                                 "li", "ul", "ol", "dl", "dt", "dd"),\
-            "RTE widgets do not work correctly on %r elements" % node_name
-        assert node_name != 't',\
-            "t-field can not be used on a t element, provide an actual HTML node"
-        assert "." in el.get('t-field'),\
-            "t-field must have at least a dot like 'record.field_name'"
+        assert node_name not in (
+            "table",
+            "tbody",
+            "thead",
+            "tfoot",
+            "tr",
+            "td",
+            "li",
+            "ul",
+            "ol",
+            "dl",
+            "dt",
+            "dd",
+        ), ("RTE widgets do not work correctly on %r elements" % node_name)
+        assert (
+            node_name != "t"
+        ), "t-field can not be used on a t element, provide an actual HTML node"
+        assert "." in el.get(
+            "t-field"
+        ), "t-field must have at least a dot like 'record.field_name'"
 
-        expression = el.attrib.pop('t-field')
+        expression = el.attrib.pop("t-field")
         field_options = self._compile_widget_options(el) or ast.Dict(keys=[], values=[])
-        record, field_name = expression.rsplit('.', 1)
+        record, field_name = expression.rsplit(".", 1)
 
         return [
             # t_attrs, content, force_display = self._get_field(record, field_name, expression, tagName, field options, template options, values)
             ast.Assign(
-                targets=[ast.Tuple(elts=[
-                    ast.Name(id='t_attrs', ctx=ast.Store()),
-                    ast.Name(id='content', ctx=ast.Store()),
-                    ast.Name(id='force_display', ctx=ast.Store())
-                ], ctx=ast.Store())],
+                targets=[
+                    ast.Tuple(
+                        elts=[
+                            ast.Name(id="t_attrs", ctx=ast.Store()),
+                            ast.Name(id="content", ctx=ast.Store()),
+                            ast.Name(id="force_display", ctx=ast.Store()),
+                        ],
+                        ctx=ast.Store(),
+                    )
+                ],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='_get_field',
-                        ctx=ast.Load()
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="_get_field",
+                        ctx=ast.Load(),
                     ),
                     args=[
                         self._compile_expr(record),
@@ -1353,56 +1661,65 @@ class QWeb(object):
                         ast.Str(expression),
                         ast.Str(node_name),
                         field_options,
-                        ast.Name(id='options', ctx=ast.Load()),
-                        ast.Name(id='values', ctx=ast.Load()),
+                        ast.Name(id="options", ctx=ast.Load()),
+                        ast.Name(id="values", ctx=ast.Load()),
                     ],
-                    keywords=[], starargs=None, kwargs=None
-                )
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
             )
         ] + self._compile_widget_value(el, options)
 
     def _compile_widget_value(self, el, options):
         # if force_display:
         #    display the tag without content
-        orelse = [ast.If(
-            test=ast.Name(id='force_display', ctx=ast.Load()),
-            body=self._compile_tag(el, [], options, True) or [ast.Pass()],
-            orelse=[],
-        )]
+        orelse = [
+            ast.If(
+                test=ast.Name(id="force_display", ctx=ast.Load()),
+                body=self._compile_tag(el, [], options, True) or [ast.Pass()],
+                orelse=[],
+            )
+        ]
 
         # default content
-        default_content = self._make_name('default_content')
+        default_content = self._make_name("default_content")
         body = self._compile_directive_content(el, options)
         if body:
             orelse = [
                 # default_content = []
                 ast.Assign(
                     targets=[ast.Name(id=default_content, ctx=ast.Store())],
-                    value=ast.List(elts=[], ctx=ast.Load())
+                    value=ast.List(elts=[], ctx=ast.Load()),
                 ),
                 # body_call_content(self, default_content.append, values, options)
-                ast.Expr(self._call_def(
-                    self._create_def(options, body, prefix='body_call_content', lineno=el.sourceline),
-                    append=ast.Attribute(
-                        value=ast.Name(id=default_content, ctx=ast.Load()),
-                        attr='append',
-                        ctx=ast.Load()
+                ast.Expr(
+                    self._call_def(
+                        self._create_def(
+                            options,
+                            body,
+                            prefix="body_call_content",
+                            lineno=el.sourceline,
+                        ),
+                        append=ast.Attribute(
+                            value=ast.Name(id=default_content, ctx=ast.Load()),
+                            attr="append",
+                            ctx=ast.Load(),
+                        ),
                     )
-                )),
+                ),
                 # default_content = u''.join(default_content)
                 ast.Assign(
                     targets=[ast.Name(id=default_content, ctx=ast.Store())],
                     value=ast.Call(
                         func=ast.Attribute(
-                            value=ast.Str(u''),
-                            attr='join',
-                            ctx=ast.Load()
+                            value=ast.Str(u""), attr="join", ctx=ast.Load()
                         ),
-                        args=[
-                            ast.Name(id=default_content, ctx=ast.Load())
-                        ],
-                        keywords=[], starargs=None, kwargs=None
-                    )
+                        args=[ast.Name(id=default_content, ctx=ast.Load())],
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
+                    ),
                 ),
                 # if default_content:
                 #    display the tag with default content
@@ -1410,9 +1727,15 @@ class QWeb(object):
                 #    display the tag without content
                 ast.If(
                     test=ast.Name(id=default_content, ctx=ast.Load()),
-                    body=self._compile_tag(el, [self._append(ast.Name(id=default_content, ctx=ast.Load()))], options, True) or [ast.Pass()],
+                    body=self._compile_tag(
+                        el,
+                        [self._append(ast.Name(id=default_content, ctx=ast.Load()))],
+                        options,
+                        True,
+                    )
+                    or [ast.Pass()],
                     orelse=orelse,
-                )
+                ),
             ]
 
         # if content is not None:
@@ -1422,23 +1745,33 @@ class QWeb(object):
         #       display the tag with default content
         #    elif force_display:
         #       display the tag without content
-        return [self._if_content_is_not_Falsy(
-            body=self._compile_tag(el, [self._append(
-                ast.Call(
-                    func=ast.Name(id='to_text', ctx=ast.Load()),
-                    args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
-                    starargs=None, kwargs=None
-                )
-            )], options, True),
-            orelse=orelse,
-        )]
+        return [
+            self._if_content_is_not_Falsy(
+                body=self._compile_tag(
+                    el,
+                    [
+                        self._append(
+                            ast.Call(
+                                func=ast.Name(id="to_text", ctx=ast.Load()),
+                                args=[ast.Name(id="content", ctx=ast.Load())],
+                                keywords=[],
+                                starargs=None,
+                                kwargs=None,
+                            )
+                        )
+                    ],
+                    options,
+                    True,
+                ),
+                orelse=orelse,
+            )
+        ]
 
     def _compile_directive_call(self, el, options):
-        tmpl = el.attrib.pop('t-call')
-        _values = self._make_name('values_copy')
-        call_options = el.attrib.pop('t-call-options', None)
-        nsmap = options.get('nsmap')
-
+        tmpl = el.attrib.pop("t-call")
+        _values = self._make_name("values_copy")
+        call_options = el.attrib.pop("t-call-options", None)
+        nsmap = options.get("nsmap")
 
         content = [
             # values_copy = values.copy()
@@ -1446,64 +1779,74 @@ class QWeb(object):
                 targets=[ast.Name(id=_values, ctx=ast.Store())],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='values', ctx=ast.Load()),
-                        attr='copy',
-                        ctx=ast.Load()
+                        value=ast.Name(id="values", ctx=ast.Load()),
+                        attr="copy",
+                        ctx=ast.Load(),
                     ),
-                    args=[], keywords=[],
-                    starargs=None, kwargs=None
-                )
+                    args=[],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
             )
         ]
 
         body = self._compile_directive_content(el, options)
         if body:
-            def_name = self._create_def(options, body, prefix='body_call_content', lineno=el.sourceline)
+            def_name = self._create_def(
+                options, body, prefix="body_call_content", lineno=el.sourceline
+            )
 
             # call_content = []
             content.append(
                 ast.Assign(
-                    targets=[ast.Name(id='call_content', ctx=ast.Store())],
-                    value=ast.List(elts=[], ctx=ast.Load())
+                    targets=[ast.Name(id="call_content", ctx=ast.Store())],
+                    value=ast.List(elts=[], ctx=ast.Load()),
                 )
             )
             # body_call_content(self, call_content.append, values, options)
             content.append(
-                ast.Expr(self._call_def(
-                    def_name,
-                    append=ast.Attribute(
-                        value=ast.Name(id='call_content', ctx=ast.Load()),
-                        attr='append',
-                        ctx=ast.Load()
-                    ),
-                    values=_values
-                ))
+                ast.Expr(
+                    self._call_def(
+                        def_name,
+                        append=ast.Attribute(
+                            value=ast.Name(id="call_content", ctx=ast.Load()),
+                            attr="append",
+                            ctx=ast.Load(),
+                        ),
+                        values=_values,
+                    )
+                )
             )
             # values_copy[0] = call_content
             content.append(
                 ast.Assign(
-                    targets=[ast.Subscript(
-                        value=ast.Name(id=_values, ctx=ast.Load()),
-                        slice=ast.Index(ast.Num(0)),
-                        ctx=ast.Store()
-                    )],
-                    value=ast.Name(id='call_content', ctx=ast.Load())
+                    targets=[
+                        ast.Subscript(
+                            value=ast.Name(id=_values, ctx=ast.Load()),
+                            slice=ast.Index(ast.Num(0)),
+                            ctx=ast.Store(),
+                        )
+                    ],
+                    value=ast.Name(id="call_content", ctx=ast.Load()),
                 )
             )
         else:
             # values_copy[0] = []
             content.append(
                 ast.Assign(
-                    targets=[ast.Subscript(
-                        value=ast.Name(id=_values, ctx=ast.Load()),
-                        slice=ast.Index(ast.Num(0)),
-                        ctx=ast.Store()
-                    )],
-                    value=ast.List(elts=[], ctx=ast.Load())
+                    targets=[
+                        ast.Subscript(
+                            value=ast.Name(id=_values, ctx=ast.Load()),
+                            slice=ast.Index(ast.Num(0)),
+                            ctx=ast.Store(),
+                        )
+                    ],
+                    value=ast.List(elts=[], ctx=ast.Load()),
                 )
             )
 
-        name_options = self._make_name('options')
+        name_options = self._make_name("options")
         # copy the original dict of options to pass to the callee
         content.append(
             # options_ = options.copy()
@@ -1511,79 +1854,107 @@ class QWeb(object):
                 targets=[ast.Name(id=name_options, ctx=ast.Store())],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='options', ctx=ast.Load()),
-                        attr='copy',
-                        ctx=ast.Load()
+                        value=ast.Name(id="options", ctx=ast.Load()),
+                        attr="copy",
+                        ctx=ast.Load(),
                     ),
-                    args=[], keywords=[], starargs=None, kwargs=None
-                )
+                    args=[],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                ),
             )
         )
         if nsmap or call_options:
 
             if call_options:
                 # update this dict with the content of `t-call-options`
-                content.extend([
-                    # options_.update(template options)
-                    ast.Expr(ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id=name_options, ctx=ast.Load()),
-                            attr='update',
-                            ctx=ast.Load()
-                        ),
-                        args=[self._compile_expr(call_options)],
-                        keywords=[], starargs=None, kwargs=None
-                    )),
-
-                    # if options.get('lang') != options_.get('lang'):
-                    #   self = self.with_context(lang=options.get('lang'))
-                    ast.If(
-                        test=ast.Compare(
-                            left=ast.Call(
-                                func=ast.Attribute(
-                                    value=ast.Name(id='options', ctx=ast.Load()),
-                                    attr='get',
-                                    ctx=ast.Load()
-                                ),
-                                args=[ast.Str("lang")], keywords=[],
-                                starargs=None, kwargs=None
-                            ),
-                            ops=[ast.NotEq()],
-                            comparators=[ast.Call(
+                content.extend(
+                    [
+                        # options_.update(template options)
+                        ast.Expr(
+                            ast.Call(
                                 func=ast.Attribute(
                                     value=ast.Name(id=name_options, ctx=ast.Load()),
-                                    attr='get',
-                                    ctx=ast.Load()
+                                    attr="update",
+                                    ctx=ast.Load(),
                                 ),
-                                args=[ast.Str("lang")], keywords=[],
-                                starargs=None, kwargs=None
-                            )]
+                                args=[self._compile_expr(call_options)],
+                                keywords=[],
+                                starargs=None,
+                                kwargs=None,
+                            )
                         ),
-                        body=[
-                            ast.Assign(
-                                targets=[ast.Name(id='self', ctx=ast.Store())],
-                                value=ast.Call(
+                        # if options.get('lang') != options_.get('lang'):
+                        #   self = self.with_context(lang=options.get('lang'))
+                        ast.If(
+                            test=ast.Compare(
+                                left=ast.Call(
                                     func=ast.Attribute(
-                                        value=ast.Name(id='self', ctx=ast.Load()),
-                                        attr='with_context',
-                                        ctx=ast.Load()
+                                        value=ast.Name(id="options", ctx=ast.Load()),
+                                        attr="get",
+                                        ctx=ast.Load(),
                                     ),
-                                    args=[],
-                                    keywords=[ast.keyword('lang', ast.Call(
+                                    args=[ast.Str("lang")],
+                                    keywords=[],
+                                    starargs=None,
+                                    kwargs=None,
+                                ),
+                                ops=[ast.NotEq()],
+                                comparators=[
+                                    ast.Call(
                                         func=ast.Attribute(
-                                            value=ast.Name(id=name_options, ctx=ast.Load()),
-                                            attr='get',
-                                            ctx=ast.Load()
+                                            value=ast.Name(
+                                                id=name_options, ctx=ast.Load()
+                                            ),
+                                            attr="get",
+                                            ctx=ast.Load(),
                                         ),
-                                        args=[ast.Str("lang")], keywords=[],
-                                        starargs=None, kwargs=None
-                                    ))],
-                                    starargs=None, kwargs=None
+                                        args=[ast.Str("lang")],
+                                        keywords=[],
+                                        starargs=None,
+                                        kwargs=None,
+                                    )
+                                ],
+                            ),
+                            body=[
+                                ast.Assign(
+                                    targets=[ast.Name(id="self", ctx=ast.Store())],
+                                    value=ast.Call(
+                                        func=ast.Attribute(
+                                            value=ast.Name(id="self", ctx=ast.Load()),
+                                            attr="with_context",
+                                            ctx=ast.Load(),
+                                        ),
+                                        args=[],
+                                        keywords=[
+                                            ast.keyword(
+                                                "lang",
+                                                ast.Call(
+                                                    func=ast.Attribute(
+                                                        value=ast.Name(
+                                                            id=name_options,
+                                                            ctx=ast.Load(),
+                                                        ),
+                                                        attr="get",
+                                                        ctx=ast.Load(),
+                                                    ),
+                                                    args=[ast.Str("lang")],
+                                                    keywords=[],
+                                                    starargs=None,
+                                                    kwargs=None,
+                                                ),
+                                            )
+                                        ],
+                                        starargs=None,
+                                        kwargs=None,
+                                    ),
                                 )
-                            )],
-                        orelse=[],
-                    )
-                ])
+                            ],
+                            orelse=[],
+                        ),
+                    ]
+                )
 
             if nsmap:
                 # update this dict with the current nsmap so that the callee know
@@ -1592,7 +1963,7 @@ class QWeb(object):
                 # make the nsmap an ast dict
                 keys = []
                 values = []
-                for key, value in options['nsmap'].items():
+                for key, value in options["nsmap"].items():
                     if isinstance(key, str):
                         keys.append(ast.Str(s=key))
                     elif key is None:
@@ -1601,21 +1972,25 @@ class QWeb(object):
 
                 # {'nsmap': {None: 'xmlns def'}}
                 nsmap_ast_dict = ast.Dict(
-                    keys=[ast.Str(s='nsmap')],
-                    values=[ast.Dict(keys=keys, values=values)]
+                    keys=[ast.Str(s="nsmap")],
+                    values=[ast.Dict(keys=keys, values=values)],
                 )
 
                 # options_.update(nsmap_ast_dict)
                 content.append(
-                    ast.Expr(ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id=name_options, ctx=ast.Load()),
-                            attr='update',
-                            ctx=ast.Load()
-                        ),
-                        args=[nsmap_ast_dict],
-                        keywords=[], starargs=None, kwargs=None
-                    ))
+                    ast.Expr(
+                        ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id=name_options, ctx=ast.Load()),
+                                attr="update",
+                                ctx=ast.Load(),
+                            ),
+                            args=[nsmap_ast_dict],
+                            keywords=[],
+                            starargs=None,
+                            kwargs=None,
+                        )
+                    )
                 )
 
         # options_.update({
@@ -1623,47 +1998,60 @@ class QWeb(object):
         #     'last_path_node': str(options['root'].getpath(el)),
         # })
         content.append(
-            ast.Expr(ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id=name_options, ctx=ast.Load()),
-                    attr='update',
-                    ctx=ast.Load()
-                ),
-                args=[
-                    ast.Dict(
-                        keys=[ast.Str(s='caller_template'), ast.Str(s='last_path_node')],
-                        values=[
-                            ast.Str(s=str(options.get('template'))),
-                            ast.Str(s=str(options['root'].getpath(el))),
-                        ]
-                    )
-                ],
-                keywords=[], starargs=None, kwargs=None
-            ))
+            ast.Expr(
+                ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id=name_options, ctx=ast.Load()),
+                        attr="update",
+                        ctx=ast.Load(),
+                    ),
+                    args=[
+                        ast.Dict(
+                            keys=[
+                                ast.Str(s="caller_template"),
+                                ast.Str(s="last_path_node"),
+                            ],
+                            values=[
+                                ast.Str(s=str(options.get("template"))),
+                                ast.Str(s=str(options["root"].getpath(el))),
+                            ],
+                        )
+                    ],
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                )
+            )
         )
 
         # self.compile($tmpl, options)(self, append, values_copy)
         content.append(
-            ast.Expr(ast.Call(
-                func=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='compile',
-                        ctx=ast.Load()
+            ast.Expr(
+                ast.Call(
+                    func=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="self", ctx=ast.Load()),
+                            attr="compile",
+                            ctx=ast.Load(),
+                        ),
+                        args=[
+                            self._compile_format(str(tmpl)),
+                            ast.Name(id=name_options, ctx=ast.Load()),
+                        ],
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
                     ),
                     args=[
-                        self._compile_format(str(tmpl)),
-                        ast.Name(id=name_options, ctx=ast.Load()),
+                        ast.Name(id="self", ctx=ast.Load()),
+                        ast.Name(id="append", ctx=ast.Load()),
+                        ast.Name(id=_values, ctx=ast.Load()),
                     ],
-                    keywords=[], starargs=None, kwargs=None
-                ),
-                args=[
-                    ast.Name(id='self', ctx=ast.Load()),
-                    ast.Name(id='append', ctx=ast.Load()),
-                    ast.Name(id=_values, ctx=ast.Load())
-                ],
-                keywords=[], starargs=None, kwargs=None
-            ))
+                    keywords=[],
+                    starargs=None,
+                    kwargs=None,
+                )
+            )
         )
         return content
 
@@ -1686,14 +2074,23 @@ class QWeb(object):
         """
         return atts
 
-    def _get_field(self, record, field_name, expression, tagName, field_options, options, values):
+    def _get_field(
+        self, record, field_name, expression, tagName, field_options, options, values
+    ):
         """
         :returns: tuple:
             * OrderedDict: attributes
             * string or None: content
             * boolean: force_display display the tag if the content and default_content are None
         """
-        return self._get_widget(getattr(record, field_name, None), expression, tagName, field_options, options, values)
+        return self._get_widget(
+            getattr(record, field_name, None),
+            expression,
+            tagName,
+            field_options,
+            options,
+            values,
+        )
 
     def _get_widget(self, value, expression, tagName, field_options, options, values):
         """
@@ -1708,41 +2105,42 @@ class QWeb(object):
 
     def _compile_strexpr(self, expr):
         return ast.Call(
-            func=ast.Name(id='str', ctx=ast.Load()),
+            func=ast.Name(id="str", ctx=ast.Load()),
             args=[
                 ast.Call(
-                    func=ast.Name(id='to_text', ctx=ast.Load()),
-                    args=[self._compile_expr(expr)], keywords=[],
+                    func=ast.Name(id="to_text", ctx=ast.Load()),
+                    args=[self._compile_expr(expr)],
+                    keywords=[],
                 )
-            ], keywords=[]
+            ],
+            keywords=[],
         )
 
     def _compile_expr0(self, expr):
         if expr == "0":
             # u''.join(values.get(0, []))
             joined = ast.Call(
-                func=ast.Attribute(
-                    value=ast.Str(u''),
-                    attr='join',
-                    ctx=ast.Load()
-                ),
+                func=ast.Attribute(value=ast.Str(u""), attr="join", ctx=ast.Load()),
                 args=[
                     ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id='values', ctx=ast.Load()),
-                            attr='get',
-                            ctx=ast.Load()
+                            value=ast.Name(id="values", ctx=ast.Load()),
+                            attr="get",
+                            ctx=ast.Load(),
                         ),
-                        args=[ast.Num(0), ast.List(elts=[], ctx=ast.Load())], keywords=[],
-                        starargs=None, kwargs=None
+                        args=[ast.Num(0), ast.List(elts=[], ctx=ast.Load())],
+                        keywords=[],
+                        starargs=None,
+                        kwargs=None,
                     )
                 ],
-                keywords=[], starargs=None, kwargs=None
+                keywords=[],
+                starargs=None,
+                kwargs=None,
             )
             # Markup(...): 0 is a rendered body, so should be safe
             return ast.Call(
-                func=ast.Name(id='Markup', ctx=ast.Load()),
-                args=[joined], keywords=[]
+                func=ast.Name(id="Markup", ctx=ast.Load()), args=[joined], keywords=[]
             )
         return self._compile_expr(expr)
 
@@ -1754,7 +2152,7 @@ class QWeb(object):
         elts = []
         base_idx = 0
         for m in _FORMAT_REGEX.finditer(f):
-            literal = f[base_idx:m.start()]
+            literal = f[base_idx : m.start()]
             if literal:
                 elts.append(ast.Str(literal))
 
@@ -1766,11 +2164,7 @@ class QWeb(object):
         if literal:
             elts.append(ast.Str(literal))
 
-        return reduce(lambda acc, it: ast.BinOp(
-            left=acc,
-            op=ast.Add(),
-            right=it
-        ), elts)
+        return reduce(lambda acc, it: ast.BinOp(left=acc, op=ast.Add(), right=it), elts)
 
     def _compile_expr(self, expr):
         """ Compiles a purported Python expression to ast, and alter its
@@ -1781,6 +2175,6 @@ class QWeb(object):
         """
         # string must be stripped otherwise whitespace before the start for
         # formatting purpose are going to break parse/compile
-        st = ast.parse(expr.strip(), mode='eval')
+        st = ast.parse(expr.strip(), mode="eval")
         # ast.Expression().body -> expr
         return Contextifier(builtin_defaults).visit(st).body

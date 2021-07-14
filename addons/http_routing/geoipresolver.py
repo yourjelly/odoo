@@ -3,7 +3,7 @@
 import os.path
 
 try:
-    import GeoIP    # Legacy
+    import GeoIP  # Legacy
 except ImportError:
     GeoIP = None
 
@@ -12,6 +12,7 @@ try:
     import geoip2.database
 except ImportError:
     geoip2 = None
+
 
 class GeoIPResolver(object):
     def __init__(self, fname):
@@ -25,7 +26,7 @@ class GeoIPResolver(object):
                 self.version = 1
                 assert self._db.database_info is not None
             except Exception:
-                raise ValueError('Invalid GeoIP database: %r' % fname)
+                raise ValueError("Invalid GeoIP database: %r" % fname)
 
     def __del__(self):
         if self.version == 2:
@@ -50,13 +51,17 @@ class GeoIPResolver(object):
             # Compatibility with Legacy database.
             # Some ips cannot be located to a specific country. Legacy DB used to locate them in
             # continent instead of country. Do the same to not change behavior of existing code.
-            country, attr = (r.country, 'iso_code') if r.country.geoname_id else (r.continent, 'code')
+            country, attr = (
+                (r.country, "iso_code")
+                if r.country.geoname_id
+                else (r.continent, "code")
+            )
             return {
-                'city': r.city.name,
-                'country_code': getattr(country, attr),
-                'country_name': country.name,
-                'region': r.subdivisions[0].iso_code if r.subdivisions else None,
-                'time_zone': r.location.time_zone,
+                "city": r.city.name,
+                "country_code": getattr(country, attr),
+                "country_name": country.name,
+                "region": r.subdivisions[0].iso_code if r.subdivisions else None,
+                "time_zone": r.location.time_zone,
             }
 
     # compat

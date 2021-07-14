@@ -467,7 +467,7 @@ Web: <a class="moz-txt-link-freetext" href="http://www.odoo.com">http://www.odoo
 
 --------------A6B5FD5F68F4D73ECD739009--"""
 
-MAIL_EML_ATTACHMENT_BOUNCE_HEADERS="""\
+MAIL_EML_ATTACHMENT_BOUNCE_HEADERS = """\
 Date: Tue, 24 Dec 2019 11:32:07 +0100 (CET)
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary=16063919151.b32bE0eD.7

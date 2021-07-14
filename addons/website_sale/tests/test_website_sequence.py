@@ -3,45 +3,42 @@
 import odoo.tests
 
 
-@odoo.tests.common.tagged('post_install', '-at_install')
+@odoo.tests.common.tagged("post_install", "-at_install")
 class TestWebsiteSequence(odoo.tests.TransactionCase):
-
     def setUp(self):
         super(TestWebsiteSequence, self).setUp()
 
-        ProductTemplate = self.env['product.template']
+        ProductTemplate = self.env["product.template"]
         product_templates = ProductTemplate.search([])
         # if stock is installed we can't archive since there is orderpoints
-        if hasattr(self.env['product.product'], 'orderpoint_ids'):
-            product_templates.mapped('product_variant_ids.orderpoint_ids').write({'active': False})
+        if hasattr(self.env["product.product"], "orderpoint_ids"):
+            product_templates.mapped("product_variant_ids.orderpoint_ids").write(
+                {"active": False}
+            )
         # if pos loyalty is installed we can't archive since there are loyalty rules and rewards
-        if 'loyalty.rule' in self.env:
-            rules = self.env['loyalty.rule'].search([])
+        if "loyalty.rule" in self.env:
+            rules = self.env["loyalty.rule"].search([])
             rules.unlink()
-        if 'loyalty.reward' in self.env:
-            rewards = self.env['loyalty.reward'].search([])
+        if "loyalty.reward" in self.env:
+            rewards = self.env["loyalty.reward"].search([])
             rewards.unlink()
-        product_templates.write({'active': False})
-        self.p1, self.p2, self.p3, self.p4 = ProductTemplate.create([{
-            'name': 'First Product',
-            'website_sequence': 100,
-        }, {
-            'name': 'Second Product',
-            'website_sequence': 180,
-        }, {
-            'name': 'Third Product',
-            'website_sequence': 225,
-        }, {
-            'name': 'Last Product',
-            'website_sequence': 250,
-        }])
+        product_templates.write({"active": False})
+        self.p1, self.p2, self.p3, self.p4 = ProductTemplate.create(
+            [
+                {"name": "First Product", "website_sequence": 100,},
+                {"name": "Second Product", "website_sequence": 180,},
+                {"name": "Third Product", "website_sequence": 225,},
+                {"name": "Last Product", "website_sequence": 250,},
+            ]
+        )
 
         self._check_correct_order(self.p1 + self.p2 + self.p3 + self.p4)
 
-    def _search_website_sequence_order(self, order='ASC'):
-        '''Helper method to limit the search only to the setUp products'''
-        return self.env['product.template'].search([
-        ], order='website_sequence %s' % (order))
+    def _search_website_sequence_order(self, order="ASC"):
+        """Helper method to limit the search only to the setUp products"""
+        return self.env["product.template"].search(
+            [], order="website_sequence %s" % (order)
+        )
 
     def _check_correct_order(self, products):
         product_ids = self._search_website_sequence_order().ids
@@ -62,16 +59,26 @@ class TestWebsiteSequence(odoo.tests.TransactionCase):
         # 95:2, 180:3, 225:4, 230:1
         self._check_correct_order(self.p2 + self.p3 + self.p4 + self.p1)
 
-        current_sequences = self._search_website_sequence_order().mapped('website_sequence')
-        self.assertEqual(current_sequences, [95, 180, 225, 230], "Wrong sequence order (2)")
+        current_sequences = self._search_website_sequence_order().mapped(
+            "website_sequence"
+        )
+        self.assertEqual(
+            current_sequences, [95, 180, 225, 230], "Wrong sequence order (2)"
+        )
 
         self.p2.website_sequence = 1
         self.p3.set_sequence_top()
         # -4:3, 1:2, 225:4, 230:1
-        self.assertEqual(self.p3.website_sequence, -4, "`website_sequence` should go below 0")
+        self.assertEqual(
+            self.p3.website_sequence, -4, "`website_sequence` should go below 0"
+        )
 
-        new_product = self.env['product.template'].create({
-            'name': 'Last Newly Created Product',
-        })
+        new_product = self.env["product.template"].create(
+            {"name": "Last Newly Created Product",}
+        )
 
-        self.assertEqual(self._search_website_sequence_order()[-1], new_product, "new product should be last")
+        self.assertEqual(
+            self._search_website_sequence_order()[-1],
+            new_product,
+            "new product should be last",
+        )

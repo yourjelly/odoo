@@ -9,39 +9,81 @@ class ImLivechatReportChannel(models.Model):
 
     _name = "im_livechat.report.channel"
     _description = "Livechat Support Channel Report"
-    _order = 'start_date, technical_name'
+    _order = "start_date, technical_name"
     _auto = False
 
-    uuid = fields.Char('UUID', readonly=True)
-    channel_id = fields.Many2one('mail.channel', 'Conversation', readonly=True)
-    channel_name = fields.Char('Channel Name', readonly=True)
-    technical_name = fields.Char('Code', readonly=True)
-    livechat_channel_id = fields.Many2one('im_livechat.channel', 'Channel', readonly=True)
-    start_date = fields.Datetime('Start Date of session', readonly=True, help="Start date of the conversation")
-    start_hour = fields.Char('Start Hour of session', readonly=True, help="Start hour of the conversation")
-    day_number = fields.Char('Day Number', readonly=True, help="Day number of the session (1 is Monday, 7 is Sunday)")
-    time_to_answer = fields.Float('Time to answer (sec)', digits=(16, 2), readonly=True, group_operator="avg", help="Average time in seconds to give the first answer to the visitor")
-    start_date_hour = fields.Char('Hour of start Date of session', readonly=True)
-    duration = fields.Float('Average duration', digits=(16, 2), readonly=True, group_operator="avg", help="Duration of the conversation (in seconds)")
-    nbr_speaker = fields.Integer('# of speakers', readonly=True, group_operator="avg", help="Number of different speakers")
-    nbr_message = fields.Integer('Average message', readonly=True, group_operator="avg", help="Number of message in the conversation")
-    is_without_answer = fields.Integer('Session(s) without answer', readonly=True, group_operator="sum",
-                                       help="""A session is without answer if the operator did not answer. 
-                                       If the visitor is also the operator, the session will always be answered.""")
-    days_of_activity = fields.Integer('Days of activity', group_operator="max", readonly=True, help="Number of days since the first session of the operator")
-    is_anonymous = fields.Integer('Is visitor anonymous', readonly=True)
-    country_id = fields.Many2one('res.country', 'Country of the visitor', readonly=True)
-    is_happy = fields.Integer('Visitor is Happy', readonly=True)
-    rating = fields.Integer('Rating', group_operator="avg", readonly=True)
+    uuid = fields.Char("UUID", readonly=True)
+    channel_id = fields.Many2one("mail.channel", "Conversation", readonly=True)
+    channel_name = fields.Char("Channel Name", readonly=True)
+    technical_name = fields.Char("Code", readonly=True)
+    livechat_channel_id = fields.Many2one(
+        "im_livechat.channel", "Channel", readonly=True
+    )
+    start_date = fields.Datetime(
+        "Start Date of session", readonly=True, help="Start date of the conversation"
+    )
+    start_hour = fields.Char(
+        "Start Hour of session", readonly=True, help="Start hour of the conversation"
+    )
+    day_number = fields.Char(
+        "Day Number",
+        readonly=True,
+        help="Day number of the session (1 is Monday, 7 is Sunday)",
+    )
+    time_to_answer = fields.Float(
+        "Time to answer (sec)",
+        digits=(16, 2),
+        readonly=True,
+        group_operator="avg",
+        help="Average time in seconds to give the first answer to the visitor",
+    )
+    start_date_hour = fields.Char("Hour of start Date of session", readonly=True)
+    duration = fields.Float(
+        "Average duration",
+        digits=(16, 2),
+        readonly=True,
+        group_operator="avg",
+        help="Duration of the conversation (in seconds)",
+    )
+    nbr_speaker = fields.Integer(
+        "# of speakers",
+        readonly=True,
+        group_operator="avg",
+        help="Number of different speakers",
+    )
+    nbr_message = fields.Integer(
+        "Average message",
+        readonly=True,
+        group_operator="avg",
+        help="Number of message in the conversation",
+    )
+    is_without_answer = fields.Integer(
+        "Session(s) without answer",
+        readonly=True,
+        group_operator="sum",
+        help="""A session is without answer if the operator did not answer. 
+                                       If the visitor is also the operator, the session will always be answered.""",
+    )
+    days_of_activity = fields.Integer(
+        "Days of activity",
+        group_operator="max",
+        readonly=True,
+        help="Number of days since the first session of the operator",
+    )
+    is_anonymous = fields.Integer("Is visitor anonymous", readonly=True)
+    country_id = fields.Many2one("res.country", "Country of the visitor", readonly=True)
+    is_happy = fields.Integer("Visitor is Happy", readonly=True)
+    rating = fields.Integer("Rating", group_operator="avg", readonly=True)
     # TODO DBE : Use Selection field - Need : Pie chart must show labels, not keys.
-    rating_text = fields.Char('Satisfaction Rate', readonly=True)
-    is_unrated = fields.Integer('Session not rated', readonly=True)
-    partner_id = fields.Many2one('res.partner', 'Operator', readonly=True)
+    rating_text = fields.Char("Satisfaction Rate", readonly=True)
+    is_unrated = fields.Integer("Session not rated", readonly=True)
+    partner_id = fields.Many2one("res.partner", "Operator", readonly=True)
 
     def init(self):
         # Note : start_date_hour must be remove when the read_group will allow grouping on the hour of a datetime. Don't forget to change the view !
-        tools.drop_view_if_exists(self.env.cr, 'im_livechat_report_channel')
-        self.env.cr.execute("""
+        tools.drop_view_if_exists(self.env.cr, "im_livechat_report_channel")
+        self.env.cr.execute(
+            """
             CREATE OR REPLACE VIEW im_livechat_report_channel AS (
                 SELECT
                     C.id as id,
@@ -97,4 +139,5 @@ class ImLivechatReportChannel(models.Model):
                     WHERE C.livechat_operator_id is not null
                 GROUP BY C.livechat_operator_id, C.id, C.name, C.livechat_channel_id, L.name, C.create_date, C.uuid, Rate.rating
             )
-        """)
+        """
+        )

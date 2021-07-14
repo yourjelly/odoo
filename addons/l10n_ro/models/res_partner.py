@@ -15,6 +15,8 @@ class ResPartner(models.Model):
 
     @api.model
     def _commercial_fields(self):
-        return super(ResPartner, self)._commercial_fields() + ['nrc']
+        return super(ResPartner, self)._commercial_fields() + ["nrc"]
 
-    nrc = fields.Char(string='NRC', help='Registration number at the Registry of Commerce')
+    nrc = fields.Char(
+        string="NRC", help="Registration number at the Registry of Commerce"
+    )

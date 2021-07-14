@@ -25,23 +25,36 @@ class MailBlackListMixin(models.AbstractModel):
 
     Mail Thread capabilities are required for this mixin. """
 
-    _name = 'mail.thread.blacklist'
-    _inherit = ['mail.thread']
-    _description = 'Mail Blacklist mixin'
-    _primary_email = 'email'
+    _name = "mail.thread.blacklist"
+    _inherit = ["mail.thread"]
+    _description = "Mail Blacklist mixin"
+    _primary_email = "email"
 
     email_normalized = fields.Char(
-        string='Normalized Email', compute="_compute_email_normalized", compute_sudo=True,
-        store=True, invisible=True,
-        help="This field is used to search on email address as the primary email field can contain more than strictly an email address.")
+        string="Normalized Email",
+        compute="_compute_email_normalized",
+        compute_sudo=True,
+        store=True,
+        invisible=True,
+        help="This field is used to search on email address as the primary email field can contain more than strictly an email address.",
+    )
     # Note : is_blacklisted sould only be used for display. As the compute is not depending on the blacklist,
     # once read, it won't be re-computed again if the blacklist is modified in the same request.
     is_blacklisted = fields.Boolean(
-        string='Blacklist', compute="_compute_is_blacklisted", compute_sudo=True, store=False,
-        search="_search_is_blacklisted", groups="base.group_user",
-        help="If the email address is on the blacklist, the contact won't receive mass mailing anymore, from any list")
+        string="Blacklist",
+        compute="_compute_is_blacklisted",
+        compute_sudo=True,
+        store=False,
+        search="_search_is_blacklisted",
+        groups="base.group_user",
+        help="If the email address is on the blacklist, the contact won't receive mass mailing anymore, from any list",
+    )
     # messaging
-    message_bounce = fields.Integer('Bounce', help="Counter of the number of bounced emails for this contact", default=0)
+    message_bounce = fields.Integer(
+        "Bounce",
+        help="Counter of the number of bounced emails for this contact",
+        default=0,
+    )
 
     @api.depends(lambda self: [self._primary_email])
     def _compute_email_normalized(self):
@@ -52,11 +65,11 @@ class MailBlackListMixin(models.AbstractModel):
     @api.model
     def _search_is_blacklisted(self, operator, value):
         # Assumes operator is '=' or '!=' and value is True or False
-        self.flush(['email_normalized'])
-        self.env['mail.blacklist'].flush(['email', 'active'])
+        self.flush(["email_normalized"])
+        self.env["mail.blacklist"].flush(["email", "active"])
         self._assert_primary_email()
-        if operator != '=':
-            if operator == '!=' and isinstance(value, bool):
+        if operator != "=":
+            if operator == "!=" and isinstance(value, bool):
                 value = not value
             else:
                 raise NotImplementedError()
@@ -79,23 +92,32 @@ class MailBlackListMixin(models.AbstractModel):
         self._cr.execute(query % self._table)
         res = self._cr.fetchall()
         if not res:
-            return [(0, '=', 1)]
-        return [('id', 'in', [r[0] for r in res])]
+            return [(0, "=", 1)]
+        return [("id", "in", [r[0] for r in res])]
 
-    @api.depends('email_normalized')
+    @api.depends("email_normalized")
     def _compute_is_blacklisted(self):
         # TODO : Should remove the sudo as compute_sudo defined on methods.
         # But if user doesn't have access to mail.blacklist, doen't work without sudo().
-        blacklist = set(self.env['mail.blacklist'].sudo().search([
-            ('email', 'in', self.mapped('email_normalized'))]).mapped('email'))
+        blacklist = set(
+            self.env["mail.blacklist"]
+            .sudo()
+            .search([("email", "in", self.mapped("email_normalized"))])
+            .mapped("email")
+        )
         for record in self:
             record.is_blacklisted = record.email_normalized in blacklist
 
     def _assert_primary_email(self):
-        if not hasattr(self, "_primary_email") or not isinstance(self._primary_email, str):
-            raise UserError(_('Invalid primary email field on model %s', self._name))
-        if self._primary_email not in self._fields or self._fields[self._primary_email].type != 'char':
-            raise UserError(_('Invalid primary email field on model %s', self._name))
+        if not hasattr(self, "_primary_email") or not isinstance(
+            self._primary_email, str
+        ):
+            raise UserError(_("Invalid primary email field on model %s", self._name))
+        if (
+            self._primary_email not in self._fields
+            or self._fields[self._primary_email].type != "char"
+        ):
+            raise UserError(_("Invalid primary email field on model %s", self._name))
 
     def _message_receive_bounce(self, email, partner):
         """ Override of mail.thread generic method. Purpose is to increment the
@@ -108,19 +130,23 @@ class MailBlackListMixin(models.AbstractModel):
         """ Override of mail.thread generic method. Purpose is to reset the
         bounce counter of the record. """
         super(MailBlackListMixin, self)._message_reset_bounce(email)
-        self.write({'message_bounce': 0})
+        self.write({"message_bounce": 0})
 
     def mail_action_blacklist_remove(self):
         # wizard access rights currently not working as expected and allows users without access to
         # open this wizard, therefore we check to make sure they have access before the wizard opens.
-        can_access = self.env['mail.blacklist'].check_access_rights('write', raise_exception=False)
+        can_access = self.env["mail.blacklist"].check_access_rights(
+            "write", raise_exception=False
+        )
         if can_access:
             return {
-                'name': 'Are you sure you want to unblacklist this Email Address?',
-                'type': 'ir.actions.act_window',
-                'view_mode': 'form',
-                'res_model': 'mail.blacklist.remove',
-                'target': 'new',
+                "name": "Are you sure you want to unblacklist this Email Address?",
+                "type": "ir.actions.act_window",
+                "view_mode": "form",
+                "res_model": "mail.blacklist.remove",
+                "target": "new",
             }
         else:
-            raise AccessError("You do not have the access right to unblacklist emails. Please contact your administrator.")
+            raise AccessError(
+                "You do not have the access right to unblacklist emails. Please contact your administrator."
+            )

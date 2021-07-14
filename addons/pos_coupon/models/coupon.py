@@ -23,13 +23,15 @@ class Coupon(models.Model):
     def _check_coupon_code(self, order_date, partner_id, **kwargs):
         if self.program_id.id in kwargs.get("reserved_program_ids", []):
             return {
-                "error": _("A coupon from the same program has already been reserved for this order.")
+                "error": _(
+                    "A coupon from the same program has already been reserved for this order."
+                )
             }
         return super()._check_coupon_code(order_date, partner_id, **kwargs)
 
     def _get_default_template(self):
         if self.source_pos_order_id:
-            return self.env.ref('pos_coupon.mail_coupon_template', False)
+            return self.env.ref("pos_coupon.mail_coupon_template", False)
         return super()._get_default_template()
 
     @api.model
@@ -39,4 +41,4 @@ class Coupon(models.Model):
         barcode rule in this module. See `data/default_barcode_patterns.xml`.
         """
         code = super()._generate_code()
-        return '043' + code[3:]
+        return "043" + code[3:]

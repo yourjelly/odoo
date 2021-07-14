@@ -9,15 +9,22 @@ from odoo import api, fields, models
 
 
 class KarmaTracking(models.Model):
-    _name = 'gamification.karma.tracking'
-    _description = 'Track Karma Changes'
-    _rec_name = 'user_id'
-    _order = 'tracking_date DESC'
+    _name = "gamification.karma.tracking"
+    _description = "Track Karma Changes"
+    _rec_name = "user_id"
+    _order = "tracking_date DESC"
 
-    user_id = fields.Many2one('res.users', 'User', index=True, readonly=True, required=True, ondelete='cascade')
-    old_value = fields.Integer('Old Karma Value', required=True, readonly=True)
-    new_value = fields.Integer('New Karma Value', required=True, readonly=True)
-    consolidated = fields.Boolean('Consolidated')
+    user_id = fields.Many2one(
+        "res.users",
+        "User",
+        index=True,
+        readonly=True,
+        required=True,
+        ondelete="cascade",
+    )
+    old_value = fields.Integer("Old Karma Value", required=True, readonly=True)
+    new_value = fields.Integer("New Karma Value", required=True, readonly=True)
+    consolidated = fields.Boolean("Consolidated")
     tracking_date = fields.Date(default=fields.Date.context_today)
 
     @api.model
@@ -30,7 +37,9 @@ class KarmaTracking(models.Model):
         """ Consolidate trackings into a single record for a given month, starting
         at a from_date (included). End date is set to last day of current month
         using a smart calendar.monthrange construction. """
-        end_date = from_date + relativedelta(day=calendar.monthrange(from_date.year, from_date.month)[1])
+        end_date = from_date + relativedelta(
+            day=calendar.monthrange(from_date.year, from_date.month)[1]
+        )
         select_query = """
 SELECT user_id,
 (
@@ -50,20 +59,21 @@ FROM gamification_karma_tracking
 WHERE tracking_date::timestamp BETWEEN %(from_date)s AND %(to_date)s
 AND consolidated IS NOT TRUE
 GROUP BY user_id """
-        self.env.cr.execute(select_query, {
-            'from_date': from_date,
-            'to_date': end_date,
-        })
+        self.env.cr.execute(
+            select_query, {"from_date": from_date, "to_date": end_date,}
+        )
         results = self.env.cr.dictfetchall()
         if results:
             for result in results:
-                result['consolidated'] = True
-                result['tracking_date'] = fields.Date.to_string(from_date)
+                result["consolidated"] = True
+                result["tracking_date"] = fields.Date.to_string(from_date)
             self.create(results)
 
-            self.search([
-                ('tracking_date', '>=', from_date),
-                ('tracking_date', '<=', end_date),
-                ('consolidated', '!=', True)]
+            self.search(
+                [
+                    ("tracking_date", ">=", from_date),
+                    ("tracking_date", "<=", end_date),
+                    ("consolidated", "!=", True),
+                ]
             ).unlink()
         return True

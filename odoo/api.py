@@ -7,11 +7,14 @@
 """
 
 __all__ = [
-    'Environment',
-    'Meta',
-    'model',
-    'constrains', 'depends', 'onchange', 'returns',
-    'call_kw',
+    "Environment",
+    "Meta",
+    "model",
+    "constrains",
+    "depends",
+    "onchange",
+    "returns",
+    "call_kw",
 ]
 
 import logging
@@ -43,7 +46,7 @@ _logger = logging.getLogger(__name__)
 #  - method._api: decorator function, used for re-applying decorator
 #
 
-INHERITED_ATTRS = ('_returns',)
+INHERITED_ATTRS = ("_returns",)
 
 
 class Params(object):
@@ -57,7 +60,7 @@ class Params(object):
             params.append(repr(arg))
         for item in sorted(self.kwargs.items()):
             params.append("%s=%r" % item)
-        return ', '.join(params)
+        return ", ".join(params)
 
 
 class Meta(type):
@@ -71,12 +74,17 @@ class Meta(type):
         parent = type.__new__(meta, name, bases, {})
 
         for key, value in list(attrs.items()):
-            if not key.startswith('__') and callable(value):
+            if not key.startswith("__") and callable(value):
                 # make the method inherit from decorators
                 value = propagate(getattr(parent, key, None), value)
 
-                if (getattr(value, '_api', None) or '').startswith('cr'):
-                    _logger.warning("Deprecated method %s.%s in module %s", name, key, attrs.get('__module__'))
+                if (getattr(value, "_api", None) or "").startswith("cr"):
+                    _logger.warning(
+                        "Deprecated method %s.%s in module %s",
+                        name,
+                        key,
+                        attrs.get("__module__"),
+                    )
 
                 attrs[key] = value
 
@@ -86,6 +94,7 @@ class Meta(type):
 def attrsetter(attr, value):
     """ Return a function that sets ``attr`` on its argument and returns it. """
     return lambda method: setattr(method, attr, value) or method
+
 
 def propagate(method1, method2):
     """ Propagate decorators from ``method1`` to ``method2``, and return the
@@ -133,7 +142,7 @@ def constrains(*args):
     """
     if args and callable(args[0]):
         args = args[0]
-    return attrsetter('_constrains', args)
+    return attrsetter("_constrains", args)
 
 
 def ondelete(*, at_uninstall):
@@ -192,7 +201,7 @@ def ondelete(*, at_uninstall):
         will break a lot of basic behavior. In this case, ``at_uninstall``
         should be set to ``True``.
     """
-    return attrsetter('_ondelete', at_uninstall)
+    return attrsetter("_ondelete", at_uninstall)
 
 
 def onchange(*args):
@@ -241,7 +250,7 @@ def onchange(*args):
         itself via onchange. This is a webclient limitation - see `#2693 <https://github.com/odoo/odoo/issues/2693>`_.
 
     """
-    return attrsetter('_onchange', args)
+    return attrsetter("_onchange", args)
 
 
 def depends(*args):
@@ -264,9 +273,9 @@ def depends(*args):
     """
     if args and callable(args[0]):
         args = args[0]
-    elif any('id' in arg.split('.') for arg in args):
+    elif any("id" in arg.split(".") for arg in args):
         raise NotImplementedError("Compute method cannot depend on field 'id'.")
-    return attrsetter('_depends', args)
+    return attrsetter("_depends", args)
 
 
 def depends_context(*args):
@@ -292,7 +301,7 @@ def depends_context(*args):
     * `uid` (current user id and superuser flag),
     * `active_test` (value in env.context or value in field.context).
     """
-    return attrsetter('_depends_context', args)
+    return attrsetter("_depends_context", args)
 
 
 def returns(model, downgrade=None, upgrade=None):
@@ -329,12 +338,12 @@ def returns(model, downgrade=None, upgrade=None):
         a decorated existing method will be decorated with the same
         ``@returns(model)``.
     """
-    return attrsetter('_returns', (model, downgrade, upgrade))
+    return attrsetter("_returns", (model, downgrade, upgrade))
 
 
 def downgrade(method, value, self, args, kwargs):
     """ Convert ``value`` returned by ``method`` on ``self`` to traditional style. """
-    spec = getattr(method, '_returns', None)
+    spec = getattr(method, "_returns", None)
     if not spec:
         return value
     _, convert, _ = spec
@@ -350,7 +359,7 @@ def split_context(method, args, kwargs):
     """ Extract the context from a pair of positional and keyword arguments.
         Return a triple ``context, args, kwargs``.
     """
-    return kwargs.pop('context', None), args, kwargs
+    return kwargs.pop("context", None), args, kwargs
 
 
 def autovacuum(method):
@@ -359,7 +368,9 @@ def autovacuum(method):
     ``ir.autovacuum``).  This is typically used for garbage-collection-like
     tasks that do not deserve a specific cron job.
     """
-    assert method.__name__.startswith('_'), "%s: autovacuum methods must be private" % method.__name__
+    assert method.__name__.startswith("_"), (
+        "%s: autovacuum methods must be private" % method.__name__
+    )
     method._autovacuum = True
     return method
 
@@ -373,13 +384,13 @@ def model(method):
                 ...
 
     """
-    if method.__name__ == 'create':
+    if method.__name__ == "create":
         return model_create_single(method)
-    method._api = 'model'
+    method._api = "model"
     return method
 
 
-_create_logger = logging.getLogger(__name__ + '.create')
+_create_logger = logging.getLogger(__name__ + ".create")
 
 
 def _model_create_single(create, self, arg):
@@ -399,7 +410,7 @@ def model_create_single(method):
             records = model.create([vals, ...])
     """
     wrapper = decorate(method, _model_create_single)
-    wrapper._api = 'model_create'
+    wrapper._api = "model_create"
     return wrapper
 
 
@@ -419,7 +430,7 @@ def model_create_multi(method):
             records = model.create([vals, ...])
     """
     wrapper = decorate(method, _model_create_multi)
-    wrapper._api = 'model_create'
+    wrapper._api = "model_create"
     return wrapper
 
 
@@ -452,10 +463,10 @@ def _call_kw_multi(method, self, args, kwargs):
 def call_kw(model, name, args, kwargs):
     """ Invoke the given method ``name`` on the recordset ``model``. """
     method = getattr(type(model), name)
-    api = getattr(method, '_api', None)
-    if api == 'model':
+    api = getattr(method, "_api", None)
+    if api == "model":
         result = _call_kw_model(method, model, args, kwargs)
-    elif api == 'model_create':
+    elif api == "model_create":
         result = _call_kw_model_create(method, model, args, kwargs)
     else:
         result = _call_kw_multi(method, model, args, kwargs)
@@ -475,17 +486,18 @@ class Environment(Mapping):
         names to new api models. It also holds a cache for records, and a data
         structure to manage recomputations.
     """
+
     _local = Local()
 
     @classproperty
     def envs(cls):
-        return getattr(cls._local, 'environments', ())
+        return getattr(cls._local, "environments", ())
 
     @classmethod
     @contextmanager
     def manage(cls):
         """ Context manager for a set of environments. """
-        if hasattr(cls._local, 'environments'):
+        if hasattr(cls._local, "environments"):
             yield
         else:
             try:
@@ -519,8 +531,8 @@ class Environment(Mapping):
         self.cr, self.uid, self.context, self.su = self.args = args
         self.registry = Registry(cr.dbname)
         self.cache = envs.cache
-        self._cache_key = {}                    # memo {field: cache_key}
-        self._protected = envs.protected        # proxy to shared data structure
+        self._cache_key = {}  # memo {field: cache_key}
+        self._protected = envs.protected  # proxy to shared data structure
         self.all = envs
         envs.add(self)
         return self
@@ -573,7 +585,9 @@ class Environment(Mapping):
 
     def ref(self, xml_id, raise_if_not_found=True):
         """Return the record corresponding to the given ``xml_id``."""
-        return self['ir.model.data'].xmlid_to_object(xml_id, raise_if_not_found=raise_if_not_found)
+        return self["ir.model.data"].xmlid_to_object(
+            xml_id, raise_if_not_found=raise_if_not_found
+        )
 
     def is_superuser(self):
         """ Return whether the environment is in superuser mode. """
@@ -595,7 +609,7 @@ class Environment(Mapping):
 
         :returns: current user - sudoed
         :rtype: :class:`~odoo.addons.base.models.res_users`"""
-        return self(su=True)['res.users'].browse(self.uid)
+        return self(su=True)["res.users"].browse(self.uid)
 
     @lazy_property
     def company(self):
@@ -618,13 +632,13 @@ class Environment(Mapping):
             even if the current user doesn't have access to
             the targeted company.
         """
-        company_ids = self.context.get('allowed_company_ids', [])
+        company_ids = self.context.get("allowed_company_ids", [])
         if company_ids:
             if not self.su:
                 user_company_ids = self.user.company_ids.ids
                 if any(cid not in user_company_ids for cid in company_ids):
                     raise AccessError(_("Access to unauthorized or invalid companies."))
-            return self['res.company'].browse(company_ids[0])
+            return self["res.company"].browse(company_ids[0])
         return self.user.company_id.with_env(self)
 
     @lazy_property
@@ -648,13 +662,13 @@ class Environment(Mapping):
             even if the current user doesn't have access to
             the targeted company.
         """
-        company_ids = self.context.get('allowed_company_ids', [])
+        company_ids = self.context.get("allowed_company_ids", [])
         if company_ids:
             if not self.su:
                 user_company_ids = self.user.company_ids.ids
                 if any(cid not in user_company_ids for cid in company_ids):
                     raise AccessError(_("Access to unauthorized or invalid companies."))
-            return self['res.company'].browse(company_ids)
+            return self["res.company"].browse(company_ids)
         # By setting the default companies to all user companies instead of the main one
         # we save a lot of potential trouble in all "out of context" calls, such as
         # /mail/redirect or /web/image, etc. And it is not unsafe because the user does
@@ -673,7 +687,7 @@ class Environment(Mapping):
 
         :rtype: str
         """
-        return self.context.get('lang')
+        return self.context.get("lang")
 
     def clear(self):
         """ Clear all record caches, and discard all fields to recompute.
@@ -689,15 +703,9 @@ class Environment(Mapping):
         """ Context manager that clears the environments (caches and fields to
             recompute) upon exception.
         """
-        tocompute = {
-            field: set(ids)
-            for field, ids in self.all.tocompute.items()
-        }
+        tocompute = {field: set(ids) for field, ids in self.all.tocompute.items()}
         towrite = {
-            model: {
-                record_id: dict(values)
-                for record_id, values in id_values.items()
-            }
+            model: {record_id: dict(values) for record_id, values in id_values.items()}
             for model, id_values in self.all.towrite.items()
         }
         try:
@@ -785,13 +793,16 @@ class Environment(Mapping):
             return self._cache_key[field]
 
         except KeyError:
+
             def get(key, get_context=self.context.get):
-                if key == 'company':
+                if key == "company":
                     return self.company.id
-                elif key == 'uid':
+                elif key == "uid":
                     return (self.uid, self.su)
-                elif key == 'active_test':
-                    return get_context('active_test', field.context.get('active_test', True))
+                elif key == "active_test":
+                    return get_context(
+                        "active_test", field.context.get("active_test", True)
+                    )
                 else:
                     val = get_context(key)
                     if type(val) is list:
@@ -807,18 +818,21 @@ class Environment(Mapping):
                     else:
                         return val
 
-            result = tuple(get(key) for key in self.registry.field_depends_context[field])
+            result = tuple(
+                get(key) for key in self.registry.field_depends_context[field]
+            )
             self._cache_key[field] = result
             return result
 
 
 class Environments(object):
     """ A common object for all environments in a request. """
+
     def __init__(self):
-        self.envs = WeakSet()                   # weak set of environments
-        self.cache = Cache()                    # cache for all records
-        self.protected = StackMap()             # fields to protect {field: ids, ...}
-        self.tocompute = defaultdict(set)       # recomputations {field: ids}
+        self.envs = WeakSet()  # weak set of environments
+        self.cache = Cache()  # cache for all records
+        self.protected = StackMap()  # fields to protect {field: ids, ...}
+        self.tocompute = defaultdict(set)  # recomputations {field: ids}
         # updates {model: {id: {field: value}}}
         self.towrite = defaultdict(lambda: defaultdict(dict))
 
@@ -838,6 +852,7 @@ EMPTY_DICT = frozendict()
 
 class Cache(object):
     """ Implementation of the cache of records. """
+
     def __init__(self):
         # {field: {record_id: value}, field: {context_key: {record_id: value}}}
         self._data = defaultdict(dict)
@@ -925,7 +940,7 @@ class Cache(object):
     def get_fields(self, record):
         """ Return the fields with a value for ``record``. """
         for name, field in record._fields.items():
-            if name != 'id' and record.id in self._get_field_cache(record, field):
+            if name != "id" and record.id in self._get_field_cache(record, field):
                 yield field
 
     def get_records(self, model, field):
@@ -952,7 +967,9 @@ class Cache(object):
                 cache = self._data.get(field)
                 if not cache:
                     continue
-                caches = cache.values() if isinstance(next(iter(cache)), tuple) else [cache]
+                caches = (
+                    cache.values() if isinstance(next(iter(cache)), tuple) else [cache]
+                )
                 for field_cache in caches:
                     for id_ in ids:
                         field_cache.pop(id_, None)
@@ -960,7 +977,7 @@ class Cache(object):
     def check(self, env):
         """ Check the consistency of the cache for the given environment. """
         # flush fields to be recomputed before evaluating the cache
-        env['res.partner'].recompute()
+        env["res.partner"].recompute()
 
         # make a copy of the cache, and invalidate it
         dump = dict(self._data)
@@ -981,7 +998,7 @@ class Cache(object):
                     value = field.convert_to_record(cached, record)
                     fetched = record[field.name]
                     if fetched != value:
-                        info = {'cached': value, 'fetched': fetched}
+                        info = {"cached": value, "fetched": fetched}
                         invalids.append((record, field, info))
                 except (AccessError, MissingError):
                     pass
@@ -996,7 +1013,7 @@ class Cache(object):
                 check(model, field, field_dump)
 
         if invalids:
-            raise UserError('Invalid cache for fields\n' + pformat(invalids))
+            raise UserError("Invalid cache for fields\n" + pformat(invalids))
 
 
 # keep those imports here in order to handle cyclic dependencies correctly

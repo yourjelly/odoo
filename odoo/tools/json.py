@@ -5,25 +5,28 @@ import re
 import markupsafe
 
 JSON_SCRIPTSAFE_MAPPER = {
-    '&': r'\u0026',
-    '<': r'\u003c',
-    '>': r'\u003e',
-    '\u2028': r'\u2028',
-    '\u2029': r'\u2029'
+    "&": r"\u0026",
+    "<": r"\u003c",
+    ">": r"\u003e",
+    "\u2028": r"\u2028",
+    "\u2029": r"\u2029",
 }
+
+
 class _ScriptSafe(str):
     def __html__(self):
         # replacement can be done straight in the serialised JSON as the
         # problematic characters are not JSON metacharacters (and can thus
         # only occur in strings)
-        return markupsafe.Markup(re.sub(
-            r'[<>&\u2028\u2029]',
-            lambda m: JSON_SCRIPTSAFE_MAPPER[m[0]],
-            self,
-        ))
+        return markupsafe.Markup(
+            re.sub(r"[<>&\u2028\u2029]", lambda m: JSON_SCRIPTSAFE_MAPPER[m[0]], self,)
+        )
+
+
 class JSON:
     def loads(self, *args, **kwargs):
         return json_.loads(*args, **kwargs)
+
     def dumps(self, *args, **kwargs):
         """ JSON used as JS in HTML (script tags) is problematic: <script>
         tags are a special context which only waits for </script> but doesn't
@@ -52,4 +55,6 @@ class JSON:
         Cf https://code.djangoproject.com/ticket/17419#comment:27
         """
         return _ScriptSafe(json_.dumps(*args, **kwargs))
+
+
 scriptsafe = JSON()

@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 
 def _format_frame(frame):
     code = frame.f_code
-    return (code.co_filename, frame.f_lineno, code.co_name, '')
+    return (code.co_filename, frame.f_lineno, code.co_name, "")
 
 
 def _format_stack(stack):
@@ -55,8 +55,8 @@ def stack_size():
     return size
 
 
-def make_session(name=''):
-    return f'{datetime.datetime.now():%Y-%m-%d %H:%M:%S} {name}'
+def make_session(name=""):
+    return f"{datetime.datetime.now():%Y-%m-%d %H:%M:%S} {name}"
 
 
 class Collector:
@@ -70,8 +70,9 @@ class Collector:
     This is a generic implementation of a basic collector, to be inherited.
     It defines default behaviors for creating an entry in the collector.
     """
-    name = None                 # symbolic name of the collector
-    _registry = {}              # map collector names to their class
+
+    name = None  # symbolic name of the collector
+    _registry = {}  # map collector names to their class
 
     @classmethod
     def __init_subclass__(cls):
@@ -98,13 +99,17 @@ class Collector:
     def add(self, entry=None, frame=None):
         """ Add an entry (dict) to this collector. """
         # todo add entry count limit
-        self._entries.append({
-            'stack': self._get_stack_trace(frame),
-            # make a copy of the current context, because it will change
-            'exec_context': dict(getattr(self.profiler.init_thread, 'exec_context', ())),
-            'start': time.time(),
-            **(entry or {}),
-        })
+        self._entries.append(
+            {
+                "stack": self._get_stack_trace(frame),
+                # make a copy of the current context, because it will change
+                "exec_context": dict(
+                    getattr(self.profiler.init_thread, "exec_context", ())
+                ),
+                "start": time.time(),
+                **(entry or {}),
+            }
+        )
 
     def _get_stack_trace(self, frame=None):
         """ Return the stack trace to be included in a given entry. """
@@ -113,7 +118,7 @@ class Collector:
 
     def post_process(self):
         for entry in self._entries:
-            stack = entry.get('stack', [])
+            stack = entry.get("stack", [])
             self.profiler._add_file_lines(stack)
 
     @property
@@ -129,11 +134,12 @@ class SQLCollector(Collector):
     """
     Saves all executed queries in the current thread with the call stack.
     """
-    name = 'sql'
+
+    name = "sql"
 
     def start(self):
         init_thread = self.profiler.init_thread
-        if not hasattr(init_thread, 'query_hooks'):
+        if not hasattr(init_thread, "query_hooks"):
             init_thread.query_hooks = []
         init_thread.query_hooks.append(self.hook)
 
@@ -141,12 +147,14 @@ class SQLCollector(Collector):
         self.profiler.init_thread.query_hooks.remove(self.hook)
 
     def hook(self, cr, query, params, query_start, query_time):
-        self.add({
-            'query': str(query),
-            'full_query': str(cr._format(query, params)),
-            'start': query_start,
-            'time': query_time,
-        })
+        self.add(
+            {
+                "query": str(query),
+                "full_query": str(cr._format(query, params)),
+                "start": query_start,
+                "time": query_time,
+            }
+        )
 
 
 class PeriodicCollector(Collector):
@@ -155,7 +163,8 @@ class PeriodicCollector(Collector):
 
     :param interval (float): time to wait in seconds between two samples.
     """
-    name = 'traces_async'
+
+    name = "traces_async"
 
     def __init__(self, interval=0.01):  # check duration. dynamic?
         super().__init__()
@@ -169,10 +178,10 @@ class PeriodicCollector(Collector):
         while self.active:  # maybe add a check on parent_thread state?
             self.add()
             time.sleep(self.frame_interval)
-        self._entries.append({'stack': [], 'start': time.time()})  # add final end frame
+        self._entries.append({"stack": [], "start": time.time()})  # add final end frame
 
     def start(self):
-        interval = self.profiler.params.get('traces_async_interval')
+        interval = self.profiler.params.get("traces_async_interval")
         if interval:
             self.frame_interval = min(max(float(interval), 0.001), 1)
         self.thread.start()
@@ -197,22 +206,25 @@ class SyncCollector(Collector):
     Record complete execution synchronously.
     Note that --limit-memory-hard may need to be increased when launching Odoo.
     """
-    name = 'traces_sync'
+
+    name = "traces_sync"
 
     def start(self):
-        assert not self._processed, "You cannot start SyncCollector after accessing entries."
+        assert (
+            not self._processed
+        ), "You cannot start SyncCollector after accessing entries."
         sys.settrace(self.hook)  # todo test setprofile, but maybe not multithread safe
 
     def stop(self):
         sys.settrace(None)
 
     def hook(self, _frame, event, _arg=None):
-        if event == 'line':
+        if event == "line":
             return
-        entry = {'event': event, 'frame': _format_frame(_frame)}
-        if event == 'call' and _frame.f_back:
+        entry = {"event": event, "frame": _format_frame(_frame)}
+        if event == "call" and _frame.f_back:
             # we need the parent frame to determine the line number of the call
-            entry['parent_frame'] = _format_frame(_frame.f_back)
+            entry["parent_frame"] = _format_frame(_frame.f_back)
         self.add(entry, frame=_frame)
         return self.hook
 
@@ -230,15 +242,15 @@ class SyncCollector(Collector):
         # We could improve it by saving as evented and manage it later.
         stack = []
         for entry in self._entries:
-            frame = entry.pop('frame')
-            event = entry.pop('event')
-            if event == 'call':
+            frame = entry.pop("frame")
+            event = entry.pop("event")
+            if event == "call":
                 if stack:
-                    stack[-1] = entry.pop('parent_frame')
+                    stack[-1] = entry.pop("parent_frame")
                 stack.append(frame)
-            elif event == 'return':
+            elif event == "return":
                 stack.pop()
-            entry['stack'] = stack[:]
+            entry["stack"] = stack[:]
         super().post_process()
 
 
@@ -248,6 +260,7 @@ class ExecutionContext:
     This context stored by collector beside stack and is used by Speedscope
     to add a level to the stack with this information.
     """
+
     def __init__(self, **context):
         self.context = context
         self.stack_trace_level = None
@@ -255,7 +268,7 @@ class ExecutionContext:
     def __enter__(self):
         current_thread = threading.current_thread()
         self.stack_trace_level = stack_size()
-        if not hasattr(current_thread, 'exec_context'):
+        if not hasattr(current_thread, "exec_context"):
             current_thread.exec_context = {}
         current_thread.exec_context[self.stack_trace_level] = self.context
 
@@ -268,8 +281,16 @@ class Profiler:
     Context manager to use to start the recording of some execution.
     Will save sql and async stack trace by default.
     """
-    def __init__(self, collectors=None, db=..., profile_session=None,
-                 description=None, disable_gc=False, params=None):
+
+    def __init__(
+        self,
+        collectors=None,
+        db=...,
+        profile_session=None,
+        description=None,
+        disable_gc=False,
+        params=None,
+    ):
         """
         :param db: database name to use to save results.
             Will try to define database automatically by default.
@@ -293,15 +314,17 @@ class Profiler:
 
         if db is ...:
             # determine database from current thread
-            db = getattr(threading.current_thread(), 'dbname', None)
+            db = getattr(threading.current_thread(), "dbname", None)
             if not db:
                 # only raise if path is not given and db is not explicitely disabled
-                raise Exception('Database name cannot be defined automaticaly. \n Please provide a valid/falsy dbname or path parameter')
+                raise Exception(
+                    "Database name cannot be defined automaticaly. \n Please provide a valid/falsy dbname or path parameter"
+                )
         self.db = db
 
         # collectors
         if collectors is None:
-            collectors = ['sql', 'traces_async']
+            collectors = ["sql", "traces_async"]
         self.collectors = []
         for collector in collectors:
             if isinstance(collector, str):
@@ -320,7 +343,9 @@ class Profiler:
         if self.description is None:
             frame = self.init_frame
             code = frame.f_code
-            self.description = f"{frame.f_code.co_name} ({code.co_filename}:{frame.f_lineno})"
+            self.description = (
+                f"{frame.f_code.co_name} ({code.co_filename}:{frame.f_lineno})"
+            )
         if self.disable_gc and gc.isenabled():
             gc.disable()
         self.start_time = time.time()
@@ -337,13 +362,18 @@ class Profiler:
 
             if self.db:
                 # pylint: disable=import-outside-toplevel
-                from odoo.sql_db import db_connect  # only import from odoo if/when needed.
+                from odoo.sql_db import (
+                    db_connect,
+                )  # only import from odoo if/when needed.
+
                 with db_connect(self.db).cursor() as cr:
                     values = {
                         "name": self.description,
                         "session": self.profile_session,
                         "create_date": datetime.datetime.now(),
-                        "init_stack_trace": json.dumps(_format_stack(self.init_stack_trace)),
+                        "init_stack_trace": json.dumps(
+                            _format_stack(self.init_stack_trace)
+                        ),
                         "duration": self.duration,
                         "entry_count": self.entry_count(),
                     }
@@ -356,7 +386,9 @@ class Profiler:
                     )
                     cr.execute(query, [tuple(values.values())])
                     profile_id = cr.fetchone()[0]
-                    _logger.info('ir_profile %s (%s) created', profile_id, self.profile_session)
+                    _logger.info(
+                        "ir_profile %s (%s) created", profile_id, self.profile_session
+                    )
         finally:
             if self.disable_gc:
                 gc.enable()
@@ -364,16 +396,19 @@ class Profiler:
     def _add_file_lines(self, stack):
         for index, frame in enumerate(stack):
             (filename, lineno, name, line) = frame
-            if line != '':
+            if line != "":
                 continue
             # retrieve file lines from the filecache
             try:
                 filelines = self.filecache[filename]
             except KeyError:
                 try:
-                    with tools.file_open(filename, filter_ext=('.py',)) as f:
+                    with tools.file_open(filename, filter_ext=(".py",)) as f:
                         filelines = f.readlines()
-                except (ValueError, FileNotFoundError):  # mainly for <decorator> "filename"
+                except (
+                    ValueError,
+                    FileNotFoundError,
+                ):  # mainly for <decorator> "filename"
                     filelines = None
                 self.filecache[filename] = filelines
             # fill in the line
@@ -393,7 +428,7 @@ class Profiler:
         return path.format(
             time=datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
             len=self.entry_count(),
-            desc=re.sub("[^0-9a-zA-Z-]+", "_", self.description)
+            desc=re.sub("[^0-9a-zA-Z-]+", "_", self.description),
         )
 
     def json(self):
@@ -408,14 +443,19 @@ class Profiler:
             with open(filename, 'w') as f:
                 f.write(profiler.json())
         """
-        return json.dumps({
-            "name": self.description,
-            "session": self.profile_session,
-            "create_date": datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
-            "init_stack_trace": _format_stack(self.init_stack_trace),
-            "duration": self.duration,
-            "collectors": {collector.name: collector.entries for collector in self.collectors},
-        }, indent=4)
+        return json.dumps(
+            {
+                "name": self.description,
+                "session": self.profile_session,
+                "create_date": datetime.datetime.now().strftime("%Y%m%d-%H%M%S"),
+                "init_stack_trace": _format_stack(self.init_stack_trace),
+                "duration": self.duration,
+                "collectors": {
+                    collector.name: collector.entries for collector in self.collectors
+                },
+            },
+            indent=4,
+        )
 
 
 class Nested:
@@ -429,6 +469,7 @@ class Nested:
     be ignored, too. This is also why Nested() does not use
     contextlib.contextmanager.
     """
+
     def __init__(self, profiler, context_manager):
         self.profiler = profiler
         self.context_manager = context_manager

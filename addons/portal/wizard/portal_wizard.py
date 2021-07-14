@@ -18,30 +18,44 @@ class PortalWizard(models.TransientModel):
         A wizard to manage the creation/removal of portal users.
     """
 
-    _name = 'portal.wizard'
-    _description = 'Grant Portal Access'
+    _name = "portal.wizard"
+    _description = "Grant Portal Access"
 
     def _default_partner_ids(self):
-        partner_ids = self.env.context.get('default_partner_ids', []) or self.env.context.get('active_ids', [])
+        partner_ids = self.env.context.get(
+            "default_partner_ids", []
+        ) or self.env.context.get("active_ids", [])
         contact_ids = set()
-        for partner in self.env['res.partner'].sudo().browse(partner_ids):
-            contact_partners = partner.child_ids.filtered(lambda p: p.type in ('contact', 'other')) | partner
+        for partner in self.env["res.partner"].sudo().browse(partner_ids):
+            contact_partners = (
+                partner.child_ids.filtered(lambda p: p.type in ("contact", "other"))
+                | partner
+            )
             contact_ids |= set(contact_partners.ids)
 
         return [Command.link(contact_id) for contact_id in contact_ids]
 
-    partner_ids = fields.Many2many('res.partner', string='Partners', default=_default_partner_ids)
-    user_ids = fields.One2many('portal.wizard.user', 'wizard_id', string='Users', compute='_compute_user_ids', store=True, readonly=False)
-    welcome_message = fields.Text('Invitation Message', help="This text is included in the email sent to new users of the portal.")
+    partner_ids = fields.Many2many(
+        "res.partner", string="Partners", default=_default_partner_ids
+    )
+    user_ids = fields.One2many(
+        "portal.wizard.user",
+        "wizard_id",
+        string="Users",
+        compute="_compute_user_ids",
+        store=True,
+        readonly=False,
+    )
+    welcome_message = fields.Text(
+        "Invitation Message",
+        help="This text is included in the email sent to new users of the portal.",
+    )
 
-    @api.depends('partner_ids')
+    @api.depends("partner_ids")
     def _compute_user_ids(self):
         for portal_wizard in self:
             portal_wizard.user_ids = [
-                Command.create({
-                    'partner_id': partner.id,
-                    'email': partner.email,
-                })
+                Command.create({"partner_id": partner.id, "email": partner.email,})
                 for partner in portal_wizard.partner_ids
             ]
 
@@ -63,13 +77,13 @@ class PortalWizard(models.TransientModel):
         """Allow to keep the wizard modal open after executing the action."""
         self.refresh()
         return {
-            'name': _('Portal Access Management'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'portal.wizard',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_id': self.id,
-            'target': 'new',
+            "name": _("Portal Access Management"),
+            "type": "ir.actions.act_window",
+            "res_model": "portal.wizard",
+            "view_type": "form",
+            "view_mode": "form",
+            "res_id": self.id,
+            "target": "new",
         }
 
 
@@ -78,33 +92,47 @@ class PortalWizardUser(models.TransientModel):
         A model to configure users in the portal wizard.
     """
 
-    _name = 'portal.wizard.user'
-    _description = 'Portal User Config'
+    _name = "portal.wizard.user"
+    _description = "Portal User Config"
 
-    wizard_id = fields.Many2one('portal.wizard', string='Wizard', required=True, ondelete='cascade')
-    partner_id = fields.Many2one('res.partner', string='Contact', required=True, readonly=True, ondelete='cascade')
-    email = fields.Char('Email')
+    wizard_id = fields.Many2one(
+        "portal.wizard", string="Wizard", required=True, ondelete="cascade"
+    )
+    partner_id = fields.Many2one(
+        "res.partner",
+        string="Contact",
+        required=True,
+        readonly=True,
+        ondelete="cascade",
+    )
+    email = fields.Char("Email")
 
-    user_id = fields.Many2one('res.users', string='User', compute='_compute_user_id', compute_sudo=True)
-    login_date = fields.Datetime(related='user_id.login_date', string='Latest Authentication')
-    is_portal = fields.Boolean('Is Portal', compute='_compute_group_details')
-    is_internal = fields.Boolean('Is Internal', compute='_compute_group_details')
+    user_id = fields.Many2one(
+        "res.users", string="User", compute="_compute_user_id", compute_sudo=True
+    )
+    login_date = fields.Datetime(
+        related="user_id.login_date", string="Latest Authentication"
+    )
+    is_portal = fields.Boolean("Is Portal", compute="_compute_group_details")
+    is_internal = fields.Boolean("Is Internal", compute="_compute_group_details")
 
-    @api.depends('partner_id')
+    @api.depends("partner_id")
     def _compute_user_id(self):
         for portal_wizard_user in self:
-            user = portal_wizard_user.partner_id.with_context(active_test=False).user_ids
+            user = portal_wizard_user.partner_id.with_context(
+                active_test=False
+            ).user_ids
             portal_wizard_user.user_id = user[0] if user else False
 
-    @api.depends('user_id', 'user_id.groups_id')
+    @api.depends("user_id", "user_id.groups_id")
     def _compute_group_details(self):
         for portal_wizard_user in self:
             user = portal_wizard_user.user_id
 
-            if user and user.has_group('base.group_user'):
+            if user and user.has_group("base.group_user"):
                 portal_wizard_user.is_internal = True
                 portal_wizard_user.is_portal = False
-            elif user and user.has_group('base.group_portal'):
+            elif user and user.has_group("base.group_portal"):
                 portal_wizard_user.is_internal = False
                 portal_wizard_user.is_portal = True
             else:
@@ -123,14 +151,19 @@ class PortalWizardUser(models.TransientModel):
         self._assert_user_email_uniqueness()
 
         if self.is_portal or self.is_internal:
-            raise UserError(_('The partner "%s" already has the portal access.', self.partner_id.name))
+            raise UserError(
+                _(
+                    'The partner "%s" already has the portal access.',
+                    self.partner_id.name,
+                )
+            )
 
-        group_portal = self.env.ref('base.group_portal')
-        group_public = self.env.ref('base.group_public')
+        group_portal = self.env.ref("base.group_portal")
+        group_public = self.env.ref("base.group_public")
 
         # update partner email, if a new one was introduced
         if self.partner_id.email != self.email:
-            self.partner_id.write({'email': self.email})
+            self.partner_id.write({"email": self.email})
 
         user_sudo = self.user_id.sudo()
 
@@ -140,7 +173,12 @@ class PortalWizardUser(models.TransientModel):
             user_sudo = self.sudo().with_company(company.id)._create_user()
 
         if not user_sudo.active or not self.is_portal:
-            user_sudo.write({'active': True, 'groups_id': [(4, group_portal.id), (3, group_public.id)]})
+            user_sudo.write(
+                {
+                    "active": True,
+                    "groups_id": [(4, group_portal.id), (3, group_public.id)],
+                }
+            )
             # prepare for the signup process
             user_sudo.partner_id.signup_prepare()
 
@@ -157,14 +195,16 @@ class PortalWizardUser(models.TransientModel):
         self._assert_user_email_uniqueness()
 
         if not self.is_portal:
-            raise UserError(_('The partner "%s" has no portal access.', self.partner_id.name))
+            raise UserError(
+                _('The partner "%s" has no portal access.', self.partner_id.name)
+            )
 
-        group_portal = self.env.ref('base.group_portal')
-        group_public = self.env.ref('base.group_public')
+        group_portal = self.env.ref("base.group_portal")
+        group_public = self.env.ref("base.group_public")
 
         # update partner email, if a new one was introduced
         if self.partner_id.email != self.email:
-            self.partner_id.write({'email': self.email})
+            self.partner_id.write({"email": self.email})
 
         # Remove the sign up token, so it can not be used
         self.partner_id.sudo().signup_token = False
@@ -172,12 +212,19 @@ class PortalWizardUser(models.TransientModel):
         user_sudo = self.user_id.sudo()
 
         # remove the user from the portal group
-        if user_sudo and user_sudo.has_group('base.group_portal'):
+        if user_sudo and user_sudo.has_group("base.group_portal"):
             # if user belongs to portal only, deactivate it
             if len(user_sudo.groups_id) <= 1:
-                user_sudo.write({'groups_id': [(3, group_portal.id), (4, group_public.id)], 'active': False})
+                user_sudo.write(
+                    {
+                        "groups_id": [(3, group_portal.id), (4, group_public.id)],
+                        "active": False,
+                    }
+                )
             else:
-                user_sudo.write({'groups_id': [(3, group_portal.id), (4, group_public.id)]})
+                user_sudo.write(
+                    {"groups_id": [(3, group_portal.id), (4, group_public.id)]}
+                )
 
         return self.wizard_id._action_open_modal()
 
@@ -186,11 +233,16 @@ class PortalWizardUser(models.TransientModel):
         self.ensure_one()
 
         if not self.is_portal:
-            raise UserError(_('You should first grant the portal access to the partner "%s".', self.partner_id.name))
+            raise UserError(
+                _(
+                    'You should first grant the portal access to the partner "%s".',
+                    self.partner_id.name,
+                )
+            )
 
         # update partner email, if a new one was introduced
         if self.partner_id.email != self.email:
-            self.partner_id.write({'email': self.email})
+            self.partner_id.write({"email": self.email})
 
         self.with_context(active_test=True)._send_email()
 
@@ -200,30 +252,44 @@ class PortalWizardUser(models.TransientModel):
         """ create a new user for wizard_user.partner_id
             :returns record of res.users
         """
-        return self.env['res.users'].with_context(no_reset_password=True)._create_user_from_template({
-            'email': email_normalize(self.email),
-            'login': email_normalize(self.email),
-            'partner_id': self.partner_id.id,
-            'company_id': self.env.company.id,
-            'company_ids': [(6, 0, self.env.company.ids)],
-        })
+        return (
+            self.env["res.users"]
+            .with_context(no_reset_password=True)
+            ._create_user_from_template(
+                {
+                    "email": email_normalize(self.email),
+                    "login": email_normalize(self.email),
+                    "partner_id": self.partner_id.id,
+                    "company_id": self.env.company.id,
+                    "company_ids": [(6, 0, self.env.company.ids)],
+                }
+            )
+        )
 
     def _send_email(self):
         """ send notification email to a new portal user """
         self.ensure_one()
 
         # determine subject and body in the portal user's language
-        template = self.env.ref('portal.mail_template_data_portal_welcome')
+        template = self.env.ref("portal.mail_template_data_portal_welcome")
         if not template:
-            raise UserError(_('The template "Portal: new user" not found for sending email to the portal user.'))
+            raise UserError(
+                _(
+                    'The template "Portal: new user" not found for sending email to the portal user.'
+                )
+            )
 
         lang = self.user_id.sudo().lang
         partner = self.user_id.sudo().partner_id
 
-        portal_url = partner.with_context(signup_force_type_in_url='', lang=lang)._get_signup_url_for_action()[partner.id]
+        portal_url = partner.with_context(
+            signup_force_type_in_url="", lang=lang
+        )._get_signup_url_for_action()[partner.id]
         partner.signup_prepare()
 
-        template.with_context(dbname=self._cr.dbname, portal_url=portal_url, lang=lang).send_mail(self.id, force_send=True)
+        template.with_context(
+            dbname=self._cr.dbname, portal_url=portal_url, lang=lang
+        ).send_mail(self.id, force_send=True)
 
         return True
 
@@ -234,12 +300,22 @@ class PortalWizardUser(models.TransientModel):
         email = email_normalize(self.email)
 
         if not email:
-            raise UserError(_('The contact "%s" does not have a valid email.', self.partner_id.name))
+            raise UserError(
+                _('The contact "%s" does not have a valid email.', self.partner_id.name)
+            )
 
-        user = self.env['res.users'].sudo().with_context(active_test=False).search([
-            ('id', '!=', self.user_id.id),
-            ('login', '=ilike', email),
-        ])
+        user = (
+            self.env["res.users"]
+            .sudo()
+            .with_context(active_test=False)
+            .search([("id", "!=", self.user_id.id), ("login", "=ilike", email),])
+        )
 
         if user:
-            raise UserError(_('The contact "%s" has the same email has an existing user (%s).', self.partner_id.name, user.name))
+            raise UserError(
+                _(
+                    'The contact "%s" has the same email has an existing user (%s).',
+                    self.partner_id.name,
+                    user.name,
+                )
+            )

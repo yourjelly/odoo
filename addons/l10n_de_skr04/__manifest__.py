@@ -31,29 +31,27 @@
 
 
 {
-    'name': 'Germany SKR04 - Accounting',
-    'icon': '/l10n_de/static/description/icon.png',
-    'version': '3.0',
-    'author': 'openbig.org',
-    'website': 'http://www.openbig.org',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Germany SKR04 - Accounting",
+    "icon": "/l10n_de/static/description/icon.png",
+    "version": "3.0",
+    "author": "openbig.org",
+    "website": "http://www.openbig.org",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 Dieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR04.
 ==============================================================================
 
 German accounting chart and localization.
     """,
-    'depends': ['l10n_de'],
-    'data': [
-        'data/l10n_de_skr04_chart_data.xml',
-        'data/account.account.template.csv',
-        'data/l10n_de_skr04_chart_post_data.xml',
-        'data/account_data.xml',
-        'data/account_tax_fiscal_position_data.xml',
-        'data/account_reconcile_model_template.xml',
-        'data/account_chart_template_data.xml',
+    "depends": ["l10n_de"],
+    "data": [
+        "data/l10n_de_skr04_chart_data.xml",
+        "data/account.account.template.csv",
+        "data/l10n_de_skr04_chart_post_data.xml",
+        "data/account_data.xml",
+        "data/account_tax_fiscal_position_data.xml",
+        "data/account_reconcile_model_template.xml",
+        "data/account_chart_template_data.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

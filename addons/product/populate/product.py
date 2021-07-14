@@ -15,7 +15,7 @@ class ProductCategory(models.Model):
     _populate_sizes = {"small": 50, "medium": 500, "large": 5_000}
 
     def _populate_factories(self):
-        return [("name", populate.constant('PC_{counter}'))]
+        return [("name", populate.constant("PC_{counter}"))]
 
     def _populate(self, size):
         categories = super()._populate(size)
@@ -24,24 +24,27 @@ class ProductCategory(models.Model):
         return categories
 
     def _populate_set_parents(self, categories, size):
-        _logger.info('Set parent/child relation of product categories')
+        _logger.info("Set parent/child relation of product categories")
         parent_ids = []
-        rand = populate.Random('product.category+parent_generator')
+        rand = populate.Random("product.category+parent_generator")
 
         for category in categories:
             if rand.random() < 0.25:
                 parent_ids.append(category.id)
 
-        categories -= self.browse(parent_ids)  # Avoid recursion in parent-child relations.
-        parent_childs = collections.defaultdict(lambda: self.env['product.category'])
+        categories -= self.browse(
+            parent_ids
+        )  # Avoid recursion in parent-child relations.
+        parent_childs = collections.defaultdict(lambda: self.env["product.category"])
         for category in categories:
             if rand.random() < 0.25:  # 1/4 of remaining categories have a parent.
                 parent_childs[rand.choice(parent_ids)] |= category
 
         for count, (parent, children) in enumerate(parent_childs.items()):
             if (count + 1) % 1000 == 0:
-                _logger.info('Setting parent: %s/%s', count + 1, len(parent_childs))
-            children.write({'parent_id': parent})
+                _logger.info("Setting parent: %s/%s", count + 1, len(parent_childs))
+            children.write({"parent_id": parent})
+
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
@@ -71,29 +74,37 @@ class ProductProduct(models.Model):
 
     def _populate_factories(self):
         return [
-            ("name", populate.constant('product_product_name_{counter}')),
-            ("description", populate.constant('product_product_description_{counter}')),
-            ("default_code", populate.constant('PP-{counter}')),
-            ("barcode", populate.constant('BARCODE-PP-{counter}')),
+            ("name", populate.constant("product_product_name_{counter}")),
+            ("description", populate.constant("product_product_description_{counter}")),
+            ("default_code", populate.constant("PP-{counter}")),
+            ("barcode", populate.constant("BARCODE-PP-{counter}")),
         ] + self._populate_get_product_factories()
 
 
 class SupplierInfo(models.Model):
-    _inherit = 'product.supplierinfo'
+    _inherit = "product.supplierinfo"
 
-    _populate_sizes = {'small': 450, 'medium': 15_000, 'large': 180_000}
-    _populate_dependencies = ['res.partner', 'product.product', 'product.template']
+    _populate_sizes = {"small": 450, "medium": 15_000, "large": 180_000}
+    _populate_dependencies = ["res.partner", "product.product", "product.template"]
 
     def _populate_factories(self):
-        random = populate.Random('product_with_supplierinfo')
-        company_ids = self.env.registry.populated_models['res.company'][:COMPANY_NB_WITH_STOCK] + [False]
-        partner_ids = self.env.registry.populated_models['res.partner']
-        product_templates_ids = self.env['product.product'].browse(self.env.registry.populated_models['product.product']).product_tmpl_id.ids
-        product_templates_ids += self.env.registry.populated_models['product.template']
-        product_templates_ids = random.sample(product_templates_ids, int(len(product_templates_ids) * 0.95))
+        random = populate.Random("product_with_supplierinfo")
+        company_ids = self.env.registry.populated_models["res.company"][
+            :COMPANY_NB_WITH_STOCK
+        ] + [False]
+        partner_ids = self.env.registry.populated_models["res.partner"]
+        product_templates_ids = (
+            self.env["product.product"]
+            .browse(self.env.registry.populated_models["product.product"])
+            .product_tmpl_id.ids
+        )
+        product_templates_ids += self.env.registry.populated_models["product.template"]
+        product_templates_ids = random.sample(
+            product_templates_ids, int(len(product_templates_ids) * 0.95)
+        )
 
         def get_company_id(values, counter, random):
-            partner = self.env['res.partner'].browse(values['name'])
+            partner = self.env["res.partner"].browse(values["name"])
             if partner.company_id:
                 return partner.company_id.id
             return random.choice(company_ids)
@@ -105,12 +116,12 @@ class SupplierInfo(models.Model):
             return random.randint(1, 10)
 
         return [
-            ('name', populate.randomize(partner_ids)),
-            ('company_id', populate.compute(get_company_id)),
-            ('product_tmpl_id', populate.iterate(product_templates_ids)),
-            ('product_name', populate.constant("SI-{counter}")),
-            ('sequence', populate.randint(1, 10)),
-            ('min_qty', populate.randint(0, 10)),
-            ('price', populate.randint(10, 100)),
-            ('delay', populate.compute(get_delay)),
+            ("name", populate.randomize(partner_ids)),
+            ("company_id", populate.compute(get_company_id)),
+            ("product_tmpl_id", populate.iterate(product_templates_ids)),
+            ("product_name", populate.constant("SI-{counter}")),
+            ("sequence", populate.randint(1, 10)),
+            ("min_qty", populate.randint(0, 10)),
+            ("price", populate.randint(10, 100)),
+            ("delay", populate.compute(get_delay)),
         ]

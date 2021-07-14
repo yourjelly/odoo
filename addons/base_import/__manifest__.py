@@ -1,6 +1,6 @@
 {
-    'name': 'Base import',
-    'description': """
+    "name": "Base import",
+    "description": """
 New extensible file import for Odoo
 ======================================
 
@@ -21,27 +21,21 @@ Re-implement Odoo's file import system:
 * In a module, so that administrators and users of Odoo who do not
   need or want an online import can avoid it being available to users.
 """,
-    'depends': ['web'],
-    'version': '2.0',
-    'category': 'Hidden/Tools',
-    'installable': True,
-    'auto_install': True,
-    'data': [
-        'security/ir.model.access.csv',
-    ],
-    'assets': {
-        'web.assets_qweb': [
-            'base_import/static/src/xml/**/*',
+    "depends": ["web"],
+    "version": "2.0",
+    "category": "Hidden/Tools",
+    "installable": True,
+    "auto_install": True,
+    "data": ["security/ir.model.access.csv",],
+    "assets": {
+        "web.assets_qweb": ["base_import/static/src/xml/**/*",],
+        "web.assets_backend": [
+            "base_import/static/src/scss/base_import.scss",
+            "base_import/static/src/scss/icons.scss",
+            "base_import/static/lib/javascript-state-machine/state-machine.js",
+            "base_import/static/src/js/import_action.js",
+            "base_import/static/src/js/import_menu.js",
         ],
-        'web.assets_backend': [
-            'base_import/static/src/scss/base_import.scss',
-            'base_import/static/src/scss/icons.scss',
-            'base_import/static/lib/javascript-state-machine/state-machine.js',
-            'base_import/static/src/js/import_action.js',
-            'base_import/static/src/js/import_menu.js',
-        ],
-        'web.qunit_suite_tests': [
-            'base_import/static/tests/**/*',
-        ],
+        "web.qunit_suite_tests": ["base_import/static/tests/**/*",],
     },
 }

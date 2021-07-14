@@ -8,9 +8,8 @@ from odoo.tests import tagged
 from odoo.tests.common import HttpCase
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestWebsiteResetPassword(HttpCase):
-
     def test_01_website_reset_password_tour(self):
         """The goal of this test is to make sure the reset password works."""
 
@@ -27,14 +26,14 @@ class TestWebsiteResetPassword(HttpCase):
             kwargs.update(force_send=False)
             return original_send_mail(*args, **kwargs)
 
-        with patch.object(MailMail, 'unlink', lambda self: None), patch.object(MailTemplate, 'send_mail', my_send_mail):
-            user = self.env['res.users'].create({
-                'login': 'test',
-                'name': 'The King',
-                'email': 'noop@example.com',
-            })
-            website_1 = self.env['website'].browse(1)
-            website_2 = self.env['website'].browse(2)
+        with patch.object(MailMail, "unlink", lambda self: None), patch.object(
+            MailTemplate, "send_mail", my_send_mail
+        ):
+            user = self.env["res.users"].create(
+                {"login": "test", "name": "The King", "email": "noop@example.com",}
+            )
+            website_1 = self.env["website"].browse(1)
+            website_2 = self.env["website"].browse(2)
 
             website_1.domain = "my-test-domain.com"
             website_2.domain = "https://domain-not-used.fr"
@@ -56,7 +55,7 @@ class TestWebsiteResetPassword(HttpCase):
             user.action_reset_password()
             user.invalidate_cache()
 
-            self.start_tour(user.signup_url, 'website_reset_password', login=None)
+            self.start_tour(user.signup_url, "website_reset_password", login=None)
 
     def test_02_multi_user_login(self):
         # In case Specific User Account is activated on a website, the same login can be used for
@@ -66,10 +65,20 @@ class TestWebsiteResetPassword(HttpCase):
 
         # Use AAA and ZZZ as names since res.users are ordered by 'login, name'
         user1 = self.env["res.users"].create(
-            {"website_id": False, "login": "bobo@mail.com", "name": "AAA", "password": "bobo@mail.com"}
+            {
+                "website_id": False,
+                "login": "bobo@mail.com",
+                "name": "AAA",
+                "password": "bobo@mail.com",
+            }
         )
         user2 = self.env["res.users"].create(
-            {"website_id": website.id, "login": "bobo@mail.com", "name": "ZZZ", "password": "bobo@mail.com"}
+            {
+                "website_id": website.id,
+                "login": "bobo@mail.com",
+                "name": "ZZZ",
+                "password": "bobo@mail.com",
+            }
         )
 
         # The most specific user should be selected

@@ -9,8 +9,7 @@ from odoo.addons.payment.controllers import portal as payment_portal
 
 
 class PaymentPortal(payment_portal.PaymentPortal):
-
-    @route('/invoice/transaction/<int:invoice_id>', type='json', auth='public')
+    @route("/invoice/transaction/<int:invoice_id>", type="json", auth="public")
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
         """ Create a draft transaction and return its processing values.
 
@@ -23,16 +22,20 @@ class PaymentPortal(payment_portal.PaymentPortal):
         """
         # Check the invoice id and the access token
         try:
-            self._document_check_access('account.move', invoice_id, access_token)
+            self._document_check_access("account.move", invoice_id, access_token)
         except MissingError as error:
             raise error
         except AccessError:
             raise ValidationError("The access token is invalid.")
 
-        kwargs['reference_prefix'] = None  # Allow the reference to be computed based on the invoice
-        kwargs.pop('custom_create_values', None)  # Don't allow passing arbitrary create values
+        kwargs[
+            "reference_prefix"
+        ] = None  # Allow the reference to be computed based on the invoice
+        kwargs.pop(
+            "custom_create_values", None
+        )  # Don't allow passing arbitrary create values
         tx_sudo = self._create_transaction(
-            custom_create_values={'invoice_ids': [Command.set([invoice_id])]}, **kwargs,
+            custom_create_values={"invoice_ids": [Command.set([invoice_id])]}, **kwargs,
         )
 
         return tx_sudo._get_processing_values()

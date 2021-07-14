@@ -5,8 +5,7 @@ from odoo.http import request
 
 
 class PaymentTestController(http.Controller):
-
-    @http.route('/payment/test/simulate_payment', type='json', auth='public')
+    @http.route("/payment/test/simulate_payment", type="json", auth="public")
     def test_simulate_payment(self, reference, customer_input):
         """ Simulate the response of a payment request.
 
@@ -15,7 +14,9 @@ class PaymentTestController(http.Controller):
         :return: None
         """
         fake_api_response = {
-            'reference': reference,
-            'cc_summary': customer_input[-4:],
+            "reference": reference,
+            "cc_summary": customer_input[-4:],
         }
-        request.env['payment.transaction'].sudo()._handle_feedback_data('test', fake_api_response)
+        request.env["payment.transaction"].sudo()._handle_feedback_data(
+            "test", fake_api_response
+        )

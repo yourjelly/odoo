@@ -11,13 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class Http(models.AbstractModel):
-    _inherit = 'ir.http'
+    _inherit = "ir.http"
 
     def session_info(self):
         session_info = super().session_info()
-        public_key = self.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')
+        public_key = (
+            self.env["ir.config_parameter"].sudo().get_param("recaptcha_public_key")
+        )
         if public_key:
-            session_info['recaptcha_public_key'] = public_key
+            session_info["recaptcha_public_key"] = public_key
         return session_info
 
     @api.model
@@ -27,17 +29,19 @@ class Http(models.AbstractModel):
             is considered inactive and this method will return True.
         """
         ip_addr = request.httprequest.remote_addr
-        token = request.params.pop('recaptcha_token_response', False)
-        recaptcha_result = request.env['ir.http']._verify_recaptcha_token(ip_addr, token, action)
-        if recaptcha_result in ['is_human', 'no_secret']:
+        token = request.params.pop("recaptcha_token_response", False)
+        recaptcha_result = request.env["ir.http"]._verify_recaptcha_token(
+            ip_addr, token, action
+        )
+        if recaptcha_result in ["is_human", "no_secret"]:
             return True
-        if recaptcha_result == 'wrong_secret':
+        if recaptcha_result == "wrong_secret":
             raise ValidationError(_("The reCaptcha private key is invalid."))
-        elif recaptcha_result == 'wrong_token':
+        elif recaptcha_result == "wrong_token":
             raise ValidationError(_("The reCaptcha token is invalid."))
-        elif recaptcha_result == 'timeout':
+        elif recaptcha_result == "timeout":
             raise UserError(_("Your request has timed out, please retry."))
-        elif recaptcha_result == 'bad_request':
+        elif recaptcha_result == "bad_request":
             raise UserError(_("The request is invalid or malformed."))
         else:
             return False
@@ -59,45 +63,69 @@ class Http(models.AbstractModel):
                      bad_request: The request is invalid or malformed.
             :rtype: str
         """
-        private_key = request.env['ir.config_parameter'].sudo().get_param('recaptcha_private_key')
+        private_key = (
+            request.env["ir.config_parameter"].sudo().get_param("recaptcha_private_key")
+        )
         if not private_key:
-            return 'no_secret'
-        min_score = request.env['ir.config_parameter'].sudo().get_param('recaptcha_min_score')
+            return "no_secret"
+        min_score = (
+            request.env["ir.config_parameter"].sudo().get_param("recaptcha_min_score")
+        )
         try:
-            r = requests.post('https://www.recaptcha.net/recaptcha/api/siteverify', {
-                'secret': private_key,
-                'response': token,
-                'remoteip': ip_addr,
-            }, timeout=2)  # it takes ~50ms to retrieve the response
+            r = requests.post(
+                "https://www.recaptcha.net/recaptcha/api/siteverify",
+                {"secret": private_key, "response": token, "remoteip": ip_addr,},
+                timeout=2,
+            )  # it takes ~50ms to retrieve the response
             result = r.json()
-            res_success = result['success']
-            res_action = res_success and action and result['action']
+            res_success = result["success"]
+            res_action = res_success and action and result["action"]
         except requests.exceptions.Timeout:
-            logger.error("Trial captcha verification timeout for ip address %s", ip_addr)
-            return 'timeout'
+            logger.error(
+                "Trial captcha verification timeout for ip address %s", ip_addr
+            )
+            return "timeout"
         except Exception:
             logger.error("Trial captcha verification bad request response")
-            return 'bad_request'
+            return "bad_request"
 
         if res_success:
-            score = result.get('score', False)
+            score = result.get("score", False)
             if score < float(min_score):
-                logger.warning("Trial captcha verification for ip address %s failed with score %f.", ip_addr, score)
-                return 'is_bot'
+                logger.warning(
+                    "Trial captcha verification for ip address %s failed with score %f.",
+                    ip_addr,
+                    score,
+                )
+                return "is_bot"
             if res_action and res_action != action:
-                logger.warning("Trial captcha verification for ip address %s failed with action %f, expected: %s.", ip_addr, score, action)
-                return 'wrong_action'
-            logger.info("Trial captcha verification for ip address %s succeeded with score %f.", ip_addr, score)
-            return 'is_human'
-        errors = result.get('error-codes', [])
-        logger.warning("Trial captcha verification for ip address %s failed error codes %r. token was: [%s]", ip_addr, errors, token)
+                logger.warning(
+                    "Trial captcha verification for ip address %s failed with action %f, expected: %s.",
+                    ip_addr,
+                    score,
+                    action,
+                )
+                return "wrong_action"
+            logger.info(
+                "Trial captcha verification for ip address %s succeeded with score %f.",
+                ip_addr,
+                score,
+            )
+            return "is_human"
+        errors = result.get("error-codes", [])
+        logger.warning(
+            "Trial captcha verification for ip address %s failed error codes %r. token was: [%s]",
+            ip_addr,
+            errors,
+            token,
+        )
         for error in errors:
-            if error in ['missing-input-secret', 'invalid-input-secret']:
-                return 'wrong_secret'
-            if error in ['missing-input-response', 'invalid-input-response']:
-                return 'wrong_token'
-            if error == 'timeout-or-duplicate':
-                return 'timeout'
-            if error == 'bad-request':
-                return 'bad_request'
-        return 'is_bot'
+            if error in ["missing-input-secret", "invalid-input-secret"]:
+                return "wrong_secret"
+            if error in ["missing-input-response", "invalid-input-response"]:
+                return "wrong_token"
+            if error == "timeout-or-duplicate":
+                return "timeout"
+            if error == "bad-request":
+                return "bad_request"
+        return "is_bot"

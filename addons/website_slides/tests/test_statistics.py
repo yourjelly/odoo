@@ -13,14 +13,19 @@ from odoo.tests.common import users
 from odoo.tools import mute_logger, float_compare
 
 
-@tagged('functional')
+@tagged("functional")
 class TestChannelStatistics(common.SlidesCase):
-
-    @mute_logger('odoo.models')
+    @mute_logger("odoo.models")
     def test_channel_new_content(self):
-        (self.slide | self.slide_2).write({'date_published': fields.Datetime.now() + relativedelta(days=-6)})
-        self.slide_3.write({'date_published': fields.Datetime.now() + relativedelta(days=-8)})
-        self.assertTrue(all(slide.is_new_slide for slide in (self.slide | self.slide_2)))
+        (self.slide | self.slide_2).write(
+            {"date_published": fields.Datetime.now() + relativedelta(days=-6)}
+        )
+        self.slide_3.write(
+            {"date_published": fields.Datetime.now() + relativedelta(days=-8)}
+        )
+        self.assertTrue(
+            all(slide.is_new_slide for slide in (self.slide | self.slide_2))
+        )
         self.assertFalse(self.slide_3.is_new_slide)
 
         channel_aspublisher = self.channel.with_user(self.user_officer)
@@ -32,36 +37,78 @@ class TestChannelStatistics(common.SlidesCase):
         channel_asportal = self.channel.with_user(self.user_portal)
         self.assertTrue(channel_asportal.partner_has_new_content)
 
-        (self.slide | self.slide_2).write({'date_published': fields.Datetime.now() + relativedelta(days=-8)})
-        channel_asportal.invalidate_cache(['partner_has_new_content'])
+        (self.slide | self.slide_2).write(
+            {"date_published": fields.Datetime.now() + relativedelta(days=-8)}
+        )
+        channel_asportal.invalidate_cache(["partner_has_new_content"])
         self.assertFalse(channel_asportal.partner_has_new_content)
 
-    @mute_logger('odoo.models')
+    @mute_logger("odoo.models")
     def test_channel_statistics(self):
         channel_publisher = self.channel.with_user(self.user_officer)
         # slide type computation
-        self.assertEqual(channel_publisher.total_slides, len(channel_publisher.slide_content_ids))
-        self.assertEqual(channel_publisher.nbr_infographic, len(channel_publisher.slide_content_ids.filtered(lambda s: s.slide_type == 'infographic')))
-        self.assertEqual(channel_publisher.nbr_presentation, len(channel_publisher.slide_content_ids.filtered(lambda s: s.slide_type == 'presentation')))
-        self.assertEqual(channel_publisher.nbr_document, len(channel_publisher.slide_content_ids.filtered(lambda s: s.slide_type == 'document')))
-        self.assertEqual(channel_publisher.nbr_video, len(channel_publisher.slide_content_ids.filtered(lambda s: s.slide_type == 'video')))
+        self.assertEqual(
+            channel_publisher.total_slides, len(channel_publisher.slide_content_ids)
+        )
+        self.assertEqual(
+            channel_publisher.nbr_infographic,
+            len(
+                channel_publisher.slide_content_ids.filtered(
+                    lambda s: s.slide_type == "infographic"
+                )
+            ),
+        )
+        self.assertEqual(
+            channel_publisher.nbr_presentation,
+            len(
+                channel_publisher.slide_content_ids.filtered(
+                    lambda s: s.slide_type == "presentation"
+                )
+            ),
+        )
+        self.assertEqual(
+            channel_publisher.nbr_document,
+            len(
+                channel_publisher.slide_content_ids.filtered(
+                    lambda s: s.slide_type == "document"
+                )
+            ),
+        )
+        self.assertEqual(
+            channel_publisher.nbr_video,
+            len(
+                channel_publisher.slide_content_ids.filtered(
+                    lambda s: s.slide_type == "video"
+                )
+            ),
+        )
         # slide statistics computation
-        self.assertEqual(float_compare(channel_publisher.total_time, sum(s.completion_time for s in channel_publisher.slide_content_ids), 3), 0)
+        self.assertEqual(
+            float_compare(
+                channel_publisher.total_time,
+                sum(s.completion_time for s in channel_publisher.slide_content_ids),
+                3,
+            ),
+            0,
+        )
         # members computation
         self.assertEqual(channel_publisher.members_count, 1)
         channel_publisher.action_add_member()
         self.assertEqual(channel_publisher.members_count, 1)
         channel_publisher._action_add_members(self.user_emp.partner_id)
-        channel_publisher.invalidate_cache(['partner_ids'])
+        channel_publisher.invalidate_cache(["partner_ids"])
         self.assertEqual(channel_publisher.members_count, 2)
-        self.assertEqual(channel_publisher.partner_ids, self.user_officer.partner_id | self.user_emp.partner_id)
+        self.assertEqual(
+            channel_publisher.partner_ids,
+            self.user_officer.partner_id | self.user_emp.partner_id,
+        )
 
-    @mute_logger('odoo.models')
+    @mute_logger("odoo.models")
     def test_channel_user_statistics(self):
         channel_publisher = self.channel.with_user(self.user_officer)
-        channel_publisher.write({
-            'enroll': 'invite',
-        })
+        channel_publisher.write(
+            {"enroll": "invite",}
+        )
         channel_publisher._action_add_members(self.user_emp.partner_id)
         channel_emp = self.channel.with_user(self.user_emp)
 
@@ -73,7 +120,10 @@ class TestChannelStatistics(common.SlidesCase):
         channel_emp.invalidate_cache()
         self.assertEqual(
             channel_emp.completion,
-            math.ceil(100.0 * len(slides_emp) / len(channel_publisher.slide_content_ids)))
+            math.ceil(
+                100.0 * len(slides_emp) / len(channel_publisher.slide_content_ids)
+            ),
+        )
         self.assertFalse(channel_emp.completed)
 
         self.slide_3.with_user(self.user_emp).action_set_completed()
@@ -89,34 +139,33 @@ class TestChannelStatistics(common.SlidesCase):
         self.assertEqual(channel_emp.completion, 100)
         self.assertTrue(channel_emp.completed)
 
-    @mute_logger('odoo.models')
+    @mute_logger("odoo.models")
     def test_channel_user_statistics_complete_check_member(self):
-        slides = (self.slide | self.slide_2)
-        slides.write({'is_preview': True})
-        slides.flush(['is_preview'])
+        slides = self.slide | self.slide_2
+        slides.write({"is_preview": True})
+        slides.flush(["is_preview"])
         slides_emp = slides.with_user(self.user_emp)
-        slides_emp.read(['name'])
+        slides_emp.read(["name"])
         with self.assertRaises(UserError):
             slides_emp.action_set_completed()
 
-    @mute_logger('odoo.models')
+    @mute_logger("odoo.models")
     def test_channel_user_statistics_view_check_member(self):
-        slides = (self.slide | self.slide_2)
-        slides.write({'is_preview': True})
-        slides.flush(['is_preview'])
+        slides = self.slide | self.slide_2
+        slides.write({"is_preview": True})
+        slides.flush(["is_preview"])
         slides_emp = slides.with_user(self.user_emp)
-        slides_emp.read(['name'])
+        slides_emp.read(["name"])
         with self.assertRaises(UserError):
             slides_emp.action_set_viewed()
 
 
-@tagged('functional')
+@tagged("functional")
 class TestSlideStatistics(common.SlidesCase):
-
     def test_slide_user_statistics(self):
         channel_publisher = self.channel.with_user(self.user_officer)
         channel_publisher._action_add_members(self.user_emp.partner_id)
-        channel_publisher.invalidate_cache(['partner_ids'])
+        channel_publisher.invalidate_cache(["partner_ids"])
 
         slide_emp = self.slide.with_user(self.user_emp)
         self.assertEqual(slide_emp.likes, 0)
@@ -142,7 +191,7 @@ class TestSlideStatistics(common.SlidesCase):
         self.assertEqual(self.slide.slide_views, 0)
         self.assertEqual(self.slide.public_views, 0)
 
-        self.slide.write({'public_views': 4})
+        self.slide.write({"public_views": 4})
 
         self.assertEqual(self.slide.slide_views, 0)
         self.assertEqual(self.slide.public_views, 4)
@@ -155,29 +204,60 @@ class TestSlideStatistics(common.SlidesCase):
         self.assertEqual(slide_emp.public_views, 4)
         self.assertEqual(slide_emp.total_views, 5)
 
-    @users('user_officer')
+    @users("user_officer")
     def test_slide_statistics_types(self):
         category = self.category.with_user(self.env.user)
         self.assertEqual(
             category.nbr_presentation,
-            len(category.channel_id.slide_ids.filtered(lambda s: s.category_id == category and s.slide_type == 'presentation')))
+            len(
+                category.channel_id.slide_ids.filtered(
+                    lambda s: s.category_id == category
+                    and s.slide_type == "presentation"
+                )
+            ),
+        )
         self.assertEqual(
             category.nbr_document,
-            len(category.channel_id.slide_ids.filtered(lambda s: s.category_id == category and s.slide_type == 'document')))
+            len(
+                category.channel_id.slide_ids.filtered(
+                    lambda s: s.category_id == category and s.slide_type == "document"
+                )
+            ),
+        )
 
-        self.assertEqual(self.channel.total_slides, 3, 'The channel should contain 3 slides')
-        self.assertEqual(category.total_slides, 2, 'The first category should contain 2 slides')
-        other_category = self.env['slide.slide'].with_user(self.user_officer).create({
-            'name': 'Other Category',
-            'channel_id': self.channel.id,
-            'is_category': True,
-            'is_published': True,
-            'sequence': 5,
-        })
-        self.assertEqual(other_category.total_slides, 0, 'The other category should not contain any slide yet')
+        self.assertEqual(
+            self.channel.total_slides, 3, "The channel should contain 3 slides"
+        )
+        self.assertEqual(
+            category.total_slides, 2, "The first category should contain 2 slides"
+        )
+        other_category = (
+            self.env["slide.slide"]
+            .with_user(self.user_officer)
+            .create(
+                {
+                    "name": "Other Category",
+                    "channel_id": self.channel.id,
+                    "is_category": True,
+                    "is_published": True,
+                    "sequence": 5,
+                }
+            )
+        )
+        self.assertEqual(
+            other_category.total_slides,
+            0,
+            "The other category should not contain any slide yet",
+        )
 
         # move one of the slide to the other category
-        self.slide_3.write({'sequence': 6})
-        self.assertEqual(category.total_slides, 1, 'The first category should contain 1 slide')
-        self.assertEqual(other_category.total_slides, 1, 'The other category should contain 1 slide')
-        self.assertEqual(self.channel.total_slides, 3, 'The channel should still contain 3 slides')
+        self.slide_3.write({"sequence": 6})
+        self.assertEqual(
+            category.total_slides, 1, "The first category should contain 1 slide"
+        )
+        self.assertEqual(
+            other_category.total_slides, 1, "The other category should contain 1 slide"
+        )
+        self.assertEqual(
+            self.channel.total_slides, 3, "The channel should still contain 3 slides"
+        )

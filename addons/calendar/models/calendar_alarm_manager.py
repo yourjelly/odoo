@@ -11,8 +11,8 @@ _logger = logging.getLogger(__name__)
 
 
 class AlarmManager(models.AbstractModel):
-    _name = 'calendar.alarm_manager'
-    _description = 'Event Alarm Manager'
+    _name = "calendar.alarm_manager"
+    _description = "Event Alarm Manager"
 
     def _get_next_potential_limit_alarm(self, alarm_type, seconds=None, partners=None):
         result = {}
@@ -58,7 +58,7 @@ class AlarmManager(models.AbstractModel):
         # Add filter on partner_id
         if partners:
             base_request += filter_user
-            tuple_params += (tuple(partners.ids), )
+            tuple_params += (tuple(partners.ids),)
 
         # Upper bound on first_alarm of requested events
         first_alarm_max_value = ""
@@ -76,35 +76,56 @@ class AlarmManager(models.AbstractModel):
             tuple_params += (seconds,)
 
         self.flush()
-        self._cr.execute("""
+        self._cr.execute(
+            """
             WITH calcul_delta AS (%s)
             SELECT *
                 FROM ( %s WHERE cal.active = True ) AS ALL_EVENTS
                WHERE ALL_EVENTS.first_alarm < %s
                  AND ALL_EVENTS.last_event_date > (now() at time zone 'utc')
-        """ % (delta_request, base_request, first_alarm_max_value), tuple_params)
+        """
+            % (delta_request, base_request, first_alarm_max_value),
+            tuple_params,
+        )
 
-        for event_id, first_alarm, last_alarm, first_meeting, last_meeting, min_duration, max_duration, rule in self._cr.fetchall():
+        for (
+            event_id,
+            first_alarm,
+            last_alarm,
+            first_meeting,
+            last_meeting,
+            min_duration,
+            max_duration,
+            rule,
+        ) in self._cr.fetchall():
             result[event_id] = {
-                'event_id': event_id,
-                'first_alarm': first_alarm,
-                'last_alarm': last_alarm,
-                'first_meeting': first_meeting,
-                'last_meeting': last_meeting,
-                'min_duration': min_duration,
-                'max_duration': max_duration,
-                'rrule': rule
+                "event_id": event_id,
+                "first_alarm": first_alarm,
+                "last_alarm": last_alarm,
+                "first_meeting": first_meeting,
+                "last_meeting": last_meeting,
+                "min_duration": min_duration,
+                "max_duration": max_duration,
+                "rrule": rule,
             }
 
         # determine accessible events
-        events = self.env['calendar.event'].browse(result)
+        events = self.env["calendar.event"].browse(result)
         result = {
-            key: result[key]
-            for key in set(events._filter_access_rules('read').ids)
+            key: result[key] for key in set(events._filter_access_rules("read").ids)
         }
         return result
 
-    def do_check_alarm_for_one_date(self, one_date, event, event_maxdelta, in_the_next_X_seconds, alarm_type, after=False, missing=False):
+    def do_check_alarm_for_one_date(
+        self,
+        one_date,
+        event,
+        event_maxdelta,
+        in_the_next_X_seconds,
+        alarm_type,
+        after=False,
+        missing=False,
+    ):
         """ Search for some alarms in the interval of time determined by some parameters (after, in_the_next_X_seconds, ...)
             :param one_date: date of the event to check (not the same that in the event browse if recurrent)
             :param event: Event browse record
@@ -129,11 +150,13 @@ class AlarmManager(models.AbstractModel):
                 continue
             if after and past <= fields.Datetime.from_string(after):
                 continue
-            result.append({
-                'alarm_id': alarm.id,
-                'event_id': event.id,
-                'notify_at': one_date - timedelta(minutes=alarm.duration_minutes),
-            })
+            result.append(
+                {
+                    "alarm_id": alarm.id,
+                    "event_id": event.id,
+                    "notify_at": one_date - timedelta(minutes=alarm.duration_minutes),
+                }
+            )
         return result
 
     def _get_events_by_alarm_to_notify(self, alarm_type):
@@ -146,7 +169,8 @@ class AlarmManager(models.AbstractModel):
         design. The attendees receive an invitation for any new event
         already.
         """
-        self.env.cr.execute('''
+        self.env.cr.execute(
+            """
             SELECT "alarm"."id", "event"."id"
               FROM "calendar_event" AS "event"
               JOIN "calendar_alarm_calendar_event_rel" AS "event_alarm_rel"
@@ -158,7 +182,9 @@ class AlarmManager(models.AbstractModel):
                AND "event"."active"
                AND "event"."start" - CAST("alarm"."duration" || ' ' || "alarm"."interval" AS Interval) >= %s
                AND "event"."start" - CAST("alarm"."duration" || ' ' || "alarm"."interval" AS Interval) < now() at time zone 'utc'
-             )''', [alarm_type, self.env.context['lastcall']])
+             )""",
+            [alarm_type, self.env.context["lastcall"]],
+        )
 
         events_by_alarm = {}
         for alarm_id, event_id in self.env.cr.fetchall():
@@ -168,23 +194,27 @@ class AlarmManager(models.AbstractModel):
     @api.model
     def _send_reminder(self):
         # Executed via cron
-        events_by_alarm = self._get_events_by_alarm_to_notify('email')
+        events_by_alarm = self._get_events_by_alarm_to_notify("email")
         if not events_by_alarm:
             return
 
-        event_ids = list(set(event_id for event_ids in events_by_alarm.values() for event_id in event_ids))
-        events = self.env['calendar.event'].browse(event_ids)
-        attendees = events.attendee_ids.filtered(lambda a: a.state != 'declined')
-        alarms = self.env['calendar.alarm'].browse(events_by_alarm.keys())
-        for alarm in alarms:
-            alarm_attendees = attendees.filtered(lambda attendee: attendee.event_id.id in events_by_alarm[alarm.id])
-            alarm_attendees.with_context(
-                mail_notify_force_send=True,
-                calendar_template_ignore_recurrence=True
-            )._send_mail_to_attendees(
-                alarm.mail_template_id,
-                force_send=True
+        event_ids = list(
+            set(
+                event_id
+                for event_ids in events_by_alarm.values()
+                for event_id in event_ids
             )
+        )
+        events = self.env["calendar.event"].browse(event_ids)
+        attendees = events.attendee_ids.filtered(lambda a: a.state != "declined")
+        alarms = self.env["calendar.alarm"].browse(events_by_alarm.keys())
+        for alarm in alarms:
+            alarm_attendees = attendees.filtered(
+                lambda attendee: attendee.event_id.id in events_by_alarm[alarm.id]
+            )
+            alarm_attendees.with_context(
+                mail_notify_force_send=True, calendar_template_ignore_recurrence=True
+            )._send_mail_to_attendees(alarm.mail_template_id, force_send=True)
 
     @api.model
     def get_next_notif(self):
@@ -194,45 +224,60 @@ class AlarmManager(models.AbstractModel):
         if not partner:
             return []
 
-        all_meetings = self._get_next_potential_limit_alarm('notification', partners=partner)
+        all_meetings = self._get_next_potential_limit_alarm(
+            "notification", partners=partner
+        )
         time_limit = 3600 * 24  # return alarms of the next 24 hours
         for event_id in all_meetings:
-            max_delta = all_meetings[event_id]['max_duration']
-            meeting = self.env['calendar.event'].browse(event_id)
+            max_delta = all_meetings[event_id]["max_duration"]
+            meeting = self.env["calendar.event"].browse(event_id)
             in_date_format = fields.Datetime.from_string(meeting.start)
-            last_found = self.do_check_alarm_for_one_date(in_date_format, meeting, max_delta, time_limit, 'notification', after=partner.calendar_last_notif_ack)
+            last_found = self.do_check_alarm_for_one_date(
+                in_date_format,
+                meeting,
+                max_delta,
+                time_limit,
+                "notification",
+                after=partner.calendar_last_notif_ack,
+            )
             if last_found:
                 for alert in last_found:
                     all_notif.append(self.do_notif_reminder(alert))
         return all_notif
 
     def do_notif_reminder(self, alert):
-        alarm = self.env['calendar.alarm'].browse(alert['alarm_id'])
-        meeting = self.env['calendar.event'].browse(alert['event_id'])
+        alarm = self.env["calendar.alarm"].browse(alert["alarm_id"])
+        meeting = self.env["calendar.event"].browse(alert["event_id"])
 
-        if alarm.alarm_type == 'notification':
+        if alarm.alarm_type == "notification":
             message = meeting.display_time
             if alarm.body:
-                message += '<p>%s</p>' % plaintext2html(alarm.body)
+                message += "<p>%s</p>" % plaintext2html(alarm.body)
 
-            delta = alert['notify_at'] - fields.Datetime.now()
+            delta = alert["notify_at"] - fields.Datetime.now()
             delta = delta.seconds + delta.days * 3600 * 24
 
             return {
-                'alarm_id': alarm.id,
-                'event_id': meeting.id,
-                'title': meeting.name,
-                'message': message,
-                'timer': delta,
-                'notify_at': fields.Datetime.to_string(alert['notify_at']),
+                "alarm_id": alarm.id,
+                "event_id": meeting.id,
+                "title": meeting.name,
+                "message": message,
+                "timer": delta,
+                "notify_at": fields.Datetime.to_string(alert["notify_at"]),
             }
 
     def _notify_next_alarm(self, partner_ids):
         """ Sends through the bus the next alarm of given partners """
         notifications = []
-        users = self.env['res.users'].search([('partner_id', 'in', tuple(partner_ids))])
+        users = self.env["res.users"].search([("partner_id", "in", tuple(partner_ids))])
         for user in users:
-            notif = self.with_user(user).with_context(allowed_company_ids=user.company_ids.ids).get_next_notif()
-            notifications.append([(self._cr.dbname, 'calendar.alarm', user.partner_id.id), notif])
+            notif = (
+                self.with_user(user)
+                .with_context(allowed_company_ids=user.company_ids.ids)
+                .get_next_notif()
+            )
+            notifications.append(
+                [(self._cr.dbname, "calendar.alarm", user.partner_id.id), notif]
+            )
         if len(notifications) > 0:
-            self.env['bus.bus'].sendmany(notifications)
+            self.env["bus.bus"].sendmany(notifications)

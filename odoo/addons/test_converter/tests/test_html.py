@@ -10,6 +10,7 @@ from odoo.tools import html_escape as e
 
 directory = os.path.dirname(__file__)
 
+
 class TestExport(common.TransactionCase):
     _model = None
 
@@ -23,14 +24,14 @@ class TestExport(common.TransactionCase):
     def get_converter(self, name, type=None):
         field = self.get_field(name)
 
-        for postfix in (type, field.type, ''):
-            fs = ['ir', 'qweb', 'field']
+        for postfix in (type, field.type, ""):
+            fs = ["ir", "qweb", "field"]
             if postfix is None:
                 continue
             if postfix:
                 fs.append(postfix)
             try:
-                model = self.env['.'.join(fs)]
+                model = self.env[".".join(fs)]
                 break
             except KeyError:
                 pass
@@ -42,23 +43,24 @@ class TestExport(common.TransactionCase):
             # spaces while others use non-break space when formatting timedeltas
             # to the french locale
             return re.sub(
-                r'[^\S\n\r]', # no \p{Zs}
-                ' ',
-                model.with_context(context).record_to_html(record, name, options or {})
+                r"[^\S\n\r]",  # no \p{Zs}
+                " ",
+                model.with_context(context).record_to_html(record, name, options or {}),
             )
+
         return converter
 
 
 class TestBasicExport(TestExport):
-    _model = 'test_converter.test_model'
+    _model = "test_converter.test_model"
 
 
 class TestCharExport(TestBasicExport):
     def test_char(self):
-        converter = self.get_converter('char')
+        converter = self.get_converter("char")
 
-        value = converter('foo')
-        self.assertEqual(value, 'foo')
+        value = converter("foo")
+        self.assertEqual(value, "foo")
 
         value = converter("foo<bar>")
         self.assertEqual(value, "foo&lt;bar&gt;")
@@ -66,7 +68,7 @@ class TestCharExport(TestBasicExport):
 
 class TestIntegerExport(TestBasicExport):
     def test_integer(self):
-        converter = self.get_converter('integer')
+        converter = self.get_converter("integer")
 
         value = converter(42)
         self.assertEqual(value, "42")
@@ -75,10 +77,10 @@ class TestIntegerExport(TestBasicExport):
 class TestFloatExport(TestBasicExport):
     def setUp(self):
         super(TestFloatExport, self).setUp()
-        self.env['res.lang'].browse(1).write({'grouping': '[3,0]'})
+        self.env["res.lang"].browse(1).write({"grouping": "[3,0]"})
 
     def test_float(self):
-        converter = self.get_converter('float')
+        converter = self.get_converter("float")
 
         value = converter(-42.0)
         self.assertEqual(value, u"-\N{ZERO WIDTH NO-BREAK SPACE}42.0")
@@ -90,36 +92,36 @@ class TestFloatExport(TestBasicExport):
         self.assertEqual(value, "42.01234")
 
         value = converter(1234567.89)
-        self.assertEqual(value, '1,234,567.89')
+        self.assertEqual(value, "1,234,567.89")
 
     def test_numeric(self):
-        converter = self.get_converter('numeric')
+        converter = self.get_converter("numeric")
 
         value = converter(42.0)
-        self.assertEqual(value, '42.00')
+        self.assertEqual(value, "42.00")
 
         value = converter(42.01234)
-        self.assertEqual(value, '42.01')
+        self.assertEqual(value, "42.01")
 
 
 class TestCurrencyExport(TestExport):
-    _model = 'test_converter.monetary'
+    _model = "test_converter.monetary"
 
     def setUp(self):
         super(TestCurrencyExport, self).setUp()
-        self.Currency = self.env['res.currency']
-        self.base = self.create(self.Currency, name="Source", symbol=u'source')
+        self.Currency = self.env["res.currency"]
+        self.base = self.create(self.Currency, name="Source", symbol=u"source")
 
     def create(self, model, **values):
         return model.create(values)
 
     def convert(self, obj, dest):
-        converter = self.env['ir.qweb.field.monetary']
+        converter = self.env["ir.qweb.field.monetary"]
         options = {
-            'widget': 'monetary',
-            'display_currency': dest,
+            "widget": "monetary",
+            "display_currency": dest,
         }
-        return converter.record_to_html(obj, 'value', options)
+        return converter.record_to_html(obj, "value", options)
 
     def test_currency_post(self):
         currency = self.create(self.Currency, name="Test", symbol=u"test")
@@ -128,26 +130,26 @@ class TestCurrencyExport(TestExport):
         converted = self.convert(obj, dest=currency)
 
         self.assertEqual(
-            converted, u'<span class="oe_currency_value">-\N{ZERO WIDTH NO-BREAK SPACE}0.12</span>'
-                       u'\N{NO-BREAK SPACE}{symbol}'.format(
-                obj=obj,
-                symbol=currency.symbol
-            ),)
+            converted,
+            u'<span class="oe_currency_value">-\N{ZERO WIDTH NO-BREAK SPACE}0.12</span>'
+            u"\N{NO-BREAK SPACE}{symbol}".format(obj=obj, symbol=currency.symbol),
+        )
 
     def test_currency_pre(self):
         currency = self.create(
-            self.Currency, name="Test", symbol=u"test", position='before')
+            self.Currency, name="Test", symbol=u"test", position="before"
+        )
         obj = self.create(self.Model, value=0.12)
 
         converted = self.convert(obj, dest=currency)
 
         self.assertEqual(
             converted,
-                      u'{symbol}\N{NO-BREAK SPACE}'
-                      u'<span class="oe_currency_value">0.12</span>'.format(
-                obj=obj,
-                symbol=currency.symbol
-            ),)
+            u"{symbol}\N{NO-BREAK SPACE}"
+            u'<span class="oe_currency_value">0.12</span>'.format(
+                obj=obj, symbol=currency.symbol
+            ),
+        )
 
     def test_currency_precision(self):
         """ Precision should be the currency's, not the float field's
@@ -159,22 +161,22 @@ class TestCurrencyExport(TestExport):
 
         self.assertEqual(
             converted,
-                      u'<span class="oe_currency_value">0.12</span>'
-                      u'\N{NO-BREAK SPACE}{symbol}'.format(
-                obj=obj,
-                symbol=currency.symbol
-            ),)
+            u'<span class="oe_currency_value">0.12</span>'
+            u"\N{NO-BREAK SPACE}{symbol}".format(obj=obj, symbol=currency.symbol),
+        )
 
 
 class TestTextExport(TestBasicExport):
     maxDiff = None
+
     def test_text(self):
-        converter = self.get_converter('text')
+        converter = self.get_converter("text")
 
         value = converter("This is my text-kai")
         self.assertEqual(value, "This is my text-kai")
 
-        value = converter("""
+        value = converter(
+            """
             .  The current line (address) in the buffer.
             $  The last line in the buffer.
             n  The nth, line in the buffer where n is a number in the range [0,$].
@@ -182,8 +184,11 @@ class TestTextExport(TestBasicExport):
             -  The previous line. This is equivalent to -1 and may be repeated with cumulative effect.
             -n The nth previous line, where n is a non-negative number.
             +  The next line. This is equivalent to +1 and may be repeated with cumulative effect.
-        """)
-        self.assertEqual(value, """<br>
+        """
+        )
+        self.assertEqual(
+            value,
+            """<br>
             .  The current line (address) in the buffer.<br>
             $  The last line in the buffer.<br>
             n  The nth, line in the buffer where n is a number in the range [0,$].<br>
@@ -191,50 +196,58 @@ class TestTextExport(TestBasicExport):
             -  The previous line. This is equivalent to -1 and may be repeated with cumulative effect.<br>
             -n The nth previous line, where n is a non-negative number.<br>
             +  The next line. This is equivalent to +1 and may be repeated with cumulative effect.<br>
-        """)
+        """,
+        )
 
-        value = converter("""
+        value = converter(
+            """
         fgdkls;hjas;lj <b>fdslkj</b> d;lasjfa lkdja <a href=http://spam.com>lfks</a>
         fldkjsfhs <i style="color: red"><a href="http://spamspam.com">fldskjh</a></i>
-        """)
-        self.assertEqual(value, """<br>
+        """
+        )
+        self.assertEqual(
+            value,
+            """<br>
         fgdkls;hjas;lj &lt;b&gt;fdslkj&lt;/b&gt; d;lasjfa lkdja &lt;a href=http://spam.com&gt;lfks&lt;/a&gt;<br>
         fldkjsfhs &lt;i style=&#34;color: red&#34;&gt;&lt;a href=&#34;http://spamspam.com&#34;&gt;fldskjh&lt;/a&gt;&lt;/i&gt;<br>
-        """)
+        """,
+        )
 
 
 class TestMany2OneExport(TestBasicExport):
     def test_many2one(self):
-        Sub = self.env['test_converter.test_model.sub']
-        converter = self.get_converter('many2one')
+        Sub = self.env["test_converter.test_model.sub"]
+        converter = self.get_converter("many2one")
 
-        value = converter(Sub.create({'name': "Foo"}).id)
+        value = converter(Sub.create({"name": "Foo"}).id)
         self.assertEqual(value, "Foo")
 
-        value = converter(Sub.create({'name': "Fo<b>o</b>"}).id)
+        value = converter(Sub.create({"name": "Fo<b>o</b>"}).id)
         self.assertEqual(value, "Fo&lt;b&gt;o&lt;/b&gt;")
 
 
 class TestBinaryExport(TestBasicExport):
     def test_image(self):
-        converter = self.env['ir.qweb.field.image']
+        converter = self.env["ir.qweb.field.image"]
 
-        with open(os.path.join(directory, 'test_vectors', 'image'), 'rb') as f:
+        with open(os.path.join(directory, "test_vectors", "image"), "rb") as f:
             content = f.read()
 
         encoded_content = base64.b64encode(content)
         value = converter.value_to_html(encoded_content, {})
 
         self.assertEqual(
-            value, u'<img src="data:image/jpeg;base64,%s">' % encoded_content.decode('ascii'))
+            value,
+            u'<img src="data:image/jpeg;base64,%s">' % encoded_content.decode("ascii"),
+        )
 
-        with open(os.path.join(directory, 'test_vectors', 'pdf'), 'rb') as f:
+        with open(os.path.join(directory, "test_vectors", "pdf"), "rb") as f:
             content = f.read()
 
         with self.assertRaises(ValueError):
             converter.value_to_html(base64.b64encode(content), {})
 
-        with open(os.path.join(directory, 'test_vectors', 'pptx'), 'rb') as f:
+        with open(os.path.join(directory, "test_vectors", "pptx"), "rb") as f:
             content = f.read()
 
         with self.assertRaises(ValueError):
@@ -243,16 +256,18 @@ class TestBinaryExport(TestBasicExport):
 
 class TestSelectionExport(TestBasicExport):
     def test_selection(self):
-        converter = self.get_converter('selection_str')
-        value = converter('C')
-        self.assertEqual(value, u"Qu&#39;est-ce qu&#39;il fout ce maudit pancake, tabernacle ?")
+        converter = self.get_converter("selection_str")
+        value = converter("C")
+        self.assertEqual(
+            value, u"Qu&#39;est-ce qu&#39;il fout ce maudit pancake, tabernacle ?"
+        )
 
 
 class TestHTMLExport(TestBasicExport):
     def test_html(self):
-        converter = self.get_converter('html')
+        converter = self.get_converter("html")
 
-        input = '<span>span</span>'
+        input = "<span>span</span>"
         value = converter(input)
         self.assertEqual(value, input)
 
@@ -261,76 +276,70 @@ class TestDatetimeExport(TestBasicExport):
     def setUp(self):
         super(TestDatetimeExport, self).setUp()
         # set user tz to known value
-        self.env.user.write({'tz': 'Pacific/Niue'})
+        self.env.user.write({"tz": "Pacific/Niue"})
 
     def test_date(self):
-        converter = self.get_converter('date')
+        converter = self.get_converter("date")
 
-        value = converter('2011-05-03')
+        value = converter("2011-05-03")
 
         # default lang/format is US
-        self.assertEqual(value, '05/03/2011')
+        self.assertEqual(value, "05/03/2011")
 
     def test_datetime(self):
-        converter = self.get_converter('datetime')
+        converter = self.get_converter("datetime")
 
-        value = converter('2011-05-03 11:12:13')
+        value = converter("2011-05-03 11:12:13")
 
         # default lang/format is US
-        self.assertEqual(value, '05/03/2011 00:12:13')
+        self.assertEqual(value, "05/03/2011 00:12:13")
 
     def test_custom_format(self):
-        converter = self.get_converter('datetime')
-        converter2 = self.get_converter('date')
-        opts = {'format': 'MMMM d'}
+        converter = self.get_converter("datetime")
+        converter2 = self.get_converter("date")
+        opts = {"format": "MMMM d"}
 
-        value = converter('2011-03-02 11:12:13', options=opts)
-        value2 = converter2('2001-03-02', options=opts)
-        self.assertEqual(
-            value,
-            'March 2'
-        )
-        self.assertEqual(
-            value2,
-            'March 2'
-        )
+        value = converter("2011-03-02 11:12:13", options=opts)
+        value2 = converter2("2001-03-02", options=opts)
+        self.assertEqual(value, "March 2")
+        self.assertEqual(value2, "March 2")
 
 
 class TestDurationExport(TestBasicExport):
     def setUp(self):
         super(TestDurationExport, self).setUp()
         # needs to have lang installed otherwise falls back on en_US
-        self.env['res.lang']._activate_lang('fr_FR')
+        self.env["res.lang"]._activate_lang("fr_FR")
 
     def test_default_unit(self):
-        converter = self.get_converter('float', 'duration')
-        self.assertEqual(converter(4), u'4 seconds')
+        converter = self.get_converter("float", "duration")
+        self.assertEqual(converter(4), u"4 seconds")
 
     def test_negative(self):
-        converter = self.get_converter('float', 'duration')
-        self.assertEqual(converter(-4), u'- 4 seconds')
+        converter = self.get_converter("float", "duration")
+        self.assertEqual(converter(-4), u"- 4 seconds")
 
     def test_negative_with_round(self):
-        converter = self.get_converter('float', 'duration')
-        result = converter(-4.678, {'unit': 'year', 'round': 'hour'}, {'lang': 'fr_FR'})
-        self.assertEqual(result, u'- 4 ans 8 mois 1 semaine 11 heures')
+        converter = self.get_converter("float", "duration")
+        result = converter(-4.678, {"unit": "year", "round": "hour"}, {"lang": "fr_FR"})
+        self.assertEqual(result, u"- 4 ans 8 mois 1 semaine 11 heures")
 
     def test_basic(self):
-        converter = self.get_converter('float', 'duration')
+        converter = self.get_converter("float", "duration")
 
-        result = converter(4, {'unit': 'hour'}, {'lang': 'fr_FR'})
-        self.assertEqual(result, u'4 heures')
+        result = converter(4, {"unit": "hour"}, {"lang": "fr_FR"})
+        self.assertEqual(result, u"4 heures")
 
-        result = converter(50, {'unit': 'second'}, {'lang': 'fr_FR'})
-        self.assertEqual(result, u'50 secondes')
+        result = converter(50, {"unit": "second"}, {"lang": "fr_FR"})
+        self.assertEqual(result, u"50 secondes")
 
     def test_multiple(self):
-        converter = self.get_converter('float', 'duration')
+        converter = self.get_converter("float", "duration")
 
-        result = converter(1.5, {'unit': 'hour'}, {'lang': 'fr_FR'})
+        result = converter(1.5, {"unit": "hour"}, {"lang": "fr_FR"})
         self.assertEqual(result, u"1 heure 30 minutes")
 
-        result = converter(72, {'unit': 'second'}, {'lang': 'fr_FR'})
+        result = converter(72, {"unit": "second"}, {"lang": "fr_FR"})
         self.assertEqual(result, u"1 minute 12 secondes")
 
 
@@ -341,11 +350,11 @@ class TestRelativeDatetime(TestBasicExport):
     def setUp(self):
         super(TestRelativeDatetime, self).setUp()
         # needs to have lang installed otherwise falls back on en_US
-        self.env['res.lang']._activate_lang('fr_FR')
+        self.env["res.lang"]._activate_lang("fr_FR")
 
     def test_basic(self):
-        converter = self.get_converter('datetime', 'relative')
+        converter = self.get_converter("datetime", "relative")
         t = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
 
-        result = converter(t, context={'lang': 'fr_FR'})
+        result = converter(t, context={"lang": "fr_FR"})
         self.assertEqual(result, u"il y a 1 heure")

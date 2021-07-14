@@ -9,28 +9,48 @@ from odoo import api, fields, models, _
 
 
 class HrWorkEntry(models.Model):
-    _name = 'hr.work.entry'
-    _description = 'HR Work Entry'
-    _order = 'conflict desc,state,date_start'
+    _name = "hr.work.entry"
+    _description = "HR Work Entry"
+    _order = "conflict desc,state,date_start"
 
-    name = fields.Char(required=True, compute='_compute_name', store=True, readonly=False)
+    name = fields.Char(
+        required=True, compute="_compute_name", store=True, readonly=False
+    )
     active = fields.Boolean(default=True)
-    employee_id = fields.Many2one('hr.employee', required=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
-    date_start = fields.Datetime(required=True, string='From')
-    date_stop = fields.Datetime(compute='_compute_date_stop', store=True, readonly=False, string='To')
-    duration = fields.Float(compute='_compute_duration', store=True, string="Period")
-    work_entry_type_id = fields.Many2one('hr.work.entry.type', index=True)
-    color = fields.Integer(related='work_entry_type_id.color', readonly=True)
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('validated', 'Validated'),
-        ('conflict', 'Conflict'),
-        ('cancelled', 'Cancelled')
-    ], default='draft')
-    company_id = fields.Many2one('res.company', string='Company', readonly=True, required=True,
-        default=lambda self: self.env.company)
-    conflict = fields.Boolean('Conflicts', compute='_compute_conflict', store=True)  # Used to show conflicting work entries first
-    department_id = fields.Many2one('hr.department', related='employee_id.department_id', store=True)
+    employee_id = fields.Many2one(
+        "hr.employee",
+        required=True,
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    )
+    date_start = fields.Datetime(required=True, string="From")
+    date_stop = fields.Datetime(
+        compute="_compute_date_stop", store=True, readonly=False, string="To"
+    )
+    duration = fields.Float(compute="_compute_duration", store=True, string="Period")
+    work_entry_type_id = fields.Many2one("hr.work.entry.type", index=True)
+    color = fields.Integer(related="work_entry_type_id.color", readonly=True)
+    state = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("validated", "Validated"),
+            ("conflict", "Conflict"),
+            ("cancelled", "Cancelled"),
+        ],
+        default="draft",
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        readonly=True,
+        required=True,
+        default=lambda self: self.env.company,
+    )
+    conflict = fields.Boolean(
+        "Conflicts", compute="_compute_conflict", store=True
+    )  # Used to show conflicting work entries first
+    department_id = fields.Many2one(
+        "hr.department", related="employee_id.department_id", store=True
+    )
 
     # There is no way for _error_checking() to detect conflicts in work
     # entries that have been introduced in concurrent transactions, because of the transaction
@@ -43,10 +63,18 @@ class HrWorkEntry(models.Model):
     # CHECK constraints, it's backed by an index.
     # 1: https://www.postgresql.org/docs/9.6/sql-createtable.html#SQL-CREATETABLE-EXCLUDE
     _sql_constraints = [
-        ('_work_entry_has_end', 'check (date_stop IS NOT NULL)', 'Work entry must end. Please define an end date or a duration.'),
-        ('_work_entry_start_before_end', 'check (date_stop > date_start)', 'Starting time should be before end time.'),
         (
-            '_work_entries_no_validated_conflict',
+            "_work_entry_has_end",
+            "check (date_stop IS NOT NULL)",
+            "Work entry must end. Please define an end date or a duration.",
+        ),
+        (
+            "_work_entry_start_before_end",
+            "check (date_stop > date_start)",
+            "Starting time should be before end time.",
+        ),
+        (
+            "_work_entries_no_validated_conflict",
             """
                 EXCLUDE USING GIST (
                     tsrange(date_start, date_stop, '()') WITH &&,
@@ -54,32 +82,39 @@ class HrWorkEntry(models.Model):
                 )
                 WHERE (state = 'validated' AND active = TRUE)
             """,
-            'Validated work entries cannot overlap'
+            "Validated work entries cannot overlap",
         ),
     ]
 
-    @api.depends('work_entry_type_id', 'employee_id')
+    @api.depends("work_entry_type_id", "employee_id")
     def _compute_name(self):
         for work_entry in self:
             if not work_entry.employee_id:
-                work_entry.name = _('Undefined')
+                work_entry.name = _("Undefined")
             else:
-                work_entry.name = "%s: %s" % (work_entry.work_entry_type_id.name or _('Undefined Type'), work_entry.employee_id.name)
+                work_entry.name = "%s: %s" % (
+                    work_entry.work_entry_type_id.name or _("Undefined Type"),
+                    work_entry.employee_id.name,
+                )
 
-    @api.depends('state')
+    @api.depends("state")
     def _compute_conflict(self):
         for rec in self:
-            rec.conflict = rec.state == 'conflict'
+            rec.conflict = rec.state == "conflict"
 
-    @api.depends('date_stop', 'date_start')
+    @api.depends("date_stop", "date_start")
     def _compute_duration(self):
         for work_entry in self:
-            work_entry.duration = work_entry._get_duration(work_entry.date_start, work_entry.date_stop)
+            work_entry.duration = work_entry._get_duration(
+                work_entry.date_start, work_entry.date_stop
+            )
 
-    @api.depends('date_start', 'duration')
+    @api.depends("date_start", "duration")
     def _compute_date_stop(self):
         for work_entry in self.filtered(lambda w: w.date_start and w.duration):
-            work_entry.date_stop = work_entry.date_start + relativedelta(hours=work_entry.duration)
+            work_entry.date_stop = work_entry.date_start + relativedelta(
+                hours=work_entry.duration
+            )
 
     def _get_duration(self, date_start, date_stop):
         if not date_start or not date_stop:
@@ -94,9 +129,9 @@ class HrWorkEntry(models.Model):
         and validation fails.
         :return: True if validation succeded
         """
-        work_entries = self.filtered(lambda work_entry: work_entry.state != 'validated')
+        work_entries = self.filtered(lambda work_entry: work_entry.state != "validated")
         if not work_entries._check_if_error():
-            work_entries.write({'state': 'validated'})
+            work_entries.write({"state": "validated"})
             return True
         return False
 
@@ -104,8 +139,10 @@ class HrWorkEntry(models.Model):
         if not self:
             return False
         undefined_type = self.filtered(lambda b: not b.work_entry_type_id)
-        undefined_type.write({'state': 'conflict'})
-        conflict = self._mark_conflicting_work_entries(min(self.mapped('date_start')), max(self.mapped('date_stop')))
+        undefined_type.write({"state": "conflict"})
+        conflict = self._mark_conflicting_work_entries(
+            min(self.mapped("date_start")), max(self.mapped("date_stop"))
+        )
         return undefined_type or conflict
 
     @api.model
@@ -120,7 +157,7 @@ class HrWorkEntry(models.Model):
         # use '()' to exlude the lower and upper bounds of the range.
         # Filter on date_start and date_stop (both indexed) in the EXISTS clause to
         # limit the resulting set size and fasten the query.
-        self.flush(['date_start', 'date_stop', 'employee_id', 'active'])
+        self.flush(["date_start", "date_stop", "employee_id", "active"])
         query = """
             SELECT b1.id
             FROM hr_work_entry b1
@@ -141,10 +178,10 @@ class HrWorkEntry(models.Model):
             );
         """
         self.env.cr.execute(query, (stop, start, stop, start))
-        conflicts = [res.get('id') for res in self.env.cr.dictfetchall()]
-        self.browse(conflicts).write({
-            'state': 'conflict',
-        })
+        conflicts = [res.get("id") for res in self.env.cr.dictfetchall()]
+        self.browse(conflicts).write(
+            {"state": "conflict",}
+        )
         return bool(conflicts)
 
     @api.model_create_multi
@@ -154,16 +191,19 @@ class HrWorkEntry(models.Model):
         return work_entries
 
     def write(self, vals):
-        skip_check = not bool({'date_start', 'date_stop', 'employee_id', 'work_entry_type_id', 'active'} & vals.keys())
-        if 'state' in vals:
-            if vals['state'] == 'draft':
-                vals['active'] = True
-            elif vals['state'] == 'cancelled':
-                vals['active'] = False
-                skip_check &= all(self.mapped(lambda w: w.state != 'conflict'))
+        skip_check = not bool(
+            {"date_start", "date_stop", "employee_id", "work_entry_type_id", "active"}
+            & vals.keys()
+        )
+        if "state" in vals:
+            if vals["state"] == "draft":
+                vals["active"] = True
+            elif vals["state"] == "cancelled":
+                vals["active"] = False
+                skip_check &= all(self.mapped(lambda w: w.state != "conflict"))
 
-        if 'active' in vals:
-            vals['state'] = 'draft' if vals['active'] else 'cancelled'
+        if "active" in vals:
+            vals["state"] = "draft" if vals["active"] else "cancelled"
 
         with self._error_checking(skip=skip_check):
             return super(HrWorkEntry, self).write(vals)
@@ -173,7 +213,7 @@ class HrWorkEntry(models.Model):
             return super().unlink()
 
     def _reset_conflicting_state(self):
-        self.filtered(lambda w: w.state == 'conflict').write({'state': 'draft'})
+        self.filtered(lambda w: w.state == "conflict").write({"state": "draft"})
 
     @contextmanager
     def _error_checking(self, start=None, stop=None, skip=False):
@@ -188,15 +228,21 @@ class HrWorkEntry(models.Model):
         :param skip: If True, no error checking is done
         """
         try:
-            skip = skip or self.env.context.get('hr_work_entry_no_check', False)
-            start = start or min(self.mapped('date_start'), default=False)
-            stop = stop or max(self.mapped('date_stop'), default=False)
+            skip = skip or self.env.context.get("hr_work_entry_no_check", False)
+            start = start or min(self.mapped("date_start"), default=False)
+            stop = stop or max(self.mapped("date_stop"), default=False)
             if not skip and start and stop:
-                work_entries = self.sudo().with_context(hr_work_entry_no_check=True).search([
-                    ('date_start', '<', stop),
-                    ('date_stop', '>', start),
-                    ('state', 'not in', ('validated', 'cancelled')),
-                ])
+                work_entries = (
+                    self.sudo()
+                    .with_context(hr_work_entry_no_check=True)
+                    .search(
+                        [
+                            ("date_start", "<", stop),
+                            ("date_stop", ">", start),
+                            ("state", "not in", ("validated", "cancelled")),
+                        ]
+                    )
+                )
                 work_entries._reset_conflicting_state()
             yield
         except OperationalError:
@@ -212,32 +258,47 @@ class HrWorkEntry(models.Model):
 
 
 class HrWorkEntryType(models.Model):
-    _name = 'hr.work.entry.type'
-    _description = 'HR Work Entry Type'
+    _name = "hr.work.entry.type"
+    _description = "HR Work Entry Type"
 
     name = fields.Char(required=True, translate=True)
-    code = fields.Char(required=True, help="Carefull, the Code is used in many references, changing it could lead to unwanted changes.")
+    code = fields.Char(
+        required=True,
+        help="Carefull, the Code is used in many references, changing it could lead to unwanted changes.",
+    )
     color = fields.Integer(default=0)
     sequence = fields.Integer(default=25)
     active = fields.Boolean(
-        'Active', default=True,
-        help="If the active field is set to false, it will allow you to hide the work entry type without removing it.")
+        "Active",
+        default=True,
+        help="If the active field is set to false, it will allow you to hide the work entry type without removing it.",
+    )
 
     _sql_constraints = [
-        ('unique_work_entry_code', 'UNIQUE(code)', 'The same code cannot be associated to multiple work entry types.'),
+        (
+            "unique_work_entry_code",
+            "UNIQUE(code)",
+            "The same code cannot be associated to multiple work entry types.",
+        ),
     ]
 
 
 class Contacts(models.Model):
     """ Personnal calendar filter """
 
-    _name = 'hr.user.work.entry.employee'
-    _description = 'Work Entries Employees'
+    _name = "hr.user.work.entry.employee"
+    _description = "Work Entries Employees"
 
-    user_id = fields.Many2one('res.users', 'Me', required=True, default=lambda self: self.env.user)
-    employee_id = fields.Many2one('hr.employee', 'Employee', required=True)
-    active = fields.Boolean('Active', default=True)
+    user_id = fields.Many2one(
+        "res.users", "Me", required=True, default=lambda self: self.env.user
+    )
+    employee_id = fields.Many2one("hr.employee", "Employee", required=True)
+    active = fields.Boolean("Active", default=True)
 
     _sql_constraints = [
-        ('user_id_employee_id_unique', 'UNIQUE(user_id,employee_id)', 'You cannot have the same employee twice.')
+        (
+            "user_id_employee_id_unique",
+            "UNIQUE(user_id,employee_id)",
+            "You cannot have the same employee twice.",
+        )
     ]

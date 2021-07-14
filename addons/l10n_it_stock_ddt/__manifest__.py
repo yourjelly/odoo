@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "l10n_it_stock_ddt",
-    'icon': '/l10n_it/static/description/icon.png',
-    'website': 'https://www.odoo.com',
-    'category': 'Accounting/Localizations/EDI',
-    'version': '0.1',
-    'description': """
+    "name": "l10n_it_stock_ddt",
+    "icon": "/l10n_it/static/description/icon.png",
+    "website": "https://www.odoo.com",
+    "category": "Accounting/Localizations/EDI",
+    "version": "0.1",
+    "description": """
 Documento di Trasporto (DDT)
 
 Whenever goods are transferred between A and B, the DDT serves
@@ -23,13 +23,13 @@ When invoices are related to their sale order and the sale order with the
 delivery, the system will automatically calculate the linked DDTs for every 
 invoice line to export in the FatturaPA XML.   
     """,
-    'depends': ['l10n_it_edi', 'delivery'],
-    'data': [
-        'report/l10n_it_ddt_report.xml',
-        'views/stock_picking_views.xml',
-        'views/account_invoice_views.xml',
-        'data/l10n_it_ddt_template.xml',
+    "depends": ["l10n_it_edi", "delivery"],
+    "data": [
+        "report/l10n_it_ddt_report.xml",
+        "views/stock_picking_views.xml",
+        "views/account_invoice_views.xml",
+        "data/l10n_it_ddt_template.xml",
     ],
-    'auto_install': True,
-    'post_init_hook': '_create_picking_seq',
+    "auto_install": True,
+    "post_init_hook": "_create_picking_seq",
 }

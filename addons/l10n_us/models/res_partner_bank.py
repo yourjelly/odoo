@@ -7,12 +7,16 @@ from odoo.exceptions import ValidationError
 
 
 class ResPartnerBank(models.Model):
-    _inherit = 'res.partner.bank'
+    _inherit = "res.partner.bank"
 
-    aba_routing = fields.Char(string="ABA/Routing", help="American Bankers Association Routing Number")
+    aba_routing = fields.Char(
+        string="ABA/Routing", help="American Bankers Association Routing Number"
+    )
 
-    @api.constrains('aba_routing')
+    @api.constrains("aba_routing")
     def _check_aba_routing(self):
         for bank in self:
-            if bank.aba_routing and not re.match(r'^\d{1,9}$', bank.aba_routing):
-                raise ValidationError(_('ABA/Routing should only contains numbers (maximum 9 digits).'))
+            if bank.aba_routing and not re.match(r"^\d{1,9}$", bank.aba_routing):
+                raise ValidationError(
+                    _("ABA/Routing should only contains numbers (maximum 9 digits).")
+                )

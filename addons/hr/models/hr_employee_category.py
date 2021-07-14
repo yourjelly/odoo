@@ -15,9 +15,15 @@ class EmployeeCategory(models.Model):
         return randint(1, 11)
 
     name = fields.Char(string="Tag Name", required=True)
-    color = fields.Integer(string='Color Index', default=_get_default_color)
-    employee_ids = fields.Many2many('hr.employee', 'employee_category_rel', 'category_id', 'emp_id', string='Employees')
+    color = fields.Integer(string="Color Index", default=_get_default_color)
+    employee_ids = fields.Many2many(
+        "hr.employee",
+        "employee_category_rel",
+        "category_id",
+        "emp_id",
+        string="Employees",
+    )
 
     _sql_constraints = [
-        ('name_uniq', 'unique (name)', "Tag name already exists !"),
+        ("name_uniq", "unique (name)", "Tag name already exists !"),
     ]

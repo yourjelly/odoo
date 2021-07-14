@@ -11,6 +11,6 @@ class IrUiView(models.Model):
     @api.model
     def _prepare_qcontext(self):
         qcontext = super(IrUiView, self)._prepare_qcontext()
-        qcontext['slug'] = slug
-        qcontext['unslug_url'] = unslug_url
+        qcontext["slug"] = slug
+        qcontext["unslug_url"] = unslug_url
         return qcontext

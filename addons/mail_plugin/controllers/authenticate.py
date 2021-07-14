@@ -16,8 +16,13 @@ _logger = logging.getLogger(__name__)
 
 
 class Authenticate(http.Controller):
-
-    @http.route(['/mail_client_extension/auth', '/mail_plugin/auth'], type='http', auth="user", methods=['GET'], website=True)
+    @http.route(
+        ["/mail_client_extension/auth", "/mail_plugin/auth"],
+        type="http",
+        auth="user",
+        methods=["GET"],
+        website=True,
+    )
     def auth(self, **values):
         """
          Once authenticated this route renders the view that shows an app wants to access Odoo.
@@ -26,9 +31,14 @@ class Authenticate(http.Controller):
          old route name "/mail_client_extension/auth is deprecated as of saas-14.3,it is not needed for newer
          versions of the mail plugin but necessary for supporting older versions
          """
-        return request.render('mail_plugin.app_auth', values)
+        return request.render("mail_plugin.app_auth", values)
 
-    @http.route(['/mail_client_extension/auth/confirm', '/mail_plugin/auth/confirm'], type='http', auth="user", methods=['POST'])
+    @http.route(
+        ["/mail_client_extension/auth/confirm", "/mail_plugin/auth/confirm"],
+        type="http",
+        auth="user",
+        methods=["POST"],
+    )
     def auth_confirm(self, scope, friendlyname, redirect, info=None, do=None, **kw):
         """
         Called by the `app_auth` template. If the user decided to allow the app to access Odoo, a temporary auth code
@@ -42,19 +52,28 @@ class Authenticate(http.Controller):
         parsed_redirect = werkzeug.urls.url_parse(redirect)
         params = parsed_redirect.decode_query()
         if do:
-            name = friendlyname if not info else f'{friendlyname}: {info}'
+            name = friendlyname if not info else f"{friendlyname}: {info}"
             auth_code = self._generate_auth_code(scope, name)
             # params is a MultiDict which does not support .update() with kwargs
             # the state attribute is needed for the gmail connector
-            params.update({'success': 1, 'auth_code': auth_code, 'state': kw.get('state', '')})
+            params.update(
+                {"success": 1, "auth_code": auth_code, "state": kw.get("state", "")}
+            )
         else:
-            params.update({'success': 0, 'state': kw.get('state', '')})
-        updated_redirect = parsed_redirect.replace(query=werkzeug.urls.url_encode(params))
+            params.update({"success": 0, "state": kw.get("state", "")})
+        updated_redirect = parsed_redirect.replace(
+            query=werkzeug.urls.url_encode(params)
+        )
         return request.redirect(updated_redirect.to_url())
 
     # In this case, an exception will be thrown in case of preflight request if only POST is allowed.
-    @http.route(['/mail_client_extension/auth/access_token', '/mail_plugin/auth/access_token'], type='json', auth="none", cors="*",
-                methods=['POST', 'OPTIONS'])
+    @http.route(
+        ["/mail_client_extension/auth/access_token", "/mail_plugin/auth/access_token"],
+        type="json",
+        auth="none",
+        cors="*",
+        methods=["POST", "OPTIONS"],
+    )
     def auth_access_token(self, auth_code, **kw):
         """
         Called by the external app to exchange an auth code, which is temporary and was passed in a URL, for an
@@ -66,23 +85,28 @@ class Authenticate(http.Controller):
         auth_message = self._get_auth_code_data(auth_code)
         if not auth_message:
             return {"error": "Invalid code"}
-        request.uid = auth_message['uid']
-        scope = 'odoo.plugin.' + auth_message.get('scope', '')
-        api_key = request.env['res.users.apikeys']._generate(scope, auth_message['name'])
-        return {'access_token': api_key}
+        request.uid = auth_message["uid"]
+        scope = "odoo.plugin." + auth_message.get("scope", "")
+        api_key = request.env["res.users.apikeys"]._generate(
+            scope, auth_message["name"]
+        )
+        return {"access_token": api_key}
 
     def _get_auth_code_data(self, auth_code):
-        data, auth_code_signature = auth_code.split('.')
+        data, auth_code_signature = auth_code.split(".")
         data = base64.b64decode(data)
         auth_code_signature = base64.b64decode(auth_code_signature)
-        signature = odoo.tools.misc.hmac(request.env(su=True), 'mail_plugin', data).encode()
+        signature = odoo.tools.misc.hmac(
+            request.env(su=True), "mail_plugin", data
+        ).encode()
         if not hmac.compare_digest(auth_code_signature, signature):
             return None
 
         auth_message = json.loads(data)
         # Check the expiration
-        if datetime.datetime.utcnow() - datetime.datetime.fromtimestamp(auth_message['timestamp']) > datetime.timedelta(
-                minutes=3):
+        if datetime.datetime.utcnow() - datetime.datetime.fromtimestamp(
+            auth_message["timestamp"]
+        ) > datetime.timedelta(minutes=3):
             return None
 
         return auth_message
@@ -91,14 +115,19 @@ class Authenticate(http.Controller):
     # necessarily happen on the same server
     def _generate_auth_code(self, scope, name):
         auth_dict = {
-            'scope': scope,
-            'name': name,
-            'timestamp': int(datetime.datetime.utcnow().timestamp()),
+            "scope": scope,
+            "name": name,
+            "timestamp": int(datetime.datetime.utcnow().timestamp()),
             # <- elapsed time should be < 3 mins when verifying
-            'uid': request.uid,
+            "uid": request.uid,
         }
         auth_message = json.dumps(auth_dict, sort_keys=True).encode()
-        signature = odoo.tools.misc.hmac(request.env(su=True), 'mail_plugin', auth_message).encode()
-        auth_code = "%s.%s" % (base64.b64encode(auth_message).decode(), base64.b64encode(signature).decode())
-        _logger.info('Auth code created - user %s, scope %s', request.env.user, scope)
+        signature = odoo.tools.misc.hmac(
+            request.env(su=True), "mail_plugin", auth_message
+        ).encode()
+        auth_code = "%s.%s" % (
+            base64.b64encode(auth_message).decode(),
+            base64.b64encode(signature).decode(),
+        )
+        _logger.info("Auth code created - user %s, scope %s", request.env.user, scope)
         return auth_code

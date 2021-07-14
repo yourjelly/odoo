@@ -10,7 +10,8 @@ from odoo.tests import tagged, HttpCase, get_db_name
 
 from ..controllers.home import Home
 
-@tagged('post_install', '-at_install')
+
+@tagged("post_install", "-at_install")
 class TestTOTP(HttpCase):
     def setUp(self):
         super().setUp()
@@ -30,54 +31,54 @@ class TestTOTP(HttpCase):
                 # "burned" so we can't generate the same, but tour is so fast
                 # we're pretty certainly within the same 30s
                 return totp.generate(time.time() + 30).token
+
         # because not preprocessed by ControllerType metaclass
-        totp_hook.routing_type = 'json'
-        self.env['ir.http']._clear_routing_map()
+        totp_hook.routing_type = "json"
+        self.env["ir.http"]._clear_routing_map()
         # patch Home to add test endpoint
-        Home.totp_hook = http.route('/totphook', type='json', auth='none')(totp_hook)
+        Home.totp_hook = http.route("/totphook", type="json", auth="none")(totp_hook)
         # remove endpoint and destroy routing map
         @self.addCleanup
         def _cleanup():
             del Home.totp_hook
-            self.env['ir.http']._clear_routing_map()
+            self.env["ir.http"]._clear_routing_map()
 
     def test_totp(self):
         # 1. Enable 2FA
-        self.start_tour('/web', 'totp_tour_setup', login='demo')
+        self.start_tour("/web", "totp_tour_setup", login="demo")
 
         # 2. Verify that RPC is blocked because 2FA is on.
         self.assertFalse(
-            self.xmlrpc_common.authenticate(get_db_name(), 'demo', 'demo', {}),
-            "Should not have returned a uid"
+            self.xmlrpc_common.authenticate(get_db_name(), "demo", "demo", {}),
+            "Should not have returned a uid",
         )
         self.assertFalse(
-            self.xmlrpc_common.authenticate(get_db_name(), 'demo', 'demo', {'interactive': True}),
-            'Trying to fake the auth type should not work'
+            self.xmlrpc_common.authenticate(
+                get_db_name(), "demo", "demo", {"interactive": True}
+            ),
+            "Trying to fake the auth type should not work",
         )
-        uid = self.env.ref('base.user_demo').id
-        with self.assertRaisesRegex(Fault, r'Access Denied'):
+        uid = self.env.ref("base.user_demo").id
+        with self.assertRaisesRegex(Fault, r"Access Denied"):
             self.xmlrpc_object.execute_kw(
-                get_db_name(), uid, 'demo',
-                'res.users', 'read', [uid, ['login']]
+                get_db_name(), uid, "demo", "res.users", "read", [uid, ["login"]]
             )
 
         # 3. Check 2FA is required and disable it
-        self.start_tour('/', 'totp_login_enabled', login=None)
+        self.start_tour("/", "totp_login_enabled", login=None)
 
         # 4. Finally, check that 2FA is in fact disabled
-        self.start_tour('/', 'totp_login_disabled', login=None)
+        self.start_tour("/", "totp_login_disabled", login=None)
 
         # 5. Check that rpc is now re-allowed
-        uid = self.xmlrpc_common.authenticate(get_db_name(), 'demo', 'demo', {})
-        self.assertEqual(uid, self.env.ref('base.user_demo').id)
+        uid = self.xmlrpc_common.authenticate(get_db_name(), "demo", "demo", {})
+        self.assertEqual(uid, self.env.ref("base.user_demo").id)
         [r] = self.xmlrpc_object.execute_kw(
-            get_db_name(), uid, 'demo',
-            'res.users', 'read', [uid, ['login']]
+            get_db_name(), uid, "demo", "res.users", "read", [uid, ["login"]]
         )
-        self.assertEqual(r['login'], 'demo')
-
+        self.assertEqual(r["login"], "demo")
 
     def test_totp_administration(self):
-        self.start_tour('/web', 'totp_tour_setup', login='demo')
-        self.start_tour('/web', 'totp_admin_disables', login='admin')
-        self.start_tour('/', 'totp_login_disabled', login=None)
+        self.start_tour("/web", "totp_tour_setup", login="demo")
+        self.start_tour("/web", "totp_admin_disables", login="admin")
+        self.start_tour("/", "totp_login_disabled", login=None)

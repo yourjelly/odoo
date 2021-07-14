@@ -1,6 +1,6 @@
 {
-    'name': 'Two-Factor Authentication (TOTP)',
-    'description': """
+    "name": "Two-Factor Authentication (TOTP)",
+    "description": """
 Two-Factor Authentication (TOTP)
 ================================
 Allows users to configure two-factor authentication on their user account
@@ -14,17 +14,13 @@ Note: logically, two-factor prevents password-based RPC access for users
 where it is enabled. In order to be able to execute RPC scripts, the user
 can setup API keys to replace their main password.
     """,
-    'depends': ['web'],
-    'category': 'Extra Tools',
-    'auto_install': True,
-    'data': [
-        'security/security.xml',
-        'views/user_preferences.xml',
-        'views/templates.xml',
+    "depends": ["web"],
+    "category": "Extra Tools",
+    "auto_install": True,
+    "data": [
+        "security/security.xml",
+        "views/user_preferences.xml",
+        "views/templates.xml",
     ],
-    'assets': {
-        'web.assets_tests': [
-            'auth_totp/static/**/*',
-        ],
-    },
+    "assets": {"web.assets_tests": ["auth_totp/static/**/*",],},
 }

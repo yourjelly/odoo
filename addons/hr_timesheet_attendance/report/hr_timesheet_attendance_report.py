@@ -5,11 +5,11 @@ from odoo import api, fields, models, tools
 
 
 class TimesheetAttendance(models.Model):
-    _name = 'hr.timesheet.attendance.report'
+    _name = "hr.timesheet.attendance.report"
     _auto = False
-    _description = 'Timesheet Attendance Report'
+    _description = "Timesheet Attendance Report"
 
-    user_id = fields.Many2one('res.users')
+    user_id = fields.Many2one("res.users")
     date = fields.Date()
     total_timesheet = fields.Float()
     total_attendance = fields.Float()
@@ -17,7 +17,8 @@ class TimesheetAttendance(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self._cr.execute("""CREATE OR REPLACE VIEW %s AS (
+        self._cr.execute(
+            """CREATE OR REPLACE VIEW %s AS (
             SELECT
                 max(id) AS id,
                 t.user_id,
@@ -48,4 +49,6 @@ class TimesheetAttendance(models.Model):
             GROUP BY t.user_id, t.date
             ORDER BY t.date
         )
-        """ % self._table)
+        """
+            % self._table
+        )

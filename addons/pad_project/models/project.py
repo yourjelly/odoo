@@ -6,13 +6,17 @@ from odoo import api, fields, models
 
 class ProjectTask(models.Model):
     _name = "project.task"
-    _inherit = ["project.task", 'pad.common']
-    _description = 'Task'
+    _inherit = ["project.task", "pad.common"]
+    _description = "Task"
 
-    description_pad = fields.Char('Pad URL', pad_content_field='description', copy=False)
-    use_pad = fields.Boolean(related="project_id.use_pads", string="Use collaborative pad", readonly=True)
+    description_pad = fields.Char(
+        "Pad URL", pad_content_field="description", copy=False
+    )
+    use_pad = fields.Boolean(
+        related="project_id.use_pads", string="Use collaborative pad", readonly=True
+    )
 
-    @api.onchange('use_pad')
+    @api.onchange("use_pad")
     def _onchange_use_pads(self):
         """ Copy the content in the pad when the user change the project of the task to the one with no pads enabled.
 
@@ -20,15 +24,17 @@ class ProjectTask(models.Model):
             that is the description_pad field contains the url of the pad.
         """
         if not self.use_pad and self.description_pad:
-            vals = {'description_pad': self.description_pad}
+            vals = {"description_pad": self.description_pad}
             self._set_pad_to_field(vals)
-            self.description = vals['description']
+            self.description = vals["description"]
 
     @api.model
     def create(self, vals):
         # When using quick create, the project_id is in the context, not in the vals
-        project_id = vals.get('project_id', False) or self.default_get(['project_id']).get('project_id', False)
-        if not self.env['project.project'].browse(project_id).use_pads:
+        project_id = vals.get("project_id", False) or self.default_get(
+            ["project_id"]
+        ).get("project_id", False)
+        if not self.env["project.project"].browse(project_id).use_pads:
             self = self.with_context(pad_no_create=True)
         return super(ProjectTask, self).create(vals)
 
@@ -43,9 +49,14 @@ class ProjectTask(models.Model):
 
 class ProjectProject(models.Model):
     _name = "project.project"
-    _inherit = ["project.project", 'pad.common']
-    _description = 'Project'
+    _inherit = ["project.project", "pad.common"]
+    _description = "Project"
 
-    description_pad = fields.Char('Pad URL', pad_content_field='description', copy=False)
-    use_pads = fields.Boolean("Use collaborative pads", default=True,
-        help="Use collaborative pad for the tasks on this project.")
+    description_pad = fields.Char(
+        "Pad URL", pad_content_field="description", copy=False
+    )
+    use_pads = fields.Boolean(
+        "Use collaborative pads",
+        default=True,
+        help="Use collaborative pad for the tasks on this project.",
+    )

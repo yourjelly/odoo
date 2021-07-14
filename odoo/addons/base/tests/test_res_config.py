@@ -10,32 +10,35 @@ _logger = logging.getLogger(__name__)
 
 
 class TestResConfig(TransactionCase):
-
     def setUp(self):
         super(TestResConfig, self).setUp()
-        self.ResConfig = self.env['res.config.settings']
+        self.ResConfig = self.env["res.config.settings"]
 
         # Define the test values
-        self.menu_xml_id = 'base.menu_action_res_users'
-        self.full_field_name = 'res.partner.lang'
+        self.menu_xml_id = "base.menu_action_res_users"
+        self.full_field_name = "res.partner.lang"
         self.error_msg = "WarningRedirect test string: %(field:res.partner.lang)s - %(menu:base.menu_action_res_users)s."
-        self.error_msg_wo_menu = "WarningRedirect test string: %(field:res.partner.lang)s."
+        self.error_msg_wo_menu = (
+            "WarningRedirect test string: %(field:res.partner.lang)s."
+        )
         # Note: see the get_config_warning() doc for a better example
 
         # Fetch the expected values
         menu = self.env.ref(self.menu_xml_id)
 
-        model_name, field_name = self.full_field_name.rsplit('.', 1)
+        model_name, field_name = self.full_field_name.rsplit(".", 1)
 
         self.expected_path = menu.complete_name
         self.expected_action_id = menu.action.id
-        self.expected_name = self.env[model_name].fields_get([field_name])[field_name]['string']
+        self.expected_name = self.env[model_name].fields_get([field_name])[field_name][
+            "string"
+        ]
         self.expected_final_error_msg = self.error_msg % {
-            'field:res.partner.lang': self.expected_name,
-            'menu:base.menu_action_res_users': self.expected_path
+            "field:res.partner.lang": self.expected_name,
+            "menu:base.menu_action_res_users": self.expected_path,
         }
         self.expected_final_error_msg_wo_menu = self.error_msg_wo_menu % {
-            'field:res.partner.lang': self.expected_name,
+            "field:res.partner.lang": self.expected_name,
         }
 
     def test_00_get_option_path(self):
@@ -84,16 +87,17 @@ class TestResConfig(TransactionCase):
         self.assertEqual(res.args[0], self.expected_final_error_msg_wo_menu)
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestResConfigExecute(TransactionCase):
-
     def test_01_execute_res_config(self):
         """
         Try to create and execute all res_config models. Target settings that can't be
         loaded or saved and avoid remaining methods `get_default_foo` or `set_foo` that
         won't be executed is foo != `fields`
         """
-        all_config_settings = self.env['ir.model'].search([('name', 'like', 'config.settings')])
+        all_config_settings = self.env["ir.model"].search(
+            [("name", "like", "config.settings")]
+        )
         for config_settings in all_config_settings:
             _logger.info("Testing %s" % (config_settings.name))
             self.env[config_settings.name].create({}).execute()

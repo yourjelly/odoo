@@ -3,10 +3,10 @@ from odoo.tools import format_date
 
 
 class RepairOrder(models.Model):
-    _inherit = 'repair.order'
+    _inherit = "repair.order"
 
-    l10n_de_template_data = fields.Binary(compute='_compute_l10n_de_template_data')
-    l10n_de_document_title = fields.Char(compute='_compute_l10n_de_document_title')
+    l10n_de_template_data = fields.Binary(compute="_compute_l10n_de_template_data")
+    l10n_de_document_title = fields.Char(compute="_compute_l10n_de_document_title")
 
     def _compute_l10n_de_template_data(self):
         for record in self:
@@ -16,12 +16,16 @@ class RepairOrder(models.Model):
             if record.lot_id:
                 data.append((_("Lot/Serial Number"), record.lot_id.name))
             if record.guarantee_limit:
-                data.append((_("Warranty"), format_date(self.env, record.guarantee_limit)))
-            data.append((_("Printing Date"), format_date(self.env, fields.Date.today())))
+                data.append(
+                    (_("Warranty"), format_date(self.env, record.guarantee_limit))
+                )
+            data.append(
+                (_("Printing Date"), format_date(self.env, fields.Date.today()))
+            )
 
     def _compute_l10n_de_document_title(self):
         for record in self:
-            if record.state == 'draft':
+            if record.state == "draft":
                 record.l10n_de_document_title = _("Repair Order")
             else:
                 record.l10n_de_document_title = _("Repair Quotation")

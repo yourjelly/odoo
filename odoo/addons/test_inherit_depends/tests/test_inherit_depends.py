@@ -10,8 +10,9 @@ class TestInheritDepends(common.TransactionCase):
         # from X should have an external ID in module C.
         #
         # Here, M is 'test_new_api.foo' and X is 'test_inherit.mixin'.
-        field = self.env['ir.model.fields']._get('test_new_api.foo', 'published')
+        field = self.env["ir.model.fields"]._get("test_new_api.foo", "published")
         self.assertTrue(field)
-        self.assertEqual(field._get_external_ids(), {
-            field.id: ['test_inherit_depends.field_test_new_api_foo__published'],
-        })
+        self.assertEqual(
+            field._get_external_ids(),
+            {field.id: ["test_inherit_depends.field_test_new_api_foo__published"],},
+        )

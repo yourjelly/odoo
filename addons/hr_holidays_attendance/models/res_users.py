@@ -5,23 +5,25 @@ from odoo import api, fields, models
 
 
 class ResUsers(models.Model):
-    _inherit = 'res.users'
+    _inherit = "res.users"
 
-    request_overtime = fields.Boolean(compute='_compute_request_overtime')
+    request_overtime = fields.Boolean(compute="_compute_request_overtime")
 
     @property
     def SELF_READABLE_FIELDS(self):
-        return super().SELF_READABLE_FIELDS + ['request_overtime']
+        return super().SELF_READABLE_FIELDS + ["request_overtime"]
 
-    @api.depends_context('uid')
-    @api.depends('total_overtime')
+    @api.depends_context("uid")
+    @api.depends("total_overtime")
     def _compute_request_overtime(self):
-        is_holiday_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
-        time_off_types = self.env['hr.leave.type'].search_count([
-            ('valid', '=', True),
-            ('allocation_type', '=', 'fixed_allocation'),
-            ('overtime_deductible', '=', True)
-        ])
+        is_holiday_user = self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+        time_off_types = self.env["hr.leave.type"].search_count(
+            [
+                ("valid", "=", True),
+                ("allocation_type", "=", "fixed_allocation"),
+                ("overtime_deductible", "=", True),
+            ]
+        )
         for user in self:
             if user.total_overtime >= 1:
                 if is_holiday_user:

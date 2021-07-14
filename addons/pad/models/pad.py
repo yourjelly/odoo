@@ -18,56 +18,68 @@ _logger = logging.getLogger(__name__)
 
 
 class PadCommon(models.AbstractModel):
-    _name = 'pad.common'
-    _description = 'Pad Common'
+    _name = "pad.common"
+    _description = "Pad Common"
 
     def _valid_field_parameter(self, field, name):
-        return name == 'pad_content_field' or super()._valid_field_parameter(field, name)
+        return name == "pad_content_field" or super()._valid_field_parameter(
+            field, name
+        )
 
     @api.model
     def pad_is_configured(self):
-        return bool(self.env['ir.config_parameter'].sudo().get_param('pad.pad_server'))
+        return bool(self.env["ir.config_parameter"].sudo().get_param("pad.pad_server"))
 
     @api.model
     def pad_generate_url(self):
         pad = {
-            "server": self.env['ir.config_parameter'].sudo().get_param('pad.pad_server'),
-            "key": self.env['ir.config_parameter'].sudo().get_param('pad.pad_key'),
+            "server": self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("pad.pad_server"),
+            "key": self.env["ir.config_parameter"].sudo().get_param("pad.pad_key"),
         }
 
         # make sure pad server in the form of http://hostname
         if not pad["server"]:
             return pad
-        if not pad["server"].startswith('http'):
-            pad["server"] = 'http://' + pad["server"]
-        pad["server"] = pad["server"].rstrip('/')
+        if not pad["server"].startswith("http"):
+            pad["server"] = "http://" + pad["server"]
+        pad["server"] = pad["server"].rstrip("/")
         # generate a salt
         s = string.ascii_uppercase + string.digits
-        salt = ''.join([s[random.SystemRandom().randint(0, len(s) - 1)] for i in range(10)])
+        salt = "".join(
+            [s[random.SystemRandom().randint(0, len(s) - 1)] for i in range(10)]
+        )
         # path
         # etherpad hardcodes pad id length limit to 50
-        path = '-%s-%s' % (self._name, salt)
-        path = '%s%s' % (self.env.cr.dbname.replace('_', '-')[0:50 - len(path)], path)
+        path = "-%s-%s" % (self._name, salt)
+        path = "%s%s" % (self.env.cr.dbname.replace("_", "-")[0 : 50 - len(path)], path)
         # contruct the url
-        url = '%s/p/%s' % (pad["server"], path)
+        url = "%s/p/%s" % (pad["server"], path)
 
         # if create with content
-        if self.env.context.get('field_name') and self.env.context.get('model'):
-            myPad = EtherpadLiteClient(pad["key"], pad["server"] + '/api')
+        if self.env.context.get("field_name") and self.env.context.get("model"):
+            myPad = EtherpadLiteClient(pad["key"], pad["server"] + "/api")
             try:
                 myPad.createPad(path)
             except IOError:
-                raise UserError(_("Pad creation failed, either there is a problem with your pad server URL or with your connection."))
+                raise UserError(
+                    _(
+                        "Pad creation failed, either there is a problem with your pad server URL or with your connection."
+                    )
+                )
 
             # get attr on the field model
             model = self.env[self.env.context["model"]]
-            field = model._fields[self.env.context['field_name']]
+            field = model._fields[self.env.context["field_name"]]
             real_field = field.pad_content_field
 
             res_id = self.env.context.get("object_id")
             record = model.browse(res_id)
             # get content of the real field
-            real_field_value = record[real_field] or self.env.context.get('record', {}).get(real_field, '')
+            real_field_value = record[real_field] or self.env.context.get(
+                "record", {}
+            ).get(real_field, "")
             if real_field_value:
                 myPad.setHtmlFallbackText(path, real_field_value)
 
@@ -80,25 +92,30 @@ class PadCommon(models.AbstractModel):
     @api.model
     def pad_get_content(self, url):
         pad = {
-            "server": self.env['ir.config_parameter'].sudo().get_param('pad.pad_server'),
-            "key": self.env['ir.config_parameter'].sudo().get_param('pad.pad_key'),
+            "server": self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("pad.pad_server"),
+            "key": self.env["ir.config_parameter"].sudo().get_param("pad.pad_key"),
         }
-        myPad = EtherpadLiteClient(pad['key'], (pad['server'] or '') + '/api')
-        content = ''
+        myPad = EtherpadLiteClient(pad["key"], (pad["server"] or "") + "/api")
+        content = ""
         if url:
-            split_url = url.split('/p/')
+            split_url = url.split("/p/")
             path = len(split_url) == 2 and split_url[1]
             try:
-                content = myPad.getHtml(path).get('html', '')
+                content = myPad.getHtml(path).get("html", "")
             except IOError:
-                _logger.warning('Http Error: the credentials might be absent for url: "%s". Falling back.' % url)
+                _logger.warning(
+                    'Http Error: the credentials might be absent for url: "%s". Falling back.'
+                    % url
+                )
                 try:
-                    r = requests.get('%s/export/html' % url)
+                    r = requests.get("%s/export/html" % url)
                     r.raise_for_status()
                 except Exception:
                     _logger.warning("No pad found with url '%s'.", url)
                 else:
-                    mo = re.search('<body>(.*)</body>', r.content.decode(), re.DOTALL)
+                    mo = re.search("<body>(.*)</body>", r.content.decode(), re.DOTALL)
                     if mo:
                         content = mo.group(1)
 
@@ -121,34 +138,42 @@ class PadCommon(models.AbstractModel):
 
         # Case of a programmatical creation (e.g. copy): we receive the field content, so we need
         # to create the corresponding pad
-        if self.env.context.get('pad_no_create', False):
+        if self.env.context.get("pad_no_create", False):
             return pad
         for k, field in self._fields.items():
-            if hasattr(field, 'pad_content_field') and k not in vals:
+            if hasattr(field, "pad_content_field") and k not in vals:
                 ctx = {
-                    'model': self._name,
-                    'field_name': k,
-                    'object_id': pad.id,
+                    "model": self._name,
+                    "field_name": k,
+                    "object_id": pad.id,
                 }
                 pad_info = self.with_context(**ctx).pad_generate_url()
-                pad[k] = pad_info.get('url')
+                pad[k] = pad_info.get("url")
         return pad
 
     def _set_field_to_pad(self, vals):
         # Update the pad if the `pad_content_field` is modified
         for k, field in self._fields.items():
-            if hasattr(field, 'pad_content_field') and vals.get(field.pad_content_field) and self[k]:
+            if (
+                hasattr(field, "pad_content_field")
+                and vals.get(field.pad_content_field)
+                and self[k]
+            ):
                 pad = {
-                    "server": self.env['ir.config_parameter'].sudo().get_param('pad.pad_server'),
-                    "key": self.env['ir.config_parameter'].sudo().get_param('pad.pad_key'),
+                    "server": self.env["ir.config_parameter"]
+                    .sudo()
+                    .get_param("pad.pad_server"),
+                    "key": self.env["ir.config_parameter"]
+                    .sudo()
+                    .get_param("pad.pad_key"),
                 }
-                myPad = EtherpadLiteClient(pad['key'], (pad['server'] or '') + '/api')
-                path = self[k].split('/p/')[1]
+                myPad = EtherpadLiteClient(pad["key"], (pad["server"] or "") + "/api")
+                path = self[k].split("/p/")[1]
                 myPad.setHtmlFallbackText(path, vals[field.pad_content_field])
 
     def _set_pad_to_field(self, vals):
         # Update the `pad_content_field` if the pad is modified
         for k, v in list(vals.items()):
             field = self._fields.get(k)
-            if hasattr(field, 'pad_content_field'):
+            if hasattr(field, "pad_content_field"):
                 vals[field.pad_content_field] = self.pad_get_content(v)

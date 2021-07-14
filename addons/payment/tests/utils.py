@@ -12,12 +12,11 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTestUtils(AccountTestInvoicingCommon):
-
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
-        cls.base_url = cls.env['ir.config_parameter'].get_param('web.base.url')
+        cls.base_url = cls.env["ir.config_parameter"].get_param("web.base.url")
 
     def _generate_test_access_token(self, *values):
         """ Generate an access token based on the provided values for testing purposes.
@@ -32,8 +31,8 @@ class PaymentTestUtils(AccountTestInvoicingCommon):
         :return: The generated access token
         :rtype: str
         """
-        token_str = '|'.join(str(val) for val in values)
-        access_token = hmac_tool(self.env(su=True), 'generate_access_token', token_str)
+        token_str = "|".join(str(val) for val in values)
+        access_token = hmac_tool(self.env(su=True), "generate_access_token", token_str)
         return access_token
 
     def _build_url(self, route):
@@ -47,9 +46,12 @@ class PaymentTestUtils(AccountTestInvoicingCommon):
         :rtype: dict[str:str]
         """
         html_tree = objectify.fromstring(html_form)
-        action = html_tree.get('action')
-        inputs = {form_input.get('name'): form_input.get('value') for form_input in html_tree.input}
+        action = html_tree.get("action")
+        inputs = {
+            form_input.get("name"): form_input.get("value")
+            for form_input in html_tree.input
+        }
         return {
-            'action': action,
-            'inputs': inputs,
+            "action": action,
+            "inputs": inputs,
         }

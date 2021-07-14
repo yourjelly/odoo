@@ -4,24 +4,31 @@ import odoo.tests
 from odoo import Command
 
 
-@odoo.tests.tagged('-at_install', 'post_install')
+@odoo.tests.tagged("-at_install", "post_install")
 class TestAccess(odoo.tests.HttpCase):
     def setUp(self):
         super(TestAccess, self).setUp()
 
-        self.portal_user = self.env['res.users'].create({
-            'login': 'P',
-            'name': 'P',
-            'groups_id': [Command.set([self.env.ref('base.group_portal').id])],
-        })
+        self.portal_user = self.env["res.users"].create(
+            {
+                "login": "P",
+                "name": "P",
+                "groups_id": [Command.set([self.env.ref("base.group_portal").id])],
+            }
+        )
         # a partner that can't be read by the portal user, would typically be a user's
-        self.internal_user_partner = self.env['res.partner'].create({'name': 'I'})
+        self.internal_user_partner = self.env["res.partner"].create({"name": "I"})
 
-        self.document = self.env['test_access_right.ticket'].create({
-            'name': 'Need help here',
-            'message_partner_ids': [Command.set([self.portal_user.partner_id.id,
-                                            self.internal_user_partner.id])],
-        })
+        self.document = self.env["test_access_right.ticket"].create(
+            {
+                "name": "Need help here",
+                "message_partner_ids": [
+                    Command.set(
+                        [self.portal_user.partner_id.id, self.internal_user_partner.id]
+                    )
+                ],
+            }
+        )
 
     def test_check_access(self):
         """Typically, a document consulted by a portal user P
@@ -35,24 +42,22 @@ class TestAccess(odoo.tests.HttpCase):
         # at this point, some fields might already be loaded in cache.
         # if so, it means we would bypass the ACL when trying to read the field
         # while this is bad, this is not the object of this test
-        self.internal_user_partner.invalidate_cache(fnames=['active'])
+        self.internal_user_partner.invalidate_cache(fnames=["active"])
         # from portal's _document_check_access:
-        document.check_access_rights('read')
-        document.check_access_rule('read')
+        document.check_access_rights("read")
+        document.check_access_rule("read")
         # no raise, because we are supposed to be able to read our ticket
 
     def test_name_search_with_sudo(self):
         """Check that _name_search return correct values with sudo
         """
-        no_access_user = self.env['res.users'].create({
-            'login': 'no_access',
-            'name': 'no_access',
-            'groups_id': [Command.clear()],
-        })
-        document = self.env['test_access_right.ticket'].with_user(no_access_user)
-        res = document.sudo().name_search('Need help here')
-        #Invalide cache in case the name is already there
-        #and will not trigget check_access_rights when
-        #the name_get will access the name
-        self.document.invalidate_cache(fnames=['name'])
+        no_access_user = self.env["res.users"].create(
+            {"login": "no_access", "name": "no_access", "groups_id": [Command.clear()],}
+        )
+        document = self.env["test_access_right.ticket"].with_user(no_access_user)
+        res = document.sudo().name_search("Need help here")
+        # Invalide cache in case the name is already there
+        # and will not trigget check_access_rights when
+        # the name_get will access the name
+        self.document.invalidate_cache(fnames=["name"])
         self.assertEqual(res[0][1], "Need help here")

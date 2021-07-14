@@ -7,7 +7,7 @@ from odoo.exceptions import AccessError
 
 class Partner(models.Model):
 
-    _inherit = ['res.partner']
+    _inherit = ["res.partner"]
 
     def name_get(self):
         """ Override to allow an employee to see its private address in his profile.
@@ -18,6 +18,8 @@ class Partner(models.Model):
         try:
             return super(Partner, self).name_get()
         except AccessError as e:
-            if len(self) == 1 and self in self.env.user.employee_ids.mapped('address_home_id'):
+            if len(self) == 1 and self in self.env.user.employee_ids.mapped(
+                "address_home_id"
+            ):
                 return super(Partner, self.sudo()).name_get()
             raise e

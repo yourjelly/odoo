@@ -26,6 +26,7 @@ class WorkIntervals(object):
         Here: they remain two different intervals.
         To implement this behaviour, the main implementation change is the way boundaries are sorted.
     """
+
     def __init__(self, intervals=()):
         self._items = []
         if intervals:
@@ -33,8 +34,10 @@ class WorkIntervals(object):
             append = self._items.append
             starts = []
             recses = []
-            for value, flag, recs in sorted(_boundaries(sorted(intervals), 'start', 'stop'), key=lambda i: i[0]):
-                if flag == 'start':
+            for value, flag, recs in sorted(
+                _boundaries(sorted(intervals), "start", "stop"), key=lambda i: i[0]
+            ):
+                if flag == "start":
                     starts.append(value)
                     recses.append(recs)
                 else:
@@ -73,17 +76,17 @@ class WorkIntervals(object):
         append = result._items.append
 
         # using 'self' and 'other' below forces normalization
-        bounds1 = _boundaries(sorted(self), 'start', 'stop')
-        bounds2 = _boundaries(sorted(other), 'switch', 'switch')
+        bounds1 = _boundaries(sorted(self), "start", "stop")
+        bounds2 = _boundaries(sorted(other), "switch", "switch")
 
-        start = None                    # set by start/stop
-        recs1 = None                    # set by start
-        enabled = difference            # changed by switch
+        start = None  # set by start/stop
+        recs1 = None  # set by start
+        enabled = difference  # changed by switch
         for value, flag, recs in sorted(chain(bounds1, bounds2), key=lambda i: i[0]):
-            if flag == 'start':
+            if flag == "start":
                 start = value
                 recs1 = recs
-            elif flag == 'stop':
+            elif flag == "stop":
                 if enabled and start < value:
                     append((start, value, recs1))
                 start = None

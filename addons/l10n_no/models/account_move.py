@@ -24,6 +24,6 @@ class AccountMove(models.Model):
 
     def _get_kid_number(self):
         self.ensure_one()
-        invoice_name = ''.join([i for i in self.name if i.isdigit()]).zfill(7)
-        ref = (str(self.partner_id.id).zfill(7)[-7:] + invoice_name[-7:])
+        invoice_name = "".join([i for i in self.name if i.isdigit()]).zfill(7)
+        ref = str(self.partner_id.id).zfill(7)[-7:] + invoice_name[-7:]
         return ref + luhn.calc_check_digit(ref)

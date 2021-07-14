@@ -8,37 +8,50 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentToken(models.Model):
-    _name = 'payment.token'
-    _order = 'partner_id, id desc'
-    _description = 'Payment Token'
+    _name = "payment.token"
+    _order = "partner_id, id desc"
+    _description = "Payment Token"
 
     acquirer_id = fields.Many2one(
-        string="Acquirer Account", comodel_name='payment.acquirer', required=True)
-    provider = fields.Selection(related='acquirer_id.provider')
+        string="Acquirer Account", comodel_name="payment.acquirer", required=True
+    )
+    provider = fields.Selection(related="acquirer_id.provider")
     name = fields.Char(
-        string="Name", help="The anonymized acquirer reference of the payment method",
-        required=True)
-    partner_id = fields.Many2one(string="Partner", comodel_name='res.partner', required=True)
+        string="Name",
+        help="The anonymized acquirer reference of the payment method",
+        required=True,
+    )
+    partner_id = fields.Many2one(
+        string="Partner", comodel_name="res.partner", required=True
+    )
     company_id = fields.Many2one(  # Indexed to speed-up ORM searches (from ir_rule or others)
-        related='acquirer_id.company_id', store=True, index=True)
+        related="acquirer_id.company_id", store=True, index=True
+    )
     acquirer_ref = fields.Char(
-        string="Acquirer Reference", help="The acquirer reference of the token of the transaction",
-        required=True)  # This is not the same thing as the acquirer reference of the transaction
+        string="Acquirer Reference",
+        help="The acquirer reference of the token of the transaction",
+        required=True,
+    )  # This is not the same thing as the acquirer reference of the transaction
     transaction_ids = fields.One2many(
-        string="Payment Transactions", comodel_name='payment.transaction', inverse_name='token_id')
+        string="Payment Transactions",
+        comodel_name="payment.transaction",
+        inverse_name="token_id",
+    )
     verified = fields.Boolean(string="Verified")
     active = fields.Boolean(string="Active", default=True)
 
-    #=== CRUD METHODS ===#
+    # === CRUD METHODS ===#
 
     @api.model_create_multi
     def create(self, values_list):
         for values in values_list:
-            if 'acquirer_id' in values:
-                acquirer = self.env['payment.acquirer'].browse(values['acquirer_id'])
+            if "acquirer_id" in values:
+                acquirer = self.env["payment.acquirer"].browse(values["acquirer_id"])
 
                 # Include acquirer-specific create values
-                values.update(self._get_specific_create_values(acquirer.provider, values))
+                values.update(
+                    self._get_specific_create_values(acquirer.provider, values)
+                )
             else:
                 pass  # Let psycopg warn about the missing required field
 
@@ -70,18 +83,18 @@ class PaymentToken(models.Model):
         :rtype: bool
         """
         # Let acquirers handle activation/deactivation requests
-        if 'active' in values:
+        if "active" in values:
             for token in self:
                 # Call handlers in sudo mode because this method might have been called by RPC
-                if values['active'] and not token.active:
+                if values["active"] and not token.active:
                     token.sudo()._handle_reactivation_request()
-                elif not values['active'] and token.active:
+                elif not values["active"] and token.active:
                     token.sudo()._handle_deactivation_request()
 
         # Proceed with the toggling of the active state
         return super().write(values)
 
-    #=== BUSINESS METHODS ===#
+    # === BUSINESS METHODS ===#
 
     def _handle_deactivation_request(self):
         """ Handle the request for deactivation of the token.

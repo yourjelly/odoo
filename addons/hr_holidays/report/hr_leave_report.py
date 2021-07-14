@@ -7,41 +7,52 @@ from odoo.osv import expression
 
 class LeaveReport(models.Model):
     _name = "hr.leave.report"
-    _description = 'Time Off Summary / Report'
+    _description = "Time Off Summary / Report"
     _auto = False
     _order = "date_from DESC, employee_id"
 
-    employee_id = fields.Many2one('hr.employee', string="Employee", readonly=True)
-    active_employee = fields.Boolean(related='employee_id.active', readonly=True)
-    name = fields.Char('Description', readonly=True)
-    number_of_days = fields.Float('Number of Days', readonly=True)
-    leave_type = fields.Selection([
-        ('allocation', 'Allocation'),
-        ('request', 'Time Off')
-        ], string='Request Type', readonly=True)
-    department_id = fields.Many2one('hr.department', string='Department', readonly=True)
-    category_id = fields.Many2one('hr.employee.category', string='Employee Tag', readonly=True)
-    holiday_status_id = fields.Many2one("hr.leave.type", string="Leave Type", readonly=True)
-    state = fields.Selection([
-        ('draft', 'To Submit'),
-        ('cancel', 'Cancelled'),
-        ('confirm', 'To Approve'),
-        ('refuse', 'Refused'),
-        ('validate1', 'Second Approval'),
-        ('validate', 'Approved')
-        ], string='Status', readonly=True)
-    holiday_type = fields.Selection([
-        ('employee', 'By Employee'),
-        ('category', 'By Employee Tag')
-    ], string='Allocation Mode', readonly=True)
-    date_from = fields.Datetime('Start Date', readonly=True)
-    date_to = fields.Datetime('End Date', readonly=True)
-    payslip_status = fields.Boolean('Reported in last payslips', readonly=True)
+    employee_id = fields.Many2one("hr.employee", string="Employee", readonly=True)
+    active_employee = fields.Boolean(related="employee_id.active", readonly=True)
+    name = fields.Char("Description", readonly=True)
+    number_of_days = fields.Float("Number of Days", readonly=True)
+    leave_type = fields.Selection(
+        [("allocation", "Allocation"), ("request", "Time Off")],
+        string="Request Type",
+        readonly=True,
+    )
+    department_id = fields.Many2one("hr.department", string="Department", readonly=True)
+    category_id = fields.Many2one(
+        "hr.employee.category", string="Employee Tag", readonly=True
+    )
+    holiday_status_id = fields.Many2one(
+        "hr.leave.type", string="Leave Type", readonly=True
+    )
+    state = fields.Selection(
+        [
+            ("draft", "To Submit"),
+            ("cancel", "Cancelled"),
+            ("confirm", "To Approve"),
+            ("refuse", "Refused"),
+            ("validate1", "Second Approval"),
+            ("validate", "Approved"),
+        ],
+        string="Status",
+        readonly=True,
+    )
+    holiday_type = fields.Selection(
+        [("employee", "By Employee"), ("category", "By Employee Tag")],
+        string="Allocation Mode",
+        readonly=True,
+    )
+    date_from = fields.Datetime("Start Date", readonly=True)
+    date_to = fields.Datetime("End Date", readonly=True)
+    payslip_status = fields.Boolean("Reported in last payslips", readonly=True)
 
     def init(self):
-        tools.drop_view_if_exists(self._cr, 'hr_leave_report')
+        tools.drop_view_if_exists(self._cr, "hr_leave_report")
 
-        self._cr.execute("""
+        self._cr.execute(
+            """
             CREATE or REPLACE view hr_leave_report as (
                 SELECT row_number() over(ORDER BY leaves.employee_id) as id,
                 leaves.employee_id as employee_id, leaves.name as name,
@@ -79,29 +90,34 @@ class LeaveReport(models.Model):
                     'request' as leave_type
                 from hr_leave as request) leaves
             );
-        """)
+        """
+        )
 
     @api.model
     def action_time_off_analysis(self):
-        domain = [('holiday_type', '=', 'employee')]
+        domain = [("holiday_type", "=", "employee")]
 
-        if self.env.context.get('active_ids'):
-            domain = expression.AND([
-                domain,
-                [('employee_id', 'in', self.env.context.get('active_ids', []))]
-            ])
+        if self.env.context.get("active_ids"):
+            domain = expression.AND(
+                [
+                    domain,
+                    [("employee_id", "in", self.env.context.get("active_ids", []))],
+                ]
+            )
 
         return {
-            'name': _('Time Off Analysis'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'hr.leave.report',
-            'view_mode': 'tree,pivot,form',
-            'search_view_id': [self.env.ref('hr_holidays.view_hr_holidays_filter_report').id],
-            'domain': domain,
-            'context': {
-                'search_default_group_type': True,
-                'search_default_year': True,
-                'search_default_validated': True,
-                'search_default_active_employee': True,
-            }
+            "name": _("Time Off Analysis"),
+            "type": "ir.actions.act_window",
+            "res_model": "hr.leave.report",
+            "view_mode": "tree,pivot,form",
+            "search_view_id": [
+                self.env.ref("hr_holidays.view_hr_holidays_filter_report").id
+            ],
+            "domain": domain,
+            "context": {
+                "search_default_group_type": True,
+                "search_default_year": True,
+                "search_default_validated": True,
+                "search_default_active_employee": True,
+            },
         }

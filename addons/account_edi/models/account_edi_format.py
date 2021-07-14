@@ -16,16 +16,13 @@ _logger = logging.getLogger(__name__)
 
 
 class AccountEdiFormat(models.Model):
-    _name = 'account.edi.format'
-    _description = 'EDI format'
+    _name = "account.edi.format"
+    _description = "EDI format"
 
     name = fields.Char()
     code = fields.Char(required=True)
 
-    _sql_constraints = [
-        ('unique_code', 'unique (code)', 'This code already exists')
-    ]
-
+    _sql_constraints = [("unique_code", "unique (code)", "This code already exists")]
 
     ####################################################
     # Low-level methods
@@ -36,12 +33,12 @@ class AccountEdiFormat(models.Model):
         edi_formats = super().create(vals_list)
 
         # activate by default on journal
-        journals = self.env['account.journal'].search([])
+        journals = self.env["account.journal"].search([])
         journals._compute_edi_format_ids()
 
         # activate cron
         if any(edi_format._needs_web_services() for edi_format in edi_formats):
-            self.env.ref('account_edi.ir_cron_edi_network').active = True
+            self.env.ref("account_edi.ir_cron_edi_network").active = True
 
         return edi_formats
 
@@ -86,7 +83,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return journal.type == 'sale'
+        return journal.type == "sale"
 
     def _is_enabled_by_default_on_journal(self, journal):
         """ Indicate if the EDI format should be selected by default on the journal passed as parameter.
@@ -117,7 +114,7 @@ class AccountEdiFormat(models.Model):
         if not attachment or not self._is_embedding_to_invoice_pdf_needed():
             return False
         datas = base64.b64decode(attachment.with_context(bin_size=False).datas)
-        return {'name': attachment.name, 'datas': datas}
+        return {"name": attachment.name, "datas": datas}
 
     def _support_batching(self, move, state, company):
         """ Indicate if we can send multiple documents in the same time to the web services.
@@ -179,7 +176,9 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return {invoice: {'success': True} for invoice in invoices}  # By default, cancel succeeds doing nothing.
+        return {
+            invoice: {"success": True} for invoice in invoices
+        }  # By default, cancel succeeds doing nothing.
 
     def _post_payment_edi(self, payments):
         """ Create the file content representing the payment (and calls web services if necessary).
@@ -205,7 +204,9 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return {payment: {'success': True} for payment in payments}  # By default, cancel succeeds doing nothing.
+        return {
+            payment: {"success": True} for payment in payments
+        }  # By default, cancel succeeds doing nothing.
 
     ####################################################
     # Import methods to override based on EDI Format
@@ -220,7 +221,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _update_invoice_from_xml_tree(self, filename, tree, invoice):
         """ Update an existing invoice with the data inside the xml.
@@ -232,7 +233,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _create_invoice_from_pdf_reader(self, filename, reader):
         """ Create a new invoice with the data inside a pdf.
@@ -244,7 +245,7 @@ class AccountEdiFormat(models.Model):
         # TO OVERRIDE
         self.ensure_one()
 
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _update_invoice_from_pdf_reader(self, filename, reader, invoice):
         """ Update an existing invoice with the data inside the pdf.
@@ -256,7 +257,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _create_invoice_from_binary(self, filename, content, extension):
         """ Create a new invoice with the data inside a binary file.
@@ -268,7 +269,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _update_invoice_from_binary(self, filename, content, extension, invoice):
         """ Update an existing invoice with the data inside a binary file.
@@ -281,7 +282,7 @@ class AccountEdiFormat(models.Model):
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self.env['account.move']
+        return self.env["account.move"]
 
     ####################################################
     # Export Internal methods (not meant to be overridden)
@@ -295,7 +296,9 @@ class AccountEdiFormat(models.Model):
         :returns: the same pdf_content with the EDI of the invoice embed in it.
         """
         attachments = []
-        for edi_format in self.filtered(lambda edi_format: edi_format._is_embedding_to_invoice_pdf_needed()):
+        for edi_format in self.filtered(
+            lambda edi_format: edi_format._is_embedding_to_invoice_pdf_needed()
+        ):
             attach = edi_format._get_embedding_to_invoice_pdf_values(invoice)
             if attach:
                 attachments.append(attach)
@@ -307,7 +310,7 @@ class AccountEdiFormat(models.Model):
             writer = OdooPdfFileWriter()
             writer.cloneReaderDocumentRoot(reader)
             for vals in attachments:
-                writer.addAttachment(vals['name'], vals['datas'])
+                writer.addAttachment(vals["name"], vals["datas"])
             buffer = io.BytesIO()
             writer.write(buffer)
             pdf_content = buffer.getvalue()
@@ -337,12 +340,14 @@ class AccountEdiFormat(models.Model):
             _logger.exception("Error when converting the xml content to etree: %s" % e)
             return to_process
         if len(xml_tree):
-            to_process.append({
-                'filename': filename,
-                'content': content,
-                'type': 'xml',
-                'xml_tree': xml_tree,
-            })
+            to_process.append(
+                {
+                    "filename": filename,
+                    "content": content,
+                    "type": "xml",
+                    "xml_tree": xml_tree,
+                }
+            )
         return to_process
 
     def _decode_pdf(self, filename, content):
@@ -371,15 +376,20 @@ class AccountEdiFormat(models.Model):
             for xml_name, content in pdf_reader.getAttachments():
                 to_process.extend(self._decode_xml(xml_name, content))
         except NotImplementedError as e:
-            _logger.warning("Unable to access the attachments of %s. Tried to decrypt it, but %s." % (filename, e))
+            _logger.warning(
+                "Unable to access the attachments of %s. Tried to decrypt it, but %s."
+                % (filename, e)
+            )
 
         # Process the pdf itself.
-        to_process.append({
-            'filename': filename,
-            'content': content,
-            'type': 'pdf',
-            'pdf_reader': pdf_reader,
-        })
+        to_process.append(
+            {
+                "filename": filename,
+                "content": content,
+                "type": "pdf",
+                "pdf_reader": pdf_reader,
+            }
+        )
 
         return to_process
 
@@ -394,12 +404,14 @@ class AccountEdiFormat(models.Model):
         * content:          The content of the attachment.
         * type:             The type of the attachment.
         """
-        return [{
-            'filename': filename,
-            'extension': ''.join(pathlib.Path(filename).suffixes),
-            'content': content,
-            'type': 'binary',
-        }]
+        return [
+            {
+                "filename": filename,
+                "extension": "".join(pathlib.Path(filename).suffixes),
+                "content": content,
+                "type": "binary",
+            }
+        ]
 
     def _decode_attachment(self, attachment):
         """Decodes an ir.attachment and unwrap sub-attachment into a list of dictionary each representing an attachment.
@@ -415,9 +427,9 @@ class AccountEdiFormat(models.Model):
         content = base64.b64decode(attachment.with_context(bin_size=False).datas)
         to_process = []
 
-        if 'pdf' in attachment.mimetype:
+        if "pdf" in attachment.mimetype:
             to_process.extend(self._decode_pdf(attachment.name, content))
-        elif 'xml' in attachment.mimetype:
+        elif "xml" in attachment.mimetype:
             to_process.extend(self._decode_xml(attachment.name, content))
         else:
             to_process.extend(self._decode_binary(attachment.name, content))
@@ -434,18 +446,35 @@ class AccountEdiFormat(models.Model):
             for edi_format in self:
                 res = False
                 try:
-                    if file_data['type'] == 'xml':
-                        res = edi_format.with_company(self.env.company)._create_invoice_from_xml_tree(file_data['filename'], file_data['xml_tree'])
-                    elif file_data['type'] == 'pdf':
-                        res = edi_format.with_company(self.env.company)._create_invoice_from_pdf_reader(file_data['filename'], file_data['pdf_reader'])
-                        file_data['pdf_reader'].stream.close()
+                    if file_data["type"] == "xml":
+                        res = edi_format.with_company(
+                            self.env.company
+                        )._create_invoice_from_xml_tree(
+                            file_data["filename"], file_data["xml_tree"]
+                        )
+                    elif file_data["type"] == "pdf":
+                        res = edi_format.with_company(
+                            self.env.company
+                        )._create_invoice_from_pdf_reader(
+                            file_data["filename"], file_data["pdf_reader"]
+                        )
+                        file_data["pdf_reader"].stream.close()
                     else:
-                        res = edi_format._create_invoice_from_binary(file_data['filename'], file_data['content'], file_data['extension'])
+                        res = edi_format._create_invoice_from_binary(
+                            file_data["filename"],
+                            file_data["content"],
+                            file_data["extension"],
+                        )
                 except Exception as e:
-                    _logger.exception("Error importing attachment \"%s\" as invoice with format \"%s\"", file_data['filename'], edi_format.name, str(e))
+                    _logger.exception(
+                        'Error importing attachment "%s" as invoice with format "%s"',
+                        file_data["filename"],
+                        edi_format.name,
+                        str(e),
+                    )
                 if res:
                     return res
-        return self.env['account.move']
+        return self.env["account.move"]
 
     def _update_invoice_from_attachment(self, attachment, invoice):
         """Decodes an ir.attachment to update an invoice.
@@ -457,18 +486,36 @@ class AccountEdiFormat(models.Model):
             for edi_format in self:
                 res = False
                 try:
-                    if file_data['type'] == 'xml':
-                        res = edi_format.with_company(self.env.company)._update_invoice_from_xml_tree(file_data['filename'], file_data['xml_tree'], invoice)
-                    elif file_data['type'] == 'pdf':
-                        res = edi_format.with_company(self.env.company)._update_invoice_from_pdf_reader(file_data['filename'], file_data['pdf_reader'], invoice)
-                        file_data['pdf_reader'].stream.close()
+                    if file_data["type"] == "xml":
+                        res = edi_format.with_company(
+                            self.env.company
+                        )._update_invoice_from_xml_tree(
+                            file_data["filename"], file_data["xml_tree"], invoice
+                        )
+                    elif file_data["type"] == "pdf":
+                        res = edi_format.with_company(
+                            self.env.company
+                        )._update_invoice_from_pdf_reader(
+                            file_data["filename"], file_data["pdf_reader"], invoice
+                        )
+                        file_data["pdf_reader"].stream.close()
                     else:  # file_data['type'] == 'binary'
-                        res = edi_format._update_invoice_from_binary(file_data['filename'], file_data['content'], file_data['extension'], invoice)
+                        res = edi_format._update_invoice_from_binary(
+                            file_data["filename"],
+                            file_data["content"],
+                            file_data["extension"],
+                            invoice,
+                        )
                 except Exception as e:
-                    _logger.exception("Error importing attachment \"%s\" as invoice with format \"%s\"", file_data['filename'], edi_format.name, str(e))
+                    _logger.exception(
+                        'Error importing attachment "%s" as invoice with format "%s"',
+                        file_data["filename"],
+                        edi_format.name,
+                        str(e),
+                    )
                 if res:
                     return res
-        return self.env['account.move']
+        return self.env["account.move"]
 
     ####################################################
     # Import helpers
@@ -478,21 +525,23 @@ class AccountEdiFormat(models.Model):
         element = xml_element.xpath(xpath, namespaces=namespaces)
         return element[0].text if element else None
 
-    def _retrieve_partner(self, name=None, phone=None, mail=None, vat=None, domain=None):
-        '''Search all partners and find one that matches one of the parameters.
+    def _retrieve_partner(
+        self, name=None, phone=None, mail=None, vat=None, domain=None
+    ):
+        """Search all partners and find one that matches one of the parameters.
 
         :param name:    The name of the partner.
         :param phone:   The phone or mobile of the partner.
         :param mail:    The mail of the partner.
         :param vat:     The vat number of the partner.
         :returns:       A partner or an empty recordset if not found.
-        '''
+        """
         domains = []
         for value, dom in (
-            (name, [('name', 'ilike', name)]),
-            (phone, expression.OR([[('phone', '=', phone)], [('mobile', '=', phone)]])),
-            (mail, [('email', '=', mail)]),
-            (vat, [('vat', 'like', vat)]),
+            (name, [("name", "ilike", name)]),
+            (phone, expression.OR([[("phone", "=", phone)], [("mobile", "=", phone)]])),
+            (mail, [("email", "=", mail)]),
+            (vat, [("vat", "like", vat)]),
         ):
             if value is not None:
                 domains.append(dom)
@@ -501,49 +550,51 @@ class AccountEdiFormat(models.Model):
             domains.append(domain)
 
         domain = expression.OR(domains)
-        return self.env['res.partner'].search(domain, limit=1)
+        return self.env["res.partner"].search(domain, limit=1)
 
     def _retrieve_product(self, name=None, default_code=None, barcode=None):
-        '''Search all products and find one that matches one of the parameters.
+        """Search all products and find one that matches one of the parameters.
 
         :param name:            The name of the product.
         :param default_code:    The default_code of the product.
         :param barcode:         The barcode of the product.
         :returns:               A product or an empty recordset if not found.
-        '''
+        """
         domains = []
         for value, domain in (
-            (name, ('name', 'ilike', name)),
-            (default_code, ('default_code', '=', default_code)),
-            (barcode, ('barcode', '=', barcode)),
+            (name, ("name", "ilike", name)),
+            (default_code, ("default_code", "=", default_code)),
+            (barcode, ("barcode", "=", barcode)),
         ):
             if value is not None:
                 domains.append([domain])
 
         domain = expression.OR(domains)
-        return self.env['product.product'].search(domain, limit=1)
+        return self.env["product.product"].search(domain, limit=1)
 
     def _retrieve_tax(self, amount, type_tax_use):
-        '''Search all taxes and find one that matches all of the parameters.
+        """Search all taxes and find one that matches all of the parameters.
 
         :param amount:          The amount of the tax.
         :param type_tax_use:    The type of the tax.
         :returns:               A tax or an empty recordset if not found.
-        '''
+        """
         domains = [
-            [('amount', '=', float(amount))],
-            [('type_tax_use', '=', type_tax_use)]
+            [("amount", "=", float(amount))],
+            [("type_tax_use", "=", type_tax_use)],
         ]
 
-        return self.env['account.tax'].search(expression.AND(domains), order='sequence ASC', limit=1)
+        return self.env["account.tax"].search(
+            expression.AND(domains), order="sequence ASC", limit=1
+        )
 
     def _retrieve_currency(self, code):
-        '''Search all currencies and find one that matches the code.
+        """Search all currencies and find one that matches the code.
 
         :param code: The code of the currency.
         :returns:    A currency or an empty recordset if not found.
-        '''
-        return self.env['res.currency'].search([('name', '=', code.upper())], limit=1)
+        """
+        return self.env["res.currency"].search([("name", "=", code.upper())], limit=1)
 
     ####################################################
     # Other helpers
@@ -551,5 +602,5 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _format_error_message(self, error_title, errors):
-        bullet_list_msg = ''.join('<li>%s</li>' % html_escape(msg) for msg in errors)
-        return '%s<ul>%s</ul>' % (error_title, bullet_list_msg)
+        bullet_list_msg = "".join("<li>%s</li>" % html_escape(msg) for msg in errors)
+        return "%s<ul>%s</ul>" % (error_title, bullet_list_msg)

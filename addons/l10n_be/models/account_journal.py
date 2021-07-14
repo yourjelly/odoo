@@ -4,8 +4,9 @@ from odoo import fields, models
 
 
 class AccountJournal(models.Model):
-    _inherit = 'account.journal'
+    _inherit = "account.journal"
 
-    invoice_reference_model = fields.Selection(selection_add=[
-        ('be', 'Belgium')
-        ], ondelete={'be': lambda recs: recs.write({'invoice_reference_model': 'odoo'})})
+    invoice_reference_model = fields.Selection(
+        selection_add=[("be", "Belgium")],
+        ondelete={"be": lambda recs: recs.write({"invoice_reference_model": "odoo"})},
+    )

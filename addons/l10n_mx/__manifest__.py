@@ -10,7 +10,7 @@
     "name": "Mexico - Accounting",
     "version": "2.0",
     "author": "Vauxoo",
-    'category': 'Accounting/Localizations/Account Charts',
+    "category": "Accounting/Localizations/Account Charts",
     "description": """
 Minimal accounting configuration for Mexico.
 ============================================
@@ -30,9 +30,7 @@ With this module you will have:
 
 .. _SAT: http://www.sat.gob.mx/
     """,
-    "depends": [
-        "account",
-    ],
+    "depends": ["account",],
     "data": [
         "data/account.account.tag.csv",
         "data/l10n_mx_chart_data.xml",
@@ -48,7 +46,5 @@ With this module you will have:
         "views/res_config_settings_views.xml",
         "views/account_views.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

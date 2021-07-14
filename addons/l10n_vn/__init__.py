@@ -8,4 +8,4 @@ from odoo import api, SUPERUSER_ID
 
 def _post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    env.ref('l10n_vn.vn_template').process_coa_translations()
+    env.ref("l10n_vn.vn_template").process_coa_translations()

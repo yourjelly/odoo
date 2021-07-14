@@ -21,16 +21,30 @@ class BusPresence(models.Model):
         at each poll, if the user have multiple opened tabs, concurrence errors can happend, but are 'muted-logged'.
     """
 
-    _name = 'bus.presence'
-    _description = 'User Presence'
+    _name = "bus.presence"
+    _description = "User Presence"
     _log_access = False
 
-    _sql_constraints = [('bus_user_presence_unique', 'unique(user_id)', 'A user can only have one IM status.')]
+    _sql_constraints = [
+        (
+            "bus_user_presence_unique",
+            "unique(user_id)",
+            "A user can only have one IM status.",
+        )
+    ]
 
-    user_id = fields.Many2one('res.users', 'Users', required=True, index=True, ondelete='cascade')
-    last_poll = fields.Datetime('Last Poll', default=lambda self: fields.Datetime.now())
-    last_presence = fields.Datetime('Last Presence', default=lambda self: fields.Datetime.now())
-    status = fields.Selection([('online', 'Online'), ('away', 'Away'), ('offline', 'Offline')], 'IM Status', default='offline')
+    user_id = fields.Many2one(
+        "res.users", "Users", required=True, index=True, ondelete="cascade"
+    )
+    last_poll = fields.Datetime("Last Poll", default=lambda self: fields.Datetime.now())
+    last_presence = fields.Datetime(
+        "Last Presence", default=lambda self: fields.Datetime.now()
+    )
+    status = fields.Selection(
+        [("online", "Online"), ("away", "Away"), ("offline", "Offline")],
+        "IM Status",
+        default="offline",
+    )
 
     @api.model
     def update(self, inactivity_period):
@@ -42,7 +56,7 @@ class BusPresence(models.Model):
         try:
             # Hide transaction serialization errors, which can be ignored, the presence update is not essential
             # The errors are supposed from presence.write(...) call only
-            with tools.mute_logger('odoo.sql_db'):
+            with tools.mute_logger("odoo.sql_db"):
                 self._update(inactivity_period)
                 # commit on success
                 self.env.cr.commit()
@@ -54,18 +68,20 @@ class BusPresence(models.Model):
 
     @api.model
     def _update(self, inactivity_period):
-        presence = self.search([('user_id', '=', self._uid)], limit=1)
+        presence = self.search([("user_id", "=", self._uid)], limit=1)
         # compute last_presence timestamp
-        last_presence = datetime.datetime.now() - datetime.timedelta(milliseconds=inactivity_period)
+        last_presence = datetime.datetime.now() - datetime.timedelta(
+            milliseconds=inactivity_period
+        )
         values = {
-            'last_poll': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            "last_poll": time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
         }
         # update the presence or a create a new one
         if not presence:  # create a new presence for the user
-            values['user_id'] = self._uid
-            values['last_presence'] = last_presence
+            values["user_id"] = self._uid
+            values["last_presence"] = last_presence
             self.create(values)
         else:  # update the last_presence if necessary, and write values
             if presence.last_presence < last_presence:
-                values['last_presence'] = last_presence
+                values["last_presence"] = last_presence
             presence.write(values)

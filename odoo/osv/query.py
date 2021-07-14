@@ -7,7 +7,7 @@ from zlib import crc32
 
 from odoo.tools import lazy_property
 
-IDENT_RE = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
+IDENT_RE = re.compile(r"^[a-z_][a-z0-9_$]*$", re.I)
 
 
 def _from_table(table, alias):
@@ -41,7 +41,7 @@ def _generate_table_alias(src_table_alias, link):
     if len(alias) >= 64:
         # We have to fit a crc32 hash and one underscore into a 63 character
         # alias. The remaining space we can use to add a human readable prefix.
-        alias = "%s_%08x" % (alias[:54], crc32(alias.encode('utf-8')))
+        alias = "%s_%08x" % (alias[:54], crc32(alias.encode("utf-8")))
     return alias
 
 
@@ -77,7 +77,9 @@ class Query(object):
 
     def add_table(self, alias, table=None):
         """ Add a table with a given alias to the from clause. """
-        assert alias not in self._tables and alias not in self._joins, "Alias %r already in %s" % (alias, str(self))
+        assert (
+            alias not in self._tables and alias not in self._joins
+        ), "Alias %r already in %s" % (alias, str(self))
         self._tables[alias] = table or alias
 
     def add_where(self, where_clause, where_params=()):
@@ -85,7 +87,16 @@ class Query(object):
         self._where_clauses.append(where_clause)
         self._where_params.extend(where_params)
 
-    def join(self, lhs_alias, lhs_column, rhs_table, rhs_column, link, extra=None, extra_params=()):
+    def join(
+        self,
+        lhs_alias,
+        lhs_column,
+        rhs_table,
+        rhs_column,
+        link,
+        extra=None,
+        extra_params=(),
+    ):
         """
         Perform a join between a table already present in the current Query object and
         another table.
@@ -129,28 +140,72 @@ class Query(object):
             WHERE ...
 
         """
-        return self._join('JOIN', lhs_alias, lhs_column, rhs_table, rhs_column, link, extra, extra_params)
+        return self._join(
+            "JOIN",
+            lhs_alias,
+            lhs_column,
+            rhs_table,
+            rhs_column,
+            link,
+            extra,
+            extra_params,
+        )
 
-    def left_join(self, lhs_alias, lhs_column, rhs_table, rhs_column, link, extra=None, extra_params=()):
+    def left_join(
+        self,
+        lhs_alias,
+        lhs_column,
+        rhs_table,
+        rhs_column,
+        link,
+        extra=None,
+        extra_params=(),
+    ):
         """ Add a LEFT JOIN to the current table (if necessary), and return the
         alias corresponding to ``rhs_table``.
 
         See the documentation of :meth:`~odoo.osv.query.Query.join` for a better overview of the
         arguments and what they do.
         """
-        return self._join('LEFT JOIN', lhs_alias, lhs_column, rhs_table, rhs_column, link, extra, extra_params)
+        return self._join(
+            "LEFT JOIN",
+            lhs_alias,
+            lhs_column,
+            rhs_table,
+            rhs_column,
+            link,
+            extra,
+            extra_params,
+        )
 
-    def _join(self, kind, lhs_alias, lhs_column, rhs_table, rhs_column, link, extra=None, extra_params=()):
-        assert lhs_alias in self._tables or lhs_alias in self._joins, "Alias %r not in %s" % (lhs_alias, str(self))
+    def _join(
+        self,
+        kind,
+        lhs_alias,
+        lhs_column,
+        rhs_table,
+        rhs_column,
+        link,
+        extra=None,
+        extra_params=(),
+    ):
+        assert (
+            lhs_alias in self._tables or lhs_alias in self._joins
+        ), "Alias %r not in %s" % (lhs_alias, str(self))
 
         rhs_alias = _generate_table_alias(lhs_alias, link)
-        assert rhs_alias not in self._tables, "Alias %r already in %s" % (rhs_alias, str(self))
+        assert rhs_alias not in self._tables, "Alias %r already in %s" % (
+            rhs_alias,
+            str(self),
+        )
 
         if rhs_alias not in self._joins:
             condition = f'"{lhs_alias}"."{lhs_column}" = "{rhs_alias}"."{rhs_column}"'
             condition_params = []
             if extra:
-                condition = condition + " AND " + extra.format(lhs=lhs_alias, rhs=rhs_alias)
+                condition = (
+                    condition + " AND " + extra.format(lhs=lhs_alias, rhs=rhs_alias)
+                )
                 condition_params = list(extra_params)
             if kind:
                 self._joins[rhs_alias] = (kind, rhs_table, condition, condition_params)
@@ -163,7 +218,7 @@ class Query(object):
     def select(self, *args):
         """ Return the SELECT query as a pair ``(query_string, query_params)``. """
         from_clause, where_clause, params = self.get_sql()
-        query_str = 'SELECT {} FROM {} WHERE {}{}{}{}'.format(
+        query_str = "SELECT {} FROM {} WHERE {}{}{}{}".format(
             ", ".join(args or [f'"{next(iter(self._tables))}".id']),
             from_clause,
             where_clause or "TRUE",
@@ -179,7 +234,7 @@ class Query(object):
         joins = []
         params = []
         for alias, (kind, table, condition, condition_params) in self._joins.items():
-            joins.append(f'{kind} {_from_table(table, alias)} ON ({condition})')
+            joins.append(f"{kind} {_from_table(table, alias)} ON ({condition})")
             params.extend(condition_params)
 
         from_clause = " ".join([", ".join(tables)] + joins)
@@ -193,7 +248,7 @@ class Query(object):
         return [row[0] for row in self._cr.fetchall()]
 
     def __str__(self):
-        return '<osv.Query: %r with params: %r>' % self.select()
+        return "<osv.Query: %r with params: %r>" % self.select()
 
     def __bool__(self):
         return bool(self._result)
@@ -209,8 +264,9 @@ class Query(object):
     #
     @property
     def tables(self):
-        warnings.warn("deprecated Query.tables, use Query.get_sql() instead",
-                      DeprecationWarning)
+        warnings.warn(
+            "deprecated Query.tables, use Query.get_sql() instead", DeprecationWarning
+        )
         return tuple(_from_table(table, alias) for alias, table in self._tables.items())
 
     @property
@@ -221,10 +277,23 @@ class Query(object):
     def where_clause_params(self):
         return tuple(self._where_params)
 
-    def add_join(self, connection, implicit=True, outer=False, extra=None, extra_params=()):
-        warnings.warn("deprecated Query.add_join, use Query.join() or Query.left_join() instead",
-                      DeprecationWarning)
+    def add_join(
+        self, connection, implicit=True, outer=False, extra=None, extra_params=()
+    ):
+        warnings.warn(
+            "deprecated Query.add_join, use Query.join() or Query.left_join() instead",
+            DeprecationWarning,
+        )
         lhs_alias, rhs_table, lhs_column, rhs_column, link = connection
-        kind = '' if implicit else ('LEFT JOIN' if outer else 'JOIN')
-        rhs_alias = self._join(kind, lhs_alias, lhs_column, rhs_table, rhs_column, link, extra, extra_params)
+        kind = "" if implicit else ("LEFT JOIN" if outer else "JOIN")
+        rhs_alias = self._join(
+            kind,
+            lhs_alias,
+            lhs_column,
+            rhs_table,
+            rhs_column,
+            link,
+            extra,
+            extra_params,
+        )
         return rhs_alias, _from_table(rhs_table, rhs_alias)

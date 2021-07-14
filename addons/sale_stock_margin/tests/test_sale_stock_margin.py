@@ -2,7 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tests.common import Form
-from odoo.addons.stock_account.tests.test_stockvaluationlayer import TestStockValuationCommon
+from odoo.addons.stock_account.tests.test_stockvaluationlayer import (
+    TestStockValuationCommon,
+)
 
 
 class TestSaleStockMargin(TestStockValuationCommon):
@@ -11,28 +13,31 @@ class TestSaleStockMargin(TestStockValuationCommon):
     #########
 
     def _create_sale_order(self):
-        return self.env['sale.order'].create({
-            'name': 'Sale order',
-            'partner_id': self.env.ref('base.partner_admin').id,
-            'partner_invoice_id': self.env.ref('base.partner_admin').id,
-        })
+        return self.env["sale.order"].create(
+            {
+                "name": "Sale order",
+                "partner_id": self.env.ref("base.partner_admin").id,
+                "partner_invoice_id": self.env.ref("base.partner_admin").id,
+            }
+        )
 
     def _create_sale_order_line(self, sale_order, product, quantity, price_unit=0):
-        return self.env['sale.order.line'].create({
-            'name': 'Sale order',
-            'order_id': sale_order.id,
-            'price_unit': price_unit,
-            'product_id': product.id,
-            'product_uom_qty': quantity,
-            'product_uom': self.env.ref('uom.product_uom_unit').id,
-        })
+        return self.env["sale.order.line"].create(
+            {
+                "name": "Sale order",
+                "order_id": sale_order.id,
+                "price_unit": price_unit,
+                "product_id": product.id,
+                "product_uom_qty": quantity,
+                "product_uom": self.env.ref("uom.product_uom_unit").id,
+            }
+        )
 
     def _create_product(self):
-        product_template = self.env['product.template'].create({
-            'name': 'Super product',
-            'type': 'product',
-        })
-        product_template.categ_id.property_cost_method = 'fifo'
+        product_template = self.env["product.template"].create(
+            {"name": "Super product", "type": "product",}
+        )
+        product_template.categ_id.property_cost_method = "fifo"
         return product_template.product_variant_ids
 
     #########
@@ -116,7 +121,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
 
         sale_order.picking_ids.move_lines.quantity_done = 1
         res = sale_order.picking_ids.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        Form(self.env[res["res_model"]].with_context(res["context"])).save().process()
 
         self.assertAlmostEqual(order_line.purchase_price, 15)
         self.assertAlmostEqual(order_line.margin, 10)
@@ -149,10 +154,12 @@ class TestSaleStockMargin(TestStockValuationCommon):
         sale_order.picking_ids.move_lines[1].quantity_done = 3
 
         res = sale_order.picking_ids.button_validate()
-        Form(self.env[res['res_model']].with_context(res['context'])).save().process()
+        Form(self.env[res["res_model"]].with_context(res["context"])).save().process()
 
-        self.assertAlmostEqual(order_line_1.purchase_price, 43)       # (35 + 51) / 2
-        self.assertAlmostEqual(order_line_2.purchase_price, 12.5)     # (17 + 11 + 11 + 11) / 4
-        self.assertAlmostEqual(order_line_1.margin, 34)               # (60 - 43) * 2
-        self.assertAlmostEqual(order_line_2.margin, 30)               # (20 - 12.5) * 4
+        self.assertAlmostEqual(order_line_1.purchase_price, 43)  # (35 + 51) / 2
+        self.assertAlmostEqual(
+            order_line_2.purchase_price, 12.5
+        )  # (17 + 11 + 11 + 11) / 4
+        self.assertAlmostEqual(order_line_1.margin, 34)  # (60 - 43) * 2
+        self.assertAlmostEqual(order_line_2.margin, 30)  # (20 - 12.5) * 4
         self.assertAlmostEqual(sale_order.margin, 64)

@@ -17,10 +17,10 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
-    _inherit = 'payment.transaction'
+    _inherit = "payment.transaction"
 
     @api.model
-    def _compute_reference(self, provider, prefix=None, separator='-', **kwargs):
+    def _compute_reference(self, provider, prefix=None, separator="-", **kwargs):
         """ Override of payment to ensure that Sips requirements for references are satisfied.
 
         Sips requirements for transaction are as follows:
@@ -40,12 +40,14 @@ class PaymentTransaction(models.Model):
         :return: The unique reference for the transaction
         :rtype: str
         """
-        if provider == 'sips':
+        if provider == "sips":
             # We use an empty separator for cosmetic reasons: As the default prefix is 'tx', we want
             # the singularized prefix to look like 'tx2020...' and not 'txx2020...'.
-            prefix = payment_utils.singularize_reference_prefix(separator='')
-            separator = 'x'  # Still, we need a dedicated separator between the prefix and the seq.
-        return super()._compute_reference(provider, prefix=prefix, separator=separator, **kwargs)
+            prefix = payment_utils.singularize_reference_prefix(separator="")
+            separator = "x"  # Still, we need a dedicated separator between the prefix and the seq.
+        return super()._compute_reference(
+            provider, prefix=prefix, separator=separator, **kwargs
+        )
 
     def _get_specific_rendering_values(self, processing_values):
         """ Override of payment to return Sips-specific rendering values.
@@ -57,29 +59,36 @@ class PaymentTransaction(models.Model):
         :rtype: dict
         """
         res = super()._get_specific_rendering_values(processing_values)
-        if self.provider != 'sips':
+        if self.provider != "sips":
             return res
 
         base_url = self.get_base_url()
         data = {
-            'amount': payment_utils.to_minor_currency_units(self.amount, self.currency_id),
-            'currencyCode': SUPPORTED_CURRENCIES[self.currency_id.name],  # The ISO 4217 code
-            'merchantId': self.acquirer_id.sips_merchant_id,
-            'normalReturnUrl': urls.url_join(base_url, SipsController._return_url),
-            'automaticResponseUrl': urls.url_join(base_url, SipsController._notify_url),
-            'transactionReference': self.reference,
-            'statementReference': self.reference,
-            'keyVersion': self.acquirer_id.sips_key_version,
-            'returnContext': json.dumps(dict(reference=self.reference)),
+            "amount": payment_utils.to_minor_currency_units(
+                self.amount, self.currency_id
+            ),
+            "currencyCode": SUPPORTED_CURRENCIES[
+                self.currency_id.name
+            ],  # The ISO 4217 code
+            "merchantId": self.acquirer_id.sips_merchant_id,
+            "normalReturnUrl": urls.url_join(base_url, SipsController._return_url),
+            "automaticResponseUrl": urls.url_join(base_url, SipsController._notify_url),
+            "transactionReference": self.reference,
+            "statementReference": self.reference,
+            "keyVersion": self.acquirer_id.sips_key_version,
+            "returnContext": json.dumps(dict(reference=self.reference)),
         }
-        api_url = self.acquirer_id.sips_prod_url if self.acquirer_id.state == 'enabled' \
+        api_url = (
+            self.acquirer_id.sips_prod_url
+            if self.acquirer_id.state == "enabled"
             else self.acquirer_id.sips_test_url
-        data = '|'.join([f'{k}={v}' for k, v in data.items()])
+        )
+        data = "|".join([f"{k}={v}" for k, v in data.items()])
         return {
-            'api_url': api_url,
-            'Data': data,
-            'InterfaceVersion': self.acquirer_id.sips_version,
-            'Seal': self.acquirer_id._sips_generate_shasign(data),
+            "api_url": api_url,
+            "Data": data,
+            "InterfaceVersion": self.acquirer_id.sips_version,
+            "Seal": self.acquirer_id._sips_generate_shasign(data),
         }
 
     @api.model
@@ -95,17 +104,17 @@ class PaymentTransaction(models.Model):
         :raise: ValidationError if the amount mismatch
         """
         tx = super()._get_tx_from_feedback_data(provider, data)
-        if provider != 'sips':
+        if provider != "sips":
             return tx
 
-        data = self._sips_data_to_object(data['Data'])
-        reference = data.get('transactionReference')
+        data = self._sips_data_to_object(data["Data"])
+        reference = data.get("transactionReference")
 
         if not reference:
-            return_context = json.loads(data.get('returnContext', '{}'))
-            reference = return_context.get('reference')
+            return_context = json.loads(data.get("returnContext", "{}"))
+            reference = return_context.get("reference")
 
-        tx = self.search([('reference', '=', reference), ('provider', '=', 'sips')])
+        tx = self.search([("reference", "=", reference), ("provider", "=", "sips")])
         if not tx:
             raise ValidationError(
                 "Sips: " + _("No transaction found matching reference %s.", reference)
@@ -118,13 +127,15 @@ class PaymentTransaction(models.Model):
             )
 
         amount_converted = payment_utils.to_major_currency_units(
-            float(data.get('amount', '0.0')), tx.currency_id
+            float(data.get("amount", "0.0")), tx.currency_id
         )
         if tx.currency_id.compare_amounts(amount_converted, tx.amount) != 0:
             raise ValidationError(
-                "Sips: " + _(
+                "Sips: "
+                + _(
                     "Incorrect amount: received %(received).2f, expected %(expected).2f",
-                    received=amount_converted, expected=tx.amount
+                    received=amount_converted,
+                    expected=tx.amount,
                 )
             )
         return tx
@@ -138,31 +149,36 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         super()._process_feedback_data(data)
-        if self.provider != 'sips':
+        if self.provider != "sips":
             return
 
-        data = self._sips_data_to_object(data.get('Data'))
-        self.acquirer_reference = data.get('transactionReference')
-        response_code = data.get('responseCode')
-        if response_code in RESPONSE_CODES_MAPPING['pending']:
+        data = self._sips_data_to_object(data.get("Data"))
+        self.acquirer_reference = data.get("transactionReference")
+        response_code = data.get("responseCode")
+        if response_code in RESPONSE_CODES_MAPPING["pending"]:
             status = "pending"
             self._set_pending()
-        elif response_code in RESPONSE_CODES_MAPPING['done']:
+        elif response_code in RESPONSE_CODES_MAPPING["done"]:
             status = "done"
             self._set_done()
-        elif response_code in RESPONSE_CODES_MAPPING['cancel']:
+        elif response_code in RESPONSE_CODES_MAPPING["cancel"]:
             status = "cancel"
             self._set_canceled()
         else:
             status = "error"
-            self._set_error(_("Unrecognized response received from the payment provider."))
+            self._set_error(
+                _("Unrecognized response received from the payment provider.")
+            )
         _logger.info(
-            "ref: %s, got response [%s], set as '%s'.", self.reference, response_code, status
+            "ref: %s, got response [%s], set as '%s'.",
+            self.reference,
+            response_code,
+            status,
         )
 
     def _sips_data_to_object(self, data):
         res = {}
-        for element in data.split('|'):
-            key, value = element.split('=')
+        for element in data.split("|"):
+            key, value = element.split("=")
             res[key] = value
         return res

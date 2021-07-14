@@ -20,7 +20,9 @@ def remove_signature(content):
 
     # Prevent using the library if it had import errors
     if not ssl_crypto:
-        _logger.warning("Error reading the content, check if the OpenSSL library is installed for for PKCS#7 envelope extraction.")
+        _logger.warning(
+            "Error reading the content, check if the OpenSSL library is installed for for PKCS#7 envelope extraction."
+        )
         return None
 
     # Load some tools from the library

@@ -13,23 +13,24 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-BASE_VERSION = odoo.modules.load_information_from_description_file('base')['version']
+BASE_VERSION = odoo.modules.load_information_from_description_file("base")["version"]
 MAX_FAIL_TIME = timedelta(hours=5)  # chosen with a fair roll of the dice
 
 
 class BadVersion(Exception):
     pass
 
+
 class BadModuleState(Exception):
     pass
 
 
 _intervalTypes = {
-    'days': lambda interval: relativedelta(days=interval),
-    'hours': lambda interval: relativedelta(hours=interval),
-    'weeks': lambda interval: relativedelta(days=7*interval),
-    'months': lambda interval: relativedelta(months=interval),
-    'minutes': lambda interval: relativedelta(minutes=interval),
+    "days": lambda interval: relativedelta(days=interval),
+    "hours": lambda interval: relativedelta(hours=interval),
+    "weeks": lambda interval: relativedelta(days=7 * interval),
+    "months": lambda interval: relativedelta(months=interval),
+    "minutes": lambda interval: relativedelta(minutes=interval),
 }
 
 
@@ -43,43 +44,80 @@ class ir_cron(models.Model):
     # See also odoo.cron
 
     _name = "ir.cron"
-    _order = 'cron_name'
-    _description = 'Scheduled Actions'
+    _order = "cron_name"
+    _description = "Scheduled Actions"
 
     ir_actions_server_id = fields.Many2one(
-        'ir.actions.server', 'Server action',
-        delegate=True, ondelete='restrict', required=True)
-    cron_name = fields.Char('Name', related='ir_actions_server_id.name', store=True, readonly=False)
-    user_id = fields.Many2one('res.users', string='Scheduler User', default=lambda self: self.env.user, required=True)
+        "ir.actions.server",
+        "Server action",
+        delegate=True,
+        ondelete="restrict",
+        required=True,
+    )
+    cron_name = fields.Char(
+        "Name", related="ir_actions_server_id.name", store=True, readonly=False
+    )
+    user_id = fields.Many2one(
+        "res.users",
+        string="Scheduler User",
+        default=lambda self: self.env.user,
+        required=True,
+    )
     active = fields.Boolean(default=True)
     interval_number = fields.Integer(default=1, help="Repeat every x.")
-    interval_type = fields.Selection([('minutes', 'Minutes'),
-                                      ('hours', 'Hours'),
-                                      ('days', 'Days'),
-                                      ('weeks', 'Weeks'),
-                                      ('months', 'Months')], string='Interval Unit', default='months')
-    numbercall = fields.Integer(string='Number of Calls', default=1, help='How many times the method is called,\na negative number indicates no limit.')
-    doall = fields.Boolean(string='Repeat Missed', help="Specify if missed occurrences should be executed when the server restarts.")
-    nextcall = fields.Datetime(string='Next Execution Date', required=True, default=fields.Datetime.now, help="Next planned execution date for this job.")
-    lastcall = fields.Datetime(string='Last Execution Date', help="Previous time the cron ran successfully, provided to the job through the context on the `lastcall` key")
-    priority = fields.Integer(default=5, help='The priority of the job, as an integer: 0 means higher priority, 10 means lower priority.')
+    interval_type = fields.Selection(
+        [
+            ("minutes", "Minutes"),
+            ("hours", "Hours"),
+            ("days", "Days"),
+            ("weeks", "Weeks"),
+            ("months", "Months"),
+        ],
+        string="Interval Unit",
+        default="months",
+    )
+    numbercall = fields.Integer(
+        string="Number of Calls",
+        default=1,
+        help="How many times the method is called,\na negative number indicates no limit.",
+    )
+    doall = fields.Boolean(
+        string="Repeat Missed",
+        help="Specify if missed occurrences should be executed when the server restarts.",
+    )
+    nextcall = fields.Datetime(
+        string="Next Execution Date",
+        required=True,
+        default=fields.Datetime.now,
+        help="Next planned execution date for this job.",
+    )
+    lastcall = fields.Datetime(
+        string="Last Execution Date",
+        help="Previous time the cron ran successfully, provided to the job through the context on the `lastcall` key",
+    )
+    priority = fields.Integer(
+        default=5,
+        help="The priority of the job, as an integer: 0 means higher priority, 10 means lower priority.",
+    )
 
     @api.model
     def create(self, values):
-        values['usage'] = 'ir_cron'
+        values["usage"] = "ir_cron"
         return super(ir_cron, self).create(values)
 
     @api.model
     def default_get(self, fields_list):
         # only 'code' state is supported for cron job so set it as default
-        if not self._context.get('default_state'):
-            self = self.with_context(default_state='code')
+        if not self._context.get("default_state"):
+            self = self.with_context(default_state="code")
         return super(ir_cron, self).default_get(fields_list)
 
     def method_direct_trigger(self):
-        self.check_access_rights('write')
+        self.check_access_rights("write")
         for cron in self:
-            cron.with_user(cron.user_id).with_context(lastcall=cron.lastcall).ir_actions_server_id.run()
+            cron.with_user(cron.user_id).with_context(
+                lastcall=cron.lastcall
+            ).ir_actions_server_id.run()
             cron.lastcall = fields.Datetime.now()
         return True
 
@@ -95,43 +133,54 @@ class ir_cron(models.Model):
                 if not jobs:
                     return
                 cls._check_modules_state(cron_cr, jobs)
-                job_ids = tuple([job['id'] for job in jobs])
+                job_ids = tuple([job["id"] for job in jobs])
 
                 while True:
                     job = cls._acquire_one_job(cron_cr, job_ids)
                     if not job:
                         break
-                    _logger.debug("job %s acquired", job['id'])
+                    _logger.debug("job %s acquired", job["id"])
                     # take into account overridings of _process_job() on that database
                     registry = odoo.registry(db_name)
                     registry[cls._name]._process_job(db, cron_cr, job)
-                    _logger.debug("job %s updated and released", job['id'])
+                    _logger.debug("job %s updated and released", job["id"])
 
         except BadVersion:
-            _logger.warning('Skipping database %s as its base version is not %s.', db_name, BASE_VERSION)
+            _logger.warning(
+                "Skipping database %s as its base version is not %s.",
+                db_name,
+                BASE_VERSION,
+            )
         except BadModuleState:
-            _logger.warning('Skipping database %s because of modules to install/upgrade/remove.', db_name)
+            _logger.warning(
+                "Skipping database %s because of modules to install/upgrade/remove.",
+                db_name,
+            )
         except psycopg2.ProgrammingError as e:
-            if e.pgcode == '42P01':
+            if e.pgcode == "42P01":
                 # Class 42 — Syntax Error or Access Rule Violation; 42P01: undefined_table
                 # The table ir_cron does not exist; this is probably not an OpenERP database.
-                _logger.warning('Tried to poll an undefined table on database %s.', db_name)
+                _logger.warning(
+                    "Tried to poll an undefined table on database %s.", db_name
+                )
             else:
                 raise
         except Exception:
-            _logger.warning('Exception in cron:', exc_info=True)
+            _logger.warning("Exception in cron:", exc_info=True)
         finally:
-            if hasattr(threading.current_thread(), 'dbname'):
+            if hasattr(threading.current_thread(), "dbname"):
                 del threading.current_thread().dbname
 
     @classmethod
     def _check_version(cls, cron_cr):
         """ Ensure the code version matches the database version """
-        cron_cr.execute("""
+        cron_cr.execute(
+            """
             SELECT latest_version
             FROM ir_module_module
              WHERE name='base'
-        """)
+        """
+        )
         (version,) = cron_cr.fetchone()
         if version is None:
             raise BadModuleState()
@@ -141,11 +190,14 @@ class ir_cron(models.Model):
     @classmethod
     def _check_modules_state(cls, cr, jobs):
         """ Ensure no module is installing or upgrading """
-        cr.execute("""
+        cr.execute(
+            """
             SELECT COUNT(*)
             FROM ir_module_module
             WHERE state LIKE %s
-        """, ['to %'])
+        """,
+            ["to %"],
+        )
         (changes,) = cr.fetchone()
         if not changes:
             return
@@ -153,10 +205,7 @@ class ir_cron(models.Model):
         if not jobs:
             raise BadModuleState()
 
-        oldest = min([
-            fields.Datetime.from_string(job['nextcall'])
-            for job in jobs
-        ])
+        oldest = min([fields.Datetime.from_string(job["nextcall"]) for job in jobs])
         if datetime.now() - oldest < MAX_FAIL_TIME:
             raise BadModuleState()
 
@@ -169,7 +218,8 @@ class ir_cron(models.Model):
     @classmethod
     def _get_all_ready_jobs(cls, cr):
         """ Return a list of all jobs that are ready to be executed """
-        cr.execute("""
+        cr.execute(
+            """
             SELECT *
             FROM ir_cron
             WHERE active = true
@@ -182,7 +232,8 @@ class ir_cron(models.Model):
                 )
               )
             ORDER BY priority
-        """)
+        """
+        )
         return cr.dictfetchall()
 
     @classmethod
@@ -213,7 +264,8 @@ class ir_cron(models.Model):
         #
         # Learn more: https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS
 
-        cr.execute("""
+        cr.execute(
+            """
             SELECT *
             FROM ir_cron
             WHERE active = true
@@ -229,7 +281,9 @@ class ir_cron(models.Model):
               AND id in %s
             ORDER BY priority
             LIMIT 1 FOR NO KEY UPDATE SKIP LOCKED
-        """, [job_ids])
+        """,
+            [job_ids],
+        )
         return cr.dictfetchone()
 
     @classmethod
@@ -252,9 +306,9 @@ class ir_cron(models.Model):
         # 4: future_nextcall, the cron nextcall as seen from now
 
         with api.Environment.manage(), db.cursor() as job_cr:
-            lastcall = fields.Datetime.to_datetime(job['lastcall'])
-            interval = _intervalTypes[job['interval_type']](job['interval_number'])
-            env = api.Environment(job_cr, job['user_id'], {'lastcall': lastcall})
+            lastcall = fields.Datetime.to_datetime(job["lastcall"])
+            interval = _intervalTypes[job["interval_type"]](job["interval_number"])
+            env = api.Environment(job_cr, job["user_id"], {"lastcall": lastcall})
             ir_cron = env[cls._name]
 
             # Use the user's timezone to compare and compute datetimes,
@@ -263,7 +317,8 @@ class ir_cron(models.Model):
             # instead of August 1st!
             now = fields.Datetime.context_timestamp(ir_cron, datetime.utcnow())
             past_nextcall = fields.Datetime.context_timestamp(
-                ir_cron, fields.Datetime.to_datetime(job['nextcall']))
+                ir_cron, fields.Datetime.to_datetime(job["nextcall"])
+            )
 
             # Compute how many call were missed
             missed_call = past_nextcall
@@ -275,38 +330,51 @@ class ir_cron(models.Model):
 
             # Compute how many time we should run the cron
             effective_call_count = (
-                     1 if not missed_call_count                    # run at least once
-                else 1 if not job['doall']                         # run once for all
-                else missed_call_count if job['numbercall'] == -1  # run them all
-                else min(missed_call_count, job['numbercall'])     # run maximum numbercall times
+                1
+                if not missed_call_count  # run at least once
+                else 1
+                if not job["doall"]  # run once for all
+                else missed_call_count
+                if job["numbercall"] == -1  # run them all
+                else min(
+                    missed_call_count, job["numbercall"]
+                )  # run maximum numbercall times
             )
-            call_count_left = max(job['numbercall'] - effective_call_count, -1)
+            call_count_left = max(job["numbercall"] - effective_call_count, -1)
 
             # The actual cron execution
             for call in range(effective_call_count):
-                ir_cron._callback(job['cron_name'], job['ir_actions_server_id'], job['id'])
+                ir_cron._callback(
+                    job["cron_name"], job["ir_actions_server_id"], job["id"]
+                )
 
         # Update the cron with the information computed above
-        cron_cr.execute("""
+        cron_cr.execute(
+            """
             UPDATE ir_cron
             SET nextcall=%s,
                 numbercall=%s,
                 lastcall=%s,
                 active=%s
             WHERE id=%s
-        """, [
-            fields.Datetime.to_string(future_nextcall.astimezone(pytz.UTC)),
-            call_count_left,
-            fields.Datetime.to_string(now.astimezone(pytz.UTC)),
-            job['active'] and bool(call_count_left),
-            job['id'],
-        ])
+        """,
+            [
+                fields.Datetime.to_string(future_nextcall.astimezone(pytz.UTC)),
+                call_count_left,
+                fields.Datetime.to_string(now.astimezone(pytz.UTC)),
+                job["active"] and bool(call_count_left),
+                job["id"],
+            ],
+        )
 
-        cron_cr.execute("""
+        cron_cr.execute(
+            """
             DELETE FROM ir_cron_trigger
             WHERE cron_id = %s
               AND call_at < (now() at time zone 'UTC')
-        """, [job['id']])
+        """,
+            [job["id"]],
+        )
 
         cron_cr.commit()
 
@@ -321,26 +389,44 @@ class ir_cron(models.Model):
                 self.env.reset()
                 self = self.env()[self._name]
 
-            log_depth = (None if _logger.isEnabledFor(logging.DEBUG) else 1)
-            odoo.netsvc.log(_logger, logging.DEBUG, 'cron.object.execute', (self._cr.dbname, self._uid, '*', cron_name, server_action_id), depth=log_depth)
+            log_depth = None if _logger.isEnabledFor(logging.DEBUG) else 1
+            odoo.netsvc.log(
+                _logger,
+                logging.DEBUG,
+                "cron.object.execute",
+                (self._cr.dbname, self._uid, "*", cron_name, server_action_id),
+                depth=log_depth,
+            )
             start_time = False
-            _logger.info('Starting job `%s`.', cron_name)
+            _logger.info("Starting job `%s`.", cron_name)
             if _logger.isEnabledFor(logging.DEBUG):
                 start_time = time.time()
-            self.env['ir.actions.server'].browse(server_action_id).run()
-            _logger.info('Job `%s` done.', cron_name)
+            self.env["ir.actions.server"].browse(server_action_id).run()
+            _logger.info("Job `%s` done.", cron_name)
             if start_time and _logger.isEnabledFor(logging.DEBUG):
                 end_time = time.time()
-                _logger.debug('%.3fs (cron %s, server action %d with uid %d)', end_time - start_time, cron_name, server_action_id, self.env.uid)
+                _logger.debug(
+                    "%.3fs (cron %s, server action %d with uid %d)",
+                    end_time - start_time,
+                    cron_name,
+                    server_action_id,
+                    self.env.uid,
+                )
             self.pool.signal_changes()
         except Exception as e:
             self.pool.reset_changes()
-            _logger.exception("Call from cron %s for server action #%s failed in Job #%s",
-                              cron_name, server_action_id, job_id)
+            _logger.exception(
+                "Call from cron %s for server action #%s failed in Job #%s",
+                cron_name,
+                server_action_id,
+                job_id,
+            )
             self._handle_callback_exception(cron_name, server_action_id, job_id, e)
 
     @api.model
-    def _handle_callback_exception(self, cron_name, server_action_id, job_id, job_exception):
+    def _handle_callback_exception(
+        self, cron_name, server_action_id, job_id, job_exception
+    ):
         """ Method called when an exception is raised by a job.
 
         Simply logs the exception and rollback the transaction. """
@@ -357,17 +443,25 @@ class ir_cron(models.Model):
         """
         row_level_lock = "UPDATE" if lockfk else "NO KEY UPDATE"
         try:
-            self._cr.execute(f"""
+            self._cr.execute(
+                f"""
                 SELECT id
                 FROM "{self._table}"
                 WHERE id IN %s
                 FOR {row_level_lock} NOWAIT
-            """, [tuple(self.ids)], log_exceptions=False)
+            """,
+                [tuple(self.ids)],
+                log_exceptions=False,
+            )
         except psycopg2.OperationalError:
             self._cr.rollback()  # early rollback to allow translations to work for the user feedback
-            raise UserError(_("Record cannot be modified right now: "
-                              "This cron task is currently being executed and may not be modified "
-                              "Please try again in a few minutes"))
+            raise UserError(
+                _(
+                    "Record cannot be modified right now: "
+                    "This cron task is currently being executed and may not be modified "
+                    "Please try again in a few minutes"
+                )
+            )
 
     def write(self, vals):
         self._try_lock()
@@ -380,12 +474,16 @@ class ir_cron(models.Model):
     def try_write(self, values):
         try:
             with self._cr.savepoint():
-                self._cr.execute(f"""
+                self._cr.execute(
+                    f"""
                     SELECT id
                     FROM "{self._table}"
                     WHERE id IN %s
                     FOR NO KEY UPDATE NOWAIT
-                """, [tuple(self.ids)], log_exceptions=False)
+                """,
+                    [tuple(self.ids)],
+                    log_exceptions=False,
+                )
         except psycopg2.OperationalError:
             pass
         else:
@@ -395,7 +493,7 @@ class ir_cron(models.Model):
     @api.model
     def toggle(self, model, domain):
         active = bool(self.env[model].search_count(domain))
-        return self.try_write({'active': active})
+        return self.try_write({"active": active})
 
     @api.model
     def _trigger(self, at=None):
@@ -439,12 +537,11 @@ class ir_cron(models.Model):
         self.ensure_one()
         now = fields.Datetime.now()
 
-        self.env['ir.cron.trigger'].sudo().create([
-            {'cron_id': self.id, 'call_at': at}
-            for at in at_list
-        ])
+        self.env["ir.cron.trigger"].sudo().create(
+            [{"cron_id": self.id, "call_at": at} for at in at_list]
+        )
         if _logger.isEnabledFor(logging.DEBUG):
-            ats = ', '.join(map(str, at_list))
+            ats = ", ".join(map(str, at_list))
             _logger.debug("will execute '%s' at %s", self.sudo().name, ats)
 
         if min(at_list) <= now:
@@ -452,14 +549,14 @@ class ir_cron(models.Model):
 
     def _notifydb(self):
         """ Wake up the cron workers """
-        with odoo.sql_db.db_connect('postgres').cursor() as cr:
-            cr.execute('NOTIFY cron_trigger')
+        with odoo.sql_db.db_connect("postgres").cursor() as cr:
+            cr.execute("NOTIFY cron_trigger")
         _logger.debug("cron workers notified")
 
 
 class ir_cron_trigger(models.Model):
-    _name = 'ir.cron.trigger'
-    _description = 'Triggered actions'
+    _name = "ir.cron.trigger"
+    _description = "Triggered actions"
 
     cron_id = fields.Many2one("ir.cron", index=True)
     call_at = fields.Datetime()

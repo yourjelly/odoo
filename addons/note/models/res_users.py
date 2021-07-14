@@ -9,20 +9,22 @@ _logger = logging.getLogger(__name__)
 
 
 class Users(models.Model):
-    _name = 'res.users'
-    _inherit = ['res.users']
+    _name = "res.users"
+    _inherit = ["res.users"]
 
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        user_group_id = self.env['ir.model.data'].xmlid_to_res_id('base.group_user')
+        user_group_id = self.env["ir.model.data"].xmlid_to_res_id("base.group_user")
         # for new employee, create his own 5 base note stages
-        users.filtered_domain([('groups_id', 'in', [user_group_id])])._create_note_stages()
+        users.filtered_domain(
+            [("groups_id", "in", [user_group_id])]
+        )._create_note_stages()
         return users
 
     @api.model
     def _init_data_user_note_stages(self):
-        emp_group_id = self.env.ref('base.group_user').id
+        emp_group_id = self.env.ref("base.group_user").id
         query = """
 SELECT res_users.id
 FROM res_users
@@ -38,11 +40,13 @@ GROUP BY id"""
 
     def _create_note_stages(self):
         for num in range(4):
-            stage = self.env.ref('note.note_stage_%02d' % (num,), raise_if_not_found=False)
+            stage = self.env.ref(
+                "note.note_stage_%02d" % (num,), raise_if_not_found=False
+            )
             if not stage:
                 break
             for user in self:
-                stage.sudo().copy(default={'user_id': user.id})
+                stage.sudo().copy(default={"user_id": user.id})
         else:
             _logger.debug("Created note columns for %s", self)
 
@@ -53,21 +57,34 @@ GROUP BY id"""
             activity menu not visible for note.
         """
         activities = super(Users, self).systray_get_activities()
-        notes_count = self.env['note.note'].search_count([('user_id', '=', self.env.uid)])
+        notes_count = self.env["note.note"].search_count(
+            [("user_id", "=", self.env.uid)]
+        )
         if notes_count:
-            note_index = next((index for (index, a) in enumerate(activities) if a["model"] == "note.note"), None)
-            note_label = _('Notes')
+            note_index = next(
+                (
+                    index
+                    for (index, a) in enumerate(activities)
+                    if a["model"] == "note.note"
+                ),
+                None,
+            )
+            note_label = _("Notes")
             if note_index is not None:
-                activities[note_index]['name'] = note_label
+                activities[note_index]["name"] = note_label
             else:
-                activities.append({
-                    'type': 'activity',
-                    'name': note_label,
-                    'model': 'note.note',
-                    'icon': modules.module.get_module_icon(self.env['note.note']._original_module),
-                    'total_count': 0,
-                    'today_count': 0,
-                    'overdue_count': 0,
-                    'planned_count': 0
-                })
+                activities.append(
+                    {
+                        "type": "activity",
+                        "name": note_label,
+                        "model": "note.note",
+                        "icon": modules.module.get_module_icon(
+                            self.env["note.note"]._original_module
+                        ),
+                        "total_count": 0,
+                        "today_count": 0,
+                        "overdue_count": 0,
+                        "planned_count": 0,
+                    }
+                )
         return activities

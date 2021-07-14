@@ -4,14 +4,15 @@
 import datetime
 from odoo import api, models, _
 from odoo.tools.safe_eval import safe_eval
+
 #
 # Use period and Journal for selection or resources
 #
 
 
 class ReportAssertAccount(models.AbstractModel):
-    _name = 'report.account_test.report_accounttest'
-    _description = 'Account Test Report'
+    _name = "report.account_test.report_accounttest"
+    _description = "Account Test Report"
 
     @api.model
     def execute_code(self, code_exec):
@@ -19,7 +20,7 @@ class ReportAssertAccount(models.AbstractModel):
             """
             returns the list of invoices that are set as reconciled = True
             """
-            return self.env['account.move'].search([('reconciled', '=', True)]).ids
+            return self.env["account.move"].search([("reconciled", "=", True)]).ids
 
         def order_columns(item, cols=None):
             """
@@ -36,40 +37,49 @@ class ReportAssertAccount(models.AbstractModel):
             return [(col, item.get(col)) for col in cols if col in item]
 
         localdict = {
-            'cr': self.env.cr,
-            'uid': self.env.uid,
-            'reconciled_inv': reconciled_inv,  # specific function used in different tests
-            'result': None,  # used to store the result of the test
-            'column_order': None,  # used to choose the display order of columns (in case you are returning a list of dict)
-            '_': _,
+            "cr": self.env.cr,
+            "uid": self.env.uid,
+            "reconciled_inv": reconciled_inv,  # specific function used in different tests
+            "result": None,  # used to store the result of the test
+            "column_order": None,  # used to choose the display order of columns (in case you are returning a list of dict)
+            "_": _,
         }
         safe_eval(code_exec, localdict, mode="exec", nocopy=True)
-        result = localdict['result']
-        column_order = localdict.get('column_order', None)
+        result = localdict["result"]
+        column_order = localdict.get("column_order", None)
 
         if not isinstance(result, (tuple, list, set)):
             result = [result]
         if not result:
-            result = [_('The test was passed successfully')]
+            result = [_("The test was passed successfully")]
         else:
+
             def _format(item):
                 if isinstance(item, dict):
-                    return ', '.join(["%s: %s" % (tup[0], tup[1]) for tup in order_columns(item, column_order)])
+                    return ", ".join(
+                        [
+                            "%s: %s" % (tup[0], tup[1])
+                            for tup in order_columns(item, column_order)
+                        ]
+                    )
                 else:
                     return item
+
             result = [_format(rec) for rec in result]
 
         return result
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        report = self.env['ir.actions.report']._get_report_from_name('account_test.report_accounttest')
-        records = self.env['accounting.assert.test'].browse(self.ids)
+        report = self.env["ir.actions.report"]._get_report_from_name(
+            "account_test.report_accounttest"
+        )
+        records = self.env["accounting.assert.test"].browse(self.ids)
         return {
-            'doc_ids': self._ids,
-            'doc_model': report.model,
-            'docs': records,
-            'data': data,
-            'execute_code': self.execute_code,
-            'datetime': datetime
+            "doc_ids": self._ids,
+            "doc_model": report.model,
+            "docs": records,
+            "data": data,
+            "execute_code": self.execute_code,
+            "datetime": datetime,
         }

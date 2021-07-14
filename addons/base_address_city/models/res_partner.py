@@ -8,12 +8,14 @@ from odoo.tools.translate import _
 
 
 class Partner(models.Model):
-    _inherit = 'res.partner'
+    _inherit = "res.partner"
 
-    country_enforce_cities = fields.Boolean(related='country_id.enforce_cities', readonly=True)
-    city_id = fields.Many2one('res.city', string='City of Address')
+    country_enforce_cities = fields.Boolean(
+        related="country_id.enforce_cities", readonly=True
+    )
+    city_id = fields.Many2one("res.city", string="City of Address")
 
-    @api.onchange('city_id')
+    @api.onchange("city_id")
     def _onchange_city_id(self):
         if self.city_id:
             self.city = self.city_id.name
@@ -57,7 +59,7 @@ class Partner(models.Model):
         """
 
         replacement_data = {
-            'placeholder': _('City'),
+            "placeholder": _("City"),
         }
 
         def _arch_location(node):
@@ -65,21 +67,21 @@ class Partner(models.Model):
             view_type = False
             parent = node.getparent()
             while parent is not None and (not view_type or not in_subview):
-                if parent.tag == 'field':
+                if parent.tag == "field":
                     in_subview = True
-                elif parent.tag in ['list', 'tree', 'kanban', 'form']:
+                elif parent.tag in ["list", "tree", "kanban", "form"]:
                     view_type = parent.tag
                 parent = parent.getparent()
             return {
-                'view_type': view_type,
-                'in_subview': in_subview,
+                "view_type": view_type,
+                "in_subview": in_subview,
             }
 
         for city_node in doc.xpath("//field[@name='city']"):
             location = _arch_location(city_node)
-            replacement_data['parent_condition'] = ''
-            if location['view_type'] == 'form' or not location['in_subview']:
-                replacement_data['parent_condition'] = ", ('parent_id', '!=', False)"
+            replacement_data["parent_condition"] = ""
+            if location["view_type"] == "form" or not location["in_subview"]:
+                replacement_data["parent_condition"] = ", ('parent_id', '!=', False)"
 
             replacement_formatted = replacement_xml % replacement_data
             for replace_node in etree.fromstring(replacement_formatted).getchildren():
@@ -87,5 +89,5 @@ class Partner(models.Model):
             parent = city_node.getparent()
             parent.remove(city_node)
 
-        arch = etree.tostring(doc, encoding='unicode')
+        arch = etree.tostring(doc, encoding="unicode")
         return arch

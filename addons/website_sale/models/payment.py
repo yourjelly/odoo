@@ -5,7 +5,7 @@ from odoo import api, models
 
 class PaymentAcquirer(models.Model):
 
-    _inherit = 'payment.acquirer'
+    _inherit = "payment.acquirer"
 
     @api.model
     def _get_compatible_acquirers(self, *args, website_id=None, **kwargs):
@@ -18,7 +18,9 @@ class PaymentAcquirer(models.Model):
         :return: The compatible acquirers
         :rtype: recordset of `payment.acquirer`
         """
-        acquirers = super()._get_compatible_acquirers(*args, website_id=website_id, **kwargs)
+        acquirers = super()._get_compatible_acquirers(
+            *args, website_id=website_id, **kwargs
+        )
         if website_id:
             acquirers = acquirers.filtered(
                 lambda a: not a.website_id or a.website_id.id == website_id

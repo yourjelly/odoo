@@ -34,7 +34,9 @@ _sha1_re = re.compile(r"^[a-f0-9]{40}$")
 def generate_key(salt=None):
     if salt is None:
         salt = repr(salt).encode("ascii")
-    return sha1(b"".join([salt, str(time()).encode("ascii"), os.urandom(30)])).hexdigest()
+    return sha1(
+        b"".join([salt, str(time()).encode("ascii"), os.urandom(30)])
+    ).hexdigest()
 
 
 class ModificationTrackingDict(CallbackDict):

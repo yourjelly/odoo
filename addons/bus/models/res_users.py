@@ -9,11 +9,12 @@ class ResUsers(models.Model):
 
     _inherit = "res.users"
 
-    im_status = fields.Char('IM Status', compute='_compute_im_status')
+    im_status = fields.Char("IM Status", compute="_compute_im_status")
 
     def _compute_im_status(self):
         """ Compute the im_status of the users """
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            """
             SELECT
                 user_id as id,
                 CASE WHEN age(now() AT TIME ZONE 'UTC', last_poll) > interval %s THEN 'offline'
@@ -22,7 +23,15 @@ class ResUsers(models.Model):
                 END as status
             FROM bus_presence
             WHERE user_id IN %s
-        """, ("%s seconds" % DISCONNECTION_TIMER, "%s seconds" % AWAY_TIMER, tuple(self.ids)))
-        res = dict(((status['id'], status['status']) for status in self.env.cr.dictfetchall()))
+        """,
+            (
+                "%s seconds" % DISCONNECTION_TIMER,
+                "%s seconds" % AWAY_TIMER,
+                tuple(self.ids),
+            ),
+        )
+        res = dict(
+            ((status["id"], status["status"]) for status in self.env.cr.dictfetchall())
+        )
         for user in self:
-            user.im_status = res.get(user.id, 'offline')
+            user.im_status = res.get(user.id, "offline")

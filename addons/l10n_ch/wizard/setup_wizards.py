@@ -4,9 +4,9 @@ from odoo import api, models
 
 
 class SwissSetupBarBankConfigWizard(models.TransientModel):
-    _inherit = 'account.setup.bank.manual.config'
+    _inherit = "account.setup.bank.manual.config"
 
-    @api.onchange('acc_number')
+    @api.onchange("acc_number")
     def _onchange_recompute_qr_iban(self):
         # Needed because ORM doesn't properly call the compute in 'new' mode, due to inherits, and
         # we want this field to be displayed in the wizard. We need to manually set acc_number

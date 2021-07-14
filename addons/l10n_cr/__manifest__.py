@@ -34,12 +34,12 @@
 ##############################################################################
 
 {
-    'name': 'Costa Rica - Accounting',
-    'url': 'https://github.com/CLEARCORP/odoo-costa-rica',
-    'author': 'ClearCorp S.A.',
-    'website': 'http://clearcorp.co.cr',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Costa Rica - Accounting",
+    "url": "https://github.com/CLEARCORP/odoo-costa-rica",
+    "author": "ClearCorp S.A.",
+    "website": "http://clearcorp.co.cr",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 Chart of accounts for Costa Rica.
 =================================
 
@@ -52,17 +52,15 @@ Includes:
 Everything is in English with Spanish translation. Further translations are welcome,
 please go to http://translations.launchpad.net/openerp-costa-rica.
     """,
-    'depends': ['account'],
-    'data': [
-        'data/l10n_cr_res_partner_title.xml',
-        'data/l10n_cr_chart_data.xml',
-        'data/account.account.template.csv',
-        'data/account_data.xml',
-        'data/account_chart_template_data.xml',
-        'data/account_tax_template_data.xml',
-        'data/account_chart_template_configure_data.xml',
+    "depends": ["account"],
+    "data": [
+        "data/l10n_cr_res_partner_title.xml",
+        "data/l10n_cr_chart_data.xml",
+        "data/account.account.template.csv",
+        "data/account_data.xml",
+        "data/account_chart_template_data.xml",
+        "data/account_tax_template_data.xml",
+        "data/account_chart_template_configure_data.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

@@ -5,53 +5,73 @@ from odoo.tests import Form, tagged
 from odoo.exceptions import AccessError
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestPurchaseInvoice(AccountTestInvoicingCommon):
-
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
         # Create a users
-        group_purchase_user = cls.env.ref('purchase.group_purchase_user')
-        group_employee = cls.env.ref('base.group_user')
-        group_partner_manager = cls.env.ref('base.group_partner_manager')
+        group_purchase_user = cls.env.ref("purchase.group_purchase_user")
+        group_employee = cls.env.ref("base.group_user")
+        group_partner_manager = cls.env.ref("base.group_partner_manager")
 
-        cls.purchase_user = cls.env['res.users'].with_context(
-            no_reset_password=True
-        ).create({
-            'name': 'Purchase user',
-            'login': 'purchaseUser',
-            'email': 'pu@odoo.com',
-            'groups_id': [(6, 0, [group_purchase_user.id, group_employee.id, group_partner_manager.id])],
-        })
+        cls.purchase_user = (
+            cls.env["res.users"]
+            .with_context(no_reset_password=True)
+            .create(
+                {
+                    "name": "Purchase user",
+                    "login": "purchaseUser",
+                    "email": "pu@odoo.com",
+                    "groups_id": [
+                        (
+                            6,
+                            0,
+                            [
+                                group_purchase_user.id,
+                                group_employee.id,
+                                group_partner_manager.id,
+                            ],
+                        )
+                    ],
+                }
+            )
+        )
 
-        cls.vendor = cls.env['res.partner'].create({
-            'name': 'Supplier',
-            'email': 'supplier.serv@supercompany.com',
-        })
+        cls.vendor = cls.env["res.partner"].create(
+            {"name": "Supplier", "email": "supplier.serv@supercompany.com",}
+        )
 
-        user_type_expense = cls.env.ref('account.data_account_type_expenses')
-        cls.account_expense_product = cls.env['account.account'].create({
-            'code': 'EXPENSE_PROD111',
-            'name': 'Expense - Test Account',
-            'user_type_id': user_type_expense.id,
-        })
+        user_type_expense = cls.env.ref("account.data_account_type_expenses")
+        cls.account_expense_product = cls.env["account.account"].create(
+            {
+                "code": "EXPENSE_PROD111",
+                "name": "Expense - Test Account",
+                "user_type_id": user_type_expense.id,
+            }
+        )
         # Create category
-        cls.product_category = cls.env['product.category'].create({
-            'name': 'Product Category with Expense account',
-            'property_account_expense_categ_id': cls.account_expense_product.id
-        })
-        cls.product = cls.env['product.product'].create({
-            'name': "Product",
-            'standard_price': 200.0,
-            'list_price': 180.0,
-            'type': 'service',
-        })
+        cls.product_category = cls.env["product.category"].create(
+            {
+                "name": "Product Category with Expense account",
+                "property_account_expense_categ_id": cls.account_expense_product.id,
+            }
+        )
+        cls.product = cls.env["product.product"].create(
+            {
+                "name": "Product",
+                "standard_price": 200.0,
+                "list_price": 180.0,
+                "type": "service",
+            }
+        )
 
     def test_create_purchase_order(self):
         """Check a purchase user can create a vendor bill from a purchase order but not post it"""
-        purchase_order_form = Form(self.env['purchase.order'].with_user(self.purchase_user))
+        purchase_order_form = Form(
+            self.env["purchase.order"].with_user(self.purchase_user)
+        )
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
@@ -70,13 +90,17 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
 
     def test_read_purchase_order(self):
         """ Check that a purchase user can read all purchase order and 'in' invoices"""
-        purchase_user_2 = self.purchase_user.copy({
-            'name': 'Purchase user 2',
-            'login': 'purchaseUser2',
-            'email': 'pu2@odoo.com',
-        })
+        purchase_user_2 = self.purchase_user.copy(
+            {
+                "name": "Purchase user 2",
+                "login": "purchaseUser2",
+                "email": "pu2@odoo.com",
+            }
+        )
 
-        purchase_order_form = Form(self.env['purchase.order'].with_user(purchase_user_2))
+        purchase_order_form = Form(
+            self.env["purchase.order"].with_user(purchase_user_2)
+        )
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
@@ -103,17 +127,21 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
 
         # edit the account.move record rule for purchase user in order to ensure
         # a user can only see his own invoices
-        rule = self.env.ref('purchase.purchase_user_account_move_rule')
+        rule = self.env.ref("purchase.purchase_user_account_move_rule")
         rule.domain_force = "['&', ('move_type', 'in', ('in_invoice', 'in_refund', 'in_receipt')), ('invoice_user_id', '=', user.id)]"
 
         # create a purchase and make a vendor bill from it as purchase user 2
-        purchase_user_2 = self.purchase_user.copy({
-            'name': 'Purchase user 2',
-            'login': 'purchaseUser2',
-            'email': 'pu2@odoo.com',
-        })
+        purchase_user_2 = self.purchase_user.copy(
+            {
+                "name": "Purchase user 2",
+                "login": "purchaseUser2",
+                "email": "pu2@odoo.com",
+            }
+        )
 
-        purchase_order_form = Form(self.env['purchase.order'].with_user(purchase_user_2))
+        purchase_order_form = Form(
+            self.env["purchase.order"].with_user(purchase_user_2)
+        )
         purchase_order_form.partner_id = self.vendor
         with purchase_order_form.order_line.new() as line:
             line.name = self.product.name
@@ -133,28 +161,34 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
             Form(vendor_bill_user2.with_user(self.purchase_user))
 
         # Check that calling 'action_view_invoice' return the same action despite the record rule
-        action_user_1 = purchase_order_user2.with_user(self.purchase_user).action_view_invoice()
+        action_user_1 = purchase_order_user2.with_user(
+            self.purchase_user
+        ).action_view_invoice()
         purchase_order_user2.invalidate_cache()
-        action_user_2 = purchase_order_user2.with_user(purchase_user_2).action_view_invoice()
+        action_user_2 = purchase_order_user2.with_user(
+            purchase_user_2
+        ).action_view_invoice()
         self.assertEqual(action_user_1, action_user_2)
 
     def test_double_validation(self):
         """Only purchase managers can approve a purchase order when double
         validation is enabled"""
-        group_purchase_manager = self.env.ref('purchase.group_purchase_manager')
+        group_purchase_manager = self.env.ref("purchase.group_purchase_manager")
         order = self.env.ref("purchase.purchase_order_1")
         company = order.sudo().company_id
-        company.po_double_validation = 'two_step'
+        company.po_double_validation = "two_step"
         company.po_double_validation_amount = 0
-        self.purchase_user.write({
-            'company_ids': [(4, company.id)],
-            'company_id': company.id,
-            'groups_id': [(3, group_purchase_manager.id)],
-        })
+        self.purchase_user.write(
+            {
+                "company_ids": [(4, company.id)],
+                "company_id": company.id,
+                "groups_id": [(3, group_purchase_manager.id)],
+            }
+        )
         order.with_user(self.purchase_user).button_confirm()
-        self.assertEqual(order.state, 'to approve')
+        self.assertEqual(order.state, "to approve")
         order.with_user(self.purchase_user).button_approve()
-        self.assertEqual(order.state, 'to approve')
+        self.assertEqual(order.state, "to approve")
         self.purchase_user.groups_id += group_purchase_manager
         order.with_user(self.purchase_user).button_approve()
-        self.assertEqual(order.state, 'purchase')
+        self.assertEqual(order.state, "purchase")

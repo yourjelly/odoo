@@ -15,49 +15,60 @@ _logger = logging.getLogger(__name__)
 class Partner(models.Model):
     """ Update partner to add a field about notification preferences. Add a generic opt-out field that can be used
        to restrict usage of automatic email templates. """
+
     _name = "res.partner"
-    _inherit = ['res.partner', 'mail.activity.mixin', 'mail.thread.blacklist']
+    _inherit = ["res.partner", "mail.activity.mixin", "mail.thread.blacklist"]
     _mail_flat_thread = False
 
     email = fields.Char(tracking=1)
     phone = fields.Char(tracking=2)
 
-    channel_ids = fields.Many2many('mail.channel', 'mail_channel_partner', 'partner_id', 'channel_id', string='Channels', copy=False)
+    channel_ids = fields.Many2many(
+        "mail.channel",
+        "mail_channel_partner",
+        "partner_id",
+        "channel_id",
+        string="Channels",
+        copy=False,
+    )
     # override the field to track the visibility of user
     user_id = fields.Many2one(tracking=True)
 
     def _compute_im_status(self):
         super()._compute_im_status()
-        odoobot_id = self.env['ir.model.data'].xmlid_to_res_id('base.partner_root')
-        odoobot = self.env['res.partner'].browse(odoobot_id)
+        odoobot_id = self.env["ir.model.data"].xmlid_to_res_id("base.partner_root")
+        odoobot = self.env["res.partner"].browse(odoobot_id)
         if odoobot in self:
-            odoobot.im_status = 'bot'
+            odoobot.im_status = "bot"
 
     def _message_get_suggested_recipients(self):
         recipients = super(Partner, self)._message_get_suggested_recipients()
         for partner in self:
-            partner._message_add_suggested_recipient(recipients, partner=partner, reason=_('Partner Profile'))
+            partner._message_add_suggested_recipient(
+                recipients, partner=partner, reason=_("Partner Profile")
+            )
         return recipients
 
     def _message_get_default_recipients(self):
-        return {r.id: {
-            'partner_ids': [r.id],
-            'email_to': False,
-            'email_cc': False}
-            for r in self}
+        return {
+            r.id: {"partner_ids": [r.id], "email_to": False, "email_cc": False}
+            for r in self
+        }
 
     @api.model
-    @api.returns('self', lambda value: value.id)
+    @api.returns("self", lambda value: value.id)
     def find_or_create(self, email, assert_valid_email=False):
         """ Override to use the email_normalized field. """
         if not email:
-            raise ValueError(_('An email is required for find_or_create to work'))
+            raise ValueError(_("An email is required for find_or_create to work"))
 
         parsed_name, parsed_email = self._parse_partner_name(email)
         if parsed_email:
             email_normalized = tools.email_normalize(parsed_email)
             if email_normalized:
-                partners = self.search([('email_normalized', '=', email_normalized)], limit=1)
+                partners = self.search(
+                    [("email_normalized", "=", email_normalized)], limit=1
+                )
                 if partners:
                     return partners
 
@@ -67,13 +78,19 @@ class Partner(models.Model):
         # If you want to override `find_or_create()` your module should depend on `mail`
         create_values = {self._rec_name: parsed_name or parsed_email}
         if parsed_email:  # otherwise keep default_email in context
-            create_values['email'] = parsed_email
+            create_values["email"] = parsed_email
         return self.create(create_values)
 
     def mail_partner_format(self):
         self.ensure_one()
-        internal_users = self.user_ids - self.user_ids.filtered('share')
-        main_user = internal_users[0] if len(internal_users) > 0 else self.user_ids[0] if len(self.user_ids) > 0 else self.env['res.users']
+        internal_users = self.user_ids - self.user_ids.filtered("share")
+        main_user = (
+            internal_users[0]
+            if len(internal_users) > 0
+            else self.user_ids[0]
+            if len(self.user_ids) > 0
+            else self.env["res.users"]
+        )
         res = {
             "id": self.id,
             "display_name": self.display_name,
@@ -91,25 +108,31 @@ class Partner(models.Model):
     def get_needaction_count(self):
         """ compute the number of needaction of the current user """
         if self.env.user.partner_id:
-            self.env['mail.notification'].flush(['is_read', 'res_partner_id'])
-            self.env.cr.execute("""
+            self.env["mail.notification"].flush(["is_read", "res_partner_id"])
+            self.env.cr.execute(
+                """
                 SELECT count(*) as needaction_count
                 FROM mail_notification R
-                WHERE R.res_partner_id = %s AND (R.is_read = false OR R.is_read IS NULL)""", (self.env.user.partner_id.id,))
-            return self.env.cr.dictfetchall()[0].get('needaction_count')
-        _logger.error('Call to needaction_count without partner_id')
+                WHERE R.res_partner_id = %s AND (R.is_read = false OR R.is_read IS NULL)""",
+                (self.env.user.partner_id.id,),
+            )
+            return self.env.cr.dictfetchall()[0].get("needaction_count")
+        _logger.error("Call to needaction_count without partner_id")
         return 0
 
     @api.model
     def get_starred_count(self):
         """ compute the number of starred of the current user """
         if self.env.user.partner_id:
-            self.env.cr.execute("""
+            self.env.cr.execute(
+                """
                 SELECT count(*) as starred_count
                 FROM mail_message_res_partner_starred_rel R
-                WHERE R.res_partner_id = %s """, (self.env.user.partner_id.id,))
-            return self.env.cr.dictfetchall()[0].get('starred_count')
-        _logger.error('Call to starred_count without partner_id')
+                WHERE R.res_partner_id = %s """,
+                (self.env.user.partner_id.id,),
+            )
+            return self.env.cr.dictfetchall()[0].get("starred_count")
+        _logger.error("Call to starred_count without partner_id")
         return 0
 
     @api.model
@@ -118,9 +141,9 @@ class Partner(models.Model):
             and stored client side. All the internal users are returned.
             The return format is a list of partner data (as per returned by `mail_partner_format()`).
         """
-        partners = self.env['res.partner']
+        partners = self.env["res.partner"]
         try:
-            partners = self.env.ref('base.group_user').users.partner_id
+            partners = self.env.ref("base.group_user").users.partner_id
         except AccessError:
             pass
         return [partner.mail_partner_format() for partner in partners]
@@ -132,19 +155,30 @@ class Partner(models.Model):
             If channel_id is given, only members of this channel are returned.
             The return format is a list of partner data (as per returned by `mail_partner_format()`).
         """
-        search_dom = expression.OR([[('name', 'ilike', search)], [('email', 'ilike', search)]])
-        search_dom = expression.AND([[('active', '=', True), ('type', '!=', 'private')], search_dom])
+        search_dom = expression.OR(
+            [[("name", "ilike", search)], [("email", "ilike", search)]]
+        )
+        search_dom = expression.AND(
+            [[("active", "=", True), ("type", "!=", "private")], search_dom]
+        )
         if channel_id:
-            search_dom = expression.AND([[('channel_ids', 'in', channel_id)], search_dom])
+            search_dom = expression.AND(
+                [[("channel_ids", "in", channel_id)], search_dom]
+            )
 
         # Search partners that are also users
-        domain = expression.AND([[('user_ids.id', '!=', False), ('user_ids.active', '=', True)], search_dom])
+        domain = expression.AND(
+            [[("user_ids.id", "!=", False), ("user_ids.active", "=", True)], search_dom]
+        )
         partners = self.search(domain, limit=limit)
 
         # Search partners that are not users if less than 'limit' partner that are users found
         remaining_limit = limit - len(partners)
         if remaining_limit > 0:
-            partners |= self.search(expression.AND([[('id', 'not in', partners.ids)], search_dom]), limit=remaining_limit)
+            partners |= self.search(
+                expression.AND([[("id", "not in", partners.ids)], search_dom]),
+                limit=remaining_limit,
+            )
 
         return [partner.mail_partner_format() for partner in partners]
 
@@ -158,10 +192,13 @@ class Partner(models.Model):
         # This method is supposed to be used only in the context of channel creation or
         # extension via an invite. As both of these actions require the 'create' access
         # right, we check this specific ACL.
-        if self.env['mail.channel'].check_access_rights('create', raise_exception=False):
-            name = '%' + name + '%'
+        if self.env["mail.channel"].check_access_rights(
+            "create", raise_exception=False
+        ):
+            name = "%" + name + "%"
             excluded_partner_ids = [self.env.user.partner_id.id]
-            self.env.cr.execute("""
+            self.env.cr.execute(
+                """
                 SELECT
                     U.id as user_id,
                     P.id as id,
@@ -178,7 +215,15 @@ class Partner(models.Model):
                     AND P.id NOT IN %s
                     AND U.active = 't'
                 LIMIT %s
-            """, ("%s seconds" % DISCONNECTION_TIMER, "%s seconds" % AWAY_TIMER, name, tuple(excluded_partner_ids), limit))
+            """,
+                (
+                    "%s seconds" % DISCONNECTION_TIMER,
+                    "%s seconds" % AWAY_TIMER,
+                    name,
+                    tuple(excluded_partner_ids),
+                    limit,
+                ),
+            )
             return self.env.cr.dictfetchall()
         else:
             return {}

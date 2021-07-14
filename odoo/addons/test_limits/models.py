@@ -6,12 +6,14 @@ import sys
 
 from odoo import models, api
 
+
 class m(models.Model):
     """ This model exposes a few methods that will consume between 'almost no
         resource' and 'a lot of resource'.
     """
-    _name = 'test.limits.model'
-    _description = 'Test Limits Model'
+
+    _name = "test.limits.model"
+    _description = "Test Limits Model"
 
     @api.model
     def consume_nothing(self):
@@ -24,7 +26,7 @@ class m(models.Model):
 
     @api.model
     def leak_memory(self, size):
-        if not hasattr(self, 'l'):
+        if not hasattr(self, "l"):
             type(self).l = []
         self.l.append([0] * size)
         return True

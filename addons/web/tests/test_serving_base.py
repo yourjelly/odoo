@@ -15,10 +15,9 @@ from odoo.addons.web.controllers.main import HomeStaticTemplateHelpers
 
 _logger = logging.getLogger(__name__)
 
+
 def sample(population):
-    return random.sample(
-        population,
-            random.randint(0, min(len(population), 5)))
+    return random.sample(population, random.randint(0, min(len(population), 5)))
 
 
 class TestModulesLoading(BaseCase):
@@ -27,9 +26,7 @@ class TestModulesLoading(BaseCase):
 
     def test_topological_sort(self):
         random.shuffle(self.mods)
-        modules = [
-            (k, sample(self.mods[:i]))
-            for i, k in enumerate(self.mods)]
+        modules = [(k, sample(self.mods[:i])) for i, k in enumerate(self.mods)]
         random.shuffle(modules)
         ms = dict(modules)
 
@@ -38,26 +35,26 @@ class TestModulesLoading(BaseCase):
         for module in sorted_modules:
             deps = ms[module]
             self.assertGreaterEqual(
-                seen, set(deps),
-                        'Module %s (index %d), ' \
-                        'missing dependencies %s from loaded modules %s' % (
-                    module, sorted_modules.index(module), deps, seen
-                ))
+                seen,
+                set(deps),
+                "Module %s (index %d), "
+                "missing dependencies %s from loaded modules %s"
+                % (module, sorted_modules.index(module), deps, seen),
+            )
             seen.add(module)
 
 
 class TestStaticInheritanceCommon(BaseCase):
-
     def setUp(self):
         super(TestStaticInheritanceCommon, self).setUp()
         # output is "manifest_glob" return
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
-            ('module_2_file_1', 'module_2', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
+            ("module_2_file_1", "module_2", "bundle_1"),
         ]
 
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -68,8 +65,7 @@ class TestStaticInheritanceCommon(BaseCase):
                     </t>
                 </templates>
                 """,
-
-            'module_2_file_1': b"""
+            "module_2_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_2_1" t-inherit="module_1.template_1_1" t-inherit-mode="primary">
                         <xpath expr="//div[1]" position="after">
@@ -91,27 +87,27 @@ class TestStaticInheritanceCommon(BaseCase):
                 """,
         }
         self._set_patchers()
-        self._toggle_patchers('start')
+        self._toggle_patchers("start")
         self._reg_replace_ws = r"\s|\t"
 
     def tearDown(self):
         super(TestStaticInheritanceCommon, self).tearDown()
-        self._toggle_patchers('stop')
+        self._toggle_patchers("stop")
 
     # Custom Assert
     def assertXMLEqual(self, output, expected):
         self.assertTrue(output)
         self.assertTrue(expected)
-        output = textwrap.dedent(output.decode('UTF-8')).strip()
-        output = re.sub(self._reg_replace_ws, '', output)
+        output = textwrap.dedent(output.decode("UTF-8")).strip()
+        output = re.sub(self._reg_replace_ws, "", output)
 
-        expected = textwrap.dedent(expected.decode('UTF-8')).strip()
-        expected = re.sub(self._reg_replace_ws, '', expected)
+        expected = textwrap.dedent(expected.decode("UTF-8")).strip()
+        expected = re.sub(self._reg_replace_ws, "", expected)
         self.assertEqual(output, expected)
 
     # Private methods
     def _get_module_names(self):
-        return ','.join([asset_path[1] for asset_path in self.asset_paths])
+        return ",".join([asset_path[1] for asset_path in self.asset_paths])
 
     def _set_patchers(self):
         def _patched_for_get_asset_paths(*args, **kwargs):
@@ -122,21 +118,31 @@ class TestStaticInheritanceCommon(BaseCase):
             return self.template_files[args[1]]
 
         self.patchers = [
-            patch.object(HomeStaticTemplateHelpers, '_get_asset_paths', _patched_for_get_asset_paths),
-            patch.object(HomeStaticTemplateHelpers, '_read_addon_file', _patch_for_read_addon_file),
+            patch.object(
+                HomeStaticTemplateHelpers,
+                "_get_asset_paths",
+                _patched_for_get_asset_paths,
+            ),
+            patch.object(
+                HomeStaticTemplateHelpers,
+                "_read_addon_file",
+                _patch_for_read_addon_file,
+            ),
         ]
 
     def _toggle_patchers(self, mode):
-        self.assertTrue(mode in ('start', 'stop'))
+        self.assertTrue(mode in ("start", "stop"))
         for p in self.patchers:
             getattr(p, mode)()
 
 
-@tagged('static_templates')
+@tagged("static_templates")
 class TestStaticInheritance(TestStaticInheritanceCommon):
     # Actual test cases
     def test_static_inheritance_01(self):
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1" random-attr="gloria">
@@ -163,7 +169,7 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_static_inheritance_02(self):
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -175,12 +181,14 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            '''
+            """
         }
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1" random-attr="gloria">
@@ -200,7 +208,7 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
     def test_static_inheritance_03(self):
         self.maxDiff = None
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1">
                         <div>At first I was afraid</div>
@@ -215,12 +223,14 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         <xpath expr="//div[2]" position="replace"/>
                     </form>
                 </templates>
-            '''
+            """
         }
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1">
@@ -243,21 +253,20 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_static_inheritance_in_same_module(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
-            ('module_1_file_2', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
+            ("module_1_file_2", "module_1", "bundle_1"),
         ]
 
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1">
                         <div>At first I was afraid</div>
                         <div>Kept thinking I could never live without you by my side</div>
                     </form>
                 </templates>
-            ''',
-
-            'module_1_file_2': b'''
+            """,
+            "module_1_file_2": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_2" t-inherit="template_1_1" t-inherit-mode="primary">
                         <xpath expr="//div[1]" position="after">
@@ -265,9 +274,11 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            '''
+            """,
         }
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1">
@@ -286,11 +297,11 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_static_inheritance_in_same_file(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
 
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1">
                         <div>At first I was afraid</div>
@@ -302,9 +313,11 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            ''',
+            """,
         }
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1">
@@ -323,10 +336,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_static_inherit_extended_template(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1">
                         <div>At first I was afraid</div>
@@ -343,9 +356,11 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            ''',
+            """,
         }
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1">
@@ -366,21 +381,20 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_sibling_extension(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
-            ('module_2_file_1', 'module_2', 'bundle_1'),
-            ('module_3_file_1', 'module_3', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
+            ("module_2_file_1", "module_2", "bundle_1"),
+            ("module_3_file_1", "module_3", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b'''
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1">
                         <div>I am a man of constant sorrow</div>
                         <div>I've seen trouble all my days</div>
                     </form>
                 </templates>
-            ''',
-
-            'module_2_file_1': b'''
+            """,
+            "module_2_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_2_1" t-inherit="module_1.template_1_1" t-inherit-mode="extension">
                         <xpath expr="//div[1]" position="after">
@@ -388,9 +402,8 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            ''',
-
-            'module_3_file_1': b'''
+            """,
+            "module_3_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_3_1" t-inherit="module_1.template_1_1" t-inherit-mode="extension">
                         <xpath expr="//div[2]" position="after">
@@ -398,10 +411,12 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </form>
                 </templates>
-            '''
+            """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1">
@@ -418,15 +433,19 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
     def test_static_misordered_modules(self):
         self.asset_paths.reverse()
         with self.assertRaises(ValueError) as ve:
-            HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+            HomeStaticTemplateHelpers.get_qweb_templates(
+                addons=self._get_module_names(), debug=True
+            )
 
         self.assertEqual(
             str(ve.exception),
-            'Module module_1 not loaded or inexistent, or templates of addon being loaded (module_2) are misordered'
+            "Module module_1 not loaded or inexistent, or templates of addon being loaded (module_2) are misordered",
         )
 
     def test_static_misordered_templates(self):
-        self.template_files['module_2_file_1'] = b"""
+        self.template_files[
+            "module_2_file_1"
+        ] = b"""
             <templates id="template" xml:space="preserve">
                 <form t-name="template_2_1" t-inherit="module_2.template_2_2" t-inherit-mode="primary">
                     <xpath expr="//div[1]" position="after">
@@ -439,11 +458,13 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
             </templates>
         """
         with self.assertRaises(ValueError) as ve:
-            HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+            HomeStaticTemplateHelpers.get_qweb_templates(
+                addons=self._get_module_names(), debug=True
+            )
 
         self.assertEqual(
             str(ve.exception),
-            'No template found to inherit from. Module module_2 and template name template_2_2'
+            "No template found to inherit from. Module module_2 and template name template_2_2",
         )
 
     def test_replace_in_debug_mode(self):
@@ -451,10 +472,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         Replacing a template's meta definition in place doesn't keep the original attrs of the template
         """
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -468,7 +489,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <div overriden-attr="overriden" t-name="template_1_1">
@@ -481,10 +504,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_replace_in_debug_mode2(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -502,7 +525,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <div t-name="template_1_1">
@@ -521,10 +546,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         This doesn't mean anything in terms of the business of template inheritance
         But it is in the XPATH specs"""
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -542,7 +567,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <div t-name="template_1_1">
@@ -560,10 +587,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         Root node IS targeted by //NODE_TAG in xpath
         """
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -580,7 +607,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <div t-name="template_1_1">
@@ -597,10 +626,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         """
         self.maxDiff = None
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -615,7 +644,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1" random-attr="gloria">
@@ -636,10 +667,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         and new ones if one is to replace its defining root node
         """
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -656,7 +687,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1" random-attr="gloria">
@@ -674,10 +707,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
     def test_replace_in_nodebug_mode1(self):
         """Comments already in the arch are ignored"""
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -696,7 +729,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=False)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=False
+        )
         expected = b"""
             <templates>
                 <div t-name="template_1_1">
@@ -711,10 +746,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_inherit_from_dotted_tname_1(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="module_1.template_1_1.dot" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -731,7 +766,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="module_1.template_1_1.dot" random-attr="gloria">
@@ -748,10 +785,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_inherit_from_dotted_tname_2(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1.dot" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -768,7 +805,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1.dot" random-attr="gloria">
@@ -785,10 +824,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_inherit_from_dotted_tname_2bis(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="template_1_1.dot" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -805,7 +844,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="template_1_1.dot" random-attr="gloria">
@@ -822,10 +863,10 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_inherit_from_dotted_tname_2ter(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="module_1" random-attr="gloria">
                         <div>At first I was afraid</div>
@@ -842,7 +883,9 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                 """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="module_1" random-attr="gloria">
@@ -859,19 +902,18 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
 
     def test_inherit_from_dotted_tname_3(self):
         self.asset_paths = [
-            ('module_1_file_1', 'module_1', 'bundle_1'),
-            ('module_2_file_1', 'module_2', 'bundle_1'),
+            ("module_1_file_1", "module_1", "bundle_1"),
+            ("module_2_file_1", "module_2", "bundle_1"),
         ]
         self.template_files = {
-            'module_1_file_1': b"""
+            "module_1_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <form t-name="module_1.template_1_1.dot" random-attr="gloria">
                         <div>At first I was afraid</div>
                     </form>
                 </templates>
                 """,
-
-            'module_2_file_1': b"""
+            "module_2_file_1": b"""
                 <templates id="template" xml:space="preserve">
                     <t t-name="template_2_1" t-inherit="module_1.template_1_1.dot" t-inherit-mode="primary">
                         <xpath expr="." position="replace">
@@ -882,10 +924,12 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
                         </xpath>
                     </t>
                 </templates>
-            """
+            """,
         }
 
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         expected = b"""
             <templates>
                 <form t-name="module_1.template_1_1.dot" random-attr="gloria">
@@ -901,9 +945,16 @@ class TestStaticInheritance(TestStaticInheritanceCommon):
         self.assertXMLEqual(contents, expected)
 
 
-@tagged('-standard', 'static_templates_performance')
+@tagged("-standard", "static_templates_performance")
 class TestStaticInheritancePerformance(TestStaticInheritanceCommon):
-    def _sick_script(self, nMod, nFilePerMod, nTemplatePerFile, stepInheritInModule=2, stepInheritPreviousModule=3):
+    def _sick_script(
+        self,
+        nMod,
+        nFilePerMod,
+        nTemplatePerFile,
+        stepInheritInModule=2,
+        stepInheritPreviousModule=3,
+    ):
         """
         Make a sick amount of templates to test perf
         nMod modules
@@ -914,15 +965,19 @@ class TestStaticInheritancePerformance(TestStaticInheritanceCommon):
         number_templates = 0
         for m in range(nMod):
             for f in range(nFilePerMod):
-                mname = 'mod_%s' % m
-                fname = 'mod_%s_file_%s' % (m, f)
-                self.asset_paths.append((fname, mname, 'bundle_1'))
+                mname = "mod_%s" % m
+                fname = "mod_%s_file_%s" % (m, f)
+                self.asset_paths.append((fname, mname, "bundle_1"))
 
                 _file = '<templates id="template" xml:space="preserve">'
 
                 for t in range(nTemplatePerFile):
-                    _template = ''
-                    if t % stepInheritInModule or t % stepInheritPreviousModule or t == 0:
+                    _template = ""
+                    if (
+                        t % stepInheritInModule
+                        or t % stepInheritPreviousModule
+                        or t == 0
+                    ):
                         _template += """
                             <div t-name="template_%(t_number)s_mod_%(m_number)s">
                                 <div>Parent</div>
@@ -955,13 +1010,13 @@ class TestStaticInheritancePerformance(TestStaticInheritanceCommon):
 
                     _template_number = 1000 * f + t
                     _file += _template % {
-                        't_number': _template_number,
-                        'm_number': m,
-                        't_inherit': _template_number - 1,
-                        't_module_inherit': _template_number,
-                        'm_module_inherit': m - 1,
+                        "t_number": _template_number,
+                        "m_number": m,
+                        "t_inherit": _template_number - 1,
+                        "t_module_inherit": _template_number,
+                        "m_module_inherit": m - 1,
                     }
-                _file += '</templates>'
+                _file += "</templates>"
 
                 self.template_files[fname] = _file.encode()
         self.assertEqual(number_templates, nMod * nFilePerMod * nTemplatePerFile)
@@ -972,10 +1027,15 @@ class TestStaticInheritancePerformance(TestStaticInheritanceCommon):
         self._sick_script(nMod, nFilePerMod, nTemplatePerFile)
 
         before = datetime.now()
-        contents = HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        contents = HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         after = datetime.now()
         delta2500 = after - before
-        _logger.runbot('Static Templates Inheritance: 2500 templates treated in %s seconds' % delta2500.total_seconds())
+        _logger.runbot(
+            "Static Templates Inheritance: 2500 templates treated in %s seconds"
+            % delta2500.total_seconds()
+        )
 
         whole_tree = etree.fromstring(contents)
         self.assertEqual(len(whole_tree), nMod * nFilePerMod * nTemplatePerFile)
@@ -985,11 +1045,18 @@ class TestStaticInheritancePerformance(TestStaticInheritanceCommon):
         self._sick_script(nMod, nFilePerMod, nTemplatePerFile)
 
         before = datetime.now()
-        HomeStaticTemplateHelpers.get_qweb_templates(addons=self._get_module_names(), debug=True)
+        HomeStaticTemplateHelpers.get_qweb_templates(
+            addons=self._get_module_names(), debug=True
+        )
         after = datetime.now()
         delta25000 = after - before
 
         time_ratio = delta25000.total_seconds() / delta2500.total_seconds()
-        _logger.runbot('Static Templates Inheritance: 25000 templates treated in %s seconds' % delta25000.total_seconds())
-        _logger.runbot('Static Templates Inheritance: Computed linearity ratio: %s' % time_ratio)
+        _logger.runbot(
+            "Static Templates Inheritance: 25000 templates treated in %s seconds"
+            % delta25000.total_seconds()
+        )
+        _logger.runbot(
+            "Static Templates Inheritance: Computed linearity ratio: %s" % time_ratio
+        )
         self.assertLessEqual(time_ratio, 12)

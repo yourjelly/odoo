@@ -20,12 +20,12 @@ class IrUiMenu(models.Model):
 
         web_menus = {}
         for menu in menus.values():
-            if not menu['id']:
+            if not menu["id"]:
                 # special root menu case
-                web_menus['root'] = {
-                    "id": 'root',
-                    "name": menu['name'],
-                    "children": menu['children'],
+                web_menus["root"] = {
+                    "id": "root",
+                    "name": menu["name"],
+                    "children": menu["children"],
                     "appID": False,
                     "xmlid": "",
                     "actionID": False,
@@ -34,28 +34,32 @@ class IrUiMenu(models.Model):
                     "webIconData": None,
                 }
             else:
-                action = menu['action']
+                action = menu["action"]
 
-                if menu['id'] == menu['app_id']:
+                if menu["id"] == menu["app_id"]:
                     # if it's an app take action of first (sub)child having one defined
                     child = menu
                     while child and not action:
-                        action = child['action']
-                        child = menus[child['children'][0]] if child['children'] else False
+                        action = child["action"]
+                        child = (
+                            menus[child["children"][0]] if child["children"] else False
+                        )
 
-                action_model, action_id = action.split(',') if action else (False, False)
+                action_model, action_id = (
+                    action.split(",") if action else (False, False)
+                )
                 action_id = int(action_id) if action_id else False
 
-                web_menus[menu['id']] = {
-                    "id": menu['id'],
-                    "name": menu['name'],
-                    "children": menu['children'],
-                    "appID": menu['app_id'],
-                    "xmlid": menu['xmlid'],
+                web_menus[menu["id"]] = {
+                    "id": menu["id"],
+                    "name": menu["name"],
+                    "children": menu["children"],
+                    "appID": menu["app_id"],
+                    "xmlid": menu["xmlid"],
                     "actionID": action_id,
                     "actionModel": action_model,
-                    "webIcon": menu['web_icon'],
-                    "webIconData": menu['web_icon_data'],
+                    "webIcon": menu["web_icon"],
+                    "webIconData": menu["web_icon_data"],
                 }
 
         return web_menus

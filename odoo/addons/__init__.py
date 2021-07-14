@@ -19,7 +19,5 @@ Importing them from here is deprecated.
 # https://packaging.python.org/guides/packaging-namespace-packages/
 import pkgutil
 import os.path
-__path__ = [
-    os.path.abspath(path)
-    for path in pkgutil.extend_path(__path__, __name__)
-]
+
+__path__ = [os.path.abspath(path) for path in pkgutil.extend_path(__path__, __name__)]

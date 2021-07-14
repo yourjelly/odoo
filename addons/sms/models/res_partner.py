@@ -5,8 +5,8 @@ from odoo import models
 
 
 class ResPartner(models.Model):
-    _name = 'res.partner'
-    _inherit = ['res.partner', 'mail.thread.phone']
+    _name = "res.partner"
+    _inherit = ["res.partner", "mail.thread.phone"]
 
     def _sms_get_default_partners(self):
         """ Override of mail.thread method.
@@ -17,4 +17,4 @@ class ResPartner(models.Model):
     def _phone_get_number_fields(self):
         """ This method returns the fields to use to find the number to use to
         send an SMS on a record. """
-        return ['mobile', 'phone']
+        return ["mobile", "phone"]

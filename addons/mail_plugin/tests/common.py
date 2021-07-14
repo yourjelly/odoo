@@ -25,6 +25,7 @@ class TestMailPluginControllerCommon(HttpCase):
         The third argument "patched_iap_enrich" allow you to mock the IAP request and
         to return the response you want.
         """
+
         def patched_auth_method_outlook(*args, **kwargs):
             request.uid = self.user_test.id
 
@@ -36,8 +37,7 @@ class TestMailPluginControllerCommon(HttpCase):
         }
 
         with patch(
-            "odoo.addons.mail_plugin.models.ir_http.IrHttp"
-            "._auth_method_outlook",
+            "odoo.addons.mail_plugin.models.ir_http.IrHttp" "._auth_method_outlook",
             new=patched_auth_method_outlook,
         ), patch(
             "odoo.addons.mail_plugin.controllers.mail_plugin.MailPluginController"
@@ -61,6 +61,7 @@ class TestMailPluginControllerCommon(HttpCase):
         The third argument "patched_iap_enrich" allow you to mock the IAP request and
         to return the response you want.
         """
+
         def patched_auth_method_outlook(*args, **kwargs):
             request.uid = self.user_test.id
 
@@ -72,8 +73,7 @@ class TestMailPluginControllerCommon(HttpCase):
         }
 
         with patch(
-            "odoo.addons.mail_plugin.models.ir_http.IrHttp"
-            "._auth_method_outlook",
+            "odoo.addons.mail_plugin.models.ir_http.IrHttp" "._auth_method_outlook",
             new=patched_auth_method_outlook,
         ), patch(
             "odoo.addons.mail_plugin.controllers.mail_plugin.MailPluginController"

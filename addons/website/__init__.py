@@ -15,14 +15,13 @@ def uninstall_hook(cr, registry):
         db_registry = odoo.modules.registry.Registry.new(dbname)
         with api.Environment.manage(), db_registry.cursor() as cr:
             env = api.Environment(cr, SUPERUSER_ID, {})
-            env['ir.model.fields'].search([
-                ('name', '=', 'website_id'),
-                ('model', '=', 'res.config.settings'),
-            ]).unlink()
+            env["ir.model.fields"].search(
+                [("name", "=", "website_id"), ("model", "=", "res.config.settings"),]
+            ).unlink()
 
     cr.postcommit.add(partial(rem_website_id_null, cr.dbname))
 
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    env['ir.module.module'].update_theme_images()
+    env["ir.module.module"].update_theme_images()

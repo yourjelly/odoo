@@ -21,18 +21,22 @@ class ResCompany(models.Model):
     def _populate(self, size):
         @lru_cache()
         def search_coa_ids(currency_id):
-            return self.env['account.chart.template'].search([('currency_id', '=', currency_id)])
+            return self.env["account.chart.template"].search(
+                [("currency_id", "=", currency_id)]
+            )
 
         records = super()._populate(size)
-        _logger.info('Loading Chart Template')
-        default_chart_templates = self.env['account.chart.template'].search([], limit=1)
+        _logger.info("Loading Chart Template")
+        default_chart_templates = self.env["account.chart.template"].search([], limit=1)
         if not default_chart_templates:
             # TODO install l10n_generic_coa ?
-            raise UserError(_(
-                "At least one localization is needed to be installed in order to populate the "
-                "database with accounting"
-            ))
-        random = populate.Random('res.company+chart_template_selector')
+            raise UserError(
+                _(
+                    "At least one localization is needed to be installed in order to populate the "
+                    "database with accounting"
+                )
+            )
+        random = populate.Random("res.company+chart_template_selector")
 
         # Load the a chart of accounts matching the currency of the company for the 3 first created companies
         # We are loading an existing CoA and not populating it because:
@@ -50,6 +54,8 @@ class ResCompany(models.Model):
         # Note that we can still populate some new records on top of the CoA if it makes sense,
         # like account.journal for instance.
         for company in records[:3]:
-            chart_templates_cur = search_coa_ids(company.currency_id.id) or default_chart_templates
+            chart_templates_cur = (
+                search_coa_ids(company.currency_id.id) or default_chart_templates
+            )
             random.choice(chart_templates_cur).with_company(company.id).try_loading()
         return records

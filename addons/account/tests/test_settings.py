@@ -3,9 +3,8 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestSettings(AccountTestInvoicingCommon):
-
     def test_switch_taxB2B_taxB2C(self):
         """
         Since having users both in the tax B2B and tax B2C groups raise,
@@ -14,7 +13,7 @@ class TestSettings(AccountTestInvoicingCommon):
         """
         # at each setting change, all users should be removed from one group and added to the other
         # so picking an arbitrary witness should be equivalent to checking that everything worked.
-        config = self.env['res.config.settings'].create({})
+        config = self.env["res.config.settings"].create({})
         self.switch_tax_settings(config)
 
     def switch_tax_settings(self, config):
@@ -22,22 +21,40 @@ class TestSettings(AccountTestInvoicingCommon):
         config._onchange_sale_tax()
         config.flush()
         config.execute()
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_excluded'), True)
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_included'), False)
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_excluded"),
+            True,
+        )
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_included"),
+            False,
+        )
 
         config.show_line_subtotals_tax_selection = "tax_included"
         config._onchange_sale_tax()
         config.flush()
         config.execute()
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_excluded'), False)
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_included'), True)
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_excluded"),
+            False,
+        )
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_included"),
+            True,
+        )
 
         config.show_line_subtotals_tax_selection = "tax_excluded"
         config._onchange_sale_tax()
         config.flush()
         config.execute()
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_excluded'), True)
-        self.assertEqual(self.env.user.has_group('account.group_show_line_subtotals_tax_included'), False)
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_excluded"),
+            True,
+        )
+        self.assertEqual(
+            self.env.user.has_group("account.group_show_line_subtotals_tax_included"),
+            False,
+        )
 
     def test_switch_taxB2B_taxB2C_multicompany(self):
         """
@@ -51,10 +68,10 @@ class TestSettings(AccountTestInvoicingCommon):
            with a non-superuser user, and in a new company with one user in common
            with another company which has a different taxB2X setting.
         """
-        user = self.env.ref('base.user_admin')
-        company = self.env['res.company'].create({'name': 'oobO'})
-        user.write({'company_ids': [(4, company.id)], 'company_id': company.id})
-        Settings = self.env['res.config.settings'].with_user(user.id)
+        user = self.env.ref("base.user_admin")
+        company = self.env["res.company"].create({"name": "oobO"})
+        user.write({"company_ids": [(4, company.id)], "company_id": company.id})
+        Settings = self.env["res.config.settings"].with_user(user.id)
         config = Settings.create({})
 
         self.switch_tax_settings(config)

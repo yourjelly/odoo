@@ -8,7 +8,8 @@ def migrate(cr, version):
     (made in 12.0, and forward-ported). The module will not be updatable if we
     don't manually clean inherit_id.
     """
-    cr.execute("""
+    cr.execute(
+        """
         update ir_ui_view v
         set inherit_id = NULL, mode='primary'
         from ir_model_data mdata
@@ -17,4 +18,5 @@ def migrate(cr, version):
         and mdata.model= 'ir.ui.view'
         and mdata.name = 'l10n_ch_swissqr_template'
         and mdata.module='l10n_ch';
-    """)
+    """
+    )

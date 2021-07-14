@@ -14,22 +14,38 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentAcquirer(models.Model):
-    _inherit = 'payment.acquirer'
+    _inherit = "payment.acquirer"
 
     provider = fields.Selection(
-        selection_add=[('ogone', "Ogone")], ondelete={'ogone': 'set default'})
+        selection_add=[("ogone", "Ogone")], ondelete={"ogone": "set default"}
+    )
     ogone_pspid = fields.Char(
-        string="PSPID", help="The ID solely used to identify the account with Ogone",
-        required_if_provider='ogone')
+        string="PSPID",
+        help="The ID solely used to identify the account with Ogone",
+        required_if_provider="ogone",
+    )
     ogone_userid = fields.Char(
-        string="API User ID", help="The ID solely used to identify the API user with Ogone",
-        required_if_provider='ogone')
+        string="API User ID",
+        help="The ID solely used to identify the API user with Ogone",
+        required_if_provider="ogone",
+    )
     ogone_password = fields.Char(
-        string="API User Password", required_if_provider='ogone', groups='base.group_system')
+        string="API User Password",
+        required_if_provider="ogone",
+        groups="base.group_system",
+    )
     ogone_shakey_in = fields.Char(
-        string="SHA Key IN", size=32, required_if_provider='ogone', groups='base.group_system')
+        string="SHA Key IN",
+        size=32,
+        required_if_provider="ogone",
+        groups="base.group_system",
+    )
     ogone_shakey_out = fields.Char(
-        string="SHA Key OUT", size=32, required_if_provider='ogone', groups='base.group_system')
+        string="SHA Key OUT",
+        size=32,
+        required_if_provider="ogone",
+        groups="base.group_system",
+    )
 
     def _get_validation_amount(self):
         """ Override of payment to return the amount for Ogone validation operations.
@@ -38,7 +54,7 @@ class PaymentAcquirer(models.Model):
         :rtype: float
         """
         res = super()._get_validation_amount()
-        if self.provider != 'ogone':
+        if self.provider != "ogone":
             return res
 
         return 1.0
@@ -51,10 +67,10 @@ class PaymentAcquirer(models.Model):
         :rtype: record of `ir.ui.view`
         """
         res = super()._get_redirect_form_view()
-        if self.provider != 'ogone' or not is_validation:
+        if self.provider != "ogone" or not is_validation:
             return res  # self.redirect_form_view_id
 
-        return self.env.ref('payment_ogone.redirect_form_validation')
+        return self.env.ref("payment_ogone.redirect_form_validation")
 
     def _ogone_get_api_url(self, api_key):
         """ Return the appropriate URL of the requested API for the acquirer state.
@@ -67,19 +83,19 @@ class PaymentAcquirer(models.Model):
         """
         self.ensure_one()
 
-        if self.state == 'enabled':
+        if self.state == "enabled":
             api_urls = {
-                'hosted_payment_page': 'https://secure.ogone.com/ncol/prod/orderstandard_utf8.asp',
-                'flexcheckout': 'https://secure.ogone.com/Tokenization/HostedPage',
-                'directlink': 'https://secure.ogone.com/ncol/prod/orderdirect_utf8.asp',
-                'maintenancedirect': 'https://secure.ogone.com/ncol/prod/maintenancedirect_utf8.asp',
+                "hosted_payment_page": "https://secure.ogone.com/ncol/prod/orderstandard_utf8.asp",
+                "flexcheckout": "https://secure.ogone.com/Tokenization/HostedPage",
+                "directlink": "https://secure.ogone.com/ncol/prod/orderdirect_utf8.asp",
+                "maintenancedirect": "https://secure.ogone.com/ncol/prod/maintenancedirect_utf8.asp",
             }
         else:  # 'test'
             api_urls = {
-                'hosted_payment_page': 'https://ogone.test.v-psp.com/ncol/test/orderstandard_utf8.asp',
-                'flexcheckout': 'https://ogone.test.v-psp.com/Tokenization/HostedPage',
-                'directlink': 'https://ogone.test.v-psp.com/ncol/test/orderdirect_utf8.asp',
-                'maintenancedirect': 'https://ogone.test.v-psp.com/ncol/test/maintenancedirect_utf8.asp',
+                "hosted_payment_page": "https://ogone.test.v-psp.com/ncol/test/orderstandard_utf8.asp",
+                "flexcheckout": "https://ogone.test.v-psp.com/Tokenization/HostedPage",
+                "directlink": "https://ogone.test.v-psp.com/ncol/test/orderdirect_utf8.asp",
+                "maintenancedirect": "https://ogone.test.v-psp.com/ncol/test/maintenancedirect_utf8.asp",
             }
         return api_urls.get(api_key)
 
@@ -100,17 +116,23 @@ class PaymentAcquirer(models.Model):
         def _filter_key(_key):
             return not incoming or _key in VALID_KEYS
 
-        key = self.ogone_shakey_out if incoming else self.ogone_shakey_in  # Swapped for Ogone's POV
+        key = (
+            self.ogone_shakey_out if incoming else self.ogone_shakey_in
+        )  # Swapped for Ogone's POV
         if format_keys:
-            formatted_items = [(k.upper().replace('_', '.'), v) for k, v in values.items()]
+            formatted_items = [
+                (k.upper().replace("_", "."), v) for k, v in values.items()
+            ]
         else:
             formatted_items = [(k.upper(), v) for k, v in values.items()]
         sorted_items = sorted(formatted_items)
-        signing_string = ''.join(f'{k}={v}{key}' for k, v in sorted_items if _filter_key(k) and v)
+        signing_string = "".join(
+            f"{k}={v}{key}" for k, v in sorted_items if _filter_key(k) and v
+        )
         shasign = sha1(signing_string.encode()).hexdigest()
         return shasign
 
-    def _ogone_make_request(self, api_key, payload=None, method='POST'):
+    def _ogone_make_request(self, api_key, payload=None, method="POST"):
         """ Make a request to one of Ogone APIs.
 
         Note: self.ensure_one()
@@ -130,14 +152,18 @@ class PaymentAcquirer(models.Model):
             response.raise_for_status()
         except requests.exceptions.ConnectionError:
             _logger.exception("unable to reach endpoint at %s", url)
-            raise ValidationError("Ogone: " + _("Could not establish the connection to the API."))
+            raise ValidationError(
+                "Ogone: " + _("Could not establish the connection to the API.")
+            )
         except requests.exceptions.HTTPError:
             _logger.exception("invalid API request at %s with data %s", url, payload)
-            raise ValidationError("Ogone: " + _("The communication with the API failed."))
+            raise ValidationError(
+                "Ogone: " + _("The communication with the API failed.")
+            )
         return response.content
 
     def _get_default_payment_method(self):
         self.ensure_one()
-        if self.provider != 'ogone':
+        if self.provider != "ogone":
             return super()._get_default_payment_method()
-        return self.env.ref('payment_ogone.payment_method_ogone').id
+        return self.env.ref("payment_ogone.payment_method_ogone").id

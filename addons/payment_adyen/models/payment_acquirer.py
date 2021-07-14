@@ -14,28 +14,41 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentAcquirer(models.Model):
-    _inherit = 'payment.acquirer'
+    _inherit = "payment.acquirer"
 
     provider = fields.Selection(
-        selection_add=[('adyen', "Adyen")], ondelete={'adyen': 'set default'})
+        selection_add=[("adyen", "Adyen")], ondelete={"adyen": "set default"}
+    )
     adyen_merchant_account = fields.Char(
         string="Merchant Account",
         help="The code of the merchant account to use with this acquirer",
-        required_if_provider='adyen', groups='base.group_system')
+        required_if_provider="adyen",
+        groups="base.group_system",
+    )
     adyen_api_key = fields.Char(
-        string="API Key", help="The API key of the user account", required_if_provider='adyen',
-        groups='base.group_system')
+        string="API Key",
+        help="The API key of the user account",
+        required_if_provider="adyen",
+        groups="base.group_system",
+    )
     adyen_hmac_key = fields.Char(
-        string="HMAC Key", help="The HMAC key of the webhook", required_if_provider='adyen',
-        groups='base.group_system')
+        string="HMAC Key",
+        help="The HMAC key of the webhook",
+        required_if_provider="adyen",
+        groups="base.group_system",
+    )
     adyen_checkout_api_url = fields.Char(
-        string="Checkout API URL", help="The base URL for the Checkout API endpoints",
-        required_if_provider='adyen')
+        string="Checkout API URL",
+        help="The base URL for the Checkout API endpoints",
+        required_if_provider="adyen",
+    )
     adyen_recurring_api_url = fields.Char(
-        string="Recurring API URL", help="The base URL for the Recurring API endpoints",
-        required_if_provider='adyen')
+        string="Recurring API URL",
+        help="The base URL for the Recurring API endpoints",
+        required_if_provider="adyen",
+    )
 
-    #=== CRUD METHODS ===#
+    # === CRUD METHODS ===#
 
     @api.model_create_multi
     def create(self, values_list):
@@ -54,13 +67,17 @@ class PaymentAcquirer(models.Model):
         :param dict values: The create or write values
         :return: None
         """
-        for field_name in ('adyen_checkout_api_url', 'adyen_recurring_api_url'):
-            if values.get(field_name):  # Test the value in case we're duplicating an acquirer
-                values[field_name] = re.sub(r'[vV]\d+(/.*)?', '', values[field_name])
+        for field_name in ("adyen_checkout_api_url", "adyen_recurring_api_url"):
+            if values.get(
+                field_name
+            ):  # Test the value in case we're duplicating an acquirer
+                values[field_name] = re.sub(r"[vV]\d+(/.*)?", "", values[field_name])
 
-    #=== BUSINESS METHODS ===#
+    # === BUSINESS METHODS ===#
 
-    def _adyen_make_request(self, url_field_name, endpoint, payload=None, method='POST'):
+    def _adyen_make_request(
+        self, url_field_name, endpoint, payload=None, method="POST"
+    ):
         """ Make a request to Adyen API at the specified endpoint.
 
         Note: self.ensure_one()
@@ -85,25 +102,33 @@ class PaymentAcquirer(models.Model):
             :return: The final URL
             :rtype: str
             """
-            _base = _base_url.rstrip('/')  # Remove potential trailing slash
-            _endpoint = _endpoint.lstrip('/')  # Remove potential leading slash
-            return f'{_base}/V{_version}/{_endpoint}'
+            _base = _base_url.rstrip("/")  # Remove potential trailing slash
+            _endpoint = _endpoint.lstrip("/")  # Remove potential leading slash
+            return f"{_base}/V{_version}/{_endpoint}"
 
         self.ensure_one()
 
         version = API_ENDPOINT_VERSIONS[endpoint]
-        base_url = self[url_field_name]  # Restrict request URL to the stored API URL fields
+        base_url = self[
+            url_field_name
+        ]  # Restrict request URL to the stored API URL fields
         url = _build_url(base_url, version, endpoint)
-        headers = {'X-API-Key': self.adyen_api_key}
+        headers = {"X-API-Key": self.adyen_api_key}
         try:
-            response = requests.request(method, url, json=payload, headers=headers, timeout=60)
+            response = requests.request(
+                method, url, json=payload, headers=headers, timeout=60
+            )
             response.raise_for_status()
         except requests.exceptions.ConnectionError:
             _logger.exception("unable to reach endpoint at %s", url)
-            raise ValidationError("Adyen: " + _("Could not establish the connection to the API."))
+            raise ValidationError(
+                "Adyen: " + _("Could not establish the connection to the API.")
+            )
         except requests.exceptions.HTTPError:
             _logger.exception("invalid API request at %s with data %s", url, payload)
-            raise ValidationError("Adyen: " + _("The communication with the API failed."))
+            raise ValidationError(
+                "Adyen: " + _("The communication with the API failed.")
+            )
         return response.json()
 
     def _adyen_compute_shopper_reference(self, partner_id):
@@ -116,10 +141,10 @@ class PaymentAcquirer(models.Model):
         :return: The unique reference for the partner
         :rtype: str
         """
-        return f'ODOO_PARTNER_{partner_id}'
+        return f"ODOO_PARTNER_{partner_id}"
 
     def _get_default_payment_method(self):
         self.ensure_one()
-        if self.provider != 'adyen':
+        if self.provider != "adyen":
             return super()._get_default_payment_method()
-        return self.env.ref('payment_adyen.payment_method_adyen').id
+        return self.env.ref("payment_adyen.payment_method_adyen").id

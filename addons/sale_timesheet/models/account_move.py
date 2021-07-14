@@ -8,26 +8,44 @@ from odoo.osv import expression
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    timesheet_ids = fields.One2many('account.analytic.line', 'timesheet_invoice_id', string='Timesheets', readonly=True, copy=False)
-    timesheet_count = fields.Integer("Number of timesheets", compute='_compute_timesheet_count')
+    timesheet_ids = fields.One2many(
+        "account.analytic.line",
+        "timesheet_invoice_id",
+        string="Timesheets",
+        readonly=True,
+        copy=False,
+    )
+    timesheet_count = fields.Integer(
+        "Number of timesheets", compute="_compute_timesheet_count"
+    )
 
-    @api.depends('timesheet_ids')
+    @api.depends("timesheet_ids")
     def _compute_timesheet_count(self):
-        timesheet_data = self.env['account.analytic.line'].read_group([('timesheet_invoice_id', 'in', self.ids)], ['timesheet_invoice_id'], ['timesheet_invoice_id'])
-        mapped_data = dict([(t['timesheet_invoice_id'][0], t['timesheet_invoice_id_count']) for t in timesheet_data])
+        timesheet_data = self.env["account.analytic.line"].read_group(
+            [("timesheet_invoice_id", "in", self.ids)],
+            ["timesheet_invoice_id"],
+            ["timesheet_invoice_id"],
+        )
+        mapped_data = dict(
+            [
+                (t["timesheet_invoice_id"][0], t["timesheet_invoice_id_count"])
+                for t in timesheet_data
+            ]
+        )
         for invoice in self:
             invoice.timesheet_count = mapped_data.get(invoice.id, 0)
 
     def action_view_timesheet(self):
         self.ensure_one()
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('Timesheets'),
-            'domain': [('project_id', '!=', False)],
-            'res_model': 'account.analytic.line',
-            'view_id': False,
-            'view_mode': 'tree,form',
-            'help': _("""
+            "type": "ir.actions.act_window",
+            "name": _("Timesheets"),
+            "domain": [("project_id", "!=", False)],
+            "res_model": "account.analytic.line",
+            "view_id": False,
+            "view_mode": "tree,form",
+            "help": _(
+                """
                 <p class="o_view_nocontent_smiling_face">
                     Record timesheets
                 </p><p>
@@ -35,12 +53,13 @@ class AccountMove(models.Model):
                     day. Every time spent on a project will become a cost and can be re-invoiced to
                     customers if required.
                 </p>
-            """),
-            'limit': 80,
-            'context': {
-                'default_project_id': self.id,
-                'search_default_project_id': [self.id]
-            }
+            """
+            ),
+            "limit": 80,
+            "context": {
+                "default_project_id": self.id,
+                "search_default_project_id": [self.id],
+            },
         }
 
     def _link_timesheets_to_invoice(self, start_date=None, end_date=None):
@@ -52,20 +71,25 @@ class AccountMove(models.Model):
             :param start_date: the start date of the period
             :param end_date: the end date of the period
         """
-        for line in self.filtered(lambda i: i.move_type == 'out_invoice' and i.state == 'draft').invoice_line_ids:
-            sale_line_delivery = line.sale_line_ids.filtered(lambda sol: sol.product_id.invoice_policy == 'delivery' and sol.product_id.service_type == 'timesheet')
+        for line in self.filtered(
+            lambda i: i.move_type == "out_invoice" and i.state == "draft"
+        ).invoice_line_ids:
+            sale_line_delivery = line.sale_line_ids.filtered(
+                lambda sol: sol.product_id.invoice_policy == "delivery"
+                and sol.product_id.service_type == "timesheet"
+            )
             if sale_line_delivery:
                 domain = line._timesheet_domain_get_invoiced_lines(sale_line_delivery)
                 if start_date:
-                    domain = expression.AND([domain, [('date', '>=', start_date)]])
+                    domain = expression.AND([domain, [("date", ">=", start_date)]])
                 if end_date:
-                    domain = expression.AND([domain, [('date', '<=', end_date)]])
-                timesheets = self.env['account.analytic.line'].sudo().search(domain)
-                timesheets.write({'timesheet_invoice_id': line.move_id.id})
+                    domain = expression.AND([domain, [("date", "<=", end_date)]])
+                timesheets = self.env["account.analytic.line"].sudo().search(domain)
+                timesheets.write({"timesheet_invoice_id": line.move_id.id})
 
 
 class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+    _inherit = "account.move.line"
 
     @api.model
     def _timesheet_domain_get_invoiced_lines(self, sale_line_delivery):
@@ -74,7 +98,9 @@ class AccountMoveLine(models.Model):
             :return a normalized domain
         """
         return [
-            ('so_line', 'in', sale_line_delivery.ids),
-            ('project_id', '!=', False),
-            '|', ('timesheet_invoice_id', '=', False), ('timesheet_invoice_id.state', '=', 'cancel')
+            ("so_line", "in", sale_line_delivery.ids),
+            ("project_id", "!=", False),
+            "|",
+            ("timesheet_invoice_id", "=", False),
+            ("timesheet_invoice_id.state", "=", "cancel"),
         ]

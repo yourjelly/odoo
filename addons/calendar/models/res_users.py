@@ -8,7 +8,7 @@ from pytz import timezone, UTC
 
 
 class Users(models.Model):
-    _inherit = 'res.users'
+    _inherit = "res.users"
 
     def _systray_get_calendar_event_domain(self):
         tz = self.env.user.tz
@@ -21,34 +21,42 @@ class Users(models.Model):
         if tz:
             end_dt = timezone(tz).localize(end_dt).astimezone(UTC)
 
-        return ['&', '|',
-                '&',
-                    '|',
-                        ['start', '>=', fields.Datetime.to_string(start_dt)],
-                        ['stop', '>=', fields.Datetime.to_string(start_dt)],
-                    ['start', '<=', fields.Datetime.to_string(end_dt)],
-                '&',
-                    ['allday', '=', True],
-                    ['start_date', '=', fields.Date.to_string(start_date)],
-                ('attendee_ids.partner_id', '=', self.env.user.partner_id.id)]
+        return [
+            "&",
+            "|",
+            "&",
+            "|",
+            ["start", ">=", fields.Datetime.to_string(start_dt)],
+            ["stop", ">=", fields.Datetime.to_string(start_dt)],
+            ["start", "<=", fields.Datetime.to_string(end_dt)],
+            "&",
+            ["allday", "=", True],
+            ["start_date", "=", fields.Date.to_string(start_date)],
+            ("attendee_ids.partner_id", "=", self.env.user.partner_id.id),
+        ]
 
     @api.model
     def systray_get_activities(self):
         res = super(Users, self).systray_get_activities()
 
-        meetings_lines = self.env['calendar.event'].search_read(
+        meetings_lines = self.env["calendar.event"].search_read(
             self._systray_get_calendar_event_domain(),
-            ['id', 'start', 'name', 'allday', 'attendee_status'],
-            order='start')
-        meetings_lines = [line for line in meetings_lines if line['attendee_status'] != 'declined']
+            ["id", "start", "name", "allday", "attendee_status"],
+            order="start",
+        )
+        meetings_lines = [
+            line for line in meetings_lines if line["attendee_status"] != "declined"
+        ]
         if meetings_lines:
             meeting_label = _("Today's Meetings")
             meetings_systray = {
-                'type': 'meeting',
-                'name': meeting_label,
-                'model': 'calendar.event',
-                'icon': modules.module.get_module_icon(self.env['calendar.event']._original_module),
-                'meetings': meetings_lines,
+                "type": "meeting",
+                "name": meeting_label,
+                "model": "calendar.event",
+                "icon": modules.module.get_module_icon(
+                    self.env["calendar.event"]._original_module
+                ),
+                "meetings": meetings_lines,
             }
             res.insert(0, meetings_systray)
 

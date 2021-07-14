@@ -3,13 +3,14 @@
 
 from odoo import models, _
 
+
 class LinkTracker(models.Model):
-    _inherit = ['link.tracker']
+    _inherit = ["link.tracker"]
 
     def action_visit_page_statistics(self):
         return {
-            'name': _("Visit Webpage Statistics"),
-            'type': 'ir.actions.act_url',
-            'url': '%s+' % (self.short_url),
-            'target': 'new',
+            "name": _("Visit Webpage Statistics"),
+            "type": "ir.actions.act_url",
+            "url": "%s+" % (self.short_url),
+            "target": "new",
         }

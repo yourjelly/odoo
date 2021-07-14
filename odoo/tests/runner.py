@@ -6,6 +6,8 @@ from .. import sql_db
 
 
 _logger = logging.getLogger(__name__)
+
+
 class OdooTestResult(unittest.result.TestResult):
     """
     This class in inspired from TextTestResult (https://github.com/python/cpython/blob/master/Lib/unittest/runner.py)
@@ -20,7 +22,7 @@ class OdooTestResult(unittest.result.TestResult):
         self.queries_start = None
 
     def __str__(self):
-        return f'{len(self.failures)} failed, {len(self.errors)} error(s) of {self.testsRun} tests'
+        return f"{len(self.failures)} failed, {len(self.errors)} error(s) of {self.testsRun} tests"
 
     def update(self, other):
         """ Merges an other test result into this one, only updates contents
@@ -35,7 +37,17 @@ class OdooTestResult(unittest.result.TestResult):
         self.unexpectedSuccesses.extend(other.unexpectedSuccesses)
         self.shouldStop = self.shouldStop or other.shouldStop
 
-    def log(self, level, msg, *args, test=None, exc_info=None, extra=None, stack_info=False, caller_infos=None):
+    def log(
+        self,
+        level,
+        msg,
+        *args,
+        test=None,
+        exc_info=None,
+        extra=None,
+        stack_info=False,
+        caller_infos=None,
+    ):
         """
         ``test`` is the running test case, ``caller_infos`` is
         (fn, lno, func, sinfo) (logger.findCaller format), see logger.log for
@@ -54,12 +66,14 @@ class OdooTestResult(unittest.result.TestResult):
         # order to provide useful location information (the problematic spot
         # inside the test function), so use lower-level functions instead
         if logger.isEnabledFor(level):
-            record = logger.makeRecord(logger.name, level, fn, lno, msg, args, exc_info, func, extra, sinfo)
+            record = logger.makeRecord(
+                logger.name, level, fn, lno, msg, args, exc_info, func, extra, sinfo
+            )
             logger.handle(record)
 
     def getDescription(self, test):
         if isinstance(test, unittest.case._SubTest):
-            return 'Subtest %s' % test._subDescription()
+            return "Subtest %s" % test._subDescription()
         if isinstance(test, unittest.TestCase):
             # since we have the module name in the logger, this will avoid to duplicate module info in log line
             # we only apply this for TestCase since we can receive error handler or other special case
@@ -68,7 +82,7 @@ class OdooTestResult(unittest.result.TestResult):
 
     def startTest(self, test):
         super().startTest(test)
-        self.log(logging.INFO, 'Starting %s ...', self.getDescription(test), test=test)
+        self.log(logging.INFO, "Starting %s ...", self.getDescription(test), test=test)
         self.time_start = time.time()
         self.queries_start = sql_db.sql_counter
 
@@ -93,17 +107,32 @@ class OdooTestResult(unittest.result.TestResult):
 
     def addSkip(self, test, reason):
         super().addSkip(test, reason)
-        self.log(logging.INFO, 'skipped %s', self.getDescription(test), test=test)
+        self.log(logging.INFO, "skipped %s", self.getDescription(test), test=test)
 
     def addUnexpectedSuccess(self, test):
         super().addUnexpectedSuccess(test)
-        self.log(logging.ERROR, 'unexpected success for %s', self.getDescription(test), test=test)
+        self.log(
+            logging.ERROR,
+            "unexpected success for %s",
+            self.getDescription(test),
+            test=test,
+        )
 
     def logError(self, flavour, test, error):
         err = self._exc_info_to_string(error, test)
         caller_infos = self.getErrorCallerInfo(error, test)
-        self.log(logging.INFO, '=' * 70, test=test, caller_infos=caller_infos)  # keep this as info !!!!!!
-        self.log(logging.ERROR, "%s: %s\n%s", flavour, self.getDescription(test), err, test=test, caller_infos=caller_infos)
+        self.log(
+            logging.INFO, "=" * 70, test=test, caller_infos=caller_infos
+        )  # keep this as info !!!!!!
+        self.log(
+            logging.ERROR,
+            "%s: %s\n%s",
+            flavour,
+            self.getDescription(test),
+            err,
+            test=test,
+            caller_infos=caller_infos,
+        )
 
     def getErrorCallerInfo(self, error, test):
         """
@@ -116,7 +145,7 @@ class OdooTestResult(unittest.result.TestResult):
         if isinstance(test, unittest.suite._ErrorHolder):
             return
         if not isinstance(test, unittest.TestCase):
-            _logger.warning('%r is not a TestCase' % test)
+            _logger.warning("%r is not a TestCase" % test)
             return
         _, _, error_traceback = error
 

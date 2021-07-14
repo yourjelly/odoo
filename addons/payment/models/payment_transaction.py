@@ -20,174 +20,249 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
-    _name = 'payment.transaction'
-    _description = 'Payment Transaction'
-    _order = 'id desc'
-    _rec_name = 'reference'
+    _name = "payment.transaction"
+    _description = "Payment Transaction"
+    _order = "id desc"
+    _rec_name = "reference"
 
     @api.model
     def _lang_get(self):
-        return self.env['res.lang'].get_installed()
+        return self.env["res.lang"].get_installed()
 
     acquirer_id = fields.Many2one(
-        string="Acquirer", comodel_name='payment.acquirer', readonly=True, required=True)
-    provider = fields.Selection(related='acquirer_id.provider')
+        string="Acquirer", comodel_name="payment.acquirer", readonly=True, required=True
+    )
+    provider = fields.Selection(related="acquirer_id.provider")
     company_id = fields.Many2one(  # Indexed to speed-up ORM searches (from ir_rule or others)
-        related='acquirer_id.company_id', store=True, index=True)
+        related="acquirer_id.company_id", store=True, index=True
+    )
     reference = fields.Char(
-        string="Reference", help="The internal reference of the transaction", readonly=True,
-        required=True)  # Already has an index from the UNIQUE SQL constraint
+        string="Reference",
+        help="The internal reference of the transaction",
+        readonly=True,
+        required=True,
+    )  # Already has an index from the UNIQUE SQL constraint
     acquirer_reference = fields.Char(
-        string="Acquirer Reference", help="The acquirer reference of the transaction",
-        readonly=True)  # This is not the same thing as the acquirer reference of the token
+        string="Acquirer Reference",
+        help="The acquirer reference of the transaction",
+        readonly=True,
+    )  # This is not the same thing as the acquirer reference of the token
     amount = fields.Monetary(
-        string="Amount", currency_field='currency_id', readonly=True, required=True)
+        string="Amount", currency_field="currency_id", readonly=True, required=True
+    )
     currency_id = fields.Many2one(
-        string="Currency", comodel_name='res.currency', readonly=True, required=True)
+        string="Currency", comodel_name="res.currency", readonly=True, required=True
+    )
     fees = fields.Monetary(
-        string="Fees", currency_field='currency_id',
-        help="The fees amount; set by the system as it depends on the acquirer", readonly=True)
+        string="Fees",
+        currency_field="currency_id",
+        help="The fees amount; set by the system as it depends on the acquirer",
+        readonly=True,
+    )
     token_id = fields.Many2one(
-        string="Payment Token", comodel_name='payment.token', readonly=True,
-        domain='[("acquirer_id", "=", "acquirer_id")]', ondelete='restrict')
+        string="Payment Token",
+        comodel_name="payment.token",
+        readonly=True,
+        domain='[("acquirer_id", "=", "acquirer_id")]',
+        ondelete="restrict",
+    )
     state = fields.Selection(
         string="Status",
-        selection=[('draft', "Draft"), ('pending', "Pending"), ('authorized', "Authorized"),
-                   ('done', "Confirmed"), ('cancel', "Canceled"), ('error', "Error")],
-        default='draft', readonly=True, required=True, copy=False)
+        selection=[
+            ("draft", "Draft"),
+            ("pending", "Pending"),
+            ("authorized", "Authorized"),
+            ("done", "Confirmed"),
+            ("cancel", "Canceled"),
+            ("error", "Error"),
+        ],
+        default="draft",
+        readonly=True,
+        required=True,
+        copy=False,
+    )
     state_message = fields.Text(
-        string="Message", help="The complementary information message about the state",
-        readonly=True)
+        string="Message",
+        help="The complementary information message about the state",
+        readonly=True,
+    )
     last_state_change = fields.Datetime(
-        string="Last State Change Date", readonly=True, default=fields.Datetime.now)
+        string="Last State Change Date", readonly=True, default=fields.Datetime.now
+    )
 
     # Fields used for traceability
     operation = fields.Selection(  # This should not be trusted if the state is 'draft' or 'pending'
         string="Operation",
-        selection=[('online_redirect', "Online payment with redirection"),
-                   ('online_direct', "Online direct payment"),
-                   ('online_token', "Online payment by token"),
-                   ('validation', "Validation of the payment method"),
-                   ('offline', "Offline payment by token")],
-        readonly=True)
-    payment_id = fields.Many2one(string="Payment", comodel_name='account.payment', readonly=True)
+        selection=[
+            ("online_redirect", "Online payment with redirection"),
+            ("online_direct", "Online direct payment"),
+            ("online_token", "Online payment by token"),
+            ("validation", "Validation of the payment method"),
+            ("offline", "Offline payment by token"),
+        ],
+        readonly=True,
+    )
+    payment_id = fields.Many2one(
+        string="Payment", comodel_name="account.payment", readonly=True
+    )
     invoice_ids = fields.Many2many(
-        string="Invoices", comodel_name='account.move', relation='account_invoice_transaction_rel',
-        column1='transaction_id', column2='invoice_id', readonly=True, copy=False,
-        domain=[('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'))])
-    invoices_count = fields.Integer(string="Invoices Count", compute='_compute_invoices_count')
+        string="Invoices",
+        comodel_name="account.move",
+        relation="account_invoice_transaction_rel",
+        column1="transaction_id",
+        column2="invoice_id",
+        readonly=True,
+        copy=False,
+        domain=[
+            (
+                "move_type",
+                "in",
+                ("out_invoice", "out_refund", "in_invoice", "in_refund"),
+            )
+        ],
+    )
+    invoices_count = fields.Integer(
+        string="Invoices Count", compute="_compute_invoices_count"
+    )
 
     # Fields used for user redirection & payment post-processing
     is_post_processed = fields.Boolean(
-        string="Is Post-processed", help="Has the payment been post-processed")
+        string="Is Post-processed", help="Has the payment been post-processed"
+    )
     tokenize = fields.Boolean(
         string="Create Token",
-        help="Whether a payment token should be created when post-processing the transaction")
+        help="Whether a payment token should be created when post-processing the transaction",
+    )
     validation_route = fields.Char(
         string="Validation Route",
-        help="The route the user is redirected to in order to refund a validation transaction")
+        help="The route the user is redirected to in order to refund a validation transaction",
+    )
     landing_route = fields.Char(
         string="Landing Route",
-        help="The route the user is redirected to after the transaction")
+        help="The route the user is redirected to after the transaction",
+    )
     callback_model_id = fields.Many2one(
-        string="Callback Document Model", comodel_name='ir.model', groups='base.group_system')
-    callback_res_id = fields.Integer(string="Callback Record ID", groups='base.group_system')
-    callback_method = fields.Char(string="Callback Method", groups='base.group_system')
+        string="Callback Document Model",
+        comodel_name="ir.model",
+        groups="base.group_system",
+    )
+    callback_res_id = fields.Integer(
+        string="Callback Record ID", groups="base.group_system"
+    )
+    callback_method = fields.Char(string="Callback Method", groups="base.group_system")
     # Hash for additional security on top of the callback fields' group in case a bug exposes a sudo
-    callback_hash = fields.Char(string="Callback Hash", groups='base.group_system')
+    callback_hash = fields.Char(string="Callback Hash", groups="base.group_system")
     callback_is_done = fields.Boolean(
-        string="Callback Done", help="Whether the callback has already been executed",
-        groups="base.group_system", readonly=True)
+        string="Callback Done",
+        help="Whether the callback has already been executed",
+        groups="base.group_system",
+        readonly=True,
+    )
 
     # Duplicated partner values allowing to keep a record of them, should they be later updated
     partner_id = fields.Many2one(
-        string="Customer", comodel_name='res.partner', readonly=True, required=True,
-        ondelete='restrict')
+        string="Customer",
+        comodel_name="res.partner",
+        readonly=True,
+        required=True,
+        ondelete="restrict",
+    )
     partner_name = fields.Char(string="Partner Name")
     partner_lang = fields.Selection(string="Language", selection=_lang_get)
     partner_email = fields.Char(string="Email")
     partner_address = fields.Char(string="Address")
     partner_zip = fields.Char(string="Zip")
     partner_city = fields.Char(string="City")
-    partner_state_id = fields.Many2one(string="State", comodel_name='res.country.state')
-    partner_country_id = fields.Many2one(string="Country", comodel_name='res.country')
+    partner_state_id = fields.Many2one(string="State", comodel_name="res.country.state")
+    partner_country_id = fields.Many2one(string="Country", comodel_name="res.country")
     partner_phone = fields.Char(string="Phone")
 
     _sql_constraints = [
-        ('reference_uniq', 'unique(reference)', "Reference must be unique!"),
+        ("reference_uniq", "unique(reference)", "Reference must be unique!"),
     ]
 
-    #=== COMPUTE METHODS ===#
+    # === COMPUTE METHODS ===#
 
-    @api.depends('invoice_ids')
+    @api.depends("invoice_ids")
     def _compute_invoices_count(self):
         self.env.cr.execute(
-            '''
+            """
             SELECT transaction_id, count(invoice_id)
             FROM account_invoice_transaction_rel
             WHERE transaction_id IN %s
             GROUP BY transaction_id
-            ''',
-            [tuple(self.ids)]
+            """,
+            [tuple(self.ids)],
         )
         tx_data = dict(self.env.cr.fetchall())  # {id: count}
         for tx in self:
             tx.invoices_count = tx_data.get(tx.id, 0)
 
-    #=== CONSTRAINT METHODS ===#
+    # === CONSTRAINT METHODS ===#
 
-    @api.constrains('state')
+    @api.constrains("state")
     def _check_state_authorized_supported(self):
         """ Check that authorization is supported for a transaction in the 'authorized' state. """
         illegal_authorize_state_txs = self.filtered(
-            lambda tx: tx.state == 'authorized' and not tx.acquirer_id.support_authorization
+            lambda tx: tx.state == "authorized"
+            and not tx.acquirer_id.support_authorization
         )
         if illegal_authorize_state_txs:
-            raise ValidationError(_(
-                "Transaction authorization is not supported by the following payment acquirers: %s",
-                ', '.join(set(illegal_authorize_state_txs.mapped('acquirer_id.name')))
-            ))
+            raise ValidationError(
+                _(
+                    "Transaction authorization is not supported by the following payment acquirers: %s",
+                    ", ".join(
+                        set(illegal_authorize_state_txs.mapped("acquirer_id.name"))
+                    ),
+                )
+            )
 
-    #=== CRUD METHODS ===#
+    # === CRUD METHODS ===#
 
     @api.model_create_multi
     def create(self, values_list):
         for values in values_list:
-            acquirer = self.env['payment.acquirer'].browse(values['acquirer_id'])
+            acquirer = self.env["payment.acquirer"].browse(values["acquirer_id"])
 
-            if not values.get('reference'):
-                values['reference'] = self._compute_reference(acquirer.provider, **values)
+            if not values.get("reference"):
+                values["reference"] = self._compute_reference(
+                    acquirer.provider, **values
+                )
 
             # Duplicate partner values
-            partner = self.env['res.partner'].browse(values['partner_id'])
-            values.update({
-                'partner_name': partner.name,
-                'partner_lang': partner.lang,
-                'partner_email': partner.email,
-                'partner_address': payment_utils.format_partner_address(
-                    partner.street, partner.street2
-                ),
-                'partner_zip': partner.zip,
-                'partner_city': partner.city,
-                'partner_state_id': partner.state_id.id,
-                'partner_country_id': partner.country_id.id,
-                'partner_phone': partner.phone,
-            })
+            partner = self.env["res.partner"].browse(values["partner_id"])
+            values.update(
+                {
+                    "partner_name": partner.name,
+                    "partner_lang": partner.lang,
+                    "partner_email": partner.email,
+                    "partner_address": payment_utils.format_partner_address(
+                        partner.street, partner.street2
+                    ),
+                    "partner_zip": partner.zip,
+                    "partner_city": partner.city,
+                    "partner_state_id": partner.state_id.id,
+                    "partner_country_id": partner.country_id.id,
+                    "partner_phone": partner.phone,
+                }
+            )
 
             # Compute fees
-            currency = self.env['res.currency'].browse(values.get('currency_id')).exists()
-            values['fees'] = acquirer._compute_fees(
-                values.get('amount', 0), currency, partner.country_id
+            currency = (
+                self.env["res.currency"].browse(values.get("currency_id")).exists()
+            )
+            values["fees"] = acquirer._compute_fees(
+                values.get("amount", 0), currency, partner.country_id
             )
 
             # Include acquirer-specific create values
             values.update(self._get_specific_create_values(acquirer.provider, values))
 
             # Generate the hash for the callback if one has be configured on the tx
-            values['callback_hash'] = self._generate_callback_hash(
-                values.get('callback_model_id'),
-                values.get('callback_res_id'),
-                values.get('callback_method'),
+            values["callback_hash"] = self._generate_callback_hash(
+                values.get("callback_model_id"),
+                values.get("callback_res_id"),
+                values.get("callback_method"),
             )
 
         txs = super().create(values_list)
@@ -200,7 +275,7 @@ class PaymentTransaction(models.Model):
         # values from the DB where there were stored using `float_repr`, which produces a result
         # consistent with the format expected by providers.
         # E.g., tx.create(amount=1111.11) ; tx.invalidate_cache() -> tx.amount == 1111.11
-        txs.invalidate_cache(['amount', 'fees'])
+        txs.invalidate_cache(["amount", "fees"])
 
         return txs
 
@@ -219,7 +294,7 @@ class PaymentTransaction(models.Model):
         """
         return dict()
 
-    #=== ACTION METHODS ===#
+    # === ACTION METHODS ===#
 
     def action_view_invoices(self):
         """ Return the action for the views of the invoices linked to the transaction.
@@ -232,25 +307,25 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         action = {
-            'name': _("Invoices"),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.move',
-            'target': 'current',
+            "name": _("Invoices"),
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "target": "current",
         }
         invoice_ids = self.invoice_ids.ids
         if len(invoice_ids) == 1:
             invoice = invoice_ids[0]
-            action['res_id'] = invoice
-            action['view_mode'] = 'form'
-            action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+            action["res_id"] = invoice
+            action["view_mode"] = "form"
+            action["views"] = [(self.env.ref("account.view_move_form").id, "form")]
         else:
-            action['view_mode'] = 'tree,form'
-            action['domain'] = [('id', 'in', invoice_ids)]
+            action["view_mode"] = "tree,form"
+            action["domain"] = [("id", "in", invoice_ids)]
         return action
 
     def action_capture(self):
         """ Check the state of the transactions and request their capture. """
-        if any(tx.state != 'authorized' for tx in self):
+        if any(tx.state != "authorized" for tx in self):
             raise ValidationError(_("Only authorized transactions can be captured."))
 
         for tx in self:
@@ -258,16 +333,16 @@ class PaymentTransaction(models.Model):
 
     def action_void(self):
         """ Check the state of the transaction and request to have them voided. """
-        if any(tx.state != 'authorized' for tx in self):
+        if any(tx.state != "authorized" for tx in self):
             raise ValidationError(_("Only authorized transactions can be voided."))
 
         for tx in self:
             tx._send_void_request()
 
-    #=== BUSINESS METHODS - PAYMENT FLOW ===#
+    # === BUSINESS METHODS - PAYMENT FLOW ===#
 
     @api.model
-    def _compute_reference(self, provider, prefix=None, separator='-', **kwargs):
+    def _compute_reference(self, provider, prefix=None, separator="-", **kwargs):
         """ Compute a unique reference for the transaction.
 
         The reference either corresponds to the prefix if no other transaction with that prefix
@@ -302,24 +377,39 @@ class PaymentTransaction(models.Model):
         # Compute the prefix
         if prefix:
             # Replace special characters by their ASCII alternative (é -> e ; ä -> a ; ...)
-            prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore').decode('utf-8')
-        if not prefix:  # Prefix not provided or voided above, compute it based on the kwargs
-            prefix = self.sudo()._compute_reference_prefix(provider, separator, **kwargs)
-        if not prefix:  # Prefix not computed from the kwargs, fallback on time-based value
+            prefix = (
+                unicodedata.normalize("NFKD", prefix)
+                .encode("ascii", "ignore")
+                .decode("utf-8")
+            )
+        if (
+            not prefix
+        ):  # Prefix not provided or voided above, compute it based on the kwargs
+            prefix = self.sudo()._compute_reference_prefix(
+                provider, separator, **kwargs
+            )
+        if (
+            not prefix
+        ):  # Prefix not computed from the kwargs, fallback on time-based value
             prefix = payment_utils.singularize_reference_prefix()
 
         # Compute the sequence number
         reference = prefix  # The first reference of a sequence has no sequence number
-        if self.sudo().search([('reference', '=', prefix)]):  # The reference already has a match
+        if self.sudo().search(
+            [("reference", "=", prefix)]
+        ):  # The reference already has a match
             # We now execute a second search on `payment.transaction` to fetch all the references
             # starting with the given prefix. The load of these two searches is mitigated by the
             # index on `reference`. Although not ideal, this solution allows for quickly knowing
             # whether the sequence for a given prefix is already started or not, usually not. An SQL
             # query wouldn't help either as the selector is arbitrary and doing that would be an
             # open-door to SQL injections.
-            same_prefix_references = self.sudo().search(
-                [('reference', 'like', f'{prefix}{separator}%')]
-            ).with_context(prefetch_fields=False).mapped('reference')
+            same_prefix_references = (
+                self.sudo()
+                .search([("reference", "like", f"{prefix}{separator}%")])
+                .with_context(prefetch_fields=False)
+                .mapped("reference")
+            )
 
             # A final regex search is necessary to figure out the next sequence number. The previous
             # search could not rely on alphabetically sorting the reference to infer the largest
@@ -328,18 +418,22 @@ class PaymentTransaction(models.Model):
             # For instance, the prefix 'example' is a valid match for the existing references
             # 'example', 'example-1' and 'example-ref', in that order. Trusting the order to infer
             # the sequence number would lead to a collision with 'example-1'.
-            search_pattern = re.compile(rf'^{prefix}{separator}(\d+)$')
-            max_sequence_number = 0  # If no match is found, start the sequence with this reference
+            search_pattern = re.compile(rf"^{prefix}{separator}(\d+)$")
+            max_sequence_number = (
+                0  # If no match is found, start the sequence with this reference
+            )
             for existing_reference in same_prefix_references:
                 search_result = re.search(search_pattern, existing_reference)
-                if search_result:  # The reference has the same prefix and is from the same sequence
+                if (
+                    search_result
+                ):  # The reference has the same prefix and is from the same sequence
                     # Find the largest sequence number, if any
                     current_sequence = int(search_result.group(1))
                     if current_sequence > max_sequence_number:
                         max_sequence_number = current_sequence
 
             # Compute the full reference
-            reference = f'{prefix}{separator}{max_sequence_number + 1}'
+            reference = f"{prefix}{separator}{max_sequence_number + 1}"
         return reference
 
     @api.model
@@ -359,17 +453,21 @@ class PaymentTransaction(models.Model):
         :return: The computed reference prefix if invoice ids are found, an empty string otherwise
         :rtype: str
         """
-        command_list = values.get('invoice_ids')
+        command_list = values.get("invoice_ids")
         if command_list:
             # Extract invoice id(s) from the X2M commands
-            invoice_ids = self._fields['invoice_ids'].convert_to_cache(command_list, self)
-            invoices = self.env['account.move'].browse(invoice_ids).exists()
+            invoice_ids = self._fields["invoice_ids"].convert_to_cache(
+                command_list, self
+            )
+            invoices = self.env["account.move"].browse(invoice_ids).exists()
             if len(invoices) == len(invoice_ids):  # All ids are valid
-                return separator.join(invoices.mapped('name'))
-        return ''
+                return separator.join(invoices.mapped("name"))
+        return ""
 
     @api.model
-    def _generate_callback_hash(self, callback_model_id, callback_res_id, callback_method):
+    def _generate_callback_hash(
+        self, callback_model_id, callback_res_id, callback_method
+    ):
         """ Return the hash for the callback on the transaction.
 
         :param int callback_model_id: The model on which the callback method is defined, as a
@@ -381,9 +479,11 @@ class PaymentTransaction(models.Model):
         :retype: str
         """
         if callback_model_id and callback_res_id and callback_method:
-            model_name = self.env['ir.model'].sudo().browse(callback_model_id).model
-            token = f'{model_name}|{callback_res_id}|{callback_method}'
-            callback_hash = hmac_tool(self.env(su=True), 'generate_callback_hash', token)
+            model_name = self.env["ir.model"].sudo().browse(callback_model_id).model
+            token = f"{model_name}|{callback_res_id}|{callback_method}"
+            callback_hash = hmac_tool(
+                self.env(su=True), "generate_callback_hash", token
+            )
             return callback_hash
         return None
 
@@ -408,33 +508,39 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         processing_values = {
-            'acquirer_id': self.acquirer_id.id,
-            'provider': self.provider,
-            'reference': self.reference,
-            'amount': self.amount,
-            'currency_id': self.currency_id.id,
-            'partner_id': self.partner_id.id,
+            "acquirer_id": self.acquirer_id.id,
+            "provider": self.provider,
+            "reference": self.reference,
+            "amount": self.amount,
+            "currency_id": self.currency_id.id,
+            "partner_id": self.partner_id.id,
         }
 
         # Complete generic processing values with acquirer-specific values
-        processing_values.update(self._get_specific_processing_values(processing_values))
+        processing_values.update(
+            self._get_specific_processing_values(processing_values)
+        )
         _logger.info(
             "generic and acquirer-specific processing values for transaction with id %s:\n%s",
-            self.id, pprint.pformat(processing_values)
+            self.id,
+            pprint.pformat(processing_values),
         )
 
         # Render the html form for the redirect flow if available
-        if self.operation in ('online_redirect', 'validation'):
+        if self.operation in ("online_redirect", "validation"):
             rendering_values = self._get_specific_rendering_values(processing_values)
             _logger.info(
                 "acquirer-specific rendering values for transaction with id %s:\n%s",
-                self.id, pprint.pformat(rendering_values)
+                self.id,
+                pprint.pformat(rendering_values),
             )
             redirect_form_view = self.acquirer_id._get_redirect_form_view(
-                is_validation=self.operation == 'validation'
+                is_validation=self.operation == "validation"
             )
             if redirect_form_view:  # Some acquirer don't need a redirect form
-                redirect_form_html = redirect_form_view._render(rendering_values, engine='ir.qweb')
+                redirect_form_html = redirect_form_view._render(
+                    rendering_values, engine="ir.qweb"
+                )
                 processing_values.update(redirect_form_html=redirect_form_html)
 
         return processing_values
@@ -526,8 +632,8 @@ class PaymentTransaction(models.Model):
         :param str state_message: The reason for which the transaction is set in 'pending' state
         :return: None
         """
-        allowed_states = ('draft',)
-        target_state = 'pending'
+        allowed_states = ("draft",)
+        target_state = "pending"
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         txs_to_process._log_received_message()
 
@@ -537,8 +643,8 @@ class PaymentTransaction(models.Model):
         :param str state_message: The reason for which the transaction is set in 'authorized' state
         :return: None
         """
-        allowed_states = ('draft', 'pending')
-        target_state = 'authorized'
+        allowed_states = ("draft", "pending")
+        target_state = "authorized"
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         txs_to_process._log_received_message()
 
@@ -547,8 +653,8 @@ class PaymentTransaction(models.Model):
 
         :return: None
         """
-        allowed_states = ('draft', 'pending', 'authorized', 'error')
-        target_state = 'done'
+        allowed_states = ("draft", "pending", "authorized", "error")
+        target_state = "done"
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         txs_to_process._log_received_message()
 
@@ -558,11 +664,11 @@ class PaymentTransaction(models.Model):
         :param str state_message: The reason for which the transaction is set in 'cancel' state
         :return: None
         """
-        allowed_states = ('draft', 'pending', 'authorized')
-        target_state = 'cancel'
+        allowed_states = ("draft", "pending", "authorized")
+        target_state = "cancel"
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         # Cancel the existing payments
-        txs_to_process.mapped('payment_id').action_cancel()
+        txs_to_process.mapped("payment_id").action_cancel()
         txs_to_process._log_received_message()
 
     def _set_error(self, state_message):
@@ -571,8 +677,8 @@ class PaymentTransaction(models.Model):
         :param str state_message: The reason for which the transaction is set in 'error' state
         :return: None
         """
-        allowed_states = ('draft', 'pending', 'authorized')
-        target_state = 'error'
+        allowed_states = ("draft", "pending", "authorized")
+        target_state = "error"
         txs_to_process = self._update_state(allowed_states, target_state, state_message)
         txs_to_process._log_received_message()
 
@@ -602,35 +708,45 @@ class PaymentTransaction(models.Model):
                      transactions 'to process', 'processed', and 'in wrong state'
             :rtype: tuple(recordset)
             """
-            _txs_to_process = _transactions.filtered(lambda _tx: _tx.state in allowed_states)
-            _txs_already_processed = _transactions.filtered(lambda _tx: _tx.state == target_state)
+            _txs_to_process = _transactions.filtered(
+                lambda _tx: _tx.state in allowed_states
+            )
+            _txs_already_processed = _transactions.filtered(
+                lambda _tx: _tx.state == target_state
+            )
             _txs_wrong_state = _transactions - _txs_to_process - _txs_already_processed
 
             return _txs_to_process, _txs_already_processed, _txs_wrong_state
 
-        txs_to_process, txs_already_processed, txs_wrong_state = _classify_by_state(self)
+        txs_to_process, txs_already_processed, txs_wrong_state = _classify_by_state(
+            self
+        )
         for tx in txs_already_processed:
             _logger.info(
                 "tried to write tx state with same value (ref: %s, state: %s)",
-                tx.reference, tx.state
+                tx.reference,
+                tx.state,
             )
         for tx in txs_wrong_state:
             logging_values = {
-                'reference': tx.reference,
-                'tx_state': tx.state,
-                'target_state': target_state,
-                'allowed_states': allowed_states,
+                "reference": tx.reference,
+                "tx_state": tx.state,
+                "target_state": target_state,
+                "allowed_states": allowed_states,
             }
             _logger.warning(
                 "tried to write tx state with illegal value (ref: %(reference)s, previous state "
                 "%(tx_state)s, target state: %(target_state)s, expected previous state to be in: "
-                "%(allowed_states)s)", logging_values
+                "%(allowed_states)s)",
+                logging_values,
             )
-        txs_to_process.write({
-            'state': target_state,
-            'state_message': state_message,
-            'last_state_change': fields.Datetime.now(),
-        })
+        txs_to_process.write(
+            {
+                "state": target_state,
+                "state_message": state_message,
+                "last_state_change": fields.Datetime.now(),
+            }
+        )
         return txs_to_process
 
     def _execute_callback(self):
@@ -653,26 +769,33 @@ class PaymentTransaction(models.Model):
             if not (model_sudo and res_id and method):
                 continue  # Skip transactions with unset (or not properly defined) callbacks
 
-            valid_callback_hash = self._generate_callback_hash(model_sudo.id, res_id, method)
+            valid_callback_hash = self._generate_callback_hash(
+                model_sudo.id, res_id, method
+            )
             if not consteq(ustr(valid_callback_hash), tx.callback_hash):
-                _logger.warning("invalid callback signature for transaction with id %s", tx.id)
+                _logger.warning(
+                    "invalid callback signature for transaction with id %s", tx.id
+                )
                 continue  # Ignore tampered callbacks
 
             record = self.env[model_sudo.model].browse(res_id).exists()
             if not record:
                 logging_values = {
-                    'model': model_sudo.model,
-                    'record_id': res_id,
-                    'tx_id': tx.id,
+                    "model": model_sudo.model,
+                    "record_id": res_id,
+                    "tx_id": tx.id,
                 }
                 _logger.warning(
                     "invalid callback record %(model)s.%(record_id)s for transaction with id "
-                    "%(tx_id)s", logging_values
+                    "%(tx_id)s",
+                    logging_values,
                 )
                 continue  # Ignore invalidated callbacks
 
             success = getattr(record, method)(tx)  # Execute the callback
-            tx.callback_is_done = success or success is None  # Missing returns are successful
+            tx.callback_is_done = (
+                success or success is None
+            )  # Missing returns are successful
 
     def _send_refund_request(self):
         """ Request the provider of the acquirer handling the transaction to refund it.
@@ -710,7 +833,7 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-    #=== BUSINESS METHODS - POST-PROCESSING ===#
+    # === BUSINESS METHODS - POST-PROCESSING ===#
 
     def _get_post_processing_values(self):
         """ Return a dict of values used to display the status of the transaction.
@@ -738,20 +861,21 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         post_processing_values = {
-            'provider': self.provider,
-            'reference': self.reference,
-            'amount': self.amount,
-            'currency_code': self.currency_id.name,
-            'state': self.state,
-            'state_message': self.state_message,
-            'is_validation': self.operation == 'validation',
-            'is_post_processed': self.is_post_processed,
-            'validation_route': self.validation_route,
-            'landing_route': self.landing_route,
+            "provider": self.provider,
+            "reference": self.reference,
+            "amount": self.amount,
+            "currency_code": self.currency_id.name,
+            "state": self.state,
+            "state_message": self.state_message,
+            "is_validation": self.operation == "validation",
+            "is_post_processed": self.is_post_processed,
+            "validation_route": self.validation_route,
+            "landing_route": self.landing_route,
         }
         _logger.debug(
             "post-processing values for acquirer with id %s:\n%s",
-            self.acquirer_id.id, pprint.pformat(post_processing_values)
+            self.acquirer_id.id,
+            pprint.pformat(post_processing_values),
         )  # DEBUG level because this can get spammy with transactions in non-final states
         return post_processing_values
 
@@ -772,16 +896,20 @@ class PaymentTransaction(models.Model):
         txs_to_post_process = self
         if not txs_to_post_process:
             # Let the client post-process transactions so that they remain available in the portal
-            client_handling_limit_date = datetime.now() - relativedelta.relativedelta(minutes=10)
+            client_handling_limit_date = datetime.now() - relativedelta.relativedelta(
+                minutes=10
+            )
             # Don't try forever to post-process a transaction that doesn't go through
             retry_limit_date = datetime.now() - relativedelta.relativedelta(days=2)
             # Retrieve all transactions matching the criteria for post-processing
-            txs_to_post_process = self.search([
-                ('state', '=', 'done'),
-                ('is_post_processed', '=', False),
-                ('last_state_change', '<=', client_handling_limit_date),
-                ('last_state_change', '>=', retry_limit_date),
-            ])
+            txs_to_post_process = self.search(
+                [
+                    ("state", "=", "done"),
+                    ("is_post_processed", "=", False),
+                    ("last_state_change", "<=", client_handling_limit_date),
+                    ("last_state_change", ">=", retry_limit_date),
+                ]
+            )
         for tx in txs_to_post_process:
             try:
                 tx._finalize_post_processing()
@@ -791,7 +919,8 @@ class PaymentTransaction(models.Model):
             except Exception as e:
                 _logger.exception(
                     "encountered an error while post-processing transaction with id %s:\n%s",
-                    tx.id, e
+                    tx.id,
+                    e,
                 )
                 self.env.cr.rollback()
 
@@ -805,10 +934,12 @@ class PaymentTransaction(models.Model):
         :return: None
         """
         # Validate invoices automatically once the transaction is confirmed
-        self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
+        self.invoice_ids.filtered(lambda inv: inv.state == "draft").action_post()
 
         # Create and post missing payments for transactions requiring reconciliation
-        for tx in self.filtered(lambda t: t.operation != 'validation' and not t.payment_id):
+        for tx in self.filtered(
+            lambda t: t.operation != "validation" and not t.payment_id
+        ):
             tx._create_payment()
 
     def _create_payment(self, **extra_create_values):
@@ -824,30 +955,31 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        payment_method_line = self.acquirer_id.journal_id.inbound_payment_method_line_ids\
-            .filtered(lambda l: l.code == self.provider)
+        payment_method_line = self.acquirer_id.journal_id.inbound_payment_method_line_ids.filtered(
+            lambda l: l.code == self.provider
+        )
         payment_values = {
-            'amount': self.amount,
-            'payment_type': 'inbound' if self.amount > 0 else 'outbound',
-            'currency_id': self.currency_id.id,
-            'partner_id': self.partner_id.commercial_partner_id.id,
-            'partner_type': 'customer',
-            'journal_id': self.acquirer_id.journal_id.id,
-            'company_id': self.acquirer_id.company_id.id,
-            'payment_method_line_id': payment_method_line.id,
-            'payment_token_id': self.token_id.id,
-            'payment_transaction_id': self.id,
-            'ref': self.reference,
+            "amount": self.amount,
+            "payment_type": "inbound" if self.amount > 0 else "outbound",
+            "currency_id": self.currency_id.id,
+            "partner_id": self.partner_id.commercial_partner_id.id,
+            "partner_type": "customer",
+            "journal_id": self.acquirer_id.journal_id.id,
+            "company_id": self.acquirer_id.company_id.id,
+            "payment_method_line_id": payment_method_line.id,
+            "payment_token_id": self.token_id.id,
+            "payment_transaction_id": self.id,
+            "ref": self.reference,
             **extra_create_values,
         }
-        payment = self.env['account.payment'].create(payment_values)
+        payment = self.env["account.payment"].create(payment_values)
         payment.action_post()
 
         # Track the payment to make a one2one.
         self.payment_id = payment
 
         if self.invoice_ids:
-            self.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()
+            self.invoice_ids.filtered(lambda inv: inv.state == "draft").action_post()
 
             (payment.line_ids + self.invoice_ids.line_ids).filtered(
                 lambda line: line.account_id == payment.destination_account_id
@@ -856,7 +988,7 @@ class PaymentTransaction(models.Model):
 
         return payment
 
-    #=== BUSINESS METHODS - LOGGING ===#
+    # === BUSINESS METHODS - LOGGING ===#
 
     def _log_sent_message(self):
         """ Log in the chatter of relevant documents that the transactions have been initiated.
@@ -895,7 +1027,7 @@ class PaymentTransaction(models.Model):
         for invoice in self.invoice_ids:
             invoice.message_post(body=message)
 
-    #=== BUSINESS METHODS - GETTERS ===#
+    # === BUSINESS METHODS - GETTERS ===#
 
     def _get_sent_message(self):
         """ Return the message stating that the transaction has been requested.
@@ -908,16 +1040,19 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         # Choose the message based on the payment flow
-        if self.operation in ('online_redirect', 'online_direct'):
+        if self.operation in ("online_redirect", "online_direct"):
             message = _(
                 "A transaction with reference %(ref)s has been initiated (%(acq_name)s).",
-                ref=self.reference, acq_name=self.acquirer_id.name
+                ref=self.reference,
+                acq_name=self.acquirer_id.name,
             )
         else:  # 'online_token'
             message = _(
                 "A transaction with reference %(ref)s has been initiated using the payment method "
                 "%(token_name)s (%(acq_name)s).",
-                ref=self.reference, token_name=self.token_id.name, acq_name=self.acquirer_id.name
+                ref=self.reference,
+                token_name=self.token_id.name,
+                acq_name=self.acquirer_id.name,
             )
         return message
 
@@ -928,41 +1063,53 @@ class PaymentTransaction(models.Model):
         """
         self.ensure_one()
 
-        formatted_amount = formatLang(self.env, self.amount, currency_obj=self.currency_id)
-        if self.state == 'pending':
+        formatted_amount = formatLang(
+            self.env, self.amount, currency_obj=self.currency_id
+        )
+        if self.state == "pending":
             message = _(
                 "The transaction with reference %(ref)s for %(amount)s is pending (%(acq_name)s).",
-                ref=self.reference, amount=formatted_amount, acq_name=self.acquirer_id.name
+                ref=self.reference,
+                amount=formatted_amount,
+                acq_name=self.acquirer_id.name,
             )
-        elif self.state == 'authorized':
+        elif self.state == "authorized":
             message = _(
                 "The transaction with reference %(ref)s for %(amount)s has been authorized "
-                "(%(acq_name)s).", ref=self.reference, amount=formatted_amount,
-                acq_name=self.acquirer_id.name
+                "(%(acq_name)s).",
+                ref=self.reference,
+                amount=formatted_amount,
+                acq_name=self.acquirer_id.name,
             )
-        elif self.state == 'done':
+        elif self.state == "done":
             message = _(
                 "The transaction with reference %(ref)s for %(amount)s has been confirmed "
-                "(%(acq_name)s).", ref=self.reference, amount=formatted_amount,
-                acq_name=self.acquirer_id.name
+                "(%(acq_name)s).",
+                ref=self.reference,
+                amount=formatted_amount,
+                acq_name=self.acquirer_id.name,
             )
             if self.payment_id:
                 message += _(
                     "\nThe related payment is posted: %s",
-                    self.payment_id._get_payment_chatter_link()
+                    self.payment_id._get_payment_chatter_link(),
                 )
-        elif self.state == 'error':
+        elif self.state == "error":
             message = _(
                 "The transaction with reference %(ref)s for %(amount)s encountered an error"
                 " (%(acq_name)s).",
-                ref=self.reference, amount=formatted_amount, acq_name=self.acquirer_id.name
+                ref=self.reference,
+                amount=formatted_amount,
+                acq_name=self.acquirer_id.name,
             )
             if self.state_message:
                 message += _("\nError: %s", self.state_message)
         else:
             message = _(
                 "The transaction with reference %(ref)s for %(amount)s is canceled (%(acq_name)s).",
-                ref=self.reference, amount=formatted_amount, acq_name=self.acquirer_id.name
+                ref=self.reference,
+                amount=formatted_amount,
+                acq_name=self.acquirer_id.name,
             )
             if self.state_message:
                 message += _("\nReason: %s", self.state_message)
@@ -974,4 +1121,4 @@ class PaymentTransaction(models.Model):
         :return: The last transaction of the recordset, sorted by id
         :rtype: recordset of `payment.transaction`
         """
-        return self.filtered(lambda t: t.state != 'draft').sorted()[:1]
+        return self.filtered(lambda t: t.state != "draft").sorted()[:1]

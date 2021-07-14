@@ -5,7 +5,7 @@ from odoo import models
 
 
 class BaseModel(models.AbstractModel):
-    _inherit = 'base'
+    _inherit = "base"
 
     def get_base_url(self):
         """
@@ -25,12 +25,12 @@ class BaseModel(models.AbstractModel):
             return super().get_base_url()
         self.ensure_one()
 
-        if self._name == 'website':
+        if self._name == "website":
             # Note that website_1.company_id.website_id might not be website_1
             return self._get_http_domain() or super().get_base_url()
-        if 'website_id' in self and self.website_id.domain:
+        if "website_id" in self and self.website_id.domain:
             return self.website_id._get_http_domain()
-        if 'company_id' in self and self.company_id.website_id.domain:
+        if "company_id" in self and self.company_id.website_id.domain:
             return self.company_id.website_id._get_http_domain()
         return super().get_base_url()
 

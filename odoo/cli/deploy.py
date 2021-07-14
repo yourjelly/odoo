@@ -10,35 +10,41 @@ import zipfile
 
 from . import Command
 
+
 class Deploy(Command):
     """Deploy a module on an Odoo instance"""
+
     def __init__(self):
         super(Deploy, self).__init__()
         self.session = requests.session()
 
-    def deploy_module(self, module_path, url, login, password, db='', force=False):
-        url = url.rstrip('/')
+    def deploy_module(self, module_path, url, login, password, db="", force=False):
+        url = url.rstrip("/")
         module_file = self.zip_module(module_path)
         try:
-            return self.login_upload_module(module_file, url, login, password, db, force=force)
+            return self.login_upload_module(
+                module_file, url, login, password, db, force=force
+            )
         finally:
             os.remove(module_file)
 
     def login_upload_module(self, module_file, url, login, password, db, force=False):
         print("Uploading module file...")
-        endpoint = url + '/base_import_module/login_upload'
+        endpoint = url + "/base_import_module/login_upload"
         post_data = {
-            'login': login,
-            'password': password,
-            'db': db,
-            'force': '1' if force else '',
+            "login": login,
+            "password": password,
+            "db": db,
+            "force": "1" if force else "",
         }
-        with open(module_file, 'rb') as f:
-            res = self.session.post(endpoint, files={'mod_file': f}, data=post_data)
+        with open(module_file, "rb") as f:
+            res = self.session.post(endpoint, files={"mod_file": f}, data=post_data)
 
         if res.status_code == 404:
             raise Exception(
-                "The server '%s' does not have the 'base_import_module' installed or is not up-to-date." % url)
+                "The server '%s' does not have the 'base_import_module' installed or is not up-to-date."
+                % url
+            )
         res.raise_for_status()
         return res.text
 
@@ -47,10 +53,10 @@ class Deploy(Command):
         if not os.path.isdir(path):
             raise Exception("Could not find module directory '%s'" % path)
         container, module_name = os.path.split(path)
-        temp = tempfile.mktemp(suffix='.zip')
+        temp = tempfile.mktemp(suffix=".zip")
         try:
             print("Zipping module directory...")
-            with zipfile.ZipFile(temp, 'w') as zfile:
+            with zipfile.ZipFile(temp, "w") as zfile:
                 for root, dirs, files in os.walk(path):
                     for file in files:
                         file_path = os.path.join(root, file)
@@ -63,15 +69,35 @@ class Deploy(Command):
     def run(self, cmdargs):
         parser = argparse.ArgumentParser(
             prog="%s deploy" % sys.argv[0].split(os.path.sep)[-1],
-            description=self.__doc__
+            description=self.__doc__,
         )
-        parser.add_argument('path', help="Path of the module to deploy")
-        parser.add_argument('url', nargs='?', help='Url of the server (default=http://localhost:8069)', default="http://localhost:8069")
-        parser.add_argument('--db', dest='db', help='Database to use if server does not use db-filter.')
-        parser.add_argument('--login', dest='login', default="admin", help='Login (default=admin)')
-        parser.add_argument('--password', dest='password', default="admin", help='Password (default=admin)')
-        parser.add_argument('--verify-ssl', action='store_true', help='Verify SSL certificate')
-        parser.add_argument('--force', action='store_true', help='Force init even if module is already installed. (will update `noupdate="1"` records)')
+        parser.add_argument("path", help="Path of the module to deploy")
+        parser.add_argument(
+            "url",
+            nargs="?",
+            help="Url of the server (default=http://localhost:8069)",
+            default="http://localhost:8069",
+        )
+        parser.add_argument(
+            "--db", dest="db", help="Database to use if server does not use db-filter."
+        )
+        parser.add_argument(
+            "--login", dest="login", default="admin", help="Login (default=admin)"
+        )
+        parser.add_argument(
+            "--password",
+            dest="password",
+            default="admin",
+            help="Password (default=admin)",
+        )
+        parser.add_argument(
+            "--verify-ssl", action="store_true", help="Verify SSL certificate"
+        )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help='Force init even if module is already installed. (will update `noupdate="1"` records)',
+        )
         if not cmdargs:
             sys.exit(parser.print_help())
 
@@ -81,9 +107,16 @@ class Deploy(Command):
             self.session.verify = False
 
         try:
-            if not args.url.startswith(('http://', 'https://')):
-                args.url = 'https://%s' % args.url
-            result = self.deploy_module(args.path, args.url, args.login, args.password, args.db, force=args.force)
+            if not args.url.startswith(("http://", "https://")):
+                args.url = "https://%s" % args.url
+            result = self.deploy_module(
+                args.path,
+                args.url,
+                args.login,
+                args.password,
+                args.db,
+                force=args.force,
+            )
             print(result)
         except Exception as e:
             sys.exit("ERROR: %s" % e)

@@ -9,42 +9,55 @@ from odoo.tools import OrderedSet
 
 
 class ReportProjectTaskBurndownChart(models.Model):
-    _name = 'project.task.burndown.chart.report'
-    _description = 'Burndown Chart'
+    _name = "project.task.burndown.chart.report"
+    _description = "Burndown Chart"
     _auto = False
-    _order = 'date'
+    _order = "date"
 
-    project_id = fields.Many2one('project.project', readonly=True)
-    display_project_id = fields.Many2one('project.project', readonly=True)
-    stage_id = fields.Many2one('project.task.type', readonly=True)
-    date = fields.Datetime('Date', readonly=True)
-    user_id = fields.Many2one('res.users', string='Assigned to', readonly=True)
-    date_assign = fields.Datetime(string='Assignment Date', readonly=True)
-    date_deadline = fields.Date(string='Deadline', readonly=True)
-    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
-    nb_tasks = fields.Integer('# of Tasks', readonly=True, group_operator="sum")
+    project_id = fields.Many2one("project.project", readonly=True)
+    display_project_id = fields.Many2one("project.project", readonly=True)
+    stage_id = fields.Many2one("project.task.type", readonly=True)
+    date = fields.Datetime("Date", readonly=True)
+    user_id = fields.Many2one("res.users", string="Assigned to", readonly=True)
+    date_assign = fields.Datetime(string="Assignment Date", readonly=True)
+    date_deadline = fields.Date(string="Deadline", readonly=True)
+    partner_id = fields.Many2one("res.partner", string="Customer", readonly=True)
+    nb_tasks = fields.Integer("# of Tasks", readonly=True, group_operator="sum")
     date_group_by = fields.Selection(
         (
-            ('day', 'By Day'),
-            ('month', 'By Month'),
-            ('quarter', 'By quarter'),
-            ('year', 'By Year')
-        ), string="Date Group By", readonly=True)
+            ("day", "By Day"),
+            ("month", "By Month"),
+            ("quarter", "By quarter"),
+            ("year", "By Year"),
+        ),
+        string="Date Group By",
+        readonly=True,
+    )
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+    def read_group(
+        self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True
+    ):
         date_group_bys = []
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
         for gb in groupby:
-            if gb.startswith('date:'):
-                date_group_bys.append(gb.split(':')[-1])
+            if gb.startswith("date:"):
+                date_group_bys.append(gb.split(":")[-1])
 
         date_domains = []
         for gb in date_group_bys:
-            date_domains = expression.OR([date_domains, [('date_group_by', '=', gb)]])
+            date_domains = expression.OR([date_domains, [("date_group_by", "=", gb)]])
         domain = expression.AND([domain, date_domains])
 
-        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        res = super().read_group(
+            domain,
+            fields,
+            groupby,
+            offset=offset,
+            limit=limit,
+            orderby=orderby,
+            lazy=lazy,
+        )
         return res
 
     def init(self):
@@ -195,7 +208,6 @@ SELECT (task_id*10^7 + 5*10^6 + to_char(d, 'YYMMDD')::integer)::bigint as id,
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute(
             sql.SQL("CREATE or REPLACE VIEW {} as ({})").format(
-                sql.Identifier(self._table),
-                sql.SQL(query)
+                sql.Identifier(self._table), sql.SQL(query)
             )
         )

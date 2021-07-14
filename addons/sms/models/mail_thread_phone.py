@@ -5,7 +5,7 @@ from odoo import models
 
 
 class PhoneMixin(models.AbstractModel):
-    _inherit = 'mail.thread.phone'
+    _inherit = "mail.thread.phone"
 
     def _sms_get_number_fields(self):
         """ Add fields coming from mail.thread.phone implementation. """

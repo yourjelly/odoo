@@ -9,8 +9,12 @@ class ModelA(models.Model):
     _description = "Model A"
 
     name = fields.Char(required=True)
-    field_b1 = fields.Many2one("test_rpc.model_b", string="required field", required=True)
-    field_b2 = fields.Many2one("test_rpc.model_b", string="restricted field", ondelete="restrict")
+    field_b1 = fields.Many2one(
+        "test_rpc.model_b", string="required field", required=True
+    )
+    field_b2 = fields.Many2one(
+        "test_rpc.model_b", string="restricted field", ondelete="restrict"
+    )
 
 
 class ModelB(models.Model):

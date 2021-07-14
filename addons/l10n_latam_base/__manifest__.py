@@ -1,12 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'LATAM Localization Base',
-    'version': '1.0',
-    'category': 'Accounting/Localizations',
-    'sequence': 14,
-    'author': 'Odoo, ADHOC SA',
-    'summary': 'LATAM Identification Types',
-    'description': """
+    "name": "LATAM Localization Base",
+    "version": "1.0",
+    "category": "Accounting/Localizations",
+    "sequence": 14,
+    "author": "Odoo, ADHOC SA",
+    "summary": "LATAM Identification Types",
+    "description": """
 Add a new model named "Identification Type" that extend the vat field functionality in the partner and let the user to identify (an eventually invoice) to contacts not only with their fiscal tax ID (VAT) but with other types of identifications like national document, passport, foreign ID, etc. With this module installed you will see now in the partner form view two fields:
 
 * Identification Type
@@ -45,18 +45,15 @@ All the defined identification types can be reviewed and activate/deactivate in 
 
 This module is compatible with base_vat module in order to be able to validate VAT numbers for each country that have or not have the possibility to manage multiple identification types.
 """,
-    'depends': [
-        'contacts',
-        'base_vat',
+    "depends": ["contacts", "base_vat",],
+    "data": [
+        "data/l10n_latam.identification.type.csv",
+        "views/res_partner_view.xml",
+        "views/l10n_latam_identification_type_view.xml",
+        "security/ir.model.access.csv",
     ],
-    'data': [
-        'data/l10n_latam.identification.type.csv',
-        'views/res_partner_view.xml',
-        'views/l10n_latam_identification_type_view.xml',
-        'security/ir.model.access.csv',
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'post_init_hook': '_set_default_identification_type',
+    "installable": True,
+    "auto_install": False,
+    "application": False,
+    "post_init_hook": "_set_default_identification_type",
 }

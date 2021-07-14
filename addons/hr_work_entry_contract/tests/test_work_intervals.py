@@ -3,9 +3,8 @@ from odoo.tests.common import TransactionCase
 
 
 class TestIntervals(TransactionCase):
-
     def ints(self, pairs):
-        recs = self.env['base']
+        recs = self.env["base"]
         return [(a, b, recs) for a, b in pairs]
 
     def test_union(self):

@@ -4,7 +4,7 @@ from odoo.addons.website.models import ir_http
 
 
 class IrRule(models.Model):
-    _inherit = 'ir.rule'
+    _inherit = "ir.rule"
 
     @api.model
     def _eval_context(self):
@@ -15,10 +15,10 @@ class IrRule(models.Model):
         # `get_current_website(falback=False)` as it could also return a website
         # in backend (if domain set & match)..
         is_frontend = ir_http.get_request_website()
-        Website = self.env['website']
-        res['website'] = is_frontend and Website.get_current_website() or Website
+        Website = self.env["website"]
+        res["website"] = is_frontend and Website.get_current_website() or Website
         return res
 
     def _compute_domain_keys(self):
         """ Return the list of context keys to use for caching ``_compute_domain``. """
-        return super(IrRule, self)._compute_domain_keys() + ['website_id']
+        return super(IrRule, self)._compute_domain_keys() + ["website_id"]

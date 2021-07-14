@@ -11,17 +11,14 @@ class AccountChartTemplate(models.Model):
 
     @api.model
     def _get_demo_data(self):
-        yield ('res.partner', {
-            'base.res_partner_12': {
-                'l10n_cl_sii_taxpayer_type': '4',
+        yield (
+            "res.partner",
+            {
+                "base.res_partner_12": {"l10n_cl_sii_taxpayer_type": "4",},
+                "base.res_partner_2": {"l10n_cl_sii_taxpayer_type": "4",},
             },
-            'base.res_partner_2': {
-                'l10n_cl_sii_taxpayer_type': '4',
-            },
-        })
-        yield ('l10n_latam.document.type', {
-            'l10n_cl.dc_fe_dte': {'active': True},
-        })
+        )
+        yield ("l10n_latam.document.type", {"l10n_cl.dc_fe_dte": {"active": True},})
         for model, data in super()._get_demo_data():
             yield model, data
 
@@ -29,14 +26,13 @@ class AccountChartTemplate(models.Model):
     def _get_demo_data_move(self):
         ref = self.env.ref
         cid = self.env.company.id
-        foreign = ref('l10n_cl.dc_fe_dte').id
+        foreign = ref("l10n_cl.dc_fe_dte").id
         model, data = super()._get_demo_data_move()
-        self.env['account.journal'].search([
-            ('type', '=', 'purchase'),
-            ('company_id', '=', self.env.company.id),
-        ]).l10n_latam_use_documents = False
-        data[f'{cid}_demo_invoice_1']['l10n_latam_document_type_id'] = foreign
-        data[f'{cid}_demo_invoice_2']['l10n_latam_document_type_id'] = foreign
-        data[f'{cid}_demo_invoice_3']['l10n_latam_document_type_id'] = foreign
-        data[f'{cid}_demo_invoice_followup']['l10n_latam_document_type_id'] = foreign
+        self.env["account.journal"].search(
+            [("type", "=", "purchase"), ("company_id", "=", self.env.company.id),]
+        ).l10n_latam_use_documents = False
+        data[f"{cid}_demo_invoice_1"]["l10n_latam_document_type_id"] = foreign
+        data[f"{cid}_demo_invoice_2"]["l10n_latam_document_type_id"] = foreign
+        data[f"{cid}_demo_invoice_3"]["l10n_latam_document_type_id"] = foreign
+        data[f"{cid}_demo_invoice_followup"]["l10n_latam_document_type_id"] = foreign
         return model, data

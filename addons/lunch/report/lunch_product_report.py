@@ -7,28 +7,33 @@ from odoo.osv import expression
 
 class LunchProductReport(models.Model):
     _name = "lunch.product.report"
-    _description = 'Product report'
+    _description = "Product report"
     _auto = False
-    _order = 'is_favorite desc, is_new desc, last_order_date asc, product_id asc'
+    _order = "is_favorite desc, is_new desc, last_order_date asc, product_id asc"
 
-    id = fields.Integer('ID')
-    product_id = fields.Many2one('lunch.product', 'Product')
-    name = fields.Char('Product Name', related='product_id.name')
-    category_id = fields.Many2one('lunch.product.category', 'Product Category')
-    description = fields.Html('Description', related='product_id.description')
-    price = fields.Float('Price')
-    supplier_id = fields.Many2one('lunch.supplier', 'Vendor')
-    company_id = fields.Many2one('res.company')
-    currency_id = fields.Many2one('res.currency', related='company_id.currency_id')
-    is_favorite = fields.Boolean('Favorite')
-    user_id = fields.Many2one('res.users')
-    is_new = fields.Boolean('New')
-    active = fields.Boolean('Active')
-    last_order_date = fields.Date('Last Order Date')
+    id = fields.Integer("ID")
+    product_id = fields.Many2one("lunch.product", "Product")
+    name = fields.Char("Product Name", related="product_id.name")
+    category_id = fields.Many2one("lunch.product.category", "Product Category")
+    description = fields.Html("Description", related="product_id.description")
+    price = fields.Float("Price")
+    supplier_id = fields.Many2one("lunch.supplier", "Vendor")
+    company_id = fields.Many2one("res.company")
+    currency_id = fields.Many2one("res.currency", related="company_id.currency_id")
+    is_favorite = fields.Boolean("Favorite")
+    user_id = fields.Many2one("res.users")
+    is_new = fields.Boolean("New")
+    active = fields.Boolean("Active")
+    last_order_date = fields.Date("Last Order Date")
     image_128 = fields.Image(compute="_compute_image_128")
 
     # This field is used only for searching
-    is_available_at = fields.Many2one('lunch.location', 'Product Availability', compute='_compute_is_available_at', search='_search_is_available_at')
+    is_available_at = fields.Many2one(
+        "lunch.location",
+        "Product Availability",
+        compute="_compute_is_available_at",
+        search="_search_is_available_at",
+    )
 
     def _compute_image_128(self):
         for product_r in self:
@@ -50,7 +55,9 @@ class LunchProductReport(models.Model):
         for report in self:
             product_last_update = report.product_id[self.CONCURRENCY_CHECK_FIELD]
             category_last_update = report.category_id[self.CONCURRENCY_CHECK_FIELD]
-            report[self.CONCURRENCY_CHECK_FIELD] = max(product_last_update, category_last_update)
+            report[self.CONCURRENCY_CHECK_FIELD] = max(
+                product_last_update, category_last_update
+            )
 
     def _compute_is_available_at(self):
         """
@@ -61,7 +68,7 @@ class LunchProductReport(models.Model):
             product.is_available_at = False
 
     def _search_is_available_at(self, operator, value):
-        supported_operators = ['in', 'not in', '=', '!=']
+        supported_operators = ["in", "not in", "=", "!="]
 
         if not operator in supported_operators:
             return expression.TRUE_DOMAIN
@@ -70,24 +77,39 @@ class LunchProductReport(models.Model):
             value = [value]
 
         if operator in expression.NEGATIVE_TERM_OPERATORS:
-            return expression.AND([[('supplier_id.available_location_ids', 'not in', value)], [('supplier_id.available_location_ids', '!=', False)]])
+            return expression.AND(
+                [
+                    [("supplier_id.available_location_ids", "not in", value)],
+                    [("supplier_id.available_location_ids", "!=", False)],
+                ]
+            )
 
-        return expression.OR([[('supplier_id.available_location_ids', 'in', value)], [('supplier_id.available_location_ids', '=', False)]])
+        return expression.OR(
+            [
+                [("supplier_id.available_location_ids", "in", value)],
+                [("supplier_id.available_location_ids", "=", False)],
+            ]
+        )
 
     def write(self, values):
-        if 'is_favorite' in values:
-            if values['is_favorite']:
-                commands = [(4, product_id) for product_id in self.mapped('product_id').ids]
+        if "is_favorite" in values:
+            if values["is_favorite"]:
+                commands = [
+                    (4, product_id) for product_id in self.mapped("product_id").ids
+                ]
             else:
-                commands = [(3, product_id) for product_id in self.mapped('product_id').ids]
-            self.env.user.write({
-                'favorite_lunch_product_ids': commands,
-            })
+                commands = [
+                    (3, product_id) for product_id in self.mapped("product_id").ids
+                ]
+            self.env.user.write(
+                {"favorite_lunch_product_ids": commands,}
+            )
 
     def init(self):
         tools.drop_view_if_exists(self._cr, self._table)
 
-        self._cr.execute("""
+        self._cr.execute(
+            """
             CREATE or REPLACE view %s AS (
                 SELECT
                     row_number() over (ORDER BY users.id,product.id) AS id,
@@ -108,4 +130,7 @@ class LunchProductReport(models.Model):
                 LEFT JOIN LATERAL (select user_id FROM lunch_product_favorite_user_rel where user_id=users.id and product_id=product.id) AS fav ON TRUE
                 WHERE users.active AND product.active AND groups.gid = %%s --only take into account active products and users
             );
-        """ % self._table, (self.env.ref('base.group_user').id,))
+        """
+            % self._table,
+            (self.env.ref("base.group_user").id,),
+        )

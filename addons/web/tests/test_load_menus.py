@@ -1,13 +1,12 @@
 from odoo.tests.common import HttpCase
 
-class LoadMenusTests(HttpCase):
 
+class LoadMenusTests(HttpCase):
     def setUp(self):
         super().setUp()
-        self.menu = self.env["ir.ui.menu"].create({
-            "name": "test_menu",
-            "parent_id": False,
-        })
+        self.menu = self.env["ir.ui.menu"].create(
+            {"name": "test_menu", "parent_id": False,}
+        )
 
         def search(*args, **kwargs):
             return self.menu
@@ -28,25 +27,21 @@ class LoadMenusTests(HttpCase):
                 "name": "test_menu",
                 "webIcon": False,
                 "webIconData": False,
-                "xmlid": ""
+                "xmlid": "",
             },
             "root": {
                 "actionID": False,
                 "actionModel": False,
                 "appID": False,
-                "children": [
-                    self.menu.id,
-                ],
+                "children": [self.menu.id,],
                 "id": "root",
                 "name": "root",
                 "webIcon": None,
                 "webIconData": None,
-                "xmlid": ""
-            }
+                "xmlid": "",
+            },
         }
 
         self.assertDictEqual(
-            menu_loaded.json(),
-            expected,
-            "load_menus didn't return the expected value"
+            menu_loaded.json(), expected, "load_menus didn't return the expected value"
         )

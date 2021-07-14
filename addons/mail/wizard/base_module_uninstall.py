@@ -10,4 +10,4 @@ class BaseModuleUninstall(models.TransientModel):
     def _get_models(self):
         # consider mail-thread models only
         models = super(BaseModuleUninstall, self)._get_models()
-        return models.filtered('is_mail_thread')
+        return models.filtered("is_mail_thread")

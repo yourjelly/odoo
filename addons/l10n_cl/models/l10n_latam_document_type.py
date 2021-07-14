@@ -5,15 +5,17 @@ from odoo import models, fields
 
 class L10nLatamDocumentType(models.Model):
 
-    _inherit = 'l10n_latam.document.type'
+    _inherit = "l10n_latam.document.type"
 
     internal_type = fields.Selection(
         selection_add=[
-            ('invoice', 'Invoices'),
-            ('invoice_in', 'Purchase Invoices'),
-            ('debit_note', 'Debit Notes'),
-            ('credit_note', 'Credit Notes'),
-            ('receipt_invoice', 'Receipt Invoice')])
+            ("invoice", "Invoices"),
+            ("invoice_in", "Purchase Invoices"),
+            ("debit_note", "Debit Notes"),
+            ("credit_note", "Credit Notes"),
+            ("receipt_invoice", "Receipt Invoice"),
+        ]
+    )
 
     def _format_document_number(self, document_number):
         """ Make validation of Import Dispatch Number

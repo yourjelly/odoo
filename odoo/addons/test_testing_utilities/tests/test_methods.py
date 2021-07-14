@@ -6,10 +6,10 @@ from odoo.tests import common
 
 class TestBasic(common.TransactionCase):
     def test_assertRecordValues(self):
-        X1 = {'f1': "X", 'f2': 1}
-        Y2 = {'f1': "Y", 'f2': 2}
-        Y3 = {'f1': "Y", 'f2': 3}
-        records = self.env['test_testing_utilities.a'].create([X1, Y2])
+        X1 = {"f1": "X", "f2": 1}
+        Y2 = {"f1": "Y", "f2": 2}
+        Y3 = {"f1": "Y", "f2": 3}
+        records = self.env["test_testing_utilities.a"].create([X1, Y2])
 
         self.assertRecordValues(records, [X1, Y2])
 

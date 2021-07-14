@@ -20,7 +20,7 @@ class odoo_resolver(etree.Resolver):
 
     def resolve(self, url, id, context):
         """Search url in ``ir.attachment`` and return the resolved content."""
-        attachment = self.env['ir.attachment'].search([('name', '=', url)])
+        attachment = self.env["ir.attachment"].search([("name", "=", url)])
         if attachment:
             return self.resolve_string(base64.b64decode(attachment.datas), context)
 
@@ -41,8 +41,8 @@ def _check_with_xsd(tree_or_str, stream, env=None):
     parser = etree.XMLParser()
     if env:
         parser.resolvers.add(odoo_resolver(env))
-        if isinstance(stream, str) and stream.endswith('.xsd'):
-            attachment = env['ir.attachment'].search([('name', '=', stream)])
+        if isinstance(stream, str) and stream.endswith(".xsd"):
+            attachment = env["ir.attachment"].search([("name", "=", stream)])
             if not attachment:
                 raise FileNotFoundError()
             stream = BytesIO(base64.b64decode(attachment.datas))
@@ -50,7 +50,7 @@ def _check_with_xsd(tree_or_str, stream, env=None):
     try:
         xsd_schema.assertValid(tree_or_str)
     except etree.DocumentInvalid as xml_errors:
-        raise UserError('\n'.join(str(e) for e in xml_errors.error_log))
+        raise UserError("\n".join(str(e) for e in xml_errors.error_log))
 
 
 def create_xml_node_chain(first_parent_node, nodes_list, last_node_value=None):

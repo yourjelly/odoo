@@ -15,8 +15,8 @@ _match_asset_file_url_regex = re.compile("^/(\w+)/(.+?)(\.custom\.(.+))?\.(\w+)$
 
 
 class Assets(models.AbstractModel):
-    _name = 'web_editor.assets'
-    _description = 'Assets Utils'
+    _name = "web_editor.assets"
+    _description = "Assets Utils"
 
     def get_all_custom_attachments(self, urls):
         """
@@ -28,7 +28,7 @@ class Assets(models.AbstractModel):
         Returns:
             ir.attachment(): attachment records related to the given URLs.
         """
-        return self._get_custom_attachment(urls, op='in')
+        return self._get_custom_attachment(urls, op="in")
 
     def get_asset_content(self, url, url_info=None, custom_attachments=None):
         """
@@ -71,7 +71,9 @@ class Assets(models.AbstractModel):
         module_path = get_module_path(module)
         module_resource_path = get_resource_path(module, url_info["resource_path"])
         if module_path and module_resource_path:
-            module_path = os.path.join(os.path.normpath(module_path), '')  # join ensures the path ends with '/'
+            module_path = os.path.join(
+                os.path.normpath(module_path), ""
+            )  # join ensures the path ends with '/'
             module_resource_path = os.path.normpath(module_resource_path)
             if module_resource_path.startswith(module_path):
                 with open(module_resource_path, "rb") as f:
@@ -102,10 +104,10 @@ class Assets(models.AbstractModel):
         if not m:
             return False
         return {
-            'module': m.group(1),
-            'resource_path': "%s.%s" % (m.group(2), m.group(5)),
-            'customized': bool(m.group(3)),
-            'bundle': m.group(4) or False
+            "module": m.group(1),
+            "resource_path": "%s.%s" % (m.group(2), m.group(5)),
+            "customized": bool(m.group(3)),
+            "bundle": m.group(4) or False,
         }
 
     def make_custom_asset_file_url(self, url, bundle_xmlid):
@@ -173,37 +175,37 @@ class Assets(models.AbstractModel):
             # If not, create a new attachment to copy the original scss/js file
             # content, with its modifications
             new_attach = {
-                'name': url.split("/")[-1],
-                'type': "binary",
-                'mimetype': (file_type == 'js' and 'text/javascript' or 'text/scss'),
-                'datas': datas,
-                'url': custom_url,
+                "name": url.split("/")[-1],
+                "type": "binary",
+                "mimetype": (file_type == "js" and "text/javascript" or "text/scss"),
+                "datas": datas,
+                "url": custom_url,
             }
             new_attach.update(self._save_asset_hook())
             self.env["ir.attachment"].create(new_attach)
 
             # Create an asset with the new attachment
-            IrAsset = self.env['ir.asset']
+            IrAsset = self.env["ir.asset"]
             new_asset = {
-                'path': custom_url,
-                'target': url,
-                'directive': 'replace',
+                "path": custom_url,
+                "target": url,
+                "directive": "replace",
                 **self._save_asset_hook(),
             }
             target_asset = self._get_custom_asset(url)
             if target_asset:
-                new_asset['name'] = target_asset.name + ' override'
-                new_asset['bundle'] = target_asset.bundle
-                new_asset['sequence'] = target_asset.sequence
+                new_asset["name"] = target_asset.name + " override"
+                new_asset["bundle"] = target_asset.bundle
+                new_asset["sequence"] = target_asset.sequence
             else:
-                path_parts = '/'.join(os.path.split(custom_url)).split('/')
-                new_asset['name'] = '%s: replace %s' % (bundle, path_parts[-1])
-                new_asset['bundle'] = IrAsset._get_related_bundle(url, bundle)
+                path_parts = "/".join(os.path.split(custom_url)).split("/")
+                new_asset["name"] = "%s: replace %s" % (bundle, path_parts[-1])
+                new_asset["bundle"] = IrAsset._get_related_bundle(url, bundle)
             IrAsset.create(new_asset)
 
         self.env["ir.qweb"].clear_caches()
 
-    def _get_custom_attachment(self, custom_url, op='='):
+    def _get_custom_attachment(self, custom_url, op="="):
         """
         Fetch the ir.attachment record related to the given customized asset.
 
@@ -214,7 +216,7 @@ class Assets(models.AbstractModel):
         Returns:
             ir.attachment()
         """
-        assert op in ('in', '='), 'Invalid operator'
+        assert op in ("in", "="), "Invalid operator"
         return self.env["ir.attachment"].search([("url", op, custom_url)])
 
     def _get_custom_asset(self, custom_url):
@@ -228,8 +230,8 @@ class Assets(models.AbstractModel):
         Returns:
             ir.asset()
         """
-        url = custom_url[1:] if custom_url.startswith(('/', '\\')) else custom_url
-        return self.env['ir.asset'].search([('path', 'like', url)])
+        url = custom_url[1:] if custom_url.startswith(("/", "\\")) else custom_url
+        return self.env["ir.asset"].search([("path", "like", url)])
 
     def _save_asset_hook(self):
         """

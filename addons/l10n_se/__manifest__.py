@@ -5,7 +5,7 @@
     "version": "1.0",
     "author": "XCLUDE",
     "category": "Accounting/Localizations/Account Charts",
-    'description': """
+    "description": """
 Swedish Accounting
 ------------------
 
@@ -27,7 +27,5 @@ It also includes the invoice OCR payment reference handling.
         "views/partner_view.xml",
         "views/account_journal_view.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
- }
+    "demo": ["demo/demo_company.xml",],
+}

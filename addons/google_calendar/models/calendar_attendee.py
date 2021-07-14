@@ -6,9 +6,10 @@ from odoo import models
 from odoo.addons.google_calendar.models.google_sync import google_calendar_token
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 
+
 class Attendee(models.Model):
-    _name = 'calendar.attendee'
-    _inherit = 'calendar.attendee'
+    _name = "calendar.attendee"
+    _inherit = "calendar.attendee"
 
     def _send_mail_to_attendees(self, mail_template, force_send=False):
         """ Override
@@ -31,7 +32,6 @@ class Attendee(models.Model):
         self._sync_event()
         return res
 
-
     def do_decline(self):
         # Synchronize event after state change
         res = super().do_decline()
@@ -39,5 +39,5 @@ class Attendee(models.Model):
         return res
 
     def _sync_event(self):
-        google_service = GoogleCalendarService(self.env['google.service'])
+        google_service = GoogleCalendarService(self.env["google.service"])
         self.event_id.filtered(lambda e: e.google_id)._sync_odoo2google(google_service)

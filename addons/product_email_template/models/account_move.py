@@ -4,13 +4,13 @@ from odoo import api, models, SUPERUSER_ID
 
 
 class AccountMove(models.Model):
-    _inherit = 'account.move'
+    _inherit = "account.move"
 
     def invoice_validate_send_email(self):
         if self.env.su:
             # sending mail in sudo was meant for it being sent from superuser
             self = self.with_user(SUPERUSER_ID)
-        for invoice in self.filtered(lambda x: x.move_type == 'out_invoice'):
+        for invoice in self.filtered(lambda x: x.move_type == "out_invoice"):
             # send template only on customer invoice
             # subscribe the partner to the invoice
             if invoice.partner_id not in invoice.message_partner_ids:
@@ -20,7 +20,7 @@ class AccountMove(models.Model):
                     invoice.message_post_with_template(
                         line.product_id.email_template_id.id,
                         composition_mode="comment",
-                        email_layout_xmlid="mail.mail_notification_light"
+                        email_layout_xmlid="mail.mail_notification_light",
                     )
         return True
 

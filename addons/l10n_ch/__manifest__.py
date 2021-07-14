@@ -5,8 +5,8 @@
 #                         Prisme Solutions Informatique SA, Quod SA
 # Translation contributors: brain-tec AG, Agile Business Group
 {
-    'name': "Switzerland - Accounting",
-    'description': """
+    "name": "Switzerland - Accounting",
+    "description": """
 Swiss localization
 ==================
 This module defines a chart of account for Switzerland (Swiss PME/KMU 2015), taxes and enables the generation of ISR and QR-bill when you print an invoice or send it by mail.
@@ -30,36 +30,26 @@ Here is how it works:
     - Printing the invoice will trigger the download of three files: the invoice, its ISR and its QR-bill
     - Clicking the 'Send by mail' button will attach three files to your draft mail : the invoice, the ISR and the QR-bill.
     """,
-    'version': '11.0',
-    'category': 'Accounting/Localizations/Account Charts',
-
-    'depends': ['account', 'l10n_multilang', 'base_iban'],
-
-    'data': [
-        'data/l10n_ch_chart_data.xml',
-        'data/account.account.template.csv',
-        'data/l10n_ch_chart_post_data.xml',
-        'data/account_data.xml',
-        'data/account_tax_report_data.xml',
-        'data/account_vat2011_data.xml',
-        'data/account_fiscal_position_data.xml',
-        'data/account_chart_template_data.xml',
-        'report/isr_report.xml',
-        'report/swissqr_report.xml',
-        'views/res_bank_view.xml',
-        'views/account_invoice_view.xml',
-        'views/res_config_settings_views.xml',
-        'views/setup_wizard_views.xml',
+    "version": "11.0",
+    "category": "Accounting/Localizations/Account Charts",
+    "depends": ["account", "l10n_multilang", "base_iban"],
+    "data": [
+        "data/l10n_ch_chart_data.xml",
+        "data/account.account.template.csv",
+        "data/l10n_ch_chart_post_data.xml",
+        "data/account_data.xml",
+        "data/account_tax_report_data.xml",
+        "data/account_vat2011_data.xml",
+        "data/account_fiscal_position_data.xml",
+        "data/account_chart_template_data.xml",
+        "report/isr_report.xml",
+        "report/swissqr_report.xml",
+        "views/res_bank_view.xml",
+        "views/account_invoice_view.xml",
+        "views/res_config_settings_views.xml",
+        "views/setup_wizard_views.xml",
     ],
-
-    'demo': [
-        'demo/account_cash_rounding.xml',
-        'demo/demo_company.xml',
-    ],
-    'post_init_hook': 'post_init',
-    'assets': {
-        'web.report_assets_common': [
-            'l10n_ch/static/src/scss/**/*',
-        ],
-    }
+    "demo": ["demo/account_cash_rounding.xml", "demo/demo_company.xml",],
+    "post_init_hook": "post_init",
+    "assets": {"web.report_assets_common": ["l10n_ch/static/src/scss/**/*",],},
 }

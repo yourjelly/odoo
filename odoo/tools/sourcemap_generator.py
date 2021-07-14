@@ -16,6 +16,7 @@ class SourceMapGenerator:
     functions/steps for our use case. This simpler version does a line by line mapping, with the ability to
     add offsets at the start and end of a file. (when we have to add comments on top a transpiled file by example).
     """
+
     def __init__(self, source_root=None):
         self._file = None
         self._source_root = source_root
@@ -53,12 +54,14 @@ class SourceMapGenerator:
                 previous_original_line = mapping["originalLine"] - 1
 
             if (source, line) not in self._cache:
-                self._cache[(source, line)] = "".join([
-                    encoded_column,
-                    base64vlq_encode(source),
-                    base64vlq_encode(line),
-                    encoded_column,
-                ])
+                self._cache[(source, line)] = "".join(
+                    [
+                        encoded_column,
+                        base64vlq_encode(source),
+                        base64vlq_encode(line),
+                        encoded_column,
+                    ]
+                )
 
             result += self._cache[source, line]
         return result
@@ -74,7 +77,9 @@ class SourceMapGenerator:
             "version": self._version,
             "sources": list(self._sources.keys()),
             "mappings": self._serialize_mappings(),
-            "sourcesContent": [self._sources_contents[source] for source in self._sources]
+            "sourcesContent": [
+                self._sources_contents[source] for source in self._sources
+            ],
         }
         if self._file:
             mapping["file"] = self._file
@@ -90,7 +95,7 @@ class SourceMapGenerator:
         :return the content of the sourcemap as a string encoded in UTF-8.
         """
         # Store with XSSI-prevention prefix
-        return b")]}'\n" + json.dumps(self.to_json()).encode('utf8')
+        return b")]}'\n" + json.dumps(self.to_json()).encode("utf8")
 
     def add_source(self, source_name, source_content, last_index, start_offset=0):
         """Adds a new source file in the sourcemap. All the lines of the source file will be mapped line by line
@@ -127,17 +132,21 @@ class SourceMapGenerator:
         if start_offset > 0:
             # adds a mapping between the first line of the source
             # and the first line of the corresponding code in the generated file.
-            self._mappings.append({
-                "generatedLine": last_index + 1,
-                "originalLine": 1,
-                "source": source_name,
-            })
+            self._mappings.append(
+                {
+                    "generatedLine": last_index + 1,
+                    "originalLine": 1,
+                    "source": source_name,
+                }
+            )
         for i in range(1, source_line_count + 1):
-            self._mappings.append({
-                "generatedLine": last_index + i + start_offset,
-                "originalLine": i,
-                "source": source_name,
-            })
+            self._mappings.append(
+                {
+                    "generatedLine": last_index + i + start_offset,
+                    "originalLine": i,
+                    "source": source_name,
+                }
+            )
 
 
 B64CHARS = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"

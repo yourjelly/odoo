@@ -5,15 +5,15 @@ from odoo import api, fields, models, _
 
 
 class ConfirmExpiry(models.TransientModel):
-    _name = 'expiry.picking.confirmation'
-    _description = 'Confirm Expiry'
+    _name = "expiry.picking.confirmation"
+    _description = "Confirm Expiry"
 
-    lot_ids = fields.Many2many('stock.production.lot', readonly=True, required=True)
-    picking_ids = fields.Many2many('stock.picking', readonly=True)
-    description = fields.Char('Description', compute='_compute_descriptive_fields')
-    show_lots = fields.Boolean('Show Lots', compute='_compute_descriptive_fields')
+    lot_ids = fields.Many2many("stock.production.lot", readonly=True, required=True)
+    picking_ids = fields.Many2many("stock.picking", readonly=True)
+    description = fields.Char("Description", compute="_compute_descriptive_fields")
+    show_lots = fields.Boolean("Show Lots", compute="_compute_descriptive_fields")
 
-    @api.depends('lot_ids')
+    @api.depends("lot_ids")
     def _compute_descriptive_fields(self):
         # Shows expired lots only if we are more than one expired lot.
         self.show_lots = len(self.lot_ids) > 1
@@ -29,13 +29,17 @@ class ConfirmExpiry(models.TransientModel):
                 "You are going to deliver the product %(product_name)s, %(lot_name)s which is expired."
                 "\nDo you confirm you want to proceed ?",
                 product_name=self.lot_ids.product_id.display_name,
-                lot_name=self.lot_ids.name
+                lot_name=self.lot_ids.name,
             )
 
     def process(self):
-        picking_to_validate = self.env.context.get('button_validate_picking_ids')
+        picking_to_validate = self.env.context.get("button_validate_picking_ids")
         if picking_to_validate:
-            picking_to_validate = self.env['stock.picking'].browse(picking_to_validate).with_context(skip_expired=True)
+            picking_to_validate = (
+                self.env["stock.picking"]
+                .browse(picking_to_validate)
+                .with_context(skip_expired=True)
+            )
             return picking_to_validate.button_validate()
         return True
 
@@ -44,8 +48,12 @@ class ConfirmExpiry(models.TransientModel):
         process for all other pickings (in case of multi). """
         # Remove `self.pick_ids` from `button_validate_picking_ids` and call
         # `button_validate` with the subset (if any).
-        pickings_to_validate = self.env['stock.picking'].browse(self.env.context.get('button_validate_picking_ids'))
+        pickings_to_validate = self.env["stock.picking"].browse(
+            self.env.context.get("button_validate_picking_ids")
+        )
         pickings_to_validate = pickings_to_validate - self.picking_ids
         if pickings_to_validate:
-            return pickings_to_validate.with_context(skip_expired=True).button_validate()
+            return pickings_to_validate.with_context(
+                skip_expired=True
+            ).button_validate()
         return True

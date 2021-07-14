@@ -32,26 +32,36 @@ from sys import stdout, stderr
 from typing import Dict, List, Set, Optional, Any, Tuple
 
 Version = Tuple[int, ...]
+
+
 def parse_version(vstring: str) -> Optional[Version]:
     if not vstring:
         return None
-    return tuple(map(int, vstring.split('.')))
+    return tuple(map(int, vstring.split(".")))
+
 
 # shared beween debian and ubuntu
 SPECIAL = {
-    'pytz': 'tz',
-    'libsass': 'libsass-python',
+    "pytz": "tz",
+    "libsass": "libsass-python",
 }
+
+
 def unfuck(s: str) -> str:
     """ Try to strip the garbage from the version string, just remove everything
     following the first `+`, `~` or `-`
     """
-    return re.match(r'''
+    return re.match(
+        r"""
         (?:\d+:)? # debian crud prefix
         (.*?) # the shit we actually want
         (?:~|\+|-|\.dfsg)
         .*
-    ''', s, flags=re.VERBOSE)[1]
+    """,
+        s,
+        flags=re.VERBOSE,
+    )[1]
+
 
 class Distribution(ABC):
     def __init__(self, release):
@@ -62,18 +72,15 @@ class Distribution(ABC):
         ...
 
     def __str__(self):
-        return f'{type(self).__name__.lower()} {self._release}'
+        return f"{type(self).__name__.lower()} {self._release}"
 
     @classmethod
     def get(cls, name):
         try:
-            return next(
-                c
-                for c in cls.__subclasses__()
-                if c.__name__.lower() == name
-            )
+            return next(c for c in cls.__subclasses__() if c.__name__.lower() == name)
         except StopIteration:
             raise ValueError(f"Unknown distribution {name!r}")
+
 
 class Debian(Distribution):
     def get_version(self, package):
@@ -83,23 +90,27 @@ class Debian(Distribution):
         # try the python prefix first: some packages have a native of foreign $X and
         # either the bindings or a python equivalent at python-X, or just a name
         # collision
-        for prefix in ['python-', '']:
-            res = json.load(urlopen(f'https://sources.debian.org/api/src/{prefix}{package}'))
-            if res.get('error') is None:
+        for prefix in ["python-", ""]:
+            res = json.load(
+                urlopen(f"https://sources.debian.org/api/src/{prefix}{package}")
+            )
+            if res.get("error") is None:
                 break
-        if res.get('error'):
+        if res.get("error"):
             return
 
         return next(
-            parse_version(unfuck(distr['version']))
-            for distr in res['versions']
-            if distr['area'] == 'main'
-            if self._release in distr['suites']
+            parse_version(unfuck(distr["version"]))
+            for distr in res["versions"]
+            if distr["area"] == "main"
+            if self._release in distr["suites"]
         )
+
 
 class Ubuntu(Distribution):
     """ Ubuntu doesn't have an API, instead it has a huge text file
     """
+
     def __init__(self, release):
         super().__init__(release)
 
@@ -108,28 +119,33 @@ class Ubuntu(Distribution):
         # apparently does not care, and returns a somewhat funky
         # content-encoding (x-gzip) anyway
         data = gzip.open(
-            urlopen(f'https://packages.ubuntu.com/source/{release}/allpackages?format=txt.gz'),
-            mode='rt', encoding='utf-8'
+            urlopen(
+                f"https://packages.ubuntu.com/source/{release}/allpackages?format=txt.gz"
+            ),
+            mode="rt",
+            encoding="utf-8",
         )
-        for line in itertools.islice(data, 6, None): # first 6 lines is garbage header
+        for line in itertools.islice(data, 6, None):  # first 6 lines is garbage header
             # ignore the restricted, security, universe, multiverse tags
-            m = re.match(r'(\S+) \(([^)]+)\)', line.strip())
+            m = re.match(r"(\S+) \(([^)]+)\)", line.strip())
             assert m, f"invalid line {line.strip()!r}"
             self._packages[m[1]] = m[2]
 
     def get_version(self, package):
         package = SPECIAL.get(package, package)
-        for prefix in ['python3-', 'python-', '']:
-            v = self._packages.get(f'{prefix}{package}')
+        for prefix in ["python3-", "python-", ""]:
+            v = self._packages.get(f"{prefix}{package}")
             if v:
                 return parse_version(unfuck(v))
         return None
+
 
 class Markers:
     """ Simplistic RD parser for requirements env markers.
 
     Evaluation of the env markers is so basic it goes to brunch in uggs.
     """
+
     def __init__(self, s=None):
         self.rules = False
         if s is not None:
@@ -142,13 +158,13 @@ class Markers:
         return self._eval(self.rules, context)
 
     def _eval(self, rule, context):
-        if rule[0] == 'OR':
+        if rule[0] == "OR":
             return self._eval(rule[1], context) or self._eval(rule[2], context)
-        elif rule[0] == 'AND':
+        elif rule[0] == "AND":
             return self._eval(rule[1], context) and self._eval(rule[2], context)
-        elif rule[0] == 'ENV':
+        elif rule[0] == "ENV":
             return context[rule[1]]
-        elif rule[0] == 'LIT':
+        elif rule[0] == "LIT":
             return rule[1]
         else:
             op, var1, var2 = rule
@@ -156,12 +172,18 @@ class Markers:
             var2 = self._eval(var2, context)
 
             # NOTE: currently doesn't follow PEP440 version matching at all
-            if op == '==': return var1 == var2
-            elif op == '!=': return var1 != var2
-            elif op == '<': return var1 < var2
-            elif op == '<=': return var1 <= var2
-            elif op == '>': return var1 > var2
-            elif op == '>=': return var1 >= var2
+            if op == "==":
+                return var1 == var2
+            elif op == "!=":
+                return var1 != var2
+            elif op == "<":
+                return var1 < var2
+            elif op == "<=":
+                return var1 <= var2
+            elif op == ">":
+                return var1 > var2
+            elif op == ">=":
+                return var1 >= var2
             else:
                 raise NotImplementedError(f"Operator {op!r}")
 
@@ -170,25 +192,25 @@ class Markers:
 
     def _parse_or(self, s):
         sub1, rest = self._parse_and(s)
-        expr, n = re.subn(r'^\s*or\b', '', rest, count=1)
+        expr, n = re.subn(r"^\s*or\b", "", rest, count=1)
         if not n:
             return sub1, rest
         sub2, rest = self._parse_and(expr)
-        return ('OR', sub1, sub2), rest
+        return ("OR", sub1, sub2), rest
 
     def _parse_and(self, s):
         sub1, rest = self._parse_expr(s)
-        expr, n = re.subn(r'\s*and\b', '', rest, count=1)
+        expr, n = re.subn(r"\s*and\b", "", rest, count=1)
         if not n:
             return sub1, rest
         sub2, rest = self._parse_expr(expr)
-        return ('AND', sub1, sub2), rest
+        return ("AND", sub1, sub2), rest
 
     def _parse_expr(self, s):
-        expr, n = re.subn(r'^\s*\(', '', s, count=1)
+        expr, n = re.subn(r"^\s*\(", "", s, count=1)
         if n:
             sub, rest = self.parse_marker(expr)
-            rest, n = re.subn(r'\s*\)', '', rest, count=1)
+            rest, n = re.subn(r"\s*\)", "", rest, count=1)
             assert n, f"expected closing parenthesis, found {rest}"
             return sub, rest
 
@@ -198,22 +220,26 @@ class Markers:
         return (op, var1, var2), rest
 
     def _parse_op(self, s):
-        m = re.match(r'''
+        m = re.match(
+            r"""
             \s*
             (<= | < | != | >= | > | ~= | ===? | in \b | not \s+ in \b)
             (.*)
-        ''', s, re.VERBOSE)
+        """,
+            s,
+            re.VERBOSE,
+        )
         assert m, f"no operator in {s!r}"
         return m.groups()
 
     def _parse_var(self, s):
-        python_str = re.escape(string.printable.translate(str.maketrans({
-            '"': '',
-            "'": '',
-            '\\': '',
-            '-': '',
-        })))
-        m = re.match(fr'''
+        python_str = re.escape(
+            string.printable.translate(
+                str.maketrans({'"': "", "'": "", "\\": "", "-": "",})
+            )
+        )
+        m = re.match(
+            fr"""
             \s*
             (:?
                 # TODO: add more envvars
@@ -222,11 +248,15 @@ class Markers:
               | ' (?P<squote>["{python_str}-]*) '
             )
             (?P<rest>.*)
-        ''', s, re.VERBOSE)
+        """,
+            s,
+            re.VERBOSE,
+        )
         assert m, f"failed to find marker var in {s}"
-        if m['env']:
-            return ('ENV', m['env']), m['rest']
-        return ('LIT', m['dquote'] or m['squote'] or ''), m['rest']
+        if m["env"]:
+            return ("ENV", m["env"]), m["rest"]
+        return ("LIT", m["dquote"] or m["squote"] or ""), m["rest"]
+
 
 def parse_spec(line: str) -> (str, (Optional[str], Optional[str]), Markers):
     """ Parse a requirements specification (a line of requirements)
@@ -249,23 +279,28 @@ def parse_spec(line: str) -> (str, (Optional[str], Optional[str]), Markers):
     Full grammar is at https://www.python.org/dev/peps/pep-0508/#complete-grammar
     """
     # weirdly a distribution name can apparently start with a number
-    name, rest = re.match(r'([\w\d](?:[._-]*[\w\d]+)*)\s*(.*)', line.strip()).groups()
+    name, rest = re.match(r"([\w\d](?:[._-]*[\w\d]+)*)\s*(.*)", line.strip()).groups()
     # skipping extras
     version_cmp = version = None
-    versionspec = re.match(r'''
+    versionspec = re.match(
+        r"""
         (< | <= | != | == | >= | > | ~= | ===)
         \s*
         ([\w\d_.*+!-]+)
         \s*
         (.*)
-    ''', rest, re.VERBOSE)
+    """,
+        rest,
+        re.VERBOSE,
+    )
     if versionspec:
         version_cmp, version, rest = versionspec.groups()
     markers = Markers()
-    if rest[:1] == ';':
+    if rest[:1] == ";":
         markers = Markers(rest[1:])
 
     return name, (version_cmp, version), markers
+
 
 def parse_requirements(reqpath: Path) -> Dict[str, List[Tuple[str, Markers]]]:
     """ Parses a requirement file to a dict of {package: [(version, markers)]}
@@ -273,39 +308,45 @@ def parse_requirements(reqpath: Path) -> Dict[str, List[Tuple[str, Markers]]]:
     The env markers express *whether* that specific dep applies.
     """
     reqs = {}
-    for line in reqpath.open('r', encoding='utf-8'):
-        if line.isspace() or line.startswith('#'):
+    for line in reqpath.open("r", encoding="utf-8"):
+        if line.isspace() or line.startswith("#"):
             continue
 
         name, (op, version), markers = parse_spec(line)
-        assert op is None or op == '==', f"unexpected version comparator {op}"
+        assert op is None or op == "==", f"unexpected version comparator {op}"
         reqs.setdefault(name, []).append((version, markers))
     return reqs
+
 
 def main(args):
     checkers = [
         Distribution.get(distro)(release)
         for version in args.release
-        for (distro, release) in [version.split(':')]
+        for (distro, release) in [version.split(":")]
     ]
 
     stderr.write(f"Fetch Python versions...\n")
     pyvers = [
-        '.'.join(map(str, checker.get_version('python3-defaults')[:2]))
+        ".".join(map(str, checker.get_version("python3-defaults")[:2]))
         for checker in checkers
     ]
 
     uniq = sorted(v for v in set(pyvers))
     table = [
-        ['']
-        + [f'req {v}' for v in uniq]
-        + [f'{checker._release} ({version})' for checker, version in zip(checkers, pyvers)]
+        [""]
+        + [f"req {v}" for v in uniq]
+        + [
+            f"{checker._release} ({version})"
+            for checker, version in zip(checkers, pyvers)
+        ]
     ]
 
-    reqs = parse_requirements((Path.cwd() / __file__).parent.parent / 'requirements.txt')
+    reqs = parse_requirements(
+        (Path.cwd() / __file__).parent.parent / "requirements.txt"
+    )
     tot = len(reqs) * len(checkers)
 
-    def progress(n=iter(range(tot+1))):
+    def progress(n=iter(range(tot + 1))):
         stderr.write(f"\rFetch requirements: {next(n)} / {tot}")
 
     progress()
@@ -316,13 +357,12 @@ def main(args):
             # FIXME: when multiple options apply, check which pip uses
             #        (first-matching. best-matching, latest, ...)
             for version, markers in options:
-                if markers.evaluate({
-                    'python_version': pyver,
-                    'sys_platform': 'linux',
-                }):
+                if markers.evaluate(
+                    {"python_version": pyver, "sys_platform": "linux",}
+                ):
                     byver[pyver] = version
                     break
-            row.append(byver.get(pyver) or '')
+            row.append(byver.get(pyver) or "")
         # this requirement doesn't apply, ignore
         if not byver:
             # normally the progressbar is updated when processing each
@@ -335,43 +375,43 @@ def main(args):
 
         mismatch = False
         for i, c in enumerate(checkers):
-            req_version = byver.get(pyvers[i], '')
-            check_version = '.'.join(map(str, c.get_version(req.lower()) or ['<missing>']))
+            req_version = byver.get(pyvers[i], "")
+            check_version = ".".join(
+                map(str, c.get_version(req.lower()) or ["<missing>"])
+            )
             progress()
             if req_version != check_version:
                 row.append(check_version)
                 mismatch = True
             else:
-                row.append('')
+                row.append("")
 
         # only show row if one of the items diverges from requirement
         if mismatch:
             table.append(row)
-    stderr.write('\n')
+    stderr.write("\n")
 
     # evaluate width of columns
     sizes = [0] * (len(checkers) + len(uniq) + 1)
     for row in table:
-        sizes = [
-            max(s, len(cell))
-            for s, cell in zip(sizes, row)
-        ]
+        sizes = [max(s, len(cell)) for s, cell in zip(sizes, row)]
 
     # format table
     for row in table:
-        stdout.write('| ')
+        stdout.write("| ")
         for cell, width in zip(row, sizes):
-            stdout.write(f'{cell:<{width}} | ')
-        stdout.write('\n')
+            stdout.write(f"{cell:<{width}} | ")
+        stdout.write("\n")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        'release', nargs='+',
-        help="Release to check against, should use the format '{distro}:{release}' e.g. 'debian:sid'"
+        "release",
+        nargs="+",
+        help="Release to check against, should use the format '{distro}:{release}' e.g. 'debian:sid'",
     )
     args = parser.parse_args()
     main(args)

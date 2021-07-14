@@ -5,17 +5,24 @@ from odoo import api, fields, models
 
 
 class HrDepartureWizard(models.TransientModel):
-    _name = 'hr.departure.wizard'
-    _description = 'Departure Wizard'
+    _name = "hr.departure.wizard"
+    _description = "Departure Wizard"
 
-    departure_reason_id = fields.Many2one("hr.departure.reason", default=lambda self: self.env['hr.departure.reason'].search([], limit=1))
-    departure_description = fields.Text(string="Additional Information")
-    departure_date = fields.Date(string="Departure Date", required=True, default=fields.Date.today)
-    employee_id = fields.Many2one(
-        'hr.employee', string='Employee', required=True,
-        default=lambda self: self.env.context.get('active_id', None),
+    departure_reason_id = fields.Many2one(
+        "hr.departure.reason",
+        default=lambda self: self.env["hr.departure.reason"].search([], limit=1),
     )
-    archive_private_address = fields.Boolean('Archive Private Address', default=True)
+    departure_description = fields.Text(string="Additional Information")
+    departure_date = fields.Date(
+        string="Departure Date", required=True, default=fields.Date.today
+    )
+    employee_id = fields.Many2one(
+        "hr.employee",
+        string="Employee",
+        required=True,
+        default=lambda self: self.env.context.get("active_id", None),
+    )
+    archive_private_address = fields.Boolean("Archive Private Address", default=True)
 
     def action_register_departure(self):
         employee = self.employee_id
@@ -26,5 +33,11 @@ class HrDepartureWizard(models.TransientModel):
         if self.archive_private_address:
             # ignore contact links to internal users
             private_address = employee.address_home_id
-            if private_address and private_address.active and not self.env['res.users'].search([('partner_id', '=', private_address.id)]):
+            if (
+                private_address
+                and private_address.active
+                and not self.env["res.users"].search(
+                    [("partner_id", "=", private_address.id)]
+                )
+            ):
                 private_address.toggle_active()

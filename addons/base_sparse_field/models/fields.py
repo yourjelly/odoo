@@ -7,11 +7,13 @@ from odoo import fields
 
 def monkey_patch(cls):
     """ Return a method decorator to monkey-patch the given class. """
+
     def decorate(func):
         name = func.__name__
         func.super = getattr(cls, name, None)
         setattr(cls, name, func)
         return func
+
     return decorate
 
 
@@ -34,17 +36,19 @@ fields.Field.__doc__ += """
 """
 fields.Field.sparse = None
 
+
 @monkey_patch(fields.Field)
 def _get_attrs(self, model_class, name):
     attrs = _get_attrs.super(self, model_class, name)
-    if attrs.get('sparse'):
+    if attrs.get("sparse"):
         # by default, sparse fields are not stored and not copied
-        attrs['store'] = False
-        attrs['copy'] = attrs.get('copy', False)
-        attrs['compute'] = self._compute_sparse
-        if not attrs.get('readonly'):
-            attrs['inverse'] = self._inverse_sparse
+        attrs["store"] = False
+        attrs["copy"] = attrs.get("copy", False)
+        attrs["compute"] = self._compute_sparse
+        if not attrs.get("readonly"):
+            attrs["inverse"] = self._inverse_sparse
     return attrs
+
 
 @monkey_patch(fields.Field)
 def _compute_sparse(self, records):
@@ -54,6 +58,7 @@ def _compute_sparse(self, records):
     if self.relational:
         for record in records:
             record[self.name] = record[self.name].exists()
+
 
 @monkey_patch(fields.Field)
 def _inverse_sparse(self, records):
@@ -74,12 +79,14 @@ def _inverse_sparse(self, records):
 # Definition and implementation of serialized fields
 #
 
+
 class Serialized(fields.Field):
     """ Serialized fields provide the storage for sparse fields. """
-    type = 'serialized'
-    column_type = ('text', 'text')
 
-    prefetch = False                    # not prefetched by default
+    type = "serialized"
+    column_type = ("text", "text")
+
+    prefetch = False  # not prefetched by default
 
     def convert_to_column(self, value, record, values=None, validate=True):
         return self.convert_to_cache(value, record, validate=validate)

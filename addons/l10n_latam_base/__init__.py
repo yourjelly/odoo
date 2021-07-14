@@ -10,5 +10,5 @@ def _set_default_identification_type(cr, registry):
             UPDATE res_partner
                SET l10n_latam_identification_type_id = %s
         """,
-        [env.ref('l10n_latam_base.it_vat').id]
+        [env.ref("l10n_latam_base.it_vat").id],
     )

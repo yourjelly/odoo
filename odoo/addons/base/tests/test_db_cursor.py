@@ -11,6 +11,7 @@ from odoo.tools.misc import mute_logger
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
 
+
 def registry():
     return odoo.registry(common.get_db_name())
 
@@ -18,18 +19,18 @@ def registry():
 class TestExecute(BaseCase):
     """ Try cr.execute with wrong parameters """
 
-    @mute_logger('odoo.sql_db')
+    @mute_logger("odoo.sql_db")
     def test_execute_bad_params(self):
         """
         Try to use iterable but non-list or int params in query parameters.
         """
         with registry().cursor() as cr:
             with self.assertRaises(ValueError):
-                cr.execute("SELECT id FROM res_users WHERE login=%s", 'admin')
+                cr.execute("SELECT id FROM res_users WHERE login=%s", "admin")
             with self.assertRaises(ValueError):
                 cr.execute("SELECT id FROM res_users WHERE id=%s", 1)
             with self.assertRaises(ValueError):
-                cr.execute("SELECT id FROM res_users WHERE id=%s", '1')
+                cr.execute("SELECT id FROM res_users WHERE id=%s", "1")
 
 
 class TestTestCursor(common.TransactionCase):
@@ -42,59 +43,59 @@ class TestTestCursor(common.TransactionCase):
         self.cr = self.registry.cursor()
         self.addCleanup(self.cr.close)
         self.env = odoo.api.Environment(self.cr, odoo.SUPERUSER_ID, {})
-        self.record = self.env['res.partner'].create({'name': 'Foo'})
+        self.record = self.env["res.partner"].create({"name": "Foo"})
 
     def write(self, record, value):
         record.ref = value
 
     def flush(self, record):
-        record.flush(['ref'])
+        record.flush(["ref"])
 
     def check(self, record, value):
-        self.assertEqual(record.read(['ref'])[0]['ref'], value)
+        self.assertEqual(record.read(["ref"])[0]["ref"], value)
 
     def test_single_cursor(self):
         """ Check the behavior of a single test cursor. """
         self.assertIsInstance(self.cr, TestCursor)
-        self.write(self.record, 'A')
+        self.write(self.record, "A")
         self.cr.commit()
 
-        self.write(self.record, 'B')
+        self.write(self.record, "B")
         self.cr.rollback()
-        self.check(self.record, 'A')
+        self.check(self.record, "A")
 
-        self.write(self.record, 'C')
+        self.write(self.record, "C")
         self.cr.rollback()
-        self.check(self.record, 'A')
+        self.check(self.record, "A")
 
     def test_sub_commit(self):
         """ Check the behavior of a subcursor that commits. """
         self.assertIsInstance(self.cr, TestCursor)
-        self.write(self.record, 'A')
+        self.write(self.record, "A")
         self.cr.commit()
 
-        self.write(self.record, 'B')
+        self.write(self.record, "B")
         self.flush(self.record)
 
         # check behavior of a "sub-cursor" that commits
         with self.registry.cursor() as cr:
             self.assertIsInstance(cr, TestCursor)
             record = self.record.with_env(self.env(cr=cr))
-            self.check(record, 'B')
-            self.write(record, 'C')
+            self.check(record, "B")
+            self.write(record, "C")
 
-        self.check(self.record, 'C')
+        self.check(self.record, "C")
 
         self.cr.rollback()
-        self.check(self.record, 'A')
+        self.check(self.record, "A")
 
     def test_sub_rollback(self):
         """ Check the behavior of a subcursor that rollbacks. """
         self.assertIsInstance(self.cr, TestCursor)
-        self.write(self.record, 'A')
+        self.write(self.record, "A")
         self.cr.commit()
 
-        self.write(self.record, 'B')
+        self.write(self.record, "B")
         self.flush(self.record)
 
         # check behavior of a "sub-cursor" that rollbacks
@@ -102,14 +103,14 @@ class TestTestCursor(common.TransactionCase):
             with self.registry.cursor() as cr:
                 self.assertIsInstance(cr, TestCursor)
                 record = self.record.with_env(self.env(cr=cr))
-                self.check(record, 'B')
-                self.write(record, 'C')
+                self.check(record, "B")
+                self.write(record, "C")
                 raise ValueError(42)
 
-        self.check(self.record, 'B')
+        self.check(self.record, "B")
 
         self.cr.rollback()
-        self.check(self.record, 'A')
+        self.check(self.record, "A")
 
 
 class TestCursorHooks(common.TransactionCase):
@@ -117,7 +118,9 @@ class TestCursorHooks(common.TransactionCase):
         super().setUp()
         self.log = []
 
-    def prepare_hooks(self, cr, precommit_msg, postcommit_msg, prerollback_msg, postrollback_msg):
+    def prepare_hooks(
+        self, cr, precommit_msg, postcommit_msg, prerollback_msg, postrollback_msg
+    ):
         cr.precommit.add(partial(self.log.append, precommit_msg))
         cr.postcommit.add(partial(self.log.append, postcommit_msg))
         cr.prerollback.add(partial(self.log.append, prerollback_msg))
@@ -127,22 +130,22 @@ class TestCursorHooks(common.TransactionCase):
         cr = self.registry.cursor()
 
         # check hook on commit()
-        self.prepare_hooks(cr, 'C1a', 'C1b', 'R1a', 'R1b')
+        self.prepare_hooks(cr, "C1a", "C1b", "R1a", "R1b")
         self.assertEqual(self.log, [])
         cr.commit()
-        self.assertEqual(self.log, ['C1a', 'C1b'])
+        self.assertEqual(self.log, ["C1a", "C1b"])
 
         # check hook on rollback()
-        self.prepare_hooks(cr, 'C2a', 'C2b', 'R2a', 'R2b')
-        self.assertEqual(self.log, ['C1a', 'C1b'])
+        self.prepare_hooks(cr, "C2a", "C2b", "R2a", "R2b")
+        self.assertEqual(self.log, ["C1a", "C1b"])
         cr.rollback()
-        self.assertEqual(self.log, ['C1a', 'C1b', 'R2a', 'R2b'])
+        self.assertEqual(self.log, ["C1a", "C1b", "R2a", "R2b"])
 
         # check hook on close()
-        self.prepare_hooks(cr, 'C3a', 'C3b', 'R3a', 'R3b')
-        self.assertEqual(self.log, ['C1a', 'C1b', 'R2a', 'R2b'])
+        self.prepare_hooks(cr, "C3a", "C3b", "R3a", "R3b")
+        self.assertEqual(self.log, ["C1a", "C1b", "R2a", "R2b"])
         cr.close()
-        self.assertEqual(self.log, ['C1a', 'C1b', 'R2a', 'R2b', 'R3a', 'R3b'])
+        self.assertEqual(self.log, ["C1a", "C1b", "R2a", "R2b", "R3a", "R3b"])
 
     def test_hooks_on_testcursor(self):
         self.registry.enter_test_mode(self.cr)
@@ -151,19 +154,19 @@ class TestCursorHooks(common.TransactionCase):
         cr = self.registry.cursor()
 
         # check hook on commit(); post-commit hooks are ignored
-        self.prepare_hooks(cr, 'C1a', 'C1b', 'R1a', 'R1b')
+        self.prepare_hooks(cr, "C1a", "C1b", "R1a", "R1b")
         self.assertEqual(self.log, [])
         cr.commit()
-        self.assertEqual(self.log, ['C1a'])
+        self.assertEqual(self.log, ["C1a"])
 
         # check hook on rollback()
-        self.prepare_hooks(cr, 'C2a', 'C2b', 'R2a', 'R2b')
-        self.assertEqual(self.log, ['C1a'])
+        self.prepare_hooks(cr, "C2a", "C2b", "R2a", "R2b")
+        self.assertEqual(self.log, ["C1a"])
         cr.rollback()
-        self.assertEqual(self.log, ['C1a', 'R2a', 'R2b'])
+        self.assertEqual(self.log, ["C1a", "R2a", "R2b"])
 
         # check hook on close()
-        self.prepare_hooks(cr, 'C3a', 'C3b', 'R3a', 'R3b')
-        self.assertEqual(self.log, ['C1a', 'R2a', 'R2b'])
+        self.prepare_hooks(cr, "C3a", "C3b", "R3a", "R3b")
+        self.assertEqual(self.log, ["C1a", "R2a", "R2b"])
         cr.close()
-        self.assertEqual(self.log, ['C1a', 'R2a', 'R2b', 'R3a', 'R3b'])
+        self.assertEqual(self.log, ["C1a", "R2a", "R2b", "R3a", "R3b"])

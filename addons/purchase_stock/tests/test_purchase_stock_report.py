@@ -9,7 +9,7 @@ class TestPurchaseStockReports(TestReportsCommon):
     def test_report_forecast_1_purchase_order_multi_receipt(self):
         """ Create a PO for 5 product, receive them then increase the quantity to 10.
         """
-        po_form = Form(self.env['purchase.order'])
+        po_form = Form(self.env["purchase.order"])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
             line.product_id = self.product
@@ -17,10 +17,12 @@ class TestPurchaseStockReports(TestReportsCommon):
         po = po_form.save()
 
         # Checks the report.
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 0, "Must have 0 line for now.")
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 5)
@@ -28,14 +30,16 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Confirms the PO and checks the report again.
         po.button_confirm()
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in'].id, po.id)
-        self.assertEqual(lines[0]['quantity'], 5)
-        self.assertEqual(lines[0]['document_out'], False)
+        self.assertEqual(lines[0]["document_in"].id, po.id)
+        self.assertEqual(lines[0]["quantity"], 5)
+        self.assertEqual(lines[0]["document_out"], False)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -43,12 +47,16 @@ class TestPurchaseStockReports(TestReportsCommon):
         # Receives 5 products.
         receipt = po.picking_ids
         res_dict = receipt.button_validate()
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
+        wizard = Form(
+            self.env[res_dict["res_model"]].with_context(res_dict["context"])
+        ).save()
         wizard.process()
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 0)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
@@ -60,13 +68,15 @@ class TestPurchaseStockReports(TestReportsCommon):
             line.product_qty = 10
         po = po_form.save()
         # Checks the report.
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 1, "Must have 1 line for now.")
-        self.assertEqual(lines[0]['document_in'].id, po.id)
-        self.assertEqual(lines[0]['quantity'], 5)
+        self.assertEqual(lines[0]["document_in"].id, po.id)
+        self.assertEqual(lines[0]["quantity"], 5)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -75,15 +85,15 @@ class TestPurchaseStockReports(TestReportsCommon):
         """ Create a PO for 4 product, receive them then increase the quantity
         to 10, but use three steps receipt.
         """
-        grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        grp_multi_routes = self.env.ref('stock.group_adv_location')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id)]})
-        self.env.user.write({'groups_id': [(4, grp_multi_routes.id)]})
+        grp_multi_loc = self.env.ref("stock.group_stock_multi_locations")
+        grp_multi_routes = self.env.ref("stock.group_adv_location")
+        self.env.user.write({"groups_id": [(4, grp_multi_loc.id)]})
+        self.env.user.write({"groups_id": [(4, grp_multi_routes.id)]})
         # Configure warehouse.
-        warehouse = self.env.ref('stock.warehouse0')
-        warehouse.reception_steps = 'three_steps'
+        warehouse = self.env.ref("stock.warehouse0")
+        warehouse.reception_steps = "three_steps"
 
-        po_form = Form(self.env['purchase.order'])
+        po_form = Form(self.env["purchase.order"])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
             line.product_id = self.product
@@ -91,10 +101,12 @@ class TestPurchaseStockReports(TestReportsCommon):
         po = po_form.save()
 
         # Checks the report -> Must be empty for now, just display some pending qty.
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 0, "Must have 0 line for now.")
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 4)
@@ -102,14 +114,16 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Confirms the PO and checks the report again.
         po.button_confirm()
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in'].id, po.id)
-        self.assertEqual(lines[0]['quantity'], 4)
-        self.assertEqual(lines[0]['document_out'], False)
+        self.assertEqual(lines[0]["document_in"].id, po.id)
+        self.assertEqual(lines[0]["quantity"], 4)
+        self.assertEqual(lines[0]["document_out"], False)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -118,12 +132,16 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Receives 4 products.
         res_dict = receipt.button_validate()
-        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
+        wizard = Form(
+            self.env[res_dict["res_model"]].with_context(res_dict["context"])
+        ).save()
         wizard.process()
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 0)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
@@ -135,13 +153,15 @@ class TestPurchaseStockReports(TestReportsCommon):
             line.product_qty = 10
         po = po_form.save()
         # Checks the report.
-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        draft_picking_qty_in = docs['draft_picking_qty']['in']
-        draft_purchase_qty = docs['draft_purchase_qty']
-        pending_qty_in = docs['qty']['in']
+        report_values, docs, lines = self.get_report_forecast(
+            product_template_ids=self.product_template.ids
+        )
+        draft_picking_qty_in = docs["draft_picking_qty"]["in"]
+        draft_purchase_qty = docs["draft_purchase_qty"]
+        pending_qty_in = docs["qty"]["in"]
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in'].id, po.id)
-        self.assertEqual(lines[0]['quantity'], 6)
+        self.assertEqual(lines[0]["document_in"].id, po.id)
+        self.assertEqual(lines[0]["quantity"], 6)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
         self.assertEqual(pending_qty_in, 0)
@@ -150,7 +170,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         """ When accessing the report from a PO line, checks if the correct PO line is highlighted in the report
         """
         # We create 2 identical PO
-        po_form = Form(self.env['purchase.order'])
+        po_form = Form(self.env["purchase.order"])
         po_form.partner_id = self.partner
         with po_form.order_line.new() as line:
             line.product_id = self.product
@@ -162,10 +182,18 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Check for both PO if the highlight (is_matched) corresponds to the correct PO
         for po in [po1, po2]:
-            context = po.order_line[0].action_product_forecast_report()['context']
-            _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
+            context = po.order_line[0].action_product_forecast_report()["context"]
+            _, _, lines = self.get_report_forecast(
+                product_template_ids=self.product_template.ids, context=context
+            )
             for line in lines:
-                if line['document_in'] == po:
-                    self.assertTrue(line['is_matched'], "The corresponding PO line should be matched in the forecast report.")
+                if line["document_in"] == po:
+                    self.assertTrue(
+                        line["is_matched"],
+                        "The corresponding PO line should be matched in the forecast report.",
+                    )
                 else:
-                    self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the PO shoud not be matched.")
+                    self.assertFalse(
+                        line["is_matched"],
+                        "A line of the forecast report not linked to the PO shoud not be matched.",
+                    )

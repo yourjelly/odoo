@@ -5,18 +5,29 @@ from odoo import api, fields, models
 
 
 class Users(models.Model):
-    _inherit = 'res.users'
+    _inherit = "res.users"
 
-    karma = fields.Integer('Karma', default=0)
-    karma_tracking_ids = fields.One2many('gamification.karma.tracking', 'user_id', string='Karma Changes', groups="base.group_system")
-    badge_ids = fields.One2many('gamification.badge.user', 'user_id', string='Badges', copy=False)
-    gold_badge = fields.Integer('Gold badges count', compute="_get_user_badge_level")
-    silver_badge = fields.Integer('Silver badges count', compute="_get_user_badge_level")
-    bronze_badge = fields.Integer('Bronze badges count', compute="_get_user_badge_level")
-    rank_id = fields.Many2one('gamification.karma.rank', 'Rank', index=False)
-    next_rank_id = fields.Many2one('gamification.karma.rank', 'Next Rank', index=False)
+    karma = fields.Integer("Karma", default=0)
+    karma_tracking_ids = fields.One2many(
+        "gamification.karma.tracking",
+        "user_id",
+        string="Karma Changes",
+        groups="base.group_system",
+    )
+    badge_ids = fields.One2many(
+        "gamification.badge.user", "user_id", string="Badges", copy=False
+    )
+    gold_badge = fields.Integer("Gold badges count", compute="_get_user_badge_level")
+    silver_badge = fields.Integer(
+        "Silver badges count", compute="_get_user_badge_level"
+    )
+    bronze_badge = fields.Integer(
+        "Bronze badges count", compute="_get_user_badge_level"
+    )
+    rank_id = fields.Many2one("gamification.karma.rank", "Rank", index=False)
+    next_rank_id = fields.Many2one("gamification.karma.rank", "Next Rank", index=False)
 
-    @api.depends('badge_ids')
+    @api.depends("badge_ids")
     def _get_user_badge_level(self):
         """ Return total badge per level of users
         TDE CLEANME: shouldn't check type is forum ? """
@@ -25,7 +36,8 @@ class Users(models.Model):
             user.silver_badge = 0
             user.bronze_badge = 0
 
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            """
             SELECT bu.user_id, b.level, count(1)
             FROM gamification_badge_user bu, gamification_badge b
             WHERE bu.user_id IN %s
@@ -33,11 +45,13 @@ class Users(models.Model):
               AND b.level IS NOT NULL
             GROUP BY bu.user_id, b.level
             ORDER BY bu.user_id;
-        """, [tuple(self.ids)])
+        """,
+            [tuple(self.ids)],
+        )
 
         for (user_id, level, count) in self.env.cr.fetchall():
             # levels are gold, silver, bronze but fields have _badge postfix
-            self.browse(user_id)['{}_badge'.format(level)] = count
+            self.browse(user_id)["{}_badge".format(level)] = count
 
     @api.model_create_multi
     def create(self, values_list):
@@ -46,25 +60,33 @@ class Users(models.Model):
         karma_trackings = []
         for user in res:
             if user.karma:
-                karma_trackings.append({'user_id': user.id, 'old_value': 0, 'new_value': user.karma})
+                karma_trackings.append(
+                    {"user_id": user.id, "old_value": 0, "new_value": user.karma}
+                )
         if karma_trackings:
-            self.env['gamification.karma.tracking'].sudo().create(karma_trackings)
+            self.env["gamification.karma.tracking"].sudo().create(karma_trackings)
 
         res._recompute_rank()
         return res
 
     def write(self, vals):
         karma_trackings = []
-        if 'karma' in vals:
+        if "karma" in vals:
             for user in self:
-                if user.karma != vals['karma']:
-                    karma_trackings.append({'user_id': user.id, 'old_value': user.karma, 'new_value': vals['karma']})
+                if user.karma != vals["karma"]:
+                    karma_trackings.append(
+                        {
+                            "user_id": user.id,
+                            "old_value": user.karma,
+                            "new_value": vals["karma"],
+                        }
+                    )
 
         result = super(Users, self).write(vals)
 
         if karma_trackings:
-            self.env['gamification.karma.tracking'].sudo().create(karma_trackings)
-        if 'karma' in vals:
+            self.env["gamification.karma.tracking"].sudo().create(karma_trackings)
+        if "karma" in vals:
             self._recompute_rank()
         return result
 
@@ -73,7 +95,9 @@ class Users(models.Model):
             user.karma += karma
         return True
 
-    def _get_tracking_karma_gain_position(self, user_domain, from_date=None, to_date=None):
+    def _get_tracking_karma_gain_position(
+        self, user_domain, from_date=None, to_date=None
+    ):
         """ Get absolute position in term of gained karma for users. First a ranking
         of all users is done given a user_domain; then the position of each user
         belonging to the current record set is extracted.
@@ -99,15 +123,17 @@ class Users(models.Model):
         if not self:
             return []
 
-        where_query = self.env['res.users']._where_calc(user_domain)
+        where_query = self.env["res.users"]._where_calc(user_domain)
         user_from_clause, user_where_clause, where_clause_params = where_query.get_sql()
 
         params = []
         if from_date:
-            date_from_condition = 'AND tracking.tracking_date::timestamp >= timestamp %s'
+            date_from_condition = (
+                "AND tracking.tracking_date::timestamp >= timestamp %s"
+            )
             params.append(from_date)
         if to_date:
-            date_to_condition = 'AND tracking.tracking_date::timestamp <= timestamp %s'
+            date_to_condition = "AND tracking.tracking_date::timestamp <= timestamp %s"
             params.append(to_date)
         params.append(tuple(self.ids))
 
@@ -126,10 +152,12 @@ FROM (
     ) intermediate
 ) final
 WHERE final.user_id IN %%s""" % {
-            'user_from_clause': user_from_clause,
-            'user_where_clause': user_where_clause or (not from_date and not to_date and 'TRUE') or '',
-            'date_from_condition': date_from_condition if from_date else '',
-            'date_to_condition': date_to_condition if to_date else ''
+            "user_from_clause": user_from_clause,
+            "user_where_clause": user_where_clause
+            or (not from_date and not to_date and "TRUE")
+            or "",
+            "date_from_condition": date_from_condition if from_date else "",
+            "date_to_condition": date_to_condition if to_date else "",
         }
 
         self.env.cr.execute(query, tuple(where_clause_params + params))
@@ -156,7 +184,7 @@ WHERE final.user_id IN %%s""" % {
         if not self:
             return {}
 
-        where_query = self.env['res.users']._where_calc(user_domain)
+        where_query = self.env["res.users"]._where_calc(user_domain)
         user_from_clause, user_where_clause, where_clause_params = where_query.get_sql()
 
         # we search on every user in the DB to get the real positioning (not the one inside the subset)
@@ -169,8 +197,8 @@ FROM (
     WHERE %(user_where_clause)s
 ) sub
 WHERE sub.user_id IN %%s""" % {
-            'user_from_clause': user_from_clause,
-            'user_where_clause': user_where_clause or 'TRUE',
+            "user_from_clause": user_from_clause,
+            "user_where_clause": user_where_clause or "TRUE",
         }
 
         self.env.cr.execute(query, tuple(where_clause_params + [tuple(self.ids)]))
@@ -180,11 +208,17 @@ WHERE sub.user_id IN %%s""" % {
         """
             Method that can be called on a batch of users with the same new rank
         """
-        template = self.env.ref('gamification.mail_template_data_new_rank_reached', raise_if_not_found=False)
+        template = self.env.ref(
+            "gamification.mail_template_data_new_rank_reached", raise_if_not_found=False
+        )
         if template:
             for u in self:
                 if u.rank_id.karma_min > 0:
-                    template.send_mail(u.id, force_send=False, notif_layout='mail.mail_notification_light')
+                    template.send_mail(
+                        u.id,
+                        force_send=False,
+                        notif_layout="mail.mail_notification_light",
+                    )
 
     def _recompute_rank(self):
         """
@@ -195,8 +229,12 @@ WHERE sub.user_id IN %%s""" % {
         For each user, check the rank of this user
         """
 
-        ranks = [{'rank': rank, 'karma_min': rank.karma_min} for rank in
-                 self.env['gamification.karma.rank'].search([], order="karma_min DESC")]
+        ranks = [
+            {"rank": rank, "karma_min": rank.karma_min}
+            for rank in self.env["gamification.karma.rank"].search(
+                [], order="karma_min DESC"
+            )
+        ]
 
         # 3 is the number of search/requests used by rank in _recompute_rank_bulk()
         if len(self) > len(ranks) * 3:
@@ -206,14 +244,18 @@ WHERE sub.user_id IN %%s""" % {
         for user in self:
             old_rank = user.rank_id
             if user.karma == 0 and ranks:
-                user.write({'next_rank_id': ranks[-1]['rank'].id})
+                user.write({"next_rank_id": ranks[-1]["rank"].id})
             else:
                 for i in range(0, len(ranks)):
-                    if user.karma >= ranks[i]['karma_min']:
-                        user.write({
-                            'rank_id': ranks[i]['rank'].id,
-                            'next_rank_id': ranks[i - 1]['rank'].id if 0 < i else False
-                        })
+                    if user.karma >= ranks[i]["karma_min"]:
+                        user.write(
+                            {
+                                "rank_id": ranks[i]["rank"].id,
+                                "next_rank_id": ranks[i - 1]["rank"].id
+                                if 0 < i
+                                else False,
+                            }
+                        )
                         break
             if old_rank != user.rank_id:
                 user._rank_changed()
@@ -224,8 +266,12 @@ WHERE sub.user_id IN %%s""" % {
             For each rank, check which users need to be ranked
 
         """
-        ranks = [{'rank': rank, 'karma_min': rank.karma_min} for rank in
-                 self.env['gamification.karma.rank'].search([], order="karma_min DESC")]
+        ranks = [
+            {"rank": rank, "karma_min": rank.karma_min}
+            for rank in self.env["gamification.karma.rank"].search(
+                [], order="karma_min DESC"
+            )
+        ]
 
         users_todo = self
 
@@ -233,49 +279,63 @@ WHERE sub.user_id IN %%s""" % {
         # wtf, next_rank_id should be a related on rank_id.next_rank_id and life might get easier.
         # And we only need to recompute next_rank_id on write with min_karma or in the create on rank model.
         for r in ranks:
-            rank_id = r['rank'].id
+            rank_id = r["rank"].id
             dom = [
-                ('karma', '>=', r['karma_min']),
-                ('id', 'in', users_todo.ids),
-                '|',  # noqa
-                    '|', ('rank_id', '!=', rank_id), ('rank_id', '=', False),
-                    '|', ('next_rank_id', '!=', next_rank_id), ('next_rank_id', '=', False if next_rank_id else -1),
+                ("karma", ">=", r["karma_min"]),
+                ("id", "in", users_todo.ids),
+                "|",  # noqa
+                "|",
+                ("rank_id", "!=", rank_id),
+                ("rank_id", "=", False),
+                "|",
+                ("next_rank_id", "!=", next_rank_id),
+                ("next_rank_id", "=", False if next_rank_id else -1),
             ]
-            users = self.env['res.users'].search(dom)
+            users = self.env["res.users"].search(dom)
             if users:
-                users_to_notify = self.env['res.users'].search([
-                    ('karma', '>=', r['karma_min']),
-                    '|', ('rank_id', '!=', rank_id), ('rank_id', '=', False),
-                    ('id', 'in', users.ids),
-                ])
-                users.write({
-                    'rank_id': rank_id,
-                    'next_rank_id': next_rank_id,
-                })
+                users_to_notify = self.env["res.users"].search(
+                    [
+                        ("karma", ">=", r["karma_min"]),
+                        "|",
+                        ("rank_id", "!=", rank_id),
+                        ("rank_id", "=", False),
+                        ("id", "in", users.ids),
+                    ]
+                )
+                users.write(
+                    {"rank_id": rank_id, "next_rank_id": next_rank_id,}
+                )
                 users_to_notify._rank_changed()
                 users_todo -= users
 
-            nothing_to_do_users = self.env['res.users'].search([
-                ('karma', '>=', r['karma_min']),
-                '|', ('rank_id', '=', rank_id), ('next_rank_id', '=', next_rank_id),
-                ('id', 'in', users_todo.ids),
-            ])
+            nothing_to_do_users = self.env["res.users"].search(
+                [
+                    ("karma", ">=", r["karma_min"]),
+                    "|",
+                    ("rank_id", "=", rank_id),
+                    ("next_rank_id", "=", next_rank_id),
+                    ("id", "in", users_todo.ids),
+                ]
+            )
             users_todo -= nothing_to_do_users
-            next_rank_id = r['rank'].id
+            next_rank_id = r["rank"].id
 
         if ranks:
-            lower_rank = ranks[-1]['rank']
-            users = self.env['res.users'].search([
-                ('karma', '>=', 0),
-                ('karma', '<', lower_rank.karma_min),
-                '|', ('rank_id', '!=', False), ('next_rank_id', '!=', lower_rank.id),
-                ('id', 'in', users_todo.ids),
-            ])
+            lower_rank = ranks[-1]["rank"]
+            users = self.env["res.users"].search(
+                [
+                    ("karma", ">=", 0),
+                    ("karma", "<", lower_rank.karma_min),
+                    "|",
+                    ("rank_id", "!=", False),
+                    ("next_rank_id", "!=", lower_rank.id),
+                    ("id", "in", users_todo.ids),
+                ]
+            )
             if users:
-                users.write({
-                    'rank_id': False,
-                    'next_rank_id': lower_rank.id,
-                })
+                users.write(
+                    {"rank_id": False, "next_rank_id": lower_rank.id,}
+                )
 
     def _get_next_rank(self):
         """ For fresh users with 0 karma that don't have a rank_id and next_rank_id yet
@@ -287,9 +347,11 @@ WHERE sub.user_id IN %%s""" % {
         if self.next_rank_id:
             return self.next_rank_id
         elif not self.rank_id:
-            return self.env['gamification.karma.rank'].search([], order="karma_min ASC", limit=1)
+            return self.env["gamification.karma.rank"].search(
+                [], order="karma_min ASC", limit=1
+            )
         else:
-            return self.env['gamification.karma.rank']
+            return self.env["gamification.karma.rank"]
 
     def get_gamification_redirection_data(self):
         """

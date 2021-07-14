@@ -7,13 +7,12 @@ from odoo import api, fields, models, _
 
 import ast
 
+
 class CouponProgram(models.Model):
     _inherit = "coupon.program"
 
     pos_config_ids = fields.Many2many(
-        "pos.config",
-        string="Point of Sales",
-        readonly=True,
+        "pos.config", string="Point of Sales", readonly=True,
     )
     pos_order_line_ids = fields.One2many(
         "pos.order.line",
@@ -70,16 +69,24 @@ class CouponProgram(models.Model):
     @api.depends("rule_products_domain")
     def _compute_valid_product_ids(self):
         for program in self:
-            domain = ast.literal_eval(program.rule_products_domain) if program.rule_products_domain else []
+            domain = (
+                ast.literal_eval(program.rule_products_domain)
+                if program.rule_products_domain
+                else []
+            )
             program.valid_product_ids = self.env["product.product"].search(domain).ids
 
     @api.depends("rule_partners_domain")
     def _compute_valid_partner_ids(self):
         for program in self:
-            domain = ast.literal_eval(program.rule_partners_domain) if program.rule_partners_domain else []
+            domain = (
+                ast.literal_eval(program.rule_partners_domain)
+                if program.rule_partners_domain
+                else []
+            )
             program.valid_partner_ids = self.env["res.partner"].search(domain).ids
 
-    @api.depends('pos_order_ids')
+    @api.depends("pos_order_ids")
     def _compute_total_order_count(self):
         super(CouponProgram, self)._compute_total_order_count()
         for program in self:

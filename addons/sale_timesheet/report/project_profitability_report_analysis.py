@@ -8,69 +8,97 @@ class ProfitabilityAnalysis(models.Model):
 
     _name = "project.profitability.report"
     _description = "Project Profitability Report"
-    _order = 'project_id, sale_line_id'
+    _order = "project_id, sale_line_id"
     _auto = False
 
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', readonly=True)
-    project_id = fields.Many2one('project.project', string='Project', readonly=True)
-    task_id = fields.Many2one('project.task', string='Task', readonly=True)
-    currency_id = fields.Many2one('res.currency', string='Project Currency', readonly=True)
-    company_id = fields.Many2one('res.company', string='Project Company', readonly=True)
-    user_id = fields.Many2one('res.users', string='Project Manager', readonly=True)
-    partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
+    analytic_account_id = fields.Many2one(
+        "account.analytic.account", string="Analytic Account", readonly=True
+    )
+    project_id = fields.Many2one("project.project", string="Project", readonly=True)
+    task_id = fields.Many2one("project.task", string="Task", readonly=True)
+    currency_id = fields.Many2one(
+        "res.currency", string="Project Currency", readonly=True
+    )
+    company_id = fields.Many2one("res.company", string="Project Company", readonly=True)
+    user_id = fields.Many2one("res.users", string="Project Manager", readonly=True)
+    partner_id = fields.Many2one("res.partner", string="Customer", readonly=True)
     line_date = fields.Date("Date", readonly=True)
     # cost
-    timesheet_unit_amount = fields.Float("Timesheet Duration", digits=(16, 2), readonly=True, group_operator="sum")
-    timesheet_cost = fields.Float("Timesheet Cost", digits=(16, 2), readonly=True, group_operator="sum")
-    expense_cost = fields.Float("Other Costs", digits=(16, 2), readonly=True, group_operator="sum")
+    timesheet_unit_amount = fields.Float(
+        "Timesheet Duration", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    timesheet_cost = fields.Float(
+        "Timesheet Cost", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    expense_cost = fields.Float(
+        "Other Costs", digits=(16, 2), readonly=True, group_operator="sum"
+    )
     # sale revenue
-    order_confirmation_date = fields.Datetime('Sales Order Confirmation Date', readonly=True)
-    sale_line_id = fields.Many2one('sale.order.line', string='Sale Order Line', readonly=True)
-    sale_order_id = fields.Many2one('sale.order', string='Sale Order', readonly=True)
-    product_id = fields.Many2one('product.product', string='Product', readonly=True)
+    order_confirmation_date = fields.Datetime(
+        "Sales Order Confirmation Date", readonly=True
+    )
+    sale_line_id = fields.Many2one(
+        "sale.order.line", string="Sale Order Line", readonly=True
+    )
+    sale_order_id = fields.Many2one("sale.order", string="Sale Order", readonly=True)
+    product_id = fields.Many2one("product.product", string="Product", readonly=True)
 
-    amount_untaxed_to_invoice = fields.Float("Amount to Invoice", digits=(16, 2), readonly=True, group_operator="sum")
-    amount_untaxed_invoiced = fields.Float("Amount Invoiced", digits=(16, 2), readonly=True, group_operator="sum")
-    expense_amount_untaxed_to_invoice = fields.Float("Amount to Re-invoice", digits=(16, 2), readonly=True, group_operator="sum")
-    expense_amount_untaxed_invoiced = fields.Float("Amount Re-invoiced", digits=(16, 2), readonly=True, group_operator="sum")
-    other_revenues = fields.Float("Other Revenues", digits=(16, 2), readonly=True, group_operator="sum",
-                                  help="All revenues that are not from timesheets and that are linked to the analytic account of the project.")
+    amount_untaxed_to_invoice = fields.Float(
+        "Amount to Invoice", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    amount_untaxed_invoiced = fields.Float(
+        "Amount Invoiced", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    expense_amount_untaxed_to_invoice = fields.Float(
+        "Amount to Re-invoice", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    expense_amount_untaxed_invoiced = fields.Float(
+        "Amount Re-invoiced", digits=(16, 2), readonly=True, group_operator="sum"
+    )
+    other_revenues = fields.Float(
+        "Other Revenues",
+        digits=(16, 2),
+        readonly=True,
+        group_operator="sum",
+        help="All revenues that are not from timesheets and that are linked to the analytic account of the project.",
+    )
     margin = fields.Float("Margin", digits=(16, 2), readonly=True, group_operator="sum")
 
     _depends = {
-        'sale.order.line': [
-            'order_id',
-            'invoice_status',
-            'price_reduce',
-            'product_id',
-            'qty_invoiced',
-            'untaxed_amount_invoiced',
-            'untaxed_amount_to_invoice',
-            'currency_id',
-            'company_id',
-            'is_downpayment',
-            'project_id',
-            'task_id',
-            'qty_delivered_method',
+        "sale.order.line": [
+            "order_id",
+            "invoice_status",
+            "price_reduce",
+            "product_id",
+            "qty_invoiced",
+            "untaxed_amount_invoiced",
+            "untaxed_amount_to_invoice",
+            "currency_id",
+            "company_id",
+            "is_downpayment",
+            "project_id",
+            "task_id",
+            "qty_delivered_method",
         ],
-        'sale.order': [
-            'date_order',
-            'user_id',
-            'partner_id',
-            'currency_id',
-            'analytic_account_id',
-            'order_line',
-            'invoice_status',
-            'amount_untaxed',
-            'currency_rate',
-            'company_id',
-            'project_id',
+        "sale.order": [
+            "date_order",
+            "user_id",
+            "partner_id",
+            "currency_id",
+            "analytic_account_id",
+            "order_line",
+            "invoice_status",
+            "amount_untaxed",
+            "currency_rate",
+            "company_id",
+            "project_id",
         ],
     }
 
     def init(self):
         tools.drop_view_if_exists(self._cr, self._table)
-        query = """
+        query = (
+            """
             CREATE VIEW %s AS (
                 SELECT
                     sub.id as id,
@@ -396,5 +424,7 @@ class ProfitabilityAnalysis(models.Model):
                         WHERE P.active = 't' AND P.analytic_account_id IS NOT NULL
                     ) AS sub
             )
-        """ % self._table
+        """
+            % self._table
+        )
         self._cr.execute(query)

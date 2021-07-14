@@ -14,15 +14,17 @@ emails_split = re.compile(r"[;,\n\r]+")
 
 
 class SurveyInvite(models.TransientModel):
-    _name = 'survey.invite'
-    _inherit = 'mail.composer.mixin'
-    _description = 'Survey Invitation Wizard'
+    _name = "survey.invite"
+    _inherit = "mail.composer.mixin"
+    _description = "Survey Invitation Wizard"
 
     @api.model
     def _get_default_from(self):
         if self.env.user.email:
             return tools.formataddr((self.env.user.name, self.env.user.email))
-        raise UserError(_("Unable to post message, please configure the sender's email address."))
+        raise UserError(
+            _("Unable to post message, please configure the sender's email address.")
+        )
 
     @api.model
     def _get_default_author(self):
@@ -30,86 +32,135 @@ class SurveyInvite(models.TransientModel):
 
     # composer content
     attachment_ids = fields.Many2many(
-        'ir.attachment', 'survey_mail_compose_message_ir_attachments_rel', 'wizard_id', 'attachment_id',
-        string='Attachments')
+        "ir.attachment",
+        "survey_mail_compose_message_ir_attachments_rel",
+        "wizard_id",
+        "attachment_id",
+        string="Attachments",
+    )
     # origin
-    email_from = fields.Char('From', default=_get_default_from, help="Email address of the sender.")
+    email_from = fields.Char(
+        "From", default=_get_default_from, help="Email address of the sender."
+    )
     author_id = fields.Many2one(
-        'res.partner', 'Author', index=True,
-        ondelete='set null', default=_get_default_author,
-        help="Author of the message.")
+        "res.partner",
+        "Author",
+        index=True,
+        ondelete="set null",
+        default=_get_default_author,
+        help="Author of the message.",
+    )
     # recipients
     partner_ids = fields.Many2many(
-        'res.partner', 'survey_invite_partner_ids', 'invite_id', 'partner_id', string='Recipients',
+        "res.partner",
+        "survey_invite_partner_ids",
+        "invite_id",
+        "partner_id",
+        string="Recipients",
         domain="""[
             '|', (survey_users_can_signup, '=', 1),
             '|', (not survey_users_login_required, '=', 1),
                  ('user_ids', '!=', False),
-        ]"""
+        ]""",
     )
     existing_partner_ids = fields.Many2many(
-        'res.partner', compute='_compute_existing_partner_ids', readonly=True, store=False)
-    emails = fields.Text(string='Additional emails', help="This list of emails of recipients will not be converted in contacts.\
-        Emails must be separated by commas, semicolons or newline.")
+        "res.partner",
+        compute="_compute_existing_partner_ids",
+        readonly=True,
+        store=False,
+    )
+    emails = fields.Text(
+        string="Additional emails",
+        help="This list of emails of recipients will not be converted in contacts.\
+        Emails must be separated by commas, semicolons or newline.",
+    )
     existing_emails = fields.Text(
-        'Existing emails', compute='_compute_existing_emails',
-        readonly=True, store=False)
-    existing_mode = fields.Selection([
-        ('new', 'New invite'), ('resend', 'Resend invite')],
-        string='Handle existing', default='resend', required=True)
-    existing_text = fields.Text('Resend Comment', compute='_compute_existing_text', readonly=True, store=False)
+        "Existing emails",
+        compute="_compute_existing_emails",
+        readonly=True,
+        store=False,
+    )
+    existing_mode = fields.Selection(
+        [("new", "New invite"), ("resend", "Resend invite")],
+        string="Handle existing",
+        default="resend",
+        required=True,
+    )
+    existing_text = fields.Text(
+        "Resend Comment", compute="_compute_existing_text", readonly=True, store=False
+    )
     # technical info
-    mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
+    mail_server_id = fields.Many2one("ir.mail_server", "Outgoing mail server")
     # survey
-    survey_id = fields.Many2one('survey.survey', string='Survey', required=True)
-    survey_start_url = fields.Char('Survey URL', compute='_compute_survey_start_url')
-    survey_access_mode = fields.Selection(related="survey_id.access_mode", readonly=True)
-    survey_users_login_required = fields.Boolean(related="survey_id.users_login_required", readonly=True)
-    survey_users_can_signup = fields.Boolean(related='survey_id.users_can_signup')
+    survey_id = fields.Many2one("survey.survey", string="Survey", required=True)
+    survey_start_url = fields.Char("Survey URL", compute="_compute_survey_start_url")
+    survey_access_mode = fields.Selection(
+        related="survey_id.access_mode", readonly=True
+    )
+    survey_users_login_required = fields.Boolean(
+        related="survey_id.users_login_required", readonly=True
+    )
+    survey_users_can_signup = fields.Boolean(related="survey_id.users_can_signup")
     deadline = fields.Datetime(string="Answer deadline")
 
-    @api.depends('partner_ids', 'survey_id')
+    @api.depends("partner_ids", "survey_id")
     def _compute_existing_partner_ids(self):
         existing_answers = self.survey_id.user_input_ids
-        self.existing_partner_ids = existing_answers.mapped('partner_id') & self.partner_ids
+        self.existing_partner_ids = (
+            existing_answers.mapped("partner_id") & self.partner_ids
+        )
 
-    @api.depends('emails', 'survey_id')
+    @api.depends("emails", "survey_id")
     def _compute_existing_emails(self):
         emails = list(set(emails_split.split(self.emails or "")))
-        existing_emails = self.survey_id.mapped('user_input_ids.email')
-        self.existing_emails = '\n'.join(email for email in emails if email in existing_emails)
+        existing_emails = self.survey_id.mapped("user_input_ids.email")
+        self.existing_emails = "\n".join(
+            email for email in emails if email in existing_emails
+        )
 
-    @api.depends('existing_partner_ids', 'existing_emails')
+    @api.depends("existing_partner_ids", "existing_emails")
     def _compute_existing_text(self):
         existing_text = False
         if self.existing_partner_ids:
-            existing_text = '%s: %s.' % (
-                _('The following customers have already received an invite'),
-                ', '.join(self.mapped('existing_partner_ids.name'))
+            existing_text = "%s: %s." % (
+                _("The following customers have already received an invite"),
+                ", ".join(self.mapped("existing_partner_ids.name")),
             )
         if self.existing_emails:
-            existing_text = '%s\n' % existing_text if existing_text else ''
-            existing_text += '%s: %s.' % (
-                _('The following emails have already received an invite'),
-                self.existing_emails
+            existing_text = "%s\n" % existing_text if existing_text else ""
+            existing_text += "%s: %s." % (
+                _("The following emails have already received an invite"),
+                self.existing_emails,
             )
 
         self.existing_text = existing_text
 
-    @api.depends('survey_id.access_token')
+    @api.depends("survey_id.access_token")
     def _compute_survey_start_url(self):
         for invite in self:
-            invite.survey_start_url = werkzeug.urls.url_join(invite.survey_id.get_base_url(), invite.survey_id.get_start_url()) if invite.survey_id else False
+            invite.survey_start_url = (
+                werkzeug.urls.url_join(
+                    invite.survey_id.get_base_url(), invite.survey_id.get_start_url()
+                )
+                if invite.survey_id
+                else False
+            )
 
     # Overrides of mail.composer.mixin
-    @api.depends('survey_id')  # fake trigger otherwise not computed in new mode
+    @api.depends("survey_id")  # fake trigger otherwise not computed in new mode
     def _compute_render_model(self):
-        self.render_model = 'survey.user_input'
+        self.render_model = "survey.user_input"
 
-    @api.onchange('emails')
+    @api.onchange("emails")
     def _onchange_emails(self):
-        if self.emails and (self.survey_users_login_required and not self.survey_id.users_can_signup):
-            raise UserError(_('This survey does not allow external people to participate. You should create user accounts or update survey access mode accordingly.'))
+        if self.emails and (
+            self.survey_users_login_required and not self.survey_id.users_can_signup
+        ):
+            raise UserError(
+                _(
+                    "This survey does not allow external people to participate. You should create user accounts or update survey access mode accordingly."
+                )
+            )
         if not self.emails:
             return
         valid, error = [], []
@@ -121,32 +172,37 @@ class SurveyInvite(models.TransientModel):
             else:
                 valid.extend(email_check)
         if error:
-            raise UserError(_("Some emails you just entered are incorrect: %s") % (', '.join(error)))
-        self.emails = '\n'.join(valid)
+            raise UserError(
+                _("Some emails you just entered are incorrect: %s") % (", ".join(error))
+            )
+        self.emails = "\n".join(valid)
 
-    @api.onchange('partner_ids')
+    @api.onchange("partner_ids")
     def _onchange_partner_ids(self):
         if self.survey_users_login_required and self.partner_ids:
             if not self.survey_id.users_can_signup:
-                invalid_partners = self.env['res.partner'].search([
-                    ('user_ids', '=', False),
-                    ('id', 'in', self.partner_ids.ids)
-                ])
+                invalid_partners = self.env["res.partner"].search(
+                    [("user_ids", "=", False), ("id", "in", self.partner_ids.ids)]
+                )
                 if invalid_partners:
-                    raise UserError(_(
-                        'The following recipients have no user account: %s. You should create user accounts for them or allow external signup in configuration.',
-                        ', '.join(invalid_partners.mapped('name'))
-                    ))
+                    raise UserError(
+                        _(
+                            "The following recipients have no user account: %s. You should create user accounts for them or allow external signup in configuration.",
+                            ", ".join(invalid_partners.mapped("name")),
+                        )
+                    )
 
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
-            if values.get('template_id') and not (values.get('body') or values.get('subject')):
-                template = self.env['mail.template'].browse(values['template_id'])
-                if not values.get('subject'):
-                    values['subject'] = template.subject
-                if not values.get('body'):
-                    values['body'] = template.body_html
+            if values.get("template_id") and not (
+                values.get("body") or values.get("subject")
+            ):
+                template = self.env["mail.template"].browse(values["template_id"])
+                if not values.get("subject"):
+                    values["subject"] = template.subject
+                if not values.get("body"):
+                    values["body"] = template.body_html
         return super().create(vals_list)
 
     # ------------------------------------------------------
@@ -154,97 +210,134 @@ class SurveyInvite(models.TransientModel):
     # ------------------------------------------------------
 
     def _prepare_answers(self, partners, emails):
-        answers = self.env['survey.user_input']
-        existing_answers = self.env['survey.user_input'].search([
-            '&', ('survey_id', '=', self.survey_id.id),
-            '|',
-            ('partner_id', 'in', partners.ids),
-            ('email', 'in', emails)
-        ])
-        partners_done = self.env['res.partner']
+        answers = self.env["survey.user_input"]
+        existing_answers = self.env["survey.user_input"].search(
+            [
+                "&",
+                ("survey_id", "=", self.survey_id.id),
+                "|",
+                ("partner_id", "in", partners.ids),
+                ("email", "in", emails),
+            ]
+        )
+        partners_done = self.env["res.partner"]
         emails_done = []
         if existing_answers:
-            if self.existing_mode == 'resend':
-                partners_done = existing_answers.mapped('partner_id')
-                emails_done = existing_answers.mapped('email')
+            if self.existing_mode == "resend":
+                partners_done = existing_answers.mapped("partner_id")
+                emails_done = existing_answers.mapped("email")
 
                 # only add the last answer for each user of each type (partner_id & email)
                 # to have only one mail sent per user
                 for partner_done in partners_done:
-                    answers |= next(existing_answer for existing_answer in
-                        existing_answers.sorted(lambda answer: answer.create_date, reverse=True)
-                        if existing_answer.partner_id == partner_done)
+                    answers |= next(
+                        existing_answer
+                        for existing_answer in existing_answers.sorted(
+                            lambda answer: answer.create_date, reverse=True
+                        )
+                        if existing_answer.partner_id == partner_done
+                    )
 
                 for email_done in emails_done:
-                    answers |= next(existing_answer for existing_answer in
-                        existing_answers.sorted(lambda answer: answer.create_date, reverse=True)
-                        if existing_answer.email == email_done)
+                    answers |= next(
+                        existing_answer
+                        for existing_answer in existing_answers.sorted(
+                            lambda answer: answer.create_date, reverse=True
+                        )
+                        if existing_answer.email == email_done
+                    )
 
         for new_partner in partners - partners_done:
-            answers |= self.survey_id._create_answer(partner=new_partner, check_attempts=False, **self._get_answers_values())
+            answers |= self.survey_id._create_answer(
+                partner=new_partner, check_attempts=False, **self._get_answers_values()
+            )
         for new_email in [email for email in emails if email not in emails_done]:
-            answers |= self.survey_id._create_answer(email=new_email, check_attempts=False, **self._get_answers_values())
+            answers |= self.survey_id._create_answer(
+                email=new_email, check_attempts=False, **self._get_answers_values()
+            )
 
         return answers
 
     def _get_answers_values(self):
         return {
-            'deadline': self.deadline,
+            "deadline": self.deadline,
         }
 
     def _send_mail(self, answer):
         """ Create mail specific for recipient containing notably its access token """
-        subject = self._render_field('subject', answer.ids, options={'render_safe': True})[answer.id]
-        body = self._render_field('body', answer.ids, post_process=True)[answer.id]
+        subject = self._render_field(
+            "subject", answer.ids, options={"render_safe": True}
+        )[answer.id]
+        body = self._render_field("body", answer.ids, post_process=True)[answer.id]
         # post the message
         mail_values = {
-            'email_from': self.email_from,
-            'author_id': self.author_id.id,
-            'model': None,
-            'res_id': None,
-            'subject': subject,
-            'body_html': body,
-            'attachment_ids': [(4, att.id) for att in self.attachment_ids],
-            'auto_delete': True,
+            "email_from": self.email_from,
+            "author_id": self.author_id.id,
+            "model": None,
+            "res_id": None,
+            "subject": subject,
+            "body_html": body,
+            "attachment_ids": [(4, att.id) for att in self.attachment_ids],
+            "auto_delete": True,
         }
         if answer.partner_id:
-            mail_values['recipient_ids'] = [(4, answer.partner_id.id)]
+            mail_values["recipient_ids"] = [(4, answer.partner_id.id)]
         else:
-            mail_values['email_to'] = answer.email
+            mail_values["email_to"] = answer.email
 
         # optional support of notif_layout in context
-        notif_layout = self.env.context.get('notif_layout', self.env.context.get('custom_layout'))
+        notif_layout = self.env.context.get(
+            "notif_layout", self.env.context.get("custom_layout")
+        )
         if notif_layout:
             try:
                 template = self.env.ref(notif_layout, raise_if_not_found=True)
             except ValueError:
-                _logger.warning('QWeb template %s not found when sending survey mails. Sending without layouting.' % (notif_layout))
+                _logger.warning(
+                    "QWeb template %s not found when sending survey mails. Sending without layouting."
+                    % (notif_layout)
+                )
             else:
                 template_ctx = {
-                    'message': self.env['mail.message'].sudo().new(dict(body=mail_values['body_html'], record_name=self.survey_id.title)),
-                    'model_description': self.env['ir.model']._get('survey.survey').display_name,
-                    'company': self.env.company,
+                    "message": self.env["mail.message"]
+                    .sudo()
+                    .new(
+                        dict(
+                            body=mail_values["body_html"],
+                            record_name=self.survey_id.title,
+                        )
+                    ),
+                    "model_description": self.env["ir.model"]
+                    ._get("survey.survey")
+                    .display_name,
+                    "company": self.env.company,
                 }
-                body = template._render(template_ctx, engine='ir.qweb', minimal_qcontext=True)
-                mail_values['body_html'] = self.env['mail.render.mixin']._replace_local_links(body)
+                body = template._render(
+                    template_ctx, engine="ir.qweb", minimal_qcontext=True
+                )
+                mail_values["body_html"] = self.env[
+                    "mail.render.mixin"
+                ]._replace_local_links(body)
 
-        return self.env['mail.mail'].sudo().create(mail_values)
+        return self.env["mail.mail"].sudo().create(mail_values)
 
     def action_invite(self):
         """ Process the wizard content and proceed with sending the related
             email(s), rendering any template patterns on the fly if needed """
         self.ensure_one()
-        Partner = self.env['res.partner']
+        Partner = self.env["res.partner"]
 
         # compute partners and emails, try to find partners for given emails
         valid_partners = self.partner_ids
         valid_emails = []
-        for email in emails_split.split(self.emails or ''):
+        for email in emails_split.split(self.emails or ""):
             partner = False
             email_normalized = tools.email_normalize(email)
             if email_normalized:
                 limit = None if self.survey_users_login_required else 1
-                partner = Partner.search([('email_normalized', '=', email_normalized)], limit=limit)
+                partner = Partner.search(
+                    [("email_normalized", "=", email_normalized)], limit=limit
+                )
             if partner:
                 valid_partners |= partner
             else:
@@ -259,4 +352,4 @@ class SurveyInvite(models.TransientModel):
         for answer in answers:
             self._send_mail(answer)
 
-        return {'type': 'ir.actions.act_window_close'}
+        return {"type": "ir.actions.act_window_close"}

@@ -23,37 +23,38 @@ class ResConfigModuleInstallationMixin(object):
         :param modules: a list of tuples (module_name, module_record)
         :return: the next action to execute
         """
-        to_install_modules = self.env['ir.module.module']
+        to_install_modules = self.env["ir.module.module"]
         to_install_missing_names = []
 
         for name, module in modules:
             if not module:
                 to_install_missing_names.append(name)
-            elif module.state == 'uninstalled':
+            elif module.state == "uninstalled":
                 to_install_modules += module
         result = None
         if to_install_modules:
             result = to_install_modules.button_immediate_install()
-        #FIXME: if result is not none, the corresponding todo will be skipped because it was just marked done
+        # FIXME: if result is not none, the corresponding todo will be skipped because it was just marked done
         if to_install_missing_names:
             return {
-                'type': 'ir.actions.client',
-                'tag': 'apps',
-                'params': {'modules': to_install_missing_names},
+                "type": "ir.actions.client",
+                "tag": "apps",
+                "params": {"modules": to_install_missing_names},
             }
 
         return result
 
 
 class ResConfigConfigurable(models.TransientModel):
-    ''' Base classes for new-style configuration items
+    """ Base classes for new-style configuration items
 
     Configuration items should inherit from this class, implement
     the execute method (and optionally the cancel one) and have
     their view inherit from the related res_config_view_base view.
-    '''
-    _name = 'res.config'
-    _description = 'Config'
+    """
+
+    _name = "res.config"
+    _description = "Config"
 
     def start(self):
         # pylint: disable=next-method-called
@@ -64,8 +65,8 @@ class ResConfigConfigurable(models.TransientModel):
         Reload the settings page
         """
         return {
-            'type': 'ir.actions.client',
-            'tag': 'reload',
+            "type": "ir.actions.client",
+            "tag": "reload",
         }
 
     def execute(self):
@@ -77,8 +78,7 @@ class ResConfigConfigurable(models.TransientModel):
         If ``execute`` returns an action dictionary, that action is executed
         rather than just going to the next configuration item.
         """
-        raise NotImplementedError(
-            'Configuration items need to implement execute')
+        raise NotImplementedError("Configuration items need to implement execute")
 
     def cancel(self):
         """ Method called when the user click on the ``Skip`` button.
@@ -222,9 +222,10 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
            hooks depending on them *are guaranteed to execute*. Setup
            your hooks accordingly.
     """
-    _name = 'res.config.installer'
-    _inherit = 'res.config'
-    _description = 'Config Installer'
+
+    _name = "res.config.installer"
+    _inherit = "res.config"
+    _description = "Config Installer"
 
     _install_if = {}
 
@@ -246,10 +247,15 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
         :returns: a list of all installed modules in this installer
         :rtype: recordset (collection of Record)
         """
-        selectable = [name for name, field in self._fields.items()
-                      if field.type == 'boolean']
-        return self.env['ir.module.module'].search([('name', 'in', selectable),
-                            ('state', 'in', ['to install', 'installed', 'to upgrade'])])
+        selectable = [
+            name for name, field in self._fields.items() if field.type == "boolean"
+        ]
+        return self.env["ir.module.module"].search(
+            [
+                ("name", "in", selectable),
+                ("state", "in", ["to install", "installed", "to upgrade"]),
+            ]
+        )
 
     def modules_to_install(self):
         """ selects all modules to install:
@@ -269,28 +275,32 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
           addons in the value are added to the set of modules to install
         * not already installed
         """
-        base = set(module_name
-                   for installer in self.read()
-                   for module_name, to_install in installer.items()
-                   if self._fields[module_name].type == 'boolean' and to_install)
+        base = set(
+            module_name
+            for installer in self.read()
+            for module_name, to_install in installer.items()
+            if self._fields[module_name].type == "boolean" and to_install
+        )
 
         hooks_results = set()
         for module in base:
-            hook = getattr(self, '_if_%s'% module, None)
+            hook = getattr(self, "_if_%s" % module, None)
             if hook:
                 hooks_results.update(hook() or set())
 
-        additionals = set(module
-                          for requirements, consequences in self._install_if.items()
-                          if base.issuperset(requirements)
-                          for module in consequences)
+        additionals = set(
+            module
+            for requirements, consequences in self._install_if.items()
+            if base.issuperset(requirements)
+            for module in consequences
+        )
 
         return (base | hooks_results | additionals) - set(self.already_installed())
 
     @api.model
     def default_get(self, fields_list):
-        ''' If an addon is already installed, check it by default
-        '''
+        """ If an addon is already installed, check it by default
+        """
         defaults = super(ResConfigInstaller, self).default_get(fields_list)
         return dict(defaults, **dict.fromkeys(self.already_installed(), True))
 
@@ -300,25 +310,28 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
         res.config.installer doesn't handle uninstallations of already
         installed addons
         """
-        fields = super(ResConfigInstaller, self).fields_get(fields, attributes=attributes)
+        fields = super(ResConfigInstaller, self).fields_get(
+            fields, attributes=attributes
+        )
 
         for name in self.already_installed():
             if name not in fields:
                 continue
             fields[name].update(
                 readonly=True,
-                help= ustr(fields[name].get('help', '')) +
-                     _('\n\nThis addon is already installed on your system'))
+                help=ustr(fields[name].get("help", ""))
+                + _("\n\nThis addon is already installed on your system"),
+            )
         return fields
 
     def execute(self):
         to_install = list(self.modules_to_install())
-        _logger.info('Selecting addons %s to install', to_install)
+        _logger.info("Selecting addons %s to install", to_install)
 
-        IrModule = self.env['ir.module.module']
+        IrModule = self.env["ir.module.module"]
         modules = []
         for name in to_install:
-            module = IrModule.search([('name', '=', name)], limit=1)
+            module = IrModule.search([("name", "=", name)], limit=1)
             modules.append((name, module))
 
         return self._install_modules(modules)
@@ -374,13 +387,15 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         It also invokes all methods with a name that starts with 'get_default_';
         such methods can be defined to provide current values for other fields.
     """
-    _name = 'res.config.settings'
-    _description = 'Config Settings'
+
+    _name = "res.config.settings"
+    _description = "Config Settings"
 
     def _valid_field_parameter(self, field, name):
         return (
-            name in ('default_model', 'config_parameter')
-            or field.type in ('boolean', 'selection') and name in ('group', 'implied_group')
+            name in ("default_model", "config_parameter")
+            or field.type in ("boolean", "selection")
+            and name in ("group", "implied_group")
             or super()._valid_field_parameter(field, name)
         )
 
@@ -388,55 +403,64 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         raise UserError(_("Cannot duplicate configuration!"), "")
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form',
-                        toolbar=False, submenu=False):
+    def fields_view_get(
+        self, view_id=None, view_type="form", toolbar=False, submenu=False
+    ):
         ret_val = super(ResConfigSettings, self).fields_view_get(
-            view_id=view_id, view_type=view_type,
-            toolbar=toolbar, submenu=submenu)
+            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
+        )
 
-        can_install_modules = self.env['ir.module.module'].check_access_rights(
-                                    'write', raise_exception=False)
+        can_install_modules = self.env["ir.module.module"].check_access_rights(
+            "write", raise_exception=False
+        )
 
-        doc = etree.XML(ret_val['arch'])
+        doc = etree.XML(ret_val["arch"])
 
-        for field in ret_val['fields']:
+        for field in ret_val["fields"]:
             if not field.startswith("module_"):
                 continue
             for node in doc.xpath("//field[@name='%s']" % field):
                 if not can_install_modules:
                     node.set("readonly", "1")
                     modifiers = json.loads(node.get("modifiers"))
-                    modifiers['readonly'] = True
+                    modifiers["readonly"] = True
                     node.set("modifiers", json.dumps(modifiers))
 
-        ret_val['arch'] = etree.tostring(doc, encoding='unicode')
+        ret_val["arch"] = etree.tostring(doc, encoding="unicode")
         return ret_val
 
     def onchange_module(self, field_value, module_name):
-        ModuleSudo = self.env['ir.module.module'].sudo()
+        ModuleSudo = self.env["ir.module.module"].sudo()
         modules = ModuleSudo.search(
-            [('name', '=', module_name.replace("module_", '')),
-            ('state', 'in', ['to install', 'installed', 'to upgrade'])])
+            [
+                ("name", "=", module_name.replace("module_", "")),
+                ("state", "in", ["to install", "installed", "to upgrade"]),
+            ]
+        )
 
         if modules and not int(field_value):
             deps = modules.sudo().downstream_dependencies()
-            dep_names = (deps | modules).mapped('shortdesc')
-            message = '\n'.join(dep_names)
+            dep_names = (deps | modules).mapped("shortdesc")
+            message = "\n".join(dep_names)
             return {
-                'warning': {
-                    'title': _('Warning!'),
-                    'message': _('Disabling this option will also uninstall the following modules \n%s', message),
+                "warning": {
+                    "title": _("Warning!"),
+                    "message": _(
+                        "Disabling this option will also uninstall the following modules \n%s",
+                        message,
+                    ),
                 }
             }
         return {}
 
     def _register_hook(self):
         """ Add an onchange method for each module field. """
+
         def make_method(name):
             return lambda self: self.onchange_module(self[name], name)
 
         for name in self._fields:
-            if name.startswith('module_'):
+            if name.startswith("module_"):
                 method = make_method(name)
                 self._onchange_methods[name].append(method)
 
@@ -451,37 +475,64 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                     'other':   ['other_field', ...],
                 }
         """
-        IrModule = self.env['ir.module.module']
-        Groups = self.env['res.groups']
+        IrModule = self.env["ir.module.module"]
+        Groups = self.env["res.groups"]
         ref = self.env.ref
 
         defaults, groups, modules, configs, others = [], [], [], [], []
         for name, field in self._fields.items():
-            if name.startswith('default_'):
-                if not hasattr(field, 'default_model'):
-                    raise Exception("Field %s without attribute 'default_model'" % field)
+            if name.startswith("default_"):
+                if not hasattr(field, "default_model"):
+                    raise Exception(
+                        "Field %s without attribute 'default_model'" % field
+                    )
                 defaults.append((name, field.default_model, name[8:]))
-            elif name.startswith('group_'):
-                if field.type not in ('boolean', 'selection'):
-                    raise Exception("Field %s must have type 'boolean' or 'selection'" % field)
-                if not hasattr(field, 'implied_group'):
-                    raise Exception("Field %s without attribute 'implied_group'" % field)
-                field_group_xmlids = getattr(field, 'group', 'base.group_user').split(',')
+            elif name.startswith("group_"):
+                if field.type not in ("boolean", "selection"):
+                    raise Exception(
+                        "Field %s must have type 'boolean' or 'selection'" % field
+                    )
+                if not hasattr(field, "implied_group"):
+                    raise Exception(
+                        "Field %s without attribute 'implied_group'" % field
+                    )
+                field_group_xmlids = getattr(field, "group", "base.group_user").split(
+                    ","
+                )
                 field_groups = Groups.concat(*(ref(it) for it in field_group_xmlids))
                 groups.append((name, field_groups, ref(field.implied_group)))
-            elif name.startswith('module_'):
-                if field.type not in ('boolean', 'selection'):
-                    raise Exception("Field %s must have type 'boolean' or 'selection'" % field)
-                module = IrModule.sudo().search([('name', '=', name[7:])], limit=1)
+            elif name.startswith("module_"):
+                if field.type not in ("boolean", "selection"):
+                    raise Exception(
+                        "Field %s must have type 'boolean' or 'selection'" % field
+                    )
+                module = IrModule.sudo().search([("name", "=", name[7:])], limit=1)
                 modules.append((name, module))
-            elif hasattr(field, 'config_parameter'):
-                if field.type not in ('boolean', 'integer', 'float', 'char', 'selection', 'many2one', 'datetime'):
-                    raise Exception("Field %s must have type 'boolean', 'integer', 'float', 'char', 'selection', 'many2one' or 'datetime'" % field)
+            elif hasattr(field, "config_parameter"):
+                if field.type not in (
+                    "boolean",
+                    "integer",
+                    "float",
+                    "char",
+                    "selection",
+                    "many2one",
+                    "datetime",
+                ):
+                    raise Exception(
+                        "Field %s must have type 'boolean', 'integer', 'float', 'char', 'selection', 'many2one' or 'datetime'"
+                        % field
+                    )
                 configs.append((name, field.config_parameter))
             else:
                 others.append(name)
 
-        return {'default': defaults, 'group': groups, 'module': modules, 'config': configs, 'other': others}
+        return {
+            "default": defaults,
+            "group": groups,
+            "module": modules,
+            "config": configs,
+            "other": others,
+        }
 
     def get_values(self):
         """
@@ -491,57 +542,63 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
     @api.model
     def default_get(self, fields):
-        IrDefault = self.env['ir.default']
-        IrConfigParameter = self.env['ir.config_parameter'].sudo()
+        IrDefault = self.env["ir.default"]
+        IrConfigParameter = self.env["ir.config_parameter"].sudo()
         classified = self._get_classified_fields()
 
         res = super(ResConfigSettings, self).default_get(fields)
 
         # defaults: take the corresponding default value they set
-        for name, model, field in classified['default']:
+        for name, model, field in classified["default"]:
             value = IrDefault.get(model, field)
             if value is not None:
                 res[name] = value
 
         # groups: which groups are implied by the group Employee
-        for name, groups, implied_group in classified['group']:
+        for name, groups, implied_group in classified["group"]:
             res[name] = all(implied_group in group.implied_ids for group in groups)
-            if self._fields[name].type == 'selection':
-                res[name] = str(int(res[name]))     # True, False -> '1', '0'
+            if self._fields[name].type == "selection":
+                res[name] = str(int(res[name]))  # True, False -> '1', '0'
 
         # modules: which modules are installed/to install
-        for name, module in classified['module']:
-            res[name] = module.state in ('installed', 'to install', 'to upgrade')
-            if self._fields[name].type == 'selection':
-                res[name] = str(int(res[name]))     # True, False -> '1', '0'
+        for name, module in classified["module"]:
+            res[name] = module.state in ("installed", "to install", "to upgrade")
+            if self._fields[name].type == "selection":
+                res[name] = str(int(res[name]))  # True, False -> '1', '0'
 
         # config: get & convert stored ir.config_parameter (or default)
-        WARNING_MESSAGE = "Error when converting value %r of field %s for ir.config.parameter %r"
-        for name, icp in classified['config']:
+        WARNING_MESSAGE = (
+            "Error when converting value %r of field %s for ir.config.parameter %r"
+        )
+        for name, icp in classified["config"]:
             field = self._fields[name]
-            value = IrConfigParameter.get_param(icp, field.default(self) if field.default else False)
+            value = IrConfigParameter.get_param(
+                icp, field.default(self) if field.default else False
+            )
             if value is not False:
-                if field.type == 'many2one':
+                if field.type == "many2one":
                     try:
                         # Special case when value is the id of a deleted record, we do not want to
                         # block the settings screen
-                        value = self.env[field.comodel_name].browse(int(value)).exists().id
+                        value = (
+                            self.env[field.comodel_name].browse(int(value)).exists().id
+                        )
                     except (ValueError, TypeError):
                         _logger.warning(WARNING_MESSAGE, value, field, icp)
                         value = False
-                elif field.type == 'integer':
+                elif field.type == "integer":
                     try:
                         value = int(value)
                     except (ValueError, TypeError):
                         _logger.warning(WARNING_MESSAGE, value, field, icp)
                         value = 0
-                elif field.type == 'float':
+                elif field.type == "float":
                     try:
                         value = float(value)
                     except (ValueError, TypeError):
                         _logger.warning(WARNING_MESSAGE, value, field, icp)
                         value = 0.0
-                elif field.type == 'boolean':
+                elif field.type == "boolean":
                     value = bool(value)
             res[name] = value
 
@@ -557,10 +614,10 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         classified = self._get_classified_fields()
 
         # default values fields
-        IrDefault = self.env['ir.default'].sudo()
-        for name, model, field in classified['default']:
+        IrDefault = self.env["ir.default"].sudo()
+        for name, model, field in classified["default"]:
             if isinstance(self[name], models.BaseModel):
-                if self._fields[name].type == 'many2one':
+                if self._fields[name].type == "many2one":
                     value = self[name].id
                 else:
                     value = self[name].ids
@@ -571,29 +628,33 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         # group fields: modify group / implied groups
         current_settings = self.default_get(list(self.fields_get()))
         with self.env.norecompute():
-            for name, groups, implied_group in sorted(classified['group'], key=lambda k: self[k[0]]):
+            for name, groups, implied_group in sorted(
+                classified["group"], key=lambda k: self[k[0]]
+            ):
                 groups = groups.sudo()
                 implied_group = implied_group.sudo()
                 if self[name] == current_settings[name]:
                     continue
                 if int(self[name]):
-                    groups.write({'implied_ids': [Command.link(implied_group.id)]})
+                    groups.write({"implied_ids": [Command.link(implied_group.id)]})
                 else:
-                    groups.write({'implied_ids': [Command.unlink(implied_group.id)]})
-                    implied_group.write({'users': [Command.unlink(user.id) for user in groups.users]})
+                    groups.write({"implied_ids": [Command.unlink(implied_group.id)]})
+                    implied_group.write(
+                        {"users": [Command.unlink(user.id) for user in groups.users]}
+                    )
 
         # config fields: store ir.config_parameters
-        IrConfigParameter = self.env['ir.config_parameter'].sudo()
-        for name, icp in classified['config']:
+        IrConfigParameter = self.env["ir.config_parameter"].sudo()
+        for name, icp in classified["config"]:
             field = self._fields[name]
             value = self[name]
-            if field.type == 'char':
+            if field.type == "char":
                 # storing developer keys as ir.config_parameter may lead to nasty
                 # bugs when users leave spaces around them
                 value = (value or "").strip() or False
-            elif field.type in ('integer', 'float'):
+            elif field.type in ("integer", "float"):
                 value = repr(value) if value else False
-            elif field.type == 'many2one':
+            elif field.type == "many2one":
                 # value is a (possibly empty) recordset
                 value = value.id
             IrConfigParameter.set_param(icp, value)
@@ -624,13 +685,13 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         # module fields: install/uninstall the selected modules
         to_install = []
-        to_uninstall_modules = self.env['ir.module.module']
-        lm = len('module_')
-        for name, module in classified['module']:
+        to_uninstall_modules = self.env["ir.module.module"]
+        lm = len("module_")
+        for name, module in classified["module"]:
             if int(self[name]):
                 to_install.append((name[lm:], module))
             else:
-                if module and module.state in ('installed', 'to upgrade'):
+                if module and module.state in ("installed", "to upgrade"):
                     to_uninstall_modules += module
 
         if to_install or to_uninstall_modules:
@@ -648,19 +709,21 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             self = self.env()[self._name]
 
         # pylint: disable=next-method-called
-        config = self.env['res.config'].next() or {}
-        if config.get('type') not in ('ir.actions.act_window_close',):
+        config = self.env["res.config"].next() or {}
+        if config.get("type") not in ("ir.actions.act_window_close",):
             return config
 
         # force client-side reload (update user menu and current view)
         return {
-            'type': 'ir.actions.client',
-            'tag': 'reload',
+            "type": "ir.actions.client",
+            "tag": "reload",
         }
 
     def cancel(self):
         # ignore the current record, and send the action to reopen the view
-        actions = self.env['ir.actions.act_window'].search([('res_model', '=', self._name)], limit=1)
+        actions = self.env["ir.actions.act_window"].search(
+            [("res_model", "=", self._name)], limit=1
+        )
         if actions:
             return actions.read()[0]
         return {}
@@ -668,7 +731,9 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     def name_get(self):
         """ Override name_get method to return an appropriate configuration wizard
         name, and not the generated name."""
-        action = self.env['ir.actions.act_window'].search([('res_model', '=', self._name)], limit=1)
+        action = self.env["ir.actions.act_window"].search(
+            [("res_model", "=", self._name)], limit=1
+        )
         name = action.name or self._name
         return [(record.id, name) for record in self]
 
@@ -695,8 +760,8 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             model_name.field_name (e.g.: "sale.config.settings.fetchmail_lead")
         :return string: human readable name of the field (e.g.: "Create leads from incoming mails")
         """
-        model_name, field_name = full_field_name.rsplit('.', 1)
-        return self.env[model_name].fields_get([field_name])[field_name]['string']
+        model_name, field_name = full_field_name.rsplit(".", 1)
+        return self.env[model_name].fields_get([field_name])[field_name]["string"]
 
     @api.model
     def get_config_warning(self, msg):
@@ -731,7 +796,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
         # Process the message
         # 1/ find the menu and/or field references, put them in a list
-        regex_path = r'%\(((?:menu|field):[a-z_\.]*)\)s'
+        regex_path = r"%\(((?:menu|field):[a-z_\.]*)\)s"
         references = re.findall(regex_path, msg, flags=re.I)
 
         # 2/ fetch the menu and/or field replacement values (full path and
@@ -739,15 +804,17 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         values = {}
         action_id = None
         for item in references:
-            ref_type, ref = item.split(':')
-            if ref_type == 'menu':
+            ref_type, ref = item.split(":")
+            if ref_type == "menu":
                 values[item], action_id = self.get_option_path(ref)
-            elif ref_type == 'field':
+            elif ref_type == "field":
                 values[item] = self.get_option_name(ref)
 
         # 3/ substitute and return the result
-        if (action_id):
-            return RedirectWarning(msg % values, action_id, _('Go to the configuration panel'))
+        if action_id:
+            return RedirectWarning(
+                msg % values, action_id, _("Go to the configuration panel")
+            )
         return UserError(msg % values)
 
     @api.model
@@ -768,13 +835,15 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             # determine the current value
             field0 = self._fields[fname0]
             old_value = field0.convert_to_record(
-                field0.convert_to_cache(values[fname0], self), self)
+                field0.convert_to_cache(values[fname0], self), self
+            )
             for fname in field.related[1:]:
                 old_value = next(iter(old_value), old_value)[fname]
 
             # determine the new value
             new_value = field.convert_to_record(
-                field.convert_to_cache(values[field.name], self), self)
+                field.convert_to_cache(values[field.name], self), self
+            )
 
             # drop if the value is the same
             if old_value == new_value:

@@ -5,7 +5,7 @@ from odoo.exceptions import UserError
 
 
 class PaymentToken(models.Model):
-    _inherit = 'payment.token'
+    _inherit = "payment.token"
 
     def _handle_reactivation_request(self):
         """ Override of payment to raise an error informing that Ogone tokens cannot be restored.
@@ -20,7 +20,9 @@ class PaymentToken(models.Model):
         :raise: UserError if the token is managed by Ogone
         """
         super()._handle_reactivation_request()
-        if self.provider != 'ogone':
+        if self.provider != "ogone":
             return
 
-        raise UserError(_("Saved payment methods cannot be restored once they have been archived."))
+        raise UserError(
+            _("Saved payment methods cannot be restored once they have been archived.")
+        )

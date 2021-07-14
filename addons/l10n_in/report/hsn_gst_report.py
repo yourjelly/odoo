@@ -8,22 +8,22 @@ class L10nInProductHsnReport(models.Model):
     _name = "l10n_in.product.hsn.report"
     _description = "Product HSN Statistics"
     _auto = False
-    _order = 'date desc'
+    _order = "date desc"
 
-    account_move_id = fields.Many2one('account.move', string="Account Move")
-    partner_id = fields.Many2one('res.partner', string="Customer")
+    account_move_id = fields.Many2one("account.move", string="Account Move")
+    partner_id = fields.Many2one("res.partner", string="Customer")
     product_id = fields.Many2one("product.product", string="Product")
-    uom_id = fields.Many2one('uom.uom', string="UOM")
+    uom_id = fields.Many2one("uom.uom", string="UOM")
     quantity = fields.Float(string="Product Qty")
     date = fields.Date(string="Date")
-    price_total = fields.Float(string='Taxable Value')
+    price_total = fields.Float(string="Taxable Value")
     total = fields.Float(string="Total Value")
     igst_amount = fields.Float(string="Integrated Tax Amount")
     cgst_amount = fields.Float(string="Central Tax Amount")
     sgst_amount = fields.Float(string="State/UT Tax Amount")
     cess_amount = fields.Float(string="Cess Amount")
-    company_id = fields.Many2one('res.company', string="Company")
-    journal_id = fields.Many2one('account.journal', string="Journal")
+    company_id = fields.Many2one("res.company", string="Company")
+    journal_id = fields.Many2one("account.journal", string="Journal")
 
     hsn_code = fields.Char(string="HSN")
     hsn_description = fields.Char(string="HSN description")
@@ -108,5 +108,7 @@ class L10nInProductHsnReport(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self.env.cr.execute("""CREATE OR REPLACE VIEW %s AS (%s %s)""" % (
-            self._table, self._select(), self._from()))
+        self.env.cr.execute(
+            """CREATE OR REPLACE VIEW %s AS (%s %s)"""
+            % (self._table, self._select(), self._from())
+        )

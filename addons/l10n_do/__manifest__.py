@@ -12,10 +12,10 @@
 # All rights reserved.
 
 {
-    'name': 'Dominican Republic - Accounting',
-    'version': '2.0',
-    'category': 'Accounting/Localizations/Account Charts',
-    'description': """
+    "name": "Dominican Republic - Accounting",
+    "version": "2.0",
+    "category": "Accounting/Localizations/Account Charts",
+    "description": """
 
 Localization Module for Dominican Republic
 ===========================================
@@ -82,28 +82,24 @@ en Odoo):
 110101- Caja
 11010101 Caja General
     """,
-    'author': 'Gustavo Valverde - iterativo | Consultores de Odoo',
-    'website': 'http://iterativo.do',
-    'depends': ['account',
-                'base_iban'
-                ],
-    'data': [
+    "author": "Gustavo Valverde - iterativo | Consultores de Odoo",
+    "website": "http://iterativo.do",
+    "depends": ["account", "base_iban"],
+    "data": [
         # Basic accounting data
-        'data/l10n_do_chart_data.xml',
-        'data/account_group.xml',
-        'data/account_account_tag_data.xml',
-        'data/account.account.template.csv',
-        'data/account_chart_template_data.xml',
-        'data/account_data.xml',
-        'data/account_tax_report_data.xml',
-        'data/account.tax.template.xml',
-        'data/l10n_do_res_partner_title.xml',
+        "data/l10n_do_chart_data.xml",
+        "data/account_group.xml",
+        "data/account_account_tag_data.xml",
+        "data/account.account.template.csv",
+        "data/account_chart_template_data.xml",
+        "data/account_data.xml",
+        "data/account_tax_report_data.xml",
+        "data/account.tax.template.xml",
+        "data/l10n_do_res_partner_title.xml",
         # Adds fiscal position
-        'data/fiscal_position_template.xml',
+        "data/fiscal_position_template.xml",
         # configuration wizard, views, reports...
-        'data/account_chart_template_configure_data.xml',
+        "data/account_chart_template_configure_data.xml",
     ],
-    'demo': [
-        'demo/demo_company.xml',
-    ],
+    "demo": ["demo/demo_company.xml",],
 }

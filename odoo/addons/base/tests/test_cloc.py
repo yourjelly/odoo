@@ -37,8 +37,8 @@ XML_TEST = """<!-- Comment -->
 </odoo>
 """
 
-PY_TEST_NO_RETURN = '''line = 1
-line = 2'''
+PY_TEST_NO_RETURN = """line = 1
+line = 2"""
 
 PY_TEST = '''
 # comment 1
@@ -59,7 +59,7 @@ def query():
 print(i.lineno, i, getattr(i,'s',None), getattr(i,'value',None))
 '''
 
-JS_TEST = '''
+JS_TEST = """
 /*
 comment
 */
@@ -77,7 +77,8 @@ function() {
     legit_code_counted = 1;
     regex2 = /.*/;
 }
-'''
+"""
+
 
 class TestCloc(TransactionCase):
     def test_parser(self):

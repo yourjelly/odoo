@@ -9,16 +9,16 @@ class L10nInExemptedReport(models.Model):
     _description = "Exempted Gst Supplied Statistics"
     _auto = False
 
-    account_move_id = fields.Many2one('account.move', string="Account Move")
-    partner_id = fields.Many2one('res.partner', string="Customer")
+    account_move_id = fields.Many2one("account.move", string="Account Move")
+    partner_id = fields.Many2one("res.partner", string="Customer")
     out_supply_type = fields.Char(string="Outward Supply Type")
     in_supply_type = fields.Char(string="Inward Supply Type")
     nil_rated_amount = fields.Float("Nil rated supplies")
     exempted_amount = fields.Float("Exempted")
     non_gst_supplies = fields.Float("Non GST Supplies")
     date = fields.Date("Date")
-    company_id = fields.Many2one('res.company', string="Company")
-    journal_id = fields.Many2one('account.journal', string="Journal")
+    company_id = fields.Many2one("res.company", string="Company")
+    journal_id = fields.Many2one("account.journal", string="Journal")
 
     def _select(self):
         select_str = """SELECT aml.id AS id,
@@ -91,5 +91,7 @@ class L10nInExemptedReport(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        self._cr.execute("""CREATE OR REPLACE VIEW %s AS (%s %s)""" % (
-            self._table, self._select(), self._from()))
+        self._cr.execute(
+            """CREATE OR REPLACE VIEW %s AS (%s %s)"""
+            % (self._table, self._select(), self._from())
+        )

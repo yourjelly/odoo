@@ -11,9 +11,10 @@ conn = cups_connection()
 PPDs = conn.getPPDs()
 cups_lock = Lock()  # We can only make one call to Cups at a time
 
+
 class PrinterInterface(Interface):
     _loop_delay = 120
-    connection_type = 'printer'
+    connection_type = "printer"
 
     def get_devices(self):
         printer_devices = {}
@@ -21,17 +22,19 @@ class PrinterInterface(Interface):
             printers = conn.getPrinters()
             devices = conn.getDevices()
             for printer in printers:
-                path = printers.get(printer).get('device-uri', False)
+                path = printers.get(printer).get("device-uri", False)
                 if path and path in devices:
-                    devices.get(path).update({'supported': True}) # these printers are automatically supported
+                    devices.get(path).update(
+                        {"supported": True}
+                    )  # these printers are automatically supported
         for path in devices:
-            if 'uuid=' in path:
-                identifier = sub('[^a-zA-Z0-9_]', '', path.split('uuid=')[1])
-            elif 'serial=' in path:
-                identifier = sub('[^a-zA-Z0-9_]', '', path.split('serial=')[1])
+            if "uuid=" in path:
+                identifier = sub("[^a-zA-Z0-9_]", "", path.split("uuid=")[1])
+            elif "serial=" in path:
+                identifier = sub("[^a-zA-Z0-9_]", "", path.split("serial=")[1])
             else:
-                identifier = sub('[^a-zA-Z0-9_]', '', path)
-            devices[path]['identifier'] = identifier
-            devices[path]['url'] = path
+                identifier = sub("[^a-zA-Z0-9_]", "", path)
+            devices[path]["identifier"] = identifier
+            devices[path]["url"] = path
             printer_devices[identifier] = devices[path]
         return printer_devices

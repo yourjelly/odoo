@@ -15,33 +15,37 @@ from odoo import api, fields, http, models
 
 _logger = getLogger(__name__)
 
-SCRIPT_EXTENSIONS = ('js',)
-STYLE_EXTENSIONS = ('css', 'scss', 'sass', 'less')
-TEMPLATE_EXTENSIONS = ('xml',)
+SCRIPT_EXTENSIONS = ("js",)
+STYLE_EXTENSIONS = ("css", "scss", "sass", "less")
+TEMPLATE_EXTENSIONS = ("xml",)
 DEFAULT_SEQUENCE = 16
 
 # Directives are stored in variables for ease of use and syntax checks.
-APPEND_DIRECTIVE = 'append'
-PREPEND_DIRECTIVE = 'prepend'
-AFTER_DIRECTIVE = 'after'
-BEFORE_DIRECTIVE = 'before'
-REMOVE_DIRECTIVE = 'remove'
-REPLACE_DIRECTIVE = 'replace'
-INCLUDE_DIRECTIVE = 'include'
+APPEND_DIRECTIVE = "append"
+PREPEND_DIRECTIVE = "prepend"
+AFTER_DIRECTIVE = "after"
+BEFORE_DIRECTIVE = "before"
+REMOVE_DIRECTIVE = "remove"
+REPLACE_DIRECTIVE = "replace"
+INCLUDE_DIRECTIVE = "include"
 # Those are the directives used with a 'target' argument/field.
 DIRECTIVES_WITH_TARGET = [AFTER_DIRECTIVE, BEFORE_DIRECTIVE, REPLACE_DIRECTIVE]
-WILDCARD_CHARACTERS = {'*', "?", "[", "]"}
+WILDCARD_CHARACTERS = {"*", "?", "[", "]"}
 
 
 def fs2web(path):
     """Converts a file system path to a web path"""
-    if os.path.sep == '/':
+    if os.path.sep == "/":
         return path
-    return '/'.join(path.split(os.path.sep))
+    return "/".join(path.split(os.path.sep))
+
 
 def can_aggregate(url):
     parsed = urls.url_parse(url)
-    return not parsed.scheme and not parsed.netloc and not url.startswith('/web/content')
+    return (
+        not parsed.scheme and not parsed.netloc and not url.startswith("/web/content")
+    )
+
 
 def is_wildcard_glob(path):
     """Determine whether a path is a wildcarded glob eg: "/web/file[14].*"
@@ -58,9 +62,10 @@ class IrAsset(models.Model):
         2. It allows to create 'ir.asset' records to add additional directives
         to certain bundles.
     """
-    _name = 'ir.asset'
-    _description = 'Asset'
-    _order = 'sequence, id'
+
+    _name = "ir.asset"
+    _description = "Asset"
+    _order = "sequence, id"
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -75,20 +80,27 @@ class IrAsset(models.Model):
         self.clear_caches()
         return super().unlink()
 
-    name = fields.Char(string='Name', required=True)
-    bundle = fields.Char(string='Bundle name', required=True)
-    directive = fields.Selection(string='Directive', selection=[
-        (APPEND_DIRECTIVE, 'Append'),
-        (PREPEND_DIRECTIVE, 'Prepend'),
-        (AFTER_DIRECTIVE, 'After'),
-        (BEFORE_DIRECTIVE, 'Before'),
-        (REMOVE_DIRECTIVE, 'Remove'),
-        (REPLACE_DIRECTIVE, 'Replace'),
-        (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
-    path = fields.Char(string='Path (or glob pattern)', required=True)
-    target = fields.Char(string='Target')
-    active = fields.Boolean(string='active', default=True)
-    sequence = fields.Integer(string="Sequence", default=DEFAULT_SEQUENCE, required=True)
+    name = fields.Char(string="Name", required=True)
+    bundle = fields.Char(string="Bundle name", required=True)
+    directive = fields.Selection(
+        string="Directive",
+        selection=[
+            (APPEND_DIRECTIVE, "Append"),
+            (PREPEND_DIRECTIVE, "Prepend"),
+            (AFTER_DIRECTIVE, "After"),
+            (BEFORE_DIRECTIVE, "Before"),
+            (REMOVE_DIRECTIVE, "Remove"),
+            (REPLACE_DIRECTIVE, "Replace"),
+            (INCLUDE_DIRECTIVE, "Include"),
+        ],
+        default=APPEND_DIRECTIVE,
+    )
+    path = fields.Char(string="Path (or glob pattern)", required=True)
+    target = fields.Char(string="Target")
+    active = fields.Boolean(string="active", default=True)
+    sequence = fields.Integer(
+        string="Sequence", default=DEFAULT_SEQUENCE, required=True
+    )
 
     def _get_asset_paths(self, bundle, addons=None, css=False, js=False, xml=False):
         """
@@ -123,7 +135,9 @@ class IrAsset(models.Model):
         self._fill_asset_paths(bundle, addons, installed, css, js, xml, asset_paths, [])
         return asset_paths.list
 
-    def _fill_asset_paths(self, bundle, addons, installed, css, js, xml, asset_paths, seen):
+    def _fill_asset_paths(
+        self, bundle, addons, installed, css, js, xml, asset_paths, seen
+    ):
         """
         Fills the given AssetPaths instance by applying the operations found in
         the matching bundle of the given addons manifests.
@@ -138,7 +152,9 @@ class IrAsset(models.Model):
         :param seen: a list of bundles already checked to avoid circularity
         """
         if bundle in seen:
-            raise Exception("Circular assets bundle declaration: %s" % " > ".join(seen + [bundle]))
+            raise Exception(
+                "Circular assets bundle declaration: %s" % " > ".join(seen + [bundle])
+            )
 
         manifest_cache = http.addons_manifest
         exts = []
@@ -168,7 +184,16 @@ class IrAsset(models.Model):
             """
             if directive == INCLUDE_DIRECTIVE:
                 # recursively call this function for each INCLUDE_DIRECTIVE directive.
-                self._fill_asset_paths(path_def, addons, installed, css, js, xml, asset_paths, seen + [bundle])
+                self._fill_asset_paths(
+                    path_def,
+                    addons,
+                    installed,
+                    css,
+                    js,
+                    xml,
+                    asset_paths,
+                    seen + [bundle],
+                )
                 return
 
             addon, paths = self._get_paths(path_def, installed, exts)
@@ -176,7 +201,7 @@ class IrAsset(models.Model):
             # retrieve target index when it applies
             if directive in DIRECTIVES_WITH_TARGET:
                 _, target_paths = self._get_paths(target, installed, exts)
-                if not target_paths and target.rpartition('.')[2] not in exts:
+                if not target_paths and target.rpartition(".")[2] not in exts:
                     # nothing to do: the extension of the target is wrong
                     return
                 target_to_index = len(target_paths) and target_paths[0] or target
@@ -200,7 +225,7 @@ class IrAsset(models.Model):
                 raise ValueError("Unexpected directive")
 
         # 1. Process the first sequence of 'ir.asset' records
-        assets = self._get_related_assets([('bundle', '=', bundle)]).filtered('active')
+        assets = self._get_related_assets([("bundle", "=", bundle)]).filtered("active")
         for asset in assets.filtered(lambda a: a.sequence < DEFAULT_SEQUENCE):
             process_path(asset.directive, asset.target, asset.path)
 
@@ -209,7 +234,7 @@ class IrAsset(models.Model):
             manifest = manifest_cache.get(addon)
             if not manifest:
                 continue
-            manifest_assets = manifest.get('assets', {})
+            manifest_assets = manifest.get("assets", {})
             for command in manifest_assets.get(bundle, []):
                 if isinstance(command, str):
                     # Default directive: append
@@ -232,7 +257,11 @@ class IrAsset(models.Model):
         :param domain: search domain
         :returns: ir.asset recordset
         """
-        return self.with_context(active_test=False).sudo().search(domain, order='sequence, id')
+        return (
+            self.with_context(active_test=False)
+            .sudo()
+            .search(domain, order="sequence, id")
+        )
 
     def _get_related_bundle(self, target_path_def, root_bundle):
         """
@@ -245,7 +274,7 @@ class IrAsset(models.Model):
         :root_bundle: string: bundle from which to initiate the search.
         :returns: the first matching bundle or None
         """
-        ext = target_path_def.split('.')[-1]
+        ext = target_path_def.split(".")[-1]
         installed = self._get_installed_addons_list()
         target_path = self._get_paths(target_path_def, installed)[1][0]
 
@@ -266,30 +295,32 @@ class IrAsset(models.Model):
         return self._get_installed_addons_list()
 
     @api.model
-    @tools.ormcache('addons_tuple')
+    @tools.ormcache("addons_tuple")
     def _topological_sort(self, addons_tuple):
         """Returns a list of sorted modules name accord to the spec in ir.module.module
         that is, application desc, sequence, name then topologically sorted"""
-        IrModule = self.env['ir.module.module']
+        IrModule = self.env["ir.module.module"]
 
         def mapper(addon):
             manif = http.addons_manifest.get(addon, {})
             from_terp = IrModule.get_values_from_terp(manif)
-            from_terp['name'] = addon
-            from_terp['depends'] = manif.get('depends', ['base'])
+            from_terp["name"] = addon
+            from_terp["depends"] = manif.get("depends", ["base"])
             return from_terp
 
         manifs = map(mapper, addons_tuple)
 
         def sort_key(manif):
-            return (not manif['application'], int(manif['sequence']), manif['name'])
+            return (not manif["application"], int(manif["sequence"]), manif["name"])
 
         manifs = sorted(manifs, key=sort_key)
 
-        return misc.topological_sort({manif['name']: manif['depends'] for manif in manifs})
+        return misc.topological_sort(
+            {manif["name"]: manif["depends"] for manif in manifs}
+        )
 
     @api.model
-    @tools.ormcache_context(keys='install_module')
+    @tools.ormcache_context(keys="install_module")
     def _get_installed_addons_list(self):
         """
         Returns the list of all installed addons.
@@ -298,7 +329,11 @@ class IrAsset(models.Model):
         # Main source: the current registry list
         # Second source of modules: server wide modules
         # Third source: the currently loading module from the context (similar to ir_ui_view)
-        return self.env.registry._init_modules | set(odoo.conf.server_wide_modules or []) | set(self.env.context.get('install_module', []))
+        return (
+            self.env.registry._init_modules
+            | set(odoo.conf.server_wide_modules or [])
+            | set(self.env.context.get("install_module", []))
+        )
 
     def _get_paths(self, path_def, installed, extensions=None):
         """
@@ -316,7 +351,7 @@ class IrAsset(models.Model):
         """
         paths = []
         path_url = fs2web(path_def)
-        path_parts = [part for part in path_url.split('/') if part]
+        path_parts = [part for part in path_url.split("/") if part]
         addon = path_parts[0]
         addon_manifest = http.addons_manifest.get(addon)
 
@@ -325,7 +360,7 @@ class IrAsset(models.Model):
             if addon not in installed:
                 # Assert that the path is in the installed addons
                 raise Exception("Unallowed to fetch files from addon %s" % addon)
-            addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
+            addons_path = os.path.join(addon_manifest["addons_path"], "")[:-1]
             full_path = os.path.normpath(os.path.join(addons_path, *path_parts))
 
             # first security layer: forbid escape from the current addon
@@ -336,19 +371,19 @@ class IrAsset(models.Model):
                 addon = None
                 safe_path = False
             else:
-                paths = [
-                    path for path in sorted(glob(full_path, recursive=True))
-                ]
+                paths = [path for path in sorted(glob(full_path, recursive=True))]
 
             # second security layer: do we have the right to access the files
             # that are grabbed by the glob ?
             # In particular we don't want to expose data in xmls of the module
             def is_safe_path(path):
                 try:
-                    misc.file_path(path, SCRIPT_EXTENSIONS + STYLE_EXTENSIONS + TEMPLATE_EXTENSIONS)
+                    misc.file_path(
+                        path, SCRIPT_EXTENSIONS + STYLE_EXTENSIONS + TEMPLATE_EXTENSIONS
+                    )
                 except (ValueError, FileNotFoundError):
                     return False
-                if path.rpartition('.')[2] in TEMPLATE_EXTENSIONS:
+                if path.rpartition(".")[2] in TEMPLATE_EXTENSIONS:
                     # normpath will strip the trailing /, which is why it has to be added afterwards
                     static_path = os.path.normpath("%s/static" % addon) + os.path.sep
                     # Forbid xml to leak
@@ -363,12 +398,20 @@ class IrAsset(models.Model):
             # files are read from the file system. But web assets (scripts and
             # stylesheets) must be loaded using relative paths, hence the trimming
             # for non-xml file paths.
-            paths = [path if path.split('.')[-1] in TEMPLATE_EXTENSIONS else fs2web(path[len(addons_path):]) for path in paths]
+            paths = [
+                path
+                if path.split(".")[-1] in TEMPLATE_EXTENSIONS
+                else fs2web(path[len(addons_path) :])
+                for path in paths
+            ]
 
         else:
             addon = None
 
-        if not paths and (not can_aggregate(path_url) or (safe_path and not is_wildcard_glob(path_url))):
+        if not paths and (
+            not can_aggregate(path_url)
+            or (safe_path and not is_wildcard_glob(path_url))
+        ):
             # No file matching the path; the path_def could be a url.
             paths = [path_url]
 
@@ -378,14 +421,19 @@ class IrAsset(models.Model):
                 msg += " It may be due to security reasons."
             _logger.warning(msg)
         # Paths are filtered on the extensions (if any).
-        return addon, [
-            path
-            for path in paths
-            if not extensions or path.split('.')[-1] in extensions
-        ]
+        return (
+            addon,
+            [
+                path
+                for path in paths
+                if not extensions or path.split(".")[-1] in extensions
+            ],
+        )
+
 
 class AssetPaths:
     """ A list of asset paths (path, addon, bundle) with efficient operations. """
+
     def __init__(self):
         self.list = []
         self.memo = set()
