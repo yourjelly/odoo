@@ -365,8 +365,10 @@ export function getAdjacents(node, predicate = n => !!n) {
  * @param {number} offset
  * @param {boolean} [full=true] (if not full, it means we only normalize
  *     positions which are not possible, like the cursor inside an image).
+ * @param {boolean} [throughBlocks=false] Wether the normalized position goes
+ *     through blocks.
  */
-export function getNormalizedCursorPosition(node, offset, full = true) {
+export function getNormalizedCursorPosition(node, offset, full = true, throughBlocks = false) {
     if (isVisibleEmpty(node) || !closestElement(node).isContentEditable) {
         // Cannot put cursor inside those elements, put it after instead.
         [node, offset] = rightPos(node);
@@ -393,7 +395,8 @@ export function getNormalizedCursorPosition(node, offset, full = true) {
             }
         }
         if (el) {
-            const leftInlineNode = leftDeepOnlyInlineInScopePath(el, elOffset).next().value;
+            const leftPath = throughBlocks ? leftDeepOnlyInScopePath : leftDeepOnlyInlineInScopePath;
+            const leftInlineNode = leftPath(el, elOffset).next().value;
             let leftVisibleEmpty = false;
             if (leftInlineNode) {
                 leftVisibleEmpty =
@@ -404,7 +407,8 @@ export function getNormalizedCursorPosition(node, offset, full = true) {
                     : endPos(leftInlineNode);
             }
             if (!leftInlineNode || leftVisibleEmpty) {
-                const rightInlineNode = rightDeepOnlyInlineInScopePath(el, elOffset).next().value;
+                const rightPath = throughBlocks ? rightDeepOnlyInScopePath : rightDeepOnlyInlineInScopePath;
+                const rightInlineNode = rightPath(el, elOffset).next().value;
                 if (rightInlineNode) {
                     const rightVisibleEmpty =
                         isVisibleEmpty(rightInlineNode) ||
@@ -1757,6 +1761,12 @@ export const leftDeepOnlyInlineInScopePath = createDOMPathGenerator(
     true,
     true,
 );
+export const leftDeepOnlyInScopePath = createDOMPathGenerator(
+    DIRECTIONS.LEFT,
+    true,
+    false,
+    true,
+);
 
 export const rightDeepFirstPath = createDOMPathGenerator(DIRECTIONS.RIGHT, false, false);
 export const rightDeepOnlyPath = createDOMPathGenerator(DIRECTIONS.RIGHT, true, false);
@@ -1766,5 +1776,11 @@ export const rightDeepOnlyInlineInScopePath = createDOMPathGenerator(
     DIRECTIONS.RIGHT,
     true,
     true,
+    true,
+);
+export const rightDeepOnlyInScopePath = createDOMPathGenerator(
+    DIRECTIONS.RIGHT,
+    true,
+    false,
     true,
 );

@@ -12,6 +12,18 @@ describe('insetHTML', () => {
                     '<p><i class="fa fa-pastafarianism" contenteditable="false">​</i>[]<br></p>',
             });
         });
+        // This scenario happen when copy pasting (ctrl+c then ctrl+v) from
+        // `<p>[a</p><p>b]</p>`.
+        it('should replace 2 <p> with 2 <p>', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>[a</p><p>b]</p>',
+                stepFunction: async editor => {
+                    await editor.execCommand('insertHTML', '<p>a</p><p>b</p>');
+                },
+                contentAfter:
+                    '<p>a</p><p>b[]</p>',
+            });
+        });
         it('should insert html after an empty paragraph', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p><br></p>[]',

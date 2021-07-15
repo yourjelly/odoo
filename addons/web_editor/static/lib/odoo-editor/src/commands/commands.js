@@ -1,16 +1,20 @@
 /** @odoo-module **/
 import {
     childNodeIndex,
+    clearEmpty,
     closestBlock,
     closestElement,
     closestPath,
     DIRECTIONS,
+    endPos,
+    fillEmpty,
     findNode,
     getCursorDirection,
     getCursors,
     getDeepRange,
     getInSelection,
     getListMode,
+    getNormalizedCursorPosition,
     getSelectedNodes,
     getTraversedNodes,
     insertText,
@@ -67,14 +71,33 @@ function insert(editor, data, isText = true) {
     }
     let nodeToInsert;
     const insertedNodes = [...fakeEl.childNodes];
+
+    // If we later insert html that contains a P and the current selection is
+    // within a P and there is a technical BR inside the selection, we remember
+    // it to remove it later.
+    const startParent = startNode.parentElement;
+    let technicalBRInsideP;
+    if (
+        startParent.nodeName === 'P' &&
+        startParent.children.length === 1 &&
+        startParent.children[0].tagName === 'BR'
+    ) {
+        technicalBRInsideP = startParent.children[0];
+    }
+    let hasEncounterPInsideP = false;
+
     while ((nodeToInsert = fakeEl.childNodes[0])) {
         if (isBlock(nodeToInsert) && !isBlock(startNode)) {
             // Split blocks at the edges if inserting new blocks (preventing
             // <p><p>text</p></p> scenarios).
             while (
                 startNode.parentElement !== editor.editable &&
-                !isBlock(startNode.parentElement)
+                (!isBlock(startNode.parentElement) ||
+                    (startNode.parentElement.nodeName === 'P' && nodeToInsert.nodeName === 'P'))
             ) {
+                if (startNode.parentElement.nodeName === 'P' && nodeToInsert.nodeName === 'P') {
+                    hasEncounterPInsideP = true;
+                }
                 let offset = childNodeIndex(startNode);
                 if (!insertBefore) {
                     offset += 1;
@@ -102,12 +125,25 @@ function insert(editor, data, isText = true) {
         }
         startNode = nodeToInsert;
     }
+    if (hasEncounterPInsideP && technicalBRInsideP) {
+        const parent = technicalBRInsideP.parentElement;
+        technicalBRInsideP.remove();
+        if (!isVisible(parent, false)) {
+            parent.remove();
+        }
+    }
 
     selection.removeAllRanges();
     const newRange = new Range();
     const lastPosition = rightPos(startNode);
-    newRange.setStart(lastPosition[0], lastPosition[1]);
-    newRange.setEnd(lastPosition[0], lastPosition[1]);
+    const lastPositionNormalized = getNormalizedCursorPosition(
+        lastPosition[0],
+        lastPosition[1],
+        true,
+        true,
+    );
+    newRange.setStart(lastPositionNormalized[0], lastPositionNormalized[1]);
+    newRange.setEnd(lastPositionNormalized[0], lastPositionNormalized[1]);
     selection.addRange(newRange);
     return insertedNodes;
 }
