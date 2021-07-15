@@ -87,6 +87,10 @@ function insert(editor, data, isText = true) {
                 }
             }
         }
+        // Fill empty block to insure selection can be visible within.
+        if (isBlock(nodeToInsert)) {
+            fillEmpty(nodeToInsert);
+        }
         if (insertBefore) {
             startNode.before(nodeToInsert);
             insertBefore = false;
