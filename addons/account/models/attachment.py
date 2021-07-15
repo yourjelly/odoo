@@ -93,6 +93,21 @@ class Attachment(models.Model):
         except etree.XMLSyntaxError:
             _logger.warning(_('You are trying to load an invalid xsd file for module %s.') % (module_name,))
             return ''
+    
+    def _create_attachments(self, content, module_name, xsd_fname):
+        attachment = self.create({
+            'name': xsd_fname,
+            'mimetype': 'text/xml',
+            'datas': base64.encodebytes(content),
+        })
+        self.env['ir.model.data'].create({
+            'name': xsd_fname,
+            'module': module_name,
+            'res_id': attachment.id,
+            'model': 'ir.attachment',
+            'noupdate': True
+        })
+        return attachment
 
     def _load_xsd_files(self, reload_app_list=None, modified_urls_info=None):
         """
@@ -148,17 +163,19 @@ class Attachment(models.Model):
                 if not len(xsd_object):
                     continue
                 # step 6: Create the attachment and ir.model.data entry.
-                attachment = self.create({
-                    'name': xsd_fname,
-                    'datas': base64.encodebytes(content),
-                })
-                self.env['ir.model.data'].create({
-                    'name': xsd_fname,
-                    'module': module_name,
-                    'res_id': attachment.id,
-                    'model': 'ir.attachment',
-                    'noupdate': True
-                })
+
+                # attachment = self.create({
+                #     'name': xsd_fname,
+                #     'datas': base64.encodebytes(content),
+                # })
+                # self.env['ir.model.data'].create({
+                #     'name': xsd_fname,
+                #     'module': module_name,
+                #     'res_id': attachment.id,
+                #     'model': 'ir.attachment',
+                #     'noupdate': True
+                # })
+                attachment = self._create_attachments(content, module_name, xsd_fname)
                 attachments += attachment
         filestore = tools.config.filestore(self.env.cr.dbname)
         return [join(filestore, attachment.store_fname) for attachment in attachments]
