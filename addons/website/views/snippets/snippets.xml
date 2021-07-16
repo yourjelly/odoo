@@ -462,6 +462,29 @@
         </we-select>
     </div>
 
+    <div data-js="snippetLayout"
+        data-selector=".s_three_columns">
+        <we-select string="Layout"
+                data-attribute-name="columnsLayout"
+                data-attribute-default-value="website.s_three_columns_default_template">
+            <we-button title="Default"
+                    data-select-data-attribute="website.s_three_columns_default_template"
+                    data-img="/website/static/src/img/snippets_options/01.svg"/>
+            <we-button title="Price"
+                    data-select-data-attribute="website.s_three_columns_price_template"
+                    data-img="/website/static/src/img/snippets_options/02.svg"/>
+            <we-button title="Raw"
+                    data-select-data-attribute="website.s_three_columns_raw_template"
+                    data-img="/website/static/src/img/snippets_options/03.svg"/>
+            <we-button title="Text"
+                    data-select-data-attribute="website.s_three_columns_text_template"
+                    data-img="/website/static/src/img/snippets_options/04.svg"/>
+            <we-button title="Comparisons"
+                    data-select-data-attribute="website.s_three_columns_comparisons_template"
+                    data-img="/website/static/src/img/snippets_options/05.svg"/>
+        </we-select>
+    </div>
+
     <div data-js="layout_column"
         data-selector="section"
         data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns"
