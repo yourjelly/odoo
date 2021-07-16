@@ -3,60 +3,137 @@
 
 <template name="Items" id="s_product_list">
     <t t-set="url" value="url or '#'"/>
-    <section class="s_product_list">
+    <section class="s_product_list pt48 pb24">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_1" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Furniture</a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_2" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Clothes</a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_3" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Books</a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_4" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Essential oils</a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_5" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Service</a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4 col-6">
-                    <a t-att-href="url">
-                        <img src="/web/image/website.s_product_list_default_image_6" alt="" class="img img-fluid"/>
-                    </a>
-                    <div class="s_product_list_item_link">
-                        <a t-att-href="url" class="btn btn-primary">Multimedia</a>
-                    </div>
+            <t t-call="website.s_product_list_default_template"/>
+        </div>
+    </section>
+</template>
+
+<template id="s_product_list_default_template" groups="base.group_user">
+    <t t-set="url" value="url or '#'"/>
+    <div class="row s_product_list_default">
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_1" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Furniture</a>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_2" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Clothes</a>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_3" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Books</a>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_4" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Essential oils</a>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_5" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Service</a>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-6 pb24">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_6" alt="" class="img img-fluid"/>
+            </a>
+            <div class="s_product_list_item_link">
+                <a t-att-href="url" class="btn btn-primary">Multimedia</a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="s_product_list_rows_template" groups="base.group_user">
+    <t t-set="url" value="url or '#'"/>
+    <div class="row px-3">
+        <div class="col-lg-4 pb24">
+            <div class="card">
+                <a t-att-href="url">
+                    <img src="/web/image/website.s_product_list_default_image_1" alt="" class="card-img-top"/>
+                </a>
+                <div class="card-body d-flex align-items-center">
+                    <h5 class="card-title mb-0">Furniture</h5>
+                    <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
                 </div>
             </div>
         </div>
-    </section>
+        <div class="col-lg-4 pb24">
+            <div class="card">
+                <a t-att-href="url">
+                    <img src="/web/image/website.s_product_list_default_image_2" alt="" class="card-img-top"/>
+                </a>
+                <div class="card-body d-flex align-items-center">
+                    <h5 class="card-title mb-0">Clothes</h5>
+                    <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 pb24">
+            <div class="card">
+                <a t-att-href="url">
+                    <img src="/web/image/website.s_product_list_default_image_3" alt="" class="card-img-top"/>
+                </a>
+                <div class="card-body d-flex align-items-center">
+                    <h5 class="card-title mb-0">Books</h5>
+                    <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 pb24">
+            <div class="card">
+                <a t-att-href="url">
+                    <img src="/web/image/website.s_product_list_default_image_4" alt="" class="card-img-top"/>
+                </a>
+                <div class="card-body d-flex align-items-center">
+                    <h5 class="card-title mb-0">Essential oils</h5>
+                    <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 pb24">
+            <div class="card">
+                <a t-att-href="url">
+                    <img src="/web/image/website.s_product_list_default_image_5" alt="" class="card-img-top"/>
+                </a>
+                <div class="card-body d-flex align-items-center">
+                    <h5 class="card-title mb-0">Service</h5>
+                    <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 pb24">
+        <div class="card">
+            <a t-att-href="url">
+                <img src="/web/image/website.s_product_list_default_image_6" alt="" class="card-img-top"/>
+            </a>
+            <div class="card-body d-flex align-items-center">
+                <h5 class="card-title mb-0">Multimedia</h5>
+                <a t-att-href="url" class="btn btn-primary ml-auto">Details</a>
+            </div>
+        </div>
+        </div>
+    </div>
 </template>
 
 <record id="website.s_product_list_000_variables_scss" model="ir.asset">
