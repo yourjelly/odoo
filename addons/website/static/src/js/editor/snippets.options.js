@@ -1944,7 +1944,7 @@ options.registry.collapse = options.Class.extend({
     },
 });
 
-options.registry.MasonryLayout = options.Class.extend({
+options.registry.snippetLayout = options.Class.extend({
 
     /**
      * @constructor

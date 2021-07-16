@@ -424,9 +424,9 @@
         </we-row>
     </div>
 
-    <div data-js="MasonryLayout"
+    <div data-js="snippetLayout"
          data-selector=".s_masonry_block">
-        <we-select string="Template"
+        <we-select string="Layout"
                    data-attribute-name="masonryTemplate"
                    data-attribute-default-value="website.s_masonry_block_default_template">
             <we-button title="Default"
