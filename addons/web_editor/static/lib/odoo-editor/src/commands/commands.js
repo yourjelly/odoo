@@ -34,6 +34,7 @@ import {
     splitElement,
     splitTextNode,
     startPos,
+    unwrapContents,
 } from '../utils/utils.js';
 
 const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
@@ -43,6 +44,7 @@ function insert(editor, data, isText = true) {
     const selection = editor.document.getSelection();
     const range = selection.getRangeAt(0);
     let startNode;
+    const endNodeParent = range.endContainer.parentElement;
     let insertBefore = false;
     if (selection.isCollapsed) {
         if (range.startContainer.nodeType === Node.TEXT_NODE) {
@@ -53,6 +55,7 @@ function insert(editor, data, isText = true) {
     } else {
         editor.deleteRange(selection);
     }
+    debugger;
     startNode = startNode || editor.document.getSelection().anchorNode;
     if (startNode.nodeType === Node.ELEMENT_NODE) {
         if (selection.anchorOffset === 0) {
@@ -85,8 +88,30 @@ function insert(editor, data, isText = true) {
         technicalBRInsideP = startParent.children[0];
     }
     let hasEncounterPInsideP = false;
+    console.log('insertedNodes:', insertedNodes);
+    console.log('endNodeParent:', endNodeParent);
+    const firstNode = insertedNodes[0];
+    const lastNode = insertedNodes[insertedNodes.length - 1];
+    let prependLastChilds;
+    if (
+        firstNode !== lastNode &&
+        // startNode !== endNode &&
+        // currentNode.parentElement.nodeName === 'P' &&
+        endNodeParent.nodeName === 'P' &&
+        lastNode.nodeName === 'P'
+    ) {
+        insertedNodes.pop();
+        prependLastChilds = unwrapContents(lastNode);
+    }
+    if (startNode.parentElement.nodeName === 'P' && firstNode.nodeName === 'P') {
+        console.log('inside start === true');
+        insertedNodes.shift();
+        const childs = [...firstNode.childNodes];
+        insertedNodes.unshift(...childs.reverse());
+    }
+    console.log('nodesToInsert:', insertedNodes);
 
-    while ((nodeToInsert = fakeEl.childNodes[0])) {
+    for (const nodeToInsert of insertedNodes) {
         if (isBlock(nodeToInsert) && !isBlock(startNode)) {
             // Split blocks at the edges if inserting new blocks (preventing
             // <p><p>text</p></p> scenarios).
@@ -124,6 +149,25 @@ function insert(editor, data, isText = true) {
             startNode.remove();
         }
         startNode = nodeToInsert;
+    }
+    if (prependLastChilds.length) {
+        const lastChild = prependLastChilds[prependLastChilds.length - 1];
+        endNodeParent.prepend(...prependLastChilds.reverse());
+        // if the endNodeParent is not in the dom anymore, it means it's parent
+        // has been merged with `deleteRange`.
+
+        if (!endNodeParent.parentElement) {
+            const nextNodes = [];
+            let current = startNode;
+            while (current = current.nextSibling) {
+                nextNodes.push(current)
+            }
+            endNodeParent.append(...nextNodes);
+            console.log("startParent:", startParent);
+            startNode.after(endNodeParent);
+        }
+        startNode = lastChild;
+
     }
     if (hasEncounterPInsideP && technicalBRInsideP) {
         const parent = technicalBRInsideP.parentElement;

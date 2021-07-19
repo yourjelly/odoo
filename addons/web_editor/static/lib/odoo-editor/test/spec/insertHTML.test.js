@@ -24,6 +24,30 @@ describe('insetHTML', () => {
                     '<p>a</p><p>b[]</p>',
             });
         });
+        // This scenario happen when copy pasting (ctrl+c then ctrl+v) from
+        // `<p>line [1</p><p>line ]2</p>`.
+        it.only('should replace 2 <p> with 2 <p> with selection in between characters', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<p>line [1</p><p>line ]2</p>',
+                stepFunction: async editor => {
+                    await editor.execCommand('insertHTML', '<p>1</p><p>line </p>');
+                },
+                contentAfter:
+                    '<p>line 1</p><p>line []2</p>',
+            });
+        });
+        // This scenario happen when copy pasting (ctrl+c then ctrl+v) from
+        // `<div>line [div</div><p>line p1</p><p>line ]p2</p>`.
+        it.only('should replace 2 <p> with 2 <p> with selection in between characters', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<div>line [div</div><p>line p1</p><p>line ]p2</p>',
+                stepFunction: async editor => {
+                    await editor.execCommand('insertHTML', '<div>div</div><p>line p1</p><p>line </p>');
+                },
+                contentAfter:
+                    '<div>line div</div><p>line p1</p><p>line p2</p>',
+            });
+        });
         it('should insert html after an empty paragraph', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p><br></p>[]',

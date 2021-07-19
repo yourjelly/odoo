@@ -310,6 +310,7 @@ export class OdooEditor extends EventTarget {
         if (testunbreak && !(node.nodeType === Node.TEXT_NODE && !node.length)) {
             const ouid = getOuid(node);
             if (!this._toRollback && ouid && ouid !== node.ouid) {
+                debugger
                 this._toRollback = UNBREAKABLE_ROLLBACK_CODE;
             }
         }
@@ -652,6 +653,7 @@ export class OdooEditor extends EventTarget {
     }
 
     historyRollback(until = 0) {
+        debugger
         const step = this._historySteps[this._historySteps.length - 1];
         this.observerFlush();
         this.historyRevert(step, until);
