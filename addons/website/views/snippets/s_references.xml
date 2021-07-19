@@ -4,30 +4,59 @@
 <template id="s_references" name="References">
     <section class="s_references pt48 pb32">
         <div class="container">
-            <h2 style="text-align: center;">Our References</h2>
-            <p style="text-align: center;">We are in good company.</p>
-            <div class="row">
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_demo_image_1" class="img img-fluid mx-auto" alt=""/>
-                </div>
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_demo_image_2" class="img img-fluid mx-auto" alt=""/>
-                </div>
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_demo_image_3" class="img img-fluid mx-auto" alt=""/>
-                </div>
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_demo_image_4" class="img img-fluid mx-auto" alt=""/>
-                </div>
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_demo_image_5" class="img img-fluid mx-auto" alt=""/>
-                </div>
-                <div class="col-lg-2 pt16 pb16">
-                    <img src="/web/image/website.s_reference_default_image_6" class="img img-fluid mx-auto" alt=""/>
-                </div>
-            </div>
+            <t t-call="website.s_references_default_template"/>
         </div>
     </section>
+</template>
+
+<template id="s_references_default_template" groups="base.group_user">
+    <h2 style="text-align: center;">Our References</h2>
+    <p style="text-align: center;">We are in good company.</p>
+    <div class="row">
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_1" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_2" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_3" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_4" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_5" class="img img-fluid mx-auto" alt=""/>
+        </div>
+        <div class="col-lg-2 pt16 pb16">
+            <img src="/web/image/website.s_reference_default_image_6" class="img img-fluid mx-auto" alt=""/>
+        </div>
+    </div>
+</template>
+
+<template id="s_references_row_template" groups="base.group_user">
+    <h3 style="text-align: center;">We are in good company.</h3>
+    <p style="text-align: center;"><br/></p>
+    <div class="row">
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_1" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_4" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_3" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_default_image_6" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_5" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+        <div class="col-lg-4 pt16 pb16">
+            <img src="/web/image/website.s_reference_demo_image_2" class="img img-fluid mx-auto" alt="" style="width: 50% !important;"/>
+        </div>
+    </div>
 </template>
 
 <record id="website.s_references_000_scss" model="ir.asset">
