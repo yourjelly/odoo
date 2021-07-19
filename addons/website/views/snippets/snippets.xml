@@ -533,6 +533,23 @@
         </we-select>
     </div>
 
+    <div data-js="snippetLayout"
+        data-selector=".s_features">
+        <we-select string="Layout"
+                data-attribute-name="textImageLayout"
+                data-attribute-default-value="website.s_features_default_template">
+            <we-button title="Default"
+                    data-select-data-attribute="website.s_features_default_template"
+                    data-img="/website/static/src/img/snippets_options/01.svg"/>
+            <we-button title="Reversed"
+                    data-select-data-attribute="website.s_features_grid_template"
+                    data-img="/website/static/src/img/snippets_options/02.svg"/>
+            <we-button title="Showcase"
+                    data-select-data-attribute="website.s_features_showcase_template"
+                    data-img="/website/static/src/img/snippets_options/03.svg"/>
+        </we-select>
+    </div>
+
     <div data-js="layout_column"
         data-selector="section"
         data-target="> *:has(> .row:not(.s_nb_column_fixed)), > .s_allow_columns"
