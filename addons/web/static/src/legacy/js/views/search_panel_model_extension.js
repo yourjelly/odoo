@@ -502,6 +502,7 @@
                     method: "search_panel_select_range",
                     model: this.config.modelName,
                     args: [category.fieldName],
+                    context: this.config.context,
                     kwargs: {
                         category_domain: this._getCategoryDomain(category.id),
                         enable_counters: category.enableCounters,
