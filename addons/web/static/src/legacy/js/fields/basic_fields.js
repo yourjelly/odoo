@@ -231,7 +231,7 @@ var InputField = DebouncedField.extend({
         }
         if (this.isDirty || (event && event.target === this &&
             event.data.changes &&
-            event.data.changes[this.name] === this.value)) {
+            event.data.changes[this.name] === this.value)) {debugger
             if (this.attrs.decorations) {
                 // if a field is modified, then it could have triggered an onchange
                 // which changed some of its decorations. Since we bypass the
@@ -253,7 +253,7 @@ var InputField = DebouncedField.extend({
      * @override
      * @returns {string} the content of the input
      */
-    _getValue: function () {
+    _getValue: function () {debugger
         return this.$input.val();
     },
     /**
@@ -261,7 +261,7 @@ var InputField = DebouncedField.extend({
      * of the changes if the actual value is not the same than the previous one.
      * @see _doDebouncedAction
      */
-    _notifyChanges() {
+    _notifyChanges() {debugger
         this.isDirty = !this._isLastSetValue(this.$input.val());
         this._doDebouncedAction();
     },
@@ -275,7 +275,7 @@ var InputField = DebouncedField.extend({
      *        If no element is given, the <input/> is created.
      * @returns {jQuery} the prepared this.$input element
      */
-    _prepareInput: function ($input) {
+    _prepareInput: function ($input) {debugger
         this.$input = $input || $("<input/>");
         this.$input.addClass('o_input');
 
@@ -300,7 +300,7 @@ var InputField = DebouncedField.extend({
      * @override
      * @private
      */
-    _renderEdit: function () {
+    _renderEdit: function () {debugger
         // Keep a reference to the input so $el can become something else
         // without losing track of the actual input.
         this._prepareInput(this.$el);
@@ -312,6 +312,9 @@ var InputField = DebouncedField.extend({
      * @private
      */
     _renderReadonly: function () {
+        if (this.$('.o_clipboard_button') && this.copiedURL) {
+            this.$('.o_clipboard_button').click();
+        }
         this.$el.text(this._formatValue(this.value));
     },
 
@@ -325,7 +328,7 @@ var InputField = DebouncedField.extend({
      *
      * @private
      */
-    _onChange: function () {
+    _onChange: function () {debugger
         this._doAction();
     },
     /**
@@ -335,7 +338,7 @@ var InputField = DebouncedField.extend({
      *
      * @param {OdooEvent} event 'field_changed' event
      */
-    _onFieldChanged: function (event) {
+    _onFieldChanged: function (event) {debugger
         this.lastChangeEvent = event;
     },
     /**
@@ -344,7 +347,7 @@ var InputField = DebouncedField.extend({
      *
      * @private
      */
-    _onInput() {
+    _onInput() {debugger
         this._notifyChanges();
     },
     /**
@@ -354,7 +357,7 @@ var InputField = DebouncedField.extend({
      * @private
      * @param {OdooEvent} ev
      */
-    _onNavigationMove: function (ev) {
+    _onNavigationMove: function (ev) {debugger
         this._super.apply(this, arguments);
 
         // the following code only makes sense in edit mode, with an input
@@ -582,7 +585,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
      * @override
      * @private
      */
-    _renderEdit: function () {
+    _renderEdit: function () {debugger
         var def = this._super.apply(this, arguments);
         if (this.field.size && this.field.size > 0) {
             this.$el.attr('maxlength', this.field.size);
@@ -601,7 +604,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
      * @param {any} value
      * @param {Object} [options]
      */
-    _setValue: function (value, options) {
+    _setValue: function (value, options) {debugger
         if (this.field.trim) {
             value = value.trim();
         }
@@ -1829,6 +1832,7 @@ var CopyClipboard = {
         this.clipboard.on('success', function () {
             _.defer(function () {
                 $clipboardBtn.tooltip('show');
+                this.copiedURL = true;
                 _.delay(function () {
                     $clipboardBtn.tooltip('hide');
                 }, 800);
