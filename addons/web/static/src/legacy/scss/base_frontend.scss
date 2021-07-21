@@ -16,6 +16,9 @@ html, body, #wrapwrap {
     // due to the right editor panel (and since we want to minimize the style
     // difference between edit mode and non-edit mode (wysiwyg)...).
     overflow: auto;
+    // Because of website animate, some elements overflow to the right of the
+    // wrapwrap while waiting to be animated. So we have to remove the horizontal scrollbar.
+    overflow-x: hidden;
 
     > * {
         flex: 0 0 auto;
