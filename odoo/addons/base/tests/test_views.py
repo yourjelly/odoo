@@ -2286,6 +2286,43 @@ class TestViews(ViewCase):
         self.assertWarning('<form><div class="btn" role="button"/></form>')
         self.assertWarning('<form><input type="email" class="btn" role="button"/></form>')
 
+    def test_partial_validation(self):
+        view = self.assertValid("""
+            <form string="View">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="inherit_id" domain="[('model', '=', model)]"/>
+            </form>
+        """)
+        # make sure that added elements are validated
+        self.assertInvalid(
+            """<field name="inherit_id" position="after">
+                <field name="groups_id" domain="[('invalid_field', '=', 'dummy')]"/>
+            </field>""",
+            '''Unknown field "res.groups.invalid_field" in domain of <field name="groups_id">  "[('invalid_field', '=', 'dummy')]"''',
+            inherit_id=view.id,
+        )
+        self.assertValid(
+            """<field name="inherit_id" position="after">
+                <field name="groups_id" domain="[('name', '=', 'dummy')]"/>
+            </field>""",
+            inherit_id=view.id,
+        )
+        # modifying attributes should validate the target element
+        self.assertInvalid(
+            """<field name="inherit_id" position="attributes">
+                <attribute name="domain">[('invalid_field', '=', 'dummy')]</attribute>
+            </field>""",
+            """Unknown field "ir.ui.view.invalid_field" in domain of <field name="inherit_id"> ([('invalid_field', '=', 'dummy')]))""",
+            inherit_id=view.id,
+        )
+        # replacing an element should validate the whole view
+        self.assertInvalid(
+            """<field name="model" position="replace"/>""",
+            """Field 'model' used in domain of <field name="inherit_id"> ([('model', '=', model)]) must be present in view but is missing.""",
+            inherit_id=view.id,
+        )
+
     def test_address_view(self):
         # pe_partner_address_form
         address_arch = """<form><div class="o_address_format"><field name="parent_name"/></div></form>"""
@@ -2324,20 +2361,24 @@ class TestViews(ViewCase):
             'A <graph> can only contains <field> nodes, found a <label>'
         )
 
-    def assertValid(self, arch, name='valid view'):
-        self.View.create({
+    def assertValid(self, arch, name='valid view', inherit_id=False):
+        return self.View.create({
             'name': name,
             'model': 'ir.ui.view',
+            'inherit_id': inherit_id,
             'arch': arch,
         })
 
-    def assertInvalid(self, arch, expected_message=None, name='invalid view'):
-        with self.assertRaises(ValidationError) as catcher, mute_logger('odoo.addons.base.models.ir_ui_view'):
-            self.View.create({
-                'name': name,
-                'model': 'ir.ui.view',
-                'arch': arch,
-            })
+    def assertInvalid(self, arch, expected_message=None, name='invalid view', inherit_id=False):
+        with mute_logger('odoo.addons.base.models.ir_ui_view'):
+            with self.assertRaises(ValidationError) as catcher:
+                with self.cr.savepoint():
+                    self.View.create({
+                        'name': name,
+                        'model': 'ir.ui.view',
+                        'inherit_id': inherit_id,
+                        'arch': arch,
+                    })
         message = str(catcher.exception.args[0])
         if expected_message:
             self.assertIn(expected_message, message)
