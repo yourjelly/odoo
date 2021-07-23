@@ -598,6 +598,8 @@
             <field name="arch" type="xml">
                 <form string="Account Entry">
                     <header>
+                        <button name="action_generate_test_lines" string="TEST" class="oe_highlight"
+                                type="object" />
                         <!-- Post -->
                         <button name="action_post" string="Post" class="oe_highlight"
                                 type="object" groups="account.group_account_invoice" data-hotkey="v"
