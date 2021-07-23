@@ -13,20 +13,29 @@
                         </t>
                     </div>
                 </t>
-
-                <div t-if="env.isMobile and !isFloorEmpty" class="buttons" t-attf-style="background: {{state.floorBackground}};">
+                <div class="buttons o-floor-map" t-attf-style="background: {{state.isDisplaySearch || state.isEditMode ? '#fff' : state.floorBackground}};">
                     <t t-if="state.isDisplaySearch">
                         <span class="button close-search-icon" t-on-click="_onCloseSearch">
                             <i class="fa fa-arrow-left" role="img" aria-label="Back" title="Back" />
                         </span>
                         <input class="search button" type="text" autofocus="autofocus" placeholder="Search..." name="searchTable" t-model="state.searchQuery" />
                     </t>
-                    <t t-else="">
-                        <span class="search button" t-attf-style="background: {{state.floorBackground }};">
+                </div>
+
+                <div>
+                    <t t-if="!isFloorEmpty">
+                        <span t-if="env.pos.user.role === 'manager'" class="button edit-button editing" t-att-class="{ active: state.isEditMode }" t-on-click.stop="toggleEditMode">
+                            <i t-if="state.isEditMode" class="fa fa-arrow-left" role="img" aria-label="Back" title="Back" />
+                            <i t-else="" class="fa fa-pencil" role="img" aria-label="Edit" title="Edit"/>
+                        </span>
+                        <span t-if="!state.isEditMode and env.isMobile" class="search button">
                             <span class="search-icon" t-on-click="state.isDisplaySearch=!state.isDisplaySearch">
                                 <i class="fa fa-search" role="img" aria-label="Search" title="Search" />
                             </span>
                         </span>
+                    </t>
+                    <t t-if="state.isEditMode">
+                        <EditBar selectedTable="selectedTable" />
                     </t>
                 </div>
 
@@ -36,6 +45,7 @@
                     t-on-touchmove="_onPinchMove"
                     t-on-touchend="_onPinchEnd"
                     class="floor-map"
+                    t-attf-style="background: {{state.floorBackground}};"
                     t-ref="floor-map-ref"
                 >
                     <div t-if="isFloorEmpty" class="empty-floor">
@@ -49,11 +59,6 @@
                             <EditableTable t-else="" table="table" />
                         </t>
                     </div>
-                    <span t-if="env.pos.user.role == 'manager'" class="edit-button editing" t-att-class="{ active: state.isEditMode }" t-on-click.stop="toggleEditMode"
-                          t-attf-style="top:{{state.floorMapScrollTop}}px;">
-                        <i class="fa fa-pencil" role="img" aria-label="Edit" title="Edit"></i>
-                    </span>
-                    <EditBar t-if="state.isEditMode" selectedTable="selectedTable" floorMapScrollTop="state.floorMapScrollTop"/>
                 </div>
             </div>
         </div>
