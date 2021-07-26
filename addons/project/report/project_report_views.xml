@@ -39,11 +39,11 @@
                     <field name="date_deadline"/>
                     <field name="date_last_stage_update"/>
                     <filter string="My Projects" name="own_projects" domain="[('project_id.user_id', '=', uid)]"/>
-                    <filter string="My Tasks" name="my_tasks" domain="[('task_id.user_id', '=', uid)]"/>
+                    <filter string="My Tasks" name="my_tasks" domain="[('user_id', '=', uid)]"/>
                     <separator/>
-                    <filter string="Starred" name="starred" domain="[('task_id.priority', 'in', [0, 1])]"/>
+                    <filter string="Starred" name="starred" domain="[('priority', 'in', [0, 1])]"/>
                     <separator/>
-                    <filter string="Tasks Late" name="late" domain="[('task_id.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="Tasks Late" name="late" domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <filter string="Unassigned Tasks" name="unassigned" domain="[('user_id', '=', False)]"/>
                     <filter string="Open tasks" name="open_tasks" domain="[('stage_id.fold', '=', False), ('stage_id.is_closed', '=', False)]"/>
                     <separator/>

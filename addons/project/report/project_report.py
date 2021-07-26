@@ -43,6 +43,7 @@ class ReportProjectTaskUser(models.Model):
     partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
     stage_id = fields.Many2one('project.task.type', string='Stage', readonly=True)
     task_id = fields.Many2one('project.task', string='Tasks', readonly=True)
+    project_user_id = fields.Many2one('res.users', string="Project User", readonly=True)
 
     def _select(self):
         select_str = """
@@ -57,6 +58,7 @@ class ReportProjectTaskUser(models.Model):
                     t.date_deadline as date_deadline,
                     t.user_id,
                     t.project_id,
+                    p.user_id as project_user_id,
                     t.priority,
                     t.name as name,
                     t.company_id,
@@ -72,6 +74,12 @@ class ReportProjectTaskUser(models.Model):
         """
         return select_str
 
+    def _from_tables(self):
+        return """
+            FROM project_task t
+            LEFT JOIN project_project p ON p.id = t.project_id
+        """
+
     def _group_by(self):
         group_by_str = """
                 GROUP BY
@@ -84,6 +92,7 @@ class ReportProjectTaskUser(models.Model):
                     t.date_last_stage_update,
                     t.user_id,
                     t.project_id,
+                    p.user_id,
                     t.priority,
                     t.name,
                     t.company_id,
@@ -97,7 +106,7 @@ class ReportProjectTaskUser(models.Model):
         self._cr.execute("""
             CREATE view %s as
               %s
-              FROM project_task t
+              %s
                 WHERE t.active = 'true'
                 %s
-        """ % (self._table, self._select(), self._group_by()))
+        """ % (self._table, self._select(), self._from_tables(), self._group_by()))
