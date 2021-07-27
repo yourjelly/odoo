@@ -76,7 +76,6 @@ class IrUiMenu(models.Model):
             raise ValidationError(_('Error! You cannot create recursive menus.'))
 
     @api.model
-    @tools.ormcache('frozenset(self.env.user.groups_id.ids)', 'debug')
     def _visible_menu_ids(self, debug=False):
         """ Return the ids of the menu items visible to the user. """
         # retrieve all menus, and determine which ones are visible
@@ -102,10 +101,30 @@ class IrUiMenu(models.Model):
             'ir.actions.report': lambda action: action.model,
             'ir.actions.server': lambda action: action.model_id.model,
         }
+
+        # The field `ir.ui.menu::action` has type `fields.Reference`, which doesn't have
+        # automatic optimization on ORM level to read all actions from the same
+        # table at once. To solve this problem, collect record ids per table
+        # and pass it to ORM via `with_prefetch` method.
+        # {model -> actions}
+        PREFETCH_GETTER = dict(
+            (model, [a.id for a in action_menus.filtered(lambda r: r.action._name == model).mapped('action')])
+            for model in ('ir.actions.act_window', 'ir.actions.report', 'ir.actions.server')
+        )
+        all_models = []
+        for menu in action_menus:
+            action_model = menu.action._name
+            get_model = MODEL_GETTER.get(action_model)
+            action = menu.action.with_prefetch(PREFETCH_GETTER.get(action_model))
+            if get_model and get_model(action):
+                all_models.append(get_model(action))
+
+        check_multi = access.check_multi(all_models, 'read')
+
         for menu in action_menus:
             get_model = MODEL_GETTER.get(menu.action._name)
             if not get_model or not get_model(menu.action) or \
-                    access.check(get_model(menu.action), 'read', False):
+                    access.check(get_model(menu.action), 'read', False, check_multi):
                 # make menu visible, and its folder ancestors, too
                 visible += menu
                 menu = menu.parent_id

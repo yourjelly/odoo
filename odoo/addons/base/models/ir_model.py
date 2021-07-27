@@ -1734,48 +1734,60 @@ class IrModelAccess(models.Model):
         """ % access_mode, [model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
 
-    # The context parameter is useful when the method translates error messages.
-    # But as the method raises an exception in that case,  the key 'lang' might
-    # not be really necessary as a cache key, unless the `ormcache_context`
-    # decorator catches the exception (it does not at the moment.)
-    @api.model
-    @tools.ormcache_context('self.env.uid', 'self.env.su', 'model', 'mode', 'raise_exception', keys=('lang',))
-    def check(self, model, mode='read', raise_exception=True):
+    def check_multi(self, all_models, mode='read'):
         if self.env.su:
-            # User root have all accesses
-            return True
+            return
 
-        assert isinstance(model, str), 'Not a model name: %s' % (model,)
+        for model in all_models:
+            assert isinstance(model, str), 'Not a model name: %s' % (model,)
+            # AbstractModel records have no access rights, only an implicit access rule
+            if model not in self.env:
+                _logger.error('Missing model %s', model)
+
         assert mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-
-        # TransientModel records have no access rights, only an implicit access rule
-        if model not in self.env:
-            _logger.error('Missing model %s', model)
 
         self.flush(self._fields)
 
         # We check if a specific rule exists
-        self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
+        self._cr.execute("""SELECT m.model, MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
                               FROM ir_model_access a
                               JOIN ir_model m ON (m.id = a.model_id)
                               JOIN res_groups_users_rel gu ON (gu.gid = a.group_id)
-                             WHERE m.model = %s
+                             WHERE m.model in %s
                                AND gu.uid = %s
-                               AND a.active IS TRUE""".format(mode=mode),
-                         (model, self._uid,))
-        r = self._cr.fetchone()[0]
+                               AND a.active IS TRUE
+                          GROUP BY m.model
+                         """.format(mode=mode),
+                         (tuple(all_models), self._uid,))
+        model2value = dict(self._cr.fetchall())
+        other_models = all_models - model2value.keys()
 
-        if not r:
+        if other_models:
             # there is no specific rule. We check the generic rule
-            self._cr.execute("""SELECT MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
+            self._cr.execute("""SELECT m.model, MAX(CASE WHEN perm_{mode} THEN 1 ELSE 0 END)
                                   FROM ir_model_access a
                                   JOIN ir_model m ON (m.id = a.model_id)
                                  WHERE a.group_id IS NULL
-                                   AND m.model = %s
-                                   AND a.active IS TRUE""".format(mode=mode),
-                             (model,))
-            r = self._cr.fetchone()[0]
+                                   AND m.model in %s
+                                   AND a.active IS TRUE
+                              GROUP BY m.model
+                             """.format(mode=mode),
+                             (tuple(other_models),))
+            model2value.update(self._cr.fetchall())
 
+        return model2value
+
+    @api.model
+    @tools.ormcache('self.env.uid', 'self.env.su', 'model', 'mode', 'raise_exception')
+    def check(self, model, mode='read', raise_exception=True, check_multi=None):
+        if self.env.su:
+            # User root have all accesses
+            return True
+
+        if not check_multi:
+            check_multi = self.check_multi([model], mode)
+
+        r = check_multi.get(model)
         if not r and raise_exception:
             groups = '\n'.join('\t- %s' % g for g in self.group_names_with_access(model, mode))
             document_kind = self.env['ir.model']._get(model).name or model
