@@ -59,7 +59,7 @@ body.o_connected_user {
         color: white;
         span {
             border: 1px solid white;
-            border-color: white;
+            border-color: $white;
             border-radius: 5px;
             padding: 7px 5px;
             margin: 5px;
@@ -190,7 +190,7 @@ body .modal {
             width: auto;
 
             .modal-content {
-                background-color: black!important;
+                background-color: $black!important;
                 border: 3px outset gray;
                 border-radius: 20px;
 
@@ -268,7 +268,7 @@ body .modal {
     &.oe_seo_configuration {
         #language-box {
             padding-right: 25px;
-            background-color: white;
+            background-color: $white;
         }
         .o_seo_og_image {
             .o_meta_img {

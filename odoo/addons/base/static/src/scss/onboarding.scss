@@ -60,7 +60,7 @@ $o-onboarding-violet-ui-2: #FBEEC8;
         //transition: transform $o-onboarding-dot-timing;
         box-shadow: 0 2px 10px gray(600);
         padding: $o-horizontal-padding;
-        background-color: white;
+        background-color: $white;
         color: $o-main-text-color;
         opacity: 0;
         z-index: -1;

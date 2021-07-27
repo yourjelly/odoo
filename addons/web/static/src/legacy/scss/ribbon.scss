@@ -41,8 +41,8 @@
         right: 0;
 
         &::before, &::after {
-            border-top-color: black;
-            border-right-color: black;
+            border-top-color: $black;
+            border-right-color: $black;
         }
 
         &::before {

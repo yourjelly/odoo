@@ -25,7 +25,7 @@ $o-searchpanel-filter-default-color: #D59244;
     height: 100%;
     padding: $o-searchpanel-p-small $o-searchpanel-p-small $o-searchpanel-p*2 $o-searchpanel-p;
     border-right: 1px solid $gray-300;
-    background-color: white;
+    background-color: $white;
 
     .o_search_panel_category .o_search_panel_section_icon {
         color: $o-brand-odoo;

@@ -4,7 +4,7 @@ $o-tip-anchor-space: 0;
 $o-tip-bounce-half-size: 3px;
 $o-tip-color: $o-enterprise-color;
 $o-tip-border-width: 3px;
-$o-tip-border-color: white;
+$o-tip-border-color: $white;
 $o-tip-animation-speed: 500ms;
 $o-tip-arrow-size: 12px;
 
@@ -150,7 +150,7 @@ $o-tip-size-delay-in: $o-tip-duration-in - $o-tip-size-duration-in;
 
     &.active {
         border: $o-tip-border-width solid $o-tip-color !important;
-        background-color: white !important;
+        background-color: $white !important;
 
         transition:
             width $o-tip-size-duration-in ease $o-tip-size-delay-in,

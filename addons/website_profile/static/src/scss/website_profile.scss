@@ -155,7 +155,7 @@ $owprofile-color-bg: mix($body-bg, #efeff4);
             min-height: 35px;
 
             &:hover {
-                background-color: white;
+                background-color: $white;
             }
         }
     }

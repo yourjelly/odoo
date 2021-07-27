@@ -20,15 +20,27 @@ $o-brand-secondary: #f0eeee !default;
 $o-brand-lightsecondary: #e2e2e0 !default;
 
 // This is BS default
-$o-gray-100: #f8f9fa !default;
-$o-gray-200: #e9ecef !default;
-$o-gray-300: #dee2e6 !default;
-$o-gray-400: #ced4da !default;
+// $o-gray-100: #f8f9fa !default;
+// $o-gray-200: #e9ecef !default;
+// $o-gray-300: #dee2e6 !default;
+// $o-gray-400: #ced4da !default;
+// $o-gray-500: #adb5bd !default;
+// $o-gray-600: #6c757d !default;
+// $o-gray-700: #495057 !default;
+// $o-gray-800: #343a40 !default;
+// $o-gray-900: #212529 !default;
+
+$black:    #fff !default;
+$o-gray-900: #f8f9fa !default;
+$o-gray-800: #e9ecef !default;
+$o-gray-700: #dee2e6 !default;
+$o-gray-600: #ced4da !default;
 $o-gray-500: #adb5bd !default;
-$o-gray-600: #6c757d !default;
-$o-gray-700: #495057 !default;
-$o-gray-800: #343a40 !default;
-$o-gray-900: #212529 !default;
+$o-gray-400: #6c757d !default;
+$o-gray-300: #495057 !default;
+$o-gray-200: #343a40 !default;
+$o-gray-100: #212529 !default;
+$white:    #000 !default;
 
 $o-success: #28a745 !default;
 $o-info: #17a2b8 !default;
@@ -50,7 +62,7 @@ $o-main-link-color: darken($o-brand-primary, 5%) !default;
 $o-main-favorite-color: #f3cc00 !default;
 $o-main-code-color: #d2317b !default;
 
-$o-view-background-color: white !default;
+$o-view-background-color: $white !default;
 $o-shadow-color: #303030 !default;
 
 $o-form-lightsecondary: #ccc !default;
@@ -58,11 +70,11 @@ $o-form-lightsecondary: #ccc !default;
 $o-list-footer-bg-color: #eee !default;
 $o-list-footer-font-weight: bold !default;
 
-$o-tooltip-background-color: white !default;
+$o-tooltip-background-color: $white !default;
 $o-tooltip-color: #666666 !default;
-$o-tooltip-arrow-color: white !default;
+$o-tooltip-arrow-color: $white !default;
 $o-tooltip-text-color: #777777 !default;
-$o-tooltip-title-text-color: black !default;
+$o-tooltip-title-text-color: $black !default;
 $o-tooltip-title-background-color: #F7F7F7 !default;
 
 // Forms

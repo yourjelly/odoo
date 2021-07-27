@@ -7,7 +7,7 @@
     border-bottom-style: $border-bottom-style;
 }
 .o_stock_reports_body_print {
-    background-color: white;
+    background-color: $white;
     color: black;
     .o_stock_reports_level0 {
         @include o-stock-reports-lines($border-width: 1px, $font-weight: bold, $border-top-style: solid, $border-bottom-style: groove);

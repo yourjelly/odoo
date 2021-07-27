@@ -564,7 +564,7 @@ body.editor_enable.editor_has_snippets {
                     height: 100%;
 
                     &:focus, &:active, &:focus:active {
-                        background-color: black;
+                        background-color: $black;
                     }
 
                     &.color-button {
@@ -600,7 +600,7 @@ body.editor_enable.editor_has_snippets {
                             display: inline-block !important;
                             width: 15px !important;
                             height: 15px !important;
-                            background-color: white !important;
+                            background-color: $white !important;
                             margin-bottom: 0 !important;
 
                             &.active {

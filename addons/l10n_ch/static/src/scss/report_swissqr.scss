@@ -19,7 +19,7 @@ body.l10n_ch_qr {
 
     .swissqr_receipt {
         position: absolute;
-        background-color: white;
+        background-color: $white;
         border-color:black;
         border-width: 1pt 1pt 1pt 1pt;
         border-style: solid;
@@ -32,7 +32,7 @@ body.l10n_ch_qr {
 
     .swissqr_body {
         position: absolute;
-        background-color: white;
+        background-color: $white;
         border-color:black;
         border-width: 1pt 1pt 1pt 1pt;
         border-style: solid;
@@ -55,7 +55,7 @@ body.l10n_ch_qr {
 
     .ch_cross {
         position: absolute;
-        background-color: white;
+        background-color: $white;
         height: 8.75mm; /* 7 * 1.25 */
         width: 8.75mm; /* 7 * 1.25 */
         top: 44.375mm;  /* (16 + 23 - 7/2) * 1.25 = 41.5 * 1.25 */

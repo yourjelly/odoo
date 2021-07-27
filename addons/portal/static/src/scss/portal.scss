@@ -316,7 +316,7 @@ img, .media_iframe_video, .o_image {
         }
 
         @if ($o-portal-use-default-colors) {
-            background-color: white!important;
+            background-color: $white!important;
         }
     }
 

@@ -63,7 +63,7 @@ $o-wslides-fs-side-width: 300px;
     vertical-align: middle;
     @for $size from 1 through length($o-colors) {
         &.o_tag_color_#{$size - 1} {
-            $background-color: white;
+            $background-color: $white;
             // no color selected
             @if $size == 1 {
                 & {

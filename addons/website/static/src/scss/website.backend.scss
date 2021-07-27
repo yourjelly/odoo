@@ -362,7 +362,7 @@
                 background-color: darken($o-theme-kanban-gray, 4%);
 
                 .o_theme_cover, .o_theme_logo {
-                    background-color: white;
+                    background-color: $white;
                 }
             }
         }

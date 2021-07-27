@@ -141,7 +141,7 @@ body:not(.editor_has_snippets) {
 }
 @media only screen and (max-width: 767px) {
     .oe-toolbar {
-        background-color: white;
+        background-color: $white;
 
         .btn {
             color: black;

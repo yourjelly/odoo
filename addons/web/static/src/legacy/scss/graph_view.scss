@@ -13,7 +13,7 @@
     }
 
     div.o_tooltip_legend {
-        background-color: white;
+        background-color: $white;
         color:black;
         font-size: 12px;
         border: black solid 0.5px;
@@ -28,7 +28,7 @@
 
     div.o_graph_custom_tooltip {
         border-radius: 3px;
-        background-color: white;
+        background-color: $white;
         border: black solid 0.5px;
         position: absolute;
         z-index: 1;

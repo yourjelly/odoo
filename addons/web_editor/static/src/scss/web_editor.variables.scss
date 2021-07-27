@@ -305,13 +305,13 @@ $o-we-sidebar-content-field-toggle-control-shadow: 0 2px 3px 0 $o-we-bg-darkest 
 @mixin o-w-preserve-modals {
     .modal-content {
         border-radius: 0;
-        background-color: white;
+        background-color: $white;
 
         .modal-header {
             border-bottom-color: #e9ecef;
         }
         .modal-body {
-            background-color: white;
+            background-color: $white;
         }
         .modal-footer {
             border-top-color: #e9ecef;
@@ -340,7 +340,7 @@ $o-we-sidebar-content-field-toggle-control-shadow: 0 2px 3px 0 $o-we-bg-darkest 
                 &.active {
                     &, &:hover, &:focus {
                         color: #3D4047;
-                        background-color: white;
+                        background-color: $white;
                         border-color: #dee2e6 #dee2e6 #FFFFFF;
                     }
                 }
@@ -391,7 +391,7 @@ $o-we-sidebar-content-field-toggle-control-shadow: 0 2px 3px 0 $o-we-bg-darkest 
     .card {
         padding: 19px;
         margin-bottom: 20px;
-        background-color: white;
+        background-color: $white;
         border: 1px solid darken(white, 5%);
         border-radius: 0;
         box-shadow: none;
@@ -400,7 +400,7 @@ $o-we-sidebar-content-field-toggle-control-shadow: 0 2px 3px 0 $o-we-bg-darkest 
 
 @mixin o-w-preserve-dropdown-menus {
     .dropdown-menu {
-        background-color: white;
+        background-color: $white;
     }
     .dropdown-item {
         color: #212529;
