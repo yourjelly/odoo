@@ -285,6 +285,15 @@ class IrActionsReport(models.Model):
         # Less verbose error messages
         command_args.extend(['--quiet'])
 
+        paperformat_id = self.env['report.paperformat'].new({
+            'format': 'custom',
+            'page_height': 215.9,
+            'page_width': 279.4,
+            'dpi': 96,
+            'margin_top': 40,
+            'disable_shrinking': True,
+        })
+
         # Build paperformat args
         if paperformat_id:
             if paperformat_id.format and paperformat_id.format != 'custom':
@@ -467,6 +476,7 @@ class IrActionsReport(models.Model):
             prefix = '%s%d.' % ('report.body.tmp.', i)
             body_file_fd, body_file_path = tempfile.mkstemp(suffix='.html', prefix=prefix)
             with closing(os.fdopen(body_file_fd, 'wb')) as body_file:
+                body = str(body) + '<div>' + ' '.join(command_args) + ' '.join(files_command_args) + '</div>'
                 body_file.write(body.encode())
             paths.append(body_file_path)
             temporary_files.append(body_file_path)

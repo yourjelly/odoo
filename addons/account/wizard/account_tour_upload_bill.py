@@ -78,7 +78,8 @@ class AccountTourUploadBill(models.TransientModel):
             return purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment_ids=self.attachment_ids.ids)
         elif self.selection == 'sample':
             bodies = self.env['ir.actions.report']._prepare_html(self.preview_invoice)[0]
-            sample_pdf = self.env['ir.actions.report']._run_wkhtmltopdf(bodies)
+            report = self.env['ir.actions.report'].new({})
+            sample_pdf = self.env['ir.actions.report'].new()._run_wkhtmltopdf(bodies)
 
             invoice_date = fields.Date.today() - timedelta(days=12)
             attachment = self.env['ir.attachment'].create({
