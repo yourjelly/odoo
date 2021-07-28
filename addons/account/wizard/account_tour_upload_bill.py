@@ -3,7 +3,9 @@
 
 from odoo import fields, models, api, _
 from odoo.modules.module import get_resource_path
+from collections import defaultdict, namedtuple
 import base64
+from datetime import timedelta, datetime
 
 class AccountTourUploadBill(models.TransientModel):
     _name = 'account.tour.upload.bill'
@@ -24,13 +26,40 @@ class AccountTourUploadBill(models.TransientModel):
         compute='_compute_sample_bill_image'
     )
 
+    preview_invoice = fields.Html(
+        compute="_compute_preview_invoice",
+        string="Invoice Preview",
+        translate=True,
+    )
+
+    def _compute_preview_invoice(self):
+        invoice_date = fields.Date.today() - timedelta(days=12)
+        addr = [x for x in [
+            self.env.company.street,
+            self.env.company.street2,
+            ' '.join([x for x in [self.env.company.state_id.name, self.env.company.zip] if x]),
+            self.env.company.country_id.name,
+        ] if x]
+        ref = 'INV/%s/0001' % invoice_date.strftime('%Y/%m')
+        html = self.env.ref('account.bill_preview')._render({
+            'company_name': self.env.company.name,
+            'company_street_address': addr,
+            'invoice_name': 'Invoice ' + ref,
+            'invoice_ref': ref,
+            'invoice_date': invoice_date,
+            'invoice_due_date': invoice_date + timedelta(days=30),
+        })
+        for record in self:
+            record.preview_invoice = html
+
     def _selection_values(self):
         journal_alias = self.env['account.journal'] \
             .search([('type', '=', 'purchase'), ('company_id', '=', self.env.company.id)], limit=1)
 
-        return [('sample', _('Try a sample vendor bill')),
-                ('upload', _('Upload your own bill')),
-                ('email', _('Or send a bill to %s@%s', journal_alias.alias_name, journal_alias.alias_domain))]
+        values = [('sample', _('Try a sample vendor bill')), ('upload', _('Upload your own bill'))]
+        if journal_alias.alias_name and journal_alias.alias_domain:
+            values.append(('email', _('Or send a bill to %s@%s', journal_alias.alias_name, journal_alias.alias_domain)))
+        return values
 
     def _compute_sample_bill_image(self):
         """ Retrieve sample bill with facturx to speed up onboarding """
