@@ -29,6 +29,7 @@
 
         'report/report_stock_forecasted.xml',
         'report/report_stock_quantity.xml',
+        'report/report_stock_reception.xml',
         'report/stock_report_views.xml',
         'report/report_package_barcode.xml',
         'report/report_lot_barcode.xml',

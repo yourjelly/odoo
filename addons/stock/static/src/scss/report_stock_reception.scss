@@ -1,0 +1,60 @@
+.o_report_reception {
+
+    .o_report_reception_header {
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+
+    .o_priority {
+        display: inline-block;
+        padding: 0;
+        border: 0;
+        &.o_priority_star {
+            background-color: transparent;
+            font-size: 1.35em;
+            &.fa-star {
+                color: gold;
+            }
+        }
+    }
+    & .btn {
+        &.btn-primary {
+            background-color: $o-brand-primary;
+            border-color: $o-brand-primary;
+            &:hover:not([disabled]) {
+                background-color: darken($o-brand-primary, 10%);
+            }
+        }
+    }
+    &[disabled] {
+        opacity: 1;
+        background-color: $gray-200;
+        color: $btn-link-disabled-color;
+    }
+    & .badge {
+        line-height: .75;
+    }
+
+    @each $-name, $-bg-color in $theme-colors {
+        $-safe-text-color: color-yiq(mix($-bg-color, $o-view-background-color));
+        @include bg-variant(".bg-#{$-name}-light", rgba(theme-color($-name), 0.5), $-safe-text-color);
+    }
+}
+
+.o_label_page {
+    margin-left: -3mm;
+    margin-right: -3mm;
+    overflow: hidden;
+    page-break-before: always;
+    padding: 1mm 0mm 0mm;
+
+    &.o_label_dymo {
+        font-size:80%;
+        width: 57mm;
+        height: 32mm;
+    }
+
+    span[itemprop="name"] {
+        font-weight: bold;
+    }
+}
