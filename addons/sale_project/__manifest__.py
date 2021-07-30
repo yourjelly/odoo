@@ -18,6 +18,7 @@ This module allows to generate a project/task from sales orders.
         'views/project_task_views.xml',
         'views/sale_order_views.xml',
         'views/project_sharing_views.xml',
+        'views/sale_project_portal_templates.xml',
     ],
     'auto_install': True,
     'license': 'LGPL-3',

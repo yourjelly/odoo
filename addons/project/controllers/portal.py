@@ -6,6 +6,7 @@ from operator import itemgetter
 from markupsafe import Markup
 
 from odoo import conf, http, _
+from odoo.addons.base.models.ir_ui_view import keep_query
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -233,26 +234,32 @@ class ProjectCustomerPortal(CustomerPortal):
             'task': task,
             'user': request.env.user,
             'project_accessible': project_accessible,
+            'task_states': dict(task._fields['kanban_state']._description_selection(request.env))
         }
         return self._get_page_view_values(task, access_token, values, history, False, **kwargs)
 
     def _task_get_searchbar_sortings(self):
         return {
-            'date': {'label': _('Newest'), 'order': 'create_date desc'},
-            'name': {'label': _('Title'), 'order': 'name'},
-            'stage': {'label': _('Stage'), 'order': 'stage_id, project_id'},
-            'project': {'label': _('Project'), 'order': 'project_id, stage_id'},
-            'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc'},
-            'date_deadline': {'label': _('Deadline'), 'order': 'date_deadline asc'},
+            'date': {'label': _('Newest'), 'order': 'create_date desc', 'sequence': 1},
+            'name': {'label': _('Title'), 'order': 'name', 'sequence': 2},
+            'project': {'label': _('Project'), 'order': 'project_id, stage_id', 'sequence': 3},
+            'user': {'label': _('Assigned to'), 'order': 'user_id', 'sequence': 4},
+            'stage': {'label': _('Stage'), 'order': 'stage_id, project_id', 'sequence': 5},
+            'status': {'label': _('Status'), 'order': 'kanban_state', 'sequence': 6},
+            'priority': {'label': _('Priority'), 'order': 'priority desc', 'sequence': 7},
+            'date_deadline': {'label': _('Deadline'), 'order': 'date_deadline asc', 'sequence': 8},
+            'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc', 'sequence': 10},
         }
 
     def _task_get_searchbar_groupby(self):
         values = {
             'none': {'input': 'none', 'label': _('None'), 'order': 1},
             'project': {'input': 'project', 'label': _('Project'), 'order': 2},
-            'stage': {'input': 'stage', 'label': _('Stage'), 'order': 3},
-            'user': {'input': 'user', 'label': _('Assigned to'), 'order': 6},
-            'customer': {'input': 'customer', 'label': _('Customer'), 'order': 7},
+            'user': {'input': 'user', 'label': _('Assigned to'), 'order': 3},
+            'stage': {'input': 'stage', 'label': _('Stage'), 'order': 4},
+            'status': {'input': 'status', 'label': _('Status'), 'order': 5},
+            'priority': {'input': 'priority', 'label': _('Priority'), 'order': 6},
+            'customer': {'input': 'customer', 'label': _('Customer'), 'order': 9},
         }
         return dict(sorted(values.items(), key=lambda item: item[1]["order"]))
 
@@ -262,6 +269,8 @@ class ProjectCustomerPortal(CustomerPortal):
             'stage': 'stage_id',
             'user': 'user_id',
             'customer': 'partner_id',
+            'priority': 'priority',
+            'status': 'kanban_state',
         }
 
     def _task_get_order(self, order, groupby):
@@ -277,9 +286,11 @@ class ProjectCustomerPortal(CustomerPortal):
             'content': {'input': 'content', 'label': Markup(_('Search <span class="nolabel"> (in Content)</span>')), 'order': 1},
             'ref': {'input': 'ref', 'label': _('Search in Ref'), 'order': 1},
             'project': {'input': 'project', 'label': _('Search in Project'), 'order': 2},
-            'stage': {'input': 'stage', 'label': _('Search in Stages'), 'order': 3},
-            'user': {'input': 'user', 'label': _('Search in Assigned to'), 'order': 7},
-            'message': {'input': 'message', 'label': _('Search in Messages'), 'order': 8},
+            'user': {'input': 'user', 'label': _('Search in Assigned to'), 'order': 3},
+            'stage': {'input': 'stage', 'label': _('Search in Stages'), 'order': 4},
+            'status': {'input': 'status', 'label': _('Search in Status'), 'order': 5},
+            'priority': {'input': 'priority', 'label': _('Search in Priority'), 'order': 6},
+            'message': {'input': 'message', 'label': _('Search in Messages'), 'order': 10},
         }
         return dict(sorted(values.items(), key=lambda item: item[1]["order"]))
 
@@ -301,12 +312,20 @@ class ProjectCustomerPortal(CustomerPortal):
         if search_in in ('user', 'all'):
             user_ids = request.env['res.users'].sudo().search([('name', 'ilike', search)])
             search_domain.append([('user_id', 'in', user_ids.ids)])
+        if search_in in ('priority', 'all'):
+            search_domain.append([('priority', 'ilike', search == 'normal' and '0' or '1')])
+        if search_in in ('status', 'all'):
+            search_domain.append([
+                ('kanban_state', 'ilike', 'normal' if search == 'In Progress' else 'done' if search == 'Ready' else 'blocked' if search == 'Blocked' else search)
+            ])
         return OR(search_domain)
 
     @http.route(['/my/tasks', '/my/tasks/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_tasks(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, search=None, search_in='content', groupby=None, **kw):
         values = self._prepare_portal_layout_values()
         searchbar_sortings = self._task_get_searchbar_sortings()
+        searchbar_sortings = dict(sorted(self._task_get_searchbar_sortings().items(),
+                                         key=lambda item: item[1]["sequence"]))
 
         searchbar_filters = {
             'all': {'label': _('All'), 'domain': []},
@@ -377,6 +396,13 @@ class ProjectCustomerPortal(CustomerPortal):
         else:
             grouped_tasks = [tasks]
 
+        task_states = dict(request.env['project.task']._fields['kanban_state']._description_selection(request.env))
+        if sortby == 'status':
+            if groupby == 'none' and grouped_tasks:
+                grouped_tasks[0] = grouped_tasks[0].sorted(lambda tasks: task_states.get(tasks.kanban_state))
+            else:
+                grouped_tasks.sort(key=lambda tasks: task_states.get(tasks[0].kanban_state))
+
         values.update({
             'date': date_begin,
             'date_end': date_end,
@@ -394,6 +420,7 @@ class ProjectCustomerPortal(CustomerPortal):
             'groupby': groupby,
             'searchbar_filters': OrderedDict(sorted(searchbar_filters.items())),
             'filterby': filterby,
+            'task_states': task_states,
         })
         return request.render("project.portal_my_tasks", values)
 
@@ -409,3 +436,15 @@ class ProjectCustomerPortal(CustomerPortal):
             attachment.generate_access_token()
         values = self._task_get_page_view_values(task_sudo, access_token, **kw)
         return request.render("project.portal_my_task", values)
+
+    @http.route(['/my/task/<int:task_id>/state/<string:state>/<access_token>/'], type='http', auth="public", website=True)
+    def portal_task_state(self, task_id, state, access_token=None, **kw):
+        try:
+            task_sudo = self._document_check_access('project.task', task_id, access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        task_sudo.write({'kanban_state': state})
+        if kw.get('path') == 'tasks':
+            return request.redirect('/my/tasks?%s' % (keep_query('*')))
+        return request.redirect('/my/task/%s?%s' % (task_id, keep_query('*')))
