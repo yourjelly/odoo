@@ -91,6 +91,7 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/fields/**/*',
             'web/static/src/search/**/*',
             'web/static/src/views/**/*',
+            ('remove', 'web/static/src/views/form/button_box/*.scss'),
             'web/static/src/webclient/**/*',
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
             'web/static/src/env.js',
@@ -133,6 +134,9 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/scss/fields_extra.scss',
             'web/static/src/legacy/scss/form_view_extra.scss',
             'web/static/src/legacy/scss/list_view_extra.scss',
+
+            # Form style should be computed before
+            'web/static/src/views/form/button_box/*.scss',
 
             'web/static/src/legacy/action_adapters.js',
             'web/static/src/legacy/debug_manager.js',
