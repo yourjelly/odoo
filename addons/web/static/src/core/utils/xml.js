@@ -7,22 +7,26 @@ export class XMLParser {
      */
     parse() {}
 
+    /**
+     * @param {Element | string} xml
+     * @param {(node: Element, visitChildren: () => any) => any} callback
+     */
     visitXML(xml, callback) {
-        function visit(xml) {
-            if (xml) {
+        const visit = (node) => {
+            if (node) {
                 let didVisitChildren = false;
                 const visitChildren = () => {
-                    for (let child of xml.children) {
+                    for (let child of node.children) {
                         visit(child);
                     }
                     didVisitChildren = true;
                 };
-                const shouldVisitChildren = callback(xml, visitChildren);
+                const shouldVisitChildren = callback(node, visitChildren);
                 if (shouldVisitChildren !== false && !didVisitChildren) {
                     visitChildren();
                 }
             }
-        }
+        };
         const xmlDoc = typeof xml === "string" ? this.parseXML(xml) : xml;
         visit(xmlDoc);
     }
@@ -31,6 +35,16 @@ export class XMLParser {
         const parser = new DOMParser();
         const xml = parser.parseFromString(arch, "text/xml");
         return xml.documentElement;
+    }
+
+    isAttr(node, attr) {
+        const value = node.getAttribute(attr);
+        return {
+            truthy: () => value && /true|1/i.test(value),
+            falsy: () => !value || /false|0/i.test(value),
+            equalTo: (expected) => value === expected,
+            notEqualTo: (expected) => value !== expected,
+        };
     }
 }
 
