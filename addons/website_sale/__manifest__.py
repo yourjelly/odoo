@@ -43,6 +43,7 @@
             'website_sale/static/src/scss/website_sale.scss',
             'website_sale/static/src/scss/website_mail.scss',
             'website_sale/static/src/scss/website_sale_frontend.scss',
+            'website_sale/static/src/scss/website_sale_multirange_custom.scss',
             'sale/static/src/scss/sale_portal.scss',
             'sale/static/src/scss/product_configurator.scss',
             'sale/static/src/js/variant_mixin.js',
@@ -53,6 +54,7 @@
             'website_sale/static/src/js/website_sale_validate.js',
             'website_sale/static/src/js/website_sale_recently_viewed.js',
             'website_sale/static/src/js/website_sale_tracking.js',
+            'website_sale/static/src/js/website_sale_multirange_custom.js',
         ],
         'web._assets_primary_variables': [
             'website_sale/static/src/scss/primary_variables.scss',
