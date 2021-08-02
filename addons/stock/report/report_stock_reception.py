@@ -76,7 +76,7 @@ class ReceptionReport(models.AbstractModel):
                 ('product_id', 'in',
                     [p.id for p in list(product_to_qty_to_assign.keys()) + list(product_to_qty_draft.keys())]),
             ],
-            order='reservation_date, priority desc, date, id')
+            order='priority desc, date, id')
 
         products_to_outs = defaultdict(list)
         for out in outs:

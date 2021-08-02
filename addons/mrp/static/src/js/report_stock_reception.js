@@ -1,6 +1,7 @@
-/** @odoo-module alias=mrp.ReceptionReport **/
+odoo.define('mrp.ReceptionReport', function (require) {
+"use strict";
 
-import ReceptionReport from 'stock.ReceptionReport';
+const ReceptionReport = require('stock.ReceptionReport');
 
 ReceptionReport.include({
 
@@ -12,5 +13,7 @@ ReceptionReport.include({
             return this._printLabel(ev, 'mrp.report_reception_report_label_mrp', 'mrp.production')
         });
     },
+
+});
 
 });

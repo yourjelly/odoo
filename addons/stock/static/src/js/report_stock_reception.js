@@ -1,7 +1,9 @@
-/** @odoo-module alias=stock.ReceptionReport **/
+odoo.define('stock.ReceptionReport', function (require) {
+"use strict";
 
-import clientAction from 'report.client_action';
-import core from 'web.core';
+
+const clientAction = require('report.client_action');
+const core = require('web.core');
 
 const qweb = core.qweb;
 
@@ -211,4 +213,6 @@ const ReceptionReport = clientAction.extend({
 
 core.action_registry.add('reception_report', ReceptionReport);
 
-export default ReceptionReport
+return ReceptionReport;
+
+});
