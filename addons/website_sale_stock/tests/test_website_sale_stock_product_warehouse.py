@@ -31,14 +31,14 @@ class TestWebsiteSaleStockProductWarehouse(TestWebsiteSaleProductAttributeValueC
         # Create two stockable products
         product_1 = self.env['product.product'].create({
             'name': 'Product A',
-            'allow_to_order': 'available',
+            'inventory_availability': 'always',
             'type': 'product',
             'default_code': 'E-COM1',
         })
 
         product_2 = self.env['product.product'].create({
             'name': 'Product B',
-            'allow_to_order': 'available',
+            'inventory_availability': 'always',
             'type': 'product',
             'default_code': 'E-COM2',
         })

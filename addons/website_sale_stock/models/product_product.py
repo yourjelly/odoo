@@ -18,9 +18,3 @@ class ProductProduct(models.Model):
         cart = website.sale_get_order()
         for product in self:
             product.cart_qty = sum(cart.order_line.filtered(lambda p: p.product_id.id == product.id).mapped('product_uom_qty')) if cart else 0
-
-    def _get_next_incoming_move_date(self):
-        domains = self._get_domain_locations()
-        domain_move_in = [('product_id', '=', self.id), ('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domains[1]
-        move = self.env['stock.move'].search(domain_move_in)
-        return move[0].date if move else False

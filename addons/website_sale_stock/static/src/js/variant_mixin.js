@@ -28,33 +28,32 @@ require('website_sale.website_sale');
  * @param {Array} combination
  */
 VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
-    let product_id = 0;
+    var product_id = 0;
     // needed for list view of variants
     if ($parent.find('input.product_id:checked').length) {
         product_id = $parent.find('input.product_id:checked').val();
     } else {
         product_id = $parent.find('.product_id').val();
     }
-    const isMainProduct = combination.product_id &&
+    var isMainProduct = combination.product_id &&
         ($parent.is('.js_main_product') || $parent.is('.main_product')) &&
         combination.product_id === parseInt(product_id);
 
-    if (!this.isWebsite || !isMainProduct) {
+    if (!this.isWebsite || !isMainProduct){
         return;
     }
 
-    const $addQtyInput = $parent.find('input[name="add_qty"]');
-    let qty = $addQtyInput.val();
+    var qty = $parent.find('input[name="add_qty"]').val();
 
     $parent.find('#add_to_cart').removeClass('out_of_stock');
     $parent.find('.o_we_buy_now').removeClass('out_of_stock');
-    if (combination.product_type === 'product' && combination.allow_to_order === 'available') {
+    if (combination.product_type === 'product' && _.contains(['always', 'threshold'], combination.inventory_availability)) {
         combination.free_qty -= parseInt(combination.cart_qty);
-        $addQtyInput.data('max', combination.free_qty || 1);
         if (combination.free_qty < 0) {
             combination.free_qty = 0;
         }
         if (qty > combination.free_qty) {
+            var $addQtyInput = $parent.find('input[name="add_qty"]');
             qty = combination.free_qty || 1;
             $addQtyInput.val(qty);
         }
@@ -69,7 +68,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
             .find('.availability_message_' + combination.product_template)
             .remove();
 
-        const $message = $(QWeb.render(
+        var $message = $(QWeb.render(
             'website_sale_stock.product_availability',
             combination
         ));
@@ -82,20 +81,9 @@ publicWidget.registry.WebsiteSale.include({
      * Adds the stock checking to the regular _onChangeCombination method
      * @override
      */
-    _onChangeCombination: function () {
+    _onChangeCombination: function (){
         this._super.apply(this, arguments);
         VariantMixin._onChangeCombinationStock.apply(this, arguments);
-    },
-    /**
-     * Recomputes the combination after adding a product to the cart
-     * @override
-     */
-    _onClickAdd(ev) {
-        return this._super.apply(this, arguments).then(() => {
-            if ($('div.availability_messages').length) {
-                this._getCombinationInfo(ev);
-            }
-        });
     }
 });
 

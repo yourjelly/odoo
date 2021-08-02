@@ -24,7 +24,6 @@ Then it can be made specific at the product level.
     'demo': [
         'data/website_sale_stock_demo.xml',
     ],
-    'post_init_hook': '_set_default_stock_messages',
     'auto_install': True,
     'assets': {
         'web.assets_frontend': [
