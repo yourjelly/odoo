@@ -204,6 +204,7 @@
             'mail/static/src/widgets/discuss/discuss.js',
             'mail/static/src/widgets/discuss_invite_partner_dialog/discuss_invite_partner_dialog.js',
             'mail/static/src/widgets/form_renderer/form_renderer.js',
+            'mail/static/src/widgets/form_renderer/wowl_form_renderer.js',
             'mail/static/src/widgets/messaging_menu/messaging_menu.js',
             'mail/static/src/widgets/notification_alert/notification_alert.js',
             'mail/static/src/components/notification_list/notification_list_item.scss',
