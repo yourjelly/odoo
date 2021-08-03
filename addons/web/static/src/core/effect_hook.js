@@ -38,8 +38,10 @@ export function useEffect(effect, computeDependencies = () => [NaN]) {
         }
     });
     onPatched(() => {
+        const newDeps = computeDependencies();
+        shouldReapplyOnPatch = newDeps.some((val, i) => val !== dependencies[i]);
         if (shouldReapplyOnPatch) {
-            cleanup = effect(...dependencies) || NO_OP;
+            cleanup = effect(...newDeps) || NO_OP;
         }
     });
 
