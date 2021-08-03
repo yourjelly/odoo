@@ -218,6 +218,7 @@ export class View extends Component {
             },
             arch,
             fields,
+            fieldsView: viewDescription[type],
             resModel,
             useSampleModel: false,
         };
