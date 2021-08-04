@@ -55,6 +55,8 @@ class OdooController(http.Controller):
 
         # Reshape the notification data for parsing
         if event_code == 'AUTHORISATION':
+            # By default, Adyen automatically captures transactions
+            # authorisation = Done for tx, unless we explicitly request manual capture.
             notification_data['resultCode'] = 'Authorised'
         elif event_code == 'CANCELLATION':
             notification_data['resultCode'] = 'Cancelled'

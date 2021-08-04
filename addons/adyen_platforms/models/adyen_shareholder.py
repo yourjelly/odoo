@@ -13,7 +13,7 @@ class AdyenShareholder(models.Model):
     _description = 'Adyen for Platforms Shareholder'
     _rec_name = 'full_name'
 
-    adyen_account_id = fields.Many2one('adyen.account', ondelete='cascade')
+    adyen_account_id = fields.Many2one('adyen.account', ondelete='cascade', required=True)
     shareholder_reference = fields.Char('Reference', default=lambda self: uuid.uuid4().hex)
     shareholder_uuid = fields.Char('UUID')  # Given by Adyen
     first_name = fields.Char('First Name', required=True)
@@ -38,6 +38,7 @@ class AdyenShareholder(models.Model):
         for shareholder in self.filtered('adyen_kyc_ids'):
             kyc = shareholder.adyen_kyc_ids._sort_by_status()
             shareholder.kyc_status = kyc[0].status
+            # FIXME ANVFE what about the kyc_status_message ?
 
     @api.depends('first_name', 'last_name')
     def _compute_full_name(self):
@@ -46,16 +47,17 @@ class AdyenShareholder(models.Model):
 
     @api.model
     def create(self, values):
-        adyen_shareholder_id = super().create(values)
-        adyen_account_id = self.env['adyen.account'].browse(values.get('adyen_account_id'))
-        response = adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(values))
+        adyen_shareholder = super().create(values)
+        # TODO ANVFE retry mechanism ?
+        # To avoid blocking the update of the account locally ?
+        response = adyen_shareholder.adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(values))
 
         shareholders = response['accountHolderDetails']['businessDetails']['shareholders']
-        created_shareholder = next(shareholder for shareholder in shareholders if shareholder['shareholderReference'] == adyen_shareholder_id.shareholder_reference)
-        adyen_shareholder_id.with_context(update_from_adyen=True).write({
+        created_shareholder = next(shareholder for shareholder in shareholders if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
+        adyen_shareholder.with_context(update_from_adyen=True).write({
             'shareholder_uuid': created_shareholder['shareholderCode'],
         })
-        return adyen_shareholder_id
+        return adyen_shareholder
 
     def write(self, vals):
         res = super().write(vals)
@@ -66,10 +68,10 @@ class AdyenShareholder(models.Model):
     def unlink(self):
         self.check_access_rights('unlink')
 
-        for shareholder_id in self:
-            shareholder_id.adyen_account_id._adyen_rpc('v1/delete_shareholders', {
-                'accountHolderCode': shareholder_id.adyen_account_id.account_holder_code,
-                'shareholderCodes': [shareholder_id.shareholder_uuid],
+        for shareholder in self:
+            shareholder.adyen_account_id._adyen_rpc('v1/delete_shareholders', {
+                'accountHolderCode': shareholder.adyen_account_id.account_holder_code,
+                'shareholderCodes': [shareholder.shareholder_uuid],
             })
         return super().unlink()
 
