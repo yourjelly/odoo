@@ -6,20 +6,17 @@ from odoo import api, fields, models
 
 class PaymentWizard(models.TransientModel):
     """ Override for the sale quotation onboarding panel. """
-
-    _inherit = 'payment.acquirer.onboarding.wizard'
     _name = 'sale.payment.acquirer.onboarding.wizard'
-    _description = 'Sale Payment acquire onboarding wizard'
+    _inherit = 'payment.acquirer.onboarding.wizard'
+    _description = 'Sale Payment acquirer onboarding wizard'
 
-    def _get_default_payment_method(self):
-        return self.env.company.sale_onboarding_payment_method or 'digital_signature'
+    @api.model
+    def _default_payment_method(self):
+        return super()._default_payment_method() or 'digital_signature'
 
     payment_method = fields.Selection(selection_add=[
         ('digital_signature', "Electronic signature"),
-        ('odoo', "Credit & Debit Card with Odoo Payment"),
-        ('manual', "Custom payment instructions"),
-    ], default=_get_default_payment_method)
-    #
+    ])
 
     def _set_payment_acquirer_onboarding_step_done(self):
         """ Override. """
@@ -29,7 +26,7 @@ class PaymentWizard(models.TransientModel):
         self.env.company.sale_onboarding_payment_method = self.payment_method
         if self.payment_method == 'digital_signature':
             self.env.company.portal_confirmation_sign = True
-        if self.payment_method in ('odoo', 'manual'):
+        elif self.payment_method in ('odoo', 'manual'):
             self.env.company.portal_confirmation_pay = True
 
-        return super(PaymentWizard, self).add_payment_methods(*args, **kwargs)
+        return super().add_payment_methods(*args, **kwargs)
