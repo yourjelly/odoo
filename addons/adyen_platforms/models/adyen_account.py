@@ -106,8 +106,6 @@ class AdyenAccount(models.Model):
     registration_number = fields.Char('Registration Number')
 
     # Adyen Account Status - internal use
-    # FIXME ANVFE seems highlight for rejected accounts doesn't work...
-    # or acc notifications is not correclty supported ?
     account_status = fields.Selection(string='Internal Account Status', selection=[
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -246,7 +244,6 @@ class AdyenAccount(models.Model):
             values.get('payout_schedule', 'biweekly'),
             'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
         response = self._adyen_rpc('v1/create_account_holder', create_data)
-        # FIXME ANVFE verify wrong response are correctly managed
 
         adyen_account.with_context(update_from_adyen=True).write({
             'account_code': response['adyen_response']['accountCode'],
@@ -255,8 +252,6 @@ class AdyenAccount(models.Model):
         })
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
-
-        # TODO ANVFE post explanation message on chatter ?
 
         return adyen_account
 
@@ -346,7 +341,6 @@ class AdyenAccount(models.Model):
 
         :param dict values: create/write values to forward to Adyen
         """
-        print("ADYEN PLATFORMS: ACCOUNT CREATION VALUES: ", values)
         fields = values.keys()
         data = {
             'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
@@ -455,8 +449,8 @@ class AdyenAccount(models.Model):
 
     @api.model
     def _sync_adyen_cron(self):
-        # FIXME ANVFE do not try to sync transactions for pending accounts...
-        self.env['adyen.account'].search([]).sync_transactions()
+        # Do not sync transactions for suspended accounts (pending validation)
+        self.env['adyen.account'].search([('account_status', '!=', 'suspended')]).sync_transactions()
 
     def _handle_notification(self, notification_data):
         """NOTE: sudoed env"""
@@ -466,7 +460,7 @@ class AdyenAccount(models.Model):
         event_type = notification_data.get('eventType')
 
         # TODO ANVFE REMOVE OR SET DEBUG
-        _logger.info("ADYEN PLATFORMS: handling notification %s with content %s", event_type, content)
+        _logger.info("ODOO PAYMENTS: handling notification %s with content %s", event_type, content)
 
         if event_type == 'ODOO_ACCOUNT_STATUS_CHANGE':
             self._handle_odoo_account_status_change(content)

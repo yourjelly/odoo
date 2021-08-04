@@ -61,8 +61,6 @@ class AdyenProxyAuth(requests.auth.AuthBase):
 def odoo_payments_proxy_control(func, *args, **kwargs):
     _logger.debug('Check notification from Odoo Payments')
 
-    # FIXME ANVFE we shouldn't raise for wrong requests, only discard them IMHO
-    # Otherwise, some outdated notifications could block the webhook(s)...
     adyen_uuid = request.httprequest.headers.get('oe-adyen-uuid')
     account = request.env['adyen.account'].sudo().search([
         ('adyen_uuid', '=', adyen_uuid)])

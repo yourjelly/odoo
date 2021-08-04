@@ -23,9 +23,9 @@ class AdyenBankAccount(models.Model):
     owner_name = fields.Char(
         'Owner Name', required=True,
         help="The name of the bank account owner.")
-    # FIXME ANVFE if there is a limit to available countries, why do we not restrict the acquirer in get_compat_acq ?
     # FIXME ANVFE Bank account country cannot be different from address country except for EU
-    # FIXME https://docs.adyen.com/account/supported-currencies
+    # FIXME ANVFE add information on best payout currencies ?
+    # https://docs.adyen.com/account/supported-currencies
     country_id = fields.Many2one(
         'res.country', string='Country',
         domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)], required=True,

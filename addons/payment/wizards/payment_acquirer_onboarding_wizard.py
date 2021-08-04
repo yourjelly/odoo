@@ -127,7 +127,6 @@ class PaymentWizard(models.TransientModel):
         # self.sudo().unlink()
 
         # the user clicked `apply` and not cancel so we can assume this step is done.
-        # NOTE ANVFE: do we wait for adyen account creation to specify onboarding step as done ?
         self._set_payment_acquirer_onboarding_step_done()
         if self.payment_method == 'odoo':
             return new_env['payment.acquirer'].odoo_create_adyen_account()
