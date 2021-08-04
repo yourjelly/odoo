@@ -106,6 +106,8 @@ class AdyenAccount(models.Model):
     registration_number = fields.Char('Registration Number')
 
     # Adyen Account Status - internal use
+    # FIXME ANVFE seems highlight for rejected accounts doesn't work...
+    # or acc notifications is not correclty supported ?
     account_status = fields.Selection(string='Internal Account Status', selection=[
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -238,9 +240,11 @@ class AdyenAccount(models.Model):
         adyen_account = super().create(values)
 
         # Create account on odoo.com, proxy and Adyen
-        create_data = self._format_data(values)
+        create_data = self._prepare_account_data(values)
         # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
-        create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
+        create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(
+            values.get('payout_schedule', 'biweekly'),
+            'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
         response = self._adyen_rpc('v1/create_account_holder', create_data)
         # FIXME ANVFE verify wrong response are correctly managed
 
@@ -264,7 +268,7 @@ class AdyenAccount(models.Model):
         }
         res = super().write(vals)
         if vals.keys() & adyen_fields and not self.env.context.get('update_from_adyen'):
-            self._adyen_rpc('v1/update_account_holder', self._format_data(vals))
+            self._adyen_rpc('v1/update_account_holder', self._prepare_account_data(vals))
 
         if 'payout_schedule' in vals:
             self._update_payout_schedule(vals['payout_schedule'])
@@ -337,7 +341,12 @@ class AdyenAccount(models.Model):
             'documentContent': content.decode(),
         })
 
-    def _format_data(self, values):
+    def _prepare_account_data(self, values):
+        """
+
+        :param dict values: create/write values to forward to Adyen
+        """
+        print("ADYEN PLATFORMS: ACCOUNT CREATION VALUES: ", values)
         fields = values.keys()
         data = {
             'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
@@ -633,8 +642,9 @@ class AdyenAccount(models.Model):
             'accountHolderCode': self.account_holder_code,
             'transactionListsPerAccount': [{
                 'accountCode': self.account_code,
-                'page': page,
-            }]
+                'page': page, # Each page lists up to 50 txs
+            }],
+            # transactionStatuses not provided to receive all adyen txs
         })
         transaction_list = response['accountTransactionLists'][0]
         return transaction_list['transactions'], transaction_list['hasNextPage']
