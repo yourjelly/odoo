@@ -364,7 +364,7 @@ class AdyenAccount(models.Model):
             data['legalEntity'] = 'Business' if values['is_business'] else 'Individual'
 
         if (values.get('is_business') or self.is_business) and {'legal_business_name', 'doing_business_as', 'registration_number'} & fields:
-            business_details = holder_details['business_details'] = {}
+            business_details = holder_details['businessDetails'] = {}
             for source, dest in [
                 ('legal_business_name', 'legalBusinessName'),
                 ('doing_business_as', 'doingBusinessAs'),
