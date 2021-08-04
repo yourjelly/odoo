@@ -252,6 +252,8 @@ class AdyenAccount(models.Model):
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
 
+        # TODO ANVFE post explanation message on chatter ?
+
         return adyen_account
 
     def write(self, vals):
@@ -271,6 +273,8 @@ class AdyenAccount(models.Model):
 
     def unlink(self):
         self.check_access_rights('unlink')
+
+        # TODO ANVFE better highlight/distinction between closed and non closed accounts
 
         for adyen_account_id in self:
             adyen_account_id._adyen_rpc('v1/close_account_holder', {
@@ -442,6 +446,7 @@ class AdyenAccount(models.Model):
 
     @api.model
     def _sync_adyen_cron(self):
+        # FIXME ANVFE do not try to sync transactions for pending accounts...
         self.env['adyen.account'].search([]).sync_transactions()
 
     def _handle_notification(self, notification_data):
@@ -450,6 +455,9 @@ class AdyenAccount(models.Model):
 
         content = notification_data.get('content', {})
         event_type = notification_data.get('eventType')
+
+        # TODO ANVFE REMOVE OR SET DEBUG
+        _logger.info("ADYEN PLATFORMS: handling notification %s with content %s", event_type, content)
 
         if event_type == 'ODOO_ACCOUNT_STATUS_CHANGE':
             self._handle_odoo_account_status_change(content)
