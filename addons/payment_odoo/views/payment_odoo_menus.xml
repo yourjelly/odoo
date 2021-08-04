@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem id="root_adyen_menu"
+        name="Odoo Payments"
+        parent="account.root_payment_menu"
+        sequence="10">
+        <menuitem id="menu_adyen_transaction"
+            action="adyen_platforms.adyen_transaction_action"/>
+        <menuitem id="menu_adyen_balance"
+            action="adyen_platforms.adyen_balance_action"/>
+        <menuitem id="menu_adyen_account"
+            action="adyen_platforms.adyen_account_action"/>
+    </menuitem>
+
+</odoo>
