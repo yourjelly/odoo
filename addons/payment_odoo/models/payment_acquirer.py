@@ -27,7 +27,7 @@ class PaymentAcquirer(models.Model):
 
         This is used for the `shopperReference` field in communications with Adyen.
 
-        :param recordset partner_id: The partner making the transaction, as a `res.partner` id
+        :param int partner_id: The partner making the transaction, as a `res.partner` id
         :return: The unique reference for the partner
         :rtype: str
         """
