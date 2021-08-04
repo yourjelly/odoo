@@ -15,31 +15,53 @@ class AdyenBankAccount(models.Model):
     _name = 'adyen.bank.account'
     _description = 'Adyen for Platforms Bank Account'
 
-    adyen_account_id = fields.Many2one('adyen.account', ondelete='cascade')
+    # TODO ANVFE try to use res.bank & res.partner.bank models for easier autofill ?
+
+    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
     bank_account_reference = fields.Char('Reference', default=lambda self: uuid.uuid4().hex)
     bank_account_uuid = fields.Char('UUID')  # Given by Adyen
-    owner_name = fields.Char('Owner Name', required=True)
-    country_id = fields.Many2one('res.country', string='Country', domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)], required=True)
+    owner_name = fields.Char(
+        'Owner Name', required=True,
+        help="The name of the bank account owner.")
+    # FIXME ANVFE if there is a limit to available countries, why do we not restrict the acquirer in get_compat_acq ?
+    country_id = fields.Many2one(
+        'res.country', string='Country',
+        domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)], required=True,
+        help="The country in which the bank account is registered.")
     country_code = fields.Char(related='country_id.code')
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True)
+    currency_id = fields.Many2one(
+        'res.currency', string='Currency', required=True,
+        help="The currency in which the bank account deals.")
     currency_name = fields.Char(related='currency_id.name', string='Currency Name')
+    # TODO ANVFE use base_iban to validate the iban ?
     iban = fields.Char('IBAN')
-    account_number = fields.Char('Account Number')
+    account_number = fields.Char(
+        'Account Number',
+        help="The bank account number (without separators).")
     branch_code = fields.Char('Branch Code')
-    bank_city = fields.Char('Bank City')
-    bank_code = fields.Char('Bank Code')
-    bank_name = fields.Char('Bank Name')
+    bank_city = fields.Char('Bank City', help="The city in which the bank branch is located.")
+    bank_code = fields.Char('Bank Code', help="The bank code of the banking institution with which the bank account is registered.")
+    bank_name = fields.Char('Bank Name', help="The name of the banking institution with which the bank account is held.")
     account_type = fields.Selection(string='Account Type', selection=[
         ('checking', 'Checking'),
         ('savings', 'Savings'),
-    ])
-    owner_country_id = fields.Many2one('res.country', string='Owner Country')
-    owner_state_id = fields.Many2one('res.country.state', 'Owner State', domain="[('country_id', '=?', owner_country_id)]")
-    owner_street = fields.Char('Owner Street')
-    owner_city = fields.Char('Owner City')
-    owner_zip = fields.Char('Owner ZIP')
-    owner_house_number_or_name = fields.Char('Owner House Number or Name')
+    ], help="The type of bank account. Only applicable to bank accounts held in the USA.")
 
+    # TODO ANVFE auto-fill owner by default with current/company partner ???
+    # Or with adyen account data ?
+    owner_country_id = fields.Many2one(
+        'res.country', string='Owner Country',
+        help="The country of residence of the bank account owner.")
+    owner_state_id = fields.Many2one('res.country.state', 'Owner State', domain="[('country_id', '=?', owner_country_id)]")
+    owner_street = fields.Char('Owner Street', help="The street name of the residence of the bank account owner.")
+    owner_city = fields.Char('Owner City', help="The city of residence of the bank account owner.")
+    owner_zip = fields.Char('Owner ZIP', help="The postal code of the residence of the bank account owner.")
+    owner_house_number_or_name = fields.Char(
+        'Owner House Number or Name',
+        help="The house name or number of the residence of the bank account owner.")
+
+    # FIXME ANVFE limit document to required specifications
+    # https://docs.adyen.com/platforms/verification-checks/bank-account-check#requirements
     bank_statement = fields.Binary('Bank Statement', help="You need to provide a bank statement to allow payouts. \
         The file must be a bank statement, a screenshot of your online banking environment, a letter from the bank or a cheque and must contain \
         the logo of the bank or it's name in a unique font, the bank account details, the name of the account holder.\
@@ -108,6 +130,7 @@ class AdyenBankAccount(models.Model):
         owner_country_id = self.env['res.country'].browse(values.get('owner_country_id')) if values.get('owner_country_id') else self.owner_country_id
         owner_state_id = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('owner_state_id') else self.owner_state_id
         return {
+            # FIXME ANVFE reduce payload for unspecified data ?
             'accountHolderCode': adyen_account_id.account_holder_code,
             'accountHolderDetails': {
                 'bankAccountDetails': [{
@@ -115,20 +138,27 @@ class AdyenBankAccount(models.Model):
                     'accountType': values.get('account_type') or self.account_type or None,
                     'bankAccountReference': values.get('bank_account_reference') or self.bank_account_reference,
                     'bankAccountUUID': values.get('bank_account_uuid') or self.bank_account_uuid or None,
+                    # FIXME ANVFE missing bankBicSwift ?
                     'bankCity': values.get('bank_city') or self.bank_city or None,
                     'bankCode': values.get('bank_code') or self.bank_code or None,
                     'bankName': values.get('bank_name') or self.bank_name or None,
                     'branchCode': values.get('branch_code') or self.branch_code or None,
+                    # checkCode
                     'countryCode': country_id.code,
                     'currencyCode': currency_id.name,
                     'iban': values.get('iban') or self.iban or None,
                     'ownerCity': values.get('owner_city') or self.owner_city or None,
                     'ownerCountryCode': owner_country_id.code or None,
+                    # ownerDateOfBirth
                     'ownerHouseNumberOrName': values.get('owner_house_number_or_name') or self.owner_house_number_or_name or None,
                     'ownerName': values.get('owner_name') or self.owner_name,
+                    # ownerNationality
                     'ownerPostalCode': values.get('owner_zip') or self.owner_zip or None,
                     'ownerState': owner_state_id.code or None,
                     'ownerStreet': values.get('owner_street') or self.owner_street or None,
+                    # primaryAccount
+                    # taxId
+                    # urlForVerification
                 }],
             }
         }

@@ -22,7 +22,7 @@ class AdyenTransaction(models.Model):
     _order = 'date desc'
     _rec_name = 'reference'
 
-    adyen_account_id = fields.Many2one('adyen.account')
+    adyen_account_id = fields.Many2one('adyen.account', required=True)
     reference = fields.Char('Reference', index=True, required=True)
     capture_reference = fields.Char('Capture Reference')
     total_amount = fields.Float('Customer Amount')

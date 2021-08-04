@@ -7,7 +7,14 @@
     'category': '',
     'summary': 'Base Module for Adyen for Platforms',
     'description': 'Base Module for Adyen for Platforms, used in eCommerce and PoS',
-    'depends': ['mail', 'web'],
+    'depends': [
+        # Advanced address formatting (necessary to specify home number separately)
+        'base_address_extended',
+        'base_vat', # VAT validation
+        'mail',
+        'phone_validation', # Phone numbers validation
+        'web',
+    ],
     'data': [
         'data/adyen_platforms_data.xml',
         'security/ir.model.access.csv',

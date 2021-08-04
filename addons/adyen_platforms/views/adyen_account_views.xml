@@ -5,20 +5,25 @@
         <field name="model">adyen.account</field>
         <field name="arch" type="xml">
             <form string="Adyen Account" create="false" js_class="adyen_account_form">
-                <field name="account_code" invisible="1" />
-                <field name="account_holder_code" invisible="1" />
-                <field name="account_status" invisible="1" />
+                <field name="account_code" invisible="1"/>
+                <field name="account_holder_code" invisible="1"/>
+                <field name="account_status" invisible="1"/>
                 <field name="adyen_uuid" invisible="1"/>
-                <field name="kyc_tier" invisible="1" />
-                <field name="payout_allowed" invisible="1" />
+                <field name="kyc_tier" invisible="1"/>
+                <field name="payout_allowed" invisible="1"/>
                 <header>
-                    <button name="sync_transactions" string="Sync Transactions" type="object" attrs="{'invisible': [('account_code', '=', False)]}" groups="base.group_no_one" />
-                    <field name="state" widget="statusbar" />
+                    <button name="sync_transactions" string="Sync Transactions" type="object"
+                        attrs="{'invisible': ['|', ('account_code', '=', False), ('state', '=', 'pending')]}"
+                        groups="base.group_no_one"/>
+                    <field name="state" widget="statusbar" attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_show_transactions" type="object"
+                        <button
+                            name="action_show_transactions" type="object"
+                            attrs="{'invisible': [('id', '=', False)]}"
                             class="oe_stat_button" icon="fa-credit-card">
+                            <!-- NOTE: statbutton shown on purpose even if there are no transactions -->
                             <div class="o_stat_info">
                                 <field name="transactions_count" class="o_stat_value"/>
                                 <span class="o_stat_text"> Transactions</span>
@@ -171,4 +176,5 @@
             action = model.action_create_redirect()
         </field>
     </record>
+
 </odoo>
