@@ -31,6 +31,7 @@ class AdyenTransaction(models.Model):
     fees = fields.Float('Fees')
     fixed_fees = fields.Float('Fixed Fees')
     variable_fees = fields.Float('Variable Fees')
+    # FIXME ANVFE if it's fixed, it should be a computed field (not stored IMHO)
     fees_currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref('base.EUR'))
     date = fields.Datetime('Date')
     description = fields.Char('Description')
@@ -287,6 +288,7 @@ class AdyenTransactionPayout(models.Model):
     _description = 'Payout Transaction'
     _order = 'date desc'
 
+    # FIXME ANVFE related to the bank_account adyen_account_id ?
     adyen_account_id = fields.Many2one('adyen.account')
     date = fields.Datetime()
     amount = fields.Float('Amount', required=True)
