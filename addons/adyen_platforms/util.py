@@ -26,9 +26,9 @@ def to_minor_currency(amount, decimal=2):
     return int(float_round(amount, decimal) * (10**decimal))
 
 class AdyenProxyAuth(requests.auth.AuthBase):
-    def __init__(self, adyen_account_id):
+    def __init__(self, adyen_account):
         super().__init__()
-        self.adyen_account_id = adyen_account_id
+        self.adyen_account_id = adyen_account
 
     def __call__(self, request):
         h = hmac.new(self.adyen_account_id.proxy_token.encode('utf-8'), digestmod=hashlib.sha256)
@@ -62,11 +62,12 @@ def odoo_payments_proxy_control(func, *args, **kwargs):
     _logger.debug('Check notification from Odoo Payments')
 
     adyen_uuid = request.httprequest.headers.get('oe-adyen-uuid')
-    account_id = request.env['adyen.account'].sudo().search([('adyen_uuid', '=', adyen_uuid)])
-    if not account_id:
+    account = request.env['adyen.account'].sudo().search([
+        ('adyen_uuid', '=', adyen_uuid)])
+    if not account:
         raise Forbidden()
 
-    secret = account_id.proxy_token.encode('utf8')
+    secret = account.proxy_token.encode('utf8')
     msg_signature = request.httprequest.headers.get('oe-signature')  # base64 encoded hmac sha256 digest
     msg_timestamp = request.httprequest.headers.get('oe-timestamp')
 

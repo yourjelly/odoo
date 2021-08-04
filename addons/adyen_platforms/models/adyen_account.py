@@ -17,6 +17,8 @@ from odoo.osv import expression
 from odoo.tools import format_amount, format_datetime
 
 from odoo.addons.adyen_platforms.util import AdyenProxyAuth, to_major_currency
+from odoo.addons.mail.tools import mail_validation
+from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
 
@@ -62,6 +64,7 @@ class AdyenAccount(models.Model):
     transactions_count = fields.Integer(compute='_compute_transactions_count')
     transaction_payout_ids = fields.One2many('adyen.transaction.payout', 'adyen_account_id')
 
+    # FIXME ANVFE add support for non profit orgs ?
     is_business = fields.Boolean('Is a business', required=True)
 
     # Payout
@@ -84,11 +87,12 @@ class AdyenAccount(models.Model):
     first_name = fields.Char('First Name')
     last_name = fields.Char('Last Name')
     date_of_birth = fields.Date('Date of birth')
-    document_number = fields.Char('ID Number',
+    document_number = fields.Char(
+        'ID Number',
         help="The type of ID Number required depends on the country:\n"
-            "US: Social Security Number (9 digits or last 4 digits)\n"
-            "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
-            "Australia: Document Number")
+        "US: Social Security Number (9 digits or last 4 digits)\n"
+        "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
+        "Australia: Document Number")
     document_type = fields.Selection(string='Document Type', selection=[
         ('ID', 'ID'),
         ('PASSPORT', 'Passport'),
@@ -127,6 +131,31 @@ class AdyenAccount(models.Model):
         ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
     ]
 
+    @api.constrains('phone_number')
+    def _check_phone_number(self):
+        for account in self:
+            phone_validation.phone_parse(
+                account.phone_number,
+                account.country_id.code)
+
+    @api.constrains('phone_number')
+    def _check_email(self):
+        for account in self:
+            if not mail_validation.mail_validate(account.email):
+                raise ValidationError(_(
+                    "The given email address is invalid: %s", account.email))
+
+    @api.constrains('registration_number')
+    def _check_vat(self):
+        for account in self:
+            if not account.env['res.partner'].simple_vat_check(
+                account.country_id.code,
+                account.registration_number):
+                raise ValidationError(_(
+                    "The given registration number is invalid: %s",
+                    account.registration_number))
+
+    @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
         company_fields = {
@@ -134,7 +163,8 @@ class AdyenAccount(models.Model):
             'state_id': 'state_id',
             'city': 'city',
             'zip': 'zip',
-            'street': 'street',
+            'street': 'street_name',  # base_address_extended
+            'house_number_or_name': 'street_number',  # base_address_extended
             'email': 'email',
             'phone_number': 'phone',
         }
@@ -205,21 +235,24 @@ class AdyenAccount(models.Model):
 
     @api.model
     def create(self, values):
-        adyen_account_id = super().create(values)
+        adyen_account = super().create(values)
 
         # Create account on odoo.com, proxy and Adyen
         create_data = self._format_data(values)
+        # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
         create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
         response = self._adyen_rpc('v1/create_account_holder', create_data)
+        # FIXME ANVFE verify wrong response are correctly managed
 
-        adyen_account_id.with_context(update_from_adyen=True).write({
+        adyen_account.with_context(update_from_adyen=True).write({
             'account_code': response['adyen_response']['accountCode'],
             'adyen_uuid': response['adyen_uuid'],
             'proxy_token': response['proxy_token'],
         })
-        self.env.company.adyen_account_id = adyen_account_id.id
+        # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
+        self.env.company.adyen_account_id = adyen_account.id
 
-        return adyen_account_id
+        return adyen_account
 
     def write(self, vals):
         adyen_fields = {
@@ -367,6 +400,7 @@ class AdyenAccount(models.Model):
     def _adyen_rpc(self, operation, adyen_data=None):
         adyen_data = adyen_data or {}
         if operation == 'v1/create_account_holder':
+            # Onboarding first passes through Internal odoo.com first
             url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.onboarding_url')
             params = {
                 'creation_token': request.session.get('adyen_creation_token'),
@@ -387,29 +421,31 @@ class AdyenAccount(models.Model):
             'params': params,
         }
         try:
-            req = requests.post(url_join(url, operation), json=payload, auth=auth, timeout=TIMEOUT)
-            req.raise_for_status()
+            response = requests.post(url_join(url, operation), json=payload, auth=auth, timeout=TIMEOUT)
+            response.raise_for_status()
         except requests.exceptions.Timeout:
             raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
         except Exception:
             raise UserError(_('The Adyen proxy is not reachable, please try again later.'))
-        response = req.json()
 
-        if 'error' in response:
-            name = response['error']['data'].get('name').rpartition('.')[-1]
+        data = response.json()
+
+        if 'error' in data:
+            name = data['error']['data'].get('name').rpartition('.')[-1]
             if name == 'ValidationError':
-                raise ValidationError(response['error']['data'].get('arguments')[0])
+                raise ValidationError(data['error']['data'].get('arguments')[0])
             else:
-                _logger.warning('Proxy error: %s', response['error'])
+                _logger.warning('Proxy error: %s', data['error'])
                 raise UserError(
                     _("We had troubles reaching Adyen, please retry later or contact the support if the problem persists"))
-        return response.get('result')
+        return data.get('result')
 
     @api.model
     def _sync_adyen_cron(self):
         self.env['adyen.account'].search([]).sync_transactions()
 
     def _handle_notification(self, notification_data):
+        """NOTE: sudoed env"""
         self.ensure_one()
 
         content = notification_data.get('content', {})
@@ -429,6 +465,7 @@ class AdyenAccount(models.Model):
             _logger.warning(_("Unknown eventType received: %s", event_type))
 
     def _handle_odoo_account_status_change(self, content):
+        """NOTE: sudoed env"""
         self.ensure_one()
 
         new_status = content.get('newStatus')
@@ -436,12 +473,15 @@ class AdyenAccount(models.Model):
             self._adyen_rpc('v1/unsuspend_account_holder', {
                 'accountHolderCode': self.account_holder_code,
             })
+            # result for unsuspend_account_holder request only contains pspReference
+            # not new account status
         elif new_status == 'rejected':
             self._adyen_rpc('v1/close_account_holder', {
                 'accountHolderCode': self.account_holder_code,
             })
 
     def _handle_account_holder_status_change_notification(self, content):
+        """NOTE: sudoed env"""
         self.ensure_one()
 
         # Account Status
@@ -472,9 +512,10 @@ class AdyenAccount(models.Model):
                 'message': content.get('reason'),
                 'reasons': reasons,
             })
-            self.sudo().message_post(body=status_message, subtype_xmlid="mail.mt_comment")
+            self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
 
     def _handle_account_holder_verification_notification(self, content):
+        """NOTE: sudoed env"""
         self.ensure_one()
 
         status = ADYEN_VALIDATION_MAP.get(content.get('verificationStatus'))
@@ -495,13 +536,13 @@ class AdyenAccount(models.Model):
         if not kyc:
             additional_data = {}
             if document == 'bank_account' and bank_uuid:
-                bank_account_id = self.env['adyen.bank.account'].sudo().search([('bank_account_uuid', '=', bank_uuid)])
+                bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
                 additional_data['bank_account_id'] = bank_account_id.id
             if shareholder_uuid:
-                shareholder_id = self.env['adyen.shareholder'].sudo().search([('shareholder_uuid', '=', shareholder_uuid)])
+                shareholder_id = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
                 additional_data['shareholder_id'] = shareholder_id.id
 
-            self.env['adyen.kyc'].sudo().create({
+            self.env['adyen.kyc'].create({
                 'verification_type': document,
                 'adyen_account_id': self.id,
                 'status': status,
@@ -511,10 +552,10 @@ class AdyenAccount(models.Model):
             })
         else:
             if bank_uuid and not kyc.bank_account_id:
-                bank_account_id = self.env['adyen.bank.account'].sudo().search([('bank_account_uuid', '=', bank_uuid)])
+                bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
                 kyc.bank_account_id = bank_account_id.id
             if shareholder_uuid and not kyc.shareholder_id:
-                shareholder_id = self.env['adyen.shareholder'].sudo().search([('shareholder_uuid', '=', shareholder_uuid)])
+                shareholder_id = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
                 kyc.shareholder_id = shareholder_id.id
 
             if status != kyc.status:
@@ -525,18 +566,20 @@ class AdyenAccount(models.Model):
                 })
 
     def _handle_account_updated_notification(self, content):
+        """NOTE: sudoed env"""
         self.ensure_one()
         scheduled_date = content.get('payoutSchedule', {}).get('nextScheduledPayout')
         if scheduled_date:
             self.next_scheduled_payout = parse(scheduled_date).astimezone(UTC).replace(tzinfo=None)
 
     def _handle_account_holder_payout(self, content):
+        """NOTE: sudoed env"""
         self.ensure_one()
         status = content.get('status', {}).get('statusCode')
 
         if status == 'Failed':
             status_message = _('Failed payout: %s', content['status']['message']['text'])
-            self.sudo().message_post(body=status_message, subtype_xmlid="mail.mt_comment")
+            self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
 
     def sync_transactions(self):
         updated_transactions = self.env['adyen.transaction']

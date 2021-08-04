@@ -24,12 +24,17 @@ class AdyenPlatformsController(http.Controller):
         data = request.jsonrequest
         _logger.debug('Account notification received: %s', pformat(data))
 
-        account = request.env['adyen.account'].sudo().search([('adyen_uuid', '=', data['adyen_uuid'])])
-        if not account:
+        account_sudo = request.env['adyen.account'].sudo().search([
+            ('adyen_uuid', '=', data['adyen_uuid'])])
+        if not account_sudo:
             _logger.error('Received notification for non-existing account: %s', data['adyen_uuid'])
             return
 
-        account.with_context(update_from_adyen=True)._handle_notification(data)
+        # TODO ANVFE specify a clear API to clearly inform the proxy whether
+        # its notifications were correctly handled or not
+        # At least for notifications coming from internal, aka ODOO_ACCOUNT_STATUS_CHANGE
+        # should raise to the support user if it didn't work as expected...
+        account_sudo.with_context(update_from_adyen=True)._handle_notification(data)
 
     @odoo_payments_proxy_control
     @http.route('/adyen_platforms/transaction_notification', type='json', auth='public', csrf=False)

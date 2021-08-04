@@ -65,7 +65,7 @@
             </table>
 
             <h3>Disclaimers</h3>
-            <p>WARNING: Please note that the right to use the payment services is only for
+            <p class="alert alert-warning">Please note that the right to use the payment services is only for
             sales in your own name. You may not resell, hire or on any other basis allow third
             parties to use the payment services to enable such third parties to be paid for their
             services. You may not use the payment services for different types of product and
