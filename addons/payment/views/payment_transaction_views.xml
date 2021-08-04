@@ -5,7 +5,7 @@
         <field name="name">payment.transaction.form</field>
         <field name="model">payment.transaction</field>
         <field name="arch" type="xml">
-            <form string="Payment Transactions" create="false" edit="false">
+            <form string="Payment Transactions" create="false" edit="false" delete="false">
                 <header>
                     <button type="object" name="action_capture" states="authorized" string="Capture Transaction" class="oe_highlight"/>
                     <button type="object" name="action_void" states="authorized" string="Void Transaction"
