@@ -228,6 +228,8 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         }
         return this.update(params, {});
     },
+    resetLocalState() {
+    },
     /**
      * This is the main entry point for the controller.  Changes from the search
      * view arrive in this method, and internal changes can sometimes also call

@@ -66,10 +66,11 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
     /**
      * Called each time the controller is dettached into the DOM
      */
-    on_detach_callback() {
-        this._super.apply(this, arguments);
-        this.renderer.resetLocalState();
-    },
+    // on_detach_callback() {
+    //     debugger;
+    //     this._super.apply(this, arguments);
+    //     this.renderer.resetLocalState();
+    // },
 
     //--------------------------------------------------------------------------
     // Public
@@ -161,6 +162,9 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      */
     isDirty: function (recordID) {
         return this.model.isDirty(recordID || this.handle);
+    },
+    resetLocalState() {
+        this.renderer.resetLocalState();
     },
     /**
      * Saves the record whose ID is given if necessary (@see _saveRecord).

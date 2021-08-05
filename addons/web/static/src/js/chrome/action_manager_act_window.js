@@ -466,6 +466,8 @@ ActionManager.include({
                     def = action.on_reverse_breadcrumb();
                 }
                 return Promise.resolve(def).then(function () {
+                    const currentController = self.getCurrentController();
+                    currentController.widget.resetLocalState();
                     return self._switchController(action, controller.viewType);
                 });
             });
@@ -716,6 +718,7 @@ ActionManager.include({
             // triggered the request is the current controller
             const action = this.actions[currentController.actionID];
             const currentControllerState = currentController.widget.exportState();
+            currentController.widget.resetLocalState();
             action.controllerState = _.extend({}, action.controllerState, currentControllerState);
             const options = {
                 controllerState: action.controllerState,

@@ -240,7 +240,6 @@ var FormRenderer = BasicRenderer.extend({
             [...notebook.querySelectorAll(':scope .tab-content > .tab-pane')]
                 .map(tab => tab.classList.remove('active'));
         }
-
     },
     /**
      * Restore active tab pages for each notebook. It relies on the implicit fact
