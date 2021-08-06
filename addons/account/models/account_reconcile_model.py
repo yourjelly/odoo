@@ -347,6 +347,7 @@ class AccountReconcileModel(models.Model):
             writeoff_line = {
                 'name': line.label or st_line.payment_ref,
                 'balance': balance,
+                'journal_id': line.journal_id.id,
                 'debit': balance > 0 and balance or 0,
                 'credit': balance < 0 and -balance or 0,
                 'account_id': line.account_id.id,
