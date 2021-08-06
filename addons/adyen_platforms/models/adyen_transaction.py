@@ -272,6 +272,8 @@ class AdyenTransactionStatus(models.Model):
         ('Debited', 'Debited'),
         ('DebitReversedReceived', 'Debit Reversed Received'),
         ('DebitedReversed', 'Debit Reversed'),
+        # TODO chargeback does the transaction change state
+        # or do we receive a new transaction for the reversed chargeback ?
         ('ChargebackReceived', 'Chargeback Received'),
         ('Chargeback', 'Chargeback'),
         ('ChargebackReversedReceived', 'Chargeback Reversed Received'),
