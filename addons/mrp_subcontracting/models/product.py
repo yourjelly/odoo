@@ -15,3 +15,18 @@ class SupplierInfo(models.Model):
             boms = supplier.product_id.variant_bom_ids
             boms |= supplier.product_tmpl_id.bom_ids.filtered(lambda b: not b.product_id)
             supplier.is_subcontractor = supplier.name in boms.subcontractor_ids
+
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    def _prepare_sellers(self, params=False):
+        if params and params.get('subcontractor_ids'):
+            return super()._prepare_sellers(params=params).filtered(lambda s: s.name in params.get('subcontractor_ids'))
+        return super()._prepare_sellers(params=params)
+
+    def _set_price_from_bom(self, boms_to_recompute=False):
+        bom = super()._set_price_from_bom(boms_to_recompute)
+        if bom and bom.type == 'subcontract':
+            self.standard_price += self._select_seller(params={'subcontractor_ids': bom.subcontractor_ids}).price or 0.0
+        return bom

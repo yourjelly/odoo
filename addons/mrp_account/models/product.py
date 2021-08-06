@@ -39,6 +39,7 @@ class ProductProduct(models.Model):
         bom = self.env['mrp.bom']._bom_find(self)[self]
         if bom:
             self.standard_price = self._compute_bom_price(bom, boms_to_recompute=boms_to_recompute)
+            return bom
 
     def _compute_average_price(self, qty_invoiced, qty_to_invoice, stock_moves):
         self.ensure_one()
