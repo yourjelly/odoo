@@ -399,17 +399,28 @@ class SaleOrderLine(models.Model):
 
         for line in self:  # TODO: maybe one day, this should be done in SQL for performance sake
             if line.qty_delivered_method == 'stock_move':
-                qty = 0.0
-                outgoing_moves, incoming_moves = line._get_outgoing_incoming_moves()
-                for move in outgoing_moves:
-                    if move.state != 'done':
-                        continue
-                    qty += move.product_uom._compute_quantity(move.product_uom_qty, line.product_uom, rounding_method='HALF-UP')
-                for move in incoming_moves:
-                    if move.state != 'done':
-                        continue
-                    qty -= move.product_uom._compute_quantity(move.product_uom_qty, line.product_uom, rounding_method='HALF-UP')
-                line.qty_delivered = qty
+                line.qty_delivered = line._get_stock_move_qty_delivered()
+
+    def _get_stock_move_qty_delivered(self, max_date=None):
+        self.ensure_one()
+        qty = 0.0
+        outgoing_moves, incoming_moves = self._get_outgoing_incoming_moves(max_date)
+        for move in outgoing_moves:
+            if move.state != 'done':
+                continue
+            qty += move.product_uom._compute_quantity(move.product_uom_qty, self.product_uom, rounding_method='HALF-UP')
+        for move in incoming_moves:
+            if move.state != 'done':
+                continue
+            qty -= move.product_uom._compute_quantity(move.product_uom_qty, self.product_uom, rounding_method='HALF-UP')
+        self.qty_delivered = qty
+
+    def _get_qty_delivered(self, max_date):
+        self.ensure_one()
+        if self.qty_delivered_method == 'stock_move':
+            return self._get_stock_move_qty_delivered(max_date)
+        else:
+            return super(SaleOrderLine, self)._get_qty_delivered(max_date)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -523,11 +534,15 @@ class SaleOrderLine(models.Model):
             qty -= move.product_uom._compute_quantity(move.product_uom_qty, self.product_uom, rounding_method='HALF-UP')
         return qty
 
-    def _get_outgoing_incoming_moves(self):
+    def _get_outgoing_incoming_moves(self, max_date=None):
         outgoing_moves = self.env['stock.move']
         incoming_moves = self.env['stock.move']
 
-        for move in self.move_ids.filtered(lambda r: r.state != 'cancel' and not r.scrapped and self.product_id == r.product_id):
+        for move in self.move_ids.filtered(
+            (lambda r: r.state != 'cancel' and not r.scrapped and self.product_id == r.product_id and self.date <= max_date)
+            if max_date else
+            (lambda r: r.state != 'cancel' and not r.scrapped and self.product_id == r.product_id)
+        ):
             if move.location_dest_id.usage == "customer":
                 if not move.origin_returned_move_id or (move.origin_returned_move_id and move.to_refund):
                     outgoing_moves |= move
