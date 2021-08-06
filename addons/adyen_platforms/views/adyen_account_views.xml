@@ -42,39 +42,46 @@
                     </div>
                     <group>
                         <group>
-                            <field name="is_business" attrs="{'readonly': [('id', '!=', False)]}"/>
+                            <field name="entity_type" attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                         <group>
                             <field name="company_id" readonly="1" groups="base.group_multi_company" />
                         </group>
 
-                        <group string="Individual" attrs="{'invisible': [('is_business', '=', True)]}">
+                        <group string="Individual"
+                            attrs="{'invisible': [('entity_type', '!=', 'individual')]}">
                             <field name="first_name"
-                                attrs="{'required': [('is_business', '=', False)]}"/>
+                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="last_name"
-                                attrs="{'required': [('is_business', '=', False)]}"/>
+                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="date_of_birth"
-                                attrs="{'required': [('is_business', '=', False)]}"/>
+                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="document_number"
-                                attrs="{'invisible': [('country_code', 'not in', ['AU', 'CA', 'GR', 'IT', 'US'])], 'required': [('is_business', '=', False), ('country_code', 'in', ['AU', 'CA', 'GR', 'IT', 'US'])]}"/>
+                                attrs="{'invisible': [('country_code', 'not in', ['AU', 'CA', 'GR', 'IT', 'US'])],
+                                    'required': [('entity_type', '=', 'individual'), ('country_code', 'in', ['AU', 'CA', 'GR', 'IT', 'US'])]}"/>
                             <field name="document_type"
-                                attrs="{'invisible': [('country_code', '!=', 'AU')], 'required': [('is_business', '=', False), ('country_code', '=', 'AU')]}"/>
-                            <field name="id_type" attrs="{'invisible': [('adyen_uuid', '=', False)], 'required': [('is_business', '=', False), ('kyc_tier', '>', 1)]}"/>
-                            <field name="id_front" filename="id_front_filename" attrs="{'invisible': [('adyen_uuid', '=', False)], 'required': [('is_business', '=', False), ('kyc_tier', '>', 1)]}"/>
+                                attrs="{'invisible': [('country_code', '!=', 'AU')],
+                                    'required': [('entity_type', '=', 'individual'), ('country_code', '=', 'AU')]}"/>
+                            <field name="id_type"
+                                attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                    'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
+                            <field name="id_front" filename="id_front_filename"
+                                attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                    'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
                             <field name="id_front_filename" invisible="1"/>
                             <field name="id_back" filename="id_back_filename"
                                 attrs="{'invisible': [('id_type', 'not in', ['ID_CARD', 'DRIVING_LICENSE'])],
                                         'required': [('id_type', 'in', ['ID_CARD', 'DRIVING_LICENSE']), ('kyc_tier', '>=', 1)]}"/>
-                            <field name="id_back_filename" invisible="1"/> 
+                            <field name="id_back_filename" invisible="1"/>
                         </group>
 
-                        <group string="Business" attrs="{'invisible': [('is_business', '=', False)]}">
+                        <group string="Business" attrs="{'invisible': [('entity_type', '=', 'individual')]}">
                             <field name="legal_business_name"
-                                attrs="{'required': [('is_business', '=', True)]}"/>
+                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                             <field name="doing_business_as"
-                                attrs="{'required': [('is_business', '=', True)]}"/>
+                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                             <field name="registration_number"
-                                attrs="{'required': [('is_business', '=', True)]}"/>
+                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                         </group>
 
                         <group string="Contact">
@@ -111,8 +118,27 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Shareholders" attrs="{'invisible': [('is_business', '=', False)], 'required': [('is_business', '=', True)]}">
-                            <field name="shareholder_ids">
+                        <page string="Shareholders"
+                            attrs="{'invisible': [('entity_type', '!=', 'business')],
+                                'required': [('entity_type', '!=', 'individual')]}">
+                            <field name="shareholder_ids"
+                                attrs="{'required': [('entity_type', '=', 'business')]}">>
+                                <tree>
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="kyc_status" widget="badge" attrs="{'invisible': [('kyc_status', '=', False)]}"
+                                        decoration-warning="kyc_status == 'awaiting_data'"
+                                        decoration-info="kyc_status == 'pending'"
+                                        decoration-success="kyc_status in ['data_provided', 'passed']"
+                                        decoration-danger="kyc_status == 'failed'"
+                                    />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Manager(s)"
+                            attrs="{'invisible': [('entity_type', '!=', 'nonprofit')]}">
+                            <field name="shareholder_ids"
+                                attrs="{'required': [('entity_type', '=', 'nonprofit')]}">
                                 <tree>
                                     <field name="first_name"/>
                                     <field name="last_name"/>

@@ -52,6 +52,39 @@ class AdyenAccount(models.Model):
     _description = 'Adyen for Platforms Account'
     _rec_name = 'full_name'
 
+    @api.model
+    def default_get(self, fields):
+        res = super().default_get(fields)
+        company_fields = {
+            'country_id': 'country_id',
+            'state_id': 'state_id',
+            'city': 'city',
+            'zip': 'zip',
+            'street': 'street_name',  # base_address_extended
+            'house_number_or_name': 'street_number',  # base_address_extended
+            'email': 'email',
+            'phone_number': 'phone',
+        }
+        if self.env.company.partner_id.is_company:
+            company_fields.update({
+                'registration_number': 'vat',
+                'legal_business_name': 'name',
+                'doing_business_as': 'name',
+            })
+            if 'entity_type' in fields:
+                res['entity_type'] = 'business'
+
+        field_keys = company_fields.keys() & set(fields)
+        for field_name in field_keys:
+            res[field_name] = self.env.company[company_fields[field_name]]
+
+        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields):
+            name = self.env.company.partner_id.name.split()
+            res['last_name'] = name[-1]
+            res['first_name'] = ' '.join(name[:-1])
+
+        return res
+
     # Credentials
     proxy_token = fields.Char('Proxy Token')
     adyen_uuid = fields.Char('Adyen UUID')
@@ -64,8 +97,11 @@ class AdyenAccount(models.Model):
     transactions_count = fields.Integer(compute='_compute_transactions_count')
     transaction_payout_ids = fields.One2many('adyen.transaction.payout', 'adyen_account_id')
 
-    # FIXME ANVFE add support for non profit orgs ?
-    is_business = fields.Boolean('Is a business', required=True)
+    entity_type = fields.Selection([
+        ('business', 'Business'),
+        ('individual', 'Individual'),
+        ('nonprofit', 'Non Profit'),
+    ], string="Legal Entity Type")
 
     # Payout
     account_code = fields.Char('Account Code')
@@ -155,40 +191,6 @@ class AdyenAccount(models.Model):
                     "The given registration number is invalid: %s",
                     account.registration_number))
 
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
-        company_fields = {
-            'country_id': 'country_id',
-            'state_id': 'state_id',
-            'city': 'city',
-            'zip': 'zip',
-            'street': 'street_name',  # base_address_extended
-            'house_number_or_name': 'street_number',  # base_address_extended
-            'email': 'email',
-            'phone_number': 'phone',
-        }
-
-        if self.env.company.partner_id.is_company:
-            company_fields.update({
-                'registration_number': 'vat',
-                'legal_business_name': 'name',
-                'doing_business_as': 'name',
-            })
-            if 'is_business' in fields:
-                res['is_business'] = True
-
-        field_keys = company_fields.keys() & set(fields)
-        for field_name in field_keys:
-            res[field_name] = self.env.company[company_fields[field_name]]
-
-        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields):
-            name = self.env.company.partner_id.name.split()
-            res['last_name'] = name[-1]
-            res['first_name'] = ' '.join(name[:-1])
-
-        return res
-
     @api.depends('transaction_ids')
     def _compute_transactions_count(self):
         for adyen_account_id in self:
@@ -197,7 +199,7 @@ class AdyenAccount(models.Model):
     @api.depends('first_name', 'last_name', 'legal_business_name')
     def _compute_full_name(self):
         for adyen_account_id in self:
-            if adyen_account_id.is_business:
+            if adyen_account_id.entity_type != 'individual':
                 adyen_account_id.full_name = adyen_account_id.legal_business_name
             else:
                 adyen_account_id.full_name = "%s %s" % (adyen_account_id.first_name, adyen_account_id.last_name)
@@ -258,7 +260,7 @@ class AdyenAccount(models.Model):
     def write(self, vals):
         adyen_fields = {
             'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name', 'email', 'phone_number',
-            'is_business', 'legal_business_name', 'doing_business_as', 'registration_number', 'first_name',
+            'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number', 'first_name',
             'last_name', 'date_of_birth', 'document_number', 'document_type',
         }
         res = super().write(vals)
@@ -367,10 +369,19 @@ class AdyenAccount(models.Model):
         if 'phone_number' in values:
             holder_details['fullPhoneNumber'] = values['phone_number']
 
-        if 'is_business' in values:
-            data['legalEntity'] = 'Business' if values['is_business'] else 'Individual'
+        if 'entity_type' in values:
+            entity_type = values['entity_type']
+            is_business = entity_type != 'individual'
+            if entity_type == 'business':
+                data['legalEntity'] = 'Business'
+            elif entity_type == 'individual':
+                data['legalEntity'] = 'Individual'
+            else:
+                data['legalEntity'] = 'NonProfit'
+        else:
+            is_business = self and self.entity_type != 'individual'
 
-        if (values.get('is_business') or self.is_business) and {'legal_business_name', 'doing_business_as', 'registration_number'} & fields:
+        if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & fields:
             business_details = holder_details['businessDetails'] = {}
             for source, dest in [
                 ('legal_business_name', 'legalBusinessName'),
