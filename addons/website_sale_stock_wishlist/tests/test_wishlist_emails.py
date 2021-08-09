@@ -28,13 +28,13 @@ class TestWishlistEmail(TestWebsiteSaleStockProductWarehouse):
         # Create two stockable products
         cls.product_1 = cls.env['product.product'].create({
             'name': 'Product A',
-            'allow_to_order': 'available',
+            'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM1',
         })
         cls.product_2 = cls.env['product.product'].create({
             'name': 'Product B',
-            'allow_to_order': 'available',
+            'allow_out_of_stock_order': False,
             'type': 'product',
             'default_code': 'E-COM2',
         })
