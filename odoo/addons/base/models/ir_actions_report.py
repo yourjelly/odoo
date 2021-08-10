@@ -387,7 +387,7 @@ class IrActionsReport(models.Model):
                 'subst': False,
                 'body': Markup(lxml.html.tostring(node, encoding='unicode')),
                 'base_url': base_url
-            })
+            }).unescape().encode()
             bodies.append(body)
             if node.get('data-oe-model') == self.model:
                 res_ids.append(int(node.get('data-oe-id', 0)))
@@ -409,12 +409,12 @@ class IrActionsReport(models.Model):
             'subst': True,
             'body': Markup(lxml.html.tostring(header_node, encoding='unicode')),
             'base_url': base_url
-        })
+        }).unescape().encode()
         footer = layout._render({
             'subst': True,
             'body': Markup(lxml.html.tostring(footer_node, encoding='unicode')),
             'base_url': base_url
-        })
+        }).unescape().encode()
 
         return bodies, res_ids, header, footer, specific_paperformat_args
 
