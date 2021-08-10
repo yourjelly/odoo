@@ -62,17 +62,18 @@ export function useModel(ModelClass, params, options = {}) {
         services[key] = useService(key);
     }
     const model = new ModelClass(component.env, params, services);
-    useBus(model, "update", options.onUpdate || component.render);
+    const { processParams = (x) => x, onUpdate } = options;
+    useBus(model, "update", onUpdate || component.render);
 
     onWillStart(() => {
         const searchParams = getSearchParams(component.props);
-        return model.load(searchParams);
+        return model.load(processParams(searchParams));
     });
 
     onWillUpdateProps((nextProps) => {
         const searchParams = getSearchParams(nextProps);
         searchParams.useSampleModel = false; // not sure it is good --> we'll know when implementing dashboard
-        return model.load(searchParams);
+        return model.load(processParams(searchParams));
     });
     return model;
 }
