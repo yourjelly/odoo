@@ -201,6 +201,20 @@ class PaletteSelectionScreen extends Component {
         this.logoInputRef.el.click();
     }
 
+    async svgToPng(logo) {
+        return new Promise ((resolved, _) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                resolved(canvas.toDataURL('image/png'));
+            };
+            img.src = logo;
+        });
+    }
+
     async changeLogo() {
         const logoSelectInput = this.logoInputRef.el;
         if (logoSelectInput.files.length === 1) {
@@ -212,7 +226,11 @@ class PaletteSelectionScreen extends Component {
     }
 
     async updatePalettes() {
-        let img = this.state.logo.split(',', 2)[1];
+        let img = this.state.logo;
+        if (img.startsWith('data:image/svg+xml')) {
+            img = await this.svgToPng(img);
+        }
+        img = img.split(',', 2)[1];
         const [color1, color2] = await rpc.query({
             model: 'base.document.layout',
             method: 'extract_image_primary_secondary_colors',
