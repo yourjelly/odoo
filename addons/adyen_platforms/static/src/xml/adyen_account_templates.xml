@@ -10,7 +10,7 @@
 
             <h3>Submitted data</h3>
             <table class="table table-sm">
-                <t t-if="data.is_business">
+                <t t-if="data.entity_type != 'individual'">
                     <tr>
                         <td>Legal Entity</td>
                         <td>Business</td>
