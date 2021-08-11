@@ -463,7 +463,7 @@ class AdyenAccount(models.Model):
         # Do not sync transactions for suspended accounts (pending validation)
         self.env['adyen.account'].search([('account_status', '!=', 'suspended')]).sync_transactions()
 
-    def _handle_notification(self, notification_data):
+    def _handle_account_notification(self, notification_data):
         """NOTE: sudoed env"""
         self.ensure_one()
 

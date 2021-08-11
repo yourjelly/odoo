@@ -27,7 +27,7 @@ class AdyenTransaction(models.Model):
     @api.model
     def _handle_payment_notification(self, notification_data, payment_tx):
         """NOTE: sudoed env"""
-        tx_sudo = self._handle_notification(notification_data)
+        tx_sudo = self._handle_transaction_notification(notification_data)
 
         if not tx_sudo.payment_transaction_id:
             tx_sudo.payment_transaction_id = payment_tx.id
