@@ -633,7 +633,8 @@ class AdyenAccount(models.Model):
                     else:
                         if status in ['Chargeback', 'ChargebackReceived']:
                             transaction['pspReference'] = transaction.get('disputePspReference')
-                        tx_sudo, _reference, _capture_reference = account.transaction_ids.sudo()._get_tx_from_notification(transaction)
+                        tx_sudo = account.transaction_ids.sudo()._get_tx_from_notification(
+                            account, transaction)
                         if not tx_sudo:
                             tx_sudo = self.env['adyen.transaction'].sudo()._create_missing_tx(account.id, transaction)
                         tx_sudo._update_status(status, create_date)
