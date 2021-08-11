@@ -172,7 +172,7 @@ class StockMove(models.Model):
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
     forecast_availability = fields.Float('Forecast Availability', compute='_compute_forecast_information', digits='Product Unit of Measure', compute_sudo=True)
     forecast_expected_date = fields.Datetime('Forecasted Expected date', compute='_compute_forecast_information', compute_sudo=True)
-    lot_ids = fields.Many2many('stock.production.lot', compute='_compute_lot_ids', inverse='_set_lot_ids', string='Serial Numbers', readonly=False)
+    lot_ids = fields.Many2many('stock.production.lot', compute='_compute_lot_ids', string='Lot/Serial Numbers')
     reservation_date = fields.Date('Date to Reserve', compute='_compute_reservation_date', store=True,
         help="This is a technical field for calculating when a move should be reserved")
     product_packaging_id = fields.Many2one('product.packaging', 'Packaging', domain="[('product_id', '=', product_id)]", check_company=True)
@@ -479,27 +479,27 @@ class StockMove(models.Model):
         for move in self:
             move.lot_ids = lots_by_move_id_list[0 if move.picking_type_id.show_reserved else 1].get(move._origin.id, [])
 
-    def _set_lot_ids(self):
-        for move in self:
-            move_lines_commands = []
-            if move.picking_type_id.show_reserved is False:
-                mls = move.move_line_nosuggest_ids
-            else:
-                mls = move.move_line_ids
-            mls = mls.filtered(lambda ml: ml.lot_id)
-            for ml in mls:
-                if ml.qty_done and ml.lot_id not in move.lot_ids:
-                    move_lines_commands.append((2, ml.id))
-            ls = move.move_line_ids.lot_id
-            for lot in move.lot_ids:
-                if lot not in ls:
-                    move_line_vals = self._prepare_move_line_vals(quantity=0)
-                    move_line_vals['lot_id'] = lot.id
-                    move_line_vals['lot_name'] = lot.name
-                    move_line_vals['product_uom_id'] = move.product_id.uom_id.id
-                    move_line_vals['qty_done'] = 1
-                    move_lines_commands.append((0, 0, move_line_vals))
-            move.write({'move_line_ids': move_lines_commands})
+    # def _set_lot_ids(self):
+    #     for move in self:
+    #         move_lines_commands = []
+    #         if move.picking_type_id.show_reserved is False:
+    #             mls = move.move_line_nosuggest_ids
+    #         else:
+    #             mls = move.move_line_ids
+    #         mls = mls.filtered(lambda ml: ml.lot_id)
+    #         for ml in mls:
+    #             if ml.qty_done and ml.lot_id not in move.lot_ids:
+    #                 move_lines_commands.append((2, ml.id))
+    #         ls = move.move_line_ids.lot_id
+    #         for lot in move.lot_ids:
+    #             if lot not in ls:
+    #                 move_line_vals = self._prepare_move_line_vals(quantity=0)
+    #                 move_line_vals['lot_id'] = lot.id
+    #                 move_line_vals['lot_name'] = lot.name
+    #                 move_line_vals['product_uom_id'] = move.product_id.uom_id.id
+    #                 move_line_vals['qty_done'] = 1
+    #                 move_lines_commands.append((0, 0, move_line_vals))
+    #         move.write({'move_line_ids': move_lines_commands})
 
     @api.depends('picking_type_id', 'date', 'priority')
     def _compute_reservation_date(self):
