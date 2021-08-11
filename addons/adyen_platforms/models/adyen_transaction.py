@@ -92,10 +92,10 @@ class AdyenTransaction(models.Model):
         return tx_sudo
 
     @api.model
-    def _handle_notification(self, data):
+    def _handle_transaction_notification(self, data):
         """
 
-        NOTE: sudoed env (coming from payment_odoo)
+        NOTE: sudoed env
 
         :returns: Found/Created transaction
         :rtype: adyen.transaction
@@ -118,8 +118,9 @@ class AdyenTransaction(models.Model):
         elif event_code in ["CHARGEBACK", "NOTIFICATION_OF_CHARGEBACK"]:
             tx._handle_chargeback_notification(data)
         else:
-            # FIXME ANVFE support CAPTURE event code
-            # Aka "Chargeback" test goes this way...
+            # FIXME ANVFE support CAPTURE event code ?
+            # Got it multiple times when some notifs were broken
+            # and surprisingly, it's considered in _get_tx_from_notification
             _logger.warning(_("Unknown eventCode received: %s", event_code))
 
         return tx
