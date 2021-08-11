@@ -1,6 +1,5 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { getX2MViewModes } from "../views/helpers/view_utils";
 import { KanbanRenderer } from "../views/kanban/kanban_renderer";
 import { KanbanArchParser } from "../views/kanban/kanban_view";
 import { ListRenderer } from "../views/list/list_renderer";
@@ -43,25 +42,25 @@ FieldKanbanMany2ManyTags.template = "web.FieldKanbanMany2ManyTags";
 
 fieldRegistry.add("kanban.many2many_tags", FieldKanbanMany2ManyTags);
 
+// LPE FIXME
+fieldRegistry.add("kanban_activity", FieldKanbanMany2ManyTags);
+
 export class FieldX2Many extends Component {
     setup() {
-        // To remove when we can discriminate between in list view or in formView
-        // Also, make a loadViews if archs is passed but not set
-        if ("archs" in this.props) {
-            const viewModes = this.props.viewMode || ["tree"];
-            const { arch, fields } = this.props.archs[viewModes[0]] || {};
-            if (!arch) {
-                return;
-            }
-            this.fields = fields;
-            this.record = this.props.record.data[this.props.name];
+        this.record = this.props.record.data[this.props.name];
 
-            const [viewMode] = getX2MViewModes(viewModes);
-            if (viewMode in X2M_RENDERERS) {
-                const [Renderer, Parser] = X2M_RENDERERS[viewMode];
-                this.archInfo = new Parser().parse(arch, fields);
-                this.Renderer = Renderer;
-            }
+        const { fields, viewType } = this.record;
+        this.fields = fields;
+
+        const { arch } = this.record.getSubViewInfo(viewType);
+        if (!arch) {
+            return;
+        }
+
+        if (viewType in X2M_RENDERERS) {
+            const [Renderer, Parser] = X2M_RENDERERS[viewType];
+            this.archInfo = new Parser().parse(arch, fields);
+            this.Renderer = Renderer;
         }
     }
 

@@ -533,18 +533,9 @@ export class FormCompiler {
         const fieldString = node.getAttribute("string");
 
         field.setAttribute("name", `"${fieldName}"`);
+
         field.setAttribute("record", `record`);
         field.setAttribute("mode", `props.mode`);
-
-        if ("mode" in node.attributes) {
-            const viewModes = node.getAttribute("mode").split(",");
-            field.setAttribute("viewMode", `${JSON.stringify(viewModes)}`);
-        }
-
-        field.setAttribute(
-            "archs",
-            `"views" in props.fields.${fieldName} and props.fields.${fieldName}.views`
-        );
 
         let widgetName;
         if (node.hasAttribute("widget")) {
@@ -563,7 +554,7 @@ export class FormCompiler {
                 if (fieldString) {
                     label.textContent = fieldString;
                 } else {
-                    label.setAttribute("t-esc", `props.model.fields.${fieldName}.string`);
+                    label.setAttribute("t-esc", `record.fields.${fieldName}.string`);
                 }
             }
             this.handleReadonly(node, label);

@@ -19,17 +19,22 @@ export const isRelational = (field) => field && RELATIONAL_TYPES.includes(field.
  */
 export const isX2Many = (field) => field && X2M_TYPES.includes(field.type);
 
-/**
- * @param {string | string[]} [mode]
- * @returns {string[]}
- */
-export const getX2MViewModes = (mode) => {
-    if (!mode) {
-        return ["list"];
+function getViewModeFromNode(node, field) {
+    let mode;
+    if ("mode" in node.attributes) {
+        mode = node.getAttribute("mode").split(",");
+    } else {
+        const views = Object.keys(field.views);
+        if ("list" in views && !("kanban" in views)) {
+            mode = ["list"];
+        } else if ("kanban" in views && !("list" in views)) {
+            mode = ["kanban"];
+        } else {
+            mode = ["kanban", "list"];
+        }
     }
-    const modes = Array.isArray(mode) ? mode : mode.split(",");
-    return modes.map((m) => (m === "tree" ? "list" : m));
-};
+    return mode.map((m) => (m === "tree" ? "list" : m));
+}
 
 /**
  * @param {number | number[]} idsList
@@ -93,8 +98,7 @@ export class FieldParser {
             }
             this.addRelation(field.relation, ...relatedFields);
             if (X2M_TYPES.includes(field.type) && FieldClass.useSubView) {
-                // TODO: is it a good idea to modify the field in place?
-                field.viewMode = getX2MViewModes(node.getAttribute("mode"))[0];
+                field.viewMode = getViewModeFromNode(node, field);
             }
         }
         return { name: fieldName, field, widget, options };

@@ -18,6 +18,10 @@ class FormArchParser extends XMLParser {
         const xmlDoc = this.parseXML(arch);
         const fieldParser = new FieldParser(fields, "form");
         this.visitXML(xmlDoc, (node) => {
+            // The widget chatter handles all of it.
+            if (node.tagName === "div" && node.classList.contains("oe_chatter")) {
+                return false;
+            }
             if (node.tagName === "field") {
                 fieldParser.addField(node);
             }

@@ -311,8 +311,7 @@ class DataList extends DataPoint {
         }
 
         for (const type in params.views || {}) {
-            const [mode] = getX2MViewModes(type);
-            this.views[mode] = Object.freeze(params.views[type]);
+            this.views[type] = Object.freeze(params.views[type]);
         }
 
         if (this.viewMode && this.views[this.viewMode]) {
@@ -437,6 +436,11 @@ class DataList extends DataPoint {
                 })
             );
         };
+    }
+
+    getSubViewInfo(viewMode) {
+        viewMode = viewMode === "list" ? "tree" : viewMode;
+        return (this.views && this.views[viewMode]) || null;
     }
 }
 
