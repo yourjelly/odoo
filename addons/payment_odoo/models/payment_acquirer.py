@@ -19,6 +19,7 @@ class PaymentAcquirer(models.Model):
     def _odoo_get_api_url(self):
         self.ensure_one()
         proxy_url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.proxy_url')
+        # FIXME ANVFE do we prefer a test route or a test kwarg ?
         url = 'v1/pay_by_link' # if self.state == 'enabled' else 'v1/test_pay_by_link'
         return urls.url_join(proxy_url, url)
 
