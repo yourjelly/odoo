@@ -300,6 +300,17 @@ class PaymentTransaction(models.Model):
 
         for tx in self:
             tx._send_capture_request()
+        # Trigger the post-processing immediatly to create the invoice when auto-invoice is enabled.
+        try:
+            self._finalize_post_processing()
+        except psycopg2.OperationalError:  # A collision of accounting sequences occurred
+            self.env.cr.rollback()  # Rollback and try later
+        except Exception as e:
+            self.env.cr.rollback()
+            _logger.exception(
+                "encountered an error while post-processing transactions with ids %s:\n%s",
+                ', '.join([str(tx_id) for tx_id in self.ids]), e
+            )
 
     def action_void(self):
         """ Check the state of the transaction and request to have them voided. """
