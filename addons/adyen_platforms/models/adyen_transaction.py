@@ -62,7 +62,7 @@ class AdyenTransaction(models.Model):
         for transaction in self.filtered('status_ids'):
             transaction.last_status_id = transaction.status_ids.sorted('date')[-1]
 
-    def _get_tx_from_notification(self, notification):
+    def _get_tx_from_notification(self, account, notification):
         if notification.get('eventCode') in ['CAPTURE', 'REFUND']:
             reference = notification.get('originalReference')
             capture_reference = notification.get('pspReference')
@@ -70,44 +70,56 @@ class AdyenTransaction(models.Model):
             reference = notification.get('pspReference')
             capture_reference = notification.get('capturePspReference')
 
-        domain = [('reference', '=', reference)]
+        domain = [
+            ('reference', '=', reference),
+            ('adyen_account_id', '=', account.id),
+        ]
         if capture_reference:
             domain = expression.AND([domain, [('capture_reference', '=', capture_reference)]])
 
-        if self:
-            return self.filtered_domain(domain), reference, capture_reference
-        return self.env['adyen.transaction'].search(domain), reference, capture_reference
+        tx_sudo = self.env['adyen.transaction'].search(domain)
+
+        if not tx_sudo:
+            tx_sudo = self.env['adyen.transaction'].create({
+                'adyen_account_id': account.id,
+                'reference': reference,
+                'capture_reference': capture_reference,
+                'description': notification.get('merchantReference'),
+            })
+        return tx_sudo
 
     @api.model
     def _handle_notification(self, data):
+        """
+
+        NOTE: sudoed env (coming from payment_odoo)
+
+        :returns: Found/Created transaction
+        :rtype: adyen.transaction
+        """
         adyen_uuid = data.get("additionalData", {}).get("metadata.adyen_uuid") or data.get('adyen_uuid')
-        account = self.env['adyen.account'].sudo().search([('adyen_uuid', '=', adyen_uuid)])
+        account = self.env['adyen.account'].search([('adyen_uuid', '=', adyen_uuid)])
         if not account:
             _logger.warning("Received payment notification for non-existing account")
             return
 
-        tx_sudo, reference, capture_reference = self.env['adyen.transaction']._get_tx_from_notification(data)
-        if not tx_sudo:
-            tx_sudo = self.env['adyen.transaction'].sudo().create({
-                'adyen_account_id': account.id,
-                'reference': reference,
-                'capture_reference': capture_reference,
-                'description': data.get('merchantReference'),
-            })
+        tx = self.env['adyen.transaction']._get_tx_from_notification(account, data)
 
         event_code = data.get('eventCode')
         if event_code == "AUTHORISATION":
-            tx_sudo._handle_authorisation_notification(data)
+            tx._handle_authorisation_notification(data)
         elif event_code == "FEES_UPDATED":
-            tx_sudo._handle_fees_updated_notification(data)
+            tx._handle_fees_updated_notification(data)
         elif event_code == "REFUND":
-            tx_sudo._handle_refund_notification(data)
+            tx._handle_refund_notification(data)
         elif event_code in ["CHARGEBACK", "NOTIFICATION_OF_CHARGEBACK"]:
-            tx_sudo._handle_chargeback_notification(data)
+            tx._handle_chargeback_notification(data)
         else:
+            # FIXME ANVFE support CAPTURE event code
+            # Aka "Chargeback" test goes this way...
             _logger.warning(_("Unknown eventCode received: %s", event_code))
 
-        return tx_sudo
+        return tx
 
     def _handle_authorisation_notification(self, notification_data):
         self.ensure_one()
@@ -182,6 +194,7 @@ class AdyenTransaction(models.Model):
     def _trigger_sync(self):
         sync_cron = self.env.ref('adyen_platforms.adyen_sync_cron', raise_if_not_found=False)
         if sync_cron:
+            # FIXME ANVFE shouldn't it be utcnow?
             sync_cron._trigger(at=fields.Datetime.now() + relativedelta(minutes=5))
 
     def _update_status(self, new_status, date):
