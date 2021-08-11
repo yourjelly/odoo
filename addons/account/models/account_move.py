@@ -2786,6 +2786,36 @@ class AccountMove(models.Model):
         self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'draft', 'is_move_sent': False})
 
+    def button_error(self):
+        raise UserError('coucou', [
+            {
+                'buttonText': 'Just the id (go to settings)',
+                'action': 2
+            }, {
+                'buttonText': 'Full action (open send and print)',
+                'action': {
+                    'name': _('Send Invoice'),
+                    'res_model': 'account.invoice.send',
+                    'views': [(False, 'form')],
+                    'context': {
+                        'default_template_id': self.env.ref(self._get_mail_template()).id,
+                        'mark_invoice_as_sent': True,
+                        'active_model': 'account.move',
+                        'active_id': self.ids[0],
+                        'active_ids': self.ids,
+                    },
+                    'target': 'new',
+                    'type': 'ir.actions.act_window',
+                }
+            }, {
+                'buttonText': 'URL (open google)',
+                'action': {
+                    'type': 'ir.actions.act_url',
+                    'url': 'http://www.google.com',
+                },
+            }
+        ])
+
     def button_cancel(self):
         self.write({'auto_post': False, 'state': 'cancel'})
 

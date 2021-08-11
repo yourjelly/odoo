@@ -633,6 +633,7 @@
                                 type='object' groups="account.group_account_invoice"
                                 attrs="{'invisible': ['|', ('move_type', 'not in', ('out_invoice', 'in_invoice')), ('state', '!=', 'posted')]}"/>
                         <!-- Cancel -->
+                        <button name="button_error" string="Error" type="object"/>
                         <button name="button_cancel" string="Cancel Entry" type="object" groups="account.group_account_invoice" data-hotkey="w"
                                 attrs="{'invisible' : ['|', '|', ('id', '=', False), ('state', '!=', 'draft'),('move_type', '!=', 'entry')]}"/>
                         <button name="button_cancel" string="Cancel" type="object" groups="account.group_account_invoice" data-hotkey="w"

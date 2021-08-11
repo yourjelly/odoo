@@ -127,19 +127,19 @@ export class RedirectWarningDialog extends Dialog {
         super.setup();
         this.actionService = useService("action");
         const { data, subType } = this.props;
-        const [message, actionId, buttonText, additional_context] = data.arguments;
+        const [message, actions] = data.arguments;
         this.title = capitalize(subType) || this.env._t("Odoo Warning");
         this.message = message;
-        this.actionId = actionId;
-        this.buttonText = buttonText;
-        this.additionalContext = additional_context;
+        this.actions = actions;
+        console.log(actions)
     }
-    async onClick() {
+    async onClick(index) {
+        let action_info = this.actions[index];
         const options = {};
         if (this.additionalContext) {
             options.additionalContext = this.additionalContext;
         }
-        await this.actionService.doAction(this.actionId, options);
+        await this.actionService.doAction(action_info.action, options);
         this.close();
     }
     onCancel() {
@@ -173,8 +173,8 @@ registry
     .add("odoo.exceptions.AccessDenied", WarningDialog)
     .add("odoo.exceptions.AccessError", WarningDialog)
     .add("odoo.exceptions.MissingError", WarningDialog)
-    .add("odoo.exceptions.UserError", WarningDialog)
-    .add("odoo.exceptions.ValidationError", WarningDialog)
+    .add("odoo.exceptions.UserError", RedirectWarningDialog)
+    .add("odoo.exceptions.ValidationError", RedirectWarningDialog)
     .add("odoo.exceptions.RedirectWarning", RedirectWarningDialog)
     .add("odoo.http.SessionExpiredException", SessionExpiredDialog)
     .add("werkzeug.exceptions.Forbidden", SessionExpiredDialog)

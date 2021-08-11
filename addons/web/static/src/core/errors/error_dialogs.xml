@@ -14,8 +14,12 @@
     </t>
 
     <t t-name="web.RedirectWarningDialogFooter" owl="1">
-      <button  class="btn btn-primary" t-on-click="onClick"><t t-esc="env._t(buttonText)"/></button>
-      <button  class="btn btn-secondary" t-on-click="onCancel">Cancel</button>
+      <t t-foreach="actions" t-as="action">
+          <button t-if="action_first" class="btn btn-primary" t-on-click="onClick(action_index)"><t t-esc="env._t(action.buttonText)"/></button>
+          <button t-else="" class="btn btn-secondary" t-on-click="onClick(action_index)"><t t-esc="env._t(action.buttonText)"/></button>
+      </t>
+      <button t-if="actions.length" class="btn btn-secondary" t-on-click="onCancel">Cancel</button>
+      <button t-else="" class="btn btn-primary" t-on-click="onCancel">Ok</button>
     </t>
 
     <t t-name="web.Error504DialogBody" owl="1">

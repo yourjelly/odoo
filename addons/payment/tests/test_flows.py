@@ -328,9 +328,9 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
         # Transaction step with a wrong flow --> UserError
         with mute_logger('odoo.http'):
             response = self.portal_transaction(**transaction_values)
-        self.assertIn(
-            "odoo.exceptions.UserError: The payment should either be direct, with redirection, or made by a token.",
-            response.text)
+        self.assertEqual(
+            "The payment should either be direct, with redirection, or made by a token.",
+            response.json()['error']['data']['arguments'][0])
 
     def test_transaction_wrong_token(self):
         route_values = self._prepare_pay_values()
@@ -339,6 +339,6 @@ class TestFlows(PaymentCommon, PaymentHttpCommon):
         # Transaction step with a wrong access token --> ValidationError
         with mute_logger('odoo.http'):
             response = self.portal_transaction(**route_values)
-        self.assertIn(
-            "odoo.exceptions.ValidationError: The access token is invalid.",
-            response.text)
+        self.assertEqual(
+            "The access token is invalid.",
+            response.json()['error']['data']['arguments'][0])

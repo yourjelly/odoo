@@ -25,11 +25,15 @@ class UserError(Exception):
     state of a record. Semantically comparable to the generic 400 HTTP status codes.
     """
 
-    def __init__(self, message):
+    def __init__(self, message, actions=None):
         """
         :param message: exception message and frontend modal content
         """
-        super().__init__(message)
+        if actions is None:
+            actions = []
+        elif not isinstance(actions, list):
+            actions = [actions]
+        super().__init__(message, actions)
 
     @property
     def name(self):
@@ -51,7 +55,11 @@ class RedirectWarning(Exception):
            Can be used to limit a view to active_ids for example.
     """
     def __init__(self, message, action, button_text, additional_context=None):
-        super().__init__(message, action, button_text, additional_context)
+        super().__init__(message, {
+            'action': action,
+            'buttonText': button_text,
+            'additionalContext': additional_context,
+        })
 
     # using this RedirectWarning won't crash if used as an UserError
     @property
