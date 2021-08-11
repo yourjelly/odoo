@@ -22,6 +22,9 @@ class AdyenTransaction(models.Model):
     _order = 'date desc'
     _rec_name = 'reference'
 
+    # TODO ANVFE multi-company consideration
+    # Add company_id = adyen_account_id.company_id stored and with ir rules of access.
+
     adyen_account_id = fields.Many2one('adyen.account', required=True)
     reference = fields.Char('Reference', index=True, required=True)
     capture_reference = fields.Char('Capture Reference')
