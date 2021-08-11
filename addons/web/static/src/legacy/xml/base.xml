@@ -677,6 +677,14 @@
     <p t-if="help" class="oe_tooltip_help" role="tooltip">
         <t t-esc="help"/>
     </p>
+    <p t-if="help_links" style="padding-left: 8px;padding-right: 8px;">
+        <b>See:</b>
+        <ul>
+            <t t-foreach="help_links" t-as="help_link">
+                <li><a t-att-href="help_links[help_link]" target="_blank"><t t-esc="help_link"/></a></li>
+            </t>
+        </ul>
+    </p>
     <ul t-if="debug" class="oe_tooltip_technical" role="tooltip">
         <li data-item="field" t-if="widget.name">
             <span class="oe_tooltip_technical_title">Field:</span>

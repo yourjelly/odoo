@@ -300,7 +300,21 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
         // should be attached if not given, the tooltip is attached on the
         // widget's $el
         $node = $node.length ? $node : widget.$el;
-        $node.tooltip(this._getTooltipOptions(widget));
+        $node.tooltip(this._getTooltipOptions(widget))
+            .on("mouseenter", function () {
+                var self = this;
+                $(this).tooltip("show");
+                $(".tooltip").on("mouseleave", function () {
+                    $(self).tooltip('hide');
+                });
+            }).on("mouseleave", function () {
+                var self = this;
+                setTimeout(function () {
+                    if (!$(".tooltip:hover").length) {
+                        $(self).tooltip("hide");
+                    }
+                }, 0);
+            });
     },
     /**
      * Does the necessary DOM updates to match the given modifiers data. The
@@ -433,6 +447,7 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
      * @private
      */
     _getTooltipOptions: function (widget) {
+        let help_links = widget.attrs.help_links || widget.field.help_links;
         return {
             title: function () {
                 let help = widget.attrs.help || widget.field.help || '';
@@ -440,10 +455,11 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
                     help += (help ? '\n\n' : '') + _t('Values set here are company-specific.');
                 }
                 const debug = config.isDebug();
-                if (help || debug) {
-                    return qweb.render('WidgetLabel.tooltip', { debug, help, widget });
+                if (help || debug || help_links) {
+                    return qweb.render('WidgetLabel.tooltip', { debug, help, help_links, widget });
                 }
-            }
+            },
+            trigger: help_links ? 'manual' : 'hover',
         };
     },
     /**

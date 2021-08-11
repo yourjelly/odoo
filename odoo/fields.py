@@ -245,7 +245,8 @@ class Field(MetaField('DummyField', (object,), {})):
 
     string = None                       # field label
     help = None                         # field tooltip
-    invisible = False             # whether the field is invisible
+    help_links = None                   # tooltip links
+    invisible = False                   # whether the field is invisible
     readonly = False                    # whether the field is readonly
     required = False                    # whether the field is required
     states = None                       # set readonly and required depending on state
@@ -784,6 +785,13 @@ class Field(MetaField('DummyField', (object,), {})):
             field_help = env['ir.translation'].get_field_help(model_name)
             return field_help.get(self.name) or self.help
         return self.help
+
+    def _description_help_links(self, env):
+        links = self.help_links
+        if isinstance(links, (list, tuple)):
+            links = {link: link for link in links}
+        return links
+
 
     def is_editable(self):
         """ Return whether the field can be editable in a view. """

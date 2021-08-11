@@ -279,6 +279,10 @@ class AccountMove(models.Model):
         string='Salesperson',
         default=lambda self: self.env.user)
     invoice_date = fields.Date(string='Invoice/Bill Date', readonly=True, index=True, copy=False,
+        help_links={
+            'Google': 'http://www.google.com',
+            'What day are we?': 'https://www.timeanddate.com/calendar/',
+        },
         states={'draft': [('readonly', False)]})
     invoice_date_due = fields.Date(string='Due Date', readonly=True, index=True, copy=False,
         states={'draft': [('readonly', False)]})
