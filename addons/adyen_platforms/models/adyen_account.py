@@ -163,6 +163,8 @@ class AdyenAccount(models.Model):
     kyc_tier = fields.Integer(string='KYC Tier', default=0, readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')
 
+    is_test = fields.Boolean(default=False)
+
     _sql_constraints = [
         ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
     ]
@@ -245,7 +247,7 @@ class AdyenAccount(models.Model):
         create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(
             values.get('payout_schedule', 'biweekly'),
             'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
-        response = self._adyen_rpc('v1/create_account_holder', create_data)
+        response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
 
         adyen_account.with_context(update_from_adyen=True).write({
             'account_code': response['adyen_response']['accountCode'],
@@ -424,6 +426,7 @@ class AdyenAccount(models.Model):
                 'creation_token': request.session.get('adyen_creation_token'),
                 'base_url': self.get_base_url(),
                 'adyen_data': adyen_data,
+                'test': self.is_test,
             }
             auth = None
         else:

@@ -71,7 +71,6 @@ class PaymentTransaction(models.Model):
         }
         return {
             'data': json.dumps(data),
-            'test': self.acquirer_id.state == 'test',
             'api_url': self.acquirer_id._odoo_get_api_url(),
         }
 
