@@ -2,7 +2,8 @@
 
 from werkzeug import urls
 
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class PaymentAcquirer(models.Model):
@@ -13,15 +14,28 @@ class PaymentAcquirer(models.Model):
     odoo_adyen_account_id = fields.Many2one(
         related='company_id.adyen_account_id', required_if_provider='odoo')
 
+    @api.constrains('state')
+    def _check_adyen_account_state(self):
+        for acquirer in self.filtered(lambda acq: acq.provider == 'odoo'):
+            adyen_account = acquirer.odoo_adyen_account_id
+            if acquirer.state == 'enabled':
+                if adyen_account.is_test:
+                    raise ValidationError("You cannot enable the acquirer with a test account")
+                elif not adyen_account.account_status == 'active':
+                    raise ValidationError("You cannot enable the acquirer with a disabled account")
+            elif acquirer.state == 'test':
+                if not adyen_account.is_test:
+                    raise ValidationError("You cannot make test payments with a live account")
+                elif not adyen_account.account_status == 'active':
+                    raise ValidationError("You cannot make payments with a disabled account")
+
     def odoo_create_adyen_account(self):
         return self.env['adyen.account'].action_create_redirect()
 
     def _odoo_get_api_url(self):
         self.ensure_one()
         proxy_url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.proxy_url')
-        # FIXME ANVFE do we prefer a test route or a test kwarg ?
-        url = 'v1/pay_by_link' # if self.state == 'enabled' else 'v1/test_pay_by_link'
-        return urls.url_join(proxy_url, url)
+        return urls.url_join(proxy_url, 'v1/pay_by_link')
 
     def _odoo_compute_shopper_reference(self, partner_id):
         """ Compute a unique reference of the partner for Adyen.
