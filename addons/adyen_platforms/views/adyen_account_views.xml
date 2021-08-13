@@ -45,9 +45,8 @@
                             <field name="entity_type" attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                         <group>
-                            <field name="company_id" readonly="1" groups="base.group_multi_company" />
+                            <field name="company_id" readonly="1" groups="base.group_multi_company"/>
                         </group>
-
                         <group string="Individual"
                             attrs="{'invisible': [('entity_type', '!=', 'individual')]}">
                             <field name="first_name"
@@ -99,6 +98,10 @@
                                 <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_create': True}"/>
                                 <field name="country_code" invisible="1"/>
                             </div>
+                        </group>
+
+                        <group string="TEST" groups="base.group_no_one">
+                            <field name="is_test"/>
                         </group>
                     </group>
                     <notebook attrs="{'invisible': [('adyen_uuid', '=', False)]}">
