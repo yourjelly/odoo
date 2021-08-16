@@ -15,7 +15,9 @@ if (timeLimitMinutes <= 0) {
 }
 
 var countDownDate = moment.utc($parent.data('timer')).add(timeLimitMinutes, 'minutes');
-
+var a =new Date();
+console.log("-----------",a);
+console.log("===========", Math.floor((new Date()).getTime() / 1000));
 if (countDownDate.diff(moment.utc(), 'seconds') < 0) {
     return Promise.reject("Timer is already finished");
 }
@@ -27,7 +29,7 @@ var formatTime = function (time) {
 var $timer = $parent.find('.timer');
 var interval = null;
 var updateTimer = function () {
-    var timeLeft = countDownDate.diff(moment.utc(), 'seconds');
+    var timeLeft = countDownDate.diff(moment(), 'seconds');
 
     if (timeLeft >= 0) {
         var timeLeftMinutes = parseInt(timeLeft / 60);
