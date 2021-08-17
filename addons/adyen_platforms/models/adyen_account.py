@@ -576,6 +576,8 @@ class AdyenAccount(models.Model):
                 **additional_data
             })
         else:
+            # FIXME ANVFE SOMETIME kyc is a multi record recordset
+            # and following lines raise.
             if bank_uuid and not kyc.bank_account_id:
                 bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
                 kyc.bank_account_id = bank_account_id.id
