@@ -492,6 +492,83 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
         self.assertEqual(len(mo), 1)
 
+    def test_flow_flexible_bom_1(self):
+        """ Record Component for a bom subcontracted with a flexible and flexible + warning consumption """
+        self.bom.consumption = 'flexible'
+        # Create a receipt picking from the subcontractor
+        picking_form = Form(self.env['stock.picking'])
+        picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
+        picking_form.partner_id = self.subcontractor_partner1
+        with picking_form.move_ids_without_package.new() as move:
+            move.product_id = self.finished
+            move.product_uom_qty = 1
+        picking_receipt = picking_form.save()
+        picking_receipt.action_confirm()
+
+        self.assertTrue(picking_receipt.display_action_record_components)
+        action = picking_receipt.action_record_components()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        mo_form = Form(mo.with_context(**action['context']), view=action['view_id'])
+        mo_form.qty_producing = 1
+        with mo_form.move_line_raw_ids.edit(0) as ml:
+            self.assertEqual(ml.product_id, self.comp1)
+            self.assertEqual(ml.qty_done, 1)
+            ml.qty_done = 2
+        mo = mo_form.save()
+        mo.subcontracting_record_component()
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.qty_done, 2)
+
+        # We should not be able to call the 'record_components' button
+        self.assertFalse(picking_receipt.display_action_record_components)
+
+        picking_receipt.button_validate()
+        self.assertEqual(mo.state, 'done')
+        avail_qty_comp1 = self.env['stock.quant']._get_available_quantity(self.comp1, self.subcontractor_partner1.property_stock_subcontractor, allow_negative=True)
+        self.assertEqual(avail_qty_comp1, -2)
+
+    def test_flow_warning_bom_1(self):
+        """ Record Component for a bom subcontracted with a flexible and flexible + warning consumption """
+        self.bom.consumption = 'warning'
+        # Create a receipt picking from the subcontractor
+        picking_form = Form(self.env['stock.picking'])
+        picking_form.picking_type_id = self.env.ref('stock.picking_type_in')
+        picking_form.partner_id = self.subcontractor_partner1
+        with picking_form.move_ids_without_package.new() as move:
+            move.product_id = self.finished
+            move.product_uom_qty = 1
+        picking_receipt = picking_form.save()
+        picking_receipt.action_confirm()
+
+        self.assertTrue(picking_receipt.display_action_record_components)
+        action = picking_receipt.action_record_components()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        mo_form = Form(mo.with_context(**action['context']), view=action['view_id'])
+        mo_form.qty_producing = 1
+        with mo_form.move_line_raw_ids.edit(0) as ml:
+            self.assertEqual(ml.product_id, self.comp1)
+            self.assertEqual(ml.qty_done, 1)
+            ml.qty_done = 2
+        mo = mo_form.save()
+        action_warning = mo.subcontracting_record_component()
+        warning = Form(self.env['mrp.consumption.warning'].with_context(**action_warning['context']))
+        warning = warning.save()
+        warning.action_cancel()
+
+        action_warning = mo.subcontracting_record_component()
+        warning = Form(self.env['mrp.consumption.warning'].with_context(**action_warning['context']))
+        warning = warning.save()
+        warning.action_confirm()
+
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.qty_done, 2)
+
+        # We should not be able to call the 'record_components' button
+        self.assertFalse(picking_receipt.display_action_record_components)
+
+        picking_receipt.button_validate()
+        self.assertEqual(mo.state, 'done')
+        avail_qty_comp1 = self.env['stock.quant']._get_available_quantity(self.comp1, self.subcontractor_partner1.property_stock_subcontractor, allow_negative=True)
+        self.assertEqual(avail_qty_comp1, -2)
+
 
 class TestSubcontractingTracking(TransactionCase):
     def setUp(self):
