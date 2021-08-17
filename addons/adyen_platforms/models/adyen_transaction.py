@@ -26,6 +26,8 @@ class AdyenTransaction(models.Model):
     # Add company_id = adyen_account_id.company_id stored and with ir rules of access.
 
     adyen_account_id = fields.Many2one('adyen.account', required=True)
+    company_id = fields.Many2one(related='adyen_account_id.company_id', store=True)
+
     reference = fields.Char('Reference', index=True, required=True)
     capture_reference = fields.Char('Capture Reference')
     total_amount = fields.Float('Customer Amount')
@@ -307,8 +309,9 @@ class AdyenTransactionPayout(models.Model):
     _description = 'Payout Transaction'
     _order = 'date desc'
 
-    # FIXME ANVFE related to the bank_account adyen_account_id ?
-    adyen_account_id = fields.Many2one('adyen.account')
+    adyen_account_id = fields.Many2one('adyen.account', required=True)
+    company_id = fields.Many2one(related='adyen_account_id.company_id', store=True)
+
     date = fields.Datetime()
     amount = fields.Float('Amount', required=True)
     currency_id = fields.Many2one('res.currency', required=True)

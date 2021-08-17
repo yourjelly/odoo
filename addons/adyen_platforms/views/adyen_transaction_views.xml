@@ -70,6 +70,7 @@
                 <field name="fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" optional="show" />
                 <field name="date"/>
                 <field name="status"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
             </tree>
         </field>
     </record>
@@ -86,6 +87,8 @@
                 <group>
                     <filter string="Currency" name="groupby_currency_id" context="{'group_by': 'currency_id'}"/>
                     <filter string="Date" name="groupby_date" context="{'group_by': 'date'}" />
+                    <filter string="Company" name="groupby_company_id"
+                        groups="base.group_multi_company" context="{'group_by': 'company_id'}"/>
                 </group>
             </search>
         </field>
@@ -103,6 +106,7 @@
                 <field name="amount" string="Amount" widget="monetary" />
                 <field name="date"/>
                 <field name="status"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
             </tree>
         </field>
     </record>
@@ -117,6 +121,8 @@
                 <group>
                     <filter string="Currency" name="groupby_currency_id" context="{'group_by': 'currency_id'}"/>
                     <filter string="Date" name="groupby_date" context="{'group_by': 'date'}" />
+                    <filter string="Company" name="groupby_company_id"
+                        groups="base.group_multi_company" context="{'group_by': 'company_id'}"/>
                 </group>
             </search>
         </field>
