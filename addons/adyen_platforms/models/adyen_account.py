@@ -90,7 +90,7 @@ class AdyenAccount(models.Model):
     adyen_uuid = fields.Char('Adyen UUID')
     account_holder_code = fields.Char('Account Holder Code', default=lambda self: uuid.uuid4().hex)
 
-    company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True)
     shareholder_ids = fields.One2many('adyen.shareholder', 'adyen_account_id', string='Shareholders')
     bank_account_ids = fields.One2many('adyen.bank.account', 'adyen_account_id', string='Bank Accounts')
     transaction_ids = fields.One2many('adyen.transaction', 'adyen_account_id', string='Transactions')
