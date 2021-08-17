@@ -15,6 +15,8 @@ class AdyenKYC(models.Model):
     _name = 'adyen.kyc'
     _description = 'Adyen KYC checks'
 
+    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
+
     status_message = fields.Char()
     status = fields.Selection(string='KYC Status', selection=[
         ('awaiting_data', 'Data To Provide'),
@@ -24,12 +26,11 @@ class AdyenKYC(models.Model):
         ('failed', 'Failed'),
     ], required=True, default='pending')
 
-    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
     bank_account_id = fields.Many2one(
         'adyen.bank.account', domain="[('adyen_account_id', '=', adyen_account_id)]", ondelete='cascade')
     shareholder_id = fields.Many2one(
         'adyen.shareholder', domain="[('adyen_account_id', '=', adyen_account_id)]", ondelete='cascade')
-    document = fields.Char(compute='_compute_document')
+    document = fields.Char(compute='_compute_document', help="Linked document name")
 
     verification_type = fields.Selection([
         ('company', 'Company'),

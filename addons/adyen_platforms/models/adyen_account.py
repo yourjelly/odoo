@@ -329,6 +329,7 @@ class AdyenAccount(models.Model):
         return action
 
     def _upload_photo_id(self, document_type, content, filename):
+        # FIXME ANVFE wtf is this test mode config param ???
         test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
         self._adyen_rpc('v1/upload_document', {
             'documentDetail': {
@@ -632,7 +633,8 @@ class AdyenAccount(models.Model):
                         reference = transaction.get('pspReference') or transaction.get('disputePspReference')
                         tx_sudo = account.transaction_payout_ids.sudo().filtered(lambda t: t.reference == reference)
                         if not tx_sudo:
-                            self.env['adyen.transaction.payout'].sudo()._create_missing_payout(account.id, transaction)
+                            self.env['adyen.transaction.payout'].sudo()._create_missing_payout(
+                                account.id, transaction)
                         else:
                             tx_sudo.status = status
                     else:

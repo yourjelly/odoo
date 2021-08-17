@@ -68,6 +68,7 @@ class AdyenShareholder(models.Model):
     def unlink(self):
         self.check_access_rights('unlink')
 
+        # TODO ANVFE this call seems to support batch deletion, to try
         for shareholder in self:
             shareholder.adyen_account_id._adyen_rpc('v1/delete_shareholders', {
                 'accountHolderCode': shareholder.adyen_account_id.account_holder_code,
@@ -76,6 +77,7 @@ class AdyenShareholder(models.Model):
         return super().unlink()
 
     def _upload_photo_id(self, document_type, content, filename):
+        # FIXME ANVFE wtf is this test mode config param ???
         test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
             'documentDetail': {
