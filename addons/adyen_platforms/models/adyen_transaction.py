@@ -323,17 +323,24 @@ class AdyenTransactionPayout(models.Model):
         ('PayoutReversed', 'Payout Reversed'),
     ], default='unknown')
 
-    def _create_missing_payout(self, account_id, transaction, **kwargs):
-        currency_id = self.env['res.currency'].search([('name', '=', transaction['amount']['currency'])])
-        bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', transaction.get('bankAccountDetail', {}).get('bankAccountUUID'))])
+    def _create_missing_payout(self, account_id, transaction):
+        """
+
+        Note: sudoed env
+
+        :param int account_id: `adyen.account` id
+        :param dict transaction: payout transaction details received from Adyen
+        """
+        currency = self.env['res.currency'].search([('name', '=', transaction['amount']['currency'])])
+        bank_account = self.env['adyen.bank.account'].search([
+            ('bank_account_uuid', '=', transaction.get('bankAccountDetail', {}).get('bankAccountUUID'))])
         tx = self.create({
             'adyen_account_id': account_id,
             'date': parse(transaction.get('creationDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            'amount': to_major_currency(transaction.get('amount', {}).get('value'), currency_id.decimal_places),
-            'currency_id': currency_id.id,
+            'amount': to_major_currency(transaction.get('amount', {}).get('value'), currency.decimal_places),
+            'currency_id': currency.id,
             'reference': transaction.get('pspReference'),
-            'bank_account_id': bank_account_id.id,
+            'bank_account_id': bank_account.id,
             'status': transaction.get('transactionStatus'),
-            **kwargs,
         })
         return tx
