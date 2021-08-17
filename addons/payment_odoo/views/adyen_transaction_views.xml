@@ -15,7 +15,9 @@
         <field name="inherit_id" ref="adyen_platforms.adyen_transaction_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='description']" position="after">
-                <field name="payment_transaction_id" attrs="{'invisible': [('payment_transaction_id', '=', False)]}" />
+                <field name="payment_transaction_id"
+                    attrs="{'invisible': [('payment_transaction_id', '=', False)]}"
+                    groups="base.group_no_one"/>
             </xpath>
             <xpath expr="//group[@name='additional_info']" position="inside">
                 <field name="partner_id" widget="res_partner_many2one" attrs="{'invisible': [('partner_id', '=', False)]}"/>
