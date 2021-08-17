@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CalendarYearPopover" owl="1">
+        <div class="o-calendar-year-popover">
+            <div class="o-calendar-year-popover--header">
+                <span class="o-calendar-year-popover--close-button" t-on-click.stop="close">
+                    <i class="fa fa-close small" />
+                </span>
+            </div>
+            <div class="o-calendar-year-popover--body">
+                <t t-foreach="recordGroups" t-as="recordGroup" t-key="recordGroup.title">
+                    <div class="o-calendar-year-popover--section">
+                        <div
+                            class="font-weight-bold mt-2 o-calendar-year-popover--section-title"
+                            t-esc="recordGroup.title"
+                        />
+                        <t t-foreach="recordGroup.records" t-as="record">
+                            <t t-call="web.CalendarYearPopover.record" />
+                        </t>
+                    </div>
+                </t>
+            </div>
+            <div class="o-calendar-year-popover--footer">
+                <t t-if="props.model.canCreate">
+                    <a
+                        href="#"
+                        class="btn-link o-calendar-year-popover--create-button"
+                        t-on-click.prevent="onCreateButtonClick"
+                    >
+                        <i class="fa fa-plus"/> Create
+                    </a>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="web.CalendarYearPopover.record" owl="1">
+        <a
+            href="#"
+            t-on-click.prevent="onRecordClick(record)"
+            t-attf-class="o-calendar-year-popover--record btn-link d-block"
+            t-att-data-id="record.id"
+            t-att-data-title="record.title"
+        >
+            <t t-esc="record.title"/> <t t-esc="record.startHour" />
+        </a>
+    </t>
+
+</templates>

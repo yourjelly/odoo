@@ -93,6 +93,10 @@ This module provides the core of the Odoo Web Client.
             'base/static/src/css/modules.css',
             'base/static/src/js/res_config_settings.js',
 
+            'web/static/lib/fullcalendar/**/*.js',  # TODO: lazy load it
+            ('remove', 'web/static/lib/fullcalendar/bootstrap/*.js'),
+            'web/static/lib/fullcalendar/**/*.css',  # TODO: lazy load it
+
             'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
             'web/static/src/fields/**/*',
@@ -454,16 +458,9 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/tests/legacy/helpers/test_utils_tests.js'),
             'web/static/tests/legacy/legacy_setup.js',
 
-            'web/static/lib/fullcalendar/core/main.css',
-            'web/static/lib/fullcalendar/daygrid/main.css',
-            'web/static/lib/fullcalendar/timegrid/main.css',
-            'web/static/lib/fullcalendar/list/main.css',
-            'web/static/lib/fullcalendar/core/main.js',
-            'web/static/lib/fullcalendar/moment/main.js',
-            'web/static/lib/fullcalendar/interaction/main.js',
-            'web/static/lib/fullcalendar/daygrid/main.js',
-            'web/static/lib/fullcalendar/timegrid/main.js',
-            'web/static/lib/fullcalendar/list/main.js',
+            'web/static/lib/fullcalendar/**/*.js',  # TODO: lazy load it
+            ('remove', 'web/static/lib/fullcalendar/bootstrap/*.js'),
+            'web/static/lib/fullcalendar/**/*.css',  # TODO: lazy load it
             'web/static/lib/ace/ace.js',
             'web/static/lib/ace/javascript_highlight_rules.js',
             'web/static/lib/ace/mode-python.js',

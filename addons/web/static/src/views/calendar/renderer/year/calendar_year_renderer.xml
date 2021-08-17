@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CalendarYearRenderer" owl="1">
+        <div class="o-calendar-year-renderer">
+            <t t-foreach="months" t-as="month" t-key="month">
+                <div class="o-calendar-year-renderer--month-container">
+                    <div class="o-calendar-year-renderer--month" t-ref="fullCalendar-{{ month }}" />
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

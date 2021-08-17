@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CalendarCommonPopover" owl="1">
+        <div class="o-calendar-common-popover">
+            <div class="card-header d-flex justify-content-between py-2 pr-2">
+                <h4 class="popover-header border-0 p-0 pt-1" t-esc="props.record.title" />
+                <span class="o_cw_popover_close ml-4" t-on-click.stop="close">
+                    <i class="fa fa-close small" />
+                </span>
+            </div>
+            <CalendarPopoverAdapter
+                Component="Widget"
+                resModel="props.model.resModel"
+                record="props.record"
+                fields="props.model.fields"
+                popoverFields="props.model.popoverFields"
+                isDateHidden="props.model.isDateHidden"
+                isTimeHidden="props.record.isTimeHidden"
+                canDelete="props.model.canDelete"
+                time="time"
+                timeDuration="timeDuration"
+                date="date"
+                dateDuration="dateDuration"
+                t-on-edit-event.stop="onEditEvent"
+                t-on-delete-event.stop="onDeleteEvent"
+            />
+        </div>
+    </t>
+
+</templates>

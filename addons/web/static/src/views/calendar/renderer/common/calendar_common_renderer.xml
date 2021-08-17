@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.CalendarCommonRenderer" owl="1">
+        <div class="o-calendar-common-renderer" t-ref="fullCalendar" />
+    </t>
+
+    <t t-name="web.CalendarCommonRenderer.event" owl="1">
+        <!-- <div class="o_calendar_event_content"> -->
+        <div>
+            <!-- <t t-if="record.isTimeHidden">
+                <span
+                    class="fc-time"
+                    t-esc="'18:00'"
+                />
+            </t> -->
+            <div class="o_event_title" t-esc="record.title"/>
+        </div>
+    </t>
+
+</templates>

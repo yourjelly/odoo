@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarView" owl="1">
+        <div class="o-calendar-view">
+            <ControlPanel t-props="controlPanelProps">
+                <t t-set-slot="control-panel-bottom-left">
+                    <t t-call="wowl.CalendarView.controlButtons"/>
+                </t>
+            </ControlPanel>
+            <div class="o-calendar-view--container">
+                <div class="o-calendar-view--calendar">
+                    <Renderer t-props="rendererProps" />
+                </div>
+                <div class="o-calendar-view--search-container">
+                    <div class="o-calendar-view--search">
+                        <DatePicker t-props="datePickerProps" />
+                        <FilterPanel t-props="filterPanelProps" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="wowl.CalendarView.controlButtons" owl="1">
+        <div class="o-calendar-view--control-buttons">
+            <span class="o-calendar-view--navigation-buttons">
+                <button
+                    class="btn btn-primary o-calendar-view--navigation-button--previous"
+                    title="Previous"
+                    aria-label="Previous"
+                    t-on-click.stop="setDate('previous')"
+                >
+                    <i class="fa fa-arrow-left" />
+                </button>
+                <t> </t> <!-- This forces to insert a space between the buttons -->
+                <button
+                    class="btn btn-primary o-calendar-view--navigation-button--today"
+                    t-on-click.stop="setDate('today')"
+                >
+                    Today
+                </button>
+                <t> </t> <!-- This forces to insert a space between the buttons -->
+                <button
+                    class="btn btn-primary o-calendar-view--navigation-button--next"
+                    title="Next"
+                    aria-label="Next"
+                    t-on-click.stop="setDate('next')"
+                >
+                    <i class="fa fa-arrow-right" />
+                </button>
+                <t> </t> <!-- This forces to insert a space between the buttons -->
+            </span>
+            <span class="o-calendar-view--scale-buttons">
+                <div class="btn-group">
+                    <t t-foreach="model.scales" t-as="scale" t-key="scale">
+                        <button
+                            class="o-calendar-view--scale-button btn btn-secondary"
+                            type="button"
+                            t-att-class="{active: model.scale === scale}"
+                            t-attf-class="o-calendar-view--scale-button--{{ scale }}"
+                            t-on-click.stop="setScale(scale)"
+                        >
+                            <t t-esc="scaleLabels[scale]"/>
+                        </button>
+                    </t>
+                </div>
+            </span>
+        </div>
+    </t>
+
+</templates>
