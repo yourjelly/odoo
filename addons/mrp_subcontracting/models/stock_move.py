@@ -130,7 +130,7 @@ class StockMove(models.Model):
             subcontract_details_per_picking[move.picking_id].append((move, bom))
             move.write({
                 'is_subcontract': True,
-                'location_id': move.picking_id.partner_id.with_company(move.company_id).property_stock_subcontractor.id
+                'location_id': move.picking_id.partner_id.with_company(move.company_id)._get_property_stock_subcontractor().id
             })
             move_to_not_merge |= move
         for picking, subcontract_details in subcontract_details_per_picking.items():

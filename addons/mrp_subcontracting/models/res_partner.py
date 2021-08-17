@@ -8,7 +8,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     property_stock_subcontractor = fields.Many2one(
-        'stock.location', string="Subcontractor Location", company_dependent=True,
+        'stock.location', string="Subcontractor Location",
+        company_dependent=True, ondelete="cascade",
         help="The stock location used as source and destination when sending\
         goods to this contact during a subcontracting process.")
     is_subcontractor = fields.Boolean(
@@ -23,3 +24,30 @@ class ResPartner(models.Model):
         else:
             search_operator = 'not in'
         return [('id', search_operator, subcontractor_ids)]
+
+    def _prepare_value_subcontracted_stock_location(self):
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'usage': 'internal',
+            'location_id': self.env.company.subcontracting_location_id.id,
+            'company_id': self.env.company.id,
+        }
+
+    def _get_property_stock_subcontractor(self):
+        """ Return the subcontracted location of the partner. If it doesn't exist,
+        create one for the partner (child of the subconctracting location of the company)
+        if the multi location is activated.
+        """
+        self.ensure_one()
+        if not self.property_stock_subcontractor and self.user_has_groups('stock.group_stock_multi_locations'):
+            self.sudo().property_stock_subcontractor = self.env['stock.location'].create(self._prepare_value_subcontracted_stock_location())
+        return self.property_stock_subcontractor or self.env.company.subcontracting_location_id
+
+    def write(self, values):
+        res = super().write(values)
+        if 'name' in values:
+            all_companies = self.env['res.company'].search([])
+            for comp in all_companies:
+                self.with_company(comp).property_stock_subcontractor.name = self.name
+        return res

@@ -119,8 +119,8 @@ class StockPicking(models.Model):
             'product_id': product.id,
             'product_uom_id': subcontract_move.product_uom.id,
             'bom_id': bom.id,
-            'location_src_id': subcontract_move.picking_id.partner_id.with_company(subcontract_move.company_id).property_stock_subcontractor.id,
-            'location_dest_id': subcontract_move.picking_id.partner_id.with_company(subcontract_move.company_id).property_stock_subcontractor.id,
+            'location_src_id': subcontract_move.picking_id.partner_id.with_company(subcontract_move.company_id)._get_property_stock_subcontractor().id,
+            'location_dest_id': subcontract_move.picking_id.partner_id.with_company(subcontract_move.company_id)._get_property_stock_subcontractor().id,
             'product_qty': subcontract_move.product_uom_qty,
             'picking_type_id': warehouse.subcontracting_type_id.id,
             'date_planned_start': subcontract_move.date - relativedelta(days=product.produce_delay)

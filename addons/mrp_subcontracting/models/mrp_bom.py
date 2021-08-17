@@ -16,7 +16,10 @@ class MrpBom(models.Model):
     def _bom_subcontract_find(self, product, picking_type=None, company_id=False, bom_type='subcontract', subcontractor=False):
         domain = self._bom_find_domain(product, picking_type=picking_type, company_id=company_id, bom_type=bom_type)
         if subcontractor:
-            domain = AND([domain, [('subcontractor_ids', 'parent_of', subcontractor.ids)]])
+            if subcontractor.is_company:
+                domain = AND([domain, [('subcontractor_ids', 'in', subcontractor.ids)]])
+            else:
+                domain = AND([domain, [('subcontractor_ids', 'parent_of', subcontractor.ids)]])
             return self.search(domain, order='sequence, product_id, id', limit=1)
         else:
             return self.env['mrp.bom']
@@ -25,3 +28,10 @@ class MrpBom(models.Model):
     def _check_subcontracting_no_operation(self):
         if self.filtered_domain([('type', '=', 'subcontract'), ('operation_ids', '!=', False), ('byproduct_ids', '!=', False)]):
             raise ValidationError(_('You can not set a Bill of Material with operations or by product line as subcontracting.'))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        for values in vals_list:
+            
+        return res
