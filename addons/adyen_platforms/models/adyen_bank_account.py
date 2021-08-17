@@ -178,6 +178,7 @@ class AdyenBankAccount(models.Model):
         if file_size > (4 * 1024 * 1024):
             raise ValidationError(_('Maximum allowed size for bank statements: 4MB.'))
 
+        # FIXME ANVFE wtf is this test mode config param ???
         test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
             'documentDetail': {
