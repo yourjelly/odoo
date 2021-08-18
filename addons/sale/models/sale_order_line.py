@@ -238,7 +238,7 @@ class SaleOrderLine(models.Model):
     price_reduce_taxinc = fields.Monetary(compute='_get_price_reduce_tax', string='Price Reduce Tax inc', readonly=True, store=True)
     price_reduce_taxexcl = fields.Monetary(compute='_get_price_reduce_notax', string='Price Reduce Tax excl', readonly=True, store=True)
 
-    discount = fields.Float(string='Discount (%)', digits='Discount', default=0.0)
+    discount = fields.Float(compute='_compute_discount', string='Discount (%)', digits='Discount', default=0.0)
 
     product_id = fields.Many2one(
         'product.product', string='Product', domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -827,3 +827,10 @@ class SaleOrderLine(models.Model):
     def _is_not_sellable_line(self):
         # True if the line is a computed line (reward, delivery, ...) that user cannot add manually
         return False
+
+    @api.depends('product_uom_qty', 'discount')
+    def _compute_discount(self):
+        for line in self:
+            if product_uom_qty == 2:
+                self.discount = 20.0
+
