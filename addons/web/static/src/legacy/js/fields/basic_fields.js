@@ -3042,7 +3042,7 @@ var FieldProgressBar = AbstractField.extend({
             }
         },
     },
-    supportedFieldTypes: ['integer', 'float'],
+    supportedFieldTypes: ['integer', 'float', 'monetary'],
     init: function () {
         this._super.apply(this, arguments);
 
@@ -3065,6 +3065,10 @@ var FieldProgressBar = AbstractField.extend({
         // Boolean to toggle if we edit the numerator (value) or the denominator (max_value)
         this.edit_max_value = !!this.nodeOptions.edit_max_value;
         this.max_value = this.recordData[this.nodeOptions.max_value] || 100;
+
+        if (this.recordData[this.nodeOptions.currency_field]) {
+            this.currency_field = this.recordData[this.nodeOptions.currency_field].res_id;
+        }
 
         this.title = _t(this.attrs.title || this.nodeOptions.title) || '';
 
@@ -3190,7 +3194,14 @@ var FieldProgressBar = AbstractField.extend({
         this.$('.o_progressbar_complete').css('width', widthComplete + '%');
 
         if (!this.write_mode) {
-            if (max_value !== 100) {
+            if (max_value !== 100 && this.currency_field) {
+                const currency =  session.get_currency(this.currency_field);
+                if (currency.position === "after") {
+                    this.$('.o_progressbar_value').text(utils.human_number(value) + " / " + utils.human_number(max_value) + currency.symbol);
+                } else if (currency.position === "before") {
+                    this.$('.o_progressbar_value').text(utils.human_number(value) + " / " + currency.symbol + utils.human_number(max_value));
+               }
+            } else if (max_value !== 100 && ! this.currency_field) {
                 this.$('.o_progressbar_value').text(utils.human_number(value) + " / " + utils.human_number(max_value));
             } else {
                 this.$('.o_progressbar_value').text(utils.human_number(value) + "%");
