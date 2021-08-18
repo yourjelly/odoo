@@ -1480,7 +1480,7 @@ class BaseModel(metaclass=MetaModel):
         for group_ext_id in not_has_groups:
             if group_ext_id == 'base.group_no_one':
                 # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session and request.session.debug:
+                if user.has_group(group_ext_id) and request and request.session.debug:
                     return False
             else:
                 if user.has_group(group_ext_id):
@@ -1489,7 +1489,7 @@ class BaseModel(metaclass=MetaModel):
         for group_ext_id in has_groups:
             if group_ext_id == 'base.group_no_one':
                 # check: the group_no_one is effective in debug mode only
-                if user.has_group(group_ext_id) and request and request.session and request.session.debug:
+                if user.has_group(group_ext_id) and request and request.session.debug:
                     return True
             else:
                 if user.has_group(group_ext_id):
