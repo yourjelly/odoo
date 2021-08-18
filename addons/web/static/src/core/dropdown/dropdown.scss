@@ -1,3 +1,34 @@
+// = Dropdown pseudo-classes
+// ----------------------------------------------------------------------------
+%o-dropdown-item--active {
+  position: relative;
+  font-weight: $font-weight-bold;
+
+  &:focus, &:hover {
+    background-color: $dropdown-link-hover-bg;
+  }
+
+  &:not(.o_dropdown_item_active_noarrow) {
+    &:before {
+      @include o-position-absolute(0);
+      transform: translate(-1.5em, 90%);
+      font: .7em/1em FontAwesome;
+      color: $primary;
+      content: "\f00c";
+    }
+
+    &.disabled:before {
+      color: $dropdown-link-disabled-color;
+    }
+  }
+}
+
+%o-dropdown-item--disabled {
+  color: $dropdown-link-disabled-color;
+  pointer-events: none;
+  background-color: transparent;
+}
+
 // = Default Boostrap Classes customizations
 // ----------------------------------------------------------------------------
 .dropdown-menu {
@@ -9,31 +40,7 @@
 
 .dropdown-item {
   &.active, &.selected {
-    position: relative;
-    font-weight: $font-weight-bold;
-
-    &:focus, &:hover  {
-      background-color: $dropdown-link-hover-bg;
-    }
-
-    &:not(.o_dropdown_item_active_noarrow) {
-      &:before {
-        @include o-position-absolute(0);
-        transform: translate(-1.5em, 90%);
-        font: .7em/1em FontAwesome;
-        color: $primary;
-        content: "\f00c";
-      }
-
-      &.disabled:before {
-        color: $dropdown-link-disabled-color;
-      }
-    }
-  }
-
-  &.selected { // Legacy
-    // FIXME: does commenting this break anything?
-    // @extend .active;
+    @extend %o-dropdown-item--active;
   }
 }
 
@@ -69,8 +76,7 @@
     @extend .dropdown-menu;
 
     &.o_dropdown_menu_right {
-      // FIXME: does commenting this break anything?
-      // @extend .dropdown-menu-right;
+      @extend .dropdown-menu-right;
     }
 
     & > li.o_dropdown {
@@ -78,8 +84,8 @@
         background-color: $dropdown-link-hover-bg;
       }
       & > .o_dropdown_toggler {
-        // FIXME: without this there is no selection feedback
-        // @extend .dropdown-item;
+        @extend .dropdown-item;
+
         &:after {
           @include o-position-absolute($right: 0);
           transform: translate(-.6em, .3em);
@@ -109,12 +115,10 @@
         @extend .dropdown-item;
       }
       &.selected > :first-child {
-        // FIXME: does commenting this break anything?
-        //@extend .active;
+        @extend %o-dropdown-item--active;
       }
       &.disabled > :first-child {
-        // FIXME: does commenting this break anything?
-        //@extend .disabled;
+        @extend %o-dropdown-item--disabled;
       }
       &.focus {
         background-color: $dropdown-link-hover-bg;
@@ -219,16 +223,8 @@ button.o_dropdown_toggler {
     min-width: max-content;
   }
 
-  &%--state-active {
+  &.o_dropdown_active, &:hover, &:focus, &:active {
     outline: none;
     box-shadow: none !important;
-  }
-
-  &.o_dropdown_active {
-    @extend %--state-active;
-  }
-
-  @include hover-focus-active() {
-    @extend %--state-active;
   }
 }
