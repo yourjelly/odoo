@@ -683,8 +683,9 @@ export class PivotModel extends Model {
         this.orm2Use = this.realORM;
         searchParams = JSON.parse(JSON.stringify(searchParams)); //This to prevent errors in the Dashboard
 
-        const activeMeasures =
-            this._processMeasures(searchParams.context.pivot_measures) || this.meta.activeMeasures;
+        const unProcessedMeasures = searchParams.context.pivot_measures || this.meta.activeMeasures;
+        const activeMeasures = this._processMeasures(unProcessedMeasures);
+
         const meta = this._buildMeta({ activeMeasures });
         if (!this.reload) {
             meta.rowGroupBys =
