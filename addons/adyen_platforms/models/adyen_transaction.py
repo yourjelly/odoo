@@ -85,6 +85,8 @@ class AdyenTransaction(models.Model):
         tx_sudo = self.env['adyen.transaction'].search(domain)
 
         if not tx_sudo:
+            # FIXME ANVFE for disputes (and other events?),
+            # an adyen transaction is created with incomplete information
             tx_sudo = self.env['adyen.transaction'].create({
                 'adyen_account_id': account.id,
                 'reference': reference,
@@ -121,8 +123,7 @@ class AdyenTransaction(models.Model):
             tx._handle_chargeback_notification(data)
         else:
             # FIXME ANVFE support CAPTURE event code ?
-            # Got it multiple times when some notifs were broken
-            # and surprisingly, it's considered in _get_tx_from_notification
+            # Got it for Chargeback test flows, we should directly support it IMHO
             _logger.warning(_("Unknown eventCode received: %s", event_code))
 
         return tx
