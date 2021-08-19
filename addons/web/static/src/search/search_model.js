@@ -15,6 +15,7 @@ import {
     yearSelected,
 } from "./utils/dates";
 import { FACET_ICONS } from "./utils/misc";
+import { deepCopy } from "@web/core/utils/objects";
 
 const { DateTime } = luxon;
 const EventBus = owl.core.EventBus;
@@ -700,6 +701,13 @@ export class SearchModel extends EventBus {
             const searchItem = this.searchItems[queryElem.searchItemId];
             return searchItem.groupId !== groupId;
         });
+
+        for (const partName in this.domainParts) {
+            const part = this.domainParts[partName];
+            if (part.groupId === groupId) {
+                this.setDomainParts({ [partName]: null });
+            }
+        }
         this._checkComparisonStatus();
         this._notify();
     }
@@ -735,8 +743,17 @@ export class SearchModel extends EventBus {
         return state;
     }
 
+    getDomainPart(partName) {
+        let part = this.domainParts[partName] || null;
+        if (part) {
+            return deepCopy(part);
+        }
+        return part;
+    }
+
     getDomainParts() {
-        return JSON.parse(JSON.stringify(this.domainParts));
+        const copy = deepCopy(this.domainParts);
+        return sortBy(Object.values(copy), (part) => part.groupId);
     }
 
     /**
@@ -788,15 +805,15 @@ export class SearchModel extends EventBus {
     setDomainParts(parts) {
         for (const key in parts) {
             const val = parts[key];
+
             if (!val) {
                 delete this.domainParts[key];
             } else {
                 this.domainParts[key] = val;
-                // val of the form { domain: ArrayRepr, facet: Object | null }
+                val.groupId = this.nextGroupId++;
             }
         }
         this._notify();
-        // this affect search panel content and maybe search bar (when facet is defined)
     }
 
     /**
@@ -1429,7 +1446,7 @@ export class SearchModel extends EventBus {
             domains.push(groupDomain);
         }
 
-        for (const { domain } of Object.values(this.domainParts)) {
+        for (const { domain } of this.getDomainParts()) {
             domains.push(domain);
         }
         // we need to manage (optional) facets, deactivateGroup, clearQuery,...
@@ -1514,6 +1531,17 @@ export class SearchModel extends EventBus {
             }
             facets.push(facet);
         }
+
+        for (const { facetLabel, groupId } of this.getDomainParts()) {
+            const type = "filter";
+            facets.push({
+                groupId,
+                type,
+                values: [facetLabel],
+                icon: FACET_ICONS[type],
+            });
+        }
+
         return facets;
     }
 
