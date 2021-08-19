@@ -42,18 +42,22 @@ class AdyenShareholder(models.Model):
 
     @api.depends('first_name', 'last_name')
     def _compute_full_name(self):
-        for adyen_shareholder_id in self:
-            adyen_shareholder_id.full_name = f'{adyen_shareholder_id.first_name} {adyen_shareholder_id.last_name}'
+        for adyen_shareholder in self:
+            adyen_shareholder.full_name = f'{adyen_shareholder.first_name} {adyen_shareholder.last_name}'
 
     @api.model
     def create(self, values):
         adyen_shareholder = super().create(values)
         # TODO ANVFE retry mechanism ?
         # To avoid blocking the update of the account locally ?
-        response = adyen_shareholder.adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(values))
+        response = adyen_shareholder.adyen_account_id._adyen_rpc(
+            'v1/update_account_holder', self._format_data(values))
 
         shareholders = response['accountHolderDetails']['businessDetails']['shareholders']
-        created_shareholder = next(shareholder for shareholder in shareholders if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
+        created_shareholder = next(
+            shareholder
+            for shareholder in shareholders
+            if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
         adyen_shareholder.with_context(update_from_adyen=True).write({
             'shareholder_uuid': created_shareholder['shareholderCode'],
         })
