@@ -74,7 +74,7 @@
                                                     <span class="text-nowrap">1,500.00</span>
                                                 </td>
                                                 <td class="text-left d-none d-md-table-cell">
-                                                    <span id="line_tax_ids">15.00%</span>
+                                                    
                                                 </td>
                                                 <td class="text-right o_price_total">
                                                     <span class="text-nowrap">$ <span class="oe_currency_value">7,500.00</span></span>
@@ -91,7 +91,7 @@
                                                 <span class="text-nowrap">2,350.00</span>
                                             </td>
                                             <td class="text-left d-none d-md-table-cell">
-                                                <span id="line_tax_ids">15.00%</span>
+                                                
                                             </td>
                                             <td class="text-right o_price_total">
                                                 <span class="text-nowrap">$ <span class="oe_currency_value">11,750.00</span></span>
@@ -109,12 +109,7 @@
                                                     <span>$ <span class="oe_currency_value">19,250.00</span></span>
                                                 </td>
                                             </tr>
-                                                <tr style="">
-                                                        <td><span class="text-nowrap">Tax 15%</span></td>
-                                                        <td class="text-right o_price_total">
-                                                            <span class="text-nowrap">$ 2,887.50</span>
-                                                        </td>
-                                                </tr>
+                                                
                                             <tr class="border-black o_total">
                                                 <td><strong>Total</strong></td>
                                                 <td class="text-right">

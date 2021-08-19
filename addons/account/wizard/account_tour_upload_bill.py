@@ -21,17 +21,12 @@ class AccountTourUploadBill(models.TransientModel):
         default="sample"
     )
 
-    sample_bill_preview = fields.Binary(
-        readonly=True,
-        compute='_compute_sample_bill_image'
-    )
-
     preview_invoice = fields.Html(
         compute="_compute_preview_invoice",
         string="Invoice Preview",
         translate=True,
     )
-
+    
     def _compute_preview_invoice(self):
         invoice_date = fields.Date.today() - timedelta(days=12)
         addr = [x for x in [
@@ -60,16 +55,7 @@ class AccountTourUploadBill(models.TransientModel):
         if journal_alias.alias_name and journal_alias.alias_domain:
             values.append(('email', _('Or send a bill to %s@%s', journal_alias.alias_name, journal_alias.alias_domain)))
         return values
-
-    def _compute_sample_bill_image(self):
-        """ Retrieve sample bill with facturx to speed up onboarding """
-        try:
-            path = get_resource_path('account_edi_facturx', 'data/files', 'Invoice.pdf')
-            self.sample_bill_preview = base64.b64encode(open(path, 'rb').read()) if path else False
-        except (IOError, OSError):
-            self.sample_bill_preview = False
-        return
-
+    
     def _action_list_view_bill(self, bill_ids=[]):
         context = dict(self._context)
         context['default_move_type'] = 'in_invoice'
@@ -84,22 +70,30 @@ class AccountTourUploadBill(models.TransientModel):
         }
 
     def apply(self):
+        invoice_date = fields.Date.today() - timedelta(days=12)
         purchase_journal = self.env['account.journal'].search([('type', '=', 'purchase')], limit=1)
         if self.selection == 'upload':
             return purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment_ids=self.attachment_ids.ids)
         elif self.selection == 'sample':
+            context = dict(self._context)
             attachment = self.env['ir.attachment'].create({
                 'type': 'binary',
-                'name': 'INV/2020/0011.pdf',
+                'name': 'INV/%s0001' % invoice_date.strftime('%Y/%m'),
                 'res_model': 'mail.compose.message',
-                'datas': self.sample_bill_preview,
+                'datas': self.preview_invoice,
             })
             bill_action = purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment.ids)
             bill = self.env['account.move'].browse(bill_action['res_id'])
+            
+            
             bill.write({
-                    'partner_id': self.env.ref('base.main_partner').id,
-                    'ref': 'INV/2020/0011'
-                })
+                    'ref': 'INV/%s0001' % invoice_date.strftime('%Y/%m'),
+                    'journal_id' : context.get('active_id'),
+                    'invoice_date' :invoice_date,
+                    'invoice_date_due' : invoice_date + timedelta(days=30),
+                    'invoice_line_ids' : [(0,0,{'name': "[FURN_8999] Three-Seat Sofa", 'quantity' : 5, 'price_unit' : 15000}),(0,0,{'name': "[FURN_8220] Four Person Desk", 'quantity' : 5, 'price_unit' : 2350})],
+            })
+            
             return self._action_list_view_bill(bill.ids)
         else:
             email_alias = '%s@%s' % (purchase_journal.alias_name, purchase_journal.alias_domain)
