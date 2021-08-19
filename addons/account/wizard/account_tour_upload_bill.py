@@ -3,9 +3,8 @@
 
 from odoo import fields, models, api, _
 from odoo.modules.module import get_resource_path
-from collections import defaultdict, namedtuple
 import base64
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 class AccountTourUploadBill(models.TransientModel):
     _name = 'account.tour.upload.bill'
@@ -26,7 +25,6 @@ class AccountTourUploadBill(models.TransientModel):
         string="Invoice Preview",
         translate=True,
     )
-    
     def _compute_preview_invoice(self):
         invoice_date = fields.Date.today() - timedelta(days=12)
         addr = [x for x in [
@@ -55,7 +53,6 @@ class AccountTourUploadBill(models.TransientModel):
         if journal_alias.alias_name and journal_alias.alias_domain:
             values.append(('email', _('Or send a bill to %s@%s', journal_alias.alias_name, journal_alias.alias_domain)))
         return values
-    
     def _action_list_view_bill(self, bill_ids=[]):
         context = dict(self._context)
         context['default_move_type'] = 'in_invoice'
@@ -84,16 +81,14 @@ class AccountTourUploadBill(models.TransientModel):
             })
             bill_action = purchase_journal.with_context(default_journal_id=purchase_journal.id, default_move_type='in_invoice').create_invoice_from_attachment(attachment.ids)
             bill = self.env['account.move'].browse(bill_action['res_id'])
-            
-            
             bill.write({
                     'ref': 'INV/%s0001' % invoice_date.strftime('%Y/%m'),
                     'journal_id' : context.get('active_id'),
                     'invoice_date' :invoice_date,
                     'invoice_date_due' : invoice_date + timedelta(days=30),
-                    'invoice_line_ids' : [(0,0,{'name': "[FURN_8999] Three-Seat Sofa", 'quantity' : 5, 'price_unit' : 15000}),(0,0,{'name': "[FURN_8220] Four Person Desk", 'quantity' : 5, 'price_unit' : 2350})],
+                    'invoice_line_ids' : [(0, 0, {'name': "[FURN_8999] Three-Seat Sofa", 'quantity' : 5, 'price_unit' : 15000}), (0, 0, {'name': "[FURN_8220] Four Person Desk", 'quantity' : 5, 'price_unit' : 2350})],
             })
-            
+
             return self._action_list_view_bill(bill.ids)
         else:
             email_alias = '%s@%s' % (purchase_journal.alias_name, purchase_journal.alias_domain)
