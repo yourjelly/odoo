@@ -26,7 +26,7 @@ class PaymentWizard(models.TransientModel):
         self.env.company.sale_onboarding_payment_method = self.payment_method
         if self.payment_method == 'digital_signature':
             self.env.company.portal_confirmation_sign = True
-        elif self.payment_method in ('odoo', 'manual'):
+        elif self.payment_method in ('odoo', 'manual', 'stripe', 'paypal'):
             self.env.company.portal_confirmation_pay = True
 
         return super().add_payment_methods(*args, **kwargs)

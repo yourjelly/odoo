@@ -13,6 +13,9 @@ class PaymentWizard(models.TransientModel):
         return self._get_default_payment_acquirer_onboarding_value('payment_method')
 
     payment_method = fields.Selection([
+        ('paypal', "PayPal"),
+        ('stripe', "Credit card (via Stripe)"),
+        ('other', "Other payment acquirer"),
         ('odoo', "Credit & Debit Card via Odoo Payments"),
         ('manual', "Custom payment instructions"),
     ], string="Payment Method", default=_default_payment_method)
@@ -58,6 +61,22 @@ class PaymentWizard(models.TransientModel):
 
         self._payment_acquirer_onboarding_cache['payment_method'] = self.env.company.payment_onboarding_payment_method
 
+        installed_modules = self.env['ir.module.module'].sudo().search([
+            ('name', 'in', ('payment_paypal', 'payment_stripe')),
+            ('state', '=', 'installed'),
+        ]).mapped('name')
+
+        if 'payment_paypal' in installed_modules:
+            acquirer = self.env.ref('payment.payment_acquirer_paypal')
+            self._payment_acquirer_onboarding_cache['paypal_email_account'] = acquirer['paypal_email_account'] or self.env.user.email or ''
+            self._payment_acquirer_onboarding_cache['paypal_seller_account'] = acquirer['paypal_seller_account']
+            self._payment_acquirer_onboarding_cache['paypal_pdt_token'] = acquirer['paypal_pdt_token']
+
+        if 'payment_stripe' in installed_modules:
+            acquirer = self.env.ref('payment.payment_acquirer_stripe')
+            self._payment_acquirer_onboarding_cache['stripe_secret_key'] = acquirer['stripe_secret_key']
+            self._payment_acquirer_onboarding_cache['stripe_publishable_key'] = acquirer['stripe_publishable_key']
+
         manual_payment = self._get_manual_payment_acquirer()
         journal = manual_payment.journal_id
 
@@ -94,6 +113,21 @@ class PaymentWizard(models.TransientModel):
         else:
             raise UserError(_("You have to set a journal for your payment acquirer %s.", self.manual_name))
 
+    def _setup_payment_paypal(self, new_env):
+        new_env.ref('payment.payment_acquirer_paypal').write({
+            'paypal_email_account': self.paypal_email_account,
+            'paypal_seller_account': self.paypal_seller_account,
+            'paypal_pdt_token': self.paypal_pdt_token,
+            'state': 'enabled',
+        })
+
+    def _setup_payment_stripe(self, new_env):
+        new_env.ref('payment.payment_acquirer_stripe').write({
+            'stripe_secret_key': self.stripe_secret_key,
+            'stripe_publishable_key': self.stripe_publishable_key,
+            'state': 'enabled',
+        })
+
     def _set_payment_acquirer_onboarding_step_done(self):
         self.env.company.sudo().set_onboarding_step_done('payment_acquirer_onboarding_state')
 
@@ -110,6 +144,10 @@ class PaymentWizard(models.TransientModel):
 
         if self.payment_method == 'odoo':
             installed_modules += self._install_module('payment_odoo')
+        elif self.payment_method == 'stripe':
+            installed_modules += self._install_module('payment_stripe')
+        elif self.payment_method == 'paypal':
+            installed_modules += self._install_module('payment_paypal')
 
         installed_modules += self._install_module('account_payment')
 
@@ -122,6 +160,10 @@ class PaymentWizard(models.TransientModel):
 
         if self.payment_method == 'manual':
             self._setup_payment_transfer(new_env)
+        elif self.payment_method == 'stripe':
+            self._setup_payment_stripe(new_env)
+        elif self.payment_method == 'paypal':
+            self._setup_payment_paypal(new_env)
 
         # delete wizard data immediately to get rid of residual credentials
         # self.sudo().unlink()
