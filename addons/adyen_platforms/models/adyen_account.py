@@ -321,6 +321,7 @@ class AdyenAccount(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'url': url_join(onboarding_url, 'get_creation_token?return_url=%s' % return_url),
+            'target': 'self',
         }
 
     def action_show_transactions(self):
