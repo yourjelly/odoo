@@ -78,7 +78,7 @@ class AdyenBankAccount(models.Model):
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):
-        self.kyc_status_message = False
+        self.kyc_status_message = False # FIXME ANVFE when is it specified ???
         self.kyc_status = False
         for bank_account in self.filtered('adyen_kyc_ids'):
             kyc = bank_account.adyen_kyc_ids._sort_by_status()
@@ -86,16 +86,20 @@ class AdyenBankAccount(models.Model):
 
     @api.model
     def create(self, values):
-        adyen_bank_account_id = super().create(values)
-        adyen_account_id = self.env['adyen.account'].browse(values.get('adyen_account_id'))
-        response = adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(values))
+        adyen_bank_account = super().create(values)
+
+        response = adyen_bank_account.adyen_account_id._adyen_rpc(
+            'v1/update_account_holder', self._format_data(values))
         bank_accounts = response['accountHolderDetails']['bankAccountDetails']
 
-        created_bank_account = next(bank_account for bank_account in bank_accounts if bank_account['bankAccountReference'] == adyen_bank_account_id.bank_account_reference)
-        adyen_bank_account_id.with_context(update_from_adyen=True).write({
+        created_bank_account = next(
+            bank_account
+            for bank_account in bank_accounts
+            if bank_account['bankAccountReference'] == adyen_bank_account.bank_account_reference)
+        adyen_bank_account.with_context(update_from_adyen=True).write({
             'bank_account_uuid': created_bank_account['bankAccountUUID'],
         })
-        return adyen_bank_account_id
+        return adyen_bank_account
 
     def write(self, vals):
         res = super().write(vals)
@@ -109,10 +113,10 @@ class AdyenBankAccount(models.Model):
     def unlink(self):
         self.check_access_rights('unlink')
 
-        for bank_account_id in self:
-            bank_account_id.adyen_account_id._adyen_rpc('v1/delete_bank_accounts', {
-                'accountHolderCode': bank_account_id.adyen_account_id.account_holder_code,
-                'bankAccountUUIDs': [bank_account_id.bank_account_uuid],
+        for bank_account in self:
+            bank_account.adyen_account_id._adyen_rpc('v1/delete_bank_accounts', {
+                'accountHolderCode': bank_account.adyen_account_id.account_holder_code,
+                'bankAccountUUIDs': [bank_account.bank_account_uuid],
             })
         return super().unlink()
 
@@ -126,6 +130,8 @@ class AdyenBankAccount(models.Model):
     def _format_data(self, values=None):
         if values is None:
             values = {}
+        # TODO ANVFE use fields on self instead of values since this method is always
+        # called after the super create/write call
         adyen_account_id = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
         country_id = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
         currency_id = self.env['res.currency'].browse(values.get('currency_id')) if values.get('currency_id') else self.currency_id
