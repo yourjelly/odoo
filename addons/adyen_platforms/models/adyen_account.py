@@ -101,7 +101,7 @@ class AdyenAccount(models.Model):
         ('business', 'Business'),
         ('individual', 'Individual'),
         ('nonprofit', 'Non Profit'),
-    ], string="Legal Entity Type")
+    ], string="Legal Entity Type", required=True)
 
     # Payout
     account_code = fields.Char('Account Code')
@@ -163,7 +163,7 @@ class AdyenAccount(models.Model):
     kyc_tier = fields.Integer(string='KYC Tier', default=0, readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')
 
-    is_test = fields.Boolean(default=False)
+    is_test = fields.Boolean(string="Test Account", help="Cannot be modified after account creation.")
 
     _sql_constraints = [
         ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
