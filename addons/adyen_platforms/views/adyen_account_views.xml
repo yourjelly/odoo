@@ -30,6 +30,9 @@
                             </div>
                         </button>
                     </div>
+                    <widget name="web_ribbon" title="Test Mode"
+                        bg_color="bg-warning"
+                        attrs="{'invisible': ['|', ('is_test', '=', 'True'), ('adyen_uuid', '=', False)]}"/>
 
                     <div class="alert alert-danger" role="alert" attrs="{'invisible': [('account_status', '!=', 'closed')]}">
                         <p>Your account is Closed.</p>
@@ -102,7 +105,7 @@
                         </group>
 
                         <group string="TEST" groups="base.group_no_one">
-                            <field name="is_test"/>
+                            <field name="is_test" attrs="{'readonly': [('adyen_uuid', '!=', False)]}"/>
                         </group>
                     </group>
                     <notebook attrs="{'invisible': [('adyen_uuid', '=', False)]}">
