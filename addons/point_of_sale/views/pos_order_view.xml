@@ -15,6 +15,7 @@
                 </header>
                 <sheet>
                 <field name="failed_pickings" invisible="1"/>
+                <field name="is_refunded" invisible="1"/>
                 <div class="oe_button_box" name="button_box">
                     <button name="action_stock_picking"
                         type="object"
@@ -30,6 +31,13 @@
                         class="oe_stat_button"
                         icon="fa-pencil-square-o"
                         attrs="{'invisible':[('state','!=','invoiced')]}">
+                    </button>
+                    <button name="action_view_refund_orders"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-undo"
+                        attrs="{'invisible':[('is_refunded', '==', False)]}">
+                        <field name="refund_orders_count" widget="statinfo" string="Refunds" />
                     </button>
                 </div>
                 <group col="4" colspan="4" name="order_fields">
@@ -61,9 +69,7 @@
                                 <field name="price_subtotal" widget="monetary" force_save="1"/>
                                 <field name="price_subtotal_incl" widget="monetary" force_save="1"/>
                                 <field name="currency_id" invisible="1"/>
-                                <field name="refunded_qty" />
-                                <field name="refund_orderline_ids" widget="many2many_tags" string="Refund Order Lines" optional="hide" />
-                                <field name="refunded_orderline_id" string="Refunded Order Line" optional="hide" />
+                                <field name="refunded_qty" optional="hide" />
                             </tree>
                             <form string="Order lines">
                                 <group col="4">

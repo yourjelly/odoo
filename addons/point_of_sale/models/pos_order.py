@@ -287,6 +287,15 @@ class PosOrder(models.Model):
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
     is_tipped = fields.Boolean('Is this already tipped?', readonly=True)
     tip_amount = fields.Float(string='Tip Amount', digits=0, readonly=True)
+    refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_orders_count')
+    is_refunded = fields.Boolean(compute='_compute_refund_orders_count')
+
+    @api.depends('lines.refund_orderline_ids')
+    def _compute_refund_orders_count(self):
+        for order in self:
+            order.refund_orders_count = len(order.mapped('lines.refund_orderline_ids.order_id'))
+            order.is_refunded = order.refund_orders_count > 0
+
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
@@ -424,6 +433,15 @@ class PosOrder(models.Model):
             'context': "{'move_type':'out_invoice'}",
             'type': 'ir.actions.act_window',
             'res_id': self.account_move.id,
+        }
+
+    def action_view_refund_orders(self):
+        return {
+            'name': _('Refund Orders'),
+            'view_mode': 'tree,form',
+            'res_model': 'pos.order',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.mapped('lines.refund_orderline_ids.order_id').ids)],
         }
 
     def _is_pos_order_paid(self):
