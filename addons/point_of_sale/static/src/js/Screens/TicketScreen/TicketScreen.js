@@ -185,11 +185,13 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const order = this.getSelectedSyncedOrder();
             const refundQuantityMap = this._state.refund[order.backendId];
             const orderlinesMap = Object.fromEntries(order.orderlines.models.map((line) => [line.id, line]));
-            const orderlinesToRefund = Object.keys(refundQuantityMap).map((id) => orderlinesMap[id]);
+            const orderlinesToRefund = Object.keys(refundQuantityMap)
+                .map((id) => orderlinesMap[id])
+                .filter((line) => !float_is_zero(refundQuantityMap[line.id]));
+            if (orderlinesToRefund.length == 0) return;
             const activeOrder = this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
-                if (float_is_zero(qtyToRefund, 6)) continue;
                 await activeOrder.add_product(orderline.product, {
                     quantity: -qtyToRefund,
                     price: orderline.price,
