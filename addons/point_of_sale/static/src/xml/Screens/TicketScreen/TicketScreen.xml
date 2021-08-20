@@ -79,14 +79,15 @@
                 </div>
                 <div class="leftpane">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedSyncedOrder()" />
-                    <OrderDetails order="_selectedSyncedOrder" />
+                    <OrderDetails order="_selectedSyncedOrder" selectedOrderlineId="getSelectedOrderlineId()" refundDetails="_selectedSyncedOrder and _state.refund[_selectedSyncedOrder.backendId]" />
                     <div class="pads">
                         <div class="control-buttons">
                             <InvoiceButton t-if="env.pos.config.module_account" order="_selectedSyncedOrder" />
                             <ReprintReceiptButton order="_selectedSyncedOrder" />
                         </div>
                         <div class="subpads">
-                            <ActionpadWidget client="getSelectedClient()" />
+                            <t t-set="_actionName">Refund</t>
+                            <ActionpadWidget client="getSelectedClient()" actionName="_actionName" actionToTrigger="'do-refund'" />
                             <NumpadWidget />
                         </div>
                     </div>

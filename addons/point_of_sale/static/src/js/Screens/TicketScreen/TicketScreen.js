@@ -4,8 +4,10 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
+    const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener, useAutofocus } = require('web.custom_hooks');
     const { posbus } = require('point_of_sale.utils');
+    const { parse } = require('web.field_utils');
 
     const makeDefaultSearchDetails = () => ({
         fieldName: 'RECEIPT_NUMBER',
@@ -23,7 +25,11 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             selectedSyncedOrderId: null,
             searchDetails: makeDefaultSearchDetails(),
             filter: null,
+            // maps the order's backendId to it's selected orderline
+            selectedOrderlineIds: {},
         },
+        // maps the order's backendId and the refund state
+        refund: {},
     };
 
     class TicketScreen extends IndependentToOrderScreen {
@@ -38,7 +44,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             useListener('next-page', this._onNextPage);
             useListener('prev-page', this._onPrevPage);
             useListener('order-invoiced', this._onInvoiceOrder);
+            useListener('click-order-line', this._onClickOrderline);
+            useListener('update-selected-orderline', this._onUpdateSelectedOrderline);
+            useListener('do-refund', this._onDoRefund);
             useAutofocus({ selector: '.search input'});
+            NumberBuffer.use({
+                nonKeyboardInputEvent: 'numpad-click-input',
+                triggerAtInput: 'update-selected-orderline',
+            });
             this._state = TICKET_SCREEN_STATE;
             const defaultUIState = this.props.reuseSavedUIState
                 ? this._state.ui
@@ -131,6 +144,59 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             await this._fetchSyncedOrders();
             this.render();
         }
+        _onClickOrderline({ detail: orderline }) {
+            const order = this.getSelectedSyncedOrder();
+            if (!(order.backendId in this._state.refund)) {
+                this._state.refund[order.backendId] = {};
+            }
+            this._state.ui.selectedOrderlineIds[order.backendId] = orderline.id;
+            NumberBuffer.reset();
+            this.render();
+        }
+        _onUpdateSelectedOrderline({ detail }) {
+            const buffer = detail.buffer;
+            const order = this.getSelectedSyncedOrder();
+            const selectedOrderlineId = this.getSelectedOrderlineId();
+            const orderline = order.orderlines.models.find((line) => line.id == selectedOrderlineId);
+            const refundState = this._state.refund[order.backendId];
+            if (buffer == null || buffer == '') {
+                delete refundState[selectedOrderlineId];
+            } else {
+                const quantity = parse.float(buffer);
+                if (quantity > orderline.quantity) {
+                    NumberBuffer.reset();
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Maximum Exceeded'),
+                        body: _.str.sprintf(
+                            this.env._t('You entered %s. You are not allowed to refund more than %s.'),
+                            quantity,
+                            orderline.quantity
+                        ),
+                    });
+                } else {
+                    refundState[selectedOrderlineId] = quantity;
+                }
+            }
+            this.render();
+        }
+        async _onDoRefund() {
+            const order = this.getSelectedSyncedOrder();
+            const refundQuantityMap = this._state.refund[order.backendId];
+            const orderlinesMap = Object.fromEntries(order.orderlines.models.map((line) => [line.id, line]));
+            const orderlinesToRefund = Object.keys(refundQuantityMap).map((id) => orderlinesMap[id]);
+            const activeOrder = this.env.pos.get_order();
+            for (const orderline of orderlinesToRefund) {
+                await activeOrder.add_product(orderline.product, {
+                    quantity: -refundQuantityMap[orderline.id],
+                    price: orderline.price,
+                    lst_price: orderline.price,
+                    extras: { price_manually_set: true },
+                    merge: false,
+                    refunded_orderline_id: orderline.id,
+                });
+            }
+            this.showScreen('ProductScreen');
+        }
         //#endregion
         //#region PUBLIC METHODS
         getSelectedSyncedOrder() {
@@ -139,6 +205,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             } else {
                 return null;
             }
+        }
+        getSelectedOrderlineId() {
+            return this._state.ui.selectedOrderlineIds[this._state.ui.selectedSyncedOrderId];
         }
         /**
          * Override to conditionally show the new ticket button.

@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="OrderlineDetails" owl="1">
-        <li class="orderline">
+        <li class="orderline" t-on-click="trigger('click-order-line', props.line)" t-att-class="{ selected: props.isSelected }">
             <span class="product-name">
                 <t t-esc="productName" />
             </span>
@@ -19,6 +19,11 @@
                 <li class="info orderline-note">
                     <i class="fa fa-sticky-note" role="img" aria-label="Customer Note" title="Customer Note"/>
                     <t t-esc="customerNote" />
+                </li>
+            </t>
+            <t t-if="props.toRefund">
+                <li class="info orderline-note">
+                    To Refund: <t t-esc="props.toRefund" />
                 </li>
             </t>
         </li>

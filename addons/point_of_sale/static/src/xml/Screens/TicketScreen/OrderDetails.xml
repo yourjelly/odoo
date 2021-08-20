@@ -22,7 +22,7 @@
                     <t t-else="">
                         <ul class="orderlines">
                             <t t-foreach="orderlines" t-as="orderline" t-key="orderline.id">
-                                <OrderlineDetails line="orderline" />
+                                <OrderlineDetails line="orderline" isSelected="orderline.id == props.selectedOrderlineId" toRefund="props.refundDetails and props.refundDetails[orderline.id]" />
                             </t>
                         </ul>
                         <!-- Not using OrderSummary because we don't need it's overrides in this view. -->
