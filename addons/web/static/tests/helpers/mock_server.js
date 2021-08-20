@@ -22,6 +22,197 @@ function traverseElementTree(tree, cb) {
     }
 }
 
+export function _fieldsViewGet(params) {
+    let processedNodes = params.processedNodes || [];
+    const { arch, context, fields, modelName } = params;
+    function isNodeProcessed(node) {
+        return processedNodes.findIndex((n) => n.isSameNode(node)) > -1;
+    }
+    const modifiersNames = ["invisible", "readonly", "required"];
+    const onchanges = params.models[modelName].onchanges || {};
+    const fieldNodes = {};
+    const groupbyNodes = {};
+    let doc;
+    if (typeof arch === "string") {
+        const domParser = new DOMParser();
+        doc = domParser.parseFromString(arch, "text/xml").documentElement;
+    } else {
+        doc = arch;
+    }
+    const inTreeView = doc.tagName === "tree";
+    // mock _postprocess_access_rights
+    const isBaseModel = !context.base_model_name || modelName === context.base_model_name;
+    const views = ["kanban", "tree", "form", "gantt", "activity"];
+    if (isBaseModel && views.indexOf(doc.tagName) !== -1) {
+        for (const action of ["create", "delete", "edit", "write"]) {
+            if (!doc.getAttribute(action) && action in context && !context[action]) {
+                doc.setAttribute(action, "false");
+            }
+        }
+    }
+
+    traverseElementTree(doc, (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return false;
+        }
+        const modifiers = {};
+        const isField = node.tagName === "field";
+        const isGroupby = node.tagName === "groupby";
+        if (isField) {
+            const fieldName = node.getAttribute("name");
+            fieldNodes[fieldName] = node;
+            // 'transfer_field_to_modifiers' simulation
+            const field = fields[fieldName];
+            if (!field) {
+                throw new Error("Field " + fieldName + " does not exist");
+            }
+            const defaultValues = {};
+            const stateExceptions = {}; // what is this ?
+            modifiersNames.forEach((attr) => {
+                stateExceptions[attr] = [];
+                defaultValues[attr] = !!field[attr];
+            });
+            // LPE: what is this ?
+            /*                _.each(field.states || {}, function (modifs, state) {
+                        _.each(modifs, function (modif) {
+                            if (defaultValues[modif[0]] !== modif[1]) {
+                                stateExceptions[modif[0]].append(state);
+                            }
+                        });
+                    });*/
+            Object.entries(defaultValues).forEach(([attr, defaultValue]) => {
+                if (stateExceptions[attr].length) {
+                    modifiers[attr] = [
+                        ["state", defaultValue ? "not in" : "in", stateExceptions[attr]],
+                    ];
+                } else {
+                    modifiers[attr] = defaultValue;
+                }
+            });
+        } else if (isGroupby && !isNodeProcessed(node)) {
+            const groupbyName = node.getAttribute("name");
+            fieldNodes[groupbyName] = node;
+            groupbyNodes[groupbyName] = node;
+        }
+        // 'transfer_node_to_modifiers' simulation
+        let attrs = node.getAttribute("attrs");
+        if (attrs) {
+            attrs = evaluateExpr(attrs);
+            Object.assign(modifiers, attrs);
+        }
+        const states = node.getAttribute("states");
+        if (states) {
+            if (!modifiers.invisible) {
+                modifiers.invisible = [];
+            }
+            modifiers.invisible.push(["state", "not in", states.split(",")]);
+        }
+        const inListHeader = inTreeView && node.closest("header");
+        modifiersNames.forEach((attr) => {
+            const mod = node.getAttribute(attr);
+            if (mod) {
+                // TODO
+                // const pyevalContext = window.py.dict.fromJSON(context || {});
+                // var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true : false;
+                console.info(
+                    "MockServer: naive parse of modifier value in",
+                    QUnit.config.current.testName
+                );
+                const v = JSON.parse(mod);
+                if (inTreeView && !inListHeader && attr === "invisible") {
+                    modifiers.column_invisible = v;
+                } else if (v || !(attr in modifiers) || !Array.isArray(modifiers[attr])) {
+                    modifiers[attr] = v;
+                }
+            }
+        });
+        modifiersNames.forEach((attr) => {
+            if (
+                attr in modifiers &&
+                (!!modifiers[attr] === false ||
+                    (Array.isArray(modifiers[attr]) && !modifiers[attr].length))
+            ) {
+                delete modifiers[attr];
+            }
+        });
+        if (Object.keys(modifiers).length) {
+            node.setAttribute("modifiers", JSON.stringify(modifiers));
+        }
+        if (isGroupby && !isNodeProcessed(node)) {
+            return false;
+        }
+        return !isField;
+    });
+    let relModel, relFields;
+    Object.entries(fieldNodes).forEach(([name, node]) => {
+        const field = fields[name];
+        if (field.type === "many2one" || field.type === "many2many") {
+            const canCreate = node.getAttribute("can_create");
+            node.setAttribute("can_create", canCreate || "true");
+            const canWrite = node.getAttribute("can_write");
+            node.setAttribute("can_write", canWrite || "true");
+        }
+        if (field.type === "one2many" || field.type === "many2many") {
+            field.views = {};
+            Array.from(node.children).forEach((children) => {
+                if (children.tagName) {
+                    // skip text nodes
+                    relModel = field.relation;
+                    relFields = Object.assign({}, params.models[relModel].fields);
+                    field.views[children.tagName] = _fieldsViewGet({
+                        models: params.models,
+                        arch: children,
+                        modelName: relModel,
+                        fields: relFields,
+                        context: Object.assign({}, context, { base_model_name: modelName }),
+                        processedNodes,
+                    });
+                }
+            });
+        }
+        // add onchanges
+        if (name in onchanges) {
+            node.setAttribute("on_change", "1");
+        }
+    });
+    Object.entries(groupbyNodes).forEach(([name, node]) => {
+        const field = fields[name];
+        if (field.type !== "many2one") {
+            throw new Error("groupby can only target many2one");
+        }
+        field.views = {};
+        relModel = field.relation;
+        relFields = Object.assign({}, params.models[relModel].fields);
+        processedNodes.push(node);
+        // postprocess simulation
+        field.views.groupby = _fieldsViewGet({
+            models: params.models,
+            arch: node,
+            modelName: relModel,
+            fields: relFields,
+            context,
+            processedNodes,
+        });
+        while (node.firstChild) {
+            node.removeChild(node.firstChild);
+        }
+    });
+    const xmlSerializer = new XMLSerializer();
+    const processedArch = xmlSerializer.serializeToString(doc);
+    const fieldsInView = {};
+    Object.entries(fields).forEach(([fname, field]) => {
+        if (fname in fieldNodes) {
+            fieldsInView[fname] = field;
+        }
+    });
+    return {
+        arch: processedArch,
+        fields: fieldsInView,
+        model: modelName,
+        type: doc.tagName === "tree" ? "list" : doc.tagName,
+    };
+}
+
 // -----------------------------------------------------------------------------
 // MockServer
 // -----------------------------------------------------------------------------
@@ -143,7 +334,13 @@ export class MockServer {
             fields[fieldName].name = fieldName;
         }
         // var viewOptions = params.viewOptions || {};
-        const fvg = this._fieldsViewGet({ arch, modelName, fields, context: kwargs.context || {} });
+        const fvg = _fieldsViewGet({
+            arch,
+            modelName,
+            fields,
+            context: kwargs.context || {},
+            models: this.models,
+        });
         if (kwargs.options.toolbar) {
             fvg.toolbar = this.models[modelName].toolbar || {};
         }
@@ -152,195 +349,6 @@ export class MockServer {
             fvg.name = key;
         }
         return fvg;
-    }
-
-    _fieldsViewGet(params) {
-        let processedNodes = params.processedNodes || [];
-        const { arch, context, fields, modelName } = params;
-        function isNodeProcessed(node) {
-            return processedNodes.findIndex((n) => n.isSameNode(node)) > -1;
-        }
-        const modifiersNames = ["invisible", "readonly", "required"];
-        const onchanges = this.models[modelName].onchanges || {};
-        const fieldNodes = {};
-        const groupbyNodes = {};
-        let doc;
-        if (typeof arch === "string") {
-            const domParser = new DOMParser();
-            doc = domParser.parseFromString(arch, "text/xml").documentElement;
-        } else {
-            doc = arch;
-        }
-        const inTreeView = doc.tagName === "tree";
-        // mock _postprocess_access_rights
-        const isBaseModel = !context.base_model_name || modelName === context.base_model_name;
-        const views = ["kanban", "tree", "form", "gantt", "activity"];
-        if (isBaseModel && views.indexOf(doc.tagName) !== -1) {
-            for (const action of ["create", "delete", "edit", "write"]) {
-                if (!doc.getAttribute(action) && action in context && !context[action]) {
-                    doc.setAttribute(action, "false");
-                }
-            }
-        }
-
-        traverseElementTree(doc, (node) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                return false;
-            }
-            const modifiers = {};
-            const isField = node.tagName === "field";
-            const isGroupby = node.tagName === "groupby";
-            if (isField) {
-                const fieldName = node.getAttribute("name");
-                fieldNodes[fieldName] = node;
-                // 'transfer_field_to_modifiers' simulation
-                const field = fields[fieldName];
-                if (!field) {
-                    throw new Error("Field " + fieldName + " does not exist");
-                }
-                const defaultValues = {};
-                const stateExceptions = {}; // what is this ?
-                modifiersNames.forEach((attr) => {
-                    stateExceptions[attr] = [];
-                    defaultValues[attr] = !!field[attr];
-                });
-                // LPE: what is this ?
-                /*                _.each(field.states || {}, function (modifs, state) {
-                            _.each(modifs, function (modif) {
-                                if (defaultValues[modif[0]] !== modif[1]) {
-                                    stateExceptions[modif[0]].append(state);
-                                }
-                            });
-                        });*/
-                Object.entries(defaultValues).forEach(([attr, defaultValue]) => {
-                    if (stateExceptions[attr].length) {
-                        modifiers[attr] = [
-                            ["state", defaultValue ? "not in" : "in", stateExceptions[attr]],
-                        ];
-                    } else {
-                        modifiers[attr] = defaultValue;
-                    }
-                });
-            } else if (isGroupby && !isNodeProcessed(node)) {
-                const groupbyName = node.getAttribute("name");
-                fieldNodes[groupbyName] = node;
-                groupbyNodes[groupbyName] = node;
-            }
-            // 'transfer_node_to_modifiers' simulation
-            let attrs = node.getAttribute("attrs");
-            if (attrs) {
-                attrs = evaluateExpr(attrs);
-                Object.assign(modifiers, attrs);
-            }
-            const states = node.getAttribute("states");
-            if (states) {
-                if (!modifiers.invisible) {
-                    modifiers.invisible = [];
-                }
-                modifiers.invisible.push(["state", "not in", states.split(",")]);
-            }
-            const inListHeader = inTreeView && node.closest("header");
-            modifiersNames.forEach((attr) => {
-                const mod = node.getAttribute(attr);
-                if (mod) {
-                    // TODO
-                    // const pyevalContext = window.py.dict.fromJSON(context || {});
-                    // var v = pyUtils.py_eval(mod, {context: pyevalContext}) ? true : false;
-                    console.info(
-                        "MockServer: naive parse of modifier value in",
-                        QUnit.config.current.testName
-                    );
-                    const v = JSON.parse(mod);
-                    if (inTreeView && !inListHeader && attr === "invisible") {
-                        modifiers.column_invisible = v;
-                    } else if (v || !(attr in modifiers) || !Array.isArray(modifiers[attr])) {
-                        modifiers[attr] = v;
-                    }
-                }
-            });
-            modifiersNames.forEach((attr) => {
-                if (
-                    attr in modifiers &&
-                    (!!modifiers[attr] === false ||
-                        (Array.isArray(modifiers[attr]) && !modifiers[attr].length))
-                ) {
-                    delete modifiers[attr];
-                }
-            });
-            if (Object.keys(modifiers).length) {
-                node.setAttribute("modifiers", JSON.stringify(modifiers));
-            }
-            if (isGroupby && !isNodeProcessed(node)) {
-                return false;
-            }
-            return !isField;
-        });
-        let relModel, relFields;
-        Object.entries(fieldNodes).forEach(([name, node]) => {
-            const field = fields[name];
-            if (field.type === "many2one" || field.type === "many2many") {
-                const canCreate = node.getAttribute("can_create");
-                node.setAttribute("can_create", canCreate || "true");
-                const canWrite = node.getAttribute("can_write");
-                node.setAttribute("can_write", canWrite || "true");
-            }
-            if (field.type === "one2many" || field.type === "many2many") {
-                field.views = {};
-                Array.from(node.children).forEach((children) => {
-                    if (children.tagName) {
-                        // skip text nodes
-                        relModel = field.relation;
-                        relFields = Object.assign({}, this.models[relModel].fields);
-                        field.views[children.tagName] = this._fieldsViewGet({
-                            arch: children,
-                            modelName: relModel,
-                            fields: relFields,
-                            context: Object.assign({}, context, { base_model_name: modelName }),
-                            processedNodes,
-                        });
-                    }
-                });
-            }
-            // add onchanges
-            if (name in onchanges) {
-                node.setAttribute("on_change", "1");
-            }
-        });
-        Object.entries(groupbyNodes).forEach(([name, node]) => {
-            const field = fields[name];
-            if (field.type !== "many2one") {
-                throw new Error("groupby can only target many2one");
-            }
-            field.views = {};
-            relModel = field.relation;
-            relFields = Object.assign({}, this.models[relModel].fields);
-            processedNodes.push(node);
-            // postprocess simulation
-            field.views.groupby = this._fieldsViewGet({
-                arch: node,
-                modelName: relModel,
-                fields: relFields,
-                context,
-                processedNodes,
-            });
-            while (node.firstChild) {
-                node.removeChild(node.firstChild);
-            }
-        });
-        const xmlSerializer = new XMLSerializer();
-        const processedArch = xmlSerializer.serializeToString(doc);
-        const fieldsInView = {};
-        Object.entries(fields).forEach(([fname, field]) => {
-            if (fname in fieldNodes) {
-                fieldsInView[fname] = field;
-            }
-        });
-        return {
-            arch: processedArch,
-            fields: fieldsInView,
-            model: modelName,
-            type: doc.tagName === "tree" ? "list" : doc.tagName,
-        };
     }
 
     /**
