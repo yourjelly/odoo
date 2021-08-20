@@ -4,6 +4,8 @@ import { getFixture } from "@web/../tests/helpers/utils";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { View } from "@web/views/view";
+import { _fieldsViewGet } from "../helpers/mock_server";
+import { addLegacyMockEnvironment } from "../webclient/helpers";
 
 const { mount } = owl;
 
@@ -24,10 +26,13 @@ const { mount } = owl;
 export async function makeView(params) {
     const serverData = params.serverData;
     const mockRPC = params.mockRPC;
+    const legacyParams = params.legacyParams || {};
     const props = Object.assign({}, params);
     delete props.serverData;
     delete props.mockRPC;
+    delete props.legacyParams;
 
+    const env = await makeTestEnv({ serverData, mockRPC });
     const defaultFields = serverData.models[props.resModel].fields;
     if (props.arch) {
         if (!props.fields) {
@@ -37,11 +42,36 @@ export async function makeView(params) {
                 props.fields[fieldName].name = fieldName;
             }
         }
+        const fvg = _fieldsViewGet({
+            arch: props.arch,
+            modelName: props.resModel,
+            fields: props.fields,
+            context: props.context || {},
+            models: serverData.models,
+        });
+        props.arch = fvg.arch;
+        props.fields = Object.assign({}, props.fields, fvg.fields);
         props.searchViewArch = props.searchViewArch || "<search/>";
         props.searchViewFields = props.searchViewFields || Object.assign({}, props.fields);
     }
 
-    const env = await makeTestEnv({ serverData, mockRPC });
+    /** Legacy Environment, for compatibility sakes
+     *  Remove this as soon as we drop the legacy support
+     */
+    const models = params.serverData.models;
+    if (legacyParams && legacyParams.withLegacyMockServer && models) {
+        legacyParams.models = Object.assign({}, 0);
+        // In lagacy, data may not be sole models, but can contain some other variables
+        // So we filter them out for our WOWL mockServer
+        Object.entries(legacyParams.models).forEach(([k, v]) => {
+            if (!(v instanceof Object) || !("fields" in v)) {
+                delete models[k];
+            }
+        });
+    }
+    addLegacyMockEnvironment(env, legacyParams);
+    //
+
     const target = getFixture();
     const view = await mount(View, { env, props, target });
 
