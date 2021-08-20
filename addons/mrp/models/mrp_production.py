@@ -1816,3 +1816,106 @@ class MrpProduction(models.Model):
                     ) and float_is_zero(production.qty_producing, precision_digits=pd):
                 immediate_productions |= production
         return immediate_productions
+
+    def _check_serial_mass_produce_components(self):
+        have_serial_components = False
+        have_lot_components = False
+        missing_components = set()
+        multiple_lot_components = set()
+        for production in self:
+            have_serial_components |= any(move.product_id.tracking == 'serial' for move in production.move_raw_ids)
+            have_lot_components |= any(move.product_id.tracking == 'lot' for move in production.move_raw_ids)
+            missing_components.update([move.product_id for move in production.move_raw_ids if float_compare(move.reserved_availability, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0])
+            components = {}
+            for move in production.move_raw_ids:
+                if move.product_id.tracking != 'lot':
+                    continue
+                lot_ids = move.mapped('move_line_ids.lot_id.id')
+                if not lot_ids:
+                    continue
+                components.setdefault(move.product_id, set()).update(lot_ids)
+            multiple_lot_components.update([p for p, l in components.items() if len(l) != 1])
+        return (have_serial_components, have_lot_components, missing_components, multiple_lot_components)
+
+    def _generate_backorder_productions_multi(self, serial_numbers, cancel_remaining_quantities=False):
+        self.ensure_one()
+        if self.product_id.tracking != 'serial':
+            raise UserError(_('Expected product tracked by Serial Number.'))
+        if self.backorder_sequence == 0:
+            self.backorder_sequence = 1
+        result = []
+        production = self
+        for serial_number in serial_numbers:
+            production.qty_producing = 1
+            if production.product_qty > 1 and (serial_number != serial_numbers[-1] or not cancel_remaining_quantities):
+                backorder = production.copy(default=production._get_backorder_mo_vals())
+            else:
+                backorder = None
+            new_moves_origin = []
+            new_moves_quantity_to_split = []
+            new_moves_vals = []
+            for move in production.move_raw_ids | production.move_finished_ids:
+                if not move.additional:
+                    uom_qty_to_split = move.product_uom_qty - move.unit_factor * production.qty_producing
+                    qty_to_split = move.product_uom._compute_quantity(uom_qty_to_split, move.product_id.uom_id, rounding_method='HALF-UP')
+                    uom_qty_to_split = float_round(uom_qty_to_split, precision_rounding=move.product_uom.rounding, rounding_method='HALF-UP')
+                    move_vals = move._split(qty_to_split)
+                    if backorder:
+                        if not move_vals:
+                            continue
+                        if move.raw_material_production_id:
+                            move_vals[0]['raw_material_production_id'] = backorder.id
+                        else:
+                            move_vals[0]['production_id'] = backorder.id
+                        new_moves_origin.append(move)
+                        new_moves_vals.append(move_vals[0])
+                        new_moves_quantity_to_split.append(uom_qty_to_split)
+                    elif move.raw_material_production_id:
+                        move.move_line_ids.product_uom_qty = 0
+                        move.move_line_ids[0].product_uom_qty = move.product_uom_qty
+            if backorder:
+                new_moves = self.env['stock.move'].create(new_moves_vals)
+                for move, quantity_to_split, new_move in zip(new_moves_origin, new_moves_quantity_to_split, new_moves):
+                    if move.raw_material_production_id:
+                        move.move_line_ids[0].copy({
+                            'move_id': new_move.id,
+                            'product_uom_qty': quantity_to_split,
+                            'lot_id': move.move_line_ids[0].lot_id.id if move.move_line_ids[0].lot_id else 0,
+                        })
+                        move.with_context(bypass_reservation_update=True).move_line_ids.product_uom_qty = 0
+                        move.with_context(bypass_reservation_update=True).move_line_ids[0].product_uom_qty = move.product_uom_qty
+                for old_wo, wo in zip(production.workorder_ids, backorder.workorder_ids):
+                    wo.qty_produced = max(old_wo.qty_produced - old_wo.qty_producing, 0)
+                    wo.qty_producing = 1
+                ratio = production.qty_producing / production.product_qty
+                for workorder in production.workorder_ids:
+                    workorder.duration_expected = workorder.duration_expected * ratio
+                for workorder in backorder.workorder_ids:
+                    workorder.duration_expected = workorder.duration_expected * (1 - ratio)
+                backorder.action_confirm()
+            production.name = self._get_name_backorder(production.name, production.backorder_sequence)
+            production.product_qty = 1
+            production.lot_producing_id = self.env['stock.production.lot'].create({
+                'product_id': production.product_id.id,
+                'company_id': production.company_id.id,
+                'name': serial_number,
+            })
+            qty_producing_uom = production.product_uom_id._compute_quantity(production.qty_producing, production.product_id.uom_id, rounding_method='HALF-UP')
+            if qty_producing_uom != 1:
+                production.qty_producing = production.product_id.uom_id._compute_quantity(1, production.product_uom_id, rounding_method='HALF-UP')
+            for move in (production.move_raw_ids | production.move_finished_ids.filtered(lambda m: m.product_id != production.product_id)):
+                if not move.product_uom:
+                    continue
+                new_qty = float_round((production.qty_producing - production.qty_produced) * move.unit_factor, precision_rounding=move.product_uom.rounding)
+                move.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
+                move.move_line_ids = move._set_quantity_done_prepare_vals(new_qty)
+            result.append((production.lot_producing_id.id, production.id))
+            production = backorder
+        return result
+
+    def _get_missing_components_origins(self):
+        pickings = self.env['stock.picking'].search([
+            ('group_id', '=', self.procurement_group_id.id),
+            ('state', 'not in', ('done', 'cancel'))
+        ])
+        return pickings.mapped('name')

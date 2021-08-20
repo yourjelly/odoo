@@ -43,3 +43,22 @@ class MrpProduction(models.Model):
         if not iterate_key and move_raw_id.created_purchase_line_id:
             iterate_key = 'created_purchase_line_id'
         return iterate_key
+
+    def _get_missing_components_origins(self):
+        names = super()._get_missing_components_origins()
+        purchase_orders = self.env['purchase.order'].search([
+            ('group_id', '=', self.procurement_group_id.id),
+            ('state', 'not in', ('purchase', 'done', 'cancel'))
+        ])
+        names += purchase_orders.mapped('name')
+        pickings = self.env['stock.picking'].search([
+            ('group_id', '=', self.procurement_group_id.id),
+            ('state', 'not in', ('done', 'cancel'))
+        ])
+        if pickings:
+            purchase_orders = self.env['purchase.order'].search([
+                ('id', 'in', pickings.move_lines.created_purchase_line_id.order_id.ids),
+                ('state', 'not in', ('purchase', 'done', 'cancel'))
+            ])
+            names += purchase_orders.mapped('name')
+        return names

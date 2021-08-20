@@ -36,10 +36,16 @@ class StockPicking(models.Model):
         for move in self.move_lines.filtered(lambda move: move.is_subcontract):
             # Auto set qty_producing/lot_producing_id of MO if there isn't tracked component
             # If there is tracked component, the flow use subcontracting_record_component instead
-            if move._has_tracked_subcontract_components():
-                continue
+            # except for mass serial receipt
             production = move.move_orig_ids.production_id.filtered(lambda p: p.state not in ('done', 'cancel'))[-1:]
             if not production:
+                continue
+            serial_mass_produce = False
+            if move.product_id.tracking == 'serial':
+                have_serial_components, have_lot_components, missing_components, multiple_lot_components = production._check_serial_mass_produce_components()
+                if not have_serial_components and have_lot_components and not missing_components and not multiple_lot_components:
+                    serial_mass_produce = True
+            if not serial_mass_produce and move._has_tracked_subcontract_components():
                 continue
             # Manage additional quantities
             quantity_done_move = move.product_uom._compute_quantity(move.quantity_done, production.product_uom_id)
@@ -54,7 +60,7 @@ class StockPicking(models.Model):
                 if move_line.lot_id:
                     production.lot_producing_id = move_line.lot_id
                 production.qty_producing = move_line.product_uom_id._compute_quantity(move_line.qty_done, production.product_uom_id)
-                production._set_qty_producing()
+                production.with_context(subcontract_move_id=move.id)._set_qty_producing()
                 if move_line != move.move_line_ids[-1]:
                     backorder = production._generate_backorder_productions(close_mo=False)
                     # The move_dest_ids won't be set because the _split filter out done move

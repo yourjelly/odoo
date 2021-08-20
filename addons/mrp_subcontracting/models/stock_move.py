@@ -15,6 +15,7 @@ class StockMove(models.Model):
     show_subcontracting_details_visible = fields.Boolean(
         compute='_compute_show_subcontracting_details_visible'
     )
+    show_serial_mass_receipt = fields.Boolean(compute='_compute_show_serial_mass_receipt')
 
     def _compute_show_subcontracting_details_visible(self):
         """ Compute if the action button in order to see moves raw is visible """
@@ -24,6 +25,17 @@ class StockMove(models.Model):
                 move.show_subcontracting_details_visible = True
             else:
                 move.show_subcontracting_details_visible = False
+
+    def _compute_show_serial_mass_receipt(self):
+        """ Compute if the action button for serial mass receipt is visible """
+        self.show_serial_mass_receipt = False
+        for move in self:
+            if move.state not in ('draft', 'cancel', 'done') and move.is_subcontract and move.product_id.tracking == "serial" \
+                    and float_compare(move.product_uom_qty, 1, precision_rounding=move.product_uom.rounding) > 0:
+                production = move.move_orig_ids.production_id
+                have_serial_components, have_lot_components, dummy, multiple_lot_components = production._check_serial_mass_produce_components()
+                if not have_serial_components and have_lot_components and not multiple_lot_components:
+                    move.show_serial_mass_receipt = True
 
     def _compute_show_details_visible(self):
         """ If the move is subcontract and the components are tracked. Then the
@@ -150,6 +162,31 @@ class StockMove(models.Model):
             'res_id': production.id,
             'context': dict(self.env.context, subcontract_move_id=self.id),
         }
+
+    def action_serial_mass_receipt(self):
+        self.ensure_one()
+        production = self.move_orig_ids.production_id[-1:]
+        dummy, dummy, missing_components, dummy = production._check_serial_mass_produce_components()
+        if missing_components:
+            message = _("Make sure enough quantities of these components are reserved to carry on production:\n")
+            message += "\n".join(component.name for component in missing_components)
+            origins = production._get_missing_components_origins()
+            if origins:
+                message += _("\nYou must Validate %s") % ",".join(sorted(set(origins)))
+            raise UserError(message)
+        return super().action_show_details()
+
+    def action_assign_serial_show_details(self):
+        res = super().action_assign_serial_show_details()
+        if self.show_serial_mass_receipt:
+            return super().action_show_details()
+        return res
+
+    def action_clear_lines_show_details(self):
+        res = super().action_clear_lines_show_details()
+        if self.show_serial_mass_receipt:
+            return super().action_show_details()
+        return res
 
     def _get_subcontract_bom(self):
         self.ensure_one()
