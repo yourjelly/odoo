@@ -21,6 +21,11 @@
                     <t t-esc="customerNote" />
                 </li>
             </t>
+            <t t-if="props.line.refunded_qty">
+                <li class="info orderline-note">
+                    Refunded: <t t-esc="props.line.refunded_qty" />
+                </li>
+            </t>
             <t t-if="props.toRefund">
                 <li class="info orderline-note">
                     To Refund: <t t-esc="props.toRefund" />

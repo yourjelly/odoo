@@ -185,7 +185,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const refundQuantityMap = this._state.refund[order.backendId];
             const orderlinesMap = Object.fromEntries(order.orderlines.models.map((line) => [line.id, line]));
             const orderlinesToRefund = Object.keys(refundQuantityMap).map((id) => orderlinesMap[id]);
-            const activeOrder = this.env.pos.get_order();
+            const activeOrder = this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
                 if (float_is_zero(qtyToRefund, 6)) continue;
