@@ -8,6 +8,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
     const { useListener, useAutofocus } = require('web.custom_hooks');
     const { posbus } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
+    const { float_is_zero } = require('web.utils');
 
     const makeDefaultSearchDetails = () => ({
         fieldName: 'RECEIPT_NUMBER',
@@ -186,8 +187,10 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const orderlinesToRefund = Object.keys(refundQuantityMap).map((id) => orderlinesMap[id]);
             const activeOrder = this.env.pos.get_order();
             for (const orderline of orderlinesToRefund) {
+                const qtyToRefund = refundQuantityMap[orderline.id];
+                if (float_is_zero(qtyToRefund, 6)) continue;
                 await activeOrder.add_product(orderline.product, {
-                    quantity: -refundQuantityMap[orderline.id],
+                    quantity: -qtyToRefund,
                     price: orderline.price,
                     lst_price: orderline.price,
                     extras: { price_manually_set: true },
