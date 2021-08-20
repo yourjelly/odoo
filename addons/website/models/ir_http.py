@@ -43,6 +43,7 @@ def sitemap_qs2dom(qs, route, field='name'):
 
 
 def get_request_website():
+    print("get_request_website ----------------->")
     """ Return the website set on `request` if called in a frontend context
     (website=True on route).
     This method can typically be used to check if we are in the frontend.
@@ -91,6 +92,9 @@ class Http(models.AbstractModel):
         logger.debug("_generate_routing_rules for website: %s", website_id)
         domain = [('redirect_type', 'in', ('308', '404')), '|', ('website_id', '=', False), ('website_id', '=', website_id)]
 
+        print("**********************************")
+        print("_generate_routing_rules ---------->", request.httprequest.headers)
+        print("**********************************")
         rewrites = dict([(x.url_from, x) for x in request.env['website.rewrite'].sudo().search(domain)])
         cls._rewrite_len[website_id] = len(rewrites)
 
@@ -134,6 +138,9 @@ class Http(models.AbstractModel):
         if not request.session.uid:
             env = api.Environment(request.cr, SUPERUSER_ID, request.context)
             website = env['website'].get_current_website()
+            print("#####################################")
+            print("_auth_method_public#####################################")
+            print("#####################################")
             request.uid = website and website._get_cached('user_id')
 
         if not request.uid:
@@ -141,6 +148,7 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _register_website_track(cls, response):
+        print("_register_website_track ----------------->")
         if getattr(response, 'status_code', 0) != 200:
             return False
 
@@ -160,6 +168,7 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _postprocess_args(cls, arguments, rule):
+        print("_postprocess_args ----------------->")
         processing = super()._postprocess_args(arguments, rule)
         if processing:
             return processing
@@ -188,6 +197,7 @@ class Http(models.AbstractModel):
         handling the original request, in which we should create the visitor. We ignore every other rerouting requests.
         """
         is_rerouting = hasattr(request, 'routing_iteration')
+        print("_dispatch request it_http ----------------->", dir(request))
 
         if request.session.db:
             reg = registry(request.session.db)
@@ -199,6 +209,7 @@ class Http(models.AbstractModel):
 
         if not is_rerouting:
             cls._register_website_track(response)
+        print("_dispatch it_http ----------------->", response)
         return response
 
     @classmethod
@@ -221,6 +232,9 @@ class Http(models.AbstractModel):
                 context.pop('tz')
 
         request.website = request.env['website'].get_current_website()  # can use `request.env` since auth methods are called
+        print("#####################################")
+        print("_add_dispatch_parameters#####################################")
+        print("#####################################")
         context['website_id'] = request.website.id
         # This is mainly to avoid access errors in website controllers where there is no
         # context (eg: /shop), and it's not going to propagate to the global context of the tab
@@ -261,6 +275,7 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _serve_page(cls):
+        print("_serve_page ----------------->", dir(request))
         req_page = request.httprequest.path
         page_domain = [('url', '=', req_page)] + request.website.website_domain()
 
@@ -323,6 +338,8 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _serve_redirect(cls):
+        import pdb; pdb.set_trace()
+        print("_serve_redirect ----------------->", dir(request))
         req_page = request.httprequest.path
         domain = [
             ('redirect_type', 'in', ('301', '302')),
@@ -346,6 +363,7 @@ class Http(models.AbstractModel):
 
         redirect = cls._serve_redirect()
         if redirect:
+            import pdb; pdb.set_trace()
             return request.redirect(_build_url_w_params(redirect.url_to, request.params), code=redirect.redirect_type)
 
         return False
@@ -416,6 +434,9 @@ class Http(models.AbstractModel):
 
     @classmethod
     def _xmlid_to_obj(cls, env, xmlid):
+        print("#####################################")
+        print("_xmlid_to_obj#####################################")
+        print("#####################################")
         website_id = env['website'].get_current_website()
         if website_id and website_id.theme_id:
             domain = [('key', '=', xmlid), ('website_id', '=', website_id.id)]
@@ -431,6 +452,7 @@ class Http(models.AbstractModel):
 
     @api.model
     def get_frontend_session_info(self):
+        print("get_frontend_session_info ----------------->", dir(request))
         session_info = super(Http, self).get_frontend_session_info()
         session_info.update({
             'is_website_user': request.env.user.id == request.website.user_id.id,
@@ -452,6 +474,9 @@ class ModelConverter(ir_http.ModelConverter):
         return super().to_url(value)
 
     def generate(self, uid, dom=None, args=None):
+        print("#####################################")
+        print("generate#####################################")
+        print("#####################################")
         Model = request.env[self.model].with_user(uid)
         # Allow to current_website_id directly in route domain
         args.update(current_website_id=request.env['website'].get_current_website().id)

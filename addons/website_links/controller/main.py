@@ -8,6 +8,7 @@ from odoo.http import request
 class WebsiteUrl(http.Controller):
     @http.route('/website_links/new', type='json', auth='user', methods=['POST'])
     def create_shorten_url(self, **post):
+        import pdb; pdb.set_trace()
         if 'url' not in post or post['url'] == '':
             return {'error': 'empty_url'}
         return request.env['link.tracker'].search_or_create(post).read()

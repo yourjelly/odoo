@@ -286,6 +286,7 @@ class Website(models.Model):
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
         website_api_endpoint = IrConfigParameter.get_param('website.website_api_endpoint', DEFAULT_ENDPOINT)
         endpoint = website_api_endpoint + route
+        print("_website_api_rpc ----------------->")
         return iap_tools.iap_jsonrpc(endpoint, params=params)
 
     def get_cta_data(self, website_purpose, website_type):
@@ -305,6 +306,9 @@ class Website(models.Model):
     def configurator_init(self):
         r = dict()
         company_id = self.get_current_website().company_id
+        print("#####################################")
+        print("configurator_init#####################################")
+        print("#####################################")
         configurator_features = self.env['website.configurator.feature'].search([])
         r['features'] = [{
             'id': feature.id,
@@ -338,6 +342,9 @@ class Website(models.Model):
 
     @api.model
     def configurator_skip(self):
+        print("#####################################")
+        print("configurator_skip#####################################")
+        print("#####################################")
         website = self.get_current_website()
         website.configurator_done = True
 
@@ -404,6 +411,7 @@ class Website(models.Model):
             return pages_views
 
         def configure_page(page_code, snippet_list, pages_views, cta_data):
+            print("configure_page ----------------->")
             if page_code == 'homepage':
                 page_view_id = website.homepage_id.view_id
             else:
@@ -627,6 +635,7 @@ class Website(models.Model):
 
     @api.model
     def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, page_values=None, menu_values=None):
+        print("new_page 632 ----------------->")
         """ Create a new website page, and assign it a xmlid based on the given one
             :param name : the name of the page
             :param add_menu : if True, add a menu for that page
@@ -693,6 +702,9 @@ class Website(models.Model):
         return _guess_mimetype()
 
     def get_unique_path(self, page_url):
+        print("#####################################")
+        print("get_unique_path#####################################")
+        print("#####################################")
         """ Given an url, return that url suffixed by counter if it already exists
             :param page_url : the url to be checked for uniqueness
         """
@@ -723,6 +735,9 @@ class Website(models.Model):
         key_copy = string
         inc = 0
         domain_static = self.get_current_website().website_domain()
+        print("#####################################")
+        print("get_unique_key#####################################")
+        print("#####################################")
         while self.env['website.page'].with_context(active_test=False).sudo().search([('key', '=', key_copy)] + domain_static):
             inc += 1
             key_copy = string + (inc and "-%s" % inc or "")
@@ -736,6 +751,7 @@ class Website(models.Model):
             :returns a dictionnary where key is the 'categorie' of object related to the given
                 view, and the value is the list of text and link to the resource using given page
         """
+        print("page_search_dependencies 742 ----------------->")
         dependencies = {}
         if not page_id:
             return dependencies
@@ -891,6 +907,9 @@ class Website(models.Model):
 
     @api.model
     def get_current_website(self, fallback=True):
+        print("get_current_website 898 ----------------->")
+        if request and request.httprequest.full_path == '/web/dataset/call_button?':
+            request.session['jsondata'] = request.jsonrequest
         if request and request.session.get('force_website_id'):
             website_id = self.browse(request.session['force_website_id']).exists()
             if not website_id:
@@ -1211,6 +1230,9 @@ class Website(models.Model):
         if domain is None:
             domain = []
         domain += self.get_current_website().website_domain()
+        print("#####################################")
+        print("_get_website_pages#####################################")
+        print("#####################################")
         pages = self.env['website.page'].sudo().search(domain, order=order, limit=limit)
         return pages
 
@@ -1224,6 +1246,7 @@ class Website(models.Model):
         return res
 
     def get_suggested_controllers(self):
+        print("get_suggested_controllers ----------------->")
         """
             Returns a tuple (name, url, icon).
             Where icon can be a module name, or a path
@@ -1315,6 +1338,7 @@ class Website(models.Model):
         self.ensure_one()
         # Compare OrderedMultiDict because the order is important, there must be
         # only one canonical and not params permutations.
+        print("_is_canonical_url 1324 ----------------->", dir(request))
         params = request.httprequest.args
         canonical_params = canonical_params or OrderedMultiDict()
         if params != canonical_params:

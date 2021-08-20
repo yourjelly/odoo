@@ -3209,6 +3209,7 @@ class _RelationalMulti(_Relational):
             result = [Command.set([])]
             for record in value:
                 origin = record._origin
+                print("fddsfdsfdsfdsfdsfdsfdsf----------------->")
                 if not origin:
                     values = record._convert_to_write({
                         name: record[name]

@@ -740,6 +740,7 @@ class HttpRequest(WebRequest):
         params.update(self.httprequest.form)
         params.update(self.httprequest.files)
         params.pop('session_id', None)
+        print("params ---------------->", params)
         self.params = params
 
     def _handle_exception(self, exception):

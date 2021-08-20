@@ -19,6 +19,7 @@ class AssetsBundleMultiWebsite(AssetsBundle):
         website_id = self.env.context.get('website_id')
         website_id_path = website_id and ('%s/' % website_id) or ''
         extra = website_id_path + extra
+        print("_get_asset_url_values ----------------->")
         res = super(AssetsBundleMultiWebsite, self)._get_asset_url_values(id, unique, extra, name, sep, extension)
         return res
 
@@ -88,4 +89,5 @@ class QWeb(models.AbstractModel):
             atts = OrderedDict(atts)
             atts['style'] = re_background_image.sub(lambda m: '%s%s' % (m.group(1), website.get_cdn_url(m.group(2))), atts['style'])
 
+        print("_post_processing_att ----------------->", atts)
         return atts

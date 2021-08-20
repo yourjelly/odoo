@@ -68,6 +68,7 @@ class Website(Home):
 
     @http.route('/', type='http', auth="public", website=True, sitemap=True)
     def index(self, **kw):
+        print("index ----------------->")
         # prefetch all menus (it will prefetch website.page too)
         top_menu = request.website.menu_id
 
@@ -87,6 +88,7 @@ class Website(Home):
 
     @http.route('/website/force/<int:website_id>', type='http', auth="user", website=True, sitemap=False, multilang=False)
     def website_force(self, website_id, path='/', isredir=False, **kw):
+        print("website_force ----------------->")
         """ To switch from a website to another, we need to force the website in
         session, AFTER landing on that website domain (if set) as this will be a
         different session.
@@ -120,6 +122,7 @@ class Website(Home):
     # ------------------------------------------------------
 
     def _login_redirect(self, uid, redirect=None):
+        print("_login_redirect ----------------->")
         """ Redirect regular users (employees) to the backend) and others to
         the frontend
         """
@@ -133,6 +136,7 @@ class Website(Home):
     # Force website=True + auth='public', required for login form layout
     @http.route(website=True, auth="public", sitemap=False)
     def web_login(self, *args, **kw):
+        print("web_login ----------------->")
         return super().web_login(*args, **kw)
 
     # ------------------------------------------------------
@@ -233,6 +237,7 @@ class Website(Home):
 
     @http.route('/website/info', type='http', auth="public", website=True, sitemap=True)
     def website_info(self, **kwargs):
+        print("website_info ----------------->")
         try:
             request.website.get_template('website.website_info').name
         except Exception as e:
@@ -252,6 +257,9 @@ class Website(Home):
         if not request.env.user.has_group('website.group_website_designer'):
             raise werkzeug.exceptions.NotFound()
         website_id = request.env['website'].get_current_website()
+        print("#####################################")
+        print("website_configurator#####################################")
+        print("#####################################")
         if website_id.configurator_done is False:
             return request.render('website.website_configurator', {'lang': request.env.user.lang})
         else:
@@ -266,6 +274,7 @@ class Website(Home):
 
     @http.route('/website/get_suggested_links', type='json', auth="user", website=True)
     def get_suggested_link(self, needle, limit=10):
+        print("get_suggested_link ----------------->")
         current_website = request.website
 
         matching_pages = []
@@ -305,6 +314,7 @@ class Website(Home):
 
     @http.route('/website/snippet/filters', type='json', auth='public', website=True)
     def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None, with_sample=False):
+        print("get_dynamic_filter ----------------->")
         dynamic_filter = request.env['website.snippet.filter'].sudo().search(
             [('id', '=', filter_id)] + request.website.website_domain()
         )
@@ -312,6 +322,7 @@ class Website(Home):
 
     @http.route('/website/snippet/options_filters', type='json', auth='user', website=True)
     def get_dynamic_snippet_filters(self, model_name=None, search_domain=None):
+        print("get_dynamic_snippet_filters ----------------->")
         domain = request.website.website_domain()
         if search_domain:
             domain = expression.AND([domain, search_domain])
@@ -339,6 +350,7 @@ class Website(Home):
 
     @http.route(['/website/pages', '/website/pages/page/<int:page>'], type='http', auth="user", website=True)
     def pages_management(self, page=1, sortby='url', search='', **kw):
+        print("pages_management ----------------->")
         # only website_designer should access the page Management
         if not request.env.user.has_group('website.group_website_designer'):
             raise werkzeug.exceptions.NotFound()
@@ -383,6 +395,7 @@ class Website(Home):
 
     @http.route(['/website/add', '/website/add/<path:path>'], type='http', auth="user", website=True, methods=['POST'])
     def pagenew(self, path="", noredirect=False, add_menu=False, template=False, **kwargs):
+        print("pagenew ----------------->")
         # for supported mimetype, get correct default template
         _, ext = os.path.splitext(path)
         ext_special_case = ext and ext in _guess_mimetype() and ext != '.html'
@@ -456,6 +469,7 @@ class Website(Home):
 
     @http.route(['/website/get_seo_data'], type='json', auth="user", website=True)
     def get_seo_data(self, res_id, res_model):
+        print("get_seo_data ----------------->")
         if not request.env.user.has_group('website.group_website_publisher'):
             raise werkzeug.exceptions.Forbidden()
 
@@ -499,6 +513,7 @@ class Website(Home):
     # ------------------------------------------------------
 
     def _get_customize_views(self, xml_ids):
+        print("_get_customize_views ----------------->")
         View = request.env["ir.ui.view"].with_context(active_test=False)
         if not xml_ids:
             return View
@@ -561,6 +576,7 @@ class Website(Home):
         '/website/action/<path_or_xml_id_or_id>/<path:path>',
     ], type='http', auth="public", website=True)
     def actions_server(self, path_or_xml_id_or_id, **post):
+        print("actions_server ----------------->")
         ServerActions = request.env['ir.actions.server']
         action = action_id = None
 

@@ -23,6 +23,9 @@ class WebsiteBackend(http.Controller):
                 'visits': {},
             }
         }
+        print("#####################################")
+        print("fetch_dashboard_data#####################################")
+        print("#####################################")
 
         current_website = website_id and Website.browse(website_id) or Website.get_current_website()
         multi_website = request.env.user.has_group('website.group_multi_website')

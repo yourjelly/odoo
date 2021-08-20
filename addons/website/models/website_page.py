@@ -37,11 +37,17 @@ class Page(models.Model):
 
     def _compute_homepage(self):
         for page in self:
+            print("#####################################")
+            print("_compute_homepage#####################################")
+            print("#####################################")
             page.is_homepage = page == self.env['website'].get_current_website().homepage_id
 
     def _set_homepage(self):
         for page in self:
             website = self.env['website'].get_current_website()
+            print("#####################################")
+            print("_set_homepage#####################################")
+            print("#####################################")
             if page.is_homepage:
                 if website.homepage_id != page:
                     website.write({'homepage_id': page.id})
@@ -81,6 +87,8 @@ class Page(models.Model):
 
     @api.model
     def save_page_info(self, website_id, data):
+        import pdb; pdb.set_trace()
+        print("save_page_info ----------------->")
         website = self.env['website'].browse(website_id)
         page = self.browse(int(data['id']))
 
@@ -169,6 +177,9 @@ class Page(models.Model):
         """
         page = self.browse(int(page_id))
         copy_param = dict(name=page_name or page.name, website_id=self.env['website'].get_current_website().id)
+        print("#####################################")
+        print("clone_page#####################################")
+        print("#####################################")
         if page_name:
             page_url = '/' + slugify(page_name, max_length=1024, path=True)
             copy_param['url'] = self.env['website'].get_unique_path(page_url)

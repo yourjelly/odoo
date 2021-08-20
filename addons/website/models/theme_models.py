@@ -273,6 +273,9 @@ class Theme(models.AbstractModel):
     def _toggle_view(self, xml_id, active):
         obj = self.env.ref(xml_id)
         website = self.env['website'].get_current_website()
+        print("#####################################")
+        print("_toggle_view#####################################")
+        print("#####################################")
         if obj._name == 'theme.ir.ui.view':
             obj = obj.with_context(active_test=False)
             obj = obj.copy_ids.filtered(lambda x: x.website_id == website)

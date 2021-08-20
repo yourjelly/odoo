@@ -37,7 +37,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: function () {debugger
         var self = this;
 
         this.lastsearch = [];

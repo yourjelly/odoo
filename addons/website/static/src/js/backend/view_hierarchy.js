@@ -31,7 +31,7 @@ const Renderer = qweb.Renderer.extend({
     /**
      * @override
      */
-    on_attach_callback: function () {
+    on_attach_callback: function () 
         this._super(...arguments);
 
         const self = this;

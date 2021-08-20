@@ -37,6 +37,7 @@ class ServerAction(models.Model):
 
     @api.depends('state', 'website_published', 'website_path', 'xml_id')
     def _get_website_url(self):
+        print("_get_website_url ----------------->")
         for action in self:
             if action.state == 'code' and action.website_published:
                 action.website_url = action._compute_website_url(action.website_path, action.xml_id)

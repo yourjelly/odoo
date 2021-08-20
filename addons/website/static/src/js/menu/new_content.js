@@ -318,7 +318,7 @@ var NewContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                         });
                     }
 
-                    self._install(moduleId).then(function () {
+                    self._install(moduleId).then(function () {debugger
                         var origin = window.location.origin;
                         var redirectURL = $el.find('a').data('url') || (window.location.pathname + '?' + enableFlag);
                         window.location.href = origin + redirectURL;

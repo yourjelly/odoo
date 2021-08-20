@@ -24,6 +24,7 @@ class WebsiteForm(http.Controller):
     # Check and insert values from the form on the model <model>
     @http.route('/website/form/<string:model_name>', type='http', auth="public", methods=['POST'], website=True, csrf=False)
     def website_form(self, model_name, **kwargs):
+        print("website_form ----------------->")
         # Partial CSRF check, only performed when session is authenticated, as there
         # is no real risk for unauthenticated sessions here. It's a common case for
         # embedded forms now: SameSite policy rejects the cookies, so the session
@@ -48,6 +49,7 @@ class WebsiteForm(http.Controller):
         })
 
     def _handle_website_form(self, model_name, **kwargs):
+        print("_handle_website_form ----------------->")
         model_record = request.env['ir.model'].sudo().search([('model', '=', model_name), ('website_form_access', '=', True)])
         if not model_record:
             return json.dumps({
@@ -132,6 +134,7 @@ class WebsiteForm(http.Controller):
 
     # Extract all data sent by the form and sort its on several properties
     def extract_data(self, model, values):
+        print("extract_data ----------------->")
         dest_model = request.env[model.sudo().model]
 
         data = {
@@ -202,6 +205,7 @@ class WebsiteForm(http.Controller):
         return data
 
     def insert_record(self, request, model, values, custom, meta=None):
+        print("insert_record ----------------->")
         model_name = model.sudo().model
         if model_name == 'mail.mail':
             values.update({'reply_to': values.get('email_from')})

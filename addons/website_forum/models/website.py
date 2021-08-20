@@ -10,21 +10,25 @@ class Website(models.Model):
 
     @api.model
     def get_default_forum_count(self):
+        print("get_default_forum_count--------------------->")
         self.forums_count = self.env['forum.forum'].search_count(self.website_domain())
 
     forums_count = fields.Integer(readonly=True, default=get_default_forum_count)
 
     def get_suggested_controllers(self):
+        print("get_suggested_controllers--------------------->")
         suggested_controllers = super(Website, self).get_suggested_controllers()
         suggested_controllers.append((_('Forum'), url_for('/forum'), 'website_forum'))
         return suggested_controllers
 
     def configurator_get_footer_links(self):
+        print("configurator_get_footer_links--------------------->")
         links = super().configurator_get_footer_links()
         links.append({'text': _("Forum"), 'href': '/forum'})
         return links
 
     def configurator_set_menu_links(self, menu_company, module_data):
+        print("configurator_set_menu_links--------------------->")
         # Forum menu should only be a footer link, not a menu
         forum_menu = self.env['website.menu'].search([('url', '=', '/forum'), ('website_id', '=', self.id)])
         forum_menu.unlink()

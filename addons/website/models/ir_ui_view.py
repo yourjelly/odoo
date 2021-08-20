@@ -240,6 +240,9 @@ class View(models.Model):
 
     @api.model
     def get_related_views(self, key, bundles=False):
+        print("#####################################")
+        print("get_related_views#####################################")
+        print("#####################################")
         '''Make this only return most specific views for website.'''
         # get_related_views can be called through website=False routes
         # (e.g. /web_editor/get_assets_editor_resources), so website
@@ -435,6 +438,9 @@ class View(models.Model):
             editable = request.website.is_publisher()
             translatable = editable and self._context.get('lang') != request.env['ir.http']._get_default_lang().code
             editable = not translatable and editable
+            print("#####################################")
+            print("_prepare_qcontext#####################################")
+            print("#####################################")
 
             cur = Website.get_current_website()
             if self.env.user.has_group('website.group_website_publisher') and self.env.user.has_group('website.group_multi_website'):
@@ -484,6 +490,9 @@ class View(models.Model):
     @api.model
     def _save_oe_structure_hook(self):
         res = super(View, self)._save_oe_structure_hook()
+        print("#####################################")
+        print("_save_oe_structure_hook#####################################")
+        print("#####################################")
         res['website_id'] = self.env['website'].get_current_website().id
         return res
 
@@ -499,6 +508,9 @@ class View(models.Model):
     def save(self, value, xpath=None):
         self.ensure_one()
         current_website = self.env['website'].get_current_website()
+        print("#####################################")
+        print("save#####################################")
+        print("#####################################")
         # xpath condition is important to be sure we are editing a view and not
         # a field as in that case `self` might not exist (check commit message)
         if xpath and self.key and current_website:

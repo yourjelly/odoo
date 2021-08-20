@@ -78,6 +78,7 @@ class Assets(models.AbstractModel):
         return res.with_context(website_id=website.id).filter_duplicate()
 
     def _save_asset_hook(self):
+        print("_save_asset_hook ----------------->")
         """
         See web_editor.Assets._save_asset_hook
         Extend to add website ID at attachment creation.

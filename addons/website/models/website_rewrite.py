@@ -34,6 +34,7 @@ class WebsiteRoute(models.Model):
         paths = {rec.path: rec for rec in self.search([])}
         for url, _, routing in ir_http._generate_routing_rules(self.pool._init_modules, converters=ir_http._get_converters()):
             if 'GET' in (routing.get('methods') or ['GET']):
+                print("_refresh ----------------->", url)
                 if paths.get(url):
                     paths.pop(url)
                 else:
@@ -81,6 +82,8 @@ class WebsiteRewrite(models.Model):
 
     @api.constrains('url_to', 'url_from', 'redirect_type')
     def _check_url_to(self):
+        import pdb; pdb.set_trace()
+        print("_check_url_to ----------------->")
         for rewrite in self:
             if rewrite.redirect_type == '308':
                 if not rewrite.url_to:
@@ -103,6 +106,7 @@ class WebsiteRewrite(models.Model):
 
     def name_get(self):
         result = []
+        import pdb; pdb.set_trace()
         for rewrite in self:
             name = "%s - %s" % (rewrite.redirect_type, rewrite.name)
             result.append((rewrite.id, name))

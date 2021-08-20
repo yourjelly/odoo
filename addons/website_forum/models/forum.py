@@ -241,6 +241,7 @@ class Forum(models.Model):
         return post_tags
 
     def _compute_website_url(self):
+        import pdb; pdb.set_trace()
         return '/forum/%s' % (slug(self))
 
     def get_tags_first_char(self):

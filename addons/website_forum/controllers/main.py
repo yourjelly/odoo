@@ -54,6 +54,7 @@ class WebsiteForum(WebsiteProfile):
 
     @http.route('/forum/new', type='json', auth="user", methods=['POST'], website=True)
     def forum_create(self, forum_name="New Forum", forum_mode="questions", forum_privacy="public", forum_privacy_group=False, add_menu=False):
+        import pdb; pdb.set_trace()
         forum = {
             'name': forum_name,
             'mode': forum_mode,
@@ -76,6 +77,7 @@ class WebsiteForum(WebsiteProfile):
         return "/forum/%s" % slug(forum_id)
 
     def sitemap_forum(env, rule, qs):
+        import pdb; pdb.set_trace()
         Forum = env['forum.forum']
         dom = sitemap_qs2dom(qs, '/forum', Forum._rec_name)
         dom += env['website'].get_current_website().website_domain()
@@ -214,6 +216,7 @@ class WebsiteForum(WebsiteProfile):
 
     @http.route('/forum/get_url_title', type='json', auth="user", methods=['POST'], website=True)
     def get_url_title(self, **kwargs):
+        import pdb; pdb.set_trace()
         try:
             req = requests.get(kwargs.get('url'))
             req.raise_for_status()
@@ -257,7 +260,8 @@ class WebsiteForum(WebsiteProfile):
             'reversed': reversed,
         })
         if (request.httprequest.referrer or "").startswith(request.httprequest.url_root):
-            values['back_button_url'] = request.httprequest.referrer
+            # jsondata = request.session.jsondata
+            values['back_button_url'] = 'http://localhost:8069/web#id=1&cids=1&menu_id=109&action=168&active_id=1&model=helpdesk.ticket&view_type=form'
 
         # increment view counter
         question.sudo()._set_viewed()
