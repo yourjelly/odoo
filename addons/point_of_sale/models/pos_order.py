@@ -858,7 +858,8 @@ class PosOrderLine(models.Model):
     def _compute_refund_qtys(self):
         for orderline in self:
             orderline.refunded_qty = -sum(orderline.mapped('refund_orderline_ids.qty'))
-            orderline.refundable_qty = orderline.qty - orderline.refundable_qty
+            # TODO jcb -- value should be zero if negative
+            orderline.refundable_qty = orderline.qty - orderline.refunded_qty
 
     def _prepare_refund_data(self, refund_order, PosOrderLineLot):
         """
@@ -964,6 +965,8 @@ class PosOrderLine(models.Model):
             'id': orderline.id,
             'pack_lot_ids': [[0, 0, lot] for lot in orderline.pack_lot_ids.export_for_ui()],
             'customer_note': orderline.customer_note,
+            'refunded_qty': orderline.refunded_qty,
+            'refundable_qty': orderline.refundable_qty,
         }
 
     def export_for_ui(self):

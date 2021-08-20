@@ -1671,6 +1671,8 @@ exports.Orderline = Backbone.Model.extend({
             this.pack_lot_lines.add(pack_lot_line);
         }
         this.set_customer_note(json.customer_note);
+        this.refunded_qty = json.refunded_qty;
+        this.refundable_qty = json.refundable_qty;
     },
     clone: function(){
         var orderline = new exports.Orderline({},{
@@ -1922,6 +1924,7 @@ exports.Orderline = Backbone.Model.extend({
             full_product_name: this.get_full_product_name(),
             price_extra: this.get_price_extra(),
             customer_note: this.get_customer_note(),
+            refunded_orderline_id: this.refunded_orderline_id
         };
     },
     //used to create a json of the ticket, to be sent to the printer
@@ -3067,6 +3070,9 @@ exports.Order = Backbone.Model.extend({
         if (options.is_tip) {
             this.is_tipped = true;
             this.tip_amount = options.price;
+        }
+        if (options.refunded_orderline_id) {
+            orderline.refunded_orderline_id = options.refunded_orderline_id;
         }
     },
     get_selected_orderline: function(){

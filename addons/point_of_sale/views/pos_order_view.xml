@@ -61,6 +61,9 @@
                                 <field name="price_subtotal" widget="monetary" force_save="1"/>
                                 <field name="price_subtotal_incl" widget="monetary" force_save="1"/>
                                 <field name="currency_id" invisible="1"/>
+                                <field name="refunded_qty" />
+                                <field name="refund_orderline_ids" widget="many2many_tags" string="Refund Order Lines" optional="hide" />
+                                <field name="refunded_orderline_id" string="Refunded Order Line" optional="hide" />
                             </tree>
                             <form string="Order lines">
                                 <group col="4">
