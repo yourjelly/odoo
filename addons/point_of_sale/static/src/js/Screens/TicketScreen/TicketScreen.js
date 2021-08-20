@@ -28,15 +28,17 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             filter: null,
             // maps the order's backendId to it's selected orderline
             selectedOrderlineIds: {},
+            orderToPutRefund: null,
         },
         // maps the order's backendId and the refund state
+        // Record<orderBackendId, Record<orderlineId, quantity>>
         refund: {},
     };
 
     class TicketScreen extends IndependentToOrderScreen {
         constructor() {
             super(...arguments);
-            useListener('close-screen', this.close);
+            useListener('close-screen', this._onCloseScreen);
             useListener('filter-selected', this._onFilterSelected);
             useListener('search', this._onSearch);
             useListener('click-order', this._onClickOrder);
@@ -60,6 +62,8 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                       selectedSyncedOrderId: null,
                       searchDetails: makeDefaultSearchDetails(),
                       filter: null,
+                      selectedOrderlineIds: {},
+                      orderToPutRefund: null,
                   };
             Object.assign(this._state.ui, defaultUIState, this.props.ui || {});
         }
@@ -80,6 +84,10 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         //#endregion
         //#region EVENT HANDLERS
+        _onCloseScreen() {
+            this._state.ui.orderToPutRefund = null;
+            this.close();
+        }
         async _onFilterSelected(event) {
             this._state.ui.filter = event.detail.filter;
             if (this._state.ui.filter == 'SYNCED') {
@@ -189,10 +197,10 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 .map((id) => orderlinesMap[id])
                 .filter((line) => !float_is_zero(refundQuantityMap[line.id]));
             if (orderlinesToRefund.length == 0) return;
-            const activeOrder = this.env.pos.add_new_order({ silent: true });
+            const orderToPutRefund = this._state.ui.orderToPutRefund || this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
-                await activeOrder.add_product(orderline.product, {
+                await orderToPutRefund.add_product(orderline.product, {
                     quantity: -qtyToRefund,
                     price: orderline.price,
                     lst_price: orderline.price,
@@ -203,7 +211,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             }
             this._invalidateSyncedOrdersCache([order.backendId]);
             this._state.refund[order.backendId] = {};
-            this.showScreen('ProductScreen');
+            this._onCloseScreen();
         }
         //#endregion
         //#region PUBLIC METHODS
