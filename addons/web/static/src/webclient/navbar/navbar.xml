@@ -115,19 +115,19 @@
 
   <t t-name="web.NavBar.SectionsMenu.Dropdown.MenuSlot" owl="1">
     <t t-foreach="items" t-as="item" t-key="item.id">
-      <MenuItem t-if="!item.childrenTree.length" payload="item">
-        <a t-att-href="getMenuItemHref(item)" t-esc="item.name" t-on-click.prevent="" />
+      <MenuItem t-if="!item.childrenTree.length" payload="item" class="o_dropdown_item dropdown-item">
+        <a t-att-href="getMenuItemHref(item)" t-esc="item.name"/>
       </MenuItem>
 
       <t t-else="">
-        <div class="o_dropdown_menu_group" t-esc="item.name" />
+        <div class="o_dropdown_menu_group dropdown-header" t-esc="item.name" />
         <MenuItem
           t-foreach="item.childrenTree"
           t-as="subItem"
           t-key="subItem.id"
-          class="o_dropdown_menu_group_entry"
+          class="o_dropdown_menu_group_entry o_dropdown_item dropdown-item"
           payload="subItem">
-          <a t-att-href="getMenuItemHref(subItem)" t-esc="subItem.name" t-on-click.prevent="" />
+          <a t-att-href="getMenuItemHref(subItem)" t-esc="subItem.name"/>
         </MenuItem>
       </t>
     </t>

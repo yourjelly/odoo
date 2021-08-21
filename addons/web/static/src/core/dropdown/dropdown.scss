@@ -1,34 +1,3 @@
-// = Dropdown pseudo-classes
-// ----------------------------------------------------------------------------
-%o-dropdown-item--active {
-  position: relative;
-  font-weight: $font-weight-bold;
-
-  &:focus, &:hover {
-    background-color: $dropdown-link-hover-bg;
-  }
-
-  &:not(.o_dropdown_item_active_noarrow) {
-    &:before {
-      @include o-position-absolute(0);
-      transform: translate(-1.5em, 90%);
-      font: .7em/1em FontAwesome;
-      color: $primary;
-      content: "\f00c";
-    }
-
-    &.disabled:before {
-      color: $dropdown-link-disabled-color;
-    }
-  }
-}
-
-%o-dropdown-item--disabled {
-  color: $dropdown-link-disabled-color;
-  pointer-events: none;
-  background-color: transparent;
-}
-
 // = Default Boostrap Classes customizations
 // ----------------------------------------------------------------------------
 .dropdown-menu {
@@ -40,7 +9,26 @@
 
 .dropdown-item {
   &.active, &.selected {
-    @extend %o-dropdown-item--active;
+    position: relative;
+    font-weight: $font-weight-bold;
+
+    &:focus, &:hover {
+      background-color: $dropdown-link-hover-bg;
+    }
+
+    &:not(.o_dropdown_item_active_noarrow) {
+      &:before {
+        @include o-position-absolute(0);
+        transform: translate(-1.5em, 90%);
+        font: .7em/1em FontAwesome;
+        color: $primary;
+        content: "\f00c";
+      }
+
+      &.disabled:before {
+        color: $dropdown-link-disabled-color;
+      }
+    }
   }
 }
 
@@ -59,159 +47,39 @@
 
 .o_rtl {
   .dropdown-menu {
-    @extend .dropdown-menu-right;
-  }
-}
-
-// = Extend Owl custom classes to visually match Boostrap ones
-// ----------------------------------------------------------------------------
-.o_dropdown {
-  @extend .dropdown;
-
-  &_toggler {
-    @extend .dropdown-toggle;
-  }
-
-  &_menu {
-    @extend .dropdown-menu;
-
-    &.o_dropdown_menu_right {
-      @extend .dropdown-menu-right;
-    }
-
-    & > li.o_dropdown {
-      &.focus > .o_dropdown_toggler {
-        background-color: $dropdown-link-hover-bg;
-      }
-      & > .o_dropdown_toggler {
-        @extend .dropdown-item;
-
-        &:after {
-          @include o-position-absolute($right: 0);
-          transform: translate(-.6em, .3em);
-          font: .9em/1em FontAwesome;
-          content: "\f0da";
-        }
-      }
-
-      // Correctly align sub dropdowns items with its parent's
-      & > .o_dropdown_menu {
-        &.o-popper-position {
-          &--rs, &--ls {
-            margin-top: calc(-.5rem - 1px);
-          }
-          &--re, &--le {
-            margin-top: calc(.5rem - 2px);
-          }
-        }
-      }
-    }
-
-    // Since wrapping entry's content is the norm, @extend bootstrap
-    // '.dropdown-item' classes to the inner element (eg. <a> or <span>)
-    // rather that on 'o_dropdown_item'.
-    .o_dropdown_item {
-      > :first-child {
-        @extend .dropdown-item;
-      }
-      &.selected > :first-child {
-        @extend %o-dropdown-item--active;
-      }
-      &.disabled > :first-child {
-        @extend %o-dropdown-item--disabled;
-      }
-      &.focus {
-        background-color: $dropdown-link-hover-bg;
-      }
-    }
-  }
-
-  &_item > *:first-child:last-child {
-    @extend .dropdown-item;
-  }
-
-  &_item.o_dropdown_active > *:first-child:last-child {
-    @extend .dropdown-item:hover;
-  }
-
-  &_menu_group {
-    @extend .dropdown-header;
-  }
-}
-
-// = Owl Nested Dropdowns
-// ----------------------------------------------------------------------------
-
-.o_dropdown .o_dropdown {
-
-  // Define submenus 'inline' design (nested into the parent menu)
-  @mixin -o-inline-dropdown-menu {
-    .o_dropdown_toggler.o_dropdown_active:after {
-      content: "\f0d7";
-    }
-
-    .o_dropdown_menu {
-      left: 0;
-      position: relative;
-      max-height: none;
-      box-shadow: none;
-      margin-top: 0;
-      margin-bottom: $dropdown-padding-y;
-      padding-top: 0;
-      background: rgba(#000, .01);
-      border-width: 0 0 1px 0;
-
-      &:last-child {
-        border-bottom-width: 0;
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  // The toggler looks like a regular menu entry
-  .o_dropdown_toggler {
-    @extend .dropdown-item;
-
-    &:after {
-      @include o-position-absolute($right: 0);
-      transform: translate(-.6em, .3em);
-      font: .9em/1em FontAwesome;
-      content: "\f0da";
-    }
-  }
-
-  // Small screen: all submenus are inline
-  @include media-breakpoint-down('lg') {
-    @include -o-inline-dropdown-menu ;
-  }
-
-  // Large screen: submenus floats...
-  @include media-breakpoint-up('lg') {
-    .o_dropdown_menu {
-      top: 0;
-      left: 100%;
-    }
-
-    //... except when specified otherwise
-    &.o_dropdown_inline {
-      @include -o-inline-dropdown-menu ;
-    }
-  }
-}
-
-// Unfortunately is not possible to set the parent menu's overflow to be 'visible'
-// horizontally (to show floating submenus) and 'auto/scroll' vertically (to hide
-// menu entries when the menu is very long).
-// We will set it 'visible' letting 'o_view_controller' handling scrollbars.
-@include media-breakpoint-up('lg') {
-  .o_dropdown_menu {
-    overflow: visible;
-    max-height: none;
+    // @extend .dropdown-menu-right;
   }
 }
 
 // = Owl components specific rules
 // -----------------------------------------------------------------------------
+.o_dropdown_menu {
+    &.focus > .o_dropdown_toggler, .o_dropdown_item.focus {
+      background-color: $dropdown-link-hover-bg;
+    }
+
+    > li.o_dropdown {
+      > .o_dropdown_toggler:after {
+        @include o-position-absolute($right: 0);
+        transform: translate(-.6em, .3em);
+        font: .9em/1em FontAwesome;
+        content: "\f0da";
+      }
+
+    // Correctly align sub dropdowns items with its parent's
+    & > .o_dropdown_menu {
+      &.o-popper-position {
+        &--rs, &--ls {
+          margin-top: calc(-.5rem - 1px);
+        }
+        &--re, &--le {
+          margin-top: calc(.5rem - 2px);
+        }
+      }
+    }
+  }
+}
+
 .o_dropdown_item:not(.disabled):not(:disabled) {
   // Needed 'cause <DropdownItem> generate <li> html tags that for browsers are
   // normally not clickable.
