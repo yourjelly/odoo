@@ -28,7 +28,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             filter: null,
             // maps the order's backendId to it's selected orderline
             selectedOrderlineIds: {},
-            orderToPutRefund: null,
         },
         // maps the order's backendId and the refund state
         // Record<orderBackendId, Record<orderlineId, quantity>>
@@ -63,7 +62,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                       searchDetails: makeDefaultSearchDetails(),
                       filter: null,
                       selectedOrderlineIds: {},
-                      orderToPutRefund: null,
                   };
             Object.assign(this._state.ui, defaultUIState, this.props.ui || {});
         }
@@ -85,7 +83,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         //#endregion
         //#region EVENT HANDLERS
         _onCloseScreen() {
-            this._state.ui.orderToPutRefund = null;
             this.close();
         }
         async _onFilterSelected(event) {
@@ -197,10 +194,11 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 .map((id) => orderlinesMap[id])
                 .filter((line) => !float_is_zero(refundQuantityMap[line.id]));
             if (orderlinesToRefund.length == 0) return;
-            const orderToPutRefund = this._state.ui.orderToPutRefund || this.env.pos.add_new_order({ silent: true });
+            // The order that will contain the refund orderlines.
+            const recipientOrder = this.props.orderToPutRefund || this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
-                await orderToPutRefund.add_product(orderline.product, {
+                await recipientOrder.add_product(orderline.product, {
                     quantity: -qtyToRefund,
                     price: orderline.price,
                     lst_price: orderline.price,
@@ -463,6 +461,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
     }
     TicketScreen.template = 'TicketScreen';
     TicketScreen.defaultProps = {
+        orderToPutRefund: null,
         // When passed as true, it will use the saved _state.ui as default
         // value when this component is reinstantiated.
         // After setting the default value, the _state.ui will be overridden
