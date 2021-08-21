@@ -175,7 +175,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Maximum Exceeded'),
                         body: _.str.sprintf(
-                            this.env._t('You entered %s. You are not allowed to refund more than %s.'),
+                            this.env._t('The requested quantity to be refunded is higher than the ordered quantity. %s is requested while only %s can be refunded.'),
                             quantity,
                             orderline.refundable_qty
                         ),
