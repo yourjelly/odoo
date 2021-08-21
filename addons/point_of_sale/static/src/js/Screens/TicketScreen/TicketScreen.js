@@ -197,13 +197,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             // The order that will contain the refund orderlines.
             // Use the orderToPutRefund from props if the order to refund has the same
             // customer as the orderToPutRefund.
-            const recipientOrder =
-                this.props.orderToPutRefund && order.get_client() === this.props.orderToPutRefund.get_client()
+            const customerToRefund = order.get_client();
+            const receivingOrder =
+                this.props.orderToPutRefund && customerToRefund === this.props.orderToPutRefund.get_client()
                     ? this.props.orderToPutRefund
                     : this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
-                await recipientOrder.add_product(orderline.product, {
+                await receivingOrder.add_product(orderline.product, {
                     quantity: -qtyToRefund,
                     price: orderline.price,
                     lst_price: orderline.price,
@@ -211,6 +212,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     merge: false,
                     refunded_orderline_id: orderline.id,
                 });
+            }
+            if (customerToRefund && !receivingOrder.get_client()) {
+                receivingOrder.set_client(customerToRefund);
             }
             this._invalidateSyncedOrdersCache([order.backendId]);
             this._state.refund[order.backendId] = {};
