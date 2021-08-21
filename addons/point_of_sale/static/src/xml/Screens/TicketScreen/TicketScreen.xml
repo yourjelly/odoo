@@ -79,6 +79,7 @@
                 </div>
                 <div class="leftpane">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedSyncedOrder()" />
+                    <t t-set="_selectedOrderlineId" t-value="getSelectedOrderlineId()" />
                     <OrderDetails order="_selectedSyncedOrder" selectedOrderlineId="getSelectedOrderlineId()" refundDetails="_selectedSyncedOrder and _state.refund[_selectedSyncedOrder.backendId]" />
                     <div class="pads">
                         <div class="control-buttons">
@@ -88,7 +89,7 @@
                         <div class="subpads">
                             <t t-set="_actionName">Refund</t>
                             <ActionpadWidget client="getSelectedClient()" actionName="_actionName" actionToTrigger="'do-refund'" />
-                            <NumpadWidget />
+                            <NumpadWidget disabledModes="['price', 'discount']" activeMode="_selectedOrderlineId and 'quantity'" />
                         </div>
                     </div>
                 </div>
