@@ -195,7 +195,12 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 .filter((line) => !float_is_zero(refundQuantityMap[line.id]));
             if (orderlinesToRefund.length == 0) return;
             // The order that will contain the refund orderlines.
-            const recipientOrder = this.props.orderToPutRefund || this.env.pos.add_new_order({ silent: true });
+            // Use the orderToPutRefund from props if the order to refund has the same
+            // customer as the orderToPutRefund.
+            const recipientOrder =
+                this.props.orderToPutRefund && order.get_client() === this.props.orderToPutRefund.get_client()
+                    ? this.props.orderToPutRefund
+                    : this.env.pos.add_new_order({ silent: true });
             for (const orderline of orderlinesToRefund) {
                 const qtyToRefund = refundQuantityMap[orderline.id];
                 await recipientOrder.add_product(orderline.product, {
