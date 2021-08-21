@@ -331,6 +331,13 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const order = this.getSelectedSyncedOrder();
             return order ? order.get_client() : null;
         }
+        getHasItemsToRefund() {
+            const order = this.getSelectedSyncedOrder();
+            if (!order) return false;
+            const refundState = this._state.refund[order.backendId] || {};
+            const total = Object.values(refundState).reduce((acc, val) => acc + val, 0);
+            return !float_is_zero(total, 6)
+        }
         //#endregion
         //#region PRIVATE METHODS
         _setOrder(order) {

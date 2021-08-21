@@ -4,7 +4,7 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const { format } = require('web.field_utils');
-    const { round_precision: round_pr } = require('web.utils');
+    const { round_precision: round_pr, float_is_zero } = require('web.utils');
 
     /**
      * @props {pos.order.line} line
@@ -48,6 +48,9 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
         }
         get customerNote() {
             return this.props.line.get_customer_note();
+        }
+        getIsColored() {
+            return !float_is_zero(this.props.toRefund || 0, 6);
         }
     }
     OrderlineDetails.template = 'OrderlineDetails';

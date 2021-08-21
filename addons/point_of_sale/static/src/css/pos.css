@@ -720,6 +720,10 @@ td {
     border-color: #bfbfbf;
     transition: all 150ms linear;
 }
+.pos .actionpad .button.pay .pay-circle.highlight {
+    color: white;
+    background-color: #6ec89b;
+}
 .pos .actionpad .button:hover {
     background: #efefef;
 }
@@ -2198,6 +2202,11 @@ td {
     color: #777;
     font-weight: bold;
     font-style:normal;
+}
+
+.pos .order .orderline .to-refund-highlight {
+    font-weight: bold;
+    color: #6ec89b;
 }
 
 /* ------ ORDER NOTES ------- */

@@ -27,7 +27,7 @@
                 </li>
             </t>
             <t t-if="props.toRefund">
-                <li class="info orderline-note">
+                <li class="info orderline-note" t-att-class="{ 'to-refund-highlight': getIsColored() }">
                     To Refund: <t t-esc="props.toRefund" />
                 </li>
             </t>
