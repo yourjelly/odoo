@@ -149,7 +149,6 @@ class PosOrder(models.Model):
 
         return pos_order.id
 
-
     def _process_payment_lines(self, pos_order, order, pos_session, draft):
         """Create account.bank.statement.lines from the dictionary given to the parent function.
 
@@ -287,15 +286,16 @@ class PosOrder(models.Model):
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
     is_tipped = fields.Boolean('Is this already tipped?', readonly=True)
     tip_amount = fields.Float(string='Tip Amount', digits=0, readonly=True)
-    refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_orders_count')
-    is_refunded = fields.Boolean(compute='_compute_refund_orders_count')
+    refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_related_fields')
+    is_refunded = fields.Boolean(compute='_compute_refund_related_fields')
+    refunded_order_ids = fields.Many2many('pos.order', compute='_compute_refund_related_fields')
 
     @api.depends('lines.refund_orderline_ids')
-    def _compute_refund_orders_count(self):
+    def _compute_refund_related_fields(self):
         for order in self:
             order.refund_orders_count = len(order.mapped('lines.refund_orderline_ids.order_id'))
             order.is_refunded = order.refund_orders_count > 0
-
+            order.refunded_order_ids = order.mapped('lines.refunded_orderline_id.order_id')
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
@@ -405,7 +405,7 @@ class PosOrder(models.Model):
     @api.model
     def _complete_values_from_session(self, session, values):
         if values.get('state') and values['state'] == 'paid':
-            values['name'] = session.config_id.sequence_id._next()
+            values['name'] = self._compute_order_name()
         values.setdefault('pricelist_id', session.config_id.pricelist_id.id)
         values.setdefault('fiscal_position_id', session.config_id.default_fiscal_position_id.id)
         values.setdefault('company_id', session.config_id.company_id.id)
@@ -414,8 +414,14 @@ class PosOrder(models.Model):
     def write(self, vals):
         for order in self:
             if vals.get('state') and vals['state'] == 'paid' and order.name == '/':
-                vals['name'] = order.config_id.sequence_id._next()
+                vals['name'] = self._compute_order_name()
         return super(PosOrder, self).write(vals)
+
+    def _compute_order_name(self):
+        if len(self.refunded_order_ids) != 0:
+            return ','.join(self.refunded_order_ids.mapped('name')) + _(' REFUND')
+        else:
+            return self.session_id.config_id.sequence_id._next()
 
     def action_stock_picking(self):
         self.ensure_one()
