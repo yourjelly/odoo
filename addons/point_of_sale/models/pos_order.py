@@ -290,7 +290,7 @@ class PosOrder(models.Model):
     is_refunded = fields.Boolean(compute='_compute_refund_related_fields')
     refunded_order_ids = fields.Many2many('pos.order', compute='_compute_refund_related_fields')
 
-    @api.depends('lines.refund_orderline_ids')
+    @api.depends('lines.refund_orderline_ids', 'lines.refunded_orderline_id')
     def _compute_refund_related_fields(self):
         for order in self:
             order.refund_orders_count = len(order.mapped('lines.refund_orderline_ids.order_id'))
