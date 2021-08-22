@@ -49,8 +49,17 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
         get customerNote() {
             return this.props.line.get_customer_note();
         }
-        getIsColored() {
-            return !float_is_zero(this.props.toRefund || 0, 6);
+        hasRefundedQty() {
+            return !this.env.pos.isProductQtyZero(this.props.line.refunded_qty);
+        }
+        getFormattedRefundedQty() {
+            return this.env.pos.formatProductQty(this.props.line.refunded_qty);
+        }
+        hasToRefundQty() {
+            return !this.env.pos.isProductQtyZero(this.props.toRefund);
+        }
+        getFormattedToRefundQty() {
+            return this.env.pos.formatProductQty(this.props.toRefund);
         }
     }
     OrderlineDetails.template = 'OrderlineDetails';

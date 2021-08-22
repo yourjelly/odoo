@@ -2209,6 +2209,10 @@ td {
     color: #6ec89b;
 }
 
+.pos .order .orderline .refund-note {
+    margin-top: 2px;
+}
+
 /* ------ ORDER NOTES ------- */
 
 .pos .order .orderline-note {

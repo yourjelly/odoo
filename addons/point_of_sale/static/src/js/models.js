@@ -1318,6 +1318,14 @@ exports.PosModel = Backbone.Model.extend({
 
     electronic_payment_interfaces: {},
 
+    isProductQtyZero: function(qty) {
+        return utils.float_is_zero(qty, this.env.pos.dp['Product Unit of Measure']);
+    },
+
+    formatProductQty: function(qty) {
+        return field_utils.format.float(qty, { digits: [true, this.dp['Product Unit of Measure']] });
+    },
+
     format_currency: function(amount, precision) {
         var currency =
             this && this.currency
