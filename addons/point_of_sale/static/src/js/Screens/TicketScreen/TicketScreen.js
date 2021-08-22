@@ -176,7 +176,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Maximum Exceeded'),
                         body: _.str.sprintf(
-                            this.env._t('The requested quantity to be refunded is higher than the ordered quantity. %s is requested while only %s can be refunded.'),
+                            this.env._t(
+                                'The requested quantity to be refunded is higher than the ordered quantity. %s is requested while only %s can be refunded.'
+                            ),
                             quantity,
                             orderline.refundable_qty
                         ),
@@ -337,7 +339,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (!order) return false;
             const refundState = this._state.refund[order.backendId] || {};
             const total = Object.values(refundState).reduce((acc, val) => acc + val, 0);
-            return !float_is_zero(total, 6)
+            return !this.env.pos.isProductQtyZero(total);
         }
         //#endregion
         //#region PRIVATE METHODS
