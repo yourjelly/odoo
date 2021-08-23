@@ -906,7 +906,8 @@ class PosOrderLine(models.Model):
             'price_subtotal': -self.price_subtotal,
             'price_subtotal_incl': -self.price_subtotal_incl,
             'pack_lot_ids': PosOrderLineLot,
-            'is_total_cost_computed': False
+            'is_total_cost_computed': False,
+            'refunded_orderline_id': self.id,
         }
 
     @api.model
