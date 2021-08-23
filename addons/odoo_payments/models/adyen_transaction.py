@@ -11,7 +11,7 @@ from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
-from odoo.addons.adyen_platforms.util import to_major_currency, to_minor_currency
+from odoo.addons.odoo_payments.util import to_major_currency, to_minor_currency
 
 _logger = logging.getLogger(__name__)
 
@@ -199,7 +199,7 @@ class AdyenTransaction(models.Model):
         return tx
 
     def _trigger_sync(self):
-        sync_cron = self.env.ref('adyen_platforms.adyen_sync_cron', raise_if_not_found=False)
+        sync_cron = self.env.ref('odoo_payments.adyen_sync_cron', raise_if_not_found=False)
         if sync_cron:
             # FIXME ANVFE shouldn't it be utcnow?
             sync_cron._trigger(at=fields.Datetime.now() + relativedelta(minutes=5))

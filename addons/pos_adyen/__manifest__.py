@@ -15,7 +15,7 @@
         'views/pos_payment_method_views.xml',
         'views/res_config_settings_views.xml',
     ],
-    'depends': ['adyen_platforms', 'point_of_sale'],
+    'depends': ['odoo_payments', 'point_of_sale'],
     'installable': True,
     'assets': {
         'point_of_sale.assets': [
