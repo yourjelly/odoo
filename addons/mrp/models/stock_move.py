@@ -60,7 +60,7 @@ class StockMove(models.Model):
     operation_id = fields.Many2one(
         'mrp.routing.workcenter', 'Operation To Consume')  # TDE FIXME: naming
     workorder_id = fields.Many2one(
-        'mrp.workorder', 'Work Order To Consume')
+        'mrp.workorder', 'Work Order To Consume', copy=False)
     # Quantities to process, in normalized UoMs
     active_move_line_ids = fields.One2many('stock.move.line', 'move_id', domain=[('done_wo', '=', True)], string='Lots')
     bom_line_id = fields.Many2one('mrp.bom.line', 'BoM Line')
