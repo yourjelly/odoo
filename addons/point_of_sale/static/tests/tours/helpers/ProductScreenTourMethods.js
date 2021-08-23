@@ -133,6 +133,13 @@ odoo.define('point_of_sale.tour.ProductScreenTourMethods', function (require) {
                 }
             ]
         }
+        clickRefund() {
+            return [
+                {
+                    trigger: '.control-button:contains("Refund")',
+                },
+            ];
+        }
     }
 
     class Check {

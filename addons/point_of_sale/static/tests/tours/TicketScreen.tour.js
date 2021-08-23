@@ -6,6 +6,7 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     const { PaymentScreen } = require('point_of_sale.tour.PaymentScreenTourMethods');
     const { ClientListScreen } = require('point_of_sale.tour.ClientListScreenTourMethods');
     const { TicketScreen } = require('point_of_sale.tour.TicketScreenTourMethods');
+    const { ErrorPopup } = require('point_of_sale.tour.ErrorPopupTourMethods');
     const { Chrome } = require('point_of_sale.tour.ChromeTourMethods');
     const { getSteps, startSteps } = require('point_of_sale.tour.utils');
     var Tour = require('web_tour.tour');
@@ -85,6 +86,42 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     ReceiptScreen.do.clickBack();
     // When going back, the ticket screen should be in its previous state.
     TicketScreen.check.filterIs('Paid');
+
+    // Test refund //
+    TicketScreen.do.clickDiscard();
+    ProductScreen.check.isShown();
+    ProductScreen.check.orderIsEmpty();
+    ProductScreen.do.clickRefund();
+    // Filter should be automatically 'Paid'.
+    TicketScreen.check.filterIs('Paid');
+    TicketScreen.do.selectOrder('-0003');
+    TicketScreen.check.customerIs('Colleen Diaz');
+    TicketScreen.do.clickOrderline('Desk Pad');
+    TicketScreen.do.pressNumpad('2');
+    // Error should show because 2 is more than the number
+    // that can be refunded.
+    ErrorPopup.do.clickConfirm();
+    TicketScreen.do.clickDiscard();
+    ProductScreen.check.isShown();
+    ProductScreen.check.orderIsEmpty();
+    ProductScreen.do.clickRefund();
+    TicketScreen.do.selectOrder('-0003');
+    TicketScreen.do.clickOrderline('Desk Pad');
+    TicketScreen.do.pressNumpad('1');
+    TicketScreen.check.toRefundIs('1.00');
+    TicketScreen.do.confirmRefund();
+    ProductScreen.check.isShown();
+    ProductScreen.check.selectedOrderlineHas('Desk Pad', '-1.00');
+    // Pay the refund order.
+    ProductScreen.do.clickPayButton();
+    PaymentScreen.do.clickPaymentMethod('Bank');
+    PaymentScreen.do.clickValidate();
+    ReceiptScreen.check.isShown();
+    ReceiptScreen.do.clickNextOrder();
+    // Check refunded quantity.
+    ProductScreen.do.clickRefund();
+    TicketScreen.do.selectOrder('-0003');
+    TicketScreen.check.refundedQtyIs('1.00');
 
     Tour.register('TicketScreenTour', { test: true, url: '/pos/ui' }, getSteps());
 });
