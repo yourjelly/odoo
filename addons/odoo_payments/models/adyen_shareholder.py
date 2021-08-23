@@ -4,7 +4,7 @@ import uuid
 
 from odoo import api, fields, models
 
-from odoo.addons.adyen_platforms.models.adyen_kyc import ADYEN_KYC_STATUS
+from odoo.addons.odoo_payments.models.adyen_kyc import ADYEN_KYC_STATUS
 
 
 class AdyenShareholder(models.Model):
@@ -82,7 +82,7 @@ class AdyenShareholder(models.Model):
 
     def _upload_photo_id(self, document_type, content, filename):
         # FIXME ANVFE wtf is this test mode config param ???
-        test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
+        test_mode = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.test_mode')
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
             'documentDetail': {
                 'accountHolderCode': self.adyen_account_id.account_holder_code,

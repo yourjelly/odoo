@@ -6,21 +6,21 @@ from pprint import pformat
 from odoo import http
 from odoo.http import request
 
-from odoo.addons.adyen_platforms.util import odoo_payments_proxy_control
+from odoo.addons.odoo_payments.util import odoo_payments_proxy_control
 
 _logger = logging.getLogger(__name__)
 
 
-class AdyenPlatformsController(http.Controller):
+class OdooPaymentsController(http.Controller):
 
-    @http.route('/adyen_platforms/create_account', type='http', auth='user', website=True)
-    def adyen_platforms_create_account(self, creation_token):
+    @http.route('/odoo_payments/create_account', type='http', auth='user', website=True)
+    def odoo_payments_create_account(self, creation_token):
         request.session['adyen_creation_token'] = creation_token
-        return request.redirect('/web?#action=adyen_platforms.adyen_account_action_create')
+        return request.redirect('/web?#action=odoo_payments.adyen_account_action_create')
 
     @odoo_payments_proxy_control
-    @http.route('/adyen_platforms/account_notification', type='json', auth='public', csrf=False)
-    def adyen_platforms_notification(self):
+    @http.route('/odoo_payments/account_notification', type='json', auth='public', csrf=False)
+    def odoo_payments_notification(self):
         data = request.jsonrequest
         _logger.debug('Account notification received: %s', pformat(data))
 
@@ -37,7 +37,7 @@ class AdyenPlatformsController(http.Controller):
         account_sudo.with_context(update_from_adyen=True)._handle_account_notification(data)
 
     @odoo_payments_proxy_control
-    @http.route('/adyen_platforms/transaction_notification', type='json', auth='public', csrf=False)
+    @http.route('/odoo_payments/transaction_notification', type='json', auth='public', csrf=False)
     def adyen_transaction_notification(self):
         data = request.jsonrequest
         _logger.debug('Transaction notification received: %s', pformat(data))

@@ -67,9 +67,9 @@ file_filter = addons/account_tax_python/i18n/<lang>.po
 source_file = addons/account_tax_python/i18n/account_tax_python.pot
 source_lang = en
 
-[odoo-master.adyen_platforms]
-file_filter = addons/adyen_platforms/i18n/<lang>.po
-source_file = addons/adyen_platforms/i18n/adyen_platforms.pot
+[odoo-master.odoo_payments]
+file_filter = addons/odoo_payments/i18n/<lang>.po
+source_file = addons/odoo_payments/i18n/odoo_payments.pot
 source_lang = en
 
 [odoo-master.analytic]
