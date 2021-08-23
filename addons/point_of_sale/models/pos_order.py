@@ -875,15 +875,12 @@ class PosOrderLine(models.Model):
     customer_note = fields.Char('Customer Note', help='This is a note destined to the customer')
     refund_orderline_ids = fields.One2many('pos.order.line', 'refunded_orderline_id', 'Refund Order Lines', help='Orderlines in this field are the lines that refunded this orderline.')
     refunded_orderline_id = fields.Many2one('pos.order.line', 'Refunded Order Line', help='If this orderline is a refund, then the refunded orderline is specified in this field.')
-    refunded_qty = fields.Float('Refunded Quantity', compute='_compute_refund_qtys', help='Number of items refunded in this orderline.')
-    refundable_qty = fields.Float('Refundable Quantity', compute='_compute_refund_qtys', help='Remaining number of items that can still be refunded in this orderline.')
+    refunded_qty = fields.Float('Refunded Quantity', compute='_compute_refund_qty', help='Number of items refunded in this orderline.')
 
     @api.depends('refund_orderline_ids')
-    def _compute_refund_qtys(self):
+    def _compute_refund_qty(self):
         for orderline in self:
             orderline.refunded_qty = -sum(orderline.mapped('refund_orderline_ids.qty'))
-            # TODO jcb -- value should be zero if negative
-            orderline.refundable_qty = orderline.qty - orderline.refunded_qty
 
     def _prepare_refund_data(self, refund_order, PosOrderLineLot):
         """
@@ -991,7 +988,6 @@ class PosOrderLine(models.Model):
             'pack_lot_ids': [[0, 0, lot] for lot in orderline.pack_lot_ids.export_for_ui()],
             'customer_note': orderline.customer_note,
             'refunded_qty': orderline.refunded_qty,
-            'refundable_qty': orderline.refundable_qty,
         }
 
     def export_for_ui(self):

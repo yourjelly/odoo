@@ -1680,7 +1680,6 @@ exports.Orderline = Backbone.Model.extend({
         }
         this.set_customer_note(json.customer_note);
         this.refunded_qty = json.refunded_qty;
-        this.refundable_qty = json.refundable_qty;
     },
     clone: function(){
         var orderline = new exports.Orderline({},{

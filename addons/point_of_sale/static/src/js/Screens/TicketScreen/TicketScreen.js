@@ -165,13 +165,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const order = this.getSelectedSyncedOrder();
             const selectedOrderlineId = this.getSelectedOrderlineId();
             const orderline = order.orderlines.models.find((line) => line.id == selectedOrderlineId);
-            if (!orderline || orderline.refundable_qty <= 0) return;
+            const refundableQty = orderline.quantity - orderline.refunded_qty;
+            if (!orderline || refundableQty <= 0) return;
             const refundState = this._state.refund[order.backendId];
             if (buffer == null || buffer == '') {
                 delete refundState[selectedOrderlineId];
             } else {
                 const quantity = parse.float(buffer);
-                if (quantity > orderline.refundable_qty) {
+                if (quantity > refundableQty) {
                     NumberBuffer.reset();
                     this.showPopup('ErrorPopup', {
                         title: this.env._t('Maximum Exceeded'),
@@ -180,7 +181,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                                 'The requested quantity to be refunded is higher than the ordered quantity. %s is requested while only %s can be refunded.'
                             ),
                             quantity,
-                            orderline.refundable_qty
+                            refundableQty
                         ),
                     });
                 } else {
