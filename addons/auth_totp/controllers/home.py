@@ -6,6 +6,8 @@ from odoo import http, _
 from odoo.exceptions import AccessDenied
 from odoo.http import request
 
+TRUSTED_DEVICE_COOKIE = 'td_id'
+TRUSTED_DEVICE_SCOPE = '2fa_trusted_device'
 
 class Home(odoo.addons.web.controllers.main.Home):
     @http.route(
@@ -21,8 +23,17 @@ class Home(odoo.addons.web.controllers.main.Home):
             return http.redirect_with_hash('/web/login')
 
         error = None
-        if request.httprequest.method == 'POST':
-            user = request.env['res.users'].browse(request.session.pre_uid)
+        user = request.env['res.users'].browse(request.session.pre_uid)
+        if user and request.httprequest.method == 'GET':
+            cookies = request.httprequest.cookies
+            key = cookies.get(TRUSTED_DEVICE_COOKIE)
+            if key is not None:
+                checked_credentials = request.env['res.users.apikeys']._check_credentials(scope=TRUSTED_DEVICE_SCOPE, key=key)
+                if checked_credentials == user.id:
+                    request.session.finalize()
+                    return http.redirect_with_hash(self._login_redirect(request.session.uid, redirect=redirect))
+
+        elif user and request.httprequest.method == 'POST':
             try:
                 with user._assert_can_auth():
                     user._totp_check(int(re.sub(r'\s', '', kwargs['totp_token'])))
@@ -32,7 +43,25 @@ class Home(odoo.addons.web.controllers.main.Home):
                 error = _("Invalid authentication code format.")
             else:
                 request.session.finalize()
-                return http.redirect_with_hash(self._login_redirect(request.session.uid, redirect=redirect))
+                response = http.redirect_with_hash(self._login_redirect(request.session.uid, redirect=redirect))
+                if kwargs.get('remember'):
+                    name = _("%(browser)s on %(platform)s",
+                        browser=request.httprequest.user_agent.browser.capitalize(),
+                        platform=request.httprequest.user_agent.platform.capitalize(),
+                    )
+                    geoip = request.session.get('geoip')
+                    if geoip is not None and len(geoip):
+                        name += " (%s, %s)" % (geoip['city'], geoip['country_name'])
+
+                    key = request.env['res.users.apikeys']._generate(TRUSTED_DEVICE_SCOPE, name)
+                    response.set_cookie(
+                        key=TRUSTED_DEVICE_COOKIE,
+                        value=key,
+                        max_age=90*86400, # 90 days expiration
+                        httponly=True,
+                        samesite='Lax'
+                    )
+                return response
 
         return request.render('auth_totp.auth_totp_form', {
             'error': error,

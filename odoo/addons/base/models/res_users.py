@@ -1582,7 +1582,7 @@ hash_api_key = getattr(KEY_CRYPT_CONTEXT, 'hash', None) or KEY_CRYPT_CONTEXT.enc
 class APIKeysUser(models.Model):
     _inherit = 'res.users'
 
-    api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys")
+    api_key_ids = fields.One2many('res.users.apikeys', 'user_id', string="API Keys", domain=[('scope', '!=', '2fa_trusted_device')])
 
     @property
     def SELF_READABLE_FIELDS(self):
@@ -1655,6 +1655,14 @@ class APIKeys(models.Model):
 
     @check_identity
     def remove(self):
+        return self._remove()
+
+    def _remove(self):
+        """Use the remove() method to remove an API Key. This method implement logic,
+        but won't check the identity (mainly used to remove trusted devices)"""
+        if not self:
+            return {'type': 'ir.actions.act_window_close'}
+
         if self.env.is_system() or self.mapped('user_id') == self.env.user:
             ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
             _logger.info("API key(s) removed: scope: <%s> for '%s' (#%s) from %s",
