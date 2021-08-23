@@ -20,6 +20,16 @@ class PaymentWizard(models.TransientModel):
         ('manual', "Custom payment instructions"),
     ], string="Payment Method", default=_default_payment_method)
 
+    paypal_user_type = fields.Selection([
+        ('new_user', "I don't have a Paypal account"),
+        ('existing_user', 'I have a Paypal account')], string="Paypal User Type", default='new_user')
+    paypal_email_account = fields.Char("Email", default=lambda self: self._get_default_payment_acquirer_onboarding_value('paypal_email_account'))
+    paypal_seller_account = fields.Char("Merchant Account ID", default=lambda self: self._get_default_payment_acquirer_onboarding_value('paypal_seller_account'))
+    paypal_pdt_token = fields.Char("PDT Identity Token", default=lambda self: self._get_default_payment_acquirer_onboarding_value('paypal_pdt_token'))
+
+    stripe_secret_key = fields.Char(default=lambda self: self._get_default_payment_acquirer_onboarding_value('stripe_secret_key'))
+    stripe_publishable_key = fields.Char(default=lambda self: self._get_default_payment_acquirer_onboarding_value('stripe_publishable_key'))
+
     manual_name = fields.Char("Method", default=lambda self: self._get_default_payment_acquirer_onboarding_value('manual_name'))
     journal_name = fields.Char("Bank Name", default=lambda self: self._get_default_payment_acquirer_onboarding_value('journal_name'))
     acc_number = fields.Char("Account Number", default=lambda self: self._get_default_payment_acquirer_onboarding_value('acc_number'))
