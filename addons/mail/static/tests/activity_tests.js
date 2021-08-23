@@ -123,8 +123,7 @@ var activityDateFormat = function (date) {
     return date.toLocaleDateString(moment().locale(), { day: 'numeric', month: 'short' });
 };
 
-QUnit.skip('activity view: simple activity rendering', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('activity view: simple activity rendering', async function (assert) {
     assert.expect(14);
     var activity = await createView({
         View: ActivityView,
@@ -194,16 +193,15 @@ QUnit.skip('activity view: simple activity rendering', async function (assert) {
     activity.destroy();
 });
 
-QUnit.skip('activity view: no content rendering', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('activity view: no content rendering', async function (assert) {
     assert.expect(2);
 
     // reset incompatible setup
-    this.serverData.models['mail.activity'].records = [];
+    this.data['mail.activity'].records = [];
     this.data.task.records.forEach(function (task) {
         task.activity_ids = false;
     });
-    this.serverData.models['mail.activity.type'].records = [];
+    this.data['mail.activity.type'].records = [];
 
     var activity = await createView({
         View: ActivityView,
@@ -227,8 +225,7 @@ QUnit.skip('activity view: no content rendering', async function (assert) {
     activity.destroy();
 });
 
-QUnit.skip('activity view: batch send mail on activity', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('activity view: batch send mail on activity', async function (assert) {
     assert.expect(6);
     var activity = await createView({
         View: ActivityView,
@@ -270,8 +267,7 @@ QUnit.skip('activity view: batch send mail on activity', async function (assert)
     activity.destroy();
 });
 
-QUnit.skip('activity view: activity widget', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('activity view: activity widget', async function (assert) {
     assert.expect(16);
 
     const params = {
@@ -363,8 +359,7 @@ QUnit.skip('activity view: activity widget', async function (assert) {
     activity.destroy();
 });
 
-QUnit.skip("activity view: no group_by_menu and no comparison_menu", async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test("activity view: no group_by_menu and no comparison_menu", async function (assert) {
     assert.expect(4);
 
     serverData.actions = {
@@ -421,8 +416,7 @@ QUnit.skip("activity view: no group_by_menu and no comparison_menu", async funct
     );
 });
 
-QUnit.skip('activity view: search more to schedule an activity for a record of a respecting model', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('activity view: search more to schedule an activity for a record of a respecting model', async function (assert) {
     assert.expect(5);
     _.extend(this.data.task.fields, {
         name: { string: "Name", type: "char" },
@@ -485,8 +479,7 @@ QUnit.skip('activity view: search more to schedule an activity for a record of a
     activity.destroy();
 });
 
-QUnit.skip("Activity view: discard an activity creation dialog", async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test("Activity view: discard an activity creation dialog", async function (assert) {
     assert.expect(2);
 
     serverData.actions = {
@@ -538,8 +531,7 @@ QUnit.skip("Activity view: discard an activity creation dialog", async function 
     assert.containsNone($, ".modal.o_technical_modal", "Activity Modal should be closed");
 });
 
-QUnit.skip('Activity view: many2one_avatar_user widget in activity view', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('Activity view: many2one_avatar_user widget in activity view', async function (assert) {
     assert.expect(3);
 
     const taskModel = serverData.models.task;
@@ -592,8 +584,7 @@ QUnit.skip('Activity view: many2one_avatar_user widget in activity view', async 
         "should not have text on many2one_avatar_user if onlyImage node option is passed");
 });
 
-QUnit.skip("Activity view: on_destroy_callback doesn't crash", async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test("Activity view: on_destroy_callback doesn't crash", async function (assert) {
     assert.expect(3);
 
     const params = {
@@ -629,8 +620,7 @@ QUnit.skip("Activity view: on_destroy_callback doesn't crash", async function (a
     activity.destroy();
 });
 
-QUnit.skip("Schedule activity dialog uses the same search view as activity view", async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test("Schedule activity dialog uses the same search view as activity view", async function (assert) {
     assert.expect(8);
     serverData.models.task.records = [];
     serverData.views = {
@@ -696,8 +686,7 @@ QUnit.skip("Schedule activity dialog uses the same search view as activity view"
     ])
 });
 
-QUnit.skip('Activity view: apply progressbar filter', async function (assert) {
-    // skip: need to adapt to use the start from test utils to actually start a view
+QUnit.test('Activity view: apply progressbar filter', async function (assert) {
     assert.expect(9);
 
     serverData.actions = {

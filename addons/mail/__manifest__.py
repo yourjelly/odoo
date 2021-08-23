@@ -83,6 +83,8 @@
             'mail/static/src/utils/test_utils.js',
             'mail/static/tests/helpers/mock_models.js',
             'mail/static/tests/helpers/mock_server.js',
+            'mail/static/tests/legacy/helpers/mock_models.js',
+            'mail/static/tests/legacy/helpers/mock_server.js',
         ],
         'web.qunit_suite_tests': [
             'mail/static/tests/*.js',
