@@ -2,7 +2,7 @@
 
 from werkzeug import urls
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -10,24 +10,37 @@ class PaymentAcquirer(models.Model):
     _inherit = 'payment.acquirer'
 
     provider = fields.Selection(
-        selection_add=[('odoo', "Odoo Payments")], ondelete={'odoo': 'set default'})
+        selection_add=[('odoo', "Odoo Payments")], ondelete={'odoo': 'set default'}
+    )
     odoo_adyen_account_id = fields.Many2one(
-        related='company_id.adyen_account_id', required_if_provider='odoo')
+        related='company_id.adyen_account_id', required_if_provider='odoo'
+    )
 
     @api.constrains('state')
-    def _check_adyen_account_state(self):
+    def _check_state_with_adyen_account(self):
         for acquirer in self.filtered(lambda acq: acq.provider == 'odoo'):
             adyen_account = acquirer.odoo_adyen_account_id
-            if acquirer.state == 'enabled':
+            if not adyen_account:
+                if acquirer.state != 'disabled':
+                    raise ValidationError(
+                        _("You must first create an account before enabling the acquirer.")
+                    )
+            elif acquirer.state == 'enabled':
                 if adyen_account.is_test:
-                    raise ValidationError("You cannot enable the acquirer with a test account")
-                elif not adyen_account.account_status == 'active':
-                    raise ValidationError("You cannot enable the acquirer with a disabled account")
+                    raise ValidationError(_("You cannot enable the acquirer with a test account."))
+                elif adyen_account.account_status != 'active':
+                    raise ValidationError(
+                        _("Your account must first be activated before enabling the acquirer.")
+                    )
             elif acquirer.state == 'test':
                 if not adyen_account.is_test:
-                    raise ValidationError("You cannot make test payments with a live account")
-                elif not adyen_account.account_status == 'active':
-                    raise ValidationError("You cannot make payments with a disabled account")
+                    raise ValidationError(
+                        _("You cannot set the acquirer in test mode with a live account.")
+                    )
+                elif adyen_account.account_status != 'active':
+                    raise ValidationError(
+                        _("Your account must first be activated before enabling the acquirer.")
+                    )
 
     def odoo_create_adyen_account(self):
         return self.env['adyen.account'].action_create_redirect()
