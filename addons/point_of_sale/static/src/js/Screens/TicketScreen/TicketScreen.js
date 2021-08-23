@@ -49,7 +49,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             useListener('click-order-line', this._onClickOrderline);
             useListener('update-selected-orderline', this._onUpdateSelectedOrderline);
             useListener('do-refund', this._onDoRefund);
-            useAutofocus({ selector: '.search input'});
+            useAutofocus({ selector: '.search input' });
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
                 triggerAtInput: 'update-selected-orderline',
