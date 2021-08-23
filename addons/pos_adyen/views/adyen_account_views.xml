@@ -3,7 +3,7 @@
     <record id="adyen_account_view_form" model="ir.ui.view">
         <field name="name">adyen.account.view.form.inherit.pos.adyen</field>
         <field name="model">adyen.account</field>
-        <field name="inherit_id" ref="adyen_platforms.adyen_account_view_form"/>
+        <field name="inherit_id" ref="odoo_payments.adyen_account_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <button name="action_order_terminal" string="Order a Terminal" class="oe_highlight" type="object" attrs="{'invisible': [('adyen_uuid', '=', False)]}"/>

@@ -16,8 +16,8 @@ from odoo.http import request
 from odoo.osv import expression
 from odoo.tools import format_amount, format_datetime
 
-from odoo.addons.adyen_platforms.util import AdyenProxyAuth, to_major_currency
 from odoo.addons.mail.tools import mail_validation
+from odoo.addons.odoo_payments.util import AdyenProxyAuth, to_major_currency
 from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
@@ -233,7 +233,7 @@ class AdyenAccount(models.Model):
                     'message': kyc.status_message,
                 })
 
-            account.kyc_status_message = self.env['ir.qweb']._render('adyen_platforms.kyc_status_message', {
+            account.kyc_status_message = self.env['ir.qweb']._render('odoo_payments.kyc_status_message', {
                 'checks': checks
             })
 
@@ -316,8 +316,8 @@ class AdyenAccount(models.Model):
                 'res_id': self.env.company.adyen_account_id.id,
                 'type': 'ir.actions.act_window',
             }
-        return_url = url_join(self.env.company.get_base_url(), 'adyen_platforms/create_account')
-        onboarding_url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.onboarding_url')
+        return_url = url_join(self.env.company.get_base_url(), 'odoo_payments/create_account')
+        onboarding_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
         return {
             'type': 'ir.actions.act_url',
             'url': url_join(onboarding_url, 'get_creation_token?return_url=%s' % return_url),
@@ -325,13 +325,13 @@ class AdyenAccount(models.Model):
         }
 
     def action_show_transactions(self):
-        action = self.env['ir.actions.actions']._for_xml_id('adyen_platforms.adyen_transaction_action')
+        action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_transaction_action')
         action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
         return action
 
     def _upload_photo_id(self, document_type, content, filename):
         # FIXME ANVFE wtf is this test mode config param ???
-        test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
+        test_mode = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.test_mode')
         self._adyen_rpc('v1/upload_document', {
             'documentDetail': {
                 'accountHolderCode': self.account_holder_code,
@@ -423,7 +423,7 @@ class AdyenAccount(models.Model):
         adyen_data = adyen_data or {}
         if operation == 'v1/create_account_holder':
             # Onboarding first passes through Internal odoo.com first
-            url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.onboarding_url')
+            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
             params = {
                 'creation_token': request.session.get('adyen_creation_token'),
                 'base_url': self.get_base_url(),
@@ -432,7 +432,7 @@ class AdyenAccount(models.Model):
             }
             auth = None
         else:
-            url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.proxy_url')
+            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
             params = {
                 'adyen_uuid': self.adyen_uuid,
                 'adyen_data': adyen_data,
@@ -535,7 +535,7 @@ class AdyenAccount(models.Model):
                 if account_event:
                     reasons.append(account_event)
 
-            status_message = self.env['ir.qweb']._render('adyen_platforms.status_message', {
+            status_message = self.env['ir.qweb']._render('odoo_payments.status_message', {
                 'message': content.get('reason'),
                 'reasons': reasons,
             })

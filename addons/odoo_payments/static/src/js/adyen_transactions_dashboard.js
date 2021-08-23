@@ -1,4 +1,4 @@
-odoo.define('adyen_platforms.transactions.dashboard', function (require) {
+odoo.define('odoo_payments.transactions.dashboard', function (require) {
     "use strict";
 
     var ListRenderer = require('web.ListRenderer');

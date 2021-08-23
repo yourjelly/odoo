@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     <!-- FIXME ANVFE this rule seems strange, to verify-->
-    <record id="adyen_platforms_account_closed" model="ir.rule">
+    <record id="odoo_payments_account_closed" model="ir.rule">
         <field name="model_id" ref="model_adyen_account"/>
         <field name="name">Readonly: Closed Accounts</field>
         <field name="domain_force">[('account_status', '!=', 'closed')]</field>
@@ -15,38 +15,38 @@
 
     <record id="account_company_rule" model="ir.rule">
         <field name="name">Access accounts in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_account"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_account"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
     <record id="transaction_company_rule" model="ir.rule">
         <field name="name">Access transactions in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_transaction"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_transaction"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
     <record id="transaction_payout_company_rule" model="ir.rule">
         <field name="name">Access transactions in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_transaction_payout"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_transaction_payout"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
     <record id="bank_accounts_company_rule" model="ir.rule">
         <field name="name">Access bank accounts in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_bank_account"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_bank_account"/>
         <field name="domain_force">[('adyen_account_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="shareholders_company_rule" model="ir.rule">
         <field name="name">Access shareholders in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_shareholder"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_shareholder"/>
         <field name="domain_force">[('adyen_account_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="kyc_company_rule" model="ir.rule">
         <field name="name">Access KYC checks in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_kyc"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_kyc"/>
         <field name="domain_force">[('adyen_account_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="transaction_status_company_rule" model="ir.rule">
         <field name="name">Access transaction status updates in own companies only</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_transaction_status"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_transaction_status"/>
         <field name="domain_force">[('adyen_transaction_id.company_id', 'in', company_ids)]</field>
     </record>
 </odoo>

@@ -47,7 +47,7 @@ class PaymentAcquirer(models.Model):
 
     def _odoo_get_api_url(self):
         self.ensure_one()
-        proxy_url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.proxy_url')
+        proxy_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
         return urls.url_join(proxy_url, 'v1/pay_by_link')
 
     def _odoo_compute_shopper_reference(self, partner_id):

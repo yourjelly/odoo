@@ -12,7 +12,7 @@ class AccountMove(models.Model):
         if any(provider != 'odoo' for provider in self.transaction_ids.mapped('provider')):
             return super().action_view_payment_transactions()
 
-        action = self.env['ir.actions.act_window']._for_xml_id('adyen_platforms.adyen_transaction_action')
+        action = self.env['ir.actions.act_window']._for_xml_id('odoo_payments.adyen_transaction_action')
         if len(self.adyen_transaction_ids) == 1:
             action['view_mode'] = 'form'
             action['res_id'] = self.adyen_transaction_ids.id

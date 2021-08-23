@@ -24,7 +24,7 @@ class AdyenAccount(models.Model):
             raise ValidationError(_('Please create a store first.'))
 
         store_uuids = ','.join(self.store_ids.mapped('store_uuid'))
-        onboarding_url = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.onboarding_url')
+        onboarding_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
         return {
             'type': 'ir.actions.act_url',
             'target': 'new',

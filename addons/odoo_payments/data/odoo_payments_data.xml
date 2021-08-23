@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <record model="ir.config_parameter" id="adyen_platforms_proxy_url">
-            <field name="key">adyen_platforms.proxy_url</field>
+        <record model="ir.config_parameter" id="odoo_payments_proxy_url">
+            <field name="key">odoo_payments.proxy_url</field>
             <field name="value">https://payment-adyen.odoo.com/payment_proxy_adyen/</field>
         </record>
 
-        <record model="ir.config_parameter" id="adyen_platforms_onboarding_url">
-            <field name="key">adyen_platforms.onboarding_url</field>
+        <record model="ir.config_parameter" id="odoo_payments_onboarding_url">
+            <field name="key">odoo_payments.onboarding_url</field>
             <field name="value">https://www.odoo.com/odoo_adyen/</field>
         </record>
 

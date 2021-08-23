@@ -7,8 +7,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.mimetypes import guess_mimetype
 
-from odoo.addons.adyen_platforms.models.adyen_kyc import ADYEN_KYC_STATUS
-from odoo.addons.adyen_platforms.models.adyen_mixins import ADYEN_AVAILABLE_COUNTRIES
+from odoo.addons.odoo_payments.models.adyen_kyc import ADYEN_KYC_STATUS
+from odoo.addons.odoo_payments.models.adyen_mixins import ADYEN_AVAILABLE_COUNTRIES
 
 
 class AdyenBankAccount(models.Model):
@@ -185,7 +185,7 @@ class AdyenBankAccount(models.Model):
             raise ValidationError(_('Maximum allowed size for bank statements: 4MB.'))
 
         # FIXME ANVFE wtf is this test mode config param ???
-        test_mode = self.env['ir.config_parameter'].sudo().get_param('adyen_platforms.test_mode')
+        test_mode = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.test_mode')
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
             'documentDetail': {
                 'accountHolderCode': self.adyen_account_id.account_holder_code,

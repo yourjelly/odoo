@@ -202,7 +202,7 @@
 
     <record id="adyen_account_action" model="ir.actions.server">
         <field name="name">Account Configuration</field>
-        <field name="model_id" ref="adyen_platforms.model_adyen_account" />
+        <field name="model_id" ref="odoo_payments.model_adyen_account" />
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">

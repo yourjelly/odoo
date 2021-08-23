@@ -1,4 +1,4 @@
-odoo.define('adyen_platforms.account_views', function (require) {
+odoo.define('odoo_payments.account_views', function (require) {
 "use strict";
 
 const core = require('web.core');

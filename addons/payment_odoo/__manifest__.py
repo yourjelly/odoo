@@ -7,7 +7,7 @@
     'sequence': 330,
     'summary': 'Payment Acquirer: Odoo Payments',
     'description': """Odoo Payments""",
-    'depends': ['payment', 'adyen_platforms'],
+    'depends': ['payment', 'odoo_payments'],
     'data': [
         'views/adyen_transaction_views.xml',
         'views/payment_acquirer_views.xml',
