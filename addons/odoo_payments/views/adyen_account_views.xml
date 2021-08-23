@@ -30,9 +30,10 @@
                             </div>
                         </button>
                     </div>
-                    <widget name="web_ribbon" title="Test Mode"
-                        bg_color="bg-warning"
-                        attrs="{'invisible': ['|', ('is_test', '=', 'False'), ('adyen_uuid', '=', False)]}"/>
+                    <widget name="web_ribbon"
+                            title="Test Mode"
+                            bg_color="bg-warning"
+                            attrs="{'invisible': ['|', ('is_test', '=', False), ('adyen_uuid', '=', False)]}"/>
 
                     <div class="alert alert-danger" role="alert" attrs="{'invisible': [('account_status', '!=', 'closed')]}">
                         <p>Your account is Closed.</p>
