@@ -64,9 +64,6 @@ export class MockModels {
                 },
             },
             debug: undefined, // boolean
-            menus: {
-                200001: { id: 200001, children: [], name: "Discuss", appID: "mail", actionID: 200001, xmlid: "mail.menu_root_discuss" },
-            },
             models: {
                 'ir.attachment': {
                     fields: {

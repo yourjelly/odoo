@@ -9,6 +9,18 @@ patch(MockServer.prototype, "mail", {
     /**
      * @override
      */
+    mockLoadMenus() {
+        let menus = this._super.apply(this, arguments);
+        if (!this.menus)
+            menus = {
+                ...menus,
+                200001: { id: 200001, children: [], name: "Discuss", appID: "mail", actionID: 200001, xmlid: "mail.menu_root_discuss" },
+        };
+        return menus;
+    },
+    /**
+     * @override
+     */
     async performRPC(route, args) {
         // routes
         if (route === '/web/binary/upload_attachment') {
