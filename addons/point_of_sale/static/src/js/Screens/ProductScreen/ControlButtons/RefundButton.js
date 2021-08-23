@@ -21,8 +21,11 @@ odoo.define('point_of_sale.RefundButton', function (require) {
         }
         onClick() {
             const customer = this.env.pos.get_order().get_client();
-            const searchDetails = customer ? { fieldName: 'CUSTOMER', searchTerm: customer.name } : null
-            this.showScreen('TicketScreen', { filter: 'SYNCED', orderToPutRefund: this.env.pos.get_order(), searchDetails });
+            const searchDetails = customer ? { fieldName: 'CUSTOMER', searchTerm: customer.name } : {};
+            this.showScreen('TicketScreen', {
+                ui: { filter: 'SYNCED', searchDetails },
+                orderToPutRefund: this.env.pos.get_order(),
+            });
         }
     }
     RefundButton.template = 'point_of_sale.RefundButton';
