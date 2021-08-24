@@ -222,9 +222,6 @@
                                         <a class="dropdown-item" role="menuitem" type="edit">
                                             Edit
                                         </a>
-                                        <a class="dropdown-item" name="action_view_slides" role="menuitem" type="object">
-                                            Lessons
-                                        </a>
                                         <a class="dropdown-item" name="action_channel_invite" role="menuitem" type="object">
                                             Invite
                                         </a>
@@ -249,7 +246,7 @@
                                         </div>
                                         <div class="col-6 o_kanban_primary_right">
                                             <div class="d-flex" t-if="record.rating_count.raw_value">
-                                                <a name="action_view_ratings" type="object" class="mr-auto"><field name="rating_count"/> reviews</a>
+                                                <a name="action_view_ratings" type="object" class="mr-auto"><field name="rating_count"/> Reviews</a>
                                                 <span><field name="rating_avg_stars"/> / 5</span>
                                             </div>
                                             <div class="d-flex">
@@ -297,19 +294,23 @@
             <field name="view_id" ref="slide_channel_view_kanban"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Create a course
+                    <strong>Create a course</strong>
+                    Your eLearning platform starts here!
+                    Upload content, set up rewards, manage attendees...
                 </p>
             </field>
         </record>
 
         <record id="slide_channel_action_report" model="ir.actions.act_window">
-            <field name="name">Courses</field>
+            <field name="name">All Courses</field>
             <field name="res_model">slide.channel</field>
             <field name="view_mode">tree,graph,form</field>
             <field name="view_id" ref="slide_channel_view_tree_report"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Create a course
+                    <strong>Create a course</strong>
+                    Your eLearning platform starts here!
+                    Upload content, set up rewards, manage attendees...
                 </p>
             </field>
         </record>
