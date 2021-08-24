@@ -184,6 +184,10 @@ class Survey(http.Controller):
             return request.redirect("/")
         return request.redirect('/survey/start/%s?%s' % (survey_sudo.access_token, keep_query('*', answer_token=retry_answer_sudo.access_token)))
 
+    @http.route('/survey/get_server_timer', type='json', auth='public',)
+    def server_time(self):
+        return fields.Datetime.now()
+
     def _prepare_retry_additional_values(self, answer):
         return {
             'deadline': answer.deadline,
