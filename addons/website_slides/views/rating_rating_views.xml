@@ -79,7 +79,7 @@
         <field name="model">rating.rating</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <graph string="Rating Average" type="bar" sample="1">
+            <graph string="Average of Reviews" type="bar" sample="1">
                 <field name="res_name" type="row"/>
                 <field name="rating" type="measure"/>
             </graph>
@@ -100,7 +100,7 @@
     </record>
 
     <record id="rating_rating_action_slide_channel" model="ir.actions.act_window">
-        <field name="name">Rating</field>
+        <field name="name">Reviews</field>
         <field name="res_model">rating.rating</field>
         <field name="view_mode">kanban,tree,graph,pivot,form</field>
         <field name="domain">[('consumed', '=', True), ('res_model', '=', 'slide.channel')]</field>
@@ -109,20 +109,20 @@
         <field name="view_id" ref="rating_rating_view_kanban_slide_channel"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
-                There are no ratings for these courses at the moment
+                There are no reviews for these courses at the moment
             </p>
         </field>
     </record>
 
     <record id="rating_rating_action_slide_channel_report" model="ir.actions.act_window">
-        <field name="name">Rating</field>
+        <field name="name">Reviews</field>
         <field name="res_model">rating.rating</field>
         <field name="domain">[('consumed', '=', True), ('res_model', '=', 'slide.channel')]</field>
         <field name="context">{}</field>
         <field name="search_view_id" ref="rating_rating_view_search_slide_channel"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
-                There are no ratings for these courses at the moment
+                There are no reviews for these courses at the moment
             </p>
         </field>
     </record>
