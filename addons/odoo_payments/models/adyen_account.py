@@ -96,6 +96,7 @@ class AdyenAccount(models.Model):
     transaction_ids = fields.One2many('adyen.transaction', 'adyen_account_id', string='Transactions')
     transactions_count = fields.Integer(compute='_compute_transactions_count')
     transaction_payout_ids = fields.One2many('adyen.transaction.payout', 'adyen_account_id')
+    payout_count = fields.Integer(compute='_compute_payout_count')
 
     entity_type = fields.Selection([
         ('business', 'Business'),
@@ -110,14 +111,14 @@ class AdyenAccount(models.Model):
         ('weekly', 'Weekly'),
         ('biweekly', 'Bi-weekly'),
         ('monthly', 'Monthly'),
-    ], default='biweekly', required=True, string='Payout Schedule')
+    ], default='biweekly', required=True, string='Payout Schedule', tracking=True)
     next_scheduled_payout = fields.Datetime('Next Scheduled Payout', readonly=True)
     last_sync_date = fields.Datetime(default=fields.Datetime.now)
 
     # Contact Info
     full_name = fields.Char(compute='_compute_full_name')
-    email = fields.Char('Email', required=True)
-    phone_number = fields.Char('Phone Number', required=True)
+    email = fields.Char('Email', required=True, tracking=True)
+    phone_number = fields.Char('Phone Number', required=True, tracking=True)
 
     # Individual
     first_name = fields.Char('First Name')
@@ -197,6 +198,11 @@ class AdyenAccount(models.Model):
     def _compute_transactions_count(self):
         for adyen_account_id in self:
             adyen_account_id.transactions_count = len(adyen_account_id.transaction_ids)
+
+    @api.depends('transaction_payout_ids')
+    def _compute_payout_count(self):
+        for adyen_account_id in self:
+            adyen_account_id.payout_count = len(adyen_account_id.transaction_payout_ids)
 
     @api.depends('first_name', 'last_name', 'legal_business_name')
     def _compute_full_name(self):
@@ -326,6 +332,11 @@ class AdyenAccount(models.Model):
 
     def action_show_transactions(self):
         action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_transaction_action')
+        action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
+        return action
+
+    def action_show_payouts(self):
+        action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_balance_action')
         action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
         return action
 

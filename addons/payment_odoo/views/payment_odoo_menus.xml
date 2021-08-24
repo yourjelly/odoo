@@ -3,8 +3,8 @@
 
     <menuitem id="root_adyen_menu"
         name="Odoo Payments"
-        parent="account.root_payment_menu"
-        sequence="10">
+        parent="account.menu_finance_configuration"
+        sequence="4">
         <menuitem id="menu_adyen_transaction"
             action="odoo_payments.adyen_transaction_action"/>
         <menuitem id="menu_adyen_balance"
