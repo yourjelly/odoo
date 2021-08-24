@@ -10,8 +10,9 @@
                     <button name="action_pos_order_invoice" string="Invoice" type="object"
                             attrs="{'invisible': ['|', ('invoice_group', '=', False), ('state','!=','paid')]}"/>
                     <button name="refund" string="Return Products" type="object"
-                        attrs="{'invisible':[('state','=','draft')]}"/>
+                        attrs="{'invisible':['|', ('state','=','draft'), ('has_refundable_lines', '=', False)]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,paid,done" />
+                    <field name="has_refundable_lines" invisible="1" />
                 </header>
                 <sheet>
                 <field name="failed_pickings" invisible="1"/>

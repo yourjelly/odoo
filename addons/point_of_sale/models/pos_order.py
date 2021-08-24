@@ -9,7 +9,7 @@ import pytz
 import re
 
 from odoo import api, fields, models, tools, _
-from odoo.tools import float_is_zero, float_round, float_repr
+from odoo.tools import float_is_zero, float_round, float_repr, float_compare
 from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
 from odoo.osv.expression import AND
@@ -289,6 +289,7 @@ class PosOrder(models.Model):
     refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_related_fields')
     is_refunded = fields.Boolean(compute='_compute_refund_related_fields')
     refunded_order_ids = fields.Many2many('pos.order', compute='_compute_refund_related_fields')
+    has_refundable_lines = fields.Boolean('Has Refundable Lines', compute='_compute_has_refundable_lines')
 
     @api.depends('lines.refund_orderline_ids', 'lines.refunded_orderline_id')
     def _compute_refund_related_fields(self):
@@ -296,6 +297,12 @@ class PosOrder(models.Model):
             order.refund_orders_count = len(order.mapped('lines.refund_orderline_ids.order_id'))
             order.is_refunded = order.refund_orders_count > 0
             order.refunded_order_ids = order.mapped('lines.refunded_orderline_id.order_id')
+
+    api.depends('lines.refunded_qty', 'lines.qty')
+    def _compute_has_refundable_lines(self):
+        digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for order in self:
+            order.has_refundable_lines = any([float_compare(line.qty, line.refunded_qty, digits) > 0 for line in order.lines])
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
