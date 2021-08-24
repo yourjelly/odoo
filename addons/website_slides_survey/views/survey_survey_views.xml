@@ -8,7 +8,11 @@
         <field name="context">{'default_certification': True, 'default_scoring_type': 'scoring_with_answers'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Add a new certification
+                Create a Certification
+            </p>
+            <p>
+                Assess the level of comprehension of your attendees 
+                <br/>and send them a document if they pass the test.
             </p>
         </field>
     </record>

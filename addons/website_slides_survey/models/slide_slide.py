@@ -37,7 +37,7 @@ class Slide(models.Model):
     nbr_certification = fields.Integer("Number of Certifications", compute='_compute_slides_statistics', store=True)
 
     _sql_constraints = [
-        ('check_survey_id', "CHECK(slide_type != 'certification' OR survey_id IS NOT NULL)", "A slide of type 'certification' requires a certification."),
+        ('check_survey_id', "CHECK(slide_type != 'certification' OR survey_id IS NOT NULL)", f"The Certification {survey_id} cannot be deleted because it is still used by the Course {survey_id}."),
         ('check_certification_preview', "CHECK(slide_type != 'certification' OR is_preview = False)", "A slide of type certification cannot be previewed."),
     ]
 

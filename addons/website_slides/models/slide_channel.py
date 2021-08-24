@@ -116,9 +116,9 @@ class Channel(models.Model):
         ('latest', 'Latest Published'),
         ('most_voted', 'Most Voted'),
         ('most_viewed', 'Most Viewed'),
-        ('specific', 'Specific'),
+        ('specific', 'Select Manually'),
         ('none', 'None')],
-        string="Promoted Content", default='latest', required=False,
+        string="Featured Content", default='latest', required=False,
         help='Depending the promote strategy, a slide will appear on the top of the course\'s page :\n'
              ' * Latest Published : the slide created last.\n'
              ' * Most Voted : the slide which has to most votes.\n'
@@ -141,12 +141,10 @@ class Channel(models.Model):
     # configuration
     allow_comment = fields.Boolean(
         "Allow rating on Course", default=True,
-        help="If checked it allows members to either:\n"
-             " * like content and post comments on documentation course;\n"
-             " * post comment and review on training course;")
+        help="Allow Attendees to like and comment your content and to submit reviews on your course.")
     publish_template_id = fields.Many2one(
         'mail.template', string='New Content Email',
-        help="Email template to send slide publication through email",
+        help="Defines the email your Attendees will receive each time you upload new content.",
         default=lambda self: self.env['ir.model.data'].xmlid_to_res_id('website_slides.slide_template_published'))
     share_template_id = fields.Many2one(
         'mail.template', string='Share Template',
@@ -155,15 +153,15 @@ class Channel(models.Model):
     enroll = fields.Selection([
         ('public', 'Public'), ('invite', 'On Invitation')],
         default='public', string='Enroll Policy', required=True,
-        help='Condition to enroll: everyone, on invite, on payment (sale bridge).')
+        help='Defines who can enroll into your Course.')
     enroll_msg = fields.Html(
         'Enroll Message', help="Message explaining the enroll process",
         default=_get_default_enroll_msg, translate=tools.html_translate, sanitize_attributes=False)
     enroll_group_ids = fields.Many2many('res.groups', string='Auto Enroll Groups', help="Members of those groups are automatically added as members of the channel.")
     visibility = fields.Selection([
-        ('public', 'Public'), ('members', 'Members Only')],
+        ('public', 'Open To All'), ('members', 'Members Only')],
         default='public', string='Visibility', required=True,
-        help='Applied directly as ACLs. Allow to hide channels and their content for non members.')
+        help='Defines who can access your courses and their content.')
     partner_ids = fields.Many2many(
         'res.partner', 'slide_channel_partner', 'channel_id', 'partner_id',
         string='Members', help="All members of the channel.", context={'active_test': False}, copy=False, depends=['channel_partner_ids'])

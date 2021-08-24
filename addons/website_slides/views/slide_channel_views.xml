@@ -14,11 +14,19 @@
                         <div class="oe_button_box" name="button_box">
                             <button name="action_view_slides"
                                 type="object"
-                                icon="fa-files-o"
+                                icon="fa-eye"
                                 class="oe_stat_button"
                                 groups="website_slides.group_website_slides_officer">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_value"><field name="total_views" nolabel="1"/> Visits</span>
+                                </div>
+                            </button>
+                            <button name="action_view_slides"
+                                type="object"
+                                icon="fa-files-o"
+                                class="oe_stat_button"
+                                groups="website_slides.group_website_slides_officer">
+                                <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_value"><field name="total_slides" nolabel="1"/> Contents</span>
                                 </div>
                             </button>
@@ -41,7 +49,7 @@
                             </button>
                              <button name="action_view_ratings"
                                 type="object"
-                                icon="fa-star"
+                                icon="fa-star-half-o"
                                 class="oe_stat_button"
                                 groups="website_slides.group_website_slides_officer"
                                 attrs="{'invisible': [('allow_comment', '=', False)]}">
@@ -112,6 +120,7 @@
                                         <field name="promoted_slide_id"
                                                attrs="{'invisible': ['|', ('channel_type', '=', 'training'), ('promote_strategy', '!=', 'specific')],
                                                        'required': [('channel_type', '!=', 'training'), ('promote_strategy', '=', 'specific')]}"
+                                               string="Content"
                                                domain="[('channel_id', '=', active_id), ('is_category', '=', False)]"/>
                                     </group>
                                 </group>
@@ -288,28 +297,32 @@
         </record>
 
         <record id="slide_channel_action_overview" model="ir.actions.act_window">
-            <field name="name">eLearning Overview</field>
+            <field name="name">All Courses</field>
             <field name="res_model">slide.channel</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="view_id" ref="slide_channel_view_kanban"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     <strong>Create a course</strong>
-                    Your eLearning platform starts here!
+                </p>
+                <p>
+                    Your eLearning platform starts here!<br/>
                     Upload content, set up rewards, manage attendees...
                 </p>
             </field>
         </record>
 
         <record id="slide_channel_action_report" model="ir.actions.act_window">
-            <field name="name">All Courses</field>
+            <field name="name">Courses</field>
             <field name="res_model">slide.channel</field>
             <field name="view_mode">tree,graph,form</field>
             <field name="view_id" ref="slide_channel_view_tree_report"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     <strong>Create a course</strong>
-                    Your eLearning platform starts here!
+                </p>
+                <p>
+                    Your eLearning platform starts here!<br/>
                     Upload content, set up rewards, manage attendees...
                 </p>
             </field>
