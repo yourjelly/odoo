@@ -330,21 +330,25 @@
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     <strong>Create a course</strong>
-                    Your eLearning platform starts here!
+                </p>
+                <p>
+                    Your eLearning platform starts here!<br/>
                     Upload content, set up rewards, manage attendees...
                 </p>
             </field>
         </record>
 
         <record id="slide_channel_action_report" model="ir.actions.act_window">
-            <field name="name">All Courses</field>
+            <field name="name">Courses</field>
             <field name="res_model">slide.channel</field>
             <field name="view_mode">dashboard,pivot,tree,graph,form</field>
             <field name="view_id" ref="slide_channel_dashboard"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     <strong>Create a course</strong>
-                    Your eLearning platform starts here!
+                </p>
+                <p>
+                    Your eLearning platform starts here!<br/>
                     Upload content, set up rewards, manage attendees...
                 </p>
             </field>
