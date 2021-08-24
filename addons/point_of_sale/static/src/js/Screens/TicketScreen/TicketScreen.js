@@ -107,6 +107,12 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 } else {
                     this._state.ui.selectedSyncedOrderId = clickedOrder.backendId;
                 }
+                if (!this.getSelectedOrderlineId()) {
+                    const firstLine = clickedOrder.get_orderlines()[0];
+                    if (firstLine) {
+                        this._state.ui.selectedOrderlineIds[clickedOrder.backendId] = firstLine.id;
+                    }
+                }
                 NumberBuffer.reset();
             } else {
                 this._setOrder(clickedOrder);
