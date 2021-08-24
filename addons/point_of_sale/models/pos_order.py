@@ -898,7 +898,7 @@ class PosOrderLine(models.Model):
         self.ensure_one()
         return {
             'name': self.name + _(' REFUND'),
-            'qty': -self.qty,
+            'qty': -(self.qty - self.refunded_qty),
             'order_id': refund_order.id,
             'price_subtotal': -self.price_subtotal,
             'price_subtotal_incl': -self.price_subtotal_incl,
