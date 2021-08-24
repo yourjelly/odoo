@@ -183,7 +183,7 @@
             <field name="name">forum.post.list</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
-                <tree string="Forum Posts">
+                <tree string="Forum Posts" create="0">
                     <field name="name"/>
                     <field name="active" invisible="1"/>
                     <field name="forum_id"/>
@@ -200,7 +200,7 @@
             <field name="name">forum.post.form</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
-                <form string="Forum Post">
+                <form string="Forum Post" create="0">
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button type="object" class="oe_stat_button" icon="fa-globe" name="go_to_website">
@@ -212,7 +212,7 @@
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                         <label for="name"/>
                         <h1>
-                            <field name="name" placeholder="e.g. Who to do this particular thing?"/>
+                            <field name="name" placeholder="e.g. 'When should I plant my tomatoes?'"/>
                         </h1>
                         <group>
                             <group name="forum_details">

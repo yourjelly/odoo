@@ -13,7 +13,7 @@
                             </li>
                             <li t-if="view_user" class="breadcrumb-item active">
                                 <a><t t-esc="view_user"/></a>
-                            </li>
+                            </li>   
                         </ol>
                     </nav>
 
@@ -22,11 +22,11 @@
                         <form t-attf-action="/profile/users" role="search" method="get">
                             <div class="input-group o_wprofile_course_nav_search ml-1 position-relative">
                                 <span class="input-group-prepend">
-                                    <button class="btn btn-link text-white rounded-0 pr-1" type="submit" aria-label="Search" title="Search">
-                                        <i class="fa fa-search"></i>
+                                    <button class="btn btn-link text-white border-1 rounded-0 pr-1" type="submit" aria-label="Search" title="Search" style="margin-right: 10px">
+                                        <i class="fa fa-search border-1"></i>
                                     </button>
                                 </span>
-                                <input type="text" class="form-control border-0 rounded-0 bg-transparent text-white" name="search" placeholder="Search users"/>
+                                <input type="text" class="form-control border-0 rounded-0 bg-transparent text-white" name="search" placeholder="Search users" style="margin-left: auto"/>
                             </div>
                         </form>
                     </div>

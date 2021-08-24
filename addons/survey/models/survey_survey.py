@@ -45,7 +45,7 @@ class Survey(models.Model):
         return False  # could not generate a code
 
     # description
-    title = fields.Char('Survey Title', required=True, translate=True)
+    title = fields.Char(required=True, translate=True)
     color = fields.Integer('Color Index', default=0)
     description = fields.Html(
         "Description", translate=True, sanitize=False,  # TDE FIXME: find a way to authorize videos

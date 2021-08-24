@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from tabnanny import check
+from xml.dom import ValidationErr
+from odoo import api, fields, models, exceptions
 
 
 class SlidePartnerRelation(models.Model):
@@ -37,10 +39,10 @@ class Slide(models.Model):
     nbr_certification = fields.Integer("Number of Certifications", compute='_compute_slides_statistics', store=True)
 
     _sql_constraints = [
-        ('check_survey_id', "CHECK(slide_type != 'certification' OR survey_id IS NOT NULL)", "A slide of type 'certification' requires a certification."),
+        ('check_survey_id', "CHECK(slide_type != 'certification' OR survey_id IS NOT NULL)", "The certification cannot be deleted because it is still used by a course."),
         ('check_certification_preview', "CHECK(slide_type != 'certification' OR is_preview = False)", "A slide of type certification cannot be previewed."),
     ]
-
+                
     @api.onchange('survey_id')
     def _on_change_survey_id(self):
         if self.survey_id:
@@ -61,7 +63,13 @@ class Slide(models.Model):
         if 'survey_id' in values:
             self._ensure_challenge_category(old_surveys=old_surveys - self.mapped('survey_id'))
         return result
-
+    
+    def check_survey(self):
+        for record in self:
+            if record.slide_type!="certification" or record.survey_id is not None:
+                return False
+        return True
+    
     def unlink(self):
         old_surveys = self.mapped('survey_id')
         result = super(Slide, self).unlink()

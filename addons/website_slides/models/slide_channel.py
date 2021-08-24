@@ -150,7 +150,7 @@ class Channel(models.Model):
     name = fields.Char('Name', translate=True, required=True)
     active = fields.Boolean(default=True, tracking=100)
     description = fields.Html('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
-    description_short = fields.Html('Short Description', translate=True, help="The description that is displayed on the course card")
+    description_short = fields.Text('Short Description', translate=True, help="The description that is displayed on the course card")
     description_html = fields.Html('Detailed Description', translate=tools.html_translate, sanitize_attributes=False, sanitize_form=False)
     channel_type = fields.Selection([
         ('training', 'Training'), ('documentation', 'Documentation')],
@@ -163,7 +163,7 @@ class Channel(models.Model):
         string='Tags', help='Used to categorize and filter displayed channels/courses')
     # slides: promote, statistics
     slide_ids = fields.One2many('slide.slide', 'channel_id', string="Slides and categories")
-    slide_content_ids = fields.One2many('slide.slide', string='Slides', compute="_compute_category_and_slide_ids")
+    slide_content_ids = fields.One2many('slide.slide', string='Content', compute="_compute_category_and_slide_ids")
     slide_category_ids = fields.One2many('slide.slide', string='Categories', compute="_compute_category_and_slide_ids")
     slide_last_update = fields.Date('Last Update', compute='_compute_slide_last_update', store=True)
     slide_partner_ids = fields.One2many(
@@ -173,15 +173,10 @@ class Channel(models.Model):
         ('latest', 'Latest Published'),
         ('most_voted', 'Most Voted'),
         ('most_viewed', 'Most Viewed'),
-        ('specific', 'Specific'),
+        ('specific', 'Select Manually'),
         ('none', 'None')],
-        string="Promoted Content", default='latest', required=False,
-        help='Depending the promote strategy, a slide will appear on the top of the course\'s page :\n'
-             ' * Latest Published : the slide created last.\n'
-             ' * Most Voted : the slide which has to most votes.\n'
-             ' * Most Viewed ; the slide which has been viewed the most.\n'
-             ' * Specific : You choose the slide to appear.\n'
-             ' * None : No slides will be shown.\n')
+        string="Featured Content", default='latest', required=False,
+    )
     promoted_slide_id = fields.Many2one('slide.slide', string='Promoted Slide')
     access_token = fields.Char("Security Token", copy=False, default=_default_access_token)
     nbr_presentation = fields.Integer('Presentations', compute='_compute_slides_statistics', store=True)
@@ -198,12 +193,10 @@ class Channel(models.Model):
     # configuration
     allow_comment = fields.Boolean(
         "Allow rating on Course", default=True,
-        help="If checked it allows members to either:\n"
-             " * like content and post comments on documentation course;\n"
-             " * post comment and review on training course;")
+        help="Allow Attendees to like and comment your content and to submit reviews on your course.")
     publish_template_id = fields.Many2one(
         'mail.template', string='New Content Email',
-        help="Email attendees once a new content is published",
+        help="Defines the email your Attendees will receive each time you upload new content.",
         default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('website_slides.slide_template_published'))
     share_template_id = fields.Many2one(
         'mail.template', string='Share Template',
@@ -215,15 +208,15 @@ class Channel(models.Model):
     enroll = fields.Selection([
         ('public', 'Public'), ('invite', 'On Invitation')],
         default='public', string='Enroll Policy', required=True,
-        help='Condition to enroll: everyone, on invite, on payment (sale bridge).')
+        help='Defines who can enroll into your Course.')
     enroll_msg = fields.Html(
         'Enroll Message', help="Message explaining the enroll process",
         default=_get_default_enroll_msg, translate=tools.html_translate, sanitize_attributes=False)
     enroll_group_ids = fields.Many2many('res.groups', string='Auto Enroll Groups', help="Members of those groups are automatically added as members of the channel.")
     visibility = fields.Selection([
-        ('public', 'Public'), ('members', 'Members Only')],
+        ('public', 'Open To All'), ('members', 'Members Only')],
         default='public', string='Visibility', required=True,
-        help='Applied directly as ACLs. Allow to hide channels and their content for non members.')
+        help='Defines who can access your courses and their content.')
     partner_ids = fields.Many2many(
         'res.partner', 'slide_channel_partner', 'channel_id', 'partner_id',
         string='Members', help="All members of the channel.", context={'active_test': False}, copy=False, depends=['channel_partner_ids'])
@@ -525,13 +518,15 @@ class Channel(models.Model):
     # ---------------------------------------------------------
 
     def action_redirect_to_members(self, completed=False):
-        """ Redirects to attendees of the course. If completed is True, a filter
-        will be added in action that will display only attendees who have completed
-        the course. """
-        action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
+        action = None
         action_ctx = {'active_test': False}
         if completed:
             action_ctx['search_default_filter_completed'] = 1
+            action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_completed_partner_action")
+        else:
+            action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
+        action['domain'] = [('channel_id', 'in', self.ids)]
+
         if len(self) == 1:
             action['display_name'] = _('Attendees of %s', self.name)
             action_ctx['search_default_channel_id'] = self.id
