@@ -247,7 +247,7 @@ class SaleOrderLine(models.Model):
         'product.template', string='Product Template',
         related="product_id.product_tmpl_id", domain=[('sale_ok', '=', True)])
     product_updatable = fields.Boolean(compute='_compute_product_updatable', string='Can Edit Product', readonly=True, default=True)
-    product_uom_qty = fields.Float(compute='_compute_discount', string='Quantity', digits='Product Unit of Measure', required=True, default=1.0, store=True)
+    product_uom_qty = fields.Float(compute='_compute_discount_on_product_uom_qty', string='Quantity', digits='Product Unit of Measure', required=True, default=1.0, store=True)
     product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]", ondelete="restrict")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     product_uom_readonly = fields.Boolean(compute='_compute_product_uom_readonly')
@@ -829,10 +829,10 @@ class SaleOrderLine(models.Model):
         return False
 
     @api.depends('product_uom_qty')
-    def _compute_discount(self):
+    def _compute_discount_on_product_uom_qty(self):
         for line in self:
-            if product_uom_qty == 2:
-                self.discount = 20.0
+            if product_uom_qty == 2.00:
+                self.discount = 20.00
 
     @api.depends('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')
     def _compute_discount(self):
