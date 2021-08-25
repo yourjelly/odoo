@@ -9,11 +9,12 @@
     'description': """Odoo Payments""",
     'depends': ['payment', 'odoo_payments'],
     'data': [
+        'data/payment_acquirer_data.xml',
+
         'views/adyen_transaction_views.xml',
         'views/payment_acquirer_views.xml',
         'views/payment_odoo_menus.xml',
         'views/payment_odoo_templates.xml',
-        'data/payment_acquirer_data.xml',
     ],
     'application': True,
     'uninstall_hook': 'uninstall_hook',
