@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
-        <record model="ir.config_parameter" id="odoo_payments_proxy_url">
-            <field name="key">odoo_payments.proxy_url</field>
-            <field name="value">https://payment-adyen.odoo.com/payment_proxy_adyen/</field>
-        </record>
 
-        <record model="ir.config_parameter" id="odoo_payments_onboarding_url">
-            <field name="key">odoo_payments.onboarding_url</field>
-            <field name="value">https://www.odoo.com/odoo_adyen/</field>
-        </record>
+    <!-- Account creation -->
+    <record id="odoo_payments_onboarding_url" model="ir.config_parameter">
+        <field name="key">odoo_payments.onboarding_url</field>
+        <field name="value">https://www.odoo.com/odoo_adyen/</field>
+    </record>
+
+    <!-- API requests after account validation -->
+    <record id="odoo_payments_proxy_url" model="ir.config_parameter">
+        <field name="key">odoo_payments.proxy_url</field>
+        <field name="value">https://payment-adyen.odoo.com/payment_proxy_adyen/</field>
+    </record>
+
+    <data noupdate="1">
 
         <record id="adyen_sync_cron" model="ir.cron">
             <field name="name">Odoo Payments Sync</field>
@@ -22,5 +26,7 @@
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
         </record>
+
     </data>
+
 </odoo>
