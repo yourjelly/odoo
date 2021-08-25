@@ -17,14 +17,17 @@
     ],
     'data': [
         'data/odoo_payments_data.xml',
+
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
+
         'views/adyen_account_templates.xml',
         'views/adyen_account_views.xml',
         'views/adyen_bank_account_views.xml',
         'views/adyen_shareholder_views.xml',
+        'views/adyen_transaction_payout_views.xml',
         'views/adyen_transaction_views.xml',
-        ],
+    ],
     'installable': True,
     'assets': {
         'web.assets_backend': [
