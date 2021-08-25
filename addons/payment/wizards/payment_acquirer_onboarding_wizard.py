@@ -3,22 +3,34 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+ODOO_PAYMENTS_DEPLOYED_COUNTRIES = [
+    'BE', 'FR',
+]
 
-class PaymentWizard(models.TransientModel):
+class PaymentAcquirerOnboardingWizard(models.TransientModel):
     _name = 'payment.acquirer.onboarding.wizard'
     _description = 'Payment acquirer onboarding wizard'
+
+    @api.model
+    def _selection_payment_methods(self):
+        base_methods = [
+            ('paypal', "PayPal"),
+            ('stripe', "Credit card (via Stripe)"),
+            ('other', "Other payment acquirer"),
+            ('manual', "Custom payment instructions"),
+        ]
+        country = self.env.company.country_id
+        if country and country.code not in ODOO_PAYMENTS_DEPLOYED_COUNTRIES:
+            return base_methods
+        return base_methods + [('odoo', "Credit & Debit Card via Odoo Payments")]
 
     @api.model
     def _default_payment_method(self):
         return self._get_default_payment_acquirer_onboarding_value('payment_method')
 
-    payment_method = fields.Selection([
-        ('paypal', "PayPal"),
-        ('stripe', "Credit card (via Stripe)"),
-        ('other', "Other payment acquirer"),
-        ('odoo', "Credit & Debit Card via Odoo Payments"),
-        ('manual', "Custom payment instructions"),
-    ], string="Payment Method", default=_default_payment_method)
+    payment_method = fields.Selection(
+        string="Payment Method", default=_default_payment_method,
+        selection='_selection_payment_methods')
 
     paypal_user_type = fields.Selection([
         ('new_user', "I don't have a Paypal account"),
