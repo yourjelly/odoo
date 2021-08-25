@@ -6,6 +6,9 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.mimetypes import guess_mimetype
 
+from odoo.addons.payment.wizards.payment_acquirer_onboarding_wizard import ODOO_PAYMENTS_DEPLOYED_COUNTRIES
+
+
 ADYEN_AVAILABLE_COUNTRIES = [
     'US', 'AT', 'AU', 'BE', 'CA', 'CH', 'CZ', 'DE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HR', 'IE', 'IT',
     'LT', 'LU', 'NL', 'PL', 'PT'
@@ -16,7 +19,9 @@ class AdyenAddressMixin(models.AbstractModel):
     _name = 'adyen.address.mixin'
     _description = 'Adyen for Platforms Address Mixin'
 
-    country_id = fields.Many2one('res.country', string='Country', domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)], required=True)
+    country_id = fields.Many2one('res.country', string='Country', required=True, domain=[
+        ('code', 'in', ADYEN_AVAILABLE_COUNTRIES),
+        ('code', 'in', ODOO_PAYMENTS_DEPLOYED_COUNTRIES)])
     country_code = fields.Char(related='country_id.code')
     state_id = fields.Many2one('res.country.state', string='State', domain="[('country_id', '=?', country_id)]")
     state_code = fields.Char(related='state_id.code')
