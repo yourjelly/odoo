@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="adyen_transaction_view_list" model="ir.ui.view">
         <field name="model">adyen.transaction</field>
+        <field name="name">adyen.transaction.list.inherit.payment</field>
         <field name="inherit_id" ref="odoo_payments.adyen_transaction_view_list"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='description']" position="after">
-                <field name="payment_transaction_id" optional="show" />
-            </xpath>
+            <field name="description" position="after">
+                <field name="payment_transaction_id" optional="show"/>
+            </field>
         </field>
     </record>
 
     <record id="adyen_transaction_view_form" model="ir.ui.view">
         <field name="model">adyen.transaction</field>
+        <field name="name">adyen.transaction.form.inherit.payment</field>
         <field name="inherit_id" ref="odoo_payments.adyen_transaction_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='description']" position="after">
+            <field name="description" position="after">
                 <field name="payment_transaction_id"
                     attrs="{'invisible': [('payment_transaction_id', '=', False)]}"
                     groups="base.group_no_one"/>
-            </xpath>
+            </field>
             <xpath expr="//group[@name='additional_info']" position="inside">
                 <field name="partner_id" widget="res_partner_many2one" attrs="{'invisible': [('partner_id', '=', False)]}"/>
                 <label for="partner_address" string="Address" attrs="{'invisible': [('partner_id', '=', False)]}"/>
@@ -42,4 +45,5 @@
             </xpath>
         </field>
     </record>
+
 </odoo>

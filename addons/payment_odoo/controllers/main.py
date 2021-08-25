@@ -75,10 +75,10 @@ class OdooController(http.Controller):
 
         :param str received_signature: The signature sent with the notification
         :param recordset tx: The transaction of the notification, as a `payment.transaction` record
+
         :return: Whether the signatures match
         :rtype: str
         """
-
         if not received_signature:
             _logger.warning("ignored notification with missing signature")
             return False
