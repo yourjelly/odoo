@@ -78,6 +78,10 @@ class MrpBom(models.Model):
     possible_product_template_attribute_value_ids = fields.Many2many(
         'product.template.attribute.value',
         compute='_compute_possible_product_template_attribute_value_ids')
+    operation_planning = fields.Selection([
+        ('sequence', 'Work Orders are planned in sequence'),
+        ('independent', 'Work Orders are independent')], string='Operation Planning',
+        default='sequence', help="Defines how Work Orders are planned", required=True)
 
     _sql_constraints = [
         ('qty_positive', 'check (product_qty > 0)', 'The quantity to produce must be positive!'),

@@ -221,7 +221,7 @@ class MrpWorkcenter(models.Model):
         unavailability_ressources = self.resource_id._get_unavailable_intervals(start_datetime, end_datetime)
         return {wc.id: unavailability_ressources.get(wc.resource_id.id, []) for wc in self}
 
-    def _get_first_available_slot(self, start_datetime, duration):
+    def _get_first_available_slot(self, start_datetime, duration, leaves_to_ignore=False):
         """Get the first available interval for the workcenter in `self`.
 
         The available interval is disjoinct with all other workorders planned on this workcenter, but
@@ -237,8 +237,14 @@ class MrpWorkcenter(models.Model):
         start_datetime, revert = make_aware(start_datetime)
 
         resource = self.resource_id
-        get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, domain=[('time_type', 'in', ['other', 'leave'])], resources=resource, tz=timezone(self.resource_calendar_id.tz))
-        get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=[('time_type', '=', 'other')], resources=resource, tz=timezone(self.resource_calendar_id.tz))
+        domain = [('time_type', 'in', ['other', 'leave'])]
+        if leaves_to_ignore:
+            domain = ['&', ('id', 'not in', leaves_to_ignore)] + domain
+        get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, domain=domain, resources=resource, tz=timezone(self.resource_calendar_id.tz))
+        domain = [('time_type', '=', 'other')]
+        if leaves_to_ignore:
+            domain = ['&', ('id', 'not in', leaves_to_ignore)] + domain
+        get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=domain, resources=resource, tz=timezone(self.resource_calendar_id.tz))
 
         remaining = duration
         start_interval = start_datetime
@@ -257,7 +263,7 @@ class MrpWorkcenter(models.Model):
                 if Intervals([(start_interval, start + timedelta(minutes=min(remaining, interval_minutes)), dummy)]) & workorder_intervals:
                     remaining = duration
                     start_interval = start
-                elif float_compare(interval_minutes, remaining, precision_digits=3) >= 0:
+                if float_compare(interval_minutes, remaining, precision_digits=3) >= 0:
                     return revert(start_interval), revert(start + timedelta(minutes=remaining))
                 # Decrease a part of the remaining duration
                 remaining -= interval_minutes

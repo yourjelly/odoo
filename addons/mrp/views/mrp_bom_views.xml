@@ -135,6 +135,9 @@
                                 <group>
                                     <field name="picking_type_id" attrs="{'invisible': [('type','=','phantom')]}" string="Operation" groups="stock.group_adv_location"/>
                                 </group>
+                                <group>
+                                    <field name="operation_planning" groups="mrp.group_mrp_routings"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>

@@ -678,9 +678,20 @@ class MrpProduction(models.Model):
         else:
             self.workorder_ids = False
 
+    @api.onchange('workorder_ids')
+    def _onchange_workorder_ids_replan(self):
+        for workorder in self.workorder_ids:
+            if workorder.date_planned_finished != workorder._origin.date_planned_finished:
+                if self.bom_id.operation_planning == 'sequence':
+                    start_date = workorder.date_planned_finished
+                    next_workorder = workorder.next_work_order_id
+                    while(next_workorder):
+                        wo_in_mo = self.workorder_ids.filtered(lambda mo_wo: mo_wo._origin.id == next_workorder.id)
+                        wo_in_mo.update(wo_in_mo._get_planning_values(start_date))
+                        start_date = wo_in_mo.date_planned_finished
+                        next_workorder = next_workorder.next_work_order_id
+
     def write(self, vals):
-        if 'workorder_ids' in self:
-            production_to_replan = self.filtered(lambda p: p.is_planned)
         res = super(MrpProduction, self).write(vals)
 
         for production in self:
@@ -709,8 +720,6 @@ class MrpProduction(models.Model):
                         'date_deadline': production.date_deadline
                     })
                 production._autoconfirm_production()
-                if production in production_to_replan:
-                    production._plan_workorders(replan=True)
             if production.state == 'done' and ('lot_producing_id' in vals or 'qty_producing' in vals):
                 finished_move_lines = production.move_finished_ids.filtered(
                     lambda move: move.product_id == production.product_id and move.state == 'done').mapped('move_line_ids')
@@ -1154,62 +1163,23 @@ class MrpProduction(models.Model):
         # Schedule all work orders (new ones and those already created)
         qty_to_produce = max(self.product_qty - self.qty_produced, 0)
         qty_to_produce = self.product_uom_id._compute_quantity(qty_to_produce, self.product_id.uom_id)
-        start_date = max(self.date_planned_start, datetime.datetime.now())
+        start_date = max(self.date_planned_start, datetime.datetime.now().replace(second=0, microsecond=0) + datetime.timedelta(minutes=1))
         if replan:
             workorder_ids = self.workorder_ids.filtered(lambda wo: wo.state in ('pending', 'waiting', 'ready'))
-            # We plan the manufacturing order according to its `date_planned_start`, but if
-            # `date_planned_start` is in the past, we plan it as soon as possible.
-            workorder_ids.leave_id.unlink()
         else:
             workorder_ids = self.workorder_ids.filtered(lambda wo: not wo.date_planned_start)
+        if self.bom_id.operation_planning == 'sequence':
+            workorder_ids = workorder_ids.filtered(lambda wo: wo.id not in [wo.next_work_order_id.id for wo in workorder_ids if wo.next_work_order_id])
+        if replan:
+            workorder_ids.leave_id.unlink()
         for workorder in workorder_ids:
-            workcenters = workorder.workcenter_id | workorder.workcenter_id.alternative_workcenter_ids
-
-            best_finished_date = datetime.datetime.max
-            vals = {}
-            for workcenter in workcenters:
-                # compute theoretical duration
-                if workorder.workcenter_id == workcenter:
-                    duration_expected = workorder.duration_expected
-                else:
-                    duration_expected = workorder._get_duration_expected(alternative_workcenter=workcenter)
-
-                from_date, to_date = workcenter._get_first_available_slot(start_date, duration_expected)
-                # If the workcenter is unavailable, try planning on the next one
-                if not from_date:
-                    continue
-                # Check if this workcenter is better than the previous ones
-                if to_date and to_date < best_finished_date:
-                    best_start_date = from_date
-                    best_finished_date = to_date
-                    best_workcenter = workcenter
-                    vals = {
-                        'workcenter_id': workcenter.id,
-                        'duration_expected': duration_expected,
-                    }
-
-            # If none of the workcenter are available, raise
-            if best_finished_date == datetime.datetime.max:
-                raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
-
+            workorder._plan_workorder(start_date)
             # Instantiate start_date for the next workorder planning
             if workorder.next_work_order_id:
-                start_date = best_finished_date
-
-            # Create leave on chosen workcenter calendar
-            leave = self.env['resource.calendar.leaves'].create({
-                'name': workorder.display_name,
-                'calendar_id': best_workcenter.resource_calendar_id.id,
-                'date_from': best_start_date,
-                'date_to': best_finished_date,
-                'resource_id': best_workcenter.resource_id.id,
-                'time_type': 'other'
-            })
-            vals['leave_id'] = leave.id
-            workorder.write(vals)
+                start_date = workorder.leave_id.date_to
         self.with_context(force_date=True).write({
-            'date_planned_start': self.workorder_ids[0].date_planned_start,
-            'date_planned_finished': self.workorder_ids[-1].date_planned_finished
+            'date_planned_start': min(self.workorder_ids.mapped("date_planned_start")),
+            'date_planned_finished': max(self.workorder_ids.mapped('date_planned_finished'))
         })
 
     def button_unplan(self):

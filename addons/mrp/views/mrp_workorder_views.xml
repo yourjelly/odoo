@@ -114,7 +114,7 @@
                 <attribute name="create">0</attribute>
                 <attribute name="sample">1</attribute>
             </xpath>
-            <field name="workcenter_id" position="after">
+            <field name="date_planned_start" position="before">
                 <field name="production_id"/>
             </field>
             <field name="state" position="attributes">
@@ -164,6 +164,9 @@
                             <field name="duration_expected" widget="float_time"/>
                             <span>minutes</span>
                         </div>
+                    </group>
+                    <group>
+                        <field name="production_id"/>
                     </group>
                 </group>
                 <notebook>
@@ -324,6 +327,8 @@
                 decoration-warning="state == 'cancel' or (json_popover and 'text-warning' in json_popover)"
                 color="production_id"
                 display_unavailability="1"
+                precision="{'day': 'hour:quarter', 'week': 'day:half', 'month': 'day'}"
+                default_scale="week"
                 form_view_id="mrp_production_workorder_form_view_inherit">
 
                 <field name="date_planned_start"/>

@@ -28,7 +28,7 @@
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='name']" position="before">
-                    <field name="sequence" widget="handle"/>
+                    <field name="sequence" widget="handle" attrs="{'invisible':[('parent.operation_planning', '!=', 'sequence')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='bom_id']" position="replace"/>
                 <xpath expr="//field[@name='time_cycle']" position="attributes">

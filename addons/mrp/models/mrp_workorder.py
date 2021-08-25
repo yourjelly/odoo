@@ -401,18 +401,38 @@ class MrpWorkorder(models.Model):
                 end_date = fields.Datetime.to_datetime(values.get('date_planned_finished')) or workorder.date_planned_finished
                 if start_date and end_date and start_date > end_date:
                     raise UserError(_('The planned end date of the work order cannot be prior to the planned start date, please correct this to save the work order.'))
+                if 'date_planned_finished' in values and values.get('date_planned_finished'):
+                    self.leave_id.unlink()
+                    if 'workcenter_id' in values:
+                        workcenter = self.env['mrp.workcenter'].browse(values['workcenter_id'])
+                    else:
+                        workcenter = workorder.workcenter_id
+                    leave = self.env['resource.calendar.leaves'].create({
+                        'name': self.display_name,
+                        'calendar_id': workcenter.resource_calendar_id.id,
+                        'date_from': start_date,
+                        'date_to': end_date,
+                        'resource_id': workcenter.resource_id.id,
+                        'time_type': 'other'
+                    })
+                    leave.write({'name': leave.id})
+                    values['leave_id'] = leave.id
+                    if workorder.production_id.bom_id.operation_planning == 'sequence' and workorder.next_work_order_id:
+                        workorder.next_work_order_id._plan_workorder(end_date)
                 # Update MO dates if the start date of the first WO or the
                 # finished date of the last WO is update.
-                if workorder == workorder.production_id.workorder_ids[0] and 'date_planned_start' in values:
-                    if values['date_planned_start']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_planned_start': fields.Datetime.to_datetime(values['date_planned_start'])
-                        })
-                if workorder == workorder.production_id.workorder_ids[-1] and 'date_planned_finished' in values:
-                    if values['date_planned_finished']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_planned_finished': fields.Datetime.to_datetime(values['date_planned_finished'])
-                        })
+                if 'date_planned_start' in values and values['date_planned_start']:
+                    date = fields.Datetime.to_datetime(values['date_planned_start'])
+                    dates = [wo.date_planned_start for wo in workorder.production_id.workorder_ids if wo.id != workorder.id and wo.date_planned_start]
+                    workorder.production_id.with_context(force_date=True).write({
+                        'date_planned_start': min(min(dates), date) if dates else date
+                    })
+                if 'date_planned_finished' in values and values['date_planned_finished']:
+                    date = fields.Datetime.to_datetime(values['date_planned_finished'])
+                    dates = [wo.date_planned_finished for wo in workorder.production_id.workorder_ids if wo.id != workorder.id and wo.date_planned_finished]
+                    workorder.production_id.with_context(force_date=True).write({
+                        'date_planned_finished': max(max(dates), date) if dates else date
+                    })
         return super(MrpWorkorder, self).write(values)
 
     @api.model_create_multi
@@ -436,10 +456,11 @@ class MrpWorkorder(models.Model):
             bom = self.env['mrp.bom']
             moves = production.move_raw_ids | production.move_finished_ids
 
-            for workorder in self:
+            for workorder in workorders:
                 bom = workorder.operation_id.bom_id or workorder.production_id.bom_id
-                previous_workorder = workorders_by_bom[bom][-1:]
-                previous_workorder.next_work_order_id = workorder.id
+                if bom.operation_planning == "sequence":
+                    previous_workorder = workorders_by_bom[bom][-1:]
+                    previous_workorder.next_work_order_id = workorder.id
                 workorders_by_bom[bom] |= workorder
 
                 moves.filtered(lambda m: m.operation_id == workorder.operation_id).write({
@@ -464,11 +485,14 @@ class MrpWorkorder(models.Model):
                         'workorder_id': workorders_by_bom[production.bom_id][-1:].id
                     })
 
-            for workorders in workorders_by_bom.values():
+            for bom, workorders in workorders_by_bom.items():
                 if not workorders:
                     continue
-                if workorders[0].state == 'pending':
-                    workorders[0].state = 'ready' if workorders[0].production_availability == 'assigned' else 'waiting'
+                if bom.operation_planning == "sequence":
+                    if workorders[0].state == 'pending':
+                        workorders[0].state = 'ready' if workorders[0].production_availability == 'assigned' else 'waiting'
+                else:
+                    workorders.filtered(lambda wo: wo.state == 'pending').state = 'ready'
                 for workorder in workorders:
                     workorder._start_nextworkorder()
 
@@ -478,44 +502,6 @@ class MrpWorkorder(models.Model):
     def _start_nextworkorder(self):
         if self.state == 'done' and self.next_work_order_id.state == 'pending':
             self.next_work_order_id.state = 'ready' if self.next_work_order_id.production_availability == 'assigned' else 'waiting'
-
-    @api.model
-    def gantt_unavailability(self, start_date, end_date, scale, group_bys=None, rows=None):
-        """Get unavailabilities data to display in the Gantt view."""
-        workcenter_ids = set()
-
-        def traverse_inplace(func, row, **kargs):
-            res = func(row, **kargs)
-            if res:
-                kargs.update(res)
-            for row in row.get('rows'):
-                traverse_inplace(func, row, **kargs)
-
-        def search_workcenter_ids(row):
-            if row.get('groupedBy') and row.get('groupedBy')[0] == 'workcenter_id' and row.get('resId'):
-                workcenter_ids.add(row.get('resId'))
-
-        for row in rows:
-            traverse_inplace(search_workcenter_ids, row)
-        start_datetime = fields.Datetime.to_datetime(start_date)
-        end_datetime = fields.Datetime.to_datetime(end_date)
-        workcenters = self.env['mrp.workcenter'].browse(workcenter_ids)
-        unavailability_mapping = workcenters._get_unavailability_intervals(start_datetime, end_datetime)
-
-        # Only notable interval (more than one case) is send to the front-end (avoid sending useless information)
-        cell_dt = (scale in ['day', 'week'] and timedelta(hours=1)) or (scale == 'month' and timedelta(days=1)) or timedelta(days=28)
-
-        def add_unavailability(row, workcenter_id=None):
-            if row.get('groupedBy') and row.get('groupedBy')[0] == 'workcenter_id' and row.get('resId'):
-                workcenter_id = row.get('resId')
-            if workcenter_id:
-                notable_intervals = filter(lambda interval: interval[1] - interval[0] >= cell_dt, unavailability_mapping[workcenter_id])
-                row['unavailabilities'] = [{'start': interval[0], 'stop': interval[1]} for interval in notable_intervals]
-                return {'workcenter_id': workcenter_id}
-
-        for row in rows:
-            traverse_inplace(add_unavailability, row)
-        return rows
 
     def button_start(self):
         self.ensure_one()
@@ -819,3 +805,52 @@ class MrpWorkorder(models.Model):
         self.ensure_one()
         if self.qty_producing:
             self.qty_producing = quantity
+
+    def _get_planning_values(self, start_date, plan=False):
+        # Detect leaves to ignore
+        leaves_to_ignore = []
+        if plan:
+            if(self.leave_id):
+                leaves_to_ignore.append(self.leave_id.id)
+            # - add leaves from all subsequent work orders
+            if self.production_id.bom_id.operation_planning == 'sequence':
+                next_workorder = self.next_work_order_id
+                while(next_workorder):
+                    if(next_workorder.leave_id):
+                        leaves_to_ignore.append(next_workorder.leave_id.id)
+                    next_workorder = next_workorder.next_work_order_id
+        else:
+            for workorder in self.production_id.workorder_ids.filtered(lambda wo: wo.state in ['ready', 'pending']):
+                if(workorder.leave_id):
+                    leaves_to_ignore.append(workorder.leave_id.id)
+        # Find best fitting workcenter
+        best_finished_date = datetime.max
+        workcenters = self.workcenter_id | self.workcenter_id.alternative_workcenter_ids
+        for workcenter in workcenters:
+            # compute theoretical duration
+            if self.workcenter_id == workcenter:
+                duration_expected = self.duration_expected
+            else:
+                duration_expected = self._get_duration_expected(alternative_workcenter=workcenter)
+            from_date, to_date = workcenter._get_first_available_slot(start_date, duration_expected, leaves_to_ignore)
+            # If the workcenter is unavailable, try planning on the next one
+            if not from_date:
+                continue
+            # Check if this workcenter is better than the previous ones
+            if to_date and to_date < best_finished_date:
+                best_start_date = from_date
+                best_finished_date = to_date
+                best_duration = duration_expected
+                best_workcenter = workcenter
+        # If none of the workcenters are available, raise
+        if best_finished_date == datetime.max:
+            raise UserError(_('Impossible to plan the next workorder. Please check the workcenter availabilities.'))
+        return {
+            'date_planned_start': best_start_date,
+            'date_planned_finished': best_finished_date,
+            'duration_expected': best_duration,
+            'workcenter_id': best_workcenter.id
+        }
+
+    def _plan_workorder(self, start_date):
+        self.write(self._get_planning_values(start_date, True))
