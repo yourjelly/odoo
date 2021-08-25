@@ -11,12 +11,12 @@ class PaymentWizard(models.TransientModel):
     _description = 'Sale Payment acquirer onboarding wizard'
 
     @api.model
+    def _selection_payment_methods(self):
+        return super()._selection_payment_methods() + [('digital_signature', "Electronic signature")]
+
+    @api.model
     def _default_payment_method(self):
         return super()._default_payment_method() or 'digital_signature'
-
-    payment_method = fields.Selection(selection_add=[
-        ('digital_signature', "Electronic signature"),
-    ])
 
     def _set_payment_acquirer_onboarding_step_done(self):
         """ Override. """
