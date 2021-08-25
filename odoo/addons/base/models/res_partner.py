@@ -170,6 +170,7 @@ class Partner(models.Model):
     user_id = fields.Many2one('res.users', string='Salesperson',
       help='The internal user in charge of this contact.')
     vat = fields.Char(string='Tax ID', index=True, help="The Tax Identification Number. Complete it if the contact is subjected to government taxes. Used in some legal statements.")
+    vat_name = fields.Char(compute="_compute_vat")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     website = fields.Char('Website Link')
@@ -237,6 +238,14 @@ class Partner(models.Model):
     _sql_constraints = [
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name'),
     ]
+
+    @api.depends('country_id')
+    def _compute_vat(self):
+        for company in self:
+            if company.country_id.vat_label != False:
+                company.vat_name = company.country_id.vat_label
+            else:
+                company.vat_name = "Tax ID"
 
     @api.depends('name', 'user_ids.share', 'image_1920', 'is_company')
     def _compute_avatar_1920(self):
