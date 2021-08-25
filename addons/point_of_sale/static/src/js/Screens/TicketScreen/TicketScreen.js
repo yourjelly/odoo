@@ -159,9 +159,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _onClickOrderline({ detail: orderline }) {
             const order = this.getSelectedSyncedOrder();
-            if (!(order.backendId in this._state.refund)) {
-                this._state.refund[order.backendId] = {};
-            }
             this._state.ui.selectedOrderlineIds[order.backendId] = orderline.id;
             NumberBuffer.reset();
             this.render();
@@ -178,6 +175,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const refundableQty = orderline.quantity - orderline.refunded_qty;
             if (refundableQty <= 0) return NumberBuffer.reset();
 
+            if (!(order.backendId in this._state.refund)) {
+                this._state.refund[order.backendId] = {};
+            }
             const refundState = this._state.refund[order.backendId];
             if (buffer == null || buffer == '') {
                 delete refundState[selectedOrderlineId];
