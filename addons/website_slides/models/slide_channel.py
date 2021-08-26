@@ -92,7 +92,7 @@ class Channel(models.Model):
     # description
     name = fields.Char('Name', translate=True, required=True)
     active = fields.Boolean(default=True, tracking=100)
-    description = fields.Text('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
+    description = fields.Html('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
     description_short = fields.Text('Short Description', translate=True, help="The description that is displayed on the course card")
     description_html = fields.Html('Detailed Description', translate=tools.html_translate, sanitize_attributes=False, sanitize_form=False)
     channel_type = fields.Selection([
@@ -106,7 +106,7 @@ class Channel(models.Model):
         string='Tags', help='Used to categorize and filter displayed channels/courses')
     # slides: promote, statistics
     slide_ids = fields.One2many('slide.slide', 'channel_id', string="Slides and categories")
-    slide_content_ids = fields.One2many('slide.slide', string='Slides', compute="_compute_category_and_slide_ids")
+    slide_content_ids = fields.One2many('slide.slide', string='Content', compute="_compute_category_and_slide_ids")
     slide_category_ids = fields.One2many('slide.slide', string='Categories', compute="_compute_category_and_slide_ids")
     slide_last_update = fields.Date('Last Update', compute='_compute_slide_last_update', store=True)
     slide_partner_ids = fields.One2many(
@@ -119,12 +119,7 @@ class Channel(models.Model):
         ('specific', 'Select Manually'),
         ('none', 'None')],
         string="Featured Content", default='latest', required=False,
-        help='Depending the promote strategy, a slide will appear on the top of the course\'s page :\n'
-             ' * Latest Published : the slide created last.\n'
-             ' * Most Voted : the slide which has to most votes.\n'
-             ' * Most Viewed ; the slide which has been viewed the most.\n'
-             ' * Specific : You choose the slide to appear.\n'
-             ' * None : No slides will be shown.\n')
+    )
     promoted_slide_id = fields.Many2one('slide.slide', string='Promoted Slide')
     access_token = fields.Char("Security Token", copy=False, default=_default_access_token)
     nbr_presentation = fields.Integer('Presentations', compute='_compute_slides_statistics', store=True)
@@ -463,7 +458,11 @@ class Channel(models.Model):
     # ---------------------------------------------------------
 
     def action_redirect_to_members(self, state=None):
-        action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
+        action=None
+        if state=='completed':
+            action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_completed_partner_action")
+        else:
+            action = self.env["ir.actions.actions"]._for_xml_id("website_slides.slide_channel_partner_action")
         action['domain'] = [('channel_id', 'in', self.ids)]
         if len(self) == 1:
             action['display_name'] = _('Attendees of %s', self.name)

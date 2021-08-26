@@ -83,7 +83,7 @@
                                 <label for="name" string="Content Title" class="oe_edit_only"/>
                             </div>
                             <h1>
-                                <field name="name" default_focus="1" placeholder="e.g. Setting up your computer" style="width:100%%"/>
+                                <field name="name" default_focus="1" placeholder="e.g. Setting up your computer" style="width:120%%"/>
                                 <field name="is_category" invisible="1"/>
                             </h1>
                             <field name="tag_ids" attrs="{'invisible': [('is_category', '=', True)]}" widget="many2many_tags" placeholder="Tags..."/>

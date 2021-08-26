@@ -403,6 +403,7 @@
                 </t>
             </div>
         </div>
+        <group>
         <div class="col-12 col-md d-flex align-items-start mb-4 mb-md-0 o_wslides_js_course_join" t-if="len(slide.slide_resource_ids)">
             <span t-if="slide.channel_id.is_member or slide.channel_id.can_publish or slide.is_preview or slide.channel_id.enroll in ['private', 'payment']" class="text-muted font-weight-bold mr-3">
                 Additional Resources
@@ -432,6 +433,7 @@
                 </div>
             </div>
         </div>
+        </group>
     </div>
 </template>
 
