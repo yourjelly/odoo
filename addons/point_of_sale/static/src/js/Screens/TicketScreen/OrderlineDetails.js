@@ -4,7 +4,7 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const { format } = require('web.field_utils');
-    const { round_precision: round_pr, float_is_zero } = require('web.utils');
+    const { round_precision: round_pr } = require('web.utils');
 
     /**
      * @props {pos.order.line} line
@@ -49,6 +49,9 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
         get customerNote() {
             return this.props.line.get_customer_note();
         }
+        getToRefundDetail() {
+            return this.env.pos.toRefundLines[this.props.line.id];
+        }
         hasRefundedQty() {
             return !this.env.pos.isProductQtyZero(this.props.line.refunded_qty);
         }
@@ -56,10 +59,20 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
             return this.env.pos.formatProductQty(this.props.line.refunded_qty);
         }
         hasToRefundQty() {
-            return !this.env.pos.isProductQtyZero(this.props.toRefund);
+            const toRefundDetail = this.getToRefundDetail();
+            return !this.env.pos.isProductQtyZero(toRefundDetail && toRefundDetail.qty);
         }
         getFormattedToRefundQty() {
-            return this.env.pos.formatProductQty(this.props.toRefund);
+            const toRefundDetail = this.getToRefundDetail();
+            return this.env.pos.formatProductQty(toRefundDetail && toRefundDetail.qty);
+        }
+        getToRefundMessage() {
+            const destinationOrderUid = this.getToRefundDetail().destinationOrderUid;
+            if (destinationOrderUid) {
+                return _.str.sprintf(this.env._t('Refunding %s in %s'), this.getFormattedToRefundQty(), destinationOrderUid);
+            } else {
+                return _.str.sprintf(this.env._t('To Refund: %s'), this.getFormattedToRefundQty());
+            }
         }
     }
     OrderlineDetails.template = 'OrderlineDetails';

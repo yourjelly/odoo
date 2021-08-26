@@ -9,22 +9,14 @@ odoo.define('point_of_sale.RefundButton', function (require) {
     class RefundButton extends PosComponent {
         constructor() {
             super(...arguments);
-            useListener('click', this.onClick);
+            useListener('click', this._onClick);
         }
-        mounted() {
-            this.env.pos.get('orders').on('add remove change', () => this.render(), this);
-            this.env.pos.on('change:selectedOrder', () => this.render(), this);
-        }
-        willUnmount() {
-            this.env.pos.get('orders').off('add remove change', null, this);
-            this.env.pos.off('change:selectedOrder', null, this);
-        }
-        onClick() {
+        _onClick() {
             const customer = this.env.pos.get_order().get_client();
             const searchDetails = customer ? { fieldName: 'CUSTOMER', searchTerm: customer.name } : {};
             this.showScreen('TicketScreen', {
                 ui: { filter: 'SYNCED', searchDetails },
-                orderToPutRefund: this.env.pos.get_order(),
+                destinationOrder: this.env.pos.get_order(),
             });
         }
     }

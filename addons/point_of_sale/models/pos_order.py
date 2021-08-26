@@ -149,6 +149,7 @@ class PosOrder(models.Model):
 
         return pos_order.id
 
+
     def _process_payment_lines(self, pos_order, order, pos_session, draft):
         """Create account.bank.statement.lines from the dictionary given to the parent function.
 

@@ -80,7 +80,7 @@
                 <div class="leftpane">
                     <t t-set="_selectedSyncedOrder" t-value="getSelectedSyncedOrder()" />
                     <t t-set="_selectedOrderlineId" t-value="getSelectedOrderlineId()" />
-                    <OrderDetails order="_selectedSyncedOrder" selectedOrderlineId="getSelectedOrderlineId()" refundDetails="_selectedSyncedOrder and _state.refund[_selectedSyncedOrder.backendId]" />
+                    <OrderDetails order="_selectedSyncedOrder" selectedOrderlineId="_selectedOrderlineId" />
                     <div class="pads">
                         <div class="control-buttons">
                             <InvoiceButton t-if="env.pos.config.module_account" order="_selectedSyncedOrder" />

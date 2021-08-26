@@ -13,6 +13,7 @@ var core = require('web.core');
 var field_utils = require('web.field_utils');
 var time = require('web.time');
 var utils = require('web.utils');
+var { Gui } = require('point_of_sale.Gui');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -77,6 +78,25 @@ exports.PosModel = Backbone.Model.extend({
         // validation (order paid then sent to the backend).
         this.validated_orders_name_server_id_map = {};
 
+        // Record<orderlineId, { 'qty': number, 'orderline': { qty: number, refundedQty: number, orderUid: string }, 'destinationOrderUid': string }>
+        this.toRefundLines = {};
+        this.TICKET_SCREEN_STATE = {
+            syncedOrders: {
+                currentPage: 1,
+                cache: {},
+                toShow: [],
+                nPerPage: 80,
+                totalCount: null,
+            },
+            ui: {
+                selectedSyncedOrderId: null,
+                searchDetails: this.makeDefaultSearchDetails(),
+                filter: null,
+                // maps the order's backendId to it's selected orderline
+                selectedOrderlineIds: {},
+            },
+        };
+
         // Extract the config id from the url.
         var given_config = new RegExp('[\?&]config_id=([^&#]*)').exec(window.location.href);
         this.config_id = given_config && given_config[1] && parseInt(given_config[1]) || false;
@@ -110,6 +130,12 @@ exports.PosModel = Backbone.Model.extend({
             return self.after_load_server_data();
         });
     },
+    makeDefaultSearchDetails: function() {
+        return {
+            fieldName: 'RECEIPT_NUMBER',
+            searchTerm: '',
+        };
+    },
     after_load_server_data: function(){
         this.load_orders();
         this.set_start_order();
@@ -129,7 +155,6 @@ exports.PosModel = Backbone.Model.extend({
         this.proxy.disconnect();
         this.barcode_reader.disconnect_from_proxy();
     },
-
     connect_to_proxy: function () {
         var self = this;
         return new Promise(function (resolve, reject) {
@@ -1058,9 +1083,29 @@ exports.PosModel = Backbone.Model.extend({
         }).catch(function(error){
             self.set_synch(self.get('failed') ? 'error' : 'disconnected');
             return Promise.reject(error);
+        }).finally(function() {
+            self._after_flush_orders(orders);
         });
     },
-
+    _after_flush_orders: function(orders) {
+        const orderIdsToRefund = new Set();
+        for (const order of orders) {
+            for (const line of order.data.lines) {
+                const refundDetail = this.toRefundLines[line[2].refunded_orderline_id];
+                if (!refundDetail) continue;
+                // Collect the backend id of the refunded orders.
+                orderIdsToRefund.add(refundDetail.orderline.orderBackendId);
+                // Reset the refund detail for the orderline.
+                delete this.env.pos.toRefundLines[refundDetail.orderline.id];
+            }
+        }
+        this._invalidateSyncedOrdersCache([...orderIdsToRefund]);
+    },
+    _invalidateSyncedOrdersCache: function(ids) {
+        for (let id of ids) {
+            delete this.TICKET_SCREEN_STATE.syncedOrders.cache[id];
+        }
+    },
     set_synch: function(status, pending) {
         if (['connected', 'connecting', 'error', 'disconnected'].indexOf(status) === -1) {
             console.error(status, ' is not a known connection state.');
@@ -1680,6 +1725,7 @@ exports.Orderline = Backbone.Model.extend({
         }
         this.set_customer_note(json.customer_note);
         this.refunded_qty = json.refunded_qty;
+        this.refunded_orderline_id = json.refunded_orderline_id;
     },
     clone: function(){
         var orderline = new exports.Orderline({},{
@@ -1783,13 +1829,41 @@ exports.Orderline = Backbone.Model.extend({
     // sets the quantity of the product. The quantity will be rounded according to the
     // product's unity of measure properties. Quantities greater than zero will not get
     // rounded to zero
+    // Return true if successfully set the quantity, otherwise, return false.
     set_quantity: function(quantity, keep_price){
         this.order.assert_editable();
         if(quantity === 'remove'){
+            if (this.refunded_orderline_id in this.pos.toRefundLines) {
+                delete this.pos.toRefundLines[this.refunded_orderline_id];
+            }
             this.order.remove_orderline(this);
-            return;
+            return true;
         }else{
             var quant = typeof(quantity) === 'number' ? quantity : (field_utils.parse.float('' + quantity) || 0);
+            if (this.refunded_orderline_id in this.pos.toRefundLines) {
+                const toRefundDetail = this.pos.toRefundLines[this.refunded_orderline_id];
+                const maxQtyToRefund = toRefundDetail.orderline.qty - toRefundDetail.orderline.refundedQty
+                if (quant > 0) {
+                    Gui.showPopup('ErrorPopup', {
+                        title: _t('Positive quantity not allowed'),
+                        body: _t('Only a negative quantity is allowed for this refund line. Click on +/- to modify the quantity to be refunded.')
+                    });
+                    return false;
+                } else if (quant == 0) {
+                    toRefundDetail.qty = 0;
+                } else if (-quant <= maxQtyToRefund) {
+                    toRefundDetail.qty = -quant;
+                } else {
+                    Gui.showPopup('ErrorPopup', {
+                        title: _t('Greater than allowed'),
+                        body: _.str.sprintf(
+                            _t('The requested quantity to be refunded is higher than the refundable quantity of %s.'),
+                            this.pos.formatProductQty(maxQtyToRefund)
+                        ),
+                    });
+                    return false;
+                }
+            }
             var unit = this.get_unit();
             if(unit){
                 if (unit.rounding) {
@@ -1813,6 +1887,7 @@ exports.Orderline = Backbone.Model.extend({
             this.order.fix_tax_included_price(this);
         }
         this.trigger('change', this);
+        return true;
     },
     // return the quantity of product
     get_quantity: function(){

@@ -194,7 +194,8 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         _setValue(val) {
             if (this.currentOrder.get_selected_orderline()) {
                 if (this.state.numpadMode === 'quantity') {
-                    this.currentOrder.get_selected_orderline().set_quantity(val);
+                    const result = this.currentOrder.get_selected_orderline().set_quantity(val);
+                    if (!result) NumberBuffer.reset();
                 } else if (this.state.numpadMode === 'discount') {
                     this.currentOrder.get_selected_orderline().set_discount(val);
                 } else if (this.state.numpadMode === 'price') {
