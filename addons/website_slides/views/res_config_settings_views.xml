@@ -41,7 +41,7 @@
                                     <div class="text-muted">
                                         Create a community and let Attendees answer each others' questions.
                                     </div>
-                                     <div class="mt8">
+                                    <div class="mt8">
                                         <button type="action" name="%(website_slides_forum.forum_forum_action_channel)d" string="Manage Forums" class="btn-link" icon="fa-arrow-right"/>
                                     </div>
                                 </div>

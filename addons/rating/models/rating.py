@@ -56,8 +56,8 @@ class Rating(models.Model):
     rating_image = fields.Binary('Image', compute='_compute_rating_image')
     rating_text = fields.Selection([
         ('satisfied', 'Satisfied'),
-        ('not_satisfied', 'Not satisfied'),
-        ('highly_dissatisfied', 'Highly dissatisfied'),
+        ('not_satisfied', 'Okay'),
+        ('highly_dissatisfied', 'Dissatisfied'),
         ('no_rating', 'No Rating yet')], string='Rating', store=True, compute='_compute_rating_text', readonly=True)
     feedback = fields.Text('Comment', help="Reason of the rating")
     message_id = fields.Many2one(

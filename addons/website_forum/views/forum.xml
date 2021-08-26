@@ -183,7 +183,7 @@
             <field name="name">forum.post.list</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
-                <tree string="Forum Posts">
+                <tree string="Forum Posts" create="0">
                     <field name="name"/>
                     <field name="active" invisible="1"/>
                     <field name="forum_id"/>

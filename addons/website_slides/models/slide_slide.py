@@ -116,7 +116,7 @@ class Slide(models.Model):
         'mail.thread',
         'image.mixin',
         'website.seo.metadata', 'website.published.mixin']
-    _description = 'Slides'
+    _description = 'Content'
     _mail_post_access = 'read'
     _order_by_strategy = {
         'sequence': 'sequence asc, id asc',
@@ -140,7 +140,7 @@ class Slide(models.Model):
     # Categories
     is_category = fields.Boolean('Is a category', default=False)
     category_id = fields.Many2one('slide.slide', string="Section", compute="_compute_category_id", store=True)
-    slide_ids = fields.One2many('slide.slide', "category_id", string="Slides")
+    slide_ids = fields.One2many('slide.slide', "category_id", string="Content")
     # subscribers
     partner_ids = fields.Many2many('res.partner', 'slide_slide_partner', 'slide_id', 'partner_id',
                                    string='Subscribers', groups='website_slides.group_website_slides_officer', copy=False)
@@ -204,6 +204,11 @@ class Slide(models.Model):
         ('exclusion_html_content_and_url', "CHECK(html_content IS NULL OR url IS NULL)", "A slide is either filled with a document url or HTML content. Not both.")
     ]
 
+    @api.constrains('name')
+    def check_name_length(self):
+        if len(self.name) > 185:
+            self.name = self.name[:185]
+    
     @api.depends('date_published', 'is_published')
     def _compute_is_new_slide(self):
         for slide in self:

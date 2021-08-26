@@ -97,7 +97,7 @@
                             <page name="options" string="Options">
                                 <group>
                                     <group name="course" string="Course">
-                                        <field string="Type" name="channel_type" widget="radio"/>
+                                        
                                         <field name="user_id" domain="[('share', '=', False)]"/>
                                         <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
                                     </group>
@@ -114,8 +114,9 @@
                                         <field name="share_template_id" domain="[('model','=','slide.slide')]" groups="base.group_no_one"/>
                                     </group>
                                     <group name="display" string="Display">
-                                        <field name="visibility" widget="radio"/>
-                                        <field name="promote_strategy" widget="radio"
+                                        <field name="visibility" widget="radio" options="{'horizontal': true}"/>
+                                        <field string="Type" name="channel_type" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="promote_strategy" widget="selection"
                                         attrs="{'invisible': [('channel_type', '=', 'training')]}"/>
                                         <field name="promoted_slide_id"
                                                attrs="{'invisible': ['|', ('channel_type', '=', 'training'), ('promote_strategy', '!=', 'specific')],
@@ -298,7 +299,7 @@
                                         <div class="col-4 border-right">
                                             <a name="action_view_slides" type="object" class="d-flex flex-column align-items-center">
                                                 <span class="font-weight-bold"><field name="total_slides"/></span>
-                                                <span class="text-muted">Contents</span>
+                                                <span class="text-muted">Published Contents</span>
                                             </a>
                                         </div>
                                         <div class="col-4 border-right">
