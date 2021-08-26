@@ -26,7 +26,13 @@ class PosPaymentMethod(models.Model):
 
     # Odoo Payments by Adyen
     adyen_account_id = fields.Many2one('adyen.account', related='company_id.adyen_account_id')
-    adyen_terminal_id = fields.Many2one('adyen.terminal', string='Adyen Terminal', domain="[('adyen_account_id', '=', adyen_account_id)]")
+    adyen_terminal_id = fields.Many2one(
+        comodel_name='adyen.terminal',
+        string='Adyen Terminal',
+        help="In the format [Terminal model]-[Serial number].\nIf you don't see your terminal in "
+             "the selection, go to your Odoo Payment account and synchronize the terminals.",
+        domain="[('adyen_account_id', '=', adyen_account_id)]"
+    )
 
     adyen_latest_response = fields.Char(help='Technical field used to buffer the latest asynchronous notification from Adyen.', copy=False, groups='base.group_erp_manager')
     adyen_latest_diagnosis = fields.Char(help='Technical field used to determine if the terminal is still connected.', copy=False, groups='base.group_erp_manager')
