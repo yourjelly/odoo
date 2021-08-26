@@ -19,7 +19,6 @@ class ResConfigSettings(models.TransientModel):
         return []
 
     def set_values(self):
-        super(ResConfigSettings, self).set_values()
         # Ensure that settings on existing projects match the above fields
         projects = self.env["project.project"].search([])
         global_features = {  # key: config_flag, value: project_flag
@@ -44,3 +43,5 @@ class ResConfigSettings(models.TransientModel):
         update_projects(projects, global_features)
         # update for basic projects
         update_projects(projects.filtered_domain(self._get_basic_project_domain()), basic_project_features)
+
+        super(ResConfigSettings, self).set_values()
