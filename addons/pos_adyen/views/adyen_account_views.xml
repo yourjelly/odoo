@@ -7,6 +7,11 @@
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <button name="action_order_terminal" string="Order a Terminal" class="oe_highlight" type="object" attrs="{'invisible': [('adyen_uuid', '=', False)]}"/>
+                <button name="action_sync_terminals"
+                        string="Sync Terminals"
+                        class="btn-secondary"
+                        type="object"
+                        attrs="{'invisible': [('adyen_uuid', '=', False)]}"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Stores">
