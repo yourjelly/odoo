@@ -31,6 +31,9 @@ class AdyenAccount(models.Model):
             'url': url_join(onboarding_url, 'order_terminals?store_uuids=%s' % store_uuids),
         }
 
+    def action_sync_terminals(self):
+        self.env['adyen.terminal']._sync_adyen_terminals()
+
 
 class AdyenStore(models.Model):
     _name = 'adyen.store'
