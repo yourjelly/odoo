@@ -309,7 +309,7 @@ QUnit.module("Views", (hooks) => {
             arch: `
                 <pivot string="Partners">
                     <field name="foo" type="measure"/>
-                    <field name="foo2" type="measure" invisible="True"/>
+                    <field name="foo2" type="measure" invisible="1"/>
                 </pivot>`,
         });
 
