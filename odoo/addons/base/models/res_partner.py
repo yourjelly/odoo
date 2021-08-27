@@ -242,7 +242,7 @@ class Partner(models.Model):
     @api.depends('country_id')
     def _compute_vat(self):
         for company in self:
-            if not company.country_id.vat_label  :
+            if not company.country_id.vat_label :
                 company.vat_name = "Tax ID"
             else:
                 company.vat_name = company.country_id.vat_label
