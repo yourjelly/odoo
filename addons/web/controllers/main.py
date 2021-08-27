@@ -1088,6 +1088,8 @@ class Database(http.Controller):
                 raise Exception(_('Invalid database name. Only alphanumerical characters, underscore, hyphen and dot are allowed.'))
             # country code could be = "False" which is actually True in python
             country_code = post.get('country_code') or False
+            if not http.db_filter([name]): # todo check this does not leak info
+                raise Exception(_("Database does not match db_filter and won't be accessible."))
             dispatch_rpc('db', 'create_database', [master_pwd, name, bool(post.get('demo')), lang, password, post['login'], country_code, post['phone']])
             request.session.authenticate(name, post['login'], password)
             return request.redirect('/web')
@@ -1103,6 +1105,8 @@ class Database(http.Controller):
         try:
             if not re.match(DBNAME_PATTERN, new_name):
                 raise Exception(_('Invalid database name. Only alphanumerical characters, underscore, hyphen and dot are allowed.'))
+            if not http.db_filter([new_name]): # todo check this does not leak info
+                raise Exception(_("Database does not match db_filter and won't be accessible."))
             dispatch_rpc('db', 'duplicate_database', [master_pwd, name, new_name])
             request._cr = None  # duplicating a database leads to an unusable cursor
             return request.redirect('/web/database/manager')
@@ -1154,6 +1158,10 @@ class Database(http.Controller):
             db.check_super(master_pwd)
             with tempfile.NamedTemporaryFile(delete=False) as data_file:
                 backup_file.save(data_file)
+            if not re.match(DBNAME_PATTERN, name):
+                raise Exception(_('Invalid database name. Only alphanumerical characters, underscore, hyphen and dot are allowed.'))
+            if not http.db_filter([name]): # todo check this does not leak info
+                raise Exception(_("Database does not match db_filter and won't be accessible."))
             db.restore_db(name, data_file.name, str2bool(copy))
             return request.redirect('/web/database/manager')
         except Exception as e:
