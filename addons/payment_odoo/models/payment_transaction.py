@@ -66,11 +66,11 @@ class PaymentTransaction(models.Model):
                 'merchant_signature': signature,
                 'notification_url': urls.url_join(base_url, OdooController._notification_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
-                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,
+                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code
             },  # Proxy-specific data
         }
         return {
-            'data': json.dumps(data),
+            'data': json.dumps(data),  # TODO ANV why not in an embedded dict?
             'api_url': self.acquirer_id._odoo_get_api_url(),
         }
 
@@ -119,7 +119,7 @@ class PaymentTransaction(models.Model):
                 'payout': self.acquirer_id.odoo_adyen_account_id.account_code,
             },  # Proxy-specific data
         }
-        response_content = self.acquirer_id.odoo_adyen_account_id._adyen_rpc('v1/payments', data)
+        response_content = self.acquirer_id.odoo_adyen_account_id._adyen_rpc('v1/payments', data)  # TODO ANV where does that lead to?
 
         # Handle the payment request response
         _logger.info("payment request response:\n%s", pprint.pformat(response_content))
