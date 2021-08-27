@@ -53,11 +53,11 @@
             }" t-attf-style="{{ isXAxis ? undefined : 'padding-left: ' + getPadding(cell) + 'px;' }}" t-att-data-tooltip="cell.label" data-tooltip-position="right" t-on-click.prevent="onHeaderClick(cell, isXAxis ? 'col' : 'row')">
             <t t-if="cell.isLeaf and !cell.isFolded">
                 <PivotGroupByMenu
-                    tag="'span'"
                     toggler="'parent'"
                     cell="cell"
                     customGroupBys="model.meta.customGroupBys"
                     showActiveItems="false"
+                    position="isXAxis ? 'bottom-middle' : 'bottom-end'"
                     t-on-click.stop=""
                     t-on-dropdown-item-selected="onDropdownItemSelected(isXAxis ? 'col' : 'row')"
                     t-on-add-custom-group-by="onAddCustomGroupBy(isXAxis ? 'col' : 'row')"

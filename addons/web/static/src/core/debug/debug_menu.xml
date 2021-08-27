@@ -5,7 +5,6 @@
         <Dropdown class="o_debug_manager"
           beforeOpen="getElements"
           position="'bottom-end'"
-          tag="'li'"
           togglerClass="'btn btn-link'">
             <t t-set-slot="toggler">
                 <span class="fa fa-bug"/>

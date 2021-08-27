@@ -17,7 +17,7 @@
                     <li class="dropdown-divider" role="separator"/>
                 </t>
                 <t t-if="item.options">
-                    <Dropdown tag="'li'" togglerClass="'o_menu_item dropdown-item' + (item.isActive ? ' selected' : '')">
+                    <Dropdown togglerClass="'o_menu_item dropdown-item' + (item.isActive ? ' selected' : '')">
                         <t t-set-slot="toggler">
                             <t t-esc="item.description"/>
                         </t>

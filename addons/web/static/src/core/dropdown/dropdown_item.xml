@@ -6,10 +6,10 @@
       class="o_dropdown_item dropdown-item"
       t-on-click="onClick"
       t-att-title="props.title"
-      t-att-data-hotkey="props.hotkey"
+      t-att-data-hotkey="props.hotkey">
+      <t t-slot="default" />
+    </div>
 
-      t-slot="default"
-    />
   </t>
 
 </templates>

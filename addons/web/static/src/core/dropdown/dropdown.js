@@ -60,7 +60,6 @@ export class Dropdown extends Component {
         // Set up nested dropdowns ---------------------------------------------
         this.hasParentDropdown = this.env.inDropdown;
         useSubEnv({ inDropdown: true });
-        this.rootTag = this.props.tag || (this.hasParentDropdown ? "li" : "div");
 
         // Set up key navigation -----------------------------------------------
         useDropdownNavigation();
@@ -277,10 +276,6 @@ Dropdown.props = {
     },
     beforeOpen: {
         type: Function,
-        optional: true,
-    },
-    tag: {
-        type: String,
         optional: true,
     },
     togglerClass: {

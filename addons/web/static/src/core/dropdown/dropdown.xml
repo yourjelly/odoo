@@ -2,10 +2,9 @@
 <templates xml:space="preserve">
 
   <t t-name="web.Dropdown" owl="1">
-    <t t-tag="rootTag" class="d-none"></t>
     <div
       class="o_dropdown dropdown"
-      t-att-class="{ show: state.open, o_dropdown_item: hasParentDropdown and rootTag === 'li', dropdown_item: hasParentDropdown and rootTag === 'li' }"
+      t-att-class="{ show: state.open, o_dropdown_item: hasParentDropdown, 'dropdown-item': hasParentDropdown }"
       t-on-dropdown-item-selected="onItemSelected"
     >
       <button

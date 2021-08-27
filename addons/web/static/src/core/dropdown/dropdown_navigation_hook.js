@@ -20,7 +20,7 @@ const { hooks } = owl;
 const { useComponent, useRef } = hooks;
 
 const ACTIVE_MENU_ELEMENT_CLASS = "focus";
-const MENU_ELEMENTS_SELECTORS = [":scope > li.o_dropdown_item", ":scope > li.o_dropdown"];
+const MENU_ELEMENTS_SELECTORS = [":scope > .o_dropdown_item", ":scope > .o_dropdown"];
 const NEXT_ACTIVE_INDEX_FNS = {
     FIRST: () => 0,
     LAST: (list) => list.length - 1,
