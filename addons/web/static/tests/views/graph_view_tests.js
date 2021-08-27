@@ -1904,7 +1904,7 @@ QUnit.module("Views", (hooks) => {
             const item = [...graph.el.querySelectorAll(".o_menu_item")].find(
                 (el) => el.innerText === measure
             );
-            assert.hasClass(item, "active");
+            assert.hasClass(item, "selected");
         }
         await toggleMenu(graph, "Measures");
         checkMeasure("Count");
