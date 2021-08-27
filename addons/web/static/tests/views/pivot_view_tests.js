@@ -668,7 +668,7 @@ QUnit.module("Views", (hooks) => {
             ".o_cp_bottom_left .o_dropdown_menu .o_dropdown_item"
         );
         assert.strictEqual(measure.innerText, "Count");
-        assert.hasClass(measure, "active", "The count measure should be activated");
+        assert.hasClass(measure, "selected", "The count measure should be selected");
     });
 
     QUnit.test("pivot view can be reloaded", async function (assert) {
@@ -1345,14 +1345,14 @@ QUnit.module("Views", (hooks) => {
         await click(pivot.el.querySelector(".o_cp_bottom_left button.o_dropdown_toggler"));
         assert.doesNotHaveClass(
             $(pivot.el).find(".o_dropdown_item:contains(Count)"),
-            "active",
+            "selected",
             "the __count measure should not be selected"
         );
         await click($(pivot.el).find(".o_cp_bottom_left .o_dropdown_item:contains(Count)")[0]);
 
         assert.hasClass(
             $(pivot.el).find(".o_cp_bottom_left .o_dropdown_item:contains(Count)"),
-            "active",
+            "selected",
             "the __count measure should be selected"
         );
         assert.containsN(
@@ -1367,7 +1367,7 @@ QUnit.module("Views", (hooks) => {
 
         assert.doesNotHaveClass(
             $(pivot.el).find(".o_dropdown_item:contains(Count)")[0],
-            "active",
+            "selected",
             "the __count measure should not be selected"
         );
         assert.containsN(
@@ -2999,7 +2999,7 @@ QUnit.module("Views", (hooks) => {
             pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item").innerText,
             "Count"
         );
-        assert.hasClass(pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item"), "active");
+        assert.hasClass(pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item"), "selected");
     });
 
     QUnit.test("not use a many2one as a measure by default", async function (assert) {
@@ -3021,7 +3021,7 @@ QUnit.module("Views", (hooks) => {
             pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item").innerText,
             "Count"
         );
-        assert.hasClass(pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item"), "active");
+        assert.hasClass(pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item"), "selected");
     });
 
     QUnit.test(
@@ -3048,7 +3048,7 @@ QUnit.module("Views", (hooks) => {
             );
             assert.doesNotHaveClass(
                 pivot.el.querySelector(".o_cp_bottom_left .o_dropdown_item"),
-                "active"
+                "selected"
             );
         }
     );
