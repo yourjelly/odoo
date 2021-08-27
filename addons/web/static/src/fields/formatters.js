@@ -44,11 +44,11 @@ function insertThousandsSep(number, thousandsSep = ",", grouping = [3, 0]) {
  * @returns {string}
  */
 function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
-    number = Math.round(number);
     const decimals = options.decimals || 0;
     const minDigits = options.minDigits || 1;
     const d2 = Math.pow(10, decimals);
     const numberMagnitude = +number.toExponential().split("e+")[1];
+    number = Math.round(number * d2) / d2;
     // the case numberMagnitude >= 21 corresponds to a number
     // better expressed in the scientific format.
     if (numberMagnitude >= 21) {
@@ -72,7 +72,7 @@ function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
         }
     }
     const { decimalPoint, grouping, thousandsSep } = l10n;
-    const [integerPart, decimalPart] = String(number).split(".");
+    const [integerPart, decimalPart] = number.toFixed(decimals).split(".");
     const int = insertThousandsSep(sign * Number(integerPart), thousandsSep, grouping);
     if (!decimalPart) {
         return int + symbol;
@@ -282,7 +282,13 @@ export function formatMonetary(value, options = {}) {
     const currency = session.currencies[currencyId];
     const digits = (currency && currency.digits) || options.digits;
 
-    const formatted = options.humanReadable ? humanNumber(value) : formatFloat(value, { digits });
+    let formatted;
+    if (options.humanReadable) {
+        formatted = humanNumber(value, { decimals: digits[1] });
+    } else {
+        formatted = formatFloat(value, { digits });
+    }
+
     if (!currency || options.noSymbol) {
         return formatted;
     }
