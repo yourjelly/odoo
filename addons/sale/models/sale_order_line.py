@@ -238,7 +238,7 @@ class SaleOrderLine(models.Model):
     price_reduce_taxinc = fields.Monetary(compute='_get_price_reduce_tax', string='Price Reduce Tax inc', readonly=True, store=True)
     price_reduce_taxexcl = fields.Monetary(compute='_get_price_reduce_notax', string='Price Reduce Tax excl', readonly=True, store=True)
 
-    discount = fields.Float(compute='_compute_discount', string='Discount (%)', digits='Discount', default=0.0, readonly=True, store=True)
+    discount = fields.Float(compute='_compute_discount', string='Discount (%)', digits='Discount', default=0.0, readonly=False, store=True)
 
     product_id = fields.Many2one(
         'product.product', string='Product', domain="[('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
