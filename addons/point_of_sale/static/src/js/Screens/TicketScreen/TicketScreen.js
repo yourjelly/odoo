@@ -332,6 +332,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     (toRefundDetail) =>
                         toRefundDetail.orderline.orderUid === order.uid && !toRefundDetail.destinationOrderUid
                 )
+                .map((toRefundDetail) => toRefundDetail.qty)
                 .reduce((acc, val) => acc + val, 0);
             return !this.env.pos.isProductQtyZero(total);
         }
