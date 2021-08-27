@@ -160,7 +160,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (buffer == null || buffer == '') {
                 toRefundDetail.qty = 0;
             } else {
-                const quantity = parse.float(buffer);
+                const quantity = Math.abs(parse.float(buffer));
                 if (quantity > refundableQty) {
                     NumberBuffer.reset();
                     this.showPopup('ErrorPopup', {
