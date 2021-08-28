@@ -87,6 +87,7 @@
                             <ReprintReceiptButton order="_selectedSyncedOrder" />
                         </div>
                         <div class="subpads">
+                            <!-- We set so that the term 'Refund' is translated. -->
                             <t t-set="_actionName">Refund</t>
                             <ActionpadWidget client="getSelectedClient()" actionName="_actionName" actionToTrigger="'do-refund'" isActionButtonHighlighted="getHasItemsToRefund()" />
                             <NumpadWidget disabledModes="['price', 'discount']" activeMode="_selectedOrderlineId and 'quantity'" />

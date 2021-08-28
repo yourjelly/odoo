@@ -547,12 +547,6 @@ var PosDB = core.Class.extend({
     },
     get_cashier: function() {
         return this.load('cashier');
-    },
-    saveToRefundLines: function(toRefundLines) {
-        this.save('to-refund-lines', toRefundLines);
-    },
-    loadToRefundLines: function() {
-        return this.load('to-refund-lines');
     }
 });
 

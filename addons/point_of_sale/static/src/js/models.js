@@ -90,7 +90,7 @@ exports.PosModel = Backbone.Model.extend({
             },
             ui: {
                 selectedSyncedOrderId: null,
-                searchDetails: this.makeDefaultSearchDetails(),
+                searchDetails: this.getDefaultSearchDetails(),
                 filter: null,
                 // maps the order's backendId to it's selected orderline
                 selectedOrderlineIds: {},
@@ -130,7 +130,7 @@ exports.PosModel = Backbone.Model.extend({
             return self.after_load_server_data();
         });
     },
-    makeDefaultSearchDetails: function() {
+    getDefaultSearchDetails: function() {
         return {
             fieldName: 'RECEIPT_NUMBER',
             searchTerm: '',
@@ -155,6 +155,7 @@ exports.PosModel = Backbone.Model.extend({
         this.proxy.disconnect();
         this.barcode_reader.disconnect_from_proxy();
     },
+
     connect_to_proxy: function () {
         var self = this;
         return new Promise(function (resolve, reject) {
@@ -774,6 +775,8 @@ exports.PosModel = Backbone.Model.extend({
             // or when we intentionally delete the only concurrent order
             this.add_new_order({ silent: true });
         }
+        // Remove the link between the refund orderlines when deleting an order
+        // that contains a refund.
         for (const line of removed_order.get_orderlines()) {
             if (line.refunded_orderline_id) {
                 delete this.toRefundLines[line.refunded_orderline_id];
@@ -1092,22 +1095,28 @@ exports.PosModel = Backbone.Model.extend({
             self._after_flush_orders(orders);
         });
     },
+    /**
+     * Hook method after _flush_orders resolved or rejected.
+     * It aims to:
+     *   - remove the refund orderlines from toRefundLines
+     *   - invalidate cache of refunded synced orders
+     */
     _after_flush_orders: function(orders) {
-        const orderIdsToRefund = new Set();
+        const refundedOrderIds = new Set();
         for (const order of orders) {
             for (const line of order.data.lines) {
                 const refundDetail = this.toRefundLines[line[2].refunded_orderline_id];
                 if (!refundDetail) continue;
                 // Collect the backend id of the refunded orders.
-                orderIdsToRefund.add(refundDetail.orderline.orderBackendId);
+                refundedOrderIds.add(refundDetail.orderline.orderBackendId);
                 // Reset the refund detail for the orderline.
                 delete this.toRefundLines[refundDetail.orderline.id];
             }
         }
-        this._invalidateSyncedOrdersCache([...orderIdsToRefund]);
+        this._invalidateSyncedOrdersCache([...refundedOrderIds]);
     },
     _invalidateSyncedOrdersCache: function(ids) {
-        for (let id of ids) {
+        for (const id of ids) {
             delete this.TICKET_SCREEN_STATE.syncedOrders.cache[id];
         }
     },

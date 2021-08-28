@@ -144,7 +144,9 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 };
                 this.env.pos = new models.PosModel(posModelDefaultAttributes);
                 await this.env.pos.ready;
-                Object.assign(this.env.pos.toRefundLines, this.env.pos.db.loadToRefundLines() || {});
+                // Load the saved `env.pos.toRefundLines` from localStorage when
+                // the PosModel is ready.
+                Object.assign(this.env.pos.toRefundLines, this.env.pos.db.load('TO_REFUND_LINES') || {});
                 this._buildChrome();
                 this._closeOtherTabs();
                 this.env.pos.set(
@@ -335,8 +337,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.state.notification.isShown = false;
             this.state.notification.message = '';
         }
+        /**
+         * Save `env.pos.toRefundLines` in localStorage on beforeunload - closing the
+         * browser, reloading or going to other page.
+         */
         _onBeforeUnload() {
-            this.env.pos.db.saveToRefundLines(this.env.pos.toRefundLines);
+            this.env.pos.db.save('TO_REFUND_LINES', this.env.pos.toRefundLines);
         }
 
         // TO PASS AS PARAMETERS //

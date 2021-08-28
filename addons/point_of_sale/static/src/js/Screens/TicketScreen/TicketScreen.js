@@ -35,7 +35,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 ? this._state.ui
                 : {
                       selectedSyncedOrderId: null,
-                      searchDetails: this.env.pos.makeDefaultSearchDetails(),
+                      searchDetails: this.env.pos.getDefaultSearchDetails(),
                       filter: null,
                       selectedOrderlineIds: {},
                   };
@@ -84,6 +84,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     this._state.ui.selectedSyncedOrderId = clickedOrder.backendId;
                 }
                 if (!this.getSelectedOrderlineId()) {
+                    // Automatically select the first orderline of the selected order.
                     const firstLine = clickedOrder.get_orderlines()[0];
                     if (firstLine) {
                         this._state.ui.selectedOrderlineIds[clickedOrder.backendId] = firstLine.id;
@@ -147,13 +148,12 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const selectedOrderlineId = this.getSelectedOrderlineId();
             const orderline = order.orderlines.models.find((line) => line.id == selectedOrderlineId);
             if (!orderline) return NumberBuffer.reset();
-            if (!(selectedOrderlineId in this.env.pos.toRefundLines)) {
-                this.env.pos.toRefundLines[selectedOrderlineId] = this._createToRefundDetail(orderline);
-            }
-            const toRefundDetail = this.env.pos.toRefundLines[selectedOrderlineId];
+
+            const toRefundDetail = this._getToRefundDetail(orderline);
             // When already linked to an order, do not modify the to refund quantity.
             if (toRefundDetail.destinationOrderUid) return NumberBuffer.reset();
 
+            // TODO jcb - use of refundedQty seems wrong. It maybe better to use refunded_qty.
             const refundableQty = toRefundDetail.orderline.qty - toRefundDetail.orderline.refundedQty;
             if (refundableQty <= 0) return NumberBuffer.reset();
 
@@ -182,13 +182,21 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         async _onDoRefund() {
             const order = this.getSelectedSyncedOrder();
             const customer = order.get_client();
-            const allToRefund = Object.values(this.env.pos.toRefundLines).filter(
+
+            // Select the lines from toRefundLines (can come from different orders)
+            // such that:
+            //   - the quantity to refund is not zero
+            //   - if there is customer in the selected paid order, select the items
+            //     with the same orderPartnerId
+            //   - it is not yet linked to an active order (no destinationOrderUid)
+            const allToRefundDetails = Object.values(this.env.pos.toRefundLines).filter(
                 ({ qty, orderline, destinationOrderUid }) =>
                     !this.env.pos.isProductQtyZero(qty) &&
                     (customer ? orderline.orderPartnerId == customer.id : true) &&
                     !destinationOrderUid
             );
-            if (allToRefund.length == 0) return;
+            if (allToRefundDetails.length == 0) return;
+
             // The order that will contain the refund orderlines.
             // Use the destinationOrder from props if the order to refund has the same
             // customer as the destinationOrder.
@@ -196,7 +204,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 this.props.destinationOrder && customer === this.props.destinationOrder.get_client()
                     ? this.props.destinationOrder
                     : this.env.pos.add_new_order({ silent: true });
-            for (const refundDetail of allToRefund) {
+
+            // Add orderline for each toRefundDetail to the destinationOrder.
+            for (const refundDetail of allToRefundDetails) {
                 const { qty, orderline } = refundDetail;
                 await destinationOrder.add_product(this.env.pos.db.get_product_by_id(orderline.productId), {
                     quantity: -qty,
@@ -208,9 +218,12 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 });
                 refundDetail.destinationOrderUid = destinationOrder.uid;
             }
+
+            // Set the customer to the destinationOrder.
             if (customer && !destinationOrder.get_client()) {
                 destinationOrder.set_client(customer);
             }
+
             this._onCloseScreen();
         }
         //#endregion
@@ -338,23 +351,36 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         //#endregion
         //#region PRIVATE METHODS
-        _createToRefundDetail(orderline) {
-            const customer = orderline.order.get_client();
-            const orderPartnerId = customer ? customer.id : false;
-            return {
-                qty: 0,
-                orderline: {
-                    id: orderline.id,
-                    productId: orderline.product.id,
-                    price: orderline.price,
-                    qty: orderline.quantity,
-                    refundedQty: orderline.refunded_qty,
-                    orderUid: orderline.order.uid,
-                    orderBackendId: orderline.order.backendId,
-                    orderPartnerId,
-                },
-                destinationOrderUid: false,
-            };
+        /**
+         * Returns the corresponding toRefundDetail of the given orderline.
+         * SIDE-EFFECT: Automatically creates a toRefundDetail object for
+         * the given orderline if it doesn't exist and returns it.
+         * @param {models.Orderline} orderline
+         * @returns
+         */
+        _getToRefundDetail(orderline) {
+            if (orderline.id in this.env.pos.toRefundLines) {
+                return this.env.pos.toRefundLines[orderline.id];
+            } else {
+                const customer = orderline.order.get_client();
+                const orderPartnerId = customer ? customer.id : false;
+                const newToRefundDetail = {
+                    qty: 0,
+                    orderline: {
+                        id: orderline.id,
+                        productId: orderline.product.id,
+                        price: orderline.price,
+                        qty: orderline.quantity,
+                        refundedQty: orderline.refunded_qty,
+                        orderUid: orderline.order.uid,
+                        orderBackendId: orderline.order.backendId,
+                        orderPartnerId,
+                    },
+                    destinationOrderUid: false,
+                };
+                this.env.pos.toRefundLines[orderline.id] = newToRefundDetail;
+                return newToRefundDetail;
+            }
         }
         _setOrder(order) {
             this.env.pos.set_order(order);
