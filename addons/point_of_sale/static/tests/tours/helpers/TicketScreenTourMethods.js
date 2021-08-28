@@ -162,17 +162,17 @@ odoo.define('point_of_sale.tour.TicketScreenTourMethods', function (require) {
                 },
             ];
         }
-        toRefundIs(qty) {
+        toRefundTextContains(text) {
             return [
                 {
-                    trigger: `.ticket-screen .to-refund-highlight:contains("${qty}")`,
+                    trigger: `.ticket-screen .to-refund-highlight:contains("${text}")`,
                 },
             ];
         }
-        refundedQtyIs(qty) {
+        refundedNoteContains(text) {
             return [
                 {
-                    trigger: `.ticket-screen .refund-note:contains("${qty}")`,
+                    trigger: `.ticket-screen .refund-note:contains("${text}")`,
                 },
             ];
         }

@@ -30,7 +30,7 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     Chrome.do.clickTicketButton();
     TicketScreen.check.nthRowContains(3, 'Brandon Freeman');
     TicketScreen.do.clickNewTicket();
-    ProductScreen.exec.addOrderline('Desk Pad', '1', '4');
+    ProductScreen.exec.addOrderline('Desk Pad', '2', '4');
     ProductScreen.do.clickPayButton();
     PaymentScreen.do.clickPaymentMethod('Bank');
     PaymentScreen.do.clickValidate();
@@ -97,7 +97,7 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     TicketScreen.do.selectOrder('-0003');
     TicketScreen.check.customerIs('Colleen Diaz');
     TicketScreen.do.clickOrderline('Desk Pad');
-    TicketScreen.do.pressNumpad('2');
+    TicketScreen.do.pressNumpad('3');
     // Error should show because 2 is more than the number
     // that can be refunded.
     ErrorPopup.do.clickConfirm();
@@ -108,10 +108,26 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     TicketScreen.do.selectOrder('-0003');
     TicketScreen.do.clickOrderline('Desk Pad');
     TicketScreen.do.pressNumpad('1');
-    TicketScreen.check.toRefundIs('1.00');
+    TicketScreen.check.toRefundTextContains('To Refund: 1.00');
     TicketScreen.do.confirmRefund();
     ProductScreen.check.isShown();
     ProductScreen.check.selectedOrderlineHas('Desk Pad', '-1.00');
+    // Try changing the refund line to positive number.
+    // Error popup should show.
+    ProductScreen.do.pressNumpad('2');
+    ErrorPopup.do.clickConfirm();
+    // Change the refund line quantity to -3 -- not allowed
+    // so error popup.
+    ProductScreen.do.pressNumpad('+/- 3');
+    ErrorPopup.do.clickConfirm();
+    // Change the refund line quantity to -2 -- allowed.
+    ProductScreen.do.pressNumpad('+/- 2');
+    ProductScreen.check.selectedOrderlineHas('Desk Pad', '-2.00');
+    // Check if the amount being refunded changed to 2.
+    ProductScreen.do.clickRefund();
+    TicketScreen.do.selectOrder('-0003');
+    TicketScreen.check.toRefundTextContains('Refunding 2.00');
+    TicketScreen.do.clickDiscard();
     // Pay the refund order.
     ProductScreen.do.clickPayButton();
     PaymentScreen.do.clickPaymentMethod('Bank');
@@ -121,7 +137,7 @@ odoo.define('point_of_sale.tour.TicketScreen', function (require) {
     // Check refunded quantity.
     ProductScreen.do.clickRefund();
     TicketScreen.do.selectOrder('-0003');
-    TicketScreen.check.refundedQtyIs('1.00');
+    TicketScreen.check.refundedNoteContains('2.00 Refunded');
 
     Tour.register('TicketScreenTour', { test: true, url: '/pos/ui' }, getSteps());
 });
