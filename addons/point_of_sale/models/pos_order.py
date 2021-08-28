@@ -291,6 +291,7 @@ class PosOrder(models.Model):
     is_refunded = fields.Boolean(compute='_compute_refund_related_fields')
     refunded_order_ids = fields.Many2many('pos.order', compute='_compute_refund_related_fields')
     has_refundable_lines = fields.Boolean('Has Refundable Lines', compute='_compute_has_refundable_lines')
+    refunded_orders_count = fields.Integer(compute='_compute_refund_related_fields')
 
     @api.depends('lines.refund_orderline_ids', 'lines.refunded_orderline_id')
     def _compute_refund_related_fields(self):
@@ -298,6 +299,7 @@ class PosOrder(models.Model):
             order.refund_orders_count = len(order.mapped('lines.refund_orderline_ids.order_id'))
             order.is_refunded = order.refund_orders_count > 0
             order.refunded_order_ids = order.mapped('lines.refunded_orderline_id.order_id')
+            order.refunded_orders_count = len(order.refunded_order_ids)
 
     api.depends('lines.refunded_qty', 'lines.qty')
     def _compute_has_refundable_lines(self):
@@ -456,6 +458,15 @@ class PosOrder(models.Model):
             'res_model': 'pos.order',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.mapped('lines.refund_orderline_ids.order_id').ids)],
+        }
+
+    def action_view_refunded_orders(self):
+        return {
+            'name': _('Refunded Orders'),
+            'view_mode': 'tree,form',
+            'res_model': 'pos.order',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.refunded_order_ids.ids)],
         }
 
     def _is_pos_order_paid(self):

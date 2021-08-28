@@ -13,6 +13,7 @@
                         attrs="{'invisible':['|', ('state','=','draft'), ('has_refundable_lines', '=', False)]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,paid,done" />
                     <field name="has_refundable_lines" invisible="1" />
+                    <field name="refunded_orders_count" invisible="1" />
                 </header>
                 <sheet>
                 <field name="failed_pickings" invisible="1"/>
@@ -37,8 +38,15 @@
                         type="object"
                         class="oe_stat_button"
                         icon="fa-undo"
-                        attrs="{'invisible':[('is_refunded', '==', False)]}">
+                        attrs="{'invisible':[('is_refunded', '=', False)]}">
                         <field name="refund_orders_count" widget="statinfo" string="Refunds" />
+                    </button>
+                    <button name="action_view_refunded_orders"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shopping-cart "
+                        attrs="{'invisible':[('refunded_orders_count', '=', 0)]}">
+                        <field name="refunded_orders_count" widget="statinfo" string="Refunded Orders" />
                     </button>
                 </div>
                 <group col="4" colspan="4" name="order_fields">
