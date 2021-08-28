@@ -774,6 +774,11 @@ exports.PosModel = Backbone.Model.extend({
             // or when we intentionally delete the only concurrent order
             this.add_new_order({ silent: true });
         }
+        for (const line of removed_order.get_orderlines()) {
+            if (line.refunded_orderline_id) {
+                delete this.toRefundLines[line.refunded_orderline_id];
+            }
+        }
     },
 
     // returns the user who is currently the cashier for this point of sale
@@ -1096,7 +1101,7 @@ exports.PosModel = Backbone.Model.extend({
                 // Collect the backend id of the refunded orders.
                 orderIdsToRefund.add(refundDetail.orderline.orderBackendId);
                 // Reset the refund detail for the orderline.
-                delete this.env.pos.toRefundLines[refundDetail.orderline.id];
+                delete this.toRefundLines[refundDetail.orderline.id];
             }
         }
         this._invalidateSyncedOrdersCache([...orderIdsToRefund]);
