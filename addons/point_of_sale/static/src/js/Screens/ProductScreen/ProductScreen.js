@@ -326,6 +326,18 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         async _onClickCustomer() {
             // IMPROVEMENT: This code snippet is very similar to selectClient of PaymentScreen.
             const currentClient = this.currentOrder.get_client();
+            if (currentClient && this.currentOrder.getHasRefundLines()) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t("Can't change customer"),
+                    body: _.str.sprintf(
+                        this.env._t(
+                            "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer."
+                        ),
+                        currentClient.name
+                    ),
+                });
+                return;
+            }
             const { confirmed, payload: newClient } = await this.showTempScreen(
                 'ClientListScreen',
                 { client: currentClient }

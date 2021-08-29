@@ -3626,6 +3626,14 @@ exports.Order = Backbone.Model.extend({
     is_to_ship: function(){
         return this.to_ship;
     },
+    getHasRefundLines: function() {
+        for (const line of this.get_orderlines()) {
+            if (line.refunded_orderline_id) {
+                return true;
+            }
+        }
+        return false;
+    },
 });
 
 var OrderCollection = Backbone.Collection.extend({
