@@ -14,7 +14,8 @@ from werkzeug import urls
 from odoo import fields as odoo_fields, http, tools, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, AccessError, MissingError, UserError, AccessDenied
 from odoo.http import content_disposition, Controller, request, route
-from odoo.tools import consteq
+from odoo.tools import consteq, email_normalize
+from odoo.tools.misc import attrgetter
 
 # --------------------------------------------------
 # Misc tools
@@ -182,7 +183,7 @@ class CustomerPortal(Controller):
         """
         return {
             'my_account_description': [{
-                'description': _("Addresses, Payments, Security"),
+                'description': _("Addresses, Payments, Security, Users"),
             }]
         }
 
@@ -307,6 +308,67 @@ class CustomerPortal(Controller):
 
     def on_account_update(self, values, partner):
         pass
+
+    @route('/my/company_access/invite', type='http', auth='user', website=True, methods=['POST'])
+    def invite_portal_user(self, user_email=None, **kw):
+        user_email = email_normalize(user_email)
+        values = self._prepare_company_access_render_values()
+        partner = request.env.user.partner_id
+        commercial_partners = partner.commercial_partner_id.child_ids
+        portal_users = commercial_partners.user_ids.filtered(lambda user: user._is_portal())
+
+        if user_email:
+            invited_partner = commercial_partners.filtered(lambda partner: partner.email == user_email)
+            if len(invited_partner) == 1:
+                try:
+                    invited_partner.action_grant_portal_access()
+                    invited_user = max(invited_partner.user_ids.filtered(lambda user: user._is_portal()), default=self.env['res.users'], key=attrgetter('create_date'))
+                    values['success'] = _("Invitation sent")
+                    portal_users += invited_user
+                except UserError as e:
+                    values['error'] = str(e)
+            elif not invited_partner:
+                values['error'] = _('No registered partner with the email "%(email)s" in your company, please ask an administrator to register it first.',
+                                    email=user_email)
+            else:
+                values['error'] = _('Multiple partners from your company are currently using the email address "%(email)s", please ask an administrator to sort this out.',
+                                    email=user_email)
+        values['portal_users'] = portal_users.sorted(lambda user: user.name)
+        return request.render("portal.portal_my_company_access", values)
+
+    @route('/my/company_access/<int:user_id>/reinvite', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    def reinvite_portal_user(self, user_id, **kw):
+        values = self._prepare_company_access_render_values()
+        partner = request.env.user.partner_id
+        commercial_partners = partner.commercial_partner_id.child_ids
+        portal_users = commercial_partners.sudo().user_ids.filtered(lambda user: user._is_portal())
+        user = request.env['res.users'].sudo().browse(user_id).exists()
+
+        if user in portal_users:
+            invited_partner = user.partner_id
+            try:
+                invited_partner.action_resend_portal_access_invitation(user=user)
+                values['success'] = _("Invitation sent")
+            except UserError as e:
+                values['error'] = str(e)
+        else:
+            values['error'] = _("The partner does not exists or you do not have the rights to reinvite them, please ask an administrator to do it for you.")
+        values['portal_users'] = portal_users.sorted(lambda u: u.name)
+        return request.render("portal.portal_my_company_access", values)
+
+    @route('/my/company_access', type='http', auth='user', website=True, methods=['GET'])
+    def company_portal_access(self, **kw):
+        values = self._prepare_company_access_render_values()
+        partner = request.env.user.partner_id
+        commercial_partners = partner.commercial_partner_id.child_ids
+        portal_users = commercial_partners.user_ids.filtered(lambda user: user._is_portal())
+        values['portal_users'] = portal_users.sorted(lambda user: user.name)
+        return request.render("portal.portal_my_company_access", values)
+
+    def _prepare_company_access_render_values(self):
+        values = self._prepare_portal_layout_values()
+        values['page_name'] = 'company_access'
+        return values
 
     @route('/my/security', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def security(self, **post):
@@ -562,7 +624,7 @@ class CustomerPortal(Controller):
 
 def get_error(e, path=''):
     """ Recursively dereferences `path` (a period-separated sequence of dict
-    keys) in `e` (an error dict or value), returns the final resolution IIF it's
+    keys) in `e` (an message dict or value), returns the final resolution IIF it's
     an str, otherwise returns None
     """
     for k in (path.split('.') if path else []):

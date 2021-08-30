@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_company_access">
+        <t t-call="portal.portal_layout"><div>
+            <t t-set="page_title" t-value="'My Company Portal Access'"/>
+            <t t-set="additional_title" t-value="page_title"/>
+            <t t-set="show_side_bar" t-value="True"/>
+            <t t-if="not portal_users">
+                <div class="alert alert-warning mt8" role="alert">
+                    There is no portal user.
+                </div>
+            </t>
+            <t t-else="">
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th class="text-right">Last connection date</th>
+                        </tr>
+                    </thead>
+                    <tr t-foreach="portal_users" t-as="portal_user">
+                        <td><span t-field="portal_user.name" t-att-title="portal_user.name"/></td>
+                        <td><span t-field="portal_user.email" t-att-title="portal_user.email"/></td>
+                        <td class="text-right">
+                            <form t-if="not portal_user.login_date" t-attf-action="/my/company_access/#{ portal_user.id }/reinvite" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-primary btn-sm" title="This portal user has never logged in">
+                                    <i class="fa fa-envelope"/> Resend Invitation</button>
+                            </form>
+                            <span t-else="" t-field="portal_user.login_date"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </div>
+        <div class="mt-4">
+            <section>
+                <div class="alert alert-success" role="alert" t-if="success">
+                    <t t-out="success"/>
+                </div>
+                <div class="alert alert-danger" role="alert" t-if="error">
+                    <t t-out="error"/>
+                </div>
+                <form action="/my/company_access/invite" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="d-flex">
+                        <input type="email" class="form-control form-control mx-auto"
+                            name="user_email" required="required"
+                            title="Enter an email address to invite a partner from your company to this portal"
+                            placeholder="Enter an email address to invite a partner from your company to this portal"/>
+                        <button type="submit" class="btn btn-primary col-3 ml-1">Add User</button>
+                    </div>
+                </form>
+            </section>
+        </div></t>
+    </template>
+</odoo>

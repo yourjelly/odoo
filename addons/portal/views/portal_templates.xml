@@ -93,7 +93,7 @@
                 </li>
                 <li t-if="page_title == 'Address'" class="breadcrumb-item active"><t t-esc="page_title"/></li>
             </t>
-            <li t-if="page_name == 'security'" class="breadcrumb-item active"><t t-esc="page_title"/></li>
+            <li t-if="page_name in ('security', 'company_access')" class="breadcrumb-item active"><t t-esc="page_title"/></li>
         </ol>
     </template>
 
@@ -124,6 +124,9 @@
                 <div class="row">
                     <a role="button" href="/my/security" t-attf-class="btn btn-link #{'font-weight-bold' if page_name == 'security' else ''}">Password &amp; Security</a>
                 </div>
+                <div class="row">
+                    <a role="button" href="/my/company_access" t-attf-class="btn btn-link #{'font-weight-bold' if page_name == 'company_access' else ''}">My Company Portal Access</a>
+                </div>
             </div>
         </div>
     </template>
@@ -146,7 +149,7 @@
                 <div class="container mb64">
                     <t t-if="show_side_bar">
                         <div class="row justify-content-between mt-4">
-                            <div t-attf-class="col-12 col-md col-lg-8">
+                            <div t-attf-class="col-12 col-md col-lg-9">
                                 <t t-out="0"/>
                             </div>
                             <t t-call="portal.portal_my_account_sidebar"></t>
