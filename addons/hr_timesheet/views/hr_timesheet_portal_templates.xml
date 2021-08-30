@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="portal_layout" name="Portal layout: timesheet menu entry" inherit_id="portal.portal_breadcrumbs" priority="35">
+    <template id="portal_layout" name="Portal layout: timesheet menu entry" inherit_id="portal.portal_breadcrumb" priority="35">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
             <li t-if="page_name == 'timesheet' or timesheet" t-attf-class="breadcrumb-item #{'active' if not timesheet else ''}">
                 <t>Timesheets</t>
@@ -10,11 +10,11 @@
     </template>
 
     <template id="portal_my_home_timesheet" name="Show Timesheets" customize_show="True"  inherit_id="portal.portal_my_home" priority="45">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-call="portal.portal_docs_entry">
+        <xpath expr="//div[hasclass('o_portal_overview')]" position="inside">
+            <t t-call="portal.portal_overview_card">
                 <t t-set="title">Timesheets</t>
                 <t t-set="url" t-value="'/my/timesheets'"/>
-                <t t-set="placeholder_count" t-value="'timesheet_count'"/>
+                <t t-set="description_data" t-value="hr_timesheet_counters"/>
             </t>
         </xpath>
     </template>

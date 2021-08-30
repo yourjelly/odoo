@@ -287,7 +287,7 @@
         </h4>
     </template>
 
-    <template id="portal_breadcrumbs_group" name="Portal layout : mail group menu entry" inherit_id="portal.portal_breadcrumbs" priority="15">
+    <template id="portal_breadcrumb_group" name="Portal layout : mail group menu entry" inherit_id="portal.portal_breadcrumb" priority="15">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
             <t t-if="page_name == 'groups'">
                 <li class="breadcrumb-item"><a href="/groups">Mailing Lists</a></li>

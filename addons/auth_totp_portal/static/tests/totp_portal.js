@@ -74,11 +74,14 @@ tour.register('totportal_login_enabled', {
     }
 }, {
     content: "check we're logged in",
-    trigger: "h3:contains(Documents)",
+    trigger: "h3:contains(Overview)",
     run: () => {}
 }, {
+    content: "go back to my account",
+    trigger: "a:contains(My Account)",
+},{
     content: "go back to security",
-    trigger: "a:contains(Security)",
+    trigger: "a:contains(Password & Security)",
 },{
     content: "Open totp wizard",
     trigger: 'button#auth_totp_portal_disable',
@@ -118,7 +121,7 @@ tour.register('totportal_login_disabled', {
     trigger: 'button:contains("Log in")',
 }, {
     content: "check we're logged in",
-    trigger: "h3:contains(Documents)",
+    trigger: "h3:contains(Overview)",
     run: () => {}
 }]);
 });

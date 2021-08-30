@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="portal_my_home_menu_sale" name="Portal layout : sales menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+    <template id="portal_my_home_menu_sale" name="Portal layout : sales menu entries" inherit_id="portal.portal_breadcrumb" priority="20">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
             <li t-if="page_name == 'quote' or sale_order and sale_order.state in ('sent', 'cancel')" t-attf-class="breadcrumb-item #{'active ' if not sale_order else ''}">
                 <a t-if="sale_order" t-attf-href="/my/quotes?{{ keep_query() }}">Quotations</a>
@@ -19,16 +19,16 @@
     </template>
 
     <template id="portal_my_home_sale" name="Show Quotations / Sales Orders" customize_show="True" inherit_id="portal.portal_my_home" priority="20">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-call="portal.portal_docs_entry">
+        <xpath expr="//div[hasclass('o_portal_overview')]" position="inside">
+            <t t-call="portal.portal_overview_card">
                 <t t-set="title">Quotations</t>
                 <t t-set="url" t-value="'/my/quotes'"/>
-                <t t-set="placeholder_count" t-value="'quotation_count'"/>
+                <t t-set="description_data" t-value="sale_quotation_counters"/>
             </t>
-            <t t-call="portal.portal_docs_entry">
+            <t t-call="portal.portal_overview_card">
                 <t t-set="title">Sales Orders</t>
                 <t t-set="url" t-value="'/my/orders'"/>
-                <t t-set="placeholder_count" t-value="'order_count'"/>
+                <t t-set="description_data" t-value="sale_order_counters"/>
             </t>
         </xpath>
     </template>

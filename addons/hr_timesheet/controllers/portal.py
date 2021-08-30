@@ -17,12 +17,28 @@ from odoo.addons.project.controllers.portal import ProjectCustomerPortal
 
 class TimesheetCustomerPortal(CustomerPortal):
 
-    def _prepare_home_portal_values(self, counters):
-        values = super()._prepare_home_portal_values(counters)
+    def _prepare_portal_counters_values(self, counters):
+        values = super()._prepare_portal_counters_values(counters)
+        Timesheet = request.env['account.analytic.line']
+        domain = Timesheet._timesheet_get_portal_domain()
         if 'timesheet_count' in counters:
-            Timesheet = request.env['account.analytic.line']
-            domain = Timesheet._timesheet_get_portal_domain()
             values['timesheet_count'] = Timesheet.sudo().search_count(domain)
+        if 'remaining_hours' in counters:
+            timesheets_group = Timesheet.sudo().read_group(domain, ['project_id'], ['project_id'])
+            project_ids = [timesheet_group['project_id'][0] for timesheet_group in timesheets_group]
+            projects = request.env['project.project'].sudo().browse(project_ids)
+            values['remaining_hours'] = sum(projects.mapped('remaining_hours'))
+        return values
+
+    def _prepare_portal_overview_values(self):
+        values = super()._prepare_portal_overview_values()
+        values['hr_timesheet_counters'] = [{
+            'description': _("Timesheets"),
+            'counter': 'timesheet_count',
+        }, {
+            'description': _("Remaining Hours"),
+            'counter': 'remaining_hours',
+        }]
         return values
 
     def _get_searchbar_inputs(self):
