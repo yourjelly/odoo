@@ -546,9 +546,15 @@ class SurveyQuestionAnswer(models.Model):
     _order = 'sequence, id'
     _description = 'Survey Label'
 
+    #question and question related fields
     question_id = fields.Many2one('survey.question', string='Question', ondelete='cascade')
-    matrix_question_id = fields.Many2one('survey.question', string='Question (as matrix row)', ondelete='cascade')
+    question_type = fields.Selection(related='question_id.question_type')
     sequence = fields.Integer('Label Sequence order', default=10)
+    scoring_type = fields.Selection(related='question_id.scoring_type')
+    allow_value_image = fields.Boolean(related='question_id.allow_value_image')
+    matrix_question_id = fields.Many2one('survey.question', string='Question (as matrix row)', ondelete='cascade')
+
+    #answer related fields
     value = fields.Char('Suggested value', translate=True, required=True)
     value_image = fields.Image('Image', max_width=256, max_height=256)
     is_correct = fields.Boolean('Is a correct answer')

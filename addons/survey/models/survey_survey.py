@@ -19,6 +19,7 @@ class Survey(models.Model):
     _description = 'Survey'
     _rec_name = 'title'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = "create_date desc"
 
     def _get_default_access_token(self):
         return str(uuid.uuid4())
@@ -64,15 +65,15 @@ class Survey(models.Model):
         ('one_page', 'One page with all the questions'),
         ('page_per_section', 'One page per section'),
         ('page_per_question', 'One page per question')],
-        string="Layout", required=True, default='one_page')
+        string="Pagination", required=True, default='one_page')
     questions_selection = fields.Selection([
         ('all', 'All questions'),
-        ('random', 'Randomized per section')],
-        string="Selection", required=True, default='all',
+        ('random', 'Randomized per Section')],
+        string="Question Draft", required=True, default='all',
         help="If randomized is selected, you can configure the number of random questions by section. This mode is ignored in live session.")
     progression_mode = fields.Selection([
-        ('percent', 'Percentage'),
-        ('number', 'Number')], string='Progression Mode', default='percent',
+        ('percent', 'Percentage left'),
+        ('number', 'Number')], string='Display Progress as', default='percent',
         help="If Number is selected, it will display the number of questions answered on the total number of question to answer.")
     # attendees
     user_input_ids = fields.One2many('survey.user_input', 'survey_id', string='User responses', readonly=True, groups='survey.group_survey_user')
@@ -82,13 +83,13 @@ class Survey(models.Model):
         ('token', 'Invited people only')], string='Access Mode',
         default='public', required=True)
     access_token = fields.Char('Access Token', default=lambda self: self._get_default_access_token(), copy=False)
-    users_login_required = fields.Boolean('Login Required', help="If checked, users have to login before answering even with a valid token.")
+    users_login_required = fields.Boolean('Require Login', help="If checked, users have to login before answering even with a valid token.")
     users_can_go_back = fields.Boolean('Users can go back', help="If checked, users can go back to previous pages.")
     users_can_signup = fields.Boolean('Users can signup', compute='_compute_users_can_signup')
     # statistics
     answer_count = fields.Integer("Registered", compute="_compute_survey_statistic")
     answer_done_count = fields.Integer("Attempts", compute="_compute_survey_statistic")
-    answer_score_avg = fields.Float("Avg Score %", compute="_compute_survey_statistic")
+    answer_score_avg = fields.Float("Avg Score (%)", compute="_compute_survey_statistic")
     answer_duration_avg = fields.Float("Average Duration", compute="_compute_answer_duration_avg", help="Average duration of the survey (in hours)")
     success_count = fields.Integer("Success", compute="_compute_survey_statistic")
     success_ratio = fields.Integer("Success Ratio", compute="_compute_survey_statistic")
@@ -98,7 +99,7 @@ class Survey(models.Model):
         ('scoring_with_answers', 'Scoring with answers at the end'),
         ('scoring_without_answers', 'Scoring without answers at the end')],
         string="Scoring", required=True, default='no_scoring')
-    scoring_success_min = fields.Float('Success %', default=80.0)
+    scoring_success_min = fields.Float('Required Score (%)', default=80.0)
     # attendees context: attempts and time limitation
     is_attempts_limited = fields.Boolean('Limited number of attempts', help="Check this option if you want to limit the number of attempts per user",
                                          compute="_compute_is_attempts_limited", store=True, readonly=False)
@@ -109,7 +110,7 @@ class Survey(models.Model):
     certification = fields.Boolean('Is a Certification', compute='_compute_certification',
                                    readonly=False, store=True)
     certification_mail_template_id = fields.Many2one(
-        'mail.template', 'Email Template',
+        'mail.template', 'Certified Email Template',
         domain="[('model', '=', 'survey.user_input')]",
         help="Automated email sent to the user when he succeeds the certification, containing his certification document.")
     certification_report_layout = fields.Selection([

@@ -137,7 +137,8 @@
                 <t t-else="">
                     <div t-if="survey.is_time_limited">
                         <p>
-                            <span>Time limit for this survey: </span>
+                            <span t-if="not survey.certification">Time limit for this survey: </span>
+                            <span t-else="">Time limit for this certification: </span>
                             <span class="font-weight-bold text-danger" t-field="survey.time_limit" t-options="{'widget': 'duration', 'unit': 'minute'}"></span>
                         </p>
                     </div>
@@ -396,15 +397,15 @@
     </template>
 
     <template id="question_simple_choice" name="Question: simple choice">
-        <t t-set="answer_line" t-value="answer_lines.filtered(lambda line: line.suggested_answer_id)"/>
         <t t-set="comment_line" t-value="answer_lines.filtered(lambda line: line.value_char_box)"/>
         <div class="row o_survey_form_choice"
              t-att-data-name="question.id"
              data-question-type="simple_choice_radio">
-            <t t-set="item_idx" t-value="0"/>
             <div t-attf-class="col-lg-12 d-flex flex-wrap">
                 <t t-set="has_correct_answer" t-value="scoring_display_correction and any(label.is_correct for label in question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="len(question.suggested_answer_ids)"/>
                 <t t-foreach='question.suggested_answer_ids' t-as='label'>
+                    <t t-set="answer_line" t-value="answer_lines.filtered(lambda line: line.suggested_answer_id)"/>
                     <t t-set="item_idx" t-value="label_index"/>
                     <t t-set="answer_selected" t-value="answer_line and answer_line.suggested_answer_id.id == label.id"/>
                     <t t-set="is_correct" t-value="label.answer_score > 0.0"/>
@@ -414,20 +415,22 @@
                     <t t-set="answer_class" t-elif="is_correct" t-value="'bg-success'" />
                     <t t-set="answer_class" t-elif="not is_correct" t-value="'bg-danger'" />
 
-                    <label t-att-for="str(question.id) + '_' + str(label.id)"
-                           t-att-class="'o_survey_choice_btn mr-2 mb-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_selected else '')">
-                        <t t-call="survey.survey_selection_key">
-                            <t t-set="selection_key_class" t-value="'position-relative o_survey_radio_btn float-left d-flex'"/>
-                        </t>
-                        <span class="ml-2" t-field='label.value'/>
-                        <input t-att-id="str(question.id) + '_' + str(label.id)" type="radio" t-att-value='label.id' class="o_survey_form_choice_item invisible position-absolute"
-                               t-att-name='question.id'
-                               t-att-checked="answer_line and answer_line.suggested_answer_id.id == label.id and 'checked' or None"
-                               t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"/>
-                        <i class="fa fa-check-circle float-right mt-1 position-relative"></i>
-                        <i class="fa fa-circle-thin float-right mt-1 position-relative"></i>
-                        <t t-call="survey.question_suggested_value_image"/>
-                    </label>
+                    <div t-att-class="'%s pl-0 pr-2' % ('col-6' if answers_count in [1, 2, 4] else 'col-4')">   
+                        <label t-att-for="str(question.id) + '_' + str(label.id)"
+                            t-att-class="'col-12 o_survey_choice_btn mr-2 mb-2 py-3 pl-4 pr-5 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_line else '')">
+                            <t t-call="survey.survey_selection_key">
+                                <t t-set="selection_key_class" t-value="'position-relative o_survey_radio_btn float-left d-flex'"/>
+                            </t>
+                            <span t-field='label.value'/>
+                            <input t-att-id="str(question.id) + '_' + str(label.id)" type="radio" t-att-value='label.id' class="o_survey_form_choice_item invisible position-absolute"
+                                t-att-name='question.id'
+                                t-att-checked="answer_line and answer_line.suggested_answer_id.id == label.id and 'checked' or None"
+                                t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"/>
+                            <i class="o_checkbox fa fa-check-circle float-right mt-1 position-relative"></i>
+                            <i class="o_checkbox fa fa-circle-thin float-right mt-1 position-relative"></i>
+                            <t t-call="survey.question_suggested_value_image"/>
+                        </label>
+                    </div>
                 </t>
             </div>
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_comments col-lg-12" >
@@ -466,6 +469,7 @@
             <t t-set="item_idx" t-value="0"/>
             <div class="d-flex flex-wrap col-lg-12">
                 <t t-set="has_correct_answer" t-value="scoring_display_correction and any(label.is_correct for label in question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="len(question.suggested_answer_ids)"/>
                 <t t-foreach='question.suggested_answer_ids' t-as='label'>
                     <t t-set="item_idx" t-value="label_index"/>
                     <t t-set="answer_line" t-value="answer_lines.filtered(lambda line: line.suggested_answer_id == label)"/>
@@ -476,20 +480,21 @@
                     <t t-set="answer_class" t-if="not has_correct_answer" t-value="''" />
                     <t t-set="answer_class" t-elif="is_correct" t-value="'bg-success'" />
                     <t t-set="answer_class" t-elif="not is_correct" t-value="'bg-danger'" />
-
-                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_line else '')">
-                        <t t-call="survey.survey_selection_key">
-                            <t t-set="selection_key_class" t-value="'position-relative float-left d-flex'"/>
-                        </t>
-                        <input type="checkbox" t-att-value='label.id' class="o_survey_form_choice_item invisible position-absolute"
-                               t-att-name="question.id"
-                               t-att-checked="'checked' if answer_line else None"
-                               t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"/>
-                        <span class="ml-2" t-field='label.value'/>
-                        <i class="fa fa-check-square float-right mt-1 position-relative"></i>
-                        <i class="fa fa-square-o float-right mt-1 position-relative"></i>
-                        <t t-call="survey.question_suggested_value_image"/>
-                    </label>
+                    <div t-att-class="'%s pl-0 pr-2' % ('col-6' if answers_count in [1, 2, 4] else 'col-4')">
+                         <label t-att-class="'col-12 o_survey_choice_btn mr-2 mb-2 py-3 pl-4 pr-5 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_line else '')">
+                            <t t-call="survey.survey_selection_key">
+                                <t t-set="selection_key_class" t-value="'position-relative float-left d-flex'"/>
+                            </t>
+                            <input type="checkbox" t-att-value='label.id' class="o_survey_form_choice_item invisible position-absolute"
+                                t-att-name="question.id"
+                                t-att-checked="'checked' if answer_line else None"
+                                t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"/>
+                            <span t-field='label.value'/>
+                            <i class="o_checkbox fa fa-check-square float-right mt-1 position-relative"></i>
+                            <i class="o_checkbox fa fa-square-o float-right mt-1 position-relative"></i>
+                            <t t-call="survey.question_suggested_value_image"/>
+                        </label>
+                    </div>
                 </t>
             </div>
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_ck_comments col-lg-12" >

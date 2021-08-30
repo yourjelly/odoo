@@ -24,3 +24,8 @@ table.o_section_list_view tr.o_data_row.o_is_section {
 .icon_rotates {
     transform: rotate(180deg);
 }
+
+.o_preview_questions {
+    width: 100%;
+    min-height: 100px;
+}

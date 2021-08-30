@@ -204,8 +204,10 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
 
     .o_survey_choice_btn {
         cursor: pointer;
+        height: calc(100% - 0.5rem); //gives every cell on the same line the same height
         background-color: rgba($primary, 0.1);
         box-shadow: $primary 0px 0px 0px 1px;
+        line-break: auto;
 
         &.o_survey_selected {
             box-shadow: $primary 0px 0px 0px 2px;
@@ -217,6 +219,12 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
                 opacity: 1;
             }
         }
+    }
+
+    .o_checkbox {
+        position: absolute !important;
+        top: calc(50% - 0.75rem) !important; //center the checkbox vertically
+        right: 5px;
     }
 
     .o_survey_choice_key {
