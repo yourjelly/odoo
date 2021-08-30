@@ -9,7 +9,7 @@ tour.register('totportal_tour_setup', {
     url: '/my/security'
 }, [{
     content: "Open totp wizard",
-    trigger: 'button#auth_totp_portal_enable',
+    trigger: 'input#auth_totp_portal_enable',
 }, {
     content: "Check that we have to enter enhanced security mode",
     trigger: 'div:contains("enter your password")',
@@ -38,7 +38,7 @@ tour.register('totportal_tour_setup', {
     }
 }, {
     content: "Check that the button has changed",
-    trigger: 'button:contains(Disable two-factor authentication)',
+    trigger: 'input#auth_totp_portal_disable',
     run: () => {}
 }]);
 
@@ -84,7 +84,7 @@ tour.register('totportal_login_enabled', {
     trigger: "a:contains(Password & Security)",
 },{
     content: "Open totp wizard",
-    trigger: 'button#auth_totp_portal_disable',
+    trigger: 'input#auth_totp_portal_disable',
 }, {
     content: "Check that we have to enter enhanced security mode",
     trigger: 'div:contains("enter your password")',
@@ -98,7 +98,7 @@ tour.register('totportal_login_enabled', {
     trigger: "button:contains(Confirm Password)",
 }, {
     content: "Check that the button has changed",
-    trigger: 'button:contains(Enable two-factor authentication)',
+    trigger: 'input#auth_totp_portal_enable',
     run: () => {}
 }]);
 
