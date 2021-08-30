@@ -16,9 +16,7 @@
                     <div class="oe_title" style="width: 100%;">
                         <label for="title" string="Section" attrs="{'invisible': [('is_page', '=', False)]}"/>
                         <label for="title" string="Question" attrs="{'invisible': [('is_page', '=', True)]}"/>
-                        <separator />
-                        <field name="title" colspan="4"/>
-                        <separator />
+                        <field name="title" placeholder="e.g. &quot;What is the...&quot;" colspan="4"/>
                         <field name="questions_selection" invisible="1"/>
                     </div>
                     <group class="o_label_nowrap" attrs="{'invisible': ['|', ('is_page', '=', False), ('questions_selection', '=', 'all')]}">
@@ -29,42 +27,50 @@
                             <field name="question_type" widget="radio" attrs="{'required': [('is_page', '=', False)]}" />
                         </group>
                         <group>
-                            <div class="col-lg-6 offset-lg-3 o_preview_questions">
+                            <div class="col-lg-6 offset-lg-3 w-100 o_preview_questions">
+                                <!-- Multiple choice: only one answer -->
+                                <div attrs="{'invisible': [('question_type', '!=', 'simple_choice')]}" role="img" aria-label="Multiple choice with one answer" title="Multiple choice with one answer">
+                                    <i>Which is yellow?</i><br/>
+                                    <div class="row"><i class="fa fa-circle-o  fa-lg mr-2"/>answer</div>
+                                    <div class="row"><i class="fa fa-dot-circle-o fa-lg mr-2"/>answer</div>
+                                    <div class="row"><i class="fa fa-circle-o  fa-lg mr-2"/>answer</div>
+                                </div>
+                                <!-- Multiple choice: multiple answers allowed -->
+                                <div attrs="{'invisible': [('question_type', '!=', 'multiple_choice')]}" role="img" aria-label="Multiple choice with multiple answers" title="Multiple choice with multiple answers">
+                                    <i>Which are yellow?</i><br/>
+                                    <div class="row"><i class="fa fa-square-o fa-lg mr-2"/>answer</div>
+                                    <div class="row"><i class="fa fa-check-square-o fa-lg mr-2"/>answer</div>
+                                    <div class="row"><i class="fa fa-square-o fa-lg mr-2"/>answer</div>
+                                </div>
                                 <!-- Multiple Lines Text Zone -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'text_box')]}">
-                                        <i class="fa fa-align-justify fa-4x" role="img" aria-label="Multiple lines" title="Multiple Lines"/>
+                                    <i>Name all the animals</i><br/>
+                                    <i class="fa fa-align-justify fa-4x" role="img" aria-label="Multiple lines" title="Multiple Lines"/>
                                 </div>
                                 <!-- Single Line Text Zone -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'char_box')]}">
+                                    <i>Name one animal</i><br/>
                                     <i class="fa fa-minus fa-4x" role="img" aria-label="Single Line" title="Single Line"/>
                                 </div>
                                 <!-- Numerical Value -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'numerical_box')]}">
-                                    <i class="fa fa-2x" role="img" aria-label="Numeric" title="Numeric">123..</i>
+                                    <i>How many ...?</i><br/>
+                                    <i class="fa fa-2x" role="img" aria-label="Numeric" title="Numeric">123&#160;</i>
+                                    <i class="fa fa-2x fa-sort" role="img" aria-label="Numeric"/>
                                 </div>
                                 <!-- Date -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'date')]}">
-                                    <p class="o_datetime">YYYY-MM-DD
+                                    <i>When is Christmas?</i><br/>
+                                    <p class="o_datetime border-0" >YYYY-MM-DD
                                         <i class="fa fa-calendar fa-2x" role="img" aria-label="Calendar" title="Calendar"/>
                                     </p>
                                 </div>
                                 <!-- Date and Time -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'datetime')]}">
+                                    <i>When does ... start?</i><br/>
                                     <p class="o_datetime">YYYY-MM-DD hh:mm:ss
                                         <i class="fa fa-calendar fa-2x" role="img" aria-label="Calendar" title="Calendar"/>
                                     </p>
-                                </div>
-                                <!-- Multiple choice: only one answer -->
-                                <div attrs="{'invisible': [('question_type', '!=', 'simple_choice')]}" role="img" aria-label="Multiple choice with one answer" title="Multiple choice with one answer">
-                                    <div class="row"><i class="fa fa-circle-o  fa-lg"/> answer</div>
-                                    <div class="row"><i class="fa fa-dot-circle-o fa-lg"/> answer</div>
-                                    <div class="row"><i class="fa fa-circle-o  fa-lg"/> answer</div>
-                                </div>
-                                <!-- Multiple choice: multiple answers allowed -->
-                                <div attrs="{'invisible': [('question_type', '!=', 'multiple_choice')]}" role="img" aria-label="Multiple choice with multiple answers" title="Multiple choice with multiple answers">
-                                    <div class="row"><i class="fa fa-square-o fa-lg"/> answer</div>
-                                    <div class="row"><i class="fa fa-check-square-o fa-lg"/> answer</div>
-                                    <div class="row"><i class="fa fa-square-o fa-lg"/> answer</div>
                                 </div>
                                 <!-- Matrix -->
                                 <div attrs="{'invisible': [('question_type', '!=', 'matrix')]}">
@@ -97,7 +103,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Answers" name="answers" attrs="{'invisible': [('is_page', '=', True)]}">
+                        <page string="Answers" name="answers" attrs="{'invisible': ['|', ('is_page', '=', True), ('question_type', '=', 'text_box')]}">
                             <div class="row">
                                 <div class="col-6"
                                     attrs="{'invisible': [('question_type', 'not in', ['char_box', 'numerical_box', 'date', 'datetime'])]}">
@@ -143,19 +149,21 @@
                                 </div>
                             </div>
                             <group attrs="{'invisible': [('question_type', 'not in', ['simple_choice', 'multiple_choice', 'matrix'])]}">
-                                <field name="suggested_answer_ids" string="Answers" context="{'default_question_id': active_id}">
+                                <field name="suggested_answer_ids" context="{'default_question_id': active_id}" nolabel="1">
                                     <tree editable="bottom">
                                         <field name="sequence" widget="handle"/>
                                         <field name="value" string="Choices"/>
                                         <field name="value_image" options="{'accepted_file_extensions': 'image/*'}"
-                                            attrs="{'column_invisible': ['|', ('parent.allow_value_image', '=', False), ('parent.question_type', '=', 'matrix')]}"/>
+                                            attrs="{'column_invisible': [('parent.question_type', '=', 'matrix')]}"/>
                                         <field name="is_correct" attrs="{'column_invisible': ['|', ('parent.scoring_type', '=', 'no_scoring'), ('parent.question_type', '=', 'matrix')]}"/>
                                         <field name="answer_score" attrs="{'column_invisible': ['|', ('parent.scoring_type', '=', 'no_scoring'), ('parent.question_type', '=', 'matrix')]}"/>
                                     </tree>
                                 </field>
                             </group>
+
                             <group attrs="{'invisible': [('question_type', '!=', 'matrix')]}">
-                                <field name="matrix_row_ids" context="{'default_matrix_question_id': active_id}" attrs="{'invisible': [('question_type', '!=', 'matrix')]}">
+                                <field name="matrix_row_ids" context="{'default_matrix_question_id': active_id}"
+                                    attrs="{'invisible': [('question_type', '!=', 'matrix')]}" nolabel="1">
                                     <tree editable="bottom">
                                         <field name="sequence" widget="handle"/>
                                         <field name="value" string="Rows"/>
@@ -167,40 +175,41 @@
                             <field name="description" widget="html"/>
                         </page>
                         <page string="Options" name="options" attrs="{'invisible': [('is_page', '=', True)]}">
-                            <group string="Constraints">
-                                <group>
-                                    <field name="constr_mandatory" string="Mandatory Answer"/>
-                                    <field name="constr_error_msg" attrs="{'invisible': [('constr_mandatory', '=', False)]}"/>
+                            <group>
+                                <group string="Answers">
+                                    <field name="save_as_email" string="Input must be an email"/>
+                                    <field name="save_as_nickname"/>
+                                    <field name="validation_required"/>
+                                    <field name="column_nb" string="Number of columns" attrs="{'invisible':[('question_type','not in',['simple_choice', 'multiple_choice'])]}"/>
                                     <field name="matrix_subtype" attrs="{'invisible':[('question_type','not in',['matrix'])],'required':[('question_type','=','matrix')]}"/>
                                 </group>
-                            </group>
-                            <group string="Display" attrs="{'invisible':[('question_type','=', 'matrix')]}">
-                                <field name="question_placeholder" attrs="{'invisible': [('question_type', 'not in', ['text_box', 'char_box', 'date', 'datetime', 'numerical_box'])]}"
+                                <group string="Layout" attrs="{'invisible':[('question_type','=', 'matrix')]}">
+                                    <field name="question_placeholder" attrs="{'invisible': [('question_type', 'not in', ['text_box', 'char_box', 'date', 'datetime', 'numerical_box'])]}"
                                        placeholder="When set, this text will appear in the field to help participants answer."/>
-                                <field name="column_nb" string="Number of columns" attrs="{'invisible':[('question_type','not in',['simple_choice', 'multiple_choice'])]}"/>
-                                <field name="allow_value_image" attrs="{'invisible':[('question_type','not in',['simple_choice', 'multiple_choice'])]}"/>
+                                    <field name="is_conditional" attrs="{'invisible': [('questions_selection', '=', 'random')]}"/>
+                                    <field name="triggering_question_id" options="{'no_open': True, 'no_create': True}"
+                                            attrs="{'invisible': [('is_conditional','=', False)], 'required': [('is_conditional','=', True)]}"/>
+                                    <field name="triggering_answer_id" options="{'no_open': True, 'no_create': True}"
+                                            attrs="{'invisible': ['|', ('is_conditional','=', False), ('triggering_question_id','=', False)],
+                                                    'required': [('is_conditional','=', True)]}"/>
+                                    <field name='comments_allowed' attrs="{'invisible':[('question_type','not in',['simple_choice','multiple_choice', 'matrix'])]}"/>
+                                    <field name='comments_message' attrs="{'invisible': [('comments_allowed', '=', False)]}"/>
+                                </group>
                             </group>
-                            <group string="Conditional Display" attrs="{'invisible': [('questions_selection', '=', 'random')]}">
-                                <field name="is_conditional"/>
-                                <field name="triggering_question_id"  options="{'no_open': True, 'no_create': True}"
-                                       attrs="{'invisible': [('is_conditional','=', False)], 'required': [('is_conditional','=', True)]}"/>
-                                <field name="triggering_answer_id" options="{'no_open': True, 'no_create': True}"
-                                       attrs="{'invisible': ['|', ('is_conditional','=', False), ('triggering_question_id','=', False)],
-                                               'required': [('is_conditional','=', True)]}"/>
-                            </group>
-                            <group string="Allow Comments" attrs="{'invisible':[('question_type','not in',['simple_choice','multiple_choice', 'matrix'])]}">
-                                <field name='comments_allowed' />
-                                <field name='comments_message' attrs="{'invisible': [('comments_allowed', '=', False)]}"/>
-                                <field name='comment_count_as_answer' attrs="{'invisible': ['|', ('comments_allowed', '=', False), ('question_type', 'in', ['matrix'])]}" />
-                            </group>
-                            <group string="Live Sessions">
-                                <label for="is_time_limited" string="Question Time Limit"/>
-                                <div>
-                                    <field name="is_time_limited" nolabel="1"/>
-                                    <field name="time_limit" nolabel="1" class="oe_inline"
-                                        attrs="{'invisible': [('is_time_limited', '=', False)]}" />
-                                    <span attrs="{'invisible': [('is_time_limited', '=', False)]}"> seconds</span>
-                                </div>
+                            <group>
+                                <group string="Constraints">
+                                    <field name="constr_mandatory" string="Mandatory Answer"/>
+                                    <field name="constr_error_msg" attrs="{'invisible': [('constr_mandatory', '=', False)]}"/>
+                                </group>
+                                <group string="Live Sessions">
+                                    <label for="is_time_limited" string="Question Time Limit"/>
+                                    <div>
+                                        <field name="is_time_limited" nolabel="1"/>
+                                        <field name="time_limit" nolabel="1" class="oe_inline"
+                                            attrs="{'invisible': [('is_time_limited', '=', False)]}" />
+                                        <span attrs="{'invisible': [('is_time_limited', '=', False)]}"> seconds</span>
+                                    </div>
+                                </group>
                             </group>
                         </page>
                     </notebook>
@@ -248,7 +257,9 @@
         <field name="domain">[('is_page', '=', False)]</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_empty_folder">
-            No questions found
+            No Questions yet!
+          </p><p>
+            Come back once you have added questions to your Surveys.
           </p>
         </field>
     </record>
@@ -267,6 +278,33 @@
             </tree>
         </field>
     </record>
+
+    <record id="survey_question_answer_view_form" model="ir.ui.view">
+        <field name="name">survey.question.answer.view.form</field>
+        <field name="model">survey.question.answer</field>
+        <field name="arch" type="xml">
+            <form string="Question Answer Form">
+                <sheet>
+                    <field name="question_type" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="scoring_type" invisible="1"/>
+                            <field name="question_id"/>
+                            <field name="is_correct"/>
+                            <field name="answer_score" attrs="{'invisible': ['|', ('scoring_type', '=', 'no_scoring'), ('question_type', '=', 'matrix')]}"/>
+                            <field name="value_image"/>
+                        </group>
+                        <group>
+                            <field name="value"/>
+                            <field name="matrix_question_id" attrs="{'invisible': [('question_type', '!=', 'matrix')]}"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="survey_question_answer_view_search" model="ir.ui.view">
         <field name="name">survey.question.answer.view.search</field>
         <field name="model">survey.question.answer</field>
@@ -298,10 +336,15 @@
         action="action_survey_question_form"
         parent="survey_menu_questions"
         sequence="2"/>
+    <menuitem name="Detailed Answers"
+        id="menu_survey_response_line_form"
+        action="survey_user_input_line_action"
+        parent="survey_menu_questions"
+        sequence="3"/>
     <menuitem name="Suggested Values"
         id="menu_survey_label_form1"
         action="survey_question_answer_action"
         parent="survey_menu_questions"
-        sequence="3"/>
+        sequence="4"/>
 </data>
 </odoo>

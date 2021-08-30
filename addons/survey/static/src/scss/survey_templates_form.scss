@@ -110,6 +110,11 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
             }
         }
 
+        .o_survey_form_choice_item_checkbox {
+            right: 5px;
+            top: 0px;
+        }
+        
         &.o_survey_selected i {
             display: none;
             &.fa-check-circle,&.fa-check-square {
@@ -212,8 +217,10 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
 
     .o_survey_choice_btn {
         cursor: pointer;
+        height: calc(100% - 0.5rem); //gives every cell on the same line the same height
         background-color: rgba($primary, 0.1);
         box-shadow: $primary 0px 0px 0px 1px;
+        line-break: auto;
 
         &.o_survey_selected {
             box-shadow: $primary 0px 0px 0px 2px;

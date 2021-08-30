@@ -49,7 +49,7 @@ class SurveyQuestion(models.Model):
     def default_get(self, fields):
         defaults = super(SurveyQuestion, self).default_get(fields)
         if (not fields or 'question_type' in fields):
-            defaults['question_type'] = False if defaults.get('is_page') == True else 'text_box'
+            defaults['question_type'] = False if defaults.get('is_page') else 'simple_choice'
         return defaults
 
     # question generic data
@@ -73,13 +73,13 @@ class SurveyQuestion(models.Model):
     # question specific
     page_id = fields.Many2one('survey.question', string='Page', compute="_compute_page_id", store=True)
     question_type = fields.Selection([
+        ('simple_choice', 'Multiple choice: only one answer'),
+        ('multiple_choice', 'Multiple choice: multiple answers allowed'),
         ('text_box', 'Multiple Lines Text Box'),
         ('char_box', 'Single Line Text Box'),
         ('numerical_box', 'Numerical Value'),
         ('date', 'Date'),
         ('datetime', 'Datetime'),
-        ('simple_choice', 'Multiple choice: only one answer'),
-        ('multiple_choice', 'Multiple choice: multiple answers allowed'),
         ('matrix', 'Matrix')], string='Question Type',
         compute='_compute_question_type', readonly=False, store=True)
     is_scored_question = fields.Boolean(
@@ -102,7 +102,6 @@ class SurveyQuestion(models.Model):
     suggested_answer_ids = fields.One2many(
         'survey.question.answer', 'question_id', string='Types of answers', copy=True,
         help='Labels used for proposed choices: simple choice, multiple choice and columns of matrix')
-    allow_value_image = fields.Boolean('Images on answers', help='Display images in addition to answer label. Valid only for simple / multiple choice questions.')
     # -- matrix
     matrix_subtype = fields.Selection([
         ('simple', 'One choice per row'),
@@ -554,12 +553,17 @@ class SurveyQuestionAnswer(models.Model):
     _order = 'sequence, id'
     _description = 'Survey Label'
 
+    #question and question related fields
     question_id = fields.Many2one('survey.question', string='Question', ondelete='cascade')
-    matrix_question_id = fields.Many2one('survey.question', string='Question (as matrix row)', ondelete='cascade')
+    question_type = fields.Selection(related='question_id.question_type')
     sequence = fields.Integer('Label Sequence order', default=10)
+    scoring_type = fields.Selection(related='question_id.scoring_type')
+    matrix_question_id = fields.Many2one('survey.question', string='Question (as matrix row)', ondelete='cascade')
+
+    #answer related fields
     value = fields.Char('Suggested value', translate=True, required=True)
     value_image = fields.Image('Image', max_width=256, max_height=256)
-    is_correct = fields.Boolean('Is a correct answer')
+    is_correct = fields.Boolean('Is correct')
     answer_score = fields.Float('Score for this choice', help="A positive score indicates a correct choice; a negative or null score indicates a wrong answer")
 
     @api.constrains('question_id', 'matrix_question_id')
