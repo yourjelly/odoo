@@ -194,11 +194,68 @@ function websiteDomain(self) {
     return ['|', ['website_id', '=', false], ['website_id', '=', websiteID]];
 }
 
+/**
+ * Converts a base64 SVG into a base64 PNG.
+ *
+ * @param {string} src a base64 SVG
+ * @returns {Promise<string>} a Promise resolving into a base64 PNG
+ */
+async function svgToPng(src) {
+    const updatedSrc = await new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+            // Firefox does not support drawing SVG to canvas unless it has
+            // width and height attributes set on the root <svg>
+            if (img.naturalHeight === 0) {
+                // Set arbitrary height on image and attach it to the DOM to force width computation.
+                img.height = 1000;
+                img.style.opacity = 0;
+                document.body.appendChild(img);
+
+                const request = new XMLHttpRequest();
+                request.open('GET', img.src, true);
+                request.onload = () => {
+                    // Convert the data URI to a SVG element
+                    const parser = new DOMParser();
+                    const result = parser.parseFromString(request.responseText, 'text/xml');
+                    const SVG = result.getElementsByTagName("svg")[0];
+
+                    // Add the attributes Firefox needs and remove image from the DOM.
+                    SVG.setAttribute('width', img.width);
+                    SVG.setAttribute('height', img.height);
+                    img.remove();
+
+                    // Convert the SVG element to a data URI
+                    const svg64 = btoa(new XMLSerializer().serializeToString(SVG));
+                    resolve('data:image/svg+xml;base64,' + svg64);
+                };
+                request.send();
+            } else {
+                resolve(src);
+            }
+        };
+        img.src = src;
+    });
+
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.src = updatedSrc;
+    });
+}
+
 return {
     loadAnchors: loadAnchors,
     autocompleteWithPages: autocompleteWithPages,
     onceAllImagesLoaded: onceAllImagesLoaded,
     prompt: prompt,
     websiteDomain: websiteDomain,
+    svgToPng: svgToPng,
 };
 });

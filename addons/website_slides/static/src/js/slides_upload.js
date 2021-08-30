@@ -4,6 +4,7 @@ odoo.define('website_slides.upload_modal', function (require) {
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 var publicWidget = require('web.public.widget');
+var wUtils = require('website.utils');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -121,7 +122,7 @@ var SlideUploadDialog = Dialog.extend({
      *
      * @private
      */
-    _formValidateGetValues: function (forcePublished) {
+    _formValidateGetValues: async function (forcePublished) {
         var canvas = this.$('#data_canvas')[0];
         var values = _.extend({
             'channel_id': this.channelID,
@@ -148,18 +149,18 @@ var SlideUploadDialog = Dialog.extend({
         } else if (values['slide_type'] === 'webpage') {
             _.extend(values, {
                 'mime_type': 'text/html',
-                'image': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data,
+                'image': this.file.type === 'image/svg+xml' ? await this._svgToPng() : this.file.data,
             });
         } else if (/^image\/.*/.test(this.file.type)) {
             if (values['slide_type'] === 'presentation') {
                 _.extend(values, {
                     'slide_type': 'infographic',
                     'mime_type': this.file.type === 'image/svg+xml' ? 'image/png' : this.file.type,
-                    'datas': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data
+                    'datas': this.file.type === 'image/svg+xml' ? await this._svgToPng() : this.file.data
                 });
             } else {
                 _.extend(values, {
-                    'image': this.file.type === 'image/svg+xml' ? this._svgToPng() : this.file.data,
+                    'image': this.file.type === 'image/svg+xml' ? await this._svgToPng() : this.file.data,
                 });
             }
         }
@@ -345,13 +346,10 @@ var SlideUploadDialog = Dialog.extend({
      */
     // TODO: Remove this part, as now SVG support in image resize tools is included
     //Python PIL does not support SVG, so converting SVG to PNG
-    _svgToPng: function () {
+    _svgToPng: async function () {
         var img = this.$el.find('img#slide-image')[0];
-        var canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        return canvas.toDataURL('image/png').split(',')[1];
+        const png = await wUtils.svgToPng(img.src);
+        return png.split(',')[1];
     },
     //--------------------------------------------------------------------------
     // Handler
@@ -509,12 +507,14 @@ var SlideUploadDialog = Dialog.extend({
         var self = this;
         var $btn = $(ev.currentTarget);
         if (this._formValidate()) {
-            var values = this._formValidateGetValues($btn.hasClass('o_w_slide_upload_published')); // get info before changing state
-            var oldType = this.get('state');
-            this.set('state', '_upload');
-            return this._rpc({
-                route: '/slides/add_slide',
-                params: values,
+            const forcePublish = $btn.hasClass('o_w_slide_upload_published');
+            var oldType = self.get('state');
+            return this._formValidateGetValues(forcePublish).then(function (values) { // get info before changing state
+                self.set('state', '_upload');
+                return self._rpc({
+                    route: '/slides/add_slide',
+                    params: values,
+                });
             }).then(function (data) {
                 if (data.error) {
                     self.set('state', oldType);
