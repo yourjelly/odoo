@@ -16,4 +16,5 @@ class OPCUAInterface(Interface):
 
     def get_devices(self):
         opcua_servers = helpers.read_file_first_line('odoo-opcua-server.conf')
+        _logger.error(opcua_servers)
         return json.loads(opcua_servers) if opcua_servers else {}
