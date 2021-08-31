@@ -24,15 +24,20 @@
                 </t>
             </t>
             <div class="o_content">
-                    <t t-if="!(model.hasData() and model.meta.activeMeasures.length) or model.meta.useSampleModel">
-                        <t t-if="props.info.noContentHelp" t-call="web.ActionHelper">
-                            <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
-                        </t>
-                        <t t-else="" t-call="web.NoContentHelper"/>
+                <t t-set="displayNoContent" t-value="
+                    props.info.noContentHelp !== false and (
+                        !(model.hasData() and model.meta.activeMeasures.length) or
+                        model.meta.useSampleModel
+                    )" />
+                <t t-if="displayNoContent">
+                    <t t-if="props.info.noContentHelp" t-call="web.ActionHelper">
+                        <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
                     </t>
-                    <t t-if="model.hasData() and model.meta.activeMeasures.length">
-                        <t t-component="constructor.Renderer" model="model" onCellClicked="onOpenView"/>
-                    </t>
+                    <t t-else="" t-call="web.NoContentHelper"/>
+                </t>
+                <t t-if="model.hasData() and model.meta.activeMeasures.length">
+                    <t t-component="constructor.Renderer" model="model" onCellClicked="onOpenView"/>
+                </t>
             </div>
         </div>
     </t>
