@@ -217,6 +217,16 @@ class PaymentAcquirer(models.Model):
             if any(not 0 <= fee < 100 for fee in (acquirer.fees_dom_var, acquirer.fees_int_var)):
                 raise ValidationError(_("Variable fees must always be positive and below 100%."))
 
+    @api.constrains('state')
+    def _check_journal_id(self):
+        """
+        Ensure that the journal_id is set if the acquirer is not disabled,
+        unless the provider is not set, or is transfer.
+        """
+        for acquirer in self.filtered(lambda a: a.state != 'disabled' and a.provider not in ['none', 'transfer']):
+            if not acquirer.journal_id:
+                raise ValidationError(_("Acquirers that are not disabled must always have a journal_id."))
+
     #=== CRUD METHODS ===#
 
     @api.model_create_multi
