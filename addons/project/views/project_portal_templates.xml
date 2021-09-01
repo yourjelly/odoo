@@ -154,7 +154,7 @@
                                     <a t-attf-href="/my/task/#{task.id}?{{ keep_query() }}"><span t-field="task.name"/></a>
                                 </td>
                                 <td name="portal_my_tasks_project_td">
-                                    <span t-out="task.user_id.name"/>
+                                    <span t-out="task.user_ids.name"/>
                                 </td>
                                 <td t-if="groupby != 'status'">
                                     <t t-call="project.portal_my_tasks_state_widget_template">
@@ -162,7 +162,7 @@
                                     </t>
                                 </td>
                                 <td t-if="groupby != 'project'">
-                                    <span class="badge badge-pill badge-info mw-100 text-truncate" title="Current project of the task" t-esc="task.project_id.name" />
+                                    <span class="badge badge-pill badge-info mw-100" title="Current project of the task" t-esc="task.project_id.name" />
                                 </td>
                                 <td t-if="groupby != 'stage'">
                                     <span class="badge badge-pill badge-info" title="Current stage of the task" t-esc="task.stage_id.name" />
