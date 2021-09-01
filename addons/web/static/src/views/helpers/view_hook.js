@@ -3,6 +3,7 @@
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
 import { registry } from "@web/core/registry";
+import * as CompileLib from "@web/views/compile/compile_lib";
 
 const { useComponent } = owl.hooks;
 
@@ -27,11 +28,16 @@ export function useViewArch(arch, params = {}) {
     }
 
     const { compile, extract } = params;
+    if (!("idForNode" in processedArch)) {
+        processedArch.idForNode = CompileLib.nodeIdentifier();
+    }
     if (!("template" in processedArch) && compile) {
-        processedArch.template = owl.tags.xml`${compile(arch)}`;
+        processedArch.template = owl.tags.xml`${compile(arch, {
+            idForNode: processedArch.idForNode,
+        })}`;
     }
     if (!("extracted" in processedArch) && extract) {
-        processedArch.extracted = extract(arch);
+        processedArch.extracted = extract(arch, { idForNode: processedArch.idForNode });
     }
 
     return processedArch;

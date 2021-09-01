@@ -2,34 +2,18 @@
 import { evaluateExpr } from "@web/core/py_js/py";
 
 export function nodeIdentifier() {
+    let id = 0;
     const mapping = {};
-    let lastNode;
-
-    function add(node) {
-        const nodeMap = mapping[node.tagName] || {
-            current: null,
-            id: 1,
-        };
-        mapping[node.tagName] = nodeMap;
-
-        if (node !== nodeMap.current) {
-            nodeMap.id++;
-        }
-        nodeMap.current = node;
-        lastNode = node;
-    }
 
     function idFor(node) {
-        node = node || lastNode;
-        const nodeMap = mapping[node.tagName];
-        return `${node.tagName}_${nodeMap.id}`;
+        const nodeAsText = node.outerHTML;
+        if (!(nodeAsText in mapping)) {
+            mapping[nodeAsText] = `${node.tagName}_${id++}`;
+        }
+        return mapping[nodeAsText];
     }
 
-    return Object.assign(add, {
-        idFor(node) {
-            return idFor(node);
-        },
-    });
+    return idFor;
 }
 
 function isComponentNode(node) {
