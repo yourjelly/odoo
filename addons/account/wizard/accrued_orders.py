@@ -83,7 +83,7 @@ class AccruedExpenseRevenue(models.TransientModel):
     def _compute_preview_data(self):
         for record in self:
             preview_vals = [self.env['account.move']._move_dict_to_preview_vals(
-                self._compute_move_vals()[0],
+                record._compute_move_vals()[0],
                 record.company_id.currency_id,
             )]
             preview_columns = [
