@@ -5,7 +5,7 @@ import copy
 import logging
 import re
 import markupsafe
-from time import time
+import threading
 from lxml import html, etree
 
 from odoo import api, models, tools
@@ -70,7 +70,16 @@ class IrQWeb(models.AbstractModel, QWeb):
         compile_options = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         compile_options.update(options)
 
-        result = super()._render(template, values=values, **compile_options)
+        current_thread = threading.current_thread()
+        execution_context_enabled = getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb')
+        has_qweb_hooks = hasattr(current_thread, 'qweb_hooks')
+        profile = execution_context_enabled or has_qweb_hooks
+        compile_options['profile'] = profile
+        if execution_context_enabled:
+            with tools.profiler.ExecutionContext(render='qweb'):
+                result = super()._render(template, values=values, **compile_options)
+        else:
+            result = super()._render(template, values=values, **compile_options)
 
         if not values or not values.get('__keep_empty_lines'):
             result = markupsafe.Markup(IrQWeb._empty_lines.sub('\n', result.strip()))
@@ -109,7 +118,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_get_template``. """
-        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id']
+        return ['lang', 'inherit_branding', 'editable', 'translatable', 'edit_translations', 'website_id', 'profile']
 
     # apply ormcache_context decorator unless in dev mode...
     @tools.conditional(
@@ -168,6 +177,16 @@ class IrQWeb(models.AbstractModel, QWeb):
 
     # compile directives
 
+    def _compile_directive(self, el, options, directive, indent):
+        if 'profile' in options and directive not in ('content', 'tag'):
+            previous_value = self._make_name('previous_profiling_info')
+            start = self._indent(f"{previous_value} = self._enter_directive_profiling({repr(directive)}, {repr(el.attrib)}, log['last_path_node'], compile_options)", indent)
+            stop = self._indent(f"self._leave_directive_profiling({previous_value})", indent)
+
+            code_directive = super()._compile_directive(el, options, directive, indent)
+            return [start] + code_directive + [stop] if code_directive else []
+        return super()._compile_directive(el, options, directive, indent)
+
     def _compile_directive_groups(self, el, options, indent):
         """Compile `t-groups` expressions into a python code as a list of
         strings.
@@ -223,6 +242,28 @@ class IrQWeb(models.AbstractModel, QWeb):
         return code
 
     # method called by computing code
+
+    def _enter_directive_profiling(self, directive, attrib, xpath, options):
+        current_thread = threading.current_thread()
+
+        qweb_hooks = getattr(current_thread, 'qweb_hooks', ())
+        for qweb_hook in qweb_hooks:
+            qweb_hook('enter', self.env, view_id=options.get('ref'), xpath=xpath, directive=directive, attrib=attrib, arch=options.get('document'))
+
+        execution_context = None
+        if  getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb'):
+            execution_context = tools.profiler.ExecutionContext(directive=directive, xpath=xpath)
+            execution_context.__enter__()
+
+        return (qweb_hooks, execution_context)
+
+    def _leave_directive_profiling(self, previous_value):
+        qweb_hooks, execution_context = previous_value
+        if execution_context:
+            execution_context.__exit__()
+
+        for qweb_hook in qweb_hooks:
+            qweb_hook('leave', self.env)
 
     def get_asset_bundle(self, bundle_name, files, env=None, css=True, js=True):
         return AssetsBundle(bundle_name, files, env=env, css=css, js=js)

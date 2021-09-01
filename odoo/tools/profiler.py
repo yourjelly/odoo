@@ -272,6 +272,85 @@ class SyncCollector(Collector):
         super().post_process()
 
 
+class QwebCollector(Collector):
+    """
+    Record qweb execution with directive trace.
+    """
+    name = 'qweb'
+
+    def __init__(self):
+        super().__init__()
+        self.events = []
+
+        def hook(event, env, **kwargs):
+            self.events.append((event, kwargs, env.cr.sql_log_count, time.time()))
+        self.hook = hook
+
+    def _get_directive_profiling_name(self, directive, attrib):
+        expr = ''
+        if directive == 'set':
+            expr = f"t-set={repr(attrib['t-set'])}"
+            if 't-value' in attrib:
+                expr = f"{expr} t-value={repr(attrib['t-value'])}"
+            if 't-valuef' in attrib:
+                expr = f"{expr} t-valuef={repr(attrib['t-valuef'])}"
+        elif directive == 'foreach':
+            expr = f"t-foreach={repr(attrib['t-foreach'])} t-as={repr(attrib['t-as'])}"
+        elif directive == 'options':
+            if attrib.get('t-options'):
+                expr = f"t-options={repr(attrib['t-options'])}"
+            for key in list(attrib):
+                if key.startswith('t-options-'):
+                    expr = f"{expr}  {key}={repr(attrib[key])}"
+        elif directive and ('t-' + directive) in attrib:
+            expr = f"t-{directive}={repr(attrib['t-' + directive])}"
+        return expr
+
+    def start(self):
+        init_thread = self.profiler.init_thread
+        if not hasattr(init_thread, 'qweb_hooks'):
+            init_thread.qweb_hooks = []
+        init_thread.qweb_hooks.append(self.hook)
+
+    def stop(self):
+        self.profiler.init_thread.qweb_hooks.remove(self.hook)
+
+    def post_process(self):
+        last_event_query = None
+        last_event_time = None
+        stack = []
+        results = []
+        archs = {}
+        for event, kwargs, sql_count, time in self.events:
+            if 'arch' in kwargs:
+                archs[kwargs['view_id']] = kwargs['arch']
+
+            # update the active directive with the elapsed time and queries
+            if stack:
+                top = stack[-1]
+                top['delay'] += time - last_event_time
+                top['query'] += sql_count - last_event_query
+
+            if event == 'enter':
+                data = {
+                    'view_id': kwargs['view_id'],
+                    'xpath': kwargs['xpath'],
+                    'directive': self._get_directive_profiling_name(kwargs['directive'], kwargs['attrib']),
+                    'delay': 0,
+                    'query': 0,
+                }
+                results.append(data)
+                stack.append(data)
+            else:
+                data = stack.pop()
+
+            last_event_time = time
+            last_event_query = sql_count
+
+        self.add({'results': {'archs': archs, 'data': results}})  
+        super().post_process()
+
+
 class ExecutionContext:
     """
     Add some context on thread at current call stack level.
@@ -349,6 +428,8 @@ class Profiler:
             frame = self.init_frame
             code = frame.f_code
             self.description = f"{frame.f_code.co_name} ({code.co_filename}:{frame.f_lineno})"
+        if self.params:
+            self.init_thread.profiler_params = self.params
         if self.disable_gc and gc.isenabled():
             gc.disable()
         self.start_time = time.time()
@@ -388,6 +469,8 @@ class Profiler:
         finally:
             if self.disable_gc:
                 gc.enable()
+            if self.params:
+                del self.init_thread.profiler_params
 
     def _add_file_lines(self, stack):
         for index, frame in enumerate(stack):

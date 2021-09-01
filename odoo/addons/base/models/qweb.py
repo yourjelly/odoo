@@ -112,11 +112,10 @@ class QWeb(object):
 
         Render the template specified by the given name.
 
-        :param template: template identifier
+        :param template: template identifier, name or etree (see ``_get_template``)
         :param dict values: template values to be used for rendering
         :param options: used to compile the template (the dict available for the rendering is frozen)
             * ``load`` (function) overrides the load method (returns: (template, ref))
-            * ``profile`` (boolean) profile the rendering
 
         :returns: str as Markup
         :rtype: markupsafe.Markup
@@ -212,10 +211,15 @@ class QWeb(object):
         return render_template
 
     def _get_template(self, template, options):
-        """ Retrieve the given template, and return it as a tuple ``(element,
-        document, ref)``, where ``element`` is an etree, ``document`` is the
+        """ Retrieve the given template, and return it as a tuple ``(etree,
+        xml, ref)``, where ``element`` is an etree, ``document`` is the
         string document that contains ``element``, and ``ref`` if the uniq
         reference of the template (id, t-name or template).
+
+        :param template: template identifier, name or etree
+        :param options: used to compile the template (the dict available for
+            the rendering is frozen)
+            ``load`` (function) overrides the load method
         """
         ref = template
         if isinstance(template, etree._Element):
@@ -251,7 +255,7 @@ class QWeb(object):
         return (element, document, ref)
 
     def _load(self, template, options):
-        """ Load a given template. """
+        """ Load a given template and return a tuple ``(xml, ref)``` """
         return (template, None)
 
     # values for running time
@@ -359,33 +363,9 @@ class QWeb(object):
         # compile the first directive present on the element
         for directive in options['iter_directives']:
             if ('t-' + directive) in el.attrib:
-                mname = directive.replace('-', '_')
-                compile_handler = getattr(self, f'_compile_directive_{mname}', None)
-                return compile_handler(el, options, indent)
+                return self._compile_directive(el, options, directive, indent)
 
         return []
-
-    def _compile_options(self, el, varname, options, indent):
-        """
-        compile t-options and add to the dict the t-options-xxx values
-        """
-        code = []
-        dict_arg = []
-        for key in list(el.attrib):
-            if key.startswith('t-options-'):
-                value = el.attrib.pop(key)
-                option_name = key[10:]
-                dict_arg.append(f'{repr(option_name)}:{self._compile_expr(value)}')
-
-        t_options = el.attrib.pop('t-options', None)
-        if t_options and dict_arg:
-            code.append(self._indent(f"{varname} = {{**{self._compile_expr(t_options)}, {', '.join(dict_arg)}}}", indent))
-        elif dict_arg:
-            code.append(self._indent(f"{varname} = {{{', '.join(dict_arg)}}}", indent))
-        elif t_options:
-            code.append(self._indent(f"{varname} = {self._compile_expr(t_options)}", indent))
-
-        return code
 
     def _compile_format(self, expr):
         """ Parses the provided format string and compiles it to a single
@@ -824,6 +804,10 @@ class QWeb(object):
 
     # compile directives
 
+    def _compile_directive(self, el, options, directive, indent):
+        compile_handler = getattr(self, f"_compile_directive_{directive.replace('-', '_')}", None)
+        return compile_handler(el, options, indent)
+
     def _compile_directive_debug(self, el, options, indent):
         """Compile `t-debug` expressions into a python code as a list of
         strings.
@@ -838,6 +822,29 @@ class QWeb(object):
         else:
             _logger.warning("@t-debug in template is only available in qweb dev mode options")
         code.extend(self._compile_directives(el, options, indent))
+        return code
+
+    def _compile_directive_options(self, el, options, indent):
+        """
+        compile t-options and add to the dict the t-options-xxx values
+        """
+        varname = options.get('t_options_varname', 't_options')
+        code = []
+        dict_arg = []
+        for key in list(el.attrib):
+            if key.startswith('t-options-'):
+                value = el.attrib.pop(key)
+                option_name = key[10:]
+                dict_arg.append(f'{repr(option_name)}:{self._compile_expr(value)}')
+
+        t_options = el.attrib.pop('t-options', None)
+        if t_options and dict_arg:
+            code.append(self._indent(f"{varname} = {{**{self._compile_expr(t_options)}, {', '.join(dict_arg)}}}", indent))
+        elif dict_arg:
+            code.append(self._indent(f"{varname} = {{{', '.join(dict_arg)}}}", indent))
+        elif t_options:
+            code.append(self._indent(f"{varname} = {self._compile_expr(t_options)}", indent))
+
         return code
 
     def _compile_directive_tag(self, el, options, indent):
@@ -1078,14 +1085,14 @@ class QWeb(object):
                 expr = el.attrib.pop('t-raw')
 
         code = self._flushText(options, indent)
-        code_options = self._compile_options(el, 't_out_t_options', options, indent)
+        options['t_options_varname'] = 't_out_t_options'
+        code_options = self._compile_directive(el, options, 'options', indent)
         code.extend(code_options)
 
         if expr == "0":
             if code_options:
                 code.append(self._indent("content = Markup(''.join(values.get('0', [])))", indent))
             else:
-                code.extend(code_options)
                 code.extend(self._compile_tag_open(el, options, indent))
                 code.extend(self._flushText(options, indent))
                 code.append(self._indent("yield from values.get('0', [])", indent))
@@ -1156,12 +1163,9 @@ class QWeb(object):
         record, field_name = expression.rsplit('.', 1)
 
         code = []
-        code_options = self._compile_options(el, 't_field_t_options', options, indent)
-        if code_options:
-            code.extend(code_options)
-        else:
-            code.append(self._indent('t_field_t_options = {}', indent))
-
+        options['t_options_varname'] = 't_field_t_options'
+        code_options = self._compile_directive(el, options, 'options', indent) or [self._indent("t_field_t_options = {}", indent)]
+        code.extend(code_options)
         code.append(self._indent(f"attrs, content, force_display = self._get_field({self._compile_expr(record, raise_on_missing=True)}, {repr(field_name)}, {repr(expression)}, {repr(tagName)}, t_field_t_options, compile_options, values)", indent))
         code.append(self._indent("content = self._compile_to_str(content)", indent))
         code.extend(self._compile_widget_value(el, options, indent))
@@ -1226,7 +1230,8 @@ class QWeb(object):
         nsmap = options.get('nsmap')
 
         code = self._flushText(options, indent)
-        code_options = self._compile_options(el, 't_call_t_options', options, indent)
+        options['t_options_varname'] = 't_call_t_options'
+        code_options = self._compile_directive(el, options, 'options', indent) or [self._indent("t_call_t_options = {}", indent)]
         code.extend(code_options)
 
         # content (t-out="0" and variables)
