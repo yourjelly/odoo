@@ -44,7 +44,6 @@
             </field>
         </record>
 
-        <!-- TODO: remove menus and move that into config settings like other EDIs? -->
         <menuitem id="menu_l10n_es_edi_root"
                   name="Spain"
                   sequence="110"

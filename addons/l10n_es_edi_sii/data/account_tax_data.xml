@@ -167,7 +167,6 @@
         <field name="name">IVA Exento Repercutido Sujeto</field>
         <field name="l10n_es_type">exento</field>
         <field name="l10n_es_exempt_reason">E1</field>
-        <!-- TODO: Taxes for other exempt reasons then -->
     </record>
     <record id="l10n_es.account_tax_template_s_iva0_ns" model="account.tax.template">
         <field name="name">IVA Exento Repercutido No Sujeto</field>

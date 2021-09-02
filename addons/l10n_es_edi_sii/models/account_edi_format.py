@@ -477,7 +477,8 @@ class AccountEdiFormat(models.Model):
                 invoice_number = respl.IDFactura.NumSerieFacturaEmisor
 
                 # Retrieve the corresponding invoice.
-                # TODO: ref can be the same for multiple partners
+                # TODO: ref can be the same for different partners
+
                 inv = invoices.filtered(lambda x: (x.name[:60] if x.is_sale_document() else x.ref[:60]) == invoice_number)
 
                 resp_line_state = respl.EstadoRegistro
@@ -539,13 +540,20 @@ class AccountEdiFormat(models.Model):
             count = len(line.tax_ids)
             recargo_count = line.tax_ids.mapped('l10n_es_type').count('recargo')
             retention_count = line.tax_ids.mapped('l10n_es_type').count('retencion')
-
+            sujeto_count = line.tax_ids.mapped('l10n_es_type').count('sujeto')
+            no_sujeto_count = line.tax_ids.mapped('l10n_es_type').count('no_sujeto')
+            no_sujeto_loc_count = line.tax_ids.mapped('l10n_es_type').count('no_sujeto_loc')
             if retention_count > 1:
                 res.append(_("Line %s should only have one retention tax.", line.display_name))
             if recargo_count > 1:
                 res.append(_("Line %s should only have one recargo tax.", line.display_name))
-            if count - recargo_count - retention_count > 1:
-                # TODO: this condition is buggy: 2 sujeto - 1 retention = 1 ok but 2 sujeto is triggering this constraint
+            if sujeto_count > 1:
+                res.append(_("Line %s should only have one sujeto tax.", line.display_name))
+            if no_sujeto_count > 1:
+                res.append(_("Line %s should only have one no sujeto tax.", line.display_name))
+            if no_sujeto_loc_count > 1:
+                res.append(_("Line %s should only have one no sujeto (localizations) tax.", line.display_name))
+            if sujeto_count + no_sujeto_loc_count + no_sujeto_count > 1:
                 res.append(_("Line %s should only have one main tax.", line.display_name))
         if move.move_type in ('in_invoice', 'in_refund'):
             if not move.ref:

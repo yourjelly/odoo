@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- TODO: replace that by sale receipts? -->
     <record id="partner_simplified" model="res.partner">
-        <field name="name">Partner for simplified invoice</field>
+        <field name="name">Simplified Invoice Partner (ES)</field>
     </record>
 </odoo>
