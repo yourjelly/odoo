@@ -381,7 +381,7 @@ class AccountEdiFormat(models.Model):
 
         # === Decode the certificate ===
 
-        certificate = invoices.company_id.l10n_es_edi_certificate_id
+        certificate = company.l10n_es_edi_certificate_id
         pem_certificate, pem_private_key, certificate = certificate._decode_certificate()
         with NamedTemporaryFile(suffix='.cert') as cert_file, NamedTemporaryFile(suffix='.pem') as pem_file:
             cert_file.write(pem_certificate)
@@ -392,6 +392,7 @@ class AccountEdiFormat(models.Model):
             # === Call the web service ===
 
             class L10nEsHTTPAdapter(requests.adapters.HTTPAdapter):
+                """ An adapter to block DH ciphers which may not work for the tax agencies called"""
                 def init_poolmanager(self, *args, **kwargs):
                     kwargs['ssl_context'] = create_urllib3_context(ciphers=EUSKADI_CIPHERS)
                     return super().init_poolmanager(*args, **kwargs)
@@ -403,14 +404,14 @@ class AccountEdiFormat(models.Model):
                     self.session.mount('https://', L10nEsHTTPAdapter())
 
             # Get connection data.
-            l10n_es_edi_tax_agency = invoices.company_id.mapped('l10n_es_edi_tax_agency')[0]
+            l10n_es_edi_tax_agency = company.mapped('l10n_es_edi_tax_agency')[0]
             connection_vals = getattr(self, f'_l10n_es_edi_web_service_{l10n_es_edi_tax_agency}_vals')(invoices)
 
             header = {
                 'IDVersionSii': '1.1',
                 'Titular': {
-                    'NombreRazon': invoices.company_id.name[:120],
-                    'NIF': invoices.company_id.vat[2:],
+                    'NombreRazon': company.name[:120],
+                    'NIF': company.vat[2:],
                 },
                 'TipoComunicacion': 'A1' if csv_number else 'A0',
             }
@@ -437,22 +438,24 @@ class AccountEdiFormat(models.Model):
             if company.l10n_es_edi_test_env and connection_vals.get('test_url'):
                 serv._binding_options['address'] = connection_vals['test_url']
 
+            msg = ''
             try:
                 if invoices[0].is_sale_document():
                     res = serv.SuministroLRFacturasEmitidas(header, info_list)
                 else:
                     res = serv.SuministroLRFacturasRecibidas(header, info_list)
+            except requests.exceptions.SSLError as error:
+                msg = _("The SSL certificate could not be validated.")
+            except zeep.exceptions.Error as error:
+                msg = _("Networking error:\n%s") % error
             except Exception as error:
-                if isinstance(error, requests.exceptions.SSLError):
-                    msg = _("The SSL certificate could not be validated.")
-                elif isinstance(error, zeep.exceptions.Error):
-                    msg = _("Networking error:\n%s") % error
-                else:
-                    msg = str(error)
-                return {inv: {
-                    'error': msg,
-                    'blocking_level': 'warning',
-                } for inv in invoices}
+                msg = str(error)
+            finally:
+                if msg:
+                    return {inv: {
+                        'error': msg,
+                        'blocking_level': 'warning',
+                    } for inv in invoices}
 
             # Process response.
 

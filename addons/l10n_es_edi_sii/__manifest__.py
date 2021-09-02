@@ -42,5 +42,8 @@
     'demo': [
         'demo/demo_company.xml'
     ],
+    'external_dependencies': {
+        'python': ['cryptography', 'zeep'],
+    },
     'post_init_hook': '_l10n_es_edi_post_init',
 }

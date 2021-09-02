@@ -4,7 +4,10 @@
 from base64 import b64decode
 from pytz import timezone
 from datetime import datetime
-from OpenSSL import crypto
+import cryptography
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, pkcs12
+
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
@@ -39,13 +42,13 @@ class Certificate(models.Model):
         """
         self.ensure_one()
         if self.password:
-            decrypted_content = crypto.load_pkcs12(b64decode(self.content), self.password.encode())
+            private_key, certificate, dummy = pkcs12.load_key_and_certificates(b64decode(self.content), self.password.encode(),
+                                                                        backend=default_backend())
         else:
-            decrypted_content = crypto.load_pkcs12(b64decode(self.content))
-        certificate = decrypted_content.get_certificate()
-        private_key = decrypted_content.get_privatekey()
-        pem_certificate = crypto.dump_certificate(crypto.FILETYPE_PEM, certificate)
-        pem_private_key = crypto.dump_privatekey(crypto.FILETYPE_PEM, private_key)
+            raise
+        pem_certificate = certificate.public_bytes(Encoding.PEM)
+        pem_private_key = private_key.private_bytes(Encoding.PEM, format=PrivateFormat.TraditionalOpenSSL,
+                                                    encryption_algorithm=NoEncryption(),)
         return pem_certificate, pem_private_key, certificate
 
     # -------------------------------------------------------------------------
@@ -56,15 +59,15 @@ class Certificate(models.Model):
     def create(self, vals):
         record = super().create(vals)
 
-        spain_tz = timezone('America/Lima')
+        spain_tz = timezone('Europe/Madrid')
         spain_dt = self._get_es_current_datetime()
         date_format = '%Y%m%d%H%M%SZ'
         try:
             pem_certificate, pem_private_key, certificate = record._decode_certificate()
-            cert_date_start = spain_tz.localize(datetime.strptime(certificate.get_notBefore().decode(), date_format))
-            cert_date_end = spain_tz.localize(datetime.strptime(certificate.get_notAfter().decode(), date_format))
-            serial_number = certificate.get_serial_number()
-        except crypto.Error:
+            cert_date_start = spain_tz.localize(certificate.not_valid_before)
+            cert_date_end = spain_tz.localize(certificate.not_valid_after)
+            serial_number = certificate.serial_number
+        except Exception:
             raise ValidationError(_(
                 "There has been a problem with the certificate, some usual problems can be:\n"
                 "- The password given or the certificate are not valid.\n"
