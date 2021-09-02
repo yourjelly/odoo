@@ -21,7 +21,6 @@ class Certificate(models.Model):
 
     content = fields.Binary(string="File", required=True, help="PFX Certificate")
     password = fields.Char(help="Passphrase for the PFX certificate", groups="base.group_system")
-    serial_number = fields.Char(readonly=True, index=True, help="The serial number to add to electronic documents")
     date_start = fields.Datetime(readonly=True, help="The date on which the certificate starts to be valid")
     date_end = fields.Datetime(readonly=True, help="The date on which the certificate expires")
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
@@ -66,7 +65,6 @@ class Certificate(models.Model):
             pem_certificate, pem_private_key, certificate = record._decode_certificate()
             cert_date_start = spain_tz.localize(certificate.not_valid_before)
             cert_date_end = spain_tz.localize(certificate.not_valid_after)
-            serial_number = certificate.serial_number
         except Exception:
             raise ValidationError(_(
                 "There has been a problem with the certificate, some usual problems can be:\n"
@@ -75,7 +73,6 @@ class Certificate(models.Model):
             ))
         # Assign extracted values from the certificate
         record.write({
-            'serial_number': ('%x' % serial_number)[1::2],
             'date_start': fields.Datetime.to_string(cert_date_start),
             'date_end': fields.Datetime.to_string(cert_date_end),
         })
