@@ -438,7 +438,6 @@ class AccountEdiFormat(models.Model):
                 serv._binding_options['address'] = connection_vals['test_url']
 
             try:
-                print(header, info_list)
                 if invoices[0].is_sale_document():
                     res = serv.SuministroLRFacturasEmitidas(header, info_list)
                 else:

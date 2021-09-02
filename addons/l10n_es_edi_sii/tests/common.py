@@ -21,9 +21,9 @@ class TestEsEdiCommon(AccountEdiTestCommon):
 
         # ==== Config ====
 
-        resource_path = modules.get_resource_path('l10n_es_edi_sii', 'demo/certificates', 'sello_entidad_act.p12')
         cls.certificate = cls.env['l10n_es_edi.certificate'].create({
-            'content': base64.encodebytes(misc.file_open(resource_path, 'rb').read()),
+            'content': base64.encodebytes(
+                misc.file_open("l10n_es_edi_sii/demo/certificates/sello_entidad_act.p12", 'rb').read()),
             'password': 'IZDesa2021',
         })
 
