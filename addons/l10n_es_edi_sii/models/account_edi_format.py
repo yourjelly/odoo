@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 from urllib3.util.ssl_ import create_urllib3_context, DEFAULT_CIPHERS
 
 from odoo import fields
+from odoo.tools import html_escape
 
 import math
 import json
@@ -236,7 +237,9 @@ class AccountEdiFormat(models.Model):
                 else:
                     invoice_node['ClaveRegimenEspecialOTrascendencia'] = '02'
             else:
-                info['IDFactura']['IDEmisorFactura'] = {'NIF': invoice.company_id.vat[2:]}
+                emisor_info = partner_info.copy()
+                emisor_info.pop("NombreRazon")
+                info['IDFactura']['IDEmisorFactura'] = emisor_info
                 info['IDFactura']['NumSerieFacturaEmisor'] = invoice.ref[:60]
                 if not is_simplified:
                     invoice_node['Contraparte'] = partner_info
@@ -435,6 +438,7 @@ class AccountEdiFormat(models.Model):
                 serv._binding_options['address'] = connection_vals['test_url']
 
             try:
+                print(header, info_list)
                 if invoices[0].is_sale_document():
                     res = serv.SuministroLRFacturasEmitidas(header, info_list)
                 else:
@@ -461,25 +465,34 @@ class AccountEdiFormat(models.Model):
 
             resp_state = res["EstadoEnvio"]
             l10n_es_edi_csv = res['CSV']
+
+            if resp_state == 'Correcto':
+                invoices.write({'l10n_es_edi_csv': l10n_es_edi_csv})
+                return {inv: {'success': True} for inv in invoices}
+
+            results = {}
             for respl in res.RespuestaLinea:
                 invoice_number = respl['IDFactura']['NumSerieFacturaEmisor']
 
                 # Retrieve the corresponding invoice.
-                inv = invoices.filtered(lambda x: (x.name if x.is_sale_document else x.ref) == invoice_number)
+                # TODO: ref can be the same for multiple partners
+                inv = invoices.filtered(lambda x: (x.name[:60] if x.is_sale_document() else x.ref[:60]) == invoice_number)
 
-                if resp_state == 'Correcto':
+                resp_line_state = respl['EstadoRegistro']
+                if resp_line_state in ('Correcto', 'AceptadoConErrores'):
                     inv.l10n_es_edi_csv = l10n_es_edi_csv
-                    return {inv: {'success': True} for inv in invoices}
-                elif resp_state == 'ParcialmenteCorrecto' and respl['EstadoRegistro'] == 'AceptadoConErrores':
-                    inv.l10n_es_edi_csv = l10n_es_edi_csv
-                    for inv in invoices:
-                        inv.message_post(body=_("This was accepted with errors."))
-                    return {inv: {'success': True} for inv in invoices}
-                elif resp_state == 'Incorrecto':
-                    return {inv: {
+                    results[inv] = {'success': True}
+                    if resp_line_state == 'AceptadoConErrores':
+                        inv.message_post(body=_("This was accepted with errors. ") + html_escape(respl["DescripcionErrorRegistro"]))
+                elif respl['RegistroDuplicado']:
+                    results[inv] = {'success': True}
+                    inv.message_post(body=_("We saw that this invoice was sent correctly before, but we did not treat the response.  Make sure it is not because of a wrong configuration. "))
+                else:
+                    results[inv] = {
                         'error': _("[%s] %s", respl['CodigoErrorRegistro'], respl["DescripcionErrorRegistro"]),
-                        'blocking_level': 'warning',
-                    } for inv in invoices}
+                        'blocking_level': 'error',
+                    }
+            return results
 
     # -------------------------------------------------------------------------
     # EDI OVERRIDDEN METHODS

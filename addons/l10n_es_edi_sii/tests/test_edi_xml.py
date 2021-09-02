@@ -601,7 +601,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'}
+                    'IDEmisorFactura': {'NIF': 'F35999705'}
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'F1',
@@ -642,7 +642,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'R4',
@@ -692,7 +692,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'F1',
@@ -745,7 +745,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'F1',
@@ -791,7 +791,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'F1',
@@ -890,7 +890,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'F1',
@@ -939,7 +939,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'R4',
@@ -990,7 +990,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 'IDFactura': {
                     'FechaExpedicionFacturaEmisor': '01-01-2019',
                     'NumSerieFacturaEmisor': 'sup0001',
-                    'IDEmisorFactura': {'NIF': '59962470K'},
+                    'IDEmisorFactura': {'NIF': 'F35999705'},
                 },
                 'FacturaRecibida': {
                     'TipoFactura': 'R4',
