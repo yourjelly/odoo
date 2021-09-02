@@ -46,7 +46,7 @@ class AccountTaxTemplate(models.Model):
     _name = 'account.tax.template'
 
     def _get_tax_vals(self, company, tax_template_to_tax):
-        # OVERRIDE
+        """Make sure that the values are copied from account.tax.template to account.tax"""
         vals = super()._get_tax_vals(company, tax_template_to_tax)
         vals['l10n_es_exempt_reason'] = self.l10n_es_exempt_reason
         vals['l10n_es_type'] = self.l10n_es_type

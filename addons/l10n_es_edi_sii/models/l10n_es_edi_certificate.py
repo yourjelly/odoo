@@ -4,7 +4,6 @@
 from base64 import b64decode
 from pytz import timezone
 from datetime import datetime
-import cryptography
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, pkcs12
 
@@ -17,7 +16,7 @@ class Certificate(models.Model):
     _name = 'l10n_es_edi.certificate'
     _description = 'Personal Digital Certificate'
     _order = 'date_start desc, id desc'
-    _rec_name = 'serial_number'
+    _rec_name = 'date_start'
 
     content = fields.Binary(string="File", required=True, help="PFX Certificate")
     password = fields.Char(help="Passphrase for the PFX certificate", groups="base.group_system")
@@ -60,7 +59,6 @@ class Certificate(models.Model):
 
         spain_tz = timezone('Europe/Madrid')
         spain_dt = self._get_es_current_datetime()
-        date_format = '%Y%m%d%H%M%SZ'
         try:
             pem_certificate, pem_private_key, certificate = record._decode_certificate()
             cert_date_start = spain_tz.localize(certificate.not_valid_before)
@@ -77,5 +75,5 @@ class Certificate(models.Model):
             'date_end': fields.Datetime.to_string(cert_date_end),
         })
         if spain_dt > cert_date_end:
-            raise ValidationError(_('The certificate is expired since %s') % record.date_end)
+            raise ValidationError(_('The certificate is expired since %s', record.date_end))
         return record

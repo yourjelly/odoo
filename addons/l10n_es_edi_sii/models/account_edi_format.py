@@ -474,24 +474,24 @@ class AccountEdiFormat(models.Model):
 
             results = {}
             for respl in res.RespuestaLinea:
-                invoice_number = respl['IDFactura']['NumSerieFacturaEmisor']
+                invoice_number = respl.IDFactura.NumSerieFacturaEmisor
 
                 # Retrieve the corresponding invoice.
                 # TODO: ref can be the same for multiple partners
                 inv = invoices.filtered(lambda x: (x.name[:60] if x.is_sale_document() else x.ref[:60]) == invoice_number)
 
-                resp_line_state = respl['EstadoRegistro']
+                resp_line_state = respl.EstadoRegistro
                 if resp_line_state in ('Correcto', 'AceptadoConErrores'):
                     inv.l10n_es_edi_csv = l10n_es_edi_csv
                     results[inv] = {'success': True}
                     if resp_line_state == 'AceptadoConErrores':
-                        inv.message_post(body=_("This was accepted with errors. ") + html_escape(respl["DescripcionErrorRegistro"]))
-                elif respl['RegistroDuplicado']:
+                        inv.message_post(body=_("This was accepted with errors: ") + html_escape(respl.DescripcionErrorRegistro))
+                elif respl.RegistroDuplicado:
                     results[inv] = {'success': True}
                     inv.message_post(body=_("We saw that this invoice was sent correctly before, but we did not treat the response.  Make sure it is not because of a wrong configuration. "))
                 else:
                     results[inv] = {
-                        'error': _("[%s] %s", respl['CodigoErrorRegistro'], respl["DescripcionErrorRegistro"]),
+                        'error': _("[%s] %s", respl.CodigoErrorRegistro, respl.DescripcionErrorRegistro),
                         'blocking_level': 'error',
                     }
             return results
@@ -539,6 +539,7 @@ class AccountEdiFormat(models.Model):
             count = len(line.tax_ids)
             recargo_count = line.tax_ids.mapped('l10n_es_type').count('recargo')
             retention_count = line.tax_ids.mapped('l10n_es_type').count('retencion')
+
             if retention_count > 1:
                 res.append(_("Line %s should only have one retention tax.", line.display_name))
             if recargo_count > 1:
