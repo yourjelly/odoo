@@ -3,6 +3,7 @@
 from collections import defaultdict
 from tempfile import NamedTemporaryFile
 from urllib3.util.ssl_ import create_urllib3_context, DEFAULT_CIPHERS
+from OpenSSL.crypto import X509, PKey, load_certificate, load_privatekey, FILETYPE_PEM
 
 from odoo import fields
 from odoo.tools import html_escape
@@ -16,6 +17,23 @@ from odoo import models, _
 
 
 EUSKADI_CIPHERS = DEFAULT_CIPHERS + ":!DH"
+
+
+def _is_key_file_encrypted(keyfile):
+    '''In memory key is not encrypted'''
+    return False
+
+
+class PyOpenSSLContext(requests.packages.urllib3.contrib.pyopenssl.PyOpenSSLContext):
+    '''Support loading certs from memory'''
+    def load_cert_chain(self, certfile, keyfile=None, password=None):
+        cert_file, key_file, dummy = certfile._decode_certificate()
+        cert_obj = load_certificate(FILETYPE_PEM, cert_file)
+        pkey_obj = load_privatekey(FILETYPE_PEM, key_file)
+
+        self._ctx.use_certificate(cert_obj)
+        self._ctx.use_privatekey(pkey_obj)
+
 
 
 class AccountEdiFormat(models.Model):
@@ -397,6 +415,15 @@ class AccountEdiFormat(models.Model):
                     kwargs['ssl_context'] = create_urllib3_context(ciphers=EUSKADI_CIPHERS)
                     return super().init_poolmanager(*args, **kwargs)
 
+                def cert_verify(self, conn, url, verify, cert):
+                    if cert:
+                        conn.cert_file = cert
+                        conn.private_key = cert
+
+
+                        cert = None
+                    super().cert_verify(conn, url, verify, cert)
+
             class ESTransport(zeep.transports.Transport):
                 def __init__(self, *args, **kwargs):
                     # OVERRIDE: block DH ciphers for Euskadi servers.
@@ -421,8 +448,12 @@ class AccountEdiFormat(models.Model):
                 'l10n_es_registration_date': fields.Date.context_today(self),
             })
 
+            if hasattr(requests.packages.urllib3.util.ssl_, '_is_key_file_encrypted'):
+                _is_key_file_encrypted.original = requests.packages.urllib3.util.ssl_._is_key_file_encrypted
+                requests.packages.urllib3.util.ssl_._is_key_file_encrypted = _is_key_file_encrypted
+            requests.packages.urllib3.util.ssl_.SSLContext = PyOpenSSLContext
             session = requests.Session()
-            session.cert = (cert_file.name, pem_file.name)
+            session.cert = company.l10n_es_edi_certificate_id
             transport = ESTransport(operation_timeout=60, timeout=60, session=session)
             client = zeep.Client(connection_vals['url'], transport=transport)
 
