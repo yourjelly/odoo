@@ -98,6 +98,15 @@ class AdyenAccount(models.Model):
     transaction_payout_ids = fields.One2many('adyen.transaction.payout', 'adyen_account_id')
     payout_count = fields.Integer(compute='_compute_payout_count')
 
+    payment_journal_id = fields.Many2one(
+        string="Payment Journal", comodel_name='account.journal',
+        compute='_compute_payment_journal_id', inverse='_inverse_payment_journal_id',
+        help="The journal in which the successful transactions are posted",
+        domain="[('type', '=', 'bank'), ('company_id', '=', company_id)]")
+
+    # UX flag to know if the user has to select/create a journal or if it will be created automatically for him.
+    need_to_provide_payment_journal = fields.Boolean(compute="_compute_need_to_provide_payment_journal", readonly=True)
+
     entity_type = fields.Selection([
         ('business', 'Business'),
         ('individual', 'Individual'),
@@ -158,6 +167,7 @@ class AdyenAccount(models.Model):
         ('validation', 'Data Validation'),  # KYC Validation from Adyen
         ('validated', 'Validated'),
     ], compute='_compute_state', string='Account State')
+    onboarding_msg = fields.Html(compute='_compute_onboarding_msg')
 
     # KYC
     adyen_kyc_ids = fields.One2many('adyen.kyc', 'adyen_account_id', string='KYC Checks', readonly=True)
@@ -169,6 +179,12 @@ class AdyenAccount(models.Model):
     _sql_constraints = [
         ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
     ]
+
+    def name_get(self):
+        return [
+            (record.id, 'Odoo Payment Account' if record.id else 'Odoo Payment Account Creation')
+            for record in self
+        ]
 
     @api.constrains('phone_number')
     def _check_phone_number(self):
@@ -193,6 +209,74 @@ class AdyenAccount(models.Model):
                 raise ValidationError(_(
                     "The given registration number is invalid: %s",
                     account.registration_number))
+
+    @api.depends('company_id')  # fake 'depends' to be sure that this _compute method is called when the form view is displayed
+    def _compute_need_to_provide_payment_journal(self):
+        self.need_to_provide_payment_journal = self.env['ir.module.module'].sudo().search([
+            ('name', '=', 'account_accountant'),
+            ('state', '=', 'installed'),
+        ])
+
+    @api.depends('company_id')
+    def _compute_payment_journal_id(self):
+        for account in self:
+            acquirer = self.env['payment.acquirer'].search([
+                ('provider', '=', 'odoo'),
+                ('company_id', '=', account.company_id.id),
+            ], limit=1)
+            account.payment_journal_id = acquirer.journal_id
+
+    def _inverse_payment_journal_id(self):
+        for account in self:
+            acquirer = self.env['payment.acquirer'].search([
+                ('provider', '=', 'odoo'),
+                ('company_id', '=', account.company_id.id),
+            ], limit=1)
+            acquirer.journal_id = account.payment_journal_id
+
+    @api.depends('state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
+    def _compute_onboarding_msg(self):
+        self.onboarding_msg = False
+        for account in self:
+            if account.state == 'pending' and account.id:
+                account.onboarding_msg = (
+                    "Our team will review your account. We will notify you, by email, as soon "
+                    "as you can start processing payments."
+                )
+            elif account.state == 'awaiting_data':
+                if account.transactions_count > 0:
+                    data_to_fill_msgs = []
+
+                    if len(account.adyen_kyc_ids) == 0:
+                        data_to_fill_msgs.append("-   KYC: use 'Add a line' in the KYC tab to upload relevant document")
+
+                    if len(account.shareholder_ids) == 0:
+                        data_to_fill_msgs.append((
+                            "-   Shareholders: use 'Add a line' in the shareholder tab to list all your company "
+                            "shareholders owning more than 25% of the company"
+                        ))
+
+                    if len(account.bank_account_ids) == 0:
+                        data_to_fill_msgs.append(
+                            "-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account"
+                        )
+
+                    if data_to_fill_msgs:
+                        account.onboarding_msg = (
+                            "In order to validate your account, you need to fill the following information:<br>"
+                            "%s<br><br>"
+                            "Then, click on 'save' and we will validate your information"
+                        ) % ("<br>".join(data_to_fill_msgs))
+                    else:
+                        account.onboarding_msg = (
+                            "We will notify you via email when we have reviewed your information"
+                        )
+            elif account.state == 'validated':
+                if account.transactions_count == 0:
+                    account.onboarding_msg = (
+                        "You can now receive payments.<br>After the first payment, we will notify "
+                        "you to gather more data such as ID and banking details"
+                    )
 
     @api.depends('transaction_ids')
     def _compute_transactions_count(self):
@@ -243,9 +327,23 @@ class AdyenAccount(models.Model):
                 'checks': checks
             })
 
+    @api.onchange('country_id')
+    def _onchange_country_id(self):
+        self.state_id = False
+
     @api.model
     def create(self, values):
         adyen_account = super().create(values)
+
+        # Set the payment journal for the Odoo payment acquirer if not yet created by the user
+        if not adyen_account.payment_journal_id:
+            payment_journal = self.env['account.journal'].search([
+                ('company_id', '=', adyen_account.company_id.id),
+                ('type', '=', 'bank'),
+            ], limit=1)
+
+            if payment_journal:
+                adyen_account.payment_journal_id = payment_journal
 
         # Create account on odoo.com, proxy and Adyen
         create_data = self._prepare_account_data(values)
@@ -260,6 +358,7 @@ class AdyenAccount(models.Model):
             'adyen_uuid': response['adyen_uuid'],
             'proxy_token': response['proxy_token'],
         })
+
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
 
@@ -322,8 +421,10 @@ class AdyenAccount(models.Model):
                 'res_id': self.env.company.adyen_account_id.id,
                 'type': 'ir.actions.act_window',
             }
+
         return_url = url_join(self.env.company.get_base_url(), 'odoo_payments/create_account')
         onboarding_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
+
         return {
             'type': 'ir.actions.act_url',
             'url': url_join(onboarding_url, 'get_creation_token?return_url=%s' % return_url),
@@ -430,6 +531,17 @@ class AdyenAccount(models.Model):
 
         return data
 
+    def _enable_payment_acquirer(self):
+        """
+        Once the Adyen account becomes active, the odoo payment acquirer is automatically enabled
+        """
+        odoo_payment_acquirer = self.env['payment.acquirer'].search([
+                ('provider', '=', 'odoo'),
+                ('company_id', '=', self.company_id.id),
+            ], limit=1)
+        if odoo_payment_acquirer:
+            odoo_payment_acquirer.state = 'enabled' if not self.is_test else 'test'
+
     def _adyen_rpc(self, operation, adyen_data=None):
         adyen_data = adyen_data or {}
         if operation == 'v1/create_account_holder':
@@ -508,6 +620,7 @@ class AdyenAccount(models.Model):
             })
             # result for unsuspend_account_holder request only contains pspReference
             # not new account status
+
         elif new_status == 'rejected':
             self._adyen_rpc('v1/close_account_holder', {
                 'accountHolderCode': self.account_holder_code,
@@ -520,7 +633,11 @@ class AdyenAccount(models.Model):
         # Account Status
         new_status = ADYEN_STATUS_MAP.get(content.get('newStatus', {}).get('status'))
         if new_status and new_status != self.account_status:
+            old_status = self.account_status
             self.account_status = new_status
+
+            if new_status == 'active' and old_status in ['suspended', 'inactive']:
+                self._enable_payment_acquirer()
 
         # Tier
         tier = content.get('newStatus', {}).get('processingState', {}).get('tierNumber', None)

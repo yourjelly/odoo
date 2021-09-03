@@ -11,6 +11,11 @@ const _t = core._t;
 const QWeb = core.qweb;
 
 var AdyenAccountFormController = FormController.extend({
+    _discardChanges: function (recordID, options) {
+        this._super.apply(this, arguments);
+        this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});    
+    },
+
     _saveRecord: function (recordID, options) {
         if (this.model.isNew(this.handle) && this.canBeSaved()) {
             var _super = this._super.bind(this, recordID, options);
@@ -33,7 +38,7 @@ var AdyenAccountFormController = FormController.extend({
             var dialog = new Dialog(this, {
                 size: 'extra-large',
                 buttons: buttons,
-                title: _t("Confirm your Adyen Account Creation"),
+                title: _t("Confirm your Odoo Payment Account Creation"),
                 $content: QWeb.render('AdyenAccountCreationConfirmation', {
                     data: this.model.get(this.handle).data,
                 }),
