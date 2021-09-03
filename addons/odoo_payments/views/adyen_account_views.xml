@@ -11,9 +11,17 @@
                 <field name="adyen_uuid" invisible="1"/>
                 <field name="kyc_tier" invisible="1"/>
                 <field name="payout_allowed" invisible="1"/>
+                <field name="need_to_provide_payment_journal" invisible="1"/>
                 <header>
                     <field name="state" widget="statusbar" attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
+                <div class="alert alert-warning o_form_header" attrs="{'invisible': ['|', ('onboarding_msg', '=', False),('account_status', '!=', 'active')]}" role="status">
+                    <a class="close" data-dismiss="alert" href="#" aria-label="Close"><i title="Close" class="small fa fa-times"/></a>
+                    <strong><field name="onboarding_msg"/></strong>
+                </div>
+                <div class="alert alert-danger o_form_header" role="alert" attrs="{'invisible': [('account_status', '!=', 'closed')]}">
+                    <strong><p>Your account is Closed.</p></strong>
+                </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button
@@ -40,16 +48,8 @@
                             title="Test Mode"
                             bg_color="bg-warning"
                             attrs="{'invisible': ['|', ('is_test', '=', False), ('adyen_uuid', '=', False)]}"/>
-
-                    <div class="alert alert-danger" role="alert" attrs="{'invisible': [('account_status', '!=', 'closed')]}">
-                        <p>Your account is Closed.</p>
-                    </div>
                     <div class="alert alert-warning" role="alert" attrs="{'invisible': [('kyc_status_message', '=', False)]}">
                         <field name="kyc_status_message" readonly="1" />
-                    </div>
-                    <div class="alert alert-warning" role="alert"
-                        attrs="{'invisible': ['|', '|', '|', ('account_code', '=', False), ('state', 'in', 'pending'), ('account_status', '=', 'closed'), ('bank_account_ids', '!=', [])]}">
-                        <p>A bank account is required to perform payouts.</p>
                     </div>
                     <group>
                         <group>
@@ -94,6 +94,13 @@
                                 attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                         </group>
 
+                        <group string="Payment Followup" attrs="{'invisible': [('need_to_provide_payment_journal', '=', False)]}">
+                            <field name="payment_journal_id"
+                                   context="{'default_type': 'bank'}"
+                                   attrs="{'required': [('need_to_provide_payment_journal', '=', True)]}"
+                                   />
+                        </group>
+
                         <group string="Contact">
                             <field name="email" widget="email"/>
                             <field name="phone_number"/>
@@ -116,7 +123,7 @@
                         </group>
                     </group>
                     <notebook attrs="{'invisible': [('adyen_uuid', '=', False)]}">
-                        <page string="KYC">
+                        <page string="KYC" attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <field name="adyen_kyc_ids">
                                 <tree no_open="1">
                                     <field name="verification_type" />
@@ -133,7 +140,7 @@
                             </field>
                         </page>
                         <page string="Shareholders"
-                            attrs="{'invisible': [('entity_type', '!=', 'business')],
+                            attrs="{'invisible': ['|', ('entity_type', '!=', 'business'), ('transactions_count', '=', 0)],
                                 'required': [('entity_type', '!=', 'individual')]}">
                             <field name="shareholder_ids"
                                 attrs="{'required': [('entity_type', '=', 'business')]}">>
@@ -150,7 +157,7 @@
                             </field>
                         </page>
                         <page string="Manager(s)"
-                            attrs="{'invisible': [('entity_type', '!=', 'nonprofit')]}">
+                            attrs="{'invisible': ['|', ('entity_type', '!=', 'nonprofit'), ('transactions_count', '=', 0)]}">
                             <field name="shareholder_ids"
                                 attrs="{'required': [('entity_type', '=', 'nonprofit')]}">
                                 <tree>
@@ -181,7 +188,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Payouts">
+                        <page string="Payouts" attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <group>
                                 <group>
                                     <field name="payout_schedule" attrs="{'readonly': [('payout_allowed', '=', False)]}" />

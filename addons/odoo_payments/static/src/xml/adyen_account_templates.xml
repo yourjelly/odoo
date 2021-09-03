@@ -3,9 +3,12 @@
     <t t-name="AdyenAccountCreationConfirmation">
         <main>
             <div class="alert alert-info">
-                You can start processing payments as soon as your application is sent.<br/>
-                Payouts will be blocked until your application has been accepted.<br/>
-                We will notify you when the status of the review changes, or if additional data is required.<br/>
+                Our team will manually review that your account meets legal requirements (detailed in the disclaimer below).
+                You will be notified when the account is validated and will be able to receive payments then.
+                <br/>
+                We will also notify you if and when we need to gather more information.
+                For example, after the first payment we will ask for your banking information so we can do payouts to your bank account.
+                <br/>
             </div>
 
             <h3>Submitted data</h3>
@@ -91,7 +94,7 @@
             and setting in Processor’s systems which are used by Processor to provide the
             services and authorise us to manage these on your behalf.</p>
 
-            <h3>Pricing</h3>
+            <h3>Pay-As-You-Go Pricing</h3>
             <ul>
                 <li>European consumer cards: 1.3% + 0.20€</li>
                 <li>Commercial and non-EU cards: 2.8% + 0.20€</li>

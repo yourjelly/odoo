@@ -29,7 +29,7 @@ class PaymentAcquirerOnboardingWizard(models.TransientModel):
         return self._get_default_payment_acquirer_onboarding_value('payment_method')
 
     payment_method = fields.Selection(
-        string="Payment Method", default=_default_payment_method,
+        string="Payment Method", default=lambda s: s._default_payment_method(),  # must be a lambda to allow overriding _default_payment_method()
         selection='_selection_payment_methods')
 
     paypal_user_type = fields.Selection([
