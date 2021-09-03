@@ -518,6 +518,19 @@ var FormRenderer = BasicRenderer.extend({
 
             // Get the unfolded buttons according to window size
             var nb_buttons = self._renderButtonBoxNbButtons();
+
+            // TODO: MSH: Instead of concating invisible buttons at last why don't we keep
+            // invisible buttons in same sequence, instead of using .slice, iterate through
+            // all buttons check when unfolded_buttons list is greater than nb_buttons
+            // take a variable unfolder_button_count which is increased when visible button is
+            // pushed to unfolded_buttons list and we also push invisible button in list but we will
+            // not increase unfolder_button_count in case of invisible button and we will stop
+            // iteration when unfolder_button_count is > nb_buttons i.e. nb_buttons + all invisible
+            // buttons upto next visible button after nb_buttons count is matched are pushed
+            // in unfolded_buttons list and we will put other invisible button in folded dropdown
+            // so we will not use .slice method for getting folded_buttons, instead we will consider
+            // length of unfolded_buttons to last button for getting folded_buttons
+
             var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
 
             // Get the folded buttons
