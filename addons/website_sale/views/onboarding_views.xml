@@ -1,7 +1,17 @@
 <odoo>
     <!-- PAYMENT ACQUIRER -->
-    <template id="website_sale_onboarding_payment_acquirer_step" primary="True"
-              inherit_id="payment.onboarding_payment_acquirer_step">
+    <template id="website_sale_onboarding_payment_acquirer_step" inherit_id="payment.onboarding_payment_acquirer_step">
+        <xpath expr="//t[@name='onboarding_text']" position="attributes">
+            <attribute name="t-if">not company.is_odoo_payment_available()</attribute>
+        </xpath>
+        <xpath expr="//t[@name='onboarding_text']" position="after">
+            <t t-else="" name="odoo_onboarding_text">
+                    <t t-set="title">Odoo Payments</t>
+                    <t t-set="description">Allow your customers to pay online for their purchase.</t>
+                    <t t-set="btn_text">Enable payments</t>
+                    <t t-set="done_text">Payments enabled!</t>
+            </t>
+        </xpath>
         <xpath expr="//t[@t-set='method']" position="replace">
             <t t-set="method" t-value="'action_open_website_sale_onboarding_payment_acquirer'" />
         </xpath>
