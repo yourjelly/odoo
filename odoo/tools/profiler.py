@@ -272,6 +272,43 @@ class SyncCollector(Collector):
         super().post_process()
 
 
+class QwebTracker():
+
+    @classmethod
+    def enabled(cls):
+        current_thread = threading.current_thread()
+        execution_context_enabled = getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb')
+        qweb_hooks = getattr(current_thread, 'qweb_hooks', ())
+        return bool(execution_context_enabled or qweb_hooks)
+
+    def __init__(self, view_id, arch, cr):
+        current_thread = threading.current_thread()  # don't store current_thread on self
+        self.execution_context_enabled = getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb')
+        self.qweb_hooks = getattr(current_thread, 'qweb_hooks', ())
+        self.context_stack = []
+        self.cr = cr
+        self.view_id = view_id
+        for hook in self.qweb_hooks:
+            hook('render', self.cr.sql_log_count, view_id=view_id, arch=arch)
+
+    def enter_directive(self, directive, attrib, xpath):
+        execution_context = None
+        if self.execution_context_enabled:
+            execution_context = tools.profiler.ExecutionContext(directive=directive, xpath=xpath)
+            execution_context.__enter__()
+            self.context_stack.append(execution_context)
+
+        for hook in self.qweb_hooks:
+            hook('enter', self.cr.sql_log_count, view_id=self.view_id, xpath=xpath, directive=directive, attrib=attrib)
+
+    def leave_directive(self):
+        if self.execution_context_enabled:
+            self.context_stack.pop().__exit__()
+
+        for hook in self.qweb_hooks:
+            hook('leave', self.cr.sql_log_count)
+
+
 class QwebCollector(Collector):
     """
     Record qweb execution with directive trace.
@@ -282,8 +319,8 @@ class QwebCollector(Collector):
         super().__init__()
         self.events = []
 
-        def hook(event, env, **kwargs):
-            self.events.append((event, kwargs, env.cr.sql_log_count, time.time()))
+        def hook(event, sql_log_count, **kwargs):
+            self.events.append((event, kwargs, sql_log_count, time.time()))
         self.hook = hook
 
     def _get_directive_profiling_name(self, directive, attrib):
@@ -322,14 +359,17 @@ class QwebCollector(Collector):
         results = []
         archs = {}
         for event, kwargs, sql_count, time in self.events:
-            if 'arch' in kwargs:
+            if event == 'render':
                 archs[kwargs['view_id']] = kwargs['arch']
+                continue
 
             # update the active directive with the elapsed time and queries
             if stack:
                 top = stack[-1]
                 top['delay'] += time - last_event_time
                 top['query'] += sql_count - last_event_query
+            last_event_time = time
+            last_event_query = sql_count
 
             if event == 'enter':
                 data = {
@@ -342,10 +382,8 @@ class QwebCollector(Collector):
                 results.append(data)
                 stack.append(data)
             else:
+                assert event == "leave"
                 data = stack.pop()
-
-            last_event_time = time
-            last_event_query = sql_count
 
         self.add({'results': {'archs': archs, 'data': results}})  
         super().post_process()

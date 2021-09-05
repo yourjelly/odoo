@@ -15,7 +15,7 @@ from textwrap import dedent, indent as _indent
 from lxml import etree
 from psycopg2.extensions import TransactionRollbackError
 
-from odoo.tools import pycompat, freehash
+from odoo.tools import pycompat, freehash, profiler
 
 _logger = logging.getLogger(__name__)
 
@@ -122,6 +122,10 @@ class QWeb(object):
         """
         if values and 0 in values:
             raise ValueError('values[0] should be unset when call the _render method and only set into the template.')
+        
+        if profiler.QwebTracker.enabled():
+            options['profile'] = True
+
         render_template = self._compile(template, options)
         rendering = render_template(self, values or {})
         result = ''.join(rendering)
@@ -143,8 +147,6 @@ class QWeb(object):
             ref = element.get('t-name', str(document))
 
         options['ref'] = ref
-        if 'profile' in options:
-            options['document'] = document if isinstance(document, str) else str(document, 'utf-8')
 
         _options = dict(options)
         options = frozendict(options)
@@ -170,7 +172,6 @@ class QWeb(object):
         except Exception as e:
             raise QWebException("Error when compiling xml template", self, options,
                 error=e, template=template, path=_options.get('last_path_node'))
-
         try:
             code = '\n'.join(code_lines)
         except QWebException as e:
@@ -207,6 +208,17 @@ class QWeb(object):
             except Exception as e:
                 raise QWebException("Error when render the template", self, options,
                     error=e, template=template, path=log.get('last_path_node'), code=code)
+
+        if options.get('profile'):
+            def profiled_render_template(self, values):
+                str_document = document if isinstance(document, str) else str(document, 'utf-8')
+                qweb_tracker = profiler.QwebTracker(ref, str_document, self.env.cr)
+                if qweb_tracker.execution_context_enabled:
+                    with profiler.ExecutionContext(template=ref):
+                        return render_template(self.with_context(qweb_tracker=qweb_tracker), values)
+                return render_template(self.with_context(qweb_tracker=qweb_tracker), values)
+
+            return profiled_render_template
 
         return render_template
 
