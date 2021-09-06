@@ -530,11 +530,24 @@ var FormRenderer = BasicRenderer.extend({
             // in unfolded_buttons list and we will put other invisible button in folded dropdown
             // so we will not use .slice method for getting folded_buttons, instead we will consider
             // length of unfolded_buttons to last button for getting folded_buttons
+            let unfoldedButtonCount = 0;
+            let unfolded_buttons = [];
+            for (let i = 0; i < buttons.length; i++) {
+                const button = buttons[i];
+                if (!button.classList.contains('o_invisible_modifier')) {
+                    unfoldedButtonCount += 1;
+                }
+                if (unfoldedButtonCount > nb_buttons) {
+                    break;
+                }
+                unfolded_buttons.push(button);
+            }
+            let folded_buttons = buttons.slice(unfolded_buttons.length);
 
-            var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
+            // var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
 
             // Get the folded buttons
-            var folded_buttons = visible_buttons.slice(nb_buttons);
+            // var folded_buttons = visible_buttons.slice(nb_buttons);
             if (folded_buttons.length === 1) {
                 unfolded_buttons = buttons;
                 folded_buttons = [];
