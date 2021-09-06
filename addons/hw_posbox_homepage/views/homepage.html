@@ -124,24 +124,6 @@
             <td class="heading">Six payment terminal</td>
             <td>{{ six_terminal }} <a class="btn btn-sm float-right" href='/six_payment_terminal'>configure</a></td>
         </tr>
-        <tr>
-            <td class="heading">Opc-Ua Server</td>
-            <td>
-                <div class="collapse">
-                    {% for device in iot_device_status if device.type == 'opcua'  %}
-                        <div class="collapsible">
-                            <div class="title arrow-down">{{ device.name }}</div>
-                            <div class="content">
-                                <div class="root-opcua">
-                                    <a class="btn btn-sm btn-in-border" href="#" data-value="root">Root</a>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                <br><center><a class="btn btn-sm" href='/opcua_server'>configure</a></center>
-            </td>
-        </tr>
         {% endif %}
         <tr>
             <td class="heading">IOT Device</td>
@@ -174,6 +156,7 @@
         <a target="_blank" class="btn" style="margin-left: 10px;" href="http://{{ ip }}:631">Printers server</a>
         {% if server_status != "Not Configured" %}
         <a class="btn" style="margin-left: 10px;" href='/list_credential'>Credential</a>
+        <a class="btn" style="margin-left: 10px;margin-top: 10px;" href='/opcua_server'>Opc-Ua Server</a>
         {% endif %}
     </div>
 {% endblock %}
