@@ -166,7 +166,11 @@ def url_lang(path_or_uri, lang_code=None):
             # Insert the context language or the provided language
             elif lang_url_code != default_lg.url_code or force_lang:
                 ps.insert(1, lang_url_code)
-            location = u'/'.join(ps) + sep + qs
+            # avoid trailing / except for homepage '/'
+            # '', fr', '' => /fr/ instead of /fr
+            if len(ps) > 1 and ps[-1] == '':
+                ps = ps[:-1]
+            location = (u'/'.join(ps)) + sep + qs
     return location
 
 
@@ -197,7 +201,10 @@ def url_for(url_from, lang_code=None, no_rewrite=False):
         new_url, _ = request.env['ir.http'].url_rewrite(path)
         new_url = new_url if not qs else new_url + '?%s' % qs
 
-    return url_lang(new_url or url_from, lang_code=lang_code)
+    url = url_lang(new_url or url_from, lang_code=lang_code)
+    if len(url) > 1:
+        url = url.rstrip('/')  # remove trailing / (e.g.: /fr/)
+    return url
 
 
 def is_multilang_url(local_url, lang_url_codes=None):
