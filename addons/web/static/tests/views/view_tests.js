@@ -6,8 +6,10 @@ import { ormService } from "@web/core/orm_service";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { registry } from "@web/core/registry";
 import { View } from "@web/views/view";
+import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { viewService } from "@web/views/view_service";
 import { click } from "../helpers/utils";
+import { actionService } from "@web/webclient/actions/action_service";
 
 const { Component, mount, hooks, tags } = owl;
 const { useState } = hooks;
@@ -95,6 +97,7 @@ QUnit.module("Views", (hooks) => {
         }
         ToyView.template = xml`<div t-att-class="class"><t t-call="{{ template }}"/></div>`;
         ToyView.type = "toy";
+        ToyView.components = { Banner: OnboardingBanner };
 
         class ToyViewImp extends ToyView {
             setup() {
@@ -814,7 +817,9 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("renders banner_route", async (assert) => {
         assert.expect(3);
         serverData.views["animal,1,toy"] = `
-            <toy banner_route="/mybody/isacage"><t t-raw="props.bannerHTML"/></toy>`;
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
 
         const mockRPC = (route) => {
             if (route === "/mybody/isacage") {
@@ -838,7 +843,9 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("renders banner_route with js and css assets", async (assert) => {
         assert.expect(7);
         serverData.views["animal,1,toy"] = `
-            <toy banner_route="/mybody/isacage"><t t-raw="props.bannerHTML"/></toy>`;
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
 
         const bannerArch = `
             <div class="setmybodyfree">
@@ -893,6 +900,54 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
         assert.containsNone(toy, "script");
         assert.containsNone(toy, "link");
+    });
+
+    QUnit.test("banner can re-render with new HTML", async (assert) => {
+        assert.expect(10);
+        assert.expect(8);
+
+        serviceRegistry.add("action", actionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const banners = [
+            `<div class="banner1">
+                <a type="action" data-method="setTheControl" data-model="animal" data-reload-on-close="true" />
+            </div>`,
+            `<div class="banner2">
+                MyBanner
+            /div>`,
+        ];
+        const mockRPC = async (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: banners.shift() };
+            }
+            if (route.includes("setTheControl")) {
+                return {
+                    type: "ir.actions.act_window_close",
+                };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".banner1");
+        assert.containsNone(toy, ".banner2");
+        await click(toy.el.querySelector("a"));
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsNone(toy, ".banner1");
+        assert.containsOnce(toy, ".banner2");
     });
 
     ////////////////////////////////////////////////////////////////////////////

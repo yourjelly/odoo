@@ -4,7 +4,6 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { WithSearch } from "@web/search/with_search/with_search";
-import { loadAssets } from "@web/core/assets";
 import { useActionLinks } from "@web/views/helpers/view_hook";
 
 const viewRegistry = registry.category("views");
@@ -116,8 +115,6 @@ export class View extends Component {
         }
 
         this.viewService = useService("view");
-        this.rpc = useService("rpc");
-        this.user = useService("user");
 
         this.withSearchProps = null;
         useActionLinks({ resModel });
@@ -204,10 +201,7 @@ export class View extends Component {
             ViewClass = viewRegistry.get(rootAttrs.js_class);
         }
 
-        let bannerHTML;
-        if (rootAttrs.banner_route) {
-            bannerHTML = await this.loadBanner(rootAttrs.banner_route);
-        }
+        const bannerRoute = rootAttrs.banner_route;
 
         // prepare the view props
         let viewProps = {
@@ -226,7 +220,7 @@ export class View extends Component {
             fields,
             resModel,
             useSampleModel: false,
-            bannerHTML,
+            bannerRoute,
         };
 
         if ("useSampleModel" in this.props) {
@@ -282,31 +276,6 @@ export class View extends Component {
                 delete this.withSearchProps[key];
             }
         }
-    }
-
-    async loadBanner(bannerRoute) {
-        const response = await this.rpc(bannerRoute, { context: this.user.context });
-        if (!response.html) {
-            return;
-        }
-
-        const banner = new DOMParser().parseFromString(response.html, "text/html");
-        const assets = {
-            jsLibs: [],
-            cssLibs: [],
-        };
-        banner
-            .querySelectorAll(`link[rel="stylesheet"] , script[type="text/javascript"]`)
-            .forEach((elem) => {
-                if (elem.tagName === "SCRIPT") {
-                    assets.jsLibs.push(elem.src);
-                } else if (elem.tagName === "LINK") {
-                    assets.cssLibs.push(elem.href);
-                }
-                elem.remove();
-            });
-        await loadAssets(assets);
-        return new XMLSerializer().serializeToString(banner);
     }
 
     async willUpdateProps(nextProps) {

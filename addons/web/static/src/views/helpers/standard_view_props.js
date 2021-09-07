@@ -30,5 +30,5 @@ export const standardViewProps = {
     state: { type: Object, optional: 1 },
     resId: { type: Number, optional: 1 },
     resIds: { type: Array, optional: 1 },
-    bannerHTML: { type: String, optional: 1 },
+    bannerRoute: { type: String, optional: 1 },
 };
