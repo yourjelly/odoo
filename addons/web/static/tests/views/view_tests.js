@@ -753,6 +753,90 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([]);
     });
 
+    QUnit.test("renders banner_route", async (assert) => {
+        assert.expect(3);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage"><t t-raw="props.bannerHTML"/></toy>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: `<div class="setmybodyfree">myBanner</div>` };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+    });
+
+    QUnit.test("renders banner_route with js and css assets", async (assert) => {
+        assert.expect(7);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage"><t t-raw="props.bannerHTML"/></toy>`;
+
+        const bannerArch = `
+            <div class="setmybodyfree">
+                <link rel="stylesheet" href="/mystyle" />
+                <script type="text/javascript" src="/myscript" />
+                myBanner
+            </div>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+        };
+
+        const docCreateElement = document.createElement.bind(document);
+        const createElement = (tagName) => {
+            const elem = docCreateElement(tagName);
+            if (tagName === "link") {
+                Object.defineProperty(elem, "href", {
+                    set(href) {
+                        if (href.includes("/mystyle")) {
+                            assert.step("css loaded");
+                        }
+                        Promise.resolve().then(() => elem.dispatchEvent(new Event("load")));
+                    },
+                });
+            } else if (tagName === "script") {
+                Object.defineProperty(elem, "src", {
+                    set(src) {
+                        if (src.includes("/myscript")) {
+                            assert.step("js loaded");
+                        }
+                        Promise.resolve().then(() => elem.dispatchEvent(new Event("load")));
+                    },
+                });
+            }
+            return elem;
+        };
+
+        patchWithCleanup(document, { createElement });
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage", "js loaded", "css loaded"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+        assert.containsNone(toy, "script");
+        assert.containsNone(toy, "link");
+    });
+
     ////////////////////////////////////////////////////////////////////////////
     // js_class
     ////////////////////////////////////////////////////////////////////////////
