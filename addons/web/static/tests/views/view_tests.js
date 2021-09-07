@@ -666,17 +666,24 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.test("can click on action-bound links", async (assert) => {
-        assert.expect(10);
+    QUnit.test("can click on action-bound links -- 1", async (assert) => {
+        assert.expect(5);
 
-        let expected;
+        const expectedAction = {
+            action: {
+                type: "ir.actions.client",
+                tag: "someAction",
+            },
+            options: {},
+        };
+
         const fakeActionService = {
             name: "action",
             start() {
                 return {
                     doAction(action, options) {
-                        assert.deepEqual(action, expected.action);
-                        assert.deepEqual(options, expected.options);
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
                         return Promise.resolve(true);
                     },
                 };
@@ -687,8 +694,6 @@ QUnit.module("Views", (hooks) => {
         serverData.views["animal,1,toy"] = `
             <toy>
                 <a type="action" data-method="setTheControl" data-model="animal" />
-                <a type="action" name="myLittleAction" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
-                <a type="action" title="myTitle" data-model="animal" data-resId="66" data-views="[[55, 'toy']]" data-domain="[['field', '=', 'val']]" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
             </toy>`;
 
         const mockRPC = (route) => {
@@ -709,21 +714,15 @@ QUnit.module("Views", (hooks) => {
             views: [[1, "toy"]],
         });
 
-        expected = {
-            action: {
-                type: "ir.actions.client",
-                tag: "someAction",
-            },
-            options: {},
-        };
-
-        const allLinks = toy.el.querySelectorAll("a");
-        assert.strictEqual(allLinks.length, 3);
-
-        await click(allLinks[0]);
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
         assert.verifySteps(["/web/dataset/call_kw/animal/setTheControl"]);
+    });
 
-        expected = {
+    QUnit.test("can click on action-bound links -- 2", async (assert) => {
+        assert.expect(3);
+
+        const expectedAction = {
             action: "myLittleAction",
             options: {
                 additionalContext: {
@@ -731,9 +730,41 @@ QUnit.module("Views", (hooks) => {
                 },
             },
         };
-        await click(allLinks[1]);
 
-        expected = {
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy>
+                <a type="action" name="myLittleAction" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
+            </toy>`;
+
+        const toy = await makeView({
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
+    });
+
+    QUnit.test("can click on action-bound links -- 3", async (assert) => {
+        assert.expect(3);
+
+        const expectedAction = {
             action: {
                 domain: [["field", "=", "val"]],
                 name: "myTitle",
@@ -749,8 +780,35 @@ QUnit.module("Views", (hooks) => {
                 },
             },
         };
-        await click(allLinks[2]);
-        assert.verifySteps([]);
+
+        const fakeActionService = {
+            name: "action",
+            start() {
+                return {
+                    doAction(action, options) {
+                        assert.deepEqual(action, expectedAction.action);
+                        assert.deepEqual(options, expectedAction.options);
+                        return Promise.resolve(true);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("action", fakeActionService, { force: true });
+
+        serverData.views["animal,1,toy"] = `
+            <toy>
+                //<a type="action" title="myTitle" data-model="animal" data-resId="66" data-views="[[55, 'toy']]" data-domain="[['field', '=', 'val']]" data-context="{ &quot;somekey&quot;: &quot;somevalue&quot; }"/>
+            </toy>`;
+
+        const toy = await makeView({
+            serverData,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.containsOnce(toy, "a");
+        await click(toy.el.querySelector("a"));
     });
 
     ////////////////////////////////////////////////////////////////////////////
