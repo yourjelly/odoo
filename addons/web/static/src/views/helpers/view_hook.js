@@ -72,7 +72,7 @@ export function useActionLinks({ keepLast, resModel }) {
             }
             const action = await keepLast.add(orm.call(data.model, data.method));
             if (action !== undefined) {
-                keepLast.add(doAction(action, options));
+                keepLast.add(Promise.resolve(doAction(action, options)));
             }
         } else if (target.getAttribute("name")) {
             const options = {};
