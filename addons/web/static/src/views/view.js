@@ -4,6 +4,7 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { WithSearch } from "@web/search/with_search/with_search";
+import { useActionLinks } from "@web/views/helpers/view_hook";
 
 const viewRegistry = registry.category("views");
 
@@ -116,6 +117,7 @@ export class View extends Component {
         this.viewService = useService("view");
 
         this.withSearchProps = null;
+        useActionLinks({ resModel });
     }
 
     async willStart() {
