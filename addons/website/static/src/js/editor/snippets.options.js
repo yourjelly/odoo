@@ -3205,6 +3205,22 @@ options.registry.MegaMenuLayout = options.registry.SelectTemplate.extend({
         this.selectTemplateWidgetName = 'mega_menu_template_opt';
     },
 
+    /**
+     * @override
+     */
+    start() {
+        this._super(...arguments);
+        core.bus.on('mega_menu_reset_template', this, this._onResetTemplate);
+    },
+
+    /**
+     * @override
+     */
+     destroy: function () {
+        core.bus.off('mega_menu_reset_template', this, this._onResetTemplate);
+        this._super();
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -3215,11 +3231,54 @@ options.registry.MegaMenuLayout = options.registry.SelectTemplate.extend({
     _computeWidgetState: function (methodName, params) {
         if (methodName === 'selectTemplate') {
             const templateDefiningClass = this.containerEl.querySelector('section')
-                .classList.value.split(' ').filter(cl => cl.startsWith('s_mega_menu'))[0];
+                .classList.value.split(' ').filter(cl => cl.startsWith('s_mega_menu_'))[0];
             return `website.${templateDefiningClass}`;
         }
         return this._super(...arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    async _onResetTemplate(ev) {
+        const widgetValue = this._computeWidgetState('selectTemplate');
+        const template = await this._rpc({
+            model: 'ir.ui.view',
+            method: 'render_public_asset',
+            args: [widgetValue, {}],
+            kwargs: {
+                context: this.options.context,
+            },
+        });
+        this.containerEl.insertAdjacentHTML('beforeend', template);
+    },
+});
+
+/**
+ * Hide delete button
+ */
+options.registry.NoDeleteButton = options.Class.extend({
+    forceNoDeleteButton: true,
+});
+
+/**
+ * Reset Mega Menu template on last column deletion
+ */
+options.registry.MegaMenuResetOnDelete = options.Class.extend({
+    /**
+     * @override
+     */
+    onRemove() {
+        this._super.apply(this, arguments);
+        if (this.$target.siblings().length === 0) {
+            core.bus.trigger('mega_menu_reset_template');
+        }
+    }
 });
 
 return {
