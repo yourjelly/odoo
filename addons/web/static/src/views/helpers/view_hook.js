@@ -72,7 +72,10 @@ export function useActionLinks({ resModel, reload }) {
     async function handler(ev) {
         ev.preventDefault();
         ev.stopPropagation();
-        const target = ev.target;
+        let target = ev.target;
+        if (target.tagName !== "A") {
+            target = target.closest("a");
+        }
         const data = target.dataset;
 
         if (data.method !== undefined && data.model !== undefined) {
