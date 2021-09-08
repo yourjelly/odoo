@@ -188,7 +188,8 @@ class PaymentTransaction(models.Model):
                 self._set_authorized()
                 if self.tokenize and not self.token_id:
                     self._authorize_tokenize()
-                self._send_refund_request(create_refund_transaction=False)  # In last step because it calls _handle_feedback_data()
+                if self.operation == 'validation':
+                    self._send_refund_request(create_refund_transaction=False)  # In last step because it calls _handle_feedback_data()
             elif status_type == 'void':
                 if self.operation == 'validation':  # Validation txs are authorized and then voided
                     self._set_done()  # If the refund went through, the validation tx is confirmed
