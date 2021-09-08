@@ -168,7 +168,7 @@ def url_lang(path_or_uri, lang_code=None):
                 ps.insert(1, lang_url_code)
             # avoid trailing / except for homepage '/'
             # '', fr', '' => /fr/ instead of /fr
-            if len(ps) > 1 and ps[-1] == '':
+            if len(ps) > 2 and ps[-1] == '':
                 ps = ps[:-1]
             location = (u'/'.join(ps)) + sep + qs
     return location
