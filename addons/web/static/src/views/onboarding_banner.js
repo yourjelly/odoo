@@ -2,19 +2,29 @@
 
 import { loadAssets } from "@web/core/assets";
 import { useService } from "@web/core/utils/hooks";
+import { useActionLinks } from "@web/views/helpers/view_hook";
 
 export class OnboardingBanner extends owl.Component {
     setup() {
         this.rpc = useService("rpc");
         this.user = useService("user");
+        const resModel = "searchModel" in this.env ? this.env.searchModel.resModel : undefined;
+        useActionLinks({
+            resModel,
+            reload: async () => {
+                this.bannerHTML = await this.loadBanner(this.props.bannerRoute);
+                this.render();
+            },
+        });
     }
 
     async willStart() {
         this.bannerHTML = await this.loadBanner(this.props.bannerRoute);
     }
 
-    async willUpdateProps() {
-        this.bannerHTML = await this.loadBanner(this.props.bannerRoute);
+    shouldUpdate() {
+        // never reload the banner from an outside request to render
+        return false;
     }
 
     async loadBanner(bannerRoute) {
