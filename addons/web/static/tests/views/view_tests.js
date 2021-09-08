@@ -950,6 +950,41 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".banner2");
     });
 
+    QUnit.test("banner does not reload on render", async (assert) => {
+        assert.expect(5);
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const bannerArch = `
+            <div class="setmybodyfree">
+                myBanner
+            </div>`;
+
+        const mockRPC = (route) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.containsOnce(toy, ".setmybodyfree");
+        await toy.render();
+        await nextTick();
+        assert.verifySteps([]);
+        assert.containsOnce(toy, ".setmybodyfree");
+    });
+
     ////////////////////////////////////////////////////////////////////////////
     // js_class
     ////////////////////////////////////////////////////////////////////////////

@@ -22,11 +22,6 @@ export class OnboardingBanner extends owl.Component {
         this.bannerHTML = await this.loadBanner(this.props.bannerRoute);
     }
 
-    shouldUpdate() {
-        // never reload the banner from an outside request to render
-        return false;
-    }
-
     async loadBanner(bannerRoute) {
         const response = await this.rpc(bannerRoute, { context: this.user.context });
         if (!response.html) {
