@@ -985,6 +985,91 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(toy, ".setmybodyfree");
     });
 
+    QUnit.test("real life banner", async (assert) => {
+        assert.expect(10);
+
+        serverData.views["animal,1,toy"] = `
+            <toy banner_route="/mybody/isacage">
+                <Banner t-if="props.bannerRoute" bannerRoute="props.bannerRoute"/>
+            </toy>`;
+
+        const bannerArch = `
+            <div class="modal o_onboarding_modal o_technical_modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Remove Configuration Tips</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-label="Close">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Do you want to remove this configuration panel?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a type="action" class="btn btn-primary" data-dismiss="modal" data-toggle="collapse" href=".o_onboarding_container" data-model="mah.model" data-method="mah_method">Remove</a>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="o_onboarding_container collapse show">
+                <div class="o_onboarding" />
+                    <div class="o_onboarding_wrap" />
+                        <a href="#" data-toggle="modal" data-target=".o_onboarding_modal" class="float-right o_onboarding_btn_close">
+                            <i class="fa fa-times" title="Close the onboarding panel" id="closeOnboarding"></i>
+                        </a>
+                        <div class="bannerContent">Content</div>
+                    </div>
+                </div>
+            </div>`;
+
+        const mockRPC = (route, args) => {
+            if (route === "/mybody/isacage") {
+                assert.step(route);
+                return { html: bannerArch };
+            }
+            if (args.method === "mah_method") {
+                assert.step(args.method);
+                return true;
+            }
+        };
+
+        const toy = await makeView({
+            serverData,
+            mockRPC,
+            resModel: "animal",
+            type: "toy",
+            views: [[1, "toy"]],
+        });
+
+        const prom = new Promise((resolve) => {
+            const complete = (ev) => {
+                if (ev.target.classList.contains("o_onboarding_container")) {
+                    resolve();
+                }
+            };
+            // We need to handle both events, because the transition is not
+            // always executed
+            toy.el.addEventListener("transitionend", complete);
+            toy.el.addEventListener("transitioncancel", complete);
+        });
+
+        assert.verifySteps(["/mybody/isacage"]);
+        assert.isNotVisible(toy.el.querySelector(".modal"));
+        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse show");
+
+        await click(toy.el.querySelector("#closeOnboarding"));
+        assert.isVisible(toy.el.querySelector(".modal"));
+
+        await click(toy.el.querySelector(".modal a[type='action']"));
+        assert.verifySteps(["mah_method"]);
+        await prom;
+        assert.doesNotHaveClass(toy.el.querySelector(".o_onboarding_container"), "show");
+        assert.hasClass(toy.el.querySelector(".o_onboarding_container"), "collapse");
+        assert.isNotVisible(toy.el.querySelector(".modal"));
+    });
+
     ////////////////////////////////////////////////////////////////////////////
     // js_class
     ////////////////////////////////////////////////////////////////////////////
