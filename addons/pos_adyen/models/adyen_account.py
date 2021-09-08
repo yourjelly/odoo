@@ -109,8 +109,14 @@ class AdyenTerminal(models.Model):
 
             # Added terminals
             for terminal in set(response.get('uniqueTerminalIds')) - terminals_in_db:
-                self.sudo().create({
+                new_terminal = self.sudo().create({
                     'adyen_account_id': adyen_store_id.adyen_account_id.id,
                     'store_id': adyen_store_id.id,
                     'terminal_uuid': terminal,
+                })
+                self.env['pos.payment.method'].create({
+                    'name': terminal,
+                    'use_payment_terminal': 'odoo_adyen',
+                    'adyen_account_id': adyen_store_id.adyen_account_id.id,
+                    'adyen_terminal_id': new_terminal.id,
                 })
