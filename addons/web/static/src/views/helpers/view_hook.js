@@ -49,15 +49,25 @@ export function useViewArch(arch, params = {}) {
  * are not dynamic according to the record.
  * @param {Object} params
  * @param  {String} params.resModel The default resModel to which actions will apply
+ * @param  {Function} [params.reload] The function to execute to reload, if a button has data-reload-on-close
  * @param  {KeepLast} [params.keepLast] The view's keeplast to allow concurrency management.
  *   A new one is created if none is passed
  */
-export function useActionLinks({ keepLast, resModel }) {
+export function useActionLinks({ resModel, reload, keepLast }) {
     const selector = `a[type="action"]`;
     const component = owl.hooks.useComponent();
     const orm = useService("orm");
     const { doAction } = useService("action");
     keepLast = keepLast || new KeepLast();
+
+    function checkAndCollapseBootstrap(target) {
+        // the handler should have stopped the Event
+        // But we still need to alert bootstrap if we need to
+        // This function should be removed when we get rid of bootstrap as a JS framework
+        if (target.dataset.toggle === "collapse") {
+            $(target).trigger("click.bs.collapse.data-api");
+        }
+    }
 
     async function handler(ev) {
         ev.preventDefault();
@@ -68,7 +78,7 @@ export function useActionLinks({ keepLast, resModel }) {
         if (data.method !== undefined && data.model !== undefined) {
             const options = {};
             if (data.reloadOnClose) {
-                options.onClose = () => component.render();
+                options.onClose = reload || (() => component.render());
             }
             const action = await keepLast.add(orm.call(data.model, data.method));
             if (action !== undefined) {
@@ -112,6 +122,7 @@ export function useActionLinks({ keepLast, resModel }) {
             }
             keepLast.add(doAction(action, options));
         }
+        checkAndCollapseBootstrap(target);
     }
 
     useListener("click", selector, handler);
