@@ -84,3 +84,32 @@
         display: none;
     }
 }
+
+@include media-breakpoint-down(xs) {
+    .daterangepicker {
+        @include o-bottom-sheet($sheet-safearea-bottom: 5rem); // give some space for the buttons
+
+        &::after,
+        &::before {
+            content: none;
+        }
+
+        &.show-calendar .ranges {
+            margin-top: 0;
+        }
+
+        .drp-calendar {
+            max-width: initial;
+
+            &, &.left, &.right {
+                padding: 0;
+            }
+        }
+
+        .drp-buttons {
+            position: fixed;
+            inset: auto 0 0 0;
+            background-color: #fff;
+        }
+    }
+}

@@ -111,3 +111,14 @@ div.dropdown-menu.bootstrap-datetimepicker-widget {
         }
     }
 }
+
+@include media-breakpoint-down(xs) {
+    div.dropdown-menu.bootstrap-datetimepicker-widget {
+        @include o-bottom-sheet;
+
+        &::after,
+        &::before {
+            content: none;
+        }
+    }
+}

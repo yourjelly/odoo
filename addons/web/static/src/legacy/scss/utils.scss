@@ -455,3 +455,22 @@
         }
     }
 }
+
+// ------------------------------------------------------------------
+// Small screens & mobile
+// ------------------------------------------------------------------
+@mixin o-bottom-sheet($sheet-max-height: 90vh, $sheet-safearea-bottom: 1rem) {
+    position: fixed;
+    top: auto !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 100vw;
+    max-height: $sheet-max-height;
+    overflow-y: auto;
+    margin: 0;
+    box-shadow: 0 -0.6rem 0.6rem rgba(0, 0, 0, 0.15);
+    border-radius: 1rem 1rem 0 0;
+    border-top-color: gray('100');
+    padding-bottom: $sheet-safearea-bottom;
+}
