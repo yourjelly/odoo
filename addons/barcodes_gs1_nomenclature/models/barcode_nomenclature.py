@@ -68,7 +68,7 @@ class BarcodeNomenclature(models.Model):
                     result['value'] = float(match.group(2)[:-decimal_position] + "." + match.group(2)[-decimal_position:])
                 else:
                     result['value'] = int(match.group(2))
-            except Exception:
+            except (IndexError, ValueError):
                 raise ValidationError(_(
                     "There is something wrong with the barcode rule \"%s\" pattern.\n"
                     "If this rule uses decimal, check it can't get sometime else than a digit as last char for the Application Identifier.\n"
