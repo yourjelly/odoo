@@ -414,6 +414,7 @@ class AccountReconcileModel(models.Model):
                 'analytic_account_id': line.analytic_account_id.id,
                 'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                 'reconcile_model_id': self.id,
+                'journal_id': line.journal_id.id,
             }
             lines_vals_list.append(writeoff_line)
 
