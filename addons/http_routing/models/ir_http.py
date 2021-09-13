@@ -515,13 +515,14 @@ class IrHttp(models.AbstractModel):
         if routing_error:
             return cls._handle_exception(routing_error)
 
-        # removed cache for auth public
+        # got it while cursor is alive, call to super could break it.
+        lang_code = request.is_frontend and request.lang.code
+
         result = super(IrHttp, cls)._dispatch()
 
         cook_lang = request.httprequest.cookies.get('frontend_lang')
-        if request.is_frontend and cook_lang != request.lang.code and hasattr(result, 'set_cookie'):
-            result.set_cookie('frontend_lang', request.lang.code)
-
+        if request.is_frontend and cook_lang != lang_code and hasattr(result, 'set_cookie'):
+            result.set_cookie('frontend_lang', lang_code)
         return result
 
     @classmethod
