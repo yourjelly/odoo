@@ -574,11 +574,11 @@ class AdyenAccount(models.Model):
         if not kyc:
             additional_data = {}
             if document == 'bank_account' and bank_uuid:
-                bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
-                additional_data['bank_account_id'] = bank_account_id.id
+                bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
+                additional_data['bank_account_id'] = bank_account.id
             if shareholder_uuid:
-                shareholder_id = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
-                additional_data['shareholder_id'] = shareholder_id.id
+                shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
+                additional_data['shareholder_id'] = shareholder.id
 
             self.env['adyen.kyc'].create({
                 'verification_type': document,
@@ -592,11 +592,11 @@ class AdyenAccount(models.Model):
             # FIXME ANVFE SOMETIME kyc is a multi record recordset
             # and following lines raise.
             if bank_uuid and not kyc.bank_account_id:
-                bank_account_id = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
-                kyc.bank_account_id = bank_account_id.id
+                bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
+                kyc.bank_account_id = bank_account.id
             if shareholder_uuid and not kyc.shareholder_id:
-                shareholder_id = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
-                kyc.shareholder_id = shareholder_id.id
+                shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
+                kyc.shareholder_id = shareholder.id
 
             if status != kyc.status:
                 kyc.write({
@@ -713,15 +713,16 @@ class AdyenAccountBalance(models.Model):
             })
             for total_balance, adyen_balances in response.get('totalBalance', {}).items():
                 for balance in adyen_balances:
-                    currency_id = self.env['res.currency'].search([('name', '=', balance.get('currency'))])
-                    bal = balances.filtered(lambda b: b.currency_id == currency_id)
+                    currency = self.env['res.currency'].search([('name', '=', balance.get('currency'))])
+                    bal = balances.filtered(lambda b: b.currency_id == currency)
                     if not bal:
                         bal = self.env['adyen.account.balance'].sudo().create({
                             'adyen_account_id': self.env.company.adyen_account_id.id,
-                            'currency_id': currency_id.id,
+                            'currency_id': currency.id,
                         })
                         balances |= bal
-                    bal[balance_fields.get(total_balance)] = to_major_currency(balance.get('value', 0), currency_id.decimal_places)
+                    bal[balance_fields.get(total_balance)] = to_major_currency(
+                        balance.get('value', 0), currency)
 
         warning_delta = fields.Datetime.now() - timedelta(hours=2)
         return [{

@@ -142,20 +142,20 @@ class AdyenTransaction(models.Model):
         self.ensure_one()
         additional_data = notification_data.get('additionalData', {})
 
-        currency_id = self.env['res.currency'].search([('name', '=', notification_data.get('amount', {}).get('currency'))])
-        shopper_country_id = self.env['res.country'].search([('code', '=', additional_data.get('shopperCountry'))])
+        currency = self.env['res.currency'].search([('name', '=', notification_data.get('amount', {}).get('currency'))])
+        shopper_country = self.env['res.country'].search([('code', '=', additional_data.get('shopperCountry'))])
         commercial_card = additional_data.get('isCardCommercial', 'unknown')
-        card_country_id = self.env['res.country'].search([('code', '=', additional_data.get('cardIssuingCountry', additional_data.get('issuerCountry')))])
+        card_country = self.env['res.country'].search([('code', '=', additional_data.get('cardIssuingCountry', additional_data.get('issuerCountry')))])
 
         self.write({
             'reference': notification_data.get('pspReference'),
-            'total_amount': to_major_currency(notification_data['amount']['value'], currency_id.decimal_places),
-            'currency_id': currency_id.id,
+            'total_amount': to_major_currency(notification_data['amount']['value'], currency),
+            'currency_id': currency.id,
             'date': parse(notification_data.get('eventDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'description': notification_data.get('merchantReference'),
             'payment_method': notification_data.get('paymentMethod'),
-            'shopper_country_id': shopper_country_id.id,
-            'card_country_id': card_country_id.id,
+            'shopper_country_id': shopper_country.id,
+            'card_country_id': card_country.id,
             'commercial_card': commercial_card if commercial_card in ('yes', 'no', 'unknown') else 'unknown',
         })
         self._trigger_sync()
@@ -163,15 +163,22 @@ class AdyenTransaction(models.Model):
     def _handle_fees_updated_notification(self, notification_data):
         self.ensure_one()
 
-        currency_amount = self.env['res.currency'].search([('name', '=', notification_data.get('totalAmount', {}).get('currency'))])
-        currency_fees = self.env['res.currency'].search([('name', '=', notification_data.get('totalFees', {}).get('currency'))])
-        self.capture_reference = notification_data.get('captureReference')
-        self.fees = to_major_currency(notification_data['totalFees']['value'], currency_fees.decimal_places)
-        self.fixed_fees = to_major_currency(notification_data['fixedFees']['value'], currency_fees.decimal_places)
-        self.variable_fees = to_major_currency(notification_data['variableFees']['value'], currency_fees.decimal_places)
-        self.merchant_amount = to_major_currency(notification_data['merchantAmount']['value'], currency_amount.decimal_places)
-        self.total_amount = to_major_currency(notification_data['totalAmount']['value'], currency_amount.decimal_places)
-        self.signature = notification_data.get('signature')
+        # TODO ANVFE assert notification_data.get('totalFees', {}).get('currency') == "EUR"
+
+        payment_currency = self.env['res.currency'].search([
+            ('name', '=', notification_data.get('totalAmount', {}).get('currency'))])
+        fees_currency = self.env.ref('base.EUR')
+        self.write({
+            "capture_reference": notification_data.get('captureReference'),
+            "fees": to_major_currency(notification_data['totalFees']['value'], fees_currency),
+            "fixed_fees": to_major_currency(notification_data['fixedFees']['value'], fees_currency),
+            "variable_fees": to_major_currency(notification_data['variableFees']['value'], fees_currency),
+
+            "merchant_amount": to_major_currency(notification_data['merchantAmount']['value'], payment_currency),
+            "total_amount": to_major_currency(notification_data['totalAmount']['value'], payment_currency),
+
+            "signature": notification_data.get('signature'),
+        })
 
     def _handle_refund_notification(self, notification_data):
         self.ensure_one()
@@ -195,15 +202,15 @@ class AdyenTransaction(models.Model):
         )
 
     def _create_missing_tx(self, account_id, transaction, **kwargs):
-        currency_id = self.env['res.currency'].search([('name', '=', transaction.get('amount', {}).get('currency'))])
-        amount = to_major_currency(transaction['amount']['value'], currency_id.decimal_places)
+        currency = self.env['res.currency'].search([('name', '=', transaction.get('amount', {}).get('currency'))])
+        amount = to_major_currency(transaction['amount']['value'], currency)
         tx = self.create({
             'adyen_account_id': account_id,
             'reference': transaction.get('pspReference'),
             'capture_reference': transaction.get('capturePspReference'),
             'merchant_amount': amount,
             'total_amount': amount,
-            'currency_id': currency_id.id,
+            'currency_id': currency.id,
             'date': parse(transaction.get('creationDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'description': transaction.get('description'),
             **kwargs,
@@ -230,7 +237,15 @@ class AdyenTransaction(models.Model):
         """ Hook defined to perform actions on transactions after they were sync'ed """
         return
 
-    def _refund_request(self, amount=None):
+    def _refund_request(self, amount=None, reference=None):
+        """
+
+        :param float amount:
+        :param str reference:
+
+        :returns: created adyen transaction
+        :rtype: `adyen.transaction` record
+        """
         self.ensure_one()
 
         if amount is None:
@@ -239,10 +254,17 @@ class AdyenTransaction(models.Model):
         if amount > self.total_amount:
             raise ValidationError(_('You cannot refund more than the original amount.'))
 
-        converted_amount = to_minor_currency(amount, self.currency_id.decimal_places)
-        initial_amount = to_minor_currency(self.total_amount, self.currency_id.decimal_places)
-        fees_amount = to_minor_currency(self.fees, self.fees_currency_id.decimal_places)
+        converted_amount = to_minor_currency(amount, self.currency_id)
+        initial_amount = to_minor_currency(self.total_amount, self.currency_id)
 
+        # FIXME ANVFE if the EUR currency (aka fee currency) is customized on the submerchant db,
+        # the fees computation will vary between proxy and submerchant DB,
+        # rendering the signature invalid (and thus blocking all refunds from the submerchant db)
+        # TODO harcode a fixed EUR decimal_precision, to share with the proxy ?
+        fees_currency = self.env.ref('base.EUR')
+        fees_amount = to_minor_currency(self.fees, fees_currency)
+
+        reference = reference or ('Refund of %s' % self.description)
         refund_data = {
             'originalReference': self.reference,
             'modificationAmount': {
@@ -258,7 +280,7 @@ class AdyenTransaction(models.Model):
                 'value': fees_amount,
             },
             'date': str(self.date),
-            'reference': 'Refund of %s' % self.description, # TODO generate unique reference
+            'reference': reference,
             'payout': self.adyen_account_id.account_code,
             'adyen_uuid': self.adyen_account_id.adyen_uuid,
             'signature': self.signature,
@@ -271,16 +293,18 @@ class AdyenTransaction(models.Model):
             'capture_reference': res['pspReference'],
             'description': refund_data.get('reference'),
             'currency_id': self.currency_id.id,
-            'total_amount': to_major_currency(res['totalAmount']['value'], self.currency_id.decimal_places),
-            'fees': to_major_currency(res['totalFees']['value'], self.currency_id.decimal_places),
-            'variable_fees': to_major_currency(res['totalFees']['value'], self.currency_id.decimal_places),
-            'merchant_amount': to_major_currency(res['merchantAmount']['value'], self.currency_id.decimal_places),
+            'total_amount': to_major_currency(res['totalAmount']['value'], self.currency_id),
+            # FIXME ANVFE shouldn't it use fees_currency here instead ?
+            'fees': to_major_currency(res['totalFees']['value'], self.currency_id),
+            'variable_fees': to_major_currency(res['totalFees']['value'], self.currency_id),
+            'merchant_amount': to_major_currency(res['merchantAmount']['value'], self.currency_id),
             'date': fields.Datetime.now(),
         })
         self._trigger_sync()
 
         return refund_tx
 
+    # TODO ANVFE check if used somewhere ?
     def action_refund(self):
         for tx in self:
             tx._refund_request()
@@ -350,7 +374,7 @@ class AdyenTransactionPayout(models.Model):
         tx = self.create({
             'adyen_account_id': account_id,
             'date': parse(transaction.get('creationDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            'amount': to_major_currency(transaction.get('amount', {}).get('value'), currency.decimal_places),
+            'amount': to_major_currency(transaction.get('amount', {}).get('value'), currency),
             'currency_id': currency.id,
             'reference': transaction.get('pspReference'),
             'bank_account_id': bank_account.id,

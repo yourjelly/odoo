@@ -125,6 +125,26 @@ class PaymentTransaction(models.Model):
         _logger.info("payment request response:\n%s", pprint.pformat(response_content))
         self._handle_feedback_data('odoo', response_content)
 
+    def _send_refund_request(self, refund_amount=None, create_refund_transaction=True):
+        refund_tx = super()._send_refund_request(refund_amount, create_refund_transaction)
+        if self.provider != 'odoo':
+            return refund_tx
+
+        adyen_tx = self.adyen_transaction_ids
+        if not len(adyen_tx) == 1:
+            # FIXME ANVFE verify and manage multiple adyen txs?
+            # what about multi refunds, chargebacks, ...
+            raise ValidationError("Cannot manage refund on multiple adyen txs")
+
+        # Refund the adyen transaction
+        adyen_refund_tx = adyen_tx._refund_request(amount=refund_amount, reference=refund_tx.reference)
+
+        # Link refund payment transaction to refunded adyen transaction
+        # TODO ANVFE propagate additional information from adyen tx to payment tx ?
+        adyen_refund_tx.payment_transaction_id = refund_tx.id
+
+        return refund_tx
+
     @api.model
     def _get_tx_from_feedback_data(self, provider, data):
         """ Override of payment to find the transaction based on Adyen data.
@@ -146,6 +166,7 @@ class PaymentTransaction(models.Model):
                 "Odoo Payments: " + _("Received data with missing merchant reference")
             )
 
+        # TODO ANVFE support REFUND event initiated by backend (cf payment_adyen)
         tx = self.search([('reference', '=', reference), ('provider', '=', 'odoo')])
         if not tx:
             raise ValidationError(
