@@ -64,7 +64,8 @@ class OdooController(http.Controller):
         elif event_code in ['NOTIFICATION_OF_CHARGEBACK', 'CHARGEBACK']:
             notification_data['resultCode'] = 'Chargeback'
         elif event_code == 'REFUND':
-            notification_data['resultCode'] = 'Refund'
+            # notification_data['resultCode'] = 'Refund'
+            notification_data['resultCode'] = 'Authorised' if success else 'Error'
         else:
             return  # Don't handle unsupported event codes or failed events
 
