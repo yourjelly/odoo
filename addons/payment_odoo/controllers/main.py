@@ -53,19 +53,20 @@ class OdooController(http.Controller):
             notification_data, tx_sudo
         )
 
+        success = notification_data['success'] == 'true'
         # Reshape the notification data for parsing
-        if event_code == 'AUTHORISATION':
+        if event_code == 'AUTHORISATION' and success:
             # By default, Adyen automatically captures transactions
             # authorisation = Done for tx, unless we explicitly request manual capture.
             notification_data['resultCode'] = 'Authorised'
-        elif event_code == 'CANCELLATION':
+        elif event_code == 'CANCELLATION' and success:
             notification_data['resultCode'] = 'Cancelled'
         elif event_code in ['NOTIFICATION_OF_CHARGEBACK', 'CHARGEBACK']:
             notification_data['resultCode'] = 'Chargeback'
         elif event_code == 'REFUND':
             notification_data['resultCode'] = 'Refund'
         else:
-            return  # Don't handle unsupported event codes
+            return  # Don't handle unsupported event codes or failed events
 
         # Handle the notification data as a regular feedback
         request.env['payment.transaction'].sudo()._handle_feedback_data('odoo', notification_data)
