@@ -63,4 +63,4 @@ class PaymentRefundWizard(models.TransientModel):
 
     def action_refund(self):
         for wizard in self:
-            wizard.transaction_id.action_refund(amount_to_refund=wizard.amount_to_refund)
+            wizard.transaction_id.action_refund(refund_amount=wizard.amount_to_refund)
