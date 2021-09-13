@@ -30,23 +30,28 @@ class AdyenTransaction(models.Model):
 
     reference = fields.Char('Reference', index=True, required=True)
     capture_reference = fields.Char('Capture Reference')
+
     total_amount = fields.Float('Customer Amount')
     currency_id = fields.Many2one('res.currency', string='Currency')
     merchant_amount = fields.Float('Merchant Amount')
     fees = fields.Float('Fees')
     fixed_fees = fields.Float('Fixed Fees')
     variable_fees = fields.Float('Variable Fees')
-    # FIXME ANVFE if it's fixed, it should be a computed field (not stored IMHO)
-    fees_currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref('base.EUR'))
+    fees_currency_id = fields.Many2one('res.currency', compute="_compute_fees_currency_id")
+
     date = fields.Datetime('Date')
     description = fields.Char('Description')
     signature = fields.Char('Signature')
     reason = fields.Char('Failure Reason')
 
-    status = fields.Selection(related='last_status_id.status')
-    last_status_id = fields.Many2one('adyen.transaction.status', 'Last Status', compute='_compute_last_status_id', store=True, readonly=True)
-    last_status_update = fields.Datetime(related='last_status_id.date', string='Last Status Update')
     status_ids = fields.One2many('adyen.transaction.status', 'adyen_transaction_id', 'Status History')
+
+    last_status_id = fields.Many2one(
+        'adyen.transaction.status', 'Last Status', compute='_compute_last_status_id',
+        store=True, readonly=True)
+    last_status_update = fields.Datetime(related='last_status_id.date', string='Last Status Update')
+    status = fields.Selection(related='last_status_id.status')
+
     payment_method = fields.Char('Payment Method')
     shopper_country_id = fields.Many2one('res.country')
     card_country_id = fields.Many2one('res.country')
@@ -55,6 +60,8 @@ class AdyenTransaction(models.Model):
         ('no', 'No'),
         ('unknown', 'Unknown'),
     ], default='unknown')
+
+    # TODO ANVFE DISPUTES: where is this set ?
     dispute_reference = fields.Char('Dispute Reference')
 
     _sql_constraints = [
@@ -66,6 +73,9 @@ class AdyenTransaction(models.Model):
         self.last_status_id = False
         for transaction in self.filtered('status_ids'):
             transaction.last_status_id = transaction.status_ids.sorted('date')[-1]
+
+    def _compute_fees_currency_id(self):
+        self.fees_currency_id = self.env.ref('base.EUR')
 
     def _get_tx_from_notification(self, account, notification):
         if notification.get('eventCode') in ['CAPTURE', 'REFUND']:
@@ -166,8 +176,10 @@ class AdyenTransaction(models.Model):
     def _handle_refund_notification(self, notification_data):
         self.ensure_one()
 
-        currency_id = self.env['res.currency'].search([('name', '=', notification_data.get('amount', {}).get('currency'))])
-        self.currency_id = currency_id.id
+        currency = self.env['res.currency'].search([
+            ('name', '=', notification_data.get('amount', {}).get('currency'))])
+        # TODO ANVFE batch write operation
+        self.currency_id = currency.id
         self.date = parse(notification_data.get('eventDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         reason = notification_data.get('reason')
         if reason:
