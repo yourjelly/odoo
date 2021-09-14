@@ -1368,3 +1368,20 @@ class HolidaysRequest(models.Model):
     @api.model
     def get_unusual_days(self, date_from, date_to=None):
         return self.env.user.employee_id._get_unusual_days(date_from, date_to)
+
+    @api.model
+    def action_time_off_dashboard(self):
+        domain = []
+        if self.env.context.get('active_ids'):
+            domain = [('employee_id', 'in', self.env.context.get('active_ids', []))]
+
+        return {
+            'name': _('Time Off Dashboard'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.leave',
+            'views': [[self.env.ref('hr_holidays.hr_leave_employee_view_dashboard').id, 'calendar']],
+            'domain': domain,
+            'context': {
+                'employee_id': self.env.context.get('active_ids', []),
+            },
+        }

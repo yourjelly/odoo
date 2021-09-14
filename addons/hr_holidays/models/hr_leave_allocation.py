@@ -41,6 +41,7 @@ class HolidaysAllocation(models.Model):
         return [('employee_requests', '=', 'yes')]
 
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False)
+    name_validity = fields.Char('Description with validity', compute='_compute_description_validity')
     active = fields.Boolean(default=True)
     private_name = fields.Char('Allocation Description', groups='hr_holidays.group_hr_holidays_user')
     state = fields.Selection([
@@ -180,6 +181,16 @@ class HolidaysAllocation(models.Model):
 
         allocations = self.sudo().search(domain)
         return [('id', 'in', allocations.ids)]
+
+    @api.depends('name', 'date_from', 'date_to')
+    def _compute_description_validity(self):
+        for allocation in self:
+            name_validity = "{} (from {} to ".format(allocation.name, allocation.date_from.strftime("%b %d %Y"))
+            if allocation.date_to:
+                name_validity += "{})".format(allocation.date_to.strftime("%b %d %Y"))
+            else:
+                name_validity += " No Limit)"
+            allocation.name_validity = name_validity
 
     @api.depends('employee_id', 'holiday_status_id', 'taken_leave_ids.number_of_days', 'taken_leave_ids.state')
     def _compute_leaves(self):
