@@ -75,7 +75,7 @@ class AdyenTransaction(models.Model):
             transaction.last_status_id = transaction.status_ids.sorted('date')[-1]
 
     def _compute_fees_currency_id(self):
-        self.fees_currency_id = self.env.ref('base.EUR')
+        self.fees_currency_id = self.env["res.currency"].search([('name', '=', 'EUR')], limit=1)
 
     def _get_tx_from_notification(self, account, notification):
         if notification.get('eventCode') in ['CAPTURE', 'REFUND']:
@@ -242,10 +242,10 @@ class AdyenTransaction(models.Model):
         initial_amount = to_minor_currency(self.total_amount, self.currency_id)
 
         # FIXME ANVFE if the EUR currency (aka fee currency) is customized on the submerchant db,
-        # the fees computation will vary between proxy and submerchant DB,
+        # the fees computation may vary between proxy and submerchant DB,
         # rendering the signature invalid (and thus blocking all refunds from the submerchant db)
         # TODO harcode a fixed EUR decimal_precision, to share with the proxy ?
-        fees_currency = self.env.ref('base.EUR')
+        fees_currency = self.fees_currency_id
         fees_amount = to_minor_currency(self.fees, fees_currency)
 
         reference = reference or ('Refund of %s' % self.description)
@@ -260,7 +260,7 @@ class AdyenTransaction(models.Model):
                 'value': initial_amount,
             },
             'feesAmount': {
-                'currency': self.fees_currency_id.name,
+                'currency': fees_currency.name,
                 'value': fees_amount,
             },
             'date': str(self.date),
