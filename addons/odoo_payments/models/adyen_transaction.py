@@ -201,22 +201,6 @@ class AdyenTransaction(models.Model):
             subtype_xmlid="mail.mt_comment"
         )
 
-    def _create_missing_tx(self, account_id, transaction, **kwargs):
-        currency = self.env['res.currency'].search([('name', '=', transaction.get('amount', {}).get('currency'))])
-        amount = to_major_currency(transaction['amount']['value'], currency)
-        tx = self.create({
-            'adyen_account_id': account_id,
-            'reference': transaction.get('pspReference'),
-            'capture_reference': transaction.get('capturePspReference'),
-            'merchant_amount': amount,
-            'total_amount': amount,
-            'currency_id': currency.id,
-            'date': parse(transaction.get('creationDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            'description': transaction.get('description'),
-            **kwargs,
-        })
-        return tx
-
     def _trigger_sync(self):
         sync_cron = self.env.ref('odoo_payments.adyen_sync_cron', raise_if_not_found=False)
         if sync_cron:
