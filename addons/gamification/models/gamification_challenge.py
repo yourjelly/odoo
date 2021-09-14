@@ -84,7 +84,7 @@ class Challenge(models.Model):
         string="Responsible")
     # members
     user_ids = fields.Many2many('res.users', 'gamification_challenge_users_rel', string="Participants")
-    user_domain = fields.Char("User domain")        # Alternative to a list of users
+    user_domain = fields.Domain(domain_model="res.users", string="User domain")  # Alternative to a list of users
     user_count = fields.Integer('# Users', compute='_compute_user_count')
     # periodicity
     period = fields.Selection([

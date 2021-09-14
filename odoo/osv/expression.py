@@ -125,6 +125,7 @@ from odoo.tools import (
     pycompat, pattern_to_translated_trigram_pattern, value_to_translated_trigram_pattern,
     Query, SQL,
 )
+from odoo.tools.misc import SelfPrint
 
 
 # Domain operators.
@@ -847,6 +848,14 @@ class expression(object):
                     - perform a name_search on comodel for each name
                     - return the list of related ids
             """
+
+            if isinstance(value, SelfPrint) or (
+                value
+                and isinstance(value, (tuple, list))
+                and any(isinstance(item, SelfPrint) for item in value)
+            ):
+                return []
+
             names = []
             if isinstance(value, str):
                 names = [value]

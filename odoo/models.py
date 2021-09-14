@@ -63,6 +63,7 @@ from .tools import (
     pycompat,
 )
 from .tools.lru import LRU
+from .tools.misc import SelfPrint
 from .tools.translate import _, _lt
 
 _logger = logging.getLogger(__name__)
@@ -2937,6 +2938,13 @@ class BaseModel(metaclass=MetaModel):
             else:
                 # '=?' behaves like '=' in other cases
                 return self._condition_to_sql(alias, fname, '=', value, query)
+
+        if isinstance(value, SelfPrint) or (
+            isinstance(value, (list, tuple))
+            and any(isinstance(e, SelfPrint) for e in value)
+        ):
+            # Should only be used for domain validation, not execution.
+            return SQL("FALSE")
 
         sql_field = self._field_to_sql(alias, fname, query)
 

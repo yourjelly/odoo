@@ -15,6 +15,7 @@ import hashlib
 import io
 import itertools
 import json
+import logging
 import os
 import re
 import socket
@@ -615,25 +616,82 @@ def remove_accents(input_str):
     nkfd_form = unicodedata.normalize('NFKD', input_str)
     return u''.join([c for c in nkfd_form if not unicodedata.combining(c)])
 
-class unquote(str):
-    """A subclass of str that implements repr() without enclosing quotation marks
-       or escaping, keeping the original string untouched. The name come from Lisp's unquote.
-       One of the uses for this is to preserve or insert bare variable names within dicts during eval()
-       of a dict's repr(). Use with care.
 
-       Some examples (notice that there are never quotes surrounding
-       the ``active_id`` name:
+class SelfPrint:
+    """Class that will return a self representing string. Used to evaluate domains."""
 
-       >>> unquote('active_id')
-       active_id
-       >>> d = {'test': unquote('active_id')}
-       >>> d
-       {'test': active_id}
-       >>> print d
-       {'test': active_id}
-    """
+    def __init__(self, name):
+        self.__name = name
+
+    def __getattr__(self, attr):
+        return SelfPrint("%r.%s" % (self, attr))
+
+    def __getitem__(self, item):
+        return SelfPrint("%r[%r]" % (self, item))
+
+    def __call__(self, *args, **kwargs):
+        s = [repr(a) for a in args]
+        for k, v in kwargs.items():
+            s.append("%s=%r" % (k, v))
+        return SelfPrint("%r(%s)" % (self, ", ".join(s)))
+
+    def __add__(self, other):
+        return SelfPrint("%r + %r" % (self, other))
+
+    def __radd__(self, other):
+        return SelfPrint("%r + %r" % (other, self))
+
+    def __sub__(self, other):
+        return SelfPrint("%r - %r" % (self, other))
+
+    def __rsub__(self, other):
+        return SelfPrint("%r - %r" % (other, self))
+
+    def __mul__(self, other):
+        return SelfPrint("%r * %r" % (self, other))
+
+    def __rmul__(self, other):
+        return SelfPrint("%r * %r" % (other, self))
+
+    def __truediv__(self, other):
+        return SelfPrint("%r / %r" % (self, other))
+
+    def __rtruediv__(self, other):
+        return SelfPrint("%r / %r" % (other, self))
+
+    def __floordiv__(self, other):
+        return SelfPrint("%r // %r" % (self, other))
+
+    def __rfloordiv__(self, other):
+        return SelfPrint("%r // %r" % (other, self))
+
+    def __mod__(self, other):
+        return SelfPrint("%r %% %r" % (self, other))
+
+    def __rmod__(self, other):
+        return SelfPrint("%r %% %r" % (other, self))
+
     def __repr__(self):
-        return self
+        return self.__name
+
+    __str__ = __repr__
+
+    def __bytes__(self):
+        return b""
+
+
+class SelfPrintEvalContext(collections.defaultdict):
+    """Evaluation Context that will return a SelfPrint object for all non-literal object"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(None, *args, **kwargs)
+
+    def __missing__(self, key):
+        return SelfPrint(key)
+
+
+def unquote(s):
+    return SelfPrint(s)
 
 
 class mute_logger(logging.Handler):
