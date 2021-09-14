@@ -148,7 +148,7 @@ class AdyenAccount(models.Model):
         ('inactive', 'Inactive'),
         ('suspended', 'Suspended'),
         ('closed', 'Closed'),
-    ], default='inactive', readonly=True)
+    ], default='inactive', readonly=True, tracking=True)
     payout_allowed = fields.Boolean(readonly=True)
 
     # Status for UX
