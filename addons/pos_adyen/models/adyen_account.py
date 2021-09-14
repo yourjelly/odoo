@@ -14,11 +14,6 @@ class AdyenAccount(models.Model):
     store_ids = fields.One2many('adyen.store', 'adyen_account_id')
     terminal_ids = fields.One2many('adyen.terminal', 'adyen_account_id')
 
-    @api.model
-    def _sync_adyen_cron(self):
-        self.env['adyen.terminal']._sync_adyen_terminals()
-        super(AdyenAccount, self)._sync_adyen_cron()
-
     def action_order_terminal(self):
         if not self.store_ids:
             raise ValidationError(_('Please create a store first.'))

@@ -12,9 +12,6 @@
                 <field name="kyc_tier" invisible="1"/>
                 <field name="payout_allowed" invisible="1"/>
                 <header>
-                    <button name="sync_transactions" string="Sync Transactions" type="object"
-                        attrs="{'invisible': ['|', ('account_code', '=', False), ('state', '=', 'pending')]}"
-                        groups="base.group_no_one"/>
                     <field name="state" widget="statusbar" attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
                 <sheet>

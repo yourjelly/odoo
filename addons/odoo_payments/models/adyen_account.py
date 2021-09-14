@@ -474,11 +474,6 @@ class AdyenAccount(models.Model):
                     _("We had troubles reaching Adyen, please retry later or contact the support if the problem persists"))
         return data.get('result')
 
-    @api.model
-    def _sync_adyen_cron(self):
-        # Do not sync transactions for suspended accounts (pending validation)
-        self.env['adyen.account'].search([('account_status', '!=', 'suspended')]).sync_transactions()
-
     def _handle_account_notification(self, notification_data):
         """NOTE: sudoed env"""
         self.ensure_one()
@@ -620,46 +615,6 @@ class AdyenAccount(models.Model):
         if status == 'Failed':
             status_message = _('Failed payout: %s', content['status']['message']['text'])
             self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
-
-    def sync_transactions(self):
-        updated_transactions = self.env['adyen.transaction']
-        for account in self:
-            page = 1
-            next_page = True
-            max_create_date = False
-
-            while next_page:
-                transactions, next_page = account._fetch_transactions(page)
-                page += 1
-
-                for transaction in transactions:
-                    create_date = parse(transaction.get('creationDate')).astimezone(UTC).replace(tzinfo=None)
-                    if not max_create_date:
-                        max_create_date = create_date
-                    if create_date <= account.last_sync_date:
-                        next_page = False
-                        break
-
-                    status = transaction.get('transactionStatus')
-                    if status in ['Payout', 'PayoutReversed']:
-                        reference = transaction.get('pspReference') or transaction.get('disputePspReference')
-                        tx_sudo = account.transaction_payout_ids.sudo().filtered(lambda t: t.reference == reference)
-                        if not tx_sudo:
-                            self.env['adyen.transaction.payout'].sudo()._create_missing_payout(
-                                account.id, transaction)
-                        else:
-                            tx_sudo.status = status
-                    else:
-                        if status in ['Chargeback', 'ChargebackReceived']:
-                            transaction['pspReference'] = transaction.get('disputePspReference')
-                        tx_sudo = account.transaction_ids.sudo()._get_tx_from_notification(
-                            account, transaction)
-                        if not tx_sudo:
-                            tx_sudo = self.env['adyen.transaction'].sudo()._create_missing_tx(account.id, transaction)
-                        tx_sudo._update_status(status, create_date)
-                        updated_transactions |= tx_sudo
-                account.last_sync_date = max_create_date
-        updated_transactions.sudo()._post_transaction_sync()
 
     def _fetch_transactions(self, page=1):
         self.ensure_one()
