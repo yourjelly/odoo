@@ -13,6 +13,7 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 from odoo.addons.odoo_payments.util import to_major_currency, to_minor_currency
 
+FEES_CURRENCY_CODE = "EUR"
 _logger = logging.getLogger(__name__)
 
 
@@ -75,7 +76,8 @@ class AdyenTransaction(models.Model):
             transaction.last_status_id = transaction.status_ids.sorted('date')[-1]
 
     def _compute_fees_currency_id(self):
-        self.fees_currency_id = self.env["res.currency"].search([('name', '=', 'EUR')], limit=1)
+        self.fees_currency_id = self.env["res.currency"].with_context(active_test=False).search([
+            ('name', '=', FEES_CURRENCY_CODE)], limit=1)
 
     def _get_tx_from_notification(self, account, notification):
         if notification.get('eventCode') in ['CAPTURE', 'REFUND']:
@@ -260,7 +262,7 @@ class AdyenTransaction(models.Model):
                 'value': initial_amount,
             },
             'feesAmount': {
-                'currency': fees_currency.name,
+                'currency': FEES_CURRENCY_CODE,
                 'value': fees_amount,
             },
             'date': str(self.date),
