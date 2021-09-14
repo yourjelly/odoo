@@ -37,22 +37,6 @@ class AdyenTransaction(models.Model):
             amount = tx_sudo.fees_currency_id._convert(tx_sudo.fees, payment_tx.currency_id, self.env.company, tx_sudo.date or fields.Date.today())
             payment_tx.fees = amount
 
-    def _create_missing_tx(self, account_id, transaction, **kwargs):
-        tx = super()._create_missing_tx(account_id, transaction, **kwargs)
-        if tx.description and not tx.payment_transaction_id:
-            payment_tx = self.env['payment.transaction'].search([('reference', '=', tx.description), ('provider', '=', 'odoo')])
-            if payment_tx:
-                tx.payment_transaction_id = payment_tx.id
-
-                if not transaction.get('disputePspReference') and tx.merchant_amount > 0:
-                    tx.total_amount = payment_tx.amount
-                    tx.currency_id = payment_tx.currency_id
-
-                    fees_amount = tx.total_amount - tx.merchant_amount
-                    tx.fees = payment_tx.currency_id._convert(fees_amount, tx.fees_currency_id, self.env.company, tx.date or fields.Date.today())
-                    tx.variable_fees = tx.fees
-        return tx
-
     def action_view_invoices(self):
         self.ensure_one()
         return self.payment_transaction_id.action_view_invoices()
