@@ -20,11 +20,11 @@ _logger = logging.getLogger(__name__)
 TIMEOUT = 60
 
 def to_major_currency(amount, currency):
-    decimal = currency.decimal_places
+    decimal = currency.decimal_places if currency else 2
     return float_round(amount, 0) / (10**decimal)
 
 def to_minor_currency(amount, currency):
-    decimal = currency.decimal_places
+    decimal = currency.decimal_places if currency else 2
     return int(float_round(amount, decimal) * (10**decimal))
 
 class AdyenProxyAuth(requests.auth.AuthBase):
