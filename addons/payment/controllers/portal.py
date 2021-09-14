@@ -208,9 +208,8 @@ class PaymentPortal(portal.CustomerPortal):
         tx_sudo = self._create_transaction(
             amount=amount, currency_id=currency_id, partner_id=partner_id, **kwargs
         )
-        if tx_sudo.operation == 'validation':
-            # The amount and currency have been chosen for the validation, recompute the access token
-            self._update_landing_route(tx_sudo)
+
+        self._update_landing_route(tx_sudo)
         return tx_sudo._get_processing_values()
 
     def _create_transaction(
