@@ -97,8 +97,6 @@ class StockPutawayRule(models.Model):
         return super(StockPutawayRule, self).write(vals)
 
     def _get_putaway_location(self, product, quantity=0, package=None, qty_by_location=None):
-        package_type = package and package.package_type_id or None
-
         checked_locations = set()
         for putaway_rule in self:
             location_out = putaway_rule.location_out_id
@@ -111,24 +109,11 @@ class StockPutawayRule(models.Model):
                 continue
 
             child_locations = location_out.child_internal_location_ids
-            # check if already have the product/package type stored
-            for location in child_locations:
-                if location in checked_locations:
-                    continue
-                if package_type:
-                    if location.quant_ids.filtered(lambda q: q.product_id == product and q.package_id and q.package_id.package_type_id == package_type):
-                        if location._check_can_be_used(product, package=package, location_qty=qty_by_location[location.id]):
-                            return location
-                        else:
-                            checked_locations.add(location)
-                elif float_compare(qty_by_location[location.id], 0, precision_rounding=product.uom_id.rounding) > 0:
-                    if location._check_can_be_used(product, quantity, location_qty=qty_by_location[location.id]):
-                        return location
-                    else:
-                        checked_locations.add(location)
+            if putaway_rule.storage_category_id:
+                child_locations = child_locations.filtered(lambda l: l.storage_category_id == putaway_rule.storage_category_id)
 
             # check locations with matched storage category
-            for location in child_locations.filtered(lambda l: l.storage_category_id == putaway_rule.storage_category_id):
+            for location in child_locations:
                 if location in checked_locations:
                     continue
                 if location._check_can_be_used(product, quantity, package, qty_by_location[location.id]):
