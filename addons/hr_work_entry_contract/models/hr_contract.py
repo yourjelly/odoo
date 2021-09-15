@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from addons.hr_work_entry.models.hr_work_entry import HrWorkEntry
 from collections import defaultdict
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -286,16 +287,29 @@ class HrContract(models.Model):
         today = fields.Date.today()
         start = today + relativedelta(day=1)
         stop = today + relativedelta(day=31)
-        contracts = self.env['hr.employee']._get_all_contracts(
-            start, stop, states=['open', 'close'])
-        # determine contracts to do (the ones without work entries this month)
-        work_entry_groups = self.env['hr.work.entry'].read_group([
+
+        HrContract = self.env['hr.contract']
+        HrWorkEntry = self.env['hr.work.entry']
+
+        # All contracts active during period
+        contracts_domain = self.env['hr.employee']._get_all_contracts_domain(
+            self, start, stop, states=['open', 'close'])
+
+        # Work entries already generated
+        work_entries_subquery = HrWorkEntry._search([
             ('date_start', '<=', stop),
             ('date_stop', '>=', start),
-            ('contract_id', 'in', contracts.ids)
-            ], ['contract_id'], ['contract_id'])
-        contracts_done = self.browse(group['contract_id'][0] for group in work_entry_groups)
-        contracts_todo = contracts - contracts_done
+            ('contract_id', 'in', HrContract._search(contracts_domain))
+        ])
+
+        # Contracts without generated work entries
+        contracts_todo = HrContract.search(
+            expression.AND([
+                contracts_domain,
+                ('id', 'not inselect',
+                    work_entries_subquery.select('"%s"."contract_id"' % HrWorkEntry._table)),
+            ])
+        )
         if not contracts_todo:
             return
         # generate a batch of work entries

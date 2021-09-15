@@ -43,10 +43,13 @@ class Employee(models.Model):
         for employee in self:
             employee.contracts_count = result.get(employee.id, 0)
 
-    def _get_contracts(self, date_from, date_to, states=['open'], kanban_state=False, all_contracts=False):
+    def _get_contracts(self, **kwargs):
         """
         Returns the contracts of the employee between date_from and date_to
         """
+        return self.env['hr.contract'].search(self._get_contracts_domain(**kwargs))
+
+    def _get_contracts_domain(self, date_from, date_to, states=['open'], kanban_state=False, all_contracts=False):
         state_domain = [('state', 'in', states)]
         if kanban_state:
             state_domain = expression.AND([state_domain, [('kanban_state', 'in', kanban_state)]])
@@ -56,18 +59,16 @@ class Employee(models.Model):
         else:
             employees_domain = [('employee_id', 'in', self.ids)]
 
-        return self.env['hr.contract'].search(
-            expression.AND([
-                employees_domain,
-                state_domain,
-                [
-                    ('date_start', '<=', date_to),
-                    '|',
-                        ('date_end', '=', False),
-                        ('date_end', '>=', date_from)
-                ]
-            ])
-        )
+        return expression.AND([
+            employees_domain,
+            state_domain,
+            [
+                ('date_start', '<=', date_to),
+                '|',
+                    ('date_end', '=', False),
+                    ('date_end', '>=', date_from)
+            ]
+        ])
 
     def _get_incoming_contracts(self, date_from, date_to):
         return self._get_contracts(date_from, date_to, states=['draft'], kanban_state=['done'])
@@ -78,6 +79,10 @@ class Employee(models.Model):
         Returns the contracts of all employees between date_from and date_to
         """
         return self._get_contracts(date_from, date_to, states=states, all_contracts=True)
+
+    @api.model
+    def _get_all_contracts_domain(self, date_from, date_to, states=['open']):
+        return self._get_contracts_domain(date_from, date_to, states=states, all_contracts=True)
 
     def write(self, vals):
         res = super(Employee, self).write(vals)
