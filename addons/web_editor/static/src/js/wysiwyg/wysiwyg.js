@@ -220,7 +220,7 @@ const Wysiwyg = Widget.extend({
         const fieldName = collaborationChannel.collaborationFieldName;
         const resId = collaborationChannel.collaborationResId;
 
-        if (!(modelName && fieldName && resId)) {
+        if (!(modelName && fieldName && resId) || window.odooEditorCollaborationChannelName) {
             return;
         }
 
@@ -230,6 +230,7 @@ const Wysiwyg = Widget.extend({
         const currentClientId = Math.floor(Math.random() * Math.pow(2, 52)).toString();
 
         this._collaborationChannelName = `editor_collaboration:${modelName}:${fieldName}:${resId}`;
+        window.odooEditorCollaborationChannelName = this._collaborationChannelName;
 
         this.call('bus_service', 'onNotification', this, (notifications) => {
             for (const [channel, busData] of notifications) {
