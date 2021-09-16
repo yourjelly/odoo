@@ -9,7 +9,8 @@ import werkzeug
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
 from odoo.osv import expression
-from odoo.tools import is_html_empty
+from datetime import datetime
+from odoo.tools import is_html_empty, format_datetime, format_date
 
 
 class Survey(models.Model):
@@ -877,6 +878,120 @@ class Survey(models.Model):
             'target': 'self',
             'url': url
         }
+
+    def survey_print(self, review=False, answer_token=None):
+        '''Display an survey in printable view; if <answer_token> is set, it will
+        grab the answers of the user_input_id that has <answer_token>.'''
+        access_data = self._get_access_data(self.access_token, answer_token, ensure_token=False)
+        if access_data['validity_code'] is not True and (
+                access_data['has_survey_access'] or
+                access_data['validity_code'] not in ['token_required', 'survey_closed', 'survey_void']):
+            return self._redirect_with_error(access_data, access_data['validity_code'])
+
+        survey_sudo, answer_sudo = access_data['survey_sudo'], access_data['answer_sudo']
+
+        return {
+            'is_html_empty': is_html_empty,
+            'review': review,
+            'survey': survey_sudo,
+            'answer': answer_sudo if survey_sudo.scoring_type != 'scoring_without_answers' else answer_sudo.browse(),
+            'questions_to_display': answer_sudo._get_print_questions(),
+            'scoring_display_correction': survey_sudo.scoring_type == 'scoring_with_answers' and answer_sudo,
+            'format_datetime': lambda dt: format_datetime(self.env, dt, dt_format=False),
+            'format_date': lambda date: format_date(self.env, date),
+        }
+        # return data
+
+    def _get_access_data(self, survey_token, answer_token, ensure_token=True):
+        """ Get back data related to survey and user input, given the ID and access
+        token provided by the route.
+
+         : param ensure_token: whether user input existence should be enforced or not(see ``_check_validity``)
+        """
+        survey_sudo, answer_sudo = self.env['survey.survey'].sudo(), self.env['survey.user_input'].sudo()
+        has_survey_access, can_answer = False, False
+
+        validity_code = self._check_validity(survey_token, answer_token, ensure_token=ensure_token)
+        if validity_code != 'survey_wrong':
+            survey_sudo, answer_sudo = self._fetch_from_access_token(survey_token, answer_token)
+            try:
+                survey_user = survey_sudo.with_user(self.env.user)
+                survey_user.check_access_rights(self, 'read', raise_exception=True)
+                survey_user.check_access_rule(self, 'read')
+            except Exception:
+                pass
+            else:
+                has_survey_access = True
+            can_answer = bool(answer_sudo)
+            if not can_answer:
+                can_answer = survey_sudo.access_mode == 'public'
+
+        return {
+            'survey_sudo': survey_sudo,
+            'answer_sudo': answer_sudo,
+            'has_survey_access': has_survey_access,
+            'can_answer': can_answer,
+            'validity_code': validity_code,
+        }
+
+    def _check_validity(self, survey_token, answer_token, ensure_token=True):
+        """ Check survey is open and can be taken. This does not checks for
+        security rules, only functional / business rules. It returns a string key
+        allowing further manipulation of validity issues
+
+         * survey_wrong: survey does not exist;
+         * survey_auth: authentication is required;
+         * survey_closed: survey is closed and does not accept input anymore;
+         * survey_void: survey is void and should not be taken;
+         * token_wrong: given token not recognized;
+         * token_required: no token given although it is necessary to access the
+           survey;
+         * answer_deadline: token linked to an expired answer;
+
+        :param ensure_token: whether user input existence based on given access token
+          should be enforced or not, depending on the route requesting a token or
+          allowing external world calls;
+        """
+        survey_sudo, answer_sudo = self._fetch_from_access_token(survey_token, answer_token)
+
+        if not survey_sudo.exists():
+            return 'survey_wrong'
+
+        if answer_token and not answer_sudo:
+            return 'token_wrong'
+
+        if not answer_sudo and ensure_token:
+            return 'token_required'
+        if not answer_sudo and survey_sudo.access_mode == 'token':
+            return 'token_required'
+
+        if survey_sudo.users_login_required and self.env.user._is_public():
+            return 'survey_auth'
+
+        if not survey_sudo.active and (not answer_sudo or not answer_sudo.test_entry):
+            return 'survey_closed'
+
+        if (not survey_sudo.page_ids and survey_sudo.questions_layout == 'page_per_section') or not survey_sudo.question_ids:
+            return 'survey_void'
+
+        if answer_sudo and answer_sudo.deadline and answer_sudo.deadline < datetime.now():
+            return 'answer_deadline'
+
+        return True
+
+    def _fetch_from_access_token(self, survey_token, answer_token):
+        """ Check that given token matches an answer from the given survey_id.
+        Returns a sudo-ed browse record of survey in order to avoid access rights
+        issues now that access is granted through token. """
+        survey_sudo = self.env['survey.survey'].with_context(active_test=False).sudo().search([('access_token', '=', survey_token)])
+        if not answer_token:
+            answer_sudo = self.env['survey.user_input'].sudo()
+        else:
+            answer_sudo = self.env['survey.user_input'].sudo().search([
+                ('survey_id', '=', survey_sudo.id),
+                ('access_token', '=', answer_token)
+            ], limit=1)
+        return survey_sudo, answer_sudo
 
     def action_result_survey(self):
         """ Open the website page with the survey results view """

@@ -88,6 +88,9 @@ sent mails with personal token for the invitation of the survey.
         'web.report_assets_pdf': [
             'survey/static/src/scss/survey_reports.scss',
         ],
+        'web.report_assets_common': [
+            'survey/static/src/scss/survey_templates_form.scss',
+        ],
         'web.assets_backend': [
             'survey/static/src/css/survey_templates_result.css',
             'survey/static/src/js/fields_section_one2many.js',
