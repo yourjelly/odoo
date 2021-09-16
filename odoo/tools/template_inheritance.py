@@ -27,10 +27,10 @@ def add_text_inside(node, text):
     """ Add text inside ``node``. """
     if text is None:
         return
-    if len(node):
-        node[-1].tail = (node[-1].tail or "") + text
-    else:
+    if not len(node):
         node.text = (node.text or "") + text
+    else:
+        node[-1].tail = (node[-1].tail or "") + text
 
 
 def remove_element(node):
