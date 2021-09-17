@@ -420,7 +420,7 @@ var Tip = Widget.extend({
             // be one of its children (or the element itself)
             $consumeEventAnchors = $anchor.closest('.ui-draggable');
         } else if (consumeEvent === "input" && !$anchor.is('textarea, input')) {
-            $consumeEventAnchors = $anchor.closest("[contenteditable='true']");
+            $consumeEventAnchors = $anchor.closest("[contenteditable='true']").length ? $anchor.closest("[contenteditable='true']") : $anchor.find('input');
         } else if (consumeEvent.includes('apply.daterangepicker')) {
             $consumeEventAnchors = $anchor.parent().children('.o_field_date_range');
         } else if (consumeEvent === "sort") {
