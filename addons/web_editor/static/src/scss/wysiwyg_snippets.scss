@@ -1708,14 +1708,12 @@ body.editor_enable.editor_has_snippets {
                 &, > .o_overlay_move_options {
                     display: flex;
                 }
-                > .o_overlay_move_options {
-                    > *, + * {
-                        @extend %we-generic-button;
-                        margin: 0 1px 0;
-                        min-width: 22px;
-                        padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
-                        color: $o-we-fg-lighter;
-                    }
+                > .o_overlay_move_options > *, .oe_snippet_remove, > we-button {
+                    @extend %we-generic-button;
+                    margin: 0 1px 0;
+                    min-width: 22px;
+                    padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
+                    color: $o-we-fg-lighter;
                 }
                 > .oe_snippet_remove {
                     margin-left: $o-we-sidebar-content-field-button-group-button-spacing;
@@ -1730,14 +1728,12 @@ body.editor_enable.editor_has_snippets {
                     background-repeat: no-repeat;
                 }
                 &:hover {
-                    > .o_overlay_move_options {
-                        > *, + * {
-                            @include o-hover-opacity(.6);
+                    > .o_overlay_move_options > *, .oe_snippet_remove, > we-button {
+                        @include o-hover-opacity(.6);
 
-                            &:hover {
-                                border-color: mix($o-we-handles-accent-color, $o-we-sidebar-content-field-pressed-bg, .4);
-                                background-color: $o-we-sidebar-content-field-pressed-bg;
-                            }
+                        &:hover {
+                            border-color: mix($o-we-handles-accent-color, $o-we-sidebar-content-field-pressed-bg, .4);
+                            background-color: $o-we-sidebar-content-field-pressed-bg;
                         }
                     }
                     > .oe_snippet_remove:hover {
