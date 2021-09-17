@@ -164,6 +164,7 @@ class PortalChatter(http.Controller):
             'messages': message_data['messages'],
             'options': {
                 'message_count': message_data['message_count'],
+                'attachment_ids': message_data['attachment_ids'],
                 'is_user_public': is_user_public,
                 'is_user_employee': request.env.user.has_group('base.group_user'),
                 'is_user_publisher': request.env.user.has_group('website.group_website_publisher'),
@@ -193,9 +194,16 @@ class PortalChatter(http.Controller):
             if not request.env['res.users'].has_group('base.group_user'):
                 domain = expression.AND([Message._get_search_domain_share(), domain])
             Message = request.env['mail.message'].sudo()
+
+        message_ids = Message.search(domain, limit=limit, offset=offset, order='date desc')
+        messages = message_ids.portal_message_format()
+        IrAttachment = request.env['ir.attachment']
+        attachments = IrAttachment.search([('res_id', '=', res_id)])._attachment_format(attachments_options={'access_token': True})
+
         return {
-            'messages': Message.search(domain, limit=limit, offset=offset).portal_message_format(),
-            'message_count': Message.search_count(domain)
+            'messages': messages,
+            'message_count': Message.search_count(domain),
+            'attachment_ids': attachments,
         }
 
     @http.route(['/mail/update_is_internal'], type='json', auth="user", website=True)
