@@ -59,12 +59,16 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         # Create file content.
         template_values = {
-            **invoice._prepare_edi_vals_to_export(),
-            'tax_details': invoice._prepare_edi_tax_details(),
+            **invoice._prepare_edi_vals_to_export(tax_grouping_methods=[
+                invoice._prepare_edi_export_tax_grouping_key('taxes'),
+            ]),
             'format_date': format_date,
             'format_monetary': format_monetary,
             'is_html_empty': is_html_empty,
         }
+
+        for i, line_vals in enumerate(template_values['invoice_lines'].values(), start=1):
+            line_vals['index'] = i
 
         xml_content = markupsafe.Markup("<?xml version='1.0' encoding='UTF-8'?>")
         xml_content += self.env.ref('account_edi_facturx.account_invoice_facturx_export')._render(template_values)

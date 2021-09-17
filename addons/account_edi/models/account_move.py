@@ -4,6 +4,7 @@
 from collections import defaultdict
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import float_is_zero
 
 
 class AccountMove(models.Model):
@@ -135,34 +136,43 @@ class AccountMove(models.Model):
     ####################################################
 
     @api.model
-    def _add_edi_tax_values(self, results, grouping_key, serialized_grouping_key, tax_values, key_by_tax):
+    def _add_edi_tax_values(self, results, grouping_key, serialized_grouping_key, tax_details, key_by_tax):
         # Add to global results.
-        results['tax_amount'] += tax_values['tax_amount']
-        results['tax_amount_currency'] += tax_values['tax_amount_currency']
+        results['tax_amount'] += tax_details['tax_amount']
+        results['tax_amount_currency'] += tax_details['tax_amount_currency']
 
         # Add to tax details.
         if serialized_grouping_key not in results['tax_details']:
-            tax_details = results['tax_details'][serialized_grouping_key]
+            tax_values = results['tax_details'][serialized_grouping_key]
 
-            tax_details.update(grouping_key)
-            tax_details.update({
-                'base_amount': tax_values['base_amount'],
-                'base_amount_currency': tax_values['base_amount_currency'],
+            tax_values.update(grouping_key)
+            tax_values.update({
+                'base_amount': tax_details['base_amount'],
+                'base_amount_currency': tax_details['base_amount_currency'],
             })
         else:
-            tax_details = results['tax_details'][serialized_grouping_key]
-            if key_by_tax[tax_values['tax_id']] != key_by_tax.get(tax_values['src_line_id'].tax_line_id):
-                tax_details['base_amount'] += tax_values['base_amount']
-                tax_details['base_amount_currency'] += tax_values['base_amount_currency']
+            tax_values = results['tax_details'][serialized_grouping_key]
+            if key_by_tax[tax_details['tax']] != key_by_tax.get(tax_details['src_line'].tax_line_id):
+                tax_values['base_amount'] += tax_details['base_amount']
+                tax_values['base_amount_currency'] += tax_details['base_amount_currency']
 
-        tax_details['tax_amount'] += tax_values['tax_amount']
-        tax_details['tax_amount_currency'] += tax_values['tax_amount_currency']
-        tax_details['group_tax_details'].append(tax_values)
+        tax_values['tax_amount'] += tax_details['tax_amount']
+        tax_values['tax_amount_currency'] += tax_details['tax_amount_currency']
+        tax_values['group_tax_details'].append(tax_details)
 
-    def _prepare_edi_tax_details(self, filter_to_apply=None, grouping_key_generator=None):
-        ''' Compute amounts related to taxes for the current invoice.
+    @api.model
+    def _prepare_edi_export_tax_grouping_key(self, code, filter_invoice_line=None, filter_tax_detail=None, grouping_key_generator=None):
+        """ Use this method to define a way to compute taxes for EDI export.
 
-        :param filter_to_apply:         Optional filter to exclude some tax values from the final results.
+        :param code:                    The unique code used to retrieve the values computed for this method.
+                                        It must be unique.
+
+        :param filter_invoice_line:     Optional filter to exclude some invoice lines.
+
+                                        The filter is defined as a method getting an invoice line as parameter.
+                                        If the filter is returning False, the invoice line is not considered.
+
+        :param filter_tax_detail:       Optional filter to exclude some tax details.
                                         The filter is defined as a method getting a dictionary as parameter
                                         representing the tax values for a single repartition line.
                                         This dictionary contains:
@@ -186,168 +196,299 @@ class AccountMove(models.Model):
                                         grouping_key to aggregate tax values together. The returned dictionary is added
                                         to each tax details in order to retrieve the full grouping_key later.
 
-        :return:                        The full tax details for the current invoice and for each invoice line
-                                        separately. The returned dictionary is the following:
+        :return:
+        """
+        if not filter_invoice_line:
+            filter_invoice_line = lambda x: True
+        if not filter_tax_detail:
+            filter_tax_detail = lambda x: True
+        if not grouping_key_generator:
+            grouping_key_generator = lambda x: {'tax': x['tax']}
 
-            'base_amount':              The total tax base amount in company currency for the whole invoice.
-            'tax_amount':               The total tax amount in company currency for the whole invoice.
-            'base_amount_currency':     The total tax base amount in foreign currency for the whole invoice.
-            'tax_amount_currency':      The total tax amount in foreign currency for the whole invoice.
-            'tax_details':              A mapping of each grouping key (see 'grouping_key_generator') to a dictionary
-                                        containing:
+        return {
+            'code': code,
+            'filter_invoice_line': filter_invoice_line,
+            'filter_tax_detail': filter_tax_detail,
+            'grouping_key_generator': grouping_key_generator,
+        }
 
-                'base_amount':              The tax base amount in company currency for the current group.
-                'tax_amount':               The tax amount in company currency for the current group.
-                'base_amount_currency':     The tax base amount in foreign currency for the current group.
-                'tax_amount_currency':      The tax amount in foreign currency for the current group.
-                'group_tax_details':        The list of all tax values aggregated into this group.
+    def _prepare_edi_vals_to_export(self, tax_grouping_methods=[]):
+        """ The purpose of this helper is to prepare values in order to export an invoice through the EDI system.
+        This includes the computation of the tax details for each invoice line that could be very difficult to
+        handle regarding the computation of the base amount.
 
-            'invoice_line_tax_details': A mapping of each invoice line to a dictionary containing:
+        :param tax_grouping_methods:    A list of dictionaries defining how the taxes computation should be handled.
+                                        The '_prepare_edi_export_tax_grouping_key' method should be use to create them.
 
-                'base_amount':          The total tax base amount in company currency for the whole invoice line.
-                'tax_amount':           The total tax amount in company currency for the whole invoice line.
-                'base_amount_currency': The total tax base amount in foreign currency for the whole invoice line.
-                'tax_amount_currency':  The total tax amount in foreign currency for the whole invoice line.
-                'tax_details':          A mapping of each grouping key (see 'grouping_key_generator') to a dictionary
-                                        containing:
+        :return: A python dictionary containing:
 
-                    'base_amount':          The tax base amount in company currency for the current group.
-                    'tax_amount':           The tax amount in company currency for the current group.
-                    'base_amount_currency': The tax base amount in foreign currency for the current group.
-                    'tax_amount_currency':  The tax amount in foreign currency for the current group.
-                    'group_tax_details':    The list of all tax values aggregated into this group.
+            record: The invoice record.
 
-        '''
+            invoice_lines:  A map <invoice_line, dictionary> where 'dictionary' contains:
+
+                record: The invoice line record.
+
+                tax_details_list:   A list of python dictionaries, each one representing a tax details and containing:
+
+                    base_line:              The invoice line record originator of taxes.
+                    tax_line:               The tax line record created for a single repartition line.
+                    src_line:               The generator move line of the current tax details.
+                                            It could be either the base line, either a tax line affecting the base of subsequent ones.
+                    tax:                    The originator tax.
+                    src_tax:                Either the group of taxes, either the same record as 'tax'.
+                    tax_repartition_line:   The tax repartition line.
+                    base_amount:            The tax base amount in company currency.
+                    tax_amount:             The tax amount in company currency.
+                    base_amount_currency:   The tax base amount in foreign currency.
+                    tax_amount_currency:    The tax amount in foreign currency.
+
+                taxes:              A map <grouping_method_code, dictionary> where 'grouping_method_code' is the 'code'
+                                    defined in the tax grouping methods passed as parameter into 'tax_grouping_methods'.
+                                    'dictionary' contains:
+
+                    base_amount:            The tax base amount in company currency.
+                    tax_amount:             The tax amount in company currency.
+                    base_amount_currency:   The tax base amount in foreign currency.
+                    tax_amount_currency:    The tax amount in foreign currency.
+                    tax_details:            A mapping of each grouping key (see 'grouping_key_generator') to a dictionary
+                                            containing:
+
+                        base_amount:                The tax base amount in company currency.
+                        tax_amount:                 The tax amount in company currency.
+                        base_amount_currency:       The tax base amount in foreign currency.
+                        tax_amount_currency:        The tax amount in foreign currency.
+                        group_tax_details:          The list of all tax details aggregated into this group.
+                                                    See 'tax_details_list' for more details.
+
+                totals:             A python dictionary containing some business values for the current line.
+                                    All these values are sum together at the invoice level.
+
+                        net_price_subtotal:         The total invoiced for the current line without tax, neither discount.
+                        net_price_subtotal_unit:    The price unit invoiced for the current line without tax, neither
+                                                    discount.
+                        gross_price_subtotal:       The total invoiced for the current line without tax including the
+                                                    discount.
+                        gross_price_subtotal:       The price unit invoiced for the current line without tax including
+                                                    discount.
+                        net_price_total:            The total invoiced for the current line including taxes but without
+                                                    discount.
+                        net_price_total_unit:       The price unit invoiced for the current line including taxes but
+                                                    without the discount.
+                        gross_price_total:          The total invoiced for the current line including the taxes and the
+                                                    discount.
+                        gross_price_total_unit:     The price unit invoiced for the current line including the taxes and
+                                                    the discount.
+                        discount_amount:            The amount of the discount for the current line.
+
+            taxes:                  Same as 'taxes' for lines but applied to the whole invoice.
+
+            totals:                 Same as 'totals' for lines but applied to the whole invoice.
+
+            format_float:           Helper method to format monetary values when exporting to a file like an xml.
+        """
         self.ensure_one()
 
         def _serialize_python_dictionary(vals):
             return '-'.join(str(vals[k]) for k in sorted(vals.keys()))
 
-        def default_grouping_key_generator(tax_values):
-            return {'tax': tax_values['tax_id']}
+        def format_float(amount, precision_digits, none_if_zero=False):
+            if amount is False or amount is None:
+                return None
+            if none_if_zero and float_is_zero(amount, precision_digits=precision_digits):
+                return None
+            return '%.*f' % (precision_digits, amount)
 
-        # Compute the taxes values for each invoice line.
         invoice_lines = self.invoice_line_ids.filtered(lambda line: not line.display_type)
-        invoice_lines_tax_values_dict = defaultdict(list)
+        balance_multiplicator = -1 if self.is_inbound() else 1
 
-        domain = [('move_id', '=', self.id)]
-        tax_details_query, tax_details_params = invoice_lines._get_query_tax_details_from_domain(domain)
-        self._cr.execute(tax_details_query, tax_details_params)
-        for row in self._cr.dictfetchall():
-            invoice_line = invoice_lines.browse(row['base_line_id'])
-            tax_line = invoice_lines.browse(row['tax_line_id'])
-            src_line = invoice_lines.browse(row['src_line_id'])
+        res = {
+            'record': self,
 
-            tax = self.env['account.tax'].browse(row['tax_id'])
+            'invoice_lines': {},
 
-            invoice_lines_tax_values_dict[invoice_line].append({
-                'base_line_id': invoice_line,
-                'tax_line_id': tax_line,
-                'src_line_id': src_line,
-                'tax_id': tax,
-                'src_tax_id': self.env['account.tax'].browse(row['group_tax_id']) if row['group_tax_id'] else tax,
-                'tax_repartition_line_id': tax_line.tax_repartition_line_id,
-                'base_amount': row['base_amount'],
-                'tax_amount': row['tax_amount'],
-                'base_amount_currency': row['base_amount_currency'],
-                'tax_amount_currency': row['tax_amount_currency'],
-            })
-        grouping_key_generator = grouping_key_generator or default_grouping_key_generator
+            'taxes': {},
 
-        # Apply 'filter_to_apply'.
+            'totals': {
+                'net_price_subtotal': 0.0,
+                'net_price_subtotal_unit': 0.0,
+                'gross_price_subtotal': 0.0,
+                'gross_price_subtotal_unit': 0.0,
+                'net_price_total': 0.0,
+                'net_price_total_unit': 0.0,
+                'gross_price_total': 0.0,
+                'gross_price_total_unit': 0.0,
+                'discount_amount': 0.0,
+            },
 
-        if filter_to_apply:
-            invoice_lines_tax_values_dict = {
-                invoice_line: [x for x in tax_values_list if filter_to_apply(x)]
-                for invoice_line, tax_values_list in invoice_lines_tax_values_dict.items()
+            'format_float': format_float,
+        }
+
+        # ==== Invoice lines details ====
+
+        for invoice_line in invoice_lines:
+
+            net_price_subtotal = invoice_line.price_subtotal
+            net_price_subtotal_unit = invoice_line.currency_id.round(net_price_subtotal / invoice_line.quantity) if invoice_line.quantity else 0.0
+            gross_price_subtotal = net_price_subtotal / (1.0 - ((invoice_line.discount or 0.0) / 100.0))
+            gross_price_subtotal_unit = invoice_line.currency_id.round(gross_price_subtotal / invoice_line.quantity) if invoice_line.quantity else 0.0
+            net_price_total = invoice_line.price_total
+            net_price_total_unit = invoice_line.currency_id.round(net_price_total / invoice_line.quantity) if invoice_line.quantity else 0.0
+            gross_price_total = net_price_total / (1.0 - (invoice_line.discount or 0.0) / 100.0)
+            gross_price_total_unit = invoice_line.currency_id.round(gross_price_total / invoice_line.quantity) if invoice_line.quantity else 0.0
+
+            res['invoice_lines'][invoice_line] = {
+                'record': invoice_line,
+
+                'tax_details_list': [],
+
+                'taxes': {},
+
+                'totals': {
+                    'net_price_subtotal': net_price_subtotal,
+                    'net_price_subtotal_unit': net_price_subtotal_unit,
+                    'gross_price_subtotal': gross_price_subtotal,
+                    'gross_price_subtotal_unit': gross_price_subtotal_unit,
+                    'net_price_total': net_price_total,
+                    'net_price_total_unit': net_price_total_unit,
+                    'gross_price_total': gross_price_total,
+                    'gross_price_total_unit': gross_price_total_unit,
+                    'discount_amount': gross_price_subtotal - net_price_subtotal,
+                },
             }
 
-        # Initialize the results dict.
+            # == Add to invoice totals ==
 
-        invoice_global_tax_details = {
-            'base_amount': 0.0,
-            'tax_amount': 0.0,
-            'base_amount_currency': 0.0,
-            'tax_amount_currency': 0.0,
-            'tax_details': defaultdict(lambda: {
-                'base_amount': 0.0,
-                'tax_amount': 0.0,
-                'base_amount_currency': 0.0,
-                'tax_amount_currency': 0.0,
-                'group_tax_details': [],
-            }),
-            'invoice_line_tax_details': defaultdict(lambda: {
-                'base_amount': 0.0,
-                'tax_amount': 0.0,
-                'base_amount_currency': 0.0,
-                'tax_amount_currency': 0.0,
-                'tax_details': defaultdict(lambda: {
+            for k, amount in res['invoice_lines'][invoice_line]['totals'].items():
+                res['totals'][k] += amount
+
+        # ==== Taxes ====
+
+        if tax_grouping_methods:
+
+            # == Compute the tax details ==
+
+            domain = [('move_id', '=', self.id)]
+            tax_details_query, tax_details_params = invoice_lines._get_query_tax_details_from_domain(domain)
+            self._cr.execute(tax_details_query, tax_details_params)
+            for row in self._cr.dictfetchall():
+                invoice_line = invoice_lines.browse(row['base_line_id'])
+                tax_line = invoice_lines.browse(row['tax_line_id'])
+                src_line = invoice_lines.browse(row['src_line_id'])
+
+                tax = self.env['account.tax'].browse(row['tax_id'])
+
+                res['invoice_lines'][invoice_line]['tax_details_list'].append({
+                    'base_line': invoice_line,
+                    'tax_line': tax_line,
+                    'src_line': src_line,
+                    'tax': tax,
+                    'src_tax': self.env['account.tax'].browse(row['group_tax_id']) if row['group_tax_id'] else tax,
+                    'tax_repartition_line': tax_line.tax_repartition_line_id,
+
+                    'base_amount': balance_multiplicator * row['base_amount'],
+                    'tax_amount': balance_multiplicator * row['tax_amount'],
+                    'base_amount_currency': balance_multiplicator * row['base_amount_currency'],
+                    'tax_amount_currency': balance_multiplicator * row['tax_amount_currency'],
+                })
+
+            # == Add missing tax details for zero tax lines ==
+
+            if self.move_type in ('out_refund', 'in_refund'):
+                tax_rep_lines_field = 'refund_repartition_line_ids'
+            else:
+                tax_rep_lines_field = 'invoice_repartition_line_ids'
+
+            for invoice_line in invoice_lines:
+                invoice_line_vals = res['invoice_lines'][invoice_line]
+                tax_details_list = invoice_line_vals['tax_details_list']
+
+                # Search for unhandled taxes.
+                taxes_set = set(invoice_line.tax_ids.flatten_taxes_hierarchy())
+                for tax_details in tax_details_list:
+                    taxes_set.discard(tax_details['tax'])
+
+                # Restore zero-tax tax details.
+                for zero_tax in taxes_set:
+
+                    affect_base_amount = 0.0
+                    affect_base_amount_currency = 0.0
+                    for tax_details in tax_details_list:
+                        if zero_tax in tax_details['tax_line'].tax_ids:
+                            affect_base_amount += tax_details['tax_amount']
+                            affect_base_amount_currency += tax_details['tax_amount_currency']
+
+                    for tax_rep in zero_tax[tax_rep_lines_field].filtered(lambda x: x.repartition_type == 'tax'):
+                        tax_details_list.append({
+                            'base_line': invoice_line,
+                            'tax_line': self.env['account.move.line'],
+                            'src_line': invoice_line,
+                            'tax': zero_tax,
+                            'src_tax': zero_tax,
+                            'tax_repartition_line': tax_rep,
+
+                            'base_amount': (balance_multiplicator * invoice_line.balance) + affect_base_amount,
+                            'tax_amount': 0.0,
+                            'base_amount_currency': (balance_multiplicator * invoice_line.amount_currency) + affect_base_amount_currency,
+                            'tax_amount_currency': 0.0,
+                        })
+
+            # == Add tax details to results ==
+
+            for tax_grouping_method in tax_grouping_methods:
+
+                invoice_global_tax_values = res['taxes'][tax_grouping_method['code']] = {
                     'base_amount': 0.0,
                     'tax_amount': 0.0,
                     'base_amount_currency': 0.0,
                     'tax_amount_currency': 0.0,
-                    'group_tax_details': [],
-                }),
-            }),
-        }
+                    'tax_details': defaultdict(lambda: {
+                        'base_amount': 0.0,
+                        'tax_amount': 0.0,
+                        'base_amount_currency': 0.0,
+                        'tax_amount_currency': 0.0,
+                        'group_tax_details': [],
+                    }),
+                }
 
-        # Apply 'grouping_key_generator' to 'invoice_lines_tax_values_list' and add all values to the final results.
+                for invoice_line in invoice_lines:
+                    if not tax_grouping_method['filter_invoice_line'](invoice_line):
+                        continue
 
-        for invoice_line in invoice_lines:
-            tax_values_list = invoice_lines_tax_values_dict.get(invoice_line, [])
+                    invoice_line_vals = res['invoice_lines'][invoice_line]
+                    tax_details_list = invoice_line_vals['tax_details_list']
 
-            key_by_tax = {}
+                    invoice_line_global_tax_values = invoice_line_vals['taxes'][tax_grouping_method['code']] = {
+                        'base_amount': balance_multiplicator * invoice_line.balance,
+                        'tax_amount': 0.0,
+                        'base_amount_currency': balance_multiplicator * invoice_line.amount_currency,
+                        'tax_amount_currency': 0.0,
+                        'tax_details': defaultdict(lambda: {
+                            'base_amount': 0.0,
+                            'tax_amount': 0.0,
+                            'base_amount_currency': 0.0,
+                            'tax_amount_currency': 0.0,
+                            'group_tax_details': [],
+                        }),
+                    }
 
-            # Add to invoice global tax amounts.
-            invoice_global_tax_details['base_amount'] += invoice_line.balance
-            invoice_global_tax_details['base_amount_currency'] += invoice_line.amount_currency
+                    invoice_global_tax_values['base_amount'] += invoice_line_global_tax_values['base_amount']
+                    invoice_global_tax_values['base_amount_currency'] += invoice_line_global_tax_values['base_amount_currency']
 
-            for tax_values in tax_values_list:
-                grouping_key = grouping_key_generator(tax_values)
-                serialized_grouping_key = _serialize_python_dictionary(grouping_key)
-                key_by_tax[tax_values['tax_id']] = serialized_grouping_key
+                    # Keep track of the serialized_grouping_key for each tax.
+                    # This will be used later to know which amount must be sum to compute the base amounts.
+                    key_by_tax = {}
 
-                # Add to invoice line global tax amounts.
-                if serialized_grouping_key not in invoice_global_tax_details['invoice_line_tax_details'][invoice_line]:
-                    invoice_line_global_tax_details = invoice_global_tax_details['invoice_line_tax_details'][invoice_line]
-                    invoice_line_global_tax_details.update({
-                        'base_amount': invoice_line.balance,
-                        'base_amount_currency': invoice_line.amount_currency,
-                    })
-                else:
-                    invoice_line_global_tax_details = invoice_global_tax_details['invoice_line_tax_details'][invoice_line]
+                    for tax_details in tax_details_list:
 
-                self._add_edi_tax_values(invoice_global_tax_details, grouping_key, serialized_grouping_key, tax_values, key_by_tax)
-                self._add_edi_tax_values(invoice_line_global_tax_details, grouping_key, serialized_grouping_key, tax_values, key_by_tax)
+                        if not tax_grouping_method['filter_tax_detail'](tax_details):
+                            continue
 
-        return invoice_global_tax_details
+                        grouping_key = tax_grouping_method['grouping_key_generator'](tax_details)
+                        serialized_grouping_key = _serialize_python_dictionary(grouping_key)
+                        key_by_tax[tax_details['tax']] = serialized_grouping_key
 
-    def _prepare_edi_vals_to_export(self):
-        ''' The purpose of this helper is to prepare values in order to export an invoice through the EDI system.
-        This includes the computation of the tax details for each invoice line that could be very difficult to
-        handle regarding the computation of the base amount.
-
-        :return: A python dict containing default pre-processed values.
-        '''
-        self.ensure_one()
-
-        res = {
-            'record': self,
-            'balance_multiplicator': -1 if self.is_inbound() else 1,
-            'invoice_line_vals_list': [],
-        }
-
-        # Invoice lines details.
-        for index, line in enumerate(self.invoice_line_ids.filtered(lambda line: not line.display_type), start=1):
-            line_vals = line._prepare_edi_vals_to_export()
-            line_vals['index'] = index
-            res['invoice_line_vals_list'].append(line_vals)
-
-        # Totals.
-        res.update({
-            'total_price_subtotal_before_discount': sum(x['price_subtotal_before_discount'] for x in res['invoice_line_vals_list']),
-            'total_price_discount': sum(x['price_discount'] for x in res['invoice_line_vals_list']),
-        })
+                        self._add_edi_tax_values(invoice_global_tax_values, grouping_key, serialized_grouping_key, tax_details, key_by_tax)
+                        self._add_edi_tax_values(invoice_line_global_tax_values, grouping_key, serialized_grouping_key, tax_details, key_by_tax)
 
         return res
 
@@ -531,29 +672,6 @@ class AccountMoveLine(models.Model):
     ####################################################
     # Export Electronic Document
     ####################################################
-
-    def _prepare_edi_vals_to_export(self):
-        ''' The purpose of this helper is the same as '_prepare_edi_vals_to_export' but for a single invoice line.
-        This includes the computation of the tax details for each invoice line or the management of the discount.
-        Indeed, in some EDI, we need to provide extra values depending the discount such as:
-        - the discount as an amount instead of a percentage.
-        - the price_unit but after subtraction of the discount.
-
-        :return: A python dict containing default pre-processed values.
-        '''
-        self.ensure_one()
-
-        res = {
-            'line': self,
-            'price_unit_after_discount': self.price_unit * (1 - (self.discount / 100.0)),
-            'price_subtotal_before_discount': self.currency_id.round(self.price_unit * self.quantity),
-            'price_subtotal_unit': self.currency_id.round(self.price_subtotal / self.quantity) if self.quantity else 0.0,
-            'price_total_unit': self.currency_id.round(self.price_total / self.quantity) if self.quantity else 0.0,
-        }
-
-        res['price_discount'] = res['price_subtotal_before_discount'] - self.price_subtotal
-
-        return res
 
     def reconcile(self):
         # OVERRIDE

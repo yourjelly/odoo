@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <template id="account_invoice_line_facturx_export">
-            <t t-set="line" t-value="line_vals['line']"/>
+            <t t-set="line" t-value="line_vals['record']"/>
             <t  xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
                 xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
                 xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
@@ -48,9 +48,9 @@
                     </ram:SpecifiedLineTradeDelivery>
 
                     <ram:SpecifiedLineTradeSettlement>
-                        <t t-foreach="tax_details['invoice_line_tax_details'][line]['tax_details'].values()"
-                           t-as="tax_detail_vals">
-                            <t t-set="tax" t-value="tax_detail_vals['tax']"/>
+                        <t t-foreach="line_vals['taxes']['taxes']['tax_details'].values()"
+                           t-as="tax_details">
+                            <t t-set="tax" t-value="tax_details['tax']"/>
                             <ram:ApplicableTradeTax t-if="tax.amount_type == 'percent'">
                                 <ram:RateApplicablePercent t-esc="tax.amount"/>
                             </ram:ApplicableTradeTax>
@@ -124,7 +124,7 @@
 
                 <rsm:SupplyChainTradeTransaction>
                     <!-- Invoice lines. -->
-                    <t t-foreach="invoice_line_vals_list" t-as="line_vals">
+                    <t t-foreach="invoice_lines.values()" t-as="line_vals">
                         <t t-call="account_edi_facturx.account_invoice_line_facturx_export"/>
                     </t>
 
@@ -183,15 +183,15 @@
                         </ram:SpecifiedTradeSettlementPaymentMeans>
 
                         <!-- Tax Summary. -->
-                        <t t-foreach="tax_details['tax_details'].values()" t-as="tax_detail_vals">
-                            <t t-set="tax" t-value="tax_detail_vals['tax']"/>
+                        <t t-foreach="taxes['taxes']['tax_details'].values()" t-as="tax_details">
+                            <t t-set="tax" t-value="tax_details['tax']"/>
                             <ram:ApplicableTradeTax>
                                 <ram:CalculatedAmount
                                     t-att-currencyID="record.currency_id.name"
-                                    t-esc="format_monetary(balance_multiplicator * tax_detail_vals['tax_amount_currency'], record.currency_id)"/>
+                                    t-esc="format_monetary(tax_details['tax_amount_currency'], record.currency_id)"/>
                                 <ram:BasisAmount
                                     t-att-currencyID="record.currency_id.name"
-                                    t-esc="format_monetary(balance_multiplicator * tax_detail_vals['base_amount_currency'], record.currency_id)"/>
+                                    t-esc="format_monetary(tax_details['base_amount_currency'], record.currency_id)"/>
                                 <ram:RateApplicablePercent
                                     t-if="tax.amount_type == 'percent'"
                                     t-esc="tax.amount"/>
