@@ -320,7 +320,7 @@ class PosSession(models.Model):
             self._check_if_no_draft_orders()
             if self.update_stock_at_closing:
                 self._create_picking_at_end_of_session()
-                self.order_ids.filtered(lambda o: not o.is_total_cost_computed)._compute_total_cost_at_session_closing(self.picking_ids.move_lines)
+                self.order_ids.filtered(lambda o: not o.is_total_cost_computed)._compute_total_cost_at_session_closing(self.picking_ids.move_ids)
             try:
                 data = self.with_company(self.company_id)._create_account_move(balancing_account, amount_to_balance)
             except AccessError as e:
@@ -1195,7 +1195,7 @@ class PosSession(models.Model):
         pickings = self.picking_ids | self.order_ids.mapped('picking_ids')
         invoices = self.mapped('order_ids.account_move')
         invoice_payments = self.mapped('order_ids.payment_ids.account_move_id')
-        stock_account_moves = pickings.mapped('move_lines.account_move_ids')
+        stock_account_moves = pickings.mapped('move_ids.account_move_ids')
         cash_moves = self.cash_register_id.line_ids.mapped('move_id')
         bank_payment_moves = self.bank_payment_ids.mapped('move_id')
         return invoices | invoice_payments | self.move_id | stock_account_moves | cash_moves | bank_payment_moves

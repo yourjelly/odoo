@@ -116,10 +116,10 @@
             <t t-foreach="docs" t-as="production">
                 <t t-foreach="production.move_finished_ids" t-as="move">
                     <t t-if="production.state == 'done'">
-                        <t t-set="move_lines" t-value="move.move_line_ids.filtered(lambda x: x.state == 'done' and x.qty_done)"/>
+                        <t t-set="move_ids" t-value="move.move_line_ids.filtered(lambda x: x.state == 'done' and x.qty_done)"/>
                     </t>
                     <t t-else="">
-                        <t t-set="move_lines" t-value="move.move_line_ids.filtered(lambda x: x.state != 'done' and x.product_qty)"/>
+                        <t t-set="move_ids" t-value="move.move_line_ids.filtered(lambda x: x.state != 'done' and x.product_qty)"/>
                     </t>
                     <t t-foreach="move_lines" t-as="move_line">
                         <t t-if="move_line.product_uom_id.category_id == uom_categ_unit">

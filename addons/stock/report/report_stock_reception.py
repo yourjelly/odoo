@@ -33,7 +33,7 @@ class ReceptionReport(models.AbstractModel):
         product_to_total_assigned = defaultdict(lambda: [0.0, []])
 
         # to support batch pickings we need to track the total already assigned
-        move_lines = pickings.move_lines.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel')
+        move_lines = pickings.move_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel')
         assigned_moves = move_lines.mapped('move_dest_ids')
         product_to_assigned_qty = defaultdict(float)
         for assigned in assigned_moves:

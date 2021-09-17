@@ -151,7 +151,7 @@ class TestSaleMrpKitBom(TransactionCase):
                 })],
         })
         so.action_confirm()
-        so.picking_ids.move_lines.quantity_done = 1
+        so.picking_ids.move_ids.quantity_done = 1
         so.picking_ids.button_validate()
 
         invoice = so.with_context(default_journal_id=self.journal_sale.id)._create_invoices()

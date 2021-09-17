@@ -82,17 +82,17 @@ class TestReorderingRule(TransactionCase):
         purchase_order.order_line.product_qty = 12
         purchase_order.button_confirm()
 
-        self.assertEqual(purchase_order.picking_ids.move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 12)
-        next_picking = purchase_order.picking_ids.move_lines.move_dest_ids.picking_id
+        self.assertEqual(purchase_order.picking_ids.move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 12)
+        next_picking = purchase_order.picking_ids.move_ids.move_dest_ids.picking_id
         self.assertEqual(len(next_picking), 2)
-        self.assertEqual(next_picking[0].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
-        self.assertEqual(next_picking[1].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 2)
+        self.assertEqual(next_picking[0].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
+        self.assertEqual(next_picking[1].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 2)
 
         # Increase the quantity on the PO
         purchase_order.order_line.product_qty = 15
-        self.assertEqual(purchase_order.picking_ids.move_lines.product_qty, 15)
-        self.assertEqual(next_picking[0].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
-        self.assertEqual(next_picking[1].move_lines.filtered(lambda m: m.product_id == self.product_01).product_qty, 5)
+        self.assertEqual(purchase_order.picking_ids.move_ids.product_qty, 15)
+        self.assertEqual(next_picking[0].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 10)
+        self.assertEqual(next_picking[1].move_ids.filtered(lambda m: m.product_id == self.product_01).product_qty, 5)
 
     def test_reordering_rule_2(self):
         """
@@ -135,8 +135,8 @@ class TestReorderingRule(TransactionCase):
             move.product_id = self.product_01
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines[0].location_id = subloc_1.id
-        customer_picking.move_lines[1].location_id = subloc_2.id
+        customer_picking.move_ids[0].location_id = subloc_1.id
+        customer_picking.move_ids[1].location_id = subloc_2.id
 
         # picking confirm
         customer_picking.action_confirm()
@@ -163,8 +163,8 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(self.product_01.with_context(location=subloc_2.id).virtual_available, 0)
         self.assertEqual(self.product_01.with_context(location=warehouse_1.lot_stock_id.id).virtual_available, 10)  # 5 on the main loc, 5 on subloc_1
 
-        self.assertEqual(purchase_order.picking_ids.move_lines[-1].product_qty, 5)
-        self.assertEqual(purchase_order.picking_ids.move_lines[-1].location_dest_id, warehouse_1.lot_stock_id)
+        self.assertEqual(purchase_order.picking_ids.move_ids[-1].product_qty, 5)
+        self.assertEqual(purchase_order.picking_ids.move_ids[-1].location_dest_id, warehouse_1.lot_stock_id)
 
     def test_replenish_report_1(self):
         """Tests the auto generation of manual orderpoints.
@@ -208,7 +208,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
@@ -251,7 +251,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint'].flush()
 
@@ -306,7 +306,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
         orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
@@ -348,7 +348,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = product_buy_mto
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
-        customer_picking.move_lines.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
+        customer_picking.move_ids.filtered(lambda m: m.product_id == product_buy_mto).procure_method = 'make_to_order'
         customer_picking.action_confirm()
         self.env['stock.warehouse.orderpoint'].flush()
 

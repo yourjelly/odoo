@@ -256,7 +256,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'Picking should be in done state.'
         )
         self.assertEqual(
-            self.pos_order_pos1.picking_ids[0].move_lines.mapped('state'),
+            self.pos_order_pos1.picking_ids[0].move_ids.mapped('state'),
             ['done', 'done'],
             'Move Lines should be in done state.'
         )
@@ -321,7 +321,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'Picking should be in done state.'
         )
         self.assertEqual(
-            self.pos_order_pos2.picking_ids[0].move_lines.mapped('state'),
+            self.pos_order_pos2.picking_ids[0].move_ids.mapped('state'),
             ['done', 'done'],
             'Move Lines should be in done state.'
         )
@@ -385,7 +385,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'Picking should be in done state.'
         )
         self.assertEqual(
-            self.pos_order_pos3.picking_ids[0].move_lines.mapped('state'),
+            self.pos_order_pos3.picking_ids[0].move_ids.mapped('state'),
             ['done'],
             'Move Lines should be in done state.'
         )

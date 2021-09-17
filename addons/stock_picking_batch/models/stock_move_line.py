@@ -53,7 +53,7 @@ class StockMoveLine(models.Model):
 
             # Split the picking in two part to extract only line that are taken on the wave
             picking_to_wave_vals = picking.copy_data({
-                'move_lines': [],
+                'move_ids': [],
                 'move_line_ids': [],
                 'batch_id': wave.id,
             })[0]

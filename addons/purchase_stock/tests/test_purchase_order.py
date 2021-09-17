@@ -212,7 +212,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
         # A new move of 10 unit (15 - 5 units)
         self.assertEqual(po1.order_line.qty_received, 5)
-        self.assertEqual(po1.picking_ids[-1].move_lines.product_qty, 10)
+        self.assertEqual(po1.picking_ids[-1].move_ids.product_qty, 10)
 
     def test_04_update_date_planned(self):
         today = datetime.today().replace(hour=9, microsecond=0)
