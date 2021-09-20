@@ -426,6 +426,18 @@ class AccountEdiFormat(models.Model):
                 'test_url': 'https://sii-prep.egoitza.gipuzkoa.eus/JBS/HACI/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
             }
 
+    def _l10n_es_edi_web_service_alava_vals(self, invoices):
+        if invoices[0].is_sale_document():
+            return {
+                'url': 'https://sii.araba.eus/documentos/SuministroFactEmitidas.wsdl',
+                'test_url': 'https://pruebas-sii.araba.eus/SSII-FACT/ws/fe/SiiFactFEV1SOAP',
+            }
+        else:
+            return {
+                'url': 'https://sii.araba.eus/documentos/SuministroFactRecibidas.wsdl',
+                'test_url': 'https://pruebas-sii.araba.eus/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
+            }
+
     def _l10n_es_edi_call_web_service_sign(self, invoices, info_list):
         company = invoices.company_id
 
@@ -442,7 +454,6 @@ class AccountEdiFormat(models.Model):
         # Get connection data.
         l10n_es_edi_tax_agency = company.mapped('l10n_es_edi_tax_agency')[0]
         connection_vals = getattr(self, f'_l10n_es_edi_web_service_{l10n_es_edi_tax_agency}_vals')(invoices)
-
         header = {
             'IDVersionSii': '1.1',
             'Titular': {
