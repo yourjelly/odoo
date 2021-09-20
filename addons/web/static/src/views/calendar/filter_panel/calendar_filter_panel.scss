@@ -6,12 +6,12 @@ $o-calendar-filter-panel-avatar-size: 20px;
   padding: 2em 0 1em;
 
   .o-calendar-filter-panel--section-header {
-    i {
+    .o-calendar-filter-panel--section-toggler {
       font-size: 0.7em;
       @include o-hover-opacity();
     }
   
-    &.o-calendar-filter-panel--section-collapsed i {
+    &.o-calendar-filter-panel--section-collapsed .o-calendar-filter-panel--section-toggler {
       opacity: 1;
     }
   }
@@ -54,7 +54,7 @@ $o-calendar-filter-panel-avatar-size: 20px;
   }
 
   input:not(:checked) + label .o-calendar-filter-panel--filter-input {
-    background: transparent!important;
+    background: transparent !important;
 
     i.fa {
       visibility: hidden;

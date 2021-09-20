@@ -10,25 +10,48 @@
                         t-att-class="{'o-calendar-filter-panel--section-collapsed': isSectionCollapsed(section)}"
                     >
                         <t t-if="section.label">
-                            <t t-if="section.canCollapse">
-                                <h5
-                                    class="o-calendar-filter-panel--section-header d-flex justify-content-between align-items-center"
-                                    type="button"
-                                    t-on-click.stop.prevent="toggleSection(section)"
-                                >
-                                    <t t-esc="section.label" />
-                                    <i
-                                        class="fa"
-                                        t-attf-class="fa-chevron-{{ isSectionCollapsed(section) ? 'left' : 'down' }}"
+                            <div class="d-flex">
+                                <div class="o-calendar-filter-panel--filter o-calendar-filter-panel--filter-with-avatar position-relative mr-1">
+                                    <input
+                                        type="checkbox"
+                                        name="select-all"
+                                        class="position-absolute"
+                                        t-attf-id="select-all-{{ section.fieldName }}"
+                                        t-att-checked="isAllActive(section)"
+                                        t-on-change="onAllFilterInputChange(section)"
                                     />
-                                </h5>
-                            </t>
-                            <t t-else="">
-                                <h5
-                                    class="o-calendar-filter-panel--section-header"
-                                    t-esc="section.label"
-                                />
-                            </t>
+                                    <label
+                                        class="d-flex align-items-center m-0"
+                                        t-attf-for="select-all-{{ section.fieldName }}"
+                                    >
+                                        <span
+                                            class="o-calendar-filter-panel--filter-input align-items-center d-flex flex-shrink-0 justify-content-center position-relative mr-1"
+                                        >
+                                            <i class="fa fa-check position-relative" />
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <t t-if="section.canCollapse">
+                                    <h5
+                                        class="o-calendar-filter-panel--section-header d-flex justify-content-between align-items-center w-100"
+                                        type="button"
+                                        t-on-click.stop.prevent="toggleSection(section)"
+                                    >
+                                        <t t-esc="section.label" />
+                                        <i
+                                            class="o-calendar-filter-panel--section-toggler fa"
+                                            t-attf-class="fa-chevron-{{ isSectionCollapsed(section) ? 'left' : 'down' }}"
+                                        />
+                                    </h5>
+                                </t>
+                                <t t-else="">
+                                    <h5
+                                        class="o-calendar-filter-panel--section-header w-100"
+                                        t-esc="section.label"
+                                    />
+                                </t>
+                            </div>
                         </t>
                         <t t-if="!isSectionCollapsed(section)">
                             <t t-foreach="getSortedFilters(section)" t-as="filter" t-key="filter.value">
@@ -113,15 +136,17 @@
     </t>
 
     <t t-name="web.CalendarFilterPanel.tooltip" owl="1">
-        <div>
-            <div
-                class="text-center"
+        <div class="card">
+            <h6
+                class="text-center card-header"
                 t-esc="props.filter.label"
             />
-            <img
-                t-attf-src="/web/image/{{ props.section.avatar.model }}/{{ props.filter.value }}/{{ props.section.avatar.field }}"
-                class="mx-auto"
-            />
+            <div class="card-body">
+                <img
+                    t-attf-src="/web/image/{{ props.section.avatar.model }}/{{ props.filter.value }}/{{ props.section.avatar.field }}"
+                    class="mx-auto"
+                />
+            </div>
         </div>
     </t>
 

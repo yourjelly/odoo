@@ -1772,7 +1772,7 @@ class PlaygroundAction extends owl.Component {
                     <field name="videocall_location" string="Join Video Call" widget="CopyClipboardURL" modifiers="{}"/>
                     <field name="attendee_status" invisible="1" modifiers="{'invisible': true, 'readonly': true}"/>
                     <field name="partner_id" string="Organizer" on_change="1" can_create="true" can_write="true" modifiers="{'readonly': true}"/>
-                    <field name="partner_ids" filters="1" widget="many2manyattendee" write_model="calendar.contacts" write_field="partner_id" filter_field="partner_checked" avatar_field="avatar_128" can_create="true" can_write="true" modifiers="{}"/>
+                    <field name="partner_ids" filters="1" widget="many2manyattendee" write_model="calendar.filters" write_field="partner_id" filter_field="partner_checked" avatar_field="avatar_128" can_create="true" can_write="true" modifiers="{}"/>
                     <field name="is_highlighted" invisible="1" modifiers="{'invisible': true, 'readonly': true}"/>
                     <field name="is_organizer_alone" invisible="1" modifiers="{'invisible': true, 'readonly': true}"/>
                     <field name="description" attrs="{'invisible': [('description', '=', False)]}" modifiers="{'invisible': [['description', '=', false]]}"/>

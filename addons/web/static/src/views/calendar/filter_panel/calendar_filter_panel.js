@@ -109,10 +109,19 @@ export class CalendarFilterPanel extends Component {
         return nextId;
     }
 
+    isAllActive(section) {
+        let active = true;
+        for (const filter of section.filters) {
+            if (filter.type !== "all" && !filter.active) {
+                active = false;
+                break;
+            }
+        }
+        return active;
+    }
     getFilterTypePriority(type) {
         return ["user", "record", "dynamic", "all"].indexOf(type);
     }
-
     getSortedFilters(section) {
         return section.filters.slice().sort((a, b) => {
             if (a.type === b.type) {
@@ -129,7 +138,9 @@ export class CalendarFilterPanel extends Component {
     }
 
     toggleSection(section) {
-        this.state.collapsed[section.fieldName] = !this.state.collapsed[section.fieldName];
+        if (section.canCollapse) {
+            this.state.collapsed[section.fieldName] = !this.state.collapsed[section.fieldName];
+        }
     }
 
     isSectionCollapsed(section) {
@@ -144,7 +155,19 @@ export class CalendarFilterPanel extends Component {
     }
 
     onFilterInputChange(section, filter, ev) {
-        this.props.model.updateFilter(section.fieldName, filter.value, ev.target.checked);
+        this.props.model.updateFilters(section.fieldName, {
+            [filter.value]: ev.target.checked,
+        });
+    }
+
+    onAllFilterInputChange(section, ev) {
+        const filters = {};
+        for (const filter of section.filters) {
+            if (filter.type !== "all") {
+                filters[filter.value] = ev.target.checked;
+            }
+        }
+        this.props.model.updateFilters(section.fieldName, filters);
     }
 
     onFilterMouseEnter(section, filter, ev) {

@@ -16,6 +16,10 @@
     min-width: 256px;
     max-width: 328px;
     font-size: $font-size-base;
+
+    .o-calendar-year-popover--record {
+      margin-left: 1rem;
+    }
   }
 
   .o-calendar-year-popover--footer {

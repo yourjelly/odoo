@@ -19,7 +19,7 @@ export class CalendarModel extends Model {
      */
     setup(params, services) {
         /** @protected */
-        this.services = services;
+        this.user = services.user;
 
         /** @protected */
         this.keepLast = new KeepLast();
@@ -142,13 +142,13 @@ export class CalendarModel extends Model {
         const info = this.meta.filtersInfo[fieldName];
         if (info && info.writeFieldName && info.writeResModel) {
             const data = {
-                user_id: this.services.user.userId,
+                user_id: this.user.userId,
                 [info.writeFieldName]: filterValue,
             };
             if (info.filterFieldName) {
                 data[info.filterFieldName] = true;
             }
-            await this.services.orm.create(info.writeResModel, data);
+            await this.orm.create(info.writeResModel, data);
             await this.load();
         }
     }
@@ -157,7 +157,7 @@ export class CalendarModel extends Model {
      */
     async createRecord(record) {
         const rawRecord = this.buildRawRecord(record);
-        await this.services.orm.create(this.meta.resModel, rawRecord);
+        await this.orm.create(this.meta.resModel, rawRecord);
         await this.load();
     }
     /**
@@ -167,7 +167,7 @@ export class CalendarModel extends Model {
     async unlinkFilter(fieldName, recordId) {
         const info = this.meta.filtersInfo[fieldName];
         if (info && info.writeFieldName && info.writeResModel) {
-            await this.services.orm.unlink(info.writeResModel, [recordId]);
+            await this.orm.unlink(info.writeResModel, [recordId]);
             await this.load();
         }
     }
@@ -175,26 +175,28 @@ export class CalendarModel extends Model {
      * @param {number} recordId
      */
     async unlinkRecord(recordId) {
-        await this.services.orm.unlink(this.meta.resModel, [recordId]);
+        await this.orm.unlink(this.meta.resModel, [recordId]);
         await this.load();
     }
     /**
      * @param {string} fieldName
-     * @param {any} filterValue
-     * @param {boolean} active
+     * @param {Record<any, boolean>} filters
      */
-    async updateFilter(fieldName, filterValue, active) {
+    async updateFilters(fieldName, filters) {
         const section = this.data.filterSections[fieldName];
         if (section) {
-            const filter = section.filters.find((filter) => filter.value === filterValue);
-            if (filter) {
-                filter.active = active;
-                const info = this.meta.filtersInfo[fieldName];
-                if (filter.recordId && info && info.writeFieldName && info.writeResModel) {
-                    const data = {
-                        [info.filterFieldName]: active,
-                    };
-                    await this.services.orm.write(info.writeResModel, [filter.recordId], data);
+            for (const value in filters) {
+                const active = filters[value];
+                const filter = section.filters.find((filter) => filter.value == value);
+                if (filter) {
+                    filter.active = active;
+                    const info = this.meta.filtersInfo[fieldName];
+                    if (filter.recordId && info && info.writeFieldName && info.writeResModel) {
+                        const data = {
+                            [info.filterFieldName]: active,
+                        };
+                        await this.orm.write(info.writeResModel, [filter.recordId], data);
+                    }
                 }
             }
         }
@@ -206,7 +208,7 @@ export class CalendarModel extends Model {
     async updateRecord(record) {
         const rawRecord = this.buildRawRecord(record);
         delete rawRecord.name; // name is immutable.
-        await this.services.orm.write(this.meta.resModel, [record.id], rawRecord, {
+        await this.orm.write(this.meta.resModel, [record.id], rawRecord, {
             from_ui: true,
         });
         await this.load();
@@ -416,7 +418,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<boolean>}
      */
     checkAccessRight(type) {
-        return this.services.orm.call(this.meta.resModel, "check_access_rights", [type, false]);
+        return this.orm.call(this.meta.resModel, "check_access_rights", [type, false]);
     }
 
     //--------------------------------------------------------------------------
@@ -426,7 +428,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, boolean>[]>}
      */
     fetchUnusualDays() {
-        return this.services.orm.call(this.meta.resModel, "get_unusual_days", [
+        return this.orm.call(this.meta.resModel, "get_unusual_days", [
             this.data.range.start.toFormat(DATE_FORMATS.datetime),
             this.data.range.end.toFormat(DATE_FORMATS.datetime),
         ]);
@@ -449,7 +451,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, any>[]>}
      */
     async fetchRecords() {
-        return this.services.orm.searchRead(
+        return this.orm.searchRead(
             this.meta.resModel,
             this.computeDomain(),
             this.meta.fieldNames
@@ -546,9 +548,9 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, any>[]>}
      */
     fetchFilters(resModel, fieldNames) {
-        return this.services.orm.searchRead(
+        return this.orm.searchRead(
             resModel,
-            [["user_id", "=", this.services.user.userId]],
+            [["user_id", "=", this.user.userId]],
             fieldNames
         );
     }
@@ -558,7 +560,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, any>[]>}
      */
     fetchDynamicFilters(fieldNames) {
-        return this.services.orm.searchRead(
+        return this.orm.searchRead(
             this.meta.resModel,
             [...this.meta.domain, ...this.computeRangeDomain()],
             fieldNames
@@ -763,12 +765,12 @@ export class CalendarModel extends Model {
         const field = this.meta.fields[fieldName];
         const userFieldName = field.relation === "res.partner" ? "partnerId" : "userId";
         const previousFilter = previousFilters.find((f) => f.type === "user");
-        const value = this.services.user[userFieldName];
+        const value = this.user[userFieldName];
         return {
             type: "user",
             recordId: null,
             value,
-            label: this.services.user.name,
+            label: this.user.name,
             active: previousFilter ? previousFilter.active : true,
             canRemove: false,
             colorIndex: this.isColored(fieldName) ? value : null,
@@ -797,4 +799,4 @@ export class CalendarModel extends Model {
         };
     }
 }
-CalendarModel.services = ["orm", "user"];
+CalendarModel.services = ["user"];
