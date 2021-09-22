@@ -218,7 +218,7 @@ class Location(models.Model):
             domain = ['|', ('barcode', operator, name), ('complete_name', operator, name)]
         return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
 
-    def _get_putaway_strategy(self, product, quantity=0, package=None, packaging=None):
+    def _get_putaway_strategy(self, qty_by_product, package=None, packaging=None, additional_qty=None):
         """Returns the location where the product has to be put, if any compliant
         putaway strategy is found. Otherwise returns self.
         The quantity should be in the default UOM of the product, it is used when
@@ -230,6 +230,13 @@ class Location(models.Model):
             package_type = package.package_type_id
         elif packaging:
             package_type = packaging.package_type_id
+
+        if len(qty_by_product.keys()) == 1:
+            product = list(qty_by_product.keys())[0]
+        elif not package_type:
+            return self
+        else:
+            product = self.env['product.product']
 
         putaway_rules = self.env['stock.putaway.rule']
         putaway_rules |= self.putaway_rule_ids.filtered(lambda x: x.product_id == product and (package_type in x.package_type_ids or package_type == x.package_type_ids))
@@ -269,8 +276,11 @@ class Location(models.Model):
                     qty_by_location[values['location_dest_id'][0]] = qty_done
                 for values in quant_data:
                     qty_by_location[values['location_id'][0]] += values['quantity']
+        if additional_qty:
+            for location_id, qty in additional_qty.items():
+                qty_by_location[location_id] += qty
 
-        putaway_location = putaway_rules._get_putaway_location(product, quantity, package, packaging, qty_by_location)
+        putaway_location = putaway_rules._get_putaway_location(qty_by_product, qty_by_location, package, packaging)
         if not putaway_location:
             putaway_location = locations[0] if locations and self.usage == 'view' else self
 
@@ -309,51 +319,56 @@ class Location(models.Model):
         self.ensure_one()
         return self.usage in ('supplier', 'customer', 'inventory', 'production') or self.scrap_location or (self.usage == 'transit' and not self.company_id)
 
-    def _check_can_be_used(self, product, quantity=0, package=None, location_qty=0):
+    def _check_can_be_used(self, qty_by_product, package=None, location_qty=0):
         """Check if product/package can be stored in the location. Quantity
         should in the default uom of product, it's only used when no package is
         specified."""
         self.ensure_one()
         if package and package.package_type_id:
-            return self._check_package_storage(product, package, location_qty)
-        return self._check_product_storage(product, quantity, location_qty)
+            return self._check_package_storage(qty_by_product, package, location_qty)
+        return self._check_product_storage(qty_by_product, location_qty)
 
-    def _check_product_storage(self, product, quantity, location_qty):
+    def _check_product_storage(self, qty_by_product, location_qty):
         """Check if a number of product can be stored in the location. Quantity
         should in the default uom of product."""
         self.ensure_one()
         if self.storage_category_id:
+            product = list(qty_by_product.keys())[0]
+            positive_quant = self.quant_ids.filtered(lambda q: float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0)
             # check weight
-            if self.storage_category_id.max_weight < self.forecast_weight + product.weight * quantity:
+            if self.storage_category_id.max_weight < self.forecast_weight + sum(product.weight * qty for product, qty in qty_by_product.items()):
                 return False
             # check if only allow new product when empty
-            if self.storage_category_id.allow_new_product == "empty" and any(float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0 for q in self.quant_ids):
+            if self.storage_category_id.allow_new_product == "empty" and positive_quant:
                 return False
             # check if only allow same product
-            if self.storage_category_id.allow_new_product == "same" and self.quant_ids and self.quant_ids.product_id != product:
+            if self.storage_category_id.allow_new_product == "same" and \
+                (len(qty_by_product.keys()) > 1 or positive_quant and positive_quant.product_id != product):
                 return False
-
             # check if enough space
             product_capacity = self.storage_category_id.product_capacity_ids.filtered(lambda pc: pc.product_id == product)
             # To handle new line without quantity in order to avoid suggesting a location already full
             if product_capacity and location_qty >= product_capacity.quantity:
                 return False
-            if product_capacity and quantity + location_qty > product_capacity.quantity:
+            if product_capacity and qty_by_product[product] + location_qty > product_capacity.quantity:
                 return False
         return True
 
-    def _check_package_storage(self, product, package, location_qty):
+    def _check_package_storage(self, qty_by_product, package, location_qty):
         """Check if the given package can be stored in the location."""
         self.ensure_one()
         if self.storage_category_id:
+            product = list(qty_by_product.keys())[0]
+            positive_quant = self.quant_ids.filtered(lambda q: float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0)
             # check weight
-            if self.storage_category_id.max_weight < self.forecast_weight + package.package_type_id.max_weight:
+            if self.storage_category_id.max_weight < self.forecast_weight + sum(product.weight * qty for product, qty in qty_by_product.items()):
                 return False
             # check if only allow new product when empty
-            if self.storage_category_id.allow_new_product == "empty" and any(float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0 for q in self.quant_ids):
+            if self.storage_category_id.allow_new_product == "empty" and positive_quant:
                 return False
             # check if only allow same product
-            if self.storage_category_id.allow_new_product == "same" and self.quant_ids and self.quant_ids.product_id != product:
+            if self.storage_category_id.allow_new_product == "same" and \
+                (len(qty_by_product.keys()) > 1 or positive_quant and positive_quant.product_id != product):
                 return False
             # check if enough space
             package_capacity = self.storage_category_id.package_capacity_ids.filtered(lambda pc: pc.package_type_id == package.package_type_id)
