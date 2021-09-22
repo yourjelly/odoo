@@ -24,6 +24,7 @@ class ResCompany(models.Model):
             ('gipuzkoa', "Hacienda Foral de Gipuzkoa"),
             ('bizkaia', "Hacienda Foral de Bizkaia"),
             ('alava', "Hacienda Foral de Alava"),
+            ('navarra', "Hacienda Navarra"),
         ],
         default=False,
     )
