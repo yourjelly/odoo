@@ -438,6 +438,12 @@ class AccountEdiFormat(models.Model):
                 'test_url': 'https://pruebas-sii.araba.eus/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
             }
 
+        def _l10n_es_edi_web_service_navarra_vals(self, invoices):
+            return {
+                'url': "https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandle",
+                'test_url': "https://siihacienda.navarra.es/SII_PRUEBAS.proxy/SiiMensajesXsdHandle"
+            }
+
     def _l10n_es_edi_call_web_service_sign(self, invoices, info_list):
         company = invoices.company_id
 
