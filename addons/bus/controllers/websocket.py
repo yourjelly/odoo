@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.http import Controller, request, route
+from odoo.addons.base.models.assetsbundle import AssetsBundle
 from ..models.bus import channel_with_db
 from ..websocket import WebsocketConnectionHandler
 
@@ -26,3 +27,11 @@ class WebsocketController(Controller):
     @route('/websocket/update_bus_presence', type='http', auth='public', cors='*')
     def update_bus_presence(self, inactivity_period):
         request.env['ir.websocket']._update_bus_presence(inactivity_period)
+
+    @route('/bus/websocket_worker_bundle', type='http', auth='public')
+    def get_websocket_worker_bundle(self):
+        bundle = 'bus.websocket_worker_assets'
+        files, _ = request.env["ir.qweb"]._get_asset_content(bundle)
+        asset = AssetsBundle(bundle, files)
+        stream = request.env['ir.binary']._get_stream_from(asset.js())
+        return stream.get_response()

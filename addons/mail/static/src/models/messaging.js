@@ -221,7 +221,7 @@ registerModel({
             }
             if (partnerIds.length !== 0 || guestIds.length !== 0) {
                 const dataList = await this.messaging.rpc({
-                    route: '/longpolling/im_status',
+                    route: '/bus/im_status',
                     params: {
                         partner_ids: partnerIds,
                         guest_ids: guestIds,
@@ -313,6 +313,18 @@ registerModel({
         /**
          * @private
          */
+        _onChangeAllCurrentClientThreads() {
+            const shouldUpdateChannels = this.isInitialized && (
+                this.env.services['multi_tab'].isOnMainTab() ||
+                !this.env.services['bus_service'].isUsingSharedWorker()
+            );
+            if (shouldUpdateChannels) {
+                this.env.services.bus_service.forceUpdateChannels();
+            }
+        },
+        /**
+         * @private
+         */
         _onChangeRingingThreads() {
             if (this.ringingThreads && this.ringingThreads.length > 0) {
                 this.soundEffects.incomingCall.play({ loop: true });
@@ -331,6 +343,13 @@ registerModel({
          */
         allRecords: many('Record', {
             inverse: 'messaging',
+            isCausal: true,
+        }),
+        /**
+         * This field contains all current client channels.
+         */
+        allCurrentClientThreads: many('Thread', {
+            inverse: 'messagingAsAllCurrentClientThreads',
             isCausal: true,
         }),
         browser: attr({
@@ -512,6 +531,10 @@ registerModel({
         new OnChange({
             dependencies: ['ringingThreads'],
             methodName: '_onChangeRingingThreads',
+        }),
+        new OnChange({
+            dependencies: ['allCurrentClientThreads'],
+            methodName: '_onChangeAllCurrentClientThreads',
         }),
     ],
 });
