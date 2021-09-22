@@ -9,7 +9,7 @@ var Widget = require('web.Widget');
 const { WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 var CalendarPopover = Widget.extend(WidgetAdapterMixin, StandaloneFieldManagerMixin, {
-    template: 'CalendarView.event.popover',
+    template: 'web.legacy.CalendarView.event.popover',
     events: {
         'click .o_cw_popover_edit': '_onClickPopoverEdit',
         'click .o_cw_popover_delete': '_onClickPopoverDelete',

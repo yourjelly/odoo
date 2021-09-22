@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="wowl.CalendarView" owl="1">
+    <t t-name="web.CalendarView" owl="1">
         <div class="o-calendar-view">
             <ControlPanel t-props="controlPanelProps">
                 <t t-set-slot="control-panel-bottom-left">
-                    <t t-call="wowl.CalendarView.controlButtons"/>
+                    <t t-call="web.CalendarView.controlButtons"/>
                 </t>
             </ControlPanel>
             <div class="o-calendar-view--container">
@@ -22,7 +22,7 @@
         </div>
     </t>
 
-    <t t-name="wowl.CalendarView.controlButtons" owl="1">
+    <t t-name="web.CalendarView.controlButtons" owl="1">
         <div class="o-calendar-view--control-buttons">
             <span class="o-calendar-view--navigation-buttons">
                 <button

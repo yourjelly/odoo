@@ -217,7 +217,7 @@ CalendarView.components = {
     QuickCreate: CalendarQuickCreate,
     ControlPanel,
 };
-CalendarView.template = "wowl.CalendarView";
+CalendarView.template = "web.CalendarView";
 
 CalendarView.type = "calendar";
 CalendarView.display_name = _lt("Calendar"); // should be `displayName` or just `name`

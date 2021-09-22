@@ -1,5 +1,5 @@
 <template>
-    <div t-name="CalendarView" class="o_calendar_container">
+    <div t-name="web.legacy.CalendarView" class="o_calendar_container">
         <div class="o_calendar_view">
             <div class="o_calendar_buttons" role="toolbar" aria-label="Calendar toolbar"/>
             <div class="o_calendar_widget" />
@@ -19,7 +19,7 @@
         </div>
     </t>
 
-    <t t-name="CalendarView.event.popover.placeholder">
+    <t t-name="web.legacy.CalendarView.event.popover.placeholder">
         <div t-attf-class="o_cw_popover popover card shadow #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : ''}" role="tooltip">
             <div class="arrow"/>
             <div class="card-header d-flex justify-content-between py-2 pr-2">
@@ -33,7 +33,7 @@
         </div>
     </t>
 
-    <t t-name="CalendarView.event.popover">
+    <t t-name="web.legacy.CalendarView.event.popover">
         <div class="o_cw_body">
             <ul class="list-group list-group-flush">
                 <li t-if="!widget.hideDate and widget.eventDate.date" class="list-group-item">
@@ -53,7 +53,7 @@
         </div>
     </t>
 
-    <t t-name="CalendarView.sidebar.filter">
+    <t t-name="web.legacy.CalendarView.sidebar.filter">
         <t t-set="needCollapse" t-value="widget.filters.length > 2 and widget.title"></t>
         <t t-set="titleWithoutSpace" t-value="widget.title.split(' ').join('')"></t>
         <div class="o_calendar_filter">
@@ -106,26 +106,26 @@
         </div>
     </t>
 
-    <t t-name="CalendarView.buttons">
+    <t t-name="web.legacy.CalendarView.buttons">
         <div class="o_calendar_buttons">
             <span class="o_calendar_navigation_buttons">
-                <t t-call="CalendarView.navigation_buttons" />
+                <t t-call="web.legacy.CalendarView.navigation_buttons" />
             </span>
             <t t-if="!scaleDrop">
                 <span class="o_calendar_scale_buttons">
-                    <t t-call="CalendarView.scale_buttons" />
+                    <t t-call="web.legacy.CalendarView.scale_buttons" />
                 </span>
             </t>
         </div>
     </t>
 
-    <t t-name="CalendarView.navigation_buttons">
+    <t t-name="web.legacy.CalendarView.navigation_buttons">
         <button class="o_calendar_button_prev btn btn-primary" aria-label="Previous" title="Previous"><span class="fa fa-arrow-left"/></button>
         <button class="o_calendar_button_today btn btn-primary">Today</button>
         <button class="o_calendar_button_next btn btn-primary" aria-label="Next" title="Next"><span class="fa fa-arrow-right"/></button>
     </t>
 
-    <t t-name="CalendarView.scale_buttons">
+    <t t-name="web.legacy.CalendarView.scale_buttons">
         <div class="btn-group">
             <button type="button" t-if="scales.includes('day')" class="o_calendar_button_day btn btn-secondary">Day</button>
             <button type="button" t-if="scales.includes('week')" class="o_calendar_button_week btn btn-secondary">Week</button>
@@ -134,14 +134,14 @@
         </div>
     </t>
 
-    <main t-name="CalendarView.quick_create" class="o_calendar_quick_create">
+    <main t-name="web.legacy.CalendarView.quick_create" class="o_calendar_quick_create">
         <div class="form-group">
             <label for='name' class='col-form-label o_form_label'>Meeting Subject:</label>
             <input type='text' name='name' class="o_input o_required_modifier" t-att-value="widget.dataTemplate.name or None"/>
         </div>
     </main>
 
-    <t t-name="CalendarView.yearEvent.popover">
+    <t t-name="web.legacy.CalendarView.yearEvent.popover">
         <div class="o_cw_body">
             <t t-foreach="groupKeys" t-as="groupKey">
                 <div class="font-weight-bold mt-2" t-esc="groupKey"/>
@@ -164,7 +164,7 @@
         </div>
     </t>
 
-    <t t-name="CalendarView.yearEvent.popover.placeholder">
+    <t t-name="web.legacy.CalendarView.yearEvent.popover.placeholder">
         <div class="popover o_cw_popover" style="position: relative">
             <div class="arrow"></div>
             <div class="popover-header"></div>

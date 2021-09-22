@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
 
-    <t t-name="calendar.CalendarView" t-extend="CalendarView">
+    <t t-name="calendar.CalendarView" t-extend="web.legacy.CalendarView">
         <t t-jquery="div.o_calendar_sidebar" t-operation="append">
             <div id="calendar_sync" class="o_calendar_sync container inline btn-group"/>
         </t>
@@ -47,7 +47,7 @@
         </t>
     </t>
 
-    <t t-name="Calendar.attendee.status.popover" t-extend="CalendarView.event.popover">
+    <t t-name="Calendar.attendee.status.popover" t-extend="web.legacy.CalendarView.event.popover">
         <t t-jquery=".o_cw_popover_delete" t-operation="after">
             <div t-if="widget.displayAttendeeAnswerChoice()" class="btn-group o-calendar-attendee-status ml-2">
                 <a href="#" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -124,7 +124,7 @@
         </div>
     </t>
 
-    <t t-name="TimeOff.CalendarView.extend" t-extend="CalendarView">
+    <t t-name="TimeOff.CalendarView.extend" t-extend="web.legacy.CalendarView">
         <t t-jquery='.o_calendar_sidebar_container' t-operation="append">
             <div class="o_timeoff_legend">
                 <h5>Legend</h5>

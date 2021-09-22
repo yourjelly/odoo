@@ -57,7 +57,7 @@ var QuickCreate = Dialog.extend({
                 }},
                 {text: _t("Cancel"), close: true},
             ] : [],
-            $content: QWeb.render('CalendarView.quick_create', {widget: this})
+            $content: QWeb.render('web.legacy.CalendarView.quick_create', {widget: this})
         });
     },
 

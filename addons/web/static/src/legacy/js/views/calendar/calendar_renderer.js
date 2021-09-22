@@ -23,7 +23,7 @@ var SidebarFilterM2O = relational_fields.FieldMany2One.extend({
 });
 
 var SidebarFilter = Widget.extend(FieldManagerMixin, {
-    template: 'CalendarView.sidebar.filter',
+    template: 'web.legacy.CalendarView.sidebar.filter',
     custom_events: _.extend({}, FieldManagerMixin.custom_events, {
         field_changed: '_onFieldChanged',
     }),
@@ -181,7 +181,7 @@ var SidebarFilter = Widget.extend(FieldManagerMixin, {
 });
 
 return AbstractRenderer.extend({
-    template: "CalendarView",
+    template: "web.legacy.CalendarView",
     config: {
         CalendarPopover: CalendarPopover,
         eventTemplate: 'calendar-box',
@@ -912,7 +912,7 @@ return AbstractRenderer.extend({
             trigger: 'manual',
             html: true,
             title: title,
-            template: qweb.render('CalendarView.event.popover.placeholder',
+            template: qweb.render('web.legacy.CalendarView.event.popover.placeholder',
             {color: this.getColor(eventData.extendedProps.color_index), displayLock: displayLock}),
             container: eventData.allDay ? '.fc-view' : '.fc-scroller',
         }
@@ -967,7 +967,7 @@ return AbstractRenderer.extend({
             groupedEvents[key].push(event);
         }
 
-        const popoverContent = qweb.render('CalendarView.yearEvent.popover', {
+        const popoverContent = qweb.render('web.legacy.CalendarView.yearEvent.popover', {
             groupedEvents,
             groupKeys: groupKeys
                 .sort((a, b) => {
@@ -994,7 +994,7 @@ return AbstractRenderer.extend({
             trigger: 'manual',
             html: true,
             content: popoverContent,
-            template: qweb.render('CalendarView.yearEvent.popover.placeholder'),
+            template: qweb.render('web.legacy.CalendarView.yearEvent.popover.placeholder'),
             container: '.fc-dayGridYear-view',
         }).on('shown.bs.popover', () => {
             $('.o_cw_popover .o_cw_popover_close').on('click', () => this._unselectEvent());
