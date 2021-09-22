@@ -3069,10 +3069,14 @@ export class OdooEditor extends EventTarget {
             this.execCommand('insertHTML', this._prepareClipboardData(clipboardHtml));
         } else {
             const text = ev.clipboardData.getData('text/plain');
-            const splitAroundUrl = text.split(URL_REGEX);
+            let splitAroundUrl = [text];
             const linkAttributes = this.options.defaultLinkAttributes || {};
             const selectionIsInsideALink = !!closestElement(sel.anchorNode, 'a');
 
+            // avoid transforming dynamic placeholder pattern to url
+            if(!text.match(/\${.*}/gi)) {
+                splitAroundUrl = text.split(URL_REGEX);
+            }
             this.historyPauseSteps("_onPaste");
             for (let i = 0; i < splitAroundUrl.length; i++) {
                 const url = /^https?:\/\//gi.test(splitAroundUrl[i])
