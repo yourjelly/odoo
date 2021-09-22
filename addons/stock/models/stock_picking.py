@@ -1345,12 +1345,10 @@ class Picking(models.Model):
             package_type = move_lines_to_pack.move_id.product_packaging_id.package_type_id
             if len(package_type) == 1:
                 package.package_type_id = package_type
-            if len(move_lines_to_pack) == 1:
+                qty_by_product = dict((ml.product_id, ml.product_uom_qty) for ml in move_lines_to_pack)
                 default_dest_location = move_lines_to_pack._get_default_dest_location()
                 move_lines_to_pack.location_dest_id = default_dest_location._get_putaway_strategy(
-                    product=move_lines_to_pack.product_id,
-                    quantity=move_lines_to_pack.product_uom_qty,
-                    package=package)
+                    qty_by_product, package=package)
             move_lines_to_pack.write({
                 'result_package_id': package.id,
             })
