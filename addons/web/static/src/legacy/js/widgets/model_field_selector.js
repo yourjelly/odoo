@@ -45,6 +45,10 @@ var ModelFieldSelector = Widget.extend({
 
         // Handle a change in the search input
         "keyup .o_field_selector_search > input": "_onSearchInputChange",
+        "change .o_field_selector_search > input": "_onSearchInputChange",
+        // Handle a change in the search input
+        "keyup .o_field_selector_default_value_input > input": "_onDefaultValueChange",
+        "change .o_field_selector_default_value_input > input": "_onDefaultValueChange",
 
         // Handle keyboard and mouse navigation to build the field chain
         "mouseover li.o_field_selector_item": "_onItemHover",
@@ -74,6 +78,10 @@ var ModelFieldSelector = Widget.extend({
      *                  true if can follow relation when building the chain
      * @param {boolean} [options.showSearchInput=true]
      *                  false to hide a search input to filter displayed fields
+     * @param {boolean} [options.needDefaultValue=false]
+     *                  true if a default value can be entered after the selected chain
+     * @param {boolean} [options.cancelOnEscape=false]
+     *                  true if a the chain selected should be ignored when the user hit ESC
      * @param {boolean} [options.debugMode=false]
      *                  true if the widget is in debug mode, false otherwise
      */
@@ -91,6 +99,8 @@ var ModelFieldSelector = Widget.extend({
             followRelations: true,
             debugMode: false,
             showSearchInput: true,
+            needDefaultValue: false,
+            cancelOnEscape: false
         }, options || {});
         this.options.filters = _.extend({
             searchable: true,
@@ -110,6 +120,7 @@ var ModelFieldSelector = Widget.extend({
         }
 
         this.searchValue = '';
+        this.defaultValue = '';
     },
     /**
      * @see Widget.willStart()
@@ -130,6 +141,7 @@ var ModelFieldSelector = Widget.extend({
         this.$popover = this.$(".o_field_selector_popover");
         this.$input = this.$popover.find(".o_field_selector_popover_footer > input");
         this.$searchInput = this.$popover.find(".o_field_selector_search > input");
+        this.$defaultValueInput = this.$popover.find(".o_field_selector_default_value_input > input");
         this.$valid = this.$(".o_field_selector_warning");
 
         this._render();
@@ -174,6 +186,18 @@ var ModelFieldSelector = Widget.extend({
         return this._prefill().then(this._render.bind(this));
     },
 
+    /**
+     * Manualy open the popover and force the chain
+     *
+     * @param {string[]} chain - the new field chain
+     * @returns {Promise} resolved once the re-rendering is finished
+     */
+    open: async function (chain = []) {
+        clearTimeout(this._hidePopoverTimeout);
+        await this.setChain(chain);
+        this._showPopover();
+    },
+
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -187,7 +211,7 @@ var ModelFieldSelector = Widget.extend({
      */
     _addChainNode: function (fieldName) {
         this.dirty = true;
-        this.chain = this.chain.slice(0, this.pages.length-1);
+        this.chain = this.chain.slice(0, this.pages.length - 1);
         this.chain.push(fieldName);
 
         this.searchValue = '';
@@ -240,6 +264,32 @@ var ModelFieldSelector = Widget.extend({
         }).bind(this));
     },
     /**
+     * Return true if the widget is currently open on the default value page
+     *
+     * @private
+     * @returns {Boolean} Is on default value page
+     */
+    _isOnDefaultValuePage: function () {
+        return this.pages[this.pages.length - 1] === 'defaultValuePage';
+    },
+    /**
+     * Adds a new page to the popover following the given field relation and
+     * show the defauld value choice page
+     *
+     * @private
+     * @param {String} name - the name of the field to add to the chain node
+     */
+    _goToDefaultValuePage: function (name) {
+        this._validate(true);
+
+        this._addChainNode(name);
+        this.pages.push('defaultValuePage');
+        this.$defaultValueInput.val('');
+        this.defaultValue = '';
+
+        this._renderDefaultValue();
+    },
+    /**
      * Adds a new page to the popover following the given field relation and
      * adapts the chain node according to this given field.
      *
@@ -274,17 +324,23 @@ var ModelFieldSelector = Widget.extend({
      * changed, it notifies its parents. If not open, this does nothing.
      *
      * @private
+     * @param {boolean} cancel - prevent the triggerUp of the `field_chain_changed` event
      */
-    _hidePopover: function () {
+    _hidePopover: function (cancel = false) {
         if (!this._isOpen) return;
 
         this._isOpen = false;
+        this.$searchInput.parent().removeClass('d-none');
+        this.$defaultValueInput.parent().addClass('d-none');
         this.$popover.addClass('d-none');
 
-        if (this.dirty) {
-            this.dirty = false;
-            this.trigger_up("field_chain_changed", {chain: this.chain});
+        if (cancel) {
+            this.trigger_up("field_chain_cancel");
+        } else if (this.dirty) {
+            this.trigger_up("field_chain_changed", {chain: this.chain, defaultValue: this.defaultValue});
         }
+        this.dirty = false;
+        this.defaultValue = '';
     },
     /**
      * Prepares the popover by filling its pages according to the current field
@@ -359,6 +415,7 @@ var ModelFieldSelector = Widget.extend({
      * @private
      */
     _render: function () {
+        this._adaptInputVisibility();
 
         // Render the chain value
         this.$value.html(core.qweb.render(this.template + ".value", {
@@ -393,6 +450,45 @@ var ModelFieldSelector = Widget.extend({
         this.$input.val(this.chain.join("."));
     },
     /**
+     * Updates the rendering of the value (the serie of tags separated by
+     * arrows). It also adapts the content of the popover.
+     *
+     * @private
+     */
+    _renderDefaultValue: function () {
+        this._adaptInputVisibility();
+        this.$defaultValueInput.focus();
+
+        // Render the chain value
+        this.$value.html(core.qweb.render(this.template + ".value", {
+            chain: this.chain,
+            pages: this.pages,
+        }));
+
+        // Toggle the warning message
+        this.$valid.toggleClass('d-none', !!this.isValid());
+
+        // Adapt the popover content
+        this.$(".o_field_selector_popover_header .o_field_selector_title").text(_("Default value"));
+
+        this.$(".o_field_selector_page").replaceWith(core.qweb.render(this.template + ".defaultValue", {
+            line: {
+                string: this.defaultValue.length ? this.defaultValue : "-",
+                description: this.defaultValue.length ? _("As a default value") : _("Enter a default Value"),
+            }
+        }));
+        this.$input.val(this.chain.join(".") + (this.defaultValue ? " OR " + this.defaultValue : ""));
+    },
+    /**
+     * Adapt the visibilitty of the search and default view input.
+     *
+     * @private
+     */
+    _adaptInputVisibility() {
+        this.$searchInput.parent().toggleClass("d-none", this._isOnDefaultValuePage());
+        this.$defaultValueInput.parent().toggleClass("d-none", !this._isOnDefaultValuePage());
+    },
+    /**
      * Selects the given field and adapts the chain node according to it.
      * It also closes the popover and so notifies the parents about the change.
      *
@@ -418,6 +514,7 @@ var ModelFieldSelector = Widget.extend({
 
         this._isOpen = true;
         this.$popover.removeClass('d-none');
+        this.trigger_up("field_selector_open");
     },
     /**
      * Toggles the valid status of the widget and display the error message if
@@ -452,13 +549,13 @@ var ModelFieldSelector = Widget.extend({
      * Called when the widget is blurred -> closes the popover
      */
     _onFocusOut: function () {
-        this._hidePopoverTimeout = _.defer(this._hidePopover.bind(this));
+        this._hidePopoverTimeout = _.defer(() => this._hidePopover(this.options.cancelOnEscape));
     },
     /**
      * Called when the popover "cross" icon is clicked -> closes the popover
      */
     _onCloseClick: function () {
-        this._hidePopover();
+        this._hidePopover(this.options.cancelOnEscape);
     },
     /**
      * Called when the popover "previous" icon is clicked -> removes last chain
@@ -484,7 +581,15 @@ var ModelFieldSelector = Widget.extend({
      * @param {Event} e
      */
     _onLastFieldClick: function (e) {
-        this._selectField(this._getLastPageField($(e.currentTarget).data("name")));
+        const name = $(e.currentTarget).data("name");
+        if (this.options.needDefaultValue && !this._isOnDefaultValuePage()) {
+            this._goToDefaultValuePage(name);
+        } else if (this.options.needDefaultValue && this._isOnDefaultValuePage()) {
+            this._render();
+            this._hidePopover();
+        } else {
+            this._selectField(this._getLastPageField(name));
+        }
     },
     /**
      * Called when the debug input value is changed -> adapts the chain
@@ -512,6 +617,15 @@ var ModelFieldSelector = Widget.extend({
         this._render();
     },
     /**
+     * Called when the default value input value is changed -> adapts the popover
+     */
+    _onDefaultValueChange: function () {
+        this.defaultValue = this.$defaultValueInput.val();
+        if (this._isOnDefaultValuePage()) {
+            this._renderDefaultValue();
+        }
+    },
+    /**
      * Called when a popover field button item is hovered -> toggles its
      * "active" status
      *
@@ -531,6 +645,7 @@ var ModelFieldSelector = Widget.extend({
         if (!this.$popover.is(":visible")) return;
         var inputHasFocus = this.$input.is(":focus");
         var searchInputHasFocus = this.$searchInput.is(":focus");
+        let name = this.$("li.o_field_selector_item.active").data("name");
 
         switch (e.which) {
             case $.ui.keyCode.UP:
@@ -558,27 +673,39 @@ var ModelFieldSelector = Widget.extend({
             case $.ui.keyCode.RIGHT:
                 if (inputHasFocus) break;
                 e.preventDefault();
-                var name = this.$("li.o_field_selector_item.active").data("name");
                 if (name) {
                     var field = this._getLastPageField(name);
                     if (field.relation) {
                         this._goToNextPage(field);
+                    } else if (this.options.needDefaultValue && !this._isOnDefaultValuePage()) {
+                        this._goToDefaultValuePage(name);
                     }
                 }
                 break;
-            case $.ui.keyCode.LEFT:
+            case $.ui.keyCode.LEFT: {
                 if (inputHasFocus) break;
                 e.preventDefault();
+                const isOnDefaultValuePage = this._isOnDefaultValuePage();
                 this._goToPrevPage();
+                if (isOnDefaultValuePage) {
+                    this.$searchInput.focus();
+                }
                 break;
+            }
             case $.ui.keyCode.ESCAPE:
                 e.stopPropagation();
-                this._hidePopover();
+                this._hidePopover(this.options.cancelOnEscape);
                 break;
             case $.ui.keyCode.ENTER:
                 if (inputHasFocus || searchInputHasFocus) break;
                 e.preventDefault();
-                this._selectField(this._getLastPageField(this.$("li.o_field_selector_item.active").data("name")));
+                if (this.options.needDefaultValue && !this._isOnDefaultValuePage()) {
+                    this._goToDefaultValuePage(name);
+                } else if (this.options.needDefaultValue && this._isOnDefaultValuePage()) {
+                    this._hidePopover();
+                } else {
+                    this._selectField(this._getLastPageField(name));
+                }
                 break;
         }
     }

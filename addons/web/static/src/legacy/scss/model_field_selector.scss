@@ -61,10 +61,11 @@
                     padding: 0px 35px;
                     text-align: center;
                 }
-                .o_field_selector_search {
+                .o_field_selector_search, .o_field_selector_default_value_input {
                     padding-right: 0.4rem;
                     > .o_input {
                         padding: 5px 0.4rem;
+                        text-align: left;
                     }
                 }
                 .o_field_selector_popover_option {

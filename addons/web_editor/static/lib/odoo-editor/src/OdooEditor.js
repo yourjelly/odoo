@@ -2542,6 +2542,11 @@ export class OdooEditor extends EventTarget {
         for (let child of el.childNodes) {
             if (child.nodeType === Node.TEXT_NODE && child.length > 3) {
                 const childStr = child.nodeValue;
+                // avoid transforming dynamic placeholder pattern to url (in mass_mailing)
+                // eg. ${object.country_id.code}
+                if( childStr.match(/\${.*}/gi)) {
+                    continue;
+                }
                 const matches = getUrlsInfosInString(childStr);
                 if (matches.length) {
                     // We only to take care of the first match.
@@ -2589,8 +2594,13 @@ export class OdooEditor extends EventTarget {
             this.execCommand('insertHTML', this._prepareClipboardData(clipboardData));
         } else {
             const text = ev.clipboardData.getData('text/plain');
-            const splitAroundUrl = text.split(URL_REGEX);
+            let splitAroundUrl = [text];
             const linkAttributes = this.options.defaultLinkAttributes || {};
+
+            // avoid transforming dynamic placeholder pattern to url
+            if(!text.match(/\${.*}/gi)) {
+                splitAroundUrl = text.split(URL_REGEX);
+            }
 
             for (let i = 0; i < splitAroundUrl.length; i++) {
                 // Even indexes will always be plain text, and odd indexes will always be URL.

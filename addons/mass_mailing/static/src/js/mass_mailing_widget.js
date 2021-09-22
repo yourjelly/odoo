@@ -3,9 +3,11 @@ odoo.define('mass_mailing.FieldHtml', function (require) {
 
 var config = require('web.config');
 var core = require('web.core');
+var ModelFieldSelector = require("web.ModelFieldSelector");
 var FieldHtml = require('web_editor.field.html');
 var fieldRegistry = require('web.field_registry');
 var convertInline = require('web_editor.convertInline');
+var getRangePosition = require('@web_editor/../lib/odoo-editor/src/utils/utils').getRangePosition;
 
 var _t = core._t;
 
@@ -344,6 +346,113 @@ var MassMailingFieldHtml = FieldHtml.extend({
         this.wysiwyg.odooEditor.historyReset();
         this.wysiwyg.$iframeBody.addClass('o_mass_mailing_iframe');
         this.trigger_up('iframe_updated', { $iframe: this.wysiwyg.$iframe });
+
+        this._initDynamicPlaceholderGenerator('#');
+    },
+
+    _initDynamicPlaceholderGenerator: function (triggerKey) {
+        this.currentActiveModelEl = $(".o_editor_mailing_model_real")[0];
+        const dynamicPlaceholderFields = document.querySelectorAll('.o_editor_dynamic_placeholder');
+        let currentFieldSelector;
+        // tabindex="-1" prevent the fieldSelector to have focus()
+        $('.modal').removeAttr("tabindex");
+
+        const onKeyDown = async ev => {
+            if (ev.key === triggerKey) {
+                ev.preventDefault();
+                this._currentTargetElement = ev.target;
+                await currentFieldSelector.open();
+                currentFieldSelector.$searchInput.val('').focus();
+            }
+        };
+        // bind keyDown events on inputs and editor
+        for (const currentField of dynamicPlaceholderFields) {
+            currentField.addEventListener('keydown', onKeyDown, true);
+        }
+        const editable = this.wysiwyg.odooEditor.editable;
+        editable.addEventListener('keydown', onKeyDown, true);
+
+        const createFieldSelector = async () => {
+            if (currentFieldSelector) {
+                currentFieldSelector.destroy();
+            }
+
+            const activeModel = this.currentActiveModelEl ? this.currentActiveModelEl.innerText : "mailing.contact";
+            currentFieldSelector = new ModelFieldSelector(
+                this, activeModel, [],
+                {
+                    readonly: false,
+                    needDefaultValue: true,
+                    cancelOnEscape: true,
+                    filter: (model) => !["one2many", "boolean", "many2many"].includes(model.type)
+                }
+            );
+
+            await currentFieldSelector.appendTo($("<div/>"));
+            const fieldSelectorElement = currentFieldSelector.$el;
+            const fieldSlectorValue = fieldSelectorElement.find(".o_field_selector_value");
+            const fieldSlectorControls = fieldSelectorElement.find(".o_field_selector_controls");
+            const fieldSlectorPopover = fieldSelectorElement.find(".o_field_selector_popover");
+            fieldSelectorElement.removeClass('o_input').css("position", "absolute");
+            fieldSlectorValue.hide();
+            fieldSlectorControls.hide();
+            await $('body').append(currentFieldSelector.$el);
+            // bind fieldSelectors events
+            currentFieldSelector.on("field_selector_open", undefined, ev => {
+                const isWysiwygEditor = !['INPUT', 'TEXTAREA'].includes(this._currentTargetElement.tagName);
+                let top, left;
+                if (isWysiwygEditor) {
+                    this.wysiwyg.odooEditor.execCommand('insertText', triggerKey);
+                    const position = getRangePosition(currentFieldSelector.$el, this.wysiwyg.options.document);
+
+                    top = position.top;
+                    left = position.left;
+                    if (this.wysiwyg.odooEditor.options.getContextFromParentRect) {
+                        const parentContextRect = this.wysiwyg.odooEditor.options.getContextFromParentRect();
+                        left += parentContextRect.left;
+                        top += parentContextRect.top;
+                    }
+                } else {
+                    this._currentTargetElement.value += triggerKey;
+                    const position = this._currentTargetElement.getBoundingClientRect();
+                    top = position.top + position.height;
+                    left = position.left;
+                }
+
+                top = Math.min(top, window.window.innerHeight - fieldSlectorPopover.height() - 15);
+                left = Math.min(left, window.window.innerWidth - fieldSlectorPopover.width() - 10);
+
+                currentFieldSelector.$el.css('top', top);
+                currentFieldSelector.$el.css('left', left);
+            });
+            currentFieldSelector.on("field_chain_changed", undefined, ev => {
+                this._currentTargetElement.focus();
+                if (ev.data.chain.length) {
+                    const isWysiwygEditor = !['INPUT', 'TEXTAREA'].includes(this._currentTargetElement.tagName);
+                    const defaultValue = ev.data.defaultValue;
+                    let dynamicPlaceholder = "${object." + ev.data.chain.join('.');
+                    dynamicPlaceholder += defaultValue && defaultValue !== '' ? ` or '''${defaultValue}'''}` : '}';
+                    if (isWysiwygEditor) {
+                        this.wysiwyg.undo();
+                        this.wysiwyg.odooEditor.execCommand('insertText', dynamicPlaceholder);
+                    } else {
+                        this._currentTargetElement.value =
+                            this._currentTargetElement.value.replace(new RegExp(triggerKey + '$'), '')
+                            + dynamicPlaceholder;
+                    }
+                }
+            });
+            currentFieldSelector.on("field_chain_cancel", undefined, ev => {
+                this._currentTargetElement.focus();
+            });
+        };
+
+        // When base  model change, we recreate the field selectors
+        if (this.currentActiveModelEl) {
+            const observer = new MutationObserver(() => createFieldSelector());
+            observer.observe(this.currentActiveModelEl, { characterData: true, childList: true, subtree: true });
+        }
+        createFieldSelector();
     },
     /**
      * @private
