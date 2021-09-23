@@ -3,10 +3,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-ODOO_PAYMENTS_DEPLOYED_COUNTRIES = [
-    'BE', 'FR',
-]
-
 class PaymentAcquirerOnboardingWizard(models.TransientModel):
     _name = 'payment.acquirer.onboarding.wizard'
     _description = 'Payment acquirer onboarding wizard'
@@ -19,8 +15,7 @@ class PaymentAcquirerOnboardingWizard(models.TransientModel):
             ('other', "Other payment acquirer"),
             ('manual', "Custom payment instructions"),
         ]
-        country = self.env.company.country_id
-        if country and country.code not in ODOO_PAYMENTS_DEPLOYED_COUNTRIES:
+        if not self.env.company.is_odoo_payment_available():
             return base_methods
         return base_methods + [('odoo', "Credit & Debit Card via Odoo Payments")]
 
