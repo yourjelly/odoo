@@ -38,7 +38,7 @@ var AdyenAccountFormController = FormController.extend({
             var dialog = new Dialog(this, {
                 size: 'extra-large',
                 buttons: buttons,
-                title: _t("Confirm your Odoo Payment Account Creation"),
+                title: _t("Confirm your Odoo Payments Account Creation"),
                 $content: QWeb.render('AdyenAccountCreationConfirmation', {
                     data: this.model.get(this.handle).data,
                 }),

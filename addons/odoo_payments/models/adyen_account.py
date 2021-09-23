@@ -239,7 +239,7 @@ class AdyenAccount(models.Model):
         self.onboarding_msg = False
         for account in self:
             if account.state == 'pending' and account.id:
-                account.onboarding_msg = (
+                account.onboarding_msg = _(
                     "Our team will review your account. We will notify you, by email, as soon "
                     "as you can start processing payments."
                 )
@@ -248,32 +248,32 @@ class AdyenAccount(models.Model):
                     data_to_fill_msgs = []
 
                     if len(account.adyen_kyc_ids) == 0:
-                        data_to_fill_msgs.append("-   KYC: use 'Add a line' in the KYC tab to upload relevant document")
+                        data_to_fill_msgs.append(_("-   KYC: use 'Add a line' in the KYC tab to upload relevant document"))
 
                     if len(account.shareholder_ids) == 0:
-                        data_to_fill_msgs.append((
+                        data_to_fill_msgs.append(_(
                             "-   Shareholders: use 'Add a line' in the shareholder tab to list all your company "
                             "shareholders owning more than 25% of the company"
                         ))
 
                     if len(account.bank_account_ids) == 0:
                         data_to_fill_msgs.append(
-                            "-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account"
+                            _("-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account")
                         )
 
                     if data_to_fill_msgs:
-                        account.onboarding_msg = (
+                        account.onboarding_msg = _(
                             "In order to validate your account, you need to fill the following information:<br>"
                             "%s<br><br>"
                             "Then, click on 'save' and we will validate your information"
                         ) % ("<br>".join(data_to_fill_msgs))
                     else:
-                        account.onboarding_msg = (
+                        account.onboarding_msg = _(
                             "We will notify you via email when we have reviewed your information"
                         )
             elif account.state == 'validated':
                 if account.transactions_count == 0:
-                    account.onboarding_msg = (
+                    account.onboarding_msg = _(
                         "You can now receive payments.<br>After the first payment, we will notify "
                         "you to gather more data such as ID and banking details"
                     )

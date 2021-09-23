@@ -2,6 +2,9 @@
 
 from odoo import api, fields, models
 
+ODOO_PAYMENTS_DEPLOYED_COUNTRIES = [
+    'BE', 'FR',
+]
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
@@ -18,6 +21,11 @@ class ResCompany(models.Model):
             ('odoo', "Credit & Debit Card with Odoo Payment"),
             ('manual', "Manual"),
         ])
+
+    @api.model
+    def is_odoo_payment_available(self):
+        country = self.env.company.country_id
+        return (country and country.code in ODOO_PAYMENTS_DEPLOYED_COUNTRIES)
 
     @api.model
     def action_open_payment_onboarding_payment_acquirer(self):

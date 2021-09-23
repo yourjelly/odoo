@@ -10,11 +10,6 @@ class ResCompany(models.Model):
     website_sale_onboarding_payment_acquirer_state = fields.Selection([('not_done', "Not done"), ('just_done', "Just done"), ('done', "Done")], string="State of the website sale onboarding payment acquirer step", default='not_done')
 
     @api.model
-    def is_odoo_payment_available(self):
-        payments_methods = [m for m, _ in self.env["payment.acquirer.onboarding.wizard"]._selection_payment_methods()]
-        return "odoo" in payments_methods
-
-    @api.model
     def action_open_website_sale_onboarding_payment_acquirer(self):
         """ Called by onboarding panel above the quotation list."""
         self.env.company.get_chart_of_accounts_or_fail()

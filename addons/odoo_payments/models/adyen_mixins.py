@@ -6,7 +6,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.mimetypes import guess_mimetype
 
-from odoo.addons.payment.wizards.payment_acquirer_onboarding_wizard import ODOO_PAYMENTS_DEPLOYED_COUNTRIES
+from odoo.addons.payment.models.res_company import ODOO_PAYMENTS_DEPLOYED_COUNTRIES
 
 
 ADYEN_AVAILABLE_COUNTRIES = [
