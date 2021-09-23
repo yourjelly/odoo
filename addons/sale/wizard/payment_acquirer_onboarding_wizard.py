@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.addons.payment.wizards.payment_acquirer_onboarding_wizard import ODOO_PAYMENTS_DEPLOYED_COUNTRIES
 
 class PaymentWizard(models.TransientModel):
     """ Override for the sale quotation onboarding panel. """
@@ -16,16 +15,15 @@ class PaymentWizard(models.TransientModel):
             ('manual', "Custom payment instructions (i.e Wire Transfer)"),
             ('digital_signature', "Electronic signature"),
         ]
-        country = self.env.company.country_id
-        if country and country.code not in ODOO_PAYMENTS_DEPLOYED_COUNTRIES:
+        if not self.env.company.is_odoo_payment_available():
             return base_methods
-
         return [('odoo', "Payment with Debit/Credit card with Odoo payment")] + base_methods
 
     @api.model
     def _default_payment_method(self):
+
         country = self.env.company.country_id
-        return 'digital_signature' if country and country.code not in ODOO_PAYMENTS_DEPLOYED_COUNTRIES else 'odoo'
+        return 'digital_signature' if not self.env.company.is_odoo_payment_available() else 'odoo'
 
     def _set_payment_acquirer_onboarding_step_done(self):
         """ Override. """
