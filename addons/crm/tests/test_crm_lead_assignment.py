@@ -142,9 +142,9 @@ class TestLeadAssign(TestLeadAssignCommon):
             count=14,
             suffix='Existing')
         self.assertEqual(existing_leads.team_id, self.sales_team_1, "Team should have lower sequence")
-        existing_leads[0].active = False  # lost
-        existing_leads[1].probability = 100  # not won
-        existing_leads[2].probability = 0  # not lost
+        existing_leads[0].action_set_lost()  # lost
+        existing_leads[1].probability = 100  # not won as stage is not won.
+        existing_leads[2].probability = 0  # not lost as active
         existing_leads.flush_recordset()
 
         self.members.invalidate_model(['lead_month_count'])
@@ -175,8 +175,12 @@ class TestLeadAssign(TestLeadAssignCommon):
             ['TestLeadInitial_0003']
         )
 
+        # TestLeadInitial_0007 has same partner as TestLeadInitial_0003
         self.assertEqual(len(teams_data[self.sales_team_1]['duplicates']), 1)
 
+        # TestLeadInitial_0005 had a 0 auto_proba when its proba was set to 0.
+        # Therefore, it is auto_proba. At this point, its proba is 9x.xx %, and it is selected.
+        # These are the two leads with the highest probabilities, as they are sorted before assignment.
         self.assertEqual(
             sorted(members_data[self.sales_team_1_m3]['assigned'].mapped('name')),
             ['TestLeadInitial_0000', 'TestLeadInitial_0005']
@@ -195,7 +199,8 @@ class TestLeadAssign(TestLeadAssignCommon):
         self.members.invalidate_model(['lead_month_count'])
         self.assertEqual(self.sales_team_1_m1.lead_month_count, 0)  # archived do not get leads
         self.assertEqual(self.sales_team_1_m2.lead_month_count, 0)  # opt-out through assignment_max = 0
-        self.assertEqual(self.sales_team_1_m3.lead_month_count, 16)  # 15 max on 4 days (2) + existing 14 and not capped anymore
+        # The last time _action_assign_leads is called before reaching the max member's capacity, the count may go over it.
+        self.assertEqual(self.sales_team_1_m3.lead_month_count, 16)  # 15 max on 4 days (2) + existing 14 and not capped as it once had been.
 
     @mute_logger('odoo.models.unlink')
     def test_assign_duplicates(self):
