@@ -3,8 +3,8 @@
 import { localization } from "@web/core/l10n/localization";
 import { debounce } from "@web/core/utils/timing";
 import { getColor } from "../../colors";
+import { useCalendarPopover, useClickHandler, useFullCalendar } from "../../hooks";
 import { calculateWeekNumber } from "../../week_utils";
-import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
 
 const { Component } = owl;

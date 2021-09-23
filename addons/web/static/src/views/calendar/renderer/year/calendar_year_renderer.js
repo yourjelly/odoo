@@ -2,8 +2,8 @@
 
 import { localization } from "@web/core/l10n/localization";
 import { getColor } from "../../colors";
+import { useCalendarPopover, useFullCalendar } from "../../hooks";
 import { calculateWeekNumber } from "../../week_utils";
-import { useCalendarPopover, useFullCalendar } from "../hooks";
 import { CalendarYearPopover } from "./calendar_year_popover";
 
 const { Component } = owl;

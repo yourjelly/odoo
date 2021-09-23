@@ -1,15 +1,19 @@
 /** @odoo-module **/
 
 import { parseDateTime } from "@web/core/l10n/dates";
+import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { Model } from "../helpers/model";
-import { computeWeekRange } from "./week_utils";
 
 const DATE_FORMATS = {
     date: "yyyy-MM-dd",
     datetime: "yyyy-MM-dd HH:mm:ss",
 };
+
+function getFirstDayOfWeek() {
+    return ![undefined, false].includes(localization.weekStart) ? localization.weekStart % 7 : 0;
+}
 
 export class CalendarModel extends Model {
     /**
@@ -30,7 +34,7 @@ export class CalendarModel extends Model {
          */
         this.meta = {
             ...params,
-            firstDayOfWeek: computeWeekRange().start,
+            firstDayOfWeek: getFirstDayOfWeek(),
         };
 
         /**
@@ -40,7 +44,10 @@ export class CalendarModel extends Model {
         this.data = {
             filterSections: {},
             hasCreateRight: null,
-            range: null,
+            range: {
+                start: this.meta.date,
+                end: this.meta.date,
+            },
             records: {},
             unusualDays: [],
         };
@@ -235,10 +242,6 @@ export class CalendarModel extends Model {
                 // in week mode or day mode, convert allday event to event
                 end = start.plus({ hours: 2 });
             }
-        } else if (partialRecord.isAllDay) {
-            // For an "allDay", FullCalendar gives the end day as the
-            // next day at midnight (instead of 23h59).
-            end = end.minus({ days: 1 });
         }
 
         if (this.meta.fieldMapping.all_day) {
@@ -451,11 +454,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, any>[]>}
      */
     async fetchRecords() {
-        return this.orm.searchRead(
-            this.meta.resModel,
-            this.computeDomain(),
-            this.meta.fieldNames
-        );
+        return this.orm.searchRead(this.meta.resModel, this.computeDomain(), this.meta.fieldNames);
     }
     /**
      * @protected
@@ -548,11 +547,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<Record<string, any>[]>}
      */
     fetchFilters(resModel, fieldNames) {
-        return this.orm.searchRead(
-            resModel,
-            [["user_id", "=", this.user.userId]],
-            fieldNames
-        );
+        return this.orm.searchRead(resModel, [["user_id", "=", this.user.userId]], fieldNames);
     }
     /**
      * @protected
