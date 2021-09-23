@@ -41,11 +41,11 @@ class OdooPaymentsController(http.Controller):
     def adyen_transaction_notification(self):
         data = request.jsonrequest
         _logger.debug('Transaction notification received: %s', pformat(data))
-
-        # NOTE ANVFE The account check is also done in the _handle_transaction_notification call
-        # account = request.env['adyen.account'].sudo().search([('adyen_uuid', '=', data['adyen_uuid'])])
-        # if not account:
-        #     _logger.error('Received notification for non-existing account: %s', data['adyen_uuid'])
-        #     return
-
-        request.env['adyen.transaction'].sudo()._handle_transaction_notification(data)
+        for notification_item in data['notificationItems']:
+            notification_data = notification_item['NotificationRequestItem']
+            # NOTE ANVFE The account check is also done in the _handle_transaction_notification call
+            # account = request.env['adyen.account'].sudo().search([('adyen_uuid', '=', data['adyen_uuid'])])
+            # if not account:
+            #     _logger.error('Received notification for non-existing account: %s', data['adyen_uuid'])
+            #     return
+            request.env['adyen.transaction'].sudo()._handle_transaction_notification(notification_data)

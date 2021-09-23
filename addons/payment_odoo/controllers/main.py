@@ -25,52 +25,56 @@ class OdooController(http.Controller):
 
         :return: None
         """
+        # TODO use same code as payment_adyen
         # Payload data represent a single notification's data. Because two notifications of a same
         # batch can be related to different sub-merchants, the proxy splits the batches and send
         # individual notifications one by one to this endpoint.
         notification_data = json.loads(request.httprequest.data)
+        for notification_item in notification_data['notificationItems']:
+            notification_data = notification_item['NotificationRequestItem']
 
-        # Check the source and integrity of the notification
-        received_signature = notification_data.get('additionalData', {}).get(
-            'metadata.merchant_signature'
-        )
-        tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
-            'odoo', notification_data
-        )
+            # Check the source and integrity of the notification
+            received_signature = notification_data.get('additionalData', {}).get(
+                'metadata.merchant_signature'
+            )
+            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
+                'odoo', notification_data
+            )
 
-        # Ignore signature for REFUND, the signature will be the one of the original transaction
-        event_code = notification_data['eventCode']
-        if event_code != 'REFUND' and not self._verify_notification_signature(
-            received_signature, tx_sudo
-        ):
-            return
+            # Ignore signature for REFUND, the signature will be the one of the original transaction
+            event_code = notification_data['eventCode']
+            if event_code != 'REFUND' and not self._verify_notification_signature(
+                received_signature, tx_sudo
+            ):
+                return
 
-        _logger.info("notification received:\n%s", pprint.pformat(notification_data))
-        if notification_data['success'] != 'true' and event_code != 'REFUND':
-            return  # Don't handle failed events
+            _logger.info("notification received:\n%s", pprint.pformat(notification_data))
+            if notification_data['success'] != 'true' and event_code != 'REFUND':
+                return  # Don't handle failed events
 
-        request.env['adyen.transaction'].sudo()._handle_payment_notification(
-            notification_data, tx_sudo
-        )
+            request.env['adyen.transaction'].sudo()._handle_payment_notification(
+                notification_data, tx_sudo
+            )
 
-        success = notification_data['success'] == 'true'
-        # Reshape the notification data for parsing
-        if event_code == 'AUTHORISATION' and success:
-            # By default, Adyen automatically captures transactions
-            # authorisation = Done for tx, unless we explicitly request manual capture.
-            notification_data['resultCode'] = 'Authorised'
-        elif event_code == 'CANCELLATION' and success:
-            notification_data['resultCode'] = 'Cancelled'
-        elif event_code in ['NOTIFICATION_OF_CHARGEBACK', 'CHARGEBACK']:
-            notification_data['resultCode'] = 'Chargeback'
-        elif event_code == 'REFUND':
-            # notification_data['resultCode'] = 'Refund'
-            notification_data['resultCode'] = 'Authorised' if success else 'Error'
-        else:
-            return  # Don't handle unsupported event codes or failed events
+            success = notification_data['success'] == 'true'
+            # Reshape the notification data for parsing
+            if event_code == 'AUTHORISATION' and success:
+                # By default, Adyen automatically captures transactions
+                # authorisation = Done for tx, unless we explicitly request manual capture.
+                notification_data['resultCode'] = 'Authorised'
+            elif event_code == 'CANCELLATION' and success:
+                notification_data['resultCode'] = 'Cancelled'
+            elif event_code in ['NOTIFICATION_OF_CHARGEBACK', 'CHARGEBACK']:
+                notification_data['resultCode'] = 'Chargeback'
+            elif event_code == 'REFUND':
+                # notification_data['resultCode'] = 'Refund'
+                notification_data['resultCode'] = 'Authorised' if success else 'Error'
+            else:
+                return  # Don't handle unsupported event codes or failed events
 
-        # Handle the notification data as a regular feedback
-        request.env['payment.transaction'].sudo()._handle_feedback_data('odoo', notification_data)
+            # Handle the notification data as a regular feedback
+            request.env['payment.transaction'].sudo()._handle_feedback_data('odoo', notification_data)
+        return '[accepted]'
 
     def _verify_notification_signature(self, received_signature, tx):
         """ Check that the signature computed from the transaction values matches the received one.
