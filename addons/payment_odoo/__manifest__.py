@@ -9,10 +9,8 @@
     'description': """Odoo Payments""",
     'depends': ['payment', 'odoo_payments'],
     'data': [
-
         'views/adyen_transaction_views.xml',
         'views/payment_acquirer_views.xml',
-        'views/payment_odoo_menus.xml',
         'views/payment_odoo_templates.xml',
 
         # Needs redirect form from templates

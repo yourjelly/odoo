@@ -27,6 +27,7 @@
         'views/adyen_shareholder_views.xml',
         'views/adyen_transaction_payout_views.xml',
         'views/adyen_transaction_views.xml',
+        'views/odoo_payments_menus.xml',
     ],
     'installable': True,
     'assets': {

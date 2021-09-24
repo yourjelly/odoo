@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem name="Odoo Payments"
+              id="odoo_payments_root_menu"
+              web_icon="odoo_payments,static/description/icon.png"
+              sequence="99">
+        <menuitem id="menu_adyen_transaction" action="adyen_transaction_action"/>
+        <menuitem id="menu_adyen_balance" action="adyen_balance_action"/>
+        <menuitem id="menu_adyen_account" action="adyen_account_action"/>
+    </menuitem>
+
+</odoo>
