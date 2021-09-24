@@ -182,7 +182,7 @@ class AdyenAccount(models.Model):
 
     def name_get(self):
         return [
-            (record.id, 'Odoo Payment Account' if record.id else 'Odoo Payment Account Creation')
+            (record.id, "Odoo Payments Account" if record.id else "Odoo Payments Account Creation")
             for record in self
         ]
 
