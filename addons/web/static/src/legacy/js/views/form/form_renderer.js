@@ -482,6 +482,7 @@ var FormRenderer = BasicRenderer.extend({
      */
     _renderButtonBox: function (node) {
         var self = this;
+        this.buttonBoxes.push(node);
         var $result = $('<' + node.tag + '>', {class: 'o_not_full'});
 
         // The rendering of buttons may be async (see renderFieldWidget), so we
@@ -557,6 +558,10 @@ var FormRenderer = BasicRenderer.extend({
         this._handleAttributes($result, node);
         this._registerModifiers(node, this.state, $result);
         return $result;
+    },
+    _reRenderButtonBox(node) {
+        // here we will call _renderButtonBox and repace existing one with newly rendered button box
+        // maybe we need to call _unregisterModifiersElement for node
     },
     /**
     * @private
@@ -1101,6 +1106,7 @@ var FormRenderer = BasicRenderer.extend({
         var defs = [];
         this.defs = defs;
         this.inactiveNotebooks = [];
+        this.buttonBoxes = [];
         var $form = this._renderNode(this.arch).addClass(this.className);
         delete this.defs;
 
@@ -1133,12 +1139,27 @@ var FormRenderer = BasicRenderer.extend({
      *
      * @override
      */
-    async _updateAllModifiers() {
+    async _updateAllModifiers(record) {
         await this._super(...arguments);
         for (const tabs of this.inactiveNotebooks) {
             this._activateFirstVisibleTab(tabs);
         }
         this.inactiveNotebooks = [];
+        let reRenderStatButton = false;
+        _.each(this.allModifiersData, function (modifiersData) {
+            // const modifiers = modifiersData.evaluatedModifiers[record.id] || {};
+            const isStatButtonChanged = _.find(modifiersData.elementsByRecord[record.id], (element) => {
+                return element.$el[0].tagName === "BUTTON" && element.$el.hasClass('oe_stat_button');
+            });
+            if (isStatButtonChanged) {
+                reRenderStatButton = true; // re-render button box
+            }
+        });
+        if (reRenderStatButton) {
+            _.each(this.buttonBoxes, (node) => {
+                this._reRenderButtonBox(node);
+            });
+        }
     },
     /**
      * Updates the form's $el with new content.
