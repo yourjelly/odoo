@@ -37,5 +37,5 @@
             'odoo_payments/static/src/xml/**/*',
         ],
     },
-    'license': 'LGPL-3',
+    'application': True,
 }
