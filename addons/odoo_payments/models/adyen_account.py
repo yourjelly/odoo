@@ -2,25 +2,63 @@
 
 import logging
 import uuid
-from datetime import timedelta
+from ast import literal_eval
 
 import requests
-from ast import literal_eval
 from dateutil.parser import parse
 from pytz import UTC
 from werkzeug.urls import url_join
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 from odoo.osv import expression
-from odoo.tools import format_amount, format_datetime
 
 from odoo.addons.mail.tools import mail_validation
-from odoo.addons.odoo_payments.util import AdyenProxyAuth, to_major_currency
+from odoo.addons.odoo_payments.util import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
+
+
+#=== COMPUTE METHODS ===#
+
+#=== CONSTRAINT METHODS ===#
+
+#=== CRUD METHODS ===#
+
+#=== ACTION METHODS ===#
+
+#=== BUSINESS METHODS ===#
+
+#=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
+@api.model
+def action_create_or_redirect(self):
+    ''' TODO ANV
+    Accessing the FormView to create an Adyen account needs to be done through this action.
+    The action will redirect the user to accounts.odoo.com to link an Odoo user_id to the Adyen
+    account. After logging in on odoo.com the user will be redirected to his DB with a token in
+    the URL. This token is then needed to create the Adyen account.
+    '''
+    if not self.env.company.adyen_account_id:  # No account exists yet
+        onboarding_url = self.env['ir.config_parameter'].sudo().get_param(
+            'odoo_payments.onboarding_url'
+        )
+        return_url = url_join(self.env.company.get_base_url(), '/odoo_payments/create_account')
+        action = {
+            'type': 'ir.actions.act_url',
+            'url': url_join(onboarding_url, f'/get_creation_token?return_url={return_url}'),
+            'target': 'self',
+        }
+    else:  # An account already exists, show it
+        action = self.env['ir.actions.actions']._for_xml_id(
+            'odoo_payments.action_view_adyen_account'
+        )
+        action.update(res_id=self.env.company.adyen_account_id.id)
+    return action
+
+
 
 TIMEOUT = 60
 ADYEN_STATUS_MAP = {
@@ -52,9 +90,13 @@ class AdyenAccount(models.Model):
     _description = 'Adyen for Platforms Account'
     _rec_name = 'full_name'
 
+    #=== DEFAULT METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
         company_fields = {
             'country_id': 'country_id',
             'state_id': 'state_id',
@@ -71,19 +113,21 @@ class AdyenAccount(models.Model):
                 'legal_business_name': 'name',
                 'doing_business_as': 'name',
             })
-            if 'entity_type' in fields:
+            if 'entity_type' in fields_list:
                 res['entity_type'] = 'business'
 
-        field_keys = company_fields.keys() & set(fields)
+        field_keys = company_fields.keys() & set(fields_list)
         for field_name in field_keys:
             res[field_name] = self.env.company[company_fields[field_name]]
 
-        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields):
+        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields_list):
             name = self.env.company.partner_id.name.split()
             res['last_name'] = name[-1]
             res['first_name'] = ' '.join(name[:-1])
 
         return res
+
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     # Credentials
     proxy_token = fields.Char('Proxy Token')
@@ -340,7 +384,8 @@ class AdyenAccount(models.Model):
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
-        self.state_id = False
+        if self.state_id and self.state_id.country_id != self.country_id:
+            self.state_id = False
 
     @api.model
     def create(self, values):
@@ -362,12 +407,12 @@ class AdyenAccount(models.Model):
         create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(
             values.get('payout_schedule', 'biweekly'),
             'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
-        response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
-        adyen_account.with_context(update_from_adyen=True).write({
-            'account_code': response['adyen_response']['accountCode'],
-            'adyen_uuid': response['adyen_uuid'],
-            'proxy_token': response['proxy_token'],
-        })
+        # response = adyen_account._adyen_rpc('v1/create_account_holder', create_data) TODO UNCOMMENT BEFORE COMMITTING
+        # adyen_account.with_context(update_from_adyen=True).write({
+        #     'account_code': response['adyen_response']['accountCode'],
+        #     'adyen_uuid': response['adyen_uuid'],
+        #     'proxy_token': response['proxy_token'],
+        # })
 
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
@@ -419,33 +464,6 @@ class AdyenAccount(models.Model):
                 'schedule': ADYEN_PAYOUT_FREQUENCIES.get(payout_schedule),
             }
         })
-
-    @api.model
-    def action_create_redirect(self):
-        '''
-        Accessing the FormView to create an Adyen account needs to be done through this action.
-        The action will redirect the user to accounts.odoo.com to link an Odoo user_id to the Adyen
-        account. After logging in on odoo.com the user will be redirected to his DB with a token in
-        the URL. This token is then needed to create the Adyen account.
-        '''
-        if self.env.company.adyen_account_id:
-            # An account already exists, show it
-            return {
-                'name': _('Adyen Account'),
-                'view_mode': 'form',
-                'res_model': 'adyen.account',
-                'res_id': self.env.company.adyen_account_id.id,
-                'type': 'ir.actions.act_window',
-            }
-
-        return_url = url_join(self.env.company.get_base_url(), 'odoo_payments/create_account')
-        onboarding_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
-
-        return {
-            'type': 'ir.actions.act_url',
-            'url': url_join(onboarding_url, 'get_creation_token?return_url=%s' % return_url),
-            'target': 'self',
-        }
 
     def action_show_transactions(self):
         action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_transaction_action')
@@ -761,62 +779,3 @@ class AdyenAccount(models.Model):
         })
         transaction_list = response['accountTransactionLists'][0]
         return transaction_list['transactions'], transaction_list['hasNextPage']
-
-
-class AdyenAccountBalance(models.Model):
-    _name = 'adyen.account.balance'
-    _description = 'Adyen Account Balance'
-
-    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
-    currency_id = fields.Many2one('res.currency')
-    balance = fields.Float(default=0.0)
-    on_hold = fields.Float(default=0.0)
-    pending = fields.Float(default=0.0)
-
-    @api.model
-    def get_account_balance(self):
-        if not self.user_has_groups('base.group_erp_manager'):
-            raise AccessError(_("You can't access account balance."))
-
-        if not self.env.company.adyen_account_id:
-            return {}
-
-        balance_fields = {'balance': 'balance', 'onHoldBalance': 'on_hold', 'pendingBalance': 'pending'}
-        balances = self.env['adyen.account.balance'].sudo().search([
-            ('adyen_account_id', '=', self.env.company.adyen_account_id.id)
-        ])
-
-        delta = fields.Datetime.now() - timedelta(hours=1)
-        if not balances or any(b.write_date <= delta for b in balances):
-            response = {}
-            try:
-                response = self.env.company.adyen_account_id._adyen_rpc('v1/account_holder_balance', {
-                    'accountHolderCode': self.env.company.adyen_account_id.account_holder_code,
-                })
-            except UserError as e:
-                _logger.warning(_('Cannot update account balance, showing previous values: %s', e))
-
-            balances.write({
-                f: 0 for f in balance_fields.values()
-            })
-            for total_balance, adyen_balances in response.get('totalBalance', {}).items():
-                for balance in adyen_balances:
-                    currency = self.env['res.currency'].search([('name', '=', balance.get('currency'))])
-                    bal = balances.filtered(lambda b: b.currency_id == currency)
-                    if not bal:
-                        bal = self.env['adyen.account.balance'].sudo().create({
-                            'adyen_account_id': self.env.company.adyen_account_id.id,
-                            'currency_id': currency.id,
-                        })
-                        balances |= bal
-                    bal[balance_fields.get(total_balance)] = to_major_currency(
-                        balance.get('value', 0), currency)
-
-        warning_delta = fields.Datetime.now() - timedelta(hours=2)
-        return [{
-            'currency': b.currency_id.name,
-            'balance': format_amount(self.env, b.balance, b.currency_id),
-            'payout_date': format_datetime(self.env, self.env.company.adyen_account_id.next_scheduled_payout, dt_format='short'),
-            'last_update_warning': b.write_date <= warning_delta,
-            'last_update': format_datetime(self.env, b.write_date),
-        } for b in balances]

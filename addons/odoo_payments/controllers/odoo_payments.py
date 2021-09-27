@@ -16,7 +16,7 @@ class OdooPaymentsController(http.Controller):
     @http.route('/odoo_payments/create_account', type='http', auth='user', website=True)
     def odoo_payments_create_account(self, creation_token):
         request.session['adyen_creation_token'] = creation_token
-        return request.redirect('/web?#action=odoo_payments.adyen_account_action_create')
+        return request.redirect('/web?#action=odoo_payments.action_view_adyen_account')
 
     @odoo_payments_proxy_control
     @http.route('/odoo_payments/account_notification', type='json', auth='public', csrf=False)

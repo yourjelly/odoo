@@ -13,6 +13,8 @@ class AdyenShareholder(models.Model):
     _description = 'Adyen for Platforms Shareholder'
     _rec_name = 'full_name'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     adyen_account_id = fields.Many2one('adyen.account', ondelete='cascade', required=True)
     shareholder_reference = fields.Char('Reference', default=lambda self: uuid.uuid4().hex)
     shareholder_uuid = fields.Char('UUID')  # Given by Adyen
@@ -29,6 +31,18 @@ class AdyenShareholder(models.Model):
     adyen_kyc_ids = fields.One2many('adyen.kyc', 'shareholder_id')
     kyc_status = fields.Selection(ADYEN_KYC_STATUS, compute='_compute_kyc_status', readonly=True)
     kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
+
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')

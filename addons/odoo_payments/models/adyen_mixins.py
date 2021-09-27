@@ -19,12 +19,16 @@ class AdyenAddressMixin(models.AbstractModel):
     _name = 'adyen.address.mixin'
     _description = 'Adyen for Platforms Address Mixin'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     country_id = fields.Many2one('res.country', string='Country', required=True, domain=[
         ('code', 'in', ADYEN_AVAILABLE_COUNTRIES),
         ('code', 'in', ODOO_PAYMENTS_DEPLOYED_COUNTRIES)])
     country_code = fields.Char(related='country_id.code')
+
     state_id = fields.Many2one('res.country.state', string='State', domain="[('country_id', '=?', country_id)]")
     state_code = fields.Char(related='state_id.code')
+
     city = fields.Char('City', required=True)
     zip = fields.Char('ZIP', required=True)
     street = fields.Char('Street', required=True)
@@ -35,6 +39,8 @@ class AdyenIDMixin(models.AbstractModel):
     _name = 'adyen.id.mixin'
     _description = 'Adyen for Platforms ID Mixin'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     id_type = fields.Selection(string='Photo ID type', selection=[
         ('PASSPORT', 'Passport'),
         ('ID_CARD', 'ID Card'),
@@ -44,6 +50,18 @@ class AdyenIDMixin(models.AbstractModel):
     id_front_filename = fields.Char()
     id_back = fields.Binary('Photo ID Back', help="Allowed formats: jpg, pdf, png. Maximum allowed size: 4MB.")
     id_back_filename = fields.Char()
+
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     def write(self, vals):
         res = super().write(vals)
