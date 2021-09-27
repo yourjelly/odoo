@@ -10,4 +10,4 @@ class ResConfigSettings(models.TransientModel):
     adyen_account_id = fields.Many2one(string='Adyen Account', related='company_id.adyen_account_id')
 
     def create_adyen_account(self):
-        return self.env['adyen.account'].action_create_redirect()
+        return self.env['adyen.account'].action_create_or_redirect()

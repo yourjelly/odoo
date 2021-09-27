@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
     'name': "Odoo Payments",
     'version': '1.0',
+    'license': 'LGPL-3',
     'category': '',
-    'summary': 'Base Module for Odoo Payments',
-    'description': 'Base Module for Odoo Payments, used in eCommerce and PoS',
+    'summary': "Base Module for Odoo Payments",
+    'description': "Base Module for Odoo Payments, used in eCommerce and PoS",
     'depends': [
-        # Advanced address formatting (necessary to specify home number separately)
-        'base_address_extended',
-        'base_vat', # VAT validation
+        'base_address_extended',  # Advanced address formatting (to specify home number separately)
+        'base_vat',  # VAT validation
         'mail',
-        'phone_validation', # Phone numbers validation
+        'phone_validation',  # Phone numbers validation
         'web',
     ],
     'data': [
@@ -29,7 +28,6 @@
         'views/adyen_transaction_views.xml',
         'views/odoo_payments_menus.xml',
     ],
-    'installable': True,
     'assets': {
         'web.assets_backend': [
             'odoo_payments/static/src/scss/**/*',

@@ -43,7 +43,7 @@ class PaymentAcquirer(models.Model):
                     )
 
     def odoo_create_adyen_account(self):
-        return self.env['adyen.account'].action_create_redirect()
+        return self.env['adyen.account'].action_create_or_redirect()
 
     def _odoo_get_api_url(self):
         self.ensure_one()

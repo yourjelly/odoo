@@ -15,6 +15,8 @@ class AdyenKYC(models.Model):
     _name = 'adyen.kyc'
     _description = 'Adyen KYC checks'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
 
     status_message = fields.Char()
@@ -42,6 +44,18 @@ class AdyenKYC(models.Model):
     ], string='KYC Document')
 
     last_update = fields.Datetime(string="Last Update")
+
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     def _sort_by_status(self):
         order = ['failed', 'awaiting_data', 'pending', 'data_provided', 'passed']

@@ -23,6 +23,8 @@ class AdyenTransaction(models.Model):
     _order = 'date desc'
     _rec_name = 'reference'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     # TODO ANVFE multi-company consideration
     # Add company_id = adyen_account_id.company_id stored and with ir rules of access.
 
@@ -68,6 +70,18 @@ class AdyenTransaction(models.Model):
     _sql_constraints = [
         ('reference_unique', 'unique(reference, capture_reference)', 'A transaction with the same reference already exists.'),
     ]
+
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends('status_ids')
     def _compute_last_status_id(self):
@@ -294,76 +308,3 @@ class AdyenTransaction(models.Model):
     def action_refund(self):
         for tx in self:
             tx._refund_request()
-
-
-class AdyenTransactionStatus(models.Model):
-    _name = 'adyen.transaction.status'
-    _description = 'Transaction Status'
-    _order = 'date desc'
-    _rec_name = 'status'
-
-    adyen_transaction_id = fields.Many2one('adyen.transaction', required=True, ondelete='cascade')
-    status = fields.Selection(string='Status', selection=[
-        ('unknown', 'Unknown'),
-        ('PendingCredit', 'Pending Credit'),
-        ('CreditFailed', 'Credit Failed'),
-        ('Credited', 'Credited'),
-        ('Converted', 'Converted'),
-        ('PendingDebit', 'Pending Debit'),
-        ('DebitFailed', 'Debit Failed'),
-        ('Debited', 'Debited'),
-        ('DebitReversedReceived', 'Debit Reversed Received'),
-        ('DebitedReversed', 'Debit Reversed'),
-        # TODO chargeback does the transaction change state
-        # or do we receive a new transaction for the reversed chargeback ?
-        ('ChargebackReceived', 'Chargeback Received'),
-        ('Chargeback', 'Chargeback'),
-        ('ChargebackReversedReceived', 'Chargeback Reversed Received'),
-        ('ChargebackReversed', 'Chargeback Reversed'),
-        ('FundTransfer', 'Fund Transfer'),
-        ('PendingFundTransfer', 'Pending Fund Transfer'),
-        ('ManualCorrected', 'Manual Corrected'),
-    ])
-    date = fields.Datetime()
-
-
-class AdyenTransactionPayout(models.Model):
-    _name = 'adyen.transaction.payout'
-    _description = 'Payout Transaction'
-    _order = 'date desc'
-
-    adyen_account_id = fields.Many2one('adyen.account', required=True)
-    company_id = fields.Many2one(related='adyen_account_id.company_id', store=True)
-
-    date = fields.Datetime()
-    amount = fields.Float('Amount', required=True)
-    currency_id = fields.Many2one('res.currency', required=True)
-    reference = fields.Char('Reference', index=True, required=True)
-    bank_account_id = fields.Many2one('adyen.bank.account')
-    status = fields.Selection(string='Type', selection=[
-        ('unknown', 'Unknown'),
-        ('Payout', 'Payout'),
-        ('PayoutReversed', 'Payout Reversed'),
-    ], default='unknown')
-
-    def _create_missing_payout(self, account_id, transaction):
-        """
-
-        Note: sudoed env
-
-        :param int account_id: `adyen.account` id
-        :param dict transaction: payout transaction details received from Adyen
-        """
-        currency = self.env['res.currency'].search([('name', '=', transaction['amount']['currency'])])
-        bank_account = self.env['adyen.bank.account'].search([
-            ('bank_account_uuid', '=', transaction.get('bankAccountDetail', {}).get('bankAccountUUID'))])
-        tx = self.create({
-            'adyen_account_id': account_id,
-            'date': parse(transaction.get('creationDate')).astimezone(UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            'amount': to_major_currency(transaction.get('amount', {}).get('value'), currency),
-            'currency_id': currency.id,
-            'reference': transaction.get('pspReference'),
-            'bank_account_id': bank_account.id,
-            'status': transaction.get('transactionStatus'),
-        })
-        return tx

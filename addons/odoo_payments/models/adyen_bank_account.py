@@ -15,6 +15,8 @@ class AdyenBankAccount(models.Model):
     _name = 'adyen.bank.account'
     _description = 'Adyen for Platforms Bank Account'
 
+    #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
     # TODO ANVFE try to use res.bank & res.partner.bank models for easier autofill ?
 
     adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
@@ -74,6 +76,18 @@ class AdyenBankAccount(models.Model):
     adyen_kyc_ids = fields.One2many('adyen.kyc', 'bank_account_id')
     kyc_status = fields.Selection(ADYEN_KYC_STATUS, compute='_compute_kyc_status', readonly=True)
     kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
+
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')

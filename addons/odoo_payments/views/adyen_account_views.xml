@@ -208,20 +208,10 @@
         </field>
     </record>
 
-    <record id="adyen_account_action_create" model="ir.actions.act_window">
-        <field name="name">Create an Adyen Account</field>
+    <record id="action_view_adyen_account" model="ir.actions.act_window">
+        <field name="name">Adyen Account</field>
         <field name="res_model">adyen.account</field>
         <field name="view_mode">form</field>
-    </record>
-
-    <record id="adyen_account_action" model="ir.actions.server">
-        <field name="name">Account Configuration</field>
-        <field name="model_id" ref="odoo_payments.model_adyen_account" />
-        <field name="type">ir.actions.server</field>
-        <field name="state">code</field>
-        <field name="code">
-            action = model.action_create_redirect()
-        </field>
     </record>
 
 </odoo>
