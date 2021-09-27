@@ -152,12 +152,23 @@ class AdyenAccount(models.Model):
     registration_number = fields.Char('Registration Number')
 
     # Adyen Account Status - internal use
-    account_status = fields.Selection(string='Internal Account Status', selection=[
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('suspended', 'Suspended'),
-        ('closed', 'Closed'),
-    ], default='inactive', readonly=True, tracking=True)
+    account_status = fields.Selection(
+        string='Internal Account Status',
+        help="The account status transitions from one status to another as follows:\n"
+             "1. The account is created -> Inactive\n"
+             "2. Adyen confirms the creation of the account -> Suspended\n"
+             "3. Odoo Support validates the account -> Active\n"
+             "4. The account is closed -> Closed",
+        selection=[
+            ('inactive', 'Inactive'),
+            ('suspended', 'Suspended'),
+            ('active', 'Active'),
+            ('closed', 'Closed'),
+        ],
+        default='inactive',
+        readonly=True,
+        tracking=True,  # TODO why track this field if not shown in the view?
+    )
     payout_allowed = fields.Boolean(readonly=True)
 
     # Status for UX
@@ -352,7 +363,6 @@ class AdyenAccount(models.Model):
             values.get('payout_schedule', 'biweekly'),
             'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
         response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
-
         adyen_account.with_context(update_from_adyen=True).write({
             'account_code': response['adyen_response']['accountCode'],
             'adyen_uuid': response['adyen_uuid'],
@@ -376,6 +386,12 @@ class AdyenAccount(models.Model):
 
         if 'payout_schedule' in vals:
             self._update_payout_schedule(vals['payout_schedule'])
+
+        # Enable the additional menus if the account has been activated by the support
+        if 'account_status' in vals and vals['account_status'] == 'active':
+            balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
+            transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
+            (balance_menu + transactions_menu).action_unarchive()
 
         return res
 
