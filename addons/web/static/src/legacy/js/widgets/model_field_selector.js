@@ -21,6 +21,47 @@ core.bus.on('clear_cache', null, function () {
     modelFieldsCache.cache = {};
     modelFieldsCache.cacheDefs = {};
 });
+/**
+ * The ModelFieldSelector widget can be used to display/select a particular
+ * field chain from a given model.
+ */
+var ModelFieldSelectorPopOver = Widget.extend({
+    template: "ModelFieldSelector.popOver",
+    init: function (parent, model, chain, options) {
+        this._super.apply(this, arguments);
+
+        this.model = model;
+        this.chain = chain;
+        this.options = _.extend({
+            order: 'string',
+            filters: {},
+            fields: null,
+            filter: function () {return true;},
+            followRelations: true,
+            debugMode: false,
+            showSearchInput: true,
+            needDefaultValue: false,
+            cancelOnEscape: false
+        }, options || {});
+        this.options.filters = _.extend({
+            searchable: true,
+        }, this.options.filters);
+
+        if (typeof this.options.followRelations !== 'function') {
+            this.options.followRelations = this.options.followRelations ?
+                function () {return true;} :
+                function () {return false;};
+        }
+
+        this.pages = [];
+        this.dirty = false;
+
+        _.extend(this.events, this.editionEvents);
+
+        this.searchValue = '';
+        this.defaultValue = '';
+    },
+});
 
 /**
  * The ModelFieldSelector widget can be used to display/select a particular
@@ -117,6 +158,8 @@ var ModelFieldSelector = Widget.extend({
 
         if (!this.options.readonly) {
             _.extend(this.events, this.editionEvents);
+            this.popOver = new ModelFieldSelectorPopOver(parent, model, chain, options);
+            this.popOver.appendTo($("<div/>"));
         }
 
         this.searchValue = '';
@@ -137,6 +180,12 @@ var ModelFieldSelector = Widget.extend({
      * @returns {Promise}
      */
     start: function () {
+        if (this.popOver) {
+            console.log('ici');
+            console.log(this.$el);
+            console.log(this.popOver);
+            this.$el.append(this.popOver.$el);
+        }
         this.$value = this.$(".o_field_selector_value");
         this.$popover = this.$(".o_field_selector_popover");
         this.$input = this.$popover.find(".o_field_selector_popover_footer > input");
