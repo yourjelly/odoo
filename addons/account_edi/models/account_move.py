@@ -15,7 +15,7 @@ class AccountMove(models.Model):
         inverse_name='move_id')
     edi_state = fields.Selection(
         selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
-        string="E-invoice state",
+        string="E-invoice State",
         store=True,
         compute='_compute_edi_state',
         help='The aggregated state of all the EDIs with web-service of this move')

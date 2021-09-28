@@ -39,7 +39,8 @@
             <field name="inherit_id" ref="account.view_account_invoice_filter"/>
             <field name="arch" type="xml">
                 <xpath expr="//search/group/filter[@name='status']" position="after">
-                    <filter string="Electronic invoicing state" name="edi_state" context="{'group_by': 'edi_state'}" />
+                    <filter string="E-Invoice State" name="edi_state" context="{'group_by': 'edi_state'}" />
+                    <filter string="E-invoice Blocking Level" name="edi_blocking_level" context="{'group_by': 'edi_blocking_level'}"/>
                 </xpath>
                 <filter name="to_check" position="after">
                     <separator/>
