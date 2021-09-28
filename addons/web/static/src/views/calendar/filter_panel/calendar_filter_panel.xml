@@ -11,7 +11,7 @@
                     >
                         <t t-if="section.label">
                             <div class="d-flex">
-                                <div class="o-calendar-filter-panel--filter o-calendar-filter-panel--filter-with-avatar position-relative mr-1">
+                                <div class="o-calendar-filter-panel--section-filter position-relative mr-1">
                                     <input
                                         type="checkbox"
                                         name="select-all"
@@ -80,6 +80,7 @@
                 [`o-calendar-filter-panel--filter-color-${filter.colorIndex}`]: typeof filter.colorIndex === 'number',
                 'o-calendar-filter-panel--filter-with-avatar': section.hasAvatar,
             }"
+            t-att-data-value="filter.value"
             t-on-mouseenter="onFilterMouseEnter(section, filter)"
             t-on-mouseleave="onFilterMouseLeave(section, filter)"
         >

@@ -173,7 +173,7 @@ export class CalendarModel extends Model {
      */
     async unlinkFilter(fieldName, recordId) {
         const info = this.meta.filtersInfo[fieldName];
-        if (info && info.writeFieldName && info.writeResModel) {
+        if (info && info.writeResModel) {
             await this.orm.unlink(info.writeResModel, [recordId]);
             await this.load();
         }
@@ -198,7 +198,13 @@ export class CalendarModel extends Model {
                 if (filter) {
                     filter.active = active;
                     const info = this.meta.filtersInfo[fieldName];
-                    if (filter.recordId && info && info.writeFieldName && info.writeResModel) {
+                    if (
+                        filter.recordId &&
+                        info &&
+                        info.writeFieldName &&
+                        info.writeResModel &&
+                        info.filterFieldName
+                    ) {
                         const data = {
                             [info.filterFieldName]: active,
                         };
@@ -585,10 +591,9 @@ export class CalendarModel extends Model {
      * @returns {Promise<import("./calendar_types").CalendarFilterSection>}
      */
     async loadFilterSection(fieldName, filterInfo) {
-        const records = await this.fetchFilters(filterInfo.writeResModel, [
-            filterInfo.writeFieldName,
-            filterInfo.filterFieldName,
-        ]);
+        const fields = [filterInfo.writeFieldName, filterInfo.filterFieldName].filter(Boolean);
+
+        const records = await this.fetchFilters(filterInfo.writeResModel, fields);
         const previousSection = this.data.filterSections[fieldName];
         const previousFilters = previousSection ? previousSection.filters : [];
         const filters = records.map((r) =>
