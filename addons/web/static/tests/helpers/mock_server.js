@@ -449,6 +449,8 @@ export class MockServer {
                 return this.mockWebSearchRead(args.model, args.args, args.kwargs);
             case "read_group":
                 return this.mockReadGroup(args.model, args.kwargs);
+            case "unlink":
+                return this.mockUnlink(args.model, args.args);
             case "web_read_group":
                 return this.mockWebReadGroup(args.model, args.kwargs);
             case "write":
@@ -1608,6 +1610,31 @@ export class MockServer {
             length,
             records: this.mockRead(params.model, [records.map((r) => r.id), fieldNames]),
         };
+    }
+
+    mockUnlink(modelName, args) {
+        let ids = args[0];
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+
+        const model = this.models[modelName];
+        model.records = model.records.filter((record) => !ids.includes(record.id));
+
+        // update value of one2many fields pointing to the deleted records
+        for (const model of Object.values(this.models)) {
+            const relatedFields = Object.entries(model.fields)
+                .filter(([, field]) => field.type === "one2many" && field.relation === modelName)
+                .map(([fieldName]) => fieldName);
+
+            for (const relatedField of relatedFields) {
+                for (const record of model.records) {
+                    record[relatedField] = record[relatedField].filter((id) => !ids.includes(id));
+                }
+            }
+        }
+
+        return true;
     }
 
     mockWrite(modelName, args) {

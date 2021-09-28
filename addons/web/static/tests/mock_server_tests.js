@@ -21,10 +21,26 @@ QUnit.module("Mock Server", {
                             type: "bool",
                             default: true,
                         },
+                        bars: {
+                            string: "Bars",
+                            type: "one2many",
+                            relation: "bar",
+                        },
                     },
                     records: [
-                        { id: 1, name: "Jean-Michel", email: "jean.michel@example.com" },
-                        { id: 2, name: "Raoul", email: "raoul@example.com", active: false },
+                        {
+                            id: 1,
+                            name: "Jean-Michel",
+                            email: "jean.michel@example.com",
+                            bars: [1, 4],
+                        },
+                        {
+                            id: 2,
+                            name: "Raoul",
+                            email: "raoul@example.com",
+                            active: false,
+                            bars: [2, 3],
+                        },
                     ],
                 },
                 bar: {
@@ -434,4 +450,25 @@ QUnit.test("performRPC: read_group, group by integer", async function (assert) {
             foo_count: 1,
         },
     ]);
+});
+
+QUnit.test("performRPC: unlink", async function (assert) {
+    const server = new MockServer(this.data, {});
+
+    assert.strictEqual(this.data.models.bar.records.length, 6);
+    assert.deepEqual(this.data.models["res.partner"].records[0].bars, [1, 4]);
+    const result = await server.performRPC("", {
+        model: "bar",
+        method: "unlink",
+        args: [[1]],
+        kwargs: {},
+    });
+    assert.ok(result);
+    assert.strictEqual(this.data.models.bar.records.length, 5);
+
+    assert.deepEqual(
+        this.data.models.bar.records.map((record) => record.id),
+        [2, 3, 4, 5, 6]
+    );
+    assert.deepEqual(this.data.models["res.partner"].records[0].bars, [4]);
 });
