@@ -122,35 +122,12 @@ div.col:not([align]) {
         }
     }
     .o_mail_header_social {
-
         a:not(.btn), .btn.btn-link {
             display: inline-block;
         }
     }
     div .col, div[class*="col-"] {
         align-self: center;
-    }
-}
-
-.o_mail_block_event {
-    .o_mail_snippet_general{
-        background: darken($o-mm-def-color-1, 2%);
-    }
-}
-
-.o_mail_block_discount1, .o_mail_block_discount2, .s_comparisons {
-    .o_mail_display_coupon {
-        font-size: 32px;
-        line-height: 1;
-    }
-}
-
-.o_mail_block_discount2 {
-    .o_code {
-        padding: 5px 10px;
-        background: $o-mm-def-color-1;
-        border-radius: 3px;
-        font-family: monospace;
     }
 }
 
@@ -179,31 +156,8 @@ div.col:not([align]) {
             text-align: center;
         }
     }
-
-    &.o_mail_footer_social_left {
-        .o_mail_footer_description {
-            padding-left: 20px;
-        }
-        .o_mail_footer_social {
-            padding-right: 20px;
-            text-align: right;
-            vertical-align: top;
-
-            .btn-link{
-                padding: 0;
-                font-size: 12px;
-            }
-        }
-    }
-    div.col:not(.o_col_head) {
-        vertical-align: middle;
-    }
 }
 
-.s_features_grid_icon {
-    float: none;
-    margin-right: 0;
-}
 // -- Bootstrap overrides for transparent colors -- //
 
 .list-group .list-group-item {
