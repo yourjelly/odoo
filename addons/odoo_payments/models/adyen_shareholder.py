@@ -10,26 +10,27 @@ from odoo.addons.odoo_payments.models.adyen_kyc import ADYEN_KYC_STATUS
 class AdyenShareholder(models.Model):
     _name = 'adyen.shareholder'
     _inherit = ['adyen.id.mixin', 'adyen.address.mixin']
-    _description = 'Adyen for Platforms Shareholder'
+    _description = "Odoo Payments Shareholder"
     _rec_name = 'full_name'
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    adyen_account_id = fields.Many2one('adyen.account', ondelete='cascade', required=True)
-    shareholder_reference = fields.Char('Reference', default=lambda self: uuid.uuid4().hex)
-    shareholder_uuid = fields.Char('UUID')  # Given by Adyen
-    first_name = fields.Char('First Name', required=True)
-    last_name = fields.Char('Last Name', required=True)
+    adyen_account_id = fields.Many2one(
+        comodel_name='adyen.account', ondelete='cascade', required=True)
+    shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
+    shareholder_uuid = fields.Char(string='UUID')  # Given by Adyen
+    first_name = fields.Char(string='First Name', required=True)
+    last_name = fields.Char(string='Last Name', required=True)
     full_name = fields.Char(compute='_compute_full_name')
-    date_of_birth = fields.Date('Date of birth', required=True)
-    document_number = fields.Char('ID Number',
+    date_of_birth = fields.Date(string='Date of birth', required=True)
+    document_number = fields.Char(string='ID Number',
             help="The type of ID Number required depends on the country:\n"
              "US: Social Security Number (9 digits or last 4 digits)\n"
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
              "Australia: Document Number")
 
-    adyen_kyc_ids = fields.One2many('adyen.kyc', 'shareholder_id')
-    kyc_status = fields.Selection(ADYEN_KYC_STATUS, compute='_compute_kyc_status', readonly=True)
+    adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='shareholder_id')
+    kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
     kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
 
     #=== COMPUTE METHODS ===#
@@ -80,6 +81,7 @@ class AdyenShareholder(models.Model):
     def write(self, vals):
         res = super().write(vals)
         if not self.env.context.get('update_from_adyen'):
+            self.ensure_one()
             self.adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(vals))
         return res
 
@@ -95,6 +97,7 @@ class AdyenShareholder(models.Model):
         return super().unlink()
 
     def _upload_photo_id(self, document_type, content, filename):
+        self.ensure_one()
         # FIXME ANVFE wtf is this test mode config param ???
         test_mode = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.test_mode')
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
@@ -109,11 +112,18 @@ class AdyenShareholder(models.Model):
         })
 
     def _format_data(self, values):
-        adyen_account_id = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
-        country_id = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-        state_id = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('state_id') else self.state_id
+        """
+
+        :param dict values:
+
+        :returns:
+        :rtype: dict
+        """
+        adyen_account = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
+        country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
+        state = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('state_id') else self.state_id
         data = {
-            'accountHolderCode': adyen_account_id.account_holder_code,
+            'accountHolderCode': adyen_account.account_holder_code,
             'accountHolderDetails': {
                 'businessDetails': {
                     'shareholders': [{
@@ -121,10 +131,10 @@ class AdyenShareholder(models.Model):
                         'shareholderReference': values.get('shareholder_reference') or self.shareholder_reference,
                         'address': {
                             'city': values.get('city') or self.city,
-                            'country': country_id.code,
+                            'country': country.code,
                             'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
                             'postalCode': values.get('zip') or self.zip,
-                            'stateOrProvince': state_id.code or None,
+                            'stateOrProvince': state.code or None,
                             'street': values.get('street') or self.street,
                         },
                         'name': {

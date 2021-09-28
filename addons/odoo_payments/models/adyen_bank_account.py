@@ -13,69 +13,93 @@ from odoo.addons.odoo_payments.models.adyen_mixins import ADYEN_AVAILABLE_COUNTR
 
 class AdyenBankAccount(models.Model):
     _name = 'adyen.bank.account'
-    _description = 'Adyen for Platforms Bank Account'
+    _description = "Odoo Payments Bank Account"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     # TODO ANVFE try to use res.bank & res.partner.bank models for easier autofill ?
 
-    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
-    bank_account_reference = fields.Char('Reference', default=lambda self: uuid.uuid4().hex)
-    bank_account_uuid = fields.Char('UUID')  # Given by Adyen
+    adyen_account_id = fields.Many2one(
+        comodel_name='adyen.account', required=True, ondelete='cascade')
+
+    bank_account_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
+    bank_account_uuid = fields.Char(string='UUID')  # Given by Adyen
     owner_name = fields.Char(
-        'Owner Name', required=True,
+        string='Owner Name',
+        required=True,
         help="The name of the bank account owner.")
     # FIXME ANVFE Bank account country cannot be different from address country except for EU
     # FIXME ANVFE add information on best payout currencies ?
     # https://docs.adyen.com/account/supported-currencies
     country_id = fields.Many2one(
-        'res.country', string='Country',
-        domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)], required=True,
+        string='Country',
+        comodel_name='res.country',
+        domain=[('code', 'in', ADYEN_AVAILABLE_COUNTRIES)],
+        required=True,
         help="The country in which the bank account is registered.")
     country_code = fields.Char(related='country_id.code')
     currency_id = fields.Many2one(
-        'res.currency', string='Currency', required=True,
+        string='Currency',
+        comodel_name='res.currency',
+        required=True,
         help="The currency in which the bank account deals.")
-    currency_name = fields.Char(related='currency_id.name', string='Currency Name')
+    currency_name = fields.Char(string='Currency Name', related='currency_id.name')
     # TODO ANVFE use base_iban to validate the iban ?
-    iban = fields.Char('IBAN')
+    iban = fields.Char(string='IBAN')
     account_number = fields.Char(
-        'Account Number',
+        string='Account Number',
         help="The bank account number (without separators).")
-    branch_code = fields.Char('Branch Code')
-    bank_city = fields.Char('Bank City', help="The city in which the bank branch is located.")
-    bank_code = fields.Char('Bank Code', help="The bank code of the banking institution with which the bank account is registered.")
-    bank_name = fields.Char('Bank Name', help="The name of the banking institution with which the bank account is held.")
-    account_type = fields.Selection(string='Account Type', selection=[
-        ('checking', 'Checking'),
-        ('savings', 'Savings'),
-    ], help="The type of bank account. Only applicable to bank accounts held in the USA.")
+    branch_code = fields.Char(string='Branch Code')
+    bank_city = fields.Char(
+        string='Bank City', help="The city in which the bank branch is located.")
+    bank_code = fields.Char(
+        string='Bank Code', help="The bank code of the banking institution with which the bank account is registered.")
+    bank_name = fields.Char(
+        string='Bank Name', help="The name of the banking institution with which the bank account is held.")
+    account_type = fields.Selection(
+        string='Account Type',
+        selection=[
+            ('checking', 'Checking'),
+            ('savings', 'Savings'),
+        ], help="The type of bank account. Only applicable to bank accounts held in the USA.")
 
     # TODO ANVFE auto-fill owner by default with current/company partner ???
     # Or with adyen account data ?
     owner_country_id = fields.Many2one(
-        'res.country', string='Owner Country',
+        comodel_name='res.country', string='Owner Country',
         help="The country of residence of the bank account owner.")
-    owner_state_id = fields.Many2one('res.country.state', 'Owner State', domain="[('country_id', '=?', owner_country_id)]")
-    owner_street = fields.Char('Owner Street', help="The street name of the residence of the bank account owner.")
-    owner_city = fields.Char('Owner City', help="The city of residence of the bank account owner.")
-    owner_zip = fields.Char('Owner ZIP', help="The postal code of the residence of the bank account owner.")
+    owner_state_id = fields.Many2one(
+        string='Owner State',
+        comodel_name='res.country.state',
+        domain="[('country_id', '=?', owner_country_id)]")
+    owner_street = fields.Char(
+        string='Owner Street',
+        help="The street name of the residence of the bank account owner.")
+    owner_city = fields.Char(
+        string='Owner City',
+        help="The city of residence of the bank account owner.")
+    owner_zip = fields.Char(
+        string='Owner ZIP',
+        help="The postal code of the residence of the bank account owner.")
     owner_house_number_or_name = fields.Char(
-        'Owner House Number or Name',
+        string='Owner House Number or Name',
         help="The house name or number of the residence of the bank account owner.")
 
     # FIXME ANVFE limit document to required specifications
     # https://docs.adyen.com/platforms/verification-checks/bank-account-check#requirements
-    bank_statement = fields.Binary('Bank Statement', help="You need to provide a bank statement to allow payouts. \
-        The file must be a bank statement, a screenshot of your online banking environment, a letter from the bank or a cheque and must contain \
-        the logo of the bank or it's name in a unique font, the bank account details, the name of the account holder.\
-        Allowed formats: jpg, pdf, png. Maximum allowed size: 10MB.")
+    bank_statement = fields.Binary(
+        string='Bank Statement',
+        help="You need to provide a bank statement to allow payouts."
+        "The file must be a bank statement, a screenshot of your online banking environment, "
+        "a letter from the bank or a cheque and must contain the logo of the bank or it's name "
+        "in a unique font, the bank account details, the name of the account holder."
+        "Allowed formats: jpg, pdf, png. Maximum allowed size: 10MB.")
     bank_statement_filename = fields.Char()
 
     # KYC
-    adyen_kyc_ids = fields.One2many('adyen.kyc', 'bank_account_id')
-    kyc_status = fields.Selection(ADYEN_KYC_STATUS, compute='_compute_kyc_status', readonly=True)
-    kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
+    adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='bank_account_id')
+    kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
+    kyc_status_message = fields.Char(compute='_compute_kyc_status')
 
     #=== COMPUTE METHODS ===#
 

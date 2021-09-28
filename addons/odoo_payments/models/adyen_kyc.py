@@ -13,35 +13,45 @@ ADYEN_KYC_STATUS = [
 
 class AdyenKYC(models.Model):
     _name = 'adyen.kyc'
-    _description = 'Adyen KYC checks'
+    _description = "Adyen KYC checks"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
 
     status_message = fields.Char()
-    status = fields.Selection(string='KYC Status', selection=[
-        ('awaiting_data', 'Data To Provide'),
-        ('pending', 'Waiting For Validation'),
-        ('data_provided', 'Data Provided'),
-        ('passed', 'Confirmed'),
-        ('failed', 'Failed'),
-    ], required=True, default='pending')
+    status = fields.Selection(
+        string='KYC Status',
+        selection=[
+            ('awaiting_data', 'Data To Provide'),
+            ('pending', 'Waiting For Validation'),
+            ('data_provided', 'Data Provided'),
+            ('passed', 'Confirmed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending',
+        required=True)
 
     bank_account_id = fields.Many2one(
-        'adyen.bank.account', domain="[('adyen_account_id', '=', adyen_account_id)]", ondelete='cascade')
+        comodel_name='adyen.bank.account',
+        domain="[('adyen_account_id', '=', adyen_account_id)]",
+        ondelete='cascade')
     shareholder_id = fields.Many2one(
-        'adyen.shareholder', domain="[('adyen_account_id', '=', adyen_account_id)]", ondelete='cascade')
+        comodel_name='adyen.shareholder',
+        domain="[('adyen_account_id', '=', adyen_account_id)]",
+        ondelete='cascade')
     document = fields.Char(compute='_compute_document', help="Linked document name")
 
-    verification_type = fields.Selection([
-        ('company', 'Company'),
-        ('identity', 'Identity'),
-        ('passport', 'Passport'),
-        ('bank_account', 'Bank Account'),
-        ('nonprofit', 'Nonprofit'),
-        ('card', 'Card'),
-    ], string='KYC Document')
+    verification_type = fields.Selection(
+        string='KYC Document',
+        selection=[
+            ('company', 'Company'),
+            ('identity', 'Identity'),
+            ('passport', 'Passport'),
+            ('bank_account', 'Bank Account'),
+            ('nonprofit', 'Nonprofit'),
+            ('card', 'Card'),
+        ])
 
     last_update = fields.Datetime(string="Last Update")
 

@@ -15,12 +15,14 @@ _logger = logging.getLogger(__name__)
 
 class AdyenAccountBalance(models.Model):
     _name = 'adyen.account.balance'
-    _description = 'Adyen Account Balance'
+    _description = "Adyen Account Balance"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    adyen_account_id = fields.Many2one('adyen.account', required=True, ondelete='cascade')
-    currency_id = fields.Many2one('res.currency')
+    adyen_account_id = fields.Many2one(
+        comodel_name='adyen.account', required=True, ondelete='cascade')
+    currency_id = fields.Many2one(
+        comodel_name='res.currency', ondelete='restrict')
     balance = fields.Float(default=0.0)
     on_hold = fields.Float(default=0.0)
     pending = fields.Float(default=0.0)

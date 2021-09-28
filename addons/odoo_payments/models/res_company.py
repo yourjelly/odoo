@@ -8,4 +8,5 @@ class ResCompany(models.Model):
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    adyen_account_id = fields.Many2one('adyen.account', string='Adyen Account', readonly=True)
+    adyen_account_id = fields.Many2one(
+        string='Adyen Account', comodel_name='adyen.account', readonly=True)

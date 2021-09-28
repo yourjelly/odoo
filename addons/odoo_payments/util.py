@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-import decorator
 import hashlib
 import hmac
 import json
 import logging
-import requests
 import time
 
-from werkzeug.urls import url_decode, url_parse
+import decorator
+import requests
 from werkzeug.exceptions import Forbidden
+from werkzeug.urls import url_decode, url_parse
 
 from odoo.http import request
 from odoo.tools import float_round
@@ -19,13 +18,17 @@ from odoo.tools import float_round
 _logger = logging.getLogger(__name__)
 TIMEOUT = 60
 
+
+# TODO ANVFE use payment utils instead after making odoo_payments depend on payment module
 def to_major_currency(amount, currency):
     decimal = currency.decimal_places if currency else 2
     return float_round(amount, 0) / (10**decimal)
 
+
 def to_minor_currency(amount, currency):
     decimal = currency.decimal_places if currency else 2
     return int(float_round(amount, decimal) * (10**decimal))
+
 
 class AdyenProxyAuth(requests.auth.AuthBase):
     def __init__(self, adyen_account):
@@ -59,17 +62,18 @@ class AdyenProxyAuth(requests.auth.AuthBase):
 
         return request
 
+
 @decorator.decorator
 def odoo_payments_proxy_control(func, *args, **kwargs):
     _logger.debug('Check notification from Odoo Payments')
 
     adyen_uuid = request.httprequest.headers.get('oe-adyen-uuid')
-    account = request.env['adyen.account'].sudo().search([
+    account_sudo = request.env['adyen.account'].sudo().search([
         ('adyen_uuid', '=', adyen_uuid)])
-    if not account:
+    if not account_sudo:
         raise Forbidden()
 
-    secret = account.proxy_token.encode('utf8')
+    secret = account_sudo.proxy_token.encode('utf8')
     msg_signature = request.httprequest.headers.get('oe-signature')  # base64 encoded hmac sha256 digest
     msg_timestamp = request.httprequest.headers.get('oe-timestamp')
 

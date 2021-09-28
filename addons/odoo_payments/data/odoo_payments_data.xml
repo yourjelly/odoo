@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Account creation -->
-    <record id="odoo_payments_onboarding_url" model="ir.config_parameter">
+    <!-- URL  Account creation -->
+    <record id="onboarding_url" model="ir.config_parameter">
         <field name="key">odoo_payments.onboarding_url</field>
         <field name="value">https://www.odoo.com/odoo_adyen/</field>
     </record>
 
-    <!-- API requests after account validation -->
-    <record id="odoo_payments_proxy_url" model="ir.config_parameter">
+    <!-- URL of the proxy to which API requests must be sent -->
+    <record id="proxy_url" model="ir.config_parameter">
         <field name="key">odoo_payments.proxy_url</field>
         <field name="value">https://payment-adyen.odoo.com/payment_proxy_adyen/</field>
     </record>
