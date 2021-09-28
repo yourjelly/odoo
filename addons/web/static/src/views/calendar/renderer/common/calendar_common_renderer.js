@@ -70,7 +70,7 @@ export class CalendarCommonRenderer extends Component {
             eventResize: this.onEventResize,
             eventResizeStart: this.onEventResizeStart,
             events: (_, successCb) => successCb(this.mapRecordsToEvents()),
-            firstDay: this.props.model.firstDayOfWeek,
+            firstDay: this.props.model.firstDayOfWeek % 7,
             header: false,
             height: "parent",
             locale: "en-US",

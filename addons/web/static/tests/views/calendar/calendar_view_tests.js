@@ -7,13 +7,12 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { ormService } from "@web/core/orm_service";
 import { popoverService } from "@web/core/popover/popover_service";
-import { titleService } from "@web/core/browser/title_service";
 import { registry } from "@web/core/registry";
 import { userService } from "@web/core/user_service";
-import { makeFakeLocalizationService } from "../../helpers/mock_services";
+import { mocks } from "../../helpers/mock_services";
 import { click, getFixture, patchDate, patchWithCleanup } from "../../helpers/utils";
 import { makeView } from "../helpers";
-import { changeScale, clickEvent } from "./calendar_helpers";
+import { changeScale, clickEvent, findTimeRow } from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -24,6 +23,22 @@ const mainComponentRegistry = registry.category("main_components");
 
 let serverData;
 let uid = -1;
+
+async function addMainComponentsContainer() {
+    const mainComponentsContainer = await owl.mount(MainComponentsContainer, {
+        target: getFixture(),
+    });
+    registerCleanup(() => {
+        mainComponentsContainer.destroy();
+    });
+
+    patchWithCleanup(browser, {
+        setTimeout: (fn) => fn(),
+        clearTimeout: () => {},
+    });
+
+    return mainComponentsContainer.el;
+}
 
 QUnit.module("wowl Views", (hooks) => {
     hooks.beforeEach(async () => {
@@ -39,7 +54,7 @@ QUnit.module("wowl Views", (hooks) => {
         serviceRegistry.add("notification", notificationService);
         serviceRegistry.add("orm", ormService);
         serviceRegistry.add("popover", popoverService);
-        serviceRegistry.add("title", titleService);
+        serviceRegistry.add("title", mocks.title());
         serviceRegistry.add("view", viewService);
         serviceRegistry.add("user", {
             ...userService,
@@ -460,17 +475,7 @@ QUnit.module("wowl Views", (hooks) => {
                 `,
             });
 
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-                clearTimeout: () => {},
-            });
-
-            const mainComponentsContainer = await owl.mount(MainComponentsContainer, {
-                target: getFixture(),
-            });
-            registerCleanup(() => {
-                mainComponentsContainer.destroy();
-            });
+            const mainComponentsContainer = await addMainComponentsContainer();
 
             await clickEvent(calendar, 4);
             assert.containsOnce(
@@ -554,7 +559,7 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.test("default week start (US)", async (assert) => {
-        assert.expect(4);
+        assert.expect(3);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -569,7 +574,6 @@ QUnit.module("wowl Views", (hooks) => {
             `,
             mockRPC(route, { method, model, kwargs }) {
                 if (model === "event" && method === "search_read") {
-                    // called twice (once for records and once for filters)
                     assert.deepEqual(
                         kwargs.domain,
                         [
@@ -601,7 +605,7 @@ QUnit.module("wowl Views", (hooks) => {
         // the week start depends on the locale
         serviceRegistry.add(
             "localization",
-            makeFakeLocalizationService({
+            mocks.localization({
                 weekStart: 1,
             })
         );
@@ -652,7 +656,7 @@ QUnit.module("wowl Views", (hooks) => {
 
         serviceRegistry.add(
             "localization",
-            makeFakeLocalizationService({
+            mocks.localization({
                 weekStart: 7,
             })
         );
@@ -689,8 +693,30 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
     });
 
-    QUnit.todo("attributes hide_date and hide_time", async (assert) => {
-        assert.ok(false);
+    QUnit.test("attributes hide_date and hide_time", async (assert) => {
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    hide_date="true"
+                    hide_time="true"
+                    mode="month"
+                />
+            `,
+        });
+
+        await addMainComponentsContainer();
+
+        await clickEvent(calendar, 4);
+        assert.containsNone(
+            calendar.el,
+            ".o-calendar-common-popover .list-group-item",
+            "popover should not contain date/time"
+        );
     });
 
     QUnit.todo(
@@ -715,8 +741,33 @@ QUnit.module("wowl Views", (hooks) => {
         }
     );
 
-    QUnit.todo("check calendar week column timeformat", async (assert) => {
-        assert.ok(false);
+    QUnit.test("check calendar week column timeformat", async (assert) => {
+        serviceRegistry.add(
+            "localization",
+            mocks.localization({
+                timeFormat: "%I:%M:%S",
+            })
+        );
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar date_start="start" />
+            `,
+        });
+
+        assert.strictEqual(
+            findTimeRow(calendar, "08:00:00").textContent,
+            "8am",
+            "calendar should show according to timeformat"
+        );
+        assert.strictEqual(
+            findTimeRow(calendar, "23:00:00").textContent,
+            "11pm",
+            "event time format should 12 hour"
+        );
     });
 
     QUnit.todo("create all day event in week mode", async (assert) => {
@@ -886,8 +937,20 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
     });
 
-    QUnit.todo("calendar is configured to have no groupBy menu", async (assert) => {
-        assert.ok(false);
+    QUnit.test("calendar is configured to have no groupBy menu", async (assert) => {
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar date_start="start" />
+            `,
+        });
+        assert.containsNone(
+            calendar.el,
+            ".o_control_panel .o_group_by_menu",
+            "the control panel has no groupBy menu"
+        );
     });
 
     QUnit.todo("timezone does not affect current day", async (assert) => {
@@ -934,20 +997,232 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
     });
 
-    QUnit.todo("default week start (US) month mode", async (assert) => {
-        assert.ok(false);
+    QUnit.test("default week start (US) month mode", async (assert) => {
+        assert.expect(8);
+
+        // 2019-09-12 08:00:00
+        patchDate(2019, 8, 12, 8, 0, 0);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    mode="month"
+                />
+            `,
+            mockRPC(route, { method, model, kwargs }) {
+                if (model === "event" && method === "search_read") {
+                    assert.deepEqual(
+                        kwargs.domain,
+                        [
+                            ["start", "<=", "2019-10-12 23:59:59"],
+                            ["stop", ">=", "2019-09-01 00:00:00"],
+                        ],
+                        "The domain to search events in should be correct"
+                    );
+                }
+            },
+        });
+
+        const dayHeaders = calendar.el.querySelectorAll(".fc-day-header");
+        assert.strictEqual(
+            dayHeaders[0].textContent,
+            "Sunday",
+            "The first day of the week should be Sunday"
+        );
+        assert.strictEqual(
+            dayHeaders[dayHeaders.length - 1].textContent,
+            "Saturday",
+            "The last day of the week should be Saturday"
+        );
+
+        const dayTops = calendar.el.querySelectorAll(".fc-day-top");
+        assert.strictEqual(
+            dayTops[0].querySelector(".fc-week-number").textContent,
+            "35",
+            "The number of the week should be correct"
+        );
+        assert.strictEqual(dayTops[0].querySelector(".fc-day-number").textContent, "1");
+        assert.strictEqual(dayTops[0].dataset.date, "2019-09-01");
+        assert.strictEqual(
+            dayTops[dayTops.length - 1].querySelector(".fc-day-number").textContent,
+            "12"
+        );
+        assert.strictEqual(dayTops[dayTops.length - 1].dataset.date, "2019-10-12");
     });
 
-    QUnit.todo("European week start month mode", async (assert) => {
-        assert.ok(false);
+    QUnit.test("European week start month mode", async (assert) => {
+        assert.expect(8);
+
+        // 2019-09-15 08:00:00
+        patchDate(2019, 8, 15, 8, 0, 0);
+
+        // the week start depends on the locale
+        serviceRegistry.add(
+            "localization",
+            mocks.localization({
+                weekStart: 1,
+            })
+        );
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    mode="month"
+                />
+            `,
+            mockRPC(route, { method, model, kwargs }) {
+                if (model === "event" && method === "search_read") {
+                    assert.deepEqual(
+                        kwargs.domain,
+                        [
+                            ["start", "<=", "2019-10-06 23:59:59"],
+                            ["stop", ">=", "2019-08-26 00:00:00"],
+                        ],
+                        "The domain to search events in should be correct"
+                    );
+                }
+            },
+        });
+
+        const dayHeaders = calendar.el.querySelectorAll(".fc-day-header");
+        assert.strictEqual(
+            dayHeaders[0].textContent,
+            "Monday",
+            "The first day of the week should be Monday"
+        );
+        assert.strictEqual(
+            dayHeaders[dayHeaders.length - 1].textContent,
+            "Sunday",
+            "The last day of the week should be Sunday"
+        );
+
+        const dayTops = calendar.el.querySelectorAll(".fc-day-top");
+        assert.strictEqual(
+            dayTops[0].querySelector(".fc-week-number").textContent,
+            "35",
+            "The number of the week should be correct"
+        );
+        assert.strictEqual(dayTops[0].querySelector(".fc-day-number").textContent, "26");
+        assert.strictEqual(dayTops[0].dataset.date, "2019-08-26");
+        assert.strictEqual(
+            dayTops[dayTops.length - 1].querySelector(".fc-day-number").textContent,
+            "6"
+        );
+        assert.strictEqual(dayTops[dayTops.length - 1].dataset.date, "2019-10-06");
     });
 
-    QUnit.todo("Monday week start week mode", async (assert) => {
-        assert.ok(false);
+    QUnit.test("Monday week start week mode", async (assert) => {
+        assert.expect(3);
+
+        // 2019-09-15 08:00:00
+        patchDate(2019, 8, 15, 8, 0, 0);
+
+        // the week start depends on the locale
+        serviceRegistry.add(
+            "localization",
+            mocks.localization({
+                weekStart: 1,
+            })
+        );
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    mode="week"
+                />
+            `,
+            mockRPC(route, { method, model, kwargs }) {
+                if (model === "event" && method === "search_read") {
+                    assert.deepEqual(
+                        kwargs.domain,
+                        [
+                            ["start", "<=", "2019-09-15 23:59:59"],
+                            ["stop", ">=", "2019-09-09 00:00:00"],
+                        ],
+                        "The domain to search events in should be correct"
+                    );
+                }
+            },
+        });
+
+        const dayHeaders = calendar.el.querySelectorAll(".fc-day-header");
+        assert.strictEqual(
+            dayHeaders[0].textContent,
+            "Mon 9",
+            "The first day of the week should be Monday the 9th"
+        );
+        assert.strictEqual(
+            dayHeaders[dayHeaders.length - 1].textContent,
+            "Sun 15",
+            "The last day of the week should be Sunday the 15th"
+        );
     });
 
-    QUnit.todo("Saturday week start week mode", async (assert) => {
-        assert.ok(false);
+    QUnit.test("Saturday week start week mode", async (assert) => {
+        assert.expect(3);
+
+        // 2019-09-12 08:00:00
+        patchDate(2019, 8, 12, 8, 0, 0);
+
+        // the week start depends on the locale
+        serviceRegistry.add(
+            "localization",
+            mocks.localization({
+                weekStart: 6,
+            })
+        );
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    mode="week"
+                />
+            `,
+            mockRPC(route, { method, model, kwargs }) {
+                if (model === "event" && method === "search_read") {
+                    assert.deepEqual(
+                        kwargs.domain,
+                        [
+                            ["start", "<=", "2019-09-13 23:59:59"],
+                            ["stop", ">=", "2019-09-07 00:00:00"],
+                        ],
+                        "The domain to search events in should be correct"
+                    );
+                }
+            },
+        });
+
+        const dayHeaders = calendar.el.querySelectorAll(".fc-day-header");
+        assert.strictEqual(
+            dayHeaders[0].textContent,
+            "Sat 7",
+            "The first day of the week should be Saturday the 7th"
+        );
+        assert.strictEqual(
+            dayHeaders[dayHeaders.length - 1].textContent,
+            "Fri 13",
+            "The last day of the week should be Friday the 13th"
+        );
     });
 
     QUnit.todo(
@@ -983,12 +1258,73 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
     });
 
-    QUnit.todo("allowed scales", async (assert) => {
-        assert.ok(false);
+    QUnit.test("allowed scales", async (assert) => {
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    scales="day,week"
+                />
+            `,
+        });
+
+        assert.containsOnce(
+            calendar.el,
+            ".o-calendar-view--scale-buttons .o-calendar-view--scale-button--day"
+        );
+        assert.containsOnce(
+            calendar.el,
+            ".o-calendar-view--scale-buttons .o-calendar-view--scale-button--week"
+        );
+        assert.containsNone(
+            calendar.el,
+            ".o-calendar-view--scale-buttons .o-calendar-view--scale-button--month"
+        );
+        assert.containsNone(
+            calendar.el,
+            ".o-calendar-view--scale-buttons .o-calendar-view--scale-button--year"
+        );
     });
 
-    QUnit.todo("click outside the popup should close it", async (assert) => {
-        assert.ok(false);
+    QUnit.test("click outside the popup should close it", async (assert) => {
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    event_open_popup="true"
+                />
+            `,
+        });
+
+        const mainComponentsContainer = await addMainComponentsContainer();
+        assert.containsNone(mainComponentsContainer, ".o-calendar-common-popover");
+
+        await clickEvent(calendar, 1);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover",
+            "open popup when click on event"
+        );
+
+        await click(mainComponentsContainer, ".o-calendar-common-popover .o_cw_body");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover",
+            "keep popup openned when click inside popup"
+        );
+
+        await click(calendar.el);
+        assert.containsNone(
+            mainComponentsContainer,
+            ".o-calendar-common-popover",
+            "close popup when click outside popup"
+        );
     });
 
     QUnit.todo("calendar: disableQuickCreate in data event", async (assert) => {

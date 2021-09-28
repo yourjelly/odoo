@@ -12,7 +12,7 @@ const DATE_FORMATS = {
 };
 
 function getFirstDayOfWeek() {
-    return ![undefined, false].includes(localization.weekStart) ? localization.weekStart % 7 : 0;
+    return ![undefined, false].includes(localization.weekStart) ? localization.weekStart : 7;
 }
 
 export class CalendarModel extends Model {
@@ -309,9 +309,6 @@ export class CalendarModel extends Model {
      * @returns {{start: luxon.DateTime, end: luxon.DateTime}}
      */
     computeRange() {
-        const { firstDayOfWeek } = this.meta;
-        const lastDayOfWeek = firstDayOfWeek + 6;
-
         let start = this.meta.date.toUTC();
         let end = this.meta.date.toUTC();
 
@@ -322,16 +319,17 @@ export class CalendarModel extends Model {
             end = end.endOf(this.meta.scale);
         }
 
-        if (this.meta.scale !== "day") {
-            const weekStart = start.weekday < firstDayOfWeek ? firstDayOfWeek - 7 : firstDayOfWeek;
-            start = start.set({ weekday: weekStart }).startOf("day");
-            if (this.meta.scale === "month") {
-                end = start.plus({ weeks: 6 }).endOf("day");
-            } else {
-                const weekEnd = end.weekday < firstDayOfWeek ? lastDayOfWeek - 7 : lastDayOfWeek;
-                end = end.set({ weekday: weekEnd }).endOf("day");
-            }
+        if (["week", "month"].includes(this.meta.scale)) {
+            const weekday =
+                start.weekday < this.meta.firstDayOfWeek
+                    ? this.meta.firstDayOfWeek - 7
+                    : this.meta.firstDayOfWeek;
+            start = start.set({ weekday });
+            end = start.plus({ weeks: this.meta.scale === "week" ? 1 : 6, days: -1 });
         }
+
+        start = start.startOf("day");
+        end = end.endOf("day");
 
         return {
             start: start,
@@ -569,6 +567,7 @@ export class CalendarModel extends Model {
      * @returns {Promise<import("./calendar_types").CalendarFilterSectionDict>}
      */
     async loadFilters() {
+        /** @type {import("./calendar_types").CalendarFilterSectionDict} */
         const sections = {};
         /** @type {import("./calendar_types").CalendarFilterInfoDict} */
         const dynamicFiltersInfo = {};
@@ -579,7 +578,10 @@ export class CalendarModel extends Model {
                 dynamicFiltersInfo[fieldName] = filterInfo;
             }
         }
-        return Object.assign(sections, await this.loadDynamicFilters(dynamicFiltersInfo));
+        if (Object.keys(dynamicFiltersInfo).length) {
+            Object.assign(sections, await this.loadDynamicFilters(dynamicFiltersInfo));
+        }
+        return sections;
     }
     /**
      * @protected

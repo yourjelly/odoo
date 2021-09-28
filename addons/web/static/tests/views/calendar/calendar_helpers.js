@@ -300,7 +300,7 @@ function findDateCol(calendar, date) {
     return calendar.el.querySelector(`.fc-day-header[data-date="${date}"]`);
 }
 
-function findTimeRow(calendar, time) {
+export function findTimeRow(calendar, time) {
     return calendar.el.querySelector(`.fc-slats [data-time="${time}"] .fc-widget-content`);
 }
 
