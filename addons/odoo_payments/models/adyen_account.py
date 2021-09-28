@@ -20,46 +20,6 @@ from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
 
-
-#=== COMPUTE METHODS ===#
-
-#=== CONSTRAINT METHODS ===#
-
-#=== CRUD METHODS ===#
-
-#=== ACTION METHODS ===#
-
-#=== BUSINESS METHODS ===#
-
-#=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
-
-@api.model
-def action_create_or_redirect(self):
-    ''' TODO ANV
-    Accessing the FormView to create an Adyen account needs to be done through this action.
-    The action will redirect the user to accounts.odoo.com to link an Odoo user_id to the Adyen
-    account. After logging in on odoo.com the user will be redirected to his DB with a token in
-    the URL. This token is then needed to create the Adyen account.
-    '''
-    if not self.env.company.adyen_account_id:  # No account exists yet
-        onboarding_url = self.env['ir.config_parameter'].sudo().get_param(
-            'odoo_payments.onboarding_url'
-        )
-        return_url = url_join(self.env.company.get_base_url(), '/odoo_payments/create_account')
-        action = {
-            'type': 'ir.actions.act_url',
-            'url': url_join(onboarding_url, f'/get_creation_token?return_url={return_url}'),
-            'target': 'self',
-        }
-    else:  # An account already exists, show it
-        action = self.env['ir.actions.actions']._for_xml_id(
-            'odoo_payments.action_view_adyen_account'
-        )
-        action.update(res_id=self.env.company.adyen_account_id.id)
-    return action
-
-
-
 TIMEOUT = 60
 ADYEN_STATUS_MAP = {
     'Active': 'active',
@@ -91,41 +51,6 @@ class AdyenAccount(models.Model):
     _rec_name = 'full_name'
 
     #=== DEFAULT METHODS ===#
-
-    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
-
-    @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
-        company_fields = {
-            'country_id': 'country_id',
-            'state_id': 'state_id',
-            'city': 'city',
-            'zip': 'zip',
-            'street': 'street_name',  # base_address_extended
-            'house_number_or_name': 'street_number',  # base_address_extended
-            'email': 'email',
-            'phone_number': 'phone',
-        }
-        if self.env.company.partner_id.is_company:
-            company_fields.update({
-                'registration_number': 'vat',
-                'legal_business_name': 'name',
-                'doing_business_as': 'name',
-            })
-            if 'entity_type' in fields_list:
-                res['entity_type'] = 'business'
-
-        field_keys = company_fields.keys() & set(fields_list)
-        for field_name in field_keys:
-            res[field_name] = self.env.company[company_fields[field_name]]
-
-        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields_list):
-            name = self.env.company.partner_id.name.split()
-            res['last_name'] = name[-1]
-            res['first_name'] = ' '.join(name[:-1])
-
-        return res
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -180,9 +105,9 @@ class AdyenAccount(models.Model):
     document_number = fields.Char(
         'ID Number',
         help="The type of ID Number required depends on the country:\n"
-        "US: Social Security Number (9 digits or last 4 digits)\n"
-        "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
-        "Australia: Document Number")
+             "US: Social Security Number (9 digits or last 4 digits)\n"
+             "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
+             "Australia: Document Number")
     document_type = fields.Selection(string='Document Type', selection=[
         ('ID', 'ID'),
         ('PASSPORT', 'Passport'),
@@ -235,35 +160,108 @@ class AdyenAccount(models.Model):
         ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
     ]
 
-    def name_get(self):
-        return [
-            (record.id, "Odoo Payments Account" if record.id else "Odoo Payments Account Creation")
-            for record in self
-        ]
+    #=== COMPUTE METHODS ===#
+
+    #=== CONSTRAINT METHODS ===#
+
+    #=== CRUD METHODS ===#
+
+    #=== ACTION METHODS ===#
+
+    @api.model
+    def action_create_or_redirect(self):
+        """ Return the action to create the account if it doesn't exist yet, or to browse it.
+        
+        This method must always be used to either create or browse the adyen account. If no account
+        is found on the current company, the returned action is an `ir.actions.act_url` that will
+        redirect the user to odoo.com in order to begin the account creation flow. If an account is
+        found on the current company, the returned action is an `ir.actions.act_window` that allows
+        browsing the account in form view.
+        
+        :return: The appropriate action depending on whether an adyen account exists for the current
+                 company
+        :rtype: dict
+        """
+        if not self.env.company.adyen_account_id:  # No account exists yet
+            onboarding_url = self.env['ir.config_parameter'].sudo().get_param(
+                'odoo_payments.onboarding_url'
+            )
+            return_url = url_join(self.env.company.get_base_url(), '/odoo_payments/create_account')
+            action = {
+                'type': 'ir.actions.act_url',
+                'url': url_join(onboarding_url, f'/get_creation_token?return_url={return_url}'),
+                'target': 'self',
+            }
+        else:  # An account already exists, show it
+            action = self.env['ir.actions.actions']._for_xml_id(
+                'odoo_payments.action_view_adyen_account'
+            )
+            action.update(res_id=self.env.company.adyen_account_id.id)
+        return action
+
+    #=== BUSINESS METHODS ===#
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.constrains('phone_number')
     def _check_phone_number(self):
         for account in self:
-            phone_validation.phone_parse(
-                account.phone_number,
-                account.country_id.code)
+            phone_validation.phone_parse(account.phone_number, account.country_id.code)
 
     @api.constrains('phone_number')
     def _check_email(self):
         for account in self:
             if not mail_validation.mail_validate(account.email):
-                raise ValidationError(_(
-                    "The given email address is invalid: %s", account.email))
+                raise ValidationError(_("The given email address is invalid: %s", account.email))
 
     @api.constrains('registration_number')
     def _check_vat(self):
         for account in self:
             if not account.env['res.partner'].simple_vat_check(
-                account.country_id.code,
-                account.registration_number):
-                raise ValidationError(_(
-                    "The given registration number is invalid: %s",
-                    account.registration_number))
+                account.country_id.code, account.registration_number
+            ):
+                raise ValidationError(
+                    _("The given registration number is invalid: %s", account.registration_number)
+                )
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        company_fields = {
+            'country_id': 'country_id',
+            'state_id': 'state_id',
+            'city': 'city',
+            'zip': 'zip',
+            'street': 'street_name',  # base_address_extended
+            'house_number_or_name': 'street_number',  # base_address_extended
+            'email': 'email',
+            'phone_number': 'phone',
+        }
+        if self.env.company.partner_id.is_company:
+            company_fields.update({
+                'registration_number': 'vat',
+                'legal_business_name': 'name',
+                'doing_business_as': 'name',
+            })
+            if 'entity_type' in fields_list:
+                res['entity_type'] = 'business'
+
+        field_keys = company_fields.keys() & set(fields_list)
+        for field_name in field_keys:
+            res[field_name] = self.env.company[company_fields[field_name]]
+
+        if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields_list):
+            name = self.env.company.partner_id.name.split()
+            res['last_name'] = name[-1]
+            res['first_name'] = ' '.join(name[:-1])
+
+        return res
+
+    def name_get(self):
+        return [
+            (record.id, "Odoo Payments Account" if record.id else "Odoo Payments Account Creation")
+            for record in self
+        ]
 
     @api.depends('company_id')  # fake 'depends' to be sure that this _compute method is called when the form view is displayed
     def _compute_need_to_provide_payment_journal(self):
@@ -272,6 +270,8 @@ class AdyenAccount(models.Model):
             ('state', '=', 'installed'),
         ])
 
+    # TODO ANVFE move payment_journal_id logic to payment_odoo module
+    # or add payment as dependency of odoo_payments
     @api.depends('company_id')
     def _compute_payment_journal_id(self):
         for account in self:
@@ -335,21 +335,21 @@ class AdyenAccount(models.Model):
 
     @api.depends('transaction_ids')
     def _compute_transactions_count(self):
-        for adyen_account_id in self:
-            adyen_account_id.transactions_count = len(adyen_account_id.transaction_ids)
+        for account in self:
+            account.transactions_count = len(account.transaction_ids)
 
     @api.depends('transaction_payout_ids')
     def _compute_payout_count(self):
-        for adyen_account_id in self:
-            adyen_account_id.payout_count = len(adyen_account_id.transaction_payout_ids)
+        for account in self:
+            account.payout_count = len(account.transaction_payout_ids)
 
     @api.depends('first_name', 'last_name', 'legal_business_name')
     def _compute_full_name(self):
-        for adyen_account_id in self:
-            if adyen_account_id.entity_type != 'individual':
-                adyen_account_id.full_name = adyen_account_id.legal_business_name
+        for account in self:
+            if account.entity_type != 'individual':
+                account.full_name = account.legal_business_name
             else:
-                adyen_account_id.full_name = "%s %s" % (adyen_account_id.first_name, adyen_account_id.last_name)
+                account.full_name = "%s %s" % (account.first_name, account.last_name)
 
     @api.depends('kyc_tier', 'adyen_kyc_ids', 'account_status')
     def _compute_state(self):
@@ -420,12 +420,14 @@ class AdyenAccount(models.Model):
         return adyen_account
 
     def write(self, vals):
-        adyen_fields = {
-            'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name', 'email', 'phone_number',
-            'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number', 'first_name',
-            'last_name', 'date_of_birth', 'document_number', 'document_type',
-        }
         res = super().write(vals)
+
+        adyen_fields = {
+            'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
+            'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
+            'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
+            'document_number', 'document_type',
+        }
         if vals.keys() & adyen_fields and not self.env.context.get('update_from_adyen'):
             self._adyen_rpc('v1/update_account_holder', self._prepare_account_data(vals))
 
@@ -445,9 +447,9 @@ class AdyenAccount(models.Model):
 
         # TODO ANVFE better highlight/distinction between closed and non closed accounts
 
-        for adyen_account_id in self:
-            adyen_account_id._adyen_rpc('v1/close_account_holder', {
-                'accountHolderCode': adyen_account_id.account_holder_code,
+        for account in self:
+            account._adyen_rpc('v1/close_account_holder', {
+                'accountHolderCode': account.account_holder_code,
             })
         return super().unlink()
 
@@ -493,7 +495,7 @@ class AdyenAccount(models.Model):
 
         :param dict values: create/write values to forward to Adyen
         """
-        fields = values.keys()
+        modified_fields = values.keys()
         data = {
             'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
         }
@@ -501,7 +503,7 @@ class AdyenAccount(models.Model):
 
         # *ALL* the address fields are required if one of them changes
         address_fields = {'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name'}
-        if address_fields & fields:
+        if address_fields & modified_fields:
             country_id = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
             state_id = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
             holder_details['address'] = {
@@ -531,7 +533,7 @@ class AdyenAccount(models.Model):
         else:
             is_business = self and self.entity_type != 'individual'
 
-        if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & fields:
+        if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & modified_fields:
             business_details = holder_details['businessDetails'] = {}
             for source, dest in [
                 ('legal_business_name', 'legalBusinessName'),
@@ -541,20 +543,20 @@ class AdyenAccount(models.Model):
                 if source in values:
                     business_details[dest] = values[source]
 
-        elif {'first_name', 'last_name', 'date_of_birth', 'document_number', 'document_type'} & fields:
+        elif {'first_name', 'last_name', 'date_of_birth', 'document_number', 'document_type'} & modified_fields:
             holder_details['individualDetails'] = {}
 
-            if {'first_name', 'last_name'} & fields:
+            if {'first_name', 'last_name'} & modified_fields:
                 holder_details['individualDetails']['name'] = {
                     'firstName': values.get('first_name') or self.first_name,
                     'lastName': values.get('last_name') or self.last_name
                 }
 
-            if 'date_of_birth' in fields:
+            if 'date_of_birth' in modified_fields:
                 holder_details['individualDetails'].setdefault('personalData', {})['dateOfBirth'] = str(values['date_of_birth'])
 
             document_number = values.get('document_number') or self.document_number
-            if self.document_number and 'document_number' in fields:
+            if self.document_number and 'document_number' in modified_fields:
                 holder_details['individualDetails'].setdefault('personalData', {})['documentData'] = [{
                     'number': document_number,
                     'type': values.get('document_type') or self.document_type,
@@ -582,17 +584,17 @@ class AdyenAccount(models.Model):
             # Onboarding first passes through Internal odoo.com first
             url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
             params = {
-                'creation_token': request.session.get('adyen_creation_token'),
-                'base_url': self.get_base_url(),
                 'adyen_data': adyen_data,
+                'base_url': self.get_base_url(),
+                'creation_token': request.session.get('adyen_creation_token'),
                 'test': self.is_test,
             }
             auth = None
         else:
             url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
             params = {
-                'adyen_uuid': self.adyen_uuid,
                 'adyen_data': adyen_data,
+                'adyen_uuid': self.adyen_uuid,
             }
             auth = AdyenProxyAuth(self)
 
