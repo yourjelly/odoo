@@ -407,12 +407,12 @@ class AdyenAccount(models.Model):
         create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(
             values.get('payout_schedule', 'biweekly'),
             'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
-        # response = adyen_account._adyen_rpc('v1/create_account_holder', create_data) TODO UNCOMMENT BEFORE COMMITTING
-        # adyen_account.with_context(update_from_adyen=True).write({
-        #     'account_code': response['adyen_response']['accountCode'],
-        #     'adyen_uuid': response['adyen_uuid'],
-        #     'proxy_token': response['proxy_token'],
-        # })
+        response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
+        adyen_account.with_context(update_from_adyen=True).write({
+            'account_code': response['adyen_response']['accountCode'],
+            'adyen_uuid': response['adyen_uuid'],
+            'proxy_token': response['proxy_token'],
+        })
 
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
