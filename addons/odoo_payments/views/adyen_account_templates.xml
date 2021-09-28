@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="kyc_status_message">
-        <p t-if="message" t-esc="message" />
+        <p t-if="message" t-esc="message"/>
         <t t-if="checks">
             <t t-foreach="checks" t-as="verification_type">
                 <ul>
-                    <li><strong><t t-esc="verification_type" />:</strong>
+                    <li>
+                        <strong><t t-esc="verification_type"/>:</strong>
                         <ul>
                             <t t-foreach="checks[verification_type]" t-as="check">
                                 <li>
-                                    <strong t-if="check['document']"><t t-esc="check['document']" />: </strong><t t-esc="check['message']" />
+                                    <strong t-if="check['document']">
+                                        <t t-esc="check['document']"/>: </strong>
+                                    <t t-esc="check['message']"/>
                                 </li>
                             </t>
                         </ul>

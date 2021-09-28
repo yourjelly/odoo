@@ -10,7 +10,7 @@ const viewRegistry = require('web.view_registry');
 const _t = core._t;
 const QWeb = core.qweb;
 
-var AdyenAccountFormController = FormController.extend({
+const AdyenAccountFormController = FormController.extend({
     _discardChanges: function (recordID, options) {
         this._super.apply(this, arguments);
         this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});    
@@ -56,7 +56,7 @@ var AdyenAccountFormController = FormController.extend({
     },
 });
 
-var AdyenAccountFormView = FormView.extend({
+const AdyenAccountFormView = FormView.extend({
     config: _.extend({}, FormView.prototype.config, {
         Controller: AdyenAccountFormController,
     }),

@@ -17,38 +17,52 @@ ADYEN_AVAILABLE_COUNTRIES = [
 
 class AdyenAddressMixin(models.AbstractModel):
     _name = 'adyen.address.mixin'
-    _description = 'Adyen for Platforms Address Mixin'
+    _description = "Odoo Payments Address Mixin"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    country_id = fields.Many2one('res.country', string='Country', required=True, domain=[
-        ('code', 'in', ADYEN_AVAILABLE_COUNTRIES),
-        ('code', 'in', ODOO_PAYMENTS_DEPLOYED_COUNTRIES)])
+    country_id = fields.Many2one(
+        string="Country",
+        comodel_name='res.country',
+        required=True,
+        domain=[
+            ('code', 'in', ADYEN_AVAILABLE_COUNTRIES),
+            ('code', 'in', ODOO_PAYMENTS_DEPLOYED_COUNTRIES),
+        ])
     country_code = fields.Char(related='country_id.code')
 
-    state_id = fields.Many2one('res.country.state', string='State', domain="[('country_id', '=?', country_id)]")
+    state_id = fields.Many2one(
+        string="State",
+        comodel_name='res.country.state',
+        domain="[('country_id', '=?', country_id)]")
     state_code = fields.Char(related='state_id.code')
 
-    city = fields.Char('City', required=True)
-    zip = fields.Char('ZIP', required=True)
-    street = fields.Char('Street', required=True)
-    house_number_or_name = fields.Char('House Number Or Name', required=True)
+    city = fields.Char(string="City", required=True)
+    zip = fields.Char(string="ZIP", required=True)
+    street = fields.Char(string="Street", required=True)
+    house_number_or_name = fields.Char(string="House Number Or Name", required=True)
 
 
 class AdyenIDMixin(models.AbstractModel):
     _name = 'adyen.id.mixin'
-    _description = 'Adyen for Platforms ID Mixin'
+    _description = "Odoo Payments ID Mixin"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    id_type = fields.Selection(string='Photo ID type', selection=[
-        ('PASSPORT', 'Passport'),
-        ('ID_CARD', 'ID Card'),
-        ('DRIVING_LICENSE', 'Driving License'),
-    ])
-    id_front = fields.Binary('Photo ID Front', help="Allowed formats: jpg, pdf, png. Maximum allowed size: 4MB.")
+    id_type = fields.Selection(
+        string='Photo ID type',
+        selection=[
+            ('PASSPORT', 'Passport'),
+            ('ID_CARD', 'ID Card'),
+            ('DRIVING_LICENSE', 'Driving License'),
+        ])
+    id_front = fields.Binary(
+        string='Photo ID Front', help="Allowed formats: jpg, pdf, png. Maximum allowed size: 4MB.")
+    # FIXME ANVFE isn't it already stored in the attachment? is this field needed ?
     id_front_filename = fields.Char()
-    id_back = fields.Binary('Photo ID Back', help="Allowed formats: jpg, pdf, png. Maximum allowed size: 4MB.")
+    id_back = fields.Binary(
+        string='Photo ID Back', help="Allowed formats: jpg, pdf, png. Maximum allowed size: 4MB.")
+    # FIXME ANVFE isn't it already stored in the attachment? is this field needed ?
     id_back_filename = fields.Char()
 
     #=== COMPUTE METHODS ===#

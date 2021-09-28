@@ -9,13 +9,13 @@ _logger = logging.getLogger(__name__)
 
 class AdyenTransactionStatus(models.Model):
     _name = 'adyen.transaction.status'  # TODO ANVFE do we really need a separate model for that? Couldn't a tracking=True do the job?
-    _description = 'Transaction Status'
+    _description = "Transaction Status"
     _order = 'date desc'
     _rec_name = 'status'
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    adyen_transaction_id = fields.Many2one('adyen.transaction', required=True, ondelete='cascade')
+    adyen_transaction_id = fields.Many2one(comodel_name='adyen.transaction', required=True, ondelete='cascade')
     status = fields.Selection(string='Status', selection=[
         ('unknown', 'Unknown'),
         ('PendingCredit', 'Pending Credit'),

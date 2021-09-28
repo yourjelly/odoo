@@ -28,36 +28,41 @@ class AdyenTransaction(models.Model):
     # TODO ANVFE multi-company consideration
     # Add company_id = adyen_account_id.company_id stored and with ir rules of access.
 
-    adyen_account_id = fields.Many2one('adyen.account', required=True)
+    adyen_account_id = fields.Many2one(comodel_name='adyen.account', required=True)
     company_id = fields.Many2one(related='adyen_account_id.company_id', store=True)
 
-    reference = fields.Char('Reference', index=True, required=True)
-    capture_reference = fields.Char('Capture Reference')
+    reference = fields.Char(string='Reference', index=True, required=True)
+    capture_reference = fields.Char(string='Capture Reference')
 
-    total_amount = fields.Float('Customer Amount')
-    currency_id = fields.Many2one('res.currency', string='Currency')
-    merchant_amount = fields.Float('Merchant Amount')
-    fees = fields.Float('Fees')
-    fixed_fees = fields.Float('Fixed Fees')
-    variable_fees = fields.Float('Variable Fees')
-    fees_currency_id = fields.Many2one('res.currency', compute="_compute_fees_currency_id")
+    total_amount = fields.Float(string='Customer Amount')
+    currency_id = fields.Many2one(comodel_name='res.currency')
+    merchant_amount = fields.Float(string='Merchant Amount')
+    fees = fields.Float(string='Fees')
+    fixed_fees = fields.Float(string='Fixed Fees')
+    variable_fees = fields.Float(string='Variable Fees')
+    fees_currency_id = fields.Many2one(
+        comodel_name='res.currency', compute="_compute_fees_currency_id")
 
-    date = fields.Datetime('Date')
-    description = fields.Char('Description')
-    signature = fields.Char('Signature')
-    reason = fields.Char('Failure Reason')
+    date = fields.Datetime(string='Date')
+    description = fields.Char(string='Description')
+    signature = fields.Char(string='Signature')
+    reason = fields.Char(string='Failure Reason')
 
-    status_ids = fields.One2many('adyen.transaction.status', 'adyen_transaction_id', 'Status History')
+    status_ids = fields.One2many(
+        string="Status History",
+        comodel_name='adyen.transaction.status', inverse_name='adyen_transaction_id')
 
     last_status_id = fields.Many2one(
-        'adyen.transaction.status', 'Last Status', compute='_compute_last_status_id',
-        store=True, readonly=True)
+        string='Last Status',
+        comodel_name='adyen.transaction.status',
+        compute='_compute_last_status_id',
+        store=True)
     last_status_update = fields.Datetime(related='last_status_id.date', string='Last Status Update')
     status = fields.Selection(related='last_status_id.status')
 
-    payment_method = fields.Char('Payment Method')
-    shopper_country_id = fields.Many2one('res.country')
-    card_country_id = fields.Many2one('res.country')
+    payment_method = fields.Char(string='Payment Method')
+    shopper_country_id = fields.Many2one(comodel_name='res.country')
+    card_country_id = fields.Many2one(comodel_name='res.country')
     commercial_card = fields.Selection([
         ('yes', 'Yes'),
         ('no', 'No'),
@@ -65,10 +70,11 @@ class AdyenTransaction(models.Model):
     ], default='unknown')
 
     # TODO ANVFE DISPUTES: where is this set ?
-    dispute_reference = fields.Char('Dispute Reference')
+    dispute_reference = fields.Char(string='Dispute Reference')
 
     _sql_constraints = [
-        ('reference_unique', 'unique(reference, capture_reference)', 'A transaction with the same reference already exists.'),
+        ('reference_unique', 'unique(reference, capture_reference)',
+         "A transaction with the same reference already exists."),
     ]
 
     #=== COMPUTE METHODS ===#

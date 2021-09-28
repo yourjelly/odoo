@@ -15,39 +15,18 @@ from odoo.http import request
 from odoo.osv import expression
 
 from odoo.addons.mail.tools import mail_validation
+from odoo.addons.odoo_payments.const import ACCOUNT_STATUS_MAPPING, KYC_STATUS_MAPPING, \
+                                            PAYOUT_SCHEDULE_MAPPING
 from odoo.addons.odoo_payments.util import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
 
-TIMEOUT = 60
-ADYEN_STATUS_MAP = {
-    'Active': 'active',
-    'Inactive': 'inactive',
-    'Suspended': 'suspended',
-    'Closed': 'closed',
-}
-ADYEN_VALIDATION_MAP = {
-    'FAILED': 'failed',
-    'INVALID_DATA': 'awaiting_data',
-    'RETRY_LIMIT_REACHED': 'awaiting_data',
-    'AWAITING_DATA': 'awaiting_data',
-    'DATA_PROVIDED': 'data_provided',
-    'PENDING': 'pending',
-    'PASSED': 'passed',
-}
-ADYEN_PAYOUT_FREQUENCIES = {
-    'daily': 'DAILY',
-    'weekly': 'WEEKLY',
-    'biweekly': 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT',
-    'monthly': 'MONTHLY',
-}
-
 
 class AdyenAccount(models.Model):
     _name = 'adyen.account'
     _inherit = ['mail.thread', 'adyen.id.mixin', 'adyen.address.mixin']
-    _description = 'Adyen for Platforms Account'
+    _description = "Odoo Payments Account"
     _rec_name = 'full_name'
 
     #=== DEFAULT METHODS ===#
@@ -55,16 +34,25 @@ class AdyenAccount(models.Model):
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     # Credentials
-    proxy_token = fields.Char('Proxy Token')
-    adyen_uuid = fields.Char('Adyen UUID')
-    account_holder_code = fields.Char('Account Holder Code', default=lambda self: uuid.uuid4().hex)
+    adyen_uuid = fields.Char(string="Adyen UUID")
+    account_holder_code = fields.Char(
+        string="Account Holder Code", default=lambda self: uuid.uuid4().hex)
+    proxy_token = fields.Char(string="Proxy Token")
 
-    company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True)
-    shareholder_ids = fields.One2many('adyen.shareholder', 'adyen_account_id', string='Shareholders')
-    bank_account_ids = fields.One2many('adyen.bank.account', 'adyen_account_id', string='Bank Accounts')
-    transaction_ids = fields.One2many('adyen.transaction', 'adyen_account_id', string='Transactions')
+    company_id = fields.Many2one(
+        comodel_name='res.company', required=True, default=lambda self: self.env.company)
+
+    bank_account_ids = fields.One2many(
+        string="Bank Accounts", comodel_name='adyen.bank.account', inverse_name='adyen_account_id')
+    shareholder_ids = fields.One2many(
+        string="Shareholders", comodel_name='adyen.shareholder', inverse_name='adyen_account_id')
+
+    transaction_ids = fields.One2many(
+        string="Transactions", comodel_name='adyen.transaction', inverse_name='adyen_account_id')
     transactions_count = fields.Integer(compute='_compute_transactions_count')
-    transaction_payout_ids = fields.One2many('adyen.transaction.payout', 'adyen_account_id')
+
+    transaction_payout_ids = fields.One2many(
+        comodel_name='adyen.transaction.payout', inverse_name='adyen_account_id')
     payout_count = fields.Integer(compute='_compute_payout_count')
 
     payment_journal_id = fields.Many2one(
@@ -74,65 +62,71 @@ class AdyenAccount(models.Model):
         domain="[('type', '=', 'bank'), ('company_id', '=', company_id)]")
 
     # UX flag to know if the user has to select/create a journal or if it will be created automatically for him.
-    need_to_provide_payment_journal = fields.Boolean(compute="_compute_need_to_provide_payment_journal", readonly=True)
+    need_to_provide_payment_journal = fields.Boolean(
+        compute="_compute_need_to_provide_payment_journal")
 
-    entity_type = fields.Selection([
-        ('business', 'Business'),
-        ('individual', 'Individual'),
-        ('nonprofit', 'Non Profit'),
-    ], string="Legal Entity Type", required=True)
+    entity_type = fields.Selection(
+        selection=[
+            ('business', "Business"),
+            ('individual', "Individual"),
+            ('nonprofit', "Non Profit"),
+        ], string="Legal Entity Type", required=True)
 
-    # Payout
-    account_code = fields.Char('Account Code')
-    payout_schedule = fields.Selection([
-        ('daily', 'Daily'),
-        ('weekly', 'Weekly'),
-        ('biweekly', 'Bi-weekly'),
-        ('monthly', 'Monthly'),
-    ], default='biweekly', required=True, string='Payout Schedule', tracking=True)
-    next_scheduled_payout = fields.Datetime('Next Scheduled Payout', readonly=True)
-    last_sync_date = fields.Datetime(default=fields.Datetime.now)
-
-    # Contact Info
-    full_name = fields.Char(compute='_compute_full_name')
-    email = fields.Char('Email', required=True, tracking=True)
-    phone_number = fields.Char('Phone Number', required=True, tracking=True)
-
+    # Contact Info #
     # Individual
-    first_name = fields.Char('First Name')
-    last_name = fields.Char('Last Name')
-    date_of_birth = fields.Date('Date of birth')
+    first_name = fields.Char(string="First Name")
+    last_name = fields.Char(string="Last Name")
+    date_of_birth = fields.Date(string="Date of birth")
     document_number = fields.Char(
-        'ID Number',
+        string="ID Number",
         help="The type of ID Number required depends on the country:\n"
              "US: Social Security Number (9 digits or last 4 digits)\n"
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
              "Australia: Document Number")
-    document_type = fields.Selection(string='Document Type', selection=[
-        ('ID', 'ID'),
-        ('PASSPORT', 'Passport'),
-        ('VISA', 'Visa'),
-        ('DRIVINGLICENSE', 'Driving license'),
-    ], default='ID')
+    document_type = fields.Selection(
+        string="Document Type",
+        selection=[
+            ('ID', "ID"),
+            ('PASSPORT', "Passport"),
+            ('VISA', "Visa"),
+            ('DRIVINGLICENSE', "Driving license"),
+        ], default='ID')
 
-    # Business
-    legal_business_name = fields.Char('Legal Business Name')
-    doing_business_as = fields.Char('Doing Business As')
-    registration_number = fields.Char('Registration Number')
+    # Business / Non Profit
+    legal_business_name = fields.Char(string="Legal Business Name")
+    doing_business_as = fields.Char(string="Doing Business As")
+    registration_number = fields.Char(string="Registration Number")
+
+    # Shared contact info (Business/Individual/NonProfit)
+    full_name = fields.Char(compute='_compute_full_name')
+    email = fields.Char(string="Email", required=True, tracking=True)
+    phone_number = fields.Char(string="Phone Number", required=True, tracking=True)
+
+    # Payout
+    account_code = fields.Char(string="Account Code")
+    payout_schedule = fields.Selection(
+        selection=[
+            ('daily', "Daily"),
+            ('weekly', "Weekly"),
+            ('biweekly', "Bi-weekly"),
+            ('monthly', "Monthly"),
+        ], default='biweekly', required=True, string="Payout Schedule", tracking=True)
+    next_scheduled_payout = fields.Datetime(string="Next Scheduled Payout", readonly=True)
+    last_sync_date = fields.Datetime(default=fields.Datetime.now)
 
     # Adyen Account Status - internal use
     account_status = fields.Selection(
-        string='Internal Account Status',
+        string="Internal Account Status",
         help="The account status transitions from one status to another as follows:\n"
              "1. The account is created -> Inactive\n"
              "2. Adyen confirms the creation of the account -> Suspended\n"
              "3. Odoo Support validates the account -> Active\n"
              "4. The account is closed -> Closed",
         selection=[
-            ('inactive', 'Inactive'),
-            ('suspended', 'Suspended'),
-            ('active', 'Active'),
-            ('closed', 'Closed'),
+            ('inactive', "Inactive"),
+            ('suspended', "Suspended"),
+            ('active', "Active"),
+            ('closed', "Closed"),
         ],
         default='inactive',
         readonly=True,
@@ -141,23 +135,25 @@ class AdyenAccount(models.Model):
     payout_allowed = fields.Boolean(readonly=True)
 
     # Status for UX
-    state = fields.Selection([
-        ('pending', 'Pending Validation'),  # Odoo Validation
-        ('awaiting_data', 'Data To Provide'),
-        ('validation', 'Data Validation'),  # KYC Validation from Adyen
-        ('validated', 'Validated'),
-    ], compute='_compute_state', string='Account State')
+    state = fields.Selection(
+        selection=[
+            ('pending', "Pending Validation"),  # Odoo Validation
+            ('awaiting_data', "Data To Provide"),
+            ('validation', "Data Validation"),  # KYC Validation from Adyen
+            ('validated', "Validated"),
+        ], compute='_compute_state', string="Account State")
     onboarding_msg = fields.Html(compute='_compute_onboarding_msg')
 
     # KYC
-    adyen_kyc_ids = fields.One2many('adyen.kyc', 'adyen_account_id', string='KYC Checks', readonly=True)
-    kyc_tier = fields.Integer(string='KYC Tier', default=0, readonly=True)
+    adyen_kyc_ids = fields.One2many(
+        string="KYC Checks", comodel_name='adyen.kyc', inverse_name='adyen_account_id', readonly=True)
+    kyc_tier = fields.Integer(string="KYC Tier", default=0, readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')
 
     is_test = fields.Boolean(string="Test Account", help="Cannot be modified after account creation.")
 
     _sql_constraints = [
-        ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', 'Adyen UUID should be unique'),
+        ('adyen_uuid_uniq', 'UNIQUE(adyen_uuid)', "Adyen UUID should be unique"),
     ]
 
     #=== COMPUTE METHODS ===#
@@ -205,17 +201,20 @@ class AdyenAccount(models.Model):
 
     @api.constrains('phone_number')
     def _check_phone_number(self):
+        """Verify phone number is valid for specified country."""
         for account in self:
             phone_validation.phone_parse(account.phone_number, account.country_id.code)
 
     @api.constrains('phone_number')
     def _check_email(self):
+        """Verify mail is valid (advanced check if flanker is installed)"""
         for account in self:
             if not mail_validation.mail_validate(account.email):
                 raise ValidationError(_("The given email address is invalid: %s", account.email))
 
     @api.constrains('registration_number')
     def _check_vat(self):
+        """Verify the given VAT is valid for specified country."""
         for account in self:
             if not account.env['res.partner'].simple_vat_check(
                 account.country_id.code, account.registration_number
@@ -227,6 +226,7 @@ class AdyenAccount(models.Model):
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
+
         company_fields = {
             'country_id': 'country_id',
             'state_id': 'state_id',
@@ -404,9 +404,11 @@ class AdyenAccount(models.Model):
         # Create account on odoo.com, proxy and Adyen
         create_data = self._prepare_account_data(values)
         # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
-        create_data['payoutSchedule'] = ADYEN_PAYOUT_FREQUENCIES.get(
-            values.get('payout_schedule', 'biweekly'),
-            'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT'),
+        # Update the payout schedule after preparing the account data. This is not done in the
+        # prepare because the schedule is updated through a dedicated endpoint if modified later on.
+        create_data['payoutSchedule'] = PAYOUT_SCHEDULE_MAPPING.get(
+            values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT',
+        ),
         response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
         adyen_account.with_context(update_from_adyen=True).write({
             'account_code': response['adyen_response']['accountCode'],
@@ -446,11 +448,11 @@ class AdyenAccount(models.Model):
         self.check_access_rights('unlink')
 
         # TODO ANVFE better highlight/distinction between closed and non closed accounts
-
         for account in self:
             account._adyen_rpc('v1/close_account_holder', {
                 'accountHolderCode': account.account_holder_code,
             })
+
         return super().unlink()
 
     def _update_payout_schedule(self, payout_schedule):
@@ -463,7 +465,7 @@ class AdyenAccount(models.Model):
             },
             'payoutSchedule': {
                 'action': 'UPDATE',
-                'schedule': ADYEN_PAYOUT_FREQUENCIES.get(payout_schedule),
+                'schedule': PAYOUT_SCHEDULE_MAPPING.get(payout_schedule),
             }
         })
 
@@ -494,6 +496,12 @@ class AdyenAccount(models.Model):
         """
 
         :param dict values: create/write values to forward to Adyen
+
+        https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
+        https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
+
+        :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
+        :rtype: dict
         """
         modified_fields = values.keys()
         data = {
@@ -504,11 +512,11 @@ class AdyenAccount(models.Model):
         # *ALL* the address fields are required if one of them changes
         address_fields = {'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name'}
         if address_fields & modified_fields:
-            country_id = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-            state_id = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
+            country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
+            state = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
             holder_details['address'] = {
-                'country': country_id.code,
-                'stateOrProvince': state_id.code or None,
+                'country': country.code,
+                'stateOrProvince': state.code or None,
                 'city': values.get('city') or self.city,
                 'postalCode': values.get('zip') or self.zip,
                 'street': values.get('street') or self.street,
@@ -579,6 +587,7 @@ class AdyenAccount(models.Model):
             odoo_payment_acquirer.state = 'enabled' if not self.is_test else 'test'
 
     def _adyen_rpc(self, operation, adyen_data=None):
+        # FIXME ANVFE do we ever reach adyen without any payload ?
         adyen_data = adyen_data or {}
         if operation == 'v1/create_account_holder':
             # Onboarding first passes through Internal odoo.com first
@@ -603,7 +612,8 @@ class AdyenAccount(models.Model):
             'params': params,
         }
         try:
-            response = requests.post(url_join(url, operation), json=payload, auth=auth, timeout=TIMEOUT)
+            response = requests.post(
+                url_join(url, operation), json=payload, auth=auth, timeout=60)
             response.raise_for_status()
         except requests.exceptions.Timeout:
             raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
@@ -667,7 +677,7 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         # Account Status
-        new_status = ADYEN_STATUS_MAP.get(content.get('newStatus', {}).get('status'))
+        new_status = ACCOUNT_STATUS_MAPPING.get(content.get('newStatus', {}).get('status'))
         if new_status and new_status != self.account_status:
             old_status = self.account_status
             self.account_status = new_status
@@ -704,7 +714,7 @@ class AdyenAccount(models.Model):
         """NOTE: sudoed env"""
         self.ensure_one()
 
-        status = ADYEN_VALIDATION_MAP.get(content.get('verificationStatus'))
+        status = KYC_STATUS_MAPPING.get(content.get('verificationStatus'))
         document = '_'.join(content.get('verificationType', '').lower().split('_')[:-1])  # bank_account, identity, passport, etc.
         status_message = content.get('statusSummary', {}).get('kycCheckDescription')
 
@@ -775,7 +785,7 @@ class AdyenAccount(models.Model):
             'accountHolderCode': self.account_holder_code,
             'transactionListsPerAccount': [{
                 'accountCode': self.account_code,
-                'page': page, # Each page lists up to 50 txs
+                'page': page,  # Each page lists up to 50 txs
             }],
             # transactionStatuses not provided to receive all adyen txs
         })

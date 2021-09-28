@@ -1,15 +1,15 @@
 odoo.define('odoo_payments.transactions.dashboard', function (require) {
     "use strict";
 
-    var ListRenderer = require('web.ListRenderer');
-    var ListView = require('web.ListView');
+    const ListRenderer = require('web.ListRenderer');
+    const ListView = require('web.ListView');
 
-    var viewRegistry = require('web.view_registry');
+    const viewRegistry = require('web.view_registry');
 
-    var core = require('web.core');
-    var QWeb = core.qweb;
+    const core = require('web.core');
+    const QWeb = core.qweb;
 
-    var AdyenTransactionsListRenderer = ListRenderer.extend({
+    const AdyenTransactionsListRenderer = ListRenderer.extend({
         _render: function () {
             const el = this.$el.parent();
             return this._super.apply(this, arguments).then(() => {
@@ -29,7 +29,7 @@ odoo.define('odoo_payments.transactions.dashboard', function (require) {
         }
     });
 
-    var AdyenTransactionsListView = ListView.extend({
+    const AdyenTransactionsListView = ListView.extend({
         config: _.extend({}, ListView.prototype.config, {
             Renderer: AdyenTransactionsListRenderer
         }),
