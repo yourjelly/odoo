@@ -13,7 +13,7 @@ import { userService } from "@web/core/user_service";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
 import { click, getFixture, patchDate, patchWithCleanup } from "../../helpers/utils";
 import { makeView } from "../helpers";
-import { clickEvent } from "./calendar_helpers";
+import { changeScale, clickEvent } from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -240,7 +240,7 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.module("CalendarView");
 
-    QUnit.debug("simple calendar rendering", async (assert) => {
+    QUnit.test("simple calendar rendering", async (assert) => {
         serverData.models.event.records.push({
             id: 8,
             user_id: uid,
@@ -304,7 +304,7 @@ QUnit.module("wowl Views", (hooks) => {
             "week scale should highlight 7 days in mini calendar"
         );
 
-        await click(calendar.el, ".o-calendar-view--scale-button--day"); // display only one day
+        await changeScale(calendar, "day"); // display only one day
         assert.containsN(calendar.el, ".fc-event", 2, "should display 2 events on the day");
         assert.containsOnce(
             sidebar,
@@ -312,7 +312,7 @@ QUnit.module("wowl Views", (hooks) => {
             "should highlight the target day in mini calendar"
         );
 
-        await click(calendar.el, ".o-calendar-view--scale-button--month"); // display all the month
+        await changeScale(calendar, "month"); // display all the month
 
         // We display the events or partner 1 2 and 4. Partner 2 has nothing and Event 6 is for partner 6 (not displayed)
         await click(calendar.el, ".o-calendar-filter-panel--filter[data-value='all'] input");
@@ -486,8 +486,51 @@ QUnit.module("wowl Views", (hooks) => {
         }
     );
 
-    QUnit.todo("breadcrumbs are updated with the displayed period", async (assert) => {
-        assert.ok(false);
+    QUnit.test("breadcrumbs are updated with the displayed period", async (assert) => {
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                />
+            `,
+            displayName: "Meetings Test",
+        });
+
+        // displays week mode by default
+        assert.strictEqual(
+            calendar.el.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
+            "Meetings Test (Dec 11 – 17, 2016)",
+            "should display the current week"
+        );
+
+        // switch to day mode
+        await changeScale(calendar, "day");
+        assert.strictEqual(
+            calendar.el.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
+            "Meetings Test (December 12, 2016)",
+            "should display the current day"
+        );
+
+        // switch to month mode
+        await changeScale(calendar, "month");
+        assert.strictEqual(
+            calendar.el.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
+            "Meetings Test (December 2016)",
+            "should display the current month"
+        );
+
+        // switch to year mode
+        await changeScale(calendar, "year");
+        assert.strictEqual(
+            calendar.el.querySelector(".o_control_panel .breadcrumb-item.active").textContent,
+            "Meetings Test (2016)",
+            "should display the current year"
+        );
     });
 
     QUnit.todo("create and change events", async (assert) => {

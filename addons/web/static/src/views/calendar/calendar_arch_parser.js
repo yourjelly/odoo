@@ -51,7 +51,7 @@ export class CalendarArchParser extends XMLParser {
             isDateHidden: false,
             isTimeHidden: false,
             popoverFields: {},
-            scale: "day",
+            scale: "week",
             scales: [],
             showUnusualDays: false,
         };
@@ -103,7 +103,7 @@ export class CalendarArchParser extends XMLParser {
         const scaleAttr = node.getAttribute("scales");
         const scales = scaleAttr && scaleAttr.split(",");
         this.data.scales = scaleAttr ? scales.filter((scale) => SCALES.includes(scale)) : SCALES;
-        this.data.scale = node.getAttribute("mode") || this.data.scales[0];
+        this.data.scale = node.getAttribute("mode") || "week";
         if (!this.data.scales.includes(this.data.scale)) {
             throw new Error(`Calendar view cannot display mode: ${this.data.scale}`);
         }

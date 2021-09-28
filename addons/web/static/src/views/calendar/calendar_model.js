@@ -44,10 +44,7 @@ export class CalendarModel extends Model {
         this.data = {
             filterSections: {},
             hasCreateRight: null,
-            range: {
-                start: this.meta.date,
-                end: this.meta.date,
-            },
+            range: this.computeRange(),
             records: {},
             unusualDays: [],
         };

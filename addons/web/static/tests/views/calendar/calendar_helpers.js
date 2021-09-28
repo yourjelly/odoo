@@ -369,3 +369,13 @@ export async function selectDateRange(calendar, startDate, endDate) {
 export async function selectAllDayRange(calendar, start, end) {}
 
 export async function moveEvent(calendar, eventId, dateTime, toAllDaySlot = false) {}
+
+export async function changeScale(calendarView, scale) {
+    if (!calendarView.el.classList.contains("o-calendar-view")) {
+        throw new Error("component should be type of CalendarView");
+    }
+    await click(
+        calendarView.el,
+        `.o-calendar-view--scale-buttons .o-calendar-view--scale-button--${scale}`
+    );
+}
