@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="adyen_account_view_form" model="ir.ui.view">
         <field name="name">adyen.account.view.form</field>
         <field name="model">adyen.account</field>
@@ -13,21 +14,31 @@
                 <field name="payout_allowed" invisible="1"/>
                 <field name="need_to_provide_payment_journal" invisible="1"/>
                 <header>
-                    <field name="state" widget="statusbar" attrs="{'invisible': [('id', '=', False)]}"/>
+                    <field name="state"
+                           widget="statusbar"
+                           attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
-                <div class="alert alert-warning o_form_header" attrs="{'invisible': ['|', ('onboarding_msg', '=', False),('account_status', '!=', 'active')]}" role="status">
-                    <a class="close" data-dismiss="alert" href="#" aria-label="Close"><i title="Close" class="small fa fa-times"/></a>
+                <div class="alert alert-warning o_form_header"
+                     attrs="{'invisible': ['|', ('onboarding_msg', '=', False), ('account_status', '!=', 'active')]}"
+                     role="status">
+                    <a class="close" data-dismiss="alert" href="#" aria-label="Close">
+                        <i title="Close" class="small fa fa-times"/>
+                    </a>
                     <strong><field name="onboarding_msg"/></strong>
                 </div>
-                <div class="alert alert-danger o_form_header" role="alert" attrs="{'invisible': [('account_status', '!=', 'closed')]}">
+                <div class="alert alert-danger o_form_header"
+                     role="alert"
+                     attrs="{'invisible': [('account_status', '!=', 'closed')]}">
                     <strong><p>Your account is Closed.</p></strong>
                 </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button
-                            name="action_show_transactions" type="object"
+                            name="action_show_transactions"
+                            type="object"
                             attrs="{'invisible': [('id', '=', False)]}"
-                            class="oe_stat_button" icon="fa-credit-card">
+                            class="oe_stat_button"
+                            icon="fa-credit-card">
                             <!-- NOTE: statbutton shown on purpose even if there are no transactions -->
                             <div class="o_stat_info">
                                 <field name="transactions_count" class="o_stat_value"/>
@@ -35,9 +46,11 @@
                             </div>
                         </button>
                         <button
-                            name="action_show_payouts" type="object"
+                            name="action_show_payouts"
+                            type="object"
                             attrs="{'invisible': [('id', '=', False)]}"
-                            class="oe_stat_button" icon="fa-credit-card">
+                            class="oe_stat_button"
+                            icon="fa-credit-card">
                             <div class="o_stat_info">
                                 <field name="payout_count" class="o_stat_value"/>
                                 <span class="o_stat_text"> Payouts</span>
@@ -48,127 +61,142 @@
                             title="Test Mode"
                             bg_color="bg-warning"
                             attrs="{'invisible': ['|', ('is_test', '=', False), ('adyen_uuid', '=', False)]}"/>
-                    <div class="alert alert-warning" role="alert" attrs="{'invisible': [('kyc_status_message', '=', False)]}">
-                        <field name="kyc_status_message" readonly="1" />
+                    <div class="alert alert-warning"
+                         attrs="{'invisible': [('kyc_status_message', '=', False)]}"
+                         role="alert">
+                        <field name="kyc_status_message" readonly="1"/>
                     </div>
                     <group>
                         <group>
                             <field name="entity_type" attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                         <group>
-                            <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                            <field name="company_id"
+                                   readonly="1"
+                                   groups="base.group_multi_company"/>
                         </group>
                         <group string="Individual"
-                            attrs="{'invisible': [('entity_type', '!=', 'individual')]}">
+                               attrs="{'invisible': [('entity_type', '!=', 'individual')]}">
                             <field name="first_name"
-                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="last_name"
-                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="date_of_birth"
-                                attrs="{'required': [('entity_type', '=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '=', 'individual')]}"/>
                             <field name="document_number"
-                                attrs="{'invisible': [('country_code', 'not in', ['AU', 'CA', 'GR', 'IT', 'US'])],
-                                    'required': [('entity_type', '=', 'individual'), ('country_code', 'in', ['AU', 'CA', 'GR', 'IT', 'US'])]}"/>
+                                   attrs="{'invisible': [('country_code', 'not in', ['AU', 'CA', 'GR', 'IT', 'US'])],
+                                           'required': [('entity_type', '=', 'individual'), ('country_code', 'in', ['AU', 'CA', 'GR', 'IT', 'US'])]}"/>
                             <field name="document_type"
-                                attrs="{'invisible': [('country_code', '!=', 'AU')],
-                                    'required': [('entity_type', '=', 'individual'), ('country_code', '=', 'AU')]}"/>
+                                   attrs="{'invisible': [('country_code', '!=', 'AU')],
+                                           'required': [('entity_type', '=', 'individual'), ('country_code', '=', 'AU')]}"/>
                             <field name="id_type"
-                                attrs="{'invisible': [('adyen_uuid', '=', False)],
-                                    'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
-                            <field name="id_front" filename="id_front_filename"
-                                attrs="{'invisible': [('adyen_uuid', '=', False)],
-                                    'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
+                                   attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                           'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
+                            <field name="id_front"
+                                   filename="id_front_filename"
+                                   attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                           'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
                             <field name="id_front_filename" invisible="1"/>
                             <field name="id_back" filename="id_back_filename"
                                 attrs="{'invisible': [('id_type', 'not in', ['ID_CARD', 'DRIVING_LICENSE'])],
                                         'required': [('id_type', 'in', ['ID_CARD', 'DRIVING_LICENSE']), ('kyc_tier', '>=', 1)]}"/>
                             <field name="id_back_filename" invisible="1"/>
                         </group>
-
-                        <group string="Business" attrs="{'invisible': [('entity_type', '=', 'individual')]}">
+                        <group string="Business"
+                               attrs="{'invisible': [('entity_type', '=', 'individual')]}">
                             <field name="legal_business_name"
-                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                             <field name="doing_business_as"
-                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                             <field name="registration_number"
-                                attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
+                                   attrs="{'required': [('entity_type', '!=', 'individual')]}"/>
                         </group>
-
-                        <group string="Payment Followup" attrs="{'invisible': [('need_to_provide_payment_journal', '=', False)]}">
+                        <group string="Payment Followup"
+                               attrs="{'invisible': [('need_to_provide_payment_journal', '=', False)]}">
                             <field name="payment_journal_id"
                                    context="{'default_type': 'bank'}"
-                                   attrs="{'required': [('need_to_provide_payment_journal', '=', True)]}"
-                                   />
+                                   attrs="{'required': [('need_to_provide_payment_journal', '=', True)]}"/>
                         </group>
-
                         <group string="Contact">
                             <field name="email" widget="email"/>
                             <field name="phone_number"/>
                             <label for="street" string="Address"/>
                             <div class="o_address_format">
                                 <field name="street" placeholder="Street" class="o_address_street"/>
-                                <field name="house_number_or_name" placeholder="House number or name" class="o_address_street"/>
+                                <field name="house_number_or_name"
+                                       placeholder="House number or name"
+                                       class="o_address_street"/>
                                 <field name="city" placeholder="City" class="o_address_city"/>
-                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}"
-                                    attrs="{'required': [('country_code', 'in', ['AU', 'CA', 'IT', 'US'])]}"/>
+                                <field name="state_id"
+                                       class="o_address_state"
+                                       placeholder="State"
+                                       options="{'no_open': True, 'no_quick_create': True}"
+                                       attrs="{'required': [('country_code', 'in', ['AU', 'CA', 'IT', 'US'])]}"/>
                                 <field name="state_code" invisible="1"/>
                                 <field name="zip" placeholder="ZIP" class="o_address_zip"/>
-                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="country_id"
+                                       placeholder="Country"
+                                       class="o_address_country"
+                                       options="{'no_open': True, 'no_create': True}"/>
                                 <field name="country_code" invisible="1"/>
                             </div>
                         </group>
-
-                        <group string="TEST" groups="base.group_no_one" attrs="{'invisible': [('id', '!=', False)]}">
-                            <field name="is_test" attrs="{'readonly': [('adyen_uuid', '!=', False)]}"/>
+                        <group string="TEST"
+                               groups="base.group_no_one"
+                               attrs="{'invisible': [('id', '!=', False)]}">
+                            <field name="is_test"
+                                   attrs="{'readonly': [('adyen_uuid', '!=', False)]}"/>
                         </group>
                     </group>
                     <notebook attrs="{'invisible': [('adyen_uuid', '=', False)]}">
                         <page string="KYC" attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <field name="adyen_kyc_ids">
                                 <tree no_open="1">
-                                    <field name="verification_type" />
-                                    <field name="document" />
-                                    <field name="status" widget="badge"
-                                        decoration-warning="status == 'awaiting_data'"
-                                        decoration-info="status == 'pending'"
-                                        decoration-success="status in ['data_provided', 'passed']"
-                                        decoration-danger="status == 'failed'"
-                                    />
-                                    <field name="status_message" />
-                                    <field name="last_update" />
+                                    <field name="verification_type"/>
+                                    <field name="document"/>
+                                    <field name="status"
+                                           widget="badge"
+                                           decoration-warning="status == 'awaiting_data'"
+                                           decoration-info="status == 'pending'"
+                                           decoration-success="status in ['data_provided', 'passed']"
+                                           decoration-danger="status == 'failed'"/>
+                                    <field name="status_message"/>
+                                    <field name="last_update"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Shareholders"
-                            attrs="{'invisible': ['|', ('entity_type', '!=', 'business'), ('transactions_count', '=', 0)],
-                                'required': [('entity_type', '!=', 'individual')]}">
+                              attrs="{'invisible': ['|', ('entity_type', '!=', 'business'), ('transactions_count', '=', 0)],
+                                      'required': [('entity_type', '!=', 'individual')]}">
                             <field name="shareholder_ids"
-                                attrs="{'required': [('entity_type', '=', 'business')]}">>
+                                   attrs="{'required': [('entity_type', '=', 'business')]}">>
                                 <tree>
                                     <field name="first_name"/>
                                     <field name="last_name"/>
-                                    <field name="kyc_status" widget="badge" attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                        decoration-warning="kyc_status == 'awaiting_data'"
-                                        decoration-info="kyc_status == 'pending'"
-                                        decoration-success="kyc_status in ['data_provided', 'passed']"
-                                        decoration-danger="kyc_status == 'failed'"
-                                    />
+                                    <field name="kyc_status"
+                                           widget="badge"
+                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
+                                           decoration-warning="kyc_status == 'awaiting_data'"
+                                           decoration-info="kyc_status == 'pending'"
+                                           decoration-success="kyc_status in ['data_provided', 'passed']"
+                                           decoration-danger="kyc_status == 'failed'"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Manager(s)"
-                            attrs="{'invisible': ['|', ('entity_type', '!=', 'nonprofit'), ('transactions_count', '=', 0)]}">
+                              attrs="{'invisible': ['|', ('entity_type', '!=', 'nonprofit'), ('transactions_count', '=', 0)]}">
                             <field name="shareholder_ids"
-                                attrs="{'required': [('entity_type', '=', 'nonprofit')]}">
+                                   attrs="{'required': [('entity_type', '=', 'nonprofit')]}">
                                 <tree>
                                     <field name="first_name"/>
                                     <field name="last_name"/>
-                                    <field name="kyc_status" widget="badge" attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                        decoration-warning="kyc_status == 'awaiting_data'"
-                                        decoration-info="kyc_status == 'pending'"
-                                        decoration-success="kyc_status in ['data_provided', 'passed']"
-                                        decoration-danger="kyc_status == 'failed'"
-                                    />
+                                    <field name="kyc_status"
+                                           widget="badge"
+                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
+                                           decoration-warning="kyc_status == 'awaiting_data'"
+                                           decoration-info="kyc_status == 'pending'"
+                                           decoration-success="kyc_status in ['data_provided', 'passed']"
+                                           decoration-danger="kyc_status == 'failed'"/>
                                 </tree>
                             </field>
                         </page>
@@ -179,22 +207,26 @@
                                     <field name="iban"/>
                                     <field name="account_number"/>
                                     <field name="currency_id"/>
-                                    <field name="kyc_status" widget="badge" attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                        decoration-warning="kyc_status == 'awaiting_data'"
-                                        decoration-info="kyc_status == 'pending'"
-                                        decoration-success="kyc_status in ['data_provided', 'passed']"
-                                        decoration-danger="kyc_status == 'failed'"
-                                    />
+                                    <field name="kyc_status"
+                                           widget="badge"
+                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
+                                           decoration-warning="kyc_status == 'awaiting_data'"
+                                           decoration-info="kyc_status == 'pending'"
+                                           decoration-success="kyc_status in ['data_provided', 'passed']"
+                                           decoration-danger="kyc_status == 'failed'"/>
                                 </tree>
                             </field>
                         </page>
-                        <page string="Payouts" attrs="{'invisible': [('transactions_count', '=', 0)]}">
+                        <page string="Payouts"
+                              attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <group>
                                 <group>
-                                    <field name="payout_schedule" attrs="{'readonly': [('payout_allowed', '=', False)]}" />
+                                    <field name="payout_schedule"
+                                           attrs="{'readonly': [('payout_allowed', '=', False)]}"/>
                                 </group>
                                 <group>
-                                    <field name="next_scheduled_payout" attrs="{'invisible': [('next_scheduled_payout', '=', False)]}" />
+                                    <field name="next_scheduled_payout"
+                                           attrs="{'invisible': [('next_scheduled_payout', '=', False)]}"/>
                                 </group>
                             </group>
                         </page>

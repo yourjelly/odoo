@@ -8,7 +8,7 @@ from pytz import UTC
 from odoo import fields, models
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
-from odoo.addons.odoo_payments.util import to_major_currency
+from odoo.addons.odoo_payments.utils import to_major_currency
 
 _logger = logging.getLogger(__name__)
 

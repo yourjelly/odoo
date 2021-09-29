@@ -17,7 +17,7 @@ from odoo.osv import expression
 from odoo.addons.mail.tools import mail_validation
 from odoo.addons.odoo_payments.const import ACCOUNT_STATUS_MAPPING, KYC_STATUS_MAPPING, \
                                             PAYOUT_SCHEDULE_MAPPING
-from odoo.addons.odoo_payments.util import AdyenProxyAuth
+from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
 _logger = logging.getLogger(__name__)
@@ -179,13 +179,13 @@ class AdyenAccount(models.Model):
         :rtype: dict
         """
         if not self.env.company.adyen_account_id:  # No account exists yet
-            onboarding_url = self.env['ir.config_parameter'].sudo().get_param(
-                'odoo_payments.onboarding_url'
+            merchant_url = self.env['ir.config_parameter'].sudo().get_param(
+                'odoo_payments.merchant_url'
             )
-            return_url = url_join(self.env.company.get_base_url(), '/odoo_payments/create_account')
+            return_url = url_join(self.env.company.get_base_url(), 'odoo_payments/create_account')
             action = {
                 'type': 'ir.actions.act_url',
-                'url': url_join(onboarding_url, f'/get_creation_token?return_url={return_url}'),
+                'url': url_join(merchant_url, f'get_creation_token?return_url={return_url}'),
                 'target': 'self',
             }
         else:  # An account already exists, show it
@@ -591,11 +591,11 @@ class AdyenAccount(models.Model):
         adyen_data = adyen_data or {}
         if operation == 'v1/create_account_holder':
             # Onboarding first passes through Internal odoo.com first
-            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.onboarding_url')
+            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url')
             params = {
                 'adyen_data': adyen_data,
                 'base_url': self.get_base_url(),
-                'creation_token': request.session.get('adyen_creation_token'),
+                'creation_token': request.session.get('odoo_payments_creation_token'),
                 'test': self.is_test,
             }
             auth = None

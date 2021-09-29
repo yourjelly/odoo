@@ -3,22 +3,19 @@
     <template id="kyc_status_message">
         <p t-if="message" t-esc="message"/>
         <t t-if="checks">
-            <t t-foreach="checks" t-as="verification_type">
-                <ul>
-                    <li>
-                        <strong><t t-esc="verification_type"/>:</strong>
-                        <ul>
-                            <t t-foreach="checks[verification_type]" t-as="check">
-                                <li>
-                                    <strong t-if="check['document']">
-                                        <t t-esc="check['document']"/>: </strong>
-                                    <t t-esc="check['message']"/>
-                                </li>
-                            </t>
-                        </ul>
-                    </li>
-                </ul>
-            </t>
+            <!-- FIXME ANVFE shouldn't it be one ul and X li nodes ? -->
+            <ul t-foreach="checks" t-as="verification_type">
+                <li>
+                    <strong><t t-esc="verification_type"/>:</strong>
+                    <ul>
+                        <li t-foreach="checks[verification_type]" t-as="check">
+                            <strong t-if="check['document']">
+                                <t t-esc="check['document']"/>: </strong>
+                            <t t-esc="check['message']"/>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </t>
     </template>
 

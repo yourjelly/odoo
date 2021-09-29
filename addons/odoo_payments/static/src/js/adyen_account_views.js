@@ -1,67 +1,97 @@
-odoo.define('odoo_payments.account_views', function (require) {
-"use strict";
+odoo.define('odoo_payments.account_views', require => {
+    'use strict';
 
-const core = require('web.core');
-const Dialog = require('web.Dialog');
-const FormController = require('web.FormController');
-const FormView = require('web.FormView');
-const viewRegistry = require('web.view_registry');
+    const core = require('web.core');
+    const Dialog = require('web.Dialog');
+    const FormController = require('web.FormController');
+    const FormView = require('web.FormView');
+    const viewRegistry = require('web.view_registry');
 
-const _t = core._t;
-const QWeb = core.qweb;
+    const _t = core._t;
+    const QWeb = core.qweb;
 
-const AdyenAccountFormController = FormController.extend({
-    _discardChanges: function (recordID, options) {
-        this._super.apply(this, arguments);
-        this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});    
-    },
+    const AdyenAccountFormController = FormController.extend({
 
-    _saveRecord: function (recordID, options) {
-        if (this.model.isNew(this.handle) && this.canBeSaved()) {
-            var _super = this._super.bind(this, recordID, options);
-            var buttons = [
-                {
-                    text: _t("Create"),
-                    classes: 'btn-primary o_adyen_confirm',
-                    close: true,
-                    disabled: true,
-                    click: function () {
-                        this.close();
-                        _super();
-                    },
-                }, {
-                    text: _t("Cancel"),
-                    close: true,
+        /**
+         * Redirect the user to /web if they abort the account creation.
+         *
+         * @override method from web.BasicController
+         * @private
+         * @param {string} recordID
+         * @param {Object} options
+         * @return {Promise}
+         */
+        _discardChanges: function (recordID, options) {
+            return this._super(...arguments).then(() => {
+                this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});
+            });
+        },
+
+        /**
+         * Upon creating the record, show a dialog with the terms and restrictions.
+         *
+         * The record can only be created if the terms and restrictions are accepted by the user.
+         *
+         * @override method from web.BasicController
+         * @private
+         * @param {string} recordID
+         * @param {Object} options
+         * @return {Promise}
+         */
+        _saveRecord: function (recordID, options) {
+            if (this.model.isNew(this.handle)) { // The record is being created
+                if (this.canBeSaved()) { // And all required fields are filled
+                    const _super = this._super.bind(this, recordID, options);
+                    // Create a dialog to display the terms and restrictions
+                    const dialog = new Dialog(this, {
+                        title: _t("Confirm your Odoo Payments Account Creation"),
+                        buttons: [
+                            {
+                                text: _t("Create"),
+                                classes: 'btn-primary o_odoo_payments_create_account',
+                                close: true,
+                                disabled: true, // Require accepting the terms and restrictions
+                                click: function () {
+                                    this.close();
+                                    _super();
+                                },
+                            },
+                            {
+                                text: _t("Cancel"),
+                                close: true
+                            },
+                        ],
+                        size: 'extra-large',
+                        $content: QWeb.render('AdyenAccountCreationConfirmation', {
+                            account_data: this.model.get(this.handle).data,
+                        }),
+                    });
+                    // Enable the confirmation button upon accepting the terms and restrictions
+                    dialog.opened(() => {
+                        dialog.$el.on('change', '#terms_and_restrictions_checkbox', ev => {
+                            ev.preventDefault();
+                            dialog.$footer.find('.o_odoo_payments_create_account').attr(
+                                'disabled', !ev.currentTarget.checked
+                            );
+                        });
+                    });
+                    // Show the dialog
+                    dialog.open();
+                } else {
+                    // Don't call super as canBeSaved() has already highlighted the required fields
                 }
-            ];
+                return Promise.resolve();
+            } else {
+                return this._super(...arguments);
+            }
+        },
+    });
 
-            var dialog = new Dialog(this, {
-                size: 'extra-large',
-                buttons: buttons,
-                title: _t("Confirm your Odoo Payments Account Creation"),
-                $content: QWeb.render('AdyenAccountCreationConfirmation', {
-                    data: this.model.get(this.handle).data,
-                }),
-            });
+    const AdyenAccountFormView = FormView.extend({
+        config: _.extend({}, FormView.prototype.config, {
+            Controller: AdyenAccountFormController,
+        }),
+    });
 
-            dialog.open().opened(function () {
-                dialog.$el.on('change', '.opt_in_checkbox', function (ev) {
-                    ev.preventDefault();
-                    dialog.$footer.find('.o_adyen_confirm')[0].disabled = !ev.currentTarget.checked;
-                });
-            });
-        } else if (!this.model.isNew(this.handle)) {
-            return this._super.apply(this, arguments);
-        }
-    },
-});
-
-const AdyenAccountFormView = FormView.extend({
-    config: _.extend({}, FormView.prototype.config, {
-        Controller: AdyenAccountFormController,
-    }),
-});
-
-viewRegistry.add('adyen_account_form', AdyenAccountFormView);
-
+    viewRegistry.add('adyen_account_form', AdyenAccountFormView);
 });
