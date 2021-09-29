@@ -906,6 +906,31 @@ body.editor_enable.editor_has_snippets {
             }
         }
 
+        @mixin boolean-toggle ($toggle-width: 1.8, $button-size: 0.7) {
+            $font-correction: 0.75;
+            $toggle-width: $toggle-width*1em;
+            $button-margin: (1 - $button-size)*0.5em;
+            $button-size: $button-size*1em;
+
+            display: inline-block;
+            height: 1em;
+            line-height: $button-size;
+            width: $toggle-width;
+            border-radius: 0.5em;
+            padding: $button-margin;
+
+            &:after {
+                display: block;
+                font-family: 'FontAwesome';
+                background-color: white;
+                text-align: center;
+                font-size: $button-size*$font-correction;
+                height: 1em/$font-correction;
+                width: 1em/$font-correction;
+                border-radius: 0.5em/$font-correction;
+            }
+        }
+
         // Checkboxes
         we-button.o_we_checkbox_wrapper.o_we_user_value_widget {
             min-width: $o-we-sidebar-content-field-toggle-width;
@@ -923,28 +948,26 @@ body.editor_enable.editor_has_snippets {
                 line-height: $o-we-sidebar-content-field-height;
             }
             we-checkbox {
-                flex: 0 0 auto;
-                display: flex;
-                align-items: center;
-                width: $o-we-sidebar-content-field-toggle-width;
-                height: $o-we-sidebar-content-field-toggle-height;
+                @include boolean-toggle($o-we-sidebar-content-field-toggle-width/$o-we-sidebar-content-field-toggle-height, 0.7);
+
+                font-size: $o-we-sidebar-content-field-toggle-height;
                 background-color: $o-we-sidebar-content-field-toggle-bg;
-                border-radius: 10rem;
                 cursor: pointer;
 
                 &::after {
-                    content: "";
-                    display: block;
-                    width: $o-we-sidebar-content-field-toggle-control-width;
-                    height: $o-we-sidebar-content-field-toggle-control-height;
-                    border-radius: 10rem;
+                    content: "\f00d";
+                    color: $o-we-sidebar-content-field-toggle-bg;
                     background-color: $o-we-sidebar-content-field-toggle-control-bg;
-                    box-shadow: $o-we-sidebar-content-field-toggle-control-shadow;
                 }
             }
             &.active we-checkbox {
                 background-color: $o-we-sidebar-content-field-toggle-active-bg;
-                justify-content: flex-end;
+
+                &:after {
+                    content: "\f00c";
+                    float: right;
+                    color: $o-we-sidebar-content-field-toggle-active-bg;
+                }
             }
             &.active, &:hover {
                 color: $o-we-sidebar-content-field-clickable-color;
