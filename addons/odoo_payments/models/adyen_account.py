@@ -293,7 +293,9 @@ class AdyenAccount(models.Model):
     def _compute_onboarding_msg(self):
         self.onboarding_msg = False
         for account in self:
-            if account.state == 'pending' and account.id:
+            if not account.id:
+                continue
+            elif account.state == 'pending':
                 account.onboarding_msg = _(
                     "Our team will review your account. We will notify you, by email, as soon "
                     "as you can start processing payments."
@@ -378,12 +380,15 @@ class AdyenAccount(models.Model):
                     'message': kyc.status_message,
                 })
 
-            account.kyc_status_message = self.env['ir.qweb']._render('odoo_payments.kyc_status_message', {
-                'checks': checks
-            })
+            account.kyc_status_message = self.env['ir.qweb']._render(
+                'odoo_payments.kyc_status_message', {
+                    'checks': checks
+                }
+            )
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
+        """Reset state_id field when country is changed."""
         if self.state_id and self.state_id.country_id != self.country_id:
             self.state_id = False
 
@@ -470,16 +475,35 @@ class AdyenAccount(models.Model):
         })
 
     def action_show_transactions(self):
+        """
+
+        :rtype: dict
+        """
+        self.ensure_one()
         action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_transaction_action')
         action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
         return action
 
     def action_show_payouts(self):
+        """
+
+        :rtype: dict
+        """
+        self.ensure_one()
         action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_balance_action')
         action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
         return action
 
     def _upload_photo_id(self, document_type, content, filename):
+        """
+
+        :param document_type:
+        :param content:
+        :param filename:
+
+        :return: None
+        """
+        self.ensure_one()
         # FIXME ANVFE wtf is this test mode config param ???
         test_mode = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.test_mode')
         self._adyen_rpc('v1/upload_document', {
@@ -587,8 +611,10 @@ class AdyenAccount(models.Model):
             odoo_payment_acquirer.state = 'enabled' if not self.is_test else 'test'
 
     def _adyen_rpc(self, operation, adyen_data=None):
+        self.ensure_one()
         # FIXME ANVFE do we ever reach adyen without any payload ?
         adyen_data = adyen_data or {}
+        # FIXME ANVFE split in two methods, to keep separate proxy and internal rpcs
         if operation == 'v1/create_account_holder':
             # Onboarding first passes through Internal odoo.com first
             url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url')
@@ -613,7 +639,7 @@ class AdyenAccount(models.Model):
         }
         try:
             response = requests.post(
-                url_join(url, operation), json=payload, auth=auth, timeout=60)
+                url_join(url, operation), json=payload, auth=auth, timeout=6000)  # TODO timeout=60
             response.raise_for_status()
         except requests.exceptions.Timeout:
             raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
