@@ -1,4 +1,4 @@
-odoo.define('odoo_payments.transactions.dashboard', function (require) {
+odoo.define('odoo_payments.transactions.dashboard', require => {
     "use strict";
 
     const ListRenderer = require('web.ListRenderer');
@@ -10,6 +10,13 @@ odoo.define('odoo_payments.transactions.dashboard', function (require) {
     const QWeb = core.qweb;
 
     const AdyenTransactionsListRenderer = ListRenderer.extend({
+
+        /**
+         * TODO ANVFE
+         *
+         * @return {*}
+         * @private
+         */
         _render: function () {
             const el = this.$el.parent();
             return this._super.apply(this, arguments).then(() => {

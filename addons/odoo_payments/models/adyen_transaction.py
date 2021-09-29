@@ -11,7 +11,7 @@ from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
-from odoo.addons.odoo_payments.util import to_major_currency, to_minor_currency
+from odoo.addons.odoo_payments.utils import to_major_currency, to_minor_currency
 
 FEES_CURRENCY_CODE = "EUR"
 _logger = logging.getLogger(__name__)

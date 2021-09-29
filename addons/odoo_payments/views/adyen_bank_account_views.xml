@@ -17,8 +17,10 @@
                     </div>
                     <group>
                         <group>
-                            <field name="country_id" options='{"no_open": True, "no_create": True}'/>
-                            <field name="currency_id" options="{'no_open': True, 'no_create': True}"/>
+                            <field name="country_id"
+                                   options='{"no_open": True, "no_create": True}'/>
+                            <field name="currency_id"
+                                   options="{'no_open': True, 'no_create': True}"/>
                             <field name="iban"
                                 attrs="{'invisible': [('country_code', 'not in', ['AT', 'BE', 'CH', 'CZ', 'DE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HR', 'IE', 'IT', 'LT', 'LU', 'NL', 'PL', 'PT'])],
                                         'required': [('country_code', 'in', ['AT', 'BE', 'CH', 'CZ', 'DE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HR', 'IE', 'IT', 'LT', 'LU', 'NL', 'PL', 'PT'])]}"/>
@@ -41,8 +43,9 @@
                                 attrs="{'invisible': [('currency_name', '!=', 'USD')],
                                     'required': [('currency_name', '=', 'USD')]}"/>
                             <!-- Only present on bank account update, not on creation -->
-                            <field name="bank_statement" filename="bank_statement_filename"
-                                attrs="{'invisible': [('bank_account_uuid', '=', False)]}"/>
+                            <field name="bank_statement"
+                                   filename="bank_statement_filename"
+                                   attrs="{'invisible': [('bank_account_uuid', '=', False)]}"/>
                         </group>
                         <group>
                             <field name="owner_name"/>
@@ -50,22 +53,36 @@
                             <!-- IMHO it's strange to consider the currency for address checks,
                                 it should be only the country, like it's shown on
                             https://docs.adyen.com/platforms/verification-checks/bank-account-check#providing-the-banks-branchcode -->
-                            <label for="owner_street" string="Owner Address" attrs="{'invisible': [('country_code', 'not in', ['CA', 'US'])]}"/>
-                            <div class="o_address_format" attrs="{'invisible': [('currency_name', '!=', 'USD')]}">
-                                <field name="owner_street" placeholder="Street" class="o_address_street"
-                                    attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
-                                <field name="owner_house_number_or_name" placeholder="House number or name" class="o_address_street"
-                                    attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
-                                <field name="owner_city" placeholder="City" class="o_address_city"
-                                    attrs="{'required': [('currency_name', '=', 'USD')]}"/>
-                                <field name="owner_state_id" class="o_address_state" placeholder="State"
-                                    options="{'no_open': True, 'no_quick_create': True}"
-                                    attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
-                                <field name="owner_zip" placeholder="ZIP" class="o_address_zip"
-                                    attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
-                                <field name="owner_country_id" placeholder="Country" class="o_address_country"
-                                    options='{"no_open": True, "no_create": True}'
-                                    attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
+                            <label for="owner_street" string="Owner Address"
+                                   attrs="{'invisible': [('country_code', 'not in', ['CA', 'US'])]}"/>
+                            <div class="o_address_format"
+                                 attrs="{'invisible': [('currency_name', '!=', 'USD')]}">
+                                <field name="owner_street"
+                                       class="o_address_street"
+                                       placeholder="Street"
+                                       attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
+                                <field name="owner_house_number_or_name"
+                                       class="o_address_street"
+                                       placeholder="House number or name"
+                                       attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
+                                <field name="owner_city"
+                                       class="o_address_city"
+                                       placeholder="City"
+                                       attrs="{'required': [('currency_name', '=', 'USD')]}"/>
+                                <field name="owner_state_id"
+                                       class="o_address_state"
+                                       placeholder="State"
+                                       options="{'no_open': True, 'no_quick_create': True}"
+                                       attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
+                                <field name="owner_zip"
+                                       class="o_address_zip"
+                                       placeholder="ZIP"
+                                       attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
+                                <field name="owner_country_id"
+                                       class="o_address_country"
+                                       placeholder="Country"
+                                       options='{"no_open": True, "no_create": True}'
+                                       attrs="{'required': [('country_code', 'in', ['CA', 'US'])]}"/>
                             </div>
                         </group>
                     </group>

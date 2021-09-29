@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- URL  Account creation -->
-    <record id="onboarding_url" model="ir.config_parameter">
-        <field name="key">odoo_payments.onboarding_url</field>
+    <!-- URL of the merchant managing the adyen accounts in this instance -->
+    <record id="merchant_url" model="ir.config_parameter">
+        <field name="key">odoo_payments.merchant_url</field>
         <field name="value">https://www.odoo.com/odoo_adyen/</field>
     </record>
 
