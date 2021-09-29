@@ -126,6 +126,34 @@
             <field name="image_1920" type="base64" file="product/static/img/product_product_3-image.jpg"/>
         </record>
 
+        <record id="product_product_26" model="product.product">
+            <field name="name">small Desk Combination</field>
+            <field name="categ_id" ref="product_category_5"/>
+            <field name="list_price">300.0</field>
+            <field name="standard_price">250.0</field>
+            <field name="detailed_type">consu</field>
+            <field name="weight">0.01</field>
+            <field name="uom_id" ref="uom.product_uom_kgm"/>
+            <field name="uom_po_id" ref="uom.product_uom_kgm"/>
+            <field name="description_sale">Desk combination, black-brown: chair + desk + drawer.</field>
+            <field name="default_code">FURN_8700</field>
+            <field name="image_1920" type="base64" file="product/static/img/product_product_3-image.jpg"/>
+        </record>
+
+        <record id="product_product_28" model="product.product">
+            <field name="name">Ragular Desk Combination</field>
+            <field name="categ_id" ref="product_category_5"/>
+            <field name="list_price">350.0</field>
+            <field name="standard_price">200.0</field>
+            <field name="detailed_type">consu</field>
+            <field name="weight">0.01</field>
+            <field name="uom_id" ref="uom.product_uom_gram"/>
+            <field name="uom_po_id" ref="uom.product_uom_gram"/>
+            <field name="description_sale">Desk combination, black-brown: chair + desk + drawer.</field>
+            <field name="default_code">FURN_8800</field>
+            <field name="image_1920" type="base64" file="product/static/img/product_product_3-image.jpg"/>
+        </record>
+
         <!-- Variants -->
 
         <record id="product_attribute_1" model="product.attribute">

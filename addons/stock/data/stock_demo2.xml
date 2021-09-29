@@ -211,6 +211,45 @@
             })]"/>
         </record>
 
+        <record id="outgoing_shipment_main_warehouse7" model="stock.picking">
+            <field name="picking_type_id" ref="stock.picking_type_out"/>
+            <field name="origin">outgoing shipment</field>
+            <field name="user_id"></field>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="scheduled_date" eval="DateTime.today() - timedelta(days=20)"/>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+            <field name="location_dest_id" ref="stock.stock_location_customers"/>
+            <field name="move_lines" model="stock.move" eval="[(0, 0, {
+                'name': obj().env.ref('product.product_product_26').name,
+                'product_id': ref('product.product_product_26'),
+                'product_uom': ref('uom.product_uom_kgm'),
+                'product_uom_qty': 6.5,
+                'picking_type_id': ref('stock.picking_type_out'),
+                'location_id': ref('stock.stock_location_stock'),
+                'location_dest_id': ref('stock.stock_location_customers'),
+            })]"/>
+        </record>
+
+        <record id="stock_move_product_10" model="stock.move">
+            <field name="picking_id" ref="stock.outgoing_shipment_main_warehouse7"/>
+            <field name="product_uom_qty">350</field>
+            <field name="name">test</field>
+            <field name="product_id" ref="product.product_product_28"/>
+            <field name="product_uom" ref="uom.product_uom_gram"/>
+            <field name="location_dest_id" ref="stock.stock_location_customers"/>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+        </record>
+
+        <record id="move_line_product_10" model="stock.move.line">
+            <field name="picking_id" ref="stock.outgoing_shipment_main_warehouse7"/>
+            <field name="product_uom_qty">350</field>
+            <field name="product_id" ref="product.product_product_28"/>
+            <field name="product_uom_id" ref="uom.product_uom_gram"/>
+            <field name="location_dest_id" ref="stock.stock_location_customers"/>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+            <field name="move_id" ref="stock.stock_move_product_10"/>
+        </record>
+
         <!-- Create STOCK_PICKING for IN -->
         <record id="incomming_shipment" model="stock.picking">
             <field name="user_id"></field>
@@ -296,6 +335,24 @@
                 'location_dest_id': ref('stock.stock_location_stock'),
             })]"/>
         </record>
+
+        <record id="incomming_shipment5" model="stock.picking">
+            <field name="user_id"></field>
+            <field name="picking_type_id" ref="stock.picking_type_in"/>
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="location_id" ref="stock.stock_location_suppliers"/>
+            <field name="location_dest_id" ref="stock.stock_location_stock"/>
+            <field name="move_lines" model="stock.move" eval="[(0, 0, {
+                'name': obj().env.ref('product.product_product_13').name,
+                'product_id': ref('product.product_product_13'),
+                'product_uom': ref('uom.product_uom_unit'),
+                'product_uom_qty': 5.0,
+                'picking_type_id': ref('stock.picking_type_in'),
+                'location_id': ref('stock.stock_location_suppliers'),
+                'location_dest_id': ref('stock.stock_location_stock'),
+            })]"/>
+        </record>
+
 
         <!-- Create STOCK_PICKING_IN for Chicago Warehouse-->
         <record id="incomming_chicago_warehouse" model="stock.picking">
@@ -463,9 +520,11 @@
                 obj().env.ref('stock.outgoing_shipment_main_warehouse4').id,
                 obj().env.ref('stock.outgoing_shipment_main_warehouse5').id,
                 obj().env.ref('stock.outgoing_shipment_main_warehouse6').id,
+                obj().env.ref('stock.outgoing_shipment_main_warehouse7').id,
                 obj().env.ref('stock.incomming_shipment1').id,
                 obj().env.ref('stock.incomming_shipment2').id,
                 obj().env.ref('stock.incomming_shipment3').id,
+                obj().env.ref('stock.incomming_shipment5').id,
                 obj().env.ref('stock.outgoing_chicago_warehouse1').id,
                 obj().env.ref('stock.outgoing_chicago_warehouse2').id,
                 obj().env.ref('stock.outgoing_chicago_warehouse3').id,
