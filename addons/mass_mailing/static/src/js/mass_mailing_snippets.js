@@ -151,4 +151,121 @@ options.registry.ImageOptimize.include({
     },
 });
 
+options.registry.mail_footer_social = options.Class.extend({
+    /**
+     * @override
+     */
+    async start() {
+        await this._super.apply(this, arguments);
+        this._updateInputLinks = this._updateInputLinks.bind(this);
+        this.options.wysiwyg.on('snippet_removed', this, this._updateInputLinks);
+
+        this._socialObjects = [
+            { faClass: 'fa-facebook', label: 'Facebook', fieldName: 'social_facebook' },
+            { faClass: 'fa-youtube', label: 'Facebook', fieldName: 'social_youtube' },
+            { faClass: 'fa-linkedin', label: 'Linkedin', fieldName: 'social_linkedin' },
+            { faClass: 'fa-twitter', label: 'Twitter', fieldName: 'social_twitter' },
+            { faClass: 'fa-instagram', label: 'Instagram', fieldName: 'social_instagram' },
+        ];
+
+        this._updateInputLinks();
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        this.options.wysiwyg.off('removeEditor', this, this._updateInputLinks);
+    },
+    /**
+     * @override
+     */
+    updateUI(){
+        this._updateInputLinks();
+    },
+    /**
+     * @override
+     */
+    async cleanForSave() {
+        const fieldsToSave = {};
+        for (const socialObject of this._socialObjects) {
+            const href = this._getLink(socialObject.faClass).attr('href');
+            if (href) {
+                fieldsToSave[socialObject.fieldName] = href;
+            }
+        }
+        if (Object.keys(fieldsToSave).length) {
+            await this._rpc({
+                model: 'res.company',
+                method: 'try_set_social_media_links',
+                args: [[]],
+                kwargs: fieldsToSave,
+            });
+        }
+    },
+    /**
+     * Gets the link that contains a fontawesome class.
+     */
+    _getLink(faClass) {
+        return this.$target.find(`.${faClass}`).parent();
+    },
+    /**
+     * Update the inputs.
+     */
+    _updateInputLinks()  {
+        this.$el.html('');
+        for (const socialObject of this._socialObjects) {
+            this._getLink(socialObject.faClass);
+            let $link = this._getLink(socialObject.faClass);
+            let url = ($link.is('a') && $link.attr('href')) || '';
+
+            if (!$link.length) {
+                continue;
+            }
+
+            const $weInput = $(`
+                <we-input class="o_we_user_value_widget o_we_large">
+                    <we-title>
+                        ${socialObject.label} url
+                    </we-title>
+                    <div>
+                        <input type="text" autocomplete="chrome-off" class="text-left">
+                    </div>
+                </we-input>
+            `);
+            const $input = $weInput.find('input');
+            $input.val(url);
+            this.$el.append($weInput);
+            $input.on('input', () => {
+                const url = $input.val();
+                if (!this._getLink(socialObject.faClass).length) {
+                    $link = $(`<a style="margin-left:10px" aria-label="${socialObject.label}" title="${socialObject.label}" href="${url}">
+                        <span class="fa ${socialObject.faClass}">​</span>
+                    </a>`);
+                    this.$target.append($link);
+                    this._updateLinksInDocument();
+                } else {
+                    $link.attr('href', url);
+                }
+            });
+            $input.on('input', () => {
+                const url = $input.val();
+                if (!url) {
+                    this._getLink(socialObject.faClass).remove();
+                }
+            });
+        }
+        this._updateLinksInDocument();
+    },
+    _updateLinksInDocument() {
+        const links = this._socialObjects
+            .map(x=>this._getLink(x.faClass))
+            .filter(x=>x.length);
+        const $fakeEl = $('<fakeEl>');
+        links.forEach(($link) => $fakeEl.append($link.clone()));
+        if ($fakeEl.html() !== this.$target.html()){
+            this.$target.html('');
+            links.forEach(($link) => this.$target.append($link))
+        }
+    },
+});
 });

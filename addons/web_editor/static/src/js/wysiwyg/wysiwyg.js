@@ -243,11 +243,7 @@ const Wysiwyg = Widget.extend({
                 ev.preventDefault();
             }
 
-            if ($target.is(this.customizableLinksSelector)
-                    && $target.is('a')
-                    && !$target.attr('data-oe-model')
-                    && !$target.find('> [data-oe-model]').length
-                    && !$target[0].closest('.o_extra_menu_items')) {
+            if (this._isElementOpenLinkPopover($target)) {
                 this.linkPopover = $target.data('popover-widget-initialized');
                 if (!this.linkPopover) {
                     // TODO this code is ugly maybe the mutex should be in the
@@ -1899,6 +1895,17 @@ const Wysiwyg = Widget.extend({
             window.location.reload(true);
         }
         return new Promise(function () {});
+    },
+    /**
+     * Checks wether the element can open the link popover.
+     *
+     * @param {jQuery} $target The jquery element to check
+     */
+    _isElementOpenLinkPopover($target) {
+        return $target.is(this.customizableLinksSelector)
+            && !$target.attr('data-oe-model')
+            && !$target.find('> [data-oe-model]').length
+            && !$target[0].closest('.o_extra_menu_items');
     },
     _onSelectionChange() {
         if (this.options.autohideToolbar) {
