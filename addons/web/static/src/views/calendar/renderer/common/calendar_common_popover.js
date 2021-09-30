@@ -3,7 +3,6 @@
 import { localization } from "@web/core/l10n/localization";
 import LegacyCalendarPopover from "web.CalendarPopover";
 import { ComponentAdapter } from "web.OwlCompatibility";
-import * as legacyEnv from "web.env";
 
 const { Component } = owl;
 
@@ -26,7 +25,7 @@ function convertRecordToEvent(record) {
 
 class CalendarPopoverAdapter extends ComponentAdapter {
     setup() {
-        this.env = legacyEnv;
+        this.env = Component.env;
     }
     get widgetArgs() {
         const popoverFields = {};
