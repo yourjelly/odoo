@@ -39,7 +39,7 @@ export interface CalendarViewDescription {
   fieldMapping: CalendarFieldMapping;
   fieldNames: string[];
   filtersInfo: CalendarFilterInfoDict;
-  formViewId: number | null;
+  formViewId: number | false;
   hasEditDialog: boolean;
   hasQuickCreate: boolean;
   isDateHidden: boolean;

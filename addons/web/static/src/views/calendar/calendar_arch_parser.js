@@ -123,7 +123,7 @@ export class CalendarArchParser extends XMLParser {
 
         this.data.formViewId = node.hasAttribute("form_view_id")
             ? parseInt(node.getAttribute("form_view_id"), 10)
-            : null;
+            : false;
         if (!Number.isInteger(this.data.eventLimit) && this.data.eventLimit !== null) {
             throw new Error(`Calendar view's event limit should be a number or null`);
         }

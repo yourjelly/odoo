@@ -93,6 +93,9 @@ export class CalendarModel extends Model {
     get firstDayOfWeek() {
         return this.meta.firstDayOfWeek;
     }
+    get formViewId() {
+        return this.meta.formViewId;
+    }
     get hasAllDaySlot() {
         return (
             this.meta.fieldMapping.all_day ||
