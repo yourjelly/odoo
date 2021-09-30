@@ -482,7 +482,10 @@ var FormRenderer = BasicRenderer.extend({
      */
     _renderButtonBox: function (node) {
         var self = this;
-        this.buttonBoxes.push(node);
+        this.buttonBox = {
+            node,
+            record: this.state,
+        };
         var $result = $('<' + node.tag + '>', {class: 'o_not_full'});
 
         // The rendering of buttons may be async (see renderFieldWidget), so we
@@ -519,7 +522,8 @@ var FormRenderer = BasicRenderer.extend({
 
             // Get the unfolded buttons according to window size
             var nb_buttons = self._renderButtonBoxNbButtons();
-            var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
+            var unfolded_buttons = visible_buttons.slice(0, nb_buttons);
+            // var unfolded_buttons = visible_buttons.slice(0, nb_buttons).concat(invisible_buttons);
 
             // Get the folded buttons
             var folded_buttons = visible_buttons.slice(nb_buttons);
@@ -559,9 +563,23 @@ var FormRenderer = BasicRenderer.extend({
         this._registerModifiers(node, this.state, $result);
         return $result;
     },
-    _reRenderButtonBox(node) {
-        // here we will call _renderButtonBox and repace existing one with newly rendered button box
-        // maybe we need to call _unregisterModifiersElement for node
+    _reRenderButtonBox() {
+        this.defs = [];
+        this._unregisterModifiersElement(this.buttonBox.node, this.buttonBox.record.id, this.$(".oe_button_box"));
+        const recursiveRegisterModifiers = (node) => {
+            if (node.children) {
+                _.map(node.children, (child) => {
+                    recursiveRegisterModifiers(child);
+                });
+            }
+            this._unregisterModifiersElement(node, this.buttonBox.record.id);
+        };
+        _.map(this.buttonBox.node.children, (child) => {
+            recursiveRegisterModifiers(child);
+        });
+        const $result = this._renderButtonBox(this.buttonBox.node);
+        delete this.defs;
+        this.$(".oe_button_box").replaceWith($result);
     },
     /**
     * @private
@@ -1106,7 +1124,6 @@ var FormRenderer = BasicRenderer.extend({
         var defs = [];
         this.defs = defs;
         this.inactiveNotebooks = [];
-        this.buttonBoxes = [];
         var $form = this._renderNode(this.arch).addClass(this.className);
         delete this.defs;
 
@@ -1146,7 +1163,7 @@ var FormRenderer = BasicRenderer.extend({
         }
         this.inactiveNotebooks = [];
         let reRenderStatButton = false;
-        _.each(this.allModifiersData, function (modifiersData) {
+        _.each(this.allModifiersData, (modifiersData) => {
             // const modifiers = modifiersData.evaluatedModifiers[record.id] || {};
             const isStatButtonChanged = _.find(modifiersData.elementsByRecord[record.id], (element) => {
                 return element.$el[0].tagName === "BUTTON" && element.$el.hasClass('oe_stat_button');
@@ -1156,9 +1173,7 @@ var FormRenderer = BasicRenderer.extend({
             }
         });
         if (reRenderStatButton) {
-            _.each(this.buttonBoxes, (node) => {
-                this._reRenderButtonBox(node);
-            });
+            this._reRenderButtonBox();
         }
     },
     /**

@@ -888,12 +888,16 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
         var modifiersData = this._getModifiersData(node);
         if (modifiersData) {
             var elements = modifiersData.elementsByRecord[recordID];
-            var index = _.findIndex(elements, function (oldElement) {
-                return oldElement.widget === element
-                    || oldElement.$el[0] === element[0];
-            });
-            if (index >= 0) {
-                elements.splice(index, 1);
+            if (element) {
+                var index = _.findIndex(elements, function (oldElement) {
+                    return oldElement.widget === element
+                        || oldElement.$el[0] === element[0];
+                });
+                if (index >= 0) {
+                    elements.splice(index, 1);
+                }
+            } else {
+                modifiersData.elementsByRecord[recordID] = [];
             }
         }
     },
