@@ -1818,12 +1818,13 @@ class PlaygroundAction extends owl.Component {
                     mode="month"
                     date_start="activity_date_deadline"
                     color="user_id"
-                    hide_time="true"
+                    hide_time="1"
                     event_limit="5"
+                    event_open_popup="1"
                 >
                     <field name="expected_revenue" modifiers="{}"/>
-                    <field name="partner_id" avatar_field="avatar_128" can_create="true" can_write="true" modifiers="{}"/>
-                    <field name="user_id" filters="1" invisible="1" can_create="true" can_write="true" modifiers="{'invisible': true}"/>
+                    <field name="partner_id" avatar_field="avatar_128" can_create="1" can_write="1" modifiers="{}"/>
+                    <field name="user_id" filters="1" invisible="1" can_create="1" can_write="1" modifiers="{'invisible': true}"/>
                 </calendar>
             `,
         };
