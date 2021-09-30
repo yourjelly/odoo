@@ -10,9 +10,16 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { userService } from "@web/core/user_service";
 import { mocks } from "../../helpers/mock_services";
-import { click, getFixture, patchDate, patchWithCleanup } from "../../helpers/utils";
+import { click, getFixture, patchDate, patchWithCleanup, triggerEvent } from "../../helpers/utils";
 import { makeView } from "../helpers";
-import { changeScale, clickEvent, findTimeRow } from "./calendar_helpers";
+import {
+    changeScale,
+    clickDate,
+    clickEvent,
+    findEvent,
+    findTimeRow,
+    selectDateRange,
+} from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
@@ -24,17 +31,13 @@ const mainComponentRegistry = registry.category("main_components");
 let serverData;
 let uid = -1;
 
-async function addMainComponentsContainer() {
+async function addMainComponentsContainer(env) {
     const mainComponentsContainer = await owl.mount(MainComponentsContainer, {
         target: getFixture(),
+        env,
     });
     registerCleanup(() => {
         mainComponentsContainer.destroy();
-    });
-
-    patchWithCleanup(browser, {
-        setTimeout: (fn) => fn(),
-        clearTimeout: () => {},
     });
 
     return mainComponentsContainer.el;
@@ -249,6 +252,29 @@ QUnit.module("wowl Views", (hooks) => {
                         { id: 3, user_id: 4, partner_id: 3, partner_checked: true },
                     ],
                 },
+            },
+            views: {
+                "event,false,form": `
+                    <form>
+                        <field name="name" />
+                        <field name="allday" />
+                        <group attrs="{'invisible': [['allday', '=', True]]}">
+                            <field name="start" />
+                            <field name="stop" />
+                        </group>
+                        <group attrs="{'invisible': [['allday', '=', False]]}">
+                            <field name="start_date" />
+                            <field name="stop_date" />
+                        </group>
+                    </form>
+                `,
+                "event,1,form": `
+                    <form>
+                        <field name="allday" invisible="1" />
+                        <field name="start" attrs="{'invisible': [['allday', '=', False]]}" />
+                        <field name="stop" attrs="{'invisible': [['allday', '=', True]]}" />
+                    </form>
+                `,
             },
         };
     });
@@ -475,7 +501,12 @@ QUnit.module("wowl Views", (hooks) => {
                 `,
             });
 
-            const mainComponentsContainer = await addMainComponentsContainer();
+            const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+                clearTimeout: () => {},
+            });
 
             await clickEvent(calendar, 4);
             assert.containsOnce(
@@ -538,12 +569,313 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("create and change events", async (assert) => {
-        assert.ok(false);
+    QUnit.debug("create and change events", async (assert) => {
+        assert.expect(28);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
+                    event_open_popup="1"
+                />
+            `,
+            mockRPC(route, { args, method }) {
+                if (method === "write") {
+                    assert.deepEqual(
+                        args[1],
+                        { name: "event 4 modified" },
+                        "should update the record"
+                    );
+                }
+            },
+        });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
+
+        assert.containsOnce(calendar.el, ".fc-dayGridMonth-view", "should display in month mode");
+
+        // click on an existing event to open the formViewDialog
+        await clickEvent(calendar, 4);
+
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover",
+            "should open a popover clicking on event"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover .o_cw_popover_close",
+            "popover should have a close button"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover .o_cw_popover_edit",
+            "popover should have an edit button"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-common-popover .o_cw_popover_delete",
+            "popover should have a delete button"
+        );
+
+        await click(mainComponentsContainer, ".o-calendar-common-popover .o_cw_popover_edit");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".modal-body",
+            "should open the form view in dialog when click on event"
+        );
+
+        let input = mainComponentsContainer.querySelector(".modal-body input");
+        input.value = "event 4 modified";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".modal-footer button.btn-primary");
+        assert.containsNone(mainComponentsContainer, ".modal-body");
+
+        // create a new event, quick create only
+        await clickDate(calendar, "2016-12-13");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-quick-create",
+            "should open the quick create dialog"
+        );
+
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event in quick create";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+        assert.strictEqual(
+            findEvent(calendar, 8).textContent,
+            "new event in quick create",
+            "should display the new record after quick create"
+        );
+        assert.containsN(
+            calendar.el,
+            "td.fc-event-container[colspan]",
+            2,
+            "should the new record have only one day"
+        );
+
+        // create a new event, quick create only (validated by pressing enter key)
+        await clickDate(calendar, "2016-12-13");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-quick-create",
+            "should open the quick create dialog"
+        );
+
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event in quick create validated by pressing enter key.";
+        await triggerEvent(input, null, "input");
+
+        await triggerEvent(input, null, "keyup", { key: "Enter" });
+        assert.strictEqual(
+            findEvent(calendar, 9).textContent,
+            "new event in quick create validated by pressing enter key.",
+            "should display the new record by pressing enter key"
+        );
+
+        // create a new event and edit it
+        await clickDate(calendar, "2016-12-27");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-quick-create",
+            "should open the quick create dialog"
+        );
+
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "coucou";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".modal",
+            "should open the slow create dialog"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".modal .modal-title").textContent,
+            "New Event",
+            "should use the string attribute as modal title"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.modal input[name="name"]`).value,
+            "coucou",
+            "should have set the name from the quick create dialog"
+        );
+
+        await click(mainComponentsContainer.querySelector(".modal-footer button.btn-primary"));
+        assert.strictEqual(
+            findEvent(calendar, 10).textContent,
+            "coucou",
+            "should display the new record with string attribute"
+        );
+
+        // create a new event with 2 days
+        await selectDateRange(calendar, "2016-12-20", "2016-12-21");
+
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event in quick create 2";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.modal .o_form_view input[name="name"]`).value,
+            "new event in quick create 2",
+            "should open the formViewDialog with default values"
+        );
+
+        await click(mainComponentsContainer.querySelector(".modal-footer button.btn-primary"));
+        assert.containsNone(mainComponentsContainer, ".modal", "should close dialogs");
+
+        return;
+        /*
+
+            quickcreate > edit should call buildRawRecord
+            rework it ^^
+
+        */
+
+        const newEvent = findEvent(calendar, 11);
+        assert.strictEqual(
+            newEvent.textContent,
+            "new event in quick create 2",
+            "should display the 2 days new record"
+        );
+        assert.hasAttrValue(
+            newEvent.closest(".fc-event-container"),
+            "colspan",
+            "2",
+            "the new record should have 2 days"
+        );
+
+        await clickEvent(calendar, 11);
+        const popoverDescription = mainComponentsContainer.querySelector(
+            ".o-calendar-common-popover .list-group-item"
+        );
+        assert.strictEqual(
+            popoverDescription.children[1].textContent,
+            "December 20-21, 2016",
+            "The popover description should indicate the correct range"
+        );
+        assert.strictEqual(
+            popoverDescription.children[2].textContent,
+            "(2 days)",
+            "The popover description should indicate 2 days"
+        );
+        await click(mainComponentsContainer, ".o_cw_popover_close");
+
+        // delete the a record
+        await clickEvent(calendar, 4);
+        await click(mainComponentsContainer, ".o_cw_popover_delete");
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".modal-title").textContent,
+            "Confirmation",
+            "should display the confirm message"
+        );
+
+        await click(mainComponentsContainer, ".modal-footer button.btn-primary");
+
+        assert.notOk(findEvent(calendar, 4), "the record should be deleted");
+
+        assert.containsN(
+            calendar.el,
+            ".fc-event-container .fc-event",
+            10,
+            "should display 10 events"
+        );
+        // move to next month
+        await click(calendar.el, ".o-calendar-view--navigation-button--next");
+        assert.containsNone(
+            calendar.el,
+            ".fc-event-container .fc-event",
+            "should display 0 events"
+        );
+
+        await click(calendar.el, ".o-calendar-view--navigation-button--previous");
+
+        await selectDateRange(calendar, "2016-12-20", "2016-12-21");
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "test";
+        await triggerEvent(input, null, "input");
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
     });
 
-    QUnit.todo("quickcreate with custom create_name_field", async (assert) => {
-        assert.ok(false);
+    QUnit.test("quickcreate with custom create_name_field", async (assert) => {
+        assert.expect(4);
+
+        serverData.models["custom.event"] = {
+            fields: {
+                id: { string: "ID", type: "integer" },
+                x_name: { string: "name", type: "char" },
+                x_start_date: { string: "start date", type: "date" },
+            },
+            records: [{ id: 1, x_name: "some event", x_start_date: "2016-12-06" }],
+            methods: {
+                async check_access_rights() {
+                    return true;
+                },
+            },
+        };
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "custom.event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="x_start_date"
+                    create_name_field="x_name"
+                    mode="month"
+                />
+            `,
+            mockRPC(route, { args, method }) {
+                if (method === "create") {
+                    assert.deepEqual(
+                        args[0],
+                        {
+                            x_name: "custom event in quick create",
+                            x_start_date: "2016-12-13 00:00:00",
+                        },
+                        "the custom create_name_field should be used instead of `name`"
+                    );
+                }
+            },
+        });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+        await clickDate(calendar, "2016-12-13");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-quick-create",
+            "should open the quick create dialog"
+        );
+
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "custom event in quick create";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+        assert.containsOnce(
+            calendar.el,
+            `.fc-event[data-event-id="2"]`,
+            "should display the new custom event record"
+        );
+        assert.strictEqual(
+            calendar.el.querySelector(`.fc-event[data-event-id="2"]`).textContent,
+            "custom event in quick create"
+        );
     });
 
     QUnit.todo("quickcreate switching to actual create for required fields", async (assert) => {
@@ -709,7 +1041,12 @@ QUnit.module("wowl Views", (hooks) => {
             `,
         });
 
-        await addMainComponentsContainer();
+        await addMainComponentsContainer(calendar.env);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
         await clickEvent(calendar, 4);
         assert.containsNone(
@@ -1302,7 +1639,13 @@ QUnit.module("wowl Views", (hooks) => {
             `,
         });
 
-        const mainComponentsContainer = await addMainComponentsContainer();
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
+
         assert.containsNone(mainComponentsContainer, ".o-calendar-common-popover");
 
         await clickEvent(calendar, 1);

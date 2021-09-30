@@ -292,7 +292,7 @@ function findDateCell(calendar, date) {
     return calendar.el.querySelector(`.fc-day-top[data-date="${date}"] .fc-day-number`);
 }
 
-function findEvent(calendar, eventId) {
+export function findEvent(calendar, eventId) {
     return calendar.el.querySelector(`.o-calendar--event[data-event-id="${eventId}"]`);
 }
 
