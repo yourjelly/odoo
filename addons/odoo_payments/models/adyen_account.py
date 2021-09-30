@@ -167,13 +167,13 @@ class AdyenAccount(models.Model):
     @api.model
     def action_create_or_redirect(self):
         """ Return the action to create the account if it doesn't exist yet, or to browse it.
-        
+
         This method must always be used to either create or browse the adyen account. If no account
         is found on the current company, the returned action is an `ir.actions.act_url` that will
         redirect the user to odoo.com in order to begin the account creation flow. If an account is
         found on the current company, the returned action is an `ir.actions.act_window` that allows
         browsing the account in form view.
-        
+
         :return: The appropriate action depending on whether an adyen account exists for the current
                  company
         :rtype: dict
