@@ -516,9 +516,11 @@ export class CalendarModel extends Model {
             colorIndex = Array.isArray(colorValue) ? colorValue[0] : colorValue;
         }
 
+        const title = rawRecord[fieldMapping.create_name_field || "display_name"];
+
         return {
             id: rawRecord.id,
-            title: rawRecord.display_name,
+            title,
             isAllDay,
             start,
             end,
