@@ -14,6 +14,47 @@ import { CalendarFilterPanel } from "./filter_panel/calendar_filter_panel";
 import { CalendarModel } from "./calendar_model";
 import { CalendarQuickCreate } from "./quick_create/calendar_quick_create";
 
+////////////////////////////////////////////////////////////////////////////////
+/** @todo: should be removed when the new view dialog API is ready           **/
+////////////////////////////////////////////////////////////////////////////////
+import { FormViewDialog } from "web.view_dialogs";
+import { ComponentAdapter } from "web.OwlCompatibility";
+class FormViewDialogAdapter extends ComponentAdapter {
+    constructor(parent, props) {
+        props.Component = FormViewDialog;
+        super(parent, props);
+        this.env = Component.env;
+        this.dialog = null;
+    }
+
+    open() {
+        this.dialog = new FormViewDialog(this, this.props);
+        this.dialog.open();
+    }
+    close() {
+        this.dialog.close();
+    }
+}
+
+function useLegacyViewDialog() {
+    const component = owl.hooks.useComponent();
+    let dialog = null;
+    const remove = () => {
+        if (dialog) {
+            dialog.close();
+            dialog = null;
+        }
+    };
+    const add = (props) => {
+        dialog = new FormViewDialogAdapter(component, props);
+        dialog.open();
+        return remove;
+    };
+    owl.hooks.onWillUnmount(remove);
+    return { add };
+}
+////////////////////////////////////////////////////////////////////////////////
+
 const { Component } = owl;
 
 const SCALE_LABELS = {
@@ -50,6 +91,8 @@ export class CalendarView extends Component {
         useSetupView({
             exportState: () => this.model.exportedState,
         });
+
+        this.viewDialog = useLegacyViewDialog();
 
         console.log(this);
     }
@@ -138,14 +181,30 @@ export class CalendarView extends Component {
         }
     }
     editRecord(record, context = {}) {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: this.model.resModel,
-            res_id: record.id,
-            views: [[false, "form"]],
-            target: "current",
-            context,
-        });
+        if (this.model.hasEditDialog) {
+            /** @todo: use view dialog API when ready */
+            this.viewDialog.add({
+                res_model: this.model.resModel,
+                res_id: record.id || null,
+                context,
+                title: record.id
+                    ? `${this.env._t("Open")}: ${record.title}`
+                    : this.env._t("New Event"),
+                view_id: this.model.formViewId,
+                on_saved: () => {
+                    this.model.load();
+                },
+            });
+        } else {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                res_model: this.model.resModel,
+                res_id: record.id,
+                views: [[this.model.formViewId, "form"]],
+                target: "current",
+                context,
+            });
+        }
     }
     editRecordInCreation(record) {
         const context = this.model.makeContextDefaults(record);
