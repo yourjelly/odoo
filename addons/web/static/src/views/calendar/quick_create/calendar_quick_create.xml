@@ -3,15 +3,16 @@
 
     <t t-name="web.CalendarQuickCreate.body" owl="1">
         <div class="o-calendar-quick-create form-group">
-            <label for="name" class="col-form-label o_form_label">
+            <label for="title" class="col-form-label o_form_label">
                 Meeting Subject:
             </label>
             <input
                 type="text"
                 class="o_input o_required_modifier o-calendar-quick-create--input"
                 autofocus=""
-                name="name"
-                t-ref="name"
+                name="title"
+                t-ref="title"
+                t-on-keyup="onInputKeyup"
             />
         </div>
     </t>
