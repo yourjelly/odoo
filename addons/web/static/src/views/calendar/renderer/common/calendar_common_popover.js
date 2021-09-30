@@ -94,7 +94,7 @@ export class CalendarCommonPopover extends Component {
         }
 
         if (!this.props.model.isDateHidden) {
-            this.date = this.getFormattedDate(start, end);
+            this.date = this.getFormattedDate(start, end, this.props.record.isAllDay);
 
             if (this.props.record.isAllDay) {
                 if (isSameDay) {
@@ -113,9 +113,14 @@ export class CalendarCommonPopover extends Component {
      *
      * @param {luxon.DateTime} start
      * @param {luxon.DateTime} end
+     * @param {boolean} isAllDay
      */
-    getFormattedDate(start, end) {
+    getFormattedDate(start, end, isAllDay) {
         const isSameDay = start.hasSame(end, "days");
+        if (isAllDay) {
+            // cancel correction done in _recordToCalendarEvent
+            end = end.minus({ days: 1 });
+        }
         if (!isSameDay && start.hasSame(end, "month")) {
             // Simplify date-range if an event occurs into the same month (eg. "4-5 August 2019")
             return start.toFormat("LLLL d") + "-" + end.toFormat("d, y");

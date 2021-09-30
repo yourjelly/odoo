@@ -248,6 +248,8 @@ export class CalendarModel extends Model {
                 // in week mode or day mode, convert allday event to event
                 end = start.plus({ hours: 2 });
             }
+        } else if (partialRecord.isAllDay) {
+            end = end.minus({ days: 1 });
         }
 
         if (this.meta.fieldMapping.all_day) {
@@ -482,7 +484,7 @@ export class CalendarModel extends Model {
         const { fields, fieldMapping, filtersInfo, scale } = this.meta;
 
         const startType = fields[fieldMapping.date_start].type;
-        const start = parseDateTime(rawRecord[fieldMapping.date_start], {
+        let start = parseDateTime(rawRecord[fieldMapping.date_start], {
             format: DATE_FORMATS[startType],
             timezone: false,
         });
@@ -496,12 +498,23 @@ export class CalendarModel extends Model {
             });
         }
 
-        const duration = rawRecord[fieldMapping.date_delay];
+        const duration = rawRecord[fieldMapping.date_delay] || 1;
 
         const isAllDay =
             startType === "date" ||
             (fieldMapping.all_day && rawRecord[fieldMapping.all_day]) ||
             false;
+
+        if (isAllDay) {
+            start = start.startOf("day");
+            end = end.startOf("day");
+        }
+        if (!fieldMapping.date_stop && duration) {
+            end = start.plus({ hours: duration });
+        }
+        if (isAllDay) {
+            end = end.plus({ days: 1 });
+        }
 
         let isTimeHidden =
             this.meta.isTimeHidden ||
