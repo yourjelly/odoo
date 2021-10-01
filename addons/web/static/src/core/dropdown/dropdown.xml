@@ -4,7 +4,7 @@
   <t t-name="web.Dropdown" owl="1">
     <t
       t-tag="rootTag"
-      class="o_dropdown"
+      class="o_dropdown overflow-auto"
       t-att-class="{ show: state.open, o_dropdown_item: hasParentDropdown and rootTag === 'li' }"
       t-on-dropdown-item-selected="onItemSelected"
     >
