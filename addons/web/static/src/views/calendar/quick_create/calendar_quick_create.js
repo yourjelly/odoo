@@ -13,6 +13,7 @@ export class CalendarQuickCreate extends Dialog {
         useAutofocus();
         this.titleRef = useRef("title");
         this.notification = useService("notification");
+        this.creatingRecord = false;
     }
 
     get recordTitle() {
@@ -25,10 +26,23 @@ export class CalendarQuickCreate extends Dialog {
         };
     }
 
-    createRecord() {
+    editRecord() {
+        this.props.editRecord(this.record);
+        this.close();
+    }
+    async createRecord() {
+        if (this.creatingRecord) {
+            return;
+        }
+
         if (this.recordTitle) {
-            this.props.model.createRecord(this.record);
-            this.close();
+            try {
+                this.creatingRecord = true;
+                await this.props.model.createRecord(this.record);
+                this.close();
+            } catch (e) {
+                this.editRecord();
+            }
         } else {
             this.titleRef.el.classList.add("o_field_invalid");
             this.notification.add(this.env._t("Meeting Subject"), {
@@ -55,8 +69,7 @@ export class CalendarQuickCreate extends Dialog {
         this.createRecord();
     }
     onEditBtnClick() {
-        this.props.editRecord(this.record);
-        this.close();
+        this.editRecord();
     }
     onCancelBtnClick() {
         this.close();

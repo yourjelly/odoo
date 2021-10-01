@@ -96,6 +96,12 @@ export class CalendarCommonRenderer extends Component {
         };
     }
 
+    getStartTime(record) {
+        return record.start
+            .toLocal()
+            .toFormat(localization.timeFormat.search("HH") !== -1 ? "HH:mm" : "hh:mm a");
+    }
+
     computeEventSelector(event) {
         return `[data-event-id="${event.id}"]`;
     }
@@ -169,7 +175,10 @@ export class CalendarCommonRenderer extends Component {
         if (record) {
             const injectedContentStr = this.env.qweb.renderToString(
                 this.constructor.eventTemplate,
-                { record }
+                {
+                    ...record,
+                    startTime: this.getStartTime(record),
+                }
             );
             const domParser = new DOMParser();
             const injectedContent = domParser.parseFromString(injectedContentStr, "application/xml")

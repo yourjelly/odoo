@@ -272,19 +272,25 @@ export class CalendarModel extends Model {
      * @returns {Record<string, any>}
      */
     makeContextDefaults(record) {
-        const context = {};
-        if (record.title) {
-            context.default_name = record.title;
+        const { fieldMapping, scale } = this.meta;
+
+        const rawRecord = this.buildRawRecord(record);
+        if (["month", "year"].includes(scale)) {
+            rawRecord[fieldMapping.all_day] = true;
         }
-        context[`default_${this.meta.fieldMapping.date_start}`] = record.start
-            ? record.start.toFormat(DATE_FORMATS.datetime)
-            : null;
-        context[`default_${this.meta.fieldMapping.date_stop}`] = record.end
-            ? record.end.toFormat(DATE_FORMATS.datetime)
-            : null;
-        context[`default_${this.meta.fieldMapping.date_delay}`] = record.duration || null;
-        context[`default_${this.meta.fieldMapping.all_day}`] =
-            ["month", "year"].includes(this.meta.scale) || record.isAllDay || null;
+
+        const context = {};
+        const fieldNames = [
+            fieldMapping.create_name_field || "name",
+            fieldMapping.date_start,
+            fieldMapping.date_stop,
+            fieldMapping.date_delay,
+            fieldMapping.all_day,
+        ];
+        for (const fieldName of fieldNames) {
+            context[`default_${fieldName}`] = rawRecord[fieldName] || null;
+        }
+
         return context;
     }
 

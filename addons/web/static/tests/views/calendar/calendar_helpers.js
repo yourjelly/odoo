@@ -284,6 +284,20 @@ export function makeFakeModel(state = {}) {
 // DOM Utils
 //------------------------------------------------------------------------------
 
+export function findPickedDate(calendar) {
+    return calendar.el.querySelector(".ui-datepicker-current-day");
+}
+
+export async function pickDate(calendar, date) {
+    const [year, month, day] = date.split("-");
+    const iMonth = parseInt(month, 10) - 1;
+    const iDay = parseInt(day, 10) - 1;
+    const el = calendar.el.querySelectorAll(
+        `.ui-datepicker-calendar td[data-year="${year}"][data-month="${iMonth}"]`
+    )[iDay];
+    await click(el);
+}
+
 function findAllDaySlot(calendar, date) {
     return calendar.el.querySelector(`.fc-day-grid .fc-day[data-date="${date}"]`);
 }
