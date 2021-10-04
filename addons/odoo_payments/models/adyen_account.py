@@ -671,6 +671,8 @@ class AdyenAccount(models.Model):
 
         if event_type == 'ODOO_ACCOUNT_STATUS_CHANGE':
             self._handle_odoo_account_status_change(content)
+        elif event_type == "ACCOUNT_HOLDER_CREATED":
+            self._handle_account_holder_created_notification(content)
         elif event_type == 'ACCOUNT_HOLDER_STATUS_CHANGE':
             self._handle_account_holder_status_change_notification(content)
         elif event_type == 'ACCOUNT_HOLDER_VERIFICATION':
@@ -698,6 +700,17 @@ class AdyenAccount(models.Model):
             self._adyen_rpc('v1/close_account_holder', {
                 'accountHolderCode': self.account_holder_code,
             })
+
+    def _handle_account_holder_created_notification(self, content):
+        self.ensure_one()
+
+        if not self.is_test:
+            # Do not pass through active state before support validation
+            # for live accounts
+            return
+
+        self.account_status = ACCOUNT_STATUS_MAPPING.get(content.get('accountStatus', {}).get('status'))
+        _logger.info("Correctly received ACCOUNT_HOLDER_CREATED notification for test account (uuid: %s)", self.adyen_uuid)
 
     def _handle_account_holder_status_change_notification(self, content):
         """NOTE: sudoed env"""
