@@ -12,6 +12,7 @@ from hashlib import sha256
 from json import dumps
 
 import ast
+import calendar
 import json
 import re
 import warnings
@@ -4477,8 +4478,9 @@ class AccountMoveLine(models.Model):
         moves = lines.mapped('move_id')
         if self._context.get('check_move_validity', True):
             moves._check_balanced()
-        moves._check_fiscalyear_lock_date()
-        lines._check_tax_lock_date()
+        if not self._context.get('skip_lock_date_check'):
+            moves._check_fiscalyear_lock_date()
+            lines._check_tax_lock_date()
         moves._synchronize_business_models({'line_ids'})
 
         return lines
@@ -4625,7 +4627,8 @@ class AccountMoveLine(models.Model):
         self._check_reconciliation()
 
         # Check the lock date.
-        moves._check_fiscalyear_lock_date()
+        if not self._context.get('skip_lock_date_check'):
+            moves._check_fiscalyear_lock_date()
 
         # Check the tax lock date.
         self._check_tax_lock_date()
@@ -4864,7 +4867,7 @@ class AccountMoveLine(models.Model):
 
             for line in lines:
 
-                exchange_diff_move_vals['date'] = max(exchange_diff_move_vals['date'], line.date)
+                # exchange_diff_move_vals['date'] = max(exchange_diff_move_vals['date'], line.date)
 
                 if not line.company_currency_id.is_zero(line.amount_residual):
                     # amount_residual_currency == 0 and amount_residual has to be fixed.
@@ -5089,9 +5092,20 @@ class AccountMoveLine(models.Model):
         company = self[0].company_id
         journal = company.currency_exchange_journal_id
 
+        # today = fields.Date.today()
+        # tax_lock_date = any(line._affect_tax_report() for line in self) and self.company_id.tax_lock_date or date.min
+        # fiscal_lock_date = self.company_id._get_user_fiscal_lock_date() or date.min
+        # lock_date = max(tax_lock_date, fiscal_lock_date)
+        # if lock_date >= today:
+        #     # set move_day to first end of month after the Lock Date
+        #     move_date = lock_date + timedelta(days=1)
+        #     move_date.replace(day=calendar.monthrange(move_date.year, move_date.month)[1])
+        # else:
+        #     move_date = today
+
         exchange_diff_move_vals = {
             'move_type': 'entry',
-            'date': date.min,
+            'date': self._get_exchange_difference_move_date(),
             'journal_id': journal.id,
             'line_ids': [],
         }
@@ -5151,6 +5165,19 @@ class AccountMoveLine(models.Model):
         self.env['account.partial.reconcile'].create(partials_vals_list)
 
         return exchange_move
+
+    def _get_exchange_difference_move_date(self):
+        today = fields.Date.today()
+        tax_lock_date = any(line._affect_tax_report() for line in self) and self.company_id.tax_lock_date or date.min
+        fiscal_lock_date = self.company_id._get_user_fiscal_lock_date() or date.min
+        lock_date = max(tax_lock_date, fiscal_lock_date)
+        if lock_date >= today:
+            # set move_day to first end of month after the Lock Date
+            move_date = lock_date + timedelta(days=1)
+            move_date.replace(day=calendar.monthrange(move_date.year, move_date.month)[1])
+        else:
+            move_date = today
+        return move_date
 
     def reconcile(self):
         ''' Reconcile the current move lines all together.

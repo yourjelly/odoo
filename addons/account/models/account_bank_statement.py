@@ -1264,10 +1264,11 @@ class AccountBankStatementLine(models.Model):
         to their original states.
         '''
         self.line_ids.remove_move_reconcile()
+
         self.payment_ids.unlink()
 
         for st_line in self:
-            st_line.with_context(force_delete=True).write({
+            st_line.with_context(force_delete=True, skip_lock_date_check=True).write({
                 'to_check': False,
                 'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in st_line._prepare_move_line_default_vals()],
             })
