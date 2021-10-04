@@ -8,6 +8,7 @@ import requests
 from dateutil.parser import parse
 from pytz import UTC
 from werkzeug.urls import url_join
+from pprint import pformat
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -666,7 +667,7 @@ class AdyenAccount(models.Model):
         event_type = notification_data.get('eventType')
 
         # TODO ANVFE REMOVE OR SET DEBUG
-        _logger.info("ODOO PAYMENTS: handling notification %s with content %s", event_type, content)
+        _logger.info("ODOO PAYMENTS: handling notification %s with content %s", event_type, pformat(content))
 
         if event_type == 'ODOO_ACCOUNT_STATUS_CHANGE':
             self._handle_odoo_account_status_change(content)
