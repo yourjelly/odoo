@@ -361,8 +361,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             if (ev.key === triggerKey) {
                 ev.preventDefault();
                 this._currentTargetElement = ev.target;
-                await currentFieldSelector.open();
-                currentFieldSelector.$searchInput.val('').focus();
+                await currentFieldSelector.popOver.open();
+                currentFieldSelector.popOver.$searchInput.val('').focus();
             }
         };
         // bind keyDown events on inputs and editor
