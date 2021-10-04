@@ -694,7 +694,7 @@ class AdyenAccount(models.Model):
                 'accountHolderCode': self.account_holder_code,
             })
             # result for unsuspend_account_holder request only contains pspReference
-            # not new account status
+            # not new account status  TODO ANVFE actually it does contain the new status
 
         elif new_status == 'rejected':
             self._adyen_rpc('v1/close_account_holder', {
