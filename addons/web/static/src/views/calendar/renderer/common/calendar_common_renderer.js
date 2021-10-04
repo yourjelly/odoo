@@ -202,16 +202,16 @@ export class CalendarCommonRenderer extends Component {
         //     el.appendChild(bg);
         // }
     }
-    onSelect(info) {
-        this.fc.api.unselect();
+    async onSelect(info) {
         this.popover.close();
         const keepLocalTime = info.allDay;
 
-        this.props.createRecord({
+        await this.props.createRecord({
             start: luxon.DateTime.fromJSDate(info.start).setZone("UTC", { keepLocalTime }),
             end: luxon.DateTime.fromJSDate(info.end).setZone("UTC", { keepLocalTime }),
             isAllDay: info.allDay,
         });
+        this.fc.api.unselect();
     }
     isSelectionAllowed(event) {
         return event.end.getDate() === event.start.getDate() || event.allDay;

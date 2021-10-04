@@ -172,15 +172,30 @@ export class CalendarView extends Component {
 
     createRecord(record) {
         if (this.model.hasQuickCreate) {
+            let resolve;
+            const def = new Promise((r) => {
+                resolve = r;
+            });
+
             this.dialog.add(
                 this.constructor.components.QuickCreate,
-                this.getQuickCreateProps(record)
+                this.getQuickCreateProps(record),
+                {
+                    onClose() {
+                        resolve();
+                    },
+                }
             );
+            return def;
         } else {
-            this.editRecordInCreation(record);
+            return this.editRecordInCreation(record);
         }
     }
     editRecord(record, context = {}) {
+        let resolve = (v) => {};
+        const def = new Promise((r) => {
+            resolve = r;
+        });
         if (this.model.hasEditDialog) {
             /** @todo: use view dialog API when ready */
             this.viewDialog.add({
@@ -194,8 +209,12 @@ export class CalendarView extends Component {
                 on_saved: () => {
                     this.model.load();
                 },
+                on_closed: () => {
+                    resolve();
+                },
             });
         } else {
+            resolve();
             this.action.doAction({
                 type: "ir.actions.act_window",
                 res_model: this.model.resModel,
@@ -205,10 +224,11 @@ export class CalendarView extends Component {
                 context,
             });
         }
+        return def;
     }
     editRecordInCreation(record) {
         const context = this.model.makeContextDefaults(record);
-        this.editRecord(record, context);
+        return this.editRecord(record, context);
     }
     deleteRecord(record) {
         this.dialog.add(ConfirmationDialog, {

@@ -940,6 +940,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(2);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // var prom = testUtils.makeTestPromise();
         // var counter = 0;
         // testUtils.mock.patch(ViewDialogs.FormViewDialog, {
@@ -998,6 +1009,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(5);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // this.data.event.records = [];
 
@@ -1214,6 +1236,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(14);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // var calendar = await createCalendarView({
         //     View: CalendarView,
         //     model: 'event',
@@ -1263,6 +1296,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(5);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.fields.priority = {string: "Priority", type: "selection", selection: [['0', 'Normal'], ['1', 'Important']],};
 
         // var calendar = await createCalendarView({
@@ -1303,6 +1347,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(3);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // await testUtils.mock.patch(BasicModel, {
         //     _fetchSpecialDataForMyWidget() {
@@ -1381,6 +1436,17 @@ QUnit.module("wowl Views", (hooks) => {
             assert.ok(false);
 
             // assert.expect(8);
+
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
 
             // this.data.event.records = [];
             // this.data.event.onchanges = {
@@ -1534,6 +1600,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(5);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records = [];
 
         // var calendar = await createCalendarView({
@@ -1626,6 +1703,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // var calendar = await createCalendarView({
         //     View: CalendarView,
         //     model: 'event',
@@ -1674,6 +1762,17 @@ QUnit.module("wowl Views", (hooks) => {
             assert.ok(false);
 
             // assert.expect(8);
+
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
 
             // this.data.event.records = [];
             // this.data.event.onchanges = {
@@ -1856,6 +1955,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records = [];
 
         // var calendar = await createCalendarView({
@@ -1922,6 +2032,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records = [];
 
         // const calendar = await createCalendarView({
@@ -1982,6 +2103,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(1);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records = [];
 
         // var calendar = await createCalendarView({
@@ -2034,6 +2166,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(4);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // this.data.event.records = [];
 
@@ -2172,6 +2315,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(5);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.fields.partner_ids.type = 'many2many';
         // this.data.event.records[0].partner_ids = [1,2,3,4,5];
         // this.data.partner.records.push({id: 5, display_name: "partner 5", image: 'EEE'});
@@ -2216,6 +2370,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(3);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // var calendar = await createCalendarView({
         //     View: CalendarView,
@@ -2294,6 +2459,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(2);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // var calendar = await createCalendarView({
         //     View: CalendarView,
         //     model: 'event',
@@ -2348,6 +2524,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(4);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // var calendar = await createCalendarView({
         //     View: CalendarView,
@@ -2445,6 +2632,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(4);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.fields.start.readonly = true;
 
         // var calendar = await createCalendarView({
@@ -2526,6 +2724,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(5);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // const calendar = await createCalendarView({
         //     View: CalendarView,
         //     model: 'event',
@@ -2561,6 +2770,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(8);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // var interval = [
         //     ["start", "<=", "2016-12-17 23:59:59"],
@@ -2627,6 +2847,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(6);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records.push(
         //     {id: 8, user_id: 4, partner_id: 1, name: "event 8", start: "2016-12-11 09:00:00", stop: "2016-12-11 10:00:00", allday: false, partner_ids: [1,2,3], event_type_id: 3, color: 4},
         //     {id: 9, user_id: 4, partner_id: 1, name: "event 9", start: "2016-12-11 19:00:00", stop: "2016-12-11 20:00:00", allday: false, partner_ids: [1,2,3], event_type_id: 1, color: 1},
@@ -2673,6 +2904,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(7);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // this.data.event.fields.user_id.default = 5;
         // this.data.event.fields.partner_id.default = 3;
@@ -2757,6 +2999,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(4);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.fields.user_id.default = 5;
         // this.data.event.fields.partner_id.default = 3;
         // this.data.user.records.push({
@@ -2835,6 +3088,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(12);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // var records = this.data.user.records;
         // records.push({
@@ -2921,6 +3185,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.user.records.push({
         //     id: 5,
         //     display_name: "user 5",
@@ -2999,6 +3274,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(2);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // var calendar = await createCalendarView({
         //     View: CalendarView,
         //     model: 'event',
@@ -3022,6 +3308,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("events starting at midnight", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(3);
 
@@ -3072,6 +3369,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(2);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // this.data.event.records[0].start_date = "2016-12-14";
 
         // var calendar = await createCalendarView({
@@ -3112,6 +3420,17 @@ QUnit.module("wowl Views", (hooks) => {
         async (assert) => {
             assert.ok(false);
 
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
+
             // assert.expect(1);
 
             // this.data.event.records[0].start_date = "2016-12-14";
@@ -3134,6 +3453,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("quickcreate avoid double event creation", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(1);
         // var createCount = 0;
@@ -3189,6 +3519,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("check if the view destroys all widgets and instances", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(2);
 
         // var instanceNumber = 0;
@@ -3237,6 +3578,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("create an event (async dialog) [REQUIRE FOCUS]", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(3);
 
@@ -3331,6 +3683,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("timezone does not affect drag and drop", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(10);
 
         // var calendar = await createCalendarView({
@@ -3389,6 +3752,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("timzeone does not affect calendar with date field", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(11);
 
@@ -3462,6 +3836,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("drag and drop on month mode", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(3);
 
         // const calendar = await createCalendarView({
@@ -3513,6 +3898,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("drag and drop on month mode with all_day mapping", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // Same test as before but in calendarEventToRecord (calendar_model.js) there is
         // different condition branching with all_day mapping or not
@@ -3577,6 +3973,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("drag and drop on month mode with date_start and date_delay", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(1);
 
         // var calendar = await createCalendarView({
@@ -3624,6 +4031,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("form_view_id attribute works (for creating events)", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(1);
 
@@ -3674,6 +4092,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("form_view_id attribute works with popup (for creating events)", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(1);
 
         // var calendar = await createCalendarView({
@@ -3711,6 +4140,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("calendar fallback to form view id in action if necessary", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(1);
 
@@ -3760,6 +4200,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("fullcalendar initializes with right locale", async (assert) => {
         assert.ok(false);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // assert.expect(1);
 
         // var initialLocale = moment.locale();
@@ -3798,6 +4249,17 @@ QUnit.module("wowl Views", (hooks) => {
 
     QUnit.todo("initial_date given in the context", async (assert) => {
         assert.ok(false);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // assert.expect(1);
 
@@ -4057,6 +4519,17 @@ QUnit.module("wowl Views", (hooks) => {
         async (assert) => {
             assert.ok(false);
 
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
+
             // assert.expect(8);
 
             // var calendar = await createCalendarView({
@@ -4122,6 +4595,17 @@ QUnit.module("wowl Views", (hooks) => {
         async (assert) => {
             assert.ok(false);
 
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
+
             // assert.expect(1);
 
             // var calendar = await createCalendarView({
@@ -4162,6 +4646,17 @@ QUnit.module("wowl Views", (hooks) => {
         async (assert) => {
             assert.ok(false);
 
+            const calendar = await makeView({
+                type: "wowl_calendar",
+                resModel: "event",
+                serverData,
+                arch: `
+                    <calendar
+                        date_start="start"
+                    />
+                `,
+            });
+
             // assert.expect(3);
             // /*
             // This test aims to verify that the order of the event in month view is coherent with their start date.
@@ -4193,6 +4688,17 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.todo("drag and drop 24h event on week mode", async (assert) => {
         assert.ok(false);
         // assert.expect(1);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // var calendar = await createCalendarView({
         //     View: CalendarView,
@@ -4238,6 +4744,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(28);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // const calendar = await createCalendarView({
         //     View: CalendarView,
@@ -4358,6 +4875,17 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(false);
 
         // assert.expect(42);
+
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
 
         // const calendar = await createCalendarView({
         //     View: CalendarView,
@@ -4494,6 +5022,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // testUtils.mock.patch(CalendarRenderer, {
         //     _preOpenCreate: function (data) {
         //         data = Object.assign({}, data, {
@@ -4546,6 +5085,17 @@ QUnit.module("wowl Views", (hooks) => {
 
         // assert.expect(3);
 
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                />
+            `,
+        });
+
         // const def = testUtils.makeTestPromise();
         // const DeferredWidget = AbstractField.extend({
         //     async start() {
@@ -4591,42 +5141,39 @@ QUnit.module("wowl Views", (hooks) => {
         // delete fieldRegistry.map.deferred_widget;
     });
 
-    QUnit.todo("select events and discard create", async (assert) => {
-        assert.ok(false);
+    QUnit.debug("select events and discard create", async (assert) => {
+        assert.expect(3);
 
-        // assert.expect(4);
+        const calendar = await makeView({
+            type: "wowl_calendar",
+            resModel: "event",
+            serverData,
+            arch: `
+                <calendar
+                    date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="year"
+                    event_open_popup="true"
+                />
+            `,
+        });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="year"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        await selectDateRange(calendar, "2016-11-13", "2016-11-19");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o-calendar-quick-create",
+            "should open the form view in dialog when select multiple days"
+        );
+        assert.hasAttrValue(
+            mainComponentsContainer.querySelector(".fc-highlight"),
+            "colspan",
+            "7",
+            "should highlight 7 days"
+        );
 
-        // assert.equal(calendar.$('.fc-dayGridMonth-view').length, 12, "should display in year mode");
-
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-day-top[data-date="2016-11-13"]'),
-        //     calendar.$('.fc-day-top[data-date="2016-11-19"]'),
-        // );
-
-        // assert.ok($('.modal-body').length, "should open the form view in dialog when select multiple days");
-        // assert.hasAttrValue($('.fc-highlight'), 'colspan', "7", "should highlight 7 days");
-        // await testUtils.dom.click($('.modal-footer button.btn:contains(Cancel)'));
-
-        // assert.containsNone(calendar, '.fc-highlight', "should not highlight days");
-
-        // calendar.destroy();
+        await click(mainComponentsContainer, ".o-calendar-quick-create--cancel-btn");
+        assert.containsNone(mainComponentsContainer, ".fc-highlight", "should not highlight days");
     });
 });
