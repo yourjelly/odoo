@@ -5141,7 +5141,7 @@ QUnit.module("wowl Views", (hooks) => {
         // delete fieldRegistry.map.deferred_widget;
     });
 
-    QUnit.debug("select events and discard create", async (assert) => {
+    QUnit.test("select events and discard create", async (assert) => {
         assert.expect(3);
 
         const calendar = await makeView({
@@ -5160,20 +5160,26 @@ QUnit.module("wowl Views", (hooks) => {
         });
         const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
+
         await selectDateRange(calendar, "2016-11-13", "2016-11-19");
         assert.containsOnce(
             mainComponentsContainer,
             ".o-calendar-quick-create",
             "should open the form view in dialog when select multiple days"
         );
+
         assert.hasAttrValue(
-            mainComponentsContainer.querySelector(".fc-highlight"),
+            calendar.el.querySelector(".fc-highlight"),
             "colspan",
             "7",
             "should highlight 7 days"
         );
 
         await click(mainComponentsContainer, ".o-calendar-quick-create--cancel-btn");
-        assert.containsNone(mainComponentsContainer, ".fc-highlight", "should not highlight days");
+        assert.containsNone(calendar.el, ".fc-highlight", "should not highlight days");
     });
 });

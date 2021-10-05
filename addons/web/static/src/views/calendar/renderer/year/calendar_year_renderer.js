@@ -149,13 +149,14 @@ export class CalendarYearRenderer extends Component {
             }
         }
     }
-    onSelect(info) {
-        this.unselect();
-        this.props.createRecord({
+    async onSelect(info) {
+        this.popover.close();
+        await this.props.createRecord({
             start: luxon.DateTime.fromJSDate(info.start).setZone("UTC", { keepLocalTime: true }),
             end: luxon.DateTime.fromJSDate(info.end).setZone("UTC", { keepLocalTime: true }),
             isAllDay: true,
         });
+        this.unselect();
     }
 }
 CalendarYearRenderer.components = {
