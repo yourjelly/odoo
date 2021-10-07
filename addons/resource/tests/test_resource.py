@@ -493,7 +493,7 @@ class TestResMixin(TestResourceCommon):
         )
         self.assertEqual(result[self.john], (
             datetime_tz(2020, 4, 3, 8, 0, 0, tzinfo=self.john.tz),
-            None,
+            datetime_tz(2020, 4, 3, 23, 0, 0, tzinfo=self.john.tz),
         ))
 
         result = self.john._adjust_to_calendar(
