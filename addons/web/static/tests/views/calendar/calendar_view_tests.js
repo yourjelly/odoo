@@ -10,7 +10,15 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { userService } from "@web/core/user_service";
 import { mocks } from "../../helpers/mock_services";
-import { click, getFixture, patchDate, patchWithCleanup, triggerEvent } from "../../helpers/utils";
+import {
+    click,
+    getFixture,
+    patchDate,
+    patchWithCleanup,
+    triggerEvent,
+    makeDeferred,
+    nextTick,
+} from "../../helpers/utils";
 import { makeView } from "../helpers";
 import {
     changeScale,
@@ -26,6 +34,9 @@ import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { browser } from "@web/core/browser/browser";
+
+import AbstractField from "web.AbstractField";
+import fieldRegistry from "web.field_registry";
 
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
@@ -4871,10 +4882,8 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("toggle filters in year view", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(42);
+    QUnit.debug("toggle filters in year view", async (assert) => {
+        assert.expect(42);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4883,33 +4892,19 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="year"
+                    event_open_popup="true"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
+                    <field name="partner_id" filters="1" invisible="1"/>
+                '</calendar>
             `,
         });
 
-        // const calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `
-        //         <calendar
-        //             event_open_popup="true"
-        //             date_start="start"
-        //             date_stop="stop"
-        //             all_day="allday"
-        //             mode="year"
-        //             attendee="partner_ids"
-        //             color="partner_id"
-        //         >
-        //             <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
-        //             <field name="partner_id" filters="1" invisible="1"/>
-        //         '</calendar>`,
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-        // // activate partner filter
+        // activate partner filter
         // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
         // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
 
@@ -5017,10 +5012,8 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("calendar: disableQuickCreate in data event", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(3);
+    QUnit.test("fields are added in the right order in popover", async (assert) => {
+        assert.expect(3);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -5029,116 +5022,45 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
+                >
+                    <field name="user_id" widget="deferred_widget" />
+                    <field name="name" />
+                </calendar>
             `,
         });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // testUtils.mock.patch(CalendarRenderer, {
-        //     _preOpenCreate: function (data) {
-        //         data = Object.assign({}, data, {
-        //             extendedProps: {disableQuickCreate: true},
-        //         });
-        //         return this._super.call(this, data);
-        //     },
-        // });
-
-        // let calendar = await testUtils.createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `<calendar mode="day" date_start="start" date_stop="stop"></calendar>`,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     intercepts: {
-        //         do_action(ev) {
-        //             assert.step('do_action');
-        //             assert.deepEqual(ev.data.action.context, {
-        //                     default_start: "2016-12-12 06:30:00",
-        //                     default_stop: "2016-12-12 11:00:00",
-        //                 }, "should send the correct data to create events");
-        //         },
-        //     },
-        // }, {positionalClicks: true});
-
-        // // Create event
-        // var $initCell = calendar.$('.fc-time-grid .fc-minor[data-time="06:30:00"] .fc-widget-content:last-child');
-        // var $endCell = calendar.$('.fc-time-grid .fc-minor[data-time="10:30:00"] .fc-widget-content:last-child');
-
-        // var left = $initCell.offset().left;
-        // var top = $initCell.offset().top;
-        // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        // top = $endCell.offset().top;
-        // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
-        // testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
-        // await testUtils.nextTick();
-
-        // assert.verifySteps(['do_action']);
-
-        // calendar.destroy();
-
-        // testUtils.mock.unpatch(CalendarRenderer);
-    });
-
-    QUnit.todo("fields are added in the right order in popover", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(3);
-
-        const calendar = await makeView({
-            type: "wowl_calendar",
-            resModel: "event",
-            serverData,
-            arch: `
-                <calendar
-                    date_start="start"
-                />
-            `,
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
         });
 
-        // const def = testUtils.makeTestPromise();
-        // const DeferredWidget = AbstractField.extend({
-        //     async start() {
-        //         await this._super(...arguments);
-        //         await def;
-        //     }
-        // });
-        // fieldRegistry.add("deferred_widget", DeferredWidget);
+        const def = makeDeferred();
+        const DeferredWidget = AbstractField.extend({
+            async start() {
+                await this._super(...arguments);
+                await def;
+            },
+        });
+        fieldRegistry.add("deferred_widget", DeferredWidget);
 
-        // const calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //         `<calendar
-        //             date_start="start"
-        //             date_stop="stop"
-        //             all_day="allday"
-        //             mode="month"
-        //         >
-        //             <field name="user_id" widget="deferred_widget" />
-        //             <field name="name" />
-        //         </calendar>`,
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        await clickEvent(calendar, 4);
+        assert.containsNone(mainComponentsContainer, ".o_cw_popover");
 
-        // await testUtils.dom.click(calendar.$(`[data-event-id="4"]`));
-        // assert.containsNone(calendar, ".o_cw_popover");
+        def.resolve();
+        await nextTick();
+        assert.containsOnce(mainComponentsContainer, ".o_cw_popover");
 
-        // def.resolve();
-        // await testUtils.nextTick();
-        // assert.containsOnce(calendar, ".o_cw_popover");
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".o_cw_popover .o_cw_popover_fields_secondary")
+                .textContent,
+            "user : name : event 4"
+        );
 
-        // assert.strictEqual(
-        //     calendar.$(".o_cw_popover .o_cw_popover_fields_secondary").text(),
-        //     "user : name : event 4"
-        // );
-
-        // calendar.destroy();
-        // delete fieldRegistry.map.deferred_widget;
+        delete fieldRegistry.map.deferred_widget;
     });
 
     QUnit.test("select events and discard create", async (assert) => {

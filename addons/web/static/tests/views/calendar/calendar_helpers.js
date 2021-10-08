@@ -295,6 +295,7 @@ export async function pickDate(calendar, date) {
     const el = calendar.el.querySelectorAll(
         `.ui-datepicker-calendar td[data-year="${year}"][data-month="${iMonth}"]`
     )[iDay];
+    el.scrollIntoView();
     await click(el);
 }
 
@@ -336,18 +337,22 @@ async function triggerEventForCalendar(el, type, position = {}) {
 
 export async function clickAllDaySlot(calendar, date) {
     const el = findAllDaySlot(calendar, date);
+    el.scrollIntoView();
     await triggerEventForCalendar(el, "mousedown");
     await triggerEventForCalendar(el, "mouseup");
 }
 
 export async function clickDate(calendar, date) {
     const el = findDateCell(calendar, date);
+    el.scrollIntoView();
     await triggerEventForCalendar(el, "mousedown");
     await triggerEventForCalendar(el, "mouseup");
 }
 
 export async function clickEvent(calendar, eventId) {
-    await click(findEvent(calendar, eventId));
+    const el = findEvent(calendar, eventId);
+    el.scrollIntoView();
+    await click(el);
 }
 
 export async function selectTimeRange(calendar, startDateTime, endDateTime) {
@@ -364,10 +369,12 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
     const startRowRect = startRow.getBoundingClientRect();
     const endRowRect = endRow.getBoundingClientRect();
 
+    startRow.scrollIntoView();
     await triggerEventForCalendar(startRow, "mousedown", {
         x: startColRect.x,
         y: startRowRect.y + 1,
     });
+    endRow.scrollIntoView();
     await triggerEventForCalendar(endRow, "mousemove", { x: endColRect.x, y: endRowRect.y - 1 });
     await triggerEventForCalendar(endRow, "mouseup", { x: endColRect.x, y: endRowRect.y - 1 });
 }
@@ -375,7 +382,9 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
 export async function selectDateRange(calendar, startDate, endDate) {
     const start = findDateCell(calendar, startDate);
     const end = findDateCell(calendar, endDate);
+    start.scrollIntoView();
     await triggerEventForCalendar(start, "mousedown");
+    end.scrollIntoView();
     await triggerEventForCalendar(end, "mousemove");
     await triggerEventForCalendar(end, "mouseup");
 }
@@ -392,4 +401,13 @@ export async function changeScale(calendarView, scale) {
         calendarView.el,
         `.o-calendar-view--scale-buttons .o-calendar-view--scale-button--${scale}`
     );
+}
+
+export async function toggleFilter(calendar, sectionName, filterValue) {
+    const sectionSelector = `.o-calendar-filter-panel--section[data-name="${sectionName}"]`;
+    const filterSelector = `.o-calendar-filter-panel--section-filter[data-value="${filterValue}"]`;
+
+    const el = calendar.el.querySelector(`${sectionSelector} ${filterSelector}`);
+    el.scrollIntoView();
+    await click(el);
 }

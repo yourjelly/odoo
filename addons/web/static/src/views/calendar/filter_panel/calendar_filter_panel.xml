@@ -8,21 +8,26 @@
                     <div
                         class="o-calendar-filter-panel--section"
                         t-att-class="{'o-calendar-filter-panel--section-collapsed': isSectionCollapsed(section)}"
+                        t-att-data-name="section.fieldName"
                     >
                         <t t-if="section.label">
                             <div class="d-flex">
-                                <div class="o-calendar-filter-panel--section-filter position-relative mr-1">
+                                <div
+                                    class="o-calendar-filter-panel--section-filter position-relative mr-1"
+                                    t-att-data-value="'global'"
+                                >
+                                    <t t-set="filterId" t-value="nextFilterId" />
                                     <input
                                         type="checkbox"
                                         name="select-all"
                                         class="position-absolute"
-                                        t-attf-id="select-all-{{ section.fieldName }}"
+                                        t-attf-id="filterId"
                                         t-att-checked="isAllActive(section)"
                                         t-on-change="onAllFilterInputChange(section)"
                                     />
                                     <label
                                         class="d-flex align-items-center m-0"
-                                        t-attf-for="select-all-{{ section.fieldName }}"
+                                        t-attf-for="filterId"
                                     >
                                         <span
                                             class="o-calendar-filter-panel--filter-input align-items-center d-flex flex-shrink-0 justify-content-center position-relative mr-1"
