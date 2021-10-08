@@ -405,7 +405,7 @@ export async function changeScale(calendarView, scale) {
 
 export async function toggleFilter(calendar, sectionName, filterValue) {
     const sectionSelector = `.o-calendar-filter-panel--section[data-name="${sectionName}"]`;
-    const filterSelector = `.o-calendar-filter-panel--section-filter[data-value="${filterValue}"]`;
+    const filterSelector = `.o-calendar-filter-panel--filter[data-value="${filterValue}"]`;
 
     const el = calendar.el.querySelector(`${sectionSelector} ${filterSelector}`);
     el.scrollIntoView();

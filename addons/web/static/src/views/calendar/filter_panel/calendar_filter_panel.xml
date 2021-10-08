@@ -13,7 +13,7 @@
                         <t t-if="section.label">
                             <div class="d-flex">
                                 <div
-                                    class="o-calendar-filter-panel--section-filter position-relative mr-1"
+                                    class="o-calendar-filter-panel--filter o-calendar-filter-panel--section-filter position-relative mr-1"
                                     t-att-data-value="'global'"
                                 >
                                     <t t-set="filterId" t-value="nextFilterId" />

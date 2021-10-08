@@ -29,6 +29,7 @@ import {
     findTimeRow,
     pickDate,
     selectDateRange,
+    toggleFilter,
 } from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
@@ -4904,37 +4905,34 @@ QUnit.module("wowl Views", (hooks) => {
             `,
         });
 
-        // activate partner filter
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
+        await toggleFilter(calendar, "partner_ids", 1);
+        await toggleFilter(calendar, "partner_ids", 2);
 
-        // function checkEvents(countMap) {
-        //     for (const [id, count] of Object.entries(countMap)) {
-        //         assert.containsN(calendar, `.fc-bgevent[data-event-id="${id}"]`, count);
-        //     }
-        // }
+        function checkEvents(countMap) {
+            for (const [id, count] of Object.entries(countMap)) {
+                assert.containsN(calendar.el, `.fc-bgevent[data-event-id="${id}"]`, count);
+            }
+        }
 
-        // checkEvents({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 7: 1, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_attendees .o_calendar_filter_item[data-value="2"] label'));
-        // checkEvents({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 0, 7: 0, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_user .o_calendar_filter_item[data-value="1"] label'));
-        // checkEvents({ 1: 0, 2: 0, 3: 1, 4: 0, 5: 0, 7: 0, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_user .o_calendar_filter_item[data-value="4"] label'));
-        // checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_attendees .o_calendar_filter_item[data-value="1"] label'));
-        // checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_attendees .o_calendar_filter_item[data-value="2"] label'));
-        // checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0, });
-        // await testUtils.dom.click(calendar.el.querySelector(
-        //     '#o_cw_filter_collapse_user .o_calendar_filter_item[data-value="4"] label'));
-        // checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 2, 7: 0, });
+        checkEvents({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 7: 1 });
 
-        // calendar.destroy();
+        await toggleFilter(calendar, "partner_ids", 2);
+        checkEvents({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 0, 7: 0 });
+
+        await toggleFilter(calendar, "partner_id", 1);
+        checkEvents({ 1: 0, 2: 0, 3: 1, 4: 0, 5: 0, 7: 0 });
+
+        await toggleFilter(calendar, "partner_id", 4);
+        checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0 });
+
+        await toggleFilter(calendar, "partner_ids", 1);
+        checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0 });
+
+        await toggleFilter(calendar, "partner_ids", 2);
+        checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 7: 0 });
+
+        await toggleFilter(calendar, "partner_id", 4);
+        checkEvents({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 2, 7: 0 });
     });
 
     QUnit.test("allowed scales", async (assert) => {
