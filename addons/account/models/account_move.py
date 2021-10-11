@@ -2033,6 +2033,8 @@ class AccountMove(models.Model):
             raise UserError(_("Cannot create unbalanced journal entry. Ids: %s\nDifferences debit - credit: %s") % (ids, sums))
 
     def _check_fiscalyear_lock_date(self):
+        if self._context.get('bypass_lock_date'):
+            return True
         for move in self:
             lock_date = move.company_id._get_user_fiscal_lock_date()
             if move.date <= lock_date:

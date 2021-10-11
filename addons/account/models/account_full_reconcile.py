@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from datetime import date, timedelta
+
 from odoo import api, fields, models, _
+from odoo.tools import date_utils
 
 
 class AccountFullReconcile(models.Model):
@@ -27,11 +30,21 @@ class AccountFullReconcile(models.Model):
         res = super().unlink()
 
         # Reverse all exchange moves at once.
-        today = fields.Date.context_today(self)
         default_values_list = [{
-            'date': today,
+            'date': self._get_exchange_diff_date(move),
             'ref': _('Reversal of: %s') % move.name,
         } for move in moves_to_reverse]
         moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
         return res
+
+    def _get_exchange_diff_date(self, move):
+        tax_lock_date = any(line._affect_tax_report() for line in move.line_ids) and move.company_id.tax_lock_date or date.min
+        fiscal_lock_date = move.company_id._get_user_fiscal_lock_date() or date.min
+        lock_date = max(tax_lock_date, fiscal_lock_date)
+        if lock_date >= move.date:
+            # return earliest between today and first end of month after Lock Date
+            today = fields.Date.context_today(self)
+            month_end_after_lockdate = date_utils.get_month(lock_date + timedelta(days=1))[1]
+            return min(today, month_end_after_lockdate)
+        return move.date
