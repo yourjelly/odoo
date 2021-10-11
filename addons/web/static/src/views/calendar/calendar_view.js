@@ -3,8 +3,7 @@
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useEffect, useService } from "@web/core/utils/hooks";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { useService } from "@web/core/utils/hooks";
 import { useModel } from "../helpers/model";
 import { useSetupView } from "../helpers/view_hook";
 import { Calendar } from "./renderer/calendar";
@@ -47,6 +46,7 @@ function useLegacyViewDialog() {
         }
     };
     const add = (props) => {
+        remove();
         dialog = new FormViewDialogAdapter(component, props);
         dialog.open();
         return remove;

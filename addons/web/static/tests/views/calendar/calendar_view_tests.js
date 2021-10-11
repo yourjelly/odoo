@@ -40,6 +40,7 @@ import { browser } from "@web/core/browser/browser";
 
 import AbstractField from "web.AbstractField";
 import fieldRegistry from "web.field_registry";
+import { FormViewDialog } from "web.view_dialogs";
 
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
@@ -967,10 +968,24 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("open multiple event form at the same time", async (assert) => {
-        assert.ok(false);
+    QUnit.test("open multiple event form at the same time", async (assert) => {
+        assert.expect(2);
 
-        // assert.expect(2);
+        const def = makeDeferred();
+        let counter = 0;
+
+        patchWithCleanup(FormViewDialog.prototype, {
+            open() {
+                counter++;
+                delete this.options.fields_view;
+                return this._super(...arguments);
+            },
+            async loadFieldView() {
+                const _super = this._super;
+                await def;
+                return _super(...arguments);
+            },
+        });
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -979,62 +994,37 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
+                    event_open_popup="1"
+                    quick_add="0"
+                >
+                    <field name="name" />
+                </calendar>
             `,
         });
 
-        // var prom = testUtils.makeTestPromise();
-        // var counter = 0;
-        // testUtils.mock.patch(ViewDialogs.FormViewDialog, {
-        //     open: function () {
-        //         counter++;
-        //         this.options = _.omit(this.options, 'fields_view');  // force loadFieldView
-        //         return this._super.apply(this, arguments);
-        //     },
-        //     loadFieldView: function () {
-        //         var self = this;
-        //         var args = arguments;
-        //         var _super = this._super;
-        //         return prom.then(function () {
-        //             return _super.apply(self, args);
-        //         });
-        //     },
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var event = $.Event();
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'quick_add="False" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="month">'+
-        //             '<field name="name"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // for (var i = 0; i < 5; i++) {
-        //     await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        //     await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // }
-        // prom.resolve();
-        // await testUtils.nextTick();
-        // assert.equal(counter, 5, "there should had been 5 attemps to open a modal");
-        // assert.containsOnce($('body'), '.modal', "there should be only one open modal");
+        for (let i = 0; i < 5; i++) {
+            await clickDate(calendar, "2016-12-13");
+        }
 
-        // calendar.destroy();
-        // testUtils.mock.unpatch(ViewDialogs.FormViewDialog);
+        def.resolve();
+        await nextTick();
+
+        assert.equal(counter, 5, "there should had been 5 attemps to open a modal");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".modal",
+            "there should be only one open modal"
+        );
     });
 
     QUnit.todo("create event with timezone in week mode European locale", async (assert) => {
@@ -1120,7 +1110,9 @@ QUnit.module("wowl Views", (hooks) => {
         //     },
         //     "the new record should have the utc datetime (quickCreate)");
 
-        // // delete record
+        // delete record
+
+        // await clickEvent(calendar, 1);
 
         // await testUtils.dom.click($newevent);
         // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_delete'));
@@ -4728,8 +4720,7 @@ QUnit.module("wowl Views", (hooks) => {
     );
 
     QUnit.todo("drag and drop 24h event on week mode", async (assert) => {
-        assert.ok(false);
-        // assert.expect(1);
+        assert.expect(1);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4738,48 +4729,30 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                    quick_add="0"
                 />
             `,
         });
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `
-        //         <calendar
-        //             event_open_popup="true"
-        //             quick_add="False"
-        //             date_start="start"
-        //             date_stop="stop"
-        //             all_day="allday"
-        //             mode="week"
-        //         />
-        //     `,
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // }, {positionalClicks: true});
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var top = calendar.$('.fc-axis:contains(8:00)').offset().top + 5;
-        // var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // try {
-        //     testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        // } catch (e) {
-        //     calendar.destroy();
-        //     throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
-        // }
+        await selectTimeRange(calendar, "2016-12-13 08:00:00", "2016-12-14 08:00:00");
 
-        // top = calendar.$('.fc-axis:contains(8:00)').offset().top - 5;
-        // var leftNextDay = calendar.$('.fc-day:eq(3)').offset().left + 5;
-        // testUtils.dom.triggerPositionalMouseEvent(leftNextDay, top, "mousemove");
-        // await testUtils.dom.triggerPositionalMouseEvent(leftNextDay, top, "mouseup");
-        // await testUtils.nextTick();
-        // assert.equal($('.o_field_boolean.o_field_widget[name=allday] input').is(':checked'), false,
-        //     "The event must not have the all_day active");
-        // calendar.destroy();
+        // assert.notOk(
+        //     mainComponentsContainer.querySelector(
+        //         `.o_field_boolean.o_field_widget[name="allday"] input`
+        //     ).checked,
+        //     "The event must not have the all_day active"
+        // );
     });
 
     QUnit.todo("correctly display year view", async (assert) => {
