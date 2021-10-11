@@ -27,8 +27,10 @@ import {
     findEvent,
     findPickedDate,
     findTimeRow,
+    patchTimeZone,
     pickDate,
     selectDateRange,
+    selectTimeRange,
     toggleFilter,
 } from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -402,7 +404,7 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(!!typeFilter, "should display 'user' filter");
         assert.containsN(
             typeFilter,
-            ".o-calendar-filter-panel--filter",
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
             3,
             "should display 3 filter items for 'user'"
         );
@@ -431,7 +433,7 @@ QUnit.module("wowl Views", (hooks) => {
         assert.ok(!!attendeesFilter, "should display 'attendees' filter");
         assert.containsN(
             attendeesFilter,
-            ".o-calendar-filter-panel--filter",
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
             3,
             "should display 3 filter items for 'attendees' who use write_model (checkall + 2 saved + Everything)"
         );
@@ -471,7 +473,7 @@ QUnit.module("wowl Views", (hooks) => {
         await click(autoCompleteItems[0]);
         assert.containsN(
             attendeesFilter,
-            ".o-calendar-filter-panel--filter",
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
             4,
             "should display 4 filter items for 'attendees'"
         );
@@ -491,7 +493,7 @@ QUnit.module("wowl Views", (hooks) => {
         await click(sidebar.querySelectorAll(".o-calendar-filter-panel--filter-remove")[1]);
         assert.containsN(
             attendeesFilter,
-            ".o-calendar-filter-panel--filter",
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
             3,
             "click on remove then should display 3 filter items for 'attendees'"
         );
@@ -537,6 +539,25 @@ QUnit.module("wowl Views", (hooks) => {
     );
 
     QUnit.test("breadcrumbs are updated with the displayed period", async (assert) => {
+        let currentTitles = {};
+        const fakeTitleService = {
+            start() {
+                return {
+                    get current() {
+                        return JSON.stringify(currentTitles);
+                    },
+                    getParts() {
+                        return currentTitles;
+                    },
+                    setParts(parts) {
+                        currentTitles = Object.assign({}, currentTitles, parts);
+                    },
+                };
+            },
+        };
+        serviceRegistry.add("title", fakeTitleService, { force: true });
+        currentTitles.action = "Meetings Test";
+
         const calendar = await makeView({
             type: "wowl_calendar",
             resModel: "event",
@@ -548,7 +569,6 @@ QUnit.module("wowl Views", (hooks) => {
                     all_day="allday"
                 />
             `,
-            displayName: "Meetings Test",
         });
 
         // displays week mode by default
@@ -1018,9 +1038,18 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("create event with timezone in week mode European locale", async (assert) => {
-        assert.ok(false);
+        assert.expect(5);
 
-        // assert.expect(5);
+        serverData.models.event.records = [];
+
+        serviceRegistry.add(
+            "localization",
+            mocks.localization({
+                timeFormat: "%H:%M:%S",
+            })
+        );
+
+        patchTimeZone("UTC+2");
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -1029,75 +1058,56 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_Stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                >
+                    <field name="name" />
+                    <field name="start" />
+                    <field name="allday" />
+                </calendar>
             `,
+            mockRPC(route, { method, kwargs }) {
+                if (method === "create") {
+                    assert.deepEqual(
+                        kwargs.context,
+                        {
+                            default_start: "2016-12-13 06:00:00",
+                            default_stop: "2016-12-13 08:00:00",
+                            default_allday: null,
+                        },
+                        "should send the context to create events"
+                    );
+                }
+            },
         });
 
-        // this.data.event.records = [];
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week">'+
-        //             '<field name="name"/>'+
-        //             '<field name="start"/>'+
-        //             '<field name="allday"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     session: {
-        //         getTZOffset: function () {
-        //             return 120;
-        //         },
-        //     },
-        //     translateParameters: { // Avoid issues due to localization formats
-        //         time_format: "%H:%M:%S",
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "create") {
-        //             assert.deepEqual(args.kwargs.context, {
-        //                 "default_start": "2016-12-13 06:00:00",
-        //                 "default_stop": "2016-12-13 08:00:00",
-        //                 "default_allday": null
-        //             },
-        //             "should send the context to create events");
-        //         }
-        //         return this._super(route, args);
-        //     },
-        // }, {positionalClicks: true});
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // var top = calendar.$('.fc-axis:contains(8:00)').offset().top + 5;
-        // var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
+        await selectTimeRange(calendar, "2016-12-13 06:00:00", "2016-12-13 08:00:00");
+        assert.strictEqual(
+            calendar.el.querySelector(".fc-content .fc-time").textContent,
+            "8:00 - 10:00",
+            "should display the time in the calendar sticker"
+        );
 
-        // try {
-        //     testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        // } catch (e) {
-        //     calendar.destroy();
-        //     throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
-        // }
+        let input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event";
+        await triggerEvent(input, null, "input");
 
-        // testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mousemove");
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
 
-        // assert.strictEqual(calendar.$('.fc-content .fc-time').text(), "8:00 - 10:00",
-        //     "should display the time in the calendar sticker");
-
-        // await testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mouseup");
-        // await testUtils.nextTick();
-        // await testUtils.fields.editInput($('.modal input:first'), 'new event');
-        // await testUtils.dom.click($('.modal button.btn:contains(Create)'));
-        // var $newevent = calendar.$('.fc-event:contains(new event)');
-
-        // assert.strictEqual($newevent.find('.o_event_title').text(), "new event",
-        //     "should display the new event with title");
+        assert.strictEqual(
+            calendar.el.querySelector(".fc-event .o_event_title").textContent,
+            "new event",
+            "should display the new event with title"
+        );
 
         // assert.deepEqual($newevent[0].fcSeg.eventRange.def.extendedProps.record,
         //     {
@@ -1116,8 +1126,6 @@ QUnit.module("wowl Views", (hooks) => {
         // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_delete'));
         // await testUtils.dom.click($('.modal button.btn-primary:contains(Ok)'));
         // assert.containsNone(calendar, '.fc-content', "should delete the record");
-
-        // calendar.destroy();
     });
 
     QUnit.test("default week start (US)", async (assert) => {
@@ -4526,10 +4534,10 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo(
+    QUnit.test(
         'edit record and attempt to create a record with "create" attribute set to false',
         async (assert) => {
-            assert.ok(false);
+            assert.expect(8);
 
             const calendar = await makeView({
                 type: "wowl_calendar",
@@ -4538,74 +4546,89 @@ QUnit.module("wowl Views", (hooks) => {
                 arch: `
                     <calendar
                         date_start="start"
+                        date_stop="stop"
+                        mode="month"
+                        event_open_popup="1"
+                        create="0"
                     />
                 `,
+                mockRPC(route, { args, method }) {
+                    if (method === "write") {
+                        assert.deepEqual(
+                            args[1],
+                            { name: "event 4 modified" },
+                            "should update the record"
+                        );
+                    }
+                },
             });
 
-            // assert.expect(8);
+            const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-            // var calendar = await createCalendarView({
-            //     View: CalendarView,
-            //     model: 'event',
-            //     data: this.data,
-            //     arch:
-            //     '<calendar class="o_calendar_test" '+
-            //         'string="Events" '+
-            //         'event_open_popup="true" '+
-            //         'create="false" '+
-            //         'date_start="start" '+
-            //         'date_stop="stop" '+
-            //         'mode="month"/>',
-            //     archs: archs,
-            //     mockRPC: function (route, args) {
-            //         if (args.method === 'write') {
-            //             assert.deepEqual(args.args[1], {name: 'event 4 modified'}, "should update the record");
-            //         }
-            //         return this._super.apply(this, arguments);
-            //     },
-            //     viewOptions: {
-            //         initialDate: initialDate,
-            //     },
-            // });
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+                clearTimeout: () => {},
+            });
 
-            // // editing existing events should still be possible
-            // // click on an existing event to open the formViewDialog
+            // editing existing events should still be possible
+            // click on an existing event to open the formViewDialog
 
-            // await testUtils.dom.click(calendar.$('.fc-event:contains(event 4) .fc-content'));
+            await clickEvent(calendar, 4);
+            assert.containsOnce(
+                mainComponentsContainer,
+                ".o_cw_popover",
+                "should open a popover clicking on event"
+            );
+            assert.containsOnce(
+                mainComponentsContainer,
+                ".o_cw_popover .o_cw_popover_edit",
+                "popover should have an edit button"
+            );
+            assert.containsOnce(
+                mainComponentsContainer,
+                ".o_cw_popover .o_cw_popover_delete",
+                "popover should have a delete button"
+            );
+            assert.containsOnce(
+                mainComponentsContainer,
+                ".o_cw_popover .o_cw_popover_close",
+                "popover should have a close button"
+            );
 
-            // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-            // assert.ok(calendar.$('.o_cw_popover .o_cw_popover_edit').length, "popover should have an edit button");
-            // assert.ok(calendar.$('.o_cw_popover .o_cw_popover_delete').length, "popover should have a delete button");
-            // assert.ok(calendar.$('.o_cw_popover .o_cw_popover_close').length, "popover should have a close button");
+            await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_edit");
+            assert.containsOnce(
+                mainComponentsContainer,
+                ".modal-body",
+                "should open the form view in dialog when click on edit"
+            );
 
-            // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_edit'));
+            let input = mainComponentsContainer.querySelector(".modal-body input");
+            input.value = "event 4 modified";
+            await triggerEvent(input, null, "input");
 
-            // assert.ok($('.modal-body').length, "should open the form view in dialog when click on edit");
+            await click(mainComponentsContainer.querySelector(".modal-footer button.btn-primary"));
+            assert.containsNone(
+                mainComponentsContainer,
+                ".modal",
+                "save button should close the modal"
+            );
 
-            // await testUtils.fields.editInput($('.modal-body input:first'), 'event 4 modified');
-            // await testUtils.dom.click($('.modal-footer button.btn:contains(Save)'));
+            // creating an event should not be possible
+            // attempt to create a new event with create set to false
 
-            // assert.notOk($('.modal-body').length, "save button should close the modal");
-
-            // // creating an event should not be possible
-            // // attempt to create a new event with create set to false
-
-            // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-
-            // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-            // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-            // await testUtils.nextTick();
-
-            // assert.notOk($('.modal-sm').length, "shouldn't open a quick create dialog for creating a new event with create attribute set to false");
-
-            // calendar.destroy();
+            await clickDate(calendar, "2016-12-13");
+            assert.containsNone(
+                mainComponentsContainer,
+                ".modal",
+                "shouldn't open a quick create dialog for creating a new event with create attribute set to false"
+            );
         }
     );
 
-    QUnit.todo(
+    QUnit.test(
         'attempt to create record with "create" and "quick_add" attributes set to false',
         async (assert) => {
-            assert.ok(false);
+            assert.expect(1);
 
             const calendar = await makeView({
                 type: "wowl_calendar",
@@ -4614,49 +4637,65 @@ QUnit.module("wowl Views", (hooks) => {
                 arch: `
                     <calendar
                         date_start="start"
+                        date_stop="stop"
+                        mode="month"
+                        create="0"
+                        event_open_popup="1"
+                        quick_create="0"
                     />
                 `,
             });
 
-            // assert.expect(1);
+            const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-            // var calendar = await createCalendarView({
-            //     View: CalendarView,
-            //     model: 'event',
-            //     data: this.data,
-            //     arch:
-            //     '<calendar class="o_calendar_test" '+
-            //         'string="Events" '+
-            //         'create="false" '+
-            //         'event_open_popup="true" '+
-            //         'quick_add="false" '+
-            //         'date_start="start" '+
-            //         'date_stop="stop" '+
-            //         'mode="month"/>',
-            //     archs: archs,
-            //     viewOptions: {
-            //         initialDate: initialDate,
-            //     },
-            // });
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+                clearTimeout: () => {},
+            });
 
-            // // attempt to create a new event with create set to false
+            // attempt to create a new event with create set to false
 
-            // var $cell = calendar.$('.fc-day-grid .fc-row:eq(5) .fc-day:eq(2)');
-
-            // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-            // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-            // await testUtils.nextTick();
-
-            // assert.strictEqual($('.modal').length, 0, "shouldn't open a form view for creating a new event with create attribute set to false");
-
-            // calendar.destroy();
+            await clickDate(calendar, "2016-12-13");
+            assert.containsNone(
+                mainComponentsContainer,
+                ".modal",
+                "shouldn't open a form view for creating a new event with create attribute set to false"
+            );
         }
     );
 
-    QUnit.todo(
+    QUnit.test(
         "attempt to create multiples events and the same day and check the ordering on month view",
         async (assert) => {
-            assert.ok(false);
+            assert.expect(3);
+
+            // This test aims to verify that the order of the event in month view is coherent with their start date.
+            // 12 of March
+            patchDate(2020, 2, 12, 8, 0, 0);
+
+            serverData.models.event.records = [
+                {
+                    id: 1,
+                    name: "Second event",
+                    start: "2020-03-12 05:00:00",
+                    stop: "2020-03-12 07:00:00",
+                    allday: false,
+                },
+                {
+                    id: 2,
+                    name: "First event",
+                    start: "2020-03-12 02:00:00",
+                    stop: "2020-03-12 03:00:00",
+                    allday: false,
+                },
+                {
+                    id: 3,
+                    name: "Third event",
+                    start: "2020-03-12 08:00:00",
+                    stop: "2020-03-12 09:00:00",
+                    allday: false,
+                },
+            ];
 
             const calendar = await makeView({
                 type: "wowl_calendar",
@@ -4665,35 +4704,26 @@ QUnit.module("wowl Views", (hooks) => {
                 arch: `
                     <calendar
                         date_start="start"
+                        date_stop="stop"
+                        all_day="allday"
+                        mode="month"
                     />
                 `,
             });
 
-            // assert.expect(3);
-            // /*
-            // This test aims to verify that the order of the event in month view is coherent with their start date.
-            // */
-            // var initDate = new Date(2020, 2, 12, 8, 0, 0); //12 of March
-            // this.data.event.records = [
-            //     {id: 1, name: "Second event", start: "2020-03-12 05:00:00", stop: "2020-03-12 07:00:00", allday: false},
-            //     {id: 2, name: "First event", start: "2020-03-12 02:00:00", stop: "2020-03-12 03:00:00", allday: false},
-            //     {id: 3, name: "Third event", start: "2020-03-12 08:00:00", stop: "2020-03-12 09:00:00", allday: false},
-            // ];
-            // var calendar = await createCalendarView({
-            //     View: CalendarView,
-            //     model: 'event',
-            //     data: this.data,
-            //     arch: `<calendar date_start="start" date_stop="stop" all_day="allday" mode="month" />`,
-            //     archs: archs,
-            //     viewOptions: {
-            //         initialDate: initDate,
-            //     },
-            // });
-            // assert.ok(calendar.$('.o_calendar_view').find('.fc-view-container').length, "should display in the calendar"); // OK
-            // // Testing the order of the events: by start date
-            // assert.strictEqual(calendar.$('.o_event_title').length, 3, "3 events should be available"); // OK
-            // assert.strictEqual(calendar.$('.o_event_title').first().text(), 'First event', "First event should be on top");
-            // calendar.destroy();
+            assert.containsOnce(
+                calendar.el,
+                ".o-calendar .fc-view-container",
+                "should display in the calendar"
+            );
+
+            // Testing the order of the events: by start date
+            assert.containsN(calendar.el, ".o_event_title", 3, "3 events should be available");
+            assert.strictEqual(
+                calendar.el.querySelector(".o_event_title").textContent,
+                "First event",
+                "First event should be on top"
+            );
         }
     );
 
@@ -4753,9 +4783,7 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("correctly display year view", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(28);
+        assert.expect(28);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4763,61 +4791,44 @@ QUnit.module("wowl Views", (hooks) => {
             serverData,
             arch: `
                 <calendar
+                    create="0"
+                    event_open_popup="1"
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="year"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
+                    <field name="partner_id" filters="1" invisible="1"/>
+                    <field name="is_hatched" invisible="1" />
+                </calendar>
             `,
         });
 
-        // const calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `
-        //         <calendar
-        //             create="false"
-        //             event_open_popup="true"
-        //             date_start="start"
-        //             date_stop="stop"
-        //             all_day="allday"
-        //             mode="year"
-        //             attendee="partner_ids"
-        //             color="partner_id"
-        //         >
-        //             <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
-        //             <field name="partner_id" filters="1" invisible="1"/>
-        //             <field name="is_hatched" invisible="1" />
-        //         </calendar>`,
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // }, {positionalClicks: true});
+        await toggleFilter(calendar, "partner_ids", "section");
 
-        // // select all partner filters
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
+        // Check view
+        assert.containsN(calendar, ".o-calendar-year-renderer--month", 12);
+        assert.strictEqual(
+            calendar.el.querySelector(
+                ".o-calendar-year-renderer--month:first-child .fc-header-toolbar"
+            ).textContent,
+            "Jan 2016"
+        );
+        assert.containsN(
+            calendar.el,
+            ".fc-bgevent",
+            7,
+            "There should be 6 events displayed but there is 1 split on 2 weeks"
+        );
 
-        // // Check view
-        // assert.containsN(calendar, '.fc-month', 12);
-        // assert.strictEqual(
-        //     calendar.el.querySelector('.fc-month:first-child .fc-header-toolbar').textContent,
-        //     'Jan 2016'
-        // );
-        // assert.containsN(calendar.el, '.fc-bgevent', 7,
-        //     'There should be 6 events displayed but there is 1 split on 2 weeks');
-
-        //     assert.containsN(calendar.el, '.o_calendar_hatched', 3,
-        //         'There should be 3 events that are hatched')
-
-        // async function clickDate(date) {
-        //     const el = calendar.el.querySelector(`.fc-day-top[data-date="${date}"]`);
-        //     el.scrollIntoView(); // scroll to it as the calendar could be too small
-
-        //     testUtils.dom.triggerMouseEvent(el, "mousedown");
-        //     testUtils.dom.triggerMouseEvent(el, "mouseup");
-
-        //     await testUtils.nextTick();
-        // }
+        assert.containsN(
+            calendar.el,
+            ".o_calendar_hatched",
+            3,
+            "There should be 3 events that are hatched"
+        );
 
         // assert.notOk(calendar.el.querySelector('.fc-day-top[data-date="2016-11-17"]')
         //     .classList.contains('fc-has-event'));
@@ -4883,7 +4894,7 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.debug("toggle filters in year view", async (assert) => {
+    QUnit.test("toggle filters in year view", async (assert) => {
         assert.expect(42);
 
         const calendar = await makeView({
@@ -4896,7 +4907,7 @@ QUnit.module("wowl Views", (hooks) => {
                     date_stop="stop"
                     all_day="allday"
                     mode="year"
-                    event_open_popup="true"
+                    event_open_popup="1"
                     color="partner_id"
                 >
                     <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
@@ -4905,15 +4916,13 @@ QUnit.module("wowl Views", (hooks) => {
             `,
         });
 
-        await toggleFilter(calendar, "partner_ids", 1);
-        await toggleFilter(calendar, "partner_ids", 2);
-
         function checkEvents(countMap) {
             for (const [id, count] of Object.entries(countMap)) {
                 assert.containsN(calendar.el, `.fc-bgevent[data-event-id="${id}"]`, count);
             }
         }
 
+        await toggleFilter(calendar, "partner_ids", "section");
         checkEvents({ 1: 1, 2: 1, 3: 1, 4: 1, 5: 2, 7: 1 });
 
         await toggleFilter(calendar, "partner_ids", 2);
@@ -4974,7 +4983,7 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                    event_open_popup="true"
+                    event_open_popup="1"
                 />
             `,
         });
@@ -5074,7 +5083,7 @@ QUnit.module("wowl Views", (hooks) => {
                     date_stop="stop"
                     all_day="allday"
                     mode="year"
-                    event_open_popup="true"
+                    event_open_popup="1"
                 />
             `,
         });

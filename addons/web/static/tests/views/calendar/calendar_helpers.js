@@ -364,17 +364,19 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
     const startRow = findTimeRow(calendar, startTime);
     const endRow = findTimeRow(calendar, endTime);
 
-    const startColRect = startCol.getBoundingClientRect();
-    const endColRect = endCol.getBoundingClientRect();
-    const startRowRect = startRow.getBoundingClientRect();
-    const endRowRect = endRow.getBoundingClientRect();
-
     startRow.scrollIntoView();
+    const startColRect = startCol.getBoundingClientRect();
+    const startRowRect = startRow.getBoundingClientRect();
+
     await triggerEventForCalendar(startRow, "mousedown", {
         x: startColRect.x,
         y: startRowRect.y + 1,
     });
+
     endRow.scrollIntoView();
+    const endColRect = endCol.getBoundingClientRect();
+    const endRowRect = endRow.getBoundingClientRect();
+
     await triggerEventForCalendar(endRow, "mousemove", { x: endColRect.x, y: endRowRect.y - 1 });
     await triggerEventForCalendar(endRow, "mouseup", { x: endColRect.x, y: endRowRect.y - 1 });
 }
@@ -393,13 +395,25 @@ export async function selectAllDayRange(calendar, start, end) {}
 
 export async function moveEvent(calendar, eventId, dateTime, toAllDaySlot = false) {}
 
+/**
+ * @param {owl.Component} calendarView
+ * @param {"day" | "week" | "month" | "year"} scale
+ */
 export async function changeScale(calendarView, scale) {
-    if (!calendarView.el.classList.contains("o-calendar-view")) {
-        throw new Error("component should be type of CalendarView");
-    }
     await click(
         calendarView.el,
         `.o-calendar-view--scale-buttons .o-calendar-view--scale-button--${scale}`
+    );
+}
+
+/**
+ * @param {owl.Component} calendarView
+ * @param {"previous" | "next" | "today"} direction
+ */
+export async function navigate(calendarView, direction) {
+    await click(
+        calendarView.el,
+        `.o-calendar-view--navigation-buttons .o-calendar-view--navigation-button--${direction}`
     );
 }
 
@@ -407,7 +421,16 @@ export async function toggleFilter(calendar, sectionName, filterValue) {
     const sectionSelector = `.o-calendar-filter-panel--section[data-name="${sectionName}"]`;
     const filterSelector = `.o-calendar-filter-panel--filter[data-value="${filterValue}"]`;
 
-    const el = calendar.el.querySelector(`${sectionSelector} ${filterSelector}`);
+    const el = calendar.el.querySelector(
+        `${sectionSelector} ${filterSelector} .o-calendar-filter-panel--filter-input`
+    );
     el.scrollIntoView();
     await click(el);
+}
+
+export function patchTimeZone(zone) {
+    luxon.Settings.defaultZoneName = zone;
+    registerCleanup(() => {
+        luxon.Settings.defaultZoneName = "system";
+    });
 }

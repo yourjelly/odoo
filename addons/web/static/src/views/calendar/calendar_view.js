@@ -3,7 +3,7 @@
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { useEffect, useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { useModel } from "../helpers/model";
 import { useSetupView } from "../helpers/view_hook";
@@ -13,6 +13,7 @@ import { CalendarDatePicker } from "./date_picker/calendar_date_picker";
 import { CalendarFilterPanel } from "./filter_panel/calendar_filter_panel";
 import { CalendarModel } from "./calendar_model";
 import { CalendarQuickCreate } from "./quick_create/calendar_quick_create";
+import { Layout } from "../layout";
 
 ////////////////////////////////////////////////////////////////////////////////
 /** @todo: should be removed when the new view dialog API is ready           **/
@@ -89,18 +90,19 @@ export class CalendarView extends Component {
         this.model = useModel(Model, modelParams, { onUpdate: this.onModelUpdate });
 
         useSetupView({
-            exportState: () => this.model.exportedState,
+            getLocalState: () => this.model.exportedState,
         });
 
         this.viewDialog = useLegacyViewDialog();
 
+        const date = this.formatScaledDate();
+        this.title.setParts({ view: date });
+        this.env.config.displayName = `${this.title.getParts().action} (${date})`;
+
         console.log(this);
     }
-    /**
-     * @override
-     */
-    async willStart() {
-        this.updateTitle();
+    willUnmount() {
+        this.title.setParts({ view: undefined });
     }
 
     get rendererProps() {
@@ -122,14 +124,6 @@ export class CalendarView extends Component {
         };
     }
 
-    get controlPanelProps() {
-        const { breadcrumbs, viewSwitcherEntries } = this.props;
-        return {
-            breadcrumbs,
-            displayName: `${this.props.info.displayName} (${this.title.getParts().view})`,
-            viewSwitcherEntries,
-        };
-    }
     get scaleLabels() {
         return SCALE_LABELS;
     }
@@ -244,7 +238,7 @@ export class CalendarView extends Component {
         });
     }
 
-    updateTitle() {
+    formatScaledDate() {
         /** @type {Intl.DateTimeFormatOptions} */
         const formatOptions = { year: "numeric" };
         switch (this.model.scale) {
@@ -260,7 +254,7 @@ export class CalendarView extends Component {
         }
 
         const formatter = Intl.DateTimeFormat("en-US", formatOptions);
-        let title = formatter.format(this.model.date.toJSDate());
+        let result = formatter.format(this.model.date.toJSDate());
         if (this.model.scale === "week") {
             const dateStartParts = formatter.formatToParts(this.model.rangeStart.toJSDate());
             const dateEndParts = formatter.formatToParts(
@@ -275,14 +269,16 @@ export class CalendarView extends Component {
                 dateEndParts[indexOfDayPart]
             );
 
-            title = dateStartParts.map((p) => p.value).join("");
+            result = dateStartParts.map((p) => p.value).join("");
         }
 
-        this.title.setParts({ view: title });
+        return result;
     }
 
     onModelUpdate() {
-        this.updateTitle();
+        const date = this.formatScaledDate();
+        this.title.setParts({ view: date });
+        this.env.config.displayName = `${this.title.getParts().action} (${date})`;
         for (const btn of this.el.querySelectorAll(".o-calendar-view--scale-button")) {
             btn.removeAttribute("disabled");
         }
@@ -294,9 +290,10 @@ CalendarView.components = {
     DatePicker: CalendarDatePicker,
     FilterPanel: CalendarFilterPanel,
     QuickCreate: CalendarQuickCreate,
-    ControlPanel,
+    Layout,
 };
 CalendarView.template = "web.CalendarView";
+CalendarView.buttonTemplate = "web.CalendarView.controlButtons";
 
 CalendarView.type = "calendar";
 CalendarView.display_name = _lt("Calendar"); // should be `displayName` or just `name`

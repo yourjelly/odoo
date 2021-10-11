@@ -14,7 +14,7 @@
                             <div class="d-flex">
                                 <div
                                     class="o-calendar-filter-panel--filter o-calendar-filter-panel--section-filter position-relative mr-1"
-                                    t-att-data-value="'global'"
+                                    data-value="section"
                                 >
                                     <t t-set="filterId" t-value="nextFilterId" />
                                     <input
