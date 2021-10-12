@@ -3924,15 +3924,21 @@ QUnit.module("wowl Views", (hooks) => {
             `,
         });
 
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
+
         // Create event (on 20 december)
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "An event");
-        // await testUtils.dom.click($('.o_field_widget[name="allday"] input'));
-        // await testUtils.nextTick();
+        await clickDate(calendar, "2016-12-20");
+
+        const input = mainComponentsContainer.querySelector(".modal-body input");
+        input.value = "An event";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer.querySelector(`.o_field_widget[name="allday"] input`));
 
         // use datepicker to enter a date: 12/20/2016 07:00:00
         // testUtils.dom.openDatepicker($('.o_field_widget[name="start"].o_datepicker'));
@@ -3948,8 +3954,7 @@ QUnit.module("wowl Views", (hooks) => {
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(19)'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
 
-        // await testUtils.dom.click($('.modal button.btn-primary'));
-        // await testUtils.nextTick();
+        // await click(mainComponentsContainer.querySelector(".modal button.btn-primary"));
 
         // Move event to another day (on 19 december)
         // await testUtils.dom.dragAndDrop(
