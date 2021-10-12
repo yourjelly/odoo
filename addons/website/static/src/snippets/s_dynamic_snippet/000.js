@@ -13,6 +13,9 @@ const DynamicSnippet = publicWidget.Widget.extend({
     read_events: {
         'click [data-url]': '_onCallToAction',
     },
+    custom_events: {
+        's_dynamic_snippet_rerender': '_onRerender',
+    },
     disabledInEditableMode: false,
 
     /**
@@ -176,6 +179,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
             this.renderedContent = '';
         }
         this._renderContent();
+        this.trigger_up('widgets_start_request', {$target: this.$el.children(), options: {parent: this}});
     },
     /**
      * @private
@@ -238,6 +242,15 @@ const DynamicSnippet = publicWidget.Widget.extend({
             this._render();
         }
     },
+    /**
+     * Rerenders the content of the dynamic snippet
+     * 
+     * @returns {Promise}
+     */
+    async _onRerender() {
+        await this._fetchData();
+        return this._render();
+    }
 });
 
 publicWidget.registry.dynamic_snippet = DynamicSnippet;
