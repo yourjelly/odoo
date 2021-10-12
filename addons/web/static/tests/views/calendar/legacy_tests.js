@@ -43,7 +43,7 @@ odoo.define("web.calendar_tests", function (require) {
     }
 
     QUnit.module(
-        "Views",
+        "legacy views",
         {
             beforeEach: function () {
                 window.addEventListener("scroll", _preventScroll, true);

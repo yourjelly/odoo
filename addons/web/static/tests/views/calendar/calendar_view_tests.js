@@ -3846,8 +3846,8 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.debug("drag and drop on month mode", async (assert) => {
-        assert.expect(3);
+    QUnit.test("drag and drop on month mode", async (assert) => {
+        assert.expect(2);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3881,8 +3881,6 @@ QUnit.module("wowl Views", (hooks) => {
         await triggerEvent(input, null, "input");
         await click(mainComponentsContainer.querySelector(".modal button.btn-primary"));
 
-        return;
-
         await moveEventToDate(calendar, 1, "2016-12-19", { disableDrop: true });
         assert.hasClass(
             calendar.el.querySelector(`.o-calendar-common-renderer > [data-event-id="1"]`),
@@ -3891,17 +3889,15 @@ QUnit.module("wowl Views", (hooks) => {
         );
 
         // Move event to another day (on 19 december)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event:contains("An event")'),
-        //     calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day-top:eq(1)')
-        // );
-        // await testUtils.nextTick();
-        // await testUtils.dom.click(calendar.$('.fc-event:contains("An event")'));
+        await moveEventToDate(calendar, 8, "2016-12-19");
+        await clickEvent(calendar, 8);
 
-        // assert.containsOnce(calendar, '.popover:contains("07:00")',
-        //     "start hour shouldn't have been changed");
-        // assert.containsOnce(calendar, '.popover:contains("19:00")',
-        //     "end hour shouldn't have been changed");
+        const row = mainComponentsContainer.querySelectorAll(".o_cw_body .list-group-item")[1];
+        assert.strictEqual(
+            row.textContent.trim(),
+            "07:00 - 19:00 (12 hours)",
+            "start and end hours shouldn't have been changed"
+        );
     });
 
     QUnit.todo("drag and drop on month mode with all_day mapping", async (assert) => {

@@ -61,21 +61,21 @@ export function useFullCalendar(refName, params) {
         return newParams;
     }
 
-    useAssets({
-        jsLibs: [
-            "/web/static/lib/fullcalendar/interaction/main.js",
-            "/web/static/lib/fullcalendar/daygrid/main.js",
-            "/web/static/lib/fullcalendar/timegrid/main.js",
-            "/web/static/lib/fullcalendar/list/main.js",
-            "/web/static/lib/fullcalendar/core/main.js",
-        ],
-        cssLibs: [
-            "/web/static/lib/fullcalendar/core/main.css",
-            "/web/static/lib/fullcalendar/daygrid/main.css",
-            "/web/static/lib/fullcalendar/timegrid/main.css",
-            "/web/static/lib/fullcalendar/list/main.css",
-        ],
-    });
+    // useAssets({
+    //     jsLibs: [
+    //         "/web/static/lib/fullcalendar/interaction/main.js",
+    //         "/web/static/lib/fullcalendar/daygrid/main.js",
+    //         "/web/static/lib/fullcalendar/timegrid/main.js",
+    //         "/web/static/lib/fullcalendar/list/main.js",
+    //         "/web/static/lib/fullcalendar/core/main.js",
+    //     ],
+    //     cssLibs: [
+    //         "/web/static/lib/fullcalendar/core/main.css",
+    //         "/web/static/lib/fullcalendar/daygrid/main.css",
+    //         "/web/static/lib/fullcalendar/timegrid/main.css",
+    //         "/web/static/lib/fullcalendar/list/main.css",
+    //     ],
+    // });
 
     onMounted(() => {
         try {

@@ -252,6 +252,17 @@ export class CalendarModel extends Model {
             end = end.minus({ days: 1 });
         }
 
+        const isDateEvent = this.fields[this.meta.fieldMapping.date_start].type === "date";
+        // An "all day" event without the "all_day" option is not considered
+        // as a 24h day. It's just a part of the day (by default: 7h-19h).
+        if (partialRecord.isAllDay) {
+            if (!this.meta.fieldMapping.all_day && !isDateEvent && !partialRecord.id) {
+                // default hours in the user's timezone
+                start = start.toLocal().set({ hours: 7 }).toUTC();
+                end = end.toLocal().set({ hours: 19 }).toUTC();
+            }
+        }
+
         if (this.meta.fieldMapping.all_day) {
             data[this.meta.fieldMapping.all_day] = partialRecord.isAllDay;
         }
