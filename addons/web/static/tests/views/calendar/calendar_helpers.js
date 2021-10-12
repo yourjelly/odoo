@@ -393,7 +393,24 @@ export async function selectDateRange(calendar, startDate, endDate) {
 
 export async function selectAllDayRange(calendar, start, end) {}
 
-export async function moveEvent(calendar, eventId, dateTime, toAllDaySlot = false) {}
+export async function moveEventToDate(calendar, eventId, date, options = {}) {
+    const event = findEvent(calendar, eventId);
+    const cell = findDateCell(calendar, date);
+
+    event.scrollIntoView();
+    await triggerEventForCalendar(event, "mousedown");
+
+    cell.scrollIntoView();
+    await triggerEventForCalendar(cell, "mousemove");
+
+    if (!options.disableDrop) {
+        await triggerEventForCalendar(cell, "mouseup");
+    }
+}
+
+export async function moveEventToTime(calendar, eventId, dateTime) {}
+
+export async function moveEventToAllDaySlot(calendar, eventId, date) {}
 
 /**
  * @param {owl.Component} calendarView

@@ -27,6 +27,7 @@ import {
     findEvent,
     findPickedDate,
     findTimeRow,
+    moveEventToDate,
     patchTimeZone,
     pickDate,
     selectDateRange,
@@ -3845,8 +3846,8 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("drag and drop on month mode", async (assert) => {
-        assert.ok(false);
+    QUnit.debug("drag and drop on month mode", async (assert) => {
+        assert.expect(3);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3855,44 +3856,41 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    mode="month"
+                    event_open_popup="1"
+                    quick_add="0"
+                >
+                    <field name="name" />
+                    <field name="partner_id" />
+                </calendar>
             `,
         });
 
-        // assert.expect(3);
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // const calendar = await createCalendarView({
-        //     arch:
-        //         `<calendar date_start="start" date_stop="stop" mode="month" event_open_popup="true" quick_add="False">
-        //             <field name="name"/>
-        //             <field name="partner_id"/>
-        //         </calendar>`,
-        //     archs: archs,
-        //     data: this.data,
-        //     model: 'event',
-        //     View: CalendarView,
-        //     viewOptions: { initialDate: initialDate },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // // Create event (on 20 december)
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "An event");
-        // await testUtils.dom.click($('.modal button.btn-primary'));
-        // await testUtils.nextTick();
+        // Create event (on 20 december)
+        await clickDate(calendar, "2016-12-20");
+        const input = mainComponentsContainer.querySelector(".modal-body input");
+        input.value = "An event";
+        await triggerEvent(input, null, "input");
+        await click(mainComponentsContainer.querySelector(".modal button.btn-primary"));
 
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event:contains("event 1")'),
-        //     calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day-top:eq(1)'),
-        //     { disableDrop: true },
-        // );
-        // assert.hasClass(calendar.$('.o_calendar_widget > [data-event-id="1"]'), 'dayGridMonth',
-        //     "should have dayGridMonth class");
+        return;
 
-        // // Move event to another day (on 19 december)
+        await moveEventToDate(calendar, 1, "2016-12-19", { disableDrop: true });
+        assert.hasClass(
+            calendar.el.querySelector(`.o-calendar-common-renderer > [data-event-id="1"]`),
+            "fc-dragging",
+            "should have fc-dragging class"
+        );
+
+        // Move event to another day (on 19 december)
         // await testUtils.dom.dragAndDrop(
         //     calendar.$('.fc-event:contains("An event")'),
         //     calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day-top:eq(1)')
@@ -3904,12 +3902,12 @@ QUnit.module("wowl Views", (hooks) => {
         //     "start hour shouldn't have been changed");
         // assert.containsOnce(calendar, '.popover:contains("19:00")',
         //     "end hour shouldn't have been changed");
-
-        // calendar.destroy();
     });
 
     QUnit.todo("drag and drop on month mode with all_day mapping", async (assert) => {
-        assert.ok(false);
+        // Same test as before but in normalizeRecord (calendar_model.js) there is
+        // different condition branching with all_day mapping or not
+        assert.expect(2);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3918,28 +3916,19 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
+                    event_open_popup="1"
+                    quick_add="0"
+                >
+                    <field name="name" />
+                    <field name="partner_id" />
+                </calendar>
             `,
         });
 
-        // Same test as before but in calendarEventToRecord (calendar_model.js) there is
-        // different condition branching with all_day mapping or not
-        // assert.expect(2);
-
-        // const calendar = await createCalendarView({
-        //     arch:
-        //         `<calendar date_start="start" date_stop="stop" mode="month" event_open_popup="true" quick_add="False" all_day="allday">
-        //             <field name="name"/>
-        //             <field name="partner_id"/>
-        //         </calendar>`,
-        //     archs: archs,
-        //     data: this.data,
-        //     model: 'event',
-        //     View: CalendarView,
-        //     viewOptions: { initialDate: initialDate },
-        // });
-
-        // // Create event (on 20 december)
+        // Create event (on 20 december)
         // var $cell = calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day:eq(2)');
         // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
         // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
@@ -3949,14 +3938,14 @@ QUnit.module("wowl Views", (hooks) => {
         // await testUtils.dom.click($('.o_field_widget[name="allday"] input'));
         // await testUtils.nextTick();
 
-        // // use datepicker to enter a date: 12/20/2016 07:00:00
+        // use datepicker to enter a date: 12/20/2016 07:00:00
         // testUtils.dom.openDatepicker($('.o_field_widget[name="start"].o_datepicker'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(07)'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
 
-        // // use datepicker to enter a date: 12/20/2016 19:00:00
+        // use datepicker to enter a date: 12/20/2016 19:00:00
         // testUtils.dom.openDatepicker($('.o_field_widget[name="stop"].o_datepicker'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
         // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
@@ -3966,7 +3955,7 @@ QUnit.module("wowl Views", (hooks) => {
         // await testUtils.dom.click($('.modal button.btn-primary'));
         // await testUtils.nextTick();
 
-        // // Move event to another day (on 19 december)
+        // Move event to another day (on 19 december)
         // await testUtils.dom.dragAndDrop(
         //     calendar.$('.fc-event:contains("An event")'),
         //     calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day-top:eq(1)')
@@ -3978,8 +3967,6 @@ QUnit.module("wowl Views", (hooks) => {
         //     "start hour shouldn't have been changed");
         // assert.containsOnce(calendar, '.popover:contains("19:00")',
         //     "end hour shouldn't have been changed");
-
-        // calendar.destroy();
     });
 
     QUnit.todo("drag and drop on month mode with date_start and date_delay", async (assert) => {
@@ -4041,8 +4028,29 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("form_view_id attribute works (for creating events)", async (assert) => {
-        assert.ok(false);
+    QUnit.test("form_view_id attribute works (for creating events)", async (assert) => {
+        assert.expect(1);
+
+        serviceRegistry.add(
+            "action",
+            {
+                ...actionService,
+                start() {
+                    const result = actionService.start(...arguments);
+                    const doAction = result.doAction;
+                    result.doAction = (request) => {
+                        assert.strictEqual(
+                            request.views[0][0],
+                            42,
+                            "should do a do_action with view id 42"
+                        );
+                        return doAction(request);
+                    };
+                    return result;
+                },
+            },
+            { force: true }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4051,58 +4059,53 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    mode="month"
+                    form_view_id="42"
                 />
             `,
+            mockRPC(route, { method }) {
+                if (method === "create") {
+                    return Promise.reject();
+                }
+            },
         });
 
-        // assert.expect(1);
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: '<calendar class="o_calendar_test" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'mode="month" '+
-        //         'form_view_id="42"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "create") {
-        //             // we simulate here the case where a create call with just
-        //             // the field name fails.  This is a normal flow, the server
-        //             // reject the create rpc (quick create), then the web client
-        //             // fall back to a form view. This happens typically when a
-        //             // model has required fields
-        //             return Promise.reject('None shall pass!');
-        //         }
-        //         return this._super(route, args);
-        //     },
-        //     intercepts: {
-        //         do_action: function (event) {
-        //             assert.strictEqual(event.data.action.views[0][0], 42,
-        //                 "should do a do_action with view id 42");
-        //         },
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
+        await clickDate(calendar, "2016-12-13");
 
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "It's just a fleshwound");
-        // await testUtils.dom.click($('.modal button.btn:contains(Create)'));
-        // await testUtils.nextTick(); // wait a little before to finish the test
-        // calendar.destroy();
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event in quick create";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
     });
 
-    QUnit.todo("form_view_id attribute works with popup (for creating events)", async (assert) => {
-        assert.ok(false);
+    QUnit.test("form_view_id attribute works with popup (for creating events)", async (assert) => {
+        assert.expect(1);
+
+        serviceRegistry.add(
+            "action",
+            {
+                ...actionService,
+                start() {
+                    const result = actionService.start(...arguments);
+                    const doAction = result.doAction;
+                    result.doAction = (request) => {
+                        assert.strictEqual(request.views[0][0], 1, "should load view with id 1");
+                        return doAction(request);
+                    };
+                    return result;
+                },
+            },
+            { force: true }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4111,102 +4114,16 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    mode="month"
+                    open_event_popup="1"
+                    quick_add="0"
+                    form_view_id="1"
                 />
             `,
         });
 
-        // assert.expect(1);
-
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: '<calendar class="o_calendar_test" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'mode="month" '+
-        //         'event_open_popup="true" ' +
-        //         'quick_add="false" ' +
-        //         'form_view_id="1">'+
-        //             '<field name="name"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "load_views") {
-        //             assert.strictEqual(args.kwargs.views[0][0], 1,
-        //                 "should load view with id 1");
-        //         }
-        //         return this._super(route, args);
-        //     },
-        // });
-
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // calendar.destroy();
-    });
-
-    QUnit.todo("calendar fallback to form view id in action if necessary", async (assert) => {
-        assert.ok(false);
-
-        const calendar = await makeView({
-            type: "wowl_calendar",
-            resModel: "event",
-            serverData,
-            arch: `
-                <calendar
-                    date_start="start"
-                />
-            `,
-        });
-
-        // assert.expect(1);
-
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: '<calendar class="o_calendar_test" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'mode="month"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //         action: {views: [{viewID: 1, type: 'kanban'}, {viewID: 43, type: 'form'}]}
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "create") {
-        //             // we simulate here the case where a create call with just
-        //             // the field name fails.  This is a normal flow, the server
-        //             // reject the create rpc (quick create), then the web client
-        //             // fall back to a form view. This happens typically when a
-        //             // model has required fields
-        //             return Promise.reject('None shall pass!');
-        //         }
-        //         return this._super(route, args);
-        //     },
-        //     intercepts: {
-        //         do_action: function (event) {
-        //             assert.strictEqual(event.data.action.views[0][0], 43,
-        //                 "should do a do_action with view id 43");
-        //         },
-        //     },
-        // });
-
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "It's just a fleshwound");
-        // await testUtils.dom.click($('.modal button.btn:contains(Create)'));
-        // calendar.destroy();
+        await clickDate(calendar, "2016-12-13");
     });
 
     QUnit.todo("fullcalendar initializes with right locale", async (assert) => {
@@ -4719,7 +4636,7 @@ QUnit.module("wowl Views", (hooks) => {
         }
     );
 
-    QUnit.todo("drag and drop 24h event on week mode", async (assert) => {
+    QUnit.test("drag and drop 24h event on week mode", async (assert) => {
         assert.expect(1);
 
         const calendar = await makeView({
@@ -4746,13 +4663,7 @@ QUnit.module("wowl Views", (hooks) => {
         });
 
         await selectTimeRange(calendar, "2016-12-13 08:00:00", "2016-12-14 08:00:00");
-
-        // assert.notOk(
-        //     mainComponentsContainer.querySelector(
-        //         `.o_field_boolean.o_field_widget[name="allday"] input`
-        //     ).checked,
-        //     "The event must not have the all_day active"
-        // );
+        assert.containsNone(mainComponentsContainer, ".modal", "should not open modal");
     });
 
     QUnit.todo("correctly display year view", async (assert) => {
