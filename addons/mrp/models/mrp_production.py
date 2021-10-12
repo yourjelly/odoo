@@ -1728,7 +1728,8 @@ class MrpProduction(models.Model):
                 domain = [
                     ('lot_id', '=', move_line.lot_id.id),
                     ('qty_done', '=', 1),
-                    ('state', '=', 'done')
+                    ('state', '=', 'done'),
+                    ('product_id.tracking', '=', 'serial')
                 ]
                 message = _('The serial number %(number)s used for byproduct %(product_name)s has already been produced',
                     number=move_line.lot_id.name,
@@ -1770,7 +1771,8 @@ class MrpProduction(models.Model):
                 domain = [
                     ('lot_id', '=', move_line.lot_id.id),
                     ('qty_done', '=', 1),
-                    ('state', '=', 'done')
+                    ('state', '=', 'done'),
+                    ('product_id.tracking', '=', 'serial')
                 ]
                 message = _('The serial number %(number)s used for component %(component)s has already been consumed',
                     number=move_line.lot_id.name,
