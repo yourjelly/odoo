@@ -9,7 +9,7 @@ const { Component } = owl;
 ////////////////////////////////////////////////////////////////////////////////
 /** @todo: should be rewritten when the new fields API is ready              **/
 ////////////////////////////////////////////////////////////////////////////////
-function convertRecordToEvent(record) {
+function convertRecordToEvent(record, fields) {
     return {
         id: record.id,
         title: record.title,
@@ -17,7 +17,14 @@ function convertRecordToEvent(record) {
         end: record.end.toLocal().toJSDate(),
         allDay: record.isAllDay,
         extendedProps: {
-            record: record.rawRecord,
+            record: Object.entries(record.rawRecord).reduce((acc, [fieldName, value]) => {
+                if (["date", "datetime"].includes(fields[fieldName].type)) {
+                    acc[fieldName] = moment(value);
+                } else {
+                    acc[fieldName] = value;
+                }
+                return acc;
+            }, {}),
             colorIndex: record.colorIndex,
         },
     };
@@ -47,7 +54,7 @@ class CalendarPopoverAdapter extends ComponentAdapter {
                 },
                 displayFields: popoverFields,
                 fields: this.props.fields,
-                event: convertRecordToEvent(this.props.record),
+                event: convertRecordToEvent(this.props.record, this.props.fields),
                 modelName: this.props.resModel,
                 canDelete: this.props.canDelete,
                 popoverFields,

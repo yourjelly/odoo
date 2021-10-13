@@ -39,9 +39,11 @@ import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup } from "../../helpers/mock_env";
 import { browser } from "@web/core/browser/browser";
 
+// These are legacy modules and should be removed
 import AbstractField from "web.AbstractField";
 import fieldRegistry from "web.field_registry";
 import { FormViewDialog } from "web.view_dialogs";
+import BasicModel from "web.BasicModel";
 
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
@@ -1304,10 +1306,17 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("render popover with modifiers", async (assert) => {
-        assert.ok(false);
+    QUnit.test("render popover with modifiers", async (assert) => {
+        assert.expect(5);
 
-        // assert.expect(5);
+        serverData.models.event.fields.priority = {
+            string: "Priority",
+            type: "selection",
+            selection: [
+                ["0", "Normal"],
+                ["1", "Important"],
+            ],
+        };
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -1316,50 +1325,67 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                >
+                    <field name="priority" widget="priority" readonly="1" />
+                    <field name="is_hatched" invisible="1" />
+                    <field name="partner_id" attrs="{'invisible': [['is_hatched', '=', False]]}" />
+                    <field name="start" attrs="{'invisible': [['is_hatched', '=', True]]}" />
+                </calendar>
             `,
         });
 
-        // this.data.event.fields.priority = {string: "Priority", type: "selection", selection: [['0', 'Normal'], ['1', 'Important']],};
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week">'+
-        //         '<field name="priority" widget="priority" readonly="1"/>'+
-        //         '<field name="is_hatched" invisible="1"/>'+
-        //         '<field name="partner_id" attrs=\'{"invisible": [["is_hatched","=",False]]}\'/>'+
-        //         '<field name="start" attrs=\'{"invisible": [["is_hatched","=",True]]}\'/>'+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        await clickEvent(calendar, 4);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
 
-        // await testUtils.dom.click($('.fc-event:contains(event 4)'));
-
-        // assert.containsOnce(calendar, '.o_cw_popover', "should open a popover clicking on event");
-        // assert.containsOnce(calendar, '.o_cw_popover .o_priority span.o_priority_star', "priority field should not be editable");
-        // assert.strictEqual(calendar.$('.o_cw_popover li.o_invisible_modifier').text(), 'user : partner 1', "partner_id field should be invisible");
-        // assert.containsOnce(calendar, '.o_cw_popover  span.o_field_date', "The start date should be visible");
-        // await testUtils.dom.click($('.o_cw_popover .o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover', "should close a popover");
-
-        // calendar.destroy();
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover .o_priority span.o_priority_star",
+            "priority field should not be editable"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".o_cw_popover li.o_invisible_modifier")
+                .textContent,
+            "user : partner 1",
+            "partner_id field should be invisible"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover span.o_field_date",
+            "The start date should be visible"
+        );
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_close");
+        assert.containsNone(mainComponentsContainer, ".o_cw_popover", "should close a popover");
     });
 
-    QUnit.todo("render popover with widget which has specialData attribute", async (assert) => {
-        assert.ok(false);
+    QUnit.test("render popover with widget which has specialData attribute", async (assert) => {
+        assert.expect(3);
 
-        // assert.expect(3);
+        patchWithCleanup(BasicModel.prototype, {
+            async _fetchSpecialDataForMyWidget() {
+                assert.step("_fetchSpecialDataForMyWidget");
+            },
+        });
+        const MyWidget = AbstractField.extend({
+            specialData: "_fetchSpecialDataForMyWidget",
+        });
+        fieldRegistry.add("specialWidget", MyWidget);
+        registerCleanup(() => {
+            delete fieldRegistry.map.specialWidget;
+        });
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -1368,48 +1394,30 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                >
+                    <field name="name" string="Custom Name" widget="specialWidget" />
+                    <field name="partner_id" />
+                </calendar>
             `,
         });
 
-        // await testUtils.mock.patch(BasicModel, {
-        //     _fetchSpecialDataForMyWidget() {
-        //         assert.step("_fetchSpecialDataForMyWidget");
-        //         return Promise.resolve();
-        //     },
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // const MyWidget = Widget.extend({
-        //     specialData: "_fetchSpecialDataForMyWidget",
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // fieldRegistry.add('specialWidget', MyWidget);
-
-        // const calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `<calendar class="o_calendar_test"
-        //             date_start="start"
-        //             date_stop="stop"
-        //             all_day="allday"
-        //             mode="week">
-        //                 <field name="name" string="Custom Name" widget="specialWidget"/>
-        //                 <field name="partner_id"/>
-        //         </calendar>`,
-        //     archs,
-        //     viewOptions: {
-        //         initialDate,
-        //     },
-        // });
-
-        // const event4 = document.querySelectorAll(".fc-event")[0];
-        // await testUtils.dom.click(event4);
-        // assert.containsOnce(calendar, '.o_cw_popover', "should open a popover clicking on event");
-        // assert.verifySteps(["_fetchSpecialDataForMyWidget"]);
-
-        // calendar.destroy();
-        // await testUtils.mock.unpatch(BasicModel);
+        await clickEvent(calendar, 4);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.verifySteps(["_fetchSpecialDataForMyWidget"]);
     });
 
     QUnit.test("attributes hide_date and hide_time", async (assert) => {
