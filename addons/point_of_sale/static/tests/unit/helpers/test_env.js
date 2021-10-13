@@ -12,6 +12,10 @@ odoo.define('point_of_sale.test_env', async function (require) {
     const env = require('web.env');
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
+    const cleanup = require("@web/../tests/helpers/cleanup");
+
+    // We override this method in the pos unit tests to prevent the unnecessary error in the web tests.
+    cleanup.registerCleanup = () => {}
 
     Registries.Component.add(owl.misc.Portal);
 
@@ -20,11 +24,9 @@ odoo.define('point_of_sale.test_env', async function (require) {
         rpc: env.services.rpc,
         session: env.session,
         do_action: async () => {},
-        setLoadingMessage: () => {},
-        setLoadingProgress: () => {},
         showLoadingSkip: () => {},
     });
-    await pos.ready;
+    await pos.load_server_data();
 
     /**
      * @param {Object} env default env
