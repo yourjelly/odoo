@@ -36,7 +36,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
             useListener('close-pos', this._closePos);
-            useListener('loading-skip-callback', () => this._loadingSkipCallback());
+            useListener('loading-skip-callback', () => this.env.pos.proxy.stop_searching());
             useListener('play-sound', this._onPlaySound);
             useListener('set-sync-status', this._onSetSyncStatus);
             useListener('show-notification', this._onShowNotification);
@@ -56,12 +56,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     isShown: false,
                     message: '',
                     duration: 2000,
-                }
-            });
-
-            this.loading = useState({
-                message: 'Loading',
-                skipButtonIsShown: false,
+                },
+                loadingSkipButtonIsShown: false,
             });
 
             this.mainScreen = useState({ name: null, component: null });
@@ -145,12 +141,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     rpc: this.rpc.bind(this),
                     session: this.env.session,
                     do_action: this.props.webClient.do_action.bind(this.props.webClient),
-                    setLoadingMessage: this.setLoadingMessage.bind(this),
-                    showLoadingSkip: this.showLoadingSkip.bind(this),
-                    setLoadingProgress: this.setLoadingProgress.bind(this),
+                    showLoadingSkip: () => {
+                        this.state.loadingSkipButtonIsShown = true;
+                    }
                 };
                 this.env.pos = new models.PosModel(posModelDefaultAttributes);
-                await this.env.pos.ready;
+                await this.env.pos.load_server_data();
                 // Load the saved `env.pos.toRefundLines` from localStorage when
                 // the PosModel is ready.
                 Object.assign(this.env.pos.toRefundLines, this.env.pos.db.load('TO_REFUND_LINES') || {});
@@ -174,6 +170,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     // Allow using the app even if not all the images are loaded.
                     // Basically, preload the images in the background.
                     this._preloadImages();
+                    if (this.env.pos.config.limited_partners_loading && this.env.pos.config.partner_load_background) {
+                        this.env.pos.loadPartnersBackground();
+                    }
+                    if (this.env.pos.config.limited_products_loading && this.env.pos.config.product_load_background) {
+                        this.env.pos.loadProductsBackground().then(() => this.render());
+                    }
                 });
             } catch (error) {
                 let title = 'Unknown Error',
@@ -312,8 +314,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     });
                     if (confirmed) {
                         this.state.uiState = 'CLOSING';
-                        this.loading.skipButtonIsShown = false;
-                        this.setLoadingMessage(this.env._t('Closing ...'));
+                        this.state.loadingSkipButtonIsShown = false;
                         window.location = '/web#action=point_of_sale.action_client_pos_menu';
                     }
                 }
@@ -358,32 +359,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.env.pos.db.save('TO_REFUND_LINES', this.env.pos.toRefundLines);
         }
 
-        // TO PASS AS PARAMETERS //
-
-        setLoadingProgress(fac) {
-            if (this.progressbar.el) {
-                this.progressbar.el.style.width = `${Math.floor(fac * 100)}%`;
-            }
-        }
-        setLoadingMessage(msg, progress) {
-            this.loading.message = msg;
-            if (typeof progress !== 'undefined') {
-                this.setLoadingProgress(progress);
-            }
-        }
-        /**
-         * Show Skip button in the loading screen and allow to assign callback
-         * when the button is pressed.
-         *
-         * @param {Function} callback function to call when Skip button is pressed.
-         */
-        showLoadingSkip(callback) {
-            if (callback) {
-                this.loading.skipButtonIsShown = true;
-                this._loadingSkipCallback = callback;
-            }
-        }
-
         get isTicketScreenShown() {
             return this.mainScreen.name === 'TicketScreen';
         }
@@ -403,7 +378,16 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 await this.rpc({
                     'route': '/pos/load_onboarding_data',
                 });
-                this.env.pos.load_server_data();
+                const result = await this.rpc({
+                    method: 'get_onboarding_data',
+                    model: 'pos.session',
+                    args: [[odoo.pos_session_id]]
+                });
+                const posCategoryModel = _.find(this.env.pos.models, function(model){return model.model === 'pos.category';});
+                const productModel = _.find(this.env.pos.models, function(model){return model.model === 'product.product';});
+                posCategoryModel.loaded(this.env.pos, Object.values(result['categories']));
+                productModel.loaded(this.env.pos, Object.values(result['products']));
+                this.render();
             }
         }
 
