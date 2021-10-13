@@ -489,6 +489,17 @@
                         <we-button data-set-img-shape="web_editor/float/flt_square_3" data-select-label="Square 3" data-animated="true"/>
                         <we-button data-set-img-shape="web_editor/float/flt_square_4" data-select-label="Square 4" data-animated="true"/>
                     </we-select-page>
+                    <we-select-page string="Mosaic">
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_duo" data-select-label="Duo"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_trio" data-select-label="Trio"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_quintet" data-select-label="Quintet"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_grid" data-select-label="Grid"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_small_grid" data-select-label="Small Grid"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_brick_grid" data-select-label="Brick Grid"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_penta_2" data-select-label="Penta"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_penta_1" data-select-label="Penta Rounded"/>
+                        <we-button data-set-img-shape="web_editor/mosaic/mos_hypno" data-select-label="Hypno"/>
+                    </we-select-page>
                     <we-select-page string="Specials">
                         <we-button data-set-img-shape="web_editor/special/spl_speed_1" data-select-label="Speed" data-animated="true"/>
                         <we-button data-set-img-shape="web_editor/special/spl_rain_1" data-select-label="Rain" data-animated="true"/>

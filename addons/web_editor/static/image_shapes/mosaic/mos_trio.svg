@@ -1,0 +1,32 @@
+<svg class="round" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="600">
+    <style>
+        .round {
+            filter:url(#fancy-goo);
+        }
+        @media only screen and (max-width: 300px) {
+            .round {
+                filter:url(#fancy-goo-thumb);
+            }
+        }
+    </style>
+    <defs>
+        <clipPath id="clip-path" clipPathUnits="objectBoundingBox">
+            <use xlink:href="#filterPath" fill="none"/>
+        </clipPath>
+        <filter id="fancy-goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
+        <filter id="fancy-goo-thumb">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
+        <path id="filterPath" d="M0,0.0752h0.3137v0.8495H0V0.0752zM0.3431,0h0.3137v1H0.3431V0zM0.6863,0.0752h0.3137v0.8495H0.6863V0.0752z"/>
+    </defs>
+    <svg viewBox="0 0 1 1" id="preview" preserveAspectRatio="none">
+        <use xlink:href="#filterPath" fill="darkgrey"/>
+    </svg>
+    <image xlink:href="" clip-path="url(#clip-path)"/>
+</svg>

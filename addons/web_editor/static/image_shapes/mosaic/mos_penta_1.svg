@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="600">
+    <defs>
+        <clipPath id="clip-path" clipPathUnits="objectBoundingBox">
+            <use xlink:href="#filterPath" fill="none"/>
+        </clipPath>
+        <path id="filterPath" d="M0.4371,0.7589L0.8752,0H0.4009l-0.0835,0.3118L0.4371,0.7589zM0.1328,1h0.3265L0.2961,0.3908L0.1328,1zM0,0v1H0.0906L0.3585,0H0zM0.9224,0L0.575,0.6017l0.425-0.0761V0H0.9224zM0.5483,0.648l-0.0962,0.1667L0.5017,1h0.4983V0.5672L0.5483,0.648zM0.4371,0.7589L0.8752,0H0.4009l-0.0835,0.3118L0.4371,0.7589zM0.1328,1h0.3265L0.2961,0.3908L0.1328,1zM0,0v1H0.0906L0.3585,0H0zM0.9224,0L0.575,0.6017l0.425-0.0761V0H0.9224zM0.5483,0.648l-0.0962,0.1667L0.5017,1h0.4983V0.5672L0.5483,0.648zM0.4595,1H0.1328l0.1632-0.6092L0.4595,1zM0.8752,0L0.4371,0.7589l-0.1198-0.447L0.4009,0H0.8752zM1,0v0.5256l-0.425,0.0761L0.9224,0H1zM1,0.5672V1H0.5017l-0.0496-0.1853l0.0962-0.1667L1,0.5672zM0.3585,0L0.0906,1H0V0H0.3585z"/>   
+    </defs>
+    <svg viewBox="0 0 1 1" id="preview" preserveAspectRatio="none">
+        <use xlink:href="#filterPath" fill="darkgrey"/>
+    </svg>
+    <image xlink:href="" clip-path="url(#clip-path)"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg class="round" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="600">
+    <style>
+        .round {
+            filter:url(#fancy-goo);
+        }
+        @media only screen and (max-width: 300px) {
+            .round {
+                filter:url(#fancy-goo-thumb);
+            }
+        }
+    </style>
+    <defs>
+        <clipPath id="clip-path" clipPathUnits="objectBoundingBox">
+            <use xlink:href="#filterPath" fill="none"/>
+        </clipPath>
+        <filter id="fancy-goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
+        <filter id="fancy-goo-thumb">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
+        <path id="filterPath" d="M0.1723,0.0387l-0.1336,0.1336c-0.0142,0.0142-0.0387,0.0042-0.0387-0.016V0.0227c0-0.0126,0.0101-0.0227,0.0227-0.0227h0.1336C0.1765,0,0.1867,0.0244,0.1723,0.0387zM0.2584,0.0136L0.0138,0.2582c-0.0086,0.0086-0.0136,0.0204-0.0136,0.0328V0.8577c0,0.0413,0.0499,0.0619,0.0791,0.0328L0.8905,0.0791C0.9197,0.0499,0.899,0,0.8578,0H0.291C0.2788,0,0.267,0.0048,0.2584,0.0136zM1,0.977v-0.1337c0-0.0204-0.0247-0.0306-0.0392-0.0162l-0.1337,0.1337c-0.0144,0.0144-0.0042,0.0392,0.0162,0.0392h0.1337C0.9897,0.9998,1,0.9896,1,0.977zM0.7409,0.9862L0.9864,0.7407c0.0088-0.0088,0.0136-0.0206,0.0136-0.033V0.1431c0-0.0416-0.0502-0.0623-0.0796-0.033L0.1103,0.9203c-0.0293,0.0293-0.0086,0.0796,0.033,0.0796h0.5648C0.7203,0.9998,0.7321,0.995,0.7409,0.9862z"/>   
+    </defs>
+    <svg viewBox="0 0 1 1" id="preview" preserveAspectRatio="none">
+        <use xlink:href="#filterPath" fill="darkgrey"/>
+    </svg>
+    <image xlink:href="" clip-path="url(#clip-path)"/>
+</svg>
