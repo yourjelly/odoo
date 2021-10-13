@@ -5,18 +5,6 @@ var models = require('point_of_sale.models');
 
 models.load_models([{
     model:  'hr.employee',
-    fields: ['name', 'id', 'user_id'],
-    domain: function(self){
-        return self.config.employee_ids.length > 0
-            ? [
-                  '&',
-                  ['company_id', '=', self.config.company_id[0]],
-                  '|',
-                  ['user_id', '=', self.user.id],
-                  ['id', 'in', self.config.employee_ids],
-              ]
-            : [['company_id', '=', self.config.company_id[0]]];
-    },
     loaded: function(self, employees) {
         if (self.config.module_pos_hr) {
             self.employees = employees;
@@ -40,30 +28,25 @@ models.load_models([{
 
 var posmodel_super = models.PosModel.prototype;
 models.PosModel = models.PosModel.extend({
-    after_load_server_data: function() {
-        return posmodel_super.after_load_server_data.apply(this, arguments).then(() => {
-            // Value starts at false when module_pos_hr is true.
-            this.hasLoggedIn = !this.config.module_pos_hr;
-        });
-    },
-    load_server_data: function () {
+    after_load_server_data: function () {
         var self = this;
-        return posmodel_super.load_server_data.apply(this, arguments).then(function () {
-            var employee_ids = _.map(self.employees, function(employee){return employee.id;});
-            var records = self.rpc({
-                model: 'hr.employee',
-                method: 'get_barcodes_and_pin_hashed',
-                args: [employee_ids],
+        var employee_ids = _.map(self.employees, function(employee){return employee.id;});
+        var records = self.rpc({
+            model: 'hr.employee',
+            method: 'get_barcodes_and_pin_hashed',
+            args: [employee_ids],
+        });
+        return records.then(function (employee_data) {
+            self.employees.forEach(function (employee) {
+                var data = _.findWhere(employee_data, {'id': employee.id});
+                if (data !== undefined){
+                    employee.barcode = data.barcode;
+                    employee.pin = data.pin;
+                }
             });
-            return records.then(function (employee_data) {
-                self.employees.forEach(function (employee) {
-                    var data = _.findWhere(employee_data, {'id': employee.id});
-                    if (data !== undefined){
-                        employee.barcode = data.barcode;
-                        employee.pin = data.pin;
-                    }
-                });
-            });
+        }).then(async () => {
+            await posmodel_super.after_load_server_data.apply(self, arguments);
+            this.hasLoggedIn = !this.config.module_pos_hr;
         });
     },
     set_cashier: function(employee) {
