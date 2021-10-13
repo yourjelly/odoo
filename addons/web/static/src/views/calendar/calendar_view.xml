@@ -31,14 +31,12 @@
                 >
                     <i class="fa fa-arrow-left" />
                 </button>
-                <t> </t> <!-- This forces to insert a space between the buttons -->
                 <button
-                    class="btn btn-primary o-calendar-view--navigation-button--today"
+                    class="btn btn-primary o-calendar-view--navigation-button--today mx-1"
                     t-on-click.stop="setDate('today')"
                 >
                     Today
                 </button>
-                <t> </t> <!-- This forces to insert a space between the buttons -->
                 <button
                     class="btn btn-primary o-calendar-view--navigation-button--next"
                     title="Next"
@@ -47,7 +45,6 @@
                 >
                     <i class="fa fa-arrow-right" />
                 </button>
-                <t> </t> <!-- This forces to insert a space between the buttons -->
             </span>
             <span class="o-calendar-view--scale-buttons">
                 <div class="btn-group">
