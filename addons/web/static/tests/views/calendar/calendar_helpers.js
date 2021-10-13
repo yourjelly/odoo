@@ -9,7 +9,8 @@ import { registry } from "@web/core/registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
-import { click, getFixture, nextTick, triggerEvent } from "../../helpers/utils";
+import { click, getFixture, nextTick, patchWithCleanup, triggerEvent } from "../../helpers/utils";
+import { session } from "@web/session";
 
 export function makeEnv(services = {}) {
     clearRegistryWithCleanup(registry.category("main_components"));
@@ -445,9 +446,14 @@ export async function toggleFilter(calendar, sectionName, filterValue) {
     await click(el);
 }
 
-export function patchTimeZone(zone) {
-    luxon.Settings.defaultZoneName = zone;
+export function patchTimeZone(offset) {
+    luxon.Settings.defaultZoneName = `UTC${Math.sign(-offset)}${Math.abs(offset / 60)}`;
     registerCleanup(() => {
         luxon.Settings.defaultZoneName = "system";
+    });
+    patchWithCleanup(session, {
+        getTZOffset() {
+            return offset;
+        },
     });
 }

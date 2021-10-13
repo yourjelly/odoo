@@ -30,7 +30,8 @@ export class CalendarDatePicker extends Component {
         // I think this is totally wrong!
         // why this func: names are in wrong order without it
         const weekdays = luxon.Info.weekdays("narrow");
-        return [...weekdays.slice(5, 6), ...weekdays.slice(0, 6)];
+        const last = weekdays.pop();
+        return [last, ...weekdays];
     }
     get options() {
         return {

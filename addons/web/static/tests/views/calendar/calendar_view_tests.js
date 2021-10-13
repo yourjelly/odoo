@@ -1040,7 +1040,7 @@ QUnit.module("wowl Views", (hooks) => {
             })
         );
 
-        patchTimeZone("UTC+2");
+        patchTimeZone(120);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3671,6 +3671,8 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.test("timezone does not affect current day", async (assert) => {
         assert.expect(2);
 
+        patchTimeZone(-2400);
+
         const calendar = await makeView({
             type: "wowl_calendar",
             resModel: "event",
@@ -3694,7 +3696,9 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("timezone does not affect drag and drop", async (assert) => {
-        assert.ok(false);
+        assert.expect(10);
+
+        // patchTimeZone(-2400);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3703,68 +3707,67 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    mode="month"
+                >
+                    <field name="name" />
+                    <field name="start" />
+                </calendar>
             `,
+            mockRPC(route, { method, args }) {
+                if (method === "write") {
+                    assert.deepEqual(args[0], [6], "event 6 is moved");
+                    assert.strictEqual(
+                        args[1].start,
+                        "2016-11-29 08:00:00",
+                        "event moved to 27th nov 16h00 +40 hours timezone"
+                    );
+                }
+            },
         });
 
-        // assert.expect(10);
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar date_start="start" mode="month">'+
-        //         '<field name="name"/>'+
-        //         '<field name="start"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "write") {
-        //             assert.deepEqual(args.args[0], [6], "event 6 is moved")
-        //             assert.deepEqual(args.args[1].start, "2016-11-29 08:00:00",
-        //                 "event moved to 27th nov 16h00 +40 hours timezone")
-        //         }
-        //         return this._super(route, args);
-        //     },
-        //     session: {
-        //         getTZOffset: function () {
-        //             return -2400; // 40 hours timezone
-        //         },
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // assert.strictEqual(calendar.$('.fc-event:eq(0)').text().replace(/\s/g, ''), "08:00event1");
-        // await testUtils.dom.click(calendar.$('.fc-event:eq(0)'));
-        // assert.strictEqual(calendar.$('.o_field_widget[name="start"]').text(), "12/09/2016 08:00:00");
+        assert.strictEqual(findEvent(calendar, 1).textContent.replace(/\s/g, ""), "08:00event1");
+        await clickEvent(calendar, 1);
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.o_field_widget[name="start"]`).textContent,
+            "12/09/2016 08:00:00"
+        );
 
-        // assert.strictEqual(calendar.$('.fc-event:eq(5)').text().replace(/\s/g, ''), "16:00event6");
-        // await testUtils.dom.click(calendar.$('.fc-event:eq(5)'));
-        // assert.strictEqual(calendar.$('.o_field_widget[name="start"]').text(), "12/16/2016 16:00:00");
+        assert.strictEqual(findEvent(calendar, 6).textContent.replace(/\s/g, ""), "16:00event6");
+        await clickEvent(calendar, 6);
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.o_field_widget[name="start"]`).textContent,
+            "12/16/2016 16:00:00"
+        );
 
-        // // Move event 6 as on first day of month view (27th november 2016)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event').eq(5),
-        //     calendar.$('.fc-day-top').first()
-        // );
-        // await testUtils.nextTick();
+        // Move event 6 as on first day of month view (27th november 2016)
+        await moveEventToDate(calendar, 6, "2016-11-27");
 
-        // assert.strictEqual(calendar.$('.fc-event:eq(0)').text().replace(/\s/g, ''), "16:00event6");
-        // await testUtils.dom.click(calendar.$('.fc-event:eq(0)'));
-        // assert.strictEqual(calendar.$('.o_field_widget[name="start"]').text(), "11/27/2016 16:00:00");
+        assert.strictEqual(findEvent(calendar, 1).textContent.replace(/\s/g, ""), "08:00event1");
+        await clickEvent(calendar, 1);
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.o_field_widget[name="start"]`).textContent,
+            "12/09/2016 08:00:00"
+        );
 
-        // assert.strictEqual(calendar.$('.fc-event:eq(1)').text().replace(/\s/g, ''), "08:00event1");
-        // await testUtils.dom.click(calendar.$('.fc-event:eq(1)'));
-        // assert.strictEqual(calendar.$('.o_field_widget[name="start"]').text(), "12/09/2016 08:00:00");
-
-        // calendar.destroy();
+        assert.strictEqual(findEvent(calendar, 6).textContent.replace(/\s/g, ""), "16:00event6");
+        await clickEvent(calendar, 6);
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(`.o_field_widget[name="start"]`).textContent,
+            "11/27/2016 16:00:00"
+        );
     });
 
     QUnit.todo("timzeone does not affect calendar with date field", async (assert) => {
-        assert.ok(false);
+        assert.expect(11);
+
+        patchTimeZone(120);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3772,55 +3775,52 @@ QUnit.module("wowl Views", (hooks) => {
             serverData,
             arch: `
                 <calendar
-                    date_start="start"
-                />
+                    date_start="start_date"
+                    mode="month"
+                >
+                    <field name="name" />
+                    <field name="start_date" />
+                </calendar>
             `,
+            mockRPC(route, { method, args }) {
+                if (method === "create") {
+                    assert.strictEqual(args[0].start_date, "2016-12-20 00:00:00");
+                }
+                if (method === "write") {
+                    assert.step(args[1].start_date);
+                }
+            },
         });
 
-        // assert.expect(11);
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar date_start="start_date" mode="month">'+
-        //         '<field name="name"/>'+
-        //         '<field name="start_date"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "create") {
-        //             assert.strictEqual(args.args[0].start_date, "2016-12-20 00:00:00");
-        //         }
-        //         if (args.method === "write") {
-        //             assert.step(args.args[1].start_date);
-        //         }
-        //         return this._super(route, args);
-        //     },
-        //     session: {
-        //         getTZOffset: function () {
-        //             return 120; // 2 hours timezone
-        //         },
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // // Create event (on 20 december)
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "An event");
-        // await testUtils.dom.click($('.modal button.btn:contains(Create)'));
-        // await testUtils.nextTick();
+        // Create event (on 20 december)
+        await clickDate(calendar, "2016-12-20");
 
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(An event)'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last .o_field_date').text(), '12/20/2016', "should have correct start date");
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "An event";
+        await triggerEvent(input, null, "input");
+
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+
+        await clickEvent(calendar, 8);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(
+                ".o_cw_popover .o_cw_popover_fields_secondary .list-group-item .o_field_date"
+            ).textContent,
+            "12/20/2016",
+            "should have correct start date"
+        );
 
         // // Move event to another day (on 27 november)
         // await testUtils.dom.dragAndDrop(
