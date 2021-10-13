@@ -3900,10 +3900,10 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("drag and drop on month mode with all_day mapping", async (assert) => {
+    QUnit.test("drag and drop on month mode with all_day mapping", async (assert) => {
         // Same test as before but in normalizeRecord (calendar_model.js) there is
         // different condition branching with all_day mapping or not
-        assert.expect(2);
+        assert.expect(1);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3941,33 +3941,57 @@ QUnit.module("wowl Views", (hooks) => {
         await click(mainComponentsContainer.querySelector(`.o_field_widget[name="allday"] input`));
 
         // use datepicker to enter a date: 12/20/2016 07:00:00
-        // testUtils.dom.openDatepicker($('.o_field_widget[name="start"].o_datepicker'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(07)'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
+        await click(
+            mainComponentsContainer,
+            `.o_field_widget[name="start"].o_datepicker .o_datepicker_input`
+        );
+        await click(
+            document.body,
+            `.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]`
+        );
+        await click(document.body, `.bootstrap-datetimepicker-widget .timepicker .timepicker-hour`);
+        await click(
+            document.body.querySelectorAll(
+                `.bootstrap-datetimepicker-widget .timepicker-hours td.hour`
+            )[7]
+        );
+        await click(
+            document.body,
+            `.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]`
+        );
 
         // use datepicker to enter a date: 12/20/2016 19:00:00
-        // testUtils.dom.openDatepicker($('.o_field_widget[name="stop"].o_datepicker'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(19)'));
-        // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
+        await click(
+            mainComponentsContainer,
+            `.o_field_widget[name="stop"].o_datepicker .o_datepicker_input`
+        );
+        await click(
+            document.body,
+            `.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]`
+        );
+        await click(document.body, `.bootstrap-datetimepicker-widget .timepicker .timepicker-hour`);
+        await click(
+            document.body.querySelectorAll(
+                `.bootstrap-datetimepicker-widget .timepicker-hours td.hour`
+            )[19]
+        );
+        await click(
+            document.body,
+            `.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]`
+        );
 
-        // await click(mainComponentsContainer.querySelector(".modal button.btn-primary"));
+        await click(mainComponentsContainer.querySelector(".modal button.btn-primary"));
 
         // Move event to another day (on 19 december)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event:contains("An event")'),
-        //     calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day-top:eq(1)')
-        // );
-        // await testUtils.nextTick();
-        // await testUtils.dom.click(calendar.$('.fc-event:contains("An event")'));
+        await moveEventToDate(calendar, 8, "2016-12-19");
+        await clickEvent(calendar, 8);
 
-        // assert.containsOnce(calendar, '.popover:contains("07:00")',
-        //     "start hour shouldn't have been changed");
-        // assert.containsOnce(calendar, '.popover:contains("19:00")',
-        //     "end hour shouldn't have been changed");
+        const row = mainComponentsContainer.querySelectorAll(".o_cw_body .list-group-item")[1];
+        assert.strictEqual(
+            row.textContent.trim(),
+            "07:00 - 19:00 (12 hours)",
+            "start and end hours shouldn't have been changed"
+        );
     });
 
     QUnit.todo("drag and drop on month mode with date_start and date_delay", async (assert) => {

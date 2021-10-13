@@ -2018,7 +2018,7 @@ class PlaygroundAction extends owl.Component {
             arch: `
                 <calendar
                     string="Time Off Request"
-                    form_view_id="610"
+                    form_view_id="1034"
                     event_open_popup="1"
                     date_start="date_from"
                     date_stop="date_to"

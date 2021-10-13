@@ -1,6 +1,6 @@
 // will be removed when rewritten
 
-odoo.define("web.calendar_tests", function (require) {
+odoo.define("web.legacy_calendar_tests", function (require) {
     "use strict";
 
     const AbstractField = require("web.AbstractField");

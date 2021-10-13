@@ -304,7 +304,7 @@ function findAllDaySlot(calendar, date) {
 }
 
 function findDateCell(calendar, date) {
-    return calendar.el.querySelector(`.fc-day-top[data-date="${date}"] .fc-day-number`);
+    return calendar.el.querySelector(`.fc-day-top[data-date="${date}"]`);
 }
 
 export function findEvent(calendar, eventId) {

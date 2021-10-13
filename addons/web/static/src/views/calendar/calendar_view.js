@@ -166,59 +166,53 @@ export class CalendarView extends Component {
 
     createRecord(record) {
         if (this.model.hasQuickCreate) {
-            let resolve;
-            const def = new Promise((r) => {
-                resolve = r;
+            return new Promise((resolve) => {
+                this.dialog.add(
+                    this.constructor.components.QuickCreate,
+                    this.getQuickCreateProps(record),
+                    {
+                        onClose() {
+                            resolve();
+                        },
+                    }
+                );
             });
-
-            this.dialog.add(
-                this.constructor.components.QuickCreate,
-                this.getQuickCreateProps(record),
-                {
-                    onClose() {
-                        resolve();
-                    },
-                }
-            );
-            return def;
         } else {
             return this.editRecordInCreation(record);
         }
     }
     editRecord(record, context = {}) {
-        let resolve = (v) => {};
-        const def = new Promise((r) => {
-            resolve = r;
+        return new Promise((resolve) => {
+            if (this.model.hasEditDialog) {
+                /** @todo: use view dialog API when ready */
+                this.viewDialog.add({
+                    res_model: this.model.resModel,
+                    res_id: record.id || null,
+                    context,
+                    title: record.id
+                        ? `${this.env._t("Open")}: ${record.title}`
+                        : this.env._t("New Event"),
+                    view_id: this.model.formViewId,
+                    disable_multiple_selection: true,
+                    on_saved: () => {
+                        this.model.load();
+                    },
+                    on_closed: () => {
+                        resolve();
+                    },
+                });
+            } else {
+                resolve();
+                this.action.doAction({
+                    type: "ir.actions.act_window",
+                    res_model: this.model.resModel,
+                    res_id: record.id,
+                    views: [[this.model.formViewId, "form"]],
+                    target: "current",
+                    context,
+                });
+            }
         });
-        if (this.model.hasEditDialog) {
-            /** @todo: use view dialog API when ready */
-            this.viewDialog.add({
-                res_model: this.model.resModel,
-                res_id: record.id || null,
-                context,
-                title: record.id
-                    ? `${this.env._t("Open")}: ${record.title}`
-                    : this.env._t("New Event"),
-                view_id: this.model.formViewId,
-                on_saved: () => {
-                    this.model.load();
-                },
-                on_closed: () => {
-                    resolve();
-                },
-            });
-        } else {
-            resolve();
-            this.action.doAction({
-                type: "ir.actions.act_window",
-                res_model: this.model.resModel,
-                res_id: record.id,
-                views: [[this.model.formViewId, "form"]],
-                target: "current",
-                context,
-            });
-        }
-        return def;
     }
     editRecordInCreation(record) {
         const context = this.model.makeContextDefaults(record);
