@@ -2692,10 +2692,52 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("readonly date_start field", async (assert) => {
-        assert.ok(false);
+    QUnit.test("readonly date_start field", async (assert) => {
+        assert.expect(4);
 
-        // assert.expect(4);
+        serverData.models.event.fields.start.readonly = true;
+
+        const expectedRequests = [
+            {
+                type: "ir.actions.act_window",
+                res_id: 4,
+                res_model: "event",
+                views: [[false, "form"]],
+                target: "current",
+                context: {},
+            },
+            {
+                type: "ir.actions.act_window",
+                res_model: "event",
+                views: [[false, "form"]],
+                target: "current",
+                context: {
+                    default_name: "coucou",
+                    default_start: "2016-12-27 00:00:00",
+                    default_stop: "2016-12-27 00:00:00",
+                    default_allday: true,
+                },
+            },
+        ];
+        let requestCount = 0;
+
+        serviceRegistry.add(
+            "action",
+            {
+                ...actionService,
+                start() {
+                    const result = actionService.start(...arguments);
+                    const doAction = result.doAction;
+                    result.doAction = (request) => {
+                        assert.deepEqual(request, expectedRequests[requestCount]);
+                        requestCount++;
+                        return doAction(request);
+                    };
+                    return result;
+                },
+            },
+            { force: true }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2704,84 +2746,39 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
                 />
             `,
+            mockRPC(route, { method }) {
+                if (method === "get_formview_id") {
+                    return Promise.resolve(false);
+                }
+            },
         });
 
-        // this.data.event.fields.start.readonly = true;
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="month"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "get_formview_id") {
-        //             return Promise.resolve(false);
-        //         }
-        //         return this._super(route, args);
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // assert.containsNone(calendar, '.fc-resizer', "should not have resize button");
+        assert.containsNone(calendar.el, ".fc-resizer", "should not have resize button");
 
-        // // click on an existing event to open the form view
+        await clickEvent(calendar, 4);
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_edit");
 
-        // testUtils.mock.intercept(calendar, 'do_action', function (event) {
-        //     assert.deepEqual(event.data.action,
-        //         {
-        //             type: "ir.actions.act_window",
-        //             res_id: 4,
-        //             res_model: "event",
-        //             views: [[false, "form"]],
-        //             target: "current",
-        //             context: {}
-        //         },
-        //         "should open the form view");
-        // });
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(event 4) .fc-content'));
-        // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_edit'));
+        // create a new event and edit it
+        await clickDate(calendar, "2016-12-27");
 
-        // // create a new event and edit it
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "coucou";
+        await triggerEvent(input, null, "input");
 
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(4) .fc-day:eq(2)');
-        // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // await testUtils.fields.editInput($('.modal-body input:first'), 'coucou');
-
-        // testUtils.mock.intercept(calendar, 'do_action', function (event) {
-        //     assert.deepEqual(event.data.action,
-        //         {
-        //             type: "ir.actions.act_window",
-        //             res_model: "event",
-        //             views: [[false, "form"]],
-        //             target: "current",
-        //             context: {
-        //                 "default_name": "coucou",
-        //                 "default_start": "2016-12-27 00:00:00",
-        //                 "default_stop": "2016-12-27 00:00:00",
-        //                 "default_allday": true
-        //             }
-        //         },
-        //         "should open the form view with the context default values");
-        // });
-
-        // await testUtils.dom.click($('.modal button.btn:contains(Edit)'));
-
-        // calendar.destroy();
-
-        // assert.strictEqual($('#ui-datepicker-div:empty').length, 0, "should have a clean body");
+        await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
+        assert.strictEqual(requestCount, 2);
     });
 
     QUnit.todo("check filters with filter_field specified", async (assert) => {
