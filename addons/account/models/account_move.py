@@ -2542,6 +2542,7 @@ class AccountMove(models.Model):
         :return: A res.partner record's id representing the delivery address.
         '''
         self.ensure_one()
+        print('hello wolrd')
         return self.partner_id.address_get(['delivery'])['delivery']
 
     def _get_reconciled_payments(self):
