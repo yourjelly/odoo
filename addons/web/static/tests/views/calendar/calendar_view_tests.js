@@ -25,6 +25,7 @@ import {
     clickDate,
     clickEvent,
     findEvent,
+    findFilterPanelFilter,
     findPickedDate,
     findTimeRow,
     moveEventToDate,
@@ -2781,10 +2782,8 @@ QUnit.module("wowl Views", (hooks) => {
         assert.strictEqual(requestCount, 2);
     });
 
-    QUnit.todo("check filters with filter_field specified", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(5);
+    QUnit.test("check filters with filter_field specified", async (assert) => {
+        assert.expect(5);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2793,45 +2792,67 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                >
+                    <field
+                        name="partner_ids"
+                        write_model="filter_partner"
+                        write_field="partner_id"
+                        filter_field="partner_checked"
+                    />
+                </calendar>
             `,
         });
 
-        // const calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: `
-        //         <calendar class="o_calendar_test"
-        //                 event_open_popup="true"
-        //                 date_start="start"
-        //                 date_stop="stop"
-        //                 all_day="allday"
-        //                 mode="week"
-        //                 color="partner_id">
-        //             <field name="partner_ids" write_model="filter_partner" write_field="partner_id" filter_field="partner_checked"/>
-        //         </calendar>`,
-        // });
+        assert.containsOnce(
+            findFilterPanelFilter(calendar, "partner_ids", 2),
+            "input:checked",
+            "checkbox should be checked"
+        );
 
-        // assert.containsOnce(calendar, '.o_calendar_filter_item[data-id="2"] input:checked',
-        //     "checkbox should be checked");
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-id="2"] input'));
-        // assert.containsNone(calendar, '.o_calendar_filter_item[data-id="2"] input:checked',
-        //     "checkbox should not be checked");
-        // assert.strictEqual(this.data.filter_partner.records.find(r => r.id === 2).partner_checked, false,
-        //     "the status of this filter should now be false");
-        // await calendar.reload();
-        // assert.containsNone(calendar, '.o_calendar_filter_item[data-id="2"] input:checked',
-        //     "checkbox should not be checked after the reload");
-        // assert.strictEqual(this.data.filter_partner.records.find(r => r.id === 2).partner_checked, false,
-        //     "the status of this filter should still be false after the reload");
-        // calendar.destroy();
+        await toggleFilter(calendar, "partner_ids", 2);
+        assert.containsNone(
+            findFilterPanelFilter(calendar, "partner_ids", 2),
+            "input:checked",
+            "checkbox should not be checked"
+        );
+        assert.strictEqual(
+            serverData.models.filter_partner.records.find((r) => r.id === 2).partner_checked,
+            false,
+            "the status of this filter should now be false"
+        );
+
+        await changeScale(calendar, "week"); // trick to reload the entire view
+        assert.containsNone(
+            findFilterPanelFilter(calendar, "partner_ids", 2),
+            "input:checked",
+            "checkbox should not be checked after the reload"
+        );
+        assert.strictEqual(
+            serverData.models.filter_partner.records.find((r) => r.id === 2).partner_checked,
+            false,
+            "the status of this filter should still be false after the reload"
+        );
     });
 
-    QUnit.todo('"all" filter', async (assert) => {
-        assert.ok(false);
+    QUnit.test('"all" filter', async (assert) => {
+        assert.expect(8);
 
-        // assert.expect(8);
+        const interval = [
+            ["start", "<=", "2016-12-17 23:59:59"],
+            ["stop", ">=", "2016-12-11 00:00:00"],
+        ];
+
+        const expectedDomains = [
+            interval.concat([["partner_ids", "in", []]]),
+            interval.concat([["partner_ids", "in", [1]]]),
+            interval.concat([["partner_ids", "in", [1, 2]]]),
+            interval,
+        ];
+
+        let requestCount = 0;
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2840,68 +2861,37 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                >
+                    <field
+                        name="partner_ids"
+                        write_model="filter_partner"
+                        write_field="partner_id"
+                    />
+                </calendar>
             `,
+            mockRPC(route, { kwargs, method, model }) {
+                if (method === "search_read" && model === "event") {
+                    assert.deepEqual(kwargs.domain, expectedDomains[requestCount]);
+                    requestCount++;
+                }
+            },
         });
 
-        // var interval = [
-        //     ["start", "<=", "2016-12-17 23:59:59"],
-        //     ["stop", ">=", "2016-12-11 00:00:00"],
-        // ];
+        // By default, no user is selected
+        assert.containsNone(calendar.el, ".fc-event", "should not display any event on the week");
 
-        // var domains = [
-        //     interval.concat([["partner_ids", "in", []]]),
-        //     interval.concat([["partner_ids", "in", [1]]]),
-        //     interval.concat([["partner_ids", "in", [2,1]]]),
-        //     interval,
-        // ];
+        await toggleFilter(calendar, "partner_ids", 1);
+        assert.containsN(calendar.el, ".fc-event", 4, "should display 4 events on the week");
 
-        // var i = 0;
+        await toggleFilter(calendar, "partner_ids", 2);
+        assert.containsN(calendar.el, ".fc-event", 9, "should display 9 events on the week");
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //     '</calendar>',
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === 'search_read' && args.model === 'event') {
-        //             assert.deepEqual(args.kwargs.domain, domains[i]);
-        //             i++;
-        //         }
-        //         return this._super.apply(this, arguments);
-        //     },
-        // });
-        // // By default, no user is selected
-        // assert.containsN(calendar, '.fc-event', 0,
-        //     "should display 0 events on the week");
-
-        // // Select the events only associated with partner 2
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-id=1] input'));
-        // assert.containsN(calendar, '.fc-event', 4,
-        //     "should display 4 events on the week");
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
-        // assert.containsN(calendar, '.fc-event', 9,
-        //     "should display 9 events on the week");
-        // // Click on the 'all' filter to reload all events
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=all] input'));
-        // assert.containsN(calendar, '.fc-event', 9,
-        //     "should display 9 events on the week");
-
-        // calendar.destroy();
+        // Click on the "all" filter to reload all events
+        await toggleFilter(calendar, "partner_ids", "all");
+        assert.containsN(calendar.el, ".fc-event", 9, "should display 9 events on the week");
     });
 
     QUnit.todo("Add filters and specific color", async (assert) => {

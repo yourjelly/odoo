@@ -435,12 +435,21 @@ export async function navigate(calendarView, direction) {
     );
 }
 
-export async function toggleFilter(calendar, sectionName, filterValue) {
-    const sectionSelector = `.o-calendar-filter-panel--section[data-name="${sectionName}"]`;
-    const filterSelector = `.o-calendar-filter-panel--filter[data-value="${filterValue}"]`;
+export function findFilterPanelSection(calendar, sectionName) {
+    return calendar.el.querySelector(
+        `.o-calendar-filter-panel--section[data-name="${sectionName}"]`
+    );
+}
 
-    const el = calendar.el.querySelector(
-        `${sectionSelector} ${filterSelector} .o-calendar-filter-panel--filter-input`
+export function findFilterPanelFilter(calendar, sectionName, filterValue) {
+    return findFilterPanelSection(calendar, sectionName).querySelector(
+        `.o-calendar-filter-panel--filter[data-value="${filterValue}"]`
+    );
+}
+
+export async function toggleFilter(calendar, sectionName, filterValue) {
+    const el = findFilterPanelFilter(calendar, sectionName, filterValue).querySelector(
+        `.o-calendar-filter-panel--filter-input`
     );
     el.scrollIntoView();
     await click(el);
