@@ -3,6 +3,7 @@ import { DomainListRepr } from "@web/core/domain";
 interface FieldMeta {
   type: string;
   relation?: string;
+  related?: string;
 }
 
 export type Scales = "day" | "week" | "month" | "year";

@@ -21,13 +21,13 @@
                                         type="checkbox"
                                         name="select-all"
                                         class="position-absolute"
-                                        t-attf-id="filterId"
+                                        t-att-id="filterId"
                                         t-att-checked="isAllActive(section)"
                                         t-on-change="onAllFilterInputChange(section)"
                                     />
                                     <label
                                         class="d-flex align-items-center m-0"
-                                        t-attf-for="filterId"
+                                        t-att-for="filterId"
                                     >
                                         <span
                                             class="o-calendar-filter-panel--filter-input align-items-center d-flex flex-shrink-0 justify-content-center position-relative mr-1"

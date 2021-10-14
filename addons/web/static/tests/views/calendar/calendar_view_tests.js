@@ -26,6 +26,7 @@ import {
     clickEvent,
     findEvent,
     findFilterPanelFilter,
+    findFilterPanelSection,
     findPickedDate,
     findTimeRow,
     moveEventToDate,
@@ -34,6 +35,7 @@ import {
     selectDateRange,
     selectTimeRange,
     toggleFilter,
+    toggleSectionFilter,
 } from "./calendar_helpers";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registerCleanup } from "../../helpers/cleanup";
@@ -2894,10 +2896,35 @@ QUnit.module("wowl Views", (hooks) => {
         assert.containsN(calendar.el, ".fc-event", 9, "should display 9 events on the week");
     });
 
-    QUnit.todo("Add filters and specific color", async (assert) => {
-        assert.ok(false);
+    QUnit.test("Add filters and specific color", async (assert) => {
+        assert.expect(5);
 
-        // assert.expect(6);
+        serverData.models.event.records.push(
+            {
+                id: 8,
+                user_id: 4,
+                partner_id: 1,
+                name: "event 8",
+                start: "2016-12-11 09:00:00",
+                stop: "2016-12-11 10:00:00",
+                allday: false,
+                partner_ids: [1, 2, 3],
+                event_type_id: 3,
+                color: 4,
+            },
+            {
+                id: 9,
+                user_id: 4,
+                partner_id: 1,
+                name: "event 9",
+                start: "2016-12-11 19:00:00",
+                stop: "2016-12-11 20:00:00",
+                allday: false,
+                partner_ids: [1, 2, 3],
+                event_type_id: 1,
+                color: 1,
+            }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2906,50 +2933,58 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    color="color"
+                >
+                    <field
+                        name="partner_ids"
+                        write_model="filter_partner"
+                        write_field="partner_id"
+                    />
+                    <field
+                        name="event_type_id"
+                        filters="1"
+                        color="color"
+                    />
+                </calendar>
             `,
         });
 
-        // this.data.event.records.push(
-        //     {id: 8, user_id: 4, partner_id: 1, name: "event 8", start: "2016-12-11 09:00:00", stop: "2016-12-11 10:00:00", allday: false, partner_ids: [1,2,3], event_type_id: 3, color: 4},
-        //     {id: 9, user_id: 4, partner_id: 1, name: "event 9", start: "2016-12-11 19:00:00", stop: "2016-12-11 20:00:00", allday: false, partner_ids: [1,2,3], event_type_id: 1, color: 1},
-        // );
+        // By default no filter is selected. We check before continuing.
+        await toggleSectionFilter(calendar, "partner_ids");
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'color="color">'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //             '<field name="event_type_id" filters="1" color="color"/>'+
-        //     '</calendar>',
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-        // // By default no filter is selected. We check before continuing.
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--section",
+            2,
+            "should display 2 sections"
+        );
 
-        // assert.containsN(calendar, '.o_calendar_filter', 2, "should display 2 filters");
+        const typeSection = findFilterPanelSection(calendar, "event_type_id");
+        assert.strictEqual(
+            typeSection.querySelector(".o-calendar-filter-panel--section-header").textContent,
+            "Event Type",
+            "should display 'Event Type' filter"
+        );
+        assert.containsN(
+            typeSection,
+            ".o-calendar-filter-panel--filter",
+            4,
+            "should display 4 filters (1 section filter + 3 filters in the section)"
+        );
 
-        // var $typeFilter =  calendar.$('.o_calendar_filter:has(span:contains(Event Type))');
-        // assert.ok($typeFilter.length, "should display 'Event Type' filter");
-        // assert.containsOnce($typeFilter, '#o_cw_filter_collapse_EventType', "Id should be equals to o_cw_filter_collapse_EventType for 'Event Type'");
-        // assert.containsN($typeFilter, '.o_calendar_filter_item', 3, "should display 3 filter items for 'Event Type'");
-
-        // assert.containsOnce($typeFilter, '.o_calendar_filter_item[data-value=3].o_cw_filter_color_4', "Filter for event type 3 must have the color 4");
-
-        // assert.containsOnce(calendar, '.fc-event[data-event-id=8].o_calendar_color_4', "Event of event type 3 must have the color 4");
-
-        // calendar.destroy();
+        assert.containsOnce(
+            typeSection,
+            `.o-calendar-filter-panel--filter[data-value="3"].o-calendar-filter-panel--filter-color-4`,
+            "Filter for event type 3 must have the color 4"
+        );
+        assert.containsOnce(
+            calendar.el,
+            `.fc-event[data-event-id="8"].o-calendar--event-color-4`,
+            "Event of event type 3 must have the color 4"
+        );
     });
 
     QUnit.todo("create event with filters", async (assert) => {

@@ -447,8 +447,22 @@ export function findFilterPanelFilter(calendar, sectionName, filterValue) {
     );
 }
 
+export function findFilterPanelSectionFilter(calendar, sectionName) {
+    return findFilterPanelSection(calendar, sectionName).querySelector(
+        `.o-calendar-filter-panel--section-filter`
+    );
+}
+
 export async function toggleFilter(calendar, sectionName, filterValue) {
     const el = findFilterPanelFilter(calendar, sectionName, filterValue).querySelector(
+        `.o-calendar-filter-panel--filter-input`
+    );
+    el.scrollIntoView();
+    await click(el);
+}
+
+export async function toggleSectionFilter(calendar, sectionName) {
+    const el = findFilterPanelSectionFilter(calendar, sectionName).querySelector(
         `.o-calendar-filter-panel--filter-input`
     );
     el.scrollIntoView();
