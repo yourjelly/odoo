@@ -1246,10 +1246,8 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("render popover", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(14);
+    QUnit.test("render popover", async (assert) => {
+        assert.expect(14);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -1258,52 +1256,94 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                >
+                    <field name="name" string="Custom Name" />
+                    <field name="partner_id" />
+                </calendar>
             `,
         });
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week">'+
-        //             '<field name="name" string="Custom Name"/>'+
-        //             '<field name="partner_id"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // await testUtils.dom.click($('.fc-event:contains(event 4)'));
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // assert.containsOnce(calendar, '.o_cw_popover', "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover .popover-header').text(), 'event 4', "popover should have a title 'event 4'");
-        // assert.containsOnce(calendar, '.o_cw_popover .o_cw_popover_edit', "popover should have an edit button");
-        // assert.containsOnce(calendar, '.o_cw_popover .o_cw_popover_delete', "popover should have a delete button");
-        // assert.containsOnce(calendar, '.o_cw_popover .o_cw_popover_close', "popover should have a close button");
+        await clickEvent(calendar, 4);
 
-        // assert.strictEqual(calendar.$('.o_cw_popover .list-group-item:first b.text-capitalize').text(), 'Wednesday, December 14, 2016', "should display date 'Wednesday, December 14, 2016'");
-        // assert.containsN(calendar, '.o_cw_popover .o_cw_popover_fields_secondary .list-group-item', 2, "popover should have a two fields");
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".o_cw_popover .popover-header").textContent,
+            "event 4",
+            "popover should have a title 'event 4'"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover .o_cw_popover_edit",
+            "popover should have an edit button"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover .o_cw_popover_delete",
+            "popover should have a delete button"
+        );
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover .o_cw_popover_close",
+            "popover should have a close button"
+        );
 
-        // assert.containsOnce(calendar, '.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:first .o_field_char', "should apply char widget");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:first strong').text(), 'Custom Name : ', "label should be a 'Custom Name'");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:first .o_field_char').text(), 'event 4', "value should be a 'event 4'");
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(
+                ".o_cw_popover .list-group-item b.text-capitalize"
+            ).textContent,
+            "Wednesday, December 14, 2016",
+            "should display date 'Wednesday, December 14, 2016'"
+        );
+        assert.containsN(
+            mainComponentsContainer,
+            ".o_cw_popover .o_cw_popover_fields_secondary .list-group-item",
+            2,
+            "popover should have a two fields"
+        );
 
-        // assert.containsOnce(calendar, '.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last .o_form_uri', "should apply m20 widget");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last strong').text(), 'user : ', "label should be a 'user'");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last .o_form_uri').text(), 'partner 1', "value should be a 'partner 1'");
+        const groups = mainComponentsContainer.querySelectorAll(
+            ".o_cw_popover .o_cw_popover_fields_secondary .list-group-item"
+        );
+        assert.containsOnce(groups[0], ".o_field_char", "should apply char widget");
+        assert.strictEqual(
+            groups[0].querySelector("strong").textContent,
+            "Custom Name : ",
+            "label should be a 'Custom Name'"
+        );
+        assert.strictEqual(
+            groups[0].querySelector(".o_field_char").textContent,
+            "event 4",
+            "value should be a 'event 4'"
+        );
 
-        // await testUtils.dom.click($('.o_cw_popover .o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover', "should close a popover");
+        assert.containsOnce(groups[1], ".o_form_uri", "should apply m20 widget");
+        assert.strictEqual(
+            groups[1].querySelector("strong").textContent,
+            "user : ",
+            "label should be a 'user'"
+        );
+        assert.strictEqual(
+            groups[1].querySelector(".o_form_uri").textContent,
+            "partner 1",
+            "value should be a 'partner 1'"
+        );
 
-        // calendar.destroy();
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_close");
+        assert.containsNone(mainComponentsContainer, ".o_cw_popover", "should close a popover");
     });
 
     QUnit.test("render popover with modifiers", async (assert) => {
@@ -2268,6 +2308,7 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("use mini calendar", async (assert) => {
+        assert.expect(12);
         // tz offset = 120
 
         const calendar = await makeView({
@@ -2331,10 +2372,12 @@ QUnit.module("wowl Views", (hooks) => {
         assert.containsN(calendar.el, ".fc-event", 2, "should display 2 events on the day");
     });
 
-    QUnit.todo("rendering, with many2many", async (assert) => {
-        assert.ok(false);
+    QUnit.test("rendering, with many2many", async (assert) => {
+        assert.expect(5);
 
-        // assert.expect(5);
+        serverData.models.event.fields.partner_ids.type = "many2many";
+        serverData.models.event.records[0].partner_ids = [1, 2, 3, 4, 5];
+        serverData.models.partner.records.push({ id: 5, display_name: "partner 5", image: "EEE" });
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2343,54 +2386,98 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    event_open_popup="1"
+                >
+                    <field
+                        name="partner_ids"
+                        widget="many2many_tags_avatar"
+                        avatar_field="image"
+                        write_model="filter_partner"
+                        write_field="partner_id"
+                    />
+                </calendar>
             `,
         });
 
-        // this.data.event.fields.partner_ids.type = 'many2many';
-        // this.data.event.records[0].partner_ids = [1,2,3,4,5];
-        // this.data.partner.records.push({id: 5, display_name: "partner 5", image: 'EEE'});
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday"> '+
-        //             '<field name="partner_ids" widget="many2many_tags_avatar" avatar_field="image" write_model="filter_partner" write_field="partner_id"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // assert.containsN(calendar, '.o_calendar_filter_items .o_cw_filter_avatar', 3,
-        //     "should have 3 avatars in the side bar");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter .o-calendar-filter-panel--filter-avatar",
+            3,
+            "should have 3 avatars in the side bar"
+        );
 
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=all] input'));
+        await toggleFilter(calendar, "partner_ids", "all");
 
-        // // Event 1
-        // await testUtils.dom.click(calendar.$('.fc-event:first'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover').find('img').length, 1, "should have 1 avatar");
+        await clickEvent(calendar, 4);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.containsOnce(mainComponentsContainer, ".o_cw_popover img", "should have 1 avatar");
 
-        // // Event 2
-        // await testUtils.dom.click(calendar.$('.fc-event:eq(1)'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover').find('img').length, 5, "should have 5 avatar");
-
-        // calendar.destroy();
+        await clickEvent(calendar, 1);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.containsN(mainComponentsContainer, ".o_cw_popover img", 5, "should have 5 avatar");
     });
 
-    QUnit.todo("open form view", async (assert) => {
-        assert.ok(false);
+    QUnit.test("open form view", async (assert) => {
+        assert.expect(3);
 
-        // assert.expect(3);
+        const expectedRequests = [
+            {
+                type: "ir.actions.act_window",
+                res_id: 4,
+                res_model: "event",
+                views: [["A view", "form"]],
+                target: "current",
+                context: {},
+            },
+            {
+                type: "ir.actions.act_window",
+                res_model: "event",
+                views: [[false, "form"]],
+                target: "current",
+                context: {
+                    default_name: "coucou",
+                    default_start: "2016-12-27 00:00:00",
+                    default_stop: "2016-12-27 00:00:00",
+                    default_allday: true,
+                },
+            },
+        ];
+        let requestCount = 0;
+
+        serviceRegistry.add(
+            "action",
+            {
+                ...actionService,
+                start() {
+                    const result = actionService.start(...arguments);
+                    const doAction = result.doAction;
+                    result.doAction = (request) => {
+                        assert.deepEqual(request, expectedRequests[requestCount]);
+                        requestCount++;
+                        return doAction(request);
+                    };
+                    return result;
+                },
+            },
+            { force: true }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2399,80 +2486,37 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
                 />
             `,
+            mockRPC(route, { method }) {
+                if (method === "get_formview_id") {
+                    return Promise.resolve("A view");
+                }
+            },
         });
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="month"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "get_formview_id") {
-        //             return Promise.resolve('A view');
-        //         }
-        //         return this._super(route, args);
-        //     },
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // // click on an existing event to open the form view
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // testUtils.mock.intercept(calendar, 'do_action', function (event) {
-        //     assert.deepEqual(event.data.action,
-        //         {
-        //             type: "ir.actions.act_window",
-        //             res_id: 4,
-        //             res_model: "event",
-        //             views: [['A view', "form"]],
-        //             target: "current",
-        //             context: {}
-        //         },
-        //         "should open the form view");
-        // });
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(event 4) .fc-content'));
-        // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_edit'));
+        await clickEvent(calendar, 4);
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_edit");
 
-        // // create a new event and edit it
+        // create a new event and edit it
+        await clickDate(calendar, "2016-12-27");
 
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(4) .fc-day:eq(2)');
-        // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // testUtils.fields.editInput($('.modal-body input:first'), 'coucou');
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "coucou";
+        await triggerEvent(input, null, "input");
 
-        // testUtils.mock.intercept(calendar, 'do_action', function (event) {
-        //     assert.deepEqual(event.data.action,
-        //         {
-        //             type: "ir.actions.act_window",
-        //             res_model: "event",
-        //             views: [[false, "form"]],
-        //             target: "current",
-        //             context: {
-        //                 "default_name": "coucou",
-        //                 "default_start": "2016-12-27 00:00:00",
-        //                 "default_stop": "2016-12-27 00:00:00",
-        //                 "default_allday": true
-        //             }
-        //         },
-        //         "should open the form view with the context default values");
-        // });
-
-        // testUtils.dom.click($('.modal button.btn:contains(Edit)'));
-
-        // calendar.destroy();
-
-        // assert.strictEqual($('#ui-datepicker-div:empty').length, 0, "should have a clean body");
+        await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
+        assert.strictEqual(requestCount, 2);
     });
 
     QUnit.todo("create and edit event in month mode (all_day: false)", async (assert) => {

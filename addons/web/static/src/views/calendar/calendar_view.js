@@ -70,6 +70,7 @@ export class CalendarView extends Component {
         this.action = useService("action");
         this.title = useService("title");
         this.dialog = useService("dialog");
+        this.orm = useService("orm");
 
         let modelParams;
         if (this.props.state) {
@@ -181,9 +182,9 @@ export class CalendarView extends Component {
             return this.editRecordInCreation(record);
         }
     }
-    editRecord(record, context = {}) {
-        return new Promise((resolve) => {
-            if (this.model.hasEditDialog) {
+    async editRecord(record, context = {}, shouldFetchFormViewId = true) {
+        if (this.model.hasEditDialog) {
+            return new Promise((resolve) => {
                 /** @todo: use view dialog API when ready */
                 this.viewDialog.add({
                     res_model: this.model.resModel,
@@ -201,22 +202,33 @@ export class CalendarView extends Component {
                         resolve();
                     },
                 });
-            } else {
-                resolve();
-                this.action.doAction({
-                    type: "ir.actions.act_window",
-                    res_model: this.model.resModel,
-                    res_id: record.id,
-                    views: [[this.model.formViewId, "form"]],
-                    target: "current",
-                    context,
-                });
+            });
+        } else {
+            let formViewId = this.model.formViewId;
+            if (shouldFetchFormViewId) {
+                formViewId = await this.orm.call(
+                    this.model.resModel,
+                    "get_formview_id",
+                    [[record.id]],
+                    context
+                );
             }
-        });
+            const action = {
+                type: "ir.actions.act_window",
+                res_model: this.model.resModel,
+                views: [[formViewId || false, "form"]],
+                target: "current",
+                context,
+            };
+            if (record.id) {
+                action.res_id = record.id;
+            }
+            this.action.doAction(action);
+        }
     }
     editRecordInCreation(record) {
         const context = this.model.makeContextDefaults(record);
-        return this.editRecord(record, context);
+        return this.editRecord(record, context, false);
     }
     deleteRecord(record) {
         this.dialog.add(ConfirmationDialog, {

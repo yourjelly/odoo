@@ -299,7 +299,9 @@ export class CalendarModel extends Model {
             fieldMapping.all_day,
         ];
         for (const fieldName of fieldNames) {
-            context[`default_${fieldName}`] = rawRecord[fieldName] || null;
+            if (fieldName in rawRecord) {
+                context[`default_${fieldName}`] = rawRecord[fieldName];
+            }
         }
 
         return context;
@@ -574,7 +576,7 @@ export class CalendarModel extends Model {
     isColored(fieldName) {
         const field = this.meta.fields[fieldName];
         const colorField = this.meta.fields[this.meta.fieldMapping.color];
-        return field.relation === colorField.relation;
+        return !!colorField && field.relation === colorField.relation;
     }
     /**
      * @protected

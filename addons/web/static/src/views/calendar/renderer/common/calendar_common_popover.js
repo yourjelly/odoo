@@ -123,11 +123,11 @@ export class CalendarCommonPopover extends Component {
      * @param {boolean} isAllDay
      */
     getFormattedDate(start, end, isAllDay) {
-        const isSameDay = start.hasSame(end, "days");
         if (isAllDay) {
             // cancel correction done in _recordToCalendarEvent
             end = end.minus({ days: 1 });
         }
+        const isSameDay = start.hasSame(end, "days");
         if (!isSameDay && start.hasSame(end, "month")) {
             // Simplify date-range if an event occurs into the same month (eg. "4-5 August 2019")
             return start.toFormat("LLLL d") + "-" + end.toFormat("d, y");
