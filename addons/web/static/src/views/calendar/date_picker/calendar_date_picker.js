@@ -29,7 +29,7 @@ export class CalendarDatePicker extends Component {
     get dayNamesMin() {
         // I think this is totally wrong!
         // why this func: names are in wrong order without it
-        const weekdays = luxon.Info.weekdays("narrow");
+        const weekdays = Array.from(luxon.Info.weekdays("narrow"));
         const last = weekdays.pop();
         return [last, ...weekdays];
     }
