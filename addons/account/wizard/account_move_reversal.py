@@ -37,6 +37,7 @@ class AccountMoveReversal(models.TransientModel):
         help='If empty, uses the journal of the journal entry to be reversed.',
     )
     company_id = fields.Many2one('res.company', required=True, readonly=True)
+    country_id = fields.Many2one(comodel_name='res.country', related='company_id.country_id', readonly=True)
     available_journal_ids = fields.Many2many('account.journal', compute='_compute_available_journal_ids')
 
     # computed fields
