@@ -30,16 +30,19 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
             }
         }
         async onClickLocal() {
-            this.env.pos.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
+            // Before, customer_display was in 'pos', which makes it available "globally".
+            // This time however, we are putting it in a different global place since
+            // we can't attached dom element in 'pos'.
+            this.env.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
             const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
             var $renderedHtml = $('<div>').html(renderedHtml);
-            $(this.env.pos.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-            $(this.env.pos.customer_display.document.head).html($renderedHtml.find('.resources').html());
+            $(this.env.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+            $(this.env.customer_display.document.head).html($renderedHtml.find('.resources').html());
         }
         async onClickProxy() {
             try {
                 const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
-                let ownership = await this.env.pos.proxy.take_ownership_over_client_screen(
+                let ownership = await this.env.proxy.take_ownership_over_client_screen(
                     renderedHtml
                 );
                 if (typeof ownership === 'string') {
@@ -50,8 +53,8 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 } else {
                     this.state.status = 'warning';
                 }
-                if (!this.env.pos.proxy.posbox_supports_display) {
-                    this.env.pos.proxy.posbox_supports_display = true;
+                if (!this.env.proxy.posbox_supports_display) {
+                    this.env.proxy.posbox_supports_display = true;
                     this._start();
                 }
             } catch (error) {
@@ -69,9 +72,9 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
 
             const self = this;
             async function loop() {
-                if (self.env.pos.proxy.posbox_supports_display) {
+                if (self.env.proxy.posbox_supports_display) {
                     try {
-                        let ownership = await self.env.pos.proxy.test_ownership_of_client_screen();
+                        let ownership = await self.env.proxy.test_ownership_of_client_screen();
                         if (typeof ownership === 'string') {
                             ownership = JSON.parse(ownership);
                         }
@@ -90,7 +93,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                             self.state.status = 'failure';
                         } else {
                             self.state.status = 'not_found';
-                            self.env.pos.proxy.posbox_supports_display = false;
+                            self.env.proxy.posbox_supports_display = false;
                         }
                         setTimeout(loop, 3000);
                     }
