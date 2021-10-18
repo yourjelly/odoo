@@ -3134,9 +3134,26 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("Update event with filters", async (assert) => {
-        assert.ok(false);
+        assert.expect(12);
 
-        // assert.expect(12);
+        const records = serverData.models.user.records;
+        records.push({ id: 5, display_name: "user 5", partner_id: 3 });
+        serverData.models.event.onchanges = {
+            user_id(obj) {
+                obj.partner_id = records.find((r) => r.id === obj.user_id).partner_id;
+            },
+        };
+        serverData.views["event,false,form"] = `
+            <form>
+                <group>
+                    <field name="name" />
+                    <field name="start" />
+                    <field name="stop" />
+                    <field name="user_id" />
+                    <field name="partner_ids" widget="many2many_tags" />
+                </group>
+            </form>
+        `;
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3145,88 +3162,102 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" />
+                    <field name="partner_id" filters="1" invisible="1" />
+                </calendar>
             `,
         });
 
-        // var records = this.data.user.records;
-        // records.push({
-        //     id: 5,
-        //     display_name: "user 5",
-        //     partner_id: 3
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // this.data.event.onchanges = {
-        //     user_id: function (obj) {
-        //         obj.partner_id = _.findWhere(records, {id:obj.user_id}).partner_id;
-        //     }
-        // };
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //             '<field name="partner_id" filters="1" invisible="1"/>'+
-        //     '</calendar>',
-        //     archs: {
-        //         "event,false,form":
-        //             '<form>'+
-        //                 '<group>'+
-        //                     '<field name="name"/>'+
-        //                     '<field name="start"/>'+
-        //                     '<field name="stop"/>'+
-        //                     '<field name="user_id"/>'+
-        //                     '<field name="partner_ids" widget="many2many_tags"/>'+
-        //                 '</group>'+
-        //             '</form>',
-        //     },
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-        // // select needed partner filters
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
+        // select needed partner filters
+        await toggleFilter(calendar, "partner_ids", 1);
+        await toggleFilter(calendar, "partner_id", 4);
 
-        // assert.containsN(calendar, '.o_calendar_filter_item', 5, "should display 5 filter items");
-        // assert.containsN(calendar, '.fc-event', 3, "should display 3 events");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            5,
+            "should display 5 filter items"
+        );
+        assert.containsN(calendar.el, ".fc-event", 3, "should display 3 events");
 
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(event 2) .fc-content'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_edit'));
-        // assert.strictEqual($('.modal .modal-title').text(), 'Open: event 2', "dialog should have a valid title");
-        // await testUtils.dom.click($('.modal .o_field_widget[name="user_id"] input'));
-        // await testUtils.dom.click($('.ui-menu-item a:contains(user 5)').trigger('mouseenter'));
-        // await testUtils.dom.click($('.modal button.btn:contains(Save)'));
+        await clickEvent(calendar, 2);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
 
-        // assert.containsN(calendar, '.o_calendar_filter_item', 6, "should add the missing filter (active)");
-        // assert.containsN(calendar, '.fc-event', 3, "should display the updated item");
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_edit");
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(".modal .modal-title").textContent,
+            "Open: event 2",
+            "dialog should have a valid title"
+        );
 
-        // // test the behavior of the 'select all' input checkbox
-        // assert.containsN(calendar, '.o_calendar_filter_item input:checked', 3, "should display 3 true checkbox");
-        // assert.containsN(calendar, '.o_calendar_filter_item input:not(:checked)', 3, "should display 3 false checkbox");
-        // // Click to select all users
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_items_checkall:eq(1) input'));
-        // // should contains 4 events
-        // assert.containsN(calendar, '.fc-event', 4, "should display the updated events");
-        // // Should have 4 checked boxes
-        // assert.containsN(calendar, '.o_calendar_filter_item input:checked', 4, "should display 4 true checkbox");
-        // // unselect all user
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_items_checkall:eq(1) input'));
-        // assert.containsN(calendar, '.fc-event', 0, "should not display any event");
-        // assert.containsN(calendar, '.o_calendar_filter_item input:checked', 1, "should display 1 true checkbox");
-        // calendar.destroy();
+        await click(mainComponentsContainer, `.modal .o_field_widget[name="user_id"] input`);
+        await click(
+            document.body.querySelectorAll(".ui-autocomplete.dropdown-menu .ui-menu-item")[2]
+        );
+        await click(mainComponentsContainer, ".modal button.btn-primary");
+
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            6,
+            "should add the missing filter (active)"
+        );
+        assert.containsN(calendar.el, ".fc-event", 3, "should display the updated item");
+
+        // test the behavior of the 'select all' input checkbox
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter input:checked",
+            3,
+            "should display 3 active checkbox"
+        );
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter) .o-calendar-filter-panel--filter input:not(:checked)",
+            3,
+            "should display 3 inactive checkbox"
+        );
+
+        // Click to select all users
+        await toggleSectionFilter(calendar, "partner_id");
+
+        // should contains 4 events
+        assert.containsN(calendar.el, ".fc-event", 4, "should display the updated events");
+
+        // Should have 4 checked boxes
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter input:checked",
+            4,
+            "should display 4 active checkbox"
+        );
+
+        // unselect all user
+        await toggleSectionFilter(calendar, "partner_id");
+        assert.containsN(calendar.el, ".fc-event", 0, "should not display any event");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter input:checked",
+            1,
+            "should display 1 true checkbox"
+        );
     });
 
     QUnit.test("change pager with filters", async (assert) => {
