@@ -23,6 +23,9 @@ class SaleOrder(models.Model):
         return lines
 
     def _website_product_id_change(self, order_id, product_id, qty=0, **kwargs):
+        if self._context.get('pricelist') != self.pricelist_id.id:
+            self = self.with_context(pricelist=self.pricelist_id.id)
+
         values = super(SaleOrder, self)._website_product_id_change(order_id, product_id, qty=qty, **kwargs)
         event_booth_pending_ids = kwargs.get('event_booth_pending_ids')
         if event_booth_pending_ids:
@@ -30,19 +33,25 @@ class SaleOrder(models.Model):
                 ('id', 'in', self.order_line.ids),
                 ('event_booth_pending_ids', 'in', event_booth_pending_ids)])
             booths = self.env['event.booth'].browse(event_booth_pending_ids)
-            new_registration_ids = [Command.create({
-                                        'event_booth_id': booth.id,
-                                        **kwargs.get('registration_values'),
-                                    }) for booth in booths]
-            if order_line:
-                event_booth_registration_ids = [Command.delete(reg.id)
-                                                for reg in order_line.event_booth_registration_ids] + new_registration_ids
-            else:
-                event_booth_registration_ids = new_registration_ids
+            if order_line.event_booth_pending_ids.ids != event_booth_pending_ids:
+                new_registration_ids = [Command.create({
+                                            'event_booth_id': booth.id,
+                                            **kwargs.get('registration_values'),
+                                        }) for booth in booths]
+                if order_line:
+                    event_booth_registration_ids = [Command.delete(reg.id)
+                                                    for reg in order_line.event_booth_registration_ids] + new_registration_ids
+                else:
+                    event_booth_registration_ids = new_registration_ids
+                values.update(event_booth_registration_ids=event_booth_registration_ids)
 
+            if self.pricelist_id.discount_policy == 'without_discount':
+                price_unit = sum(booth.price for booth in booths)
+            else:
+                price_unit = sum(booth.price_reduce for booth in booths)
             values.update(
                 event_id=booths.event_id.id,
-                event_booth_registration_ids=event_booth_registration_ids,
+                price_unit=price_unit,
                 name=booths._get_booth_multiline_description,
             )
 
@@ -50,6 +59,11 @@ class SaleOrder(models.Model):
 
     def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):
         values = {}
+        if line_id:
+            line = self.env['sale.order.line'].browse(line_id)
+            booths = line.event_booth_pending_ids
+            if booths:
+                kwargs.update({'event_booth_pending_ids': booths.ids})
         product = self.env['product.product'].browse(product_id)
         if product.detailed_type == 'event_booth' and set_qty > 1:
             set_qty = 1
