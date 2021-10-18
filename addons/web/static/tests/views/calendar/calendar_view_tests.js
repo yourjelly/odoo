@@ -3513,66 +3513,6 @@ QUnit.module("wowl Views", (hooks) => {
         assert.strictEqual(createCount, 1, "should create only one event");
     });
 
-    QUnit.todo("check if the view destroys all widgets and instances", async (assert) => {
-        assert.ok(false);
-
-        const calendar = await makeView({
-            type: "wowl_calendar",
-            resModel: "event",
-            serverData,
-            arch: `
-                <calendar
-                    date_start="start"
-                />
-            `,
-        });
-
-        // assert.expect(2);
-
-        // var instanceNumber = 0;
-        // testUtils.mock.patch(mixins.ParentedMixin, {
-        //     init: function () {
-        //         instanceNumber++;
-        //         return this._super.apply(this, arguments);
-        //     },
-        //     destroy: function () {
-        //         if (!this.isDestroyed()) {
-        //             instanceNumber--;
-        //         }
-        //         return this._super.apply(this, arguments);
-        //     }
-        // });
-
-        // var params = {
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start_date" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // };
-
-        // var calendar = await createCalendarView(params);
-        // assert.ok(instanceNumber > 0);
-
-        // calendar.destroy();
-        // assert.strictEqual(instanceNumber, 0);
-
-        // testUtils.mock.unpatch(mixins.ParentedMixin);
-    });
-
     QUnit.todo("create an event (async dialog) [REQUIRE FOCUS]", async (assert) => {
         assert.ok(false);
 
