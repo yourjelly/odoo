@@ -2968,10 +2968,12 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("create event with filters", async (assert) => {
-        assert.ok(false);
+    QUnit.test("create event with filters", async (assert) => {
+        assert.expect(7);
 
-        // assert.expect(7);
+        serverData.models.event.fields.user_id.default = 5;
+        serverData.models.event.fields.partner_id.default = 3;
+        serverData.models.user.records.push({ id: 5, display_name: "user 5", partner_id: 3 });
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2980,86 +2982,79 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" />
+                    <field name="partner_id" filters="1" invisible="1" />
+                </calendar>
             `,
         });
 
-        // this.data.event.fields.user_id.default = 5;
-        // this.data.event.fields.partner_id.default = 3;
-        // this.data.user.records.push({id: 5, display_name: "user 5", partner_id: 3});
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //             '<field name="partner_id" filters="1" invisible="1"/>'+
-        //     '</calendar>',
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // }, {positionalClicks: true});
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // // By default only
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // assert.containsN(calendar, '.o_calendar_filter_item', 5, "should display 5 filter items");
-        // assert.containsN(calendar, '.fc-event', 4, "should display 4 events");
+        // By default only
+        await toggleFilter(calendar, "partner_ids", 1);
 
-        // // quick create a record
-        // var left = calendar.$('.fc-bg td:eq(4)').offset().left+15;
-        // var top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
-        // try {
-        //     testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        // } catch (e) {
-        //     calendar.destroy();
-        //     throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
-        // }
-        // testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
-        // testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mouseup");
-        // await testUtils.nextTick();
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            5,
+            "should display 5 filter items"
+        );
+        assert.containsN(calendar.el, ".fc-event", 4, "should display 4 events");
 
-        // await testUtils.fields.editInput($('.modal-body input:first'), 'coucou');
-        // await testUtils.dom.click($('.modal-footer button.btn:contains(Create)'));
+        // quick create a record
+        await selectTimeRange(calendar, "2016-12-15 06:00:00", "2016-12-15 08:00:00");
 
-        // assert.containsN(calendar, '.o_calendar_filter_item', 6, "should add the missing filter (active)");
-        // assert.containsN(calendar, '.fc-event', 5, "should display the created item");
-        // await testUtils.nextTick();
+        let input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "coucou";
+        await triggerEvent(input, null, "input");
 
-        // // change default value for quick create an hide record
-        // this.data.event.fields.user_id.default = 4;
-        // this.data.event.fields.partner_id.default = 4;
-        // // Disable our filter to create a record without displaying it
-        //  await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
-        // // quick create and other record
-        // left = calendar.$('.fc-bg td:eq(3)').offset().left+15;
-        // top = calendar.$('.fc-slats tr:eq(12) td:first').offset().top+15;
-        // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-        // testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mousemove");
-        // testUtils.dom.triggerPositionalMouseEvent(left, top + 200, "mouseup");
-        // await testUtils.nextTick();
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            6,
+            "should add the missing filter (active)"
+        );
+        assert.containsN(calendar.el, ".fc-event", 5, "should display the created item");
 
-        // testUtils.fields.editInput($('.modal-body input:first'), 'coucou 2');
-        // await testUtils.dom.click($('.modal-footer button.btn:contains(Create)'));
+        // change default value for quick create an hide record
+        serverData.models.event.fields.user_id.default = 4;
+        serverData.models.event.fields.partner_id.default = 4;
 
-        // assert.containsN(calendar, '.o_calendar_filter_item', 6, "should have the same filters");
-        // assert.containsN(calendar, '.fc-event', 4, "should not display the created item");
+        // Disable our filter to create a record without displaying it
+        await toggleFilter(calendar, "partner_id", 4);
 
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
+        // quick create and other record
+        await selectTimeRange(calendar, "2016-12-13 06:00:00", "2016-12-13 08:00:00");
 
-        // assert.containsN(calendar, '.fc-event', 11, "should display all records");
+        input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "coucou 2";
+        await triggerEvent(input, null, "input");
 
-        // calendar.destroy();
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            6,
+            "should have the same filters"
+        );
+        assert.containsN(calendar.el, ".fc-event", 4, "should not display the created item");
+
+        await toggleFilter(calendar, "partner_id", 4);
+        await toggleFilter(calendar, "partner_ids", 2);
+
+        assert.containsN(calendar.el, ".fc-event", 11, "should display all records");
     });
 
     QUnit.todo("create event with filters (no quickCreate)", async (assert) => {
@@ -3337,41 +3332,25 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("ensure events are still shown if filters give an empty domain", async (assert) => {
-        assert.ok(false);
-
-        // assert.expect(2);
+    QUnit.test("ensure events are still shown if filters give an empty domain", async (assert) => {
+        assert.expect(2);
 
         const calendar = await makeView({
             type: "wowl_calendar",
             resModel: "event",
             serverData,
             arch: `
-                <calendar
-                    date_start="start"
-                />
+                <calendar date_start="start" mode="week">
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" />
+                </calendar>
             `,
         });
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: '<calendar mode="week" date_start="start">' +
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>' +
-        //         '</calendar>',
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
-        // assert.containsN(calendar, '.fc-event', 5,
-        //     "should display 5 events");
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=all] input[type=checkbox]'));
-        // assert.containsN(calendar, '.fc-event', 5,
-        //     "should display 5 events");
-        // calendar.destroy();
+        await toggleSectionFilter(calendar, "partner_ids");
+        assert.containsN(calendar.el, ".fc-event", 5, "should display 5 events");
+
+        await toggleFilter(calendar, "partner_ids", "all");
+        assert.containsN(calendar.el, ".fc-event", 5, "should display 5 events");
     });
 
     QUnit.todo("events starting at midnight", async (assert) => {
