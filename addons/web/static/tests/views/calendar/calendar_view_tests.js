@@ -3464,8 +3464,10 @@ QUnit.module("wowl Views", (hooks) => {
         }
     );
 
-    QUnit.todo("quickcreate avoid double event creation", async (assert) => {
-        assert.ok(false);
+    QUnit.test("quickcreate avoid double event creation", async (assert) => {
+        assert.expect(1);
+        let createCount = 0;
+        const prom = makeDeferred();
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3474,59 +3476,41 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="month"
+                    event_open_popup="1"
                 />
             `,
+            mockRPC(route, { method }, performRPC) {
+                if (method === "create") {
+                    createCount++;
+                    return prom.then(() => performRPC(...arguments));
+                }
+            },
         });
 
-        // assert.expect(1);
-        // var createCount = 0;
-        // var prom = testUtils.makeTestPromise();
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch: '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="month"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         var result = this._super(route, args);
-        //         if (args.method === "create") {
-        //             createCount++;
-        //             return prom.then(_.constant(result));
-        //         }
-        //         return result;
-        //     },
-        // });
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // // create a new event
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // var $input = $('.modal input:first');
-        // await testUtils.fields.editInput($input, 'new event in quick create');
-        // // Simulate ENTER pressed on Create button (after a TAB)
-        // $input.trigger($.Event('keyup', {
-        //     which: $.ui.keyCode.ENTER,
-        //     keyCode: $.ui.keyCode.ENTER,
-        // }));
-        // await testUtils.nextTick();
-        // await testUtils.dom.click($('.modal-footer button:first'));
-        // prom.resolve();
-        // await testUtils.nextTick();
-        // assert.strictEqual(createCount, 1,
-        //     "should create only one event");
+        // create a new event
+        await clickDate(calendar, "2016-12-13");
 
-        // calendar.destroy();
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "new event in quick create";
+        await triggerEvent(input, null, "input");
+
+        // Simulate ENTER pressed on Create button (after a TAB)
+        await triggerEvent(input, null, "keyup", { key: "Enter" });
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+
+        prom.resolve();
+        await nextTick();
+        assert.strictEqual(createCount, 1, "should create only one event");
     });
 
     QUnit.todo("check if the view destroys all widgets and instances", async (assert) => {
