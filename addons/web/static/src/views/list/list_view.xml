@@ -20,7 +20,7 @@
             Discard
         </button>
         <t t-if="activeActions['create']">
-            <button type="button" class="btn btn-primary o_list_button_add" title="Create record" accesskey="c" t-on-click="onCreate">
+            <button type="button" class="btn btn-primary o_list_button_add" title="Create record" accesskey="c" t-on-click="onClickCreate">
                 Create
             </button>
         </t>

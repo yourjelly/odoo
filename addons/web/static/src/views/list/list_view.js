@@ -82,6 +82,10 @@ class ListView extends owl.Component {
         const resIds = this.model.root.data.map((datapoint) => datapoint.resId);
         this.actionService.switchView("form", { resId: record.resId, resIds });
     }
+
+    onClickCreate() {
+        this.actionService.switchView("form", { resId: undefined });
+    }
 }
 
 ListView.type = "list";
