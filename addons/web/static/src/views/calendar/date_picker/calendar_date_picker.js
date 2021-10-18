@@ -81,8 +81,9 @@ export class CalendarDatePicker extends Component {
         let scale = "week";
 
         if (model.date.hasSame(date, "day")) {
-            const rs = model.scales.slice().reverse();
-            scale = rs[(rs.indexOf(model.scale) + 1) % rs.length];
+            // const scales = model.scales.slice().reverse();
+            const scales = ["month", "week", "day"];
+            scale = scales[(scales.indexOf(model.scale) + 1) % scales.length];
         } else {
             const currentDate = model.date.set({
                 weekday:

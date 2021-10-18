@@ -116,11 +116,11 @@ export class CalendarYearRenderer extends Component {
             ).contains(date);
         });
 
+        this.popover.close();
         if (records.length) {
             const target = info.dayEl;
             this.openPopover(target, date, records);
-        } else {
-            this.popover.close();
+        } else if (this.props.model.canCreate) {
             this.props.createRecord({
                 start: luxon.DateTime.fromJSDate(info.date).setZone("UTC", { keepLocalTime: true }),
                 isAllDay: true,

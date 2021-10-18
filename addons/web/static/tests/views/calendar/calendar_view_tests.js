@@ -2292,9 +2292,9 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("use mini calendar", async (assert) => {
+    QUnit.test("use mini calendar", async (assert) => {
         assert.expect(12);
-        // tz offset = 120
+        patchTimeZone(120);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2318,7 +2318,7 @@ QUnit.module("wowl Views", (hooks) => {
             "should display 9 events on the week (4 event + 5 days event)"
         );
 
-        await click(calendar.el, ".o-calendar-date-picker a:contains(19)");
+        await pickDate(calendar, "2016-12-19");
         // Clicking on a day in another week should switch to the other week view
         assert.containsOnce(calendar.el, ".fc-timeGridWeek-view", "should be in week mode");
         assert.containsN(
@@ -2329,12 +2329,12 @@ QUnit.module("wowl Views", (hooks) => {
         );
 
         // Clicking on a day in the same week should switch to that particular day view
-        await click(calendar.el, ".o-calendar-date-picker a:contains(18)");
+        await pickDate(calendar, "2016-12-18");
         assert.containsOnce(calendar.el, ".fc-timeGridDay-view", "should be in day mode");
         assert.containsN(calendar.el, ".fc-event", 2, "should display 2 events on the day");
 
         // Clicking on the same day should toggle between day, month and week views
-        await click(calendar.el, ".o-calendar-date-picker a:contains(18)");
+        await pickDate(calendar, "2016-12-18");
         assert.containsOnce(calendar.el, ".fc-dayGridMonth-view", "should be in month mode");
         assert.containsN(
             calendar.el,
@@ -2343,7 +2343,7 @@ QUnit.module("wowl Views", (hooks) => {
             "should display 7 events on the month (event 5 is on multiple weeks and generates to .fc-event)"
         );
 
-        await click(calendar.el, ".o-calendar-date-picker a:contains(18)");
+        await pickDate(calendar, "2016-12-18");
         assert.containsOnce(calendar.el, ".fc-timeGridWeek-view", "should be in week mode");
         assert.containsN(
             calendar.el,
@@ -2352,7 +2352,7 @@ QUnit.module("wowl Views", (hooks) => {
             "should display 4 events on the week (1 event + 3 days event)"
         );
 
-        await click(calendar.el, ".o-calendar-date-picker a:contains(18)");
+        await pickDate(calendar, "2016-12-18");
         assert.containsOnce(calendar.el, ".fc-timeGridDay-view", "should be in day mode");
         assert.containsN(calendar.el, ".fc-event", 2, "should display 2 events on the day");
     });
@@ -2622,13 +2622,11 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("start time should not shown for date type field", async (assert) => {
-        // assert.expect(1);
-
-        assert.ok(false);
+    QUnit.test("start time should not shown for date type field", async (assert) => {
+        assert.expect(1);
+        patchTimeZone(-240);
 
         serverData.models.event.fields.start.type = "date";
-        // tz offset = -240
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -2650,11 +2648,9 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("start time should not shown in month mode if hide_time is true", async (assert) => {
-        // assert.expect(1);
-
-        assert.ok(false);
-        // tz offset = -240
+    QUnit.test("start time should not shown in month mode if hide_time is true", async (assert) => {
+        assert.expect(1);
+        patchTimeZone(-240);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3133,7 +3129,7 @@ QUnit.module("wowl Views", (hooks) => {
         assert.containsN(calendar.el, ".fc-event", 4, "should display the created item");
     });
 
-    QUnit.todo("Update event with filters", async (assert) => {
+    QUnit.skip("Update event with filters", async (assert) => {
         assert.expect(12);
 
         const records = serverData.models.user.records;
@@ -3420,10 +3416,11 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("set event as all day when field is date", async (assert) => {
-        assert.ok(false);
+    QUnit.test("set event as all day when field is date", async (assert) => {
+        assert.expect(2);
 
-        // assert.expect(2);
+        patchTimeZone(-480);
+        serverData.models.event.records[0].start_date = "2016-12-14";
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3431,44 +3428,25 @@ QUnit.module("wowl Views", (hooks) => {
             serverData,
             arch: `
                 <calendar
-                    date_start="start"
-                />
+                    date_start="start_date"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" />
+                </calendar>
             `,
         });
 
-        // this.data.event.records[0].start_date = "2016-12-14";
+        await toggleFilter(calendar, "partner_ids", 1);
+        assert.containsOnce(
+            calendar.el,
+            ".fc-day-grid .fc-event-container",
+            "should be one event in the all day row"
+        );
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start_date" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     session: {
-        //         getTZOffset: function () {
-        //             return -480;
-        //         }
-        //     },
-        // });
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input'));
-        // assert.containsOnce(calendar, '.fc-day-grid .fc-event-container',
-        //     "should be one event in the all day row");
-        // assert.strictEqual(moment(calendar.model.data.data[0].r_start).date(), 14,
-        //     "the date should be 14");
-        // calendar.destroy();
+        assert.strictEqual(calendar.model.records[1].start.day, 14, "the date should be 14");
     });
 
     QUnit.test(
@@ -3587,10 +3565,10 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("timezone does not affect drag and drop", async (assert) => {
+    QUnit.skip("timezone does not affect drag and drop", async (assert) => {
         assert.expect(10);
 
-        // patchTimeZone(-2400);
+        patchTimeZone(-2400);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3656,7 +3634,7 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("timzeone does not affect calendar with date field", async (assert) => {
+    QUnit.test("timzeone does not affect calendar with date field", async (assert) => {
         assert.expect(11);
 
         patchTimeZone(120);
@@ -3714,28 +3692,41 @@ QUnit.module("wowl Views", (hooks) => {
             "should have correct start date"
         );
 
-        // // Move event to another day (on 27 november)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event').first(),
-        //     calendar.$('.fc-day-top').first()
-        // );
-        // await testUtils.nextTick();
-        // assert.verifySteps(["2016-11-27 00:00:00"]);
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(An event)'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last .o_field_date').text(), '11/27/2016', "should have correct start date");
+        // Move event to another day (on 27 november)
+        await moveEventToDate(calendar, 8, "2016-11-27");
+        assert.verifySteps(["2016-11-27 00:00:00"]);
 
-        // // Move event to last day (on 7 january)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event').first(),
-        //     calendar.$('.fc-day-top').last()
-        // );
-        // await testUtils.nextTick();
-        // assert.verifySteps(["2017-01-07 00:00:00"]);
-        // await testUtils.dom.click(calendar.$('.fc-event:contains(An event)'));
-        // assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
-        // assert.strictEqual(calendar.$('.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:last .o_field_date').text(), '01/07/2017', "should have correct start date");
-        // calendar.destroy();
+        await clickEvent(calendar, 8);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(
+                ".o_cw_popover .o_cw_popover_fields_secondary .list-group-item .o_field_date"
+            ).textContent,
+            "11/27/2016",
+            "should have correct start date"
+        );
+
+        // Move event to last day (on 7 january)
+        await moveEventToDate(calendar, 8, "2017-01-07");
+        assert.verifySteps(["2017-01-07 00:00:00"]);
+
+        await clickEvent(calendar, 8);
+        assert.containsOnce(
+            mainComponentsContainer,
+            ".o_cw_popover",
+            "should open a popover clicking on event"
+        );
+        assert.strictEqual(
+            mainComponentsContainer.querySelector(
+                ".o_cw_popover .o_cw_popover_fields_secondary .list-group-item .o_field_date"
+            ).textContent,
+            "01/07/2017",
+            "should have correct start date"
+        );
     });
 
     QUnit.test("drag and drop on month mode", async (assert) => {
@@ -3792,7 +3783,7 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.test("drag and drop on month mode with all_day mapping", async (assert) => {
+    QUnit.skip("drag and drop on month mode with all_day mapping", async (assert) => {
         // Same test as before but in normalizeRecord (calendar_model.js) there is
         // different condition branching with all_day mapping or not
         assert.expect(1);
@@ -4570,8 +4561,8 @@ QUnit.module("wowl Views", (hooks) => {
         assert.containsNone(mainComponentsContainer, ".modal", "should not open modal");
     });
 
-    QUnit.todo("correctly display year view", async (assert) => {
-        assert.expect(28);
+    QUnit.skip("correctly display year view", async (assert) => {
+        assert.expect(19);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -4579,19 +4570,25 @@ QUnit.module("wowl Views", (hooks) => {
             serverData,
             arch: `
                 <calendar
-                    create="0"
-                    event_open_popup="1"
                     date_start="start"
                     date_stop="stop"
                     all_day="allday"
                     mode="year"
+                    create="0"
+                    event_open_popup="1"
                     color="partner_id"
                 >
                     <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
                     <field name="partner_id" filters="1" invisible="1"/>
-                    <field name="is_hatched" invisible="1" />
                 </calendar>
             `,
+        });
+
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
+
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
         });
 
         await toggleFilter(calendar, "partner_ids", "section");
@@ -4611,75 +4608,65 @@ QUnit.module("wowl Views", (hooks) => {
             "There should be 6 events displayed but there is 1 split on 2 weeks"
         );
 
-        assert.containsN(
-            calendar.el,
-            ".o_calendar_hatched",
-            3,
-            "There should be 3 events that are hatched"
-        );
+        await clickDate(calendar, "2016-11-17");
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.notOk(calendar.el.querySelector('.fc-day-top[data-date="2016-11-17"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-11-17');
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-11-16");
+        await nextTick();
+        assert.containsOnce(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.ok(calendar.el.querySelector('.fc-day-top[data-date="2016-11-16"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-11-16');
-        // assert.containsOnce(calendar, '.o_cw_popover');
-        // let popoverText = calendar.el.querySelector('.o_cw_popover')
-        //     .textContent.replace(/\s{2,}/g, ' ').trim();
-        // assert.strictEqual(popoverText, 'November 14-16, 2016 event 7');
-        // await testUtils.dom.click(calendar.el.querySelector('.o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover');
+        let popoverText = mainComponentsContainer
+            .querySelector(".o-calendar-year-popover")
+            .textContent.replace(/\s{2,}/g, " ")
+            .trim();
+        assert.strictEqual(popoverText, "November 14-16, 2016event 7");
+        await click(mainComponentsContainer, ".o-calendar-year-popover--close-button");
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.ok(calendar.el.querySelector('.fc-day-top[data-date="2016-11-14"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-11-14');
-        // assert.containsOnce(calendar, '.o_cw_popover');
-        // popoverText = calendar.el.querySelector('.o_cw_popover')
-        //     .textContent.replace(/\s{2,}/g, ' ').trim();
-        // assert.strictEqual(popoverText, 'November 14-16, 2016 event 7');
-        // await testUtils.dom.click(calendar.el.querySelector('.o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-11-14");
+        await nextTick();
+        assert.containsOnce(mainComponentsContainer, ".o-calendar-year-popover");
+        popoverText = mainComponentsContainer
+            .querySelector(".o-calendar-year-popover")
+            .textContent.replace(/\s{2,}/g, " ")
+            .trim();
+        assert.strictEqual(popoverText, "November 14-16, 2016event 7");
+        await click(mainComponentsContainer, ".o-calendar-year-popover--close-button");
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.notOk(calendar.el.querySelector('.fc-day-top[data-date="2016-11-13"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-11-13');
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-11-13");
+        await nextTick();
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.notOk(calendar.el.querySelector('.fc-day-top[data-date="2016-12-10"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-12-10');
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-12-10");
+        await nextTick();
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.ok(calendar.el.querySelector('.fc-day-top[data-date="2016-12-12"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-12-12');
-        // assert.containsOnce(calendar, '.o_cw_popover');
-        // popoverText = calendar.el.querySelector('.o_cw_popover')
-        //     .textContent.replace(/\s{2,}/g, ' ').trim();
-        // assert.strictEqual(popoverText, 'December 12, 2016 10:55 event 2 15:55 event 3');
-        // await testUtils.dom.click(calendar.el.querySelector('.o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-12-12");
+        await nextTick();
+        assert.containsOnce(mainComponentsContainer, ".o-calendar-year-popover");
+        popoverText = mainComponentsContainer
+            .querySelector(".o-calendar-year-popover")
+            .textContent.replace(/\s{2,}/g, " ")
+            .trim();
+        assert.strictEqual(popoverText, "December 12, 2016 10:55event 2 15:55event 3");
+        await click(mainComponentsContainer, ".o-calendar-year-popover--close-button");
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.ok(calendar.el.querySelector('.fc-day-top[data-date="2016-12-14"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-12-14');
-        // assert.containsOnce(calendar, '.o_cw_popover');
-        // popoverText = calendar.el.querySelector('.o_cw_popover')
-        //     .textContent.replace(/\s{2,}/g, ' ').trim();
-        // assert.strictEqual(popoverText,
-        //     'December 14, 2016 event 4 December 13-20, 2016 event 5');
-        // await testUtils.dom.click(calendar.el.querySelector('.o_cw_popover_close'));
-        // assert.containsNone(calendar, '.o_cw_popover');
+        await clickDate(calendar, "2016-12-14");
+        await nextTick();
+        assert.containsOnce(mainComponentsContainer, ".o-calendar-year-popover");
+        popoverText = mainComponentsContainer
+            .querySelector(".o-calendar-year-popover")
+            .textContent.replace(/\s{2,}/g, " ")
+            .trim();
+        assert.strictEqual(popoverText, "December 14, 2016event 4 December 13-20, 2016event 5");
+        await click(mainComponentsContainer, ".o-calendar-year-popover--close-button");
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
 
-        // assert.notOk(calendar.el.querySelector('.fc-day-top[data-date="2016-12-21"]')
-        //     .classList.contains('fc-has-event'));
-        // await clickDate('2016-12-21');
-        // assert.containsNone(calendar, '.o_cw_popover');
-
-        // calendar.destroy();
+        await clickDate(calendar, "2016-12-21");
+        await nextTick();
+        assert.containsNone(mainComponentsContainer, ".o-calendar-year-popover");
     });
 
     QUnit.test("toggle filters in year view", async (assert) => {
