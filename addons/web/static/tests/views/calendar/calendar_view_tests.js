@@ -3513,69 +3513,6 @@ QUnit.module("wowl Views", (hooks) => {
         assert.strictEqual(createCount, 1, "should create only one event");
     });
 
-    QUnit.todo("create an event (async dialog) [REQUIRE FOCUS]", async (assert) => {
-        assert.ok(false);
-
-        const calendar = await makeView({
-            type: "wowl_calendar",
-            resModel: "event",
-            serverData,
-            arch: `
-                <calendar
-                    date_start="start"
-                />
-            `,
-        });
-
-        // assert.expect(3);
-
-        // var prom = testUtils.makeTestPromise();
-        // testUtils.mock.patch(Dialog, {
-        //     open: function () {
-        //         var _super = this._super.bind(this);
-        //         prom.then(_super);
-        //         return this;
-        //     },
-        // });
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'string="Events" ' +
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="month"/>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-
-        // // create an event
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(2) .fc-day:eq(2)');
-        // testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-
-        // assert.strictEqual($('.modal').length, 0,
-        //     "should not have opened the dialog yet");
-
-        // prom.resolve();
-        // await testUtils.nextTick();
-
-        // assert.strictEqual($('.modal').length, 1,
-        //     "should have opened the dialog");
-        // assert.strictEqual($('.modal input')[0], document.activeElement,
-        //     "should focus the input in the dialog");
-
-        // calendar.destroy();
-        // testUtils.mock.unpatch(Dialog);
-    });
-
     QUnit.test("calendar is configured to have no groupBy menu", async (assert) => {
         const calendar = await makeView({
             type: "wowl_calendar",
