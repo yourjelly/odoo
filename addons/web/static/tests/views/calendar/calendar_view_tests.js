@@ -3467,7 +3467,7 @@ QUnit.module("wowl Views", (hooks) => {
     QUnit.test("quickcreate avoid double event creation", async (assert) => {
         assert.expect(1);
         let createCount = 0;
-        const prom = makeDeferred();
+        const def = makeDeferred();
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3485,7 +3485,7 @@ QUnit.module("wowl Views", (hooks) => {
             mockRPC(route, { method }, performRPC) {
                 if (method === "create") {
                     createCount++;
-                    return prom.then(() => performRPC(...arguments));
+                    return def.then(() => performRPC(...arguments));
                 }
             },
         });
@@ -3508,7 +3508,7 @@ QUnit.module("wowl Views", (hooks) => {
         await triggerEvent(input, null, "keyup", { key: "Enter" });
         await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
 
-        prom.resolve();
+        def.resolve();
         await nextTick();
         assert.strictEqual(createCount, 1, "should create only one event");
     });
