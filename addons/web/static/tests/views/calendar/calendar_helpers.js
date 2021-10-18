@@ -285,6 +285,11 @@ export function makeFakeModel(state = {}) {
 // DOM Utils
 //------------------------------------------------------------------------------
 
+async function scrollTo(el, scrollParam) {
+    el.scrollIntoView(scrollParam);
+    await new Promise(window.requestAnimationFrame);
+}
+
 export function findPickedDate(calendar) {
     return calendar.el.querySelector(".ui-datepicker-current-day");
 }
@@ -338,22 +343,21 @@ async function triggerEventForCalendar(el, type, position = {}) {
 
 export async function clickAllDaySlot(calendar, date) {
     const el = findAllDaySlot(calendar, date);
-    el.scrollIntoView();
+    await scrollTo(el);
     await triggerEventForCalendar(el, "mousedown");
     await triggerEventForCalendar(el, "mouseup");
 }
 
 export async function clickDate(calendar, date) {
     const el = findDateCell(calendar, date);
-    el.scrollIntoView();
+    await scrollTo(el);
     await triggerEventForCalendar(el, "mousedown");
     await triggerEventForCalendar(el, "mouseup");
 }
 
 export async function clickEvent(calendar, eventId) {
     const el = findEvent(calendar, eventId);
-    el.scrollIntoView();
-    await new Promise(window.requestAnimationFrame);
+    await scrollTo(el);
     await click(el);
 }
 
@@ -366,8 +370,7 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
     const startRow = findTimeRow(calendar, startTime);
     const endRow = findTimeRow(calendar, endTime);
 
-    startRow.scrollIntoView();
-    await new Promise(window.requestAnimationFrame);
+    await scrollTo(startRow);
     const startColRect = startCol.getBoundingClientRect();
     const startRowRect = startRow.getBoundingClientRect();
 
@@ -376,8 +379,7 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
         y: startRowRect.y + 1,
     });
 
-    endRow.scrollIntoView(false);
-    await new Promise(window.requestAnimationFrame);
+    await scrollTo(endRow, false);
     const endColRect = endCol.getBoundingClientRect();
     const endRowRect = endRow.getBoundingClientRect();
 
@@ -388,9 +390,9 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
 export async function selectDateRange(calendar, startDate, endDate) {
     const start = findDateCell(calendar, startDate);
     const end = findDateCell(calendar, endDate);
-    start.scrollIntoView();
+    await scrollTo(start);
     await triggerEventForCalendar(start, "mousedown");
-    end.scrollIntoView();
+    await scrollTo(end);
     await triggerEventForCalendar(end, "mousemove");
     await triggerEventForCalendar(end, "mouseup");
 }
@@ -401,10 +403,10 @@ export async function moveEventToDate(calendar, eventId, date, options = {}) {
     const event = findEvent(calendar, eventId);
     const cell = findDateCell(calendar, date);
 
-    event.scrollIntoView();
+    await scrollTo(event);
     await triggerEventForCalendar(event, "mousedown");
 
-    cell.scrollIntoView();
+    await scrollTo(cell);
     await triggerEventForCalendar(cell, "mousemove");
 
     if (!options.disableDrop) {
@@ -460,7 +462,7 @@ export async function toggleFilter(calendar, sectionName, filterValue) {
     const el = findFilterPanelFilter(calendar, sectionName, filterValue).querySelector(
         `.o-calendar-filter-panel--filter-input`
     );
-    el.scrollIntoView();
+    await scrollTo(el);
     await click(el);
 }
 
@@ -468,7 +470,7 @@ export async function toggleSectionFilter(calendar, sectionName) {
     const el = findFilterPanelSectionFilter(calendar, sectionName).querySelector(
         `.o-calendar-filter-panel--filter-input`
     );
-    el.scrollIntoView();
+    await scrollTo(el);
     await click(el);
 }
 
