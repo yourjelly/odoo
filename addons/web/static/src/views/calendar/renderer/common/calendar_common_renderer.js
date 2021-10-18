@@ -220,12 +220,17 @@ export class CalendarCommonRenderer extends Component {
     onEventDrop(info) {
         this.fc.api.unselect();
         const keepLocalTime = info.event.allDay;
-        this.props.model.updateRecord({
-            id: this.props.model.records[info.event.id].id,
-            start: luxon.DateTime.fromJSDate(info.event.start).setZone("UTC", { keepLocalTime }),
-            end: luxon.DateTime.fromJSDate(info.event.end).setZone("UTC", { keepLocalTime }),
-            isAllDay: info.event.allDay,
-        });
+        this.props.model.updateRecord(
+            {
+                id: this.props.model.records[info.event.id].id,
+                start: luxon.DateTime.fromJSDate(info.event.start).setZone("UTC", {
+                    keepLocalTime,
+                }),
+                end: luxon.DateTime.fromJSDate(info.event.end).setZone("UTC", { keepLocalTime }),
+                isAllDay: info.event.allDay,
+            },
+            { moved: true }
+        );
     }
     onEventResize(info) {
         this.fc.api.unselect();

@@ -3978,8 +3978,8 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("drag and drop on month mode with date_start and date_delay", async (assert) => {
-        assert.ok(false);
+    QUnit.test("drag and drop on month mode with date_start and date_delay", async (assert) => {
+        assert.expect(1);
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3988,53 +3988,40 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_delay="delay"
+                    mode="month"
+                >
+                    <field name="name" />
+                    <field name="start" />
+                    <field name="delay" />
+                </calendar>
             `,
+            mockRPC(route, { args, method }) {
+                if (method === "write") {
+                    // delay should not be written at drag and drop
+                    assert.strictEqual(args[1].delay, undefined);
+                }
+            },
         });
 
-        // assert.expect(1);
+        const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar date_start="start" date_delay="delay" mode="month">'+
-        //         '<field name="name"/>'+
-        //         '<field name="start"/>'+
-        //         '<field name="delay"/>'+
-        //     '</calendar>',
-        //     archs: archs,
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        //     mockRPC: function (route, args) {
-        //         if (args.method === "write") {
-        //             // delay should not be written at drag and drop
-        //             assert.equal(args.args[1].delay, undefined)
-        //         }
-        //         return this._super(route, args);
-        //     },
-        // });
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
-        // // Create event (on 20 december)
-        // var $cell = calendar.$('.fc-day-grid .fc-row:eq(3) .fc-day:eq(2)');
-        // await testUtils.dom.triggerMouseEvent($cell, "mousedown");
-        // await testUtils.dom.triggerMouseEvent($cell, "mouseup");
-        // await testUtils.nextTick();
-        // var $input = $('.modal-body input:first');
-        // await testUtils.fields.editInput($input, "An event");
-        // await testUtils.dom.click($('.modal button.btn:contains(Create)'));
-        // await testUtils.nextTick();
+        // Create event (on 20 december)
+        await clickDate(calendar, "2016-12-20");
 
-        // // Move event to another day (on 27 november)
-        // await testUtils.dom.dragAndDrop(
-        //     calendar.$('.fc-event').first(),
-        //     calendar.$('.fc-day-top').first()
-        // );
-        // await testUtils.nextTick();
+        const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+        input.value = "An event";
+        await triggerEvent(input, null, "input");
 
-        // calendar.destroy();
+        await click(mainComponentsContainer, ".o-calendar-quick-create--create-btn");
+
+        // Move event to another day (on 27 november)
+        await moveEventToDate(calendar, 8, "2016-11-27");
     });
 
     QUnit.test("form_view_id attribute works (for creating events)", async (assert) => {

@@ -217,9 +217,11 @@ export class CalendarModel extends Model {
     }
     /**
      * @param {import("./calendar_types").CalendarRecord} record
+     * @param {object} [options]
+     * @param {boolean} [options.moved]
      */
-    async updateRecord(record) {
-        const rawRecord = this.buildRawRecord(record);
+    async updateRecord(record, options = {}) {
+        const rawRecord = this.buildRawRecord(record, options);
         delete rawRecord.name; // name is immutable.
         await this.orm.write(this.meta.resModel, [record.id], rawRecord, {
             from_ui: true,
@@ -231,9 +233,11 @@ export class CalendarModel extends Model {
 
     /**
      * @param {Partial<import("./calendar_types").CalendarRecord>} partialRecord
+     * @param {object} [options]
+     * @param {boolean} [options.moved]
      * @returns {Record<string, any>}
      */
-    buildRawRecord(partialRecord) {
+    buildRawRecord(partialRecord, options = {}) {
         const data = {};
         data[this.meta.fieldMapping.create_name_field || "name"] = partialRecord.title;
 
@@ -273,9 +277,10 @@ export class CalendarModel extends Model {
         }
 
         if (this.meta.fieldMapping.date_delay) {
-            data[this.meta.fieldMapping.date_delay] = end.diff(start, "hours").hours;
+            if (this.meta.scale !== "month" || !options.moved) {
+                data[this.meta.fieldMapping.date_delay] = end.diff(start, "hours").hours;
+            }
         }
-
         return data;
     }
     /**
