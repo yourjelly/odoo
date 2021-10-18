@@ -63,11 +63,12 @@ export function useFullCalendar(refName, params) {
 
     // useAssets({
     //     jsLibs: [
+    //         "/web/static/lib/fullcalendar/core/main.js",
     //         "/web/static/lib/fullcalendar/interaction/main.js",
     //         "/web/static/lib/fullcalendar/daygrid/main.js",
+    //         "/web/static/lib/fullcalendar/luxon/main.js",
     //         "/web/static/lib/fullcalendar/timegrid/main.js",
     //         "/web/static/lib/fullcalendar/list/main.js",
-    //         "/web/static/lib/fullcalendar/core/main.js",
     //     ],
     //     cssLibs: [
     //         "/web/static/lib/fullcalendar/core/main.css",

@@ -353,6 +353,7 @@ export async function clickDate(calendar, date) {
 export async function clickEvent(calendar, eventId) {
     const el = findEvent(calendar, eventId);
     el.scrollIntoView();
+    await new Promise(window.requestAnimationFrame);
     await click(el);
 }
 
@@ -366,6 +367,7 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
     const endRow = findTimeRow(calendar, endTime);
 
     startRow.scrollIntoView();
+    await new Promise(window.requestAnimationFrame);
     const startColRect = startCol.getBoundingClientRect();
     const startRowRect = startRow.getBoundingClientRect();
 
@@ -374,7 +376,8 @@ export async function selectTimeRange(calendar, startDateTime, endDateTime) {
         y: startRowRect.y + 1,
     });
 
-    endRow.scrollIntoView();
+    endRow.scrollIntoView(false);
+    await new Promise(window.requestAnimationFrame);
     const endColRect = endCol.getBoundingClientRect();
     const endRowRect = endRow.getBoundingClientRect();
 
@@ -469,14 +472,17 @@ export async function toggleSectionFilter(calendar, sectionName) {
     await click(el);
 }
 
-export function patchTimeZone(offset) {
-    luxon.Settings.defaultZoneName = `UTC${Math.sign(-offset)}${Math.abs(offset / 60)}`;
+export function patchTimeZone(afterUTCOffset) {
+    const originalZone = luxon.Settings.defaultZone;
+    luxon.Settings.defaultZone = new luxon.FixedOffsetZone.instance(afterUTCOffset);
     registerCleanup(() => {
-        luxon.Settings.defaultZoneName = "system";
+        luxon.Settings.defaultZone = originalZone;
     });
+
     patchWithCleanup(session, {
         getTZOffset() {
-            return offset;
+            // BOI not sure when it is used
+            return afterUTCOffset;
         },
     });
 }

@@ -16,9 +16,9 @@ const SCALE_TO_FC_VIEW = {
     month: "dayGridMonth",
 };
 const SCALE_TO_HEADER_FORMAT = {
-    day: (info) => luxon.DateTime.fromJSDate(info.date.marker).toFormat("DDD"),
-    week: (info) => luxon.DateTime.fromJSDate(info.date.marker).toFormat("EEE d"),
-    month: (info) => luxon.DateTime.fromJSDate(info.date.marker).toFormat("EEEE"),
+    day: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("DDD"),
+    week: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("EEE d"),
+    month: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("EEEE"),
 };
 const HOUR_FORMATS = {
     12: {
@@ -73,20 +73,21 @@ export class CalendarCommonRenderer extends Component {
             firstDay: this.props.model.firstDayOfWeek % 7,
             header: false,
             height: "parent",
-            locale: "en-US",
+            locale: luxon.Settings.defaultLocale,
             longPressDelay: 500,
             monthNames: luxon.Info.months("long"),
             monthNamesShort: luxon.Info.months("short"),
             navLinks: false,
             nowIndicator: true,
-            plugins: ["dayGrid", "interaction", "timeGrid"],
+            plugins: ["dayGrid", "interaction", "timeGrid", "luxon"],
             select: this.onSelect,
             selectAllow: this.isSelectionAllowed,
             selectMirror: true,
             selectable: this.props.model.canCreate,
             slotLabelFormat:
-                localization.timeFormat.search("HH") !== -1 ? HOUR_FORMATS[24] : HOUR_FORMATS[12],
+                localization.timeFormat.search("HH") !== -1 ? HOUR_FORMATS[24] : HOUR_FORMATS[12], // fixme ?
             snapDuration: { minutes: 15 },
+            timeZone: luxon.Settings.defaultZone.name,
             unselectAuto: false,
             weekLabel: this.env._t("Week"),
             weekNumberCalculation: calculateWeekNumber,
@@ -99,7 +100,7 @@ export class CalendarCommonRenderer extends Component {
     getStartTime(record) {
         return record.start
             .toLocal()
-            .toFormat(localization.timeFormat.search("HH") !== -1 ? "HH:mm" : "hh:mm a");
+            .toFormat(localization.timeFormat.search("HH") !== -1 ? "HH:mm" : "hh:mm a"); // fixme ?
     }
 
     computeEventSelector(event) {

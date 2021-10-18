@@ -18,6 +18,7 @@ import {
     triggerEvent,
     makeDeferred,
     nextTick,
+    legacyExtraNextTick,
 } from "../../helpers/utils";
 import { makeView } from "../helpers";
 import {
@@ -1033,19 +1034,14 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo("create event with timezone in week mode European locale", async (assert) => {
-        assert.expect(5);
-
+    QUnit.test("create event with timezone in week mode European locale", async (assert) => {
+        assert.expect(4);
         serverData.models.event.records = [];
-
-        serviceRegistry.add(
-            "localization",
-            mocks.localization({
-                timeFormat: "%H:%M:%S",
-            })
-        );
-
         patchTimeZone(120);
+        patchWithCleanup(browser, {
+            setTimeout: (fn) => fn(),
+            clearTimeout: () => {},
+        });
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -1054,7 +1050,7 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                    date_Stop="stop"
+                    date_stop="stop"
                     all_day="allday"
                     mode="week"
                     event_open_popup="1"
@@ -1064,16 +1060,19 @@ QUnit.module("wowl Views", (hooks) => {
                     <field name="allday" />
                 </calendar>
             `,
-            mockRPC(route, { method, kwargs }) {
+            mockRPC(route, { method, args }) {
                 if (method === "create") {
                     assert.deepEqual(
-                        kwargs.context,
-                        {
-                            default_start: "2016-12-13 06:00:00",
-                            default_stop: "2016-12-13 08:00:00",
-                            default_allday: null,
-                        },
-                        "should send the context to create events"
+                        args,
+                        [
+                            {
+                                allday: false,
+                                name: "new event",
+                                start: "2016-12-13 06:00:00",
+                                stop: "2016-12-13 08:00:00",
+                            },
+                        ],
+                        "should create this event"
                     );
                 }
             },
@@ -1081,12 +1080,7 @@ QUnit.module("wowl Views", (hooks) => {
 
         const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-        patchWithCleanup(browser, {
-            setTimeout: (fn) => fn(),
-            clearTimeout: () => {},
-        });
-
-        await selectTimeRange(calendar, "2016-12-13 06:00:00", "2016-12-13 08:00:00");
+        await selectTimeRange(calendar, "2016-12-13 08:00:00", "2016-12-13 10:00:00");
         assert.strictEqual(
             calendar.el.querySelector(".fc-content .fc-time").textContent,
             "8:00 - 10:00",
@@ -1105,25 +1099,12 @@ QUnit.module("wowl Views", (hooks) => {
             "should display the new event with title"
         );
 
-        // assert.deepEqual($newevent[0].fcSeg.eventRange.def.extendedProps.record,
-        //     {
-        //         display_name: "new event",
-        //         start: fieldUtils.parse.datetime("2016-12-13 06:00:00", this.data.event.fields.start, {isUTC: true}),
-        //         stop: fieldUtils.parse.datetime("2016-12-13 08:00:00", this.data.event.fields.stop, {isUTC: true}),
-        //         allday: false,
-        //         name: "new event",
-        //         id: 1
-        //     },
-        //     "the new record should have the utc datetime (quickCreate)");
-
         // delete record
-
-        // await clickEvent(calendar, 1);
-
-        // await testUtils.dom.click($newevent);
-        // await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_delete'));
-        // await testUtils.dom.click($('.modal button.btn-primary:contains(Ok)'));
-        // assert.containsNone(calendar, '.fc-content', "should delete the record");
+        await clickEvent(calendar, 1);
+        await legacyExtraNextTick();
+        await click(mainComponentsContainer, ".o_cw_popover .o_cw_popover_delete");
+        await click(mainComponentsContainer, ".modal button.btn-primary");
+        assert.containsNone(calendar, ".fc-content", "should delete the record");
     });
 
     QUnit.test("default week start (US)", async (assert) => {

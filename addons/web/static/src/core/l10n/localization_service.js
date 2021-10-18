@@ -20,7 +20,7 @@ export const localizationService = {
         let url = `${translationURL}/${translationsHash}`;
         if (lang) {
             url += `?lang=${lang}`;
-            luxon.Settings.defaultLocale = lang.replace("_", "-");
+            luxon.Settings.defaultLocale = lang.replace("_", "-"); // fixme ? is it enough ?
         }
 
         const response = await browser.fetch(url);

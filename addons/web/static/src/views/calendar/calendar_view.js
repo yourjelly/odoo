@@ -259,7 +259,7 @@ export class CalendarView extends Component {
                 break;
         }
 
-        const formatter = Intl.DateTimeFormat("en-US", formatOptions);
+        const formatter = Intl.DateTimeFormat("en-US", formatOptions); // fixme
         let result = formatter.format(this.model.date.toJSDate());
         if (this.model.scale === "week") {
             const dateStartParts = formatter.formatToParts(this.model.rangeStart.toJSDate());

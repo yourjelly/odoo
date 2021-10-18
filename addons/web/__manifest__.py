@@ -93,10 +93,6 @@ This module provides the core of the Odoo Web Client.
             'base/static/src/css/modules.css',
             'base/static/src/js/res_config_settings.js',
 
-            'web/static/lib/fullcalendar/**/*.js',  # TODO: lazy load it
-            ('remove', 'web/static/lib/fullcalendar/bootstrap/*.js'),
-            'web/static/lib/fullcalendar/**/*.css',  # TODO: lazy load it
-
             'web/static/src/core/utils/transitions.scss',
             'web/static/src/core/**/*',
             'web/static/src/fields/**/*',
@@ -194,6 +190,10 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/legacy/js/owl_compatibility.js',
             ("remove", 'web/static/src/legacy/js/views/graph/**/*'),
             ("remove", 'web/static/src/legacy/js/views/pivot/**/*'),
+
+            'web/static/lib/fullcalendar/**/*.js',  # TODO: lazy load it
+            ('remove', 'web/static/lib/fullcalendar/bootstrap/*.js'),
+            'web/static/lib/fullcalendar/**/*.css',  # TODO: lazy load it
         ],
         "web.assets_backend_legacy_lazy": [
             ("include", "web._assets_helpers"),
