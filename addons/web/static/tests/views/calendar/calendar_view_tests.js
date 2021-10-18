@@ -3440,39 +3440,27 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo(
+    QUnit.test(
         "set event as all day when field is date (without all_day mapping)",
         async (assert) => {
-            assert.ok(false);
+            assert.expect(1);
+
+            serverData.models.event.records[0].start_date = "2016-12-14";
 
             const calendar = await makeView({
                 type: "wowl_calendar",
                 resModel: "event",
                 serverData,
                 arch: `
-                    <calendar
-                        date_start="start"
-                    />
+                    <calendar date_start="start_date" mode="week" />
                 `,
             });
 
-            // assert.expect(1);
-
-            // this.data.event.records[0].start_date = "2016-12-14";
-
-            // var calendar = await createCalendarView({
-            //     View: CalendarView,
-            //     model: 'event',
-            //     data: this.data,
-            //     arch: `<calendar date_start="start_date" mode="week"></calendar>`,
-            //     archs: archs,
-            //     viewOptions: {
-            //         initialDate: initialDate,
-            //     },
-            // });
-            // assert.containsOnce(calendar, '.fc-day-grid .fc-event-container',
-            //     "should be one event in the all day row");
-            // calendar.destroy();
+            assert.containsOnce(
+                calendar.el,
+                ".fc-day-grid .fc-event-container",
+                "should be one event in the all day row"
+            );
         }
     );
 
