@@ -31,6 +31,7 @@ import {
     findPickedDate,
     findTimeRow,
     moveEventToDate,
+    navigate,
     patchTimeZone,
     pickDate,
     selectDateRange,
@@ -830,14 +831,14 @@ QUnit.module("wowl Views", (hooks) => {
             "should display 10 events"
         );
         // move to next month
-        await click(calendar.el, ".o-calendar-view--navigation-button--next");
+        await navigate(calendar, "next");
         assert.containsNone(
             calendar.el,
             ".fc-event-container .fc-event",
             "should display 0 events"
         );
 
-        await click(calendar.el, ".o-calendar-view--navigation-button--previous");
+        await navigate(calendar, "previous");
 
         await selectDateRange(calendar, "2016-12-20", "2016-12-21");
         input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
@@ -3228,10 +3229,45 @@ QUnit.module("wowl Views", (hooks) => {
         // calendar.destroy();
     });
 
-    QUnit.todo("change pager with filters", async (assert) => {
-        assert.ok(false);
+    QUnit.test("change pager with filters", async (assert) => {
+        assert.expect(3);
 
-        // assert.expect(3);
+        serverData.models.user.records.push({ id: 5, display_name: "user 5", partner_id: 3 });
+        serverData.models.event.records.push(
+            {
+                id: 8,
+                user_id: 5,
+                partner_id: 3,
+                name: "event 8",
+                start: "2016-12-06 04:00:00",
+                stop: "2016-12-06 08:00:00",
+                allday: false,
+                partner_ids: [1, 2, 3],
+                type: 1,
+            },
+            {
+                id: 9,
+                user_id: uid,
+                partner_id: 1,
+                name: "event 9",
+                start: "2016-12-07 04:00:00",
+                stop: "2016-12-07 08:00:00",
+                allday: false,
+                partner_ids: [1, 2, 3],
+                type: 1,
+            },
+            {
+                id: 10,
+                user_id: 4,
+                partner_id: 4,
+                name: "event 10",
+                start: "2016-12-08 04:00:00",
+                stop: "2016-12-08 08:00:00",
+                allday: false,
+                partner_ids: [1, 2, 3],
+                type: 1,
+            }
+        );
 
         const calendar = await makeView({
             type: "wowl_calendar",
@@ -3240,81 +3276,38 @@ QUnit.module("wowl Views", (hooks) => {
             arch: `
                 <calendar
                     date_start="start"
-                />
+                    date_stop="stop"
+                    all_day="allday"
+                    mode="week"
+                    event_open_popup="1"
+                    color="partner_id"
+                >
+                    <field name="partner_ids" write_model="filter_partner" write_field="partner_id" />
+                    <field name="partner_id" filters="1" invisible="1" />
+                </calendar>
             `,
         });
 
-        // this.data.user.records.push({
-        //     id: 5,
-        //     display_name: "user 5",
-        //     partner_id: 3
-        // });
-        // this.data.event.records.push({
-        //     id: 8,
-        //     user_id: 5,
-        //     partner_id: 3,
-        //     name: "event 8",
-        //     start: "2016-12-06 04:00:00",
-        //     stop: "2016-12-06 08:00:00",
-        //     allday: false,
-        //     partner_ids: [1,2,3],
-        //     type: 1
-        // }, {
-        //     id: 9,
-        //     user_id: session.uid,
-        //     partner_id: 1,
-        //     name: "event 9",
-        //     start: "2016-12-07 04:00:00",
-        //     stop: "2016-12-07 08:00:00",
-        //     allday: false,
-        //     partner_ids: [1,2,3],
-        //     type: 1
-        // },{
-        //     id: 10,
-        //     user_id: 4,
-        //     partner_id: 4,
-        //     name: "event 10",
-        //     start: "2016-12-08 04:00:00",
-        //     stop: "2016-12-08 08:00:00",
-        //     allday: false,
-        //     partner_ids: [1,2,3],
-        //     type: 1
-        // });
-
-        // var calendar = await createCalendarView({
-        //     View: CalendarView,
-        //     model: 'event',
-        //     data: this.data,
-        //     arch:
-        //     '<calendar class="o_calendar_test" '+
-        //         'event_open_popup="true" '+
-        //         'date_start="start" '+
-        //         'date_stop="stop" '+
-        //         'all_day="allday" '+
-        //         'mode="week" '+
-        //         'attendee="partner_ids" '+
-        //         'color="partner_id">'+
-        //             '<filter name="user_id" avatar_field="image"/>'+
-        //             '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-        //             '<field name="partner_id" filters="1" invisible="1"/>'+
-        //     '</calendar>',
-        //     viewOptions: {
-        //         initialDate: initialDate,
-        //     },
-        // });
-        // // select filter for partner 1, 2 and 4
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=1] input')[0]);
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=2] input'));
-        // await testUtils.dom.click(calendar.$('.o_calendar_filter_item[data-value=4] input'));
-
-        // await testUtils.dom.click($('.o_calendar_button_prev'));
-
-        // assert.containsN(calendar, '.o_calendar_filter_item', 6, "should display 6 filter items");
-        // assert.containsN(calendar, '.fc-event', 2, "should display 2 events");
-        // assert.strictEqual(calendar.$('.fc-event .o_event_title').text().replace(/\s/g, ''), "event8event9",
-        //     "should display 2 events");
-
-        // calendar.destroy();
+        // select filter for partner 1, 2 and 4
+        await toggleSectionFilter(calendar, "partner_ids");
+        await toggleFilter(calendar, "partner_id", 4);
+        await navigate(calendar, "previous");
+        assert.containsN(
+            calendar.el,
+            ".o-calendar-filter-panel--filter:not(.o-calendar-filter-panel--section-filter)",
+            6,
+            "should display 6 filter items"
+        );
+        assert.containsN(calendar.el, ".fc-event", 2, "should display 2 events");
+        const events = calendar.el.querySelectorAll(".fc-event .o_event_title");
+        assert.strictEqual(
+            Array.from(events)
+                .map((e) => e.textContent)
+                .join("")
+                .replace(/\s/g, ""),
+            "event8event9",
+            "should display 2 events"
+        );
     });
 
     QUnit.test("ensure events are still shown if filters give an empty domain", async (assert) => {
