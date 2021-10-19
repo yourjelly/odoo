@@ -111,7 +111,7 @@ class TestMailRender(common.MailCommon):
         cls.base_rendered_local_links = [
             '<div style="background-image:url(https://www.example.com/web/path?a=a&b=b);"/>',
             '<div style="background-image:url(\'https://www.example.com/web/path?a=a&b=b\');"/>',
-            '<div style="background-image:url(&#34;/web/path?a=a&b=b&#34;);"/>'
+            '<div style="background-image:url(&#34;https://www.example.com/web/path?a=a&b=b&#34;);"/>'
         ]
 
         # link to mail template
