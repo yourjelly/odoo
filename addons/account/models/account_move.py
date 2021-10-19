@@ -5521,6 +5521,22 @@ class AccountMoveLine(models.Model):
         action['context'] = ctx
         return action
 
+    def action_open_move_from_aml(self):
+        self.ensure_one()
+        return {
+            'name': _("Journal Entry"),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'view_id': self.env.ref('account.view_move_form').id,
+            'res_model': 'account.move',
+            'res_id': self.move_id.id,
+            'context': {
+                'move_type': self.move_id.move_type,
+                'create': False,
+                'delete': False,
+            },
+        }
+
     @api.model
     def _get_suspense_moves_domain(self):
         return [
