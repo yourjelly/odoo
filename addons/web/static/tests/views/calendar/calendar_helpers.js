@@ -414,7 +414,18 @@ export async function moveEventToDate(calendar, eventId, date, options = {}) {
     }
 }
 
-export async function moveEventToTime(calendar, eventId, dateTime) {}
+export async function moveEventToTime(calendar, eventId, dateTime) {
+    const event = findEvent(calendar, eventId);
+    const [date, time] = dateTime.split(" ");
+
+    const col = findDateCol(calendar, date);
+    const row = findTimeRow(calendar, time);
+
+    await scrollTo(event);
+    await triggerEventForCalendar(event, "mousedown");
+
+    // todo
+}
 
 export async function moveEventToAllDaySlot(calendar, eventId, date) {}
 

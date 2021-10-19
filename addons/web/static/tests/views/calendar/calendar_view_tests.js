@@ -30,7 +30,9 @@ import {
     findFilterPanelSection,
     findPickedDate,
     findTimeRow,
+    moveEventToAllDaySlot,
     moveEventToDate,
+    moveEventToTime,
     navigate,
     patchTimeZone,
     pickDate,
@@ -1476,12 +1478,32 @@ QUnit.module("wowl Views", (hooks) => {
         );
     });
 
-    QUnit.todo(
+    QUnit.debug(
         "create event with timezone in week mode with formViewDialog European locale",
         async (assert) => {
-            assert.ok(false);
+            assert.expect(8);
 
-            // assert.expect(8);
+            patchTimeZone(120);
+            // translateParameters: { // Avoid issues due to localization formats
+            //     time_format: "%H:%M:%S",
+            // },
+
+            serverData.models.event.records = [];
+            serverData.models.event.onchanges = {
+                allday(obj) {
+                    if (obj.allday) {
+                        obj.start_date = (obj.start && obj.start.split(" ")[0]) || obj.start_date;
+                        obj.stop_date =
+                            (obj.stop && obj.stop.split(" ")[0]) || obj.stop_date || obj.start_date;
+                    } else {
+                        obj.start = (obj.start_date && obj.start_date + " 00:00:00") || obj.start;
+                        obj.stop =
+                            (obj.stop_date && obj.stop_date + " 00:00:00") || obj.stop || obj.start;
+                    }
+                },
+            };
+
+            let expectedEvent = null;
 
             const calendar = await makeView({
                 type: "wowl_calendar",
@@ -1490,154 +1512,148 @@ QUnit.module("wowl Views", (hooks) => {
                 arch: `
                     <calendar
                         date_start="start"
-                    />
+                        date_stop="stop"
+                        all_day="allday"
+                        mode="week"
+                        event_open_popup="1"
+                    >
+                        <field name="name" />
+                    </calendar>
                 `,
+                mockRPC(route, { args, kwargs, method }) {
+                    if (method === "create") {
+                        assert.deepEqual(
+                            kwargs.context,
+                            {
+                                default_name: "new event",
+                                default_start: "2016-12-13 06:00:00",
+                                default_stop: "2016-12-13 08:00:00",
+                                default_allday: null,
+                            },
+                            "should send the context to create events"
+                        );
+                    } else if (method === "write") {
+                        assert.deepEqual(args[1], expectedEvent, "should move the event");
+                    }
+                },
             });
 
-            // this.data.event.records = [];
-            // this.data.event.onchanges = {
-            //     allday: function (obj) {
-            //         if (obj.allday) {
-            //             obj.start_date = obj.start && obj.start.split(' ')[0] || obj.start_date;
-            //             obj.stop_date = obj.stop && obj.stop.split(' ')[0] || obj.stop_date || obj.start_date;
-            //         } else {
-            //             obj.start = obj.start_date && (obj.start_date + ' 00:00:00') || obj.start;
-            //             obj.stop = obj.stop_date && (obj.stop_date + ' 00:00:00') || obj.stop || obj.start;
-            //         }
-            //     }
-            // };
+            const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-            // var calendar = await createCalendarView({
-            //     View: CalendarView,
-            //     model: 'event',
-            //     data: this.data,
-            //     arch:
-            //     '<calendar class="o_calendar_test" '+
-            //         'event_open_popup="true" '+
-            //         'date_start="start" '+
-            //         'date_stop="stop" '+
-            //         'all_day="allday" '+
-            //         'mode="week">'+
-            //             '<field name="name"/>'+
-            //     '</calendar>',
-            //     archs: archs,
-            //     viewOptions: {
-            //         initialDate: initialDate,
-            //     },
-            //     session: {
-            //         getTZOffset: function () {
-            //             return 120;
-            //         },
-            //     },
-            //     translateParameters: { // Avoid issues due to localization formats
-            //         time_format: "%H:%M:%S",
-            //     },
-            //     mockRPC: function (route, args) {
-            //         if (args.method === "create") {
-            //             assert.deepEqual(args.kwargs.context, {
-            //                 "default_name": "new event",
-            //                 "default_start": "2016-12-13 06:00:00",
-            //                 "default_stop": "2016-12-13 08:00:00",
-            //                 "default_allday": null
-            //             },
-            //             "should send the context to create events");
-            //         }
-            //         if (args.method === "write") {
-            //             assert.deepEqual(args.args[1], expectedEvent,
-            //                 "should move the event");
-            //         }
-            //         return this._super(route, args);
-            //     },
-            // }, {positionalClicks: true});
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+                clearTimeout: () => {},
+            });
 
-            // var top = calendar.$('.fc-axis:contains(8:00)').offset().top + 5;
-            // var left = calendar.$('.fc-day:eq(2)').offset().left + 5;
+            await selectTimeRange(calendar, "2016-12-13 06:00:00", "2016-12-13 08:00:00");
 
-            // try {
-            //     testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-            // } catch (e) {
-            //     calendar.destroy();
-            //     throw new Error('The test fails to simulate a click in the screen. Your screen is probably too small or your dev tools is open.');
-            // }
-            // testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mousemove");
-            // testUtils.dom.triggerPositionalMouseEvent(left, top + 60, "mouseup");
-            // await testUtils.nextTick();
-            // await testUtils.fields.editInput($('.modal input:first'), 'new event');
-            // await testUtils.dom.click($('.modal button.btn:contains(Edit)'));
+            let input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+            input.value = "new event";
+            await triggerEvent(input, null, "input");
 
-            // assert.strictEqual($('.o_field_widget[name="start"] input').val(),
-            //     "12/13/2016 08:00:00", "should display the datetime");
+            await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
+            assert.strictEqual(
+                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
+                "12/13/2016 08:00:00",
+                "should display the datetime"
+            );
 
-            // await testUtils.dom.click($('.modal-lg .o_field_boolean[name="allday"] input'));
-            // await testUtils.nextTick();
-            // assert.strictEqual($('input[name="start_date"]').val(),
-            //     "12/13/2016", "should display the date");
+            await click(mainComponentsContainer, `.modal .o_field_boolean[name="allday"] input`);
+            assert.strictEqual(
+                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
+                "12/13/2016",
+                "should display the date"
+            );
 
-            // await testUtils.dom.click($('.modal-lg .o_field_boolean[name="allday"] input'));
+            await click(mainComponentsContainer, `.modal .o_field_boolean[name="allday"] input`);
+            assert.strictEqual(
+                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
+                "12/13/2016 02:00:00",
+                "should display the datetime from the date with the timezone"
+            );
 
-            // assert.strictEqual($('.o_field_widget[name="start"] input').val(),
-            //     "12/13/2016 02:00:00", "should display the datetime from the date with the timezone");
+            // use datepicker to enter a date: 12/13/2016 08:00:00
+            await click(
+                mainComponentsContainer,
+                `.o_field_widget[name="start"].o_datepicker .o_datepicker_input`
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]`
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .timepicker .timepicker-hour`
+            );
+            await click(
+                document.body.querySelectorAll(
+                    `.bootstrap-datetimepicker-widget .timepicker-hours td.hour`
+                )[8]
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]`
+            );
 
-            // // use datepicker to enter a date: 12/13/2016 08:00:00
-            // testUtils.dom.openDatepicker($('.o_field_widget[name="start"].o_datepicker'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(08)'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
+            // use datepicker to enter a date: 12/13/2016 10:00:00
+            await click(
+                mainComponentsContainer,
+                `.o_field_widget[name="stop"].o_datepicker .o_datepicker_input`
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]`
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .timepicker .timepicker-hour`
+            );
+            await click(
+                document.body.querySelectorAll(
+                    `.bootstrap-datetimepicker-widget .timepicker-hours td.hour`
+                )[10]
+            );
+            await click(
+                document.body,
+                `.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]`
+            );
 
-            // // use datepicker to enter a date: 12/13/2016 10:00:00
-            // testUtils.dom.openDatepicker($('.o_field_widget[name="stop"].o_datepicker'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="togglePicker"]'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker .timepicker-hour'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .timepicker-hours td.hour:contains(10)'));
-            // await testUtils.dom.click($('.bootstrap-datetimepicker-widget .picker-switch a[data-action="close"]'));
+            await click(mainComponentsContainer, ".modal-footer button.btn-primary");
 
-            // await testUtils.dom.click($('.modal-lg button.btn:contains(Save)'));
-            // var $newevent = calendar.$('.fc-event:contains(new event)');
+            assert.strictEqual(
+                findEvent(calendar, 1).querySelector(".o_event_title").textContent,
+                "new event",
+                "should display the new event with title"
+            );
 
-            // assert.strictEqual($newevent.find('.o_event_title').text(), "new event",
-            //     "should display the new event with title");
-
-            // assert.deepEqual($newevent[0].fcSeg.eventRange.def.extendedProps.record,
+            // assert.deepEqual(
+            //     serverData.models.event.records[0],
             //     {
             //         display_name: "new event",
-            //         start: fieldUtils.parse.datetime("2016-12-13 06:00:00", this.data.event.fields.start, {isUTC: true}),
-            //         stop: fieldUtils.parse.datetime("2016-12-13 08:00:00", this.data.event.fields.stop, {isUTC: true}),
+            //         start: "2016-12-13 06:00:00",
+            //         stop: "2016-12-13 08:00:00",
             //         allday: false,
             //         name: "new event",
-            //         id: 1
+            //         id: 1,
             //     },
-            //     "the new record should have the utc datetime (formViewDialog)");
+            //     "the new record should have the utc datetime (formViewDialog)"
+            // );
 
-            // var pos = calendar.$('.fc-content').offset();
-            // left = pos.left + 5;
-            // top = pos.top + 5;
+            // Mode this event to another day
+            expectedEvent = {
+                allday: false,
+                start: "2016-12-12 06:00:00",
+                stop: "2016-12-12 08:00:00",
+            };
+            await moveEventToTime(calendar, 1, "2016-12-12 06:00:00");
 
-            // // Mode this event to another day
-            // var expectedEvent = {
-            // "allday": false,
-            // "start": "2016-12-12 06:00:00",
-            // "stop": "2016-12-12 08:00:00"
-            // };
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-            // left = calendar.$('.fc-day:eq(1)').offset().left + 15;
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
-            // await testUtils.nextTick();
-
-            // // Move to "All day"
-            // expectedEvent = {
-            // "allday": true,
-            // "start": "2016-12-12 00:00:00",
-            // "stop": "2016-12-12 00:00:00"
-            // };
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousedown");
-            // top = calendar.$('.fc-day:eq(1)').offset().top + 15;
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mousemove");
-            // testUtils.dom.triggerPositionalMouseEvent(left, top, "mouseup");
-            // await testUtils.nextTick();
-
-            // calendar.destroy();
+            // Move to "All day"
+            expectedEvent = {
+                allday: true,
+                start: "2016-12-12 00:00:00",
+                stop: "2016-12-12 00:00:00",
+            };
+            await moveEventToAllDaySlot(calendar, 1, "2016-12-12");
         }
     );
 
