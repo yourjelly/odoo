@@ -397,7 +397,15 @@ export async function selectDateRange(calendar, startDate, endDate) {
     await triggerEventForCalendar(end, "mouseup");
 }
 
-export async function selectAllDayRange(calendar, start, end) {}
+export async function selectAllDayRange(calendar, startDate, endDate) {
+    const start = findAllDaySlot(calendar, startDate);
+    const end = findAllDaySlot(calendar, endDate);
+    await scrollTo(start);
+    await triggerEventForCalendar(start, "mousedown");
+    await scrollTo(end);
+    await triggerEventForCalendar(end, "mousemove");
+    await triggerEventForCalendar(end, "mouseup");
+}
 
 export async function moveEventToDate(calendar, eventId, date, options = {}) {
     const event = findEvent(calendar, eventId);
@@ -424,10 +432,25 @@ export async function moveEventToTime(calendar, eventId, dateTime) {
     await scrollTo(event);
     await triggerEventForCalendar(event, "mousedown");
 
-    // todo
+    await scrollTo(row, false);
+    const colRect = col.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+
+    await triggerEventForCalendar(row, "mousemove", { x: colRect.x, y: rowRect.y - 1 });
+    await triggerEventForCalendar(row, "mouseup", { x: colRect.x, y: rowRect.y - 1 });
 }
 
-export async function moveEventToAllDaySlot(calendar, eventId, date) {}
+export async function moveEventToAllDaySlot(calendar, eventId, date) {
+    const event = findEvent(calendar, eventId);
+    const slot = findAllDaySlot(calendar, date);
+
+    await scrollTo(event);
+    await triggerEventForCalendar(event, "mousedown");
+
+    await scrollTo(slot);
+    await triggerEventForCalendar(slot, "mousemove");
+    await triggerEventForCalendar(slot, "mouseup");
+}
 
 /**
  * @param {owl.Component} calendarView
