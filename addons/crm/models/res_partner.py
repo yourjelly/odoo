@@ -8,7 +8,7 @@ class Partner(models.Model):
     _name = 'res.partner'
     _inherit = 'res.partner'
 
-    team_id = fields.Many2one('crm.team', string='Sales Team', ondelete="set null")
+    team_id = fields.Many2one('crm.team', string='Sales Team', compute='_compute_team_id', readonly=False, store=True, ondelete="set null")
     opportunity_ids = fields.One2many('crm.lead', 'partner_id', string='Opportunities', domain=[('type', '=', 'opportunity')])
     opportunity_count = fields.Integer("Opportunity", compute='_compute_opportunity_count')
 
@@ -51,6 +51,14 @@ class Partner(models.Model):
                 if partner in self:
                     partner.opportunity_count += group['partner_id_count']
                 partner = partner.parent_id
+
+    @api.depends('parent_id')
+    def _compute_team_id(self):
+        for partner in self:
+            if not partner.team_id and partner.parent_id.team_id and partner.company_type == 'person':
+                partner.team_id = partner.parent_id.team_id
+            elif not partner.team_id:
+                partner.team_id = False
 
     def action_view_opportunity(self):
         '''

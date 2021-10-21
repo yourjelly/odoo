@@ -167,7 +167,7 @@ class Partner(models.Model):
                                "Anywhere else, time values are computed according to the time offset of your web client.")
 
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
-    user_id = fields.Many2one('res.users', string='Salesperson',
+    user_id = fields.Many2one('res.users', string='Salesperson', compute='_compute_user_id', readonly=False, store=True,
       help='The internal user in charge of this contact.')
     vat = fields.Char(string='Tax ID', index=True, help="The Tax Identification Number. Complete it if the contact is subjected to government taxes. Used in some legal statements.")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
@@ -338,6 +338,14 @@ class Partner(models.Model):
         for partner in self:
             p = partner.commercial_partner_id
             partner.commercial_company_name = p.is_company and p.name or partner.company_name
+
+    @api.depends('parent_id')
+    def _compute_user_id(self):
+        for partner in self:
+            if not partner.user_id and partner.parent_id.user_id and partner.company_type == 'person':
+                partner.user_id = partner.parent_id.user_id
+            elif not partner.user_id:
+                partner.user_id = False
 
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
