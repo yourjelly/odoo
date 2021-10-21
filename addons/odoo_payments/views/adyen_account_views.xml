@@ -8,7 +8,7 @@
             <form string="Adyen Account" create="false" js_class="adyen_account_form">
                 <field name="account_code" invisible="1"/>
                 <field name="account_holder_code" invisible="1"/>
-                <field name="account_status" invisible="1"/>
+                <field name="merchant_status" invisible="1"/>
                 <field name="adyen_uuid" invisible="1"/>
                 <field name="kyc_tier" invisible="1"/>
                 <field name="payout_allowed" invisible="1"/>
@@ -19,7 +19,7 @@
                            attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
                 <div class="alert alert-warning o_form_header"
-                     attrs="{'invisible': ['|', ('onboarding_msg', '=', False), ('account_status', '!=', 'active')]}"
+                     attrs="{'invisible': ['|', ('onboarding_msg', '=', False), ('merchant_status', '!=', 'active')]}"
                      role="status">
                     <a class="close" data-dismiss="alert" href="#" aria-label="Close">
                         <i title="Close" class="small fa fa-times"/>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="alert alert-danger o_form_header"
                      role="alert"
-                     attrs="{'invisible': [('account_status', '!=', 'closed')]}">
+                     attrs="{'invisible': [('merchant_status', '!=', 'closed')]}">
                     <strong><p>Your account is Closed.</p></strong>
                 </div>
                 <sheet>

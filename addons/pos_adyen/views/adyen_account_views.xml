@@ -10,12 +10,12 @@
                         string="Order a Terminal"
                         class="oe_highlight"
                         type="object"
-                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('account_status', '=', 'closed')]}"/>
+                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('merchant_status', '=', 'closed')]}"/>
                 <button name="action_sync_terminals"
                         string="Sync Terminals"
                         class="btn-secondary"
                         type="object"
-                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('account_status', '=', 'closed')]}"/>
+                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('merchant_status', '=', 'closed')]}"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Stores" attrs="{'invisible': [('transactions_count', '=', 0)]}">

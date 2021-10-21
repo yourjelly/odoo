@@ -4,7 +4,7 @@
     <record id="odoo_payments_account_closed" model="ir.rule">
         <field name="model_id" ref="model_adyen_account"/>
         <field name="name">Readonly: Closed Accounts</field>
-        <field name="domain_force">[('account_status', '!=', 'closed')]</field>
+        <field name="domain_force">[('merchant_status', '!=', 'closed')]</field>
         <field name="perm_read" eval="False"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>

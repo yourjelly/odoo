@@ -1,12 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Mapping of Adyen account holder statuses to adyen.account.account_status values
-ACCOUNT_STATUS_MAPPING = {
-    'Active': 'active',
-    'Inactive': 'inactive',
-    'Suspended': 'suspended',
-    'Closed': 'closed',
-}
+# TODO ANVFE is this still useful or do we only rely on internal's status?
+# # Mapping of Adyen account holder statuses to adyen.account.account_status values
+# ACCOUNT_STATUS_MAPPING = {
+#     'Active': 'active',
+#     'Inactive': 'inactive',
+#     'Suspended': 'suspended',
+#     'Closed': 'closed',
+# }
 
 # Mapping of Adyen verification statuses to adyen.kyc.status values
 KYC_STATUS_MAPPING = {
