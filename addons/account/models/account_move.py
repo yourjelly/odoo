@@ -5521,20 +5521,34 @@ class AccountMoveLine(models.Model):
         action['context'] = ctx
         return action
 
-    def action_open_move_from_aml(self):
+    def action_open_business_doc_from_aml(self):
         self.ensure_one()
+
+        context = {
+            'create': False,
+            'delete': False,
+        }
+
+        if self.payment_id:
+            res_model = 'account.payment'
+            res_id = self.payment_id.id
+        elif self.statement_line_id:
+            res_model = 'account.bank.statement.line'
+            res_id = self.statement_line_id.id
+        else:
+            res_model = 'account.move'
+            res_id = self.move_id.id
+            context['default_move_type'] = self.move_id.move_type
+
         return {
             'name': _("Journal Entry"),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'view_id': self.env.ref('account.view_move_form').id,
-            'res_model': 'account.move',
-            'res_id': self.move_id.id,
-            'context': {
-                'move_type': self.move_id.move_type,
-                'create': False,
-                'delete': False,
-            },
+            'res_model': res_model,
+            'res_id': res_id,
+            'context': context,
+            'target': 'new',
         }
 
     @api.model

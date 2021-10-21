@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+import re
 
 from odoo import api, fields, models, _
 from odoo.tools import float_is_zero
