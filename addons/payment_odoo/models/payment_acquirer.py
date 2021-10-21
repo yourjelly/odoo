@@ -28,18 +28,18 @@ class PaymentAcquirer(models.Model):
             elif acquirer.state == 'enabled':
                 if adyen_account.is_test:
                     raise ValidationError(_("You cannot enable the acquirer with a test account."))
-                elif adyen_account.account_status != 'active':
+                elif adyen_account.merchant_status != 'active':
                     raise ValidationError(
-                        _("Your account must first be activated before enabling the acquirer.")
+                        _("Your account must first be validated before enabling the acquirer.")
                     )
             elif acquirer.state == 'test':
                 if not adyen_account.is_test:
                     raise ValidationError(
                         _("You cannot set the acquirer in test mode with a live account.")
                     )
-                elif adyen_account.account_status != 'active':
+                elif adyen_account.merchant_status != 'active':
                     raise ValidationError(
-                        _("Your account must first be activated before enabling the acquirer.")
+                        _("Your account must first be validated before enabling the acquirer.")
                     )
 
     def odoo_create_adyen_account(self):

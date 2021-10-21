@@ -16,8 +16,9 @@ from odoo.http import request
 from odoo.osv import expression
 
 from odoo.addons.mail.tools import mail_validation
-from odoo.addons.odoo_payments.const import ACCOUNT_STATUS_MAPPING, KYC_STATUS_MAPPING, \
-                                            PAYOUT_SCHEDULE_MAPPING
+# from odoo.addons.odoo_payments.const import ACCOUNT_STATUS_MAPPING, KYC_STATUS_MAPPING, \
+#                                             PAYOUT_SCHEDULE_MAPPING
+from odoo.addons.odoo_payments.const import KYC_STATUS_MAPPING, PAYOUT_SCHEDULE_MAPPING
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
@@ -31,6 +32,23 @@ class AdyenAccount(models.Model):
     _rec_name = 'full_name'
 
     #=== DEFAULT METHODS ===#
+
+    merchant_status = fields.Selection(
+        string="Merchant Status",
+        help="The status of the Adyen account on the merchant database (internal). The account"
+             "transitions from one status to another as follows:\n"
+             "1. The account is created -> Pending Validation\n"
+             "2. Adyen confirms the creation of the account -> Active (test environment only)\n"
+             "3. The merchant validates the account -> Active (live environment only)\n"
+             "4. The merchant rejects the account or the account is closed -> Closed",
+        selection=[
+            ('pending', "Pending Validation"),
+            ('active', "Active"),
+            ('closed', "Closed"),
+        ],
+        default='pending',
+        readonly=True,
+    )
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -114,25 +132,6 @@ class AdyenAccount(models.Model):
         ], default='biweekly', required=True, string="Payout Schedule", tracking=True)
     next_scheduled_payout = fields.Datetime(string="Next Scheduled Payout", readonly=True)
     last_sync_date = fields.Datetime(default=fields.Datetime.now)
-
-    # Adyen Account Status - internal use
-    account_status = fields.Selection(
-        string="Internal Account Status",
-        help="The account status transitions from one status to another as follows:\n"
-             "1. The account is created -> Inactive\n"
-             "2. Adyen confirms the creation of the account -> Suspended\n"
-             "3. Odoo Support validates the account -> Active\n"
-             "4. The account is closed -> Closed",
-        selection=[
-            ('inactive', "Inactive"),
-            ('suspended', "Suspended"),
-            ('active', "Active"),
-            ('closed', "Closed"),
-        ],
-        default='inactive',
-        readonly=True,
-        tracking=True,  # TODO why track this field if not shown in the view?
-    )
     payout_allowed = fields.Boolean(readonly=True)
 
     # Status for UX
@@ -142,7 +141,7 @@ class AdyenAccount(models.Model):
             ('awaiting_data', "Data To Provide"),
             ('validation', "Data Validation"),  # KYC Validation from Adyen
             ('validated', "Validated"),
-        ], compute='_compute_state', string="Account State")
+        ], compute='_compute_state', string="Account State")  # TODO ANVFE could it simply be a bool `kyc pending`?
     onboarding_msg = fields.Html(compute='_compute_onboarding_msg')
 
     # KYC
@@ -197,6 +196,135 @@ class AdyenAccount(models.Model):
         return action
 
     #=== BUSINESS METHODS ===#
+
+    def _handle_account_holder_created_notification(self):
+        """ Handle `ACCOUNT_HOLDER_CREATED` notifications and update `merchant_status` accordingly.
+
+        Upon receiving the notification, the account's `merchant_status` is immediately set to
+        'active' if it is a test account because these do no go through the validation by the
+        support. If the account is created in the live environment, no action is performed because
+        we are waiting for the validation notification.
+
+        Note: sudoed env
+
+        :return: None
+        """
+        self.ensure_one()
+
+        if self.is_test:
+            if self.merchant_status == 'active':
+                _logger.info(
+                    "tried to update merchant_status with same value: active (uuid: %s)",
+                    self.adyen_uuid,
+                )
+            else:
+                self._set_active()
+        else:
+            pass  # Live accounts are only set active after validation by the support
+
+    def _handle_odoo_merchant_status_change_notification(self, content):
+        """ Handle `ODOO_MERCHANT_STATUS_CHANGE` notifications and update `merchant_status` accordingly.
+
+        This notification is received when the support performs a manual update of the submerchant's
+        status on the merchant database (internal). The account's `merchant_status` is updated with
+        the new status of the submerchant. An email is sent from the merchant database to inform the
+        client.
+
+        Note: sudoed env
+
+        :param dict content: The notification content with the following structure:
+                             {'newStatus': new_status}
+        :return: None
+        """
+        self.ensure_one()
+
+        new_status = content.get('newStatus')
+        if new_status == 'rejected':  # TODO no longer needed when 'rejected' renamed to 'closed' on internal
+            new_status = 'closed'  # TODO no longer needed when 'rejected' renamed to 'closed' on internal
+        if new_status == self.merchant_status:
+            _logger.info(
+                "tried to update merchant_status with same value: %(status)s (uuid: %(uuid)s)",
+                {'status': new_status, 'uuid': self.adyen_uuid},
+            )
+        else:
+            old_status = self.merchant_status
+            if new_status == 'pending':
+                self._set_pending()
+            elif new_status == 'active':
+                self._set_active()
+            else:  # 'closed'
+                self._set_closed()
+            _logger.info(
+                "updated merchant status from %(old_status)s to %(new_status)s (uuid: %(uuid)s)",
+                {'old_status': old_status, 'new_status': new_status, 'uuid': self.adyen_uuid},
+            )
+
+    def _set_pending(self):
+        """ Update the account's merchant status to 'pending'.
+
+        All linked payment acquirers are also disabled to prevent any transaction to be made for
+        this account. In practice, the proxy would prevent such transaction to reach Adyen's API.
+
+        Note: self.ensure_one()
+
+        :return: None
+        """
+        self.ensure_one()
+
+        # Deactivate the account
+        self.merchant_status = 'pending'
+
+        # Disable all linked payment acquirers
+        payment_acquirers = self.env['payment.acquirer'].search(
+            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)]
+        )
+        if payment_acquirers:
+            payment_acquirers.write({'state': 'disabled'})
+
+    def _set_active(self):
+        """ Update the account's merchant status to 'active'.
+
+        The first linked payment acquirer is also enabled to allow smooth onboarding. If other
+        payment acquirers are linked to this account, they are left disabled and must be enabled
+        manually.
+
+        Note: self.ensure_one()
+
+        :return: None
+        """
+        self.ensure_one()
+
+        # Activate the account
+        self.merchant_status = 'active'
+
+        # Enable the initial linked payment acquirer
+        payment_acquirer = self.env['payment.acquirer'].search(
+            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)], limit=1
+        )
+        if payment_acquirer:
+            payment_acquirer.state = 'enabled' if not self.is_test else 'test'
+
+    def _set_closed(self):
+        """ Update the account's merchant status to 'closed'.
+
+        All linked payment acquirers are also disabled to prevent any transaction to be made for
+        this account. In practice, the proxy would prevent such transaction to reach Adyen's API.
+
+        Note: self.ensure_one()
+
+        :return: None
+        """
+        self.ensure_one()
+
+        # Deactivate the account
+        self.merchant_status = 'closed'
+
+        # Disable all linked payment acquirers
+        payment_acquirers = self.env['payment.acquirer'].search(
+            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)]
+        )
+        if payment_acquirers:
+            payment_acquirers.write({'state': 'disabled'})
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -354,10 +482,10 @@ class AdyenAccount(models.Model):
             else:
                 account.full_name = "%s %s" % (account.first_name, account.last_name)
 
-    @api.depends('kyc_tier', 'adyen_kyc_ids', 'account_status')
+    @api.depends('kyc_tier', 'adyen_kyc_ids', 'merchant_status')
     def _compute_state(self):
         for account in self:
-            if account.account_status in ['inactive', 'suspended'] and account.kyc_tier == 0:
+            if account.merchant_status == 'pending' and account.kyc_tier == 0:
                 account.state = 'pending'
             else:
                 if any(k.status == 'awaiting_data' for k in account.adyen_kyc_ids):
@@ -443,7 +571,7 @@ class AdyenAccount(models.Model):
             self._update_payout_schedule(vals['payout_schedule'])
 
         # Enable the additional menus if the account has been activated by the support
-        if 'account_status' in vals and vals['account_status'] == 'active':
+        if 'merchant_status' in vals and vals['merchant_status'] == 'active':
             balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
             transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
             (balance_menu + transactions_menu).action_unarchive()
@@ -600,17 +728,6 @@ class AdyenAccount(models.Model):
 
         return data
 
-    def _enable_payment_acquirer(self):
-        """
-        Once the Adyen account becomes active, the odoo payment acquirer is automatically enabled
-        """
-        odoo_payment_acquirer = self.env['payment.acquirer'].search([
-                ('provider', '=', 'odoo'),
-                ('company_id', '=', self.company_id.id),
-            ], limit=1)
-        if odoo_payment_acquirer:
-            odoo_payment_acquirer.state = 'enabled' if not self.is_test else 'test'
-
     def _adyen_rpc(self, operation, adyen_data=None):
         self.ensure_one()
         # FIXME ANVFE do we ever reach adyen without any payload ?
@@ -669,10 +786,10 @@ class AdyenAccount(models.Model):
         # TODO ANVFE REMOVE OR SET DEBUG
         _logger.info("ODOO PAYMENTS: handling notification %s with content %s", event_type, pformat(content))
 
-        if event_type == 'ODOO_ACCOUNT_STATUS_CHANGE':
-            self._handle_odoo_account_status_change(content)
-        elif event_type == "ACCOUNT_HOLDER_CREATED":
-            self._handle_account_holder_created_notification(content)
+        if event_type == 'ACCOUNT_HOLDER_CREATED':
+            self._handle_account_holder_created_notification()
+        elif event_type == 'ODOO_MERCHANT_STATUS_CHANGE':
+            self._handle_odoo_merchant_status_change_notification(content)
         elif event_type == 'ACCOUNT_HOLDER_STATUS_CHANGE':
             self._handle_account_holder_status_change_notification(content)
         elif event_type == 'ACCOUNT_HOLDER_VERIFICATION':
@@ -684,46 +801,19 @@ class AdyenAccount(models.Model):
         else:
             _logger.warning(_("Unknown eventType received: %s", event_type))
 
-    def _handle_odoo_account_status_change(self, content):
-        """NOTE: sudoed env"""
-        self.ensure_one()
-
-        new_status = content.get('newStatus')
-        if new_status == 'active' and self.account_status in ['suspended', 'inactive']:
-            self._adyen_rpc('v1/unsuspend_account_holder', {
-                'accountHolderCode': self.account_holder_code,
-            })
-            # result for unsuspend_account_holder request only contains pspReference
-            # not new account status  TODO ANVFE actually it does contain the new status
-
-        elif new_status == 'rejected':
-            self._adyen_rpc('v1/close_account_holder', {
-                'accountHolderCode': self.account_holder_code,
-            })
-
-    def _handle_account_holder_created_notification(self, content):
-        self.ensure_one()
-
-        if not self.is_test:
-            # Do not pass through active state before support validation
-            # for live accounts
-            return
-
-        self.account_status = ACCOUNT_STATUS_MAPPING.get(content.get('accountStatus', {}).get('status'))
-        _logger.info("Correctly received ACCOUNT_HOLDER_CREATED notification for test account (uuid: %s)", self.adyen_uuid)
-
     def _handle_account_holder_status_change_notification(self, content):
         """NOTE: sudoed env"""
         self.ensure_one()
 
-        # Account Status
-        new_status = ACCOUNT_STATUS_MAPPING.get(content.get('newStatus', {}).get('status'))
-        if new_status and new_status != self.account_status:
-            old_status = self.account_status
-            self.account_status = new_status
-
-            if new_status == 'active' and old_status in ['suspended', 'inactive']:
-                self._enable_payment_acquirer()
+        # TODO ANVFE do we still need this? I guess not but confirm with task 2667380
+        # # Account Status
+        # new_status = ACCOUNT_STATUS_MAPPING.get(content.get('newStatus', {}).get('status'))
+        # if new_status and new_status != self.account_status:
+        #     old_status = self.account_status
+        #     self.account_status = new_status
+        #
+        #     if new_status == 'active' and old_status in ['suspended', 'inactive']:
+        #         self._enable_payment_acquirer()
 
         # Tier
         tier = content.get('newStatus', {}).get('processingState', {}).get('tierNumber', None)
