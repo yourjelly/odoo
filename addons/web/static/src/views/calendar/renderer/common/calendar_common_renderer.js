@@ -16,9 +16,9 @@ const SCALE_TO_FC_VIEW = {
     month: "dayGridMonth",
 };
 const SCALE_TO_HEADER_FORMAT = {
-    day: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("DDD"),
-    week: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("EEE d"),
-    month: (info) => luxon.DateTime.fromJSDate(info.date.marker, { zone: "UTC" }).toFormat("EEEE"),
+    day: "DDD",
+    week: "EEE d",
+    month: "EEEE",
 };
 const HOUR_FORMATS = {
     12: {
@@ -93,7 +93,7 @@ export class CalendarCommonRenderer extends Component {
             weekNumberCalculation: calculateWeekNumber,
             weekNumbers: true,
             weekNumbersWithinDays: true,
-            windowResize: debounce(this.onWindowResize, 200),
+            windowResize: debounce(this.onWindowResize, 200), // fixme: cancel debounce on unmount
         };
     }
 
@@ -205,12 +205,12 @@ export class CalendarCommonRenderer extends Component {
     }
     async onSelect(info) {
         this.popover.close();
-        const keepLocalTime = info.allDay;
-
+        const { allDay, start, end } = info;
+        const keepLocalTime = allDay; // BOI needs an explanation comment
         await this.props.createRecord({
-            start: luxon.DateTime.fromJSDate(info.start).setZone("UTC", { keepLocalTime }),
-            end: luxon.DateTime.fromJSDate(info.end).setZone("UTC", { keepLocalTime }),
-            isAllDay: info.allDay,
+            start: luxon.DateTime.fromJSDate(start).toUTC(0, { keepLocalTime }),
+            end: luxon.DateTime.fromJSDate(end).toUTC(0, { keepLocalTime }),
+            isAllDay: allDay,
         });
         this.fc.api.unselect();
     }
@@ -219,27 +219,27 @@ export class CalendarCommonRenderer extends Component {
     }
     onEventDrop(info) {
         this.fc.api.unselect();
-        const keepLocalTime = info.event.allDay;
+        const { id, allDay, start, end } = info.event;
+        const keepLocalTime = allDay; // BOI needs an explanation comment
         this.props.model.updateRecord(
             {
-                id: this.props.model.records[info.event.id].id,
-                start: luxon.DateTime.fromJSDate(info.event.start).setZone("UTC", {
-                    keepLocalTime,
-                }),
-                end: luxon.DateTime.fromJSDate(info.event.end).setZone("UTC", { keepLocalTime }),
-                isAllDay: info.event.allDay,
+                id: this.props.model.records[id].id,
+                start: luxon.DateTime.fromJSDate(start).toUTC(0, { keepLocalTime }),
+                end: luxon.DateTime.fromJSDate(end).toUTC(0, { keepLocalTime }),
+                isAllDay: allDay,
             },
             { moved: true }
         );
     }
     onEventResize(info) {
         this.fc.api.unselect();
-        const keepLocalTime = info.event.allDay;
+        const { id, allDay, start, end } = info.event;
+        const keepLocalTime = allDay; // BOI needs an explanation comment
         this.props.model.updateRecord({
-            id: this.props.model.records[info.event.id].id,
-            start: luxon.DateTime.fromJSDate(info.event.start).setZone("UTC", { keepLocalTime }),
-            end: luxon.DateTime.fromJSDate(info.event.end).setZone("UTC", { keepLocalTime }),
-            isAllDay: info.event.allDay,
+            id: this.props.model.records[id].id,
+            start: luxon.DateTime.fromJSDate(start).toUTC(0, { keepLocalTime }),
+            end: luxon.DateTime.fromJSDate(end).toUTC(0, { keepLocalTime }),
+            isAllDay: allDay,
         });
     }
     onEventMouseEnter(info) {

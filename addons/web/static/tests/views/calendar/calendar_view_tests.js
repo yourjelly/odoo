@@ -1485,6 +1485,10 @@ QUnit.module("wowl Views", (hooks) => {
             assert.expect(8);
 
             patchTimeZone(120);
+            patchWithCleanup(browser, {
+                setTimeout: (fn) => fn(),
+                clearTimeout: () => {},
+            });
             // translateParameters: { // Avoid issues due to localization formats
             //     time_format: "%H:%M:%S",
             // },
@@ -1541,35 +1545,32 @@ QUnit.module("wowl Views", (hooks) => {
 
             const mainComponentsContainer = await addMainComponentsContainer(calendar.env);
 
-            patchWithCleanup(browser, {
-                setTimeout: (fn) => fn(),
-                clearTimeout: () => {},
-            });
-
             await selectTimeRange(calendar, "2016-12-13 08:00:00", "2016-12-13 10:00:00");
 
-            const input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
+            // Name the new event and edit in formViewDialog
+            let input = mainComponentsContainer.querySelector(".o-calendar-quick-create--input");
             input.value = "new event";
             await triggerEvent(input, null, "input");
 
             await click(mainComponentsContainer, ".o-calendar-quick-create--edit-btn");
-            assert.strictEqual(
-                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
-                "12/13/2016 08:00:00",
-                "should display the datetime"
-            );
 
-            await click(mainComponentsContainer, `.modal .o_field_boolean[name="allday"] input`);
-            assert.strictEqual(
-                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
-                "12/13/2016",
-                "should display the date"
-            );
+            // Check the datetimes
+            input = mainComponentsContainer.querySelector(".o_field_widget[name='start'] input");
+            assert.strictEqual(input.value, "12/13/2016 08:00:00", "should display the datetime");
 
-            await click(mainComponentsContainer, `.modal .o_field_boolean[name="allday"] input`);
+            // Set allday to true in formViewDialog
+            await click(mainComponentsContainer, ".modal .o_field_boolean[name='allday'] input");
+            input = mainComponentsContainer.querySelector(
+                ".o_field_widget[name='start_date'] input"
+            );
+            assert.strictEqual(input.value, "12/13/2016", "should display the date");
+
+            // Set allday to false in formViewDialog
+            await click(mainComponentsContainer, ".modal .o_field_boolean[name='allday'] input");
+            input = mainComponentsContainer.querySelector(".o_field_widget[name='start'] input");
             assert.strictEqual(
-                mainComponentsContainer.querySelector(`.o_field_widget[name="start"] input`).value,
-                "12/13/2016 02:00:00",
+                input.value,
+                "12/13/2016 02:00:00", // FIXME ? this is weird
                 "should display the datetime from the date with the timezone"
             );
 
@@ -3930,6 +3931,7 @@ QUnit.module("wowl Views", (hooks) => {
     });
 
     QUnit.todo("fullcalendar initializes with right locale", async (assert) => {
+        // BOI to discuss in review: I think this test should be removed
         assert.ok(false);
 
         const calendar = await makeView({
