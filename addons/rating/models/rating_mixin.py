@@ -60,6 +60,23 @@ class RatingMixin(models.AbstractModel):
     rating_last_image = fields.Binary('Rating Last Image', groups='base.group_user', related='rating_ids.rating_image')
     rating_count = fields.Integer('Rating count', compute="_compute_rating_stats", compute_sudo=True)
     rating_avg = fields.Float("Rating Average", compute='_compute_rating_stats', compute_sudo=True)
+    rating_text = fields.Selection([
+        ('top', 'Satisfied'),
+        ('ok', 'Okay'),
+        ('ko', 'Dissatisfied'),
+        ('none', 'No Rating yet')], string='Customer Rating', store=True, compute='_compute_rating_text', readonly=True)
+
+    @api.depends('rating_last_value')
+    def _compute_rating_text(self):
+        for rating in self:
+            if rating.rating_last_value >= RATING_LIMIT_SATISFIED:
+                rating.rating_text = 'top'
+            elif rating.rating_last_value >= RATING_LIMIT_OK:
+                rating.rating_text = 'ok'
+            elif rating.rating_last_value >= RATING_LIMIT_MIN:
+                rating.rating_text = 'ko'
+            else:
+                rating.rating_text = 'none'
 
     @api.depends('rating_ids.rating', 'rating_ids.consumed')
     def _compute_rating_last_value(self):
