@@ -34,8 +34,9 @@ def _lang_get(self):
     return self.env['res.lang'].get_installed()
 
 
-# put POSIX 'Etc/*' entries at the end to avoid confusing users - see bug 1086728
-_tzs = [(tz, tz) for tz in sorted(pytz.all_timezones, key=lambda tz: tz if not tz.startswith('Etc/') else '_')]
+tz_z = lambda tz : pytz.timezone(tz).localize(datetime.datetime.utcnow()).strftime("%z")
+_tzs = [(tz, f"(UTC{tz_z(tz)[:3]}:{tz_z(tz)[3:]}) {tz}") for tz in sorted(pytz.all_timezones, key=lambda tz: int(tz_z(tz)))]
+
 def _tz_get(self):
     return _tzs
 
