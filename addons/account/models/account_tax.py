@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, Command
 from odoo.osv import expression
 from odoo.tools.float_utils import float_round as round
 from odoo.exceptions import UserError, ValidationError
@@ -22,9 +22,10 @@ class AccountTaxGroup(models.Model):
 
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer(default=10)
-    property_tax_payable_account_id = fields.Many2one('account.account', company_dependent=True, string='Tax current account (payable)')
-    property_tax_receivable_account_id = fields.Many2one('account.account', company_dependent=True, string='Tax current account (receivable)')
-    property_advance_tax_payment_account_id = fields.Many2one('account.account', company_dependent=True, string='Advance Tax payment account')
+    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
+    property_tax_payable_account_id = fields.Many2one('account.account', string='Tax current account (payable)')
+    property_tax_receivable_account_id = fields.Many2one('account.account', string='Tax current account (receivable)')
+    property_advance_tax_payment_account_id = fields.Many2one('account.account', string='Advance Tax payment account')
     country_id = fields.Many2one(string="Country", comodel_name='res.country', help="The country for which this tax group is applicable.")
     preceding_subtotal = fields.Char(
         string="Preceding Subtotal",
@@ -700,6 +701,47 @@ class AccountTaxRepartitionLine(models.Model):
     sequence = fields.Integer(string="Sequence", default=1,
         help="The order in which distribution lines are displayed and matched. For refunds to work properly, invoice distribution lines should be arranged in the same order as the credit note distribution lines they correspond to.")
     use_in_tax_closing = fields.Boolean(string="Tax Closing Entry", default=True)
+
+    def _sanitize_vals(self, vals):
+        def command_to_ids(command_list):
+            if all(isinstance(e, int) for e in command_list):
+                return command_list
+            elif 'tag_ids' in vals:
+                ids = []
+                for command, id, values in command_list:
+                    if command == Command.SET:
+                        ids.extend(values)
+                    if command == Command.LINK:
+                        ids.append(id)
+                return ids
+
+        tag_ids = set(command_to_ids(vals.get('tag_ids', [])))
+        if 'plus_report_line_ids' in vals:
+            tag_ids.update(
+                self.env['account.tax.report.line'].browse(
+                    command_to_ids(vals['plus_report_line_ids'])
+                ).tag_ids.filtered(lambda x: not x.tax_negate).ids
+            )
+            del vals['plus_report_line_ids']
+        if 'minus_report_line_ids' in vals:
+            tag_ids.update(
+                self.env['account.tax.report.line'].browse(
+                    command_to_ids(vals['minus_report_line_ids'])
+                ).tag_ids.filtered(lambda x: x.tax_negate).ids
+            )
+            del vals['minus_report_line_ids']
+        if tag_ids:
+            vals['tag_ids'] = list(tag_ids)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._sanitize_vals(vals)
+        super().create(vals_list)
+
+    def write(self, vals):
+        self._sanitize_vals(vals)
+        super().write(vals)
 
     @api.onchange('account_id', 'repartition_type')
     def _on_change_account_id(self):

@@ -413,8 +413,8 @@ class AccountJournal(models.Model):
                 JOIN account_journal journal on journal.id = apml.journal_id
                 JOIN res_company company on journal.company_id = company.id
                 WHERE apm.code in %s
-                GROUP BY 
-                    company.id, 
+                GROUP BY
+                    company.id,
                     apm.id
                 HAVING array_length(array_agg(journal.id), 1) > 1;
             ''', [unique_codes])
@@ -651,6 +651,12 @@ class AccountJournal(models.Model):
         # Create the bank_account_id if necessary
         if journal.type == 'bank' and not journal.bank_account_id and vals.get('bank_acc_number'):
             journal.set_bank_account(vals.get('bank_acc_number'), vals.get('bank_id'))
+
+        if journal.type == 'general':
+            if journal.code == _('EXCH') and not journal.company_id.currency_exchange_journal_id:
+                journal.company_id.currency_exchange_journal_id = journal
+            if journal.code == _('CABA') and not journal.company_id.tax_cash_basis_journal_id:
+                journal.company_id.tax_cash_basis_journal_id = journal
 
         return journal
 
