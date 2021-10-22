@@ -71,6 +71,8 @@ class Registry(Mapping):
         """ Create and return a new registry for the given database name. """
         t0 = time.time()
         with cls._lock:
+          from contextlib import nullcontext
+          with odoo.tools.profiler.Profiler(db=db_name, profile_session='ALL', collectors=['traces_async']) if update_module else nullcontext():
             registry = object.__new__(cls)
             registry.init(db_name)
 
@@ -238,7 +240,7 @@ class Registry(Mapping):
 
         return self.descendants(model_names, '_inherit', '_inherits')
 
-    def setup_models(self, cr):
+    def setup_models(self, cr, model_names=None):
         """ Complete the setup of models.
             This must be called after loading modules and before using the ORM.
         """
@@ -276,8 +278,10 @@ class Registry(Mapping):
         for model in models:
             model._prepare_setup()
 
-        self.field_depends.clear()
-        self.field_depends_context.clear()
+
+        old_depends = dict(self.field_depends)
+        #self.field_depends.clear()
+        #self.field_depends_context.clear()
         self.field_inverses.clear()
 
         # do the actual setup
@@ -299,6 +303,15 @@ class Registry(Mapping):
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
 
+        new_depends = dict(self.field_depends)
+        #for key, value in new_depends.items():
+        #    old_value = old_depends.get(key)
+        #    if value != old_value and model_names is not None:
+        #        if not key.model_name in model_names:
+        #            print(key.name, old_value, value)
+        #            print(key.model_name)
+        #            print(model_names)
+        #            raise
         # Reinstall registry hooks. Because of the condition, this only happens
         # on a fully loaded registry, and not on a registry being loaded.
         if self.ready:
