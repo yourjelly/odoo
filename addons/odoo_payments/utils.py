@@ -71,7 +71,7 @@ def odoo_payments_proxy_control(func, *args, **kwargs):
     account_sudo = request.env['adyen.account'].sudo().search([
         ('adyen_uuid', '=', adyen_uuid)])
     if not account_sudo:
-        raise Forbidden()
+        raise Forbidden()  # TODO ANVFE does that even make sense?
 
     secret = account_sudo.proxy_token.encode('utf8')
     msg_signature = request.httprequest.headers.get('oe-signature')  # base64 encoded hmac sha256 digest
