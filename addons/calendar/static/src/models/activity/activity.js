@@ -1,17 +1,20 @@
 /** @odoo-module **/
 
 import {
-    registerClassPatchModel,
-    registerInstancePatchModel,
-    registerFieldPatchModel
+    patchModelMethods,
+    patchRecordMethods,
+    patchFields
 } from'@mail/model/model_core';
 import { attr } from '@mail/model/model_field';
 
-registerFieldPatchModel('mail.activity', 'calendar/static/src/models/activity/activity.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/activity/activity';
+
+patchFields('mail.activity', {
     calendar_event_id: attr({ default: false }),
 });
 
-registerClassPatchModel('mail.activity', 'calendar/static/src/models/activity/activity.js', {
+patchModelMethods('mail.activity', {
     /**
      * @override
      */
@@ -24,7 +27,7 @@ registerClassPatchModel('mail.activity', 'calendar/static/src/models/activity/ac
     },
 });
 
-registerInstancePatchModel('mail.activity', 'calendar/static/src/models/activity/activity.js', {
+patchRecordMethods('mail.activity', {
     /**
      * @override
      */

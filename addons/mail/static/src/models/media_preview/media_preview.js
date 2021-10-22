@@ -1,41 +1,34 @@
 /** @odoo-module **/
 
-import { attr } from '@mail/model/model_field';
 import { registerNewModel } from '@mail/model/model_core';
+import { attr } from '@mail/model/model_field';
 
-function factory(dependencies) {
-
-    class MediaPreview extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+export const mediaPreview = {
+    modelName: 'mail.media_preview',
+    identifyingFields: ['messaging'],
+    lifecycle: {
         _created() {
-            super._created();
             // Bind necessary until OWL supports arrow function in handlers: https://github.com/odoo/owl/issues/876
             this.onClickDisableMicrophoneButton = this.onClickDisableMicrophoneButton.bind(this);
             this.onClickDisableVideoButton = this.onClickDisableVideoButton.bind(this);
             this.onClickEnableMicrophoneButton = this.onClickEnableMicrophoneButton.bind(this);
             this.onClickEnableVideoButton = this.onClickEnableVideoButton.bind(this);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    modelMethods: {
         /**
          * Iterates tracks of the provided MediaStream, calling the `stop`
          * method on each of them.
          * 
-         * @static
          * @param {MediaStream} mediaStream 
          */
-        static stopTracksOnMediaStream(mediaStream) {
+        stopTracksOnMediaStream(mediaStream) {
             for (const track of mediaStream.getTracks()) {
                 track.stop();
             }
-        }
-
+        },
+    },
+    recordMethods: {
         /**
          * Stops recording user's microphone.
          */
@@ -46,8 +39,7 @@ function factory(dependencies) {
             }
             this.messaging.models['mail.media_preview'].stopTracksOnMediaStream(this.audioStream);
             this.update({ audioStream: null });
-        }
-
+        },
         /**
          * Stops recording user's video device.
          */
@@ -58,8 +50,7 @@ function factory(dependencies) {
             }
             this.messaging.models['mail.media_preview'].stopTracksOnMediaStream(this.videoStream);
             this.update({ videoStream: null });
-        }
-
+        },
         /**
          * Asks for access to the user's microphone if not granted yet, then
          * starts recording and defines the resulting audio stream as the source
@@ -76,8 +67,7 @@ function factory(dependencies) {
             } catch {
                 // TODO: display popup asking the user to re-enable their mic
             }
-        }
-
+        },
         /**
          * Asks for access to the user's video device if not granted yet, then
          * starts recording and defines the resulting video stream as the source
@@ -94,40 +84,31 @@ function factory(dependencies) {
             } catch {
                 // TODO: display popup asking the user to re-enable their camera
             }
-        }
-
+        },
         /**
          * Handles click on the "disable microphone" button.
          */
         onClickDisableMicrophoneButton() {
             this.disableMicrophone();
-        }
-
+        },
         /**
          * Handles click on the "disable video" button.
          */
         onClickDisableVideoButton() {
             this.disableVideo();
-        }
-
+        },
         /**
          * Handles click on the "enable microphone" button.
          */
         onClickEnableMicrophoneButton() {
             this.enableMicrophone();
-        }
-
+        },
         /**
          * Handles click on the "enable video" button.
          */
         onClickEnableVideoButton() {
             this.enableVideo();
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
         /**
          * @private
          * @returns {boolean} 
@@ -138,16 +119,14 @@ function factory(dependencies) {
                 navigator.mediaDevices.getUserMedia &&
                 window.MediaStream
             );
-        }
-
+        },
         /**
          * @private
          * @returns {boolean} 
          */
         _computeIsMicrophoneEnabled() {
             return this.audioStream !== null;
-        }
-
+        },
         /**
          * @private
          * @returns {boolean} 
@@ -155,10 +134,8 @@ function factory(dependencies) {
         _computeIsVideoEnabled() {
             return this.videoStream !== null;
         }
-
-    }
-
-    MediaPreview.fields = {
+    },
+    fields: {
         /**
          * Ref to the audio element used for the audio feedback.
          */
@@ -204,11 +181,7 @@ function factory(dependencies) {
         videoStream: attr({
             default: null,
         }),
-    };
-    MediaPreview.identifyingFields = ['messaging'];
-    MediaPreview.modelName = 'mail.media_preview';
+    },
+};
 
-    return MediaPreview;
-}
-
-registerNewModel('mail.media_preview', factory);
+registerNewModel(mediaPreview);

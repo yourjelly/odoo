@@ -1,10 +1,13 @@
 /** @odoo-module **/
 
-import { registerClassPatchModel } from '@mail/model/model_core';
+import { patchModelMethods } from '@mail/model/model_core';
+
+// ensure that the model definition is loaded before the patch
+import '@mail/models/partner/partner';
 
 let nextPublicId = -1;
 
-registerClassPatchModel('mail.partner', 'im_livechat/static/src/models/partner/partner.js', {
+patchModelMethods('mail.partner', {
 
     //----------------------------------------------------------------------
     // Public

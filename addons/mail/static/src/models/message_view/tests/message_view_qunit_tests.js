@@ -1,15 +1,18 @@
 /** @odoo-module **/
 
-import { registerFieldPatchModel, registerIdentifyingFieldsPatch } from '@mail/model/model_core';
+import { patchFields, patchIdentifyingFields } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 
-registerFieldPatchModel('mail.message_view', 'qunit', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/message_view/message_view';
+
+patchFields('mail.message_view', {
     qunitTest: one2one('mail.qunit_test', {
         inverse: 'messageView',
         readonly: true,
     }),
 });
 
-registerIdentifyingFieldsPatch('mail.message_view', 'qunit', identifyingFields => {
+patchIdentifyingFields('mail.message_view', identifyingFields => {
     identifyingFields[0].push('qunitTest');
 });

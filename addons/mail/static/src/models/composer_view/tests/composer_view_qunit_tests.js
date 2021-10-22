@@ -1,10 +1,13 @@
 /** @odoo-module **/
 
-import { registerFieldPatchModel, registerIdentifyingFieldsPatch, registerInstancePatchModel } from '@mail/model/model_core';
+import { patchFields, patchIdentifyingFields, patchRecordMethods } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 import { replace } from '@mail/model/model_field_command';
 
-registerInstancePatchModel('mail.composer_view', 'qunit', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/composer_view/composer_view';
+
+patchRecordMethods('mail.composer_view', {
     _computeComposer() {
         if (this.qunitTest && this.qunitTest.composer) {
             return replace(this.qunitTest.composer);
@@ -13,13 +16,13 @@ registerInstancePatchModel('mail.composer_view', 'qunit', {
     }
 });
 
-registerFieldPatchModel('mail.composer_view', 'qunit', {
+patchFields('mail.composer_view', {
     qunitTest: one2one('mail.qunit_test', {
         inverse: 'composerView',
         readonly: true,
     }),
 });
 
-registerIdentifyingFieldsPatch('mail.composer_view', 'qunit', identifyingFields => {
+patchIdentifyingFields('mail.composer_view', identifyingFields => {
     identifyingFields[0].push('qunitTest');
 });

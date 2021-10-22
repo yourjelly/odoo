@@ -1,11 +1,14 @@
 /** @odoo-module **/
 
 import {
-    registerFieldPatchModel,
+    patchFields,
 } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 
-registerFieldPatchModel('mail.user', 'hr/static/src/models/user/user.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/user/user';
+
+patchFields('mail.user', {
     /**
      * Employee related to this user.
      */

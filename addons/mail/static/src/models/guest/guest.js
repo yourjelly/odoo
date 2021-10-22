@@ -1,47 +1,12 @@
 /** @odoo-module **/
 
-import { attr, one2many } from '@mail/model/model_field';
 import { registerNewModel } from '@mail/model/model_core';
+import { attr, one2many } from '@mail/model/model_field';
 
-function factory(dependencies) {
-
-    class Guest extends dependencies['mail.model'] {
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
-        /**
-         * @static
-         * @param {Object} param0
-         * @param {number} param0.id The id of the guest to rename.
-         * @param {string} param0.name The new name to use to rename the guest.
-         */
-        static async performRpcGuestUpdateName({ id, name }) {
-            await this.env.services.rpc({
-                route: '/mail/guest/update_name',
-                params: {
-                    guest_id: id,
-                    name,
-                },
-            });
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @private
-         * @returns {string}
-         */
-        _computeAvatarUrl() {
-            return `/web/image/mail.guest/${this.id}/avatar_128?unique=${this.name}`;
-        }
-
-    }
-
-    Guest.fields = {
+export const guest = {
+    modelName: 'mail.guest',
+    identifyingFields: ['id'],
+    fields: {
         authoredMessages: one2many('mail.message', {
             inverse: 'guestAuthor',
         }),
@@ -53,11 +18,33 @@ function factory(dependencies) {
             readonly: true,
         }),
         name: attr(),
-    };
-    Guest.identifyingFields = ['id'];
-    Guest.modelName = 'mail.guest';
+    },
+    modelMethods: {
+        /**
+         * @static
+         * @param {Object} param0
+         * @param {number} param0.id The id of the guest to rename.
+         * @param {string} param0.name The new name to use to rename the guest.
+         */
+        async performRpcGuestUpdateName({ id, name }) {
+            await this.env.services.rpc({
+                route: '/mail/guest/update_name',
+                params: {
+                    guest_id: id,
+                    name,
+                },
+            });
+        }
+    },
+    recordMethods: {
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeAvatarUrl() {
+            return `/web/image/mail.guest/${this.id}/avatar_128?unique=${this.name}`;
+        }
+    },
+};
 
-    return Guest;
-}
-
-registerNewModel('mail.guest', factory);
+registerNewModel(guest);

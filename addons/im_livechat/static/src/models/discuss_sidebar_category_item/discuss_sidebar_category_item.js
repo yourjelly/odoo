@@ -1,8 +1,11 @@
 /** @odoo-module **/
 
-import { registerInstancePatchModel } from '@mail/model/model_core';
+import { patchRecordMethods } from '@mail/model/model_core';
 
-registerInstancePatchModel('mail.discuss_sidebar_category_item', 'im_livechat/static/src/models/discuss_sidebar_category_item/discuss_sidebar_category_item.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/discuss_sidebar_category_item/discuss_sidebar_category_item';
+
+patchRecordMethods('mail.discuss_sidebar_category_item', {
 
     //----------------------------------------------------------------------
     // Private

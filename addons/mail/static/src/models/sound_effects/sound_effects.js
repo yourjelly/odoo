@@ -4,12 +4,10 @@ import { registerNewModel } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 import { insertAndReplace } from '@mail/model/model_field_command';
 
-function factory(dependencies) {
-
-    class SoundEffects extends dependencies['mail.model'] {
-    }
-
-    SoundEffects.fields = {
+export const soundEffects = {
+    modelName: 'mail.sound_effects',
+    identifyingFields: ['messaging'],
+    fields: {
         channelJoin: one2one('mail.sound_effect', {
             default: insertAndReplace({ filename: 'channel_01_in' }),
             isCausal: true,
@@ -38,11 +36,7 @@ function factory(dependencies) {
             default: insertAndReplace({ filename: 'share_02' }),
             isCausal: true,
         }),
-    };
-    SoundEffects.identifyingFields = ['messaging'];
-    SoundEffects.modelName = 'mail.sound_effects';
+    },
+};
 
-    return SoundEffects;
-}
-
-registerNewModel('mail.sound_effects', factory);
+registerNewModel(soundEffects);

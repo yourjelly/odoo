@@ -1,8 +1,11 @@
 /** @odoo-module **/
 
-import { registerInstancePatchModel } from '@mail/model/model_core';
+import { patchRecordMethods } from '@mail/model/model_core';
 
-registerInstancePatchModel('mail.messaging_notification_handler', 'im_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/messaging_notification_handler/messaging_notification_handler';
+
+patchRecordMethods('mail.messaging_notification_handler', {
 
     //----------------------------------------------------------------------
     // Private

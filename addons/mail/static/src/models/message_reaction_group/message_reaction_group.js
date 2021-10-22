@@ -5,22 +5,16 @@ import { attr, many2many, many2one } from '@mail/model/model_field';
 import { insertAndReplace } from '@mail/model/model_field_command';
 import { markEventHandled } from '@mail/utils/utils';
 
-function factory(dependencies) {
-
-    class MessageReactionGroup extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+export const messageReactionGroup = {
+    modelName: 'mail.message_reaction_group',
+    identifyingFields: ['message', 'content'],
+    lifecycle: {
         _created() {
             super._created();
             this.onClick = this.onClick.bind(this);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         /**
          * Handles click on the reaction group.
          *
@@ -33,12 +27,7 @@ function factory(dependencies) {
             } else {
                 this.message.addReaction(this.content);
             }
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
         /**
          * @private
          * @returns {boolean}
@@ -48,16 +37,14 @@ function factory(dependencies) {
                 (this.messaging.currentPartner && this.partners.includes(this.messaging.currentPartner)) ||
                 (this.messaging.currentGuest && this.guests.includes(this.messaging.currentGuest))
             );
-        }
-
+        },
         /**
          * @private
          * @returns {FieldCommand}
          */
         _computeMessage() {
             return insertAndReplace({ id: this.messageId });
-        }
-
+        },
         /**
          * @private
          * @returns {string}
@@ -84,11 +71,9 @@ function factory(dependencies) {
                 default:
                     return _.str.sprintf(this.env._t('%s, %s, %s and %s other persons have reacted with %s'), firstUser, secondUser, thirdUser, length - 3, this.content);
             }
-        }
-
-    }
-
-    MessageReactionGroup.fields = {
+        },
+    },
+    fields: {
         content: attr({
             readonly: true,
             required: true,
@@ -121,11 +106,7 @@ function factory(dependencies) {
         summary: attr({
             compute: '_computeSummary',
         }),
-    };
-    MessageReactionGroup.identifyingFields = ['message', 'content'];
-    MessageReactionGroup.modelName = 'mail.message_reaction_group';
+    },
+};
 
-    return MessageReactionGroup;
-}
-
-registerNewModel('mail.message_reaction_group', factory);
+registerNewModel(messageReactionGroup);

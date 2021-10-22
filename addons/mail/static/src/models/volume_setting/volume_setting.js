@@ -5,21 +5,15 @@ import { attr, one2one, many2one } from '@mail/model/model_field';
 import { insert } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
-function factory(dependencies) {
-
-    class VolumeSetting extends dependencies['mail.model'] {
-
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+export const volumeSetting = {
+    modelName: 'mail.volume_setting',
+    identifyingFields: ['id'],
+    modelMethods: {
         /**
-         * @static
          * @param {Object} data
          * @returns {Object}
          */
-        static convertData(data) {
+        convertData(data) {
             const data2 = {};
             if ('volume' in data) {
                 data2.volume = data.volume;
@@ -38,12 +32,9 @@ function factory(dependencies) {
                 data2.partner = insert(partnerData);
             }
             return data2;
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         /**
          * @private
          */
@@ -53,10 +44,9 @@ function factory(dependencies) {
                     rtcSession.audioElement.volume = this.volume;
                 }
             }
-        }
-    }
-
-    VolumeSetting.fields = {
+        },
+    },
+    fields: {
         id: attr({
             readonly: true,
             required: true,
@@ -72,18 +62,13 @@ function factory(dependencies) {
         volume: attr({
             default: 0.5,
         }),
-    };
-    VolumeSetting.identifyingFields = ['id'];
-    VolumeSetting.onChanges = [
+    },
+    onChanges: [
         new OnChange({
             dependencies: ['volume'],
             methodName: '_onChangeVolume',
         }),
-    ];
+    ],
+};
 
-    VolumeSetting.modelName = 'mail.volume_setting';
-
-    return VolumeSetting;
-}
-
-registerNewModel('mail.volume_setting', factory);
+registerNewModel(volumeSetting);

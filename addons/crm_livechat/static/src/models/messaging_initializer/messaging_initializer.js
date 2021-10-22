@@ -1,9 +1,12 @@
 /** @odoo-module **/
 
-import { registerInstancePatchModel } from '@mail/model/model_core';
+import { patchRecordMethods } from '@mail/model/model_core';
 import { insert } from '@mail/model/model_field_command';
 
-registerInstancePatchModel('mail.messaging_initializer', 'crm_livechat', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/messaging_initializer/messaging_initializer';
+
+patchRecordMethods('mail.messaging_initializer', {
     /**
      * @override
      */

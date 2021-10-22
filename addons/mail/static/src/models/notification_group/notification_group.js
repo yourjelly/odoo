@@ -4,14 +4,10 @@ import { registerNewModel } from '@mail/model/model_core';
 import { attr, many2one, one2many } from '@mail/model/model_field';
 import { clear, insert, unlink } from '@mail/model/model_field_command';
 
-function factory(dependencies) {
-
-    class NotificationGroup extends dependencies['mail.model'] {
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+export const notificationGroup = {
+    modelName: 'mail.notification_group',
+    identifyingFields: ['id'],
+    recordMethods: {
         /**
          * Opens the view that allows to cancel all notifications of the group.
          */
@@ -28,8 +24,7 @@ function factory(dependencies) {
                     },
                 },
             });
-        }
-
+        },
         /**
          * Opens the view that displays either the single record of the group or
          * all the records in the group.
@@ -40,12 +35,7 @@ function factory(dependencies) {
             } else {
                 this._openDocuments();
             }
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
         /**
          * @private
          * @returns {mail.thread|undefined}
@@ -62,8 +52,7 @@ function factory(dependencies) {
                 id: notificationsThreadIds[0],
                 model: this.res_model,
             });
-        }
-
+        },
         /**
          * Compute the most recent date inside the notification messages.
          *
@@ -78,8 +67,7 @@ function factory(dependencies) {
                 return clear();
             }
             return moment.max(dates);
-        }
-
+        },
         /**
          * Compute the position of the group inside the notification list.
          *
@@ -88,8 +76,7 @@ function factory(dependencies) {
          */
         _computeSequence() {
             return -Math.max(...this.notifications.map(notification => notification.message.id));
-        }
-
+        },
         /**
          * Opens the view that displays all the records of the group.
          *
@@ -115,11 +102,9 @@ function factory(dependencies) {
                 // be closed to ensure the visibility of the view
                 this.messaging.messagingMenu.close();
             }
-        }
-
-    }
-
-    NotificationGroup.fields = {
+        },
+    },
+    fields: {
         /**
          * States the most recent date of all the notification message.
          */
@@ -147,11 +132,7 @@ function factory(dependencies) {
         thread: many2one('mail.thread', {
             compute: '_computeThread',
         })
-    };
-    NotificationGroup.identifyingFields = ['id'];
-    NotificationGroup.modelName = 'mail.notification_group';
+    },
+};
 
-    return NotificationGroup;
-}
-
-registerNewModel('mail.notification_group', factory);
+registerNewModel(notificationGroup);

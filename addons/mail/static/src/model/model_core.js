@@ -22,33 +22,9 @@ const registry = {};
  */
 function _getEntryFromModelName(modelName) {
     if (!registry[modelName]) {
-        registry[modelName] = {
-            dependencies: [],
-            factory: undefined,
-            name: modelName,
-            patches: [],
-        };
+        registry[modelName] = { factory: undefined };
     }
     return registry[modelName];
-}
-
-/**
- * @private
- * @param {string} modelName
- * @param {string} patchName
- * @param {Object} patch
- * @param {Object} [param3={}]
- * @param {string} [param3.type='instance'] 'instance', 'class', 'field' or 'identifyingFields'
- */
-function _registerPatchModel(modelName, patchName, patch, { type = 'instance' } = {}) {
-    const entry = _getEntryFromModelName(modelName);
-    Object.assign(entry, {
-        patches: (entry.patches || []).concat([{
-            name: patchName,
-            patch,
-            type,
-        }]),
-    });
 }
 
 //------------------------------------------------------------------------------
@@ -56,68 +32,122 @@ function _registerPatchModel(modelName, patchName, patch, { type = 'instance' } 
 //------------------------------------------------------------------------------
 
 /**
- * Register a patch for static methods in model.
+ * Applies the provided fields to the model specified by the `modelName`.
  *
- * @param {string} modelName
- * @param {string} patchName
- * @param {Object} patch
+ * @param {string} modelName The name of the model to which to apply the patch.
+ * @param {Object} fields Fields to be patched.
  */
-function registerClassPatchModel(modelName, patchName, patch) {
-    _registerPatchModel(modelName, patchName, patch, { type: 'class' });
-}
-
-/**
- * Register a patch for fields in model.
- *
- * @param {string} modelName
- * @param {string} patchName
- * @param {Object} patch
- */
-function registerFieldPatchModel(modelName, patchName, patch) {
-    _registerPatchModel(modelName, patchName, patch, { type: 'field' });
-}
-
-/**
- * Register a patch for identifyignFields in model.
- *
- * @param {string} modelName
- * @param {string} patchName
- * @param {function} patch
- */
-function registerIdentifyingFieldsPatch(modelName, patchName, patch) {
-    _registerPatchModel(modelName, patchName, patch, { type: 'identifyingFields' });
-}
-
-/**
- * Register a patch for instance methods in model.
- *
- * @param {string} modelName
- * @param {string} patchName
- * @param {Object} patch
- */
-function registerInstancePatchModel(modelName, patchName, patch) {
-    _registerPatchModel(modelName, patchName, patch, { type: 'instance' });
-}
-
-/**
- * @param {string} name
- * @param {function} factory
- * @param {string[]} [dependencies=[]]
- */
-function registerNewModel(name, factory, dependencies = []) {
-    const entry = _getEntryFromModelName(name);
-    let entryDependencies = [...dependencies];
-    if (name !== 'mail.model') {
-        entryDependencies = [...new Set(entryDependencies.concat(['mail.model']))];
+function patchFields(modelName, fields) {
+    const entry = _getEntryFromModelName(modelName);
+    if (!entry.factory) {
+        throw new Error(`Model "${modelName}" must be registered before patched.`);
     }
+    for (const [fieldName, field] of Object.entries(fields)) {
+        entry.factory.fields[fieldName] = field;
+    }
+}
+
+/**
+ * Applies the provided function to the identifying fields of the model
+ * specified by the `modelName`.
+ *
+ * @param {string} modelName The name of the model to which to apply the patch.
+ * @param {function} patch The function to be applied on the identifying fields.
+ */
+function patchIdentifyingFields(modelName, patch) {
+    const entry = _getEntryFromModelName(modelName);
+    if (!entry.factory) {
+        throw new Error(`Model "${modelName}" must be registered before patched.`);
+    }
+    patch(entry.factory.identifyingFields);
+}
+
+/**
+ * Adds or overrides the provided methods to the model specified by the
+ * `modelName`.
+ *
+ * @param {string} modelName The name of the model to which to apply the patch.
+ * @param {Object} methods Methods to be added or overriden.
+ */
+function patchModelMethods(modelName, methods) {
+    const entry = _getEntryFromModelName(modelName);
+    if (!entry.factory) {
+        throw new Error(`Model "${modelName}" must be registered before patched.`);
+    }
+    if (!entry.factory.modelMethods) {
+        entry.factory.modelMethods = {};
+    }
+    for (const [methodName, method] of Object.entries(methods)) {
+        if (typeof method !== 'function') {
+            throw new Error(`Cannot patch model methods on model "${modelName}": values must be typeof function.`);
+        }
+        if (!entry.factory.modelMethods[methodName]) {
+            entry.factory.modelMethods[methodName] = method;
+            continue;
+        }
+        const originalMethod = entry.factory.modelMethods[methodName];
+        entry.factory.modelMethods[methodName] = function(...args) {
+            const previousSuper = this._super;
+            this._super = originalMethod;
+            const ret = method.call(this, ...args);
+            this._super = previousSuper;
+            return ret;
+        };
+}
+}
+
+/**
+ * Adds or overrides the provided methods to the records of the model specified
+ * by the `modelName`.
+ *
+ * @param {string} modelName The name of the model to which to apply the patch.
+ * @param {Object} methods
+ */
+function patchRecordMethods(modelName, methods) {
+    const entry = _getEntryFromModelName(modelName);
+    if (!entry.factory) {
+        throw new Error(`Model "${modelName}" must be registered before patched.`);
+    }
+    if (!entry.factory.recordMethods) {
+        entry.factory.recordMethods = {};
+    }
+    for (const [methodName, method] of Object.entries(methods)) {
+        if (typeof method !== 'function') {
+            throw new Error(`Cannot patch record methods on model "${modelName}": values must be typeof function.`);
+        }
+        if (!entry.factory.recordMethods[methodName]) {
+            entry.factory.recordMethods[methodName] = method;
+            continue;
+        }
+        const originalMethod = entry.factory.recordMethods[methodName];
+        entry.factory.recordMethods[methodName] = function(...args) {
+            const previousSuper = this._super;
+            this._super = originalMethod;
+            const ret = method.call(this, ...args);
+            this._super = previousSuper;
+            return ret;
+        };
+    }
+}
+
+/**
+ * @param {Object} factory
+ */
+function registerNewModel(factory) {
+    if (!factory.modelName) {
+        throw new Error("Model is lacking a modelName.");
+    }
+    if (!factory.identifyingFields) {
+        throw new Error(`Model "${factory.modelName}" is lacking identifying fields.`);
+    }
+    if (!factory.fields) {
+        factory.fields = {};
+    }
+    const entry = _getEntryFromModelName(factory.modelName);
     if (entry.factory) {
-        throw new Error(`Model "${name}" has already been registered!`);
+        throw new Error(`Model "${factory.modelName}" has already been registered!`);
     }
-    Object.assign(entry, {
-        dependencies: entryDependencies,
-        factory,
-        name,
-    });
+    Object.assign(entry, { factory });
 }
 
 //------------------------------------------------------------------------------
@@ -125,11 +155,10 @@ function registerNewModel(name, factory, dependencies = []) {
 //------------------------------------------------------------------------------
 
 export {
-    registerClassPatchModel,
-    registerFieldPatchModel,
-    registerInstancePatchModel,
-    registerIdentifyingFieldsPatch,
+    patchFields,
+    patchIdentifyingFields,
+    patchModelMethods,
+    patchRecordMethods,
     registerNewModel,
     registry,
 };
-

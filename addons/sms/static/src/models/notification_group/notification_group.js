@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
-import {
-    registerInstancePatchModel,
-} from '@mail/model/model_core';
+import { patchRecordMethods } from '@mail/model/model_core';
 
-registerInstancePatchModel('mail.notification_group', 'sms/static/src/models/notification_group/notification_group.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/notification_group/notification_group';
+
+patchRecordMethods('mail.notification_group', {
 
     //--------------------------------------------------------------------------
     // Public

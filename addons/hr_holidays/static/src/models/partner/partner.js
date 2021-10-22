@@ -1,17 +1,19 @@
-odoo.define('hr_holidays/static/src/models/partner/partner.js', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {
-    registerClassPatchModel,
-    registerFieldPatchModel,
-    registerInstancePatchModel,
-} = require('@mail/model/model_core');
-const { attr } = require('@mail/model/model_field');
-const { clear } = require('@mail/model/model_field_command');
+import {
+    patchModelMethods,
+    patchFields,
+    patchRecordMethods,
+} from '@mail/model/model_core';
+import { attr } from '@mail/model/model_field';
+import { clear } from '@mail/model/model_field_command';
 
-const { str_to_date } = require('web.time');
+import { str_to_date } from 'web.time';
 
-registerClassPatchModel('mail.partner', 'hr_holidays/static/src/models/partner/partner.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/partner/partner';
+
+patchModelMethods('mail.partner', {
     /**
      * @override
      */
@@ -24,7 +26,7 @@ registerClassPatchModel('mail.partner', 'hr_holidays/static/src/models/partner/p
     },
 });
 
-registerInstancePatchModel('mail.partner', 'hr_holidays/static/src/models/partner/partner.js', {
+patchRecordMethods('mail.partner', {
     /**
      * @private
      */
@@ -56,7 +58,7 @@ registerInstancePatchModel('mail.partner', 'hr_holidays/static/src/models/partne
     },
 });
 
-registerFieldPatchModel('mail.partner', 'hr/static/src/models/partner/partner.js', {
+patchFields('mail.partner', {
     /**
      * Date of end of the out of office period of the partner as string.
      * String is expected to use Odoo's date string format
@@ -69,6 +71,4 @@ registerFieldPatchModel('mail.partner', 'hr/static/src/models/partner/partner.js
     outOfOfficeText: attr({
         compute: '_computeOutOfOfficeText',
     }),
-});
-
 });

@@ -3,23 +3,16 @@
 import { registerNewModel } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
-function factory(dependencies) {
-
-    class RtcLayoutMenu extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+export const rtcLayoutMenu = {
+    modelName: 'mail.rtc_layout_menu',
+    identifyingFields: ['callViewer'],
+    lifecycle: {
         _created() {
-            super._created();
             this.onClickFilter = this.onClickFilter.bind(this);
             this.onClickLayout = this.onClickLayout.bind(this);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         /**
          * @param {MouseEvent} ev
          */
@@ -37,8 +30,7 @@ function factory(dependencies) {
                     });
                     break;
             }
-        }
-
+        },
         /**
          * @param {MouseEvent} ev
          */
@@ -48,21 +40,15 @@ function factory(dependencies) {
                 rtcLayout: ev.target.value,
             });
             this.component.trigger('dialog-closed');
-        }
-
-    }
-
-    RtcLayoutMenu.fields = {
+        },
+    },
+    fields: {
         component: attr(),
         callViewer: one2one('mail.rtc_call_viewer', {
             inverse: 'rtcLayoutMenu',
             readonly: true,
         }),
-    };
-    RtcLayoutMenu.identifyingFields = ['callViewer'];
-    RtcLayoutMenu.modelName = 'mail.rtc_layout_menu';
+    },
+};
 
-    return RtcLayoutMenu;
-}
-
-registerNewModel('mail.rtc_layout_menu', factory);
+registerNewModel(rtcLayoutMenu);

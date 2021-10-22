@@ -4,14 +4,10 @@ import { registerNewModel } from '@mail/model/model_core';
 import { one2many } from '@mail/model/model_field';
 import { link } from '@mail/model/model_field_command';
 
-function factory(dependencies) {
-
-    class NotificationGroupManager extends dependencies['mail.model'] {
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+export const notificationGroupManager = {
+    modelName: 'mail.notification_group_manager',
+    identifyingFields: ['messaging'],
+    recordMethods: {
         computeGroups() {
             // not supported for guests
             if (this.messaging.isCurrentUserGuest) {
@@ -44,17 +40,11 @@ function factory(dependencies) {
                 }
             });
             this.update({ groups: link(groups) });
-        }
-
-    }
-
-    NotificationGroupManager.fields = {
+        },
+    },
+    fields: {
         groups: one2many('mail.notification_group'),
-    };
-    NotificationGroupManager.identifyingFields = ['messaging'];
-    NotificationGroupManager.modelName = 'mail.notification_group_manager';
+    },
+};
 
-    return NotificationGroupManager;
-}
-
-registerNewModel('mail.notification_group_manager', factory);
+registerNewModel(notificationGroupManager);

@@ -4,7 +4,6 @@ import { registry } from '@mail/model/model_core';
 import { ModelField } from '@mail/model/model_field';
 import { FieldCommand, unlinkAll } from '@mail/model/model_field_command';
 import { Listener } from '@mail/model/model_listener';
-import { patchClassMethods, patchInstanceMethods } from '@mail/utils/utils';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
 /**
@@ -432,24 +431,12 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model} Model class
-     * @param {Object} patch
-     */
-    _applyModelPatchFields(Model, patch) {
-        for (const [fieldName, field] of Object.entries(patch)) {
-            Model.fields[fieldName] = field;
-        }
-    }
-
-    /**
-     * @private
      * @param {Object} Models
      * @throws {Error} in case some declared fields are not correct.
      */
     _checkDeclaredFieldsOnModels(Models) {
         for (const Model of Object.values(Models)) {
-            for (const fieldName in Model.fields) {
-                const field = Model.fields[fieldName];
+            for (const [fieldName, field] of Object.entries(registry[Model.modelName].factory.fields)) {
                 // 0. Forbidden name.
                 if (fieldName in Model.prototype) {
                     throw new Error(`Field "${Model}/${fieldName}" has a forbidden name.`);
@@ -464,7 +451,6 @@ export class ModelManager {
                         ![
                             'compute',
                             'default',
-                            'dependencies',
                             'fieldType',
                             'readonly',
                             'related',
@@ -480,7 +466,6 @@ export class ModelManager {
                         ![
                             'compute',
                             'default',
-                            'dependencies',
                             'fieldType',
                             'inverse',
                             'isCausal',
@@ -527,9 +512,7 @@ export class ModelManager {
                     let relatedRelation;
                     let TargetModel = Model;
                     while (Models[TargetModel.modelName] && !relatedRelation) {
-                        if (TargetModel.fields) {
-                            relatedRelation = TargetModel.fields[relationName];
-                        }
+                        relatedRelation = registry[TargetModel.modelName].factory.fields[relationName];
                         TargetModel = TargetModel.__proto__;
                     }
                     if (!relatedRelation) {
@@ -544,9 +527,7 @@ export class ModelManager {
                     let relatedField;
                     TargetModel = RelatedModel;
                     while (Models[TargetModel.modelName] && !relatedField) {
-                        if (TargetModel.fields) {
-                            relatedField = TargetModel.fields[relatedFieldName];
-                        }
+                        relatedField = registry[TargetModel.modelName].factory.fields[relatedFieldName];
                         TargetModel = TargetModel.__proto__;
                     }
                     if (!relatedField) {
@@ -720,7 +701,16 @@ export class ModelManager {
          * Prepare record state. Assign various keys and values that are
          * expected to be found on every record.
          */
-        const nonProxyRecord = new Model({ localId, valid: true });
+        const nonProxyRecord = new Model();
+        Object.assign(nonProxyRecord, {
+            // The unique record identifier.
+            localId,
+            // Listeners that are bound to this record, to be notified of
+            // change in dependencies of compute, related and "on change".
+            __listeners: [],
+            // Field values of record.
+            __values: {},
+        });
         const record = !this.env.isDebug() ? nonProxyRecord : new Proxy(nonProxyRecord, {
             get: function (record, prop) {
                 if (
@@ -756,7 +746,10 @@ export class ModelManager {
          * considered existing.
          */
         Model.__records[record.localId] = record;
-        record._willCreate();
+        const { factory } = registry[record.constructor.modelName];
+        if (factory.lifecycle && factory.lifecycle._willCreate) {
+            factory.lifecycle._willCreate.call(record);
+        }
         /**
          * Register post processing operation that are to be delayed at
          * the end of the update cycle.
@@ -791,7 +784,10 @@ export class ModelManager {
         if (!record.exists()) {
             throw Error(`Cannot delete already deleted record ${record.localId}.`);
         }
-        record._willDelete();
+        const { factory } = registry[record.constructor.modelName];
+        if (factory.lifecycle && factory.lifecycle._willDelete) {
+            factory.lifecycle._willDelete.call(record);
+        }
         for (const listener of record.__listeners) {
             this.removeListener(listener);
         }
@@ -838,8 +834,6 @@ export class ModelManager {
 
     /**
      * Executes the compute methods of the created records.
-     *
-     * @returns {boolean} whether any change happened
      */
     _executeCreatedRecordsComputes() {
         const hasChanged = this._createdRecordsComputes.size > 0;
@@ -894,8 +888,6 @@ export class ModelManager {
 
     /**
      * Executes the _created method of the created records.
-     *
-     * @returns {boolean} whether any change happened
      */
     _executeCreatedRecordsCreated() {
         for (const record of this._createdRecordsCreated) {
@@ -905,14 +897,15 @@ export class ModelManager {
             if (!record.exists()) {
                 throw Error(`Cannot call _created for already deleted ${record}.`);
             }
-            record._created();
+            const { factory } = registry[record.constructor.modelName];
+            if (factory.lifecycle && factory.lifecycle._created) {
+                factory.lifecycle._created.call(record);
+            }
         }
     }
 
     /**
      * Executes the onChange method of the created records.
-     *
-     * @returns {boolean} whether any change happened
      */
     _executeCreatedRecordsOnChange() {
         for (const record of this._createdRecordsOnChange) {
@@ -922,7 +915,7 @@ export class ModelManager {
             if (!record.exists()) {
                 throw Error(`Cannot call onChange for already deleted ${record}.`);
             }
-            for (const onChange of record.constructor.onChanges || []) {
+            for (const onChange of registry[record.constructor.modelName].factory.onChanges || []) {
                 const listener = new Listener({
                     name: `${onChange} of ${record}`,
                     onChange: (info) => {
@@ -955,8 +948,6 @@ export class ModelManager {
 
     /**
      * Executes the check of the required field of updated records.
-     *
-     * @returns {boolean} whether any change happened
      */
     _executeUpdatedRecordsCheckRequired() {
         for (const record of this._updatedRecordsCheckRequired) {
@@ -993,30 +984,36 @@ export class ModelManager {
         const allNames = Object.keys(registry);
         const Models = {};
         const generatedNames = [];
-        let toGenerateNames = [...allNames];
-        while (toGenerateNames.length > 0) {
-            const generatable = toGenerateNames.map(name => registry[name]).find(entry => {
-                let isGenerateable = true;
-                for (const dependencyName of entry.dependencies) {
-                    if (!generatedNames.includes(dependencyName)) {
-                        isGenerateable = false;
-                    }
+        for (const modelName of ['mail.model', ...allNames.filter(name => name !== 'mail.model')]) {
+            const { factory } = registry[modelName];
+            // Create the model and give it a meaningful name to be displayed in
+            // stack traces and stuff.
+            const Model = modelName === 'mail.model'
+                ? { [modelName]: class {} }[modelName]
+                : { [modelName]: class extends Models['mail.model'] {} }[modelName];
+            if (modelName === 'mail.model') {
+                for (const [getterName, getter] of Object.entries(factory.modelGetters)) {
+                    Object.defineProperty(Model, getterName, { get: getter });
                 }
-                return isGenerateable;
-            });
-            if (!generatable) {
-                throw new Error(`Cannot generate following Model: ${toGenerateNames.join(', ')}`);
+                for (const [getterName, getter] of Object.entries(factory.recordGetters)) {
+                    Object.defineProperty(Model.prototype, getterName, { get: getter });
+                }
             }
+            Object.assign(Model, factory.modelMethods);
+            if (factory.recordMethods) {
+                for (const [methodName, method] of Object.entries(factory.recordMethods)) {
+                    Model.prototype[methodName] = method;
+                }
+            }
+            Model.modelName = factory.modelName;
             // Make model manager accessible from Model.
-            const Model = generatable.factory(Models);
             Model.modelManager = this;
+            Model.fields = {};
             /**
             * Contains all records. key is local id, while value is the record.
             */
             Model.__records = {};
-            if (!Model.hasOwnProperty('identifyingFields')) {
-                throw new Error(`${Model} is lacking identifying fields.`);
-            }
+            Model.identifyingFields = factory.identifyingFields;
             Model.__identifyingFields = Model.identifyingFields;
             const identifyingFieldsFlattened = new Set();
             for (const identifyingElement of Model.identifyingFields) {
@@ -1028,31 +1025,11 @@ export class ModelManager {
                 }
             }
             Model.__identifyingFieldsFlattened = identifyingFieldsFlattened;
-            for (const patch of generatable.patches) {
-                switch (patch.type) {
-                    case 'class':
-                        patchClassMethods(Model, patch.name, patch.patch);
-                        break;
-                    case 'instance':
-                        patchInstanceMethods(Model, patch.name, patch.patch);
-                        break;
-                    case 'field':
-                        this._applyModelPatchFields(Model, patch.patch);
-                        break;
-                    case 'identifyingFields':
-                        patch.patch(Model.__identifyingFields);
-                        break;
-                }
-            }
-            if (!Object.prototype.hasOwnProperty.call(Model, 'modelName')) {
-                throw new Error(`Missing static property "modelName" on Model class "${Model.name}".`);
-            }
             if (generatedNames.includes(Model.modelName)) {
                 throw new Error(`Duplicate model name "${Model}" shared on 2 distinct Model classes.`);
             }
             Models[Model.modelName] = Model;
             generatedNames.push(Model.modelName);
-            toGenerateNames = toGenerateNames.filter(name => name !== Model.modelName);
             this._listenersObservingAllByModel.set(Model, new Map());
         }
         /**
@@ -1265,12 +1242,8 @@ export class ModelManager {
          * 1. Prepare fields.
          */
         for (const Model of Object.values(Models)) {
-            if (!Object.prototype.hasOwnProperty.call(Model, 'fields')) {
-                Model.fields = {};
-            }
-            Model.inverseRelations = [];
             // Make fields aware of their field name.
-            for (const [fieldName, fieldData] of Object.entries(Model.fields)) {
+            for (const [fieldName, fieldData] of Object.entries(registry[Model.modelName].factory.fields)) {
                 Model.fields[fieldName] = new ModelField(Object.assign({}, fieldData, {
                     fieldName,
                 }));

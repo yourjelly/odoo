@@ -1,15 +1,18 @@
 /** @odoo-module **/
 
-import { registerFieldPatchModel, registerIdentifyingFieldsPatch } from '@mail/model/model_core';
+import { patchFields, patchIdentifyingFields } from '@mail/model/model_core';
 import { one2one } from '@mail/model/model_field';
 
-registerFieldPatchModel('mail.discuss_sidebar_category', 'im_livechat', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/discuss_sidebar_category/discuss_sidebar_category';
+
+patchFields('mail.discuss_sidebar_category', {
     discussAsLivechat: one2one('mail.discuss', {
         inverse: 'categoryLivechat',
         readonly: true,
     }),
 });
 
-registerIdentifyingFieldsPatch('mail.discuss_sidebar_category', 'im_livechat', identifyingFields => {
+patchIdentifyingFields('mail.discuss_sidebar_category', identifyingFields => {
     identifyingFields[0].push('discussAsLivechat');
 });

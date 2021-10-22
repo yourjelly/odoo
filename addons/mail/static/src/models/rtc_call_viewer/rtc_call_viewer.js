@@ -9,15 +9,11 @@ import { clear, insert, insertAndReplace, link, unlink } from '@mail/model/model
 
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
-function factory(dependencies) {
-
-    class RtcCallViewer extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+export const rtcCallViewer = {
+    modelName: 'mail.rtc_call_viewer',
+    identifyingFields: ['threadView'],
+    lifecycle: {
         _created() {
-            super._created();
             this._timeoutId = undefined;
             this.onClick = this.onClick.bind(this);
             this.onLayoutSettingsDialogClosed = this.onLayoutSettingsDialogClosed.bind(this);
@@ -26,35 +22,25 @@ function factory(dependencies) {
             this.onRtcSettingsDialogClosed = this.onRtcSettingsDialogClosed.bind(this);
             this._onFullScreenChange = this._onFullScreenChange.bind(this);
             browser.addEventListener('fullscreenchange', this._onFullScreenChange);
-        }
-
-        /**
-         * @override
-         */
+        },
         _willDelete() {
             browser.clearTimeout(this._timeoutId);
             browser.removeEventListener('fullscreenchange', this._onFullScreenChange);
-            return super._willDelete(...arguments);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         /**
          * @param {MouseEvent} ev
          */
         onClick(ev) {
             this._showOverlay();
-        }
-
+        },
         /**
          * @param {MouseEvent} ev
          */
         onLayoutSettingsDialogClosed(ev) {
             this.toggleLayoutMenu();
-        }
-
+        },
         /**
          * @param {MouseEvent} ev
          */
@@ -66,8 +52,7 @@ function factory(dependencies) {
                 return;
             }
             this._showOverlay();
-        }
-
+        },
         /**
          * @param {MouseEvent} ev
          */
@@ -80,15 +65,13 @@ function factory(dependencies) {
                 showOverlay: true,
             });
             browser.clearTimeout(this._timeoutId);
-        }
-
+        },
         /**
          * @param {MouseEvent} ev
          */
         onRtcSettingsDialogClosed(ev) {
             this.messaging.userSetting.rtcConfigurationMenu.toggle();
-        }
-
+        },
         async activateFullScreen() {
             const el = document.body;
             try {
@@ -111,8 +94,7 @@ function factory(dependencies) {
                     type: 'warning',
                 });
             }
-        }
-
+        },
         async deactivateFullScreen() {
             const fullScreenElement = document.webkitFullscreenElement || document.fullscreenElement;
             if (fullScreenElement) {
@@ -127,16 +109,14 @@ function factory(dependencies) {
             if (this.exists()) {
                 this.update({ isFullScreen: false });
             }
-        }
-
+        },
         toggleLayoutMenu() {
             if (!this.rtcLayoutMenu) {
                 this.update({ rtcLayoutMenu: insertAndReplace() });
                 return;
             }
             this.update({ rtcLayoutMenu: unlink() });
-        }
-
+        },
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
@@ -149,8 +129,7 @@ function factory(dependencies) {
             const aspectRatio = rtcAspectRatio || 16 / 9;
             // if we are in minimized mode (round avatar frames), we treat the cards like squares.
             return this.isMinimized ? 1 : aspectRatio;
-        }
-
+        },
         /**
          * @private
          */
@@ -159,8 +138,7 @@ function factory(dependencies) {
                 this.isFullScreen ||
                 this.layout !== "tiled" && !this.threadView.compact
             );
-        }
-
+        },
         /**
          * @private
          */
@@ -172,8 +150,7 @@ function factory(dependencies) {
                 return false;
             }
             return !this.threadView.thread.rtc || this.threadView.thread.videoCount === 0;
-        }
-
+        },
         /**
          * @private
          */
@@ -198,8 +175,7 @@ function factory(dependencies) {
                 return 'spotlight';
             }
             return this.messaging.userSetting.rtcLayout;
-        }
-
+        },
         /**
          * @private
          */
@@ -215,8 +191,7 @@ function factory(dependencies) {
                 });
             }
             return unlink();
-        }
-
+        },
         /**
          * @private
          */
@@ -257,8 +232,7 @@ function factory(dependencies) {
                 });
             }
             return insertAndReplace(tileCards);
-        }
-
+        },
         /**
          * @private
          */
@@ -270,16 +244,14 @@ function factory(dependencies) {
                 }
                 f();
             }, delay);
-        }
-
+        },
         /**
          * @private
          */
         _onChangeRtcChannel() {
             this.deactivateFullScreen();
             this.update({ filterVideoGrid: false });
-        }
-
+        },
         /**
          * @private
          */
@@ -287,8 +259,7 @@ function factory(dependencies) {
             if (this.threadView.thread.videoCount === 0) {
                 this.update({ filterVideoGrid: false });
             }
-        }
-
+        },
         /**
          * Shows the overlay (buttons) for a set a mount of time.
          *
@@ -304,12 +275,7 @@ function factory(dependencies) {
                 }
                 this.update({ showOverlay: false });
             }, { delay: 3000 });
-        }
-
-        //----------------------------------------------------------------------
-        // Handlers
-        //----------------------------------------------------------------------
-
+        },
         /**
          * @private
          */
@@ -320,11 +286,9 @@ function factory(dependencies) {
                 return;
             }
             this.update({ isFullScreen: false });
-        }
-
-    }
-
-    RtcCallViewer.fields = {
+        },
+    },
+    fields: {
         /**
          * The aspect ratio of the tiles.
          */
@@ -411,9 +375,8 @@ function factory(dependencies) {
             compute: '_computeTileParticipantCards',
             inverse: 'rtcCallViewerOfTile',
         }),
-    };
-    RtcCallViewer.identifyingFields = ['threadView'];
-    RtcCallViewer.onChanges = [
+    },
+    onChanges: [
         new OnChange({
             dependencies: ['threadView.thread.rtc'],
             methodName: '_onChangeRtcChannel',
@@ -422,10 +385,7 @@ function factory(dependencies) {
             dependencies: ['threadView.thread.videoCount'],
             methodName: '_onChangeVideoCount',
         }),
-    ];
-    RtcCallViewer.modelName = 'mail.rtc_call_viewer';
+    ],
+};
 
-    return RtcCallViewer;
-}
-
-registerNewModel('mail.rtc_call_viewer', factory);
+registerNewModel(rtcCallViewer);

@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
 import { registerNewModel } from '@mail/model/model_core';
-import { many2one, one2one } from '@mail/model/model_field';
+import { attr, many2one, one2one } from '@mail/model/model_field';
 import { replace } from '@mail/model/model_field_command';
 
-function factory(dependencies) {
-
-    class Dialog extends dependencies['mail.model'] {
-
+export const dialog = {
+    modelName: 'mail.dialog',
+    identifyingFields: ['manager', ['attachmentViewer', 'followerSubtypeList']],
+    recordMethods: {
         /**
          * @private
          * @returns {FieldCommand}
@@ -19,14 +19,25 @@ function factory(dependencies) {
             if (this.followerSubtypeList) {
                 return replace(this.followerSubtypeList);
             }
+        },
+        _computeComponentName() {
+            if (this.attachmentViewer) {
+                return 'AttachmentViewer';
+            }
+            if (this.followerSubtypeList) {
+                return 'FollowerSubtypeList';
+            }
+            return '';
         }
-    }
-
-    Dialog.fields = {
+    },
+    fields: {
         attachmentViewer: one2one('mail.attachment_viewer', {
             isCausal: true,
             inverse: 'dialog',
             readonly: true,
+        }),
+        componentName: attr({
+            compute: '_computeComponentName',
         }),
         followerSubtypeList: one2one('mail.follower_subtype_list', {
             isCausal: true,
@@ -48,11 +59,7 @@ function factory(dependencies) {
             readonly: true,
             required: true,
         }),
-    };
-    Dialog.identifyingFields = ['manager', ['attachmentViewer', 'followerSubtypeList']];
-    Dialog.modelName = 'mail.dialog';
+    },
+};
 
-    return Dialog;
-}
-
-registerNewModel('mail.dialog', factory);
+registerNewModel(dialog);

@@ -3,12 +3,10 @@
 import { registerNewModel } from '@mail/model/model_core';
 import { attr } from '@mail/model/model_field';
 
-function factory(dependencies) {
-
-    class RTCPeerNotification extends dependencies['mail.model'] {
-    }
-
-    RTCPeerNotification.fields = {
+export const rtcPeerNotification = {
+    modelName: 'mail.rtc_peer_notification',
+    identifyingFields: ['id'],
+    fields: {
         channelId: attr({
             readonly: true,
             required: true,
@@ -37,11 +35,7 @@ function factory(dependencies) {
             readonly: true,
             required: true,
         }),
-    };
-    RTCPeerNotification.identifyingFields = ['id'];
-    RTCPeerNotification.modelName = 'mail.rtc_peer_notification';
+    },
+};
 
-    return RTCPeerNotification;
-}
-
-registerNewModel('mail.rtc_peer_notification', factory);
+registerNewModel(rtcPeerNotification);

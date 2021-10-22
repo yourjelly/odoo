@@ -7,30 +7,18 @@ import { attr, many2one, one2one, one2many } from '@mail/model/model_field';
 import { clear, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
 
-function factory(dependencies) {
-
-    class RtcSession extends dependencies['mail.model'] {
-
-        /**
-         * @override
-         */
+export const rtcSession = {
+    modelName: 'mail.rtc_session',
+    identifyingFields: ['id'],
+    lifecycle: {
         _created() {
-            super._created();
             this._timeoutId = undefined;
-        }
-
-        /**
-         * @override
-         */
+        },
         _willDelete() {
             this.reset();
-            return super._willDelete(...arguments);
-        }
-
-        //----------------------------------------------------------------------
-        // Public
-        //----------------------------------------------------------------------
-
+        },
+    },
+    recordMethods: {
         /**
          * restores the session to its default values
          */
@@ -42,8 +30,7 @@ function factory(dependencies) {
                 audioElement: clear(),
                 isTalking: clear(),
             });
-        }
-
+        },
         /**
          * cleanly removes the video stream of the session
          */
@@ -56,8 +43,7 @@ function factory(dependencies) {
             this.update({
                 videoStream: clear(),
             });
-        }
-
+        },
         /**
          * @param {Object} param0
          * @param {MediaStream} param0.audioStream
@@ -101,8 +87,7 @@ function factory(dependencies) {
                 }
                 console.error(error);
             }
-        }
-
+        },
         /**
          * @param {number} volume
          */
@@ -125,8 +110,7 @@ function factory(dependencies) {
                 return;
             }
             this.messaging.userSetting.saveVolumeSetting(this.partner.id, volume);
-        }
-
+        },
         /**
          * Toggles the deaf state of the current session, this must be a session
          * of the current partner.
@@ -153,8 +137,7 @@ function factory(dependencies) {
                     requestAudioDevice: false,
                 }));
             }
-        }
-
+        },
         /**
          * updates the record and notifies the server of the change
          *
@@ -187,12 +170,7 @@ function factory(dependencies) {
                     );
                 });
             }, 3000);
-        }
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
+        },
         /**
          * @private
          * @returns {string}
@@ -207,8 +185,7 @@ function factory(dependencies) {
             if (this.guest) {
                 return `/mail/channel/${this.channel.id}/guest/${this.guest.id}/avatar_128?unique=${this.guest.name}`;
             }
-        }
-
+        },
         /**
          * @private
          * @returns {boolean}
@@ -219,8 +196,7 @@ function factory(dependencies) {
             }
             return (this.partner && this.messaging.currentPartner === this.partner) ||
                 (this.guest && this.messaging.currentGuest === this.guest);
-        }
-
+        },
         /**
          * @private
          * @returns {string}
@@ -232,16 +208,14 @@ function factory(dependencies) {
             if (this.guest) {
                 return this.guest.name;
             }
-        }
-
+        },
         /**
          * @private
          * @returns {string}
          */
         _computePeerToken() {
             return String(this.id);
-        }
-
+        },
         /**
          * @private
          * @returns {number} float
@@ -253,8 +227,7 @@ function factory(dependencies) {
             if (this.audioElement) {
                 return this.audioElement.volume;
             }
-        }
-
+        },
         /**
          * @private
          */
@@ -266,8 +239,7 @@ function factory(dependencies) {
                 }
                 f();
             }, delay);
-        }
-
+        },
         /**
          * @private
          */
@@ -275,8 +247,7 @@ function factory(dependencies) {
             if (!this.videoStream) {
                 this.update({ focusingMessaging: unlink() });
             }
-        }
-
+        },
         /**
          * cleanly removes the audio stream of the session
          *
@@ -300,11 +271,9 @@ function factory(dependencies) {
                 audioStream: clear(),
                 isAudioInError: false,
             });
-        }
-
-    }
-
-    RtcSession.fields = {
+        },
+    },
+    fields: {
         /**
          * HTMLAudioElement that plays and control the audioStream of the user,
          * it is not mounted on the DOM as it can operate from the JS.
@@ -452,17 +421,13 @@ function factory(dependencies) {
             default: 0.5,
             compute: '_computeVolume',
         }),
-    };
-    RtcSession.onChanges = [
+    },
+    onChanges: [
         new OnChange({
             dependencies: ['videoStream'],
             methodName: '_onChangeVideoStream',
         }),
-    ];
-    RtcSession.identifyingFields = ['id'];
-    RtcSession.modelName = 'mail.rtc_session';
+    ],
+};
 
-    return RtcSession;
-}
-
-registerNewModel('mail.rtc_session', factory);
+registerNewModel(rtcSession);

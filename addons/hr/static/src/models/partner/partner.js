@@ -1,12 +1,15 @@
 /** @odoo-module **/
 
 import {
-    registerInstancePatchModel,
-    registerFieldPatchModel,
+    patchRecordMethods,
+    patchFields,
 } from '@mail/model/model_core';
 import { attr, one2one } from '@mail/model/model_field';
 
-registerInstancePatchModel('mail.partner', 'hr/static/src/models/partner/partner.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/partner/partner';
+
+patchRecordMethods('mail.partner', {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -42,7 +45,7 @@ registerInstancePatchModel('mail.partner', 'hr/static/src/models/partner/partner
     },
 });
 
-registerFieldPatchModel('mail.partner', 'hr/static/src/models/partner/partner.js', {
+patchFields('mail.partner', {
     /**
      * Employee related to this partner. It is computed through
      * the inverse relation and should be considered read-only.

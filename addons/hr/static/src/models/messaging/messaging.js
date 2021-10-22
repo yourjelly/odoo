@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
-import {
-    registerInstancePatchModel,
-} from '@mail/model/model_core';
+import { patchRecordMethods } from '@mail/model/model_core';
 
-registerInstancePatchModel('mail.messaging', 'hr/static/src/models/messaging/messaging.js', {
+// ensure that the model definition is loaded before the patch
+import '@mail/models/messaging/messaging';
+
+patchRecordMethods('mail.messaging', {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
