@@ -776,11 +776,11 @@ async function start(param0 = {}) {
     returnCallbacks.forEach(callback => callback(result));
     await waitUntilEventPromise;
     registerCleanup(() => {
-        if (modelManager.messaging) {
-            modelManager.messaging.delete();
-        }
         if (widget) {
             widget.destroy();
+        }
+        if (modelManager.messaging) {
+            modelManager.messaging.delete();
         }
     });
     return {
