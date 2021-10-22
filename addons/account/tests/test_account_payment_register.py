@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import UserError
-from odoo.tests import tagged, Form
 from odoo import Command
+from odoo.tests import tagged
 
 
 @tagged('post_install', '-at_install')
@@ -19,11 +19,11 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'currency_subunit_label': "Broken Umbrella",
         }, rate2017=0.01)
 
-        cls.payment_debit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_debit_account_id.copy()
-        cls.payment_credit_account_id = cls.company_data['default_journal_bank'].company_id.account_journal_payment_credit_account_id.copy()
+        cls.payment_debit_account_id = cls.payment_journal.company_id.account_journal_payment_debit_account_id.copy()
+        cls.payment_credit_account_id = cls.payment_journal.company_id.account_journal_payment_credit_account_id.copy()
 
-        cls.bank_journal_1 = cls.company_data['default_journal_bank']
-        cls.bank_journal_2 = cls.company_data['default_journal_bank'].copy()
+        cls.bank_journal_1 = cls.payment_journal
+        cls.bank_journal_2 = cls.payment_journal.copy()
 
         cls.partner_bank_account1 = cls.env['res.partner.bank'].create({
             'acc_number': "0123456789",

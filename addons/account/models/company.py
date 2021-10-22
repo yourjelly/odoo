@@ -2,7 +2,6 @@
 
 from datetime import timedelta, datetime, date
 import calendar
-from dateutil.relativedelta import relativedelta
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
@@ -58,7 +57,7 @@ class ResCompany(models.Model):
     transfer_account_id = fields.Many2one('account.account',
         domain="[('reconcile', '=', True), ('account_type', '=', 'asset_current'), ('deprecated', '=', False)]", string="Inter-Banks Transfer Account", help="Intermediary account used when moving money from a liqity account to another")
     expects_chart_of_accounts = fields.Boolean(string='Expects a Chart of Accounts', default=True)
-    chart_template_id = fields.Many2one('account.chart.template', help='The chart template for the company (if any)')
+    chart_template = fields.Selection(selection='_chart_template_selection')
     bank_account_code_prefix = fields.Char(string='Prefix of the bank accounts')
     cash_account_code_prefix = fields.Char(string='Prefix of the cash accounts')
     default_cash_difference_income_account_id = fields.Many2one('account.account', string="Cash Difference Income Account")
@@ -254,11 +253,15 @@ class ResCompany(models.Model):
         return new_prefix + current_code.replace(old_prefix, '', 1).lstrip('0').rjust(digits-len(new_prefix), '0')
 
     def reflect_code_prefix_change(self, old_code, new_code):
-        accounts = self.env['account.account'].search([('code', 'like', old_code), ('account_type', 'in', ('asset_cash', 'liability_credit_card')),
-            ('company_id', '=', self.id)], order='code asc')
+        if not old_code:
+            return
+        accounts = self.env['account.account'].search([
+            ('code', 'like', old_code),
+            ('account_type', 'in', ('asset_cash', 'liability_credit_card')),
+            ('company_id', '=', self.id)],
+            order='code asc')
         for account in accounts:
-            if account.code.startswith(old_code):
-                account.write({'code': self.get_new_account_code(account.code, old_code, new_code)})
+            account.write({'code': self.get_new_account_code(account.code, old_code, new_code)})
 
     def _get_fiscalyear_lock_statement_lines_redirect_action(self, unreconciled_statement_lines):
         """ Get the action redirecting to the statement lines that are not already reconciled when setting a fiscal
@@ -562,6 +565,38 @@ class ResCompany(models.Model):
             raise RedirectWarning(msg, action.id, _("Go to the configuration panel"))
         return account
 
+    def existing_accounting(self):
+        """ Returns True iff some accounting entries have already been made for
+        the provided company (meaning hence that its chart of accounts cannot
+        be changed anymore).
+        """
+        self.ensure_one()
+        # self.env['account.bank.statement'].sudo().search([]).button_reopen()
+        # self.env['account.move'].sudo().search([]).state = 'draft'
+        # prop_values = ['account.account,%s' % (account_id,) for account_id in self.env['account.account'].search([]).ids]
+        # existing_journals = self.env['account.journal'].search([])
+        # if existing_journals:
+        #     prop_values.extend(['account.journal,%s' % (journal_id,) for journal_id in existing_journals.ids])
+        # self.env['ir.property'].sudo().search(
+        #     [('value_reference', 'in', prop_values)]
+        # ).unlink()
+        # for model in [
+        #     'account.move',
+        #     'account.bank.statement',
+        #     'account.payment',
+        #     'account.reconcile.model',
+        #     'account.fiscal.position',
+        #     'account.journal',
+        #     'account.account',
+        #     'account.tax',
+        #     'account.group',
+        # ]:
+        #     self.env[model].sudo().search([]).with_context(force_delete=True).unlink()
+        return bool(self.env['account.move.line'].sudo().search([('company_id', '=', self.id)], limit=1))
+
+    def _chart_template_selection(self):
+        return self.env['account.chart.template']._select_chart_template(self)
+
     @api.model
     def _action_check_hash_integrity(self):
         return self.env.ref('account.action_report_account_hash_integrity').report_action(self.id)
@@ -607,9 +642,10 @@ class ResCompany(models.Model):
                 results_by_journal['results'].append(rslt)
                 continue
 
-            previous_hash = u''
+            previous_hash = ''
             start_move_info = []
             hash_corrupted = False
+            move = None
             for move in moves:
                 if move.inalterable_hash != move._compute_hash(previous_hash=previous_hash):
                     rslt.update({'msg_cover': _('Corrupted data on journal entry with id %s.', move.id)})

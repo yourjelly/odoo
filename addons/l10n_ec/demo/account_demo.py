@@ -6,14 +6,15 @@ from odoo import api, models
 _logger = logging.getLogger(__name__)
 
 
-class AccountChartTemplate(models.Model):
+class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
 
     @api.model
-    def _get_demo_data_move(self):
+    def _get_demo_data_move(self, company=None):
         ref = self.env.ref
-        cid = self.env.company.id
-        model, data = super()._get_demo_data_move()
+        company = company or self.env.company
+        cid = company.id
+        model, data = super()._get_demo_data_move(company)
         if self.env.company.account_fiscal_country_id.code == 'EC':
             document_type = ref('l10n_ec.ec_dt_18', False) and ref('l10n_ec.ec_dt_18').id or False
             data[f'{cid}_demo_invoice_1']['l10n_latam_document_type_id'] = document_type

@@ -11,19 +11,9 @@ class AccountAccountTag(models.Model):
 
     name = fields.Char(translate=True)
 
-class AccountAccountTemplate(models.Model):
-    _inherit = 'account.account.template'
-
-    name = fields.Char(translate=True)
-
 
 class AccountAccount(models.Model):
     _inherit = 'account.account'
-
-    name = fields.Char(translate=True)
-
-class AccountGroupTemplate(models.Model):
-    _inherit = 'account.group.template'
 
     name = fields.Char(translate=True)
 
@@ -39,14 +29,7 @@ class AccountTax(models.Model):
     description = fields.Char(translate=True)
 
 
-class AccountTaxTemplate(models.Model):
-    _inherit = 'account.tax.template'
-
-    name = fields.Char(translate=True)
-    description = fields.Char(translate=True)
-
-
-class AccountChartTemplate(models.Model):
+class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
     _order = 'name'
 
@@ -63,13 +46,6 @@ class AccountFiscalPosition(models.Model):
 
     name = fields.Char(translate=True)
     note = fields.Html(translate=True)
-
-
-class AccountFiscalPositionTemplate(models.Model):
-    _inherit = 'account.fiscal.position.template'
-
-    name = fields.Char(translate=True)
-    note = fields.Text(translate=True)
 
 
 class AccountJournal(models.Model):

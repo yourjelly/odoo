@@ -3,7 +3,6 @@
 from odoo import fields
 from odoo.tests.common import TransactionCase, HttpCase, tagged, Form
 
-import json
 import time
 import base64
 from lxml import etree
@@ -32,15 +31,6 @@ class AccountTestInvoicingCommon(TransactionCase):
 
         assert 'post_install' in cls.test_tags, 'This test requires a CoA to be installed, it should be tagged "post_install"'
 
-        if chart_template_ref:
-            chart_template = cls.env.ref(chart_template_ref)
-        else:
-            chart_template = cls.env.ref('l10n_generic_coa.configurable_chart_template', raise_if_not_found=False)
-        if not chart_template:
-            cls.tearDownClass()
-            # skipTest raises exception
-            cls.skipTest(cls, "Accounting Tests skipped because the user's company has no chart of accounts.")
-
         # Create user.
         user = cls.env['res.users'].create({
             'name': 'Because I am accountman!',
@@ -59,8 +49,8 @@ class AccountTestInvoicingCommon(TransactionCase):
         cls.env = cls.env(user=user)
         cls.cr = cls.env.cr
 
-        cls.company_data_2 = cls.setup_company_data('company_2_data', chart_template=chart_template)
-        cls.company_data = cls.setup_company_data('company_1_data', chart_template=chart_template)
+        cls.company_data_2 = cls.setup_company_data('company_2_data', chart_template=chart_template_ref)
+        cls.company_data = cls.setup_company_data('company_1_data', chart_template=chart_template_ref)
 
         user.write({
             'company_ids': [(6, 0, (cls.company_data['company'] + cls.company_data_2['company']).ids)],
@@ -179,10 +169,9 @@ class AccountTestInvoicingCommon(TransactionCase):
         })
 
         # ==== Payment methods ====
-        bank_journal = cls.company_data['default_journal_bank']
-
-        cls.inbound_payment_method_line = bank_journal.inbound_payment_method_line_ids[0]
-        cls.outbound_payment_method_line = bank_journal.outbound_payment_method_line_ids[0]
+        cls.payment_journal = cls.company_data['default_journal_bank']
+        cls.inbound_payment_method_line = cls.payment_journal.inbound_payment_method_line_ids[0]
+        cls.outbound_payment_method_line = cls.payment_journal.outbound_payment_method_line_ids[0]
 
     @classmethod
     def setup_company_data(cls, company_name, chart_template=None, **kwargs):
@@ -194,30 +183,24 @@ class AccountTestInvoicingCommon(TransactionCase):
         :param company_name: The name of the company.
         :return: A dictionary will be returned containing all relevant accounting data for testing.
         '''
-        def search_account(company, chart_template, field_name, domain):
-            template_code = chart_template[field_name].code
-            domain = [('company_id', '=', company.id)] + domain
 
-            account = None
-            if template_code:
-                account = cls.env['account.account'].search(domain + [('code', '=like', template_code + '%')], limit=1)
-
-            if not account:
-                account = cls.env['account.account'].search(domain, limit=1)
-            return account
-
-        chart_template = chart_template or cls.env.company.chart_template_id
         company = cls.env['res.company'].create({
             'name': company_name,
             **kwargs,
         })
         cls.env.user.company_ids |= company
 
-        chart_template.try_loading(company=company, install_demo=False)
+        # Install the chart template
+        chart_template = chart_template or cls.env['account.chart.template']._guess_chart_template(company)
+        cls.env['account.chart.template'].try_loading(chart_template, company=company, install_demo=False)
 
         # The currency could be different after the installation of the chart template.
         if kwargs.get('currency_id'):
             company.write({'currency_id': kwargs['currency_id']})
+
+        template_data = cls.env['account.chart.template']._get_template_data(chart_template, company)
+        def account_from_property(property_name):
+            return cls.env.ref(template_data.get(property_name))
 
         return {
             'company': company,
@@ -230,13 +213,8 @@ class AccountTestInvoicingCommon(TransactionCase):
                     ('company_id', '=', company.id),
                     ('account_type', '=', 'expense')
                 ], limit=1),
-            'default_account_receivable': search_account(company, chart_template, 'property_account_receivable_id', [
-                ('account_type', '=', 'asset_receivable')
-            ]),
-            'default_account_payable': cls.env['account.account'].search([
-                    ('company_id', '=', company.id),
-                    ('account_type', '=', 'liability_payable')
-                ], limit=1),
+            'default_account_receivable': account_from_property('property_account_receivable_id'),
+            'default_account_payable': account_from_property('property_account_payable_id'),
             'default_account_assets': cls.env['account.account'].search([
                     ('company_id', '=', company.id),
                     ('account_type', '=', 'asset_current')

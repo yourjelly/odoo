@@ -24,7 +24,6 @@ from . import test_sequence_mixin
 from . import test_settings
 from . import test_tax
 from . import test_invoice_taxes
-from . import test_templates_consistency
 from . import test_account_all_l10n
 from . import test_reconciliation_matching_rules
 from . import test_account_onboarding
@@ -35,3 +34,4 @@ from . import test_account_incoming_supplier_invoice
 from . import test_payment_term
 from . import test_account_payment_register
 from . import test_tour
+from . import test_account_chart_template

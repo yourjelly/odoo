@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tests import tagged, new_test_user
+from odoo.tests import tagged
 from odoo.tests.common import Form
 
 
@@ -132,7 +132,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
         # ==== Check editing the account.move.line ====
 
-        liquidity_lines, counterpart_lines, writeoff_lines = payment._seek_for_lines()
+        liquidity_lines, counterpart_lines, _writeoff_lines = payment._seek_for_lines()
         payment.move_id.write({
             'line_ids': [
                 (1, counterpart_lines.id, {
@@ -611,7 +611,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
         # ==== Check editing the account.move.line ====
 
-        liquidity_lines, counterpart_lines, writeoff_lines = payment._seek_for_lines()
+        liquidity_lines, counterpart_lines, _writeoff_lines = payment._seek_for_lines()
         payment.move_id.write({
             'line_ids': [
                 (1, counterpart_lines.id, {
@@ -718,7 +718,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'partner_type': 'customer',
             'destination_account_id': self.company_data['default_account_receivable'].id,
         })
-        liquidity_lines, counterpart_lines, writeoff_lines = payment._seek_for_lines()
+        liquidity_lines, counterpart_lines, _writeoff_lines = payment._seek_for_lines()
 
         self.assertRecordValues(payment, [{
             'is_reconciled': False,
@@ -798,10 +798,9 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         not on the company level.
         """
         company = self.company_data['company']
-        bank_journal = self.company_data['default_journal_bank']
 
-        bank_journal.outbound_payment_method_line_ids.payment_account_id = company.account_journal_payment_credit_account_id
-        bank_journal.inbound_payment_method_line_ids.payment_account_id = company.account_journal_payment_debit_account_id
+        self.payment_journal.outbound_payment_method_line_ids.payment_account_id = company.account_journal_payment_credit_account_id
+        self.payment_journal.inbound_payment_method_line_ids.payment_account_id = company.account_journal_payment_debit_account_id
         company.account_journal_payment_debit_account_id = False
         company.account_journal_payment_credit_account_id = False
 
@@ -809,7 +808,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'amount': 5.0,
             'payment_type': 'inbound',
             'partner_type': 'customer',
-            'journal_id': bank_journal.id,
+            'journal_id': self.payment_journal.id,
         })
         self.assertRecordValues(payment, [{
             'amount': 5.0,
