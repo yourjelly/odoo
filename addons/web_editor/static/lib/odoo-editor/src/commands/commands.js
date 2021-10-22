@@ -39,7 +39,7 @@ const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/g;
 const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/g;
 
 function insert(editor, data, isText = true) {
-    const selection = editor.document.getSelection();
+    const selection = editor.contentDocument.getSelection();
     const range = selection.getRangeAt(0);
     let startNode;
     let insertBefore = false;
@@ -52,7 +52,7 @@ function insert(editor, data, isText = true) {
     } else {
         editor.deleteRange(selection);
     }
-    startNode = startNode || editor.document.getSelection().anchorNode;
+    startNode = startNode || editor.contentDocument.getSelection().anchorNode;
     if (startNode.nodeType === Node.ELEMENT_NODE) {
         if (selection.anchorOffset === 0) {
             startNode.prepend(editor.document.createTextNode(''));
@@ -111,7 +111,7 @@ function insert(editor, data, isText = true) {
     return insertedNodes;
 }
 function align(editor, mode) {
-    const sel = editor.document.getSelection();
+    const sel = editor.contentDocument.getSelection();
     const visitedBlocks = new Set();
     const traversedNode = getTraversedNodes(editor.editable);
     for (const node of traversedNode) {
@@ -201,7 +201,7 @@ function hasColor(element, mode) {
  * which the wanted style should be applied
  */
 export function applyInlineStyle(editor, applyStyle) {
-    const sel = editor.document.getSelection();
+    const sel = editor.contentDocument.getSelection();
     const { startContainer, startOffset, endContainer, endOffset } = sel.getRangeAt(0);
     const { anchorNode, anchorOffset, focusNode, focusOffset } = sel;
     const direction = getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset);
@@ -326,7 +326,7 @@ export const editorCommands = {
             ) {
                 setSelection(block, 0, block, nodeSize(block));
                 editor.historyPauseSteps();
-                editor.document.execCommand('removeFormat');
+                editor.contentDocument.execCommand('removeFormat');
                 editor.historyUnpauseSteps();
                 setTagName(block, tagName);
             } else {
@@ -345,7 +345,7 @@ export const editorCommands = {
     // Formats
     // -------------------------------------------------------------------------
     bold: editor => {
-        const selection = editor.document.getSelection();
+        const selection = editor.contentDocument.getSelection();
         if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
         getDeepRange(editor.editable, { splitText: true, select: true, correctTripleClick: true });
         const isAlreadyBold = getSelectedNodes(editor.editable)
@@ -360,10 +360,10 @@ export const editorCommands = {
             }
         });
     },
-    italic: editor => editor.document.execCommand('italic'),
-    underline: editor => editor.document.execCommand('underline'),
-    strikeThrough: editor => editor.document.execCommand('strikeThrough'),
-    removeFormat: editor => editor.document.execCommand('removeFormat'),
+    italic: editor => editor.contentDocument.execCommand('italic'),
+    underline: editor => editor.contentDocument.execCommand('underline'),
+    strikeThrough: editor => editor.contentDocument.execCommand('strikeThrough'),
+    removeFormat: editor => editor.contentDocument.execCommand('removeFormat'),
 
     // Align
     justifyLeft: editor => align(editor, 'left'),
@@ -374,7 +374,7 @@ export const editorCommands = {
      * @param {string} size A valid css size string
      */
     setFontSize: (editor, size) => {
-        const selection = editor.document.getSelection();
+        const selection = editor.contentDocument.getSelection();
         if (!selection.rangeCount || selection.getRangeAt(0).collapsed) return;
         applyInlineStyle(editor, element => {
             element.style.fontSize = size;
@@ -383,7 +383,7 @@ export const editorCommands = {
 
     // Link
     createLink: (editor, link, content) => {
-        const sel = editor.document.getSelection();
+        const sel = editor.contentDocument.getSelection();
         if (content && !sel.isCollapsed) {
             editor.deleteRange(sel);
         }
@@ -392,7 +392,7 @@ export const editorCommands = {
         }
         const currentLink = closestElement(sel.focusNode, 'a');
         link = link || prompt('URL or Email', (currentLink && currentLink.href) || 'http://');
-        const res = editor.document.execCommand('createLink', false, link);
+        const res = editor.contentDocument.execCommand('createLink', false, link);
         if (res) {
             setSelection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
             const node = findNode(closestPath(sel.focusNode), node => node.tagName === 'A');
@@ -404,7 +404,7 @@ export const editorCommands = {
         }
     },
     unlink: editor => {
-        const sel = editor.document.getSelection();
+        const sel = editor.contentDocument.getSelection();
         // we need to remove the contentEditable isolation of links
         // before we apply the unlink, otherwise the command is not performed
         // because the content editable root is the link
@@ -416,10 +416,10 @@ export const editorCommands = {
             const cr = preserveCursor(editor.document);
             const node = closestElement(sel.focusNode, 'a');
             setSelection(node, 0, node, node.childNodes.length, false);
-            editor.document.execCommand('unlink');
+            editor.contentDocument.execCommand('unlink');
             cr();
         } else {
-            editor.document.execCommand('unlink');
+            editor.contentDocument.execCommand('unlink');
             setSelection(sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset);
         }
     },
@@ -550,7 +550,7 @@ export const editorCommands = {
         const tdsHtml = new Array(colNumber).fill('<td><br></td>').join('');
         const trsHtml = new Array(rowNumber).fill(`<tr>${tdsHtml}</tr>`).join('');
         const tableHtml = `<table class="table table-bordered"><tbody>${trsHtml}</tbody></table>`;
-        const sel = editor.document.getSelection();
+        const sel = editor.contentDocument.getSelection();
         if (!sel.isCollapsed) {
             editor.deleteRange(sel);
         }
@@ -602,7 +602,7 @@ export const editorCommands = {
     },
     deleteTable: (editor, table) => deleteTable(editor, table),
     insertHorizontalRule(editor) {
-        const selection = editor.document.getSelection();
+        const selection = editor.contentDocument.getSelection();
         const range = selection.getRangeAt(0);
         const element = closestElement(
             range.startContainer,

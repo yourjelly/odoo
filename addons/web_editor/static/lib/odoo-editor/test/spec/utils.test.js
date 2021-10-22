@@ -946,7 +946,7 @@ describe('Utils', () => {
                 contentBefore: '<p>a[bc]d</p>',
                 stepFunction: editor => {
                     const { anchorNode, anchorOffset, focusNode, focusOffset } =
-                        editor.document.getSelection();
+                        editor.contentDocument.getSelection();
                     window.chai
                         .expect(
                             getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset),
@@ -960,7 +960,7 @@ describe('Utils', () => {
                 contentBefore: '<p>a]bc[d</p>',
                 stepFunction: editor => {
                     const { anchorNode, anchorOffset, focusNode, focusOffset } =
-                        editor.document.getSelection();
+                        editor.contentDocument.getSelection();
                     window.chai
                         .expect(
                             getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset),
@@ -974,7 +974,7 @@ describe('Utils', () => {
                 contentBefore: '<p>ab[]cd</p>',
                 stepFunction: editor => {
                     const { anchorNode, anchorOffset, focusNode, focusOffset } =
-                        editor.document.getSelection();
+                        editor.contentDocument.getSelection();
                     window.chai
                         .expect(
                             getCursorDirection(anchorNode, anchorOffset, focusNode, focusOffset),

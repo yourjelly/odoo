@@ -144,7 +144,7 @@ export class Powerbox {
         this.options.editable.addEventListener(
             'keydown',
             ev => {
-                const selection = this.options.document.getSelection();
+                const selection = this.options.contentDocument.getSelection();
                 if (!selection.isCollapsed || !selection.rangeCount) return;
                 if (
                     ev.key === triggerKey &&

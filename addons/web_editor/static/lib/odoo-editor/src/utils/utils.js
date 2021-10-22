@@ -522,6 +522,12 @@ export function setSelection(
     ) {
         return null;
     }
+    console.log('set selection ',
+    anchorNode,
+        anchorOffset,
+        focusNode = anchorNode,
+        focusOffset = anchorOffset,
+        normalize = true);
     const document = anchorNode.ownerDocument;
 
     const seemsCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;

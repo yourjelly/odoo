@@ -4,11 +4,35 @@ const localStorageKey = 'odoo-editor-snippets';
 
 function startEditor(html) {
     const editableContainer = document.getElementById('dom');
-    editableContainer.innerHTML = html;
-    new OdooEditor(editableContainer, {
+    const iframe = document.createElement('iframe');
+    editableContainer.appendChild(iframe);
+
+    // iframe.innerHTML = ;
+    const iframeW = iframe.contentWindow || ( iframe.contentDocument.document || iframe.contentDocument);
+
+    iframeW.document.open();
+    iframeW.document.write("<div id='oe-iframe-editable-wrapper'>"+html+"</div>");
+    iframeW.document.close();
+
+    const srcs = [
+        '/web_editor/static/lib/odoo-editor/src/OdooEditor.js',
+    ];
+
+    for(let src of srcs) {
+        console.log('add script ' + src);
+        var script = iframeW.document.createElement("script");
+        script.type = "text/javascript";
+        script.defer = true;
+        script.type = "module";
+        script.src = src;
+        iframeW.document.body.appendChild(script);
+    }
+
+    new OdooEditor(iframeW.document.getElementById("oe-iframe-editable-wrapper"), {
         toolbar: document.querySelector('#toolbar'),
         autohideToolbar: true,
         defaultLinkAttributes: { target: '_blank', rel: 'ugc' },
+        contentDocument: iframeW.document
     });
 
     document.querySelector('#control-panel').style.display = 'none';
