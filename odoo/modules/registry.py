@@ -280,8 +280,8 @@ class Registry(Mapping):
 
 
         old_depends = dict(self.field_depends)
-        #self.field_depends.clear()
-        #self.field_depends_context.clear()
+        self.field_depends.clear()
+        self.field_depends_context.clear()
         self.field_inverses.clear()
 
         # do the actual setup
@@ -297,21 +297,15 @@ class Registry(Mapping):
             model._setup_complete()
 
         # determine field_depends and field_depends_context
+        mro_cache = {}
         for model in models:
             for field in model._fields.values():
-                depends, depends_context = field.get_depends(model)
+                depends, depends_context = field.get_depends(model, mro_cache=mro_cache)
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
+        del mro_cache
 
         new_depends = dict(self.field_depends)
-        #for key, value in new_depends.items():
-        #    old_value = old_depends.get(key)
-        #    if value != old_value and model_names is not None:
-        #        if not key.model_name in model_names:
-        #            print(key.name, old_value, value)
-        #            print(key.model_name)
-        #            print(model_names)
-        #            raise
         # Reinstall registry hooks. Because of the condition, this only happens
         # on a fully loaded registry, and not on a registry being loaded.
         if self.ready:

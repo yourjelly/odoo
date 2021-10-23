@@ -52,20 +52,26 @@ def first(records):
     return next(iter(records)) if len(records) > 1 else records
 
 
-def resolve_mro(model, name, predicate):
+def resolve_mro(model, name, predicate, mro_cache=None):
     """ Return the list of successively overridden values of attribute ``name``
         in mro order on ``model`` that satisfy ``predicate``.  Model registry
         classes are ignored.
     """
+    if mro_cache is None:
+        mro_cache = {}
     result = []
-    for cls in type(model).mro():
-        if not is_registry_class(cls):
-            value = cls.__dict__.get(name, Default)
-            if value is Default:
-                continue
-            if not predicate(value):
-                break
-            result.append(value)
+    model_class = type(model)
+    mro = mro_cache.get(model_class)
+    if mro is None:
+        mro = [cls for cls in model_class.mro() if not is_registry_class(cls)]
+        mro_cache[model_class] = mro
+    for cls in mro:
+        value = cls.__dict__.get(name, Default)
+        if value is Default:
+            continue
+        if not predicate(value):
+            break
+        result.append(value)
     return result
 
 
@@ -474,7 +480,7 @@ class Field(MetaField('DummyField', (object,), {})):
         """ Determine the dependencies and inverse field(s) of ``self``. """
         pass
 
-    def get_depends(self, model):
+    def get_depends(self, model, mro_cache=None):
         """ Return the field's dependencies and cache dependencies. """
         if self._depends is not None:
             # the parameter 'depends' has priority over 'depends' on compute
@@ -485,7 +491,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 depends_context = self._depends_context
             else:
                 related_model = model.env[self.related_field.model_name]
-                depends, depends_context = self.related_field.get_depends(related_model)
+                depends, depends_context = self.related_field.get_depends(related_model, mro_cache)
             return [self.related], depends_context
 
         if not self.compute:
@@ -493,7 +499,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # determine the functions implementing self.compute
         if isinstance(self.compute, str):
-            funcs = resolve_mro(model, self.compute, callable)
+            funcs = resolve_mro(model, self.compute, callable, mro_cache)
         else:
             funcs = [self.compute]
 
@@ -3264,8 +3270,8 @@ class _RelationalMulti(_Relational):
     def convert_to_display_name(self, value, record):
         raise NotImplementedError()
 
-    def get_depends(self, model):
-        depends, depends_context = super().get_depends(model)
+    def get_depends(self, model, mro_cache=None):
+        depends, depends_context = super().get_depends(model, mro_cache)
         if not self.compute and isinstance(self.domain, list):
             depends = unique(itertools.chain(depends, (
                 self.name + '.' + arg[0]
