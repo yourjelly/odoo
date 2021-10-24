@@ -398,9 +398,9 @@ def load_openerp_module(module_name):
         # Call the module's post-load hook. This can done before any model or
         # data has been initialized. This is ok as the post-load hook is for
         # server-wide (instead of registry-specific) functionalities.
-        info = load_information_from_description_file(module_name)
-        if info['post_load']:
-            getattr(sys.modules['odoo.addons.' + module_name], info['post_load'])()
+        #info = load_information_from_description_file(module_name)
+        #if info['post_load']:
+        #    getattr(sys.modules['odoo.addons.' + module_name], info['post_load'])()
 
     except Exception as e:
         msg = "Couldn't load module %s" % (module_name)

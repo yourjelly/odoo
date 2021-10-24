@@ -2980,7 +2980,7 @@ class BaseModel(metaclass=MetaModel):
             discardattr(cls, attr)
 
     @api.model
-    def _setup_base(self):
+    def _setup_base(self, mro_cache):
         """ Determine the inherited and custom fields of the model. """
         cls = type(self)
         if cls._setup_done:
@@ -2997,8 +2997,9 @@ class BaseModel(metaclass=MetaModel):
 
         # collect the definitions of each field (base definition + overrides)
         definitions = defaultdict(list)
-        for klass in reversed(cls.mro()):
-            if is_definition_class(klass):
+
+        for klass in reversed(mro_cache.get(cls)):
+            if isinstance(klass, MetaModel):
                 for field in klass._field_definitions:
                     definitions[field.name].append(field)
         for name, fields_ in definitions.items():
@@ -3015,7 +3016,7 @@ class BaseModel(metaclass=MetaModel):
         # inherited fields to cls
         self._inherits_check()
         for parent in self._inherits:
-            self.env[parent]._setup_base()
+            self.env[parent]._setup_base(mro_cache)
         self._add_inherited_fields()
 
         # 4. initialize more field metadata

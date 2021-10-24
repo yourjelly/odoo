@@ -285,8 +285,14 @@ class Registry(Mapping):
         self.field_inverses.clear()
 
         # do the actual setup
+        mro_cache = {}
         for model in models:
-            model._setup_base()
+            model_class = type(model)
+            mro = [cls for cls in model_class.mro() if getattr(cls, 'pool', None) is None] # same check has not is_registry_class
+            mro_cache[model_class] = mro
+
+        for model in models:
+            model._setup_base(mro_cache)
 
         self._m2m = defaultdict(list)
         for model in models:
@@ -297,7 +303,6 @@ class Registry(Mapping):
             model._setup_complete()
 
         # determine field_depends and field_depends_context
-        mro_cache = {}
         for model in models:
             for field in model._fields.values():
                 depends, depends_context = field.get_depends(model, mro_cache=mro_cache)
