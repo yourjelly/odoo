@@ -351,10 +351,11 @@ class Registry(Mapping):
         def transitive_dependencies(field, seen=[]):
             if field in seen:
                 return
-            for seq1 in dependencies.get(field, ()):
-                yield seq1
-                for seq2 in transitive_dependencies(seq1[-1], seen + [field]):
-                    yield concat(seq1[:-1], seq2)
+            seen.append(field)
+            for field_dependency in dependencies.get(field, ()):
+                yield field_dependency
+                for relational_dependency in transitive_dependencies(field_dependency[-1], seen):
+                    yield concat(field_dependency[:-1], relational_dependency)
 
         def concat(seq1, seq2):
             if seq1 and seq2:
@@ -367,13 +368,12 @@ class Registry(Mapping):
         # determine triggers based on transitive dependencies
         triggers = {}
         for field in dependencies:
-            for path in transitive_dependencies(field):
+            for path in transitive_dependencies(field, []):
                 if path:
                     tree = triggers
                     for label in reversed(path):
                         tree = tree.setdefault(label, {})
                     tree.setdefault(None, OrderedSet()).add(field)
-
         return triggers
 
     def post_init(self, func, *args, **kwargs):
