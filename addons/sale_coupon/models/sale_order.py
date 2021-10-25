@@ -195,14 +195,14 @@ class SaleOrder(models.Model):
                             'name': _(
                                 "Discount: %(program)s - On product with following taxes: %(taxes)s",
                                 program=program.name,
-                                taxes=", ".join(taxes.mapped('name')),
+                                taxes=", ".join(taxes.filtered(lambda t: t.amount_type != 'fixed').mapped('name')),
                             ),
                             'product_id': program.discount_line_product_id.id,
                             'price_unit': - discount_line_amount if discount_line_amount > 0 else 0,
                             'product_uom_qty': 1.0,
                             'product_uom': program.discount_line_product_id.uom_id.id,
                             'is_reward_line': True,
-                            'tax_id': [(4, tax.id, False) for tax in taxes],
+                            'tax_id': [(4, tax.id, False) for tax in taxes if tax.amount_type != 'fixed'],
                         }
                         currently_discounted_amount += discount_line_amount
 
