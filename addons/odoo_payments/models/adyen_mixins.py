@@ -86,15 +86,18 @@ class AdyenIDMixin(models.AbstractModel):
         if vals.get('id_back'):
             self._check_file_requirements(vals.get('id_back'))
 
-        for adyen_account in self:
+        # FIXME ANVFE what is this dev logic...
+        # 1) this mixin is used for adyen.account AND adyen.shareholder models
+        # 2) _upload_photo_id is implemented on those models (and duplicated...), but called in the mixin -_-
+        for record in self:
             if vals.get('id_front'):
-                document_type = adyen_account.id_type
-                if adyen_account.id_type in ['ID_CARD', 'DRIVING_LICENSE']:
+                document_type = record.id_type
+                if record.id_type in ['ID_CARD', 'DRIVING_LICENSE']:
                     document_type += '_FRONT'
-                adyen_account._upload_photo_id(document_type, adyen_account.id_front, adyen_account.id_front_filename)
-            if vals.get('id_back') and adyen_account.id_type in ['ID_CARD', 'DRIVING_LICENSE']:
-                document_type = adyen_account.id_type + '_BACK'
-                adyen_account._upload_photo_id(document_type, adyen_account.id_back, adyen_account.id_back_filename)
+                record._upload_photo_id(document_type, record.id_front, record.id_front_filename)
+            if vals.get('id_back') and record.id_type in ['ID_CARD', 'DRIVING_LICENSE']:
+                document_type = record.id_type + '_BACK'
+                record._upload_photo_id(document_type, record.id_back, record.id_back_filename)
             return res
 
     @api.model

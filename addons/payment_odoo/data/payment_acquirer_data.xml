@@ -6,6 +6,8 @@
         <field name="redirect_form_view_id" ref="redirect_form"/>
         <field name="support_authorization">False</field>
         <field name="support_fees_computation">False</field>
+        <!-- FIXME ANVFE some payment methods do not support partial refund,
+            should we only support full refund until dedicated task is done ? -->
         <field name="support_refund">partial</field>
         <field name="support_tokenization">True</field>
         <field name="allow_tokenization">True</field>
