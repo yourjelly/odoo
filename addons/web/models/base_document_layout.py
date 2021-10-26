@@ -35,19 +35,9 @@ class BaseDocumentLayout(models.TransientModel):
     @api.model
     def _default_company_details(self):
         company = self.env.company
-        default_address_format = "%(company_name)s\n%(street)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s"
-        address_format = company.country_id.address_format or default_address_format
+        address_format, company_data = company.partner_id._prepare_display_address()
         if 'company_name' not in address_format:
             address_format = '%(company_name)s\n' + address_format
-        company_data = {
-            "company_name": company.name or "",
-            "street": company.street or "",
-            "street2": "",
-            "city": company.city or "",
-            "state_code": company.state_id.name or "",
-            "zip": company.zip or "",
-            "country_name": company.country_id.name or "",
-        }
         return Markup(nl2br(address_format)) % company_data
 
     company_id = fields.Many2one(
