@@ -152,6 +152,7 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
     models_updated = set()
 
     for index, package in enumerate(graph, 1):
+      with odoo.tools.profiler.ExecutionContext(m=package.name):
         module_name = package.name
         module_id = package.id
 
