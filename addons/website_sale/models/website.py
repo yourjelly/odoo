@@ -98,7 +98,7 @@ class Website(models.Model):
             it might not be website compliant (eg: it is not selectable anymore,
             it is a backend pricelist, it is not active anymore..).
             """
-            return (not show_visible or pl.selectable or pl.id in (current_pl, order_pl))
+            return (not show_visible or pl.selectable or pl.id in (current_pl, order_pl.id))
 
         # Note: 1. pricelists from all_pl are already website compliant (went through
         #          `_get_website_pricelists_domain`)
@@ -123,7 +123,7 @@ class Website(models.Model):
         is_public = self.user_id.id == self.env.user.id
         if not is_public:
             # keep partner_pl only if website compliant
-            partner_pl = pricelists.browse(partner_pl).filtered(lambda pl: pl._is_available_on_website(self) and _check_show_visible(pl))
+            partner_pl = partner_pl.filtered(lambda pl: pl._is_available_on_website(self) and _check_show_visible(pl))
             if country_code:
                 # keep partner_pl only if GeoIP compliant in case of GeoIP enabled
                 partner_pl = partner_pl.filtered(
@@ -149,14 +149,21 @@ class Website(models.Model):
                 website = len(self) == 1 and self or self.search([], limit=1)
         isocountry = req and req.session.geoip and req.session.geoip.get('country_code') or False
         partner = self.env.user.partner_id
+        website_partner = website.user_id.sudo().partner_id
         last_order_pl = partner.last_website_so_id.pricelist_id
-        partner_pl = partner.property_product_pricelist
-        pricelists = website._get_pl_partner_order(isocountry, show_visible,
-                                                   website.user_id.sudo().partner_id.property_product_pricelist.id,
-                                                   req and req.session.get('website_sale_current_pl') or None,
-                                                   website.pricelist_ids,
-                                                   partner_pl=partner_pl and partner_pl.id or None,
-                                                   order_pl=last_order_pl and last_order_pl.id or None)
+        # Group the calls to _compute_product_pricelist for performance sake
+        partner_pls = {
+            p: p.property_product_pricelist for p in (website_partner + partner).sudo()
+        }
+        partner_pl = partner_pls[partner]
+        pricelists = website._get_pl_partner_order(
+            isocountry,
+            show_visible,
+            partner_pls[website_partner].id,
+            req and req.session.get('website_sale_current_pl') or None,
+            website.pricelist_ids,
+            partner_pl=partner_pl,
+            order_pl=last_order_pl)
         return self.env['product.pricelist'].browse(pricelists)
 
     def get_pricelist_available(self, show_visible=False):

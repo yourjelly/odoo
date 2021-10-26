@@ -23,7 +23,7 @@ class Pricelist(models.Model):
         'product.pricelist.item', 'pricelist_id', 'Pricelist Rules',
         copy=True)
     currency_id = fields.Many2one('res.currency', 'Currency', default=_get_default_currency_id, required=True)
-    company_id = fields.Many2one('res.company', 'Company')
+    company_id = fields.Many2one('res.company', 'Company', index=True)
 
     sequence = fields.Integer(default=16)
     country_group_ids = fields.Many2many('res.country.group', 'res_country_group_pricelist_rel',
