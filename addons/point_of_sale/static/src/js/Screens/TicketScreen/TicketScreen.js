@@ -49,8 +49,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         //#region LIFECYCLE METHODS
         mounted() {
             posbus.on('ticket-button-clicked', this, this.close);
-            this.env.pos.get('orders').on('add remove change', () => this.render(), this);
-            this.env.pos.on('change:selectedOrder', () => this.render(), this);
             setTimeout(() => {
                 // Show updated list of synced orders when going back to the screen.
                 this._onFilterSelected({ detail: { filter: this._state.ui.filter } });
@@ -58,8 +56,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         willUnmount() {
             posbus.off('ticket-button-clicked', this);
-            this.env.pos.get('orders').off('add remove change', null, this);
-            this.env.pos.off('change:selectedOrder', null, this);
         }
         //#endregion
         //#region EVENT HANDLERS
@@ -103,6 +99,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _onCreateNewOrder() {
             this.env.pos.add_new_order();
+            this.showScreen('ProductScreen');
         }
         async _onDeleteOrder({ detail: order }) {
             const screen = order.get_screen_data();
@@ -117,6 +114,8 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 if (!confirmed) return;
             }
             if (order && (await this._onBeforeDeleteOrder(order))) {
+                const deletedIndex = this.env.pos.orders.remove(order);
+                await this.env.pos.on_removed_order(order, deletedIndex, 'abandon')
                 order.destroy({ reason: 'abandon' });
                 posbus.trigger('order-deleted');
             }
@@ -148,7 +147,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _onClickRefundOrderUid({ detail: orderUid }) {
             // Open the refund order.
-            const refundOrder = this.env.pos.get('orders').models.find((order) => order.uid == orderUid);
+            const refundOrder = this.env.pos.orders.models.find((order) => order.uid == orderUid);
             if (refundOrder) {
                 this._setOrder(refundOrder);
             }
@@ -159,7 +158,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (!order) return NumberBuffer.reset();
 
             const selectedOrderlineId = this.getSelectedOrderlineId();
-            const orderline = order.orderlines.models.find((line) => line.id == selectedOrderlineId);
+            const orderline = order.orderlines.getItems().find((line) => line.id == selectedOrderlineId);
             if (!orderline) return NumberBuffer.reset();
 
             const toRefundDetail = this._getToRefundDetail(orderline);
@@ -227,7 +226,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             const destinationOrder =
                 this.props.destinationOrder && customer === this.props.destinationOrder.get_client()
                     ? this.props.destinationOrder
-                    : this.env.pos.add_new_order({ silent: true });
+                    : this.env.pos.add_new_order();
 
             // Add orderline for each toRefundDetail to the destinationOrder.
             for (const refundDetail of allToRefundDetails) {
@@ -387,7 +386,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _prepareAutoRefundOnOrder(order) {
             const selectedOrderlineId = this.getSelectedOrderlineId();
-            const orderline = order.orderlines.models.find((line) => line.id == selectedOrderlineId);
+            const orderline = order.orderlines.getItems().find((line) => line.id == selectedOrderlineId);
             if (!orderline) return;
 
             const toRefundDetail = this._getToRefundDetail(orderline);
@@ -431,9 +430,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         _setOrder(order) {
             this.env.pos.set_order(order);
-            if (order === this.env.pos.get_order()) {
-                this.close();
-            }
+            this.close();
         }
         _getOrderList() {
             return this.env.pos.get_order_list();
