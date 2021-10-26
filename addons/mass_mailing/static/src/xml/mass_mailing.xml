@@ -8,11 +8,23 @@
         </t>
     </div>
     <div t-name="mass_mailing.theme_selector_new" class="o_mail_theme_selector_new">
-        <t t-foreach="themes" t-as="theme">
-            <a t-att-id="theme.name" role="menuitem" href="#" class="dropdown-item">
-                <div class="o_thumb small"  t-attf-style="background-image: url(#{theme.img}_small.png)"/>
-                <div class="o_thumb large" t-attf-style="background-image: url(#{theme.img}_large.png)"/>
+        <div class="d-inline-block w-100">
+            <div t-foreach="templates" t-as="template"
+                class="o_mail_template_preview d-inline-block dropdown-item" t-att-id="template.name">
+                <div class="d-inline-flex flex-row align-items-center text-white border px-2 py-2 w-100">
+                    <i class="fa fa-star text-warning mr-2"/>
+                    <span class="text-truncate" t-esc="template.subject"/>
+                    <i class="o_mail_template_remove_favorite fa fa-trash ml-auto pl-2" t-att-data-id="template.id"/>
+                </div>
+            </div>
+        </div>
+        <div class="d-inline-block w-100">
+            <a t-foreach="themes" t-as="theme"
+                t-att-id="theme.name" role="menuitem" href="#" class="dropdown-item px-4">
+                <div class="o_thumb small mb-2"  t-attf-style="background-image: url(#{theme.img}_small.png)"/>
+                <div class="o_thumb large mb-2" t-attf-style="background-image: url(#{theme.img}_large.png)"/>
+                <h4 class="text-white text-capitalize text-truncate" t-esc="theme.title"/>
             </a>
-        </t>
+        </div>
     </div>
 </templates>

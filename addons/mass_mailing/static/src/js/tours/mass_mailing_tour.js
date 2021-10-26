@@ -51,7 +51,7 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         edition: 'community',
         run: 'click',
     }, {
-        trigger: 'div[name="body_arch"] iframe div.o_mail_block_text',
+        trigger: 'div[name="body_arch"] iframe div.s_text_block',
         content: _t('Click on this paragraph to edit it.'),
         position: 'top',
         edition: 'enterprise',
@@ -61,6 +61,11 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         content: _t('Click on this paragraph to edit it.'),
         position: 'top',
         edition: 'community',
+        run: 'click',
+    }, {
+        trigger: 'button[name="action_add_favorite"]',
+        content: _t('Click on this button to add this mailing to your templates.'),
+        position: 'right',
         run: 'click',
     }, {
         trigger: 'button[name="action_test"]',

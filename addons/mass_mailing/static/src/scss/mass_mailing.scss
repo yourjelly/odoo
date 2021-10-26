@@ -55,6 +55,32 @@
     }
 }
 
+.o_form_view.o_mass_mailing_mailing_form {
+    .o_mass_mailing_subject {
+        // Place the favorite button without breaking the emoji widget
+        padding-right: 50px;
+        .o_mass_mailing_favorite {
+            margin-right: -50px;
+        }
+        span.o_field_char {
+            // Override widget CSS attributes to place
+            // the favorite button next to the subject
+            margin-right: 1rem;
+            min-width: 0;
+            width: auto!important;
+            max-width: calc(100vw - 300px);
+        }
+    }
+}
+
+.o_xxs_form_view.o_mass_mailing_mailing_form {
+    .o_mass_mailing_subject {
+        span.o_field_char {
+            max-width: 90vw!important;
+        }
+    }
+}
+
 .o_kanban_view {
     .oe_kanban_mass_mailing {
         .o_title {

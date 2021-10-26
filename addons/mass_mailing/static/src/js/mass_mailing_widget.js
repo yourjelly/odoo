@@ -42,6 +42,25 @@ var MassMailingFieldHtml = FieldHtml.extend({
         this.__extraAssetsForIframe = [{jsLibs: []}];
     },
 
+    willStart: async function () {
+        const getFavoritesPromise = this._rpc({
+            model: 'mailing.mailing',
+            method: 'get_favorites',
+        }).then(result => {
+            // Templates taken from old mailings
+            this.templatesParams = result.map(values => {
+                return {
+                    id: values.id,
+                    name: `template_${values.id}`,
+                    subject: values.subject,
+                    template: values.body_arch,
+                };
+            });
+        });
+        const superPromise = this._super(...arguments);
+        return Promise.all([superPromise, getFavoritesPromise]);
+    },
+
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -210,16 +229,16 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 return;
             }
 
-            var file = m[1];
-            var img_info = themeParams.get_image_info(file);
+            if (themeParams.get_image_info) {
+                const file = m[1];
+                const imgInfo = themeParams.get_image_info(file);
 
-            if (img_info.format) {
-                src = "/" + img_info.module + "/static/src/img/theme_" + themeParams.name + "/s_default_image_" + file + "." + img_info.format;
-            } else {
-                src = "/web/image/" + img_info.module + ".s_default_image_theme_" + themeParams.name + "_" + file;
+                const src = imgInfo.format
+                    ? `/${imgInfo.module}/static/src/img/theme_${themeParams.name}/s_default_image_${file}.${imgInfo.format}`
+                    : `/web/image/${imgInfo.module}.s_default_image_theme_${themeParams.name}_${file}`;
+
+                $img.attr('src', src);
             }
-
-            $img.attr("src", src);
         });
         $container.find('.o_mail_block_cover .oe_img_bg').each(function () {
             $(this).css('background-image', `url('/mass_mailing_themes/static/src/img/theme_${themeParams.name}/s_default_image_block_banner.jpg')`);
@@ -400,6 +419,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             });
             return {
                 name: name,
+                title: $theme.data("title") || "",
                 className: classname || "",
                 img: $theme.data("img") || "",
                 template: $theme.html().trim(),
@@ -422,7 +442,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
             themes: themesParams
         }));
         const $themeSelectorNew = $(core.qweb.render("mass_mailing.theme_selector_new", {
-            themes: themesParams
+            themes: themesParams,
+            templates: this.templatesParams,
         }));
 
 
@@ -476,10 +497,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             }
         });
 
-        const selectTheme = (e) => {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            const themeParams = themesParams[$(e.currentTarget).index()];
+        const selectTheme = (themeParams) => {
             self._switchImages(themeParams, $snippets);
 
             selectedTheme = themeParams;
@@ -489,11 +507,23 @@ var MassMailingFieldHtml = FieldHtml.extend({
             $themeSelector.find('.dropdown-item:eq(' + themesParams.indexOf(selectedTheme) + ')').addClass('selected');
         };
 
-        $themeSelector.on("click", ".dropdown-item", selectTheme);
-        $themeSelectorNew.on("click", ".dropdown-item", async (e) => {
+        $themeSelector.on('click', '.dropdown-item', (e) => {
             e.preventDefault();
             e.stopImmediatePropagation();
             const themeParams = themesParams[$(e.currentTarget).index()];
+            selectTheme(themeParams);
+        });
+        $themeSelectorNew.on('click', '.dropdown-item', async (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const themeName = $(e.currentTarget).attr('id');
+
+            let themeParams = themesParams.find(theme => theme.name === themeName);
+            if (!themeParams) {
+                // search a template instead of a theme
+                themeParams = this.templatesParams.find(template => template.name === themeName);
+            }
 
             if (themeParams.name === "basic") {
                 await this._restartWysiwygInstance(false);
@@ -507,12 +537,29 @@ var MassMailingFieldHtml = FieldHtml.extend({
                 $snippets_menu.empty();
             }
 
-            selectTheme(e);
+            selectTheme(themeParams);
             // Wait the next tick because some mutation have to be processed by
             // the Odoo editor before resetting the history.
             setTimeout(() => {
                 this.wysiwyg.historyReset();
             }, 0);
+        });
+
+        // Remove the mailing from the favorites list
+        $themeSelectorNew.on('click', '.o_mail_template_preview i.o_mail_template_remove_favorite', async (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const $target = $(event.currentTarget);
+            const mailingId = $target.data('id');
+
+            await this._rpc({
+                model: 'mailing.mailing',
+                method: 'action_remove_favorite',
+                args: [mailingId],
+            });
+
+            $target.parents('.o_mail_template_preview').remove();
         });
 
         /**
