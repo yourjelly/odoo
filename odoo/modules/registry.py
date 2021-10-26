@@ -370,6 +370,54 @@ class Registry(Mapping):
 
         return triggers
 
+    def base_triggers(self):
+        triggers = {}
+        for Model in self.models.values():
+            if Model._abstract:
+                continue
+            for field in Model._fields.values():
+                # dependencies of custom fields may not exist; ignore that case
+                exceptions = (Exception,) if field.base_field.manual else ()
+                with ignore(*exceptions):
+                    depends = list(field.resolve_depends(self))
+                    for depends_path in depends:
+                        for depends_field in depends_path:
+                            triggers.setdefault(depends_field, OrderedSet()).add(field)
+        return triggers
+
+    def field_triggers2(self, fields=None):
+        # determine field dependencies
+        triggers = self.base_triggers()
+
+        def transitive_triggers(field, seen=[]):
+            if field in seen:
+                return
+            for dependant_field in triggers.get(field, ()):
+                yield (dependant_field,)
+                for dependant_paths in transitive_triggers(dependant_field, seen + [field]):
+                    yield concat(dependant_field, dependant_paths)
+
+        def concat(dependant_field, dependant_paths):
+            if dependant_field and dependant_paths:
+                f1, f2 = dependant_field, dependant_paths[0]
+                if f1.type == 'one2many' and f2.type == 'many2one' and \
+                        f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
+                    return concat(dependant_field, dependant_paths[1:])
+            return (dependant_field,) + dependant_paths
+
+        # determine triggers based on transitive dependencies
+        triggers_tree = {}
+        for field in fields or triggers:
+            for path in transitive_triggers(field):
+                if path:
+                    tree = triggers_tree
+                    for label in path:
+                        tree = tree.setdefault(label, {})
+                    tree.setdefault(None, OrderedSet()).add(field)
+                    #tree.setdefault(None, {})[field] = None
+
+        return triggers_tree
+
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """
         self._post_init_queue.append(partial(func, *args, **kwargs))
