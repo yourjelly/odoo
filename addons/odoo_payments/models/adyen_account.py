@@ -36,7 +36,7 @@ class AdyenAccount(models.Model):
     merchant_status = fields.Selection(
         string="Merchant Status",
         help="The status of the Adyen account on the merchant database (internal). The account"
-             "transitions from one status to another as follows:\n"
+             "transitions from one merchant status to another as follows:\n"
              "1. The account is created -> Pending Validation\n"
              "2. Adyen confirms the creation of the account -> Active (test environment only)\n"
              "3. The merchant validates the account -> Active (live environment only)\n"
@@ -48,6 +48,20 @@ class AdyenAccount(models.Model):
         ],
         default='pending',
         readonly=True,
+    )
+    kyc_state = fields.Selection(
+        string="KYC State",
+        help="The summary of the states of the KYC checks. The KYC state corresponds to:\n"
+             "- At least one KYC check is in 'awaiting_data' -> Data To Provide\n"
+             "- All data are provided but at least one KYC check is in 'pending' ->"
+             "  Data Validation\n"
+             "- All KYC check are in 'passed' -> Validated\n",
+        selection=[
+            ('data_to_provide', "Data To Provide"),
+            ('validation', "Data Validation"),
+            ('validated', "Validated"),
+        ],
+        compute='_compute_kyc_state',
     )
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
@@ -133,15 +147,6 @@ class AdyenAccount(models.Model):
     next_scheduled_payout = fields.Datetime(string="Next Scheduled Payout", readonly=True)
     last_sync_date = fields.Datetime(default=fields.Datetime.now)
     payout_allowed = fields.Boolean(readonly=True)
-
-    # Status for UX
-    state = fields.Selection(
-        selection=[
-            ('pending', "Pending Validation"),  # Odoo Validation
-            ('awaiting_data', "Data To Provide"),
-            ('validation', "Data Validation"),  # KYC Validation from Adyen
-            ('validated', "Validated"),
-        ], compute='_compute_state', string="Account State")  # TODO ANVFE could it simply be a bool `kyc pending`?
     onboarding_msg = fields.Html(compute='_compute_onboarding_msg')
 
     # KYC
@@ -418,18 +423,18 @@ class AdyenAccount(models.Model):
             ], limit=1)
             acquirer.journal_id = account.payment_journal_id
 
-    @api.depends('state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
+    @api.depends('merchant_status', 'kyc_state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
     def _compute_onboarding_msg(self):
         self.onboarding_msg = False
         for account in self:
             if not account.id:
                 continue
-            elif account.state == 'pending':
+            elif account.merchant_status == 'pending':
                 account.onboarding_msg = _(
                     "Our team will review your account. We will notify you, by email, as soon "
                     "as you can start processing payments."
                 )
-            elif account.state == 'awaiting_data':
+            elif account.kyc_state == 'data_to_provide':
                 if account.transactions_count > 0:
                     data_to_fill_msgs = []
 
@@ -457,7 +462,7 @@ class AdyenAccount(models.Model):
                         account.onboarding_msg = _(
                             "We will notify you via email when we have reviewed your information"
                         )
-            elif account.state == 'validated':
+            elif account.kyc_state == 'validated':
                 if account.transactions_count == 0:
                     account.onboarding_msg = _(
                         "You can now receive payments.<br>After the first payment, we will notify "
@@ -482,18 +487,15 @@ class AdyenAccount(models.Model):
             else:
                 account.full_name = "%s %s" % (account.first_name, account.last_name)
 
-    @api.depends('kyc_tier', 'adyen_kyc_ids', 'merchant_status')
-    def _compute_state(self):
+    @api.depends('adyen_kyc_ids')
+    def _compute_kyc_state(self):
         for account in self:
-            if account.merchant_status == 'pending' and account.kyc_tier == 0:
-                account.state = 'pending'
+            if any(kyc.status == 'awaiting_data' for kyc in account.adyen_kyc_ids):
+                account.kyc_state = 'data_to_provide'
+            elif any(kyc.status == 'pending' for kyc in account.adyen_kyc_ids):
+                account.kyc_state = 'validation'
             else:
-                if any(k.status == 'awaiting_data' for k in account.adyen_kyc_ids):
-                    account.state = 'awaiting_data'
-                elif any(k.status == 'pending' for k in account.adyen_kyc_ids):
-                    account.state = 'validation'
-                else:
-                    account.state = 'validated'
+                account.kyc_state = 'validated'
 
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')

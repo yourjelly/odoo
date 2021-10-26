@@ -14,7 +14,7 @@
                 <field name="payout_allowed" invisible="1"/>
                 <field name="need_to_provide_payment_journal" invisible="1"/>
                 <header>
-                    <field name="state"
+                    <field name="merchant_status"
                            widget="statusbar"
                            attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
