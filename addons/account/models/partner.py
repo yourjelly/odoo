@@ -187,23 +187,23 @@ class AccountFiscalPosition(models.Model):
         domain_group = base_domain + [('country_group_id.country_ids', '=', country_id)]
 
         # Build domain to search records with exact matching criteria
-        fpos = self.search(domain_country + state_domain + zip_domain, limit=1)
+        fpos_id = self._search(domain_country + state_domain + zip_domain, limit=1)
         # return records that fit the most the criteria, and fallback on less specific fiscal positions if any can be found
-        if not fpos and state_id:
-            fpos = self.search(domain_country + null_state_dom + zip_domain, limit=1)
-        if not fpos and zipcode:
-            fpos = self.search(domain_country + state_domain + null_zip_dom, limit=1)
-        if not fpos and state_id and zipcode:
-            fpos = self.search(domain_country + null_state_dom + null_zip_dom, limit=1)
+        if not fpos_id and state_id:
+            fpos_id = self._search(domain_country + null_state_dom + zip_domain, limit=1)
+        if not fpos_id and zipcode:
+            fpos_id = self._search(domain_country + state_domain + null_zip_dom, limit=1)
+        if not fpos_id and state_id and zipcode:
+            fpos_id = self._search(domain_country + null_state_dom + null_zip_dom, limit=1)
 
         # fallback: country group with no state/zip range
-        if not fpos:
-            fpos = self.search(domain_group + null_state_dom + null_zip_dom, limit=1)
+        if not fpos_id:
+            fpos_id = self._search(domain_group + null_state_dom + null_zip_dom, limit=1)
 
-        if not fpos:
+        if not fpos_id:
             # Fallback on catchall (no country, no group)
-            fpos = self.search(base_domain + null_country_dom, limit=1)
-        return fpos
+            fpos_id = self._search(base_domain + null_country_dom, limit=1)
+        return self.browse(fpos_id)
 
     @api.model
     def get_fiscal_position(self, partner_id, delivery_id=None):

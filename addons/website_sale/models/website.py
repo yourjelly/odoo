@@ -68,7 +68,7 @@ class Website(models.Model):
         Pricelist = self.env['product.pricelist']
         for website in self:
             website.pricelist_ids = Pricelist.search(
-                Pricelist._get_website_pricelists_domain(website.id)
+                Pricelist._get_website_pricelists_domain(website)
             )
 
     def _compute_pricelist_id(self):
@@ -110,10 +110,10 @@ class Website(models.Model):
         self.ensure_one()
         pricelists = self.env['product.pricelist']
         if country_code:
-            for cgroup in self.env['res.country.group'].search([('country_ids.code', '=', country_code)]):
-                pricelists |= cgroup.pricelist_ids.filtered(
-                    lambda pl: pl._is_available_on_website(self.id) and _check_show_visible(pl)
-                )
+            cgroups = self.env['res.country.group'].search([('country_ids.code', '=', country_code)])
+            pricelists = cgroups.pricelist_ids.filtered(
+                lambda pl: pl._is_available_on_website(self) and _check_show_visible(pl)
+            )
 
         # no GeoIP or no pricelist for this country
         if not country_code or not pricelists:
@@ -123,7 +123,7 @@ class Website(models.Model):
         is_public = self.user_id.id == self.env.user.id
         if not is_public:
             # keep partner_pl only if website compliant
-            partner_pl = pricelists.browse(partner_pl).filtered(lambda pl: pl._is_available_on_website(self.id) and _check_show_visible(pl))
+            partner_pl = pricelists.browse(partner_pl).filtered(lambda pl: pl._is_available_on_website(self) and _check_show_visible(pl))
             if country_code:
                 # keep partner_pl only if GeoIP compliant in case of GeoIP enabled
                 partner_pl = partner_pl.filtered(

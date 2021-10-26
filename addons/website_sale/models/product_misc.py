@@ -72,14 +72,14 @@ class ProductPricelist(models.Model):
         domain = super(ProductPricelist, self)._get_partner_pricelist_multi_search_domain_hook(company_id)
         website = ir_http.get_request_website()
         if website:
-            domain += self._get_website_pricelists_domain(website.id)
+            domain += self._get_website_pricelists_domain(website)
         return domain
 
     def _get_partner_pricelist_multi_filter_hook(self):
         res = super(ProductPricelist, self)._get_partner_pricelist_multi_filter_hook()
         website = ir_http.get_request_website()
         if website:
-            res = res.filtered(lambda pl: pl._is_available_on_website(website.id))
+            res = res.filtered(lambda pl: pl._is_available_on_website(website))
         return res
 
     def _check_website_pricelist(self):
@@ -87,7 +87,7 @@ class ProductPricelist(models.Model):
             if not website.pricelist_ids:
                 raise UserError(_("With this action, '%s' website would not have any pricelist available.") % (website.name))
 
-    def _is_available_on_website(self, website_id):
+    def _is_available_on_website(self, website):
         """ To be able to be used on a website, a pricelist should either:
         - Have its `website_id` set to current website (specific pricelist).
         - Have no `website_id` set and should be `selectable` (generic pricelist)
@@ -100,18 +100,18 @@ class ProductPricelist(models.Model):
         Change in this method should be reflected in `_get_website_pricelists_domain`.
         """
         self.ensure_one()
-        if self.company_id and self.company_id != self.env["website"].browse(website_id).company_id:
+        if self.company_id and self.company_id != website.company_id:
             return False
-        return self.website_id.id == website_id or (not self.website_id and (self.selectable or self.sudo().code))
+        return self.website_id == website or (not self.website_id and (self.selectable or self.sudo().code))
 
-    def _get_website_pricelists_domain(self, website_id):
+    def _get_website_pricelists_domain(self, website):
         ''' Check above `_is_available_on_website` for explanation.
         Change in this method should be reflected in `_is_available_on_website`.
         '''
-        company_id = self.env["website"].browse(website_id).company_id.id
+        company_id = website.company_id.id
         return [
             '&', ('company_id', 'in', [False, company_id]),
-            '|', ('website_id', '=', website_id),
+            '|', ('website_id', '=', website.id),
             '&', ('website_id', '=', False),
             '|', ('selectable', '=', True), ('code', '!=', False),
         ]

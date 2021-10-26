@@ -21,7 +21,8 @@ from odoo.addons.website.controllers.form import WebsiteForm
 from odoo.osv import expression
 from odoo.tools.json import scriptsafe as json_scriptsafe
 _logger = logging.getLogger(__name__)
-
+from odoo.tools.profiler import Profiler
+from odoo.tools import profiler
 
 class TableCompute(object):
 
@@ -223,6 +224,7 @@ class WebsiteSale(http.Controller):
         '''/shop/category/<model("product.public.category"):category>/page/<int:page>'''
     ], type='http', auth="public", website=True, sitemap=sitemap_shop)
     def shop(self, page=0, category=None, search='', min_price=0.0, max_price=0.0, ppg=False, **post):
+      with Profiler():
         add_qty = int(post.get('add_qty', 1))
         try:
             min_price = float(min_price)
