@@ -71,6 +71,8 @@ class Registry(Mapping):
         """ Create and return a new registry for the given database name. """
         t0 = time.time()
         with cls._lock:
+          from contextlib import nullcontext
+          with odoo.tools.profiler.Profiler([odoo.tools.profiler.PeriodicCollector(0.1)], db=db_name) if update_module else nullcontext():
             registry = object.__new__(cls)
             registry.init(db_name)
 
