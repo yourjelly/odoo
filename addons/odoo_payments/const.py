@@ -11,9 +11,9 @@
 
 # Mapping of Adyen verification statuses to adyen.kyc.status values
 KYC_STATUS_MAPPING = {
-    'INVALID_DATA': 'awaiting_data',
-    'RETRY_LIMIT_REACHED': 'awaiting_data',
-    'AWAITING_DATA': 'awaiting_data',
+    'INVALID_DATA': 'data_to_provide',
+    'RETRY_LIMIT_REACHED': 'data_to_provide',
+    'AWAITING_DATA': 'data_to_provide',
     'DATA_PROVIDED': 'data_provided',
     'PENDING': 'pending',
     'PASSED': 'passed',
