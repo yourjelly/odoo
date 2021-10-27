@@ -137,8 +137,8 @@ class AccountAccount(models.Model):
         self.env['account.payment.method.line'].flush(['payment_method_id', 'payment_account_id'])
 
         self._cr.execute('''
-            SELECT 
-                account.id, 
+            SELECT
+                account.id,
                 journal.id
             FROM account_journal journal
             JOIN res_company company ON company.id = journal.company_id
@@ -147,11 +147,11 @@ class AccountAccount(models.Model):
             AND journal.currency_id != company.currency_id
             AND account.currency_id != journal.currency_id
             AND account.id IN %(accounts)s
-            
+
             UNION ALL
-            
-            SELECT 
-                account.id, 
+
+            SELECT
+                account.id,
                 journal.id
             FROM account_journal journal
             JOIN res_company company ON company.id = journal.company_id
@@ -163,11 +163,11 @@ class AccountAccount(models.Model):
             AND account.currency_id != journal.currency_id
             AND apm.payment_type = 'inbound'
             AND account.id IN %(accounts)s
-            
+
             UNION ALL
-            
-            SELECT 
-                account.id, 
+
+            SELECT
+                account.id,
                 journal.id
             FROM account_journal journal
             JOIN res_company company ON company.id = journal.company_id
@@ -525,12 +525,13 @@ class AccountAccount(models.Model):
         """
         self.env.cr.execute(query, [tuple(self.ids)])
 
+    @api.model_recordify
     def write(self, vals):
         # Do not allow changing the company_id when account_move_line already exist
         if vals.get('company_id', False):
             move_lines = self.env['account.move.line'].search([('account_id', 'in', self.ids)], limit=1)
             for account in self:
-                if (account.company_id.id != vals['company_id']) and move_lines:
+                if (account.company_id != vals['company_id']) and move_lines:
                     raise UserError(_('You cannot change the owner company of an account that already contains journal items.'))
         if 'reconcile' in vals:
             if vals['reconcile']:
@@ -665,6 +666,7 @@ class AccountGroup(models.Model):
         if res:
             raise ValidationError(_('Account Groups with the same granularity can\'t overlap'))
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -675,6 +677,7 @@ class AccountGroup(models.Model):
         res_ids._adapt_parent_account_group()
         return res_ids
 
+    @api.model_recordify
     def write(self, vals):
         res = super(AccountGroup, self).write(vals)
         if 'code_prefix_start' in vals or 'code_prefix_end' in vals:

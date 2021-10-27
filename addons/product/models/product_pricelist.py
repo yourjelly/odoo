@@ -595,6 +595,7 @@ class PricelistItem(models.Model):
             template_rules.update({'applied_on': '1_product'})
             (self-variants_rules-template_rules).update({'applied_on': '3_global'})
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
@@ -611,6 +612,7 @@ class PricelistItem(models.Model):
                     values.update(dict(categ_id=None))
         return super(PricelistItem, self).create(vals_list)
 
+    @api.model_recordify
     def write(self, values):
         if values.get('applied_on', False):
             # Ensure item consistency for later searches.

@@ -638,6 +638,7 @@ class AccountPayment(models.Model):
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
@@ -685,6 +686,7 @@ class AccountPayment(models.Model):
 
         return payments
 
+    @api.model_recordify
     def write(self, vals):
         # OVERRIDE
         res = super().write(vals)
@@ -777,15 +779,15 @@ class AccountPayment(models.Model):
                 liquidity_amount = liquidity_lines.amount_currency
 
                 move_vals_to_write.update({
-                    'currency_id': liquidity_lines.currency_id.id,
-                    'partner_id': liquidity_lines.partner_id.id,
+                    'currency_id': liquidity_lines.currency_id,
+                    'partner_id': liquidity_lines.partner_id,
                 })
                 payment_vals_to_write.update({
                     'amount': abs(liquidity_amount),
                     'partner_type': partner_type,
-                    'currency_id': liquidity_lines.currency_id.id,
-                    'destination_account_id': counterpart_lines.account_id.id,
-                    'partner_id': liquidity_lines.partner_id.id,
+                    'currency_id': liquidity_lines.currency_id,
+                    'destination_account_id': counterpart_lines.account_id,
+                    'partner_id': liquidity_lines.partner_id,
                 })
                 if liquidity_amount > 0.0:
                     payment_vals_to_write.update({'payment_type': 'inbound'})

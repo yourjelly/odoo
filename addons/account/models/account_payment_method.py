@@ -18,6 +18,7 @@ class AccountPaymentMethod(models.Model):
         ('name_code_unique', 'unique (code, payment_type)', 'The combination code/payment type already exists!'),
     ]
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         payment_methods = super().create(vals_list)
@@ -149,6 +150,7 @@ class AccountPaymentMethodLine(models.Model):
 
         return super(AccountPaymentMethodLine, unused_payment_method_lines).unlink()
 
+    @api.model_recordify
     def write(self, vals):
         if 'payment_account_id' in vals:
             account = self.env['account.account'].browse(vals['payment_account_id'])
@@ -156,7 +158,8 @@ class AccountPaymentMethodLine(models.Model):
                 account.reconcile = True
         return super().write(vals)
 
-    @api.model
+    @api.model_recordify
+    @api.model_create_multi
     def create(self, vals_list):
         if 'payment_account_id' in vals_list:
             account = self.env['account.account'].browse(vals_list['payment_account_id'])

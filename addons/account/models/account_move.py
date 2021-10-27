@@ -366,7 +366,7 @@ class AccountMove(models.Model):
             return False
         field = record._fields[field_name]
         if field.type == 'many2one':
-            return record[field_name].id != vals[field_name]
+            return record[field_name] != vals[field_name]
         if field.type == 'many2many':
             current_ids = set(record[field_name].ids)
             after_write_ids = set(record.new({field_name: vals[field_name]})[field_name].ids)
@@ -383,9 +383,9 @@ class AccountMove(models.Model):
 
     @api.model
     def _cleanup_write_orm_values(self, record, vals):
-        cleaned_vals = dict(vals)
+        cleaned_vals = fields.write_dict(vals, _model=self)
         for field_name, value in vals.items():
-            if not self._field_will_change(record, vals, field_name):
+            if not self._field_will_change(record, cleaned_vals, field_name):
                 del cleaned_vals[field_name]
         return cleaned_vals
 
@@ -2130,7 +2130,7 @@ class AccountMove(models.Model):
             if default_move_type:
                 ctx_vals['default_move_type'] = default_move_type
             if vals.get('journal_id'):
-                ctx_vals['default_journal_id'] = vals['journal_id']
+                ctx_vals['default_journal_id'] = vals['journal_id'].id
                 # reorder the companies in the context so that the company of the journal
                 # (which will be the company of the move) is the main one, ensuring all
                 # property fields are read with the correct company
@@ -2206,6 +2206,7 @@ class AccountMove(models.Model):
 
         return copied_am
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
@@ -2215,15 +2216,16 @@ class AccountMove(models.Model):
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
         return super(AccountMove, self).create(vals_list)
 
+    @api.model_recordify
     def write(self, vals):
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
                 raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
             if (move.restrict_mode_hash_table and move.inalterable_hash and 'inalterable_hash' in vals) or (move.secure_sequence_number and 'secure_sequence_number' in vals):
                 raise UserError(_('You cannot overwrite the values ensuring the inalterability of the accounting.'))
-            if (move.posted_before and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
+            if (move.posted_before and 'journal_id' in vals and move.journal_id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it has been posted once.'))
-            if (move.name and move.name != '/' and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
+            if (move.name and move.name != '/' and 'journal_id' in vals and move.journal_id != vals['journal_id']):
                 raise UserError(_('You cannot edit the journal of an account move if it already has a sequence number assigned.'))
 
             # You can't change the date of a move being inside a locked period.
@@ -4390,6 +4392,7 @@ class AccountMoveLine(models.Model):
         if not cr.fetchone():
             cr.execute('CREATE INDEX account_move_line_partner_id_ref_idx ON account_move_line (partner_id, ref)')
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
@@ -4398,12 +4401,12 @@ class AccountMoveLine(models.Model):
 
         for vals in vals_list:
             move = self.env['account.move'].browse(vals['move_id'])
-            vals.setdefault('company_currency_id', move.company_id.currency_id.id) # important to bypass the ORM limitation where monetary fields are not rounded; more info in the commit message
+            vals.setdefault('company_currency_id', move.company_id.currency_id) # important to bypass the ORM limitation where monetary fields are not rounded; more info in the commit message
 
             # Ensure balance == amount_currency in case of missing currency or same currency as the one from the
             # company.
-            currency_id = vals.get('currency_id') or move.company_id.currency_id.id
-            if currency_id == move.company_id.currency_id.id:
+            currency_id = vals.get('currency_id') or move.company_id.currency_id
+            if currency_id == move.company_id.currency_id:
                 balance = vals.get('debit', 0.0) - vals.get('credit', 0.0)
                 vals.update({
                     'currency_id': currency_id,
@@ -4483,6 +4486,7 @@ class AccountMoveLine(models.Model):
 
         return lines
 
+    @api.model_recordify
     def write(self, vals):
         # OVERRIDE
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
@@ -4491,7 +4495,7 @@ class AccountMoveLine(models.Model):
         PROTECTED_FIELDS_LOCK_DATE = PROTECTED_FIELDS_TAX_LOCK_DATE + ['account_id', 'journal_id', 'amount_currency', 'currency_id', 'partner_id']
         PROTECTED_FIELDS_RECONCILIATION = ('account_id', 'date', 'debit', 'credit', 'amount_currency', 'currency_id')
 
-        account_to_write = self.env['account.account'].browse(vals['account_id']) if 'account_id' in vals else None
+        account_to_write = vals.get('account_id')
 
         # Check writing a deprecated account.
         if account_to_write and account_to_write.deprecated:

@@ -355,6 +355,7 @@ class ProductProduct(models.Model):
                 'message': _("The Internal Reference '%s' already exists.", self.default_code),
             }}
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -364,6 +365,7 @@ class ProductProduct(models.Model):
         self.clear_caches()
         return products
 
+    @api.model_recordify
     def write(self, values):
         self.product_tmpl_id._sanitize_vals(values)
         res = super(ProductProduct, self).write(values)

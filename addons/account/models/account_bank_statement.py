@@ -74,12 +74,14 @@ class AccountBankStmtCashWizard(models.Model):
             result.append((cashbox.id, str(cashbox.total)))
         return result
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals):
         cashboxes = super(AccountBankStmtCashWizard, self).create(vals)
         cashboxes._validate_cashbox()
         return cashboxes
 
+    @api.model_recordify
     def write(self, vals):
         res = super(AccountBankStmtCashWizard, self).write(vals)
         self._validate_cashbox()
@@ -246,6 +248,7 @@ class AccountBankStatement(models.Model):
         help="Technical field to display a warning message in case starting balance is different than previous ending balance")
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
 
+    @api.model_recordify
     def write(self, values):
         res = super(AccountBankStatement, self).write(values)
         if values.get('date') or values.get('journal'):
@@ -265,6 +268,7 @@ class AccountBankStatement(models.Model):
                 next_statements_to_recompute.modified(['previous_statement_id'])
         return res
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, values):
         res = super(AccountBankStatement, self).create(values)
@@ -834,6 +838,7 @@ class AccountBankStatementLine(models.Model):
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
@@ -870,6 +875,7 @@ class AccountBankStatementLine(models.Model):
 
         return st_lines
 
+    @api.model_recordify
     def write(self, vals):
         # OVERRIDE
         res = super().write(vals)
@@ -921,7 +927,7 @@ class AccountBankStatementLine(models.Model):
 
                 st_line_vals_to_write.update({
                     'payment_ref': liquidity_lines.name,
-                    'partner_id': liquidity_lines.partner_id.id,
+                    'partner_id': liquidity_lines.partner_id,
                 })
 
                 # Update 'amount' according to the liquidity line.
@@ -962,12 +968,12 @@ class AccountBankStatementLine(models.Model):
 
                         st_line_vals_to_write.update({
                             'amount_currency': -suspense_lines.amount_currency,
-                            'foreign_currency_id': suspense_lines.currency_id.id,
+                            'foreign_currency_id': suspense_lines.currency_id,
                         })
 
                 move_vals_to_write.update({
-                    'partner_id': liquidity_lines.partner_id.id,
-                    'currency_id': (st_line.foreign_currency_id or journal_currency or company_currency).id,
+                    'partner_id': liquidity_lines.partner_id,
+                    'currency_id': (st_line.foreign_currency_id or journal_currency or company_currency),
                 })
 
             move.write(move._cleanup_write_orm_values(move, move_vals_to_write))

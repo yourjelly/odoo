@@ -19,6 +19,7 @@ class ResCurrency(models.Model):
                                               and record._origin.rounding != record.rounding \
                                               and record._origin._has_accounting_entries()
 
+    @api.model_recordify
     def write(self, vals):
         if 'rounding' in vals:
             rounding_val = vals['rounding']

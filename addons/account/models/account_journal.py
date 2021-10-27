@@ -520,17 +520,18 @@ class AccountJournal(models.Model):
             # remove alias_name to avoid useless write on alias
             del(vals['alias_name'])
 
+    @api.model_recordify
     def write(self, vals):
         for journal in self:
             company = journal.company_id
-            if ('company_id' in vals and journal.company_id.id != vals['company_id']):
-                if self.env['account.move'].search([('journal_id', '=', journal.id)], limit=1):
+            if ('company_id' in vals and journal.company_id != vals['company_id']):
+                if self.env['account.move'].search([('journal_id', '=', journal)], limit=1):
                     raise UserError(_('This journal already contains items, therefore you cannot modify its company.'))
-                company = self.env['res.company'].browse(vals['company_id'])
+                company = vals['company_id']
                 if journal.bank_account_id.company_id and journal.bank_account_id.company_id != company:
                     journal.bank_account_id.write({
-                        'company_id': company.id,
-                        'partner_id': company.partner_id.id,
+                        'company_id': company,
+                        'partner_id': company.partner_id,
                     })
             if 'currency_id' in vals:
                 if journal.bank_account_id:
@@ -539,13 +540,13 @@ class AccountJournal(models.Model):
                 if not vals.get('bank_account_id'):
                     raise UserError(_('You cannot remove the bank account from the journal once set.'))
                 else:
-                    bank_account = self.env['res.partner.bank'].browse(vals['bank_account_id'])
+                    bank_account = vals['bank_account_id']
                     if bank_account.partner_id != company.partner_id:
                         raise UserError(_("The partners of the journal's company and the related bank account mismatch."))
             if 'alias_name' in vals:
                 journal._update_mail_alias(vals)
             if 'restrict_mode_hash_table' in vals and not vals.get('restrict_mode_hash_table'):
-                journal_entry = self.env['account.move'].search([('journal_id', '=', self.id), ('state', '=', 'posted'), ('secure_sequence_number', '!=', 0)], limit=1)
+                journal_entry = self.env['account.move'].search([('journal_id', '=', self), ('state', '=', 'posted'), ('secure_sequence_number', '!=', 0)], limit=1)
                 if len(journal_entry) > 0:
                     field_string = self._fields['restrict_mode_hash_table'].get_description(self.env)['string']
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.", field_string))

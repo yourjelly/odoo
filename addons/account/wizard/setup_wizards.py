@@ -39,6 +39,7 @@ class FinancialYearOpeningWizard(models.TransientModel):
                     (wiz.fiscalyear_last_month, wiz.fiscalyear_last_day)
                 )
 
+    @api.model_recordify
     def write(self, vals):
         # Amazing workaround: non-stored related fields on company are a BAD idea since the 3 fields
         # must follow the constraint '_check_fiscalyear_last_day'. The thing is, in case of related

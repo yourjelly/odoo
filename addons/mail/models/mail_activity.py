@@ -258,6 +258,7 @@ class MailActivity(models.Model):
     # ORM overrides
     # ------------------------------------------------------
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         activities = super(MailActivity, self).create(vals_list)
@@ -299,14 +300,15 @@ class MailActivity(models.Model):
         self.check_access_rule('read')
         return super(MailActivity, self).read(fields=fields, load=load)
 
+    @api.model_recordify
     def write(self, values):
         if values.get('user_id'):
-            user_changes = self.filtered(lambda activity: activity.user_id.id != values.get('user_id'))
+            user_changes = self.filtered(lambda activity: activity.user_id != values.get('user_id'))
             pre_responsibles = user_changes.mapped('user_id.partner_id')
         res = super(MailActivity, self).write(values)
 
         if values.get('user_id'):
-            if values['user_id'] != self.env.uid:
+            if values['user_id'] != self.env.user:
                 to_check = user_changes.filtered(lambda act: not act.automated)
                 to_check._check_access_assignation()
                 if not self.env.context.get('mail_activity_quick_update', False):

@@ -7,6 +7,7 @@ from odoo import api, models, _
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         companies = super(ResCompany, self).create(vals_list)
@@ -30,6 +31,7 @@ class ResCompany(models.Model):
             )
         return companies
 
+    @api.model_recordify
     def write(self, values):
         # When we modify the currency of the company, we reflect the change on the list0 pricelist, if
         # that pricelist is not used by another company. Otherwise, we create a new pricelist for the
@@ -42,10 +44,10 @@ class ResCompany(models.Model):
             for company in self:
                 existing_pricelist = ProductPricelist.search(
                     [('company_id', 'in', (False, company.id)),
-                     ('currency_id', 'in', (currency_id, company.currency_id.id))])
-                if existing_pricelist and any(currency_id == x.currency_id.id for x in existing_pricelist):
+                     ('currency_id', 'in', (currency_id, company.currency_id))])
+                if existing_pricelist and any(currency_id == x.currency_id for x in existing_pricelist):
                     continue
-                if currency_id == company.currency_id.id:
+                if currency_id == company.currency_id:
                     continue
                 currency_match = main_pricelist.currency_id == company.currency_id
                 company_match = (main_pricelist.company_id == company or
@@ -53,7 +55,7 @@ class ResCompany(models.Model):
                 if currency_match and company_match:
                     main_pricelist.write({'currency_id': currency_id})
                 else:
-                    params = {'currency': self.env['res.currency'].browse(currency_id).name}
+                    params = {'currency': currency_id.name}
                     pricelist = ProductPricelist.create({
                         'name': _("Default %(currency)s pricelist") %  params,
                         'currency_id': currency_id,

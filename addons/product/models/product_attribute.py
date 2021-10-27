@@ -51,6 +51,7 @@ class ProductAttribute(models.Model):
     def _without_no_variant_attributes(self):
         return self.filtered(lambda pa: pa.create_variant != 'no_variant')
 
+    @api.model_recordify
     def write(self, vals):
         """Override to make sure attribute type can't be changed if it's used on
         a product template.
@@ -142,10 +143,11 @@ class ProductAttributeValue(models.Model):
             return super(ProductAttributeValue, self).name_get()
         return [(value.id, "%s: %s" % (value.attribute_id.name, value.name)) for value in self]
 
+    @api.model_recordify
     def write(self, values):
         if 'attribute_id' in values:
             for pav in self:
-                if pav.attribute_id.id != values['attribute_id'] and pav.is_used_on_products:
+                if pav.attribute_id != values['attribute_id'] and pav.is_used_on_products:
                     raise UserError(
                         _("You cannot change the attribute of the value %s because it is used on the following products:%s") %
                         (pav.display_name, ", ".join(pav.pav_attribute_line_ids.product_tmpl_id.mapped('display_name')))
@@ -215,6 +217,7 @@ class ProductTemplateAttributeLine(models.Model):
                     )
         return True
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         """Override to:
@@ -251,6 +254,7 @@ class ProductTemplateAttributeLine(models.Model):
         res._update_product_template_attribute_values()
         return res
 
+    @api.model_recordify
     def write(self, values):
         """Override to:
         - Add constraints to prevent doing changes that are not supported such
@@ -260,18 +264,18 @@ class ProductTemplateAttributeLine(models.Model):
         """
         if 'product_tmpl_id' in values:
             for ptal in self:
-                if ptal.product_tmpl_id.id != values['product_tmpl_id']:
+                if ptal.product_tmpl_id != values['product_tmpl_id']:
                     raise UserError(
                         _("You cannot move the attribute %s from the product %s to the product %s.") %
-                        (ptal.attribute_id.display_name, ptal.product_tmpl_id.display_name, values['product_tmpl_id'])
+                        (ptal.attribute_id.display_name, ptal.product_tmpl_id.display_name, values['product_tmpl_id'].display_name)
                     )
 
         if 'attribute_id' in values:
             for ptal in self:
-                if ptal.attribute_id.id != values['attribute_id']:
+                if ptal.attribute_id != values['attribute_id']:
                     raise UserError(
                         _("On the product %s you cannot transform the attribute %s into the attribute %s.") %
-                        (ptal.product_tmpl_id.display_name, ptal.attribute_id.display_name, values['attribute_id'])
+                        (ptal.product_tmpl_id.display_name, ptal.attribute_id.display_name, values['attribute_id'].display_name)
                     )
         # Remove all values while archiving to make sure the line is clean if it
         # is ever activated again.
@@ -475,6 +479,7 @@ class ProductTemplateAttributeValue(models.Model):
                     (ptav.product_attribute_value_id.display_name, ptav.attribute_id.display_name, ptav.product_tmpl_id.display_name)
                 )
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         if any('ptav_product_variant_ids' in v for v in vals_list):
@@ -483,6 +488,7 @@ class ProductTemplateAttributeValue(models.Model):
             raise UserError(_("You cannot update related variants from the values. Please update related values from the variants."))
         return super(ProductTemplateAttributeValue, self).create(vals_list)
 
+    @api.model_recordify
     def write(self, values):
         if 'ptav_product_variant_ids' in values:
             # Force write on this relation from `product.product` to properly
@@ -492,12 +498,12 @@ class ProductTemplateAttributeValue(models.Model):
         product_in_values = 'product_tmpl_id' in values
         if pav_in_values or product_in_values:
             for ptav in self:
-                if pav_in_values and ptav.product_attribute_value_id.id != values['product_attribute_value_id']:
+                if pav_in_values and ptav.product_attribute_value_id != values['product_attribute_value_id']:
                     raise UserError(
                         _("You cannot change the value of the value %s set on product %s.") %
                         (ptav.display_name, ptav.product_tmpl_id.display_name)
                     )
-                if product_in_values and ptav.product_tmpl_id.id != values['product_tmpl_id']:
+                if product_in_values and ptav.product_tmpl_id != values['product_tmpl_id']:
                     raise UserError(
                         _("You cannot change the product of the value %s set on product %s.") %
                         (ptav.display_name, ptav.product_tmpl_id.display_name)

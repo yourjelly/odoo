@@ -156,6 +156,7 @@ class AccountFiscalPosition(models.Model):
             vals['zip_from'], vals['zip_to'] = self._convert_zip_values(zip_from, zip_to)
         return super(AccountFiscalPosition, self).create(vals)
 
+    @api.model_recordify
     def write(self, vals):
         zip_from = vals.get('zip_from')
         zip_to = vals.get('zip_to')
@@ -532,6 +533,7 @@ class ResPartner(models.Model):
         ], limit=1)
         return can_edit_vat and not (bool(has_invoice))
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         search_partner_mode = self.env.context.get('res_partner_search_mode')

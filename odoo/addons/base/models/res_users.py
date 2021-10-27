@@ -557,6 +557,7 @@ class Users(models.Model):
             user.partner_id.active = user.active
         return users
 
+    @api.model_recordify
     def write(self, values):
         if values.get('active') and SUPERUSER_ID in self._ids:
             raise UserError(_("You cannot activate the superuser."))
@@ -574,7 +575,7 @@ class Users(models.Model):
                     break
             else:
                 if 'company_id' in values:
-                    if values['company_id'] not in self.env.user.company_ids.ids:
+                    if values['company_id'] not in self.env.user.company_ids:
                         del values['company_id']
                 # safe fields only, so we write as super-user to bypass access rights
                 self = self.sudo().with_context(binary_field_real_user=self.env.user)
@@ -583,7 +584,7 @@ class Users(models.Model):
         if 'company_id' in values:
             for user in self:
                 # if partner is global we keep it that way
-                if user.partner_id.company_id and user.partner_id.company_id.id != values['company_id']:
+                if user.partner_id.company_id and user.partner_id.company_id != values['company_id']:
                     user.partner_id.write({'company_id': user.company_id.id})
 
         if 'company_id' in values or 'company_ids' in values:

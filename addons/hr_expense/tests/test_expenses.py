@@ -324,7 +324,7 @@ class TestExpenses(TestExpenseCommon):
                     'product_id': self.product_a.id,
                     'unit_amount': 10.0,
                     'employee_id': self.expense_employee.id,
-                    'tax_ids': tax
+                    'tax_ids': [tax],
                 }),
                 (0, 0, {
                     'name': 'expense_2',
@@ -332,7 +332,7 @@ class TestExpenses(TestExpenseCommon):
                     'product_id': self.product_a.id,
                     'unit_amount': 1.0,
                     'employee_id': self.expense_employee.id,
-                    'tax_ids': tax
+                    'tax_ids': [tax],
                 }),
             ],
         })

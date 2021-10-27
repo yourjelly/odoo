@@ -66,10 +66,11 @@ class ChannelPartner(models.Model):
                         raise AccessError(_('This user can not be added in this channel'))
         return super(ChannelPartner, self).create(vals_list)
 
+    @api.model_recordify
     def write(self, vals):
         for channel_partner in self:
             for field_name in {'channel_id', 'partner_id', 'guest_id'}:
-                if field_name in vals and vals[field_name] != channel_partner[field_name].id:
+                if field_name in vals and vals[field_name] != channel_partner[field_name]:
                     raise AccessError(_('You can not write on %(field_name)s.', field_name=field_name))
         return super(ChannelPartner, self).write(vals)
 

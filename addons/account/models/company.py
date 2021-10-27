@@ -281,6 +281,7 @@ class ResCompany(models.Model):
             lock_date = self.fiscalyear_lock_date or date.min
         return lock_date
 
+    @api.model_recordify
     def write(self, values):
         #restrict the closing of FY if there are still unposted entries
         self._validate_fiscalyear_lock(values)
@@ -296,7 +297,7 @@ class ResCompany(models.Model):
                 company.reflect_code_prefix_change(company.cash_account_code_prefix, new_cash_code)
 
             #forbid the change of currency_id if there are already some accounting entries existing
-            if 'currency_id' in values and values['currency_id'] != company.currency_id.id:
+            if 'currency_id' in values and values['currency_id'] != company.currency_id:
                 if self.env['account.move.line'].search([('company_id', '=', company.id)]):
                     raise UserError(_('You cannot change the currency of the company since some journal items already exist'))
 

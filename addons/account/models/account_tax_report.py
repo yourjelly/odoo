@@ -14,6 +14,7 @@ class AccountTaxReport(models.Model):
     line_ids = fields.One2many(string="Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', help="Content of this tax report")
     root_line_ids = fields.One2many(string="Root Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', domain=[('parent_id', '=', None)], help="Subset of line_ids, containing the lines at the root of the report.")
 
+    @api.model_recordify
     def write(self, vals):
         # Overridden so that we change the country _id of the existing tags
         # when writing the country_id of the report, or create new tags
@@ -21,7 +22,7 @@ class AccountTaxReport(models.Model):
 
         if 'country_id' in vals:
             tags_cache = {}
-            for record in self.filtered(lambda x: x.country_id.id != vals['country_id']):
+            for record in self.filtered(lambda x: x.country_id != vals['country_id']):
                 for line in record.line_ids:
                     if line.tag_ids:
                         #The tags for this country may have been created by a previous line in this loop
@@ -190,6 +191,7 @@ class AccountTaxReportLine(models.Model):
         }
         return [(0, 0, minus_tag_vals), (0, 0, plus_tag_vals)]
 
+    @api.model_recordify
     def write(self, vals):
         tag_name_postponed = None
 

@@ -60,9 +60,10 @@ class MailNotification(models.Model):
                                     ON mail_notification (res_partner_id, is_read, notification_status, mail_message_id)
         """)
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
-        messages = self.env['mail.message'].browse(vals['mail_message_id'] for vals in vals_list)
+        messages = self.env['mail.message'].browse(vals['mail_message_id'].id for vals in vals_list)
         messages.check_access_rights('read')
         messages.check_access_rule('read')
         for vals in vals_list:
@@ -70,6 +71,7 @@ class MailNotification(models.Model):
                 vals['read_date'] = fields.Datetime.now()
         return super(MailNotification, self).create(vals_list)
 
+    @api.model_recordify
     def write(self, vals):
         if ('mail_message_id' in vals or 'res_partner_id' in vals) and not self.env.is_admin():
             raise AccessError(_("Can not update the message or recipient of a notification."))

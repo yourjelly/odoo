@@ -457,6 +457,7 @@ class ProductTemplate(models.Model):
             type_mapping = self._detailed_type_mapping()
             vals['type'] = type_mapping.get(vals['detailed_type'], vals['detailed_type'])
 
+    @api.model_recordify
     @api.model_create_multi
     def create(self, vals_list):
         ''' Store the initial standard price in order to be able to retrieve the cost of a product template for a given date'''
@@ -487,11 +488,12 @@ class ProductTemplate(models.Model):
 
         return templates
 
+    @api.model_recordify
     def write(self, vals):
         self._sanitize_vals(vals)
         if 'uom_id' in vals or 'uom_po_id' in vals:
-            uom_id = self.env['uom.uom'].browse(vals.get('uom_id')) or self.uom_id
-            uom_po_id = self.env['uom.uom'].browse(vals.get('uom_po_id')) or self.uom_po_id
+            uom_id = vals.get('uom_id') or self.uom_id
+            uom_po_id = vals.get('uom_po_id') or self.uom_po_id
             if uom_id and uom_po_id and uom_id.category_id != uom_po_id.category_id:
                 vals['uom_po_id'] = uom_id.id
         res = super(ProductTemplate, self).write(vals)
