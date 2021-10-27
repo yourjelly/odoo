@@ -2759,7 +2759,7 @@ class Many2one(_Relational):
             cache.set(record, self, self.convert_to_cache(value, record, validate=False))
 
     def convert_to_column(self, value, record, values=None, validate=True):
-        return value or None
+        return getattr(value, 'id', value) or None
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
@@ -2821,7 +2821,7 @@ class Many2one(_Relational):
             return value.id
         if isinstance(value, tuple):
             # value is either a pair (id, name), or a tuple of ids
-            return value[0] if value else False
+            return value[0].id if value else False
         if isinstance(value, dict):
             return record.env[self.comodel_name].new(value).id
         raise ValueError("Wrong value for %s: %r" % (self, value))
@@ -3100,6 +3100,43 @@ class Command(enum.IntEnum):
         return (cls.SET, 0, ids)
 
 
+def _recordify(env, field, value):
+    if not field:
+        pass
+    elif field.type == 'many2one':
+        if not value or isinstance(value, int):
+            value = env[field.comodel_name].browse(value)
+        elif isinstance(value, str):
+            value = env.ref(value)
+    elif field.type in ('one2many', 'many2many'):
+        if value and isinstance(value[0], (list, tuple)):
+            for i, command in enumerate(value):
+                command = list(command)
+                if command[0] in (Command.CREATE, Command.UPDATE):
+                    command[2] = write_dict(command[2], _model=env[field.comodel_name])
+                value[i] = tuple(command)
+    return value
+
+
+class write_dict(dict):
+    def __init__(self, /, *args, _model=None, **kwargs):
+        self.model = _model
+        super().__init__({
+            field_name: _recordify(self.model.env, self.model._fields.get(field_name), value)
+            for field_name, value in {**dict(*args), **kwargs}.items()
+        })
+
+    def __setitem__(self, key, value, /):
+        super().__setitem__(key, _recordify(self.model.env, self.model._fields.get(key), value))
+
+    def __repr__(self):
+        return f"<write[{self.model._name}]>{super().__repr__()}"
+
+    @classmethod
+    def build(cls, model, other):
+        return other if isinstance(other, write_dict) else write_dict(other, _model=model)
+
+
 class _RelationalMulti(_Relational):
     """ Abstract class for relational fields *2many. """
     write_sequence = 20
@@ -3160,13 +3197,13 @@ class _RelationalMulti(_Relational):
             for command in value:
                 if isinstance(command, (tuple, list)):
                     if command[0] == Command.CREATE:
-                        ids.add(comodel.new(command[2], ref=command[1]).id)
+                        ids.add(comodel.new({k: v for k, v in command[2].items()}, ref=command[1]).id)
                     elif command[0] == Command.UPDATE:
                         line = browse(command[1])
                         if validate:
-                            line.update(command[2])
+                            line.update({k: v for k, v in command[2].items()})
                         else:
-                            line._update_cache(command[2], validate=False)
+                            line._update_cache({k: v for k, v in command[2].items()}, validate=False)
                         ids.add(line.id)
                     elif command[0] in (Command.DELETE, Command.UNLINK):
                         ids.discard(browse(command[1]).id)
@@ -3458,10 +3495,10 @@ class One2many(_RelationalMulti):
                 for command in (commands or ()):
                     if command[0] == Command.CREATE:
                         for record in recs:
-                            to_create.append(dict(command[2], **{inverse: record.id}))
+                            to_create.append(({**{k: v for k, v in command[2].items()}, **{inverse: record.id}}))
                         allow_full_delete = False
                     elif command[0] == Command.UPDATE:
-                        comodel.browse(command[1]).write(command[2])
+                        comodel.browse(command[1]).write({k: v for k, v in command[2].items()})
                     elif command[0] == Command.DELETE:
                         to_delete.append(command[1])
                     elif command[0] == Command.UNLINK:
@@ -3499,9 +3536,9 @@ class One2many(_RelationalMulti):
                 for command in (commands or ()):
                     if command[0] == Command.CREATE:
                         for record in recs:
-                            link(record, comodel.new(command[2], ref=command[1]))
+                            link(record, comodel.new({k: v for k, v in command[2].items()}, ref=command[1]))
                     elif command[0] == Command.UPDATE:
-                        comodel.browse(command[1]).write(command[2])
+                        comodel.browse(command[1]).write({k: v for k, v in command[2].items()})
                     elif command[0] == Command.DELETE:
                         unlink(comodel.browse(command[1]))
                     elif command[0] == Command.UNLINK:
@@ -3545,10 +3582,10 @@ class One2many(_RelationalMulti):
                 for command in commands:
                     if command[0] == Command.CREATE:
                         for record in recs:
-                            line = comodel.new(command[2], ref=command[1])
+                            line = comodel.new({k: v for k, v in command[2].items()}, ref=command[1])
                             line[inverse] = record
                     elif command[0] == Command.UPDATE:
-                        browse([command[1]]).update(command[2])
+                        browse([command[1]]).update({k: v for k, v in command[2].items()})
                     elif command[0] == Command.DELETE:
                         browse([command[1]])[inverse] = False
                     elif command[0] == Command.UNLINK:
@@ -3577,9 +3614,9 @@ class One2many(_RelationalMulti):
                 for command in commands:
                     if command[0] == Command.CREATE:
                         for record in recs:
-                            link(record, comodel.new(command[2], ref=command[1]))
+                            link(record, comodel.new({k: v for k, v in command[2].items()}, ref=command[1]))
                     elif command[0] == Command.UPDATE:
-                        browse([command[1]]).update(command[2])
+                        browse([command[1]]).update({k: v for k, v in command[2].items()})
                     elif command[0] == Command.DELETE:
                         unlink(browse([command[1]]))
                     elif command[0] == Command.UNLINK:
@@ -3844,9 +3881,9 @@ class Many2many(_RelationalMulti):
                 if not isinstance(command, (list, tuple)) or not command:
                     continue
                 if command[0] == Command.CREATE:
-                    to_create.append((recs._ids, command[2]))
+                    to_create.append((recs._ids, {k: v for k, v in command[2].items()}))
                 elif command[0] == Command.UPDATE:
-                    comodel.browse(command[1]).write(command[2])
+                    comodel.browse(command[1]).write({k: v for k, v in command[2].items()})
                 elif command[0] == Command.DELETE:
                     to_delete.append(command[1])
                 elif command[0] == Command.UNLINK:
@@ -3961,12 +3998,12 @@ class Many2many(_RelationalMulti):
                 if not isinstance(command, (list, tuple)) or not command:
                     continue
                 if command[0] == Command.CREATE:
-                    line_id = comodel.new(command[2], ref=command[1]).id
+                    line_id = comodel.new({k: v for k, v in command[2].items()}, ref=command[1]).id
                     for line_ids in new_relation.values():
                         line_ids.add(line_id)
                 elif command[0] == Command.UPDATE:
                     line_id = new(command[1])
-                    comodel.browse([line_id]).update(command[2])
+                    comodel.browse([line_id]).update({k: v for k, v in command[2].items()})
                 elif command[0] == Command.DELETE:
                     line_id = new(command[1])
                     for line_ids in new_relation.values():

@@ -382,6 +382,16 @@ def model(method):
 _create_logger = logging.getLogger(__name__ + '.create')
 
 
+def _model_recordify(func, self, arg):
+    if isinstance(arg, Mapping):
+        return func(self, odoo.fields.write_dict.build(self, arg))
+    return func(self, [odoo.fields.write_dict.build(self, vals) for vals in arg])
+
+
+def model_recordify(method):
+    wrapper = decorate(method, _model_recordify)
+    return wrapper
+
 def _model_create_single(create, self, arg):
     # 'create' expects a dict and returns a record
     if isinstance(arg, Mapping):
@@ -409,8 +419,7 @@ def _model_create_multi(create, self, arg):
         return create(self, [arg])
     return create(self, arg)
 
-
-def model_create_multi(method):
+def model_create_multi(method=None):
     """ Decorate a method that takes a list of dictionaries and creates multiple
         records. The method may be called with either a single dict or a list of
         dicts::
@@ -1012,6 +1021,7 @@ class Cache(object):
 
 
 # keep those imports here in order to handle cyclic dependencies correctly
+import odoo
 from odoo import SUPERUSER_ID
 from odoo.exceptions import UserError, AccessError, MissingError
 from odoo.modules.registry import Registry

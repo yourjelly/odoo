@@ -48,7 +48,7 @@ from decorator import decorator
 from lxml import etree, html
 
 import odoo
-from odoo import api
+from odoo import api, fields
 from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.modules.registry import Registry
@@ -592,13 +592,6 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                         diff[field_name] = (sorted(record_value.ids), None)
                     elif set(record_value.ids) != set(candidate[field_name]):
                         diff[field_name] = (sorted(record_value.ids), sorted(candidate[field_name]))
-                elif field_type == 'many2one':
-                    # Compare many2one relational fields.
-                    # Every falsy value is allowed to compare with an empty record.
-                    if field_name not in candidate:
-                        diff[field_name] = (record_value.id, None)
-                    elif (record_value or candidate[field_name]) and record_value.id != candidate[field_name]:
-                        diff[field_name] = (record_value.id, candidate[field_name])
                 else:
                     # Compare others fields if not both interpreted as falsy values.
                     if field_name not in candidate:
@@ -607,6 +600,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                         diff[field_name] = (record_value, candidate[field_name])
             return diff
 
+        expected_values = [fields.write_dict(vals, _model=records[0]) for vals in expected_values]
         # Compare records with candidates.
         different_values = []
         field_names = list(expected_values[0].keys())

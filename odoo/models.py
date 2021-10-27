@@ -3721,6 +3721,7 @@ Fields:
 
         return True
 
+    @api.model_recordify
     def write(self, vals):
         """ write(vals)
 
@@ -3968,6 +3969,7 @@ Fields:
 
         return True
 
+    @api.model_recordify
     @api.model_create_multi
     @api.returns('self', lambda value: value.id)
     def create(self, vals_list):
@@ -5160,8 +5162,10 @@ Fields:
             ids = ()
         elif ids.__class__ in IdType:
             ids = (ids,)
+        elif isinstance(ids, type(self)):
+            ids = ids.ids
         else:
-            ids = tuple(ids)
+            ids = tuple(getattr(id, 'id', id) for id in ids)
         return self._browse(self.env, ids, ids)
 
     #

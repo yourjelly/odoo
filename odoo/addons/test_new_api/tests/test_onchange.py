@@ -248,7 +248,7 @@ class TestOnChange(SavepointCaseWithUserDemo):
         values = multi._convert_to_write({key: multi[key] for key in ('name', 'partner', 'lines')})
         self.assertEqual(values, {
             'name': partner1.name,
-            'partner': partner1.id,
+            'partner': partner1,
             'lines': [Command.set([line1.id])],
         })
 

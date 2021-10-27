@@ -352,6 +352,15 @@ class Cursor(BaseCursor):
             # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
+        def derecordify(params):
+            if isinstance(params, (list, tuple)):
+                return type(params)(derecordify(e) for e in params)
+            elif isinstance(params, dict):
+                return {k: derecordify(v) for k, v in params.items()}
+            else:
+                return getattr(params, 'id', params)
+        params = derecordify(params)
+
         if self.sql_log:
             _logger.debug("query: %s", self._format(query, params))
         start = time.time()
