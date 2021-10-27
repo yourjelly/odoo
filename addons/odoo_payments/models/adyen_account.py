@@ -55,7 +55,7 @@ class AdyenAccount(models.Model):
              "- At least one KYC check is in 'awaiting_data' -> Data To Provide\n"
              "- All data are provided but at least one KYC check is in 'pending' ->"
              "  Data Validation\n"
-             "- All KYC check are in 'passed' -> Validated\n",
+             "- All KYC check are in 'passed' -> Validated",
         selection=[
             ('data_to_provide', "Data To Provide"),
             ('validation', "Data Validation"),
