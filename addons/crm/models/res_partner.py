@@ -63,3 +63,16 @@ class Partner(models.Model):
         else:
             action['domain'] = [('partner_id.id', '=', self.id)]
         return action
+
+    def _fields_sync(self, values):
+        # sync salesteam with parent
+        if not values.get('team_id') and values.get('parent_id') and self.company_type == 'person':
+            self.update({'team_id': self.parent_id.team_id.id})
+        return super(Partner, self)._fields_sync(values)
+
+    @api.onchange('parent_id')
+    def _onchange_parent_id_for_team_id(self):
+        # While creating / updating parent, take the parent salesteam value and set on current record
+        if not self.team_id and self.parent_id.team_id and self.company_type == 'person':
+            self.team_id = self.parent_id.team_id
+            
