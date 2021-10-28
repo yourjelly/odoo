@@ -6,19 +6,20 @@
         <field name="inherit_id" ref="odoo_payments.adyen_account_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_order_terminal" 
+                <button name="action_order_terminal"
                         string="Order a Terminal"
                         class="oe_highlight"
                         type="object"
-                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('merchant_status', '=', 'closed')]}"/>
+                        attrs="{'invisible': ['|', ('adyen_uuid', '=', False), ('merchant_status', '!=', 'active')]}"/>
                 <button name="action_sync_terminals"
                         string="Sync Terminals"
                         class="btn-secondary"
                         type="object"
-                        attrs="{'invisible': ['|', '|', ('adyen_uuid', '=', False), ('state', '!=', 'validated'), ('merchant_status', '=', 'closed')]}"/>
+                        attrs="{'invisible': ['|', ('adyen_uuid', '=', False), ('merchant_status', '!=', 'active')]}"/>
+                        <!-- TODO edm: see with pde for the attrs, is it okay like this? -->
             </xpath>
             <xpath expr="//notebook" position="inside">
-                <page string="Stores" attrs="{'invisible': [('transactions_count', '=', 0)]}">
+                <page string="Stores">
                     <field name="store_ids">
                         <tree>
                             <field name="name"/>
