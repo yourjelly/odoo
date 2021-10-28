@@ -19,7 +19,7 @@
                            attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
                 <div class="alert alert-warning o_form_header"
-                     attrs="{'invisible': ['|', ('onboarding_msg', '=', False), ('merchant_status', '!=', 'active')]}"
+                     attrs="{'invisible': [('onboarding_msg', '=', False)]}"
                      role="status">
                     <a class="close" data-dismiss="alert" href="#" aria-label="Close">
                         <i title="Close" class="small fa fa-times"/>

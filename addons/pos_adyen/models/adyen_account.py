@@ -29,6 +29,18 @@ class AdyenAccount(models.Model):
     def action_sync_terminals(self):
         self.env['adyen.terminal']._sync_adyen_terminals()
 
+    @api.depends('merchant_status', 'kyc_state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
+    def _compute_onboarding_msg(self):
+        for account in self:
+            super(AdyenAccount, account)._compute_onboarding_msg()
+            if not account.id:
+                continue
+            elif account.merchant_status == 'pending':
+                account.onboarding_msg = _(
+                    "Our team will review your account. We will notify you, by email, as soon "
+                    "as you can start processing payments and order or synchronize your terminals."
+                )
+
 
 class AdyenStore(models.Model):
     _name = 'adyen.store'

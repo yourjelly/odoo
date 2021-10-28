@@ -16,7 +16,6 @@
                         class="btn-secondary"
                         type="object"
                         attrs="{'invisible': ['|', ('adyen_uuid', '=', False), ('merchant_status', '!=', 'active')]}"/>
-                        <!-- TODO edm: see with pde for the attrs, is it okay like this? -->
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Stores">
