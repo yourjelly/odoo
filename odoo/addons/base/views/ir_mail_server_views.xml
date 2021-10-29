@@ -29,6 +29,7 @@
                                 <field name="smtp_host"/>
                                 <field name="smtp_port" options="{'format': false}"/>
                                 <field name="smtp_debug" groups="base.group_no_one"/>
+                                <field name="max_mail_size"/>
                             </group>
                         </group>
                     </sheet>

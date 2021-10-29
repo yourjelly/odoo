@@ -9,6 +9,8 @@ import psycopg2
 import smtplib
 import threading
 import re
+import sys
+import json
 
 from collections import defaultdict
 
@@ -313,6 +315,11 @@ class MailMail(models.Model):
                 if smtp_session:
                     smtp_session.quit()
 
+    def attachments_too_heavy(self, base, index):
+        to_add = "<br><br>Attachments have been removed from this email to reduce its weight." \
+                 "<br>Consult them on the Portal or ask the sender to share them otherwise."
+        return base[:index] + to_add + base[index:]
+
     def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
         IrMailServer = self.env['ir.mail_server']
         IrAttachment = self.env['ir.attachment']
@@ -392,16 +399,42 @@ class MailMail(models.Model):
                 res = None
                 # TDE note: could be great to pre-detect missing to/cc and skip sending it
                 # to go directly to failed state update
+
+                # If the attachments are too heavy for the mail server, we strip them and add a message
+                # to inform the receiver that they are still available on Portal.
+                max_mail_size = IrMailServer.sudo().browse(next(self._split_by_mail_configuration())[0]).max_mail_size
+                if max_mail_size == 0:
+                    try:
+                        max_mail_size = int(smtp_session.esmtp_features.get('size', 10000000)) - 500000 #Subtracting to add a small margin
+                    except:
+                        max_mail_size = 10000000
+
                 for email in email_list:
+                    strip_attachments = False
+                    if attachments:
+                        body_size = sys.getsizeof(base64.b64encode(email.get('body').encode('utf-8')))
+                        headers_size = sys.getsizeof(base64.b64encode(json.dumps(headers).encode('utf-8')))
+                        attachments_size = 0
+                        for attachment in attachments:
+                            attachments_size += sys.getsizeof(base64.b64encode(attachment[1]))
+                        size = body_size + headers_size + attachments_size
+                        strip_attachments = False if size <= max_mail_size else True
+                        if strip_attachments:
+                            end_body = 0
+                            #End of body text
+                            match = re.search("</p></div>", email.get('body'))
+                            if match:
+                                end_body = match.start()
+
                     msg = IrMailServer.build_email(
                         email_from=mail.email_from,
                         email_to=email.get('email_to'),
                         subject=mail.subject,
-                        body=email.get('body'),
+                        body=(email.get('body') if not strip_attachments else self.attachments_too_heavy(email.get('body'), end_body)),
                         body_alternative=email.get('body_alternative'),
                         email_cc=tools.email_split(mail.email_cc),
                         reply_to=mail.reply_to,
-                        attachments=attachments,
+                        attachments=(attachments if not strip_attachments else []),
                         message_id=mail.message_id,
                         references=mail.references,
                         object_id=mail.res_id and ('%s-%s' % (mail.res_id, mail.model)),

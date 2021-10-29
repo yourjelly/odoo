@@ -117,6 +117,10 @@ class IrMailServer(models.Model):
                                                          "(this is very verbose and may include confidential info!)")
     sequence = fields.Integer(string='Priority', default=10, help="When no specific mail server is requested for a mail, the highest priority one "
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
+    max_mail_size = fields.Integer(string="Max email size", default=0, store=True,
+                                    help="If exceeded, the attachments will be stripped and the receiver will be informed on where to find them.\n"
+                                         "If the value is set to 0, the limit will be automatically computed."
+                                         "If set manually, please be aware of the limit of your outgoing server.")
     active = fields.Boolean(default=True)
 
     @api.constrains('smtp_ssl_certificate', 'smtp_ssl_private_key')
