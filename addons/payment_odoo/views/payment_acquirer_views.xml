@@ -8,9 +8,9 @@
         <field name="arch" type="xml">
             <xpath expr='//group[@name="acquirer"]' position='inside'>
                 <group attrs="{'invisible': [('provider', '!=', 'odoo')]}">
-                    <button name="odoo_create_adyen_account"
+                    <button name="odoo_payments.action_view_adyen_account"
                             icon="fa-arrow-right"
-                            type="object"
+                            type="action"
                             class="btn-link"
                             string="Create an account in 1 minute"
                             attrs="{'invisible': [('odoo_adyen_account_id', '!=', False)]}"/>

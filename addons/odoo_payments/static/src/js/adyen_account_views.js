@@ -2,8 +2,11 @@ odoo.define('odoo_payments.account_views', require => {
     'use strict';
 
     const core = require('web.core');
+    const framework = require('web.framework');
+    const session = require('web.session');
     const Dialog = require('web.Dialog');
     const FormController = require('web.FormController');
+    const FormRenderer = require('web.FormRenderer');
     const FormView = require('web.FormView');
     const viewRegistry = require('web.view_registry');
 
@@ -22,15 +25,18 @@ odoo.define('odoo_payments.account_views', require => {
          * @return {Promise}
          */
         _discardChanges: function (recordID, options) {
+            // TODO ANVFE see if we can juste return super when coming from payment acquirer form
             return this._super(...arguments).then(() => {
                 this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});
             });
         },
 
         /**
-         * Upon creating the record, show a dialog with the terms and restrictions.
+         * Upon creating the record, show a the terms and restrictions, and redirect to internal.
          *
          * The record can only be created if the terms and restrictions are accepted by the user.
+         * After accepting the terms and restrictions, the user is redirected to internal to
+         * finalize the onboarding flow.
          *
          * @override method from web.BasicController
          * @private
@@ -48,12 +54,14 @@ odoo.define('odoo_payments.account_views', require => {
                         buttons: [
                             {
                                 text: _t("Create"),
-                                classes: 'btn-primary o_odoo_payments_create_account',
+                                classes: 'btn-primary o_odoo_payments_create_account_button',
                                 close: true,
                                 disabled: true, // Require accepting the terms and restrictions
-                                click: function () {
-                                    this.close();
-                                    _super();
+                                click: async () => {
+                                    framework.blockUI();
+                                    await _super(); // Create the account
+                                    // session.odoo_payments_in_creation_flow = true;
+                                    await this._submitCreationForm();
                                 },
                             },
                             {
@@ -62,7 +70,7 @@ odoo.define('odoo_payments.account_views', require => {
                             },
                         ],
                         size: 'extra-large',
-                        $content: QWeb.render('AdyenAccountCreationConfirmation', {
+                        $content: QWeb.render('terms_and_restrictions_dialog', {
                             account_data: this.model.get(this.handle).data,
                         }),
                     });
@@ -70,7 +78,7 @@ odoo.define('odoo_payments.account_views', require => {
                     dialog.opened(() => {
                         dialog.$el.on('change', '#terms_and_restrictions_checkbox', ev => {
                             ev.preventDefault();
-                            dialog.$footer.find('.o_odoo_payments_create_account').attr(
+                            dialog.$footer.find('.o_odoo_payments_create_account_button').attr(
                                 'disabled', !ev.currentTarget.checked
                             );
                         });
@@ -85,13 +93,54 @@ odoo.define('odoo_payments.account_views', require => {
                 return this._super(...arguments);
             }
         },
+
+        /**
+         * Retrieve the creation redirect form, insert it in the body, and submit it.
+         *
+         * @private
+         * @return {undefined}
+         */
+        _submitCreationForm: async function () {
+            const redirectFormString = await this._rpc({
+                route: '/odoo_payments/get_creation_redirect_form'
+            });
+            const $redirectForm = $(redirectFormString).appendTo('body');
+            $redirectForm.submit();
+        },
     });
+
+    // const AdyenAccountFormRenderer = FormRenderer.extend({
+    //
+    //     /**
+    //      * Find the redirect button banner and hide it.
+    //      *
+    //      * This is only done once when the account is created to hide the banner behind the blockUI
+    //      * and prevent flickering in the background. After that, the banner must always be shown if
+    //      * the account creation flow went wrong.
+    //      *
+    //      * @private
+    //      * @return {undefined}
+    //      */
+    //     _hideRedirectButtonBanner: () => this.$(
+    //         'div[name="o_odoo_payments_redirect_button_widget"]'
+    //     ).addClass('d-none'),
+    //
+    //     _renderView: function () {
+    //         console.log("test");
+    //         console.log(session.odoo_payments_in_creation_flow);
+    //         this._super(...arguments);
+    //         this._hideRedirectButtonBanner();
+    //         return Promise.resolve();
+    //     },
+    //
+    // });
 
     const AdyenAccountFormView = FormView.extend({
         config: _.extend({}, FormView.prototype.config, {
             Controller: AdyenAccountFormController,
+            // Renderer: AdyenAccountFormRenderer,
         }),
     });
 
-    viewRegistry.add('adyen_account_form', AdyenAccountFormView);
+    viewRegistry.add('adyen_account_form_view', AdyenAccountFormView);
 });

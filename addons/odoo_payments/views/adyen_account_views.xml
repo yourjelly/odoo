@@ -5,7 +5,7 @@
         <field name="name">adyen.account.view.form</field>
         <field name="model">adyen.account</field>
         <field name="arch" type="xml">
-            <form string="Adyen Account" create="false" js_class="adyen_account_form">
+            <form string="Adyen Account" create="false" js_class="adyen_account_form_view">
                 <field name="account_code" invisible="1"/>
                 <field name="account_holder_code" invisible="1"/>
                 <field name="merchant_status" invisible="1"/>
@@ -16,9 +16,20 @@
                 <header>
                     <field name="merchant_status"
                            widget="statusbar"
+                           statusbar_visible="pending,active,closed"
                            attrs="{'invisible': [('id', '=', False)]}"/>
                 </header>
-                <div class="alert alert-warning o_form_header"
+                <!-- Redirect button to re-submit the account data if the creation failed -->
+                <div class="alert alert-danger text-center"
+                     name="o_odoo_payments_redirect_button_banner"
+                     role="alert"
+                     attrs="{'invisible': ['|', ('merchant_status', '!=', 'draft'), ('id', '=', False)]}">
+                    Something went wrong when validating your Odoo Payments account. Please validate
+                    your account now. <widget name="o_odoo_payments_redirect_button_widget"/>
+                </div>
+                <!-- The onboarding message giving information on the merchant status and the KYC.
+                     The message is not computed if the account status is 'draft' or 'closed'. -->
+                <div class="alert alert-warning"
                      attrs="{'invisible': [('onboarding_msg', '=', False)]}"
                      role="status">
                     <a class="close" data-dismiss="alert" href="#" aria-label="Close">
@@ -26,19 +37,19 @@
                     </a>
                     <strong><field name="onboarding_msg"/></strong>
                 </div>
-                <div class="alert alert-danger o_form_header"
+                <!-- The message stating that the account is closed -->
+                <div class="alert alert-danger"
                      role="alert"
                      attrs="{'invisible': [('merchant_status', '!=', 'closed')]}">
                     <strong><p>Your account is Closed.</p></strong>
                 </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button
-                            name="action_show_transactions"
-                            type="object"
-                            attrs="{'invisible': [('id', '=', False)]}"
-                            class="oe_stat_button"
-                            icon="fa-credit-card">
+                        <button name="action_show_transactions"
+                                type="object"
+                                attrs="{'invisible': [('id', '=', False)]}"
+                                class="oe_stat_button"
+                                icon="fa-credit-card">
                             <!-- NOTE: statbutton shown on purpose even if there are no transactions -->
                             <div class="o_stat_info">
                                 <field name="transactions_count" class="o_stat_value"/>
@@ -241,7 +252,7 @@
     </record>
 
     <record id="action_view_adyen_account" model="ir.actions.act_window">
-        <field name="name">Adyen Account</field>
+        <field name="name">Odoo Payments Account</field>
         <field name="res_model">adyen.account</field>
         <field name="view_mode">form</field>
     </record>

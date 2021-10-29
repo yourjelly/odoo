@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
 
-    <t t-name="AdyenAccountCreationConfirmation">
+    <t t-name="terms_and_restrictions_dialog">
         <main>
             <div class="alert alert-info">
                 Our team will manually review that your account meets legal requirements (detailed in the disclaimer below).
@@ -122,6 +122,12 @@
                 </li>
             </ul>
         </main>
+    </t>
+
+    <t t-name="account_creation_redirect_button">
+        <button id="o_odoo_payments_redirect_button" class="btn btn-primary ml4">
+            Validate your account
+        </button>
     </t>
 
 </templates>

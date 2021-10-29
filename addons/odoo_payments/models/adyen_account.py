@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import uuid
 from ast import literal_eval
@@ -16,9 +17,7 @@ from odoo.http import request
 from odoo.osv import expression
 
 from odoo.addons.mail.tools import mail_validation
-# from odoo.addons.odoo_payments.const import ACCOUNT_STATUS_MAPPING, KYC_STATUS_MAPPING, \
-#                                             PAYOUT_SCHEDULE_MAPPING
-from odoo.addons.odoo_payments.const import KYC_STATUS_MAPPING, PAYOUT_SCHEDULE_MAPPING
+from odoo.addons.odoo_payments.const import LEGAL_ENTITY_TYPE_MAPPING, KYC_STATUS_MAPPING, PAYOUT_SCHEDULE_MAPPING
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
@@ -37,16 +36,19 @@ class AdyenAccount(models.Model):
         string="Merchant Status",
         help="The status of the Adyen account on the merchant database (internal). The account"
              "transitions from one merchant status to another as follows:\n"
-             "1. The account is created -> Pending Validation\n"
-             "2. Adyen confirms the creation of the account -> Active (test environment only)\n"
-             "3. The merchant validates the account -> Active (live environment only)\n"
-             "4. The merchant rejects the account or the account is closed -> Closed",
+             "1.  The account is created -> Draft\n"
+             "2.  The user is redirected to the merchant database -> Pending Validation\n"
+             "3a. Adyen confirms the creation of the account -> Active (test environment only)\n"
+             "3b. The merchant validates the account -> Active (live environment only)\n"
+             "3c. The merchant rejects the creation of the account -> Closed\n"
+             "4.  The merchant closes the account -> Closed",
         selection=[
+            ('draft', "Draft"),
             ('pending', "Pending Validation"),
             ('active', "Active"),
             ('closed', "Closed"),
         ],
-        default='pending',
+        default='draft',
         readonly=True,
     )
     kyc_state = fields.Selection(
@@ -170,33 +172,20 @@ class AdyenAccount(models.Model):
     #=== ACTION METHODS ===#
 
     @api.model
-    def action_create_or_redirect(self):
-        """ Return the action to create the account if it doesn't exist yet, or to browse it.
+    def _action_create_or_view(self):
+        """ Return an action to create the account if it doesn't exist yet, or to browse it.
 
-        This method must always be used to either create or browse the adyen account. If no account
-        is found on the current company, the returned action is an `ir.actions.act_url` that will
-        redirect the user to odoo.com in order to begin the account creation flow. If an account is
-        found on the current company, the returned action is an `ir.actions.act_window` that allows
-        browsing the account in form view.
+        This method must always be used to either create or browse the adyen account. If an account
+        is found on the current company, the returned action contains the `res_id` of the account.
+        Otherwise, the user is prompted to create a new account.
 
-        :return: The appropriate action depending on whether an adyen account exists for the current
-                 company
+        :return: The appropriate action to either browse or create the account
         :rtype: dict
         """
-        if not self.env.company.adyen_account_id:  # No account exists yet
-            merchant_url = self.env['ir.config_parameter'].sudo().get_param(
-                'odoo_payments.merchant_url'
-            )
-            return_url = url_join(self.env.company.get_base_url(), 'odoo_payments/create_account')
-            action = {
-                'type': 'ir.actions.act_url',
-                'url': url_join(merchant_url, f'get_creation_token?return_url={return_url}'),
-                'target': 'self',
-            }
-        else:  # An account already exists, show it
-            action = self.env['ir.actions.actions']._for_xml_id(
-                'odoo_payments.action_view_adyen_account'
-            )
+        action = self.env['ir.actions.actions']._for_xml_id(
+            'odoo_payments.action_view_adyen_account'
+        )
+        if self.env.company.adyen_account_id:
             action.update(res_id=self.env.company.adyen_account_id.id)
         return action
 
@@ -253,9 +242,7 @@ class AdyenAccount(models.Model):
             )
         else:
             old_status = self.merchant_status
-            if new_status == 'pending':
-                self._set_pending()
-            elif new_status == 'active':
+            if new_status == 'active':
                 self._set_active()
             else:  # 'closed'
                 self._set_closed()
@@ -263,28 +250,6 @@ class AdyenAccount(models.Model):
                 "updated merchant status from %(old_status)s to %(new_status)s (uuid: %(uuid)s)",
                 {'old_status': old_status, 'new_status': new_status, 'uuid': self.adyen_uuid},
             )
-
-    def _set_pending(self):
-        """ Update the account's merchant status to 'pending'.
-
-        All linked payment acquirers are also disabled to prevent any transaction to be made for
-        this account. In practice, the proxy would prevent such transaction to reach Adyen's API.
-
-        Note: self.ensure_one()
-
-        :return: None
-        """
-        self.ensure_one()
-
-        # Deactivate the account
-        self.merchant_status = 'pending'
-
-        # Disable all linked payment acquirers
-        payment_acquirers = self.env['payment.acquirer'].search(
-            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)]
-        )
-        if payment_acquirers:
-            payment_acquirers.write({'state': 'disabled'})
 
     def _set_active(self):
         """ Update the account's merchant status to 'active'.
@@ -429,45 +394,54 @@ class AdyenAccount(models.Model):
         for account in self:
             if not account.id:
                 continue
+            if account.merchant_status == 'draft':
+                continue
             elif account.merchant_status == 'pending':
                 account.onboarding_msg = _(
                     "Our team will review your account. We will notify you, by email, as soon "
                     "as you can start processing payments."
                 )
-            elif account.kyc_state == 'data_to_provide':
-                if account.transactions_count > 0:
-                    data_to_fill_msgs = []
+            elif account.merchant_status == 'active':
+                if account.kyc_state == 'data_to_provide':
+                    if account.transactions_count > 0:
+                        data_to_fill_msgs = []
 
-                    if len(account.adyen_kyc_ids) == 0:
-                        data_to_fill_msgs.append(_("-   KYC: use 'Add a line' in the KYC tab to upload relevant document"))
+                        if len(account.adyen_kyc_ids) == 0:
+                            data_to_fill_msgs.append(_("-   KYC: use 'Add a line' in the KYC tab to upload relevant document"))
 
-                    if len(account.shareholder_ids) == 0:
-                        data_to_fill_msgs.append(_(
-                            "-   Shareholders: use 'Add a line' in the shareholder tab to list all your company "
-                            "shareholders owning more than 25% of the company"
-                        ))
+                        if len(account.shareholder_ids) == 0:
+                            data_to_fill_msgs.append(_(
+                                "-   Shareholders: use 'Add a line' in the shareholder tab to list all your company "
+                                "shareholders owning more than 25% of the company"
+                            ))
 
-                    if len(account.bank_account_ids) == 0:
-                        data_to_fill_msgs.append(
-                            _("-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account")
-                        )
+                        if len(account.bank_account_ids) == 0:
+                            data_to_fill_msgs.append(
+                                _("-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account")
+                            )
 
-                    if data_to_fill_msgs:
-                        account.onboarding_msg = _(
-                            "In order to validate your account, you need to fill the following information:<br>"
-                            "%s<br><br>"
-                            "Then, click on 'save' and we will validate your information"
-                        ) % ("<br>".join(data_to_fill_msgs))
-                    else:
-                        account.onboarding_msg = _(
-                            "We will notify you via email when we have reviewed your information"
-                        )
-            elif account.kyc_state == 'validated':
-                if account.transactions_count == 0:
+                        if data_to_fill_msgs:
+                            account.onboarding_msg = _(
+                                "In order to validate your account, you need to fill the following information:<br>"
+                                "%s<br><br>"
+                                "Then, click on 'save' and we will validate your information"
+                            ) % ("<br>".join(data_to_fill_msgs))
+                        else:
+                            account.onboarding_msg = _(
+                                "We will notify you via email when we have reviewed your information"
+                            )
+                elif account.kyc_state == 'validation':
                     account.onboarding_msg = _(
-                        "You can now receive payments.<br>After the first payment, we will notify "
-                        "you to gather more data such as ID and banking details"
-                    )
+                        "We will notify you via email when we have reviewed your information"
+                    )  # TODO ANVFE check if this message should be displayed (duplicate of the message above)
+                elif account.kyc_state == 'validated':
+                    if account.transactions_count == 0:
+                        account.onboarding_msg = _(
+                            "You can now receive payments.<br>After the first payment, we will notify "
+                            "you to gather more data such as ID and banking details"
+                        )
+            elif account.merchant_status == 'closed':
+                continue
 
     @api.depends('transaction_ids')
     def _compute_transactions_count(self):
@@ -529,28 +503,20 @@ class AdyenAccount(models.Model):
 
         # Set the payment journal for the Odoo payment acquirer if not yet created by the user
         if not adyen_account.payment_journal_id:
-            payment_journal = self.env['account.journal'].search([
-                ('company_id', '=', adyen_account.company_id.id),
-                ('type', '=', 'bank'),
-            ], limit=1)
-
+            payment_journal = self.env['account.journal'].search(
+                [('company_id', '=', adyen_account.company_id.id), ('type', '=', 'bank')],
+                limit=1
+            )
             if payment_journal:
                 adyen_account.payment_journal_id = payment_journal
 
-        # Create account on odoo.com, proxy and Adyen
-        create_data = self._prepare_account_data(values)
-        # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
-        # Update the payout schedule after preparing the account data. This is not done in the
-        # prepare because the schedule is updated through a dedicated endpoint if modified later on.
-        create_data['payoutSchedule'] = PAYOUT_SCHEDULE_MAPPING.get(
-            values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT',
-        ),
-        response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
-        adyen_account.with_context(update_from_adyen=True).write({
-            'account_code': response['adyen_response']['accountCode'],
-            'adyen_uuid': response['adyen_uuid'],
-            'proxy_token': response['proxy_token'],
-        })
+        # # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
+        # # Update the payout schedule after preparing the account data. This is not done in the
+        # # prepare because the schedule is updated through a dedicated endpoint if modified later on.
+        # create_data['payoutSchedule'] = PAYOUT_SCHEDULE_MAPPING.get(
+        #     values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT',
+        # ),
+        # response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
 
         # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
         self.env.company.adyen_account_id = adyen_account.id
@@ -560,23 +526,23 @@ class AdyenAccount(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        adyen_fields = {
-            'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
-            'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
-            'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
-            'document_number', 'document_type',
-        }
-        if vals.keys() & adyen_fields and not self.env.context.get('update_from_adyen'):
-            self._adyen_rpc('v1/update_account_holder', self._prepare_account_data(vals))
-
-        if 'payout_schedule' in vals:
-            self._update_payout_schedule(vals['payout_schedule'])
-
-        # Enable the additional menus if the account has been activated by the support
-        if 'merchant_status' in vals and vals['merchant_status'] == 'active':
-            balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
-            transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
-            (balance_menu + transactions_menu).action_unarchive()
+        # adyen_fields = {  # TODO restore update on write
+        #     'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
+        #     'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
+        #     'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
+        #     'document_number', 'document_type',
+        # }
+        # if vals.keys() & adyen_fields and not self.env.context.get('update_from_adyen'):
+        #     self._adyen_rpc('v1/update_account_holder', self._prepare_account_data(vals))
+        #
+        # if 'payout_schedule' in vals:
+        #     self._update_payout_schedule(vals['payout_schedule'])
+        #
+        # # Enable the additional menus if the account has been activated by the support
+        # if 'merchant_status' in vals and vals['merchant_status'] == 'active':
+        #     balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
+        #     transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
+        #     (balance_menu + transactions_menu).action_unarchive()
 
         return res
 
@@ -647,88 +613,173 @@ class AdyenAccount(models.Model):
             'documentContent': content.decode(),
         })
 
-    def _prepare_account_data(self, values):
-        """
+    def _get_creation_redirect_form(self):
+        self.ensure_one()
 
-        :param dict values: create/write values to forward to Adyen
-
-        https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
-        https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
-
-        :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
-        :rtype: dict
-        """
-        modified_fields = values.keys()
-        data = {
-            'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
+        db_url = self.env.company.get_base_url()
+        rendering_context = {
+            'redirect_url': url_join(
+                self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url'),
+                'create_submerchant',
+            ),
+            'db_url': db_url,
+            'is_test': self.is_test,
+            'return_url': url_join(db_url, 'odoo_payments/return'),
+            'adyen_data': json.dumps(self._prepare_adyen_data()),
         }
-        holder_details = {}
+        return self.env.ref('odoo_payments.redirect_form')._render(rendering_context)
 
-        # *ALL* the address fields are required if one of them changes
-        address_fields = {'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name'}
-        if address_fields & modified_fields:
-            country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-            state = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
-            holder_details['address'] = {
-                'country': country.code,
-                'stateOrProvince': state.code or None,
-                'city': values.get('city') or self.city,
-                'postalCode': values.get('zip') or self.zip,
-                'street': values.get('street') or self.street,
-                'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
+    def _prepare_adyen_data(self):
+        """ TODO. """
+        return {
+            'accountHolderCode': self.account_holder_code,
+            'accountHolderDetails': self._prepare_account_holder_details(),
+            # 'description': None,
+            'legalEntity': LEGAL_ENTITY_TYPE_MAPPING[self.entity_type],
+            # TODO 'primaryCurrency': None,
+            # 'processingTier': --> Proxy
+            # 'verificationProfile': None,
+        }
+
+    def _prepare_account_holder_details(self):
+        return {
+            'address': {
+                'city': self.city,
+                'country': self.country_id.code,
+                'houseNumberOrName': self.house_number_or_name,
+                'postalCode': self.zip,
+                'stateOrProvince': self.state_id.code or None,
+                'street': self.street,
+            },
+            'bankAccountDetails': self.bank_account_ids._prepare_bank_account_details(),
+            'businessDetails': self._prepare_business_details(),
+            'email': self.email,
+            'fullPhoneNumber': self.phone_number,
+            'individualDetails': self._prepare_individual_details(),
+            # TODO ?
+            'legalArrangements': None,
+            'merchantCategoryCode': None,
+            'metadata': None,
+            'payoutMethods': None,
+            'principalBusinessAddress': None,
+            'storeDetails': None,
+            'webAddress': None,
+        }
+
+    def _prepare_business_details(self):
+        if self.entity_type not in ('business', 'nonprofit'):
+            return None  # Don't include the key in the payload
+        else:
+            return {
+                'doingBusinessAs': self.doing_business_as,
+                'legalBusinessName': self.legal_business_name,
+                'registrationNumber': self.registration_number,
+                'shareholders': self.shareholder_ids._prepare_shareholders_data(),
+                # TODO store verificationProfile after acc creation
+                #  and provide it for update requests ?
             }
 
-        if 'email' in values:
-            holder_details['email'] = values['email']
-
-        if 'phone_number' in values:
-            holder_details['fullPhoneNumber'] = values['phone_number']
-
-        if 'entity_type' in values:
-            entity_type = values['entity_type']
-            is_business = entity_type != 'individual'
-            if entity_type == 'business':
-                data['legalEntity'] = 'Business'
-            elif entity_type == 'individual':
-                data['legalEntity'] = 'Individual'
-            else:
-                data['legalEntity'] = 'NonProfit'
+    def _prepare_individual_details(self):
+        if self.entity_type != 'individual':
+            return None  # Don't include the key in the payload
         else:
-            is_business = self and self.entity_type != 'individual'
-
-        if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & modified_fields:
-            business_details = holder_details['businessDetails'] = {}
-            for source, dest in [
-                ('legal_business_name', 'legalBusinessName'),
-                ('doing_business_as', 'doingBusinessAs'),
-                ('registration_number', 'registrationNumber'),
-            ]:
-                if source in values:
-                    business_details[dest] = values[source]
-
-        elif {'first_name', 'last_name', 'date_of_birth', 'document_number', 'document_type'} & modified_fields:
-            holder_details['individualDetails'] = {}
-
-            if {'first_name', 'last_name'} & modified_fields:
-                holder_details['individualDetails']['name'] = {
-                    'firstName': values.get('first_name') or self.first_name,
-                    'lastName': values.get('last_name') or self.last_name
+            return {
+                'name': {
+                    'firstName': self.first_name,
+                    'lastName': self.last_name,
+                },
+                'personalData': {
+                    'dateOfBirth': self.date_of_birth,
+                    'documentData': [
+                        {
+                            'number': self.document_number,
+                            'type': self.document_type,
+                            }
+                    ] if self.document_number else [],
                 }
+            }
 
-            if 'date_of_birth' in modified_fields:
-                holder_details['individualDetails'].setdefault('personalData', {})['dateOfBirth'] = str(values['date_of_birth'])
-
-            document_number = values.get('document_number') or self.document_number
-            if self.document_number and 'document_number' in modified_fields:
-                holder_details['individualDetails'].setdefault('personalData', {})['documentData'] = [{
-                    'number': document_number,
-                    'type': values.get('document_type') or self.document_type,
-                }]
-
-        if holder_details:
-            data['accountHolderDetails'] = holder_details
-
-        return data
+    # def _prepare_account_data(self):
+    #     """
+    #
+    #     :param dict values: create/write values to forward to Adyen
+    #
+    #     https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
+    #     https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
+    #
+    #     :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
+    #     :rtype: dict
+    #     """
+    #     data = {
+    #         'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
+    #     }
+    #     holder_details = {}
+    #
+    #     # *ALL* the address fields are required if one of them changes
+    #     address_fields = {'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name'}
+    #     if address_fields & modified_fields:
+    #         country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
+    #         state = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
+    #         holder_details['address'] = {
+    #             'country': country.code,
+    #             'stateOrProvince': state.code or None,
+    #             'city': values.get('city') or self.city,
+    #             'postalCode': values.get('zip') or self.zip,
+    #             'street': values.get('street') or self.street,
+    #             'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
+    #         }
+    #
+    #     if 'email' in values:
+    #         holder_details['email'] = values['email']
+    #
+    #     if 'phone_number' in values:
+    #         holder_details['fullPhoneNumber'] = values['phone_number']
+    #
+    #     if 'entity_type' in values:
+    #         entity_type = values['entity_type']
+    #         is_business = entity_type != 'individual'
+    #         if entity_type == 'business':
+    #             data['legalEntity'] = 'Business'
+    #         elif entity_type == 'individual':
+    #             data['legalEntity'] = 'Individual'
+    #         else:
+    #             data['legalEntity'] = 'NonProfit'
+    #     else:
+    #         is_business = self and self.entity_type != 'individual'
+    #
+    #     if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & modified_fields:
+    #         business_details = holder_details['businessDetails'] = {}
+    #         for source, dest in [
+    #             ('legal_business_name', 'legalBusinessName'),
+    #             ('doing_business_as', 'doingBusinessAs'),
+    #             ('registration_number', 'registrationNumber'),
+    #         ]:
+    #             if source in values:
+    #                 business_details[dest] = values[source]
+    #
+    #     elif {'first_name', 'last_name', 'date_of_birth', 'document_number', 'document_type'} & modified_fields:
+    #         holder_details['individualDetails'] = {}
+    #
+    #         if {'first_name', 'last_name'} & modified_fields:
+    #             holder_details['individualDetails']['name'] = {
+    #                 'firstName': values.get('first_name') or self.first_name,
+    #                 'lastName': values.get('last_name') or self.last_name
+    #             }
+    #
+    #         if 'date_of_birth' in modified_fields:
+    #             holder_details['individualDetails'].setdefault('personalData', {})['dateOfBirth'] = str(values['date_of_birth'])
+    #
+    #         document_number = values.get('document_number') or self.document_number
+    #         if self.document_number and 'document_number' in modified_fields:
+    #             holder_details['individualDetails'].setdefault('personalData', {})['documentData'] = [{
+    #                 'number': document_number,
+    #                 'type': values.get('document_type') or self.document_type,
+    #             }]
+    #
+    #     if holder_details:
+    #         data['accountHolderDetails'] = holder_details
+    #
+    #     return data
 
     def _adyen_rpc(self, operation, adyen_data=None):
         self.ensure_one()

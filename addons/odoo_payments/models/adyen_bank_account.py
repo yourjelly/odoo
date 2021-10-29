@@ -111,6 +111,42 @@ class AdyenBankAccount(models.Model):
 
     #=== BUSINESS METHODS ===#
 
+    def _prepare_bank_account_details(self):
+        if not self:  # No bank account is created yet
+            return None  # Don't include the key in the payload
+        # TODO
+        else:
+            # Build an array of shareholder details for each existing bank account
+            return [
+                {
+                    'accountNumber': None,
+                    'accountType': None,
+                    'bankAccountName': None,
+                    'bankAccountReference': None,
+                    'bankAccountUUID': None,
+                    'bankBicSwift': None,
+                    'bankCity': None,
+                    'bankCode': None,
+                    'bankName': None,
+                    'branchCode': None,
+                    'checkCode': None,
+                    'countryCode': None,
+                    'currencyCode': None,
+                    'iban': None,
+                    'ownerCity': None,
+                    'ownerCountryCode': None,
+                    'ownerDateOfBirth': None,
+                    'ownerHouseNumberOrName': None,
+                    'ownerName': None,
+                    'ownerNationality': None,
+                    'ownerPostalCode': None,
+                    'ownerState': None,
+                    'ownerStreet': None,
+                    'primaryAccount': None,
+                    'urlForVerification': None,
+                } for account in self
+            ]
+
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends_context('lang')
