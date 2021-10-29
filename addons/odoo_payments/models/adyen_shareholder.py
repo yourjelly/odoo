@@ -45,6 +45,54 @@ class AdyenShareholder(models.Model):
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
+    def _prepare_shareholders_data(self):
+        if not self:  # No shareholder is created yet
+            return None  # Don't include the key in the payload
+        else:
+            # Build an array of shareholder details for each existing shareholder
+            return [
+                {
+                    # TODO
+                    'address': {
+                        'city': None,
+                        'country': None,
+                        'houseNumberOrName': None,
+                        'postalCode': None,
+                        'stateOrProvince': None,
+                        'street': None,
+                    },
+                    'email': None,
+                    'fullPhoneNumber': None,
+                    'jobTitle': None,
+                    'name': {
+                        'firstName': None,
+                        'gender': None,
+                        'infix': None,
+                        'lastName': None,
+                    },
+                    'personalData': {
+                        'dateOfBirth': None,
+                        'documentData': {
+                            'expirationDate': None,
+                            'issuerCountry': None,
+                            'issuerState': None,
+                            'number': None,
+                            'type': None,
+                        },
+                        'nationality': None,
+                    },
+                    'phoneNumber': {
+                        'phoneCountryCode': None,
+                        'phoneNumber': None,
+                        'phoneType': None,  # Landline/Mobile/SIP/Fax
+                    },
+                    'shareholderCode': None,
+                    'shareholderReference': None,
+                    'shareholderType': None,  # Owner/Controller
+                    'webAddress': None,
+                } for shareholder in self
+            ]
+
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):

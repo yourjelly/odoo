@@ -59,19 +59,4 @@
         </field>
     </record>
 
-    <record id="action_pos_adyen_account" model="ir.actions.server">
-        <field name="name">Adyen Account</field>
-        <field name="model_id" ref="model_adyen_account"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = model.action_create_or_redirect()
-        </field>
-    </record>
-
-    <menuitem id="menu_pos_adyen_account"
-        parent="point_of_sale.menu_point_config_product"
-        action="action_pos_adyen_account"
-        sequence="5"
-        groups="point_of_sale.group_pos_manager,point_of_sale.group_pos_user"/>
-
 </odoo>

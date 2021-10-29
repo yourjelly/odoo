@@ -42,9 +42,6 @@ class PaymentAcquirer(models.Model):
                         _("Your account must first be validated before enabling the acquirer.")
                     )
 
-    def odoo_create_adyen_account(self):
-        return self.env['adyen.account'].action_create_or_redirect()
-
     def _odoo_get_api_url(self):
         self.ensure_one()
         proxy_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')

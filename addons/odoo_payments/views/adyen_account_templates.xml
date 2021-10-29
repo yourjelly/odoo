@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <template id="redirect_form">
+        <form t-att-action="redirect_url" method="post">
+            <input type="hidden" name="adyen_data" t-att-value="adyen_data"/>
+            <input type="hidden" name="db_url" t-att-value="db_url"/>
+            <input type="hidden" name="is_test" t-att-value="is_test"/>
+            <input type="hidden" name="return_url" t-att-value="return_url"/>
+        </form>
+    </template>
+
     <template id="kyc_status_message">
         <p t-if="message" t-esc="message"/>
         <t t-if="checks">
@@ -27,4 +37,5 @@
             </li>
         </ul>
     </template>
+
 </odoo>
