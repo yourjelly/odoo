@@ -1,7 +1,7 @@
-odoo.define('website_event_meet.set_customize_options', function (require) {
-"use strict";
+/** @odoo-module **/
 
-let EventSpecificOptions = require('website_event.set_customize_options').EventSpecificOptions;
+import CustomizeMenu from "website.customizeMenu";
+import { EventSpecificOptions } from "website_event.set_customize_options";
 
 EventSpecificOptions.include({
     xmlDependencies: (EventSpecificOptions.prototype.xmlDependencies || [])
@@ -9,61 +9,62 @@ EventSpecificOptions.include({
             '/website_event_meet/static/src/xml/customize_options.xml',
         ]),
 
-    events: _.extend({}, EventSpecificOptions.prototype.events, {
-        'change #allow-room-creation': '_onAllowRoomCreationChange',
-    }),
-
-    start: function () {
+    start() {
         this.$allowRoomCreationInput = this.$('#allow-room-creation');
         this._super.apply(this, arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    _onAllowRoomCreationChange: function () {
-        let checkboxValue = this.$allowRoomCreationInput.is(':checked');
-        this._toggleAllowRoomCreation(checkboxValue);
     },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    _getCheckboxFields: function () {
+    _getCheckboxFields() {
         let fields = this._super();
         fields = _.union(fields, ['meeting_room_allow_creation']);
         return fields;
     },
 
-    _getCheckboxFieldMatch: function (checkboxField) {
+    _getCheckboxFieldMatch(checkboxField) {
         if (checkboxField === 'meeting_room_allow_creation') {
             return this.$allowRoomCreationInput;
         }
         return this._super(checkboxField);
     },
 
-    _initCheckboxCallback: function (rpcData) {
+    _initCheckboxCallback(rpcData) {
         this._super(rpcData);
         if (rpcData[0]['meeting_room_allow_creation']) {
             let submenuInput = this._getCheckboxFieldMatch('meeting_room_allow_creation');
             submenuInput.attr('checked', 'checked');
         }
     },
-
-    _toggleAllowRoomCreation: async function (val) {
-        await this._rpc({
-            model: this.modelName,
-            method: 'write',
-            args: [[this.eventId], {
-                meeting_room_allow_creation: val
-            }],
-        });
-
-        location.reload();
-    },
-
 });
 
+CustomizeMenu.include({
+    /**
+     * @override
+     * @param {Event} ev 
+     */
+    _onCustomOptionClick(ev) {
+        this._super(...arguments);
+        if (this.eventOptions.modelName === "event.event") {
+            const $currentTarget = $(ev.currentTarget);
+            const $inputOption = $($currentTarget.find('input'));
+            if ($inputOption[0].id === 'allow-room-creation') {
+                var checkboxValue = $inputOption.is(':checked');
+                this._toggleAllowRoomCreation(!checkboxValue);
+            }
+        }
+    },
+    _toggleAllowRoomCreation(val) {
+        this._rpc({
+            model: this.eventOptions.modelName,
+            method: 'write',
+            args: [[this.eventOptions.eventId], {
+                meeting_room_allow_creation: val
+            }],
+        }).then(() => {
+            window.location.reload();
+        });
+    },
 });

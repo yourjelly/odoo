@@ -3,7 +3,8 @@
 
     <t t-name="website_event.customize_options" id="event_options">
         <li class="dropdown-header">Event Specific</li>
-        <a href="#" name="display-website-menu" class="dropdown-item" role="menuitem">
+        <a href="#" name="display-website-menu" class="dropdown-item" role="menuitem"
+            t-att-data-view-key="false">
             <label class="o_switch" for="display-website-menu">
                 <input id="display-website-menu" type="checkbox"/>
                 <span/>

@@ -117,13 +117,26 @@ var CustomizeMenu = Widget.extend({
     _onCustomizeOptionClick: function (ev) {
         ev.preventDefault();
         var viewKey = $(ev.currentTarget).data('viewKey');
-        this._doCustomize(viewKey);
+        if (viewKey) {
+            this._doCustomize(viewKey);
+        } else {
+            this._onCustomOptionClick(ev);
+        }
     },
     /**
      * @private
      */
     _onDropdownShow: function () {
         this._loadCustomizeOptions();
+    },
+    /**
+     * To inherit for custom options
+     * @private
+     * @param {Event} ev
+     */
+    _onCustomOptionClick: function (ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
     },
 });
 
