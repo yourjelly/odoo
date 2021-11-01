@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm.action_lead_mass_mail" model="ir.actions.act_window">
+        <field name="name">Send emails</field>
+        <field name="res_model">mailing.mailing</field>
+        <field name="view_id" ref="mass_mailing_crm.mailing_mailing_view_inherit_form"/>
+        <field name="target">current</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

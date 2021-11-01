@@ -10,10 +10,12 @@
     'depends': ['crm', 'mass_mailing'],
     'data': [
         'views/mailing_mailing_views.xml',
+        'views/crm_lead_views.xml',
     ],
     'demo': [
         'data/mass_mailing_demo.xml',
     ],
     'auto_install': True,
+    'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
 }
