@@ -233,12 +233,14 @@ const Link = Widget.extend({
             }
         } else if (!link) {
             link = document.createElement('a');
-            if (range.collapsed) {
-                range.insertNode(link);
-                this.needLabel = true;
-            } else {
-                link.appendChild(range.extractContents());
-                range.insertNode(link);
+            if (!$(range.commonAncestorContainer).parents('.o_we_customize_panel').length) {
+                if (range.collapsed) {
+                    range.insertNode(link);
+                    this.needLabel = true;
+                } else {
+                    link.appendChild(range.extractContents());
+                    range.insertNode(link);
+                }
             }
         }
         return link;
