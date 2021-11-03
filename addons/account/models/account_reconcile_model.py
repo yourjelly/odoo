@@ -356,10 +356,11 @@ class AccountReconcileModel(models.Model):
             })
 
         base_line_dict['tax_tag_ids'] = [(6, 0, res['base_tags'])]
+        base_line_dict['balance_with_taxes'] = res['total_included']
         return new_aml_dicts
 
     def _get_write_off_move_lines_dict(self, st_line, residual_balance, partner_id):
-        ''' Get move.lines dict (to be passed to the create()) corresponding to the reconciliation model's write-off lines.
+        ''' Get move.lines dict corresponding to the reconciliation model's write-off lines.
         :param st_line:             An account.bank.statement.line record.(possibly empty, if performing manual reconciliation)
         :param residual_balance:    The residual balance of the statement line.
         :return: A list of dict representing move.lines to be created corresponding to the write-off lines.
@@ -438,6 +439,19 @@ class AccountReconcileModel(models.Model):
                         residual_balance -= tax_line['balance']
 
         return lines_vals_list
+
+    # def _get_write_off_move_lines_create_list(self, st_line, residual_balance, partner_id):
+    #     ''' Get move.lines dict (to be passed to the create()) corresponding to the reconciliation model's write-off lines.
+    #     :param st_line:             An account.bank.statement.line record.(possibly empty, if performing manual reconciliation)
+    #     :param residual_balance:    The residual balance of the statement line.
+    #     :return: A list of dict representing move.lines to be created corresponding to the write-off lines.
+    #     '''
+    #     lines_vals_list = self._get_write_off_move_lines_dict(st_line, residual_balance, partner_id)
+    #
+    #     for line_vals in lines_vals_list:
+    #         line_vals.pop('balance_with_taxes', None)
+    #
+    #     return lines_vals_list
 
     ####################################################
     # RECONCILIATION CRITERIA
