@@ -2,10 +2,9 @@
 
 import { Domain } from "@web/core/domain";
 import { cartesian, sections, sortBy, symmetricalDifference } from "@web/core/utils/arrays";
-import { KeepLast, Race } from "@web/core/utils/concurrency";
 import { computeVariation } from "@web/core/utils/numbers";
 import { DEFAULT_INTERVAL } from "@web/search/utils/dates";
-import { Model } from "@web/views/helpers/model";
+import { loader, Model } from "@web/views/helpers/model";
 import { computeReportMeasures, processMeasure } from "@web/views/helpers/utils";
 
 /**
@@ -339,12 +338,7 @@ export class PivotModel extends Model {
      */
     setup(params) {
         // concurrency management
-        this.keepLast = new KeepLast();
-        this.race = new Race();
-        const _loadData = this._loadData.bind(this);
-        this._loadData = (...args) => {
-            return this.race.add(_loadData(...args));
-        };
+        this.loading = null;
 
         let sortedColumn = params.metaData.sortedColumn || null;
         if (!sortedColumn && params.metaData.defaultOrder) {
@@ -397,8 +391,8 @@ export class PivotModel extends Model {
      * @param {string} [params.interval]
      */
     async addGroupBy(params) {
-        if (this.race.getCurrentProm()) {
-            return; // we are currently reloaded the table
+        if (this.loading) {
+            return; // we are currently reloading the table
         }
 
         const { groupId, fieldName, type, custom } = params;
@@ -425,9 +419,15 @@ export class PivotModel extends Model {
             metaData.expandedColGroupBys.push(groupBy);
         }
         const config = { metaData, data: this.data };
-        await this._expandGroup(groupId, type, config);
-        this.metaData = metaData;
-        this.notify();
+
+        const loading = loader(this._expandGroup(groupId, type, config));
+        this.loading = loading;
+        await loading;
+        this.loading = null;
+        if (!loading.isCancelled) {
+            this.metaData = metaData;
+            this.notify();
+        }
     }
     /**
      * Close the group with id given by groupId. A type must be specified
@@ -438,7 +438,7 @@ export class PivotModel extends Model {
      * @param {'row'|'col'} type
      */
     closeGroup(groupId, type) {
-        if (this.race.getCurrentProm()) {
+        if (this.loading) {
             return; // we are currently reloading the table
         }
 
@@ -500,8 +500,14 @@ export class PivotModel extends Model {
      */
     async expandAll() {
         const config = { metaData: this.metaData, data: this.data };
-        await this._loadData(config, false);
-        this.notify();
+
+        const loading = loader(this._loadData(config, false));
+        this.loading = loading;
+        await loading;
+        this.loading = null;
+        if (!loading.isCancelled) {
+            this.notify();
+        }
     }
     /**
      * Expand a group by using groupBy to split it and trigger a re-rendering.
@@ -510,13 +516,19 @@ export class PivotModel extends Model {
      * @param {'row'|'col'} type
      */
     async expandGroup(groupId, type) {
-        if (this.race.getCurrentProm()) {
-            return; // we are currently reloaded the table
+        if (this.loading) {
+            return; // we are currently reloading the table
         }
 
         const config = { metaData: this.metaData, data: this.data };
-        await this._expandGroup(groupId, type, config);
-        this.notify();
+
+        const loading = loader(this._expandGroup(groupId, type, config));
+        this.loading = loading;
+        await loading;
+        this.loading = null;
+        if (!loading.isCancelled) {
+            this.notify();
+        }
     }
     /**
      * Export model data in a form suitable for an easy encoding of the pivot
@@ -601,7 +613,7 @@ export class PivotModel extends Model {
      * flipping the axes. This method is thus async.
      */
     async flip() {
-        await this.race.getCurrentProm();
+        await this.loading;
 
         // swap the data: the main column and the main row
         let temp = this.data.rowGroupTree;
@@ -680,6 +692,9 @@ export class PivotModel extends Model {
      * @param {SearchParams} searchParams
      */
     async load(searchParams) {
+        if (this.loading) {
+            this.loading.cancel();
+        }
         this.searchParams = searchParams;
 
         const activeMeasures =
@@ -712,7 +727,12 @@ export class PivotModel extends Model {
             metaData.additionalMeasures
         );
         const config = { metaData, data: this.data };
-        return this._loadData(config);
+
+        const loading = loader(this._loadData(config));
+        this.loading = loading;
+        const data = await loading;
+        this.loading = null;
+        return data;
     }
     /**
      * Sort the rows, depending on the values of a given column.  This is an
@@ -722,8 +742,8 @@ export class PivotModel extends Model {
      * @param {number[]} sortedColumn.groupId
      */
     sortRows(sortedColumn) {
-        if (this.race.getCurrentProm()) {
-            return; // we are currently reloaded the table
+        if (this.loading) {
+            return; // we are currently reloading the table
         }
 
         const config = { metaData: this.metaData, data: this.data };
@@ -743,20 +763,26 @@ export class PivotModel extends Model {
         this.nextActiveMeasures = this.nextActiveMeasures || metaData.activeMeasures;
         metaData.activeMeasures = this.nextActiveMeasures;
         const index = metaData.activeMeasures.indexOf(fieldName);
+        let loading = this.loading;
         if (index !== -1) {
             // in this case, we already have all data in memory, no need to
             // actually reload a lesser amount of information (but still, we need
             // to wait in case there is a pending load)
             metaData.activeMeasures.splice(index, 1);
-            await Promise.resolve(this.race.getCurrentProm());
+            await loading;
             this.metaData = metaData;
         } else {
             metaData.activeMeasures.push(fieldName);
             let config = { metaData, data: this.data };
-            await this._loadData(config);
+            loading = loader(this._loadData(config));
+            this.loading = loading;
+            await loading;
+            this.loading = null;
         }
-        this.nextActiveMeasures = null;
-        this.notify();
+        if (!loading || !loading.isCancelled) {
+            this.nextActiveMeasures = null;
+            this.notify();
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -835,7 +861,7 @@ export class PivotModel extends Model {
      * @param {'row'|'col'} type
      * @param {Config} config
      */
-    async _expandGroup(groupId, type, config) {
+    *_expandGroup(groupId, type, config) {
         const { metaData } = config;
         const group = {
             rowValues: groupId[0],
@@ -859,7 +885,7 @@ export class PivotModel extends Model {
         }
         const divisors = cartesian(leftDivisors, rightDivisors);
         delete group.type;
-        await this._subdivideGroup(group, divisors, config);
+        yield* this._subdivideGroup(group, divisors, config);
     }
     /**
      * Find a group with given values in the provided groupTree, either
@@ -1349,7 +1375,7 @@ export class PivotModel extends Model {
      * @protected
      * @param {Config} config
      */
-    async _loadData(config, prune = true) {
+    *_loadData(config, prune = true) {
         config.data = {}; // data will be completely recomputed
         const { data, metaData } = config;
         data.rowGroupTree = { root: { labels: [], values: [] }, directSubTrees: new Map() };
@@ -1366,8 +1392,8 @@ export class PivotModel extends Model {
         const rightDivisors = sections(metaData.fullColGroupBys);
         const divisors = cartesian(leftDivisors, rightDivisors);
 
-        await this._subdivideGroup(group, divisors.slice(0, 1), config);
-        await this._subdivideGroup(group, divisors.slice(1), config);
+        yield* this._subdivideGroup(group, divisors.slice(0, 1), config);
+        yield* this._subdivideGroup(group, divisors.slice(1), config);
 
         // keep folded groups folded after the reload if the structure of the table is the same
         if (prune && this._hasData(data) && this._hasData(this.data)) {
@@ -1552,7 +1578,7 @@ export class PivotModel extends Model {
      * @param {Array[]} divisors
      * @param {Config} config
      */
-    async _subdivideGroup(group, divisors, config) {
+    *_subdivideGroup(group, divisors, config) {
         const { data, metaData } = config;
         const key = JSON.stringify([group.rowValues, group.colValues]);
 
@@ -1572,7 +1598,7 @@ export class PivotModel extends Model {
             }
             return acc;
         }, []);
-        const groupSubdivisions = await this.keepLast.add(Promise.all(proms));
+        const groupSubdivisions = yield Promise.all(proms);
         if (groupSubdivisions.length) {
             this._prepareData(group, groupSubdivisions, config);
         }

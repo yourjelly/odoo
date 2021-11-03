@@ -133,3 +133,31 @@ export function useModel(ModelClass, params, options = {}) {
 
     return model;
 }
+
+export function loader(loadIterator) {
+    let cancelled = false;
+    const loadExecuter = async () => {
+        let it = loadIterator.next();
+        while (!it.done) {
+            const result = await it.value;
+            if (cancelled) {
+                it = loadIterator.return();
+            } else {
+                it = loadIterator.next(result);
+            }
+        }
+        return it.value;
+    };
+    const loadPromise = loadExecuter();
+    return {
+        cancel() {
+            cancelled = true;
+        },
+        get isCancelled() {
+            return cancelled;
+        },
+        then(...params) {
+            return loadPromise.then(...params);
+        },
+    };
+}
