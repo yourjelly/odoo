@@ -60,7 +60,6 @@ const LinkTools = Link.extend({
         if (!this.el) {
             return this._super(...arguments);
         }
-        this.$link.removeClass('oe_edited_link');
         const $contents = this.$link.contents();
         if (!this.$link.attr('href') && !this.colorCombinationClass) {
             $contents.unwrap();
@@ -69,6 +68,7 @@ const LinkTools = Link.extend({
         this.options.wysiwyg.odooEditor.observerActive();
         this.applyLinkToDom(this._getData());
         setSelection(this.$link[0], 0, this.$link[0], 1);
+        this.$link.removeClass('oe_edited_link');
         this.options.wysiwyg.odooEditor.historyStep();
         this._super(...arguments);
     },
