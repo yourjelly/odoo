@@ -324,14 +324,6 @@ class Location(models.Model):
         should in the default uom of product, it's only used when no package is
         specified."""
         self.ensure_one()
-        if package and package.package_type_id:
-            return self._check_package_storage(qty_by_product, package, location_qty)
-        return self._check_product_storage(qty_by_product, location_qty)
-
-    def _check_product_storage(self, qty_by_product, location_qty):
-        """Check if a number of product can be stored in the location. Quantity
-        should in the default uom of product."""
-        self.ensure_one()
         if self.storage_category_id:
             product = list(qty_by_product.keys())[0]
             positive_quant = self.quant_ids.filtered(lambda q: float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0)
@@ -346,34 +338,16 @@ class Location(models.Model):
                 (len(qty_by_product.keys()) > 1 or positive_quant and positive_quant.product_id != product):
                 return False
             # check if enough space
-            product_capacity = self.storage_category_id.product_capacity_ids.filtered(lambda pc: pc.product_id == product)
-            # To handle new line without quantity in order to avoid suggesting a location already full
-            if product_capacity and location_qty >= product_capacity.quantity:
-                return False
-            if product_capacity and qty_by_product[product] + location_qty > product_capacity.quantity:
-                return False
-        return True
-
-    def _check_package_storage(self, qty_by_product, package, location_qty):
-        """Check if the given package can be stored in the location."""
-        self.ensure_one()
-        if self.storage_category_id:
-            product = list(qty_by_product.keys())[0]
-            positive_quant = self.quant_ids.filtered(lambda q: float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0)
-            # check weight
-            if self.storage_category_id.max_weight < self.forecast_weight + sum(product.weight * qty for product, qty in qty_by_product.items()):
-                return False
-            # check if only allow new product when empty
-            if self.storage_category_id.allow_new_product == "empty" and positive_quant:
-                return False
-            # check if only allow same product
-            if self.storage_category_id.allow_new_product == "same" and \
-                (len(qty_by_product.keys()) > 1 or positive_quant and positive_quant.product_id != product):
-                return False
-            # check if enough space
-            package_capacity = self.storage_category_id.package_capacity_ids.filtered(lambda pc: pc.package_type_id == package.package_type_id)
-            if package_capacity:
-                if location_qty >= package_capacity.quantity:
+            if package and package.package_type_id:
+                package_capacity = self.storage_category_id.package_capacity_ids.filtered(lambda pc: pc.package_type_id == package.package_type_id)
+                if package_capacity and location_qty >= package_capacity.quantity:
+                    return False
+            else:
+                product_capacity = self.storage_category_id.product_capacity_ids.filtered(lambda pc: pc.product_id == product)
+                # To handle new line without quantity in order to avoid suggesting a location already full
+                if product_capacity and location_qty >= product_capacity.quantity:
+                    return False
+                if product_capacity and qty_by_product[product] + location_qty > product_capacity.quantity:
                     return False
         return True
 
