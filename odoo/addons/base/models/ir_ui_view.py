@@ -1971,16 +1971,16 @@ actual arch.
         template._check_view_access()
         return template.sudo()._render(values, engine="ir.qweb")
 
-    def _render_template(self, template, values=None, engine='ir.qweb'):
-        return self.browse(self.get_view_id(template))._render(values, engine)
+    def _render_template(self, template, rendering_env, values=None, engine='ir.qweb'):
+        return self.browse(self.get_view_id(template))._render(rendering_env, values, engine)
 
-    def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
+    def _render(self, rendering_env, values=None, engine='ir.qweb', minimal_qcontext=False):
         assert isinstance(self.id, int)
 
-        qcontext = dict() if minimal_qcontext else self._prepare_qcontext()
+        qcontext = dict() if minimal_qcontext else rendering_env[self._name]._prepare_qcontext()
         qcontext.update(values or {})
 
-        return self.env[engine]._render(self.id, qcontext)
+        return self.env[engine]._render(self.id, rendering_env, qcontext)
 
     @api.model
     def _prepare_qcontext(self):

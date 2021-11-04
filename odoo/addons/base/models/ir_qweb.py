@@ -53,7 +53,7 @@ class IrQWeb(models.AbstractModel, QWeb):
 
     @QwebTracker.wrap_render
     @api.model
-    def _render(self, template, values=None, **options):
+    def _render(self, template, rendering_env, values=None, **options):
         """ render(template, values, **options)
 
         Render the template specified by the given name.
@@ -71,7 +71,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         compile_options = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         compile_options.update(options)
 
-        result = super()._render(template, values=values, **compile_options)
+        result = super()._render(template, rendering_env, values=values, **compile_options)
 
         if not values or not values.get('__keep_empty_lines'):
             result = markupsafe.Markup(IrQWeb._empty_lines.sub('\n', result.strip()))

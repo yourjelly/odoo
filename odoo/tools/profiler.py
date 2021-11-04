@@ -278,7 +278,7 @@ class QwebTracker():
     @classmethod
     def wrap_render(cls, method_render):
         @functools.wraps(method_render)
-        def _tracked_method_render(self, template, values=None, **options):
+        def _tracked_method_render(self, template, rendering_env, values=None, **options):
             current_thread = threading.current_thread()
             execution_context_enabled = getattr(current_thread, 'profiler_params', {}).get('execution_context_qweb')
             qweb_hooks = getattr(current_thread, 'qweb_hooks', ())
@@ -286,7 +286,7 @@ class QwebTracker():
                 # To have the new compilation cached because the generated code will change.
                 # Therefore 'profile' is a key to the cache.
                 options['profile'] = True
-            return method_render(self, template, values, **options)
+            return method_render(self, template, rendering_env, values, **options)
         return _tracked_method_render
 
     @classmethod

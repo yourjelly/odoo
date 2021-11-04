@@ -568,9 +568,10 @@ class IrActionsReport(models.Model):
         """
         return {}
 
-    def _render_template(self, template, values=None):
+    def _render_template(self, template, rendering_env, values=None):
         """Allow to render a QWeb template python-side. This function returns the 'ir.ui.view'
         render but embellish it with some variables/methods used in reports.
+        :param rendering_env: the environment accessing the template content
         :param values: additional methods/variables used in the rendering
         :returns: html representation of the template
         :rtype: bytes
@@ -581,7 +582,7 @@ class IrActionsReport(models.Model):
         context = dict(self.env.context, inherit_branding=False)
 
         # Browse the user instead of using the sudo self.env.user
-        user = self.env['res.users'].browse(self.env.uid)
+        user = rendering_env['res.users'].browse(self.env.uid)
         website = None
         if request and hasattr(request, 'website'):
             if request.website is not None:
@@ -597,7 +598,7 @@ class IrActionsReport(models.Model):
             website=website,
             web_base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
         )
-        return view_obj._render_template(template, values).encode()
+        return view_obj._render_template(template, rendering_env, values).encode()
 
     def _post_pdf(self, save_in_attachment, pdf_content=None, res_ids=None):
         '''Merge the existing attachments by adding one by one the content of the attachments
@@ -743,7 +744,7 @@ class IrActionsReport(models.Model):
         writer.write(result_stream)
         return result_stream.getvalue()
 
-    def _render_qweb_pdf(self, res_ids=None, data=None):
+    def _render_qweb_pdf(self, rendering_env, res_ids=None, data=None):
         """
         :rtype: bytes
         """
@@ -757,7 +758,7 @@ class IrActionsReport(models.Model):
         # In case of test environment without enough workers to perform calls to wkhtmltopdf,
         # fallback to render_html.
         if (tools.config['test_enable'] or tools.config['test_file']) and not self.env.context.get('force_report_rendering'):
-            return self_sudo._render_qweb_html(res_ids, data=data)
+            return self_sudo._render_qweb_html(res_ids, rendering_env, data=data)
 
         # As the assets are generated during the same transaction as the rendering of the
         # templates calling them, there is a scenario where the assets are unreachable: when
@@ -839,7 +840,7 @@ class IrActionsReport(models.Model):
         return pdf_content, 'pdf'
 
     @api.model
-    def _render_qweb_text(self, docids, data=None):
+    def _render_qweb_text(self, docids, rendering_env, data=None):
         """
         :rtype: bytes
         """
@@ -847,11 +848,11 @@ class IrActionsReport(models.Model):
             data = {}
         data.setdefault('report_type', 'text')
         data.setdefault('__keep_empty_lines', True)
-        data = self._get_rendering_context(docids, data)
-        return self._render_template(self.report_name, data), 'text'
+        data = rendering_env._get_rendering_context(docids, data)
+        return self._render_template(self.report_name, rendering_env, data), 'text'
 
     @api.model
-    def _render_qweb_html(self, docids, data=None):
+    def _render_qweb_html(self, docids, rendering_env, data=None):
         """This method generates and returns html version of a report.
 
         :rtype: bytes
@@ -859,11 +860,11 @@ class IrActionsReport(models.Model):
         if not data:
             data = {}
         data.setdefault('report_type', 'html')
-        data = self._get_rendering_context(docids, data)
-        return self._render_template(self.report_name, data), 'html'
+        data = rendering_env._get_rendering_context(docids, data)
+        return self._render_template(self.report_name, rendering_env, data), 'html'
 
     def _get_rendering_context_model(self):
-        report_model_name = 'report.%s' % self.report_name
+        report_model_name = 'report.%s' % self.sudo().report_name
         return self.env.get(report_model_name)
 
     def _get_rendering_context(self, docids, data):
@@ -874,8 +875,6 @@ class IrActionsReport(models.Model):
         data = data and dict(data) or {}
 
         if report_model is not None:
-            # _render_ may be executed in sudo but evaluation context as real user
-            report_model = report_model.sudo(False)
             data.update(report_model._get_report_values(docids, data=data))
         else:
             # _render_ may be executed in sudo but evaluation context as real user
