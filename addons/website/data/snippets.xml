@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Snippet Categories -->
+    <record id="snippet_category_structure" model="snippet.category">
+        <field name="name">Structure</field>
+        <field name="used_for">website_builder</field>
+        <field name="sequence" eval="20"/>
+    </record>
+    <record id="snippet_category_features" model="snippet.category">
+        <field name="name">Features</field>
+        <field name="used_for">website_builder</field>
+        <field name="sequence" eval="30"/>
+    </record>
+    <record id="snippet_category_dynamic" model="snippet.category">
+        <field name="name">Dynamic Content</field>
+        <field name="used_for">website_builder</field>
+        <field name="sequence" eval="40"/>
+    </record>
+    <record id="snippet_category_inner" model="snippet.category">
+        <field name="name">Inner content</field>
+        <field name="used_for">website_builder</field>
+        <field name="sequence" eval="50"/>
+    </record>
+
+    <!-- Snippets Keywords -->
+    <record id="snippet_keyword_hero" model="snippet.keyword">
+        <field name="name">hero</field>
+    </record>
+    <record id="snippet_keyword_jumbotron" model="snippet.keyword">
+        <field name="name">jumbotron</field>
+    </record>
+    <record id="snippet_keyword_content" model="snippet.keyword">
+        <field name="name">content</field>
+    </record>
+
+    <!-- Snippets -->
+    <record id="s_banner" model="snippet">
+        <field name="name">Banner</field>
+        <field name="key">s_hr</field>
+        <field name="thumbnail_url">/website/static/src/img/snippets_thumbs/s_banner.svg</field>
+        <field name="used_for">website_builder</field>
+        <field name="sequence" eval="10"/>
+        <field name="keyword_ids" eval="[(4, ref('website.snippet_keyword_hero')), (4, ref('website.snippet_keyword_jumbotron'))]"/>
+        <field name="category_ids" eval="[(4, ref('website.snippet_category_structure'))]"/>
+        <field name="content" type="html">
+            <section class="s_banner parallax s_parallax_is_fixed pt96 pb96" data-scroll-background-ratio="1">
+                <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_banner_default_image'); background-position: 50% 0;"/>
+                <div class="container">
+                    <div class="row s_nb_column_fixed">
+                        <div class="col-lg-6 jumbotron rounded o_cc o_cc1 pt32 pb32" data-name="Box">
+                            <h1><font style="font-size: 62px;">Sell Online. Easily.</font></h1>
+                            <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+                            <a href="/contactus" class="btn btn-primary mb-2">Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </field>
+    </record>
+    <record id="s_cover" model="snippet">
+        <field name="name">Cover</field>
+        <field name="key">s_cover</field>
+        <field name="thumbnail_url">/website/static/src/img/snippets_thumbs/s_cover.svg</field>
+        <field name="used_for">website_builder</field>
+        <field name="keyword_ids" eval="[(4, ref('website.snippet_keyword_hero')), (4, ref('website.snippet_keyword_jumbotron'))]"/>
+        <field name="category_ids" eval="[(4, ref('website.snippet_category_structure'))]"/>
+        <field name="sequence" eval="20"/>
+        <field name="content" type="html">
+            <section class="s_cover parallax s_parallax_is_fixed bg-black-50 pt96 pb96" data-scroll-background-ratio="1">
+                <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 50% 0;"/>
+                <div class="o_we_bg_filter bg-black-50"/>
+                <div class="container s_allow_columns">
+                    <h1 style="text-align: center;"><font style="font-size: 62px; font-weight: bold;">Catchy Headline</font></h1>
+                    <p class="lead" style="text-align: center;">Write one or two paragraphs describing your product, services or a specific feature.<br/> To be successful your content needs to be useful to your readers.</p>
+                    <p style="text-align: center;">
+                        <a t-att-href="cta_btn_href" class="btn btn-primary mb-2"><t t-esc="cta_btn_text">Contact us</t></a>
+                    </p>
+                </div>
+            </section>
+        </field>
+    </record>
+    <record id="s_text_image" model="snippet">
+        <field name="name">Text - Image</field>
+        <field name="key">s_text_image</field>
+        <field name="thumbnail_url">/website/static/src/img/snippets_thumbs/s_text_image.svg</field>
+        <field name="used_for">website_builder</field>
+        <field name="keyword_ids" eval="[(4, ref('website.snippet_keyword_content'))]"/>
+        <field name="category_ids" eval="[(4, ref('website.snippet_category_structure'))]"/>
+        <field name="sequence" eval="20"/>
+        <field name="content" type="html">
+            <section class="s_text_image pt32 pb32">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 pt16 pb16">
+                            <h2>A Section Subtitle</h2>
+                            <p>Write one or two paragraphs describing your product or services. To be successful your content needs to be useful to your readers.</p>
+                            <p>Start with the customer – find out what they want and give it to them.</p>
+                            <p><a href="#" class="btn btn-primary mb-2">Learn more</a></p>
+                        </div>
+                        <div class="col-lg-6 pt16 pb16">
+                            <img src="/web/image/website.s_text_image_default_image" class="img img-fluid mx-auto" alt=""/>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </field>
+    </record>
+    <record id="s_image_text" model="snippet">
+        <field name="name">Image - Text</field>
+        <field name="key">s_image_text</field>
+        <field name="thumbnail_url">/website/static/src/img/snippets_thumbs/s_image_text.svg</field>
+        <field name="used_for">website_builder</field>
+        <field name="keyword_ids" eval="[(4, ref('website.snippet_keyword_content'))]"/>
+        <field name="category_ids" eval="[(4, ref('website.snippet_category_structure'))]"/>
+        <field name="sequence" eval="20"/>
+        <field name="content" type="html">
+            <section class="s_text_image pt32 pb32">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 pt16 pb16">
+                            <img src="/web/image/website.s_image_text_default_image" class="img img-fluid mx-auto" alt=""/>
+                        </div>
+                        <div class="col-lg-6 pt16 pb16">
+                            <h2>Section Subtitle</h2>
+                            <p>Write one or two paragraphs describing your product or services. To be successful your content needs to be useful to your readers.</p>
+                            <p>Start with the customer – find out what they want and give it to them.</p>
+                            <p><a href="#" class="btn btn-primary mb-2">Discover more</a></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </field>
+    </record>
+</odoo>

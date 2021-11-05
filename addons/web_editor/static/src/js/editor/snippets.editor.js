@@ -1104,8 +1104,8 @@ var SnippetsMenu = Widget.extend({
         'click .o_we_add_snippet_btn': '_onBlocksTabClick',
         'click .o_we_customize_snippet_btn': '_onOptionsTabClick',
         'click .o_we_invisible_entry': '_onInvisibleEntryClick',
-        'click #snippet_custom .o_rename_btn': '_onRenameBtnClick',
-        'click #snippet_custom .o_delete_btn': '_onDeleteBtnClick',
+        'click .oe_snippet_custom .o_rename_btn': '_onRenameBtnClick',
+        'click .oe_snippet_custom .o_delete_btn': '_onDeleteBtnClick',
         'mousedown': '_onMouseDown',
         'input .o_snippet_search_filter_input': '_onSnippetSearchInput',
         'click .o_snippet_search_filter_reset': '_onSnippetSearchResetClick',
@@ -1132,7 +1132,6 @@ var SnippetsMenu = Widget.extend({
         'snippet_cloned': '_onSnippetCloned',
         'snippet_option_update': '_onSnippetOptionUpdate',
         'snippet_option_visibility_update': '_onSnippetOptionVisibilityUpdate',
-        'snippet_thumbnail_url_request': '_onSnippetThumbnailURLRequest',
         'reload_snippet_dropzones': '_disableUndroppableSnippets',
         'request_save': '_onSaveRequest',
         'hide_overlay': '_onHideOverlay',
@@ -2057,12 +2056,12 @@ var SnippetsMenu = Widget.extend({
         };
 
         this.$snippets = $scroll.find('.o_panel_body').children()
-            .addClass('oe_snippet')
+            // .addClass('oe_snippet')
             .each((i, el) => {
                 const $snippet = $(el);
                 const name = _.escape(el.getAttribute('name'));
-                const thumbnailSrc = _.escape(el.dataset.oeThumbnail);
-                const $sbody = $snippet.children().addClass('oe_snippet_body');
+                // const thumbnailSrc = _.escape(el.dataset.oeThumbnail);
+                const $sbody = $snippet.find('.oe_snippet_body').children();
                 const isCustomSnippet = !!el.closest('#snippet_custom');
 
                 // Associate in-page snippets to their name
@@ -2075,14 +2074,14 @@ var SnippetsMenu = Widget.extend({
                 const $els = $(snippetClasses).not('[data-name]').add($sbody);
                 $els.attr('data-name', name).data('name', name);
 
-                // Create the thumbnail
-                const $thumbnail = $(`
-                    <div class="oe_snippet_thumbnail">
-                        <div class="oe_snippet_thumbnail_img" style="background-image: url(${thumbnailSrc});"/>
-                        <span class="oe_snippet_thumbnail_title">${name}</span>
-                    </div>
-                `);
-                $snippet.prepend($thumbnail);
+                // // Create the thumbnail
+                // const $thumbnail = $(`
+                //     <div class="oe_snippet_thumbnail">
+                //         <div class="oe_snippet_thumbnail_img" style="background-image: url(${thumbnailSrc});"/>
+                //         <span class="oe_snippet_thumbnail_title">${name}</span>
+                //     </div>
+                // `);
+                // $snippet.prepend($thumbnail);
 
                 // Create the install button (t-install feature) if necessary
                 const moduleID = $snippet.data('moduleId');
@@ -2096,18 +2095,18 @@ var SnippetsMenu = Widget.extend({
                 }
 
                 // Create the rename and delete button for custom snippets
-                if (isCustomSnippet) {
-                    const btnRenameEl = document.createElement('we-button');
-                    btnRenameEl.dataset.snippetId = $snippet.data('oeSnippetId');
-                    btnRenameEl.classList.add('o_rename_btn', 'fa', 'fa-pencil', 'btn', 'o_we_hover_success');
-                    btnRenameEl.title = _.str.sprintf(_t("Rename %s"), name);
-                    $snippet.append(btnRenameEl);
-                    const btnEl = document.createElement('we-button');
-                    btnEl.dataset.snippetId = $snippet.data('oeSnippetId');
-                    btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash', 'btn', 'o_we_hover_danger');
-                    btnEl.title = _.str.sprintf(_t("Delete %s"), name);
-                    $snippet.append(btnEl);
-                }
+                // if (isCustomSnippet) {
+                //     const btnRenameEl = document.createElement('we-button');
+                //     btnRenameEl.dataset.snippetId = $snippet.data('oeSnippetId');
+                //     btnRenameEl.classList.add('o_rename_btn', 'fa', 'fa-pencil', 'btn', 'o_we_hover_success');
+                //     btnRenameEl.title = _.str.sprintf(_t("Rename %s"), name);
+                //     $snippet.append(btnRenameEl);
+                //     const btnEl = document.createElement('we-button');
+                //     btnEl.dataset.snippetId = $snippet.data('oeSnippetId');
+                //     btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash', 'btn', 'o_we_hover_danger');
+                //     btnEl.title = _.str.sprintf(_t("Delete %s"), name);
+                //     $snippet.append(btnEl);
+                // }
             })
             .not('[data-module-id]');
 
@@ -2191,7 +2190,7 @@ var SnippetsMenu = Widget.extend({
         var cache = {};
         this.$snippets.each(function () {
             var $snippet = $(this);
-            var $snippetBody = $snippet.find('.oe_snippet_body');
+            var $snippetBody = $snippet.find('.oe_snippet_body').children();
 
             var check = false;
             _.each(self.templateOptions, function (option, k) {
@@ -2321,7 +2320,7 @@ var SnippetsMenu = Widget.extend({
 
                     dropped = false;
                     $snippet = $(this);
-                    var $baseBody = $snippet.find('.oe_snippet_body');
+                    var $baseBody = $snippet.find('.oe_snippet_body').children();
                     var $selectorSiblings = $();
                     var $selectorChildren = $();
                     var temp = self.templateOptions;
@@ -2500,7 +2499,7 @@ var SnippetsMenu = Widget.extend({
      */
     _registerDefaultTexts: function ($in) {
         if ($in === undefined) {
-            $in = this.$snippets.find('.oe_snippet_body');
+            $in = this.$snippets.find('.oe_snippet_body').children();
         }
 
         $in.find('*').addBack()
@@ -2837,7 +2836,6 @@ var SnippetsMenu = Widget.extend({
      */
     _onDeleteBtnClick: function (ev) {
         const $snippet = $(ev.target).closest('.oe_snippet');
-        const snippetId = parseInt(ev.currentTarget.dataset.snippetId);
         ev.stopPropagation();
         new Dialog(this, {
             size: 'medium',
@@ -2849,11 +2847,10 @@ var SnippetsMenu = Widget.extend({
                 classes: 'btn-primary',
                 click: async () => {
                     await this._rpc({
-                        model: 'ir.ui.view',
-                        method: 'delete_snippet',
+                        model: 'snippet',
+                        method: 'unlink',
                         kwargs: {
-                            'view_id': snippetId,
-                            'template_key': this.options.snippets,
+                            'id': parseInt(ev.currentTarget.dataset.snippetId),
                         },
                     });
                     await this._loadSnippetsTemplates(true);
@@ -2892,12 +2889,11 @@ var SnippetsMenu = Widget.extend({
             if (name !== snippetName) {
                 this._execWithLoadingEffect(async () => {
                     await this._rpc({
-                        model: 'ir.ui.view',
-                        method: 'rename_snippet',
+                        model: 'snippet',
+                        method: 'rename_custom',
                         kwargs: {
+                            'id': parseInt(ev.target.dataset.snippetId),
                             'name': name,
-                            'view_id': parseInt(ev.target.dataset.snippetId),
-                            'template_key': this.options.snippets,
                         },
                     });
                 }, true);
@@ -3099,14 +3095,6 @@ var SnippetsMenu = Widget.extend({
             await this._activateSnippet(false);
         }
         await this._updateInvisibleDOM(); // Re-render to update status
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     */
-    _onSnippetThumbnailURLRequest(ev) {
-        const $snippet = this.$snippets.has(`[data-snippet="${ev.data.key}"]`);
-        ev.data.onSuccess($snippet.length ? $snippet[0].dataset.oeThumbnail : '');
     },
     /**
      * Called when an user value widget is being opened -> close all the other

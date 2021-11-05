@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Snippets -->
+        <record id="s_hr" model="snippet">
+            <field name="name">Separator</field>
+            <field name="key">s_hr</field>
+            <field name="thumbnail_url">/web_editor/static/src/img/snippets_thumbs/s_hr.svg</field>
+            <field name="used_for">web_editor</field>
+            <field name="category_ids" eval="[(4, ref('web_editor.snippet_category_first_panel'))]"/>
+            <field name="content">
+                <div class="s_hr pt32 pb32">
+                    <hr class="s_hr_1px s_hr_solid w-100 mx-auto"/>
+                </div>
+            </field>
+        </record>
+
+        <!-- Snippet Categories -->
+        <record id="snippet_category_custom" model="snippet.category">
+            <field name="name">Custom</field>
+            <field name="used_for">shared</field>
+            <field name="sequence" eval="10"/>
+        </record>
+        <record id="snippet_category_first_panel" model="snippet.category">
+            <field name="name">First Panel</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="20"/>
+        </record>
+        <record id="snippet_category_headers" model="snippet.category">
+            <field name="name">Headers</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="30"/>
+        </record>
+        <record id="snippet_category_body" model="snippet.category">
+            <field name="name">Body</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="40"/>
+        </record>
+        <record id="snippet_category_marketing" model="snippet.category">
+            <field name="name">Marketing Content</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="50"/>
+        </record>
+        <record id="snippet_category_inner" model="snippet.category">
+            <field name="name">Inner Content</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="60"/>
+        </record>
+        <record id="snippet_category_footers" model="snippet.category">
+            <field name="name">Footers</field>
+            <field name="used_for">web_editor</field>
+            <field name="sequence" eval="70"/>
+        </record>
+    </data>
+</odoo>

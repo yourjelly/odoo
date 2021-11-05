@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_cover" name="Cover">
+<!-- <template id="s_cover" name="Cover">
     <section class="s_cover parallax s_parallax_is_fixed bg-black-50 pt96 pb96" data-scroll-background-ratio="1">
         <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 50% 0;"/>
         <div class="o_we_bg_filter bg-black-50"/>
@@ -13,6 +13,6 @@
             </p>
         </div>
     </section>
-</template>
+</template> -->
 
 </odoo>

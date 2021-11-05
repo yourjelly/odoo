@@ -28,18 +28,42 @@
     </div>
 
     <div id="o_scroll">
-        <div id="snippet_custom" class="o_panel d-none">
+        <!-- Loaded in JS -->
+        <!-- Don't forget to add `oe_snippet_custom` is snippet is_custom -->
+        <!-- <div id="snippet_custom" class="o_panel d-none">
             <div class="o_panel_header">Custom</div>
             <div id="snippet_custom_body" class="o_panel_body"/>
+        </div> -->
+        <t t-set="used_for" t-valuef="web_editor"/>
+        <t t-set="categories" t-value="request.env['snippet.category'].search([('used_for', 'in', (used_for, 'shared')), ('snippet_count', '>', 0)])"/>
+        <div t-foreach="categories" t-as="category" class="o_panel">
+            <div class="o_panel_header" t-esc="category.name"/>
+            <div class="o_panel_body">
+                <div t-foreach="category.snippet_ids" t-as="snippet" class="oe_snippet"
+                     t-att-name="snippet.name" data-oe-type="snippet" t-att-data-oe-snippet-id="snippet.id"
+                     t-att-data-oe-keywords="(', ').join(snippet.keyword_ids.mapped('name'))">
+                    <div class="oe_snippet_thumbnail">
+                        <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{snippet.thumbnail_url});"/>
+                        <span class="oe_snippet_thumbnail_title" t-esc="snippet.name"/>
+                    </div>
+                    <div class="oe_snippet_body">
+                        <t t-out="snippet.content"/>
+                    </div>
+                    <t t-if="snippet.is_custom">
+                        <we-button t-att-data-snippet-id="snippet.id" class="o_rename_btn fa fa-pencil btn o_we_hover_success" t-attf-title="Rename #{snippet.name\"/>
+                        <we-button t-att-data-snippet-id="snippet.id" class="o_delete_btn fa fa-trash btn o_we_hover_danger" t-attf-title="Delete #{snippet.name}"/>
+                    </t>
+                </div>
+            </div>
         </div>
-        <t id="default_snippets">
+        <!-- <t id="default_snippets">
             <div id="snippet_structure" class="o_panel">
                 <div class="o_panel_header">First Panel</div>
                 <div class="o_panel_body">
                     <t t-snippet="web_editor.s_hr" t-thumbnail="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
                 </div>
             </div>
-        </t>
+        </t> -->
     </div>
 
     <div id="snippet_options" class="d-none">
@@ -559,13 +583,6 @@
             <we-colorpicker data-color="true" data-color-name="c4"/>
             <we-colorpicker data-color="true" data-color-name="c5"/>
         </we-row>
-    </div>
-</template>
-
-<!-- default block -->
-<template id="s_hr" name="Separator">
-    <div class="s_hr pt32 pb32">
-        <hr class="s_hr_1px s_hr_solid w-100 mx-auto"/>
     </div>
 </template>
 

@@ -405,7 +405,7 @@ body.editor_enable.editor_has_snippets {
                 }
             }
         }
-        #snippet_custom .oe_snippet {
+        .oe_snippet.oe_snippet_custom {
             width: 100%;
 
             &, .oe_snippet_thumbnail, .btn {

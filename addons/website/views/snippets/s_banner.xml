@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_banner" name="Banner">
+<!-- <template id="s_banner" name="Banner">
     <section class="s_banner parallax s_parallax_is_fixed pt96 pb96" data-scroll-background-ratio="1">
         <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_banner_default_image'); background-position: 50% 0;"/>
         <div class="container">
@@ -14,6 +14,6 @@
             </div>
         </div>
     </section>
-</template>
+</template> -->
 
 </odoo>

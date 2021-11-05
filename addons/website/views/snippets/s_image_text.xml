@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_image_text" name="Image - Text">
+<!-- <template id="s_image_text" name="Image - Text">
     <section class="s_text_image pt32 pb32">
         <div class="container">
             <div class="row align-items-center">
@@ -17,6 +17,6 @@
             </div>
         </div>
     </section>
-</template>
+</template> -->
 
 </odoo>

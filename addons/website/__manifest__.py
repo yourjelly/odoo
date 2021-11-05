@@ -28,6 +28,7 @@
         'security/ir.model.access.csv',
         'data/ir_asset.xml',
         'data/mail_mail_data.xml',
+        'data/snippets.xml',
         'data/website_data.xml',
         'data/website_visitor_cron.xml',
         'data/digest_data.xml',

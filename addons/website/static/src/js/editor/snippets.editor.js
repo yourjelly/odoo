@@ -392,5 +392,19 @@ weSnippetEditor.SnippetEditor.include({
         }
         return this._super(...arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _getUsedFor() {
+        if (this.enableWebsite) {
+            return 'website_builder';
+        }
+        return this._super(...arguments);
+    },
 });
 });

@@ -3890,6 +3890,13 @@ const SnippetOptionWidget = Widget.extend({
         collapseEl.classList.toggle('active', show);
         collapseEl.querySelector('we-toggler.o_we_collapse_toggler').classList.toggle('active', show);
     },
+    /**
+     * @private
+     * @returns {String} The application for which the editor is used.
+     */
+    _getUsedFor() {
+        return 'web_editor';
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -6772,12 +6779,6 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                         classes: 'btn-primary',
                         close: true,
                         click: () => {
-                            const snippetKey = this.$target[0].dataset.snippet;
-                            let thumbnailURL;
-                            this.trigger_up('snippet_thumbnail_url_request', {
-                                key: snippetKey,
-                                onSuccess: url => thumbnailURL = url,
-                            });
                             let context;
                             this.trigger_up('context_get', {
                                 callback: ctx => context = ctx,
@@ -6785,7 +6786,6 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                             this.trigger_up('request_save', {
                                 reloadEditor: true,
                                 onSuccess: async () => {
-                                    const defaultSnippetName = _.str.sprintf(_t("Custom %s"), this.data.snippetName);
                                     const targetCopyEl = this.$target[0].cloneNode(true);
                                     delete targetCopyEl.dataset.name;
                                     // By the time onSuccess is called after request_save, the
@@ -6793,14 +6793,12 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                                     // will not work as it can't trigger_up. For this reason, we need
                                     // to bypass the service provider and use the global RPC directly
                                     await rpc.query({
-                                        model: 'ir.ui.view',
-                                        method: 'save_snippet',
+                                        model: 'snippet',
+                                        method: 'save_custom',
                                         kwargs: {
-                                            'name': defaultSnippetName,
                                             'arch': targetCopyEl.outerHTML,
-                                            'template_key': this.options.snippets,
-                                            'snippet_key': snippetKey,
-                                            'thumbnail_url': thumbnailURL,
+                                            'snippet_key': this.$target[0].dataset.snippet,
+                                            'used_for': this.get_used_for(),
                                             'context': context,
                                         },
                                     });

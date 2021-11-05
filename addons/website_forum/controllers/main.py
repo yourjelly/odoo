@@ -260,6 +260,7 @@ class WebsiteForum(WebsiteProfile):
             'filters': filters,
             'reversed': reversed,
         })
+        import pudb; pudb.set_trace()
         if (request.httprequest.referrer or "").startswith(request.httprequest.url_root):
             values['back_button_url'] = request.httprequest.referrer
 

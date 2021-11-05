@@ -9,15 +9,19 @@
             <span>Theme</span>
         </button>
     </xpath>
-    <xpath expr="//t[@id='default_snippets']" position="replace">
-        <t id="default_snippets">
-            <t t-set="cta_btn_text" t-value="False"/>
-            <t t-set="cta_btn_href">/contactus</t>
-
-            <div id="snippet_structure" class="o_panel">
+    <!-- <xpath expr="//t[@id='o_scroll']" position="inside">
+        <t t-set="cta_btn_text" t-value="False"/>
+        <t t-set="cta_btn_href">/contactus</t>
+    </xpath> -->
+    <xpath expr="//t[@t-set='used_for']" position="replace">
+        <t t-set="used_for" t-valuef="website_builder"/>
+    </xpath>
+            <!-- call method python instead of search? -->
+            
+            <!-- <div id="snippet_structure" class="o_panel">
                 <div class="o_panel_header">Structure</div>
-                <div class="o_panel_body">
-                    <t t-snippet="website.s_banner" t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg">
+                <div class="o_panel_body"> -->
+                    <!-- <t t-snippet="website.s_banner" t-thumbnail="/website/static/src/img/snippets_thumbs/s_banner.svg">
                         <keywords>hero, jumbotron</keywords>
                     </t>
                     <t t-snippet="website.s_cover" t-thumbnail="/website/static/src/img/snippets_thumbs/s_cover.svg">
@@ -28,8 +32,11 @@
                     </t>
                     <t t-snippet="website.s_image_text" t-thumbnail="/website/static/src/img/snippets_thumbs/s_image_text.svg">
                         <keywords>content</keywords>
-                    </t>
-                    <t t-snippet="website.s_title" t-thumbnail="/website/static/src/img/snippets_thumbs/s_title.svg">
+                    </t> -->
+                    
+                    
+                    
+                    <!-- <t t-snippet="website.s_title" t-thumbnail="/website/static/src/img/snippets_thumbs/s_title.svg">
                         <keywords>heading, h1</keywords>
                     </t>
                     <t t-snippet="website.s_text_block" t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_block.svg">
@@ -157,14 +164,15 @@
                 </div>
             </div>
         </t>
-    </xpath>
+    </xpath> -->
 
     <xpath expr="//div[@id='snippet_options']/t" position="attributes">
         <attribute name="t-call">website.snippet_options</attribute>
     </xpath>
 </template>
 
-<template id="external_snippets" inherit_id="website.snippets" priority="8">
+<!-- TODO Quid des t-install ? -->
+<!-- <template id="external_snippets" inherit_id="website.snippets" priority="8">
     <xpath expr="//div[@id='snippet_effect']//t[@t-snippet][last()]" position="after">
         <t id="newsletter_popup_snippet" t-install="mass_mailing" string="Newsletter Popup" t-thumbnail="/website/static/src/img/snippets_thumbs/newsletter_subscribe_popup.svg"/>
         <t t-install="website_mail_group" string="Discussion Group" t-thumbnail="/website/static/src/img/snippets_thumbs/s_group.svg"/>
@@ -175,7 +183,7 @@
         <t id="newsletter_snippet" t-install="mass_mailing" string="Newsletter" t-thumbnail="/website/static/src/img/snippets_thumbs/s_newsletter_subscribe_form.svg"/>
         <t t-install="website_payment" string="Donation Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
     </xpath>
-</template>
+</template> -->
 
 <template id="snippet_options_background_options" inherit_id="web_editor.snippet_options_background_options">
     <xpath expr="//we-button[@data-toggle-bg-image]" position="after">
