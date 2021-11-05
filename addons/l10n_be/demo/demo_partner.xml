@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_be_01_iban" model="res.partner.bank">
+        <field name="acc_number">BE81 8979 6289 4224</field>
+        <field name="acc_type">iban</field>
+        <field name="company_id" ref="demo_company_be"/>
+        <field name="partner_id" ref="partner_demo_company_be"/>
+        <field name="bank_id" ref="base.bank_ing"/>
+    </record>
+
+    <record id="res_partner_be_01" model="res.partner">
+        <field name="name">Le Roi du Bureau</field>
+        <field name="category_id" eval="[(6, 0, [ref('base.res_partner_category_11')])]"/>
+        <field name="is_company">1</field>
+        <field name="street">371 Route de Lennik</field>
+        <field name="city">Anderlecht</field>
+        <field name="zip">1070</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="bank_ids" eval="[(6, 0, [ref('res_partner_be_01_iban')])]"/>
+    </record>
+</odoo>

@@ -31,4 +31,20 @@
         <value eval="[ref('l10n_be.l10nbe_chart_template')]"/>
         <value model="res.company" eval="obj().env.ref('l10n_be.demo_company_be')"/>
     </function>
+
+    <record id="demo_company_be_iban" model="res.partner.bank">
+        <field name="acc_number">BE44 7359 2299 9545</field>
+        <field name="acc_type">iban</field>
+        <field name="company_id" ref="demo_company_be"/>
+        <field name="partner_id" ref="partner_demo_company_be"/>
+        <field name="bank_id" ref="base.bank_bnp"/>
+    </record>
+
+    <function model="account.journal" name="write">
+        <value model="account.journal" search="[
+            ('name', '=', 'Bank'),
+            ('company_id', '=', ref('demo_company_be'))
+        ]"/>
+        <value eval="{'bank_account_id': ref('demo_company_be_iban')}"/>
+    </function>
 </odoo>

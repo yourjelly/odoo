@@ -59,6 +59,7 @@ Wizards provided by this module:
     'demo': [
         'demo/l10n_be_demo.xml',
         'demo/demo_company.xml',
+        'demo/demo_partner.xml',
     ],
     'post_init_hook': 'load_translations',
     'license': 'LGPL-3',
