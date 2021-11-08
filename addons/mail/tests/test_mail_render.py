@@ -53,6 +53,13 @@ class TestMailRender(common.MailCommon):
 </p>"""
         ]
 
+        # some templates with local links to replace (see _replace_local_links)
+        cls.base_local_links_template_bits = [
+            '<div style="background-image:url(/web/path?a=a&b=b);"/>',
+            '<div style="background-image:url(\'/web/path?a=a&b=b\');"/>',
+            '<div style="background-image:url(&#34;/web/path?a=a&b=b&#34;);"/>',
+        ]
+
         # some qweb templates, their views and their xml ids
         cls.base_qweb_bits = [
             '<p>Hello</p>',
@@ -100,6 +107,11 @@ class TestMailRender(common.MailCommon):
             """<p>
     <span>Autre Narrateur</span>
 </p>"""
+        ]
+        cls.base_rendered_local_links = [
+            '<div style="background-image:url(https://www.example.com/web/path?a=a&b=b);"/>',
+            '<div style="background-image:url(\'https://www.example.com/web/path?a=a&b=b\');"/>',
+            '<div style="background-image:url(&#34;/web/path?a=a&b=b&#34;);"/>'
         ]
 
         # link to mail template
@@ -208,6 +220,15 @@ class TestMailRender(common.MailCommon):
                 partner.ids,
                 engine='inline_template',
             )[partner.id]
+            self.assertEqual(rendered, expected)
+
+    @users('employee')
+    def test_render_template_local_links(self):
+        for source, expected in zip(self.base_local_links_template_bits, self.base_rendered_local_links):
+            rendered = self.env['mail.render.mixin']._replace_local_links(
+                source,
+                'https://www.example.com',
+            )
             self.assertEqual(rendered, expected)
 
     @users('employee')
