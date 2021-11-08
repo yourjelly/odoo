@@ -9,8 +9,8 @@ class PaymentWizard(models.TransientModel):
     _description = 'Payment acquire onboarding wizard'
 
     payment_method = fields.Selection([
-        ('paypal', "PayPal"),
         ('stripe', "Credit card (via Stripe)"),
+        ('paypal', "PayPal"),
         ('other', "Other payment acquirer"),
         ('manual', "Custom payment instructions"),
     ], string="Payment Method", default=lambda self: self._get_default_payment_acquirer_onboarding_value('payment_method'))
@@ -115,35 +115,11 @@ class PaymentWizard(models.TransientModel):
             new_env = api.Environment(self.env.cr, self.env.uid, self.env.context)
 
             if self.payment_method == 'paypal':
-                new_env.ref('payment.payment_acquirer_paypal').write({
-                    'paypal_email_account': self.paypal_email_account,
-                    'paypal_seller_account': self.paypal_seller_account,
-                    'paypal_pdt_token': self.paypal_pdt_token,
-                    'state': 'enabled',
-                })
+                self._init_paypal(new_env)
             if self.payment_method == 'stripe':
-                new_env.ref('payment.payment_acquirer_stripe').write({
-                    'stripe_secret_key': self.stripe_secret_key,
-                    'stripe_publishable_key': self.stripe_publishable_key,
-                    'state': 'enabled',
-                })
+                self._init_stripe(new_env)
             if self.payment_method == 'manual':
-                manual_acquirer = self._get_manual_payment_acquirer(new_env)
-                if not manual_acquirer:
-                    raise UserError(_(
-                        'No manual payment method could be found for this company. '
-                        'Please create one from the Payment Acquirer menu.'
-                    ))
-                manual_acquirer.name = self.manual_name
-                manual_acquirer.pending_msg = self.manual_post_msg
-                manual_acquirer.state = 'enabled'
-
-                journal = manual_acquirer.journal_id
-                if journal:
-                    journal.name = self.journal_name
-                    journal.bank_acc_number = self.acc_number
-                else:
-                    raise UserError(_("You have to set a journal for your payment acquirer %s.", self.manual_name))
+                self._init_manual(new_env)
 
             # delete wizard data immediately to get rid of residual credentials
             self.sudo().unlink()
@@ -158,3 +134,36 @@ class PaymentWizard(models.TransientModel):
         self._set_payment_acquirer_onboarding_step_done()
         action = self.env["ir.actions.actions"]._for_xml_id("payment.action_payment_acquirer")
         return action
+
+    def _init_paypal(self, env):
+        env.ref('payment.payment_acquirer_paypal').write({
+            'paypal_email_account': self.paypal_email_account,
+            'paypal_seller_account': self.paypal_seller_account,
+            'paypal_pdt_token': self.paypal_pdt_token,
+            'state': 'enabled',
+        })
+
+    def _init_stripe(self, env):
+        env.ref('payment.payment_acquirer_stripe').write({
+            'stripe_secret_key': self.stripe_secret_key,
+            'stripe_publishable_key': self.stripe_publishable_key,
+            'state': 'enabled',
+        })
+
+    def _init_manual(self, env):
+        manual_acquirer = self._get_manual_payment_acquirer(env)
+        if not manual_acquirer:
+            raise UserError(_(
+                'No manual payment method could be found for this company. '
+                'Please create one from the Payment Acquirer menu.'
+            ))
+        manual_acquirer.name = self.manual_name
+        manual_acquirer.pending_msg = self.manual_post_msg
+        manual_acquirer.state = 'enabled'
+
+        journal = manual_acquirer.journal_id
+        if journal:
+            journal.name = self.journal_name
+            journal.bank_acc_number = self.acc_number
+        else:
+            raise UserError(_("You have to set a journal for your payment acquirer %s.", self.manual_name))

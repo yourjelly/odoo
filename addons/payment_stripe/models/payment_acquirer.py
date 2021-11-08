@@ -44,8 +44,9 @@ class PaymentAcquirer(models.Model):
 
         url = urls.url_join('https://api.stripe.com/v1/', endpoint)
         headers = {
-            'AUTHORIZATION': f'Bearer {self.stripe_secret_key}',
+            'AUTHORIZATION': f'Bearer {self._get_stripe_secret_key()}',
             'Stripe-Version': '2019-05-16',  # SetupIntent needs a specific version
+            **self._additional_header(endpoint),
         }
         try:
             response = requests.request(method, url, data=payload, headers=headers, timeout=60)
@@ -78,3 +79,9 @@ class PaymentAcquirer(models.Model):
         if self.provider != 'stripe':
             return super()._get_default_payment_method_id()
         return self.env.ref('payment_stripe.payment_method_stripe').id
+
+    def _get_stripe_secret_key(self):
+        return self.stripe_secret_key
+
+    def _additional_header(self, endpoint):
+        return {}
