@@ -23,7 +23,7 @@ class TestPdf(TransactionCase):
 
         pdf_writer = pdf.PdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
+        self._add_attachment(pdf_writer, 'test_attachment.txt', b'My awesome attachment')
 
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 1)
@@ -35,11 +35,11 @@ class TestPdf(TransactionCase):
         pdf_writer = pdf.OdooPdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
 
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
+        self._add_attachment(pdf_writer, 'test_attachment.txt', b'My awesome attachment')
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 1)
 
-        pdf_writer.addAttachment('another_attachment.txt', b'My awesome OTHER attachment')
+        self._add_attachment(pdf_writer, 'another_attachment.txt', b'My awesome OTHER attachment')
         attachments = list(self.minimal_pdf_reader.getAttachments())
         self.assertEqual(len(attachments), 2)
 
@@ -47,8 +47,8 @@ class TestPdf(TransactionCase):
         pdf_writer = pdf.OdooPdfFileWriter()
         pdf_writer.cloneReaderDocumentRoot(self.minimal_pdf_reader)
 
-        pdf_writer.addAttachment('test_attachment.txt', b'My awesome attachment')
-        pdf_writer.addAttachment('another_attachment.txt', b'My awesome OTHER attachment')
+        self._add_attachment(pdf_writer, 'test_attachment.txt', b'My awesome attachment')
+        self._add_attachment(pdf_writer, 'another_attachment.txt', b'My awesome OTHER attachment')
 
         pdf_writer.encrypt("", "foo")
 
@@ -92,3 +92,14 @@ class TestPdf(TransactionCase):
     def tearDown(self):
         super().tearDown()
         self.minimal_reader_buffer.close()
+
+    def _add_attachment(self, pdf_writer, fname, fdata):
+        """
+        The odoo pdf writer append the attachment for "real" when calling write, not at the moment we use addAttachment.
+        In a real situation you would only call write once, but for testing purpose we'll do it every time we add a new
+        attachment.
+        """
+        pdf_writer.addAttachment(fname, fdata)
+        stream = io.BytesIO()
+        pdf_writer.write(stream)
+        stream.close()

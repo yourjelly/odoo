@@ -7,6 +7,7 @@ from odoo.osv import expression
 from odoo.tools import html_escape
 
 from lxml import etree
+from ast import literal_eval
 import base64
 import io
 import logging
@@ -105,6 +106,22 @@ class AccountEdiFormat(models.Model):
         # TO OVERRIDE
         return False
 
+    def _get_metadata_to_embed(self, invoice):
+        """ Return eventual metadata to append to the PDF if needed by the edi.
+
+        :returns: A byte-like object containing the metadata to append to the PDF.
+        """
+        # TO OVERRIDE
+        return False
+
+    def _is_pdfa_comformity_needed(self):
+        """ Indicate if the EDI must have a PDF/A compliant PDF.
+
+        :returns: True if the documents must be PDF/A, False otherwise.
+        """
+        # TO OVERRIDE
+        return False
+
     def _get_embedding_to_invoice_pdf_values(self, invoice):
         """ Get the values to embed to pdf.
 
@@ -117,7 +134,7 @@ class AccountEdiFormat(models.Model):
         if not attachment or not self._is_embedding_to_invoice_pdf_needed():
             return False
         datas = base64.b64decode(attachment.with_context(bin_size=False).datas)
-        return {'name': attachment.name, 'datas': datas}
+        return {'name': attachment.name, 'datas': datas, 'subtype': attachment.mimetype}
 
     def _support_batching(self, move, state, company):
         """ Indicate if we can send multiple documents in the same time to the web services.
@@ -296,10 +313,12 @@ class AccountEdiFormat(models.Model):
         :returns: the same pdf_content with the EDI of the invoice embed in it.
         """
         attachments = []
+        metadata = False
         for edi_format in self.filtered(lambda edi_format: edi_format._is_embedding_to_invoice_pdf_needed()):
             attach = edi_format._get_embedding_to_invoice_pdf_values(invoice)
             if attach:
                 attachments.append(attach)
+            metadata = edi_format._get_metadata_to_embed(invoice)
 
         if attachments:
             # Add the attachments to the pdf file
@@ -308,7 +327,12 @@ class AccountEdiFormat(models.Model):
             writer = OdooPdfFileWriter()
             writer.cloneReaderDocumentRoot(reader)
             for vals in attachments:
-                writer.addAttachment(vals['name'], vals['datas'])
+                writer.addAttachment(vals['name'], vals['datas'], vals['subtype'])
+            if (self._is_pdfa_comformity_needed()
+                    and literal_eval(self.env['ir.config_parameter'].sudo().get_param('edi.use_pdfa', 'False'))):
+                writer.enable_pdfa()
+            if metadata:
+                writer.add_file_metadata(metadata)
             buffer = io.BytesIO()
             writer.write(buffer)
             pdf_content = buffer.getvalue()

@@ -39,11 +39,28 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         return True if self.code == 'facturx_1_0_05' else super()._is_embedding_to_invoice_pdf_needed()
 
+    def _is_pdfa_comformity_needed(self):
+        self.ensure_one()
+        return True if self.code == 'facturx_1_0_05' else super()._is_embedding_to_invoice_pdf_needed()
+
     def _get_embedding_to_invoice_pdf_values(self, invoice):
         values = super()._get_embedding_to_invoice_pdf_values(invoice)
         if values and self.code == 'facturx_1_0_05':
             values['name'] = 'factur-x.xml'
         return values
+
+    def _get_metadata_to_embed(self, invoice):
+        if self.code != 'facturx_1_0_05':
+            return super()._get_metadata_to_embed(invoice)
+
+        metadata_content = self.env.ref('account_edi_facturx.account_invoice_pdfa_3_facturx_metadata')._render({
+            'title': invoice.name,
+            'date': fields.Date.context_today(self),
+        })
+        header = markupsafe.Markup("""<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>""")
+        footer = markupsafe.Markup("""<?xpacket end="w"?>""")
+        metadata = "%s%s%s" % (header, metadata_content, footer)
+        return metadata.encode()
 
     def _export_facturx(self, invoice):
 
@@ -72,7 +89,7 @@ class AccountEdiFormat(models.Model):
         return self.env['ir.attachment'].create({
             'name': xml_name,
             'raw': xml_content.encode(),
-            'mimetype': 'application/xml'
+            'mimetype': '/text#2Fxml'
         })
 
     def _is_facturx(self, filename, tree):
