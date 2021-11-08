@@ -765,6 +765,52 @@ function normalizeRem($editable) {
 }
 
 /**
+ * Takes the url of an image and return its average rgb as css style ready
+ * string.
+ *
+ * @param {string} imageUrl
+ * @returns {string}
+ */
+function _getAverageRgb(imageUrl) {
+    const context = document.createElement('canvas').getContext('2d');
+    const image = document.createElement('img');
+    image.setAttribute('src', imageUrl);
+    context.drawImage(image, 0, 0, 1, 1);
+    const rgbValues = context.getImageData(0, 0, 1, 1).data.slice(0,3);
+    return `rgb(${rgbValues.join(', ')})`;
+}
+
+const reBackgroundImageUrl = /url\(?["']([^\)]*)?["']\)/;
+/**
+ * Adds VML for Microsoft Outlook and Office 365 for desktop to display
+ * background images, with a fallback on a simple background color (the average
+ * color of the image) for Windows 10 Mail.
+ *
+ * @see https://www.litmus.com/blog/the-ultimate-guide-to-background-images-in-email/
+ * @param {JQuery} $editable
+ */
+function convertBgImages($editable) {
+    for (const node of $editable.find('[style*="background-image"]')) {
+        const $node = $(node);
+        const imageUrl = node.style.backgroundImage.match(reBackgroundImageUrl)[1];
+        const rgb = _getAverageRgb(imageUrl);
+        $node.prepend(`
+            <!--[if gte mso 9]>
+                <v:rect xmlns_v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="background-color: ${rgb}">
+                <v:fill type="frame" src="${imageUrl}" />
+                <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
+            <![endif]-->
+        `);
+        $node.append(`
+            <!--[if gte mso 9]>
+                </v:textbox>
+                </v:rect>
+            <![endif]-->
+        `);
+    }
+}
+
+/**
  * Converts css display for attachment link to real image.
  * Without this post process, the display depends on the css and the picture
  * does not appear when we use the html without css (to send by email for e.g.)
@@ -830,6 +876,7 @@ FieldHtml.include({
         listGroupToTable($editable);
         addTables($editable);
         formatTables($editable);
+        convertBgImages($editable);
         normalizeColors($editable);
         normalizeRem($editable);
 
@@ -857,6 +904,7 @@ export default {
     addTables: addTables,
     formatTables: formatTables,
     classToStyle: classToStyle,
+    convertBgImages: convertBgImages,
     normalizeColors: normalizeColors,
     normalizeRem: normalizeRem,
     attachmentThumbnailToLinkImg: attachmentThumbnailToLinkImg,

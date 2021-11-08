@@ -90,6 +90,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
             convertInline.listGroupToTable($editable);
             convertInline.addTables($editable);
             convertInline.formatTables($editable);
+            convertInline.convertBgImages($editable);
             convertInline.normalizeColors($editable);
             convertInline.normalizeRem($editable);
 
