@@ -3,10 +3,8 @@ odoo.define('odoo_payments.account_views', require => {
 
     const core = require('web.core');
     const framework = require('web.framework');
-    const session = require('web.session');
     const Dialog = require('web.Dialog');
     const FormController = require('web.FormController');
-    const FormRenderer = require('web.FormRenderer');
     const FormView = require('web.FormView');
     const viewRegistry = require('web.view_registry');
 
@@ -55,12 +53,10 @@ odoo.define('odoo_payments.account_views', require => {
                             {
                                 text: _t("Create"),
                                 classes: 'btn-primary o_odoo_payments_create_account_button',
-                                close: true,
                                 disabled: true, // Require accepting the terms and restrictions
                                 click: async () => {
                                     framework.blockUI();
                                     await _super(); // Create the account
-                                    // session.odoo_payments_in_creation_flow = true;
                                     await this._submitCreationForm();
                                 },
                             },
@@ -109,36 +105,9 @@ odoo.define('odoo_payments.account_views', require => {
         },
     });
 
-    // const AdyenAccountFormRenderer = FormRenderer.extend({
-    //
-    //     /**
-    //      * Find the redirect button banner and hide it.
-    //      *
-    //      * This is only done once when the account is created to hide the banner behind the blockUI
-    //      * and prevent flickering in the background. After that, the banner must always be shown if
-    //      * the account creation flow went wrong.
-    //      *
-    //      * @private
-    //      * @return {undefined}
-    //      */
-    //     _hideRedirectButtonBanner: () => this.$(
-    //         'div[name="o_odoo_payments_redirect_button_widget"]'
-    //     ).addClass('d-none'),
-    //
-    //     _renderView: function () {
-    //         console.log("test");
-    //         console.log(session.odoo_payments_in_creation_flow);
-    //         this._super(...arguments);
-    //         this._hideRedirectButtonBanner();
-    //         return Promise.resolve();
-    //     },
-    //
-    // });
-
     const AdyenAccountFormView = FormView.extend({
         config: _.extend({}, FormView.prototype.config, {
             Controller: AdyenAccountFormController,
-            // Renderer: AdyenAccountFormRenderer,
         }),
     });
 
