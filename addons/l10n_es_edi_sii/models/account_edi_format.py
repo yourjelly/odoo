@@ -438,11 +438,11 @@ class AccountEdiFormat(models.Model):
                 'test_url': 'https://pruebas-sii.araba.eus/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
             }
 
-        def _l10n_es_edi_web_service_navarra_vals(self, invoices):
-            return {
-                'url': "https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandle",
-                'test_url': "https://siihacienda.navarra.es/SII_PRUEBAS.proxy/SiiMensajesXsdHandle"
-            }
+    def _l10n_es_edi_web_service_navarra_vals(self, invoices):
+        return {
+            'prod_url': "https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandle.ashx",
+            'test_url': "https://siihacienda.navarra.es/SII_PRUEBAS.proxy/SiiMensajesXsdHandle.ashx"
+        }
 
     def _l10n_es_edi_call_web_service_sign(self, invoices, info_list):
         company = invoices.company_id
@@ -474,6 +474,8 @@ class AccountEdiFormat(models.Model):
         session.mount('https://', PatchedHTTPAdapter())
 
         transport = Transport(operation_timeout=60, timeout=60, session=session)
+        if not connection_vals.get('url'):
+            connection_vals['url'] = self._l10n_es_edi_web_service_aeat_vals(invoices)['url']
         client = zeep.Client(connection_vals['url'], transport=transport)
 
         if invoices[0].is_sale_document():
@@ -487,7 +489,8 @@ class AccountEdiFormat(models.Model):
         serv = client.bind('siiService', service_name)
         if company.l10n_es_edi_test_env and connection_vals.get('test_url'):
             serv._binding_options['address'] = connection_vals['test_url']
-
+        if connection_vals.get('prod_url'):
+            serv._binding_options['address'] = connection_vals['prod_url']
         msg = ''
         try:
             if invoices[0].is_sale_document():
