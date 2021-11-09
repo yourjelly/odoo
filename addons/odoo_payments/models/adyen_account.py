@@ -700,12 +700,12 @@ class AdyenAccount(models.Model):
                     'lastName': self.last_name,
                 },
                 'personalData': {
-                    'dateOfBirth': self.date_of_birth,
+                    'dateOfBirth': str(self.date_of_birth),
                     'documentData': [
                         {
                             'number': self.document_number,
                             'type': self.document_type,
-                            }
+                        }
                     ] if self.document_number else [],
                 }
             }
