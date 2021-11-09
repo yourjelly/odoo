@@ -804,13 +804,17 @@ class AdyenAccount(models.Model):
             }
             auth = AdyenProxyAuth(self)
 
+        request_url = url_join(url, operation)
+
+        _logger.info("Sending data to %s:\n%s", request_url, pformat(params))
+
         payload = {
             'jsonrpc': '2.0',
             'params': params,
         }
         try:
             response = requests.post(
-                url_join(url, operation), json=payload, auth=auth, timeout=6000)  # TODO timeout=60
+                request_url, json=payload, auth=auth, timeout=6000)  # TODO timeout=60
             response.raise_for_status()
         except requests.exceptions.Timeout:
             raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
