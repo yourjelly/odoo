@@ -489,7 +489,7 @@ class AccountEdiFormat(models.Model):
         serv = client.bind('siiService', service_name)
         if company.l10n_es_edi_test_env and connection_vals.get('test_url'):
             serv._binding_options['address'] = connection_vals['test_url']
-        if connection_vals.get('prod_url'):
+        if not company.l10n_es_edi_test_env and connection_vals.get('prod_url'):
             serv._binding_options['address'] = connection_vals['prod_url']
         msg = ''
         try:
