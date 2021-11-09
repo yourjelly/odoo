@@ -83,22 +83,36 @@
 
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
     <xpath expr="//*[@t-set='so_snippet_addition_selector']" position="inside">, .o_newsletter_popup</xpath>
-    <xpath expr="//div" position="after">
-        <t t-set="selector" t-value="'.js_subscribe'"/>
-        <div data-js="mailing_list_subscribe"
-            t-att-data-selector="selector">
-            <we-select string="Newsletter" data-attribute-name="listId"></we-select>
-        </div>
-        <div data-js="recaptchaSubscribe"
-            t-att-data-selector="selector">
-            <t t-set="recaptcha_public_key" t-value="request.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')"/>
-            <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
-        </div>
-        <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
+    <xpath expr="//div[last()]" position="after">
+        <t t-call="website_mass_mailing.newsletter_subscribe_options_common">
+            <t t-set="_selector" t-value="'.js_subscribe'"/>
+            <t t-set="_exclude" t-value="'.s_newsletter_block .js_subscribe, .o_newsletter_popup .js_subscribe'"/>
+        </t>
+        <t t-call="website_mass_mailing.newsletter_subscribe_options_common">
+            <t t-set="_selector" t-value="'.s_newsletter_block, .o_newsletter_popup'"/>
+            <t t-set="_target" t-value="'.js_subscribe'"/>
+        </t>
+        <div data-selector=".js_subscribe" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
     </xpath>
     <xpath expr="//div[@data-js='anchor']" position="attributes">
         <attribute name="data-exclude" add=".o_newsletter_popup" separator=","/>
     </xpath>
+</template>
+
+<template id="newsletter_subscribe_options_common">
+    <div data-js="mailing_list_subscribe"
+         t-att-data-selector="_selector"
+         t-att-data-exclude="_exclude"
+         t-att-data-target="_target">
+        <we-select string="Newsletter" data-attribute-name="listId"></we-select>
+    </div>
+    <div data-js="recaptchaSubscribe"
+         t-att-data-selector="_selector"
+         t-att-data-exclude="_exclude"
+         t-att-data-target="_target">
+        <t t-set="recaptcha_public_key" t-value="request.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')"/>
+        <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
+    </div>
 </template>
 
 <!-- Extend default mass_mailing snippets with website feature -->
