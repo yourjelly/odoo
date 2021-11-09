@@ -10,7 +10,7 @@ from datetime import date, datetime, time
 import io
 from PIL import Image
 import psycopg2
-
+from pprint import pprint
 from odoo import models, fields, Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -18,8 +18,10 @@ from odoo.tests import common
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
 from odoo.tools.image import image_data_uri
+from odoo.tools.misc import OrderedSet
 
 
+@common.tagged('post_install', '-at_install')
 class TestFields(TransactionCaseWithUserDemo):
 
     def setUp(self):
@@ -34,6 +36,135 @@ class TestFields(TransactionCaseWithUserDemo):
         # self.env.ref('test_new_api.discussion_0').with_context(active_test=False).participants -> 2 users
         self.env.ref('test_new_api.message_0_1').write({'author': self.user_demo.id})
 
+    def test_recursive_fields_trigger(self):
+        """
+            triggers of recursive field must not contains recursion
+            in this case, we don't expect a 
+            `test_new_api.recursive.tree.children_ids: {None: OrderedSet([test_new_api.recursive.tree.display_name])}}`
+            in the triggers of `test_new_api.recursive.tree.name`
+        """
+        example_field = self.env['test_new_api.recursive.tree']._fields['name']
+        trigger_field = self.env['test_new_api.recursive.tree']._fields['display_name']
+        triggers = self.env.registry.field_triggers[example_field]
+        self.assertEqual(triggers, {None: OrderedSet([trigger_field])})
+
+    def test_new_triggers(self):
+        """
+        recursive field: 
+            ir.ui.menu.complete_name
+            ir.rule.global
+            res.partner.display_name
+            res.partner.commercial_partner_id
+            res.partner.commercial_partner_id
+            res.groups.rule_groups
+            res.groups.trans_implied_ids
+            res.partner.commercial_partner_id
+            res.partner.commercial_partner_id
+            test_new_api.category.display_name
+            test_new_api.recursive.full_name
+            test_new_api.recursive.display_name
+            test_new_api.recursive.tree.display_name
+
+        """
+        env = self.env
+        def get_field(name):
+            model_name, field_name = name.rsplit('.', 1)
+            return env[model_name]._fields[field_name]
+        
+        def get_fields(*names):
+            return tuple([get_field(n) for n in names])
+  
+        triggers = env.registry.field_triggers
+      
+        if True:
+            import timeit
+            #field = get_field('ir.ui.view.arch')
+            #field = get_field('res.country.address_format')
+            ##field = get_field('res.partner.contact_address')
+            ##field = get_field('test_new_api.recursive.full_name')
+            #field = get_field('res.partner.membership_state')
+            field = get_field('ir.ui.menu.name')
+            #field = get_field('account.asset.value_residual')
+            field = get_field('test_new_api.recursive.display_name')
+
+            from odoo.modules import registry as r
+            #dependencies = r._dependencies(env.registry)
+            #dependencies[get_field('test_new_api.recursive.display_name')]) 
+            # OrderedSet([
+            #   get_fields(test_new_api.recursive.name),
+            #   get_fields(test_new_api.recursive.parent),
+            #   get_fields(test_new_api.recursive.parent, test_new_api.recursive.display_name)
+            # ])
+            dependencies = {}
+            dependencies[get_field('test_new_api.recursive.display_name')] = OrderedSet([
+                #get_fields('test_new_api.recursive.name'),
+                get_fields('test_new_api.recursive.parent'),
+                get_fields('test_new_api.recursive.parent', 'test_new_api.recursive.display_name')
+            ])
+            print('Dependencies:')
+            pprint(dependencies)
+            print('Triggers:')
+            triggers = r._triggers(dependencies)
+            pprint(r._triggers(dependencies))
+            print()
+
+            print('++++++++ _transitive_dependencies display_name:')
+            pprint(list(r._transitive_dependencies(get_field('test_new_api.recursive.display_name'), dependencies)))
+
+            print('******** _transitive_triggers name:')
+            name_transitive_triggers = list(r._transitive_triggers(get_field('test_new_api.recursive.name'), triggers))
+            pprint(name_transitive_triggers)
+            # self.assertEqual(name_transitive_triggers,[get_fields('test_new_api.recursive.display_name')])
+            # NOTE: we dont expect   (test_new_api.recursive.parent, test_new_api.recursive.display_name) here
+
+            print()
+            print('******** _transitive_dependencies name:')
+            pprint(list(r._transitive_dependencies(get_field('test_new_api.recursive.name'), dependencies)))
+            print('++++++++ _transitive_triggers display_name:')
+            pprint(list(r._transitive_triggers(get_field('test_new_api.recursive.display_name'), triggers)))
+
+
+            print()
+
+            old = r._field_triggers(dependencies)
+            new = r._field_triggers2(r._triggers(dependencies))
+            print('Field triggers original')
+            pprint(old)
+            print('Field triggers new:')
+            pprint(new)
+            self.assertEqual(old, new)
+
+            return
+            ##print('resolve_depends', list(get_field('res.users.contact_address').resolve_depends(env.registry)))
+            ##pprint.pprint(base_triggers[get_field('res.users.partner_id')])
+            #print('base_triggers', base_triggers[field])
+            print(field)
+            print('_'*100)
+            pprint.pprint(triggers[field])
+            print('+'*100)
+            pprint.pprint(env.registry.field_triggers2([field])[field])
+            print('='*100)
+
+        else:
+            new_triggers = env.registry.field_triggers2()
+            count = 0
+            failure = 0
+            for field in triggers:
+                count += 1
+                if triggers[field] != new_triggers[field]:
+                    print('#######################################')
+                    print(field)
+                    print('________________')
+                    pprint.pprint(triggers[field])
+                    print('________________')
+                    pprint.pprint(new_triggers[field])
+                    failure += 1
+            self.assertEqual(count-failure, count)
+
+    def test_relational_simplification(self):
+        # todo (res.partner.membership_state)
+        pass
+    
     def test_00_basics(self):
         """ test accessing new fields """
         # find a discussion

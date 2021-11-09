@@ -28,6 +28,99 @@ _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
 
 
+def concat(seq1, seq2):
+    if seq1 and seq2:
+        f1, f2 = seq1[-1], seq2[0]
+        if f1.type == 'one2many' and f2.type == 'many2one' and \
+                f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
+            #print(field)
+            #print(seq1, seq2)
+            return concat(seq1[:-1], seq2[1:])
+    return seq1 + seq2
+
+def _dependencies(registry):
+    dependencies = {}
+    _f = None
+    for Model in registry.models.values():
+        if Model._abstract:
+            continue
+        for field in Model._fields.values():
+            # dependencies of custom fields may not exist; ignore that case
+            exceptions = (Exception,) if field.base_field.manual else ()
+            with ignore(*exceptions):
+                dependencies[field] = OrderedSet(field.resolve_depends(registry))
+    return dependencies
+
+def _triggers(dependencies):
+    """
+    Returns a mapping dependency -> dependant field.
+    """
+    triggers = {}
+    for field, depends in dependencies.items():
+        for depends_path in depends:
+            depends_field = depends_path[-1]
+            depends_path = depends_path and tuple(reversed(depends_path[:-1]))
+            triggers.setdefault(depends_field, {})[field] = depends_path
+    return triggers
+
+def _transitive_dependencies(field, dependencies, seen=[]):
+    if field in seen:
+        return
+    for seq1 in dependencies.get(field, ()):
+        yield seq1
+        for seq2 in _transitive_dependencies(seq1[-1], dependencies, seen + [field]):
+            yield concat(seq1[:-1], seq2)
+
+def _field_triggers(dependencies):
+    # determine triggers based on transitive dependencies
+    triggers = {}
+    for field in dependencies:
+        for path in _transitive_dependencies(field, dependencies):
+            if path:
+                tree = triggers
+                for label in reversed(path):
+                    tree = tree.setdefault(label, {})
+                tree.setdefault(None, OrderedSet()).add(field)
+
+    return triggers
+
+def _transitive_triggers(field, triggers, seen=[]):
+    #print('seen', seen)
+    if field in seen:
+        return
+    #print(field, list(triggers.get(field, {}).items()))
+    for dependant_field, dependant_field_path in triggers.get(field, {}).items():
+        #print('yield', dependant_field_path, dependant_field)
+        if dependant_field_path and dependant_field_path[-1] in seen:
+            continue
+        yield concat(dependant_field_path, (dependant_field,))
+
+        #print('dependant_field', dependant_field)
+        for dependant_path in _transitive_triggers(dependant_field, triggers, seen + [field]):
+            yield concat(dependant_field_path, dependant_path)
+
+
+def _field_triggers2(triggers, fields=None):
+
+    # determine triggers based on transitive dependencies
+    triggers_tree = {}
+    for field in fields or triggers:
+        paths = list(_transitive_triggers(field, triggers))
+        #print('trigger:', field)
+        #print('transitive_triggers', paths)
+        for path in paths:
+            if path:
+                tree = triggers_tree
+                trigger = field
+                for dependant in path:
+                    tree = tree.setdefault(trigger, {})
+                    trigger = dependant
+                tree.setdefault(None, OrderedSet()).add(trigger)
+                #tree.setdefault(None, {})[trigger] = None
+
+    return triggers_tree
+
+
 class Registry(Mapping):
     """ Model registry for a particular database.
 
@@ -70,9 +163,13 @@ class Registry(Mapping):
     def new(cls, db_name, force_demo=False, status=None, update_module=False):
         """ Create and return a new registry for the given database name. """
         t0 = time.time()
+        from contextlib import nullcontext
+        if update_module:
+            p = odoo.tools.profiler.Profiler([odoo.tools.profiler.PeriodicCollector(0.1)], db=db_name)
+        else:
+            p = nullcontext()
         with cls._lock:
-          from contextlib import nullcontext
-          with odoo.tools.profiler.Profiler([odoo.tools.profiler.PeriodicCollector(0.1)], db=db_name) if update_module else nullcontext():
+          with p:
             registry = object.__new__(cls)
             registry.init(db_name)
 
@@ -328,95 +425,23 @@ class Registry(Mapping):
                                     model_name, ", ".join(field.name for field in fields))
         return computed
 
-    @lazy_property
-    def field_triggers(self):
-        # determine field dependencies
-        dependencies = {}
-        for Model in self.models.values():
-            if Model._abstract:
-                continue
-            for field in Model._fields.values():
-                # dependencies of custom fields may not exist; ignore that case
-                exceptions = (Exception,) if field.base_field.manual else ()
-                with ignore(*exceptions):
-                    dependencies[field] = OrderedSet(field.resolve_depends(self))
-
-        # determine transitive dependencies
-        def transitive_dependencies(field, seen=[]):
-            if field in seen:
-                return
-            for seq1 in dependencies.get(field, ()):
-                yield seq1
-                for seq2 in transitive_dependencies(seq1[-1], seen + [field]):
-                    yield concat(seq1[:-1], seq2)
-
+    def transitive_dependencies(self, field, dependencies, seen=[]):
         def concat(seq1, seq2):
             if seq1 and seq2:
                 f1, f2 = seq1[-1], seq2[0]
                 if f1.type == 'one2many' and f2.type == 'many2one' and \
                         f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
+                    #print(field)
+                    #print(seq1, seq2)
                     return concat(seq1[:-1], seq2[1:])
             return seq1 + seq2
 
-        # determine triggers based on transitive dependencies
-        triggers = {}
-        for field in dependencies:
-            for path in transitive_dependencies(field):
-                if path:
-                    tree = triggers
-                    for label in reversed(path):
-                        tree = tree.setdefault(label, {})
-                    tree.setdefault(None, OrderedSet()).add(field)
+    @lazy_property
+    def field_triggers(self):
+        return _field_triggers(_dependencies(self))
 
-        return triggers
-
-    def base_triggers(self):
-        triggers = {}
-        for Model in self.models.values():
-            if Model._abstract:
-                continue
-            for field in Model._fields.values():
-                # dependencies of custom fields may not exist; ignore that case
-                exceptions = (Exception,) if field.base_field.manual else ()
-                with ignore(*exceptions):
-                    depends = list(field.resolve_depends(self))
-                    for depends_path in depends:
-                        for depends_field in depends_path:
-                            triggers.setdefault(depends_field, OrderedSet()).add(field)
-        return triggers
-
-    def field_triggers2(self, fields=None):
-        # determine field dependencies
-        triggers = self.base_triggers()
-
-        def transitive_triggers(field, seen=[]):
-            if field in seen:
-                return
-            for dependant_field in triggers.get(field, ()):
-                yield (dependant_field,)
-                for dependant_paths in transitive_triggers(dependant_field, seen + [field]):
-                    yield concat(dependant_field, dependant_paths)
-
-        def concat(dependant_field, dependant_paths):
-            if dependant_field and dependant_paths:
-                f1, f2 = dependant_field, dependant_paths[0]
-                if f1.type == 'one2many' and f2.type == 'many2one' and \
-                        f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
-                    return concat(dependant_field, dependant_paths[1:])
-            return (dependant_field,) + dependant_paths
-
-        # determine triggers based on transitive dependencies
-        triggers_tree = {}
-        for field in fields or triggers:
-            for path in transitive_triggers(field):
-                if path:
-                    tree = triggers_tree
-                    for label in path:
-                        tree = tree.setdefault(label, {})
-                    tree.setdefault(None, OrderedSet()).add(field)
-                    #tree.setdefault(None, {})[field] = None
-
-        return triggers_tree
+    def field_triggers2(self, fields):
+        return _field_triggers2(_triggers(_dependencies(self)), fields)
 
     def post_init(self, func, *args, **kwargs):
         """ Register a function to call at the end of :meth:`~.init_models`. """
