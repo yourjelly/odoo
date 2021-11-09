@@ -30,6 +30,9 @@ ADYEN_SHARED_FIELDS = {
     'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
     'document_number', 'document_type',
 }
+ADYEN_SHARED_MODELS = {
+    'bank_account_ids', 'shareholder_ids'
+}
 _logger = logging.getLogger(__name__)
 
 
@@ -546,8 +549,13 @@ class AdyenAccount(models.Model):
         if len(self) > 1:
             raise UserError(_("Multi edit is not supported for Adyen Accounts"))
 
-        if vals.keys() & ADYEN_SHARED_FIELDS:
-            self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
+        modified_fields = vals.keys()
+        if modified_fields & ADYEN_SHARED_FIELDS or modified_fields & ADYEN_SHARED_MODELS:
+            response = self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
+
+            if modified_fields & ADYEN_SHARED_MODELS:
+                # FIXME ANVFE could be better if based on ACCOUNT_HOLDER_UPDATED notifications instead
+                self._handle_adyen_update_feedback(response)
 
         if 'payout_schedule' in vals and vals.get('payout_schedule') != self.payout_schedule:
             self._update_payout_schedule()
@@ -564,6 +572,10 @@ class AdyenAccount(models.Model):
             })
 
         return super().unlink()
+
+    def _handle_adyen_update_feedback(self, response):
+        self.bank_account_ids._handle_adyen_update_feedback(response)
+        self.shareholder_ids._handle_adyen_update_feedback(response)
 
     def _update_payout_schedule(self):
         self.ensure_one()

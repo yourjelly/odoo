@@ -49,47 +49,50 @@ class AdyenShareholder(models.Model):
         if not self:  # No shareholder is created yet
             return None  # Don't include the key in the payload
         else:
+            # TODO ANVFE not tested atm, shareholder flow is more complex (and later in the onboarding process)
             # Build an array of shareholder details for each existing shareholder
             return [
                 {
-                    # TODO
+                    # TODO fallback on None for falsy values
                     'address': {
-                        'city': None,
-                        'country': None,
-                        'houseNumberOrName': None,
-                        'postalCode': None,
-                        'stateOrProvince': None,
-                        'street': None,
+                        'city': shareholder.city,
+                        'country': shareholder.country_id.code,
+                        'houseNumberOrName': shareholder.house_number_or_name,
+                        'postalCode': shareholder.zip,
+                        'stateOrProvince': shareholder.state_id.code or None,
+                        'street': shareholder.street,
                     },
-                    'email': None,
-                    'fullPhoneNumber': None,
-                    'jobTitle': None,
+                    # 'email': None,
+                    # 'fullPhoneNumber': None,
+                    # 'jobTitle': None,
                     'name': {
-                        'firstName': None,
-                        'gender': None,
-                        'infix': None,
-                        'lastName': None,
+                        'firstName': shareholder.first_name,
+                        'gender': 'UNKNOWN',
+                        # 'infix': None,
+                        'lastName': shareholder.last_name,
                     },
                     'personalData': {
-                        'dateOfBirth': None,
-                        'documentData': {
-                            'expirationDate': None,
-                            'issuerCountry': None,
-                            'issuerState': None,
-                            'number': None,
-                            'type': None,
-                        },
-                        'nationality': None,
+                        'dateOfBirth': str(shareholder.date_of_birth),
+                        'documentData': [
+                            {
+                                # 'expirationDate': None,
+                                # 'issuerCountry': None,
+                                # 'issuerState': None,
+                                'number': shareholder.document_number,
+                                'type': shareholder.document_type,
+                            }
+                        ] if shareholder.document_number else []
+                        # 'nationality': None,
                     },
-                    'phoneNumber': {
-                        'phoneCountryCode': None,
-                        'phoneNumber': None,
-                        'phoneType': None,  # Landline/Mobile/SIP/Fax
-                    },
-                    'shareholderCode': None,
-                    'shareholderReference': None,
-                    'shareholderType': None,  # Owner/Controller
-                    'webAddress': None,
+                    # 'phoneNumber': {
+                    #     'phoneCountryCode': None,
+                    #     'phoneNumber': None,
+                    #     'phoneType': None,  # Landline/Mobile/SIP/Fax
+                    # },
+                    'shareholderCode': shareholder.shareholder_uuid or None,
+                    'shareholderReference': shareholder.shareholder_reference,
+                    # 'shareholderType': None,  # Owner/Controller
+                    # 'webAddress': None,
                 } for shareholder in self
             ]
 
@@ -108,30 +111,31 @@ class AdyenShareholder(models.Model):
         for adyen_shareholder in self:
             adyen_shareholder.full_name = f'{adyen_shareholder.first_name} {adyen_shareholder.last_name}'
 
-    @api.model
-    def create(self, values):
-        adyen_shareholder = super().create(values)
-        # TODO ANVFE retry mechanism ?
-        # To avoid blocking the update of the account locally ?
-        response = adyen_shareholder.adyen_account_id._adyen_rpc(
-            'v1/update_account_holder', self._format_data(values))
+    # @api.model
+    # def create(self, values):
+    #     adyen_shareholder = super().create(values)
+    #     # TODO ANVFE retry mechanism ?
+    #     # To avoid blocking the update of the account locally ?
+    #     response = adyen_shareholder.adyen_account_id._adyen_rpc(
+    #         'v1/update_account_holder', self._format_data(values))
 
-        shareholders = response['accountHolderDetails']['businessDetails']['shareholders']
-        created_shareholder = next(
-            shareholder
-            for shareholder in shareholders
-            if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
-        adyen_shareholder.with_context(update_from_adyen=True).write({
-            'shareholder_uuid': created_shareholder['shareholderCode'],
-        })
-        return adyen_shareholder
+    #     # FIXME ANVFE would be more consistent if based on ACCOUNT_HOLDER_UPDATED notifications
+    #     shareholders = response['accountHolderDetails']['businessDetails']['shareholders']
+    #     created_shareholder = next(
+    #         shareholder
+    #         for shareholder in shareholders
+    #         if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
+    #     adyen_shareholder.with_context(update_from_adyen=True).write({
+    #         'shareholder_uuid': created_shareholder['shareholderCode'],
+    #     })
+    #     return adyen_shareholder
 
-    def write(self, vals):
-        res = super().write(vals)
-        if not self.env.context.get('update_from_adyen'):
-            self.ensure_one()
-            self.adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(vals))
-        return res
+    # def write(self, vals):
+    #     res = super().write(vals)
+    #     if not self.env.context.get('update_from_adyen'):
+    #         self.ensure_one()
+    #         self.adyen_account_id._adyen_rpc('v1/update_account_holder', self._format_data(vals))
+    #     return res
 
     def unlink(self):
         self.check_access_rights('unlink')
@@ -143,6 +147,24 @@ class AdyenShareholder(models.Model):
                 'shareholderCodes': [shareholder.shareholder_uuid],
             })
         return super().unlink()
+
+    def _handle_adyen_update_feedback(self, response):
+        if not self:
+            return
+
+        shareholder_details = response['accountHolderDetails']['businessDetails']['shareholders']
+        for shareholder_data in shareholder_details:
+            shareholder = self.filtered(
+                lambda acc: acc.shareholder_reference == shareholder_data['shareholderReference'])
+
+            if not shareholder:
+                continue  # shouldn't happen, unless data was not properly synchronized between adyen and submerchant
+
+            uuid = shareholder_data['shareholderCode']
+            if shareholder.shareholder_uuid != uuid:
+                shareholder.with_context(update_from_adyen=True).write({
+                    'shareholder_uuid': uuid,
+                })
 
     def _upload_photo_id(self, document_type, content, filename):
         self.ensure_one()
@@ -159,51 +181,51 @@ class AdyenShareholder(models.Model):
             'documentContent': content.decode(),
         })
 
-    def _format_data(self, values):
-        """
+    # def _format_data(self, values):
+    #     """
 
-        :param dict values:
+    #     :param dict values:
 
-        :returns:
-        :rtype: dict
-        """
-        adyen_account = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
-        country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-        state = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('state_id') else self.state_id
-        data = {
-            'accountHolderCode': adyen_account.account_holder_code,
-            'accountHolderDetails': {
-                'businessDetails': {
-                    'shareholders': [{
-                        'shareholderCode': values.get('shareholder_uuid') or self.shareholder_uuid or None,
-                        'shareholderReference': values.get('shareholder_reference') or self.shareholder_reference,
-                        'address': {
-                            'city': values.get('city') or self.city,
-                            'country': country.code,
-                            'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
-                            'postalCode': values.get('zip') or self.zip,
-                            'stateOrProvince': state.code or None,
-                            'street': values.get('street') or self.street,
-                        },
-                        'name': {
-                            'firstName': values.get('first_name') or self.first_name,
-                            'lastName': values.get('last_name') or self.last_name,
-                            'gender': 'UNKNOWN'
-                        },
-                        'personalData': {
-                            'dateOfBirth': str(values.get('date_of_birth') or self.date_of_birth),
-                        }
-                    }]
-                }
-            }
-        }
+    #     :returns:
+    #     :rtype: dict
+    #     """
+    #     adyen_account = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
+    #     country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
+    #     state = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('state_id') else self.state_id
+    #     data = {
+    #         'accountHolderCode': adyen_account.account_holder_code,
+    #         'accountHolderDetails': {
+    #             'businessDetails': {
+    #                 'shareholders': [{
+    #                     'shareholderCode': values.get('shareholder_uuid') or self.shareholder_uuid or None,
+    #                     'shareholderReference': values.get('shareholder_reference') or self.shareholder_reference,
+    #                     'address': {
+    #                         'city': values.get('city') or self.city,
+    #                         'country': country.code,
+    #                         'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
+    #                         'postalCode': values.get('zip') or self.zip,
+    #                         'stateOrProvince': state.code or None,
+    #                         'street': values.get('street') or self.street,
+    #                     },
+    #                     'name': {
+    #                         'firstName': values.get('first_name') or self.first_name,
+    #                         'lastName': values.get('last_name') or self.last_name,
+    #                         'gender': 'UNKNOWN'
+    #                     },
+    #                     'personalData': {
+    #                         'dateOfBirth': str(values.get('date_of_birth') or self.date_of_birth),
+    #                     }
+    #                 }]
+    #             }
+    #         }
+    #     }
 
-        # documentData cannot be present in the data if not set
-        document_number = values.get('document_number') or self.document_number
-        if document_number:
-            data['accountHolderDetails']['businessDetails']['shareholders'][0]['personalData']['documentData'] = [{
-                'number': document_number,
-                'type': 'ID',
-            }]
+    #     # documentData cannot be present in the data if not set
+    #     document_number = values.get('document_number') or self.document_number
+    #     if document_number:
+    #         data['accountHolderDetails']['businessDetails']['shareholders'][0]['personalData']['documentData'] = [{
+    #             'number': document_number,
+    #             'type': 'ID',
+    #         }]
 
-        return data
+    #     return data
