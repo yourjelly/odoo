@@ -21,6 +21,15 @@ from odoo.addons.odoo_payments.const import LEGAL_ENTITY_TYPE_MAPPING, KYC_STATU
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
+ADYEN_SHARED_FIELDS = {
+    # Adyen address mixin
+    'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
+
+    # Adyen account fields
+    'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
+    'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
+    'document_number', 'document_type',
+}
 _logger = logging.getLogger(__name__)
 
 
@@ -274,6 +283,11 @@ class AdyenAccount(models.Model):
         if payment_acquirer:
             payment_acquirer.state = 'enabled' if not self.is_test else 'test'
 
+        # Enable the additional menus after account activation
+        balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
+        transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
+        (balance_menu + transactions_menu).action_unarchive()
+
     def _set_closed(self):
         """ Update the account's merchant status to 'closed'.
 
@@ -526,23 +540,17 @@ class AdyenAccount(models.Model):
     def write(self, vals):
         res = super().write(vals)
 
-        # adyen_fields = {  # TODO restore update on write
-        #     'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
-        #     'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
-        #     'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
-        #     'document_number', 'document_type',
-        # }
-        # if vals.keys() & adyen_fields and not self.env.context.get('update_from_adyen'):
-        #     self._adyen_rpc('v1/update_account_holder', self._prepare_account_data(vals))
-        #
-        # if 'payout_schedule' in vals:
-        #     self._update_payout_schedule(vals['payout_schedule'])
-        #
-        # # Enable the additional menus if the account has been activated by the support
-        # if 'merchant_status' in vals and vals['merchant_status'] == 'active':
-        #     balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
-        #     transactions_menu = self.env.ref('odoo_payments.menu_adyen_transaction')
-        #     (balance_menu + transactions_menu).action_unarchive()
+        if not self or self.env.context.get('update_from_adyen'):
+            return res
+
+        if len(self) > 1:
+            raise UserError(_("Multi edit is not supported for Adyen Accounts"))
+
+        if vals.keys() & ADYEN_SHARED_FIELDS:
+            self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
+
+        if 'payout_schedule' in vals and vals.get('payout_schedule') != self.payout_schedule:
+            self._update_payout_schedule()
 
         return res
 
@@ -557,8 +565,11 @@ class AdyenAccount(models.Model):
 
         return super().unlink()
 
-    def _update_payout_schedule(self, payout_schedule):
+    def _update_payout_schedule(self):
         self.ensure_one()
+
+        # FIXME ANVFE do we really want to allow submerchants to modify their payout schedule ?
+        # wouldn't it be easier if it was the same frequency for all submerchants ?
 
         self._adyen_rpc('v1/update_payout_schedule', {
             'accountCode': self.account_code,
@@ -567,7 +578,7 @@ class AdyenAccount(models.Model):
             },
             'payoutSchedule': {
                 'action': 'UPDATE',
-                'schedule': PAYOUT_SCHEDULE_MAPPING.get(payout_schedule),
+                'schedule': PAYOUT_SCHEDULE_MAPPING.get(self.payout_schedule),
             }
         })
 
