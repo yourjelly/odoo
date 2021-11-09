@@ -794,28 +794,13 @@ class AdyenAccount(models.Model):
 
     def _adyen_rpc(self, operation, adyen_data=None):
         self.ensure_one()
-        # FIXME ANVFE do we ever reach adyen without any payload ?
-        adyen_data = adyen_data or {}
-        # FIXME ANVFE split in two methods, to keep separate proxy and internal rpcs
-        if operation == 'v1/create_account_holder':
-            # Onboarding first passes through Internal odoo.com first
-            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url')
-            params = {
-                'adyen_data': adyen_data,
-                'base_url': self.get_base_url(),
-                'creation_token': request.session.get('odoo_payments_creation_token'),
-                'test': self.is_test,
-            }
-            auth = None
-        else:
-            url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
-            params = {
-                'adyen_data': adyen_data,
-                'adyen_uuid': self.adyen_uuid,
-            }
-            auth = AdyenProxyAuth(self)
+        params = {
+            'adyen_data': adyen_data or {},  # FIXME ANVFE do we ever reach adyen without any payload ?
+            'adyen_uuid': self.adyen_uuid,
+        }
 
-        request_url = url_join(url, operation)
+        proxy_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
+        request_url = url_join(proxy_url, operation)
 
         _logger.info("Sending data to %s:\n%s", request_url, pformat(params))
 
@@ -825,7 +810,10 @@ class AdyenAccount(models.Model):
         }
         try:
             response = requests.post(
-                request_url, json=payload, auth=auth, timeout=6000)  # TODO timeout=60
+                request_url,
+                json=payload,
+                auth=AdyenProxyAuth(self),
+                timeout=6000)  # TODO timeout=60
             response.raise_for_status()
         except requests.exceptions.Timeout:
             raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
