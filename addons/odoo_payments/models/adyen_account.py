@@ -312,7 +312,12 @@ class AdyenAccount(models.Model):
     def _check_phone_number(self):
         """Verify phone number is valid for specified country."""
         for account in self:
-            phone_validation.phone_parse(account.phone_number, account.country_id.code)
+            if not account.phone_number.startswith('+'):
+                raise ValidationError(_("The provided phone number must be in international format"))
+            phone_validation.phone_parse(
+                account.phone_number,
+                None # Do not specify country code to force international format number
+            )
 
     @api.constrains('phone_number')
     def _check_email(self):
@@ -664,6 +669,8 @@ class AdyenAccount(models.Model):
         }
 
     def _prepare_account_holder_details(self):
+        sanitized_phone_number = phone_validation.phone_format(
+            self.phone_number, None, None, force_format="E164")
         return {
             'address': {
                 'city': self.city,
@@ -676,7 +683,8 @@ class AdyenAccount(models.Model):
             'bankAccountDetails': self.bank_account_ids._prepare_bank_account_details(),
             'businessDetails': self._prepare_business_details(),
             'email': self.email,
-            'fullPhoneNumber': self.phone_number,
+            # TODO make compute
+            'fullPhoneNumber': sanitized_phone_number,
             'individualDetails': self._prepare_individual_details(),
             # TODO ?
             'legalArrangements': None,
