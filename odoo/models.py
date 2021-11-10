@@ -76,6 +76,8 @@ regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
 
+NO_ORDER = object()
+
 def check_object_name(name):
     """ Check if the given name is a valid model name.
 
@@ -2221,7 +2223,7 @@ class BaseModel(metaclass=MetaModel):
         """
         orderby_terms = []
         groupby_terms = [gb['qualified_field'] for gb in annotated_groupbys]
-        if not orderby:
+        if not orderby or orderby is NO_ORDER:
             return groupby_terms, orderby_terms
 
         self._check_qorder(orderby)
@@ -2440,6 +2442,9 @@ class BaseModel(metaclass=MetaModel):
         :raise AccessError: * if user has no read rights on the requested object
                             * if user tries to bypass access rules for read on the requested object
         """
+        if orderby is NO_ORDER and offset:
+            ValidationError("No order with a offset doesn't have sense")
+
         result = self._read_group_raw(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
         groupby = [groupby] if isinstance(groupby, str) else list(OrderedSet(groupby))
@@ -2578,7 +2583,7 @@ class BaseModel(metaclass=MetaModel):
             'from': from_clause,
             'where': prefix_term('WHERE', where_clause),
             'groupby': prefix_terms('GROUP BY', groupby_terms),
-            'orderby': prefix_terms('ORDER BY', orderby_terms),
+            'orderby': orderby_terms and prefix_terms('ORDER BY', orderby_terms) or '',
             'limit': prefix_term('LIMIT', int(limit) if limit else None),
             'offset': prefix_term('OFFSET', int(offset) if limit else None),
         }
@@ -4647,14 +4652,15 @@ Fields:
                     to_flush[model_name].add(model._parent_name)
 
         # flush the order fields
-        order_spec = order or self._order
-        for order_part in order_spec.split(','):
-            order_field = order_part.split()[0]
-            field = self._fields.get(order_field)
-            if field is not None:
-                to_flush[self._name].add(order_field)
-                if field.relational:
-                    self.env[field.comodel_name]._flush_search([], seen=seen)
+        if order is not NO_ORDER:
+            order_spec = order or self._order
+            for order_part in order_spec.split(','):
+                order_field = order_part.split()[0]
+                field = self._fields.get(order_field)
+                if field is not None:
+                    to_flush[self._name].add(order_field)
+                    if field.relational:
+                        self.env[field.comodel_name]._flush_search([], seen=seen)
 
         if self._active_name:
             to_flush[self._name].add(self._active_name)
@@ -4683,6 +4689,8 @@ Fields:
                                   (not for ir.rules, this is only for ir.model.access)
         :return: a list of record ids or an integer (if count is True)
         """
+        if order is NO_ORDER and offset:
+            ValidationError("No order with a offset doesn't have sense")
         model = self.with_user(access_rights_uid) if access_rights_uid else self
         model.check_access_rights('read')
 
@@ -4704,7 +4712,8 @@ Fields:
             res = self._cr.fetchone()
             return res[0]
 
-        query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
+        if order is not NO_ORDER:
+            query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
         query.limit = limit
         query.offset = offset
 
