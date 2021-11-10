@@ -549,6 +549,10 @@ class AdyenAccount(models.Model):
         if len(self) > 1:
             raise UserError(_("Multi edit is not supported for Adyen Accounts"))
 
+        if self.state == 'draft':
+            # Do not try to update an account not created on Adyen side
+            return res
+
         modified_fields = vals.keys()
         if modified_fields & ADYEN_SHARED_FIELDS or modified_fields & ADYEN_SHARED_MODELS:
             response = self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
