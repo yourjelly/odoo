@@ -19,6 +19,11 @@ class AdyenAddressMixin(models.AbstractModel):
     _name = 'adyen.address.mixin'
     _description = "Odoo Payments Address Mixin"
 
+
+    def _valid_field_parameter(self, field, name):
+        return name == 'sync_with_adyen' or super()._valid_field_parameter(field, name)
+
+
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     country_id = fields.Many2one(
@@ -28,19 +33,20 @@ class AdyenAddressMixin(models.AbstractModel):
         domain=[
             ('code', 'in', ADYEN_AVAILABLE_COUNTRIES),
             ('code', 'in', ODOO_PAYMENTS_DEPLOYED_COUNTRIES),
-        ])
+        ], sync_with_adyen=True)
     country_code = fields.Char(related='country_id.code')
 
     state_id = fields.Many2one(
         string="State",
         comodel_name='res.country.state',
-        domain="[('country_id', '=?', country_id)]")
+        domain="[('country_id', '=?', country_id)]",
+        sync_with_adyen=True)
     state_code = fields.Char(related='state_id.code')
 
-    city = fields.Char(string="City", required=True)
-    zip = fields.Char(string="ZIP", required=True)
-    street = fields.Char(string="Street", required=True)
-    house_number_or_name = fields.Char(string="House Number Or Name", required=True)
+    city = fields.Char(string="City", required=True, sync_with_adyen=True)
+    zip = fields.Char(string="ZIP", required=True, sync_with_adyen=True)
+    street = fields.Char(string="Street", required=True, sync_with_adyen=True)
+    house_number_or_name = fields.Char(string="House Number Or Name", required=True, sync_with_adyen=True)
 
 
 class AdyenIDMixin(models.AbstractModel):

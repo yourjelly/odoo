@@ -21,18 +21,6 @@ from odoo.addons.odoo_payments.const import LEGAL_ENTITY_TYPE_MAPPING, KYC_STATU
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
-ADYEN_SHARED_FIELDS = {
-    # Adyen address mixin
-    'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name',
-
-    # Adyen account fields
-    'email', 'phone_number', 'first_name', 'last_name', 'date_of_birth',
-    'entity_type', 'legal_business_name', 'doing_business_as', 'registration_number',
-    'document_number', 'document_type',
-}
-ADYEN_SHARED_MODELS = {
-    'bank_account_ids', 'shareholder_ids'
-}
 _logger = logging.getLogger(__name__)
 
 
@@ -90,9 +78,11 @@ class AdyenAccount(models.Model):
         comodel_name='res.company', required=True, default=lambda self: self.env.company)
 
     bank_account_ids = fields.One2many(
-        string="Bank Accounts", comodel_name='adyen.bank.account', inverse_name='adyen_account_id')
+        string="Bank Accounts", comodel_name='adyen.bank.account', inverse_name='adyen_account_id',
+        sync_with_adyen=True)
     shareholder_ids = fields.One2many(
-        string="Shareholders", comodel_name='adyen.shareholder', inverse_name='adyen_account_id')
+        string="Shareholders", comodel_name='adyen.shareholder', inverse_name='adyen_account_id',
+        sync_with_adyen=True)
 
     transaction_ids = fields.One2many(
         string="Transactions", comodel_name='adyen.transaction', inverse_name='adyen_account_id')
@@ -117,19 +107,21 @@ class AdyenAccount(models.Model):
             ('business', "Business"),
             ('individual', "Individual"),
             ('nonprofit', "Non Profit"),
-        ], string="Legal Entity Type", required=True)
+        ], string="Legal Entity Type", required=True,
+        sync_with_adyen=True)
 
     # Contact Info #
     # Individual
-    first_name = fields.Char(string="First Name")
-    last_name = fields.Char(string="Last Name")
-    date_of_birth = fields.Date(string="Date of birth")
+    first_name = fields.Char(string="First Name", sync_with_adyen=True)
+    last_name = fields.Char(string="Last Name", sync_with_adyen=True)
+    date_of_birth = fields.Date(string="Date of birth", sync_with_adyen=True)
     document_number = fields.Char(
         string="ID Number",
         help="The type of ID Number required depends on the country:\n"
              "US: Social Security Number (9 digits or last 4 digits)\n"
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
-             "Australia: Document Number")
+             "Australia: Document Number",
+        sync_with_adyen=True)
     document_type = fields.Selection(
         string="Document Type",
         selection=[
@@ -137,17 +129,18 @@ class AdyenAccount(models.Model):
             ('PASSPORT', "Passport"),
             ('VISA', "Visa"),
             ('DRIVINGLICENSE', "Driving license"),
-        ], default='ID')
+        ], default='ID',
+        sync_with_adyen=True)
 
     # Business / Non Profit
-    legal_business_name = fields.Char(string="Legal Business Name")
-    doing_business_as = fields.Char(string="Doing Business As")
-    registration_number = fields.Char(string="Registration Number")
+    legal_business_name = fields.Char(string="Legal Business Name", sync_with_adyen=True)
+    doing_business_as = fields.Char(string="Doing Business As", sync_with_adyen=True)
+    registration_number = fields.Char(string="Registration Number", sync_with_adyen=True)
 
     # Shared contact info (Business/Individual/NonProfit)
     full_name = fields.Char(compute='_compute_full_name')
-    email = fields.Char(string="Email", required=True, tracking=True)
-    phone_number = fields.Char(string="Phone Number", required=True, tracking=True)
+    email = fields.Char(string="Email", required=True, tracking=True, sync_with_adyen=True)
+    phone_number = fields.Char(string="Phone Number", required=True, tracking=True, sync_with_adyen=True)
 
     # Payout
     account_code = fields.Char(string="Account Code")
@@ -554,12 +547,14 @@ class AdyenAccount(models.Model):
             return res
 
         modified_fields = vals.keys()
-        if modified_fields & ADYEN_SHARED_FIELDS or modified_fields & ADYEN_SHARED_MODELS:
+        if any(getattr(self._fields[fname], 'sync_with_adyen', False) for fname in modified_fields):
+            # if modified_fields & ADYEN_SHARED_FIELDS or modified_fields & ADYEN_SHARED_MODELS:
             response = self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
 
-            if modified_fields & ADYEN_SHARED_MODELS:
-                # FIXME ANVFE could be better if based on ACCOUNT_HOLDER_UPDATED notifications instead
-                self._handle_adyen_update_feedback(response)
+            # FIXME ANVFE could be better if based on ACCOUNT_HOLDER_UPDATED notifications instead
+            # "Requests using /updateAccountHolder are processed asynchronously."
+            # "You'll receive a response to your API request, but you must rely on notification webhooks to know the final result of a request."
+            self._handle_adyen_update_feedback(response)
 
         if 'payout_schedule' in vals and vals.get('payout_schedule') != self.payout_schedule:
             self._update_payout_schedule()
