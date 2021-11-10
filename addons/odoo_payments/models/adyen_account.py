@@ -549,7 +549,7 @@ class AdyenAccount(models.Model):
         if len(self) > 1:
             raise UserError(_("Multi edit is not supported for Adyen Accounts"))
 
-        if self.state == 'draft':
+        if self.merchant_status == 'draft':
             # Do not try to update an account not created on Adyen side
             return res
 
