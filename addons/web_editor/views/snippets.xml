@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+<template id="snippet">
+    <div class="oe_snippet" t-att-name="name" t-att-data-oe-keywords="keywords" t-att-data-oe-thumbnail="thumbnail_url">
+        <div class="oe_snippet_thumbnail">
+            <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{thumbnail_url});"/>
+            <span class="oe_snippet_thumbnail_title" t-esc="name"/>
+        </div>
+        <div class="oe_snippet_body">
+            <!-- <t>$0</t> -->
+            <!-- <t t-out="0"/> -->
+            <t t-call="{{key}}" t-options="{'snippet-key': key}"/>
+        </div>
+    </div>
+</template>
 <template id="snippets" groups="base.group_user">
     <div class="o_we_website_top_actions">
         <div class="o_we_external_history_buttons">
@@ -28,15 +41,34 @@
     </div>
 
     <div id="o_scroll">
-        <div id="snippet_custom" class="o_panel d-none">
+        <t t-set="snippet_custom_domain" t-value="[]"/>
+        <t t-set="custom_snippets" t-value="request.env['snippet.custom'].search(snippet_custom_domain)"/>
+        <div t-if="custom_snippets" class="o_panel">
             <div class="o_panel_header">Custom</div>
-            <div id="snippet_custom_body" class="o_panel_body"/>
+            <div class="o_panel_body">
+                <div t-foreach="custom_snippets" t-as="snippet" class="oe_snippet oe_snippet_custom"
+                     t-att-name="snippet.name" t-att-data-oe-snippet-id="snippet.id">
+                    <div class="oe_snippet_thumbnail">
+                        <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{snippet.thumbnail_url});"/>
+                        <span class="oe_snippet_thumbnail_title" t-esc="snippet.name"/>
+                    </div>
+                    <div class="oe_snippet_body">
+                        <t t-out="snippet.content"/>
+                    </div>
+                    <we-button t-att-data-snippet-id="snippet.id" class="o_rename_btn fa fa-pencil btn o_we_hover_success" t-attf-title="Rename #{snippet.name}"/>
+                    <we-button t-att-data-snippet-id="snippet.id" class="o_delete_btn fa fa-trash btn o_we_hover_danger" t-attf-title="Delete #{snippet.name}"/>
+                </div>
+            </div>
         </div>
         <t id="default_snippets">
             <div id="snippet_structure" class="o_panel">
                 <div class="o_panel_header">First Panel</div>
                 <div class="o_panel_body">
-                    <t t-snippet="web_editor.s_hr" t-thumbnail="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
+                    <t t-call="web_editor.snippet">
+                        <t t-set="name" t-value="Separator"/>
+                        <t t-set="key" t-value="web_editor.s_hr"/>
+                        <t t-set="thumbnail_url" t-value="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
+                    </t>
                 </div>
             </div>
         </t>

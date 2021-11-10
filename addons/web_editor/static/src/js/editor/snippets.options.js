@@ -6785,7 +6785,6 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                             this.trigger_up('request_save', {
                                 reloadEditor: true,
                                 onSuccess: async () => {
-                                    const defaultSnippetName = _.str.sprintf(_t("Custom %s"), this.data.snippetName);
                                     const targetCopyEl = this.$target[0].cloneNode(true);
                                     delete targetCopyEl.dataset.name;
                                     // By the time onSuccess is called after request_save, the
@@ -6793,13 +6792,12 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                                     // will not work as it can't trigger_up. For this reason, we need
                                     // to bypass the service provider and use the global RPC directly
                                     await rpc.query({
-                                        model: 'ir.ui.view',
-                                        method: 'save_snippet',
+                                        model: 'snippet.custom',
+                                        method: 'save_custom',
                                         kwargs: {
-                                            'name': defaultSnippetName,
+                                            'name': this.data.snippetName,
                                             'arch': targetCopyEl.outerHTML,
-                                            'template_key': this.options.snippets,
-                                            'snippet_key': snippetKey,
+                                            'snippet_key': this.$target[0].dataset.snippet,
                                             'thumbnail_url': thumbnailURL,
                                             'context': context,
                                         },

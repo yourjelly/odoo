@@ -71,25 +71,6 @@ class QWeb(models.AbstractModel):
 
         return super()._compile_node(el, options, indent)
 
-    def _compile_directive_snippet(self, el, options, indent):
-        key = el.attrib.pop('t-snippet')
-        el.set('t-call', key)
-        el.set('t-options', "{'snippet-key': '" + key + "'}")
-        View = self.env['ir.ui.view'].sudo()
-        view_id = View.get_view_id(key)
-        name = View.browse(view_id).name
-        thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
-        div = '<div name="%s" data-oe-type="snippet" data-oe-thumbnail="%s" data-oe-snippet-id="%s" data-oe-keywords="%s">' % (
-            escape(pycompat.to_text(name)),
-            escape(pycompat.to_text(thumbnail)),
-            escape(pycompat.to_text(view_id)),
-            escape(pycompat.to_text(el.findtext('keywords')))
-        )
-        self._appendText(div, options)
-        code = self._compile_node(el, options, indent)
-        self._appendText('</div>', options)
-        return code
-
     def _compile_directive_snippet_call(self, el, options, indent):
         key = el.attrib.pop('t-snippet-call')
         el.set('t-call', key)

@@ -522,15 +522,3 @@ class View(models.Model):
             if website_specific_view:
                 self = website_specific_view
         super(View, self).save(value, xpath=xpath)
-
-    # --------------------------------------------------------------------------
-    # Snippet saving
-    # --------------------------------------------------------------------------
-
-    @api.model
-    def _snippet_save_view_values_hook(self):
-        res = super()._snippet_save_view_values_hook()
-        website_id = self.env.context.get('website_id')
-        if website_id:
-            res['website_id'] = website_id
-        return res

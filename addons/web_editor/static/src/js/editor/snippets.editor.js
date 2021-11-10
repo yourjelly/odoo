@@ -1104,8 +1104,8 @@ var SnippetsMenu = Widget.extend({
         'click .o_we_add_snippet_btn': '_onBlocksTabClick',
         'click .o_we_customize_snippet_btn': '_onOptionsTabClick',
         'click .o_we_invisible_entry': '_onInvisibleEntryClick',
-        'click #snippet_custom .o_rename_btn': '_onRenameBtnClick',
-        'click #snippet_custom .o_delete_btn': '_onDeleteBtnClick',
+        'click .oe_snippet_custom .o_rename_btn': '_onRenameBtnClick',
+        'click .oe_snippet_custom .o_delete_btn': '_onDeleteBtnClick',
         'mousedown': '_onMouseDown',
         'input .o_snippet_search_filter_input': '_onSnippetSearchInput',
         'click .o_snippet_search_filter_reset': '_onSnippetSearchResetClick',
@@ -2057,57 +2057,28 @@ var SnippetsMenu = Widget.extend({
         };
 
         this.$snippets = $scroll.find('.o_panel_body').children()
-            .addClass('oe_snippet')
             .each((i, el) => {
+                // TODO: no jquery
                 const $snippet = $(el);
+                const $sbody = $snippet.find('.oe_snippet_body');
+                // // Add the `data-snippet` key which is used to detect outdated
+                // // snippet. It was done in t-snippet qweb instruction before
+                // // See https://github.com/odoo/odoo/commit/11c60739e4f4379a61581ed179bc7debbb5e91f9
+                // $sbody.children().attr('data-snippet', $sbody.data('snippet-key'))
                 const name = _.escape(el.getAttribute('name'));
-                const thumbnailSrc = _.escape(el.dataset.oeThumbnail);
-                const $sbody = $snippet.children().addClass('oe_snippet_body');
-                const isCustomSnippet = !!el.closest('#snippet_custom');
+                $sbody.children().attr('data-name', name).data('name', name);
 
-                // Associate in-page snippets to their name
-                // TODO I am not sure this is useful anymore and it should at
-                // least be made more robust using data-snippet
-                let snippetClasses = $sbody.attr('class').match(/s_[^ ]+/g);
-                if (snippetClasses && snippetClasses.length) {
-                    snippetClasses = '.' + snippetClasses.join('.');
-                }
-                const $els = $(snippetClasses).not('[data-name]').add($sbody);
-                $els.attr('data-name', name).data('name', name);
-
-                // Create the thumbnail
-                const $thumbnail = $(`
-                    <div class="oe_snippet_thumbnail">
-                        <div class="oe_snippet_thumbnail_img" style="background-image: url(${thumbnailSrc});"/>
-                        <span class="oe_snippet_thumbnail_title">${name}</span>
-                    </div>
-                `);
-                $snippet.prepend($thumbnail);
-
+                // TODO: remove this + qweb instruction and create a template to to-call?
                 // Create the install button (t-install feature) if necessary
-                const moduleID = $snippet.data('moduleId');
-                if (moduleID) {
-                    el.classList.add('o_snippet_install');
-                    $thumbnail.append($('<button/>', {
-                        class: 'btn btn-primary o_install_btn w-100',
-                        type: 'button',
-                        text: _t("Install"),
-                    }));
-                }
-
-                // Create the rename and delete button for custom snippets
-                if (isCustomSnippet) {
-                    const btnRenameEl = document.createElement('we-button');
-                    btnRenameEl.dataset.snippetId = $snippet.data('oeSnippetId');
-                    btnRenameEl.classList.add('o_rename_btn', 'fa', 'fa-pencil', 'btn', 'o_we_hover_success');
-                    btnRenameEl.title = _.str.sprintf(_t("Rename %s"), name);
-                    $snippet.append(btnRenameEl);
-                    const btnEl = document.createElement('we-button');
-                    btnEl.dataset.snippetId = $snippet.data('oeSnippetId');
-                    btnEl.classList.add('o_delete_btn', 'fa', 'fa-trash', 'btn', 'o_we_hover_danger');
-                    btnEl.title = _.str.sprintf(_t("Delete %s"), name);
-                    $snippet.append(btnEl);
-                }
+                // const moduleID = el.dataset.moduleId;
+                // if (moduleID) {
+                //     el.classList.add('o_snippet_install');
+                //     $thumbnail.append($('<button/>', {
+                //         class: 'btn btn-primary o_install_btn w-100',
+                //         type: 'button',
+                //         text: _t("Install"),
+                //     }));
+                // }
             })
             .not('[data-module-id]');
 
@@ -2191,7 +2162,7 @@ var SnippetsMenu = Widget.extend({
         var cache = {};
         this.$snippets.each(function () {
             var $snippet = $(this);
-            var $snippetBody = $snippet.find('.oe_snippet_body');
+            var $snippetBody = $snippet.find('.oe_snippet_body').children();
 
             var check = false;
             _.each(self.templateOptions, function (option, k) {
@@ -2321,7 +2292,7 @@ var SnippetsMenu = Widget.extend({
 
                     dropped = false;
                     $snippet = $(this);
-                    var $baseBody = $snippet.find('.oe_snippet_body');
+                    var $baseBody = $snippet.find('.oe_snippet_body').children();
                     var $selectorSiblings = $();
                     var $selectorChildren = $();
                     var temp = self.templateOptions;
@@ -2500,7 +2471,7 @@ var SnippetsMenu = Widget.extend({
      */
     _registerDefaultTexts: function ($in) {
         if ($in === undefined) {
-            $in = this.$snippets.find('.oe_snippet_body');
+            $in = this.$snippets.find('.oe_snippet_body').children();
         }
 
         $in.find('*').addBack()
@@ -2837,7 +2808,6 @@ var SnippetsMenu = Widget.extend({
      */
     _onDeleteBtnClick: function (ev) {
         const $snippet = $(ev.target).closest('.oe_snippet');
-        const snippetId = parseInt(ev.currentTarget.dataset.snippetId);
         ev.stopPropagation();
         new Dialog(this, {
             size: 'medium',
@@ -2849,12 +2819,9 @@ var SnippetsMenu = Widget.extend({
                 classes: 'btn-primary',
                 click: async () => {
                     await this._rpc({
-                        model: 'ir.ui.view',
-                        method: 'delete_snippet',
-                        kwargs: {
-                            'view_id': snippetId,
-                            'template_key': this.options.snippets,
-                        },
+                        model: 'snippet.custom',
+                        method: 'unlink',
+                        args: [parseInt(ev.currentTarget.dataset.snippetId)],
                     });
                     await this._loadSnippetsTemplates(true);
                 },
@@ -2892,12 +2859,11 @@ var SnippetsMenu = Widget.extend({
             if (name !== snippetName) {
                 this._execWithLoadingEffect(async () => {
                     await this._rpc({
-                        model: 'ir.ui.view',
-                        method: 'rename_snippet',
+                        model: 'snippet.custom',
+                        method: 'rename_custom',
                         kwargs: {
+                            'id': parseInt(ev.target.dataset.snippetId),
                             'name': name,
-                            'view_id': parseInt(ev.target.dataset.snippetId),
-                            'template_key': this.options.snippets,
                         },
                     });
                 }, true);
@@ -2935,7 +2901,7 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onGetSnippetVersions: function (ev) {
-        const snippet = this.el.querySelector(`.oe_snippet > [data-snippet="${ev.data.snippetName}"]`);
+        const snippet = this.el.querySelector(`.oe_snippet > .oe_snippet_body > [data-snippet="${ev.data.snippetName}"]`);
         ev.data.onSuccess(snippet && {
             vcss: snippet.dataset.vcss,
             vjs: snippet.dataset.vjs,
