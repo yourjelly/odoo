@@ -36,7 +36,10 @@
                                     <div t-elif="model.metaData.measures[cell.measure].type === 'boolean'" class="o_value">
                                         <CheckBox disabled="true" value="cell.value" />
                                     </div>
-                                    <div t-else="1" class="o_value" t-esc="getFormattedValue(cell)"/>
+                                    <t t-set="value" t-value="getFormattedValue(cell)"/>
+                                    <t t-if="!cell.isLeaf or value > 0">
+                                        <div class="o_value" t-esc="value"/>
+                                    </t>
                                 </t>
                             </td>
                         </t>

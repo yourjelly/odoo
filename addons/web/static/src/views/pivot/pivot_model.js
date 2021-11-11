@@ -1290,6 +1290,7 @@ export class PivotModel extends Model {
                 measure: measure,
                 value: value,
                 isBold: !groupIntersectionId[0].length || !groupIntersectionId[1].length,
+                isLeaf: isLeaf,
             };
             return measurement;
         });
