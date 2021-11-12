@@ -595,6 +595,9 @@ function listGroupToTable($editable) {
                     $col.append(descendant);
                 }
                 $col.removeClass('list-group-item');
+                if (!$col[0].className) {
+                    $col.removeAttr('class');
+                }
                 $row.append($col);
                 $table.append($row);
                 $(child).remove();
@@ -603,9 +606,15 @@ function listGroupToTable($editable) {
             }
         }
         $table.removeClass('list-group');
+        if (!$table[0].className) {
+            $table.removeAttr('class');
+        }
         if ($listGroup.is('td')) {
             $listGroup.append($table);
             $listGroup.removeClass('list-group');
+            if (!$listGroup[0].className) {
+                $listGroup.removeAttr('class');
+            }
         } else {
             $listGroup.before($table);
             $listGroup.remove();
