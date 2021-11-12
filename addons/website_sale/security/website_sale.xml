@@ -51,11 +51,13 @@
         <field name="name">product pricelist company rule</field>
         <field name="model_id" ref="product.model_product_pricelist"/>
         <field name="domain_force">['|', ('company_id', 'in', [False,website.company_id.id]), ('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
     <record id="product_pricelist_item_comp_rule" model="ir.rule">
         <field name="name">product pricelist item company rule</field>
         <field name="model_id" ref="product.model_product_pricelist_item"/>
         <field name="domain_force">['|', ('company_id', 'in', [False,website.company_id.id]), ('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
 </odoo>

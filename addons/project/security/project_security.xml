@@ -53,6 +53,7 @@
         <field name="name">Project: multi-company</field>
         <field name="model_id" ref="model_project_project"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <record model="ir.rule" id="project_project_manager_rule">
@@ -76,6 +77,7 @@
         <field name="name">Project/Task: multi-company</field>
         <field name="model_id" ref="model_project_task"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <record model="ir.rule" id="task_visibility_rule">
@@ -132,6 +134,7 @@
         <field name="name">Task Analysis multi-company</field>
         <field name="model_id" ref="model_report_project_task_user"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <record id="ir_rule_project_personal_stage_my" model="ir.rule">
@@ -214,6 +217,7 @@
         <field name="name">Project/Updates: multi-company</field>
         <field name="model_id" ref="model_project_update"/>
         <field name="domain_force">[('project_id.company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <record model="ir.rule" id="update_visibility_rule">

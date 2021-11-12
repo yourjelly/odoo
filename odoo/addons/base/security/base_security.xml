@@ -21,6 +21,7 @@
             and make some users unselectable in relational fields. This means that partners
             of internal users are always visible, not matter the company setting. -->
             <field name="domain_force">['|', '|', ('partner_share', '=', False), ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+            <field name="is_multi_company">True</field>
         </record>
 
         <record model="ir.rule" id="res_partner_portal_public_rule">
@@ -60,12 +61,14 @@
             <field name="name">Partner bank company rule</field>
             <field name="model_id" ref="model_res_partner_bank"/>
             <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+            <field name="is_multi_company">True</field>
         </record>
 
         <record id="res_currency_rate_rule" model="ir.rule">
             <field name="name">multi-company currency rate rule</field>
             <field name="model_id" ref="model_res_currency_rate"/>
             <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+            <field name="is_multi_company">True</field>
         </record>
 
         <record id="change_password_rule" model="ir.rule">
@@ -149,6 +152,7 @@
             <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_portal')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
+            <field name="is_multi_company">True</field>
         </record>
         <record id="res_company_rule_employee" model="ir.rule">
             <field name="name">company rule employee</field>
@@ -156,6 +160,7 @@
             <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_user')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
+            <field name="is_multi_company">True</field>
         </record>
         <record id="res_company_rule_public" model="ir.rule">
             <field name="name">company rule public</field>
@@ -163,6 +168,7 @@
             <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_public')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
+            <field name="is_multi_company">True</field>
         </record>
         <record id="res_company_rule_erp_manager" model="ir.rule">
             <field name="name">company rule erp manager</field>
@@ -184,6 +190,7 @@
             <field name="model_id" ref="model_res_users"/>
             <field eval="True" name="global"/>
             <field name="domain_force">['|', ('share', '=', False), ('company_ids', 'in', company_ids)]</field>
+            <field name="is_multi_company">True</field>
         </record>
 
         <!-- rules for API token -->

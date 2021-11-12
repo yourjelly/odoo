@@ -21,6 +21,7 @@ class IrRule(models.Model):
     model_id = fields.Many2one('ir.model', string='Model', index=True, required=True, ondelete="cascade")
     groups = fields.Many2many('res.groups', 'rule_group_rel', 'rule_group_id', 'group_id', ondelete='restrict')
     domain_force = fields.Text(string='Domain')
+    is_multi_company = fields.Boolean(string="Multi-Company Rule", help="If set to True it won't be check for a mono company database")
     perm_read = fields.Boolean(string='Apply for Read', default=True)
     perm_write = fields.Boolean(string='Apply for Write', default=True)
     perm_create = fields.Boolean(string='Apply for Create', default=True)
@@ -198,6 +199,10 @@ class IrRule(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if self.env['res.company'].search_count([]) == 1:
+            for vals in vals_list:
+                if vals.get('is_multi_company'):
+                    vals['active'] = False
         res = super(IrRule, self).create(vals_list)
         # DLE P33: tests
         self.flush()

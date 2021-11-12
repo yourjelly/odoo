@@ -7,6 +7,7 @@
         <field name="name">Access acquirers in own companies only</field>
         <field name="model_id" ref="payment.model_payment_acquirer"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <!-- Transactions -->
@@ -30,6 +31,7 @@
         <field name="name">Access transactions in own companies only</field>
         <field name="model_id" ref="payment.model_payment_transaction"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
     <!-- Tokens -->
@@ -53,6 +55,7 @@
         <field name="name">Access tokens in own companies only</field>
         <field name="model_id" ref="payment.model_payment_token"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="is_multi_company">True</field>
     </record>
 
 </odoo>

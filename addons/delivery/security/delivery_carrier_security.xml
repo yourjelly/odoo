@@ -5,6 +5,7 @@
       <field name="name">Delivery Carrier multi-company</field>
       <field name="model_id" ref="model_delivery_carrier"/>
       <field name="domain_force"> ['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+      <field name="is_multi_company">True</field>
     </record>
 
   </odoo>
