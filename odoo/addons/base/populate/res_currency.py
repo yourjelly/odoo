@@ -8,6 +8,8 @@ from odoo.tools import populate
 class ResCurrencyRate(models.Model):
     _inherit = "res.currency.rate"
 
+    _populate_dependencies = ['res.company', 'res.currency']
+
     _populate_sizes = {
         'small': 100,
         'medium': 1000,

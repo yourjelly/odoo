@@ -17,8 +17,10 @@ class Partner(models.Model):
     }
 
     def _populate_factories(self):
-        # Activate currency to avoid fail iterator
         (self.env.ref('base.USD') | self.env.ref('base.EUR')).active = True
+        self.search([]).currency_id = self.env.ref('base.USD')
+        return []
+        # Activate currency to avoid fail iterator
 
         # remaining: paperformat_id, parent_id, partner_id, favicon, font, report_header, external_report_layout_id, report_footer
         def get_name(values=None, counter=0, **kwargs):
@@ -38,6 +40,8 @@ class Partner(models.Model):
         ]
 
     def _populate(self, size):
+        (self.env.ref('base.USD') | self.env.ref('base.EUR')).active = True
+        return self.search([])
         records = super()._populate(size)
         self.env.ref('base.user_admin').write({'company_ids': [Command.link(rec.id) for rec in records]})  # add all created companies on user admin
         return records

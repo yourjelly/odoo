@@ -13,7 +13,7 @@ from odoo.tools import populate, groupby
 _logger = logging.getLogger(__name__)
 
 # Take X first company to put some stock on it data (it is to focus data on these companies)
-COMPANY_NB_WITH_STOCK = 3  # Need to be smaller than 5 (_populate_sizes['small'] of company)
+COMPANY_NB_WITH_STOCK = 1  # Need to be smaller than 5 (_populate_sizes['small'] of company)
 
 
 class Warehouse(models.Model):
