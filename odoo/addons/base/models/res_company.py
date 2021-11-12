@@ -186,19 +186,6 @@ class Company(models.Model):
         return super(Company, newself.with_context(context))._name_search(name=name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.model
-    @api.returns('self', lambda value: value.id)
-    def _company_default_get(self, object=False, field=False):
-        """ Returns the user's company
-            - Deprecated
-        """
-        _logger.warning("The method '_company_default_get' on res.company is deprecated and shouldn't be used anymore")
-        return self.env.company
-
-    # deprecated, use clear_caches() instead
-    def cache_restart(self):
-        self.clear_caches()
-
-    @api.model
     def create(self, vals):
         if not vals.get('favicon'):
             vals['favicon'] = self._get_default_favicon()
