@@ -37,7 +37,7 @@ class Property(models.Model):
 
     name = fields.Char(index=True)
     res_id = fields.Char(string='Resource', index=True, help="If not set, acts as a default value for new resources",)
-    company_id = fields.Many2one('res.company', string='Company', index=True)
+    company_id = fields.Many2one('res.company', string='Company', ondelete='cascade', index=True)
     fields_id = fields.Many2one('ir.model.fields', string='Field', ondelete='cascade', required=True)
     value_float = fields.Float()
     value_integer = fields.Integer()

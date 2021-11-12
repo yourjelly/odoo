@@ -84,7 +84,7 @@ class PickingType(models.Model):
     count_picking_backorders = fields.Integer(compute='_compute_picking_count')
     barcode = fields.Char('Barcode', copy=False)
     company_id = fields.Many2one(
-        'res.company', 'Company', required=True,
+        'res.company', 'Company', required=True, ondelete='cascade',
         default=lambda s: s.env.company.id, index=True)
 
     @api.model

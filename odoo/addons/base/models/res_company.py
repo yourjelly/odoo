@@ -247,6 +247,11 @@ class Company(models.Model):
             self.invalidate_cache(fnames=company_address_fields)
         return res
 
+    def unlink(self):
+        # Write on the users explicitly to remove the multi-company if there is one company left
+        self.env.user.write({'company_ids': [Command.unlink(company.id) for company in self]})
+        super().unlink()
+
     @api.constrains('parent_id')
     def _check_parent_id(self):
         if not self._check_recursion():
