@@ -21,7 +21,7 @@ import pytz
 from .tools import (
     float_repr, float_round, float_compare, float_is_zero, html_sanitize, human_size,
     pg_varchar, ustr, OrderedSet, pycompat, sql, date_utils, unique, IterableGenerator,
-    image_process, merge_sequences,
+    image_process, merge_sequences, is_html_empty
 )
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
@@ -1800,9 +1800,9 @@ class Html(_String):
 
     def convert_to_column(self, value, record, values=None, validate=True):
         if value is None or value is False:
-            return None
-        if self.sanitize:
-            return html_sanitize(
+            value = None
+        elif validate and self.sanitize:
+            value = html_sanitize(
                 value, silent=True,
                 sanitize_tags=self.sanitize_tags,
                 sanitize_attributes=self.sanitize_attributes,
@@ -1810,13 +1810,15 @@ class Html(_String):
                 sanitize_form=self.sanitize_form,
                 strip_style=self.strip_style,
                 strip_classes=self.strip_classes)
+        if is_html_empty(value):
+            value = None
         return value
 
     def convert_to_cache(self, value, record, validate=True):
         if value is None or value is False:
-            return None
-        if validate and self.sanitize:
-            return html_sanitize(
+            value = None
+        elif validate and self.sanitize:
+            value = html_sanitize(
                 value, silent=True,
                 sanitize_tags=self.sanitize_tags,
                 sanitize_attributes=self.sanitize_attributes,
@@ -1824,6 +1826,8 @@ class Html(_String):
                 sanitize_form=self.sanitize_form,
                 strip_style=self.strip_style,
                 strip_classes=self.strip_classes)
+        if is_html_empty(value):
+            value = None
         return value
 
     def convert_to_record(self, value, record):
