@@ -8,6 +8,7 @@ import logging
 from collections import namedtuple, defaultdict
 
 from datetime import datetime, timedelta, time
+from dateutil.relativedelta import relativedelta
 from pytz import timezone, UTC
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
@@ -86,25 +87,30 @@ class HolidaysRequest(models.Model):
             defaults.update({'date_from': now})
         if 'date_to' not in defaults:
             defaults.update({'date_to': now})
+
+        employee_resource = self.env['hr.employee'].browse(defaults['employee_id']).resource_id if defaults.get('employee_id') else self.env.user.employee_id.resource_id
+        leave_date_from, leave_date_to = None, None
+        if employee_resource:
+            employee_tz = timezone(employee_resource.tz if employee_resource.tz else 'UTC')
+            leave_date_from = employee_tz.localize(defaults['date_from'])
+            leave_date_to = employee_tz.localize(defaults['date_to'])
+            leave_date_from, leave_date_to = employee_resource._adjust_to_calendar(leave_date_from, leave_date_to)[employee_resource]
+        else:
+            user_tz = timezone(self.env.user.tz)
+            leave_date_from, leave_date_to = defaults['date_from'] + relativedelta(hour=7, minute=0, second=0), defaults['date_to'] + relativedelta(hour=19, minute=0, second=0)
+            leave_date_from, leave_date_to = user_tz.localize(leave_date_from), user_tz.localize(leave_date_to)
+
+        defaults.update({'date_from': (leave_date_from and leave_date_from.astimezone(UTC).replace(tzinfo=None)) or defaults['date_from']})
+        defaults.update({'date_to': (leave_date_to and leave_date_to.astimezone(UTC).replace(tzinfo=None)) or defaults['date_to']})
+        defaults = self._default_get_request_parameters(defaults)
         return defaults
 
     def _default_get_request_parameters(self, values):
         new_values = dict(values)
-        global_from, global_to = False, False
-        # TDE FIXME: consider a mapping on several days that is not the standard
-        # calendar widget 7-19 in user's TZ is some custom input
         if values.get('date_from'):
-            user_tz = self.env.user.tz or 'UTC'
-            localized_dt = timezone('UTC').localize(values['date_from']).astimezone(timezone(user_tz))
-            global_from = localized_dt.time().hour == 7 and localized_dt.time().minute == 0
-            new_values['request_date_from'] = localized_dt.date()
+            new_values['request_date_from'] = values['date_from'].date()
         if values.get('date_to'):
-            user_tz = self.env.user.tz or 'UTC'
-            localized_dt = timezone('UTC').localize(values['date_to']).astimezone(timezone(user_tz))
-            global_to = localized_dt.time().hour == 19 and localized_dt.time().minute == 0
-            new_values['request_date_to'] = localized_dt.date()
-        if global_from and global_to:
-            new_values['request_unit_custom'] = True
+            new_values['request_date_to'] = values['date_to'].date()
         return new_values
 
     active = fields.Boolean(default=True)
@@ -272,7 +278,6 @@ class HolidaysRequest(models.Model):
     # request type
     request_unit_half = fields.Boolean('Half Day', compute='_compute_request_unit_half', store=True, readonly=False)
     request_unit_hours = fields.Boolean('Custom Hours', compute='_compute_request_unit_hours', store=True, readonly=False)
-    request_unit_custom = fields.Boolean('Days-long custom hours', compute='_compute_request_unit_custom', store=True, readonly=False)
     # view
     is_hatched = fields.Boolean('Hatched', compute='_compute_is_hatched')
     is_striked = fields.Boolean('Striked', compute='_compute_is_hatched')
@@ -373,7 +378,7 @@ class HolidaysRequest(models.Model):
                 leave.holiday_allocation_id = False
 
     @api.depends('request_date_from_period', 'request_hour_from', 'request_hour_to', 'request_date_from', 'request_date_to',
-                'request_unit_half', 'request_unit_hours', 'request_unit_custom', 'employee_id')
+                'request_unit_half', 'request_unit_hours', 'employee_id')
     def _compute_date_from_to(self):
         for holiday in self:
             if holiday.request_date_from and holiday.request_date_to and holiday.request_date_from > holiday.request_date_to:
@@ -435,35 +440,27 @@ class HolidaysRequest(models.Model):
                 elif holiday.request_unit_hours:
                     hour_from = float_to_time(float(holiday.request_hour_from))
                     hour_to = float_to_time(float(holiday.request_hour_to))
-                elif holiday.request_unit_custom:
-                    hour_from = holiday.date_from.time()
-                    hour_to = holiday.date_to.time()
-                    compensated_request_date_from = holiday._adjust_date_based_on_tz(holiday.request_date_from, hour_from)
-                    compensated_request_date_to = holiday._adjust_date_based_on_tz(holiday.request_date_to, hour_to)
                 else:
                     hour_from = float_to_time(attendance_from.hour_from)
                     hour_to = float_to_time(attendance_to.hour_to)
+                    compensated_request_date_from = holiday._adjust_date_based_on_tz(holiday.request_date_from, hour_from)
+                    compensated_request_date_to = holiday._adjust_date_based_on_tz(holiday.request_date_to, hour_to)
 
-                holiday.date_from = timezone(holiday.tz).localize(datetime.combine(compensated_request_date_from, hour_from)).astimezone(UTC).replace(tzinfo=None)
-                holiday.date_to = timezone(holiday.tz).localize(datetime.combine(compensated_request_date_to, hour_to)).astimezone(UTC).replace(tzinfo=None)
+                holiday_tz = timezone(holiday.employee_id.tz if holiday.employee_id else holiday.tz)
+                holiday.date_from = holiday_tz.localize(datetime.combine(compensated_request_date_from, hour_from)).astimezone(UTC).replace(tzinfo=None)
+                holiday.date_to = holiday_tz.localize(datetime.combine(compensated_request_date_to, hour_to)).astimezone(UTC).replace(tzinfo=None)
 
-    @api.depends('holiday_status_id', 'request_unit_hours', 'request_unit_custom')
+    @api.depends('holiday_status_id', 'request_unit_hours')
     def _compute_request_unit_half(self):
         for holiday in self:
-            if holiday.holiday_status_id or holiday.request_unit_hours or holiday.request_unit_custom:
+            if holiday.holiday_status_id or holiday.request_unit_hours:
                 holiday.request_unit_half = False
 
-    @api.depends('holiday_status_id', 'request_unit_half', 'request_unit_custom')
+    @api.depends('holiday_status_id', 'request_unit_half')
     def _compute_request_unit_hours(self):
         for holiday in self:
-            if holiday.holiday_status_id or holiday.request_unit_half or holiday.request_unit_custom:
+            if holiday.holiday_status_id or holiday.request_unit_half:
                 holiday.request_unit_hours = False
-
-    @api.depends('holiday_status_id', 'request_unit_half', 'request_unit_hours')
-    def _compute_request_unit_custom(self):
-        for holiday in self:
-            if holiday.holiday_status_id or holiday.request_unit_half or holiday.request_unit_hours:
-                holiday.request_unit_custom = False
 
     @api.depends('employee_ids')
     def _compute_from_employee_ids(self):
@@ -531,13 +528,11 @@ class HolidaysRequest(models.Model):
         for leave in self:
             leave.tz_mismatch = leave.tz != self.env.user.tz
 
-    @api.depends('request_unit_custom', 'employee_id', 'holiday_type', 'department_id.company_id.resource_calendar_id.tz', 'mode_company_id.resource_calendar_id.tz')
+    @api.depends('employee_id', 'holiday_type', 'department_id.company_id.resource_calendar_id.tz', 'mode_company_id.resource_calendar_id.tz')
     def _compute_tz(self):
         for leave in self:
             tz = False
-            if leave.request_unit_custom:
-                tz = 'UTC' # custom -> already in UTC
-            elif leave.holiday_type == 'employee':
+            if leave.holiday_type == 'employee':
                 tz = leave.employee_id.tz
             elif leave.holiday_type == 'department':
                 tz = leave.department_id.company_id.resource_calendar_id.tz
@@ -858,6 +853,21 @@ class HolidaysRequest(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+
+        if self._context.get('leave_compute_date_from_to'):
+            for values in vals_list:
+                employee_id = values.get('employee_id', False)
+                if values.get('date_from') and values.get('date_to') and employee_id:
+                    employee_resource = self.env['hr.employee'].browse(employee_id).resource_id
+                    employee_tz = timezone(employee_resource.tz)
+                    leave_date_from, leave_date_to = None, None
+                    leave_date_from = employee_tz.localize(values['date_from'])
+                    leave_date_to = employee_tz.localize(values['date_to'])
+                    leave_date_from, leave_date_to = employee_resource._adjust_to_calendar(leave_date_from, leave_date_to)[employee_resource]
+                    values['date_from'] = (leave_date_from and leave_date_from.astimezone(UTC).replace(tzinfo=None) or values['date_from'])
+                    values['date_to'] = (leave_date_to and leave_date_to.astimezone(UTC).replace(tzinfo=None) or values['date_to'])
+                    values['request_date_from'], values['request_date_to'] = values['date_from'].date(), values['date_to'].date()
+
         """ Override to avoid automatic logging of creation """
         if not self._context.get('leave_fast_create'):
             leave_types = self.env['hr.leave.type'].browse([values.get('holiday_status_id') for values in vals_list if values.get('holiday_status_id')])
@@ -1219,7 +1229,7 @@ class HolidaysRequest(models.Model):
                         tracking_disable=True,
                         mail_activity_automation_skip=True,
                         leave_fast_create=True,
-                        leave_skip_state_check=True
+                        leave_skip_state_check=True,
                     ).create(split_leaves_vals)
 
                     split_leaves.filtered(lambda l: l.state in 'validate')._validate_leave_request()
@@ -1230,6 +1240,10 @@ class HolidaysRequest(models.Model):
                     mail_activity_automation_skip=True,
                     leave_fast_create=True,
                     leave_skip_state_check=True,
+                    # date_from and date_to are computed based on the employee tz
+                    # If _compute_date_from_to is used instead, it will trigger _compute_number_of_days
+                    # and create a conflict on the number of days calculation between the different leaves
+                    leave_compute_date_from_to=True,
                 ).create(values)
 
                 leaves._validate_leave_request()

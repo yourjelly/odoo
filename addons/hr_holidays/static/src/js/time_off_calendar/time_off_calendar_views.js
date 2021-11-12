@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import CalendarView from "web.CalendarView";
+import { TimeOffCalendarModel } from "./time_off_calendar_model";
 import { TimeOffCalendarController } from "./time_off_calendar_controller";
 import { TimeOffCalendarRenderer } from "./time_off_calendar_renderer";
 import { TimeOffPopoverRenderer } from "./time_off_popover_renderer";
@@ -10,6 +11,7 @@ export const TimeOffCalendarView = CalendarView.extend({
     config: Object.assign({}, CalendarView.prototype.config, {
         Controller: TimeOffCalendarController,
         Renderer: TimeOffCalendarRenderer,
+        Model: TimeOffCalendarModel,
     }),
 });
 
