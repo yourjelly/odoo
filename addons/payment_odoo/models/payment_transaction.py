@@ -63,7 +63,7 @@ class PaymentTransaction(models.Model):
             # /payment/status route directly as return url.
             'returnUrl': urls.url_join(base_url, '/payment/status'),
             'metadata': {
-                'merchant_signature': signature,
+                'merchant_signature': signature,  # TODO ANV not sure if necessary to generate an access token in redirect
                 'notification_url': urls.url_join(base_url, OdooController._notification_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
                 'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code

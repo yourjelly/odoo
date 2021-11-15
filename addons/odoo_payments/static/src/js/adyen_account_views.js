@@ -23,7 +23,9 @@ odoo.define('odoo_payments.account_views', require => {
          * @return {Promise}
          */
         _discardChanges: function (recordID, options) {
-            // TODO ANVFE see if we can juste return super when coming from payment acquirer form
+            // TODO ANVFE see if we can just return super when coming from payment acquirer form
+            // FIXME ANVFE this is basically wrong because it makes us leave the form view of a created account
+            //  whenever we discard local changes, the redirection should only happen for non-saved accounts
             return this._super(...arguments).then(() => {
                 this.do_action({type: 'ir.actions.act_url', url: '/web', target: 'self'});
             });

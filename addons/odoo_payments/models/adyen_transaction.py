@@ -144,6 +144,8 @@ class AdyenTransaction(models.Model):
 
         tx = self.env['adyen.transaction']._get_tx_from_notification(account, data)
 
+        # FIXME ANVFE no check on whether the event was successful...
+        # success = data['success'] == 'true'
         event_code = data.get('eventCode')
         if event_code == "AUTHORISATION":
             tx._handle_authorisation_notification(data)
@@ -167,6 +169,9 @@ class AdyenTransaction(models.Model):
         currency = self.env['res.currency'].search([('name', '=', notification_data.get('amount', {}).get('currency'))])
         shopper_country = self.env['res.country'].search([('code', '=', additional_data.get('shopperCountry'))])
         commercial_card = additional_data.get('isCardCommercial', 'unknown')
+
+        # NOTE ANVFE: issuerCountry in Standard Notification Payload is a custom setting "Include Issuer Country"
+        # https://docs.adyen.com/point-of-sale/shopper-recognition/identifiers#receiving-identifiers-in-webhooks
         card_country = self.env['res.country'].search([('code', '=', additional_data.get('cardIssuingCountry', additional_data.get('issuerCountry')))])
 
         self.write({
