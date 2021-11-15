@@ -358,6 +358,7 @@ QUnit.module('web_editor', {}, function () {
             });
 
             var pText = $field.find('.note-editable p').first().contents()[0];
+            debugger;
             Wysiwyg.setRange(pText, 1, pText, 2);
 
             await new Promise((resolve) => setTimeout(resolve));

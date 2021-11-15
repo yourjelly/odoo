@@ -6786,7 +6786,7 @@ registry.SnippetSave = SnippetOptionWidget.extend({
                                 reloadEditor: true,
                                 onSuccess: async () => {
                                     const targetCopyEl = this.$target[0].cloneNode(true);
-                                    delete targetCopyEl.dataset.name;
+                                    delete targetCopyEl.dataset.snippetName;
                                     // By the time onSuccess is called after request_save, the
                                     // current widget has been destroyed and is orphaned, so this._rpc
                                     // will not work as it can't trigger_up. For this reason, we need

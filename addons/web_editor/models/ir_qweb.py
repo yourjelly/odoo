@@ -77,21 +77,6 @@ class QWeb(models.AbstractModel):
         el.set('t-options', "{'snippet-key': '" + key + "'}")
         return self._compile_node(el, options, indent)
 
-    def _compile_directive_install(self, el, options, indent):
-        if self.user_has_groups('base.group_system'):
-            module = self.env['ir.module.module'].search([('name', '=', el.attrib.get('t-install'))])
-            if not module or module.state == 'installed':
-                return []
-            name = el.attrib.get('string') or 'Snippet'
-            thumbnail = el.attrib.pop('t-thumbnail', 'oe-thumbnail')
-            div = '<div name="%s" data-oe-type="snippet" data-module-id="%s" data-oe-thumbnail="%s"><section/></div>' % (
-                escape(pycompat.to_text(name)),
-                module.id,
-                escape(pycompat.to_text(thumbnail))
-            )
-            self._appendText(div, options)
-        return []
-
     def _compile_directive_tag(self, el, options, indent):
         if el.get('t-placeholder'):
             el.set('t-att-placeholder', el.attrib.pop('t-placeholder'))

@@ -226,7 +226,7 @@
                         <t t-set="thumbnail_url" t-valuef="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
                     </t>
                     <t t-if="debug" t-call="web_editor.snippet">
-                        <t t-set="name"></t>
+                        <t t-set="name">Dynamic Snippet</t>
                         <t t-set="key" t-valuef="website.s_dynamic_snippet"/>
                         <t t-set="thumbnail_url" t-valuef="/website/static/src/img/snippets_thumbs/s_dynamic_snippet.svg"/>
                     </t>
@@ -269,7 +269,12 @@
                         <t t-set="key" t-valuef="website.s_embed_code"/>
                         <t t-set="thumbnail_url" t-valuef="/website/static/src/img/snippets_thumbs/s_embed_code.svg"/>
                     </t>
-                    <t id="snippet_donation_hook"/>
+                    <t t-call="web_editor.snippet_install" id="snippet_donation_hook">
+                        <t t-set="name">Donation</t>
+                        <t t-set="key" t-valuef="website_payment.s_donation"/>
+                        <t t-set="module" t-valuef="website_payment"/>
+                        <t t-set="thumbnail_url" t-valuef="/website/static/src/img/snippets_thumbs/s_donation.svg"/>
+                    </t>
                 </div>
             </div>
 
@@ -338,7 +343,12 @@
                         <t t-set="keywords">cite</t> <!-- TODO: 'cite' Wtf ?? -->
                     </t>
                     <t id="event_speaker_bio_hook"/>
-                    <t id="snippet_donation_button_hook"/>
+                    <t t-call="web_editor.snippet_install" id="snippet_donation_button_hook">
+                        <t t-set="name">Donation Button</t>
+                        <t t-set="key" t-valuef="website_payment.s_donation_button"/>
+                        <t t-set="module" t-valuef="website_payment"/>
+                        <t t-set="thumbnail_url" t-valuef="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
+                    </t>
                 </div>
             </div>
         </t>
@@ -351,15 +361,15 @@
 
 <template id="external_snippets" inherit_id="website.snippets" priority="8">
     <xpath expr="//div[@id='snippet_effect']/div[hasclass('o_panel_body')]/t" position="after">
-        <t id="newsletter_popup_snippet" t-install="mass_mailing" string="Newsletter Popup" t-thumbnail="/website/static/src/img/snippets_thumbs/newsletter_subscribe_popup.svg"/>
+        <!-- <t id="newsletter_popup_snippet" t-install="mass_mailing" string="Newsletter Popup" t-thumbnail="/website/static/src/img/snippets_thumbs/newsletter_subscribe_popup.svg"/>
         <t t-install="website_mail_group" string="Discussion Group" t-thumbnail="/website/static/src/img/snippets_thumbs/s_group.svg"/>
         <t t-install="website_twitter" string="Twitter Scroller" t-thumbnail="/website/static/src/img/snippets_thumbs/s_twitter_scroll.svg"/>
-        <t t-install="website_payment" string="Donation" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation.svg"/>
+        <t t-install="website_payment" string="Donation" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation.svg"/> -->
     </xpath>
-    <xpath expr="//div[@id='snippet_content']/div[hasclass('o_panel_body')]/t" position="after">
+    <!-- <xpath expr="//div[@id='snippet_content']/div[hasclass('o_panel_body')]/t" position="after">
         <t id="newsletter_snippet" t-install="mass_mailing" string="Newsletter" t-thumbnail="/website/static/src/img/snippets_thumbs/s_newsletter_subscribe_form.svg"/>
-        <t t-install="website_payment" string="Donation Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_donation_button.svg"/>
-    </xpath>
+        
+    </xpath> -->
 </template>
 
 <template id="snippet_options_background_options" inherit_id="web_editor.snippet_options_background_options">

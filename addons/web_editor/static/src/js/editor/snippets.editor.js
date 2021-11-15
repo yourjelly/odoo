@@ -387,8 +387,8 @@ var SnippetEditor = Widget.extend({
      * directly in the DOM thanks to the `data-name` attribute.
      */
     getName: function () {
-        if (this.$target.data('name') !== undefined) {
-            return this.$target.data('name');
+        if (this.$target.data('snippet-name') !== undefined) {
+            return this.$target.data('snippet-name');
         }
         if (this.$target.is('img')) {
             return _t("Image");
@@ -1230,6 +1230,13 @@ var SnippetsMenu = Widget.extend({
         if (this.options.enableTranslation) {
             // Load the sidebar with the style tab only.
             await this._loadSnippetsTemplates();
+            // TODO: Generate an object on odoo js object (or editor object) to
+            //       get snippets definition (name, version, thumnail etc)
+            // snippets = {
+            //     's_cover': {
+            //         'thumbnail': 'ok',
+            //     },
+            // }
             this.$el.find('.o_we_website_top_actions').removeClass('d-none');
             this.$('.o_snippet_search_filter').addClass('d-none');
             this.$('#o_scroll').addClass('d-none');
@@ -2057,30 +2064,18 @@ var SnippetsMenu = Widget.extend({
         };
 
         this.$snippets = $scroll.find('.o_panel_body').children()
+            .not('[data-module-id]')
             .each((i, el) => {
-                // TODO: no jquery
                 const $snippet = $(el);
+                const snippetName = _.escape(el.dataset.snippetName);
                 const $sbody = $snippet.find('.oe_snippet_body');
-                // // Add the `data-snippet` key which is used to detect outdated
-                // // snippet. It was done in t-snippet qweb instruction before
-                // // See https://github.com/odoo/odoo/commit/11c60739e4f4379a61581ed179bc7debbb5e91f9
-                // $sbody.children().attr('data-snippet', $sbody.data('snippet-key'))
-                const name = _.escape(el.getAttribute('name'));
-                $sbody.children().attr('data-name', name).data('name', name);
+                $sbody.children().attr('data-snippet-name', snippetName);
+            });
 
-                // TODO: remove this + qweb instruction and create a template to to-call?
-                // Create the install button (t-install feature) if necessary
-                // const moduleID = el.dataset.moduleId;
-                // if (moduleID) {
-                //     el.classList.add('o_snippet_install');
-                //     $thumbnail.append($('<button/>', {
-                //         class: 'btn btn-primary o_install_btn w-100',
-                //         type: 'button',
-                //         text: _t("Install"),
-                //     }));
-                // }
-            })
-            .not('[data-module-id]');
+        // Install snippet last
+        $scroll.find('.o_panel_body').each((i, el) => {
+            $(el).find('.oe_snippet[data-module-id]').appendTo(el)
+        });
 
         // Hide scroll if no snippets defined
         if (!this.$snippets.length) {
@@ -2211,7 +2206,7 @@ var SnippetsMenu = Widget.extend({
             const isPanelTitleMatch = strMatches(panelTitle);
             for (const snippetEl of panelEl.querySelectorAll('.oe_snippet')) {
                 const matches = (isPanelTitleMatch
-                    || strMatches(snippetEl.getAttribute('name'))
+                    || strMatches(snippetEl.dataset.snippetName)
                     || strMatches(snippetEl.dataset.oeKeywords || ''));
                 if (matches) {
                     hasVisibleSnippet = true;
@@ -3071,8 +3066,10 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onSnippetThumbnailURLRequest(ev) {
+        // TODO: replace by read on odoo.snippets object: getSnippetInfo('s_cover', 'thumbnail')
         const $snippet = this.$snippets.has(`[data-snippet="${ev.data.key}"]`);
-        ev.data.onSuccess($snippet.length ? $snippet[0].dataset.oeThumbnail : '');
+        const $thumbnailUrl = $snippet.find('.oe_snippet_thumbnail_img').css('background-image');
+        ev.data.onSuccess($thumbnailUrl ? $thumbnailUrl.replace('url(', '').replace(')', '').replace(/\"/gi, "") : '');
     },
     /**
      * Called when an user value widget is being opened -> close all the other

@@ -2,13 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import uuid
-
 from odoo import api, fields, models
 from odoo.osv import expression
+from odoo.tools.translate import html_translate
 
 
 class SnippetCustom(models.Model):
-
+    # TODO: Migration script -> view to model + name attribute to data-snippet-name
     _name = "snippet.custom"
     _description = "Snippet Custom"
     _order = "name"
@@ -16,7 +16,7 @@ class SnippetCustom(models.Model):
     name = fields.Char('Snippet Name', required=True, translate=True)
     original_key = fields.Char(required=True)
     thumbnail_url = fields.Char(required=True)
-    content = fields.Html()
+    content = fields.Html(translate=html_translate, sanitize=False)
 
     @api.model
     def save_custom(self, name, arch, snippet_key, thumbnail_url):

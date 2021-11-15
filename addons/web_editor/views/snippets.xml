@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="snippet">
-    <div class="oe_snippet" t-att-name="name" t-att-data-oe-keywords="keywords" t-att-data-oe-thumbnail="thumbnail_url">
+    <div class="oe_snippet" t-att-data-snippet-name="name" t-att-data-oe-keywords="keywords">
         <div class="oe_snippet_thumbnail">
             <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{thumbnail_url});"/>
             <span class="oe_snippet_thumbnail_title" t-esc="name"/>
         </div>
         <div class="oe_snippet_body">
-            <!-- <t>$0</t> -->
-            <!-- <t t-out="0"/> -->
             <t t-call="{{key}}" t-options="{'snippet-key': key}"/>
+        </div>
+    </div>
+</template>
+<template id="snippet_install">
+    <!-- TODO: cached util method on module -> Given a name, get id + shortdesc + state? -->
+    <t t-set="module" t-value="request.env['ir.module.module'].search([('name', '=', module), ('state', '!=', 'installed')])"/>
+    <div t-if="module" class="oe_snippet o_snippet_install" t-att-data-snippet-name="name" t-att-data-module-id="module.id">
+        <div class="oe_snippet_thumbnail">
+            <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{thumbnail_url});"/>
+            <span class="oe_snippet_thumbnail_title" t-esc="name"/>
+            <button type="button" class="btn btn-primary o_install_btn w-100">Install</button>
         </div>
     </div>
 </template>
@@ -47,7 +56,7 @@
             <div class="o_panel_header">Custom</div>
             <div class="o_panel_body">
                 <div t-foreach="custom_snippets" t-as="snippet" class="oe_snippet oe_snippet_custom"
-                     t-att-name="snippet.name" t-att-data-oe-snippet-id="snippet.id">
+                     t-att-data-snippet-name="snippet.name" t-att-data-oe-snippet-id="snippet.id">
                     <div class="oe_snippet_thumbnail">
                         <div class="oe_snippet_thumbnail_img" t-attf-style="background-image: url(#{snippet.thumbnail_url});"/>
                         <span class="oe_snippet_thumbnail_title" t-esc="snippet.name"/>
