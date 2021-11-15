@@ -52,7 +52,7 @@
                 <div t-if="lead.date_deadline">
                     Expected Closing: <span t-field="lead.date_deadline"/>
                 </div>
-                <div t-if="not is_html_empty(lead.description)">
+                <div t-if="lead.description">
                     Notes: <span t-field="lead.description"/>
                 </div>
                 <div t-if="lead.lang_id" name="lang_id">

@@ -110,7 +110,7 @@
                 <t t-if="object.event_id.videocall_location">
                     <li>Meeting URL: <a t-att-href="object.event_id.videocall_location" target="_blank" t-out="object.event_id.videocall_location or ''">https://meet.jit.si/odoo-xyz</a></li>
                 </t>
-                <t t-if="not is_html_empty(object.event_id.description)">
+                <t t-if="object.event_id.description">
                     <li>Description of the event:
                     <t t-out="object.event_id.description">Internal meeting for discussion for new pricing for product and services.</t></li>
                 </t>
@@ -235,7 +235,7 @@
                 <t t-if="object.event_id.videocall_location">
                     <li>Meeting URL: <a t-att-href="object.event_id.videocall_location" target="_blank" t-out="object.event_id.videocall_location or ''">https://meet.jit.si/odoo-xyz</a></li>
                 </t>
-                <t t-if="not is_html_empty(object.event_id.description)">
+                <t t-if="object.event_id.description">
                     <li>Description of the event:
                     <t t-out="object.event_id.description">Internal meeting for discussion for new pricing for product and services.</t></li>
                 </t>
@@ -336,7 +336,7 @@
                 <t t-if="object.event_id.videocall_location">
                     <li>Meeting URL: <a t-attf-href="{{ object.event_id.videocall_location }}" target="_blank" t-out="object.event_id.videocall_location or ''">https://meet.jit.si/odoo-xyz</a></li>
                 </t>
-                <t t-if="not is_html_empty(object.event_id.description)">
+                <t t-if="object.event_id.description">
                     <li>Description of the event:
                     <t t-out="object.event_id.description">Internal meeting for discussion for new pricing for product and services.</t></li>
                 </t>
@@ -402,7 +402,7 @@
                         <strong>Details of the event</strong>
                     </p>
                     <ul>
-                        <t t-if="not is_online and object.display_description">
+                        <t t-if="not is_online and object.description">
                             <li>Description: <t t-out="object.description or ''" /></li>
                         </t>
                         <t t-elif="is_online and object.description">

@@ -9,7 +9,6 @@ import werkzeug
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
 from odoo.osv import expression
-from odoo.tools import is_html_empty
 
 
 class Survey(models.Model):
@@ -524,7 +523,7 @@ class Survey(models.Model):
                 result = user_input.predefined_question_ids
             else:
                 result = self.question_and_page_ids.filtered(
-                    lambda question: not question.is_page or not is_html_empty(question.description))
+                    lambda question: not question.is_page or question.description)
 
         return result
 
@@ -577,7 +576,7 @@ class Survey(models.Model):
                 # pages with description are potential questions to display (are part of question_candidates)
                 if question.is_page:
                     contains_active_question = any(sub_question not in inactive_questions for sub_question in question.question_ids)
-                    is_description_section = not question.question_ids and not is_html_empty(question.description)
+                    is_description_section = not question.question_ids and question.description
                     if contains_active_question or is_description_section:
                         return question
                 else:
@@ -590,7 +589,7 @@ class Survey(models.Model):
                 else pages_or_questions[current_page_index + 1:]
             for section in section_candidates.sorted(reverse=go_back):
                 contains_active_question = any(question not in inactive_questions for question in section.question_ids)
-                is_description_section = not section.question_ids and not is_html_empty(section.description)
+                is_description_section = not section.question_ids and section.description
                 if contains_active_question or is_description_section:
                     return section
             return Question
@@ -601,7 +600,7 @@ class Survey(models.Model):
             else, the first question will be the first screen to be displayed.
             This methods is used for survey session management where the host should not be able to go back on the
             first page or question."""
-        first_section_has_description = self.page_ids and not is_html_empty(self.page_ids[0].description)
+        first_section_has_description = self.page_ids and self.page_ids[0].description
         is_first_page_or_question = (first_section_has_description and page_or_question == self.page_ids[0]) or \
             (not first_section_has_description and page_or_question == self.question_ids[0])
         return is_first_page_or_question

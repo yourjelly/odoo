@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import html2plaintext, is_html_empty, plaintext2html
+from odoo.tools import html2plaintext, plaintext2html
 
 ATTENDEE_CONVERTER_O2M = {
     'needsAction': 'notresponded',
@@ -273,7 +273,7 @@ class Meeting(models.Model):
 
         if 'description' in fields_to_sync:
             values['body'] = {
-                'content': html2plaintext(self.description) if not is_html_empty(self.description) else '',
+                'content': html2plaintext(self.description) if self.description else '',
                 'contentType': "text",
             }
 

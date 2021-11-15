@@ -15,7 +15,7 @@ import pytz
 from odoo import exceptions, http, fields, tools, _
 from odoo.http import request
 from odoo.osv import expression
-from odoo.tools import is_html_empty, plaintext2html
+from odoo.tools import plaintext2html
 from odoo.tools.misc import babel_locale_parse
 
 
@@ -161,7 +161,6 @@ class EventTrackController(http.Controller):
             'search_tags': search_tags,
             'tag_categories': tag_categories,
             # environment
-            'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
             'is_event_user': request.env.user.has_group('event.group_event_user'),
         }
@@ -363,7 +362,6 @@ class EventTrackController(http.Controller):
             # options
             'option_widescreen': option_widescreen,
             # environment
-            'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
             'is_event_user': request.env.user.has_group('event.group_event_user'),
         }

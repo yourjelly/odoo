@@ -18,7 +18,7 @@
                             <t t-foreach='survey.question_and_page_ids' t-as='question'>
                                 <t t-if="question.is_page and
                                             (any(q in questions_to_display for q in question.question_ids)
-                                            or not is_html_empty(question.description))">
+                                            or question.description)">
                                     <hr t-if="question != survey.page_ids[0]" />
                                     <div class="o_page_header">
                                         <h1 t-field='question.title' />

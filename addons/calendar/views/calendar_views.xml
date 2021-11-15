@@ -275,9 +275,8 @@
                 />
                 <field name="is_highlighted" invisible="1"/>
                 <field name="is_organizer_alone" invisible="1"/>
-                <field name="display_description" invisible="1"/>
                 <field name="location" attrs="{'invisible': [('location', '=', False)]}"/>
-                <field name="description" attrs="{'invisible': [('display_description', '=', False)]}"/>
+                <field name="description" attrs="{'invisible': [('description', '=', False)]}"/>
                 <field name="privacy"/>
                 <field name="alarm_ids" attrs="{'invisible': [('alarm_ids', '=', [])]}"/>
                 <field name="categ_ids" attrs="{'invisible': [('categ_ids', '=', [])]}"/>

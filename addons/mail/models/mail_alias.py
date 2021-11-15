@@ -8,7 +8,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import is_html_empty, remove_accents
+from odoo.tools import remove_accents
 
 # see rfc5322 section 3.2.3
 atext = r"[a-zA-Z0-9!#$%&'*+\-/=?^_`{|}~]"
@@ -259,7 +259,7 @@ Kind Regards,</p>"""
         if lang_author:
             self = self.with_context(lang=lang_author)
 
-        if not is_html_empty(self.alias_bounced_content):
+        if self.alias_bounced_content:
             body = self.alias_bounced_content
         else:
             body = self._get_alias_bounced_body_fallback(message_dict)

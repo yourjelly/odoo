@@ -86,8 +86,6 @@ class MassMailing(models.Model):
     # don't translate 'body_arch', the translations are only on 'body_html'
     body_arch = fields.Html(string='Body', translate=False, sanitize=False)
     body_html = fields.Html(string='Body converted to be sent by mail', sanitize=False)
-    is_body_empty = fields.Boolean(compute="_compute_is_body_empty",
-                                   help='Technical field used to determine if the mail body is empty')
     attachment_ids = fields.Many2many('ir.attachment', 'mass_mailing_ir_attachments_rel',
         'mass_mailing_id', 'attachment_id', string='Attachments')
     keep_archives = fields.Boolean(string='Keep Archives')
@@ -334,11 +332,6 @@ class MassMailing(models.Model):
                 mailing.calendar_date = fields.Datetime.now()
             else:
                 mailing.calendar_date = False
-
-    @api.depends('body_html')
-    def _compute_is_body_empty(self):
-        for mailing in self:
-            mailing.is_body_empty = tools.is_html_empty(mailing.body_html)
 
     def _compute_mail_server_available(self):
         self.mail_server_available = self.env['ir.config_parameter'].sudo().get_param('mass_mailing.outgoing_mail_server')

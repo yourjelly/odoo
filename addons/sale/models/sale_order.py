@@ -10,7 +10,7 @@ from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools.misc import formatLang
 from odoo.osv import expression
-from odoo.tools import float_is_zero, html_keep_url, is_html_empty
+from odoo.tools import float_is_zero, html_keep_url
 
 
 class SaleOrder(models.Model):
@@ -440,7 +440,7 @@ class SaleOrder(models.Model):
             if self.terms_type == 'html' and self.env.company.invoice_terms_html:
                 baseurl = html_keep_url(self.get_base_url() + '/terms')
                 values['note'] = _('Terms & Conditions: %s', baseurl)
-            elif not is_html_empty(self.env.company.invoice_terms):
+            elif self.env.company.invoice_terms:
                 values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
         if not self.env.context.get('not_self_saleperson') or not self.team_id:
             values['team_id'] = self.env['crm.team'].with_context(

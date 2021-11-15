@@ -6,7 +6,7 @@ import pytz
 
 from odoo import _, api, Command, fields, models
 from odoo.addons.base.models.res_partner import _tz_get
-from odoo.tools import format_datetime, is_html_empty
+from odoo.tools import format_datetime
 from odoo.exceptions import ValidationError
 from odoo.tools.translate import html_translate
 
@@ -484,14 +484,13 @@ class EventEvent(models.Model):
     @api.depends('event_type_id')
     def _compute_note(self):
         for event in self:
-            if event.event_type_id and not is_html_empty(event.event_type_id.note):
+            if event.event_type_id and event.event_type_id.note:
                 event.note = event.event_type_id.note
 
     @api.depends('event_type_id')
     def _compute_ticket_instructions(self):
         for event in self:
-            if is_html_empty(event.ticket_instructions) and not \
-               is_html_empty(event.event_type_id.ticket_instructions):
+            if event.ticket_instructions and event.event_type_id.ticket_instructions:
                 event.ticket_instructions = event.event_type_id.ticket_instructions
 
     @api.constrains('seats_max', 'seats_available', 'seats_limited')

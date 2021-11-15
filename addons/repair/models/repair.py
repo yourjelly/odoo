@@ -7,7 +7,7 @@ from markupsafe import Markup
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_compare, is_html_empty
+from odoo.tools import float_compare
 
 
 class StockMove(models.Model):
@@ -348,7 +348,7 @@ class Repair(models.Model):
                     'partner_id': partner_invoice.id,
                     'partner_shipping_id': repair.address_id.id,
                     'currency_id': currency.id,
-                    'narration': narration if not is_html_empty(narration) else '',
+                    'narration': narration if narration else '',
                     'invoice_origin': repair.name,
                     'repair_ids': [(4, repair.id)],
                     'invoice_line_ids': [],
@@ -362,8 +362,8 @@ class Repair(models.Model):
                 invoice_vals = current_invoices_list[0]
                 invoice_vals['invoice_origin'] += ', ' + repair.name
                 invoice_vals['repair_ids'].append((4, repair.id))
-                if not is_html_empty(narration):
-                    if  is_html_empty(invoice_vals['narration']):
+                if narration:
+                    if not invoice_vals['narration']:
                         invoice_vals['narration'] = narration
                     else:
                         invoice_vals['narration'] += Markup('<br/>') + narration

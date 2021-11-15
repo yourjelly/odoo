@@ -15,7 +15,7 @@ from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
 from odoo.tools.translate import _
-from odoo.tools import date_utils, email_re, email_split, is_html_empty, groupby
+from odoo.tools import date_utils, email_re, email_split, groupby
 
 from . import crm_stage
 
@@ -1178,7 +1178,7 @@ class Lead(models.Model):
             on the action, the same is returned. Otherwise, we build the help message which
             contains the alias responsible for creating the lead (if available) and return it.
         """
-        if not is_html_empty(help):
+        if help:
             return help
 
         help_title, sub_title = "", ""
@@ -1312,7 +1312,6 @@ class Lead(models.Model):
             values={
                 "merged_followers": merged_followers,
                 "opportunities": opportunities_tail,
-                "is_html_empty": is_html_empty
             },
             subtype_id=self.env.ref('mail.mt_note').id
         )
@@ -1350,7 +1349,7 @@ class Lead(models.Model):
 
     def _merge_get_fields_specific(self):
         return {
-            'description': lambda fname, leads: '<br/><br/>'.join(desc for desc in leads.mapped('description') if not is_html_empty(desc)),
+            'description': lambda fname, leads: '<br/><br/>'.join(desc for desc in leads.mapped('description') if desc),
             'type': lambda fname, leads: 'opportunity' if any(lead.type == 'opportunity' for lead in leads) else 'lead',
             'priority': lambda fname, leads: max(leads.mapped('priority')) if leads else False,
             'tag_ids': lambda fname, leads: leads.mapped('tag_ids'),

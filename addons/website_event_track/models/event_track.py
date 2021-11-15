@@ -8,7 +8,6 @@ from random import randint
 from odoo import api, fields, models
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.osv import expression
-from odoo.tools.mail import is_html_empty
 from odoo.tools.translate import _, html_translate
 
 
@@ -204,8 +203,8 @@ class Track(models.Model):
         for track in self:
             if not track.partner_biography:
                 track.partner_biography = track.partner_id.website_description
-            elif track.partner_id and is_html_empty(track.partner_biography) and \
-                not is_html_empty(track.partner_id.website_description):
+            elif track.partner_id and not track.partner_biography and \
+                track.partner_id.website_description:
                 track.partner_biography = track.partner_id.website_description
 
     @api.depends('partner_id')
@@ -415,7 +414,6 @@ class Track(models.Model):
                 'website_event_track.event_track_template_new',
                 values={
                     'track': track,
-                    'is_html_empty': is_html_empty,
                 },
                 subtype_id=self.env.ref('website_event_track.mt_event_track').id,
                 **email_values,

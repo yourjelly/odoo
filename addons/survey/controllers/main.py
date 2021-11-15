@@ -13,7 +13,7 @@ from odoo.addons.base.models.ir_ui_view import keep_query
 from odoo.exceptions import UserError
 from odoo.http import request, content_disposition
 from odoo.osv import expression
-from odoo.tools import format_datetime, format_date, is_html_empty
+from odoo.tools import format_datetime, format_date
 
 _logger = logging.getLogger(__name__)
 
@@ -237,7 +237,6 @@ class Survey(http.Controller):
                 - previous_page_id : come from the breadcrumb or the back button and force the next questions to load
                                      to be the previous ones. """
         data = {
-            'is_html_empty': is_html_empty,
             'survey': survey_sudo,
             'answer': answer_sudo,
             'breadcrumb_pages': [{
@@ -558,7 +557,6 @@ class Survey(http.Controller):
 
         survey_sudo, answer_sudo = access_data['survey_sudo'], access_data['answer_sudo']
         return request.render('survey.survey_page_print', {
-            'is_html_empty': is_html_empty,
             'review': review,
             'survey': survey_sudo,
             'answer': answer_sudo if survey_sudo.scoring_type != 'scoring_without_answers' else answer_sudo.browse(),

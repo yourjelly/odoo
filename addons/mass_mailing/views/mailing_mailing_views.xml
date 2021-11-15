@@ -207,8 +207,7 @@
                                                 'cssReadonly': 'mass_mailing.iframe_css_assets_edit'
                                         }" attrs="{'readonly': [('state', 'in', ('sending', 'done'))]}"/>
                                     </div>
-                                    <field name="is_body_empty" invisible="1"/>
-                                    <div class="o_view_nocontent oe_read_only" attrs="{'invisible': ['|', ('is_body_empty', '=', False), ('state', 'in', ('sending', 'done'))]}">
+                                    <div class="o_view_nocontent oe_read_only" attrs="{'invisible': ['|', ('body_html', '!=', False), ('state', 'in', ('sending', 'done'))]}">
                                         <div class="o_nocontent_help">
                                             <p class="o_view_nocontent_smiling_face">
                                                 No template picked yet.
@@ -423,8 +422,7 @@
                                 <field name="body_html" class="o_mail_body" widget="html"
                                     options="{'cssReadonly': 'mass_mailing.iframe_css_assets_readonly', 'notEditable': True}"/>
                             </div>
-                            <field name="is_body_empty" invisible="1"/>
-                            <div class="o_view_nocontent oe_read_only" attrs="{'invisible': ['|', ('is_body_empty', '=', False), ('state', 'in', ('sending', 'done'))]}">
+                            <div class="o_view_nocontent oe_read_only" attrs="{'invisible': ['|', ('body_html', '!=', False), ('state', 'in', ('sending', 'done'))]}">
                                 <div class="o_nocontent_help">
                                     <p class="o_view_nocontent_smiling_face">
                                         No template picked yet.

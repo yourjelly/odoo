@@ -60,7 +60,7 @@
                             <field name="tz" groups="base.group_no_one"/>
                         </group>
                         <group>
-                            <field name="message"/>
+                            <field name="message" required="1"/>
                         </group>
                     </group>
                 </sheet>

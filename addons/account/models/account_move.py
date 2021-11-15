@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re, html_escape, is_html_empty
+from odoo.tools import float_compare, date_utils, email_split, email_re, html_escape
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 from datetime import date, timedelta
@@ -3436,7 +3436,7 @@ class AccountMove(models.Model):
                 move.narration = False
             else:
                 if not move.company_id.terms_type == 'html':
-                    narration = move.company_id.invoice_terms if not is_html_empty(move.company_id.invoice_terms) else ''
+                    narration = move.company_id.invoice_terms
                 else:
                     baseurl = self.env.company.get_base_url() + '/terms'
                     narration = _('Terms & Conditions: %s', baseurl)

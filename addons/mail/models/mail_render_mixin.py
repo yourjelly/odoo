@@ -13,7 +13,7 @@ from werkzeug import urls
 from odoo import _, api, fields, models, tools
 from odoo.addons.base.models.qweb import QWebCodeFound
 from odoo.exceptions import UserError, AccessError
-from odoo.tools import is_html_empty, safe_eval
+from odoo.tools import safe_eval
 from odoo.tools.rendering_tools import convert_inline_template_to_qweb, parse_inline_template, render_inline_template, template_env_globals
 
 _logger = logging.getLogger(__name__)
@@ -232,7 +232,6 @@ class MailRenderMixin(models.AbstractModel):
             'format_duration': lambda value: tools.format_duration(value),
             'user': self.env.user,
             'ctx': self._context,
-            'is_html_empty': is_html_empty,
         }
         render_context.update(copy.copy(template_env_globals))
         return render_context

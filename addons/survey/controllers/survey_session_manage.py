@@ -9,7 +9,6 @@ from werkzeug.exceptions import NotFound
 
 from odoo import fields, http
 from odoo.http import request
-from odoo.tools import is_html_empty
 
 
 class UserInputSession(http.Controller):
@@ -240,7 +239,6 @@ class UserInputSession(http.Controller):
             } for line in full_statistics.get('table_data', request.env['survey.user_input.line'])[:100]]
 
         return {
-            'is_html_empty': is_html_empty,
             'question_statistics_graph': full_statistics.get('graph_data'),
             'input_line_values': input_line_values,
             'answers_validity': json.dumps(answers_validity),

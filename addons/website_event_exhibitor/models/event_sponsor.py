@@ -8,7 +8,6 @@ from odoo import api, fields, models, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.resource.models.resource import float_to_time
 from odoo.modules.module import get_resource_path
-from odoo.tools import is_html_empty
 from odoo.tools.translate import html_translate
 
 
@@ -142,7 +141,7 @@ class Sponsor(models.Model):
     @api.depends('partner_id')
     def _compute_website_description(self):
         for sponsor in self:
-            if is_html_empty(sponsor.website_description):
+            if not sponsor.website_description:
                 sponsor.website_description = sponsor.partner_id.website_description
 
     @api.depends('event_id.is_ongoing', 'hour_from', 'hour_to', 'event_id.date_begin', 'event_id.date_end')

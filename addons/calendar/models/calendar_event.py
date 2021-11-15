@@ -13,7 +13,7 @@ from odoo.addons.calendar.models.calendar_attendee import Attendee
 from odoo.addons.calendar.models.calendar_recurrence import weekday_to_field, RRULE_TYPE_SELECTION, END_TYPE_SELECTION, MONTH_BY_SELECTION, WEEKDAY_SELECTION, BYDAY_SELECTION
 from odoo.tools.translate import _
 from odoo.tools.misc import get_lang
-from odoo.tools import pycompat, html2plaintext, is_html_empty
+from odoo.tools import pycompat, html2plaintext
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -197,8 +197,6 @@ class Meeting(models.Model):
     weekday = fields.Selection(WEEKDAY_SELECTION, compute='_compute_recurrence', readonly=False)
     byday = fields.Selection(BYDAY_SELECTION, compute='_compute_recurrence', readonly=False)
     until = fields.Date(compute='_compute_recurrence', readonly=False)
-    # UI Fields.
-    display_description = fields.Boolean(compute='_compute_display_description')
 
     def _compute_is_highlighted(self):
         if self.env.context.get('active_model') == 'res.partner':
@@ -337,11 +335,6 @@ class Meeting(models.Model):
                 event.update({**false_values, **defaults, **event_values, **rrule_values})
             else:
                 event.update(false_values)
-
-    @api.depends('description')
-    def _compute_display_description(self):
-        for event in self:
-            event.display_description = not is_html_empty(event.description)
 
     # ------------------------------------------------------------
     # CRUD
@@ -984,7 +977,7 @@ class Meeting(models.Model):
             event.add('dtstart').value = ics_datetime(meeting.start, meeting.allday)
             event.add('dtend').value = ics_datetime(meeting.stop, meeting.allday)
             event.add('summary').value = meeting.name
-            if not is_html_empty(meeting.description):
+            if meeting.description:
                 if 'appointment_type_id' in meeting._fields and self.appointment_type_id:
                     # convert_online_event_desc_to_text method for correct data formatting in external calendars
                     event.add('description').value = self.convert_online_event_desc_to_text(meeting.description)
