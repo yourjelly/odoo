@@ -27,7 +27,7 @@ class OnboardingController(http.Controller):
         return request.env.company.adyen_account_id._get_creation_redirect_form()
 
     @http.route('/odoo_payments/return', type='http', methods=['GET'], auth='user')
-    def odoo_payments_return_from_redirect(self, account_holder_code, account_code, adyen_uuid, proxy_token):
+    def odoo_payments_return_from_redirect(self, account_code, account_holder_code, adyen_uuid, proxy_token):
         """ Update the account with the data received from the merchant and redirect to the account.
 
         The user is redirected to this route by the merchant instance (odoo.com) after having been
