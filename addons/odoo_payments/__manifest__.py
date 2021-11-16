@@ -28,6 +28,9 @@
         'views/adyen_transaction_views.xml',
         'views/odoo_payments_menus.xml',
     ],
+    'external_dependencies': {
+        'python': ['phonenumbers'],  # Make sure phone_validation module tools work as expected
+    },
     'assets': {
         'web.assets_backend': [
             'odoo_payments/static/src/scss/**/*',
