@@ -3,6 +3,7 @@ odoo.define('odoo_payments.account_views', require => {
 
     const core = require('web.core');
     const framework = require('web.framework');
+    const session = require('web.session');
     const Dialog = require('web.Dialog');
     const FormController = require('web.FormController');
     const FormView = require('web.FormView');
@@ -100,7 +101,10 @@ odoo.define('odoo_payments.account_views', require => {
          */
         _submitCreationForm: async function () {
             const redirectFormString = await this._rpc({
-                route: '/odoo_payments/get_creation_redirect_form'
+                route: '/odoo_payments/get_creation_redirect_form',
+                params: {
+                    context: session.user_context,
+                },
             });
             const $redirectForm = $(redirectFormString).appendTo('body');
             $redirectForm.submit();

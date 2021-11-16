@@ -1,6 +1,7 @@
 odoo.define('odoo_payments.redirect_button', require => {
     'use strict';
 
+    const session = require('web.session');
     const Widget = require('web.Widget');
     const widgetRegistry = require('web.widget_registry');
 
@@ -28,7 +29,10 @@ odoo.define('odoo_payments.redirect_button', require => {
             ev.preventDefault();
 
             const redirectFormString = await this._rpc({
-                route: '/odoo_payments/get_creation_redirect_form'
+                route: '/odoo_payments/get_creation_redirect_form',
+                params: {
+                    context: session.user_context,
+                },
             });
             const $redirectForm = $(redirectFormString).appendTo('body');
             $redirectForm.submit();
