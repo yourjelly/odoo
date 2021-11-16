@@ -70,8 +70,9 @@ class PaymentTransaction(models.Model):
             },  # Proxy-specific data
         }
         return {
-            'data': json.dumps(data),  # TODO ANV why not in an embedded dict?
+            'data': json.dumps(data),
             'api_url': self.acquirer_id._odoo_get_api_url(),
+            'is_test': self.acquirer_id.odoo_adyen_account_id.is_test,
         }
 
     def _send_payment_request(self):
