@@ -3448,7 +3448,7 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
-    _order = "date desc, move_name desc, id"
+    _order = "date desc, move_name desc, sequence, id"
     _check_company_auto = True
 
     # ==== Business fields ====
