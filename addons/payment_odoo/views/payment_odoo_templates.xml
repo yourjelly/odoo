@@ -4,7 +4,6 @@
     <template id="redirect_form">
         <form t-att-action="api_url" method="post">
             <input type="hidden" name="data" t-att-value="data"/>
-            <input type="hidden" name="is_test" t-att-value="str(is_test)"/>
         </form>
     </template>
 
