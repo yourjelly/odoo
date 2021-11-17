@@ -45,8 +45,8 @@ class OnboardingController(http.Controller):
         :param str proxy_token: The secret token to authenticate requests from the proxy
         """
         if not request.env.user.has_group('base.group_erp_manager'):
-            # Adyen Account updates are restricted to users with "Settings" access
-            raise Forbidden()
+            raise Forbidden()  # Prevents users without "Settings" access to update Adyen accounts
+
         account_sudo = request.env['adyen.account'].sudo().search([
             ('account_holder_code', '=', account_holder_code),
             ('company_id', 'in', request.env.user.company_ids.ids),
