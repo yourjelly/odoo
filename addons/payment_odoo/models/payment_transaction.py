@@ -47,7 +47,7 @@ class PaymentTransaction(models.Model):
         signature = payment_utils.generate_access_token(
             converted_amount, self.currency_id.name, self.reference
         )
-        data = {
+        adyen_data = {
             'amount': {
                 'value': converted_amount,
                 'currency': self.currency_id.name,
@@ -70,7 +70,7 @@ class PaymentTransaction(models.Model):
             },  # Proxy-specific data
         }
         return {
-            'adyen_data': json.dumps(data),
+            'adyen_data': json.dumps(adyen_data),
             'api_url': self.acquirer_id._odoo_get_api_url(),
         }
 

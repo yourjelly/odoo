@@ -3,7 +3,7 @@
 
     <template id="redirect_form">
         <form t-att-action="api_url" method="post">
-            <input type="hidden" name="data" t-att-value="data"/>
+            <input type="hidden" name="adyen_data" t-att-value="adyen_data"/>
         </form>
     </template>
 
