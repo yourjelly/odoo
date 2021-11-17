@@ -44,9 +44,9 @@ class PaymentTransaction(models.Model):
         # provide the lang string as is (after adapting the format) and let Adyen find the best fit.
         lang_code = (self._context.get('lang') or 'en-US').replace('_', '-')
         base_url = self.acquirer_id.get_base_url()
-        signature = payment_utils.generate_access_token(
-            converted_amount, self.currency_id.name, self.reference
-        )
+        access_token = payment_utils.generate_access_token(
+            self.amount, self.currency_id.name, self.reference
+        )  # Used to check that a redirect or a notification originates from this transaction
         adyen_data = {
             'amount': {
                 'value': converted_amount,
@@ -59,15 +59,14 @@ class PaymentTransaction(models.Model):
             ) if self.tokenize else '',
             'recurringProcessingModel': 'Subscription' if self.tokenize else '',
             'storePaymentMethod': self.tokenize,  # True by default on Adyen side
-            # Since the Pay by Link API redirects the customer without any payload, we use the
-            # /payment/status route directly as return url.
-            'returnUrl': urls.url_join(base_url, '/payment/status'),
+            'returnUrl': f'{urls.url_join(base_url, OdooController._return_url)}'
+                         f'?reference={self.reference}&access_token={access_token}',
             'metadata': {
-                'merchant_signature': signature,  # TODO ANV not sure if necessary to generate an access token in redirect
-                'notification_url': urls.url_join(base_url, OdooController._notification_url),
+                'notification_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
                 'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code
-            },  # Proxy-specific data
+                'access_token': access_token,
+            },
         }
         return {
             'adyen_data': json.dumps(adyen_data),
@@ -94,9 +93,9 @@ class PaymentTransaction(models.Model):
             self.amount, self.currency_id, CURRENCY_DECIMALS.get(self.currency_id.name)
         )
         base_url = self.acquirer_id.get_base_url()
-        signature = payment_utils.generate_access_token(
-            converted_amount, self.currency_id.name, self.reference
-        )
+        access_token = payment_utils.generate_access_token(
+            self.amount, self.currency_id.name, self.reference
+        )  # Used to check that a notification originates from this transaction
         data = {
             'amount': {
                 'value': converted_amount,
@@ -113,11 +112,11 @@ class PaymentTransaction(models.Model):
             'recurringProcessingModel': 'Subscription',
             'shopperInteraction': 'ContAuth',
             'metadata': {
-                'merchant_signature': signature,
-                'notification_url': urls.url_join(base_url, OdooController._notification_url),
+                'notification_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
-                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,
-            },  # Proxy-specific data
+                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code
+                'access_token': access_token,
+            },
         }
         response_content = self.acquirer_id.odoo_adyen_account_id._adyen_rpc('v1/payments', data)  # TODO ANV where does that lead to?
 

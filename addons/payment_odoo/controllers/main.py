@@ -14,10 +14,31 @@ _logger = logging.getLogger(__name__)
 
 
 class OdooController(http.Controller):
-    _notification_url = '/payment/odoo/notification'
+    _return_url = '/payment/odoo/return'
+    _webhook_url = '/payment/odoo/webhook'
 
-    @http.route(_notification_url, type='json', auth='public')
-    def odoo_notification(self):
+    @http.route(_return_url, type='http', methods=['GET'], auth='public')
+    def odoo_return_from_redirect(self, reference, access_token):
+        """ Set the transaction as 'pending' and redirect the user to the status page.
+
+        The user is redirected to this route by Adyen after making a payment. The reference and
+        access token are appended to the return URL before passing it to Adyen.
+
+        :param str reference: The reference of the transaction
+        :param str access_token: The access token used to verify the provided values
+        """
+        tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
+            'odoo', {'merchantReference': reference}
+        )
+        if payment_utils.check_access_token(
+            access_token, tx_sudo.amount, tx_sudo.currency_id.name, tx_sudo.reference
+        ):  # Check the access token to prevent setting any transaction as 'pending'.
+            tx_sudo._set_pending()
+
+        return request.redirect('/payment/status')
+
+    @http.route(_webhook_url, type='json', auth='public')
+    def odoo_webhook(self):
         """ Process the data sent by Adyen to the webhook based on the event code.
 
         See https://docs.adyen.com/development-resources/webhooks/understand-notifications for the
@@ -32,19 +53,16 @@ class OdooController(http.Controller):
         notification_data = json.loads(request.httprequest.data)
         for notification_item in notification_data['notificationItems']:
             notification_data = notification_item['NotificationRequestItem']
-
-            # Check the source and integrity of the notification
-            received_signature = notification_data.get('additionalData', {}).get(
-                'metadata.merchant_signature'
-            )
             tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
                 'odoo', notification_data
             )
 
-            # Ignore signature for REFUND, the signature will be the one of the original transaction
+            # Check that the notification originates from the transaction. Don't check the access
+            # token REFUND notifications. The signature will be the one of the original transaction.
             event_code = notification_data['eventCode']
-            if event_code != 'REFUND' and not self._verify_notification_signature(
-                received_signature, tx_sudo
+            access_token = notification_data.get('additionalData', {}).get('metadata.access_token')
+            if event_code != 'REFUND' and not self._verify_notification_access_token(
+                access_token, tx_sudo
             ):
                 return
 
@@ -73,29 +91,28 @@ class OdooController(http.Controller):
                 return  # Don't handle unsupported event codes or failed events
 
             # Handle the notification data as a regular feedback
-            request.env['payment.transaction'].sudo()._handle_feedback_data('odoo', notification_data)
+            request.env['payment.transaction'].sudo()._handle_feedback_data(
+                'odoo', notification_data
+            )
         return '[accepted]'
 
-    def _verify_notification_signature(self, received_signature, tx):
+    def _verify_notification_access_token(self, received_access_token, tx):
         """ Check that the signature computed from the transaction values matches the received one.
 
-        :param str received_signature: The signature sent with the notification
+        :param str received_access_token: The access token sent with the notification
         :param recordset tx: The transaction of the notification, as a `payment.transaction` record
 
-        :return: Whether the signatures match
+        :return: Whether the access token matches
         :rtype: str
         """
-        if not received_signature:
-            _logger.warning("ignored notification with missing signature")
+        if not received_access_token:
+            _logger.warning("ignored notification with missing access token")
             return False
 
-        converted_amount = payment_utils.to_minor_currency_units(
-            tx.amount, tx.currency_id, CURRENCY_DECIMALS.get(tx.currency_id.name)
-        )
         if not payment_utils.check_access_token(
-            received_signature, converted_amount, tx.currency_id.name, tx.reference
+            received_access_token, self.amount, tx.currency_id.name, tx.reference
         ):
-            _logger.warning("ignored notification with invalid signature")
+            _logger.warning("ignored notification with invalid access token")
             return False
 
         return True
