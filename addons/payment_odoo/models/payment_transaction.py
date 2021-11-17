@@ -70,7 +70,7 @@ class PaymentTransaction(models.Model):
             },  # Proxy-specific data
         }
         return {
-            'data': json.dumps(data),
+            'adyen_data': json.dumps(data),
             'api_url': self.acquirer_id._odoo_get_api_url(),
         }
 
