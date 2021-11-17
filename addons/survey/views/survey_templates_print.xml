@@ -68,5 +68,12 @@
             </body>
         </html>
     </template>
+
+    <template id="survey_page_print_report" inherit_id="survey.survey_page_print" primary="True">
+        <xpath expr="//t[@t-call='survey.layout']" position="attributes">
+            <attribute name="t-call">web.basic_layout</attribute>
+        </xpath>
+    </template>
+
 </data>
 </odoo>

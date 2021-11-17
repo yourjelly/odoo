@@ -29,5 +29,16 @@
             <field name="binding_type">report</field>
             <field name="paperformat_id" ref="paperformat_survey_certification"/>
         </record>
+
+        <record id="survey_report" model="ir.actions.report">
+            <field name="name">Print</field>
+            <field name="model">survey.survey</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">survey.survey_page_print_report</field>
+            <field name="report_file">survey.survey_page_print_report</field>
+            <field name="print_report_name">'Survey - %s' % (object.display_name)</field>
+            <field name="binding_model_id" ref="model_survey_survey"/>
+            <field name="binding_type">report</field>
+        </record>
     </data>
 </odoo>

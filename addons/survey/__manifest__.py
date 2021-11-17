@@ -100,6 +100,9 @@ sent mails with personal token for the invitation of the survey.
         'web.assets_tests': [
             'survey/static/tests/**/*',
         ],
+        'web.report_assets_common': [
+            'survey/static/src/scss/survey_templates_form.scss',
+        ],
     },
     'license': 'LGPL-3',
 }
