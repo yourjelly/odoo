@@ -64,7 +64,7 @@ class PaymentTransaction(models.Model):
             'metadata': {
                 'notification_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
-                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code
+                'account_code': self.acquirer_id.odoo_adyen_account_id.account_code,
                 'access_token': access_token,
             },
         }
@@ -114,7 +114,7 @@ class PaymentTransaction(models.Model):
             'metadata': {
                 'notification_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
-                'payout': self.acquirer_id.odoo_adyen_account_id.account_code,  # TODO ANVFE rename to account_code
+                'account_code': self.acquirer_id.odoo_adyen_account_id.account_code,
                 'access_token': access_token,
             },
         }
