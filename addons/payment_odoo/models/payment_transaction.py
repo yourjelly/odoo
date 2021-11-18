@@ -62,7 +62,7 @@ class PaymentTransaction(models.Model):
             'returnUrl': f'{urls.url_join(base_url, OdooController._return_url)}'
                          f'?reference={self.reference}&access_token={access_token}',
             'metadata': {
-                'notification_url': urls.url_join(base_url, OdooController._webhook_url),
+                'webhook_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
                 'account_code': self.acquirer_id.odoo_adyen_account_id.account_code,
                 'access_token': access_token,
@@ -112,7 +112,7 @@ class PaymentTransaction(models.Model):
             'recurringProcessingModel': 'Subscription',
             'shopperInteraction': 'ContAuth',
             'metadata': {
-                'notification_url': urls.url_join(base_url, OdooController._webhook_url),
+                'webhook_url': urls.url_join(base_url, OdooController._webhook_url),
                 'adyen_uuid': self.acquirer_id.odoo_adyen_account_id.adyen_uuid,
                 'account_code': self.acquirer_id.odoo_adyen_account_id.account_code,
                 'access_token': access_token,

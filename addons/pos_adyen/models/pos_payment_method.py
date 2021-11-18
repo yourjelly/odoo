@@ -146,7 +146,7 @@ class PosPaymentMethod(models.Model):
             return company_sudo.adyen_account_id._adyen_rpc('v1/%s' % operation, {
                 'request_data': data,
                 'account_code': self.sudo().adyen_account_id.account_code,
-                'notification_url': company_sudo.get_base_url(),
+                'webhook_url': company_sudo.get_base_url(),
             })
         except Forbidden:
             return {
