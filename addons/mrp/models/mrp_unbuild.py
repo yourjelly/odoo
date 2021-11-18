@@ -2,9 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import UserError
 from odoo.tools import float_compare
-from odoo.osv import expression
 
 
 class MrpUnbuild(models.Model):
@@ -40,8 +39,7 @@ class MrpUnbuild(models.Model):
         '|',
             ('company_id', '=', company_id),
             ('company_id', '=', False)
-        ]
-""",
+        ]""",
         states={'done': [('readonly', True)]}, check_company=True)
     mo_id = fields.Many2one(
         'mrp.production', 'Manufacturing Order',
