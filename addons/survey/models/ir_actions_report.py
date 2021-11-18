@@ -10,9 +10,9 @@ class IrActionsReport(models.Model):
     def _get_rendering_context(self, docids, data):
         data = super()._get_rendering_context(docids, data)
 
-        if self.report_name == 'survey.survey_page_print_report':
+        if self.report_name in ['survey.survey_page_print_report', 'survey.survey_answer_print_report']:
             docs = data.get('docs')
-            if docs._name == 'survey.survey':
+            if self.report_name == 'survey.survey_page_print_report':
                 survey = docs
                 answer = self.env['survey.user_input']
             else:
