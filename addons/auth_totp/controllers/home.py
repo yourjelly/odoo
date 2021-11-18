@@ -27,6 +27,7 @@ class Home(odoo.addons.web.controllers.main.Home):
         error = None
         secret = kwargs.get("secret")
         qrcode = bytes(kwargs.get("qrcode")[2:-1], 'utf-8') if kwargs.get("qrcode") else None
+        url = kwargs.get("url")
 
         user = request.env['res.users'].browse(request.session.pre_uid)
         if user and request.httprequest.method == 'GET':
@@ -77,10 +78,12 @@ class Home(odoo.addons.web.controllers.main.Home):
             w = request.env['auth_totp.wizard'].sudo().create({'user_id': user.id})
             secret = w.secret
             qrcode = w.qrcode
+            url = w.url
 
         return request.render('auth_totp.auth_totp_form', {
             'error': error,
             'redirect': redirect,
             'secret': secret,
             'qrcode': qrcode,
+            'url': url,
         })
