@@ -47,7 +47,7 @@ class PaymentTransaction(models.Model):
         access_token = payment_utils.generate_access_token(
             self.amount, self.currency_id.name, self.reference
         )  # Used to check that a redirect or a notification originates from this transaction
-        adyen_data = {
+        data = {
             'amount': {
                 'value': converted_amount,
                 'currency': self.currency_id.name,
@@ -68,9 +68,9 @@ class PaymentTransaction(models.Model):
                 'access_token': access_token,
             },
         }
+        payment_link = self.acquirer_id.odoo_adyen_account_id._adyen_rpc('v1/payment_link', data)
         return {
-            'adyen_data': json.dumps(adyen_data),
-            'api_url': self.acquirer_id._odoo_get_api_url(),
+            'api_url': payment_link,
         }
 
     def _send_payment_request(self):
