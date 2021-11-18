@@ -12,8 +12,11 @@
                         <a href="https://www.odoo.com/documentation/15.0/applications/general/auth/2fa.html"
                            title="Learn More" target="_blank">Learn More</a>
                     </div>
+                    <img t-if="secret" name="qrcode" t-att-src = "image_data_uri (qrcode)"/>
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <input type="hidden" name="redirect" t-att-value="redirect"/>
+                    <input t-if="secret" type="hidden" name="secret" t-att-value="secret"/>
+                    <input t-if="secret" type="hidden" name="qrcode" t-att-value="qrcode"/>
                     <div class="form-group">
                         <label class="font-weight-bold" for="totp_token">Authentication Code</label>
                         <input id="totp_token" name="totp_token" class="form-control mb-2"

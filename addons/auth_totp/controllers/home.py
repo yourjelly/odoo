@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import functools
 
 import odoo.addons.web.controllers.main
 from odoo import http, _
@@ -9,7 +10,7 @@ from odoo.http import request
 TRUSTED_DEVICE_COOKIE = 'td_id'
 TRUSTED_DEVICE_AGE = 90*86400 # 90 days expiration
 
-
+compress = functools.partial(re.sub, r'\s', '')
 class Home(odoo.addons.web.controllers.main.Home):
     @http.route(
         '/web/login/totp',
@@ -24,6 +25,8 @@ class Home(odoo.addons.web.controllers.main.Home):
             return request.redirect('/web/login')
 
         error = None
+        secret = kwargs.get("secret")
+        qrcode = bytes(kwargs.get("qrcode")[2:-1], 'utf-8') if kwargs.get("qrcode") else None
 
         user = request.env['res.users'].browse(request.session.pre_uid)
         if user and request.httprequest.method == 'GET':
@@ -37,8 +40,13 @@ class Home(odoo.addons.web.controllers.main.Home):
 
         elif user and request.httprequest.method == 'POST':
             try:
-                with user._assert_can_auth():
-                    user._totp_check(int(re.sub(r'\s', '', kwargs['totp_token'])))
+                if not user.totp_enabled:
+                    c = int(compress(kwargs.get('totp_token')))
+                    if not user.with_user(user)._totp_try_setting(secret, c):
+                        raise AccessDenied
+                else:
+                    with user._assert_can_auth():
+                        user._totp_check(int(re.sub(r'\s', '', kwargs['totp_token'])))
             except AccessDenied:
                 error = _("Verification failed, please double-check the 6-digit code")
             except ValueError:
@@ -65,7 +73,14 @@ class Home(odoo.addons.web.controllers.main.Home):
                     )
                 return response
 
+        if not secret and user.sudo().totp_required and not user.totp_enabled:
+            w = request.env['auth_totp.wizard'].sudo().create({'user_id': user.id})
+            secret = w.secret
+            qrcode = w.qrcode
+
         return request.render('auth_totp.auth_totp_form', {
             'error': error,
             'redirect': redirect,
+            'secret': secret,
+            'qrcode': qrcode,
         })

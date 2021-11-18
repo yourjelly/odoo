@@ -22,6 +22,7 @@ class Users(models.Model):
 
     totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS)
     totp_enabled = fields.Boolean(string="Two-factor authentication", compute='_compute_totp_enabled')
+    totp_required = fields.Boolean(string="Two-factor authentication required", groups="base.group_erp_manager")
     totp_trusted_device_ids = fields.One2many('auth_totp.device', 'user_id', string="Trusted Devices")
 
     @property
@@ -33,7 +34,7 @@ class Users(models.Model):
         r = super()._mfa_url()
         if r is not None:
             return r
-        if self.totp_enabled:
+        if self.totp_enabled or self.sudo().totp_required:
             return '/web/login/totp'
 
     @api.depends('totp_secret')
@@ -114,13 +115,8 @@ class Users(models.Model):
         if self.totp_enabled:
             raise UserError(_("Two-factor authentication already enabled"))
 
-        secret_bytes_count = TOTP_SECRET_SIZE // 8
-        secret = base64.b32encode(os.urandom(secret_bytes_count)).decode()
-        # format secret in groups of 4 characters for readability
-        secret = ' '.join(map(''.join, zip(*[iter(secret)]*4)))
         w = self.env['auth_totp.wizard'].create({
             'user_id': self.id,
-            'secret': secret,
         })
         return {
             'type': 'ir.actions.act_window',

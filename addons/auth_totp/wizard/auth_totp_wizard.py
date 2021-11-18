@@ -5,6 +5,7 @@ import base64
 import functools
 import io
 import qrcode
+import os
 import re
 import werkzeug.urls
 
@@ -13,7 +14,7 @@ from odoo.addons.base.models.res_users import check_identity
 from odoo.exceptions import UserError
 from odoo.http import request
 
-from odoo.addons.auth_totp.models.totp import ALGORITHM, DIGITS, TIMESTEP
+from odoo.addons.auth_totp.models.totp import ALGORITHM, DIGITS, TIMESTEP, TOTP_SECRET_SIZE
 
 compress = functools.partial(re.sub, r'\s', '')
 
@@ -21,8 +22,14 @@ class TOTPWizard(models.TransientModel):
     _name = 'auth_totp.wizard'
     _description = "2-Factor Setup Wizard"
 
+    def _default_secret(self):
+        secret_bytes_count = TOTP_SECRET_SIZE // 8
+        secret = base64.b32encode(os.urandom(secret_bytes_count)).decode()
+        # format secret in groups of 4 characters for readability
+        return ' '.join(map(''.join, zip(*[iter(secret)] * 4)))
+
     user_id = fields.Many2one('res.users', required=True, readonly=True)
-    secret = fields.Char(required=True, readonly=True)
+    secret = fields.Char(required=True, readonly=True, default=_default_secret)
     url = fields.Char(store=True, readonly=True, compute='_compute_qrcode')
     qrcode = fields.Binary(
         attachment=False, store=True, readonly=True,

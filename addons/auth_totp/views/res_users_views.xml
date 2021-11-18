@@ -23,6 +23,9 @@
                     <field name="totp_enabled" invisible="1"/>
                     <!-- For own user, allow to activate the two-factor Authentication -->
                     <group>
+                        <field name="totp_required"/>
+                    </group>
+                    <group>
                         <div>
                             <div class="o_horizontal_separator d-flex align-items-center mt-0">Two-factor Authentication
                                 <div attrs="{'invisible': [('totp_enabled', '!=', False)]}">
