@@ -12,6 +12,12 @@ class MrpUnbuild(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
+    @api.model
+    def _get_default_picking_type(self):
+        company_id = self.env.context.get('default_company_id', self.env.company.id)
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
+        return warehouse.unbuild_type_id.id
+
     name = fields.Char('Reference', copy=False, readonly=True, default=lambda x: _('New'))
     product_id = fields.Many2one(
         'product.product', 'Product', check_company=True,
@@ -26,7 +32,7 @@ class MrpUnbuild(models.Model):
         required=True, states={'done': [('readonly', True)]})
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
-        required=True, states={'done': [('readonly', True)]})
+        required=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     bom_id = fields.Many2one(
         'mrp.bom', 'Bill of Material',
         domain="""[
@@ -46,11 +52,15 @@ class MrpUnbuild(models.Model):
         domain="[('state', '=', 'done'), ('company_id', '=', company_id), ('product_id', '=?', product_id), ('bom_id', '=?', bom_id)]",
         states={'done': [('readonly', True)]}, check_company=True)
     mo_bom_id = fields.Many2one('mrp.bom', 'Bill of Material used on the Production Order', related='mo_id.bom_id')
+    move_component_ids = fields.One2many(
+        'stock.move', 'unbuild_id', 'Components', copy=False,
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]})
     lot_id = fields.Many2one(
-        'stock.production.lot', 'Lot/Serial Number',
-        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True,
-        states={'done': [('readonly', True)]}, help="Lot/Serial Number of the product to unbuild.")
-    has_tracking=fields.Selection(related='product_id.tracking', readonly=True)
+        'stock.production.lot', 'Lot/Serial Number', check_company=True,
+        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]",
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        help="Lot/Serial Number of the product to unbuild.")
+    has_tracking = fields.Selection(related='product_id.tracking')
     location_id = fields.Many2one(
         'stock.location', 'Source Location',
         domain="[('usage','=','internal'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -61,6 +71,10 @@ class MrpUnbuild(models.Model):
         domain="[('usage','=','internal'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         check_company=True,
         required=True, states={'done': [('readonly', True)]}, help="Location where you want to send the components resulting from the unbuild order.")
+    picking_type_id = fields.Many2one(
+        'stock.picking.type', 'Operation Type',
+        domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]",
+        default=_get_default_picking_type, required=True, check_company=True)
     consume_line_ids = fields.One2many(
         'stock.move', 'consume_unbuild_id', readonly=True,
         string='Consumed Disassembly Lines')
@@ -69,7 +83,20 @@ class MrpUnbuild(models.Model):
         string='Processed Disassembly Lines')
     state = fields.Selection([
         ('draft', 'Draft'),
-        ('done', 'Done')], string='Status', default='draft')
+        ('confirmed', 'Confirmed'),
+        ('progress', 'In Progress'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')], string='Status', default='draft')
+    user_id = fields.Many2one(
+        'res.users', 'Responsible', default=lambda self: self.env.user,
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
+        domain=lambda self: [('groups_id', 'in', self.env.ref('mrp.group_mrp_user').id)])
+    planned_date = fields.Datetime(
+        'Scheduled Date', copy=False, default=fields.Datetime.now,
+        help="Date at which you plan to start the production.",
+        index=True, required=True)
+    expected_duration = fields.Float("Expected Duration", help="Total expected duration (in minutes)")
+    real_duration = fields.Float("Real Duration", help="Total real duration (in minutes)")
 
     @api.onchange('company_id')
     def _onchange_company_id(self):

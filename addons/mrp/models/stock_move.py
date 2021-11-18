@@ -119,6 +119,7 @@ class StockMove(models.Model):
     operation_id = fields.Many2one(
         'mrp.routing.workcenter', 'Operation To Consume', check_company=True,
         domain="[('id', 'in', allowed_operation_ids)]")
+    unbuild_id = fields.Many2one('mrp.unbuild', 'Unbuild Order', copy=False, check_company=True)
     workorder_id = fields.Many2one(
         'mrp.workorder', 'Work Order To Consume', copy=False, check_company=True)
     # Quantities to process, in normalized UoMs

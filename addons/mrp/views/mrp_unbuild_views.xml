@@ -90,7 +90,7 @@
             <form string="Unbuild Orders">
                 <header>
                     <button name="action_validate" string="Unbuild" type="object" states="draft" class="oe_highlight" data-hotkey="v"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,progress,done,cancel"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -101,25 +101,49 @@
                         <h1><field name="name" placeholder="Unbuild Order" nolabel="1"/></h1>
                     </div>
                     <group>
+                        <field name="has_tracking" invisible="1"/>
+                        <field name="mo_bom_id" invisible="1"/>
+                        <field name="picking_type_id" invisible="1"/>
                         <group>
-                            <field name="product_id" attrs="{'readonly':['|', ('mo_id', '!=', False), ('state', '=', 'done')]}" force_save="1"/>
-                            <field name="mo_bom_id" invisible="1"/>
-                            <field name="bom_id" attrs="{'required': [('mo_id', '=', False)], 'readonly':['|', ('mo_id','!=',False), ('state', '=', 'done')], 'invisible': [('mo_id', '!=', False), ('mo_bom_id', '=', False)]}" force_save="1"/>
+                            <field name="product_id" attrs="{'readonly':['|', ('mo_id', '!=', False), ('state', 'in', ['cancel', 'done'])]}" force_save="1"/>
                             <label for="product_qty"/>
                             <div class="o_row">
-                                <field name="product_qty" attrs="{'readonly': ['|', ('has_tracking', '=', 'serial'), ('state', '=', 'done')]}"/>
-                                <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" attrs="{'readonly': ['|', ('mo_id', '!=', False), ('state', '=', 'done')]}" force_save="1"/>
+                                <field name="product_qty" attrs="{'readonly': ['|', '|', ('mo_id', '!=', False), ('has_tracking', '=', 'serial'), ('state', 'in', ['cancel', 'done'])]}"/>
+                                <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" attrs="{'readonly': ['|', ('mo_id', '!=', False), ('state', 'in', ['cancel', 'done'])]}" force_save="1"/>
+                                <span>To Unbuild</span>
                             </div>
+                            <field name="lot_id" attrs="{'invisible': ['|', ('has_tracking', '=', 'none'), ('product_id', '=', False)], 'required': [('has_tracking', '!=', 'none')]}" groups="stock.group_production_lot"/>
+                            <field name="bom_id" attrs="{'required': [('mo_id', '=', False)], 'readonly':['|', ('mo_id','!=',False), ('state', 'in', ['cancel', 'done'])], 'invisible': [('mo_id', '!=', False), ('mo_bom_id', '=', False)]}" force_save="1"/>
                         </group>
                         <group>
+                            <field name="planned_date"/>
+                            <field name="user_id"/>
                             <field name="mo_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                             <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                             <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
-                            <field name="has_tracking" invisible="1"/>
-                            <field name="lot_id" attrs="{'invisible': [('has_tracking', '=', 'none')], 'required': [('has_tracking', '!=', 'none')]}" groups="stock.group_production_lot"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Components" name="components">
+                            <field name="move_component_ids" options="{'delete': [('state', '=', 'draft')]}">
+                                <tree editable="bottom">
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="has_tracking" invisible="1"/>
+                                    <field name="state" invisible="1"/>
+                                    <field name="product_id" force_save="1" required="1"
+                                        context="{'default_detailed_type': 'product'}"/>
+                                    <field name="location_id" string="From" readonly="1"
+                                        groups="stock.group_stock_multi_locations" optional="show"/>
+                                    <field name="product_uom_qty" widget="mrp_should_consume"
+                                        force_save="1" string="To Remove" width="1"
+                                        attrs="{'readonly': [('parent.state', '!=', 'draft')]}"/>
+                                    <field name="quantity_done" string="Consumed"
+                                        attrs="{'column_invisible': [('parent.state', '=', 'draft')], 'readonly': [('has_tracking', '!=','none')]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
@@ -173,17 +197,21 @@
         <field name="model">mrp.unbuild</field>
         <field name="arch" type="xml">
             <tree sample="1">
-                <field name="name" decoration-bf="1"/>
-                <field name="product_id"/>
-                <field name="bom_id"/>
-                <field name="mo_id"/>
-                <field name="lot_id" groups="stock.group_production_lot"/>
-                <field name="product_qty"/>
-                <field name="product_uom_id" groups="uom.group_uom"/>
-                <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                <field name="name" optional="show" decoration-bf="1"/>
+                <field name="planned_date" optional="show"/>
+                <field name="product_id" optional="show"/>
+                <field name="bom_id" optional="show"/>
+                <field name="mo_id" optional="show"/>
+                <field name="lot_id" optional="show" groups="stock.group_production_lot"/>
+                <field name="product_qty" optional="show"/>
+                <field name="product_uom_id" string="UoM" optional="show" groups="uom.group_uom"/>
+                <field name="expected_duration" optional="hide"/>
+                <field name="real_duration" optional="hide"/>
+                <field name="location_id" optional="show" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
-                <field name="company_id" groups="base.group_multi_company"/>
-                <field name="state" widget='badge' decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
+                <field name="user_id" optional="hide"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="state" optional="show" widget='badge' decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
             </tree>
         </field>
     </record>
