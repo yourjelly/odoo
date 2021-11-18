@@ -11,10 +11,16 @@ class IrActionsReport(models.Model):
         data = super()._get_rendering_context(docids, data)
 
         if self.report_name == 'survey.survey_page_print_report':
-            survey = data.get('docs')
+            docs = data.get('docs')
+            if docs._name == 'survey.survey':
+                survey = docs
+                answer = self.env['survey.user_input']
+            else:
+                survey = docs.survey_id
+                answer = docs
             data.update({
                 'survey': survey,
-                'answer': self.env['survey.user_input'],
+                'answer': answer,
                 'questions_to_display': survey.question_ids,
                 'scoring_display_correction': False,
                 'format_datetime': lambda dt: format_datetime(self.env, dt, dt_format=False),
