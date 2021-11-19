@@ -5,9 +5,9 @@ from odoo import models
 
 
 class PosSession(models.Model):
-    _inherit = "pos.session"
+    _inherit = 'pos.session'
 
     def _loader_params_restaurant_printer(self):
         meta = super()._loader_params_restaurant_printer()
-        meta["fields"].append("epson_printer_ip")
+        meta['fields'].append('epson_printer_ip')
         return meta
