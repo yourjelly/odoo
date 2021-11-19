@@ -24,7 +24,10 @@ class PosSession(models.Model):
     def _loader_info_restaurant_table(self):
         return {
             "domain": [("active", "=", True)],
-            "fields": ["name", "width", "height", "position_h", "position_v", "shape", "floor_id", "color", "seats", "active"],
+            "fields": [
+                "name", "width", "height", "position_h", "position_v",
+                "shape", "floor_id", "color", "seats", "active"
+            ],
         }
 
     def _get_pos_ui_restaurant_table(self, params):
