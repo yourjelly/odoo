@@ -12,6 +12,6 @@ class PosSession(models.Model):
 
     def _loader_params_product_product(self):
         result = super()._loader_params_product_product()
-        result["domain"] = OR([result["domain"], [("id", "=", self.config_id.down_payment_product_id.id)]])
-        result["fields"].extend(["invoice_policy", "type"])
+        result['domain'] = OR([result['domain'], [('id', '=', self.config_id.down_payment_product_id.id)]])
+        result['fields'].extend(['invoice_policy', 'type'])
         return result
