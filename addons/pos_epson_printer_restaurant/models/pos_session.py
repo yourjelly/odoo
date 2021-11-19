@@ -9,7 +9,5 @@ class PosSession(models.Model):
 
     def _loader_info_restaurant_printer(self):
         meta = super()._loader_info_restaurant_printer()
-        if not meta:
-            return
         meta["fields"].append("epson_printer_ip")
         return meta
