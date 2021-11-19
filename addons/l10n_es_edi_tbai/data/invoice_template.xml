@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <template id="invoice_template">
+            <T:TicketBai xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" xmlns:T="urn:ticketbai:emision">
+                <Cabecera>
+                    <IDVersionTBAI>
+                        <t t-out="TBAI_VERSION" />
+                    </IDVersionTBAI>
+                </Cabecera>
+                <Sujetos>
+                    <Emisor>
+                        <NIF>
+                            <t t-out="COMPANY_NIF" />
+                        </NIF>
+                        <ApellidosNombreRazonSocial>
+                            <t t-out="COMPANY_NAME" />
+                        </ApellidosNombreRazonSocial>
+                    </Emisor>
+                </Sujetos>
+            </T:TicketBai>
+        </template>
+    </data>
+</odoo>
