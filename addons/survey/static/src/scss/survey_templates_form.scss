@@ -102,6 +102,9 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
         &:focus {
             box-shadow: none;
         }
+        @media print {
+            resize: none;
+        }
     }
 
     .o_survey_form_date .input-group-append {
