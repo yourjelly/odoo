@@ -16,6 +16,8 @@ class MassMailingContactListRel(models.Model):
 
     contact_id = fields.Many2one('mailing.contact', string='Contact', ondelete='cascade', required=True)
     list_id = fields.Many2one('mailing.list', string='Mailing List', ondelete='cascade', required=True)
+    contact_name = fields.Char(related='contact_id.name', readonly=False)
+    contact_email = fields.Char(related='contact_id.email', readonly=False)
     opt_out = fields.Boolean(string='Opt Out',
                              help='The contact has chosen not to receive mails anymore from this list', default=False)
     unsubscription_date = fields.Datetime(string='Unsubscription Date')
@@ -43,6 +45,10 @@ class MassMailingContactListRel(models.Model):
         if vals.get('unsubscription_date'):
             vals['opt_out'] = True
         return super(MassMailingContactListRel, self).write(vals)
+
+    @api.model
+    def _get_searchable_fields(self):
+        return ['contact_email']
 
 
 class MassMailingContact(models.Model):
