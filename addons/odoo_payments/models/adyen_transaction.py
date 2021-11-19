@@ -25,9 +25,6 @@ class AdyenTransaction(models.Model):
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    # TODO ANVFE multi-company consideration
-    # Add company_id = adyen_account_id.company_id stored and with ir rules of access.
-
     adyen_account_id = fields.Many2one(comodel_name='adyen.account', required=True)
     company_id = fields.Many2one(related='adyen_account_id.company_id', store=True)
 
@@ -315,7 +312,10 @@ class AdyenTransaction(models.Model):
 
         return refund_tx
 
-    # TODO ANVFE check if used somewhere ?
+    # Used in adyen.transaction form view
+    # FIXME ANVFE Do we want to support refund on adyen tx view?
+    # It does not go through dedicated wizard in payment
+    # (and probably doesn't consider accounting logic with account.payment)
     def action_refund(self):
         for tx in self:
             tx._refund_request()
