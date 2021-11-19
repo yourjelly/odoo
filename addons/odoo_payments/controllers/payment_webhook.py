@@ -3,21 +3,18 @@
 import logging
 from pprint import pformat
 
-from odoo import http
-from odoo.http import request
+from odoo.http import Controller, request, route
 
 from odoo.addons.odoo_payments.utils import odoo_payments_proxy_control
 
 _logger = logging.getLogger(__name__)
 
 
-class NotificationController(http.Controller):
-    # Notifications Routes #
-    # Proxy -> Customer databases
+class PaymentWebhookController(Controller):
 
     @odoo_payments_proxy_control
-    @http.route('/odoo_payments/transaction_notification', type='json', auth='public', csrf=False)
-    def adyen_transaction_notification(self):
+    @route('/odoo_payments/transaction_notification', type='json', auth='public', csrf=False)
+    def odoo_payments_transaction_notification(self):
         """Handle payment notifications (from Adyen)
 
         https://docs.adyen.com/development-resources/webhooks/understand-notifications
