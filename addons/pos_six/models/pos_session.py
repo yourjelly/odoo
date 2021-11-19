@@ -7,7 +7,7 @@ from odoo import models
 class PosSession(models.Model):
     _inherit = "pos.session"
 
-    def _loader_info_pos_payment_method(self):
-        meta = super()._loader_info_pos_payment_method()
+    def _loader_params_pos_payment_method(self):
+        meta = super()._loader_params_pos_payment_method()
         meta["fields"].append("six_terminal_ip")
         return meta
