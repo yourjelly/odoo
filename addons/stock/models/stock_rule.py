@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
 
 from dateutil.relativedelta import relativedelta
 
@@ -82,6 +82,7 @@ class StockRule(models.Model):
         'res.partner', 'Partner Address',
         check_company=True,
         help="Address where goods should be delivered. Optional.")
+    product_ids = fields.Many2many(related="route_id.product_ids")
     propagate_cancel = fields.Boolean(
         'Cancel Next Move', default=False,
         help="When ticked, if the move created by this rule is cancelled, the next move will be cancelled too.")
@@ -425,6 +426,9 @@ class ProcurementGroup(models.Model):
             else:
                 raise ProcurementException(procurement_errors)
 
+        # With this we have a dict with all applicable rules ordered by their sequences
+        general_dict = self._get_all_rules([('action', '!=', 'push')])
+
         actions_to_run = defaultdict(list)
         procurement_errors = []
         for procurement in procurements:
@@ -436,7 +440,8 @@ class ProcurementGroup(models.Model):
                 float_is_zero(procurement.product_qty, precision_rounding=procurement.product_uom.rounding)
             ):
                 continue
-            rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
+            rule_old = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
+            rule = self._get_rule_from_dict(general_dict, procurement.product_id, procurement.location_id, procurement.values.get('warehouse_id', False))
             if not rule:
                 error = _('No rule has been found to replenish "%s" in "%s".\nVerify the routes configuration on the product.') %\
                     (procurement.product_id.display_name, procurement.location_id.display_name)
@@ -460,6 +465,117 @@ class ProcurementGroup(models.Model):
         if procurement_errors:
             raise_exception(procurement_errors)
         return True
+
+    @api.model
+    def _get_all_rules(self, domain):
+        global_dict = {}
+        base_dict = OrderedDict()
+        product_dict = defaultdict(lambda: self.env['stock.rule'])
+        warehouse_dict = defaultdict(lambda: self.env['stock.rule'])
+        rules = self.env['stock.rule'].search(domain, order='route_sequence, sequence')
+
+        for rule in rules:
+            # General dict
+            seq_key = '%s%s' % (rule.route_sequence, rule.sequence)
+            if base_dict.get(seq_key):
+                base_dict[seq_key] |= rule
+            else:
+                base_dict[seq_key] = rule
+
+            # Product dict
+            # TODO : probably incorrect. As here it uses product.template in product_ids (as in the route definition)
+            # However, it is a product.product that is used in the procurement !
+            for product_id in rule.product_ids:
+                product_dict[product_id.id] |= rule
+
+            # Warehouse dict
+            if rule.warehouse_id:
+                warehouse_dict[rule.warehouse_id.id] |= rule
+
+        global_dict['base'] = base_dict
+        global_dict['product'] = product_dict
+        global_dict['warehouse'] = warehouse_dict
+
+        return global_dict
+
+    @api.model
+    def _get_rule_from_dict(self, rule_dict, product_id, location_id, warehouse_id):
+        def get_first_matching_rule(rules, location_id, warehouse_id, route_ids=None):
+            # Gets the first applicable rule from the recordset, depending on the given warehouse_id
+            for rule in rules:
+                if rule.location_id != location_id:
+                    continue
+                if route_ids and rule.route_id not in route_ids:
+                    continue
+                if not warehouse_id:
+                    return rule
+                if rule.warehouse_id.id == warehouse_id.id or rule.warehouse_id is False:
+                    return rule
+            return False
+
+        location = location_id
+        found_rule = self.env['stock.rule']
+
+        while (not found_rule) and location:
+            # if route_ids:
+            #     # route = route_ids.filtered(lambda route:
+            #     found_rule = Rule.search(expression.AND([[('route_id', 'in', route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
+            # if not found_rule and packaging_id:
+            #     packaging_routes = packaging_id.route_ids
+            #     if packaging_routes:
+            #         found_rule = Rule.search(expression.AND([[('route_id', 'in', packaging_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+            if not found_rule:
+                # TODO: Not working as intented
+                product_rules = rule_dict['product'].get(product_id.id, False)
+                if product_rules:
+                    found_rule = get_first_matching_rule(product_rules, location, warehouse_id)
+            if not found_rule and warehouse_id:
+                warehouse_rules = rule_dict['warehouse'].get(warehouse_id.id, False)
+                if warehouse_rules:
+                    found_rule = get_first_matching_rule(warehouse_rules, location, warehouse_id, warehouse_id.route_ids)
+            location = location.location_id
+        return found_rule
+
+    @api.model
+    def run_new(self, procurements, raise_user_error=True):
+        def raise_exception(procurement_errors):
+            if procurement_errors:
+                procurements, error_messages = zip(*procurement_errors)
+                raise UserError('\n'.join(error_messages))
+            # Is that really useful to check the else ? I mean, right before invoking it, we check if procurement_errors is empty or not.
+
+        for procurement in procurements:
+            if procurement.product_id.type not in ('consu', 'product') or\
+               float_is_zero(procurement.product_qty, precision_rounding=procurement.product_uom.rounding):
+                # Since empty/non-product procurements are not run, no use setting them anything.
+                continue
+
+            procurement.values.setdefault('company_id', procurement.location_id.company_id)
+            procurement.values.setdefault('priority', '0')
+            procurement.values.setdefault('date_planned', fields.Datetime.now())
+
+            # Find route that applies to this procurement
+            route = self._get_route(procurement.product_id, procurement.location_id, procurement.values)
+
+
+            # Get all rules from that route -> Maybe only grab those that have a "pull" or "pull_push" action
+            #                               -> Not sure _run_manufacture / _run_buy should be really modified
+            rules = route.rule_ids.filtered(lambda rule: rule.action in ('pull', 'pull_push'))
+
+            # Create all moves ???
+            # Need procurement + rule to make a new move
+            # WARNING : Moves can be incomplete (in case of only partial quantity left in a location). So move creation should anticipate that too.
+
+    @api.model
+    def _get_route(self, product_id, location_id, values):
+        # Need to find the route that matches this procurement.
+        # Need to find a non-push route. Right now it's easier because we check the rule directly instead of the route
+        result = False
+        location = location_id
+        while (not result) and location:
+            # Search for route here, if nothing found for this location, try with parent location. (Same as now)
+            location = location.location_id
+        return result
 
     @api.model
     def _search_rule(self, route_ids, packaging_id, product_id, warehouse_id, domain):
