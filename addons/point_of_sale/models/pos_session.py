@@ -1570,36 +1570,36 @@ class PosSession(models.Model):
 
     @api.model
     def _pos_ui_models_to_load(self):
-        return [
-            "res.company",
-            "decimal.precision",
-            "uom.uom",
-            "res.country.state",
-            "res.country",
-            "res.lang",
-            "account.tax",
-            "pos.session",
-            "pos.config",
-            "pos.bill",
-            "res.partner",
-            "stock.picking.type",
-            "res.users",
-            "product.pricelist",
-            "product.pricelist.item",
-            "account.bank.statement",
-            "product.category",
-            "res.currency",
-            "pos.category",
-            "product.product",
-            "product.packaging",
-            "product.attribute",
-            "product.attribute.value",
-            "product.template.attribute.value",
-            "account.cash.rounding",
-            "pos.payment.method",
-            "account.fiscal.position",
-            "account.fiscal.position.tax",
+        models_to_load = [
+            'res.company',
+            'decimal.precision',
+            'uom.uom',
+            'res.country.state',
+            'res.country',
+            'res.lang',
+            'account.tax',
+            'pos.session',
+            'pos.config',
+            'pos.bill',
+            'res.partner',
+            'stock.picking.type',
+            'res.users',
+            'product.pricelist',
+            'account.bank.statement',
+            'product.pricelist.item',
+            'product.category',
+            'res.currency',
+            'pos.category',
+            'product.product',
+            'product.packaging',
+            'account.cash.rounding',
+            'pos.payment.method',
+            'account.fiscal.position',
+            'account.fiscal.position.tax',
         ]
+        if self.config_id.product_configurator:
+            models_to_load.extend(['product.attribute', 'product.attribute.value', 'product.template.attribute.value'])
+        return models_to_load
 
     def _loader_info_res_company(self):
         return {
@@ -1624,34 +1624,6 @@ class PosSession(models.Model):
 
     def _get_pos_ui_uom_uom(self, params):
         return self.env["uom.uom"].with_context(**params["context"]).search_read(params["domain"], params["fields"])
-
-    def _loader_info_res_partner(self):
-        return {
-            "domain": [],
-            "fields": [
-                "name",
-                "street",
-                "city",
-                "state_id",
-                "country_id",
-                "vat",
-                "lang",
-                "phone",
-                "zip",
-                "mobile",
-                "email",
-                "barcode",
-                "write_date",
-                "property_account_position_id",
-                "property_product_pricelist",
-            ],
-        }
-
-    def _get_pos_ui_res_partner(self, params):
-        if not self.config_id.limited_partners_loading:
-            return self.env["res.partner"].search_read(params["domain"], params["fields"])
-        partner_ids = [res[0] for res in self.config_id.get_limited_partners_loading()]
-        return self.env["res.partner"].browse(partner_ids).read(params["fields"])
 
     def _loader_info_res_country_state(self):
         return {"domain": [], "fields": ["name", "country_id"]}
@@ -1706,6 +1678,34 @@ class PosSession(models.Model):
 
     def _get_pos_ui_pos_bill(self, params):
         return self.env["pos.bill"].search_read(params["domain"], params["fields"])
+
+    def _loader_info_res_partner(self):
+        return {
+            "domain": [],
+            "fields": [
+                "name",
+                "street",
+                "city",
+                "state_id",
+                "country_id",
+                "vat",
+                "lang",
+                "phone",
+                "zip",
+                "mobile",
+                "email",
+                "barcode",
+                "write_date",
+                "property_account_position_id",
+                "property_product_pricelist",
+            ],
+        }
+
+    def _get_pos_ui_res_partner(self, params):
+        if not self.config_id.limited_partners_loading:
+            return self.env["res.partner"].search_read(params["domain"], params["fields"])
+        partner_ids = [res[0] for res in self.config_id.get_limited_partners_loading()]
+        return self.env["res.partner"].browse(partner_ids).read(params["fields"])
 
     def _loader_info_stock_picking_type(self):
         return {
@@ -1772,17 +1772,16 @@ class PosSession(models.Model):
     def _loader_info_res_currency(self):
         return {
             "domain": [("id", "in", [self.config_id.currency_id.id, self.company_id.currency_id.id])],
-            "fields": ["name", "symbol", "position", "rounding", "rate", "decimal_places"],
+            "fields": ["name", "symbol", "position", "rounding", "rate"],
         }
 
     def _get_pos_ui_res_currency(self, params):
         return self.env["res.currency"].search_read(params["domain"], params["fields"])
 
     def _loader_info_pos_category(self):
+        domain = []
         if self.config_id.limit_categories and self.config_id.iface_available_categ_ids:
             domain = [("id", "in", self.config_id.iface_available_categ_ids.ids)]
-        else:
-            domain = []
         return {
             "domain": domain,
             "fields": ["id", "name", "parent_id", "child_id", "write_date"],
@@ -1841,7 +1840,7 @@ class PosSession(models.Model):
 
     def _loader_info_product_packaging(self):
         return {
-            "domain": [("barcode", "!=", "")],
+            "domain": [("barcode", "not in", ["", False])],
             "fields": ["name", "barcode", "product_id", "qty"],
         }
 
@@ -1849,44 +1848,32 @@ class PosSession(models.Model):
         return self.env["product.packaging"].search_read(params["domain"], params["fields"])
 
     def _loader_info_product_attribute(self):
-        if not self.config_id.product_configurator:
-            return
-        return {
-            "domain": [("create_variant", "=", "no_variant")],
-            "fields": ["name", "display_type"],
-        }
+        return {'domain': [('create_variant', '=', 'no_variant')], 'fields': ['name', 'display_type']}
 
     def _get_pos_ui_product_attribute(self, params):
-        if params:
-            return self.env["product.attribute"].search_read(params["domain"], params["fields"])
+        return self.env["product.attribute"].search_read(params["domain"], params["fields"])
 
     def _loader_info_product_attribute_value(self):
         loaded_models = self._context.get("loaded_models")
         attributes = loaded_models["product.attribute"]
-        if not self.config_id.product_configurator:
-            return
         return {
             "domain": [("attribute_id", "in", [attr["id"] for attr in attributes])],
             "fields": ["name", "attribute_id", "is_custom", "html_color"],
         }
 
     def _get_pos_ui_product_attribute_value(self, params):
-        if params:
-            return self.env["product.attribute.value"].search_read(params["domain"], params["fields"])
+        return self.env["product.attribute.value"].search_read(params["domain"], params["fields"])
 
     def _loader_info_product_template_attribute_value(self):
         loaded_models = self._context.get("loaded_models")
         attributes = loaded_models["product.attribute"]
-        if not self.config_id.product_configurator:
-            return
         return {
             "domain": [("attribute_id", "in", [attr["id"] for attr in attributes])],
             "fields": ["product_attribute_value_id", "attribute_id", "attribute_line_id", "price_extra"],
         }
 
     def _get_pos_ui_product_template_attribute_value(self, params):
-        if params:
-            return self.env["product.template.attribute.value"].search_read(params["domain"], params["fields"])
+        return self.env["product.template.attribute.value"].search_read(params["domain"], params["fields"])
 
     def _loader_info_account_cash_rounding(self):
         return {
@@ -1899,7 +1886,7 @@ class PosSession(models.Model):
 
     def _loader_info_pos_payment_method(self):
         return {
-            "domain": [("id", "in", self.config_id.payment_method_ids.ids)],
+            "domain": [],
             "fields": ["name", "is_cash_count", "use_payment_terminal", "split_transactions", "type"],
         }
 
