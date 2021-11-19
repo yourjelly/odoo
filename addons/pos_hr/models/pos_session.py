@@ -9,7 +9,10 @@ class PosSession(models.Model):
 
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()
-        result.append("hr.employee")
+        if self.config_id.module_pos_hr:
+            new_model = 'hr.employee'
+            if new_model not in result:
+                result.append(new_model)
         return result
 
     def _loader_info_hr_employee(self):
