@@ -157,7 +157,11 @@ class PaymentAcquirerOnboardingWizard(models.TransientModel):
         # TODO ANVFE first require proper company setup before trying to create an adyen account
         # if payment meth is odoo?
 
-        self.env.company.payment_onboarding_payment_method = self.payment_method
+        if self.payment_method in ('odoo', 'stripe', 'paypal', 'manual', 'other'):
+            # 'digital_signature' used in sale is stored as sale_onboarding_payment_method field
+            # and cannot be specified as payment onboarding because not available in selection
+            # field choices
+            self.env.company.payment_onboarding_payment_method = self.payment_method
 
         installed_modules = self.env['ir.module.module']
 

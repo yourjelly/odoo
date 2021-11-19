@@ -29,11 +29,11 @@ class PaymentWizard(models.TransientModel):
         """ Override. """
         self.env.company.sudo().set_onboarding_step_done('sale_onboarding_order_confirmation_state')
 
-    def add_payment_methods(self, *args, **kwargs):
+    def add_payment_methods(self):
         self.env.company.sale_onboarding_payment_method = self.payment_method
         if self.payment_method == 'digital_signature':
             self.env.company.portal_confirmation_sign = True
         elif self.payment_method in ('odoo', 'manual', 'stripe', 'paypal'):
             self.env.company.portal_confirmation_pay = True
 
-        return super().add_payment_methods(*args, **kwargs)
+        return super().add_payment_methods()

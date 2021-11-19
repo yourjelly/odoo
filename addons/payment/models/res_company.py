@@ -20,6 +20,7 @@ class ResCompany(models.Model):
             ('stripe', "Stripe"),
             ('odoo', "Credit & Debit Card with Odoo Payment"),
             ('manual', "Manual"),
+            ('other', "Other"),
         ])
 
     @api.model
