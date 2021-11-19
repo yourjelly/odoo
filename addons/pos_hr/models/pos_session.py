@@ -15,7 +15,7 @@ class PosSession(models.Model):
                 result.append(new_model)
         return result
 
-    def _loader_info_hr_employee(self):
+    def _loader_params_hr_employee(self):
         if len(self.config_id.employee_ids) > 0:
             domain = ["&", ("company_id", "=", self.config_id.company_id.id), "|", ("user_id", "=", self.user_id.id), ("id", "in", self.config_id.employee_ids.ids)]
         else:

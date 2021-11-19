@@ -12,7 +12,7 @@ class PosSession(models.Model):
         result.extend(["restaurant.floor", "restaurant.table", "restaurant.printer"])
         return result
 
-    def _loader_info_restaurant_floor(self):
+    def _loader_params_restaurant_floor(self):
         return {
             "domain": [("pos_config_id", "=", self.config_id.id)],
             "fields": ["name", "background_color", "table_ids", "sequence"]
@@ -21,7 +21,7 @@ class PosSession(models.Model):
     def _get_pos_ui_restaurant_floor(self, params):
         return self.env["restaurant.floor"].search_read(params["domain"], params["fields"])
 
-    def _loader_info_restaurant_table(self):
+    def _loader_params_restaurant_table(self):
         return {
             "domain": [("active", "=", True)],
             "fields": [
@@ -33,7 +33,7 @@ class PosSession(models.Model):
     def _get_pos_ui_restaurant_table(self, params):
         return self.env["restaurant.table"].search_read(params["domain"], params["fields"])
 
-    def _loader_info_restaurant_printer(self):
+    def _loader_params_restaurant_printer(self):
         return {
             "domain": [("id", "in", self.config_id.printer_ids.ids)],
             "fields": ["name", "proxy_ip", "product_categories_ids", "printer_type"],
