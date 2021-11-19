@@ -156,7 +156,7 @@ class AdyenTransaction(models.Model):
         elif event_code in ["CHARGEBACK", "NOTIFICATION_OF_CHARGEBACK"]:
             tx._handle_chargeback_notification(data)
         else:
-            # FIXME ANVFE support CAPTURE event code ?
+            # FIXME ANVFE support CAPTURE event code? We receive them for the moment
             # Got it for Chargeback test flows, we should directly support it IMHO
             _logger.warning(_("Unknown eventCode received: %s", event_code))
 

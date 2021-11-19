@@ -33,7 +33,8 @@ class OdooController(http.Controller):
         if payment_utils.check_access_token(
             access_token, tx_sudo.amount, tx_sudo.currency_id.name, tx_sudo.reference
         ):  # Check the access token to prevent setting any transaction as 'pending'.
-            tx_sudo._set_pending()
+            if tx_sudo.state == 'draft':  # Dont set as 'pending' if it was processed by the webhook
+                tx_sudo._set_pending()
 
         return request.redirect('/payment/status')
 
@@ -52,7 +53,7 @@ class OdooController(http.Controller):
         # individual notifications one by one to this endpoint.
         notification_data = json.loads(request.httprequest.data)
         for notification_item in notification_data['notificationItems']:
-            notification_data = notification_item['NotificationRequestItem']
+            notification_data = notification_item['NotificationRequestItem']  # TODO don't overwrite the var
             tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_feedback_data(
                 'odoo', notification_data
             )
@@ -66,7 +67,7 @@ class OdooController(http.Controller):
             ):
                 return
 
-            _logger.info("notification received:\n%s", pprint.pformat(notification_data))
+            _logger.info("notification received with data:\n%s", pprint.pformat(notification_data))
             if notification_data['success'] != 'true' and event_code != 'REFUND':
                 return  # Don't handle failed events
 
@@ -110,7 +111,7 @@ class OdooController(http.Controller):
             return False
 
         if not payment_utils.check_access_token(
-            received_access_token, self.amount, tx.currency_id.name, tx.reference
+            received_access_token, tx.amount, tx.currency_id.name, tx.reference
         ):
             _logger.warning("ignored notification with invalid access token")
             return False
