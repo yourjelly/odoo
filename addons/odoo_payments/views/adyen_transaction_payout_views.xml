@@ -36,7 +36,7 @@
         </field>
     </record>
 
-    <record id="adyen_balance_action" model="ir.actions.act_window">
+    <record id="adyen_transaction_payout_action" model="ir.actions.act_window">
         <field name="name">Balance</field>
         <field name="res_model">adyen.transaction.payout</field>
         <field name="view_mode">tree</field>
