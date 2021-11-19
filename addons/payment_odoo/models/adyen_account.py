@@ -9,6 +9,6 @@ class AdyenAccount(models.Model):
         # Disable odoo acquirers since linked account is deleted
         acquirer = self.env['payment.acquirer'].search([
             ('provider', '=', 'odoo'),
-            ('odoo_adyen_account_id', 'in', self.ids)])
+            ('company_id.adyen_account_id', 'in', self.ids)])
         acquirer.state = 'disabled'
         return super().unlink()
