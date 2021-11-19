@@ -8,7 +8,6 @@ from odoo import http
 from odoo.http import request
 
 from odoo.addons.payment import utils as payment_utils
-from odoo.addons.payment_odoo.const import CURRENCY_DECIMALS
 
 _logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class OdooController(http.Controller):
 
         :return: None
         """
-        # TODO use same code as payment_adyen
+        # TODO in master: use same code as payment_adyen
         # Payload data represent a single notification's data. Because two notifications of a same
         # batch can be related to different sub-merchants, the proxy splits the batches and send
         # individual notifications one by one to this endpoint.
