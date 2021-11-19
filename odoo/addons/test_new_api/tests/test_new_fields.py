@@ -3,7 +3,7 @@
 #
 import base64
 from collections import OrderedDict
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 import io
 from PIL import Image
 import psycopg2
@@ -1279,6 +1279,127 @@ class TestFields(common.TransactionCase):
         company_record.foo = 'DEF'
         self.assertEqual(attribute_record.company.foo, 'DEF')
         self.assertEqual(attribute_record.bar, 'DEFDEF')
+
+    @mute_logger('odoo.models.unlink')
+    def test_28_company_dependent_search(self):
+        """ Test the search on company-dependent fields in all corner cases.
+            This assumes that get_multi/set_multi are correct, and that
+            filtered_domain() correctly mimics the search.
+        """
+        Model = self.env['test_new_api.company']
+        TagModel = self.env['test_new_api.multi.tag']
+        normal_tag = TagModel.create({'name': 'normal'})
+        urgent_tag = TagModel.create({'name': 'urgent'})
+        today = fields.Date.today()
+        tomorrow = today + timedelta(days=1)
+        now = fields.Datetime.now()
+        now_tomorrow = now + timedelta(days=1)
+
+        # description of cases: (field_name, record_values, {operation: test_values})
+        CASES = [
+            # boolean fields
+            ('truth', (True, False, None), {
+                '=': (True, False),
+                '!=': (True, False),
+            }),
+            # integer fields
+            ('count', (10, -2, None), {
+                '=': (10, -2, 0, False),
+                '!=': (10, -2, 0, False),
+                '<': (10, -2, 0),
+                '>=': (10, -2, 0),
+                '<=': (10, -2, 0),
+                '>': (10, -2, 0),
+            }),
+            # float fields
+            ('phi', (1.61803, -1, None), {
+                '=': (1.61803, -1, 0, False),
+                '!=': (1.61803, -1, 0, False),
+                '<': (1.61803, -1, 0),
+                '>=': (1.61803, -1, 0),
+                '<=': (1.61803, -1, 0),
+                '>': (1.61803, -1, 0),
+            }),
+            # char fields
+            ('foo', ('qwer', 'azer', None), {
+                'like': ('qwer', 'azer'),
+                'ilike': ('qwer', 'azer'),
+                'not like': ('qwer', 'azer'),
+                'not ilike': ('qwer', 'azer'),
+                '=': ('qwer', 'azer', False),
+                '!=': ('qwer', 'azer', False),
+                'not in': (['qwer', 'azer'], ['qwer', False], [False], []),
+                'in': (['qwer', 'azer'], ['qwer', False], [False], []),
+            }),
+            # date fields
+            ('date', (today, tomorrow, False), {
+                '=': (today, tomorrow, False),
+                '!=': (today, tomorrow, False),
+                '<': (today, tomorrow),
+                '>=': (today, tomorrow),
+                '<=': (today, tomorrow),
+                '>': (today, tomorrow),
+            }),
+            # datetime fields
+            ('moment', (now, now_tomorrow, False), {
+                '=': (now, now_tomorrow, False),
+                '!=': (now, now_tomorrow, False),
+                '<': (now, now_tomorrow),
+                '>=': (now, now_tomorrow),
+                '<=': (now, now_tomorrow),
+                '>': (now, now_tomorrow),
+            }),
+            # many2one fields
+            ('tag_id', (normal_tag.id, urgent_tag.id, False), {
+                'like': (normal_tag.name, urgent_tag.name),
+                'ilike': (normal_tag.name, urgent_tag.name),
+                'not like': (normal_tag.name, urgent_tag.name),
+                'not ilike': (normal_tag.name, urgent_tag.name),
+                '=': (normal_tag.id, urgent_tag.id, False),
+                '!=': (normal_tag.id, urgent_tag.id, False),
+                'not in': ([normal_tag.id, urgent_tag.id], [urgent_tag.id, False], [False], []),
+                'in': ([normal_tag.id, urgent_tag.id], [urgent_tag.id, False], [False], []),
+            }),
+        ]
+
+        def run_case(field, values, operators, default=None):
+            records = Model.create([
+                {field: val} if val is not None else {}
+                for val in values
+            ])
+            for operator, values in operators.items():
+                for value in values:
+                    domain = [(field, operator, value)]
+                    with self.subTest(field=field, domain=domain, default=default):
+                        search_result = Model.search([('id', 'in', records.ids)] + domain)
+                        filter_result = records.filtered_domain(domain)
+                        self.assertEqual(
+                            search_result,
+                            filter_result,
+                            f"domain {domain} with default {default}: "
+                            f"got {search_result.mapped(field)} "
+                            f"instead of {filter_result.mapped(field)}",
+                        )
+
+        for field_name, values, operators in CASES:
+            field = self.env['ir.model.fields']._get(Model._name, field_name)
+            # test without default value
+            run_case(field_name, values, operators)
+            # set default value to values[0]
+            prop = self.env['ir.property'].create({
+                'name': field.name,
+                'type': field.ttype,
+                'fields_id': field.id,
+                'value': values[0],
+            })
+            prop.flush()
+            prop.invalidate_cache()
+            run_case(field_name, values, operators, values[0])
+            # set default value to values[1]
+            prop.write({'value': values[1]})
+            prop.flush()
+            prop.invalidate_cache()
+            run_case(field_name, values, operators, values[1])
 
     def test_30_read(self):
         """ test computed fields as returned by read(). """
