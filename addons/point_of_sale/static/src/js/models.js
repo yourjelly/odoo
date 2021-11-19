@@ -704,7 +704,7 @@ exports.PosModel = Backbone.Model.extend({
         let product_model = _.find(this.models, (model) => model.model === 'product.product');
         let productLoadingInfo = await this.rpc({
             model: 'pos.session',
-            method: 'get_loading_info',
+            method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'product.product'],
             context: this.session.user_context,
         });
@@ -733,7 +733,7 @@ exports.PosModel = Backbone.Model.extend({
         let partners = [];
         let partnerLoadingInfo = await this.rpc({
             model: 'pos.session',
-            method: 'get_loading_info',
+            method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'res.partner'],
             context: this.session.user_context,
         });
