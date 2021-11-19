@@ -27,6 +27,9 @@
         'account_edi'
     ],
     'data': [
+        'data/account_edi_data.xml',
+        'data/invoice_template.xml',
+
         'security/ir.model.access.csv',
 
         'views/l10n_es_tbai_certificate_views.xml',
