@@ -7,7 +7,7 @@ from odoo import models
 class PosSession(models.Model):
     _inherit = "pos.session"
 
-    def _loader_info_product_product(self):
-        meta = super()._loader_info_product_product()
+    def _loader_params_product_product(self):
+        meta = super()._loader_params_product_product()
         meta["fields"].append("optional_product_ids")
         return meta
