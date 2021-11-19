@@ -5,11 +5,16 @@ const core = require('web.core');
 const config = require('web.config');
 const publicWidget = require('web.public.widget');
 const {Markup} = require('web.utils');
+const DEFAULT_NUMBER_OF_ELEMENTS = 4;
+const DEFAULT_NUMBER_OF_ELEMENTS_SM = 1;
 
 const DynamicSnippet = publicWidget.Widget.extend({
     selector: '.s_dynamic_snippet',
     read_events: {
         'click [data-url]': '_onCallToAction',
+    },
+    custom_events: {
+        's_dynamic_snippet_rerender': '_onRerender',
     },
     disabledInEditableMode: false,
 
@@ -134,28 +139,31 @@ const DynamicSnippet = publicWidget.Widget.extend({
      * @private
      */
     _prepareContent: function () {
-        if (this.$target[0].dataset.numberOfElements && this.$target[0].dataset.numberOfElementsSmallDevices) {
-            this.renderedContent = core.qweb.render(
-                this.template_key,
-                this._getQWebRenderOptions());
-        } else {
-            this.renderedContent = '';
-        }
+        this.renderedContent = core.qweb.render(
+            this.template_key,
+            this._getQWebRenderOptions()
+        );
     },
     /**
      * Method to be overridden in child components in order to prepare QWeb
      * options.
      * @private
      */
-    _getQWebRenderOptions: function () {
+     _getQWebRenderOptions: function () {
+        const dataset = this.$target[0].dataset;
+        const numberOfRecords = parseInt(dataset.numberOfRecords);
+        let numberOfElements;
+        if (config.device.isMobile) {
+            numberOfElements = parseInt(dataset.numberOfElementsSmallDevices) || DEFAULT_NUMBER_OF_ELEMENTS_SM;
+        } else {
+            numberOfElements = parseInt(dataset.numberOfElements) || DEFAULT_NUMBER_OF_ELEMENTS;
+        }
+        const chunkSize = numberOfRecords < numberOfElements ? numberOfRecords : numberOfElements;
         return {
-            chunkSize: parseInt(
-                config.device.isMobile
-                    ? this.$target[0].dataset.numberOfElementsSmallDevices
-                    : this.$target[0].dataset.numberOfElements
-            ),
+            chunkSize: chunkSize,
             data: this.data,
-            uniqueId: this.uniqueId
+            uniqueId: this.uniqueId,
+            extraClasses: dataset.extraClasses || '',
         };
     },
     /**
@@ -171,6 +179,7 @@ const DynamicSnippet = publicWidget.Widget.extend({
             this.renderedContent = '';
         }
         this._renderContent();
+        this.trigger_up('widgets_start_request', {$target: this.$el.children(), options: {parent: this}});
     },
     /**
      * @private
@@ -233,6 +242,15 @@ const DynamicSnippet = publicWidget.Widget.extend({
             this._render();
         }
     },
+    /**
+     * Rerenders the content of the dynamic snippet
+     * 
+     * @returns {Promise}
+     */
+    async _onRerender() {
+        await this._fetchData();
+        return this._render();
+    }
 });
 
 publicWidget.registry.dynamic_snippet = DynamicSnippet;
