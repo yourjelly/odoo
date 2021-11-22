@@ -13,13 +13,6 @@ _logger = logging.getLogger(__name__)
 class OnboardingController(http.Controller):
     _return_url = '/odoo_payments/return'
 
-    """ This controller is responsible for the onboarding (account creation) flow of Odoo Payments.
-
-    The following routes are exposed:
-    - `/odoo_payments/get_creation_redirect_form` retrieve the creation redirect form of the Adyen
-      account in the current company.
-    """
-
     @http.route('/odoo_payments/get_creation_redirect_form', type='json', auth='user')
     def odoo_payments_creation_redirect_form(self):
         """ Return the account creation form used to redirect the user to the merchant database.

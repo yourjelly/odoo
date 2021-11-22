@@ -13,11 +13,10 @@ from pprint import pformat
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.http import request
 from odoo.osv import expression
 
 from odoo.addons.mail.tools import mail_validation
-from odoo.addons.odoo_payments.const import LEGAL_ENTITY_TYPE_MAPPING, KYC_STATUS_MAPPING, PAYOUT_SCHEDULE_MAPPING
+from odoo.addons.odoo_payments import const
 from odoo.addons.odoo_payments.controllers.onboarding import OnboardingController
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
@@ -234,7 +233,8 @@ class AdyenAccount(models.Model):
         support. If the account is created in the live environment, no action is performed because
         we are waiting for the validation notification.
 
-        Note: sudoed env
+        Note: sudoed environment
+        Note: self.ensure_one()
 
         :return: None
         """
@@ -251,15 +251,16 @@ class AdyenAccount(models.Model):
         else:
             pass  # Live accounts are only set active after validation by the support
 
-    def _handle_odoo_merchant_status_change_notification(self, content):
-        """ Handle `ODOO_MERCHANT_STATUS_CHANGE` notifications and update `merchant_status` accordingly.
+    def _handle_merchant_status_change_notification(self, content):
+        """ Handle `MERCHANT_STATUS_CHANGE` notifications and update `merchant_status` accordingly.
 
-        This notification is received when the support performs a manual update of the submerchant's
-        status on the merchant database (internal). The account's `merchant_status` is updated with
-        the new status of the submerchant. An email is sent from the merchant database to inform the
-        client.
+        This notification is received when the support team performs a manual update of the
+        submerchant's status on the merchant database (internal). The account's `merchant_status` is
+        updated with the new status of the submerchant. An email is sent from the merchant database
+        to inform the client.
 
-        Note: sudoed env
+        Note: sudoed environment
+        Note: self.ensure_one()
 
         :param dict content: The notification content with the following structure:
                              {'newStatus': new_status}
@@ -300,7 +301,7 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         # Activate the account
-        self.merchant_status = 'active'
+        self.with_context(update_from_adyen=True).merchant_status = 'active'
 
         # Enable the initial linked payment acquirer
         payment_acquirer = self.env['payment.acquirer'].search(
@@ -327,7 +328,7 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         # Deactivate the account
-        self.merchant_status = 'closed'
+        self.with_context(update_from_adyen=True).merchant_status = 'closed'
 
         # Disable all linked payment acquirers
         payment_acquirers = self.env['payment.acquirer'].search(
@@ -346,7 +347,7 @@ class AdyenAccount(models.Model):
                 raise ValidationError(_("The provided phone number must be in international format"))
             phone_validation.phone_parse(
                 account.phone_number,
-                None # Do not specify country code to force international format number
+                None  # Do not specify country code to force international format number
             )
 
     @api.constrains('phone_number')
@@ -585,7 +586,7 @@ class AdyenAccount(models.Model):
             },
             'payoutSchedule': {
                 'action': 'UPDATE',
-                'schedule': PAYOUT_SCHEDULE_MAPPING.get(self.payout_schedule),
+                'schedule': const.PAYOUT_SCHEDULE_MAPPING.get(self.payout_schedule),
             }
         })
 
@@ -605,7 +606,9 @@ class AdyenAccount(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        action = self.env['ir.actions.actions']._for_xml_id('odoo_payments.adyen_balance_action')
+        action = self.env['ir.actions.actions']._for_xml_id(
+            'odoo_payments.action_view_adyen_transaction_payout'
+        )
         action['domain'] = expression.AND([[('adyen_account_id', '=', self.id)], literal_eval(action.get('domain', '[]'))])
         return action
 
@@ -660,7 +663,7 @@ class AdyenAccount(models.Model):
             'accountHolderCode': self.account_holder_code,
             'accountHolderDetails': self._prepare_account_holder_details(),
             # 'description': None,
-            'legalEntity': LEGAL_ENTITY_TYPE_MAPPING[self.entity_type],
+            'legalEntity': const.LEGAL_ENTITY_TYPE_MAPPING[self.entity_type],
             # TODO 'primaryCurrency': None,
             # 'processingTier': --> Proxy
             # 'verificationProfile': None,
@@ -727,54 +730,28 @@ class AdyenAccount(models.Model):
                 }
             }
 
-    def _handle_account_notification(self, notification_data):
-        """NOTE: sudoed env"""
-        self.ensure_one()
-
-        content = notification_data.get('content', {})
-        event_type = notification_data.get('eventType')
-
-        # TODO ANVFE REMOVE OR SET DEBUG
-        _logger.info("ODOO PAYMENTS: handling notification %s with content %s", event_type, pformat(content))
-
-        if event_type == 'ACCOUNT_HOLDER_CREATED':
-            self._handle_account_holder_created_notification()
-        elif event_type == 'ODOO_MERCHANT_STATUS_CHANGE':
-            self._handle_odoo_merchant_status_change_notification(content)
-        elif event_type == 'ACCOUNT_HOLDER_STATUS_CHANGE':
-            self._handle_account_holder_status_change_notification(content)
-        elif event_type == 'ACCOUNT_HOLDER_VERIFICATION':
-            self._handle_account_holder_verification_notification(content)
-        elif event_type == 'ACCOUNT_UPDATED':
-            self._handle_account_updated_notification(content)
-        elif event_type == 'ACCOUNT_HOLDER_PAYOUT':
-            self._handle_account_holder_payout(content)
-        else:
-            _logger.warning(_("Unknown eventType received: %s", event_type))
-
     def _handle_account_holder_status_change_notification(self, content):
-        """NOTE: sudoed env"""
-        self.ensure_one()
+        """
 
-        # TODO ANVFE do we still need this? I guess not but confirm with task 2667380
-        # # Account Status
-        # new_status = ACCOUNT_STATUS_MAPPING.get(content.get('newStatus', {}).get('status'))
-        # if new_status and new_status != self.account_status:
-        #     old_status = self.account_status
-        #     self.account_status = new_status
-        #
-        #     if new_status == 'active' and old_status in ['suspended', 'inactive']:
-        #         self._enable_payment_acquirer()
+        Note: sudoed environment
+        Note: self.ensure_one()
+
+        """
+        self.ensure_one()
+        write_vals = {}
 
         # Tier
         tier = content.get('newStatus', {}).get('processingState', {}).get('tierNumber', None)
         if isinstance(tier, int) and tier != self.kyc_tier:
-            self.kyc_tier = tier
+            write_vals['kyc_tier'] = tier
 
         # Payout
         payout_allowed = content.get('newStatus', {}).get('payoutState', {}).get('allowPayout', None)
         if payout_allowed is not None:
-            self.payout_allowed = payout_allowed == 'true'
+            write_vals['payout_allowed'] = payout_allowed == 'true'
+
+        if write_vals:
+            self.with_context(update_from_adyen=True).write(write_vals)
 
         # Events
         events = content.get('newStatus', {}).get('events')
@@ -792,10 +769,15 @@ class AdyenAccount(models.Model):
             self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
 
     def _handle_account_holder_verification_notification(self, content):
-        """NOTE: sudoed env"""
+        """
+
+        Note: sudoed environment
+        Note: self.ensure_one()
+
+        """
         self.ensure_one()
 
-        status = KYC_STATUS_MAPPING.get(content.get('verificationStatus'))
+        status = const.KYC_STATUS_MAPPING.get(content.get('verificationStatus'))
         document = '_'.join(content.get('verificationType', '').lower().split('_')[:-1])  # bank_account, identity, passport, etc.
         status_message = content.get('statusSummary', {}).get('kycCheckDescription')
 
@@ -845,14 +827,27 @@ class AdyenAccount(models.Model):
                 })
 
     def _handle_account_updated_notification(self, content):
-        """NOTE: sudoed env"""
+        """
+
+        Note: sudoed environment
+        Note: self.ensure_one()
+
+        """
         self.ensure_one()
+
         scheduled_date = content.get('payoutSchedule', {}).get('nextScheduledPayout')
         if scheduled_date:
-            self.next_scheduled_payout = parse(scheduled_date).astimezone(UTC).replace(tzinfo=None)
+            self.with_context(
+                update_from_adyen=True
+            ).next_scheduled_payout = parse(scheduled_date).astimezone(UTC).replace(tzinfo=None)
 
-    def _handle_account_holder_payout(self, content):
-        """NOTE: sudoed env"""
+    def _handle_account_holder_payout_notification(self, content):
+        """
+
+        Note: sudoed environment
+        Note: self.ensure_one()
+
+        """
         self.ensure_one()
         status = content.get('status', {}).get('statusCode')
 

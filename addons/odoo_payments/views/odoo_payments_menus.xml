@@ -17,7 +17,7 @@
               sequence="99">
         <!-- Disabled until the account is created and validated by the support -->
         <menuitem id="menu_adyen_balance"
-                  action="adyen_transaction_payout_action"
+                  action="action_view_adyen_transaction_payout"
                   sequence="10"
                   active="False"/>
         <!-- Disabled until the account is created and validated by the support -->
