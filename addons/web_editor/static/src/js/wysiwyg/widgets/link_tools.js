@@ -37,8 +37,13 @@ const LinkTools = Link.extend({
             $(node).wrap('<a href="#"/>');
             node = node.parentElement;
         }
-        const link = node || this.getOrCreateLink(editable);
-        this._super(parent, options, editable, data, $button, link);
+        this._link = node || this.getOrCreateLink(editable);
+        this._observer = new MutationObserver(() =>{
+            this._setLinkContent = false;
+            this._observer.disconnect();
+        });
+        this._observer.observe(this._link, { subtree: true, childList: true, characterData: true });
+        this._super(parent, options, editable, data, $button, this._link);
         // Keep track of each selected custom color and colorpicker.
         this.customColors = {};
         this.colorpickers = {};
@@ -70,7 +75,14 @@ const LinkTools = Link.extend({
         this.options.wysiwyg.odooEditor.observerActive();
         this.applyLinkToDom(this._getData());
         this.options.wysiwyg.odooEditor.historyStep();
+        this._observer.disconnect();
         this._super(...arguments);
+    },
+
+    applyLinkToDom () {
+        this._observer.disconnect();
+        this._super(...arguments);
+        this._observer.observe(this._link, { subtree: true, childList: true, characterData: true });
     },
 
     //--------------------------------------------------------------------------
