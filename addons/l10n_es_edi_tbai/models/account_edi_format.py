@@ -3,6 +3,8 @@
 
 from odoo import models, _
 
+from .res_company import L10N_ES_EDI_TBAI_VERSION
+
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
@@ -50,13 +52,10 @@ class AccountEdiFormat(models.Model):
             } for inv in invoices}
 
         # Generate the XML values.
-        inv_values = self._l10n_es_tbai_get_invoice_values(invoices)
-
-        # Render the XML file
-        inv_xml = self.env.ref('l10n_es_edi_tbai.invoice_template')._render(inv_values)
+        inv_xml = self._l10n_es_tbai_get_invoice_xml(invoices)
 
         # Call the web service and get response
-        res = self._l10n_es_tbai_call_web_service_sign(invoices, inv_values)
+        res = self._l10n_es_tbai_call_web_service_sign(invoices, inv_xml)
 
         # Create attachment & post to chatter
         for inv in invoices:  # TODO loop should not be necessary, use ensure_one() ?
@@ -75,8 +74,79 @@ class AccountEdiFormat(models.Model):
                     attachment_ids=attachment.ids)
         return res
 
-    def _l10n_es_tbai_get_invoice_values(self, invoice):
-        return {"COMPANY_NIF": 123, "TBAI_VERSION": "1.1", "COMPANY_NAME": "The Best Company"}
+    # -------------------------------------------------------------------------
+    # TBAI XML BUILD
+    # -------------------------------------------------------------------------
+
+    def _l10n_es_tbai_get_invoice_xml(self, invoice):
+        values = self._l10n_es_tbai_get_header_values(invoice)
+        values.update(self._l10n_es_tbai_get_subject_values(invoice))
+        values.update(self._l10n_es_tbai_get_move_values(invoice))
+        values.update(self._l10n_es_tbai_get_trail_values(invoice))
+        return self.env.ref('l10n_es_edi_tbai.template_invoice_bundle')._render(values)
+
+    def _l10n_es_tbai_get_header_values(self, invoice):
+        return {
+            'IDVersionTBAI': L10N_ES_EDI_TBAI_VERSION
+        }
+
+    def _l10n_es_tbai_get_subject_values(self, invoice):
+        xml_recipients = []
+
+        # === PARTNERS ===
+        # TODO multiple partners ?
+        for dest in (1,):
+            eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+            partner = invoice.commercial_partner_id if invoice.is_sale_document() else invoice.company_id
+
+            NIF = False
+            IDOtro_Code = False
+            IDOtro_ID = partner.vat or 'NO_DISPONIBLE'
+            IDOtro_Type = ""
+            if (not partner.country_id or partner.country_id.code == 'ES') and partner.vat:
+                # ES partner with VAT.
+                NIF = partner.vat[2:] if partner.vat.startswith('ES') else partner.vat
+            elif partner.country_id.code in eu_country_codes:
+                # European partner
+                IDOtro_Type = '02'
+            else:
+                if partner.vat:
+                    IDOtro_Type = '04'
+                else:
+                    IDOtro_Type = '06'
+                if partner.country_id:
+                    IDOtro_Code = partner.country_id.code
+
+            values_dest = {
+                'NIF': NIF,
+                'IDOtro_CodigoPais': IDOtro_Code,
+                'IDOtro_ID': IDOtro_ID,
+                'IDOtro_IDType': IDOtro_Type,
+                'ApellidosNombreRazonSocial': partner.name,
+                'CodigoPostal': partner.zip,
+                'Direccion': ", ".join(filter(lambda x: x, [partner.street, partner.street2, partner.city]))
+            }
+            xml_recipients.append(self.env.ref('l10n_es_edi_tbai.template_invoice_destinatarios')._render(values_dest))
+        # TODO check that less than 100 recipients (max for TBAI) ?
+
+        # === SENDER ===
+        sender = invoice.company_id if invoice.is_sale_document() else invoice.commercial_partner_id
+        return {
+            'Emisor': sender,
+            'Destinatarios': xml_recipients,
+            'VariosDestinatarios': "N",  # TODO
+            'TerceroODestinatario': "D"  # TODO
+        }
+
+    def _l10n_es_tbai_get_move_values(self, invoice):
+        return {}
+
+    def _l10n_es_tbai_get_trail_values(self, invoice):
+        return {}
+
+    # -------------------------------------------------------------------------
+    # TBAI SERVER CALLS
+    # -------------------------------------------------------------------------
 
     def _l10n_es_tbai_call_web_service_sign(self, invoice, invoice_values):
         return {invoice: {'success': True}}

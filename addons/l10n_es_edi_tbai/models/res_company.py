@@ -3,8 +3,8 @@
 
 from odoo import api, fields, models
 
-TBAI_VERSION = 1.2
-TBAI_URLS = {
+L10N_ES_EDI_TBAI_VERSION = 1.2
+L10N_ES_EDI_TBAI_URLS = {
     'invoice_test': {
         'araba': '',
         'bizkaia': '',
@@ -91,7 +91,7 @@ class ResCompany(models.Model):
     def _compute_l10n_es_tbai_url(self, company, prefix):
         if company.country_code == 'ES':
             suffix = 'test' if company.l10n_es_edi_test_env else 'prod'
-            return TBAI_URLS[prefix + suffix][company.l10n_es_edi_tax_agency]
+            return L10N_ES_EDI_TBAI_URLS[prefix + suffix][company.l10n_es_edi_tax_agency]
         else:
             return False
 

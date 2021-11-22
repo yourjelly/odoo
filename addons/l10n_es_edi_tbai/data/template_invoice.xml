@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <template id="template_invoice_bundle">
+            <T:TicketBai xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" xmlns:T="urn:ticketbai:emision">
+                <Cabecera>
+                    <IDVersionTBAI>
+                        <t t-out="IDVersionTBAI" />
+                    </IDVersionTBAI>
+                </Cabecera>
+                <Sujetos>
+                    <Emisor>
+                        <NIF>
+                            <t t-out="Emisor.vat" />
+                        </NIF>
+                        <ApellidosNombreRazonSocial>
+                            <t t-out="Emisor.name" />
+                        </ApellidosNombreRazonSocial>
+                    </Emisor>
+                    <Destinatarios t-foreach="Destinatarios" t-as="dest">
+                        <t t-out="dest" />
+                    </Destinatarios>
+                    <VariosDestinatarios>
+                        <t t-out="VariosDestinatarios" />
+                    </VariosDestinatarios>
+                    <FacturaEmitidaPorTerceroODestinatario>
+                        <t t-out="TerceroODestinatario" />
+                    </FacturaEmitidaPorTerceroODestinatario>
+                </Sujetos>
+                <Factura>
+                    <t t-call="l10n_es_edi_tbai.template_invoice_factura" />
+                </Factura>
+                <HuellaTBAI>
+                    <t t-call="l10n_es_edi_tbai.template_invoice_huella" />
+                </HuellaTBAI>
+            </T:TicketBai>
+        </template>
+
+        <template id="template_invoice_destinatarios">
+            <IDDestinatario>
+                <NIF t-if="NIF">
+                    <t t-out="NIF" />
+                </NIF>
+                <IDOtro t-else="">
+                    <CodigoPais t-if="IDOtro_CodigoPais">
+                        <t t-out="IDOtro_CodigoPais" />
+                    </CodigoPais>
+                    <IDType>
+                        <t t-out="IDOtro_IDType" />
+                    </IDType>
+                    <ID>
+                        <t t-out="IDOtro_ID" />
+                    </ID>
+                </IDOtro>
+                <ApellidosNombreRazonSocial>
+                    <t t-out="ApellidosNombreRazonSocial" />
+                </ApellidosNombreRazonSocial>
+                <CodigoPostal>
+                    <t t-out="CodigoPostal" />
+                </CodigoPostal>
+                <Direccion>
+                    <t t-out="Direccion" />
+                </Direccion>
+            </IDDestinatario>
+        </template>
+
+        <template id="template_invoice_factura">
+            <Factura>
+                <CabeceraFactura>
+                    <SerieFactura>TBAITEST/</SerieFactura>
+                    <NumFactura>00001</NumFactura>
+                    <FechaExpedicionFactura>22-11-2021</FechaExpedicionFactura>
+                    <HoraExpedicionFactura>09:00:00</HoraExpedicionFactura>
+                </CabeceraFactura>
+                <DatosFactura>
+                    <DescripcionFactura>/</DescripcionFactura>
+                    <DetallesFactura>
+                        <IDDetalleFactura>
+                            <DescripcionDetalle>L1</DescripcionDetalle>
+                            <Cantidad>1.00</Cantidad>
+                            <ImporteUnitario>100.00</ImporteUnitario>
+                            <Descuento>10.00</Descuento>
+                            <ImporteTotal>108.90</ImporteTotal>
+                        </IDDetalleFactura>
+                        <IDDetalleFactura>
+                            <DescripcionDetalle>L2</DescripcionDetalle>
+                            <Cantidad>1.25</Cantidad>
+                            <ImporteUnitario>4.99</ImporteUnitario>
+                            <Descuento>0.00</Descuento>
+                            <ImporteTotal>7.55</ImporteTotal>
+                        </IDDetalleFactura>
+                    </DetallesFactura>
+                    <ImporteTotalFactura>116.45</ImporteTotalFactura>
+                    <Claves>
+                        <IDClave>
+                            <ClaveRegimenIvaOpTrascendencia>01</ClaveRegimenIvaOpTrascendencia>
+                        </IDClave>
+                    </Claves>
+                </DatosFactura>
+                <TipoDesglose>
+                    <DesgloseFactura>
+                        <Sujeta>
+                            <NoExenta>
+                                <DetalleNoExenta>
+                                    <TipoNoExenta>S1</TipoNoExenta>
+                                    <DesgloseIVA>
+                                        <DetalleIVA>
+                                            <BaseImponible>116.45</BaseImponible>
+                                            <TipoImpositivo>21.00</TipoImpositivo>
+                                            <CuotaImpuesto>20.21</CuotaImpuesto>
+                                            <OperacionEnRecargoDeEquivalenciaORegimenSimplificado>N</OperacionEnRecargoDeEquivalenciaORegimenSimplificado>
+                                        </DetalleIVA>
+                                    </DesgloseIVA>
+                                </DetalleNoExenta>
+                            </NoExenta>
+                        </Sujeta>
+                    </DesgloseFactura>
+                </TipoDesglose>
+            </Factura>
+        </template>
+
+        <template id="template_invoice_huella">
+            <HuellaTBAI>
+                <Software>
+                    <LicenciaTBAI>TBAI-LICENSE-KEY</LicenciaTBAI>
+                    <EntidadDesarrolladora>
+                        <NIF>B20990602</NIF>
+                    </EntidadDesarrolladora>
+                    <Nombre>Odoo</Nombre>
+                    <Version>15.0+e</Version>
+                </Software>
+                <NumSerieDispositivo>TEST-DEVICE-001</NumSerieDispositivo>
+            </HuellaTBAI>
+        </template>
+    </data>
+</odoo>
