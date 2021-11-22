@@ -63,7 +63,7 @@
                             class="oe_stat_button"
                             icon="fa-credit-card">
                             <div class="o_stat_info">
-                                <field name="payout_count" class="o_stat_value"/>
+                                <field name="payouts_count" class="o_stat_value"/>
                                 <span class="o_stat_text"> Payouts</span>
                             </div>
                         </button>
@@ -71,7 +71,7 @@
                     <widget name="web_ribbon"
                             title="Test Mode"
                             bg_color="bg-warning"
-                            attrs="{'invisible': ['|', ('is_test', '=', False), ('adyen_uuid', '=', False)]}"/>
+                            attrs="{'invisible': ['|', ('is_test', '=', False), ('id', '=', False)]}"/>
                     <div class="alert alert-warning"
                          attrs="{'invisible': [('kyc_status_message', '=', False)]}"
                          role="alert">
@@ -101,11 +101,11 @@
                                    attrs="{'invisible': [('country_code', '!=', 'AU')],
                                            'required': [('entity_type', '=', 'individual'), ('country_code', '=', 'AU')]}"/>
                             <field name="id_type"
-                                   attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                   attrs="{'invisible': [('id', '=', False)],
                                            'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
                             <field name="id_front"
                                    filename="id_front_filename"
-                                   attrs="{'invisible': [('adyen_uuid', '=', False)],
+                                   attrs="{'invisible': [('id', '=', False)],
                                            'required': [('entity_type', '=', 'individual'), ('kyc_tier', '>', 1)]}"/>
                             <field name="id_front_filename" invisible="1"/>
                             <field name="id_back" filename="id_back_filename"
@@ -156,10 +156,10 @@
                                groups="base.group_no_one"
                                attrs="{'invisible': [('id', '!=', False)]}">
                             <field name="is_test"
-                                   attrs="{'readonly': [('adyen_uuid', '!=', False)]}"/>
+                                   attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                     </group>
-                    <notebook attrs="{'invisible': [('adyen_uuid', '=', False)]}">
+                    <notebook attrs="{'invisible': [('id', '=', False)]}">
                         <page string="KYC" attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <field name="adyen_kyc_ids">
                                 <tree no_open="1">
@@ -233,7 +233,8 @@
                             <group>
                                 <group>
                                     <field name="payout_schedule"
-                                           attrs="{'readonly': [('payout_allowed', '=', False)]}"/>
+                                           attrs="{'readonly': [('payout_allowed', '=', False)],
+                                                   'invisible': [('id', '=', False)]}"/>
                                 </group>
                                 <group>
                                     <field name="next_scheduled_payout"

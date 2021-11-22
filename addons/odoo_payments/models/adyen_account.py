@@ -90,7 +90,7 @@ class AdyenAccount(models.Model):
 
     transaction_payout_ids = fields.One2many(
         comodel_name='adyen.transaction.payout', inverse_name='adyen_account_id')
-    payout_count = fields.Integer(compute='_compute_payout_count')
+    payouts_count = fields.Integer(compute='_compute_payouts_count')
 
     payment_journal_id = fields.Many2one(
         string="Payment Journal", comodel_name='account.journal',
@@ -170,9 +170,38 @@ class AdyenAccount(models.Model):
 
     #=== COMPUTE METHODS ===#
 
+    @api.depends('transaction_ids')
+    def _compute_transactions_count(self):
+        for account in self:
+            account.transactions_count = len(account.transaction_ids)
+
+    @api.depends('transaction_payout_ids')
+    def _compute_payouts_count(self):
+        for account in self:
+            account.payouts_count = len(account.transaction_payout_ids)
+
     #=== CONSTRAINT METHODS ===#
 
     #=== CRUD METHODS ===#
+
+    @api.model
+    def create(self, values):
+        adyen_account = super().create(values)
+
+        # Set the payment journal for the Odoo payment acquirer if not yet created by the user
+        if not adyen_account.payment_journal_id:
+            payment_journal = self.env['account.journal'].search(
+                [('company_id', '=', adyen_account.company_id.id), ('type', '=', 'bank')],
+                limit=1
+            )
+            if payment_journal:
+                adyen_account.payment_journal_id = payment_journal
+
+        # Assign the account to the company. The company is read from the account rather than from
+        # the env in case the account is created from a company A for a company B.
+        adyen_account.company_id.adyen_account_id = adyen_account.id
+
+        return adyen_account
 
     #=== ACTION METHODS ===#
 
@@ -384,8 +413,6 @@ class AdyenAccount(models.Model):
             ('state', '=', 'installed'),
         ])
 
-    # TODO ANVFE move payment_journal_id logic to payment_odoo module
-    # or add payment as dependency of odoo_payments
     @api.depends('company_id')
     def _compute_payment_journal_id(self):
         for account in self:
@@ -458,16 +485,6 @@ class AdyenAccount(models.Model):
             elif account.merchant_status == 'closed':
                 continue
 
-    @api.depends('transaction_ids')
-    def _compute_transactions_count(self):
-        for account in self:
-            account.transactions_count = len(account.transaction_ids)
-
-    @api.depends('transaction_payout_ids')
-    def _compute_payout_count(self):
-        for account in self:
-            account.payout_count = len(account.transaction_payout_ids)
-
     @api.depends('first_name', 'last_name', 'legal_business_name')
     def _compute_full_name(self):
         for account in self:
@@ -512,32 +529,6 @@ class AdyenAccount(models.Model):
         if self.state_id and self.state_id.country_id != self.country_id:
             self.state_id = False
 
-    @api.model
-    def create(self, values):
-        adyen_account = super().create(values)
-
-        # Set the payment journal for the Odoo payment acquirer if not yet created by the user
-        if not adyen_account.payment_journal_id:
-            payment_journal = self.env['account.journal'].search(
-                [('company_id', '=', adyen_account.company_id.id), ('type', '=', 'bank')],
-                limit=1
-            )
-            if payment_journal:
-                adyen_account.payment_journal_id = payment_journal
-
-        # # FIXME ANVFE tuple as payoutSchedule data ? why the , at the end of the line ?
-        # # Update the payout schedule after preparing the account data. This is not done in the
-        # # prepare because the schedule is updated through a dedicated endpoint if modified later on.
-        # create_data['payoutSchedule'] = PAYOUT_SCHEDULE_MAPPING.get(
-        #     values.get('payout_schedule', 'biweekly'), 'BIWEEKLY_ON_1ST_AND_15TH_AT_MIDNIGHT',
-        # ),
-        # response = adyen_account._adyen_rpc('v1/create_account_holder', create_data)
-
-        # FIXME ANVFE shouldn't it be adyen_account.company_id.adyen_account_id instead ?
-        self.env.company.adyen_account_id = adyen_account.id
-
-        return adyen_account
-
     def write(self, vals):
         res = super().write(vals)
 
@@ -553,7 +544,6 @@ class AdyenAccount(models.Model):
 
         modified_fields = vals.keys()
         if any(getattr(self._fields[fname], 'sync_with_adyen', False) for fname in modified_fields):
-            # if modified_fields & ADYEN_SHARED_FIELDS or modified_fields & ADYEN_SHARED_MODELS:
             response = self._adyen_rpc('v1/update_account_holder', self._prepare_adyen_data())
 
             # FIXME ANVFE could be better if based on ACCOUNT_HOLDER_UPDATED notifications instead
@@ -569,6 +559,9 @@ class AdyenAccount(models.Model):
     def unlink(self):
         self.check_access_rights('unlink')
 
+        # TODO ANVFE delete accounts on Adyen side *after* effective deletion on submerchant side (sql constraints, ...)
+        # TODO ANVFE provide a button to close an account from submerchant side, instead of deleting the account record
+        # TODO ANVFE catch close_account_holder request on Proxy, process on proxy & forward to internal as well?
         # TODO ANVFE better highlight/distinction between closed and non closed accounts
         for account in self:
             account._adyen_rpc('v1/close_account_holder', {
@@ -583,9 +576,6 @@ class AdyenAccount(models.Model):
 
     def _update_payout_schedule(self):
         self.ensure_one()
-
-        # FIXME ANVFE do we really want to allow submerchants to modify their payout schedule ?
-        # wouldn't it be easier if it was the same frequency for all submerchants ?
 
         self._adyen_rpc('v1/update_payout_schedule', {
             'accountCode': self.account_code,
