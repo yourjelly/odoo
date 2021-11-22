@@ -647,7 +647,14 @@ class AdyenAccount(models.Model):
         return self.env.ref('odoo_payments.redirect_form')._render(rendering_context)
 
     def _prepare_adyen_data(self):
-        """ TODO. """
+        """ Prepare expected payload for account holder creation/update routes
+
+        https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
+        https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
+
+        :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
+        :rtype: dict
+        """
         return {
             'accountHolderCode': self.account_holder_code,
             'accountHolderDetails': self._prepare_account_holder_details(),
@@ -718,128 +725,6 @@ class AdyenAccount(models.Model):
                     ] if self.document_number else [],
                 }
             }
-
-    # def _prepare_account_data(self):
-    #     """
-    #
-    #     :param dict values: create/write values to forward to Adyen
-    #
-    #     https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
-    #     https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
-    #
-    #     :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
-    #     :rtype: dict
-    #     """
-    #     data = {
-    #         'accountHolderCode': values.get('account_holder_code') or self.account_holder_code,
-    #     }
-    #     holder_details = {}
-    #
-    #     # *ALL* the address fields are required if one of them changes
-    #     address_fields = {'country_id', 'state_id', 'city', 'zip', 'street', 'house_number_or_name'}
-    #     if address_fields & modified_fields:
-    #         country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-    #         state = self.env['res.country.state'].browse(values.get('state_id')) if values.get('state_id') else self.state_id
-    #         holder_details['address'] = {
-    #             'country': country.code,
-    #             'stateOrProvince': state.code or None,
-    #             'city': values.get('city') or self.city,
-    #             'postalCode': values.get('zip') or self.zip,
-    #             'street': values.get('street') or self.street,
-    #             'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
-    #         }
-    #
-    #     if 'email' in values:
-    #         holder_details['email'] = values['email']
-    #
-    #     if 'phone_number' in values:
-    #         holder_details['fullPhoneNumber'] = values['phone_number']
-    #
-    #     if 'entity_type' in values:
-    #         entity_type = values['entity_type']
-    #         is_business = entity_type != 'individual'
-    #         if entity_type == 'business':
-    #             data['legalEntity'] = 'Business'
-    #         elif entity_type == 'individual':
-    #             data['legalEntity'] = 'Individual'
-    #         else:
-    #             data['legalEntity'] = 'NonProfit'
-    #     else:
-    #         is_business = self and self.entity_type != 'individual'
-    #
-    #     if is_business and {'legal_business_name', 'doing_business_as', 'registration_number'} & modified_fields:
-    #         business_details = holder_details['businessDetails'] = {}
-    #         for source, dest in [
-    #             ('legal_business_name', 'legalBusinessName'),
-    #             ('doing_business_as', 'doingBusinessAs'),
-    #             ('registration_number', 'registrationNumber'),
-    #         ]:
-    #             if source in values:
-    #                 business_details[dest] = values[source]
-    #
-    #     elif {'first_name', 'last_name', 'date_of_birth', 'document_number', 'document_type'} & modified_fields:
-    #         holder_details['individualDetails'] = {}
-    #
-    #         if {'first_name', 'last_name'} & modified_fields:
-    #             holder_details['individualDetails']['name'] = {
-    #                 'firstName': values.get('first_name') or self.first_name,
-    #                 'lastName': values.get('last_name') or self.last_name
-    #             }
-    #
-    #         if 'date_of_birth' in modified_fields:
-    #             holder_details['individualDetails'].setdefault('personalData', {})['dateOfBirth'] = str(values['date_of_birth'])
-    #
-    #         document_number = values.get('document_number') or self.document_number
-    #         if self.document_number and 'document_number' in modified_fields:
-    #             holder_details['individualDetails'].setdefault('personalData', {})['documentData'] = [{
-    #                 'number': document_number,
-    #                 'type': values.get('document_type') or self.document_type,
-    #             }]
-    #
-    #     if holder_details:
-    #         data['accountHolderDetails'] = holder_details
-    #
-    #     return data
-
-    def _adyen_rpc(self, operation, adyen_data=None):
-        self.ensure_one()
-        params = {
-            'adyen_data': adyen_data or {},  # FIXME ANVFE do we ever reach adyen without any payload ?
-            'adyen_uuid': self.adyen_uuid,
-        }
-
-        proxy_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
-        request_url = url_join(proxy_url, operation)
-
-        _logger.info("Sending data to %s:\n%s", request_url, pformat(params))
-
-        payload = {
-            'jsonrpc': '2.0',
-            'params': params,
-        }
-        try:
-            response = requests.post(
-                request_url,
-                json=payload,
-                auth=AdyenProxyAuth(self),
-                timeout=6000)  # TODO timeout=60
-            response.raise_for_status()
-        except requests.exceptions.Timeout:
-            raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
-        except Exception:
-            raise UserError(_('The Adyen proxy is not reachable, please try again later.'))
-
-        data = response.json()
-
-        if 'error' in data:
-            name = data['error']['data'].get('name').rpartition('.')[-1]
-            if name == 'ValidationError':
-                raise ValidationError(data['error']['data'].get('arguments')[0])
-            else:
-                _logger.warning('Proxy error: %s', data['error'])
-                raise UserError(
-                    _("We had troubles reaching Adyen, please retry later or contact the support if the problem persists"))
-        return data.get('result')
 
     def _handle_account_notification(self, notification_data):
         """NOTE: sudoed env"""
@@ -974,6 +859,7 @@ class AdyenAccount(models.Model):
             status_message = _('Failed payout: %s', content['status']['message']['text'])
             self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
 
+    # FIXME ANVFE doesn't seem used
     def _fetch_transactions(self, page=1):
         self.ensure_one()
         response = self._adyen_rpc('v1/get_transactions', {
@@ -986,3 +872,51 @@ class AdyenAccount(models.Model):
         })
         transaction_list = response['accountTransactionLists'][0]
         return transaction_list['transactions'], transaction_list['hasNextPage']
+
+    # Tooling #
+
+    def _adyen_rpc(self, operation, adyen_data=None):
+        """
+        :param str operation: operation to request from Adyen
+        :param dict adyen_data: payload
+
+        :returns:
+        """
+        self.ensure_one()
+        params = {
+            'adyen_data': adyen_data or {},  # FIXME ANVFE do we ever reach adyen without any payload ?
+            'adyen_uuid': self.adyen_uuid,
+        }
+
+        proxy_url = self.env['ir.config_parameter'].sudo().get_param('odoo_payments.proxy_url')
+        request_url = url_join(proxy_url, operation)
+
+        _logger.info("Sending data to %s:\n%s", request_url, pformat(params))
+
+        payload = {
+            'jsonrpc': '2.0',
+            'params': params,
+        }
+        try:
+            response = requests.post(
+                request_url,
+                json=payload,
+                auth=AdyenProxyAuth(self),
+                timeout=6000)  # TODO timeout=60
+            response.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise UserError(_('A timeout occurred while trying to reach the Adyen proxy.'))
+        except Exception:
+            raise UserError(_('The Adyen proxy is not reachable, please try again later.'))
+
+        data = response.json()
+
+        if 'error' in data:
+            name = data['error']['data'].get('name').rpartition('.')[-1]
+            if name == 'ValidationError':
+                raise ValidationError(data['error']['data'].get('arguments')[0])
+            else:
+                _logger.warning('Proxy error: %s', data['error'])
+                raise UserError(
+                    _("We had troubles reaching Adyen, please retry later or contact the support if the problem persists"))
+        return data.get('result')
