@@ -28,7 +28,7 @@
     ],
     'data': [
         'data/account_edi_data.xml',
-        'data/invoice_template.xml',
+        'data/template_invoice.xml',
 
         'security/ir.model.access.csv',
 
