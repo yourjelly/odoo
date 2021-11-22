@@ -92,16 +92,6 @@ class AdyenAccount(models.Model):
         comodel_name='adyen.transaction.payout', inverse_name='adyen_account_id')
     payouts_count = fields.Integer(compute='_compute_payouts_count')
 
-    payment_journal_id = fields.Many2one(
-        string="Payment Journal", comodel_name='account.journal',
-        compute='_compute_payment_journal_id', inverse='_inverse_payment_journal_id',
-        help="The journal in which the successful transactions are posted",
-        domain="[('type', '=', 'bank'), ('company_id', '=', company_id)]")
-
-    # UX flag to know if the user has to select/create a journal or if it will be created automatically for him.
-    need_to_provide_payment_journal = fields.Boolean(
-        compute="_compute_need_to_provide_payment_journal")
-
     entity_type = fields.Selection(
         selection=[
             ('business', "Business"),
@@ -188,15 +178,6 @@ class AdyenAccount(models.Model):
     def create(self, values):
         adyen_account = super().create(values)
 
-        # Set the payment journal for the Odoo payment acquirer if not yet created by the user
-        if not adyen_account.payment_journal_id:
-            payment_journal = self.env['account.journal'].search(
-                [('company_id', '=', adyen_account.company_id.id), ('type', '=', 'bank')],
-                limit=1
-            )
-            if payment_journal:
-                adyen_account.payment_journal_id = payment_journal
-
         # Assign the account to the company. The company is read from the account rather than from
         # the env in case the account is created from a company A for a company B.
         adyen_account.company_id.adyen_account_id = adyen_account.id
@@ -269,8 +250,6 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         new_status = content.get('newStatus')
-        if new_status == 'rejected':  # TODO no longer needed when 'rejected' renamed to 'closed' on internal
-            new_status = 'closed'  # TODO no longer needed when 'rejected' renamed to 'closed' on internal
         if new_status == self.merchant_status:
             _logger.info(
                 "tried to update merchant_status with same value: %(status)s (uuid: %(uuid)s)",
@@ -290,10 +269,9 @@ class AdyenAccount(models.Model):
     def _set_active(self):
         """ Update the account's merchant status to 'active'.
 
-        The first linked payment acquirer is also enabled to allow smooth onboarding. If other
-        payment acquirers are linked to this account, they are left disabled and must be enabled
-        manually.
+        The "advanced" menus for the balance and transactions are also enabled for all accounts.
 
+        Note: sudoed environment
         Note: self.ensure_one()
 
         :return: None
@@ -301,14 +279,7 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         # Activate the account
-        self.with_context(update_from_adyen=True).merchant_status = 'active'
-
-        # Enable the initial linked payment acquirer
-        payment_acquirer = self.env['payment.acquirer'].search(
-            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)], limit=1
-        )
-        if payment_acquirer:
-            payment_acquirer.state = 'enabled' if not self.is_test else 'test'
+        self.with_context(update_from_adyen=True).merchant_status = 'active'  # TODO ANV change to sync_with_adyen=False?
 
         # Enable the additional menus after account activation
         balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
@@ -318,9 +289,7 @@ class AdyenAccount(models.Model):
     def _set_closed(self):
         """ Update the account's merchant status to 'closed'.
 
-        All linked payment acquirers are also disabled to prevent any transaction to be made for
-        this account. In practice, the proxy would prevent such transaction to reach Adyen's API.
-
+        Note: sudoed environment
         Note: self.ensure_one()
 
         :return: None
@@ -329,13 +298,6 @@ class AdyenAccount(models.Model):
 
         # Deactivate the account
         self.with_context(update_from_adyen=True).merchant_status = 'closed'
-
-        # Disable all linked payment acquirers
-        payment_acquirers = self.env['payment.acquirer'].search(
-            [('provider', '=', 'odoo'), ('company_id', '=', self.company_id.id)]
-        )
-        if payment_acquirers:
-            payment_acquirers.write({'state': 'disabled'})
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -407,30 +369,6 @@ class AdyenAccount(models.Model):
             (record.id, "Odoo Payments Account" if record.id else "Odoo Payments Account Creation")
             for record in self
         ]
-
-    @api.depends('company_id')  # fake 'depends' to be sure that this _compute method is called when the form view is displayed
-    def _compute_need_to_provide_payment_journal(self):
-        self.need_to_provide_payment_journal = self.env['ir.module.module'].sudo().search([
-            ('name', '=', 'account_accountant'),
-            ('state', '=', 'installed'),
-        ])
-
-    @api.depends('company_id')
-    def _compute_payment_journal_id(self):
-        for account in self:
-            acquirer = self.env['payment.acquirer'].search([
-                ('provider', '=', 'odoo'),
-                ('company_id', '=', account.company_id.id),
-            ], limit=1)
-            account.payment_journal_id = acquirer.journal_id
-
-    def _inverse_payment_journal_id(self):
-        for account in self:
-            acquirer = self.env['payment.acquirer'].search([
-                ('provider', '=', 'odoo'),
-                ('company_id', '=', account.company_id.id),
-            ], limit=1)
-            acquirer.journal_id = account.payment_journal_id
 
     @api.depends('merchant_status', 'kyc_state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
     def _compute_onboarding_msg(self):

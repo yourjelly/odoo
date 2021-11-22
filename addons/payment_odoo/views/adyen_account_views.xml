@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="adyen_account_view_form" model="ir.ui.view">
+        <field name="name">adyen.account.view.form.inherit.payment.odoo</field>
+        <field name="model">adyen.account</field>
+        <field name="inherit_id" ref="odoo_payments.adyen_account_view_form"/>
+        <field name="arch" type="xml">
+            <header position="before">
+                <field name="allow_payment_journal_selection" invisible="1"/>
+            </header>
+            <group name="business_details" position="after">
+                <group string="Payment Followup"
+                       attrs="{'invisible': ['|', ('allow_payment_journal_selection', '=', False), ('id', '!=', False)]}">
+                    <field name="payment_journal_id"
+                           context="{'default_type': 'bank'}"
+                           attrs="{'required': [('allow_payment_journal_selection', '=', True)]}"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

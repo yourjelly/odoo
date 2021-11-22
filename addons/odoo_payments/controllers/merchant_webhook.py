@@ -31,8 +31,8 @@ class PlatformWebhookController(Controller):
         if not account_sudo:
             _logger.error("received notification for non-existing account: %s", adyen_uuid)
         else:
-            event_type = notification_data.get('eventType')
-            content = notification_data.get('content', {})
+            event_type = data.get('eventType')
+            content = data.get('content', {})
             if event_type == 'MERCHANT_STATUS_CHANGE':
                 account_sudo._handle_merchant_status_change_notification(content)
             else:
