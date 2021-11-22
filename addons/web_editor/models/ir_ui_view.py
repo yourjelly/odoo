@@ -18,7 +18,7 @@ EDITING_ATTRIBUTES = ['data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-x
 class IrUiView(models.Model):
     _inherit = 'ir.ui.view'
 
-    def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False, options=None):
+    def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
         if values and values.get('editable'):
             try:
                 self.check_access_rights('write')
@@ -26,7 +26,7 @@ class IrUiView(models.Model):
             except AccessError:
                 values['editable'] = False
 
-        return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext, options=options)
+        return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
 
     #------------------------------------------------------
     # Save from html

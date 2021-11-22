@@ -280,7 +280,6 @@ class MailRenderMixin(models.AbstractModel):
                     html.fragment_fromstring(template_src, create_parent='div'),
                     variables,
                     raise_on_code=is_restricted,
-                    **(options or {})
                 )
                 # remove the rendered tag <div> that was added in order to wrap potentially multiples nodes into one.
                 render_result = render_result[5:-6]
@@ -333,7 +332,7 @@ class MailRenderMixin(models.AbstractModel):
         for record in self.env[model].browse(res_ids):
             variables['object'] = record
             try:
-                render_result = view._render(variables, engine='ir.qweb', minimal_qcontext=True, options=options)
+                render_result = view._render(variables, engine='ir.qweb', minimal_qcontext=True)
             except Exception as e:
                 _logger.info("Failed to render template : %s (%d)", template_src, view.id, exc_info=True)
                 raise UserError(_("Failed to render template : %(xml_id)s (%(view_id)d)",
