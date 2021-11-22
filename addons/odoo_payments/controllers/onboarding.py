@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 
 
 class OnboardingController(http.Controller):
+    _return_url = '/odoo_payments/return'
 
     """ This controller is responsible for the onboarding (account creation) flow of Odoo Payments.
 
@@ -28,7 +29,7 @@ class OnboardingController(http.Controller):
         """
         return request.env.company.adyen_account_id._get_creation_redirect_form()
 
-    @http.route('/odoo_payments/return', type='http', methods=['GET'], auth='user')
+    @http.route(_return_url, type='http', methods=['GET'], auth='user')
     def odoo_payments_return_from_redirect(
         self, account_holder_code, account_code, adyen_uuid, proxy_token
     ):

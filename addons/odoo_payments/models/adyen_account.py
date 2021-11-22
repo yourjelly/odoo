@@ -18,6 +18,7 @@ from odoo.osv import expression
 
 from odoo.addons.mail.tools import mail_validation
 from odoo.addons.odoo_payments.const import LEGAL_ENTITY_TYPE_MAPPING, KYC_STATUS_MAPPING, PAYOUT_SCHEDULE_MAPPING
+from odoo.addons.odoo_payments.controllers.onboarding import OnboardingController
 from odoo.addons.odoo_payments.utils import AdyenProxyAuth
 from odoo.addons.phone_validation.tools import phone_validation
 
@@ -641,7 +642,7 @@ class AdyenAccount(models.Model):
             ),
             'db_url': db_url,
             'is_test': self.is_test,
-            'return_url': url_join(db_url, 'odoo_payments/return'),
+            'return_url': url_join(db_url, OnboardingController._return_url),
             'adyen_data': json.dumps(self._prepare_adyen_data()),
         }
         return self.env.ref('odoo_payments.redirect_form')._render(rendering_context)
