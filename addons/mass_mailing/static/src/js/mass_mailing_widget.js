@@ -84,7 +84,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
             convertInline.attachmentThumbnailToLinkImg($editable);
             convertInline.fontToImg($editable);
-            convertInline.classToStyle($editable);
+            console.log(self.cssRules.length);
+            convertInline.classToStyle($editable, self.cssRules);
             convertInline.bootstrapToTable($editable);
             convertInline.cardToTable($editable);
             convertInline.listGroupToTable($editable);
