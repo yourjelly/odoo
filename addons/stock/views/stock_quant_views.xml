@@ -2,8 +2,8 @@
 <odoo>
 
     <record id="quant_search_view" model="ir.ui.view">
-        <field name="name">stock.quant.search</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.search</field>
+        <field name="model">stock.inventory</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
             <search string="Quants">
@@ -43,8 +43,8 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_form_editable">
-        <field name="name">stock.quant.form.editable</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.form.editable</field>
+        <field name="model">stock.inventory</field>
         <field eval="11" name="priority"/>
         <field name="arch" type="xml">
             <form string="Inventory Valuation" create="false" edit="false" delete="false">
@@ -81,8 +81,8 @@
 
     <!-- Inventory Report + Update Quantity (via product) view -->
     <record model="ir.ui.view" id="view_stock_quant_tree_editable">
-        <field name="name">stock.quant.tree.editable</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.tree.editable</field>
+        <field name="model">stock.inventory</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
             <tree editable="bottom"
@@ -118,8 +118,8 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_tree">
-        <field name="name">stock.quant.tree</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.tree</field>
+        <field name="model">stock.inventory</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
             <tree string="Inventory Valuation" js_class="inventory_report_list"
@@ -139,8 +139,8 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_pivot">
-        <field name="name">stock.quant.pivot</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.pivot</field>
+        <field name="model">stock.inventory</field>
         <field name="arch" type="xml">
             <pivot string="Inventory" sample="1">
                 <field name="product_id" type="row"/>
@@ -151,8 +151,8 @@
     </record>
 
     <record id="stock_quant_view_graph" model="ir.ui.view">
-        <field name="name">stock.quant.graph</field>
-        <field name="model">stock.quant</field>
+        <field name="name">stock.inventory.graph</field>
+        <field name="model">stock.inventory</field>
         <field name="arch" type="xml">
             <graph string="Stock Quant" sample="1">
                 <field name="location_id"/>
@@ -161,9 +161,9 @@
         </field>
     </record>
 
-    <record model="ir.actions.server" id="action_view_quants"> <!-- Menu + python -->
+    <record model="ir.actions.server" id="action_view_inventory_report"> <!-- Menu + python -->
         <field name="name">Inventory</field>
-        <field name="model_id" ref="model_stock_quant"/>
+        <field name="model_id" ref="model_stock_inventory"/>
         <field name="state">code</field>
         <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]"/>
         <field name="code">
@@ -171,7 +171,7 @@
                 search_default_internal_loc=1,
                 search_default_productgroup=1,
                 search_default_locationgroup=1,
-            ).action_view_quants()
+            ).action_view_inventory_report()
         </field>
     </record>
 
@@ -299,9 +299,9 @@
     </record>
 
     <!-- Inventory Adjustments view -->
-    <record model="ir.ui.view" id="view_stock_quant_tree_inventory_editable">
-        <field name="name">stock.quant.inventory.tree.editable</field>
-        <field name="model">stock.quant</field>
+    <record model="ir.ui.view" id="view_stock_inventory_tree_editable">
+        <field name="name">stock.inventory.inventory.tree.editable</field>
+        <field name="model">stock.inventory</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
             <tree default_order="location_id, inventory_date, product_id, package_id, lot_id, owner_id" decoration-warning='is_outdated' editable="bottom" create="1" edit="1" import="1" js_class="singleton_list" sample="1">
@@ -339,10 +339,10 @@
         </field>
     </record>
 
-    <record model="ir.actions.server" id="action_view_set_quants_tree">
+    <record model="ir.actions.server" id="action_view_set_inventory_tree">
         <field name="name">Set</field>
-        <field name="model_id" ref="model_stock_quant"/>
-        <field name="binding_model_id" ref="stock.model_stock_quant"/>
+        <field name="model_id" ref="model_stock_inventory"/>
+        <field name="binding_model_id" ref="stock.model_stock_inventory"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]"/>
@@ -353,7 +353,7 @@
 
     <record model="ir.actions.server" id="action_view_inventory_tree"> <!-- Menu + python -->
         <field name="name">Inventory</field>
-        <field name="model_id" ref="model_stock_quant"/>
+        <field name="model_id" ref="model_stock_inventory"/>
         <field name="state">code</field>
         <field name="groups_id" eval="[(4, ref('stock.group_stock_user'))]"/>
         <field name="code">
@@ -365,5 +365,5 @@
     <menuitem id="menu_package" name="Packages" parent="menu_stock_inventory_control" action="action_package_view" groups="stock.group_tracking_lot" sequence="102"/>
     <menuitem id="menu_valuation" name="Inventory Report"
               parent="stock.menu_warehouse_report" sequence="100"
-              action="action_view_quants"/>
+              action="action_view_inventory_report"/>
 </odoo>

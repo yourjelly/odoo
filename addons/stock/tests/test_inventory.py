@@ -280,11 +280,12 @@ class TestInventory(TransactionCase):
             'product_uom_id': self.uom_unit.id,
             'owner_id': owner1.id,
             'location_id': self.stock_location.id,
-            'quantity': 1,
         }
-        self.env['stock.quant'].create(vals)
-        self.env['stock.quant'].create(dict(**vals, inventory_quantity=1))
-        self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 2.0)
+        self.env['stock.inventory'].create(
+            dict(**vals, inventory_quantity_auto_apply=1))
+        self.env['stock.inventory'].create(
+            dict(**vals, inventory_quantity_auto_apply=2))
+        self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 2.0)
         self.env['stock.quant']._quant_tasks()
         inventory_quant = self.env['stock.quant'].search([

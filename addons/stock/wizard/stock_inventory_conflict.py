@@ -8,17 +8,18 @@ class StockInventoryConflict(models.TransientModel):
     _name = 'stock.inventory.conflict'
     _description = 'Conflict in Inventory'
 
-    quant_ids = fields.Many2many(
-        'stock.quant', 'stock_conflict_quant_rel', string='Quants')
-    quant_to_fix_ids = fields.Many2many(
-        'stock.quant', string='Conflicts')
+    inventory_ids = fields.Many2many(
+        'stock.inventory', 'stock_conflict_quant_rel', string='Quants')
+    inventory_to_fix_ids = fields.Many2many(
+        'stock.inventory', string='Conflicts')
 
     def action_keep_counted_quantity(self):
-        for quant in self.quant_ids:
-            quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
-        return self.quant_ids.action_apply_inventory()
+        for inventory in self.inventory_ids:
+            inventory.inventory_diff_quantity = inventory.inventory_quantity - inventory.quantity
+        return self.inventory_ids.action_apply_inventory()
 
     def action_keep_difference(self):
-        for quant in self.quant_ids:
-            quant.inventory_quantity = quant.quantity + quant.inventory_diff_quantity
-        return self.quant_ids.action_apply_inventory()
+        for inventory in self.inventory_ids:
+            inventory.inventory_quantity = inventory.quantity + \
+                inventory.inventory_diff_quantity
+        return self.inventory_ids.action_apply_inventory()

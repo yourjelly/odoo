@@ -57,24 +57,24 @@
             <field name="company_id" ref="base.main_company"/>
         </record>
 
-        <record id="stock_inventory_icecream_lot_0" model="stock.quant">
+        <record id="stock_inventory_icecream_lot_0" model="stock.inventory">
             <field name="product_id" ref="stock.product_cable_management_box"/>
             <field name="inventory_quantity">50.0</field>
             <field name="location_id" ref="stock.stock_location_14"/>
             <field name="lot_id" ref="lot_product_product_cable_management_box_0"/>
         </record>
 
-        <record id="stock_inventory_icecream_lot_1" model="stock.quant">
+        <record id="stock_inventory_icecream_lot_1" model="stock.inventory">
             <field name="product_id" ref="stock.product_cable_management_box"/>
             <field name="inventory_quantity">40.0</field>
             <field name="location_id" ref="stock.stock_location_14"/>
             <field name="lot_id" ref="lot_product_product_cable_management_box_1"/>
         </record>
 
-        <function model="stock.quant" name="action_apply_inventory">
+        <function model="stock.inventory" name="action_apply_inventory">
             <function eval="[[('id', 'in', (ref('stock_inventory_icecream_lot_0'),
                                             ref('stock_inventory_icecream_lot_1')
-                                            ))]]" model="stock.quant" name="search"/>
+                                            ))]]" model="stock.inventory" name="search"/>
         </function>
 
         <!-- Create STOCK_MOVE for OUT -->

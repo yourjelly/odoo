@@ -206,21 +206,25 @@ class StockQuant(TransactionCase):
         """ Increase the available quantity when a concurrent transaction is already increasing
         the reserved quanntity for the same product.
         """
-        quant = self.env['stock.quant'].search([('location_id', '=', self.stock_location.id)], limit=1)
+        quant = self.env['stock.quant'].search([('location_id.usage', '=', 'internal')], limit=1)
         if not quant:
             self.skipTest('Cannot test concurrent transactions without demo data.')
         product = quant.product_id
-        available_quantity = self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True)
+        available_quantity = self.env['stock.quant']._get_available_quantity(product, quant.location_id, allow_negative=True)
         # opens a new cursor and SELECT FOR UPDATE the quant, to simulate another concurrent reserved
         # quantity increase
         with closing(self.registry.cursor()) as cr:
-            cr.execute("SELECT id FROM stock_quant WHERE product_id=%s AND location_id=%s", (product.id, self.stock_location.id))
+            cr.execute("SELECT id FROM stock_quant WHERE product_id=%s AND location_id=%s",
+                       (product.id, quant.location_id.id))
             quant_id = cr.fetchone()
             cr.execute("SELECT 1 FROM stock_quant WHERE id=%s FOR UPDATE", quant_id)
-            self.env['stock.quant']._update_available_quantity(product, self.stock_location, 1.0)
+            self.env['stock.quant']._update_available_quantity(product, quant.location_id, 1.0)
 
-        self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location, allow_negative=True), available_quantity + 1)
-        self.assertEqual(len(self.gather_relevant(product, self.stock_location, strict=True)), 2)
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(
+            product, quant.location_id, allow_negative=True), available_quantity + 1)
+        self.assertEqual(len(self.gather_relevant(
+            product, quant.location_id, strict=True)), 2)
+        self.env['stock.quant']._merge_quants()
 
     def test_increase_available_quantity_4(self):
         """ Increase the available quantity when no quants are already in a location with a user without access right.

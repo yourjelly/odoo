@@ -19,8 +19,8 @@
                 </div>
                 <div>
                     <br/>
-                    <field name="quant_ids" invisible="1"/>
-                    <field name="quant_to_fix_ids" readonly="1" style="margin-top:10px;">
+                    <field name="inventory_ids" invisible="1"/>
+                    <field name="inventory_to_fix_ids" readonly="1" style="margin-top:10px;">
                         <tree editable="bottom" create="0" delete="0">
                             <field name="id" invisible="1"/>
                             <field name="tracking" invisible="1"/>
