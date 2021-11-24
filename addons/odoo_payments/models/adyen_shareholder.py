@@ -4,7 +4,7 @@ import uuid
 
 from odoo import api, fields, models
 
-from odoo.addons.odoo_payments.models.adyen_kyc import ADYEN_KYC_STATUS
+from odoo.addons.odoo_payments.models.adyen_kyc_check import ADYEN_KYC_STATUS
 
 
 class AdyenShareholder(models.Model):
@@ -18,8 +18,7 @@ class AdyenShareholder(models.Model):
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account', ondelete='cascade', required=True)
     shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
-    # TODO ANVFE rename shareholder_uuid to shareholder_code, it's the name used in adyen API/Doc
-    shareholder_uuid = fields.Char(string='UUID')  # Given by Adyen
+    code = fields.Char(string="Code")
     first_name = fields.Char(string='First Name', required=True)
     last_name = fields.Char(string='Last Name', required=True)
     full_name = fields.Char(compute='_compute_full_name')
@@ -30,7 +29,7 @@ class AdyenShareholder(models.Model):
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
              "Australia: Document Number")
 
-    adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='shareholder_id')
+    # adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='shareholder_id')
     kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
     kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
 
@@ -80,6 +79,9 @@ class AdyenShareholder(models.Model):
                                 # 'issuerCountry': None,
                                 # 'issuerState': None,
                                 'number': shareholder.document_number,
+                                # FIXME ANVFE fix the whole document verification logic
+                                # document_type not specified on shareholders
+                                # use a dedicated model for documents for Adyen?
                                 'type': shareholder.document_type,
                             }
                         ] if shareholder.document_number else []
@@ -90,7 +92,7 @@ class AdyenShareholder(models.Model):
                     #     'phoneNumber': None,
                     #     'phoneType': None,  # Landline/Mobile/SIP/Fax
                     # },
-                    'shareholderCode': shareholder.shareholder_uuid or None,
+                    'shareholderCode': shareholder.code or None,
                     'shareholderReference': shareholder.shareholder_reference,
                     # 'shareholderType': None,  # Owner/Controller
                     # 'webAddress': None,
@@ -98,14 +100,14 @@ class AdyenShareholder(models.Model):
             ]
 
     @api.depends_context('lang')
-    @api.depends('adyen_kyc_ids')
+    # @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):
         self.kyc_status_message = False
         self.kyc_status = False
-        for shareholder in self.filtered('adyen_kyc_ids'):
-            kyc = shareholder.adyen_kyc_ids._sort_by_status()
-            shareholder.kyc_status = kyc[0].status
-            # FIXME ANVFE what about the kyc_status_message ?
+        #for shareholder in self.filtered('adyen_kyc_ids'):
+        #    kyc = shareholder.adyen_kyc_ids._sort_by_status()
+        #    shareholder.kyc_status = kyc[0].status
+        #    # FIXME ANVFE what about the kyc_status_message ?
 
     @api.depends('first_name', 'last_name')
     def _compute_full_name(self):
@@ -127,7 +129,7 @@ class AdyenShareholder(models.Model):
     #         for shareholder in shareholders
     #         if shareholder['shareholderReference'] == adyen_shareholder.shareholder_reference)
     #     adyen_shareholder.with_context(update_from_adyen=True).write({
-    #         'shareholder_uuid': created_shareholder['shareholderCode'],
+    #         'code': created_shareholder['shareholderCode'],
     #     })
     #     return adyen_shareholder
 
@@ -145,7 +147,7 @@ class AdyenShareholder(models.Model):
         for shareholder in self:
             shareholder.adyen_account_id._adyen_rpc('v1/delete_shareholders', {
                 'accountHolderCode': shareholder.adyen_account_id.account_holder_code,
-                'shareholderCodes': [shareholder.shareholder_uuid],
+                'shareholderCodes': [shareholder.code],
             })
         return super().unlink()
 
@@ -161,11 +163,9 @@ class AdyenShareholder(models.Model):
             if not shareholder:
                 continue  # shouldn't happen, unless data was not properly synchronized between adyen and submerchant
 
-            uuid = shareholder_data['shareholderCode']
-            if shareholder.shareholder_uuid != uuid:
-                shareholder.with_context(update_from_adyen=True).write({
-                    'shareholder_uuid': uuid,
-                })
+            shareholder_code = shareholder_data['shareholderCode']
+            if shareholder.code != shareholder_code:
+                shareholder.with_context(update_from_adyen=True).code = shareholder_code
 
     def _upload_photo_id(self, document_type, content, filename):
         self.ensure_one()
@@ -174,7 +174,7 @@ class AdyenShareholder(models.Model):
         self.adyen_account_id._adyen_rpc('v1/upload_document', {
             'documentDetail': {
                 'accountHolderCode': self.adyen_account_id.account_holder_code,
-                'shareholderCode': self.shareholder_uuid,
+                'shareholderCode': self.code,
                 'documentType': document_type,
                 'filename': filename,
                 'description': 'PASSED' if test_mode else '',
@@ -198,7 +198,7 @@ class AdyenShareholder(models.Model):
     #         'accountHolderDetails': {
     #             'businessDetails': {
     #                 'shareholders': [{
-    #                     'shareholderCode': values.get('shareholder_uuid') or self.shareholder_uuid or None,
+    #                     'shareholderCode': values.get('code') or self.shareholder_uuid or None,
     #                     'shareholderReference': values.get('shareholder_reference') or self.shareholder_reference,
     #                     'address': {
     #                         'city': values.get('city') or self.city,

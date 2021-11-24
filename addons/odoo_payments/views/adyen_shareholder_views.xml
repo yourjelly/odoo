@@ -5,8 +5,8 @@
         <field name="model">adyen.shareholder</field>
         <field name="arch" type="xml">
             <form string="Adyen Shareholder">
-                <field name="adyen_kyc_ids" invisible="1" />
-                <field name="shareholder_uuid" invisible="1"/>
+                <!-- <field name="adyen_kyc_ids" invisible="1" /> -->
+                <field name="code" invisible="1"/>
                 <field name="shareholder_reference" invisible="1" />
                 <sheet>
                     <field name="kyc_status" />
@@ -25,11 +25,10 @@
                             <field name="document_number"
                                 attrs="{'invisible': [('country_code', 'not in', ['IT', 'US'])],
                                         'required': [('country_code', 'in', ['IT', 'US'])]}"/>
-                            <field name="id_type"
-                                   attrs="{'invisible': [('shareholder_uuid', '=', False)]}"/>
+                            <field name="id_type" attrs="{'invisible': [('code', '=', False)]}"/>
                             <field name="id_front"
                                    filename="id_front_filename"
-                                   attrs="{'invisible': [('shareholder_uuid', '=', False)]}"/>
+                                   attrs="{'invisible': [('code', '=', False)]}"/>
                             <field name="id_front_filename" invisible="1"/>
                             <field name="id_back"
                                    filename="id_back_filename"

@@ -148,7 +148,7 @@ class AdyenAccount(models.Model):
 
     # KYC
     adyen_kyc_ids = fields.One2many(
-        string="KYC Checks", comodel_name='adyen.kyc', inverse_name='adyen_account_id', readonly=True)
+        string="KYC Checks", comodel_name='adyen.kyc.check', inverse_name='adyen_account_id', readonly=True)
     kyc_tier = fields.Integer(string="KYC Tier", readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')
 
@@ -494,21 +494,21 @@ class AdyenAccount(models.Model):
     @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):
         self.kyc_status_message = False
-        doc_types = dict(self.env['adyen.kyc']._fields['verification_type']._description_selection(self.env))
-        for account in self.filtered('adyen_kyc_ids.status_message'):
-            checks = {}
-            for kyc in account.adyen_kyc_ids.filtered('status_message'):
-                doc_type = doc_types.get(kyc.verification_type, _('Other'))
-                checks.setdefault(doc_type, []).append({
-                    'document': kyc.document,
-                    'message': kyc.status_message,
-                })
-
-            account.kyc_status_message = self.env['ir.qweb']._render(
-                'odoo_payments.kyc_status_message', {
-                    'checks': checks
-                }
-            )
+        # doc_types = dict(self.env['adyen.kyc']._fields['verification_type']._description_selection(self.env))
+        # for account in self.filtered('adyen_kyc_ids.status_message'):
+        #     checks = {}
+        #     for kyc in account.adyen_kyc_ids.filtered('status_message'):
+        #         doc_type = doc_types.get(kyc.verification_type, _('Other'))
+        #         checks.setdefault(doc_type, []).append({
+        #             'document': kyc.document,
+        #             'message': kyc.status_message,
+        #         })
+        #
+        #     account.kyc_status_message = self.env['ir.qweb']._render(
+        #         'odoo_payments.kyc_status_message', {
+        #             'checks': checks
+        #         }
+        #     )
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
@@ -730,54 +730,127 @@ class AdyenAccount(models.Model):
         """
         self.ensure_one()
 
-        status = const.KYC_STATUS_MAPPING.get(content.get('verificationStatus'))
-        document = '_'.join(content.get('verificationType', '').lower().split('_')[:-1])  # bank_account, identity, passport, etc.
-        status_message = content.get('statusSummary', {}).get('kycCheckDescription')
+        # status:
+        # AWAITING_DATA
+        # DATA_PROVIDED
+        # FAILED
+        # INVALID_DATA
+        # PASSED
+        # PENDING
+        # RETRY_LIMIT_REACHED
 
-        bank_uuid = content.get('bankAccountUUID')
-        shareholder_uuid = content.get('shareholderCode')
+        # types:
+        # COMPANY_VERIFICATION
+        # CARD_VERIFICATION
+        # IDENTITY_VERIFICATION
+        # LEGAL_ARRANGEMENT_VERIFICATION
+        # NONPROFIT_VERIFICATION
+        # PASSPORT_VERIFICATION
+        # PAYOUT_METHOD_VERIFICATION (ex BANK_ACCOUNT_VERIFICATION)
+        # PCI_VERIFICATION
 
-        kyc = self.adyen_kyc_ids.filtered(lambda k: k.verification_type == document)
-        if bank_uuid:
-            kyc = kyc.filtered(lambda k: k.bank_account_id.bank_account_uuid == bank_uuid or not k.bank_account_id)
-        elif shareholder_uuid:
-            kyc = kyc.filtered(lambda k: k.shareholder_id.shareholder_uuid == shareholder_uuid or not k.shareholder_id)
-        else:
-            kyc = kyc.filtered(lambda k: not k.shareholder_id and not k.bank_account_id)
+        kyc_check = content.get('kycCheckStatusData')
+        if kyc_check:
+            kyc_check_status = kyc_check['status'].lower()
+            kyc_check_type = kyc_check['type'].lower()
 
-        if not kyc:
-            additional_data = {}
-            if document == 'bank_account' and bank_uuid:
-                bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
-                additional_data['bank_account_id'] = bank_account.id
-            if shareholder_uuid:
-                shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
-                additional_data['shareholder_id'] = shareholder.id
+            # kyc_check_summary = kyc_check.get('summary', {})
+            # kyc_check_code = kyc_check_summary.get('kycCheckCode', '')
+            # kyc_check_description = kyc_check_summary.get('kycCheckDescription', '')
 
-            self.env['adyen.kyc'].create({
-                'verification_type': document,
-                'adyen_account_id': self.id,
-                'status': status,
-                'status_message': status_message,
-                'last_update': fields.Datetime.now(),
-                **additional_data
-            })
-        else:
-            # FIXME ANVFE SOMETIME kyc is a multi record recordset
-            # and following lines raise.
-            if bank_uuid and not kyc.bank_account_id:
-                bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
-                kyc.bank_account_id = bank_account.id
-            if shareholder_uuid and not kyc.shareholder_id:
-                shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
-                kyc.shareholder_id = shareholder.id
+            # Find the shareholder linked to this KYC check, if any
+            kyc_shareholder_code = content.get('shareholderCode')
+            if kyc_shareholder_code:
+                shareholder = self.env['adyen.shareholder'].search([
+                    ('adyen_account_id', '=', self.id), ('code', '=', kyc_shareholder_code)
+                ])
+                if not shareholder:
+                    _logger.warning(
+                        "received KYC check for unknown shareholder %s", kyc_shareholder_code
+                    )
+            else:
+                shareholder = self.env['adyen.shareholder']
 
-            if status != kyc.status:
-                kyc.write({
-                    'status': status,
-                    'status_message': status_message,
-                    'last_update': fields.Datetime.now(),
+            existing_kyc = self.env['adyen.kyc.check'].search([
+                ('adyen_account_id', '=', self.id),
+                ('check_type', '=', kyc_check_type),
+                ('shareholder_id', '=', shareholder.id),
+                # TODO state not in final states (passed/failed/retry_limit_reached/...) ?
+            ])
+            if existing_kyc:
+                if len(existing_kyc) > 1:
+                    _logger.error(
+                        "KYC received for account %s, unable to know which existing KYC process is targeted",
+                        self.display_name,
+                    )
+                write_vals = {'status': kyc_check_status}
+                # if kyc_check_description:
+                #     write_vals['description'] = kyc_check_description
+                existing_kyc.write(write_vals)
+                # TODO log on account chatter the kyc update information ?
+            else:
+                kyc_check = self.env['adyen.kyc.check'].create({
+                    'adyen_account_id': self.id,
+                    'check_type': kyc_check_type,
+                    'status': kyc_check_status,
+                    # 'description': kyc_check_description,
+                    # 'code': kyc_check_code,
+                    'shareholder_id': shareholder.id,
                 })
+                # TODO post a message on account to inform the beginning of a kyc check process?
+        else:
+            # What are we supposed to do when there is no kyc details provided?
+            # Does this really happen ?
+            pass
+
+        # status = const.KYC_STATUS_MAPPING.get(content.get('verificationStatus'))
+        # document = '_'.join(content.get('verificationType', '').lower().split('_')[:-1])  # bank_account, identity, passport, etc.
+        # status_message = content.get('statusSummary', {}).get('kycCheckDescription')
+        #
+        # bank_uuid = content.get('payoutMethodCode')
+        # shareholder_uuid = content.get('shareholderCode')
+        #
+        # kyc = self.adyen_kyc_ids.filtered(lambda k: k.verification_type == document)
+        # if bank_uuid:
+        #     kyc = kyc.filtered(lambda k: k.bank_account_id.bank_account_uuid == bank_uuid or not k.bank_account_id)
+        # elif shareholder_uuid:
+        #     kyc = kyc.filtered(lambda k: k.shareholder_id.shareholder_uuid == shareholder_uuid or not k.shareholder_id)
+        # else:
+        #     kyc = kyc.filtered(lambda k: not k.shareholder_id and not k.bank_account_id)
+        #
+        # if not kyc:
+        #     additional_data = {}
+        #     if document == 'bank_account' and bank_uuid:
+        #         bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
+        #         additional_data['bank_account_id'] = bank_account.id
+        #     if shareholder_uuid:
+        #         shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
+        #         additional_data['shareholder_id'] = shareholder.id
+        #
+        #     self.env['adyen.kyc'].create({
+        #         'verification_type': document,
+        #         'adyen_account_id': self.id,
+        #         'status': status,
+        #         'status_message': status_message,
+        #         'last_update': fields.Datetime.now(),
+        #         **additional_data
+        #     })
+        # else:
+        #     # FIXME ANVFE SOMETIME kyc is a multi record recordset
+        #     # and following lines raise.
+        #     if bank_uuid and not kyc.bank_account_id:
+        #         bank_account = self.env['adyen.bank.account'].search([('bank_account_uuid', '=', bank_uuid)])
+        #         kyc.bank_account_id = bank_account.id
+        #     if shareholder_uuid and not kyc.shareholder_id:
+        #         shareholder = self.env['adyen.shareholder'].search([('shareholder_uuid', '=', shareholder_uuid)])
+        #         kyc.shareholder_id = shareholder.id
+        #
+        #     if status != kyc.status:
+        #         kyc.write({
+        #             'status': status,
+        #             'status_message': status_message,
+        #             'last_update': fields.Datetime.now(),
+        #         })
 
     def _handle_account_updated_notification(self, content):
         """ Handle `ACCOUNT_UPDATED` notifications and update the account accordingly.

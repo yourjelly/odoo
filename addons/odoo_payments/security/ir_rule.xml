@@ -40,9 +40,9 @@
         <field name="model_id" ref="odoo_payments.model_adyen_shareholder"/>
         <field name="domain_force">[('adyen_account_id.company_id', 'in', company_ids)]</field>
     </record>
-    <record id="kyc_company_rule" model="ir.rule">
+    <record id="kyc_check_company_rule" model="ir.rule">
         <field name="name">Access KYC checks in own companies only</field>
-        <field name="model_id" ref="odoo_payments.model_adyen_kyc"/>
+        <field name="model_id" ref="odoo_payments.model_adyen_kyc_check"/>
         <field name="domain_force">[('adyen_account_id.company_id', 'in', company_ids)]</field>
     </record>
     <record id="transaction_status_company_rule" model="ir.rule">

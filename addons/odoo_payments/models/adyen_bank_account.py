@@ -7,7 +7,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools.mimetypes import guess_mimetype
 
-from odoo.addons.odoo_payments.models.adyen_kyc import ADYEN_KYC_STATUS
+from odoo.addons.odoo_payments.models.adyen_kyc_check import ADYEN_KYC_STATUS
 from odoo.addons.odoo_payments.models.adyen_mixins import ADYEN_AVAILABLE_COUNTRIES
 
 
@@ -97,7 +97,7 @@ class AdyenBankAccount(models.Model):
     bank_statement_filename = fields.Char()
 
     # KYC
-    adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='bank_account_id')
+    # adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='bank_account_id')
     kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
     kyc_status_message = fields.Char(compute='_compute_kyc_status')
 
@@ -150,13 +150,13 @@ class AdyenBankAccount(models.Model):
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends_context('lang')
-    @api.depends('adyen_kyc_ids')
+    # @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):
         self.kyc_status_message = False # FIXME ANVFE when is it specified ???
         self.kyc_status = False
-        for bank_account in self.filtered('adyen_kyc_ids'):
-            kyc = bank_account.adyen_kyc_ids._sort_by_status()
-            bank_account.kyc_status = kyc[0].status
+    #     for bank_account in self.filtered('adyen_kyc_ids'):
+    #         kyc = bank_account.adyen_kyc_ids._sort_by_status()
+    #         bank_account.kyc_status = kyc[0].status
 
     # @api.model
     # def create(self, values):

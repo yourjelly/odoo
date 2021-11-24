@@ -161,16 +161,15 @@
                         <page string="KYC" attrs="{'invisible': [('transactions_count', '=', 0)]}">
                             <field name="adyen_kyc_ids">
                                 <tree no_open="1">
-                                    <field name="verification_type"/>
-                                    <field name="document"/>
+                                    <field name="check_type"/>
+<!--                                <field name="document"/>-->
                                     <field name="status"
                                            widget="badge"
                                            decoration-warning="status == 'awaiting_data'"
                                            decoration-info="status == 'pending'"
                                            decoration-success="status in ['data_provided', 'passed']"
-                                           decoration-danger="status == 'failed'"/>
-                                    <field name="status_message"/>
-                                    <field name="last_update"/>
+                                           decoration-danger="status in ['invalid_data', 'failed', 'retry_limit_reached']"/>
+                                    <field name="write_date"/>
                                 </tree>
                             </field>
                         </page>

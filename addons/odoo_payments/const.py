@@ -16,17 +16,6 @@ LEGAL_ENTITY_TYPE_MAPPING = {
 #     'Closed': 'closed',
 # }
 
-# Mapping of Adyen verification statuses to adyen.kyc.status values
-KYC_STATUS_MAPPING = {
-    'INVALID_DATA': 'data_to_provide',
-    'RETRY_LIMIT_REACHED': 'data_to_provide',
-    'AWAITING_DATA': 'data_to_provide',
-    'DATA_PROVIDED': 'data_provided',
-    'PENDING': 'pending',
-    'PASSED': 'passed',
-    'FAILED': 'failed',
-}
-
 # Mapping of adyen.account.payout_schedule values to Adyen payout schedules
 PAYOUT_SCHEDULE_MAPPING = {
     'daily': 'DAILY',

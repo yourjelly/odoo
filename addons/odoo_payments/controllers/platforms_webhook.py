@@ -37,14 +37,14 @@ class PlatformWebhookController(Controller):
             content = data.get('content', {})
             if event_type == 'ACCOUNT_HOLDER_CREATED':
                 account_sudo._handle_account_holder_created_notification()
-            elif event_type == 'ACCOUNT_HOLDER_PAYOUT':
-                account_sudo._handle_account_holder_payout_notification(content)
             elif event_type == 'ACCOUNT_HOLDER_STATUS_CHANGE':
                 account_sudo._handle_account_holder_status_change_notification(content)
             elif event_type == 'ACCOUNT_HOLDER_VERIFICATION':
                 account_sudo._handle_account_holder_verification_notification(content)
             elif event_type == 'ACCOUNT_UPDATED':
                 account_sudo._handle_account_updated_notification(content)
+            elif event_type == 'ACCOUNT_HOLDER_PAYOUT':
+                account_sudo._handle_account_holder_payout_notification(content)
             else:
                 _logger.warning(
                     "discarded platforms notification with unknown event type: %s", event_type
