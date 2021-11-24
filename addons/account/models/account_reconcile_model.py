@@ -440,6 +440,16 @@ class AccountReconcileModel(models.Model):
 
         return lines_vals_list
 
+    @api.model
+    def _convert_to_amls_create_list(self, lines_vals_list):
+        amls_fields = self.env['account.move.line']._fields
+        for line_vals in lines_vals_list:
+            for field_name in list(line_vals.keys()):
+                if field_name not in amls_fields:
+                    line_vals.pop(field_name, None)
+
+        return lines_vals_list
+
     ####################################################
     # RECONCILIATION CRITERIA
     ####################################################
@@ -876,7 +886,8 @@ class AccountReconcileModel(models.Model):
                         if not st_line.partner_id and partner:
                             st_line.partner_id = partner
 
-                        st_line.reconcile(lines_vals_list + writeoff_vals_list, allow_partial=True)
+                        amls_vals_list = self._convert_to_amls_create_list(lines_vals_list + writeoff_vals_list,)
+                        st_line.reconcile(amls_vals_list, allow_partial=True)
 
                         rslt['status'] = 'reconciled'
                         rslt['reconciled_lines'] = st_line.line_ids
@@ -1082,7 +1093,8 @@ class AccountReconcileModel(models.Model):
             if not st_line.partner_id and partner:
                 st_line.partner_id = partner
 
-            st_line.reconcile(writeoff_vals_list)
+            amls_vals_list = self._convert_to_amls_create_list(writeoff_vals_list)
+            st_line.reconcile(amls_vals_list)
             rslt['status'] = 'reconciled'
             rslt['reconciled_lines'] = st_line.line_ids
 
