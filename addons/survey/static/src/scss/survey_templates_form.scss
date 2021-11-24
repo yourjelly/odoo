@@ -102,6 +102,11 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
             }
         }
 
+        .o_survey_form_choice_item_checkbox {
+            right: 5px;
+            top: 0px;
+        }
+
         &.o_survey_selected i {
             display: none;
             &.fa-check-circle,&.fa-check-square {
@@ -219,12 +224,6 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
                 opacity: 1;
             }
         }
-    }
-
-    .o_checkbox {
-        position: absolute !important;
-        top: calc(50% - 0.75rem) !important; //center the checkbox vertically
-        right: 5px;
     }
 
     .o_survey_choice_key {

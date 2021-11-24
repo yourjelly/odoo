@@ -490,8 +490,10 @@
                                 t-att-checked="'checked' if answer_line else None"
                                 t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"/>
                             <span t-field='label.value'/>
-                            <i class="o_checkbox fa fa-check-square float-right mt-1 position-relative"></i>
-                            <i class="o_checkbox fa fa-square-o float-right mt-1 position-relative"></i>
+                            <div class="o_survey_form_choice_item_checkbox position-absolute d-flex align-items-center h-100">
+                                <i class="o_checkbox fa fa-check-square float-right mt-1 position-relative"></i>
+                                <i class="o_checkbox fa fa-square-o float-right mt-1 position-relative"></i>
+                            </div>
                             <t t-call="survey.question_suggested_value_image"/>
                         </label>
                     </div>
