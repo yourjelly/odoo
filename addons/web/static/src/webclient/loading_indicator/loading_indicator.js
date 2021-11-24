@@ -28,7 +28,7 @@ export class LoadingIndicator extends Component {
         this.uiService = useService("ui");
     }
 
-    requestCall(rpcId) {
+    requestCall({ detail: rpcId }) {
         if (this.state.count === 0) {
             this.state.show = true;
             this.blockUITimer = browser.setTimeout(() => {
@@ -40,7 +40,7 @@ export class LoadingIndicator extends Component {
         this.state.count++;
     }
 
-    responseCall(rpcId) {
+    responseCall({ detail: rpcId }) {
         this.rpcIds.delete(rpcId);
         this.state.count = this.rpcIds.size;
         if (this.state.count === 0) {
