@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- TODO ANVFE clean this view (& model, & other onboarding views)
+        according to following doc on necessary fields/content
+        https://docs.adyen.com/platforms/verification-process/required-information -->
+
     <record id="adyen_account_view_form" model="ir.ui.view">
         <field name="name">adyen.account.view.form</field>
         <field name="model">adyen.account</field>

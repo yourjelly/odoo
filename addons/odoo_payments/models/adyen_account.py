@@ -149,7 +149,7 @@ class AdyenAccount(models.Model):
     # KYC
     adyen_kyc_ids = fields.One2many(
         string="KYC Checks", comodel_name='adyen.kyc', inverse_name='adyen_account_id', readonly=True)
-    kyc_tier = fields.Integer(string="KYC Tier", default=0, readonly=True)
+    kyc_tier = fields.Integer(string="KYC Tier", readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')
 
     is_test = fields.Boolean(string="Test Account", help="Cannot be modified after account creation.")
@@ -213,6 +213,8 @@ class AdyenAccount(models.Model):
         'active' if it is a test account because these do no go through the validation by the
         support. If the account is created in the live environment, no action is performed because
         we are waiting for the validation notification.
+
+        Doc: https://docs.adyen.com/api-explorer/#/NotificationService/v6/post/ACCOUNT_HOLDER_CREATED
 
         Note: sudoed environment
         Note: self.ensure_one()
@@ -298,6 +300,51 @@ class AdyenAccount(models.Model):
 
         # Deactivate the account
         self.with_context(update_from_adyen=True).merchant_status = 'closed'
+
+    def _handle_account_holder_status_change_notification(self, content):
+        """ Handle `ACCOUNT_HOLDER_STATUS_CHANGE` notifications and update the account accordingly.
+
+        Upon receiving the notification, the account's `kyc_tier` & `payout_allowed` are updated.
+        Also, if any specific event reason is provided by Adyen in the notification content, they
+        are posted on the account's chatter.
+        Doc: https://docs.adyen.com/api-explorer/#/NotificationService/v6/post/ACCOUNT_HOLDER_STATUS_CHANGE
+
+        Note: sudoed environment
+        Note: self.ensure_one()
+
+        :param dict content: The notification content
+        :return: None
+        """
+        self.ensure_one()
+
+        write_vals = {}
+
+        # Update the KYC tier
+        kyc_tier = content['newStatus'].get('processingState', {}).get('tierNumber')
+        if isinstance(kyc_tier, int) and kyc_tier != self.kyc_tier:
+            write_vals['kyc_tier'] = kyc_tier
+
+        # Update the payout clearance
+        payout_allowed_str = content['newStatus'].get('payoutState', {}).get('allowPayout')
+        if isinstance(payout_allowed_str, str):
+            payout_allowed = payout_allowed_str == 'true'
+            if payout_allowed != self.payout_allowed:
+                write_vals['payout_allowed'] = payout_allowed
+
+        if write_vals:
+            self.with_context(update_from_adyen=True).write(write_vals)
+
+        # Notify the account status change if events are provided
+        events = content['newStatus'].get('events', [])
+        if events:
+            status_message = self.env['ir.qweb']._render(
+                'odoo_payments.account_status_change_message',
+                values={
+                    'reason': content.get('reason'),
+                    'event_reasons': [event['reason'] for event in events],
+                }
+            )
+            self.message_post(body=status_message, subtype_xmlid='mail.mt_comment')
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -668,50 +715,18 @@ class AdyenAccount(models.Model):
                 }
             }
 
-    def _handle_account_holder_status_change_notification(self, content):
-        """
-
-        Note: sudoed environment
-        Note: self.ensure_one()
-
-        """
-        self.ensure_one()
-        write_vals = {}
-
-        # Tier
-        tier = content.get('newStatus', {}).get('processingState', {}).get('tierNumber', None)
-        if isinstance(tier, int) and tier != self.kyc_tier:
-            write_vals['kyc_tier'] = tier
-
-        # Payout
-        payout_allowed = content.get('newStatus', {}).get('payoutState', {}).get('allowPayout', None)
-        if payout_allowed is not None:
-            write_vals['payout_allowed'] = payout_allowed == 'true'
-
-        if write_vals:
-            self.with_context(update_from_adyen=True).write(write_vals)
-
-        # Events
-        events = content.get('newStatus', {}).get('events')
-        if events:
-            reasons = []
-            for event in events:
-                account_event = event.get('AccountEvent', {}).get('reason')
-                if account_event:
-                    reasons.append(account_event)
-
-            status_message = self.env['ir.qweb']._render('odoo_payments.status_message', {
-                'message': content.get('reason'),
-                'reasons': reasons,
-            })
-            self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
-
     def _handle_account_holder_verification_notification(self, content):
-        """
+        """ Handle `ACCOUNT_HOLDER_VERIFICATION` notifications and update the account accordingly.
+
+        TODO
+
+        Doc: https://docs.adyen.com/api-explorer/#/NotificationService/v6/post/ACCOUNT_HOLDER_VERIFICATION
 
         Note: sudoed environment
         Note: self.ensure_one()
 
+        :param dict content: The notification content
+        :return: None
         """
         self.ensure_one()
 
@@ -765,11 +780,17 @@ class AdyenAccount(models.Model):
                 })
 
     def _handle_account_updated_notification(self, content):
-        """
+        """ Handle `ACCOUNT_UPDATED` notifications and update the account accordingly.
+
+        TODO
+
+        Doc: https://docs.adyen.com/api-explorer/#/NotificationService/v6/post/ACCOUNT_UPDATED
 
         Note: sudoed environment
         Note: self.ensure_one()
 
+        :param dict content: The notification content
+        :return: None
         """
         self.ensure_one()
 
@@ -780,11 +801,17 @@ class AdyenAccount(models.Model):
             ).next_scheduled_payout = parse(scheduled_date).astimezone(UTC).replace(tzinfo=None)
 
     def _handle_account_holder_payout_notification(self, content):
-        """
+        """ Handle `ACCOUNT_HOLDER_PAYOUT` notifications.
+
+        TODO
+
+        Doc: https://docs.adyen.com/api-explorer/#/NotificationService/v6/post/ACCOUNT_HOLDER_PAYOUT
 
         Note: sudoed environment
         Note: self.ensure_one()
 
+        :param dict content: The notification content
+        :return: None
         """
         self.ensure_one()
         status = content.get('status', {}).get('statusCode')
@@ -814,7 +841,10 @@ class AdyenAccount(models.Model):
         :param str operation: operation to request from Adyen
         :param dict adyen_data: payload
 
-        :returns:
+        :return: Request result
+        :rtype: dict
+        :raises: UserError when TODO
+        :raises: ValidationError when TODO
         """
         self.ensure_one()
         params = {

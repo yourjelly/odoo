@@ -10,6 +10,15 @@
         </form>
     </template>
 
+    <template id="account_status_change_message">
+        <p t-if="reason"><t t-esc="reason"/>:</p>
+        <ul>
+            <li t-foreach="event_reasons" t-as="event_reason">
+                <t t-esc="event_reason"/>
+            </li>
+        </ul>
+    </template>
+
     <template id="kyc_status_message">
         <p t-if="message" t-esc="message"/>
         <t t-if="checks">
@@ -27,15 +36,6 @@
                 </li>
             </ul>
         </t>
-    </template>
-
-    <template id="status_message">
-        <p t-if="message"><t t-esc="message" />:</p>
-        <ul>
-            <li t-foreach="reasons" t-as="reason">
-                <t t-esc="reason" />
-            </li>
-        </ul>
     </template>
 
 </odoo>

@@ -18,6 +18,7 @@ class AdyenShareholder(models.Model):
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account', ondelete='cascade', required=True)
     shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
+    # TODO ANVFE rename shareholder_uuid to shareholder_code, it's the name used in adyen API/Doc
     shareholder_uuid = fields.Char(string='UUID')  # Given by Adyen
     first_name = fields.Char(string='First Name', required=True)
     last_name = fields.Char(string='Last Name', required=True)
