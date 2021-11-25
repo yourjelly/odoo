@@ -4078,7 +4078,7 @@ Fields:
         records = self._create(data_list)
 
         # protect fields being written against recomputation
-        protected = [(data['protected'], data['record']) for data in data_list]
+        protected = [(data['protected'], data['record']) for data in data_list if data['protected']]
         with self.env.protecting(protected):
             # group fields by inverse method (to call it once), and order groups
             # by dependence (in case they depend on each other)
@@ -4216,7 +4216,7 @@ Fields:
         records._parent_store_create()
 
         # protect fields being written against recomputation
-        protected = [(data['protected'], data['record']) for data in data_list]
+        protected = [(data['protected'], data['record']) for data in data_list if data['protected']]
         with self.env.protecting(protected):
             # mark computed fields as todo
             records.modified(self._fields, create=True)
