@@ -20,21 +20,11 @@ class AdyenAccount(models.Model):
         comodel_name='account.journal',
         domain="[('type', '=', 'bank'), ('company_id', '=', company_id)]",
         default=_default_payment_journal_id,
+        required=True,
         store=False,
-    )
-    allow_payment_journal_selection = fields.Boolean(
-        help="Whether the user can select the default journal to set to payment acquirers.",
-        compute='_compute_allow_payment_journal_selection',
     )
 
     #=== COMPUTE METHODS ===#
-
-    @api.depends('company_id')  # Fake 'depends' to be sure that this _compute method is called
-    def _compute_allow_payment_journal_selection(self):
-        self.allow_payment_journal_selection = bool(self.env['ir.module.module'].sudo().search([
-            ('name', '=', 'account_accountant'),
-            ('state', '=', 'installed'),
-        ]))
 
     #=== CRUD METHODS ===#
 
