@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mail.action_partner_mass_mail" model="ir.actions.act_window">
+        <field name="name">Send emails</field>
+        <field name="res_model">mailing.mailing</field>
+        <field name="view_id" ref="mass_mailing_contacts.mailing_mailing_view_form_inherit"/>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{
+                'default_reply_to': "",
+            }
+        </field>
+    </record>
+</odoo>
