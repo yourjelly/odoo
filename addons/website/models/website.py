@@ -286,7 +286,7 @@ class Website(models.Model):
     # ----------------------------------------------------------
     def _website_api_rpc(self, route, params):
         params['version'] = release.version
-        IrConfigParameter = self.env['ir.config_parameter'].sudo()
+        IrConfigParameter = request.env['ir.config_parameter'].sudo()
         website_api_endpoint = IrConfigParameter.get_param('website.website_api_endpoint', DEFAULT_ENDPOINT)
         endpoint = website_api_endpoint + route
         return iap_tools.iap_jsonrpc(endpoint, params=params)
@@ -315,7 +315,7 @@ class Website(models.Model):
     def configurator_init(self):
         r = dict()
         company = self.get_current_website().company_id
-        configurator_features = self.env['website.configurator.feature'].search([])
+        configurator_features = request.env['website.configurator.feature'].search([])
         r['features'] = [{
             'id': feature.id,
             'name': feature.name,
@@ -329,7 +329,7 @@ class Website(models.Model):
         if company.logo and company.logo != company._get_logo():
             r['logo'] = company.logo.decode('utf-8')
         try:
-            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.user.lang})
+            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': request.context['lang']})
             r['industries'] = result['industries']
         except AccessError as e:
             logger.warning(e.args[0])
@@ -344,7 +344,7 @@ class Website(models.Model):
             '/api/website/2/configurator/recommended_themes/%s' % industry_id,
             {'client_themes': client_themes_img}
         )
-        process_svg = self.env['website.configurator.feature']._process_svg
+        process_svg = request.env['website.configurator.feature']._process_svg
         for theme in themes_suggested:
             theme['svg'] = process_svg(theme['name'], palette, theme.pop('image_urls'))
         return themes_suggested
@@ -360,19 +360,19 @@ class Website(models.Model):
             url = '/website/static/src/scss/options/user_values.scss'
             selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
             values = {'color-palettes-name': "'%s'" % selected_palette_name}
-            self.env['web_editor.assets'].make_scss_customization(url, values)
+            request.env['web_editor.assets'].make_scss_customization(url, values)
 
             if isinstance(selected_palette, list):
                 url = '/website/static/src/scss/options/colors/user_color_palette.scss'
                 values = {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
-                self.env['web_editor.assets'].make_scss_customization(url, values)
+                request.env['web_editor.assets'].make_scss_customization(url, values)
 
         def set_features(selected_features):
-            features = self.env['website.configurator.feature'].browse(selected_features)
+            features = request.env['website.configurator.feature'].browse(selected_features)
 
-            menu_company = self.env['website.menu']
+            menu_company = request.env['website.menu']
             if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
-                menu_company = self.env['website.menu'].create({
+                menu_company = request.env['website.menu'].create({
                     'name': _('Company'),
                     'parent_id': website.menu_id.id,
                     'website_id': website.id,
@@ -380,7 +380,7 @@ class Website(models.Model):
                 })
 
             pages_views = {}
-            modules = self.env['ir.module.module']
+            modules = request.env['ir.module.module']
             module_data = {}
             for feature in features:
                 add_menu = bool(feature.menu_sequence)
@@ -394,7 +394,7 @@ class Website(models.Model):
                             blogs = module_data.setdefault('#blog', [])
                             blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
                 elif feature.page_view_id:
-                    result = self.env['website'].new_page(
+                    result = request.env['website'].new_page(
                         name=feature.name,
                         add_menu=add_menu,
                         page_values=dict(url=feature.feature_url, is_published=True),
@@ -409,9 +409,9 @@ class Website(models.Model):
 
             if modules:
                 modules.button_immediate_install()
-                assert self.env.registry is registry()
+                assert request.env.registry is registry()
 
-            self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
+            request.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
 
             return pages_views
 
@@ -419,12 +419,12 @@ class Website(models.Model):
             if page_code == 'homepage':
                 page_view_id = website.homepage_id.view_id
             else:
-                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
+                page_view_id = request.env['ir.ui.view'].browse(pages_views[page_code])
             rendered_snippets = []
             nb_snippets = len(snippet_list)
             for i, snippet in enumerate(snippet_list, start=1):
                 try:
-                    view_id = self.env['website'].with_context(website_id=website.id).viewref('website.' + snippet)
+                    view_id = request.env['website'].with_context(website_id=website.id, lang=website.default_lang_id.code).viewref('website.' + snippet)
                     if view_id:
                         el = html.fromstring(view_id._render(values=cta_data))
 
@@ -459,7 +459,7 @@ class Website(models.Model):
                 except Exception as e:
                     logger.warning("Failed to download image: %s.\n%s", url, e)
                 else:
-                    attachment = self.env['ir.attachment'].create({
+                    attachment = request.env['ir.attachment'].create({
                         'name': name,
                         'website_id': website.id,
                         'key': name,
@@ -467,7 +467,7 @@ class Website(models.Model):
                         'raw': response.content,
                         'public': True,
                     })
-                    self.env['ir.model.data'].create({
+                    request.env['ir.model.data'].create({
                         'name': 'configurator_%s_%s' % (website.id, name.split('.')[1]),
                         'module': 'website',
                         'model': 'ir.attachment',
@@ -477,23 +477,23 @@ class Website(models.Model):
 
         website = self.get_current_website()
         theme_name = kwargs['theme_name']
-        theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
+        theme = request.env['ir.module.module'].search([('name', '=', theme_name)])
         url = theme.button_choose_theme()
 
         # Force to refresh env after install of module
-        assert self.env.registry is registry()
+        assert request.env.registry is registry()
 
         website.configurator_done = True
 
         # Enable tour
-        tour_asset_id = self.env.ref('website.configurator_tour')
+        tour_asset_id = request.env.ref('website.configurator_tour')
         tour_asset_id.copy({'key': tour_asset_id.key, 'website_id': website.id, 'active': True})
 
         # Set logo from generated attachment or from company's logo
         logo_attachment_id = kwargs.get('logo_attachment_id')
         company = website.company_id
         if logo_attachment_id:
-            attachment = self.env['ir.attachment'].browse(logo_attachment_id)
+            attachment = request.env['ir.attachment'].browse(logo_attachment_id)
             attachment.write({
                 'res_model': 'website',
                 'res_field': 'logo',
@@ -511,8 +511,8 @@ class Website(models.Model):
         cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
         if cta_data['cta_btn_text']:
             xpath_view = 'website.snippets'
-            parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
-            self.env['ir.ui.view'].create({
+            parent_view = request.env['website'].with_context(website_id=website.id).viewref(xpath_view)
+            request.env['ir.ui.view'].create({
                 'name': parent_view.key + ' CTA',
                 'key': parent_view.key + "_cta",
                 'inherit_id': parent_view.id,
@@ -531,7 +531,7 @@ class Website(models.Model):
                 """ % (cta_data['cta_btn_href'], cta_data['cta_btn_text'])
             })
             try:
-                view_id = self.env['website'].viewref('website.header_call_to_action')
+                view_id = request.env['website'].viewref('website.header_call_to_action')
                 if view_id:
                     el = etree.fromstring(view_id.arch_db)
                     btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
@@ -546,7 +546,7 @@ class Website(models.Model):
         pages_views = set_features(kwargs.get('selected_features'))
         # We need to refresh the environment of website because set_features installed some new module
         # and we need the overrides of these new menus e.g. for .get_cta_data()
-        website = self.env['website'].browse(website.id)
+        website = request.env['website'].browse(website.id)
 
         # Update footers links, needs to be done after `set_features` to go
         # through module overide of `configurator_get_footer_links`
@@ -558,7 +558,7 @@ class Website(models.Model):
         ]
         for footer_id in footer_ids:
             try:
-                view_id = self.env['website'].viewref(footer_id)
+                view_id = request.env['website'].viewref(footer_id)
                 if view_id:
                     # Deliberately hardcode dynamic code inside the view arch,
                     # it will be transformed into static nodes after a save/edit
