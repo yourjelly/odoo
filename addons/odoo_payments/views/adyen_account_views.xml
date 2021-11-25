@@ -162,14 +162,16 @@
                             <field name="adyen_kyc_ids">
                                 <tree no_open="1">
                                     <field name="check_type"/>
-<!--                                <field name="document"/>-->
+                                    <field name="shareholder_name"/>
                                     <field name="status"
                                            widget="badge"
                                            decoration-warning="status == 'awaiting_data'"
                                            decoration-info="status == 'pending'"
                                            decoration-success="status in ['data_provided', 'passed']"
                                            decoration-danger="status in ['invalid_data', 'failed', 'retry_limit_reached']"/>
-                                    <field name="write_date"/>
+                                    <field name="error_code" optional="hide"/>
+                                    <field name="error_description" optional="hide"/>
+                                    <field name="write_date" optional="show"/>
                                 </tree>
                             </field>
                         </page>

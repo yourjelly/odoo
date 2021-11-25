@@ -37,12 +37,29 @@ class AdyenKYCCheck(models.Model):
         required=True,
     )
     status = fields.Selection(string="Status", selection=ADYEN_KYC_STATUS, required=True)
-    shareholder_id = fields.Many2one(comodel_name='adyen.shareholder', ondelete='cascade')
+    # https://docs.adyen.com/platforms/verification-process/verification-codes
+    error_code = fields.Char(
+        string="Error Code",
+        help="The error code associated with the check failure.",
+    )
+    error_description = fields.Char(
+        string="Description",
+        help="The description associated with the error code",
+    )
+
+    # Linked records
+    shareholder_id = fields.Many2one(
+        string="Linked Shareholder",
+        comodel_name='adyen.shareholder',
+        ondelete='cascade',
+    )
+    shareholder_name = fields.Char(
+        string="Shareholder",
+        help="The shareholder on which this KYC check applies, if any.",
+        related='shareholder_id.display_name',
+    )
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
-
-    # code = fields.Char(string="Code")
-    # description = fields.Char(string="Description")
 
     # Linked Documents
     # legalArrangementCode = fields.Char()
@@ -51,18 +68,11 @@ class AdyenKYCCheck(models.Model):
     # shareholderCode = fields.Char() --> shareholder_id
     # signatoryCode = fields.Char()
 
+    # Became payout method in adyen api ???
     # bank_account_id = fields.Many2one(
     #     comodel_name='adyen.bank.account',
     #     domain="[('adyen_account_id', '=', adyen_account_id)]",
     #     ondelete='cascade')
-    # shareholder_id = fields.Many2one(
-    #     comodel_name='adyen.shareholder',
-    #     domain="[('adyen_account_id', '=', adyen_account_id)]",
-    #     ondelete='cascade')
-    # document = fields.Char(compute='_compute_document', help="Linked document name")
-    document = fields.Char(default="TODO", help="Linked document name")
-
-    # last_update = fields.Datetime(string="Last Update")
 
     #=== COMPUTE METHODS ===#
 
