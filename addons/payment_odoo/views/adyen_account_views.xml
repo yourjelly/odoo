@@ -7,7 +7,9 @@
         <field name="inherit_id" ref="odoo_payments.adyen_account_view_form"/>
         <field name="arch" type="xml">
             <group name="business_details" position="after">
-                <group string="Payment Followup" attrs="{'invisible': [('id', '!=', False)]}"/>
+                <group string="Payment Followup" attrs="{'invisible': [('id', '!=', False)]}">
+                    <field name="payment_journal_id" context="{'default_type': 'bank'}"/>
+                </group>
             </group>
         </field>
     </record>
