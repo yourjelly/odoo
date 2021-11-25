@@ -67,3 +67,14 @@ class Eggs(models.Model):
     _description = 'Test Performance Eggs'
 
     name = fields.Char()
+
+
+class SimpleModel(models.Model):
+    _name = 'sample.model'
+    _description = 'Test Performance Unlink'
+    _log_access = False
+
+    name = fields.Char(compute="_compute_name", store=True, readonly=False)
+
+    def _compute_company_desc(self):
+        self.name = "default"

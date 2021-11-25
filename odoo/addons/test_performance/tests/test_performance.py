@@ -66,6 +66,32 @@ class TestPerformance(SavepointCaseWithUserDemo):
             for record in records:
                 record.value_pc
 
+    @mute_logger('odoo.models.unlink')
+    def test_unlink(self):
+        import time
+        p = time.perf_counter()
+        c_id = []
+        for i in range(5000):
+            c_id.append(self.env['sample.model'].create({'name': f"balbal_{i}"}).id)
+        print(time.perf_counter() - p, " sec to create 1 * 10000 records")
+
+        p = time.perf_counter()
+        for id_ in c_id:
+            self.env['sample.model'].browse(id_).unlink()
+        print(time.perf_counter() - p, " sec to unlink 1 * 10000 records")
+
+        numbers = (1000, 10000, 30000, 80000)
+        for n in numbers:
+            p = time.perf_counter()
+            records = self.env['sample.model'].create(
+                [{'name': f"balbal_{i}"} for i in range(n)]
+            )
+            print(time.perf_counter() - p, f" sec to create {n} records")
+            p = time.perf_counter()
+            records.unlink()
+            print(time.perf_counter() - p, f" sec to unlink {n} records")
+
+
     @warmup
     def test_read_base_depends_context(self):
         """ Compute in batch even when in cache in another context. """
