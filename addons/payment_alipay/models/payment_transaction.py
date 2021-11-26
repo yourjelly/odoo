@@ -39,7 +39,7 @@ class PaymentTransaction(models.Model):
             total_fee = self.amount
         rendering_values = {
             '_input_charset': 'utf-8',
-            'notify_url': urls.url_join(base_url, AlipayController._notify_url),
+            'webhook_url': urls.url_join(base_url, AlipayController._webhook_url),
             'out_trade_no': self.reference,
             'partner': self.acquirer_id.alipay_merchant_partner_id,
             'return_url': urls.url_join(base_url, AlipayController._return_url),

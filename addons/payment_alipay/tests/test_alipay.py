@@ -53,7 +53,7 @@ class AlipayTest(AlipayCommon):
 
         expected_values = {
             '_input_charset': 'utf-8',
-            'notify_url': self._build_url(AlipayController._notify_url),
+            'webhook_url': self._build_url(AlipayController._webhook_url),
             'out_trade_no': self.reference,
             'partner': self.alipay.alipay_merchant_partner_id,
             'return_url': self._build_url(AlipayController._return_url),
