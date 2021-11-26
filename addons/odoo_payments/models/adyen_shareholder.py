@@ -30,9 +30,10 @@ class AdyenShareholder(models.Model):
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
              "Australia: Document Number")
 
-    # adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='shareholder_id')
-    kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
-    kyc_status_message = fields.Char(compute='_compute_kyc_status', readonly=True)
+    latest_kyc_check_id = fields.Many2one(comodel_name='adyen.kyc.check', compute='_compute_latest_kyc_check_id')
+    kyc_status = fields.Selection(related='latest_kyc_check_id.status')
+    # FIXME is this still needed ?
+    kyc_status_message = fields.Char(related='latest_kyc_check_id.error_description')
 
     #=== COMPUTE METHODS ===#
 
@@ -103,15 +104,11 @@ class AdyenShareholder(models.Model):
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    @api.depends_context('lang')
-    # @api.depends('adyen_kyc_ids')
-    def _compute_kyc_status(self):
-        self.kyc_status_message = False
-        self.kyc_status = False
-        #for shareholder in self.filtered('adyen_kyc_ids'):
-        #    kyc = shareholder.adyen_kyc_ids._sort_by_status()
-        #    shareholder.kyc_status = kyc[0].status
-        #    # FIXME ANVFE what about the kyc_status_message ?
+    def _compute_latest_kyc_check_id(self):
+        for shareholder in self:
+            shareholder.latest_kyc_check_id = shareholder.adyen_account_id.adyen_kyc_ids.filtered(
+                lambda kyc_check: kyc_check.shareholder_id == shareholder
+            )._sort_by_status()[:1]
 
     @api.depends('first_name', 'last_name')
     def _compute_full_name(self):

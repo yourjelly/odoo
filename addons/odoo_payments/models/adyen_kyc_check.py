@@ -99,10 +99,12 @@ class AdyenKYCCheck(models.Model):
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
-    # def _sort_by_status(self):
-    #     order = ['failed', 'awaiting_data', 'pending', 'data_provided', 'passed']
-    #     kyc_sorted = sorted(self, key=lambda k: order.index(k.status))
-    #     return kyc_sorted
+    # TODO ANVFE CLEAN ME is this really the order we want to keep???
+    def _sort_by_status(self):
+        # FIXME ANVFE does not consider invalid_data & retry_limit_reached
+        order = ['failed', 'awaiting_data', 'pending', 'data_provided', 'passed']
+        kyc_sorted = sorted(self, key=lambda k: order.index(k.status))
+        return kyc_sorted
 
     # @api.depends('bank_account_id', 'shareholder_id')
     # def _compute_document(self):

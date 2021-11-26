@@ -160,6 +160,7 @@ class AdyenAccount(models.Model):
 
     # KYC
     kyc_tier = fields.Integer(string="KYC Tier", readonly=True)
+    # TODO ANVFE rename to kyc_check_ids
     adyen_kyc_ids = fields.One2many(
         string="KYC Checks", comodel_name='adyen.kyc.check', inverse_name='adyen_account_id', readonly=True)
     kyc_status_message = fields.Html(compute='_compute_kyc_status')  # TODO move on adyen.kyc.check
