@@ -88,3 +88,8 @@ class PosController(http.Controller):
     @http.route('/pos/load_onboarding_data', type='json', auth='user')
     def load_onboarding_data(self):
         convert.convert_file(request.env.cr, 'point_of_sale', 'data/point_of_sale_onboarding.xml', None, mode='init', kind='data')
+
+    @http.route('/pos/log_printer_error', type='json', auth='none', cors='*')
+    def log_printer_error(self, data):
+        _logger.error(data)
+        return True

@@ -13,7 +13,7 @@
     previousElement,
     computedCSS,
     html2canvas;
-    
+    window.debughtml2canvas = _html2canvas;
     _html2canvas.Util = {};
     
     _html2canvas.Util.log = function(a) {
@@ -2811,6 +2811,8 @@
         fstyle,
         zStack = parsedData.stack;
     
+        Util.log(options);
+        Util.log(zStack.ctx);
         canvas.width = canvas.style.width =  options.width || zStack.ctx.width;
         canvas.height = canvas.style.height = options.height || zStack.ctx.height;
     

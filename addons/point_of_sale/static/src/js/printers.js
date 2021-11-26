@@ -5,6 +5,7 @@ var Session = require('web.Session');
 var core = require('web.core');
 const { Gui } = require('point_of_sale.Gui');
 var _t = core._t;
+var ajax = require('web.ajax');
 
 // IMPROVEMENT: This is too much. We can get away from this class.
 class PrintResult {
@@ -47,6 +48,13 @@ var PrinterMixin = {
         this.htmlToImgLetterRendering = false; // Whether to render each letter seperately. Necessary if letter-spacing is used.
     },
 
+
+    send_printing_log: function () {
+        return ajax.jsonRpc("/pos/log_printer_error", 'call', {
+            data: window.debugLog
+        });
+    },
+
     /**
      * Add the receipt to the queue of receipts to be printed and process it.
      * We clear the print queue if printing is not successful.
@@ -60,7 +68,10 @@ var PrinterMixin = {
         let image, sendPrintResult;
         while (this.receipt_queue.length > 0) {
             receipt = this.receipt_queue.shift();
-            image = await this.htmlToImg(receipt);
+            image = await this.htmlToImg(receipt).catch(async (e) => {
+                await this.send_printing_log();
+                throw e;
+            });
             try {
                 sendPrintResult = await this.send_printing_job(image);
             } catch (error) {
@@ -91,15 +102,37 @@ var PrinterMixin = {
      * @param {String} receipt: The receipt to be printed, in HTML
      */
     htmlToImg: function (receipt) {
+        window.debugLog = {
+            date: new Date().toUTCString(),
+            timestamp: Date.now(),
+            logs: [],
+        };
+        window.debughtml2canvas.Util.log = function(a) {
+            window.debugLog.logs.push(a);
+        };
+
         var self = this;
         $('.pos-receipt-print').html(receipt);
         var promise = new Promise(function (resolve, reject) {
             self.receipt = $('.pos-receipt-print>.pos-receipt');
+            window.debugLog.html = self.receipt.html();
             html2canvas(self.receipt[0], {
                 onparsed: function(queue) {
+                    const oldValue = queue.stack.ctx.height;
+                    // $('.pos-receipt-print').empty();
                     queue.stack.ctx.height = Math.ceil(self.receipt.outerHeight() + self.receipt.offset().top);
+                    if (queue.stack.ctx.height === 0) {
+                        window.debugLog.selfReceipt = self.receipt.prop('outerHTML');
+                        window.debugLog.outerHeight = self.receipt.outerHeight();
+                        window.debugLog.offset = self.receipt.offset();
+                        window.debugLog.timestampOnParsed = Date.now();
+                        window.debugLog.callStack = new Error().stack;
+                        window.debugLog.oldHeight = oldValue;
+                        reject("printing_error");
+                    }
                 },
                 onrendered: function (canvas) {
+                    window.debugLog.timestampOnRendered = Date.now();
                     $('.pos-receipt-print').empty();
                     resolve(self.process_canvas(canvas));
                 },
