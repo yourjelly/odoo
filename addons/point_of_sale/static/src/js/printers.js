@@ -50,8 +50,18 @@ var PrinterMixin = {
 
 
     send_printing_log: function () {
-        return ajax.jsonRpc("/pos/log_printer_error", 'call', {
-            data: window.debugLog
+        return ajax.jsonRpc("/web/dataset/call_kw/ir_logging/create", 'call', {
+            model: 'ir.logging',
+            method: 'create',
+            args: [{
+                name: "Log Error drawImage Printer",
+                type: 'server',
+                path: '',
+                func: '',
+                line: '',
+                message: window.debugLog,
+              }],
+            kwargs: {}
         });
     },
 
