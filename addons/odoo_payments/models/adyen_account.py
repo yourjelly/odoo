@@ -624,7 +624,10 @@ class AdyenAccount(models.Model):
 
         field_keys = company_fields.keys() & set(fields_list)
         for field_name in field_keys:
-            res[field_name] = self.env.company[company_fields[field_name]]
+            company_value = self.env.company[company_fields[field_name]]
+            if self._fields[field_name].type == 'many2one':
+                company_value = company_value.id
+            res[field_name] = company_value
 
         if not self.env.company.partner_id.is_company and {'last_name', 'first_name'} & set(fields_list):
             name = self.env.company.partner_id.name.split()
