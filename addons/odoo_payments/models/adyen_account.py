@@ -65,6 +65,16 @@ class AdyenAccount(models.Model):
         ],
         compute='_compute_kyc_state',
     )
+    phone_number = fields.Char(
+        string="Phone Number",
+        required=True,
+        tracking=True,
+        sync_with_adyen=True,
+    )
+    formatted_phone_number = fields.Char(
+        compute='_compute_formatted_phone_number',
+        store=True,
+    )
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -97,8 +107,11 @@ class AdyenAccount(models.Model):
             ('business', "Business"),
             ('individual', "Individual"),
             ('nonprofit', "Non Profit"),
-        ], string="Legal Entity Type", required=True,
-        sync_with_adyen=True)
+        ],
+        string="Legal Entity Type",
+        required=True,
+        sync_with_adyen=True,
+    )
 
     # Contact Info #
     # Individual
@@ -130,7 +143,6 @@ class AdyenAccount(models.Model):
     # Shared contact info (Business/Individual/NonProfit)
     full_name = fields.Char(compute='_compute_full_name')
     email = fields.Char(string="Email", required=True, tracking=True, sync_with_adyen=True)
-    phone_number = fields.Char(string="Phone Number", required=True, tracking=True, sync_with_adyen=True)
 
     # Payout
     account_code = fields.Char(string="Account Code")
@@ -159,6 +171,23 @@ class AdyenAccount(models.Model):
     ]
 
     #=== COMPUTE METHODS ===#
+
+    @api.depends('adyen_kyc_ids')
+    def _compute_kyc_state(self):
+        for account in self:
+            if any(kyc.status == 'awaiting_data' for kyc in account.adyen_kyc_ids):
+                account.kyc_state = 'data_to_provide'
+            elif any(kyc.status == 'pending' for kyc in account.adyen_kyc_ids):
+                account.kyc_state = 'validation'
+            else:
+                account.kyc_state = 'validated'
+
+    @api.depends('phone_number')
+    def _compute_formatted_phone_number(self):
+        for account in self:
+            account.formatted_phone_number = phone_validation.phone_format(
+                account.phone_number, None, None, force_format='E164'
+            )
 
     @api.depends('transaction_ids')
     def _compute_transactions_count(self):
@@ -205,6 +234,133 @@ class AdyenAccount(models.Model):
         return action
 
     #=== BUSINESS METHODS ===#
+
+    def _get_creation_redirect_form(self):
+        """ Render and return the account holder creation form.
+
+        Note: self.ensure_one()
+
+        :return: The rendered HTML form
+        :rtype: str
+        """
+        self.ensure_one()
+
+        db_url = self.env.company.get_base_url()
+        rendering_context = {
+            'redirect_url': url_join(
+                self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url'),
+                'create_submerchant',
+            ),
+            'db_url': db_url,
+            'is_test': self.is_test,
+            'return_url': url_join(db_url, OnboardingController._return_url),
+            'adyen_data': json.dumps(self._prepare_adyen_data()),
+        }
+        return self.env.ref('odoo_payments.redirect_form')._render(rendering_context)
+
+    def _prepare_adyen_data(self):
+        """ Prepare the payload for the creation or update of the account holder in Adyen format.
+
+        This is necessary to either create or update an account holder through the API endpoints
+        `createAccountHolder` and `updateAccountHolder`, respectively.
+
+        The payload is formatted as per Adyen's specifications and always include all the field
+        values that are synchronized with Adyen, regardless of whether they were updated.
+
+        Note: self.ensure_one()
+
+        :return: The adyen-formatted payload for the creation/update request
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        return {
+            'accountHolderCode': self.account_holder_code,
+            'accountHolderDetails': self._prepare_account_holder_details(),
+            'legalEntity': const.LEGAL_ENTITY_TYPE_MAPPING[self.entity_type],
+        }
+
+    def _prepare_account_holder_details(self):
+        """ Prepare the payload for the account holder details in Adyen format.
+
+        Note: self.ensure_one()
+
+        :return: The adyen-formatted payload for the account holder details
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        return {
+            'address': {
+                'city': self.city,
+                'country': self.country_id.code or None,
+                'houseNumberOrName': self.house_number_or_name,
+                'postalCode': self.zip,
+                'stateOrProvince': self.state_id.code or None,
+                'street': self.street,
+            },
+            'bankAccountDetails': self.bank_account_ids._prepare_bank_account_details(),
+            'businessDetails': self._prepare_business_details(),
+            'email': self.email,
+            'fullPhoneNumber': self.formatted_phone_number,
+            'individualDetails': self._prepare_individual_details(),
+            # 'legalArrangements': None,
+            # 'merchantCategoryCode': None,
+            # 'metadata': None,
+            # 'payoutMethods': None,
+            # 'principalBusinessAddress': None,
+            # 'storeDetails': None,
+            # 'webAddress': None,
+        }
+
+    def _prepare_business_details(self):
+        """ Prepare the payload for the business details in Adyen format.
+
+        Note: self.ensure_one()
+
+        :return: The adyen-formatted payload for the business details
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        if self.entity_type not in ('business', 'nonprofit'):
+            return None
+        else:
+            return {
+                'doingBusinessAs': self.doing_business_as,
+                'legalBusinessName': self.legal_business_name,
+                'registrationNumber': self.registration_number,
+                'shareholders': self.shareholder_ids._prepare_shareholders_data(),
+            }
+
+    def _prepare_individual_details(self):
+        """ Prepare the payload for the individual details in Adyen format.
+
+        Note: self.ensure_one()
+
+        :return: The adyen-formatted payload for the individual details
+        :rtype: dict
+        """
+        self.ensure_one()
+
+        if self.entity_type != 'individual':
+            return None
+        else:
+            return {
+                'name': {
+                    'firstName': self.first_name,
+                    'lastName': self.last_name,
+                },
+                'personalData': {
+                    'dateOfBirth': str(self.date_of_birth),
+                    'documentData': [
+                        {
+                            'number': self.document_number,
+                            'type': self.document_type,
+                        }
+                    ] if self.document_number else [],
+                }
+            }
 
     def _handle_account_holder_created_notification(self):
         """ Handle `ACCOUNT_HOLDER_CREATED` notifications and update `merchant_status` accordingly.
@@ -322,6 +478,7 @@ class AdyenAccount(models.Model):
             write_vals['kyc_tier'] = kyc_tier
 
         # Update the payout clearance
+        # TODO ANVFE Investigate, received as true on proxy but saved as false (sometimes?)
         payout_allowed_str = content['newStatus'].get('payoutState', {}).get('allowPayout')
         if isinstance(payout_allowed_str, str):
             payout_allowed = payout_allowed_str == 'true'
@@ -338,7 +495,7 @@ class AdyenAccount(models.Model):
                 'odoo_payments.account_status_change_message',
                 values={
                     'reason': content.get('reason'),
-                    'event_reasons': [event['reason'] for event in events],
+                    'events': [event['AccountEvent'] for event in events],
                 }
             )
             self.message_post(body=status_message, subtype_xmlid='mail.mt_comment')
@@ -482,7 +639,10 @@ class AdyenAccount(models.Model):
             for record in self
         ]
 
-    @api.depends('merchant_status', 'kyc_state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids', 'bank_account_ids')
+    @api.depends(
+        'merchant_status', 'kyc_state', 'transactions_count', 'adyen_kyc_ids', 'shareholder_ids',
+        'bank_account_ids'
+    )
     def _compute_onboarding_msg(self):
         self.onboarding_msg = False
         for account in self:
@@ -511,7 +671,7 @@ class AdyenAccount(models.Model):
 
                         if len(account.bank_account_ids) == 0:
                             data_to_fill_msgs.append(
-                                _("-   Bank accounts: use 'Add a line' in the Bank accounts tab to a bank account.")
+                                _("-   Bank Accounts: use 'Add a line' in the Bank Accounts tab to a bank account.")
                             )
 
                         if data_to_fill_msgs:
@@ -545,16 +705,6 @@ class AdyenAccount(models.Model):
             else:
                 account.full_name = "%s %s" % (account.first_name, account.last_name)
 
-    @api.depends('adyen_kyc_ids')
-    def _compute_kyc_state(self):
-        for account in self:
-            if any(kyc.status == 'awaiting_data' for kyc in account.adyen_kyc_ids):
-                account.kyc_state = 'data_to_provide'
-            elif any(kyc.status == 'pending' for kyc in account.adyen_kyc_ids):
-                account.kyc_state = 'validation'
-            else:
-                account.kyc_state = 'validated'
-
     @api.depends_context('lang')
     @api.depends('adyen_kyc_ids')
     def _compute_kyc_status(self):
@@ -575,6 +725,7 @@ class AdyenAccount(models.Model):
         #         }
         #     )
 
+    # TODO clear wrong/unused data when account/bank_account/shareholder data is modified
     @api.onchange('country_id')
     def _onchange_country_id(self):
         """Reset state_id field when country is changed."""
@@ -684,102 +835,6 @@ class AdyenAccount(models.Model):
             'documentContent': content.decode(),
         })
 
-    def _get_creation_redirect_form(self):
-        self.ensure_one()
-
-        db_url = self.env.company.get_base_url()
-        rendering_context = {
-            'redirect_url': url_join(
-                self.env['ir.config_parameter'].sudo().get_param('odoo_payments.merchant_url'),
-                'create_submerchant',
-            ),
-            'db_url': db_url,
-            'is_test': self.is_test,
-            'return_url': url_join(db_url, OnboardingController._return_url),
-            'adyen_data': json.dumps(self._prepare_adyen_data()),
-        }
-        return self.env.ref('odoo_payments.redirect_form')._render(rendering_context)
-
-    def _prepare_adyen_data(self):
-        """ Prepare expected payload for account holder creation/update routes
-
-        https://docs.adyen.com/api-explorer/#/Account/v6/post/createAccountHolder
-        https://docs.adyen.com/api-explorer/#/Account/v6/post/updateAccountHolder
-
-        :returns: Payload for the createAccountHolder/updateAccountHolder Adyen routes
-        :rtype: dict
-        """
-        return {
-            'accountHolderCode': self.account_holder_code,
-            'accountHolderDetails': self._prepare_account_holder_details(),
-            # 'description': None,
-            'legalEntity': const.LEGAL_ENTITY_TYPE_MAPPING[self.entity_type],
-            # TODO 'primaryCurrency': None,
-            # 'processingTier': --> Proxy
-            # 'verificationProfile': None,
-        }
-
-    def _prepare_account_holder_details(self):
-        sanitized_phone_number = phone_validation.phone_format(
-            self.phone_number, None, None, force_format="E164")
-        return {
-            'address': {
-                'city': self.city,
-                'country': self.country_id.code,
-                'houseNumberOrName': self.house_number_or_name,
-                'postalCode': self.zip,
-                'stateOrProvince': self.state_id.code or None,
-                'street': self.street,
-            },
-            'bankAccountDetails': self.bank_account_ids._prepare_bank_account_details(),
-            'businessDetails': self._prepare_business_details(),
-            'email': self.email,
-            # TODO make compute
-            'fullPhoneNumber': sanitized_phone_number,
-            'individualDetails': self._prepare_individual_details(),
-            # TODO ?
-            'legalArrangements': None,
-            'merchantCategoryCode': None,
-            'metadata': None,
-            'payoutMethods': None,
-            'principalBusinessAddress': None,
-            'storeDetails': None,
-            'webAddress': None,
-        }
-
-    def _prepare_business_details(self):
-        if self.entity_type not in ('business', 'nonprofit'):
-            return None  # Don't include the key in the payload
-        else:
-            return {
-                'doingBusinessAs': self.doing_business_as,
-                'legalBusinessName': self.legal_business_name,
-                'registrationNumber': self.registration_number,
-                'shareholders': self.shareholder_ids._prepare_shareholders_data(),
-                # TODO store verificationProfile after acc creation
-                #  and provide it for update requests ?
-            }
-
-    def _prepare_individual_details(self):
-        if self.entity_type != 'individual':
-            return None  # Don't include the key in the payload
-        else:
-            return {
-                'name': {
-                    'firstName': self.first_name,
-                    'lastName': self.last_name,
-                },
-                'personalData': {
-                    'dateOfBirth': str(self.date_of_birth),
-                    'documentData': [
-                        {
-                            'number': self.document_number,
-                            'type': self.document_type,
-                        }
-                    ] if self.document_number else [],
-                }
-            }
-
     def _handle_account_updated_notification(self, content):
         """ Handle `ACCOUNT_UPDATED` notifications and update the account accordingly.
 
@@ -798,7 +853,9 @@ class AdyenAccount(models.Model):
         scheduled_date = content.get('payoutSchedule', {}).get('nextScheduledPayout')
         if scheduled_date:
             self.with_context(
-                update_from_adyen=True  # FIXME ANVFE Is this context key necessary? I don't think next_scheduled_payout is synched with adyen -> might be to avoid sending an update to adyen
+                update_from_adyen=True  # FIXME ANVFE Is this context key necessary?
+                # I don't think next_scheduled_payout is synched with adyen -> might be to avoid sending an update to adyen
+                # Yes but there is already a verification to sync only if a field synched with adyen is modified
             ).next_scheduled_payout = parse(scheduled_date).astimezone(UTC).replace(tzinfo=None)
 
     def _handle_account_holder_payout_notification(self, content):

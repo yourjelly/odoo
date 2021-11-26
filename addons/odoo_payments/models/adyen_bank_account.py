@@ -22,7 +22,7 @@ class AdyenBankAccount(models.Model):
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account', required=True, ondelete='cascade')
 
-    bank_account_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
+    bank_account_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex, required=True, readonly=True)
     bank_account_uuid = fields.Char(string='UUID')  # Given by Adyen
     owner_name = fields.Char(
         string='Owner Name',
@@ -112,39 +112,44 @@ class AdyenBankAccount(models.Model):
     #=== BUSINESS METHODS ===#
 
     def _prepare_bank_account_details(self):
+        """ Prepare the payload for the bank account details in Adyen format.
+
+        :return: The adyen-formatted payload for the bank account details
+        :rtype: list
+        """
         if not self:  # No bank account is created yet
-            return None  # Don't include the key in the payload
+            return None
         else:
             # Build an array of shareholder details for each existing bank account
             return [
                 {
-                    'accountNumber': account.account_number or None,
-                    'accountType': account.account_type or None,
+                    'accountNumber': bank_account.account_number or None,
+                    'accountType': bank_account.account_type or None,
                     # 'bankAccountName': None,
-                    'bankAccountReference': account.bank_account_reference,
-                    'bankAccountUUID': account.bank_account_uuid or None,
+                    'bankAccountReference': bank_account.bank_account_reference,
+                    'bankAccountUUID': bank_account.bank_account_uuid or None,
                     # 'bankBicSwift': None,
-                    'bankCity': account.bank_city or None,
-                    'bankCode': account.bank_code or None,
-                    'bankName': account.bank_name or None,
-                    'branchCode': account.branch_code or None,
+                    'bankCity': bank_account.bank_city or None,
+                    'bankCode': bank_account.bank_code or None,
+                    'bankName': bank_account.bank_name or None,
+                    'branchCode': bank_account.branch_code or None,
                     # 'checkCode': None,
-                    'countryCode': account.country_code,
-                    'currencyCode': account.currency_id.name,
-                    'iban': account.iban or None,
-                    'ownerCity': account.owner_city or None,
-                    'ownerCountryCode': account.owner_country_id.code or None,
+                    'countryCode': bank_account.country_code or None,
+                    'currencyCode': bank_account.currency_id.name,
+                    'iban': bank_account.iban or None,
+                    'ownerCity': bank_account.owner_city or None,
+                    'ownerCountryCode': bank_account.owner_country_id.code or None,
                     # 'ownerDateOfBirth': None,
-                    'ownerHouseNumberOrName': account.owner_house_number_or_name or None,
-                    'ownerName': account.owner_name,
+                    'ownerHouseNumberOrName': bank_account.owner_house_number_or_name or None,
+                    'ownerName': bank_account.owner_name,
                     # 'ownerNationality': None,
-                    'ownerPostalCode': account.owner_zip or None,
-                    'ownerState': account.owner_state_id.code or None,
-                    'ownerStreet': account.owner_street or None,
+                    'ownerPostalCode': bank_account.owner_zip or None,
+                    'ownerState': bank_account.owner_state_id.code or None,
+                    'ownerStreet': bank_account.owner_street or None,
                     # 'primaryAccount': None,
                     # 'taxId': None,
                     # 'urlForVerification': None,
-                } for account in self
+                } for bank_account in self
             ]
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
@@ -219,50 +224,6 @@ class AdyenBankAccount(models.Model):
                 bank_account.with_context(update_from_adyen=True).write({
                     'bank_account_uuid': uuid,
                 })
-
-    # def _format_data(self, values=None):
-    #     if values is None:
-    #         values = {}
-    #     # TODO ANVFE use fields on self instead of values since this method is always
-    #     # called after the super create/write call
-    #     adyen_account_id = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
-    #     country_id = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-    #     currency_id = self.env['res.currency'].browse(values.get('currency_id')) if values.get('currency_id') else self.currency_id
-    #     owner_country_id = self.env['res.country'].browse(values.get('owner_country_id')) if values.get('owner_country_id') else self.owner_country_id
-    #     owner_state_id = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('owner_state_id') else self.owner_state_id
-    #     return {
-    #         # FIXME ANVFE reduce payload for unspecified data ?
-    #         'accountHolderCode': adyen_account_id.account_holder_code,
-    #         'accountHolderDetails': {
-    #             'bankAccountDetails': [{
-    #                 'accountNumber': values.get('account_number') or self.account_number or None,
-    #                 'accountType': values.get('account_type') or self.account_type or None,
-    #                 'bankAccountReference': values.get('bank_account_reference') or self.bank_account_reference,
-    #                 'bankAccountUUID': values.get('bank_account_uuid') or self.bank_account_uuid or None,
-    #                 # FIXME ANVFE missing bankBicSwift ?
-    #                 'bankCity': values.get('bank_city') or self.bank_city or None,
-    #                 'bankCode': values.get('bank_code') or self.bank_code or None,
-    #                 'bankName': values.get('bank_name') or self.bank_name or None,
-    #                 'branchCode': values.get('branch_code') or self.branch_code or None,
-    #                 # checkCode
-    #                 'countryCode': country_id.code,
-    #                 'currencyCode': currency_id.name,
-    #                 'iban': values.get('iban') or self.iban or None,
-    #                 'ownerCity': values.get('owner_city') or self.owner_city or None,
-    #                 'ownerCountryCode': owner_country_id.code or None,
-    #                 # ownerDateOfBirth
-    #                 'ownerHouseNumberOrName': values.get('owner_house_number_or_name') or self.owner_house_number_or_name or None,
-    #                 'ownerName': values.get('owner_name') or self.owner_name,
-    #                 # ownerNationality
-    #                 'ownerPostalCode': values.get('owner_zip') or self.owner_zip or None,
-    #                 'ownerState': owner_state_id.code or None,
-    #                 'ownerStreet': values.get('owner_street') or self.owner_street or None,
-    #                 # primaryAccount
-    #                 # taxId
-    #                 # urlForVerification
-    #             }],
-    #         }
-    #     }
 
     def _upload_bank_statement(self, content, filename):
         content_encoded = content.encode('utf8')

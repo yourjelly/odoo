@@ -17,7 +17,7 @@ class AdyenShareholder(models.Model):
 
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account', ondelete='cascade', required=True)
-    shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex)
+    shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex, required=True, readonly=True)
     code = fields.Char(string="Code")
     first_name = fields.Char(string='First Name', required=True)
     last_name = fields.Char(string='Last Name', required=True)
@@ -43,20 +43,21 @@ class AdyenShareholder(models.Model):
 
     #=== BUSINESS METHODS ===#
 
-    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
-
     def _prepare_shareholders_data(self):
+        """ Prepare the payload for the shareholder data in Adyen format.
+
+        :return: The adyen-formatted payload for the shareholder data
+        :rtype: list
+        """
         if not self:  # No shareholder is created yet
-            return None  # Don't include the key in the payload
+            return None
         else:
-            # TODO ANVFE not tested atm, shareholder flow is more complex (and later in the onboarding process)
             # Build an array of shareholder details for each existing shareholder
             return [
                 {
-                    # TODO fallback on None for falsy values
                     'address': {
                         'city': shareholder.city,
-                        'country': shareholder.country_id.code,
+                        'country': shareholder.country_id.code or None,
                         'houseNumberOrName': shareholder.house_number_or_name,
                         'postalCode': shareholder.zip,
                         'stateOrProvince': shareholder.state_id.code or None,
@@ -67,7 +68,7 @@ class AdyenShareholder(models.Model):
                     # 'jobTitle': None,
                     'name': {
                         'firstName': shareholder.first_name,
-                        'gender': 'UNKNOWN',
+                        'gender': 'UNKNOWN',  # TODO convert to selection with mapping
                         # 'infix': None,
                         'lastName': shareholder.last_name,
                     },
@@ -98,6 +99,8 @@ class AdyenShareholder(models.Model):
                     # 'webAddress': None,
                 } for shareholder in self
             ]
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     @api.depends_context('lang')
     # @api.depends('adyen_kyc_ids')

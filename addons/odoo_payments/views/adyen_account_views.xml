@@ -80,7 +80,7 @@
                          role="alert">
                         <field name="kyc_status_message" readonly="1"/>
                     </div>
-                    <group>
+                    <group name="account_holder_details">
                         <group>
                             <field name="entity_type" attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
@@ -89,6 +89,7 @@
                                    readonly="1"
                                    groups="base.group_multi_company"/>
                         </group>
+                        <!-- TODO clean attrs? -->
                         <group string="Individual"
                                attrs="{'invisible': [('entity_type', '!=', 'individual')]}">
                             <field name="first_name"
@@ -150,11 +151,10 @@
                                 <field name="country_code" invisible="1"/>
                             </div>
                         </group>
-                        <group string="TEST"
+                        <group string="Test"
                                groups="base.group_no_one"
                                attrs="{'invisible': [('id', '!=', False)]}">
-                            <field name="is_test"
-                                   attrs="{'readonly': [('id', '!=', False)]}"/>
+                            <field name="is_test" attrs="{'readonly': [('id', '!=', False)]}"/>
                         </group>
                     </group>
                     <notebook attrs="{'invisible': [('id', '=', False)]}">

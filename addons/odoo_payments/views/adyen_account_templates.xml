@@ -13,8 +13,10 @@
     <template id="account_status_change_message">
         <p t-if="reason"><t t-esc="reason"/>:</p>
         <ul>
-            <li t-foreach="event_reasons" t-as="event_reason">
-                <t t-esc="event_reason"/>
+            <li t-foreach="events" t-as="event">
+                <t t-esc="event['reason']"/>
+                <br/>
+                Deadline: <t t-esc="event['executionDate']"/>
             </li>
         </ul>
     </template>

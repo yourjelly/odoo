@@ -16,6 +16,7 @@ ADYEN_KYC_STATUS = [
 class AdyenKYCCheck(models.Model):
     _name = 'adyen.kyc.check'
     _description = "Adyen KYC Check"
+    _order = 'write_date desc'
 
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account',
@@ -48,6 +49,9 @@ class AdyenKYCCheck(models.Model):
     )
 
     # Linked records
+    # TODO store shareholder_code
+    # and make shareholder_id compute to cover the case when the shareholder code is received after
+    # its kyc update
     shareholder_id = fields.Many2one(
         string="Linked Shareholder",
         comodel_name='adyen.shareholder',
