@@ -120,6 +120,10 @@ class Field(MetaField('DummyField', (object,), {})):
         ``default=None`` to discard default values for the field
     :type default: value or callable
 
+    :param bool random_default: if the default callable is random or not. If not, 
+        the `create` (batch) will reuse the default instead of call it for each values
+        (default: ``False``)
+
     :param dict states: a dictionary mapping state values to lists of UI attribute-value
         pairs; possible attributes are: ``readonly``, ``required``, ``invisible``.
 
@@ -240,7 +244,8 @@ class Field(MetaField('DummyField', (object,), {})):
     search = None                       # search(recs, operator, value) searches on self
     related = None                      # sequence of field names, for related fields
     company_dependent = False           # whether ``self`` is company-dependent (property field)
-    default = None                      # default(recs) returns the default value
+    default = None                      # default() returns the default value
+    random_default = False              # whether the default field is random
 
     string = None                       # field label
     help = None                         # field tooltip
