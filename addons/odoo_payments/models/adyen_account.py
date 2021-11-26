@@ -537,19 +537,18 @@ class AdyenAccount(models.Model):
                     ('adyen_account_id', '=', self.id), ('code', '=', kyc_shareholder_code)
                 ])
                 if not kyc_shareholder:
+                    # TODO ANVFE update to make it clear it might not be an error and the shareholder code was not received atm
                     _logger.warning(
                         "received KYC check data for account holder with uuid %(account_uuid)s "
                         "targeting unknown shareholder with code %(shareholder_code)s",
                         {'account_uuid': self.adyen_uuid, 'shareholder_code': kyc_shareholder_code}
                     )
-            else:
-                kyc_shareholder = self.env['adyen.shareholder']
 
             # Find the already existing KYC check and update it, or create a new one
             existing_kyc = self.env['adyen.kyc.check'].search([
                 ('adyen_account_id', '=', self.id),
                 ('check_type', '=', kyc_check_type),
-                ('shareholder_id', '=', kyc_shareholder.id),
+                ('shareholder_code', '=', kyc_shareholder_code),
             ])
             if existing_kyc:
                 if len(existing_kyc) > 1:
@@ -564,7 +563,7 @@ class AdyenAccount(models.Model):
                 self.env['adyen.kyc.check'].create({
                     'adyen_account_id': self.id,
                     'check_type': kyc_check_type,
-                    'shareholder_id': kyc_shareholder.id,
+                    'shareholder_code': kyc_shareholder_code,
                     **vals
                 })
 

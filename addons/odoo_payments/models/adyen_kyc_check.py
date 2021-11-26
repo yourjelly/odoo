@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 ADYEN_KYC_STATUS = [
     ('awaiting_data', "Data To Provide"),
@@ -49,13 +49,14 @@ class AdyenKYCCheck(models.Model):
     )
 
     # Linked records
+    shareholder_code = fields.Char(string="Shareholder Code")
     # TODO store shareholder_code
     # and make shareholder_id compute to cover the case when the shareholder code is received after
     # its kyc update
     shareholder_id = fields.Many2one(
         string="Linked Shareholder",
         comodel_name='adyen.shareholder',
-        ondelete='cascade',
+        compute="_compute_shareholder_id"
     )
     shareholder_name = fields.Char(
         string="Shareholder",
@@ -79,6 +80,14 @@ class AdyenKYCCheck(models.Model):
     #     ondelete='cascade')
 
     #=== COMPUTE METHODS ===#
+
+    @api.depends('shareholder_code')
+    def _compute_shareholder_id(self):
+        self.shareholder_id = False
+        for kyc_check in self.filtered('shareholder_code'):
+            kyc_check.shareholder_id = kyc_check.adyen_account_id.shareholder_ids.filtered(
+                lambda shareholder: shareholder.code == kyc_check.shareholder_code
+            )
 
     #=== CONSTRAINT METHODS ===#
 
