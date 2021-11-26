@@ -23,7 +23,8 @@ class AdyenBankAccount(models.Model):
         comodel_name='adyen.account', required=True, ondelete='cascade')
 
     bank_account_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex, required=True, readonly=True)
-    bank_account_uuid = fields.Char(string='UUID')  # Given by Adyen
+    bank_account_uuid = fields.Char(string='UUID', readonly=True, help="Adyen Reference")
+
     owner_name = fields.Char(
         string='Owner Name',
         required=True,
@@ -191,14 +192,20 @@ class AdyenBankAccount(models.Model):
         return res
 
     def unlink(self):
-        self.check_access_rights('unlink')
+        unlink_data = {}
+        for account in self.adyen_account_id:
+            bank_accounts = self.filtered(lambda bank_account: bank_account.adyen_account_id.id == account.id)
+            unlink_data[account] = bank_accounts.mapped('bank_account_uuid')
 
-        for bank_account in self:
-            bank_account.adyen_account_id._adyen_rpc('v1/delete_bank_accounts', {
-                'accountHolderCode': bank_account.adyen_account_id.account_holder_code,
-                'bankAccountUUIDs': [bank_account.bank_account_uuid],
+        res = super().unlink()
+
+        for account, bank_account_uuids in unlink_data.items():
+            account._adyen_rpc('v1/delete_bank_accounts', {
+                'accountHolderCode': account.account_holder_code,
+                'bankAccountUUIDs': bank_account_uuids,
             })
-        return super().unlink()
+
+        return res
 
     def name_get(self):
         res = []

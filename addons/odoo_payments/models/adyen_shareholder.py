@@ -18,7 +18,8 @@ class AdyenShareholder(models.Model):
     adyen_account_id = fields.Many2one(
         comodel_name='adyen.account', ondelete='cascade', required=True)
     shareholder_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex, required=True, readonly=True)
-    code = fields.Char(string="Code")
+    code = fields.Char(string="Code", readonly=True, help="Adyen Reference")
+
     first_name = fields.Char(string='First Name', required=True)
     last_name = fields.Char(string='Last Name', required=True)
     full_name = fields.Char(compute='_compute_full_name')
@@ -144,15 +145,20 @@ class AdyenShareholder(models.Model):
     #     return res
 
     def unlink(self):
-        self.check_access_rights('unlink')
+        unlink_data = {}
+        for account in self.adyen_account_id:
+            shareholders = self.filtered(lambda shareholder: shareholder.adyen_account_id.id == account.id)
+            unlink_data[account] = shareholders.mapped('code')
 
-        # TODO ANVFE this call seems to support batch deletion, to try
-        for shareholder in self:
-            shareholder.adyen_account_id._adyen_rpc('v1/delete_shareholders', {
-                'accountHolderCode': shareholder.adyen_account_id.account_holder_code,
-                'shareholderCodes': [shareholder.code],
+        res = super().unlink()
+
+        for account, shareholder_codes in unlink_data.items():
+            account._adyen_rpc('v1/delete_shareholders', {
+                'accountHolderCode': account.account_holder_code,
+                'shareholderCodes': shareholder_codes,
             })
-        return super().unlink()
+
+        return res
 
     def _handle_adyen_update_feedback(self, response):
         if not self:
@@ -184,52 +190,3 @@ class AdyenShareholder(models.Model):
             },
             'documentContent': content.decode(),
         })
-
-    # def _format_data(self, values):
-    #     """
-
-    #     :param dict values:
-
-    #     :returns:
-    #     :rtype: dict
-    #     """
-    #     adyen_account = self.env['adyen.account'].browse(values.get('adyen_account_id')) if values.get('adyen_account_id') else self.adyen_account_id
-    #     country = self.env['res.country'].browse(values.get('country_id')) if values.get('country_id') else self.country_id
-    #     state = self.env['res.country.state'].browse(values.get('owner_state_id')) if values.get('state_id') else self.state_id
-    #     data = {
-    #         'accountHolderCode': adyen_account.account_holder_code,
-    #         'accountHolderDetails': {
-    #             'businessDetails': {
-    #                 'shareholders': [{
-    #                     'shareholderCode': values.get('code') or self.shareholder_uuid or None,
-    #                     'shareholderReference': values.get('shareholder_reference') or self.shareholder_reference,
-    #                     'address': {
-    #                         'city': values.get('city') or self.city,
-    #                         'country': country.code,
-    #                         'houseNumberOrName': values.get('house_number_or_name') or self.house_number_or_name,
-    #                         'postalCode': values.get('zip') or self.zip,
-    #                         'stateOrProvince': state.code or None,
-    #                         'street': values.get('street') or self.street,
-    #                     },
-    #                     'name': {
-    #                         'firstName': values.get('first_name') or self.first_name,
-    #                         'lastName': values.get('last_name') or self.last_name,
-    #                         'gender': 'UNKNOWN'
-    #                     },
-    #                     'personalData': {
-    #                         'dateOfBirth': str(values.get('date_of_birth') or self.date_of_birth),
-    #                     }
-    #                 }]
-    #             }
-    #         }
-    #     }
-
-    #     # documentData cannot be present in the data if not set
-    #     document_number = values.get('document_number') or self.document_number
-    #     if document_number:
-    #         data['accountHolderDetails']['businessDetails']['shareholders'][0]['personalData']['documentData'] = [{
-    #             'number': document_number,
-    #             'type': 'ID',
-    #         }]
-
-    #     return data
