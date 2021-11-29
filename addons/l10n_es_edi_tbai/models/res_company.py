@@ -21,8 +21,8 @@ L10N_ES_EDI_TBAI_URLS = {
         'gipuzkoa': 'https://tbai.prep.gipuzkoa.eus/qr/'
     },
     'qr_prod': {
-        'araba': '',
-        'bizkaia': '',
+        'araba': 'https://ticketbai.araba.eus/TBAI/QRTBAI',
+        'bizkaia': 'https://batuz.eus/QRTBAI/',
         'gipuzkoa': 'https://tbai.egoitza.gipuzkoa.eus/qr/'
     },
     'cancel_test': {
@@ -77,7 +77,7 @@ class ResCompany(models.Model):
 
     # === CERTIFICATES ===
     l10n_es_tbai_certificate_id = fields.Many2one(
-        string="Certificate (ES)",
+        string="Certificate (ES-TicketBai)",
         store=True,
         readonly=False,
         comodel_name='l10n_es_edi_tbai.certificate',
@@ -88,10 +88,10 @@ class ResCompany(models.Model):
         inverse_name='company_id',
     )
 
-    def _compute_l10n_es_tbai_url(self, company, prefix):
-        if company.country_code == 'ES':
-            suffix = 'test' if company.l10n_es_edi_test_env else 'prod'
-            return L10N_ES_EDI_TBAI_URLS[prefix + suffix][company.l10n_es_edi_tax_agency]
+    def _compute_l10n_es_tbai_url(self, prefix):
+        if self.country_code == 'ES':
+            suffix = 'test' if self.l10n_es_tbai_test_env else 'prod'
+            return L10N_ES_EDI_TBAI_URLS[prefix + suffix][self.l10n_es_tbai_tax_agency]
         else:
             return False
 
