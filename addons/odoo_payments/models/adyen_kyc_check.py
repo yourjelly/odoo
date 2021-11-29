@@ -26,6 +26,7 @@ class AdyenKYCCheck(models.Model):
     check_type = fields.Selection(
         string="Type",
         selection=[
+            ('bank_account_verification', "Bank Account"),  # TODO ANVFE REMOVE ME AFTER RICK FEEDBACK
             ('company_verification', "Company"),
             ('card_verification', "Card"),
             ('identity_verification', "Identity"),
