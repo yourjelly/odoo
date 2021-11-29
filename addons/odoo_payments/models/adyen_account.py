@@ -11,7 +11,7 @@ from pytz import UTC
 from werkzeug.urls import url_join
 from pprint import pformat
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 
@@ -499,7 +499,7 @@ class AdyenAccount(models.Model):
                     'events': [event['AccountEvent'] for event in events],
                 }
             )
-            self.message_post(body=status_message, subtype_xmlid='mail.mt_comment')
+            self.with_user(SUPERUSER_ID).message_post(body=status_message, subtype_xmlid='mail.mt_comment')
 
     def _handle_account_holder_verification_notification(self, content):
         """ Handle `ACCOUNT_HOLDER_VERIFICATION` notifications and update the account accordingly.
@@ -879,7 +879,7 @@ class AdyenAccount(models.Model):
 
         if status == 'Failed':
             status_message = _('Failed payout: %s', content['status']['message']['text'])
-            self.message_post(body=status_message, subtype_xmlid="mail.mt_comment")
+            self.with_user(SUPERUSER_ID).message_post(body=status_message, subtype_xmlid="mail.mt_comment")
 
     # FIXME ANVFE doesn't seem used
     def _fetch_transactions(self, page=1):
