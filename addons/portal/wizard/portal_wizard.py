@@ -35,13 +35,15 @@ class PortalWizard(models.TransientModel):
     @api.depends('partner_ids')
     def _compute_user_ids(self):
         for portal_wizard in self:
-            portal_wizard.user_ids = [
-                Command.create({
-                    'partner_id': partner.id,
-                    'email': partner.email,
-                })
-                for partner in portal_wizard.partner_ids
-            ]
+            for partner in portal_wizard.partner_ids:
+                portal_wizard.user_ids = [
+                    Command.create({
+                        'partner_id': partner.id,
+                        'email': partner.email,
+                        'user_id': user,
+                    })
+                    for user in (partner.with_context(active_test=False).user_ids or [False])
+                ]
 
     @api.model
     def action_open_wizard(self):
@@ -83,16 +85,10 @@ class PortalWizardUser(models.TransientModel):
     partner_id = fields.Many2one('res.partner', string='Contact', required=True, readonly=True, ondelete='cascade')
     email = fields.Char('Email')
 
-    user_id = fields.Many2one('res.users', string='User', compute='_compute_user_id', compute_sudo=True)
+    user_id = fields.Many2one('res.users', string='User')
     login_date = fields.Datetime(related='user_id.login_date', string='Latest Authentication')
     is_portal = fields.Boolean('Is Portal', compute='_compute_group_details')
     is_internal = fields.Boolean('Is Internal', compute='_compute_group_details')
-
-    @api.depends('partner_id')
-    def _compute_user_id(self):
-        for portal_wizard_user in self:
-            user = portal_wizard_user.partner_id.with_context(active_test=False).user_ids
-            portal_wizard_user.user_id = user[0] if user else False
 
     @api.depends('user_id', 'user_id.groups_id')
     def _compute_group_details(self):
@@ -102,7 +98,7 @@ class PortalWizardUser(models.TransientModel):
             if user and user.has_group('base.group_user'):
                 portal_wizard_user.is_internal = True
                 portal_wizard_user.is_portal = False
-            elif user and user.has_group('base.group_portal'):
+            elif user and user._is_portal():
                 portal_wizard_user.is_internal = False
                 portal_wizard_user.is_portal = True
             else:
@@ -110,6 +106,7 @@ class PortalWizardUser(models.TransientModel):
                 portal_wizard_user.is_portal = False
 
     def action_grant_access(self):
+        # send selected user information to the res_partner method if needed
         """Grant the portal access to the partner.
 
         If the partner has no linked user, we will create a new one in the same company
@@ -123,7 +120,7 @@ class PortalWizardUser(models.TransientModel):
         if not self.is_portal and not self.is_internal and self.partner_id.email != self.email:
             self.partner_id.write({'email': self.email})
 
-        self.partner_id.action_grant_portal_access(welcome_message=self.wizard_id.welcome_message)
+        self.partner_id.action_grant_portal_access(user=self.user_id, welcome_message=self.wizard_id.welcome_message)
         return self.wizard_id._action_open_modal()
 
     def action_revoke_access(self):
@@ -137,7 +134,7 @@ class PortalWizardUser(models.TransientModel):
         if self.is_portal and self.partner_id.email != self.email:
             self.partner_id.write({'email': self.email})
 
-        self.partner_id.action_revoke_portal_access()
+        self.partner_id.action_revoke_portal_access(user=self.user_id)
         return self.wizard_id._action_open_modal()
 
     def action_invite_again(self):
@@ -148,5 +145,5 @@ class PortalWizardUser(models.TransientModel):
         if self.is_portal and self.partner_id.email != self.email:
             self.partner_id.write({'email': self.email})
 
-        self.partner_id.action_resend_portal_access_invitation(welcome_message=self.wizard_id.welcome_message)
+        self.partner_id.action_resend_portal_access_invitation(user=self.user_id, welcome_message=self.wizard_id.welcome_message)
         return self.wizard_id._action_open_modal()

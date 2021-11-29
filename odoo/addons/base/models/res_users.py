@@ -899,6 +899,10 @@ class Users(models.Model):
             'target': 'current',
         }
 
+    def _is_portal(self):
+        self.ensure_one()
+        return self.share and not self._is_public()
+
     def _is_public(self):
         self.ensure_one()
         return self.has_group('base.group_public')

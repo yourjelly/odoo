@@ -45,7 +45,7 @@ class ResPartner(models.Model):
                 self.env['res.users'].check_access_rights('write')
             partner.signup_url = result.get(partner.id, False)
 
-    def _get_signup_url_for_action(self, url=None, action=None, view_type=None, menu_id=None, res_id=None, model=None):
+    def _get_signup_url_for_action(self, url=None, action=None, view_type=None, menu_id=None, res_id=None, model=None, signup_type=None):
         """ generate a signup url for the given partner ids and action, possibly overriding
             the url state components (menu_id, id, view_type) """
 
@@ -59,7 +59,7 @@ class ResPartner(models.Model):
             route = 'login'
             # the parameters to encode for the query
             query = dict(db=self.env.cr.dbname)
-            signup_type = self.env.context.get('signup_force_type_in_url', partner.sudo().signup_type or '')
+            signup_type = signup_type or partner.sudo().signup_type or ''
             if signup_type:
                 route = 'reset_password' if signup_type == 'reset' else signup_type
 
