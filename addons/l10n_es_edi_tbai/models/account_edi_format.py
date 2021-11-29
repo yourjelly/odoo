@@ -1,9 +1,22 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, _
+import os
+from base64 import b64encode
+from datetime import datetime
+from uuid import uuid4
 
+import xmlsig
+from cryptography.hazmat.primitives import hashes
+from lxml import etree
+from lxml.objectify import fromstring
+from odoo import _, fields, models
+from odoo.tools import html_escape
+from requests import exceptions
+
+from .requests_pkcs12 import post
 from .res_company import L10N_ES_EDI_TBAI_VERSION
+
 
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
@@ -63,7 +76,7 @@ class AccountEdiFormat(models.Model):
                 attachment = self.env['ir.attachment'].create({
                     'type': 'binary',
                     'name': inv.name,
-                    'raw': inv_xml,
+                    'raw': etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
                     'mimetype': 'application/xml',
                     'res_model': inv._name,
                     'res_id': inv.id,
@@ -83,7 +96,11 @@ class AccountEdiFormat(models.Model):
         values.update(self._l10n_es_tbai_get_subject_values(invoice))
         values.update(self._l10n_es_tbai_get_move_values(invoice))
         values.update(self._l10n_es_tbai_get_trail_values(invoice))
-        return self.env.ref('l10n_es_edi_tbai.template_invoice_bundle')._render(values)
+        xml_str = self.env.ref('l10n_es_edi_tbai.template_invoice_bundle')._render(values)
+
+        xml_doc = etree.fromstring(xml_str, etree.XMLParser(compact=True, remove_blank_text=True, remove_comments=True))
+
+        return xml_doc
 
     def _l10n_es_tbai_get_header_values(self, invoice):
         return {
@@ -148,5 +165,191 @@ class AccountEdiFormat(models.Model):
     # TBAI SERVER CALLS
     # -------------------------------------------------------------------------
 
-    def _l10n_es_tbai_call_web_service_sign(self, invoice, invoice_values):
-        return {invoice: {'success': True}}
+    def _l10n_es_tbai_call_web_service_sign(self, invoices, invoice_xml):
+        company = invoices.company_id
+
+        # All are sharing the same value, see '_get_batch_key'.
+        # TBAID only exists if invoice has already been successfully submitted to gov.
+        tbai_id = invoices.mapped('l10n_es_tbai_id')[0]
+
+        # Set registration date
+        invoices.filtered(lambda inv: not inv.l10n_es_registration_date).write({
+            'l10n_es_registration_date': fields.Date.context_today(self),
+        })
+
+        # Sign the XML document
+        private, public = company.l10n_es_tbai_certificate_id.get_key_pair()
+        signature = AccountEdiFormat.sign(invoice_xml, (private, public))
+        xml_str = etree.tostring(invoice_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+
+        # === Call the web service ===
+
+        # Get connection data. TODO use session w/ timeout ?
+        url = company.l10n_es_tbai_url_cancel if tbai_id else company.l10n_es_tbai_url_invoice
+        header = {"Content-Type": "application/xml; charset=UTF-8"}
+        cert_file = company.l10n_es_tbai_certificate_id.get_file()
+        password = company.l10n_es_tbai_certificate_id.get_password()
+
+        # Post and retrieve response
+        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password)
+        data = response.content.decode(response.encoding)
+
+        print(data)  # TODO remove
+
+        return {invoices: {'success': True}}
+
+    @staticmethod
+    def sign(root, certificate):
+        """
+        Sign XML with PKCS #12
+        :param certificate: (private key, x509 certificate)
+        :return: SignatureValue
+        """
+
+        def create_node_tree(root_node, elem_list):
+            """Convierte una lista en XML.
+
+            Cada elemento de la lista se interpretará de la siguiente manera:
+
+            Si es un string se añadirá al texto suelto del nodo root.
+            Si es una tupla/lista t se interpretará como sigue:
+                t[0]  es el nombre del elemento a crear. Puede tener prefijo de espacio
+                de nombres.
+                t[1]  es la lista de atributos donde las posiciones pares son claves y
+                los impares valores.
+                t[2:] son los subelementos que se interpretan recursivamente
+            """
+            for elem_def in elem_list:
+                if isinstance(elem_def, str):
+                    root_node.text = (root_node.text or "") + elem_def
+                else:
+                    ns = ""
+                    elemname = elem_def[0]
+                    attrs = elem_def[1]
+                    children = elem_def[2:]
+                    if ":" in elemname:
+                        ns, elemname = elemname.split(":")
+                        ns = root_node.nsmap[ns]
+                    node = xmlsig.utils.create_node(elemname, root_node, ns)
+                    for attr_name, attr_value in zip(attrs[::2], attrs[1::2]):
+                        node.set(attr_name, attr_value)
+                    create_node_tree(node, children)
+
+        doc_id = "id-" + str(uuid4())
+        signature_id = "sig-" + doc_id
+        kinfo_id = "ki-" + doc_id
+        sp_id = "sp-" + doc_id
+        signature = xmlsig.template.create(
+            xmlsig.constants.TransformInclC14N,
+            xmlsig.constants.TransformRsaSha256,
+            signature_id,
+        )
+        ref = xmlsig.template.add_reference(
+            signature, xmlsig.constants.TransformSha256, uri=""
+        )
+        xmlsig.template.add_transform(ref, xmlsig.constants.TransformEnveloped)
+        xmlsig.template.add_reference(
+            signature, xmlsig.constants.TransformSha256, uri="#" + kinfo_id
+        )
+        xmlsig.template.add_reference(
+            signature, xmlsig.constants.TransformSha256, uri="#" + sp_id
+        )
+        ki = xmlsig.template.ensure_key_info(signature, name=kinfo_id)
+        data = xmlsig.template.add_x509_data(ki)
+        xmlsig.template.x509_data_add_certificate(data)
+        xmlsig.template.add_key_value(ki)
+        ctx = xmlsig.SignatureContext()
+        ctx.x509 = certificate[1]
+        ctx.public_key = ctx.x509.public_key()
+        ctx.private_key = certificate[0]
+        dslist = (
+            "ds:Object",
+            (),
+            (
+                "etsi:QualifyingProperties",
+                ("Target", signature_id),
+                (
+                    "etsi:SignedProperties",
+                    ("Id", sp_id),
+                    (
+                        "etsi:SignedSignatureProperties",
+                        (),
+                        ("etsi:SigningTime", (), datetime.now().isoformat()),
+                        (
+                            "etsi:SigningCertificateV2",
+                            (),
+                            (
+                                "etsi:Cert",
+                                (),
+                                (
+                                    "etsi:CertDigest",
+                                    (),
+                                    (
+                                        "ds:DigestMethod",
+                                        (
+                                            "Algorithm",
+                                            "http://www.w3.org/2000/09/xmldsig#sha256",
+                                        ),
+                                    ),
+                                    (
+                                        "ds:DigestValue",
+                                        (),
+                                        b64encode(
+                                            ctx.x509.fingerprint(hashes.SHA256())
+                                        ).decode(),
+                                    ),
+                                ),
+                            ),
+                        ),
+                        (
+                            "etsi:SignaturePolicyIdentifier",
+                            (),
+                            (
+                                "etsi:SignaturePolicyId",
+                                (),
+                                (
+                                    "etsi:SigPolicyId",
+                                    (),
+                                    (
+                                        "etsi:Identifier",
+                                        (),
+                                        "http://ticketbai.eus/politicafirma",
+                                    ),
+                                    (
+                                        "etsi:Description",
+                                        (),
+                                        "Política de Firma TicketBAI 1.0",
+                                    ),
+                                ),
+                                (
+                                    "etsi:SigPolicyHash",
+                                    (),
+                                    (
+                                        "ds:DigestMethod",
+                                        (
+                                            "Algorithm",
+                                            "http://www.w3.org/2000/09/xmldsig#sha256",
+                                        ),
+                                    ),
+                                    (
+                                        "ds:DigestValue",
+                                        (),
+                                        "lX1xDvBVAsPXkkJ7R07WCVbAm9e0H33I1sCpDtQNkbc=",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        root.append(signature)
+        create_node_tree(signature, [dslist])
+        ctx.sign(signature)
+        signature_value = signature.find(
+            "ds:SignatureValue", namespaces=xmlsig.constants.NS_MAP
+        ).text
+        # RFC2045 - Base64 Content-Transfer-Encoding (page 25)
+        # Any characters outside of the base64 alphabet are to be ignored in
+        # base64-encoded data.
+        return signature_value.replace("\n", "")
