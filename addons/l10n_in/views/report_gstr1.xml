@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_l10n_in_report_gstr1" model="ir.actions.client">
+        <field name="name">GSTR-1</field>
+        <field name="tag">account_report_gstr1</field>
+        <!-- <field name="context" eval="{'model': ''}"/> -->
+    </record>
+    <menuitem id="menu_l10n_in_report_gstr1" name="GSTR-1" action="action_l10n_in_report_gstr1" parent="l10n_in.account_reports_in_statements_menu" sequence="1"/>
+
+</odoo>

@@ -1,0 +1,186 @@
+<templates>
+    <t t-name="GSTR1">
+        <div class="o_gstr_main">
+            <t t-call="invoiceDetails">
+                <t t-set="invoiceSection" t-value="widget.data.sections.invoice_section"/>
+            </t>
+            <t t-call="otherDetails">
+                <t t-set="otherSection" t-value="widget.data.sections.other_section"/>
+            </t>
+            <t t-call="amendmentsDetails">
+                <t t-set="amendmentsSection" t-value="widget.data.sections.amendments_section"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="invoiceDetails">
+        <div class="o_section o_invoice_section">
+            <div>
+                <h3>Invoice level details</h3>
+                <hr class="o_section_hr"/>
+                <p>We have grouped the invoices uploaded/created by you in here in GSTR1(goverment) defined non aggregate categories
+                like B2B, B2C(large), Credit/Debit Notes (Registered), Credit/Debit Notes (Unregistered), Export.</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table o_invoice_section_table">
+                    <thead>
+                        <th t-foreach="invoiceSection.columns" t-as="column">
+                            <t t-esc="column.string"/>
+                            <t t-if="column.meta_string">
+                                <span t-esc="column.meta_string" class="text-muted"/>
+                            </t>
+                        </th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="invoiceSection.rows" t-as="row">
+                            <td t-foreach="row.row_data" t-as="cellData">
+                                <t t-if="cellData.type === 'html'">
+                                    <t t-raw="cellData.value or '-'"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="cellData.value or '-'"/>
+                                </t>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary o_open_move_list" t-attf-data-action="openAccountMoveLine" t-att-domain="row.row_domain">View/Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="otherDetails">
+        <div class="o_section o_order_section">
+            <div>
+                <h3>Other details</h3>
+                <hr class="o_section_hr"/>
+                <p>GSTR1(goverment) has specified that summary level details are enough for B2C Others,
+                Nill rated supplies, Advanced received and Adjustment of Advances.</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table o_invoice_section_table">
+                    <thead>
+                        <th t-foreach="otherSection.columns" t-as="column">
+                            <t t-esc="column.string"/>
+                            <t t-if="column.meta_string" t-esc="column.meta_string"/>
+                        </th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="otherSection.rows" t-as="row">
+                            <td t-foreach="row.row_data" t-as="cellData">
+                                <t t-if="cellData.type === 'html'">
+                                    <t t-raw="cellData.value or '-'"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="cellData.value or '-'"/>
+                                </t>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary o_open_move_list" t-attf-data-action="openAccountMoveLine" t-att-domain="row.row_domain">View/Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="amendmentsDetails">
+        <div class="o_section o_amendments_section">
+            <div>
+                <h3>Amendment Details</h3>
+                <hr class="o_section_hr"/>
+            </div>
+            <div class="table-responsive">
+                <table class="table o_invoice_section_table">
+                    <thead>
+                        <th t-foreach="amendmentsSection.columns" t-as="column">
+                            <t t-esc="column.string"/>
+                            <t t-if="column.meta_string" t-esc="column.meta_string"/>
+                        </th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="amendmentsSection.rows" t-as="row">
+                            <td t-foreach="row.row_data" t-as="cellData">
+                                <t t-if="cellData.type === 'html'">
+                                    <t t-raw="cellData.value or '-'"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="cellData.value or '-'"/>
+                                </t>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary o_open_move_list" t-attf-data-action="openAccountMoveLine" t-att-domain="row.row_domain">View/Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="search_template_fiscal_period_filter">
+        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <t t-set="activePeriod" t-value="widget.getActivePeriod()"></t>
+            <span class="fa fa-calendar" title="Periods" role="img" aria-label="Periods"/>
+            <t t-if="activePeriod" t-esc="activePeriod.name"/>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <a t-foreach="widget.data.filters.fiscal_periods" t-as="period" role="menuitem" class="dropdown-item js_gstr_fiscal_period_filter" t-att-title="period.name" data-filter="period.id"><t t-esc="period.name"/></a>
+        </div>
+    </t>
+
+    <t t-name="search_template_journals">
+        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <span class="fa fa-book"/>
+            Journals:
+            <t t-set="selected_journals" t-value="widget.getActiveJournals()"/>
+            <t t-if="selected_journals">
+                <t t-esc="selected_journals"/>
+            </t>
+            <t t-else="">
+                All
+            </t>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <t t-foreach="widget.data.filters.journals" t-as="j">
+                <!-- <t t-if="j.get('id') == 'divider'">
+                    <div role="separator" class="dropdown-divider"/>
+                    <b role="menuitem" class="ml4 dropdown-item-text"><t t-esc="j.get('name')"/></b>
+                    <div role="separator" class="dropdown-divider"/>
+                </t> -->
+                <!-- <t t-if="j.get('id') != 'divider'"> -->
+                    <!-- <t t-if="j.get('id') == 'group'">
+                        <a role="menuitem" class="dropdown-item js_account_report_group_choice_filter" data-filter="journals" t-att-data-id="j.get('id')" t-att-data-member-ids="j.get('ids')">
+                            <t t-esc="j.get('name')"/>
+                        </a>
+                    </t> -->
+                    <t>
+                        <a role="menuitem" class="dropdown-item js_gstr_journal_filter" t-att-title="j.name + '-' + j.code" t-att-data-id="j.id" data-filter="journals">
+                            <t t-esc="j.name"/>
+                        </a>
+                    </t>
+                <!-- </t> -->
+            </t>
+        </div>
+    </t>
+
+    <t t-name="search_template">
+        <div class="btn-group dropdown o_account_reports_filter_date">
+            <t t-call="search_template_fiscal_period_filter"/>
+        </div>
+        <div class="btn-group dropdown o_account_reports_filter_journals" t-if="widget.data.filters.journals">
+            <t t-call="search_template_journals"/>
+        </div>
+    </t>
+
+    <t t-name="gstr1.buttons">
+        <button type="button" class="btn btn-primary o_gstr1_generate_json">Generate JSON</button>
+    </t>
+
+</templates>

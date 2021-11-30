@@ -1,0 +1,92 @@
+<templates>
+    <t t-name="GSTR2">
+        <div class="o_gstr_main">
+            <t t-foreach="widget.data.sections" t-as="section">
+                <t t-call="gstr2_section">
+                    <t t-set="sectionDatas" t-value="section"/>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="gstr2_section">
+        <div class="o_section">
+            <div>
+                <h3><t t-esc="sectionDatas.section_title" /></h3>
+                <hr class="o_section_hr"/>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <th t-foreach="sectionDatas.columns" t-as="column">
+                            <t t-esc="column.string"/>
+                            <t t-if="column.meta_string">
+                                <span t-esc="column.meta_string" class="text-muted"/>
+                            </t>
+                        </th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="sectionDatas.rows" t-as="row">
+                            <td t-foreach="row.row_data" t-as="cellData">
+                                <t t-if="cellData.type === 'html'">
+                                    <t t-raw="cellData.value or '-'"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-esc="cellData.value or '-'"/>
+                                </t>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary o_open_move_list" t-attf-data-action="openAccountMoveLine" t-att-domain="row.row_domain">View/Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="gstr2_search_template_fiscal_period_filter">
+        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <t t-set="activePeriod" t-value="widget.getActivePeriod()"></t>
+            <span class="fa fa-calendar" title="Periods" role="img" aria-label="Periods"/>
+            <t t-if="activePeriod" t-esc="activePeriod.name"/>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <a t-foreach="widget.data.filters.fiscal_periods" t-as="period" role="menuitem" class="dropdown-item js_gstr_fiscal_period_filter" t-att-title="period.name" data-filter="period.id"><t t-esc="period.name"/></a>
+        </div>
+    </t>
+
+    <t t-name="gstr2_search_template_journals">
+        <button type="button" class="o-no-caret btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <span class="fa fa-book"/>
+            Journals:
+            <t t-set="selected_journals" t-value="widget.getActiveJournals()"/>
+            <t t-if="selected_journals">
+                <t t-esc="selected_journals"/>
+            </t>
+            <t t-else="">
+                All
+            </t>
+        </button>
+        <div class="dropdown-menu o_filter_menu" role="menu">
+            <t t-foreach="widget.data.filters.journals" t-as="j">
+                <t>
+                    <a role="menuitem" class="dropdown-item js_gstr_journal_filter" t-att-title="j.name + '-' + j.code" t-att-data-id="j.id" data-filter="journals">
+                        <t t-esc="j.name"/>
+                    </a>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="gstr2_search_template">
+        <div class="btn-group dropdown o_account_reports_filter_date">
+            <t t-call="gstr2_search_template_fiscal_period_filter"/>
+        </div>
+        <div class="btn-group dropdown o_account_reports_filter_journals" t-if="widget.data.filters.journals">
+            <t t-call="gstr2_search_template_journals"/>
+        </div>
+    </t>
+
+</templates>

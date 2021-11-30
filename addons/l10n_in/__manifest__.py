@@ -37,6 +37,9 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'views/res_config_settings_views.xml',
         'views/product_template_view.xml',
         'views/port_code_views.xml',
+        'views/report_gstr1.xml',
+        'views/report_gstr2.xml',
+        'views/report_gstr3.xml',
         'views/report_invoice.xml',
         'views/res_company_view.xml',
         'views/res_country_state_view.xml',
@@ -53,5 +56,17 @@ Sheet, now only Vertical format has been permitted Which is Supported By Odoo.
         'demo/account_payment_demo.xml',
         'demo/account_invoice_demo.xml',
     ],
+    'assets': {
+        'web.assets_qweb': [
+            'l10n_in/static/src/**/*.xml',
+        ],
+        'web.assets_backend': [
+            'l10n_in/static/src/**/*.scss',
+            'l10n_in/static/src/**/*.js',
+        ],
+        # 'web.qunit_suite_tests': [
+        #     'l10n_in/static/tests/**/*',
+        # ],
+    },
     'license': 'LGPL-3',
 }
