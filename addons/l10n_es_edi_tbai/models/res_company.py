@@ -75,6 +75,13 @@ class ResCompany(models.Model):
         compute="_compute_l10n_es_tbai_url_qr"
     )
 
+    # === TBAI CHAIN HEAD ===
+    # TODO should we maintain multiple heads, one for each server (tax administration) ?
+    l10n_es_tbai_last_posted_id = fields.Many2one(
+        string="Last posted invoice",
+        store=True,
+        comodel_name='account.move')
+
     # === CERTIFICATES ===
     l10n_es_tbai_certificate_id = fields.Many2one(
         string="Certificate (ES-TicketBai)",

@@ -7,6 +7,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import xmlsig
+import re as regex
 from cryptography.hazmat.primitives import hashes
 from lxml import etree
 from lxml.objectify import fromstring
@@ -150,6 +151,7 @@ class AccountEdiFormat(models.Model):
         sender = invoice.company_id if invoice.is_sale_document() else invoice.commercial_partner_id
         return {
             'Emisor': sender,
+            'EmisorVAT': sender.vat[2:] if sender.vat.startswith('ES') else sender.vat,
             'Destinatarios': xml_recipients,
             'VariosDestinatarios': "N",  # TODO
             'TerceroODestinatario': "D"  # TODO
@@ -159,7 +161,19 @@ class AccountEdiFormat(models.Model):
         return {}
 
     def _l10n_es_tbai_get_trail_values(self, invoice):
-        return {}
+        prev_invoice = invoice.company_id.l10n_es_tbai_last_posted_id
+        if prev_invoice:
+            return {
+                'EncadenamientoFacturaAnterior': True,
+                'SerieFacturaAnterior': prev_invoice.l10n_es_tbai_sequence,
+                'NumFacturaAnterior': prev_invoice.l10n_es_tbai_number,
+                'FechaExpedicionFacturaAnterior': datetime.strftime(prev_invoice.date, '%d-%m-%Y'),
+                'FirmaFacturaAnterior': prev_invoice.l10n_es_tbai_signature[:100]
+            }
+        else:
+            return {
+                'EncadenamientoFacturaAnterior': False
+            }
 
     # -------------------------------------------------------------------------
     # TBAI SERVER CALLS
@@ -194,8 +208,11 @@ class AccountEdiFormat(models.Model):
         response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password)
         data = response.content.decode(response.encoding)
 
-        print(data)  # TODO remove
-
+        # TODO remove print + error management
+        print(data)
+        invoices.write({'l10n_es_tbai_previous_invoice_id': company.l10n_es_tbai_last_posted_id})
+        invoices.write({'l10n_es_tbai_signature': signature})
+        company.write({'l10n_es_tbai_last_posted_id': invoices})
         return {invoices: {'success': True}}
 
     @staticmethod

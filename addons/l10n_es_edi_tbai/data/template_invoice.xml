@@ -8,14 +8,14 @@
                 </Cabecera>
                 <Sujetos>
                     <Emisor>
-                        <NIF t-out="Emisor.vat"/>
+                        <NIF t-out="EmisorVAT"/>
                         <ApellidosNombreRazonSocial t-out="Emisor.name"/>
                     </Emisor>
                     <t t-foreach="Destinatarios" t-as="dest">
                         <Destinatarios t-out="dest"/>
                     </t>
                     <VariosDestinatarios t-out="VariosDestinatarios"/>
-                    <FacturaEmitidaPorTerceroODestinatario t-out="TerceroODestinatario"/>
+                    <EmitidaPorTercerosODestinatario t-out="TerceroODestinatario"/>
                 </Sujetos>
                 <Factura t-call="l10n_es_edi_tbai.template_invoice_factura"/>
                 <HuellaTBAI t-call="l10n_es_edi_tbai.template_invoice_huella"/>
@@ -90,6 +90,12 @@
         </template>
 
         <template id="template_invoice_huella">
+            <EncadenamientoFacturaAnterior t-if="EncadenamientoFacturaAnterior">
+                <SerieFacturaAnterior t-out="SerieFacturaAnterior"/>
+                <NumFacturaAnterior t-out="NumFacturaAnterior"/>
+                <FechaExpedicionFacturaAnterior t-out="FechaExpedicionFacturaAnterior"/>
+                <SignatureValueFirmaFacturaAnterior t-out="FirmaFacturaAnterior"/>
+            </EncadenamientoFacturaAnterior>
             <Software>
                 <LicenciaTBAI>TBAI-LICENSE-KEY</LicenciaTBAI>
                 <EntidadDesarrolladora>
