@@ -32,6 +32,7 @@
 
         'security/ir.model.access.csv',
 
+        'views/account_move_view.xml',
         'views/l10n_es_tbai_certificate_views.xml',
         'views/res_config_settings_views.xml'
     ],
