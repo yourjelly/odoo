@@ -10,7 +10,7 @@ import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
 const { Component } = owl;
 import { registry } from "@web/core/registry";
-import { proxy_queue, proxy, barcode_reader } from "@point_of_sale/js/pos_env";
+import pos_env from "point_of_sale.env";
 
 function setupResponsivePlugin(env) {
     const isMobile = () => window.innerWidth <= 768;
@@ -36,22 +36,19 @@ export class ChromeAdapter extends Component {
         const reactivePos = reactive(pos, () => {});
 
         // The proxy requires the instance of PosGlobalState to function properly.
-        proxy.set_pos(reactivePos);
+        pos_env.proxy.set_pos(reactivePos);
 
         // TODO-REF: Should we continue on exposing posmodel as global variable?
         //  Also, should it be the reactive version? If it's the reactive version,
         //  we can perform operations on it from the console and we can see UI changing.
         window.posmodel = reactivePos;
 
-        this.env = owl.Component.env;
+        this.env = pos_env;
 
         useBus(this.env.qweb, "update", () => this.render());
         setupResponsivePlugin(this.env);
         owl.hooks.useSubEnv({
             pos: reactivePos,
-            proxy_queue,
-            proxy,
-            barcode_reader,
             legacyActionManager,
         });
 
