@@ -12,7 +12,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const Registries = require('point_of_sale.Registries');
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
-    const { identifyError, posbus } = require('point_of_sale.utils');
+    const { identifyError } = require('point_of_sale.utils');
     const { odooExceptionTitleMap } = require("@web/core/errors/error_dialogs");
     const { ConnectionLostError, ConnectionAbortedError, RPCError } = require('@web/core/network/rpc_service');
     const { useBus } = require("@web/core/utils/hooks");
@@ -37,7 +37,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('show-notification', this._onShowNotification);
             useListener('close-notification', this._onCloseNotification);
             useListener('connect-to-proxy', this.connect_to_proxy);
-            useBus(posbus, 'start-cash-control', this.openCashControl);
+            useBus(this.env.posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
 
             this.state = useState({
