@@ -8,8 +8,10 @@ var core = require('web.core');
 var field_utils = require('web.field_utils');
 var time = require('web.time');
 var utils = require('web.utils');
+var env = require('web.env');
 var { Gui } = require('point_of_sale.Gui');
 var { posMutex } = require('point_of_sale.utils');
+var { proxy } = require('@point_of_sale/js/pos_env');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -153,7 +155,7 @@ class PosGlobalState extends PosModel {
             args: ['uom', 'product_uom_unit'],
         };
 
-        const uom_id = await this.rpc(params);
+        const uom_id = await env.services.rpc(params);
         this.uom_unit_id = uom_id[1];
     }
 
@@ -164,7 +166,7 @@ class PosGlobalState extends PosModel {
     }
 
     async load_server_data(){
-        const loadedModels = await this.rpc({
+        const loadedModels = await env.services.rpc({
             model: 'pos.session',
             method: 'load_pos_data',
             args: [[odoo.pos_session_id]],
@@ -187,7 +189,7 @@ class PosGlobalState extends PosModel {
         return new Promise(function (resolve, reject) {
             var fields = _.find(self.models, function(model){ return model.label === 'load_partners'; }).fields;
             var domain = self.prepare_new_partners_domain();
-            self.rpc({
+            env.services.rpc({
                 model: 'res.partner',
                 method: 'search_read',
                 args: [domain, fields],
@@ -311,26 +313,26 @@ class PosGlobalState extends PosModel {
         }
         const productModel = _.find(this.models, function(model){return model.model === 'product.product';});
         const fields = productModel.fields;
-        const products = await this.rpc({
+        const products = await env.services.rpc({
             model: 'product.product',
             method: 'read',
             args: [[...missingProductIds], fields],
-            context: Object.assign(this.session.user_context, { display_default_code: false }),
+            context: Object.assign(env.session.user_context, { display_default_code: false }),
         });
         productModel.loaded(this, products);
     }
     async loadProductsBackground() {
         let page = 0;
         let product_model = _.find(this.models, (model) => model.model === 'product.product');
-        let productLoadingInfo = await this.rpc({
+        let productLoadingInfo = await env.services.rpc({
             model: 'pos.session',
             method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'product.product'],
-            context: this.session.user_context,
+            context: env.session.user_context,
         });
         let products = [];
         do {
-            products = await this.rpc({
+            products = await env.services.rpc({
                 model: 'product.product',
                 method: 'search_read',
                 kwargs: {
@@ -340,7 +342,7 @@ class PosGlobalState extends PosModel {
                     'offset': page * this.config.limited_products_amount,
                     'limit': this.config.limited_products_amount,
                 },
-                context: { ...this.session.user_context, ...productLoadingInfo.context },
+                context: { ...env.session.user_context, ...productLoadingInfo.context },
             });
             product_model.loaded(this, products);
             page += 1;
@@ -351,14 +353,14 @@ class PosGlobalState extends PosModel {
         // same order as this background loading procedure.
         let i = 0;
         let partners = [];
-        let partnerLoadingInfo = await this.rpc({
+        let partnerLoadingInfo = await env.services.rpc({
             model: 'pos.session',
             method: 'get_loading_params',
             args: [[odoo.pos_session_id], 'res.partner'],
-            context: this.session.user_context,
+            context: env.session.user_context,
         });
         do {
-            partners = await this.rpc({
+            partners = await env.services.rpc({
                 model: 'res.partner',
                 method: 'search_read',
                 args: [[], partnerLoadingInfo.fields],
@@ -366,7 +368,7 @@ class PosGlobalState extends PosModel {
                     limit: this.config.limited_partners_amount,
                     offset: this.config.limited_partners_amount * i
                 },
-                context: this.session.user_context,
+                context: env.session.user_context,
             });
             this.db.add_partners(partners);
             i += 1;
@@ -429,13 +431,13 @@ class PosGlobalState extends PosModel {
     send_current_order_to_customer_facing_display() {
         var self = this;
         this.render_html_for_customer_facing_display().then(function (rendered_html) {
-            if (self.env.pos.customer_display) {
+            if (self.customer_display) {
                 var $renderedHtml = $('<div>').html(rendered_html);
-                $(self.env.pos.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-                var orderlines = $(self.env.pos.customer_display.document.body).find('.pos_orderlines_list');
+                $(self.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+                var orderlines = $(self.customer_display.document.body).find('.pos_orderlines_list');
                 orderlines.scrollTop(orderlines.prop("scrollHeight"));
-            } else if (self.env.proxy.posbox_supports_display) {
-                self.proxy.update_customer_facing_display(rendered_html);
+            } else if (proxy.posbox_supports_display) {
+                proxy.update_customer_facing_display(rendered_html);
             }
         });
     }
@@ -468,7 +470,7 @@ class PosGlobalState extends PosModel {
 
         return Promise.all(get_image_promises).then(function () {
             return QWeb.render('CustomerFacingDisplayOrder', {
-                pos: self.env.pos,
+                pos: self,
                 origin: window.location.origin,
                 order: order,
             });
@@ -534,25 +536,6 @@ class PosGlobalState extends PosModel {
                             timeout: 30000,
                             to_invoice: true,
                         });
-                        if (server_ids.length) {
-                            const [orderWithInvoice] = await self.rpc({
-                                method: 'read',
-                                model: 'pos.order',
-                                args: [server_ids, ['account_move']],
-                                kwargs: { load: false },
-                            });
-                            await self
-                                .do_action('account.account_invoices', {
-                                    additional_context: {
-                                        active_ids: [orderWithInvoice.account_move],
-                                    },
-                                })
-                                .catch(() => {
-                                    reject({ code: 401, message: 'Backend Invoice', data: { order: order } });
-                                });
-                        } else {
-                            reject({ code: 401, message: 'Backend Invoice', data: { order: order } });
-                        }
                         resolve(server_ids);
                     } catch (error) {
                         reject(error);
@@ -641,11 +624,11 @@ class PosGlobalState extends PosModel {
                 return order;
             })];
         args.push(options.draft || false);
-        return this.rpc({
+        return env.services.rpc({
                 model: 'pos.order',
                 method: 'create_from_ui',
                 args: args,
-                kwargs: {context: this.session.user_context},
+                kwargs: {context: env.session.user_context},
             }, {
                 timeout: timeout,
                 shadow: !options.to_invoice
@@ -685,11 +668,11 @@ class PosGlobalState extends PosModel {
         var self = this;
         var timeout = typeof options.timeout === 'number' ? options.timeout : 7500 * server_ids.length;
 
-        return this.rpc({
+        return env.services.rpc({
                 model: 'pos.order',
                 method: 'remove_from_ui',
                 args: [server_ids],
-                kwargs: {context: this.session.user_context},
+                kwargs: {context: env.session.user_context},
             }, {
                 timeout: timeout,
                 shadow: true,
@@ -832,6 +815,8 @@ class PosGlobalState extends PosModel {
     }
 
     /**
+     * TODO: We can probably remove this here and put it somewhere else.
+     * And that somewhere else becomes the parent of the proxy.
      * Directly calls the requested service, instead of triggering a
      * 'call_service' event up, which wouldn't work as services have no parent
      *
@@ -848,7 +833,7 @@ class PosGlobalState extends PosModel {
                 // ajax service uses an extra 'target' argument for rpc
                 args = args.concat(ev.target);
             }
-            const service = this.env.services[payload.service];
+            const service = env.services[payload.service];
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
         }
@@ -935,18 +920,18 @@ class PosGlobalState extends PosModel {
      * fetch them to be added on the loaded products.
      */
     async _addProducts(ids){
-        await this.rpc({
+        await env.services.rpc({
             model: 'product.product',
             method: 'write',
             args: [ids, {'available_in_pos': true}],
-            context: this.session.user_context,
+            context: env.session.user_context,
         });
         let product_model = _.find(this.models, (model) => model.model === 'product.product');
-        let product = await this.rpc({
+        let product = await env.services.rpc({
             model: 'product.product',
             method: 'read',
             args: [ids, product_model.fields],
-            context: { ...this.session.user_context, ...product_model.context() },
+            context: { ...env.session.user_context, ...product_model.context() },
         });
         product_model.loaded(this, product);
     }
@@ -959,7 +944,7 @@ PosGlobalState.prototype.models = [
     {
         label:  'version',
         loaded: function (self) {
-            return self.session.rpc('/web/webclient/version_info',{}).then(function (version) {
+            return env.session.rpc('/web/webclient/version_info',{}).then(function (version) {
                 self.version = version;
             });
         },
@@ -1074,7 +1059,7 @@ PosGlobalState.prototype.models = [
                         return true;
                     }
                 });
-                if (user.id === self.session.uid) {
+                if (user.id === env.session.uid) {
                     self.user = user;
                     self.employee.name = user.name;
                     self.employee.role = user.role;
@@ -1296,7 +1281,7 @@ PosGlobalState.prototype.models = [
                     reject();
                 };
                 self.company_logo.crossOrigin = "anonymous";
-                self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + self.session.db + '&company=' + self.company.id + '&_' + Math.random();
+                self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + env.session.db + '&company=' + self.company.id + '&_' + Math.random();
             });
         },
     },
