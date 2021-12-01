@@ -17,6 +17,14 @@ class Department(models.Model):
     active = fields.Boolean('Active', default=True)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     parent_id = fields.Many2one('hr.department', string='Parent Department', index=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    ancestor_ids = fields.Many2many('hr.department',
+                                    compute='_compute_ancestor_departments',
+                                    store=True,
+                                    recursive=True,
+                                    relation='hr_ancestor_departments',
+                                    column1='ancestor',
+                                    column2='descendant',
+                                    string='Ancestor Departments')
     child_ids = fields.One2many('hr.department', 'parent_id', string='Child Departments')
     manager_id = fields.Many2one('hr.employee', string='Manager', tracking=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     member_ids = fields.One2many('hr.employee', 'department_id', string='Members', readonly=True)
@@ -41,6 +49,13 @@ class Department(models.Model):
                 department.complete_name = '%s / %s' % (department.parent_id.complete_name, department.name)
             else:
                 department.complete_name = department.name
+
+    @api.depends('parent_id', 'parent_id.ancestor_ids')
+    def _compute_ancestor_departments(self):
+        for department in self:
+            department.ancestor_ids = self.env['hr.department']
+            department.ancestor_ids |= department.parent_id
+            department.ancestor_ids |= department.parent_id.ancestor_ids
 
     def _compute_total_employee(self):
         emp_data = self.env['hr.employee'].read_group([('department_id', 'in', self.ids)], ['department_id'], ['department_id'])
