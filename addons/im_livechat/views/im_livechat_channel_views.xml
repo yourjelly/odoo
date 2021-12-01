@@ -326,5 +326,13 @@
             groups="im_livechat_group_user"
             sequence="15"/>
 
+        <menuitem
+            id="chatbot_config"
+            name="Chatbots"
+            parent="livechat_config"
+            action="chatbot_bot_action"
+            groups="im_livechat_group_user"
+            sequence="25"/>
+
     </data>
 </odoo>

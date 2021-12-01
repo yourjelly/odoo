@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="im_livechat_chatbot_script_question_view_form" model="ir.ui.view">
+            <field name="name">im_livechat.chatbot.script_question.view.form</field>
+            <field name="model">im_livechat.chatbot.script_question</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Script Question">
+                    <sheet>
+                        <group>
+                            <field name="chatbot_id" invisible="1"/>
+                            <field name="name"/>
+                            <field name="triggering_question_answer_ids"
+                                widget="chatbot_script_question_triggering_answers"
+                                options="{'no_open': True, 'no_create': True}"/>
+                            <field name="answer_ids" nolabel="1" colspan="2">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="chatbot_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

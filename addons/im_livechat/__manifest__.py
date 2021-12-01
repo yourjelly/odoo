@@ -25,6 +25,8 @@ Help your customers with this chat, and analyse their feedback.
         "data/mail_data.xml",
         "data/im_livechat_channel_data.xml",
         'data/digest_data.xml',
+        "views/chatbot_bot_views.xml",
+        "views/chatbot_script_question_views.xml",
         "views/rating_views.xml",
         "views/mail_channel_views.xml",
         "views/im_livechat_channel_views.xml",
@@ -48,6 +50,7 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/models/*/*.js',
         ],
         'web.assets_backend': [
+            'im_livechat/static/src/js/chatbot_script_questions_widget.js',
             'im_livechat/static/src/js/im_livechat_channel_form_view.js',
             'im_livechat/static/src/js/im_livechat_channel_form_controller.js',
             'im_livechat/static/src/components/*/*.js',

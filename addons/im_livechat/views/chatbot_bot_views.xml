@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="chatbot_bot_action" model="ir.actions.act_window">
+            <field name="name">Chatbots</field>
+            <field name="res_model">im_livechat.chatbot.bot</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="im_livechat_chatbot_bot_view_tree" model="ir.ui.view">
+            <field name="name">im_livechat.chatbot.bot.view.tree</field>
+            <field name="model">im_livechat.chatbot.bot</field>
+            <field name="arch" type="xml">
+                <tree string="Chatbots">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="im_livechat_chatbot_bot_view_form" model="ir.ui.view">
+            <field name="name">im_livechat.chatbot.bot.view.form</field>
+            <field name="model">im_livechat.chatbot.bot</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Chatbot" js_class="chatbot_bot_view_form">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="question_ids" nolabel="1" colspan="2"
+                                widget="chatbot_script_questions">
+                                <tree>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="chatbot_id" invisible="1"/>
+                                    <field name="triggering_question_answer_ids" widget="many2many_tags"/>
+                                    <control>
+                                        <create name="add_question_control" string="Add a question"/>
+                                    </control>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
