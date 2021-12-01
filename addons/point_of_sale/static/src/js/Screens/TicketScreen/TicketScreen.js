@@ -7,7 +7,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
     const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener, useAutofocus } = require('web.custom_hooks');
-    const { posbus } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
 
 
@@ -48,14 +47,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
         //#region LIFECYCLE METHODS
         mounted() {
-            posbus.on('ticket-button-clicked', this, this.close);
+            this.env.posbus.on('ticket-button-clicked', this, this.close);
             setTimeout(() => {
                 // Show updated list of synced orders when going back to the screen.
                 this._onFilterSelected({ detail: { filter: this._state.ui.filter } });
             });
         }
         willUnmount() {
-            posbus.off('ticket-button-clicked', this);
+            this.env.posbus.off('ticket-button-clicked', this);
         }
         //#endregion
         //#region EVENT HANDLERS
@@ -117,7 +116,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 const deletedIndex = this.env.pos.orders.remove(order);
                 await this.env.pos.on_removed_order(order, deletedIndex, 'abandon')
                 order.destroy({ reason: 'abandon' });
-                posbus.trigger('order-deleted');
+                this.env.posbus.trigger('order-deleted');
             }
         }
         async _onNextPage() {
