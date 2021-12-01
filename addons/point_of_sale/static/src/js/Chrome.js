@@ -365,7 +365,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.state.sound.src = src;
         }
         _onSetSyncStatus({ detail: { status, pending }}) {
-            this.env.pos.synch = { status, pending };
+            this.env.pos.synch.status = status;
+            this.env.pos.synch.pending = pending;
         }
         _onShowNotification({ detail: { message, duration } }) {
             this.state.notification.isShown = true;
