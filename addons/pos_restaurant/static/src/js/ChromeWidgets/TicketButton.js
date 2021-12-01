@@ -3,15 +3,14 @@ odoo.define('pos_restaurant.TicketButton', function (require) {
 
     const TicketButton = require('point_of_sale.TicketButton');
     const Registries = require('point_of_sale.Registries');
-    const { posbus } = require('point_of_sale.utils');
 
     const PosResTicketButton = (TicketButton) =>
         class extends TicketButton {
             mounted() {
-                posbus.on('table-set', this, this.render);
+                this.env.posbus.on('table-set', this, this.render);
             }
             willUnmount() {
-                posbus.off('table-set', this);
+                this.env.posbus.off('table-set', this);
             }
             /**
              * If no table is set to pos, which means the current main screen

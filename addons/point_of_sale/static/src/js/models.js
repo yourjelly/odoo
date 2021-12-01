@@ -10,7 +10,6 @@ var time = require('web.time');
 var utils = require('web.utils');
 var pos_env = require('point_of_sale.env');
 var { Gui } = require('point_of_sale.Gui');
-var { posMutex } = require('point_of_sale.utils');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -487,7 +486,7 @@ class PosGlobalState extends PosModel {
         }
 
         return new Promise((resolve, reject) => {
-            posMutex.exec(async () => {
+            pos_env.posMutex.exec(async () => {
                 try {
                     resolve(await self._flush_orders(self.db.get_orders(), opts));
                 } catch (error) {
@@ -503,7 +502,7 @@ class PosGlobalState extends PosModel {
         const order_id = self.db.add_order(order.export_as_JSON());
 
         return new Promise((resolve, reject) => {
-            posMutex.exec(async () => {
+            pos_env.posMutex.exec(async () => {
                 const order = self.db.get_order(order_id);
                 try {
                     resolve(await self._flush_orders([order], opts));
@@ -522,6 +521,7 @@ class PosGlobalState extends PosModel {
     // error-transfer: there was a connection error during the transfer. You can retry to make the invoice once
     //     the network connection is up
 
+    // TODO-REF: This doesn't invoice anymore!
     push_and_invoice_order (order) {
         var self = this;
         return new Promise((resolve, reject) => {
@@ -529,7 +529,7 @@ class PosGlobalState extends PosModel {
                 reject({ code: 400, message: 'Missing Customer', data: {} });
             } else {
                 var order_id = self.db.add_order(order.export_as_JSON());
-                posMutex.exec(async () => {
+                pos_env.posMutex.exec(async () => {
                     try {
                         const server_ids = await self._flush_orders([self.db.get_order(order_id)], {
                             timeout: 30000,

@@ -4,7 +4,6 @@ odoo.define('pos_restaurant.floors', function (require) {
 var models = require('point_of_sale.models');
 var pos_env = require('point_of_sale.env');
 const { Gui } = require('point_of_sale.Gui');
-const { posbus } = require('point_of_sale.utils');
 const Registries = require('point_of_sale.Registries');
 
 // At POS Startup, load the floors, and add them to the pos model
@@ -288,7 +287,7 @@ class PosRestaurantPosModel extends PosGlobalState {
             res = this.sync_to_server(table, order);
         }
         return res.then(() => {
-            posbus.trigger('table-set');
+            pos_env.posbus.trigger('table-set');
         })
     }
 

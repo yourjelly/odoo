@@ -5,7 +5,6 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     const TicketScreen = require('point_of_sale.TicketScreen');
     const Registries = require('point_of_sale.Registries');
     const { useAutofocus } = require('web.custom_hooks');
-    const { posbus } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
     const { useState } = owl.hooks;
 
@@ -15,7 +14,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                 if (!this.env.pos.config.iface_floorplan) {
                     // Make sure the 'table-set' event is triggered
                     // to properly rerender the components that listens to it.
-                    posbus.trigger('table-set');
+                    this.env.posbus.trigger('table-set');
                     super.close();
                 } else {
                     const order = this.env.pos.get_order();

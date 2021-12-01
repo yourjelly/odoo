@@ -7,7 +7,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
     const { useBarcodeReader } = require('point_of_sale.custom_hooks');
-    const { isConnectionError, posbus } = require('point_of_sale.utils');
+    const { isConnectionError } = require('point_of_sale.utils');
     const { useState, onMounted } = owl.hooks;
     const { parse } = require('web.field_utils');
 
@@ -42,7 +42,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
             });
         }
         mounted() {
-            posbus.trigger('start-cash-control');
+            this.env.posbus.trigger('start-cash-control');
         }
         /**
          * To be overridden by modules that checks availability of
