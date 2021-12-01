@@ -3,7 +3,7 @@ odoo.define('pos_hr.employees', function (require) {
 
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
-var env = require('web.env');
+var pos_env = require('point_of_sale.env');
 
 models.load_models([{
     model:  'hr.employee',
@@ -34,7 +34,7 @@ class PosHrPosModel extends PosGlobalState {
     after_load_server_data() {
         var self = this;
         var employee_ids = _.map(self.employees, function(employee){return employee.id;});
-        var records = env.services.rpc({
+        var records = pos_env.services.rpc({
             model: 'hr.employee',
             method: 'get_barcodes_and_pin_hashed',
             args: [employee_ids],
