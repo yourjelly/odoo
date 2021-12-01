@@ -9,7 +9,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
      */
 
     const makeTestEnvironment = require('web.test_env');
-    const env = require('web.env');
+    const pos_env = require('point_of_sale.env');
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
     const cleanup = require("@web/../tests/helpers/cleanup");
@@ -19,7 +19,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
 
     Registries.Component.add(owl.misc.Portal);
 
-    await env.session.is_bound;
+    await pos_env.session.is_bound;
     const ExtendedPosModel = Registries.PosModelRegistry.get(models.PosGlobalState);
     const pos = new ExtendedPosModel();
     await pos.load_server_data();
