@@ -23,17 +23,6 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
         willUnmount() {
             this.env.proxy.off('change:status', this, this._onChangeStatus);
         }
-        async onClick() {
-            try {
-                await this.env.pos.connect_to_proxy(this.env.proxy, this.env.barcode_reader);
-            } catch (error) {
-                if (error instanceof Error) {
-                    throw error;
-                } else {
-                    this.showPopup('ErrorPopup', error);
-                }
-            }
-        }
         _onChangeStatus(posProxy, statusChange) {
             this._setStatus(statusChange.newValue);
         }

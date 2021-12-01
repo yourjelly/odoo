@@ -184,6 +184,25 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                     syncedOrderBackendIds = await this.env.pos.push_and_invoice_order(
                         this.currentOrder
                     );
+                    if (syncedOrderBackendIds.length) {
+                        const [orderWithInvoice] = await this.rpc({
+                            method: 'read',
+                            model: 'pos.order',
+                            args: [syncedOrderBackendIds, ['account_move']],
+                            kwargs: { load: false },
+                        });
+                        // TODO-REF: Should properly handle "offline".
+                        // To reproduce: put debugger here, then stop the server.
+                        // When continue, there are multiple promises that are unhandled.
+                        await this.env.legacyActionManager
+                            .do_action('account.account_invoices', {
+                                additional_context: {
+                                    active_ids: [orderWithInvoice.account_move],
+                                },
+                            })
+                    } else {
+                        throw { code: 401, message: 'Backend Invoice', data: { order: this.currentOrder } };
+                    }
                 } else {
                     syncedOrderBackendIds = await this.env.pos.push_single_order(this.currentOrder);
                 }
