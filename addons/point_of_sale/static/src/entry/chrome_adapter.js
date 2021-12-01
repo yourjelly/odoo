@@ -27,23 +27,33 @@ function setupResponsivePlugin(env) {
 export class ChromeAdapter extends Component {
     setup() {
         this.PosChrome = Registries.Component.get(Chrome);
-        this.legacyActionManager = useService("legacy_action_manager");
+        const legacyActionManager = useService("legacy_action_manager");
 
+        // Instantiate PosGlobalState here to ensure that every extension
+        // (or class overloads) is taken into consideration.
         const ExtendedPosGlobalState = Registries.PosModelRegistry.get(PosGlobalState);
         const pos = new ExtendedPosGlobalState();
         const reactivePos = reactive(pos, () => {});
+
+        // The proxy requires the instance of PosGlobalState to function properly.
         proxy.set_pos(reactivePos);
 
+        // TODO-REF: Should we continue on exposing posmodel as global variable?
+        //  Also, should it be the reactive version? If it's the reactive version,
+        //  we can perform operations on it from the console and we can see UI changing.
         window.posmodel = reactivePos;
 
         this.env = owl.Component.env;
-        this.env.pos = reactivePos;
-        this.env.proxy_queue = proxy_queue;
-        this.env.proxy = proxy;
-        this.env.barcode_reader = barcode_reader;
 
         useBus(this.env.qweb, "update", () => this.render());
         setupResponsivePlugin(this.env);
+        owl.hooks.useSubEnv({
+            pos: reactivePos,
+            proxy_queue,
+            proxy,
+            barcode_reader,
+            legacyActionManager,
+        });
 
         const chrome = owl.hooks.useRef("chrome");
         owl.hooks.onMounted(async () => {
@@ -67,4 +77,4 @@ export class ChromeAdapter extends Component {
         });
     }
 }
-ChromeAdapter.template = owl.tags.xml`<PosChrome t-ref="chrome" webClient="legacyActionManager"/>`;
+ChromeAdapter.template = owl.tags.xml`<PosChrome t-ref="chrome" />`;

@@ -2,6 +2,7 @@ odoo.define('pos_restaurant.floors', function (require) {
 "use strict";
 
 var models = require('point_of_sale.models');
+var env = require('web.env');
 const { Gui } = require('point_of_sale.Gui');
 const { posbus } = require('point_of_sale.utils');
 const Registries = require('point_of_sale.Registries');
@@ -134,11 +135,11 @@ class PosRestaurantPosModel extends PosGlobalState {
     _get_from_server (table_id, options) {
         options = options || {};
         var timeout = typeof options.timeout === 'number' ? options.timeout : 7500;
-        return this.rpc({
+        return env.services.rpc({
                 model: 'pos.order',
                 method: 'get_table_draft_orders',
                 args: [table_id],
-                kwargs: {context: this.session.user_context},
+                kwargs: {context: env.session.user_context},
             }, {
                 timeout: timeout,
                 shadow: false,

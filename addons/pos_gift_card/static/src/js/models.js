@@ -65,19 +65,4 @@ odoo.define("pos_gift_card.gift_card", function (require) {
 
   return PosGiftCardOrderline;
   });
-
-  Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-
-  class PosGiftCardPosModel extends PosGlobalState {
-        print_gift_pdf(giftCardIds) {
-            this.do_action('pos_gift_card.gift_card_report_pdf', {
-                additional_context: {
-                    active_ids: [giftCardIds],
-                },
-            })
-        }
-    }
-
-    return PosGiftCardPosModel;
-    });
 });
