@@ -22,9 +22,6 @@ odoo.define('point_of_sale.test_env', async function (require) {
     await env.session.is_bound;
     const ExtendedPosModel = Registries.PosModelRegistry.get(models.PosGlobalState);
     const pos = new ExtendedPosModel();
-    pos.rpc = env.services.rpc.bind(env.services);
-    pos.session = env.session;
-    pos.do_action = async () => {};
     await pos.load_server_data();
 
     /**
@@ -34,13 +31,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
      */
     function makePosTestEnv(env = {}, providedRPC = null, providedDoAction = null) {
         env = Object.assign(env, { pos });
-        let posEnv = makeTestEnvironment(env, providedRPC);
-        // Replace rpc in the PosGlobalState instance after loading
-        // data from the server so that every succeeding rpc calls
-        // made by pos are mocked by the providedRPC.
-        pos.rpc = posEnv.rpc;
-        pos.do_action = providedDoAction;
-        return posEnv;
+        return makeTestEnvironment(env, providedRPC);
     }
 
     return makePosTestEnv;

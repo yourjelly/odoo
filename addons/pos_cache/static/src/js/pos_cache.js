@@ -6,6 +6,7 @@ var core = require('web.core');
 var { Gui } = require('point_of_sale.Gui');
 const Registries = require('point_of_sale.Registries');
 var _t = core._t;
+var env = require('web.env');
 
 function roundUpDiv(y, x) {
     const remainder = y % x;
@@ -31,19 +32,19 @@ class PosCachePosModel extends PosGlobalState {
         Gui.showNotification(_t('All products are loaded.'), 5000);
     }
     async _getTotalProductsCount() {
-        return this.rpc({
+        return env.services.rpc({
             model: 'pos.session',
             method: 'get_total_products_count',
             args: [[odoo.pos_session_id]],
-            context: this.session.user_context,
+            context: env.session.user_context,
         });
     }
     async _loadCachedProducts(start, end) {
-        const products = await this.rpc({
+        const products = await env.services.rpc({
             model: 'pos.session',
             method: 'get_cached_products',
             args: [[odoo.pos_session_id], start, end],
-            context: this.session.user_context,
+            context: env.session.user_context,
         });
         const productModel = _.find(this.models, function(model){return model.model === 'product.product';});
         productModel.loaded(this, products);

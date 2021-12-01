@@ -36,6 +36,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('set-sync-status', this._onSetSyncStatus);
             useListener('show-notification', this._onShowNotification);
             useListener('close-notification', this._onCloseNotification);
+            useListener('connect-to-proxy', this.connect_to_proxy);
             useBus(posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
 
@@ -64,12 +65,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.previous_touch_y_coordinate = -1;
 
             this.env.pos = reactivity.useState(this.env.pos);
-
-            // TODO-REF: Aim to remove these assignments.
-            this.env.pos.do_action = this.props.webClient.do_action.bind(this.props.webClient);
-            this.env.pos.session = this.env.session;
-            this.env.pos.rpc = this.rpc.bind(this);
-            this.env.pos.env = this.env;
         }
 
         // OVERLOADED METHODS //
