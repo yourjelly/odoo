@@ -63,8 +63,13 @@ odoo.define('pos_gift_card.PaymentScreen', function(require) {
                     method: 'get_new_card_ids',
                     args: [server_ids]
                 });
-                if(ids.length > 0)
-                    this.env.pos.print_gift_pdf(ids);
+                if (ids.length > 0) {
+                    this.env.legacyActionManager.do_action('pos_gift_card.gift_card_report_pdf', {
+                        additional_context: {
+                            active_ids: [ids],
+                        },
+                    });
+                }
             }
             return super._postPushOrderResolve(order, server_ids);
         }
