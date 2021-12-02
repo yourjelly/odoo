@@ -10,10 +10,17 @@ import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService, makeFakeRPCService } from "../helpers/mock_services";
-import { click, getFixture, makeDeferred, nextTick, patchWithCleanup } from "../helpers/utils";
+import {
+    click,
+    getFixture,
+    makeDeferred,
+    mount,
+    nextTick,
+    patchWithCleanup,
+} from "../helpers/utils";
 import { Dialog } from "../../src/core/dialog/dialog";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 
 let env;
 let target;
@@ -46,9 +53,6 @@ QUnit.module("DialogManager", {
         serviceRegistry.add("l10n", makeFakeLocalizationService());
 
         env = await makeTestEnv();
-    },
-    afterEach() {
-        pseudoWebClient.destroy();
     },
 });
 QUnit.test("Simple rendering with a single dialog", async (assert) => {

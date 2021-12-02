@@ -346,12 +346,15 @@ export function mockAnimationFrame() {
 export async function mount(Comp, { props, target, env }) {
     const app = new App(Comp, props);
     env.app = app;
-    app.configure({
+    const configuration = {
         env,
         templates: window.__ODOO_TEMPLATES__,
         dev: env.debug,
-        translateFn: env._t,
-    });
+    };
+    if ("localization" in env.services) {
+        configuration.translateFn = env._t;
+    }
+    app.configure(configuration);
     registerCleanup(() => app.destroy());
     return app.mount(target);
 }

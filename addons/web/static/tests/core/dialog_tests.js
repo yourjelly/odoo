@@ -6,10 +6,10 @@ import { uiService } from "@web/core/ui/ui_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { Dialog } from "@web/core/dialog/dialog";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture } from "../helpers/utils";
+import { click, getFixture, mount } from "../helpers/utils";
 import { makeFakeDialogService } from "../helpers/mock_services";
 
-const { mount, useRef, useState } = owl;
+const { useRef, useState } = owl;
 const serviceRegistry = registry.category("services");
 let parent;
 let target;
@@ -40,7 +40,6 @@ QUnit.module("Components", (hooks) => {
     });
     hooks.afterEach(() => {
         if (parent) {
-            parent.unmount();
             parent = undefined;
         }
     });
