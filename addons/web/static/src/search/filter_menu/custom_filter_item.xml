@@ -31,20 +31,20 @@
                     </select>
                     <span t-if="!('value' in selectedOperator)" class="o_generator_menu_value">
                         <t t-if="fieldType === 'date'">
-                            <DatePicker onDatetimeChanged="onDateChanged.bind(this, condition, 0)"
+                            <DatePicker onDateChange="onDateChange.bind(this, condition, 0)"
                                 date="condition.value[0]"
                                 />
                             <DatePicker t-if="selectedOperator.symbol === 'between'"
-                                onDatetimeChanged="onDateChanged.bind(this, condition, 1)"
+                                onDateChange="onDateChange.bind(this, condition, 1)"
                                 date="condition.value[1]"
                                 />
                         </t>
                         <t t-elif="fieldType === 'datetime'">
-                            <DateTimePicker onDatetimeChanged="onDateChanged.bind(this, condition, 0)"
+                            <DateTimePicker onDateChange="onDateChange.bind(this, condition, 0)"
                                 date="condition.value[0]"
                                 />
                             <DateTimePicker t-if="selectedOperator.symbol === 'between'"
-                                onDatetimeChanged="onDateChanged.bind(this, condition, 1)"
+                                onDateChange="onDateChange.bind(this, condition, 1)"
                                 date="condition.value[1]"
                                 />
                         </t>

@@ -258,7 +258,7 @@ export class CustomFilterItem extends Component {
      * @param {number} valueIndex
      * @param {OwlEvent} ev
      */
-    onDateChanged(condition, valueIndex, date) {
+    onDateChange(condition, valueIndex, date) {
         condition.value[valueIndex] = date;
     }
 
