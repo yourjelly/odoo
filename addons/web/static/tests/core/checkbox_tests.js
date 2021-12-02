@@ -5,9 +5,9 @@ import { translatedTerms } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { getFixture, patchWithCleanup } from "../helpers/utils";
+import { getFixture, patchWithCleanup, mount } from "../helpers/utils";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 
 let env;
