@@ -4387,7 +4387,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 console.info(DEV_MSG);
             }
             if (config.env) {
-                this.env = Object.freeze(Object.assign({}, config.env));
+                const descriptors = Object.getOwnPropertyDescriptors(config.env);
+                this.env = Object.freeze(Object.defineProperties({}, descriptors));
             }
             if (config.translateFn) {
                 this.translateFn = config.translateFn;
