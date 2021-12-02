@@ -350,6 +350,7 @@ export async function mount(Comp, { props, target, env }) {
         env,
         templates: window.__ODOO_TEMPLATES__,
         dev: env.debug,
+        translateFn: env._t,
     });
     registerCleanup(() => app.destroy());
     return app.mount(target);
