@@ -4,7 +4,7 @@ import { useService } from "@web/core/utils/hooks";
 
 import Chrome from "point_of_sale.Chrome";
 import Registries from "point_of_sale.Registries";
-import { reactive } from "@point_of_sale/js/reactivity";
+import { reactive, batched } from "@point_of_sale/js/reactivity";
 import { PosGlobalState } from "point_of_sale.models";
 import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
@@ -33,7 +33,11 @@ export class ChromeAdapter extends Component {
         // (or class overloads) is taken into consideration.
         const ExtendedPosGlobalState = Registries.PosModelRegistry.get(PosGlobalState);
         const pos = new ExtendedPosGlobalState();
-        const reactivePos = reactive(pos, () => {});
+
+        const batchedCustomerDisplayRender = batched(() => {
+            reactivePos.send_current_order_to_customer_facing_display();
+        });
+        const reactivePos = reactive(pos, batchedCustomerDisplayRender);
 
         // The proxy requires the instance of PosGlobalState to function properly.
         pos_env.proxy.set_pos(reactivePos);
@@ -71,6 +75,9 @@ export class ChromeAdapter extends Component {
             configureGui({ component: chrome.comp });
             await chrome.comp.start();
             registry.category("main_components").add("BlockUI", BlockUiFromRegistry);
+
+            // Subscribe to the changes in the models.
+            batchedCustomerDisplayRender();
         });
     }
 }
