@@ -130,10 +130,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 await this.env.pos.load_server_data();
                 await this.setupBarcodeParser();
                 if(this.env.pos.config.use_proxy){
-                    // TODO-REF: set listener to show customer display
-                    // if (this.config.iface_customer_facing_display) {
-                    //     this.on('change:selectedOrder', this.send_current_order_to_customer_facing_display, this);
-                    // }
                     await this.connect_to_proxy();
                 }
                 // Load the saved `env.pos.toRefundLines` from localStorage when
