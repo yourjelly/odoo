@@ -59,10 +59,10 @@ class StockAssignSerialNumbers(models.TransientModel):
         self.show_backorders = self.produced_qty > 0 and self.produced_qty < self.expected_qty
 
     def apply(self):
-        self.production_id._generate_backorder_productions_multi(self._get_serial_numbers())
+        self.production_id._generate_backorder_productions_multi([(serial_number, 1) for serial_number in self._get_serial_numbers()])
 
     def create_backorder(self):
-        self.production_id._generate_backorder_productions_multi(self._get_serial_numbers(), False)
+        self.production_id._generate_backorder_productions_multi([(serial_number, 1) for serial_number in self._get_serial_numbers()], False)
 
     def no_backorder(self):
-        self.production_id._generate_backorder_productions_multi(self._get_serial_numbers(), True)
+        self.production_id._generate_backorder_productions_multi([(serial_number, 1) for serial_number in self._get_serial_numbers()], True)
