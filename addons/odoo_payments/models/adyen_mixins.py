@@ -19,10 +19,8 @@ class AdyenAddressMixin(models.AbstractModel):
     _name = 'adyen.address.mixin'
     _description = "Odoo Payments Address Mixin"
 
-
     def _valid_field_parameter(self, field, name):
         return name == 'sync_with_adyen' or super()._valid_field_parameter(field, name)
-
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
@@ -54,6 +52,8 @@ class AdyenIDMixin(models.AbstractModel):
     _description = "Odoo Payments ID Mixin"
 
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+
+    # TODO don't ever log the binaries on either the client db or the proxy (several MB logs)
 
     id_type = fields.Selection(
         string='Photo ID type',

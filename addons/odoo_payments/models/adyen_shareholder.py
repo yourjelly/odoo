@@ -13,6 +13,14 @@ class AdyenShareholder(models.Model):
     _description = "Odoo Payments Shareholder"
     _rec_name = 'full_name'
 
+    kyc_check_id = fields.Many2one(
+        help="The KYC check linked to this shareholder that needs the most attention from the user",
+        comodel_name='adyen.kyc.check',
+        compute='_compute_kyc_check_id',
+    )
+    kyc_status = fields.Selection(related='kyc_check_id.status')
+    kyc_error_description = fields.Char(related='kyc_check_id.error_description')
+
     #=========== ANY FIELD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     adyen_account_id = fields.Many2one(
@@ -30,12 +38,14 @@ class AdyenShareholder(models.Model):
              "Canada: Social Insurance Number\nItaly: Codice fiscale\n"
              "Australia: Document Number")
 
-    latest_kyc_check_id = fields.Many2one(comodel_name='adyen.kyc.check', compute='_compute_latest_kyc_check_id')
-    kyc_status = fields.Selection(related='latest_kyc_check_id.status')
-    # FIXME is this still needed ?
-    kyc_status_message = fields.Char(related='latest_kyc_check_id.error_description')
-
     #=== COMPUTE METHODS ===#
+
+    @api.depends('adyen_account_id')
+    def _compute_kyc_check_id(self):
+        for shareholder in self:
+            shareholder.kyc_check_id = shareholder.adyen_account_id.adyen_kyc_ids.filtered(
+                lambda kyc_check: kyc_check.shareholder_id == shareholder
+            )._sort_by_status()[:1]
 
     #=== CONSTRAINT METHODS ===#
 
@@ -103,12 +113,6 @@ class AdyenShareholder(models.Model):
             ]
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
-
-    def _compute_latest_kyc_check_id(self):
-        for shareholder in self:
-            shareholder.latest_kyc_check_id = shareholder.adyen_account_id.adyen_kyc_ids.filtered(
-                lambda kyc_check: kyc_check.shareholder_id == shareholder
-            )._sort_by_status()[:1]
 
     @api.depends('first_name', 'last_name')
     def _compute_full_name(self):

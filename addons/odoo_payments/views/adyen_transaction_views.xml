@@ -1,7 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="adyen_transaction_view_form" model="ir.ui.view">
-        <field name="name">adyen.transaction.view.form</field>
+
+    <record id="adyen_transaction_list" model="ir.ui.view">
+        <field name="name">adyen.transaction.list</field>
+        <field name="model">adyen.transaction</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="reason != False">
+                <field name="adyen_account_id" invisible="1" />
+                <field name="reason" invisible="1" />
+                <field name="currency_id" invisible="1" />
+                <field name="fees_currency_id" invisible="1" />
+                <field name="description"/>
+                <field name="reference" optional="show" />
+                <field name="payment_method" optional="show" />
+                <field name="shopper_country_id" optional="show" />
+                <field name="card_country_id" optional="show" />
+                <field name="commercial_card" optional="hide" />
+                <field name="total_amount" widget="monetary" />
+                <field name="merchant_amount" widget="monetary" />
+                <field name="fixed_fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" groups="base.group_no_one" optional="hide" />
+                <field name="variable_fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" groups="base.group_no_one" optional="hide" />
+                <field name="fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" optional="show" />
+                <field name="date"/>
+                <field name="status"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="adyen_transaction_form" model="ir.ui.view">
+        <field name="name">adyen.transaction.form</field>
         <field name="model">adyen.transaction</field>
         <field name="arch" type="xml">
             <form>
@@ -48,35 +76,8 @@
         </field>
     </record>
 
-    <record id="adyen_transaction_view_list" model="ir.ui.view">
-        <field name="name">adyen.transaction.view.list</field>
-        <field name="model">adyen.transaction</field>
-        <field name="arch" type="xml">
-            <tree decoration-danger="reason != False">
-                <field name="adyen_account_id" invisible="1" />
-                <field name="reason" invisible="1" />
-                <field name="currency_id" invisible="1" />
-                <field name="fees_currency_id" invisible="1" />
-                <field name="description"/>
-                <field name="reference" optional="show" />
-                <field name="payment_method" optional="show" />
-                <field name="shopper_country_id" optional="show" />
-                <field name="card_country_id" optional="show" />
-                <field name="commercial_card" optional="hide" />
-                <field name="total_amount" widget="monetary" />
-                <field name="merchant_amount" widget="monetary" />
-                <field name="fixed_fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" groups="base.group_no_one" optional="hide" />
-                <field name="variable_fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" groups="base.group_no_one" optional="hide" />
-                <field name="fees" widget="monetary" options="{'currency_field': 'fees_currency_id'}" optional="show" />
-                <field name="date"/>
-                <field name="status"/>
-                <field name="company_id" groups="base.group_multi_company" optional="show"/>
-            </tree>
-        </field>
-    </record>
-
-    <record id="adyen_transaction_view_search" model="ir.ui.view">
-        <field name="name">adyen.transaction.view.search</field>
+    <record id="adyen_transaction_search" model="ir.ui.view">
+        <field name="name">adyen.transaction.search</field>
         <field name="model">adyen.transaction</field>
         <field name="arch" type="xml">
             <search string="Transactions">

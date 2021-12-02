@@ -234,7 +234,7 @@ class AdyenAccount(models.Model):
             action.update(res_id=self.env.company.adyen_account_id.id)
         return action
 
-    #=== BUSINESS METHODS ===#
+    #=== BUSINESS METHODS - Account holder creation/update flow ===#
 
     def _get_creation_redirect_form(self):
         """ Render and return the account holder creation form.
@@ -363,6 +363,8 @@ class AdyenAccount(models.Model):
                 }
             }
 
+    #=== BUSINESS METHODS - Platforms API notifications handling ===#
+
     def _handle_account_holder_created_notification(self):
         """ Handle `ACCOUNT_HOLDER_CREATED` notifications and update `merchant_status` accordingly.
 
@@ -436,7 +438,7 @@ class AdyenAccount(models.Model):
         self.ensure_one()
 
         # Activate the account
-        self.with_context(update_from_adyen=True).merchant_status = 'active'  # TODO ANV change to sync_with_adyen=False?
+        self.with_context(update_from_adyen=True).merchant_status = 'active'  # TODO ANV change to update_from_adyen=False?
 
         # Enable the additional menus after account activation
         balance_menu = self.env.ref('odoo_payments.menu_adyen_balance')
@@ -475,31 +477,30 @@ class AdyenAccount(models.Model):
 
         # Update the KYC tier
         kyc_tier = content['newStatus'].get('processingState', {}).get('tierNumber')
-        if isinstance(kyc_tier, int) and kyc_tier != self.kyc_tier:
+        if kyc_tier is not None and kyc_tier != self.kyc_tier:
             write_vals['kyc_tier'] = kyc_tier
 
         # Update the payout clearance
-        # TODO ANVFE Investigate, received as true on proxy but saved as false (sometimes?)
-        payout_allowed_str = content['newStatus'].get('payoutState', {}).get('allowPayout')
-        if isinstance(payout_allowed_str, str):
-            payout_allowed = payout_allowed_str == 'true'
-            if payout_allowed != self.payout_allowed:
-                write_vals['payout_allowed'] = payout_allowed
+        payout_allowed = content['newStatus'].get('payoutState', {}).get('allowPayout')
+        if payout_allowed is not None and payout_allowed != self.payout_allowed:
+            write_vals['payout_allowed'] = payout_allowed
 
         if write_vals:
             self.with_context(update_from_adyen=True).write(write_vals)
 
         # Notify the account status change if events are provided
-        events = content['newStatus'].get('events', [])
+        events = content['newStatus'].get('events')
         if events:
             status_message = self.env['ir.qweb']._render(
                 'odoo_payments.account_status_change_message',
                 values={
                     'reason': content.get('reason'),
-                    'events': [event['AccountEvent'] for event in events],
+                    'events': events,
                 }
             )
-            self.with_user(SUPERUSER_ID).message_post(body=status_message, subtype_xmlid='mail.mt_comment')
+            self.with_user(SUPERUSER_ID).message_post(
+                body=status_message, subtype_xmlid='mail.mt_comment'
+            )
 
     def _handle_account_holder_verification_notification(self, content):
         """ Handle `ACCOUNT_HOLDER_VERIFICATION` notifications and update the account accordingly.
@@ -514,6 +515,7 @@ class AdyenAccount(models.Model):
         :param dict content: The notification content
         :return: None
         """
+        # TODO fix "Non-stored field adyen.shareholder.kyc_check_id cannot be searched."
         self.ensure_one()
 
         kyc_check = content.get('kycCheckStatusData')
@@ -523,33 +525,28 @@ class AdyenAccount(models.Model):
             kyc_check_status = kyc_check['status'].lower()
             kyc_check_type = kyc_check['type'].lower()
             kyc_check_summary = kyc_check.get('summary', {})
-            kyc_check_error_code = kyc_check_summary.get('kycCheckCode', '')
-            kyc_check_error_description = kyc_check_summary.get('kycCheckDescription', '')
+            kyc_check_error_code = kyc_check_summary.get('kycCheckCode')
+            kyc_check_error_description = kyc_check_summary.get('kycCheckDescription')
+            kyc_shareholder_code = content.get('shareholderCode')
+            kyc_payout_method_code = content.get('payoutMethodCode')  # The bank account code
             vals = {
                 'status': kyc_check_status,
                 'error_code': kyc_check_error_code,
                 'error_description': kyc_check_error_description,
+                'shareholder_code': kyc_shareholder_code,
+                'payout_method_code': kyc_payout_method_code,
             }
-
-            # Find the shareholder linked to the KYC check, if any
-            kyc_shareholder_code = content.get('shareholderCode')
-            if kyc_shareholder_code:
-                kyc_shareholder = self.env['adyen.shareholder'].search([
-                    ('adyen_account_id', '=', self.id), ('code', '=', kyc_shareholder_code)
-                ])
-                if not kyc_shareholder:
-                    # TODO ANVFE update to make it clear it might not be an error and the shareholder code was not received atm
-                    _logger.warning(
-                        "received KYC check data for account holder with uuid %(account_uuid)s "
-                        "targeting unknown shareholder with code %(shareholder_code)s",
-                        {'account_uuid': self.adyen_uuid, 'shareholder_code': kyc_shareholder_code}
-                    )
 
             # Find the already existing KYC check and update it, or create a new one
             existing_kyc = self.env['adyen.kyc.check'].search([
                 ('adyen_account_id', '=', self.id),
                 ('check_type', '=', kyc_check_type),
-                ('shareholder_code', '=', kyc_shareholder_code),
+                # If a KYC check of the same type but without shareholder code exists, allow
+                # matching and overwriting it, as it would otherwise remain in its old status.
+                ('shareholder_code', 'in', [kyc_shareholder_code, False]),
+                # If a KYC check of the same type but without payout method code exists, allow
+                # matching and overwriting it, as it would otherwise remain in its old status.
+                ('payout_method_code', 'in', [kyc_payout_method_code, False]),
             ])
             if existing_kyc:
                 if len(existing_kyc) > 1:
@@ -564,8 +561,7 @@ class AdyenAccount(models.Model):
                 self.env['adyen.kyc.check'].create({
                     'adyen_account_id': self.id,
                     'check_type': kyc_check_type,
-                    'shareholder_code': kyc_shareholder_code,
-                    **vals
+                    **vals,
                 })
 
     #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
@@ -625,6 +621,8 @@ class AdyenAccount(models.Model):
         field_keys = company_fields.keys() & set(fields_list)
         for field_name in field_keys:
             company_value = self.env.company[company_fields[field_name]]
+            # Provided value for m2o must be an id, not a recordset.
+            # Needed to allow calling `create` server-side, not through the UX (e.g for tests)
             if self._fields[field_name].type == 'many2one':
                 company_value = company_value.id
             res[field_name] = company_value
@@ -879,7 +877,9 @@ class AdyenAccount(models.Model):
 
         if status == 'Failed':
             status_message = _('Failed payout: %s', content['status']['message']['text'])
-            self.with_user(SUPERUSER_ID).message_post(body=status_message, subtype_xmlid="mail.mt_comment")
+            self.with_user(SUPERUSER_ID).message_post(
+                body=status_message, subtype_xmlid='mail.mt_comment'
+            )
 
     # FIXME ANVFE doesn't seem used
     def _fetch_transactions(self, page=1):

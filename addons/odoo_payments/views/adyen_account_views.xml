@@ -5,8 +5,8 @@
         according to following doc on necessary fields/content
         https://docs.adyen.com/platforms/verification-process/required-information -->
 
-    <record id="adyen_account_view_form" model="ir.ui.view">
-        <field name="name">adyen.account.view.form</field>
+    <record id="adyen_account_form" model="ir.ui.view">
+        <field name="name">adyen.account.form</field>
         <field name="model">adyen.account</field>
         <field name="arch" type="xml">
             <form string="Adyen Account" create="false" js_class="adyen_account_form_view">
@@ -159,8 +159,8 @@
                     </group>
                     <notebook attrs="{'invisible': [('id', '=', False)]}">
                         <page string="KYC" attrs="{'invisible': [('transactions_count', '=', 0)]}">
-                            <field name="adyen_kyc_ids">
-                                <tree no_open="1">
+                            <field name="adyen_kyc_ids" options="{'no_open': True}">
+                                <tree>
                                     <field name="check_type"/>
                                     <field name="shareholder_name"/>
                                     <field name="status"
@@ -179,53 +179,15 @@
                               attrs="{'invisible': ['|', ('entity_type', '!=', 'business'), ('transactions_count', '=', 0)],
                                       'required': [('entity_type', '!=', 'individual')]}">
                             <field name="shareholder_ids"
-                                   attrs="{'required': [('entity_type', '=', 'business')]}">>
-                                <tree>
-                                    <field name="first_name"/>
-                                    <field name="last_name"/>
-                                    <field name="kyc_status"
-                                           widget="badge"
-                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                           decoration-warning="kyc_status == 'awaiting_data'"
-                                           decoration-info="kyc_status == 'pending'"
-                                           decoration-success="kyc_status in ['data_provided', 'passed']"
-                                           decoration-danger="kyc_status == 'failed'"/>
-                                </tree>
-                            </field>
+                                   attrs="{'required': [('entity_type', '=', 'business')]}"/>
                         </page>
                         <page string="Manager(s)"
                               attrs="{'invisible': ['|', ('entity_type', '!=', 'nonprofit'), ('transactions_count', '=', 0)]}">
                             <field name="shareholder_ids"
-                                   attrs="{'required': [('entity_type', '=', 'nonprofit')]}">
-                                <tree>
-                                    <field name="first_name"/>
-                                    <field name="last_name"/>
-                                    <field name="kyc_status"
-                                           widget="badge"
-                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                           decoration-warning="kyc_status == 'awaiting_data'"
-                                           decoration-info="kyc_status == 'pending'"
-                                           decoration-success="kyc_status in ['data_provided', 'passed']"
-                                           decoration-danger="kyc_status == 'failed'"/>
-                                </tree>
-                            </field>
+                                   attrs="{'required': [('entity_type', '=', 'nonprofit')]}"/>
                         </page>
                         <page string="Bank Accounts">
-                            <field name="bank_account_ids">
-                                <tree>
-                                    <field name="owner_name"/>
-                                    <field name="iban"/>
-                                    <field name="account_number"/>
-                                    <field name="currency_id"/>
-                                    <field name="kyc_status"
-                                           widget="badge"
-                                           attrs="{'invisible': [('kyc_status', '=', False)]}"
-                                           decoration-warning="kyc_status == 'awaiting_data'"
-                                           decoration-info="kyc_status == 'pending'"
-                                           decoration-success="kyc_status in ['data_provided', 'passed']"
-                                           decoration-danger="kyc_status == 'failed'"/>
-                                </tree>
-                            </field>
+                            <field name="bank_account_ids"/>
                         </page>
                         <page string="Payouts"
                               attrs="{'invisible': [('transactions_count', '=', 0)]}">

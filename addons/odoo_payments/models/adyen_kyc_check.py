@@ -3,14 +3,16 @@
 from odoo import api, fields, models
 
 ADYEN_KYC_STATUS = [
+    # Need a user action
     ('awaiting_data', "Data To Provide"),
-    ('data_provided', "Data Provided"),
-    ('pending', "Waiting For Validation"),
     ('invalid_data', "Invalid Data"),
-    ('passed', "Confirmed"),
     ('failed', "Failed"),
     ('retry_limit_reached', "Maximum Retry Limit Reached"),
-]
+    # Final state or waiting for validation
+    ('data_provided', "Data Provided"),
+    ('pending', "Waiting For Validation"),
+    ('passed', "Confirmed"),
+]  # Ordered by display importance (desc) to always show the KYC check requiring an action
 
 
 class AdyenKYCCheck(models.Model):
@@ -26,7 +28,6 @@ class AdyenKYCCheck(models.Model):
     check_type = fields.Selection(
         string="Type",
         selection=[
-            ('bank_account_verification', "Bank Account"),  # TODO ANVFE REMOVE ME AFTER RICK FEEDBACK
             ('company_verification', "Company"),
             ('card_verification', "Card"),
             ('identity_verification', "Identity"),
@@ -51,13 +52,10 @@ class AdyenKYCCheck(models.Model):
 
     # Linked records
     shareholder_code = fields.Char(string="Shareholder Code")
-    # TODO store shareholder_code
-    # and make shareholder_id compute to cover the case when the shareholder code is received after
-    # its kyc update
     shareholder_id = fields.Many2one(
         string="Linked Shareholder",
         comodel_name='adyen.shareholder',
-        compute="_compute_shareholder_id"
+        compute='_compute_shareholder_id',
     )
     shareholder_name = fields.Char(
         string="Shareholder",
@@ -70,17 +68,28 @@ class AdyenKYCCheck(models.Model):
     # Linked Documents
     # legalArrangementCode = fields.Char()
     # legalArrangementEntityCode = fields.Char()
-    # payoutMethodCode = fields.Char()
+    payout_method_code = fields.Char(string="Bank Account UUID")
     # shareholderCode = fields.Char() --> shareholder_id
     # signatoryCode = fields.Char()
 
-    # Became payout method in adyen api ???
-    # bank_account_id = fields.Many2one(
-    #     comodel_name='adyen.bank.account',
-    #     domain="[('adyen_account_id', '=', adyen_account_id)]",
-    #     ondelete='cascade')
+    bank_account_id = fields.Many2one(
+        string="Bank Account",
+        comodel_name='adyen.bank.account',
+        compute='_compute_bank_account_id',
+    )
+    bank_account_name = fields.Char(
+        related='bank_account_id.owner_name'
+    )
 
     #=== COMPUTE METHODS ===#
+
+    @api.depends('payout_method_code')
+    def _compute_bank_account_id(self):
+        self.bank_account_id = False
+        for kyc_check in self.filtered('payout_method_code'):
+            kyc_check.bank_account_id = kyc_check.adyen_account_id.bank_account_ids.filtered(
+                lambda bank_account: bank_account.bank_account_uuid == kyc_check.payout_method_code
+            )
 
     @api.depends('shareholder_code')
     def _compute_shareholder_id(self):
@@ -98,14 +107,18 @@ class AdyenKYCCheck(models.Model):
 
     #=== BUSINESS METHODS ===#
 
-    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
+    #=== TOOLING ===#
 
-    # TODO ANVFE CLEAN ME is this really the order we want to keep???
     def _sort_by_status(self):
-        # FIXME ANVFE does not consider invalid_data & retry_limit_reached
-        order = ['failed', 'awaiting_data', 'pending', 'data_provided', 'passed']
-        kyc_sorted = sorted(self, key=lambda k: order.index(k.status))
-        return kyc_sorted
+        """ Sort the KYC checks according to the status order.
+
+        :return: The sorted recordset of KYC checks
+        :rtype: recordset of `adyen.kyc.check`
+        """
+        status_order = [state[0] for state in ADYEN_KYC_STATUS]
+        return self.sorted(key=lambda k: status_order.index(k.status))
+
+    #=========== ANY METHOD BELOW THIS LINE HAS NOT BEEN CLEANED YET ===========#
 
     # @api.depends('bank_account_id', 'shareholder_id')
     # def _compute_document(self):

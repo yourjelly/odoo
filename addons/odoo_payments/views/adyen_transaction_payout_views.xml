@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <record id="adyen_transaction_payout_view_list" model="ir.ui.view">
-        <field name="name">adyen.transaction.payout.view.list</field>
+    <record id="adyen_transaction_payout_list" model="ir.ui.view">
+        <field name="name">adyen.transaction.payout.list</field>
         <field name="model">adyen.transaction.payout</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
@@ -18,8 +18,8 @@
         </field>
     </record>
 
-    <record id="adyen_transaction_payout_view_search" model="ir.ui.view">
-        <field name="name">adyen.transaction.payout.view.search</field>
+    <record id="adyen_transaction_payout_search" model="ir.ui.view">
+        <field name="name">adyen.transaction.payout.search</field>
         <field name="model">adyen.transaction.payout</field>
         <field name="arch" type="xml">
             <search string="Payouts">

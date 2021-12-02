@@ -23,6 +23,7 @@ class AdyenBankAccount(models.Model):
         comodel_name='adyen.account', required=True, ondelete='cascade')
 
     bank_account_reference = fields.Char(string='Reference', default=lambda self: uuid.uuid4().hex, required=True, readonly=True)
+    # Note: payout method code in kyc check results
     bank_account_uuid = fields.Char(string='UUID', readonly=True, help="Adyen Reference")
 
     owner_name = fields.Char(
@@ -100,7 +101,7 @@ class AdyenBankAccount(models.Model):
     # KYC
     # adyen_kyc_ids = fields.One2many(comodel_name='adyen.kyc', inverse_name='bank_account_id')
     kyc_status = fields.Selection(selection=ADYEN_KYC_STATUS, compute='_compute_kyc_status')
-    kyc_status_message = fields.Char(compute='_compute_kyc_status')
+    kyc_status_message = fields.Char(compute='_compute_kyc_status')  # TODO rename to something else ('kyc_error_message' ?)
 
     #=== COMPUTE METHODS ===#
 

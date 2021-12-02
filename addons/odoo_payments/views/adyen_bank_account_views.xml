@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="adyen_bank_account_view_form" model="ir.ui.view">
-        <field name="name">adyen.bank.account.view.form</field>
+
+    <record id="adyen_bank_account_list" model="ir.ui.view">
+        <field name="name">adyen.bank.account.list</field>
+        <field name="model">adyen.bank.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="owner_name"/>
+                <field name="iban"/>
+                <field name="account_number"/>
+                <field name="currency_id"/>
+                <field name="kyc_status"
+                       widget="badge"
+                       attrs="{'invisible': [('kyc_status', '=', False)]}"
+                       decoration-warning="kyc_status == 'awaiting_data'"
+                       decoration-info="kyc_status == 'pending'"
+                       decoration-success="kyc_status in ['data_provided', 'passed']"
+                       decoration-danger="kyc_status == 'failed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="adyen_bank_account_form" model="ir.ui.view">
+        <field name="name">adyen.bank.account.form</field>
         <field name="model">adyen.bank.account</field>
         <field name="arch" type="xml">
             <form string="Adyen Bank Account">
@@ -90,4 +111,5 @@
             </form>
         </field>
     </record>
+
 </odoo>
