@@ -732,7 +732,7 @@ class Module(models.Model):
             'model': 'ir.module.module',
             'module': 'base',
             'res_id': new.id,
-            'noupdate': True,
+            'noupdate': False,
         }
         self.env['ir.model.data'].create(module_metadata)
         return new

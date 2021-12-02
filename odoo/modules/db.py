@@ -64,7 +64,7 @@ def initialize(cr):
         id = cr.fetchone()[0]
         cr.execute('INSERT INTO ir_model_data \
             (name,model,module, res_id, noupdate) VALUES (%s,%s,%s,%s,%s)', (
-                'module_'+i, 'ir.module.module', 'base', id, True))
+                'module_'+i, 'ir.module.module', 'base', id, False))
         dependencies = info['depends']
         for d in dependencies:
             cr.execute(
