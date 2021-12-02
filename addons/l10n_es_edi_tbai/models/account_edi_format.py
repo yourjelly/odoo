@@ -12,7 +12,7 @@ from cryptography.hazmat.primitives import hashes
 from lxml import etree
 from lxml.objectify import fromstring
 from odoo import _, fields, models
-from odoo.tools import html_escape
+from odoo.tools import html_escape, get_lang
 from requests import exceptions
 
 from .requests_pkcs12 import post
@@ -69,7 +69,8 @@ class AccountEdiFormat(models.Model):
         inv_xml = self._l10n_es_tbai_get_invoice_xml(invoices)
 
         # Call the web service and get response
-        res = self._l10n_es_tbai_call_web_service_sign(invoices, inv_xml)
+        signature = self._l10n_es_tbai_sign_invoice(invoices, inv_xml)
+        res = self._l10n_es_tbai_post_to_web_service(invoices, inv_xml, signature)
 
         # Create attachment & post to chatter
         for inv in invoices:  # TODO loop should not be necessary, use ensure_one() ?
@@ -175,25 +176,31 @@ class AccountEdiFormat(models.Model):
                 'EncadenamientoFacturaAnterior': False
             }
 
+    def _l10n_es_tbai_sign_invoice(self, invoices, invoice_xml):
+        company = invoices.company_id
+
+        # Sign the XML document (modified in-place)
+        private, public = company.l10n_es_tbai_certificate_id.get_key_pair()
+        signature = AccountEdiFormat.sign(invoice_xml, (private, public))
+
+        return signature
+
     # -------------------------------------------------------------------------
     # TBAI SERVER CALLS
     # -------------------------------------------------------------------------
 
-    def _l10n_es_tbai_call_web_service_sign(self, invoices, invoice_xml):
+    def _l10n_es_tbai_post_to_web_service(self, invoices, invoice_xml, signature):
         company = invoices.company_id
 
-        # All are sharing the same value, see '_get_batch_key'.
-        # TBAID only exists if invoice has already been successfully submitted to gov.
-        tbai_id = invoices.mapped('l10n_es_tbai_id')[0]
-
-        # Set registration date
+        # Set registration date (TODO only do that after successful post ?)
         invoices.filtered(lambda inv: not inv.l10n_es_registration_date).write({
             'l10n_es_registration_date': fields.Date.context_today(self),
         })
 
-        # Sign the XML document
-        private, public = company.l10n_es_tbai_certificate_id.get_key_pair()
-        signature = AccountEdiFormat.sign(invoice_xml, (private, public))
+        # All invoices share the same value, see '_get_batch_key'.
+        # TBAID only exists if invoice has already been successfully submitted to gov.
+        tbai_id = invoices.mapped('l10n_es_tbai_id')[0]
+
         xml_str = etree.tostring(invoice_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
 
         # === Call the web service ===
@@ -208,12 +215,22 @@ class AccountEdiFormat(models.Model):
         response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password)
         data = response.content.decode(response.encoding)
 
-        # TODO remove print + error management
-        print(data)
-        invoices.write({'l10n_es_tbai_previous_invoice_id': company.l10n_es_tbai_last_posted_id})
-        invoices.write({'l10n_es_tbai_signature': signature})
-        company.write({'l10n_es_tbai_last_posted_id': invoices})
-        return {invoices: {'success': True}}
+        # Error management
+        response_xml = etree.fromstring(bytes(data, 'utf-8'))
+        state = int(response_xml.find(r'.//Estado').text)
+        if state == 0:
+            # SUCCESS
+            invoices.write({'l10n_es_tbai_previous_invoice_id': company.l10n_es_tbai_last_posted_id})
+            invoices.write({'l10n_es_tbai_signature': signature})
+            company.write({'l10n_es_tbai_last_posted_id': invoices})
+            return {invoices: {'success': True}}
+        else:
+            # ERROR
+            results = response_xml.find(r'.//ResultadosValidacion')
+            message = results.find('Codigo').text + ": " + \
+                (results.find(r'Azalpena').text if get_lang(self.env).code == 'eu_ES' else results.find(r'Descripcion').text)
+            print(message)
+            return {invoices: {'success': state == 0, 'error': _(message), 'blocking_level': 'warning'}}
 
     @staticmethod
     def sign(root, certificate):
