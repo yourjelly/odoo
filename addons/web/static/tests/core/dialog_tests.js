@@ -9,7 +9,7 @@ import { makeTestEnv } from "../helpers/mock_env";
 import { click, getFixture, mount } from "../helpers/utils";
 import { makeFakeDialogService } from "../helpers/mock_services";
 
-const { useRef, useState } = owl;
+const { App, onMounted, onPatched, useState } = owl;
 const serviceRegistry = registry.category("services");
 let parent;
 let target;
@@ -27,6 +27,15 @@ class SimpleDialog extends Dialog {
         this.size = "size" in this.props ? this.props.size : this.constructor.size;
         this.fullscreen =
             "fullscreen" in this.props ? this.props.fullscreen : this.constructor.fullscreen;
+
+        const setRef = () => {
+            if (this.props.setModalRef) {
+                this.props.setModalRef(this.modalRef.el);
+            }
+        };
+
+        onMounted(setRef);
+        onPatched(setRef);
     }
 }
 SimpleDialog.bodyTemplate = owl.xml`<t t-slot="default"/>`;
@@ -187,7 +196,7 @@ QUnit.module("Components", (hooks) => {
         class SubComponent extends owl.Component {
             _onClick() {
                 assert.step("subcomponent-clicked");
-                this.trigger("subcomponent-clicked");
+                this.props.onClicked();
             }
         }
         SubComponent.template = owl.xml`
@@ -201,7 +210,7 @@ QUnit.module("Components", (hooks) => {
         Parent.components = { SimpleDialog, SubComponent };
         Parent.template = owl.xml`
               <SimpleDialog>
-                  <SubComponent text="'Wow(l) Effect'" t-on-subcomponent-clicked="_onSubcomponentClicked"/>
+                  <SubComponent text="'Wow(l) Effect'" onClicked="_onSubcomponentClicked"/>
               </SimpleDialog>
           `;
         const env = await makeTestEnv();
@@ -278,28 +287,40 @@ QUnit.module("Components", (hooks) => {
         class Parent extends owl.Component {
             setup() {
                 this.ui = useService("ui");
-                this.dialog = useRef("dialogRef");
+                this.modal = null;
                 assert.strictEqual(
                     this.ui.activeElement,
                     document,
                     "UI active element should be the default (document) as Parent is not mounted yet"
                 );
             }
+            setModalRef(modalEl) {
+                this.modal = modalEl;
+            }
             mounted() {
-                const dialogModalEl = this.dialog.comp.modalRef.el;
                 assert.strictEqual(
                     this.ui.activeElement,
-                    dialogModalEl,
+                    this.modal,
                     "UI active element should be the dialog modal"
                 );
             }
         }
         const env = await makeTestEnv();
-        Parent.template = owl.xml`<div><SimpleDialog t-ref="dialogRef"/></div>`;
+        Parent.template = owl.xml`<div><SimpleDialog setModalRef="setModalRef.bind(this)"/></div>`;
         Parent.components = { SimpleDialog };
-        parent = await mount(Parent, { env, target });
 
-        parent.unmount();
+        const app = new App(Parent);
+        env.app = app;
+        const configuration = {
+            env,
+            templates: window.__ODOO_TEMPLATES__,
+            dev: env.debug,
+        };
+        app.configure(configuration);
+        await app.mount(target);
+
+        app.destroy();
+
         assert.strictEqual(
             env.services.ui.activeElement,
             document,
