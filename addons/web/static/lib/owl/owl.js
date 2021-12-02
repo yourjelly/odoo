@@ -3501,15 +3501,17 @@
     const hasBracketsAtTheEnd = /\[[^\[]+\]\s*$/;
     function parseDOMNode(node, ctx) {
         const { tagName } = node;
+        if (tagName === "pre") {
+            ctx = Object.create(ctx);
+            ctx.inPreTag = true;
+        }
         const dynamicTag = node.getAttribute("t-tag");
         node.removeAttribute("t-tag");
         if (tagName === "t" && !dynamicTag) {
             return null;
         }
         const children = [];
-        if (tagName === "pre") {
-            ctx.inPreTag = true;
-        }
+
         const shouldAddSVGNS = tagName === "svg" || (tagName === "g" && !ctx.inSVG);
         ctx.inSVG = ctx.inSVG || shouldAddSVGNS;
         const ns = shouldAddSVGNS ? "http://www.w3.org/2000/svg" : null;
