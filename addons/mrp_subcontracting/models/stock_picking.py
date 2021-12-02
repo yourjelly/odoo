@@ -62,7 +62,7 @@ class StockPicking(models.Model):
                 production._set_qty_producing()
                 production.subcontracting_has_been_recorded = True
                 if move_line != move.move_line_ids[-1]:
-                    backorder = production._generate_backorder_productions(close_mo=False)
+                    backorder = production._generate_backorder_productions()
                     # The move_dest_ids won't be set because the _split filter out done move
                     backorder.move_finished_ids.filtered(lambda mo: mo.product_id == move.product_id).move_dest_ids = production.move_finished_ids.filtered(lambda mo: mo.product_id == move.product_id).move_dest_ids
                     production.product_qty = production.qty_producing

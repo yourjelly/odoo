@@ -106,7 +106,7 @@ class MrpProduction(models.Model):
                 finished_move.price_unit = total_cost * float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001) / qty_done
         return True
 
-    def _get_backorder_mo_vals(self):
-        res = super()._get_backorder_mo_vals()
+    def _get_split_production_vals(self):
+        res = super()._get_split_production_vals()
         res['extra_cost'] = self.extra_cost
         return res
