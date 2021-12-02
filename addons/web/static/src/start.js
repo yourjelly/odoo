@@ -45,7 +45,7 @@ export async function startWebClient(Webclient) {
         owl.blockDom.mount(bdom, div);
         return div.innerHTML;
     };
-    app.configure({ env });
+    app.configure({ env, dev: env.debug });
     app.addTemplates(templates);
     const root = await app.mount(document.body);
     // delete odoo.debug; // FIXME: some legacy code rely on this
