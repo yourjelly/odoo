@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -1319,9 +1319,10 @@
                 fiber.root.counter--;
             }
             let stopped = false;
-            for (const h of errorHandlers) {
+            // execute in the opposite order
+            for (let i = errorHandlers.length - 1; i >= 0; i--) {
                 try {
-                    h(error);
+                    errorHandlers[i](error);
                     stopped = true;
                     break;
                 }
@@ -2024,17 +2025,14 @@
             return result;
         };
     }
-    function onError(fn) {
+    function onError(callback) {
         const node = getCurrent();
         let handlers = nodeErrorHandlers.get(node);
-        if (handlers) {
-            handlers.push(fn);
-        }
-        else {
+        if (!handlers) {
             handlers = [];
-            handlers.push(fn);
             nodeErrorHandlers.set(node, handlers);
         }
+        handlers.push(callback);
     }
 
     // -----------------------------------------------------------------------------
@@ -2518,6 +2516,7 @@
             this.targets = [];
             this.target = new CodeTarget("template");
             this.staticCalls = [];
+            this.helpers = new Set();
             this.translateFn = options.translateFn || ((s) => s);
             this.translatableAttributes = options.translatableAttributes || TRANSLATABLE_ATTRS;
             this.hasSafeContext = options.hasSafeContext || false;
@@ -2541,8 +2540,10 @@
             // define blocks and utility functions
             let mainCode = [
                 `  let { text, createBlock, list, multi, html, toggler, component, comment } = bdom;`,
-                `let { withDefault, getTemplate, prepareList, withKey, zero, call, callSlot, capture, isBoundary, shallowEqual, setContextValue, toNumber, safeOutput } = helpers;`,
             ];
+            if (this.helpers.size) {
+                mainCode.push(`let { ${[...this.helpers].join(", ")} } = helpers;`);
+            }
             if (this.templateName) {
                 mainCode.push(`// Template name: "${this.templateName}"`);
             }
@@ -2620,6 +2621,7 @@
                 if (tKeyExpr) {
                     keyArg = `${tKeyExpr} + ${keyArg}`;
                 }
+                this.helpers.add("withKey");
                 this.addLine(`${block.parentVar}[${ctx.index}] = withKey(${blockExpr}, ${keyArg});`);
                 return;
             }
@@ -2853,6 +2855,7 @@
                     idx = block.insertData(`${baseExpression}[${expression}]`);
                     attrs[`block-attribute-${idx}`] = targetAttr;
                 }
+                this.helpers.add("toNumber");
                 let valueCode = `ev.target.${targetAttr}`;
                 valueCode = shouldTrim ? `${valueCode}.trim()` : valueCode;
                 valueCode = shouldNumberize ? `toNumber(${valueCode})` : valueCode;
@@ -2906,11 +2909,13 @@
             let { block, forceNewBlock } = ctx;
             let expr;
             if (ast.expr === "0") {
+                this.helpers.add("zero");
                 expr = `ctx[zero]`;
             }
             else {
                 expr = compileExpr(ast.expr);
                 if (ast.defaultValue) {
+                    this.helpers.add("withDefault");
                     expr = `withDefault(${expr}, \`${ast.defaultValue}\`)`;
                 }
             }
@@ -2930,11 +2935,13 @@
                 this.insertAnchor(block);
             }
             block = this.createBlock(block, "html", ctx);
+            this.helpers.add(ast.expr === "0" ? "zero" : "safeOutput");
             let expr = ast.expr === "0" ? "ctx[zero]" : `safeOutput(${compileExpr(ast.expr)})`;
             if (ast.body) {
                 const nextId = BlockDescription.nextBlockId;
                 const subCtx = createContext(ctx);
                 this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
+                this.helpers.add("withDefault");
                 expr = `withDefault(${expr}, b${nextId})`;
             }
             this.insertBlock(`${expr}`, block, ctx);
@@ -3009,6 +3016,7 @@
             const keys = `k_block${block.id}`;
             const l = `l_block${block.id}`;
             const c = `c_block${block.id}`;
+            this.helpers.add("prepareList");
             this.addLine(`const [${keys}, ${vals}, ${l}, ${c}] = prepareList(${compileExpr(ast.collection)});`);
             // Throw errors on duplicate keys in dev mode
             if (this.dev) {
@@ -3132,10 +3140,12 @@
             if (ast.body) {
                 this.addLine(`ctx = Object.create(ctx);`);
                 this.addLine(`ctx[isBoundary] = 1;`);
+                this.helpers.add("isBoundary");
                 const nextId = BlockDescription.nextBlockId;
                 const subCtx = createContext(ctx, { preventRoot: true });
                 this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
                 if (nextId !== BlockDescription.nextBlockId) {
+                    this.helpers.add("zero");
                     this.addLine(`ctx[zero] = b${nextId};`);
                 }
             }
@@ -3151,10 +3161,12 @@
                 const templateVar = this.generateId("template");
                 this.addLine(`const ${templateVar} = ${subTemplate};`);
                 block = this.createBlock(block, "multi", ctx);
+                this.helpers.add("call");
                 this.insertBlock(`call(this, ${templateVar}, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
             }
             else {
                 const id = this.generateId(`callTemplate_`);
+                this.helpers.add("getTemplate");
                 this.staticCalls.push({ id, template: subTemplate });
                 block = this.createBlock(block, "multi", ctx);
                 this.insertBlock(`${id}.call(this, ctx, node, ${key})`, block, Object.assign(Object.assign({}, ctx), { forceNewBlock: !block }));
@@ -3175,6 +3187,7 @@
         }
         compileTSet(ast, ctx) {
             this.target.shouldProtectScope = true;
+            this.helpers.add("isBoundary").add("withDefault");
             const expr = ast.value ? compileExpr(ast.value || "") : "null";
             if (ast.body) {
                 const subCtx = createContext(ctx);
@@ -3196,6 +3209,7 @@
                 else {
                     value = expr;
                 }
+                this.helpers.add("setContextValue");
                 this.addLine(`setContextValue(ctx, "${ast.name}", ${value});`);
             }
         }
@@ -3225,6 +3239,7 @@
                 let ctxStr = "ctx";
                 if (this.target.loopLevel || !this.hasSafeContext) {
                     ctxStr = this.generateId("ctx");
+                    this.helpers.add("capture");
                     this.addLine(`const ${ctxStr} = capture(ctx);`);
                 }
                 let slotStr = [];
@@ -3304,6 +3319,7 @@
             this.insertBlock(blockExpr, block, ctx);
         }
         compileTSlot(ast, ctx) {
+            this.helpers.add("callSlot");
             let { block } = ctx;
             let blockString;
             let slotName;
@@ -4394,7 +4410,13 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             const node = new ComponentNode(this.Root, this.props, this);
             const promise = new Promise((resolve, reject) => {
                 onMounted(() => resolve(node.component));
-                onError((e) => {
+                // Manually add the last resort error handler on the node
+                let handlers = nodeErrorHandlers.get(node);
+                if (!handlers) {
+                    handlers = [];
+                    nodeErrorHandlers.set(node, handlers);
+                }
+                handlers.unshift((e) => {
                     reject(e);
                     throw e;
                 });
@@ -4951,8 +4973,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-01T12:42:32.627Z';
-    __info__.hash = 'e008966';
+    __info__.date = '2021-12-02T10:30:09.729Z';
+    __info__.hash = '2472001';
     __info__.url = 'https://github.com/odoo/owl';
 
 
