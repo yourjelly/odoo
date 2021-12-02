@@ -206,9 +206,6 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
                     selected_orderline.price_manually_set = true;
                     selected_orderline.set_unit_price(val);
                 }
-                if (this.env.pos.config.iface_customer_facing_display) {
-                    this.env.pos.send_current_order_to_customer_facing_display();
-                }
             }
         }
         async _barcodeProductAction(code) {
