@@ -6,6 +6,8 @@ import { patch, unpatch } from "@web/core/utils/patch";
 import { registerCleanup } from "./cleanup";
 import { download } from "@web/core/network/download";
 
+const { App } = owl;
+
 /**
  * Patch the native Date object
  *
@@ -339,4 +341,16 @@ export function mockAnimationFrame() {
         }
         callbacks.clear();
     };
+}
+
+export async function mount(Comp, { props, target, env }) {
+    const app = new App(Comp, props);
+    env.app = app;
+    app.configure({
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+        dev: env.debug,
+    });
+    registerCleanup(() => app.destroy());
+    return app.mount(target);
 }
