@@ -19,6 +19,11 @@ var round_pr = utils.round_precision;
 const { PosModelRegistry } = require('point_of_sale.Registries');
 const reactivity = require('@point_of_sale/js/reactivity');
 
+// Container of the product images fetched during rendering
+// of customer display. There is no need to observe it, thus,
+// we are putting it outside of PosGlobalState.
+const PRODUCT_ID_TO_IMAGE_CACHE = {};
+
 /**
  * TODO-REF-JCB If optimization is needed, then we implement this
  * using a Balanced Binary Tree to behave like an Object and an Array.
@@ -248,10 +253,12 @@ class PosGlobalState extends PosModel {
         if (json) {
             options.json = json;
         }
-        let order = reactivity.reactive(new (PosModelRegistry.get(Order))({},options), () => {
+        let order = new (PosModelRegistry.get(Order))({}, options);
+        const batchedSavedToDB = reactivity.batched(() => {
             order.save_to_db();
         });
-        order.save_to_db();
+        order = reactivity.reactive(order, batchedSavedToDB);
+        batchedSavedToDB();
         return order;
     }
     // creates a new empty order and sets it as the current order
@@ -416,10 +423,9 @@ class PosGlobalState extends PosModel {
                 ctx.drawImage(this,0,0);
 
                 var dataURL = canvas.toDataURL('image/jpeg');
-                product.image_base64 = dataURL;
                 canvas = null;
 
-                resolve();
+                resolve([product, dataURL]);
             };
             img.crossOrigin = 'use-credentials';
             img.src = url;
@@ -427,12 +433,12 @@ class PosGlobalState extends PosModel {
     }
 
     send_current_order_to_customer_facing_display() {
-        var self = this;
+        if (!this.config.iface_customer_facing_display) return;
         this.render_html_for_customer_facing_display().then(function (rendered_html) {
-            if (self.customer_display) {
+            if (pos_env.customer_display) {
                 var $renderedHtml = $('<div>').html(rendered_html);
-                $(self.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-                var orderlines = $(self.customer_display.document.body).find('.pos_orderlines_list');
+                $(pos_env.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+                var orderlines = $(pos_env.customer_display.document.body).find('.pos_orderlines_list');
                 orderlines.scrollTop(orderlines.prop("scrollHeight"));
             } else if (pos_env.proxy.posbox_supports_display) {
                 pos_env.proxy.update_customer_facing_display(rendered_html);
@@ -460,17 +466,26 @@ class PosGlobalState extends PosModel {
                 var image_url = `/web/image?model=product.product&field=image_128&id=${product.id}&write_date=${product.write_date}&unique=1`;
 
                 // only download and convert image if we haven't done it before
-                if (! product.image_base64) {
+                if (!(product.id in PRODUCT_ID_TO_IMAGE_CACHE)) {
                     get_image_promises.push(self._convert_product_img_to_base64(product, image_url));
                 }
             });
         }
 
-        return Promise.all(get_image_promises).then(function () {
+        return Promise.all(get_image_promises).then(function (productIdImagePairs) {
+            for (let [product, image] of productIdImagePairs) {
+                PRODUCT_ID_TO_IMAGE_CACHE[product.id] = image;
+            }
+            // Collect the product images that will be used in rendering the customer display template.
+            const productImages = {};
+            for (const line of order.get_orderlines()) {
+                productImages[line.product.id] = PRODUCT_ID_TO_IMAGE_CACHE[line.product.id];
+            }
             return QWeb.render('CustomerFacingDisplayOrder', {
                 pos: self,
                 origin: window.location.origin,
                 order: order,
+                productImages
             });
         });
     }
@@ -2383,7 +2398,6 @@ class Payment extends PosModel {
     set_amount(value){
         this.order.assert_editable();
         this.amount = round_di(parseFloat(value) || 0, this.pos.currency.decimals);
-        if (this.pos.config.iface_customer_facing_display) this.pos.send_current_order_to_customer_facing_display();
     }
     // returns the amount of money on this paymentline
     get_amount(){
@@ -2525,15 +2539,6 @@ class Order extends PosModel {
                 return fp.id === self.pos.config.default_fiscal_position_id[0];
             });
         }
-
-        if (this.pos.config.iface_customer_facing_display) {
-            // modelBus.on("PAYMENT_DONE", this.pos, () => this.pos.send_current_order_to_customer_facing_display());
-            // modelBus.on("PAYMENT_COLLECTION_DONE", this.pos, () => this.pos.send_current_order_to_customer_facing_display());
-            // modelBus.on("ORDERLINE_COLLECTION_DONE", this.pos, () => this.pos.send_current_order_to_customer_facing_display());
-            // modelBus.on("ORDERLINE_DONE", this.pos, () => this.pos.send_current_order_to_customer_facing_display());
-        }
-
-        return this;
     }
     save_to_db(){
         if (!this.temporary && !this.locked) {
@@ -2915,9 +2920,6 @@ class Order extends PosModel {
 
         if (options.draftPackLotLines) {
             this.selected_orderline.setPackLotLines(options.draftPackLotLines);
-        }
-        if (this.pos.config.iface_customer_facing_display) {
-            this.pos.send_current_order_to_customer_facing_display();
         }
     }
     set_orderline_options(orderline, options) {
