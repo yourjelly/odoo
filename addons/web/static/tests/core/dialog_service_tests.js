@@ -213,7 +213,7 @@ QUnit.test("Interactions between multiple dialogs", async (assert) => {
     assert.containsOnce(target, ".o_dialog_container");
 });
 
-QUnit.test("dialog component crashes", async (assert) => {
+QUnit.skip("dialog component crashes", async (assert) => {
     assert.expect(4);
 
     class FailingDialog extends Dialog {
