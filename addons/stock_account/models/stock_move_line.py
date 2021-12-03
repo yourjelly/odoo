@@ -13,11 +13,9 @@ class StockMoveLine(models.Model):
     # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
-        analytic_move_to_recompute = set()
         move_lines = super(StockMoveLine, self).create(vals_list)
         for move_line in move_lines:
             move = move_line.move_id
-            analytic_move_to_recompute.add(move.id)
             if move_line.state != 'done':
                 continue
             rounding = move.product_id.uom_id.rounding
@@ -25,17 +23,9 @@ class StockMoveLine(models.Model):
             if float_is_zero(diff, precision_rounding=rounding):
                 continue
             self._create_correction_svl(move, diff)
-        if analytic_move_to_recompute:
-            self.env['stock.move'].browse(
-                analytic_move_to_recompute)._account_analytic_entry_move()
         return move_lines
 
     def write(self, vals):
-        analytic_move_to_recompute = set()
-        if 'qty_done' in vals or 'move_id' in vals:
-            for move_line in self:
-                move_id = vals.get('move_id') if vals.get('move_id') else move_line.move_id.id
-                analytic_move_to_recompute.add(move_id)
         if 'qty_done' in vals:
             for move_line in self:
                 if move_line.state != 'done':
@@ -47,14 +37,6 @@ class StockMoveLine(models.Model):
                     continue
                 self._create_correction_svl(move, diff)
         res = super(StockMoveLine, self).write(vals)
-        if analytic_move_to_recompute:
-            self.env['stock.move'].browse(analytic_move_to_recompute)._account_analytic_entry_move()
-        return res
-
-    def unlink(self):
-        analytic_move_to_recompute = self.move_id.filtered(lambda m: m.state not in ['draft', 'cancel'])
-        res = super().unlink()
-        analytic_move_to_recompute._account_analytic_entry_move()
         return res
 
     # -------------------------------------------------------------------------

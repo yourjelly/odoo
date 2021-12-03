@@ -21,6 +21,12 @@ class StockMove(models.Model):
     analytic_account_line_id = fields.Many2one(
         'account.analytic.line', copy=False)
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'quantity_done' in vals or 'move_line_ids' in vals:
+            self.filtered(lambda m: m.state not in ['draft', 'cancel'])._account_analytic_entry_move()
+        return res
+
     def _filter_anglo_saxon_moves(self, product):
         return self.filtered(lambda m: m.product_id.id == product.id)
 
