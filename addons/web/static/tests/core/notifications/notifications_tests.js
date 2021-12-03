@@ -4,9 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { notificationService } from "@web/core/notifications/notification_service";
 import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";
-import { click, getFixture, nextTick, patchWithCleanup } from "../../helpers/utils";
-
-const { mount } = owl;
+import { click, getFixture, mount, nextTick, patchWithCleanup } from "../../helpers/utils";
 
 let target;
 const serviceRegistry = registry.category("services");
