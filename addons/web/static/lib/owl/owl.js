@@ -94,7 +94,7 @@
      */
     function createAttrUpdater(attr) {
         return function (value) {
-            if (value !== false && value !== undefined) { // NXOWL to fix in owl
+            if (value !== false) {
                 setAttribute.call(this, attr, value === true ? "" : value);
             }
         };
@@ -3501,17 +3501,16 @@
     const hasBracketsAtTheEnd = /\[[^\[]+\]\s*$/;
     function parseDOMNode(node, ctx) {
         const { tagName } = node;
-        if (tagName === "pre") {
-            ctx = Object.create(ctx);
-            ctx.inPreTag = true;
-        }
         const dynamicTag = node.getAttribute("t-tag");
         node.removeAttribute("t-tag");
         if (tagName === "t" && !dynamicTag) {
             return null;
         }
+        ctx = Object.assign({}, ctx);
         const children = [];
-
+        if (tagName === "pre") {
+            ctx.inPreTag = true;
+        }
         const shouldAddSVGNS = tagName === "svg" || (tagName === "g" && !ctx.inSVG);
         ctx.inSVG = ctx.inSVG || shouldAddSVGNS;
         const ns = shouldAddSVGNS ? "http://www.w3.org/2000/svg" : null;
@@ -4389,8 +4388,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
                 console.info(DEV_MSG);
             }
             if (config.env) {
-                const descriptors = Object.getOwnPropertyDescriptors(config.env);
-                this.env = Object.freeze(Object.defineProperties({}, descriptors));
+                const descrs = Object.getOwnPropertyDescriptors(config.env);
+                this.env = Object.freeze(Object.defineProperties({}, descrs));
             }
             if (config.translateFn) {
                 this.translateFn = config.translateFn;
@@ -4848,7 +4847,9 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      */
     function useSubEnv(envExtension) {
         const node = getCurrent();
-        node.childEnv = Object.freeze(Object.assign({}, node.childEnv, envExtension));
+        const env = Object.create(node.childEnv);
+        const descrs = Object.getOwnPropertyDescriptors(envExtension);
+        node.childEnv = Object.freeze(Object.defineProperties(env, descrs));
     }
     // -----------------------------------------------------------------------------
     // useEffect
@@ -4976,8 +4977,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-02T10:30:09.729Z';
-    __info__.hash = '2472001';
+    __info__.date = '2021-12-03T09:14:35.759Z';
+    __info__.hash = '144d4a2';
     __info__.url = 'https://github.com/odoo/owl';
 
 
