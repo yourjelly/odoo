@@ -16,7 +16,6 @@ const { Component, useExternalListener } = owl;
  *
  * @typedef Simple
  * @property {string} message Message to be displayed on rainbowman card
- * @property {boolean} [messageIsHtml=false]
  *
  * @typedef Custom
  * @property {Component} Component

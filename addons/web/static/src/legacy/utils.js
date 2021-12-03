@@ -240,7 +240,6 @@ export function makeLegacyNotificationService(legacyEnv) {
                     className,
                     onClose,
                     buttons,
-                    messageIsHtml: true,
                 });
                 const id = ++notifId;
                 idsToRemoveFn[id] = removeFn;

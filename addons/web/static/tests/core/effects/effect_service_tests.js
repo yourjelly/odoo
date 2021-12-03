@@ -45,8 +45,7 @@ QUnit.module("Effect Service", (hooks) => {
     let execRegisteredTimeouts;
     hooks.beforeEach(() => {
         effectParams = {
-            message: "<div>Congrats!</div>",
-            messageIsHtml: true,
+            message: owl.markup("<div>Congrats!</div>"),
         };
 
         execRegisteredTimeouts = mockTimeout();
@@ -58,7 +57,7 @@ QUnit.module("Effect Service", (hooks) => {
         serviceRegistry.add("localization", makeFakeLocalizationService());
     });
 
-    QUnit.debug("effect service displays a rainbowman by default", async function (assert) {
+    QUnit.test("effect service displays a rainbowman by default", async function (assert) {
         const parent = await makeParent();
         parent.env.services.effect.add();
         await nextTick();
@@ -116,7 +115,7 @@ QUnit.module("Effect Service", (hooks) => {
     QUnit.test("rendering a rainbowman with an escaped message", async function (assert) {
         const parent = await makeParent();
 
-        parent.env.services.effect.add({ ...effectParams, messageIsHtml: false });
+        parent.env.services.effect.add(effectParams);
         await nextTick();
         execRegisteredTimeouts();
 
@@ -124,7 +123,7 @@ QUnit.module("Effect Service", (hooks) => {
         assert.containsOnce(parent.el, ".o_reward_rainbow");
         assert.strictEqual(
             parent.el.querySelector(".o_reward_msg_content").textContent,
-            "<div>Congrats!</div>"
+            "Congrats!"
         );
     });
 

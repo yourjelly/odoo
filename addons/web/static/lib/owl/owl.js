@@ -2599,7 +2599,6 @@
             block.insert(anchor);
         }
         createBlock(parentBlock, type, ctx) {
-            debugger
             const hasRoot = this.target.hasRoot;
             const block = new BlockDescription(this.target, type);
             if (!hasRoot && !ctx.preventRoot) {

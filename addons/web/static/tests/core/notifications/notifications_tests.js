@@ -60,25 +60,6 @@ QUnit.test("title and message are escaped by default", async (assert) => {
     );
 });
 
-QUnit.test("notification with messageIsHtml option", async (assert) => {
-    const env = await makeTestEnv({ serviceRegistry });
-    const { Component: NotificationContainer, props } = registry
-        .category("main_components")
-        .get("NotificationContainer");
-    const notifService = env.services.notification;
-    await mount(NotificationContainer, { env, target, props });
-
-    notifService.add("<i>Some message</i>", { messageIsHtml: true });
-    await nextTick();
-    assert.containsOnce(target, ".o_notification");
-    const notif = target.querySelector(".o_notification");
-    assert.strictEqual(notif.querySelector(".o_notification_content").textContent, "Some message");
-    assert.strictEqual(
-        notif.querySelector(".o_notification_content").innerHTML,
-        "<i>Some message</i>"
-    );
-});
-
 QUnit.test("can display a notification of type danger", async (assert) => {
     const env = await makeTestEnv({ serviceRegistry });
     const { Component: NotificationContainer, props } = registry
