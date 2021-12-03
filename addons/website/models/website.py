@@ -1279,6 +1279,7 @@ class Website(models.Model):
     def button_go_website(self, path='/', mode_edit=False):
         self._force()
         if mode_edit:
+            path = url_for(path, self.default_lang_id.code)
             path += '?enable_editor=1'
         return {
             'type': 'ir.actions.act_url',
