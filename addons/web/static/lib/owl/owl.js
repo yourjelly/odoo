@@ -560,7 +560,7 @@
         switch (node.nodeType) {
             case Node.ELEMENT_NODE: {
                 // HTMLElement
-                let currentNS = parent && parent.currentNS;
+                let currentNS = domParentTree && domParentTree.currentNS;
                 const tagName = node.tagName;
                 let el = undefined;
                 const info = [];
@@ -2599,6 +2599,7 @@
             block.insert(anchor);
         }
         createBlock(parentBlock, type, ctx) {
+            debugger
             const hasRoot = this.target.hasRoot;
             const block = new BlockDescription(this.target, type);
             if (!hasRoot && !ctx.preventRoot) {
