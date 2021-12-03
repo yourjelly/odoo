@@ -271,6 +271,10 @@ export class Dropdown extends Component {
 }
 Dropdown.bus = new EventBus();
 Dropdown.props = {
+    class: {
+        type: String,
+        optional: true,
+    },
     toggler: {
         type: String,
         optional: true,
@@ -304,8 +308,16 @@ Dropdown.props = {
         type: String,
         optional: true,
     },
+    onDropdownItemSelected: {
+        type: Function,
+        optional: true,
+    },
     position: {
         type: String,
+        optional: true,
+    },
+    slots: {
+        type: Object,
         optional: true,
     },
 };

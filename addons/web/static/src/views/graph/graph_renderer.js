@@ -627,4 +627,4 @@ export class GraphRenderer extends Component {
 }
 
 GraphRenderer.template = "web.GraphRenderer";
-GraphRenderer.props = ["model", "onGraphClicked"];
+GraphRenderer.props = ["class?", "model", "onGraphClicked"];

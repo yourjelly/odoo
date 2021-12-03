@@ -70,6 +70,10 @@ export class WithSearch extends Component {
         for (const key of OTHER_SEARCH_KEYS) {
             componentProps.info[key] = this.searchModel[key];
         }
+        // if (this.props.class) {
+        // NXOWL what if componentProps already contains class? Possible?
+        // --> rethink system with View and WithSearch
+        // }
         return componentProps;
     }
 }
@@ -107,5 +111,7 @@ WithSearch.props = {
     activateFavorite: { type: Boolean, optional: true },
     dynamicFilters: { type: Array, element: Object, optional: true },
     searchMenuTypes: { type: Array, element: String, optional: true },
+
+    class: { type: String, optional: true },
 };
 WithSearch.template = "web.WithSearch";

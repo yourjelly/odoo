@@ -47,6 +47,10 @@ export class DropdownItem extends Component {
 }
 DropdownItem.template = "web.DropdownItem";
 DropdownItem.props = {
+    class: {
+        type: [String, Object],
+        optional: true,
+    },
     payload: {
         type: Object,
         optional: true,
@@ -61,6 +65,10 @@ DropdownItem.props = {
     },
     href: {
         type: String,
+        optional: true,
+    },
+    slots: {
+        type: Object,
         optional: true,
     },
     title: {
