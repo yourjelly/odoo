@@ -457,7 +457,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
             return self._assertRaises(exception, **kwargs)
 
     @contextmanager
-    def assertQueries(self, expected, flush=True):
+    def assertQueries(self, expected, flush=True, template=False):
         """ Check the queries made by the current cursor. ``expected`` is a list
         of strings representing the expected queries being made. Query strings
         are matched against each other, ignoring case and whitespaces.
@@ -466,7 +466,10 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
         actual_queries = []
 
         def execute(self, query, params=None, log_exceptions=None):
-            actual_queries.append(query)
+            if isinstance(query, bytes):
+                actual_queries.append(query.decode())  # query can be byte too
+            else:
+                actual_queries.append(query)
             return Cursor_execute(self, query, params, log_exceptions)
 
         def get_unaccent_wrapper(cr):
@@ -482,7 +485,6 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                 if flush:
                     self.env.user.flush()
                     self.env.cr.flush()
-
         self.assertEqual(
             len(actual_queries), len(expected),
             "\n---- actual queries:\n%s\n---- expected queries:\n%s" % (
@@ -490,11 +492,18 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
             )
         )
         for actual_query, expect_query in zip(actual_queries, expected):
-            self.assertEqual(
-                "".join(actual_query.lower().split()),
-                "".join(expect_query.lower().split()),
-                "\n---- actual query:\n%s\n---- not like:\n%s" % (actual_query, expect_query),
-            )
+            if template:  # Only match the template of the sql request
+                regex_query = re.escape(expect_query.lower()).replace('%s', '.+')
+                self.assertTrue(
+                    bool(re.match(regex_query, actual_query.lower())),
+                    "\n---- actual template query:\n%s\n---- not match:\n%s" % (actual_query, expect_query)
+                )
+            else:
+                self.assertEqual(
+                    "".join(actual_query.lower().split()),
+                    "".join(expect_query.lower().split()),
+                    "\n---- actual query:\n%s\n---- not like:\n%s" % (actual_query, expect_query),
+                )
 
     @contextmanager
     def assertQueryCount(self, default=0, flush=True, **counters):

@@ -3248,7 +3248,7 @@ def update(model, *fnames):
     columns = sorted(fnames + ('write_uid', 'write_date'))
     return 'UPDATE "{}" SET {} WHERE id IN %s'.format(
         model._table,
-        ", ".join('"{}" = %s'.format(column) for column in columns),
+        ",".join('"{}"=%s'.format(column) for column in columns),
     )
 
 
@@ -3260,24 +3260,24 @@ class TestComputeQueries(common.TransactionCase):
         model.create({})
 
         # no value, no default
-        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.bar, 'Foo')
 
         # some value, no default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.bar, 'Foo')
 
         model = model.with_context(default_bar='Def')
 
         # no value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.bar, 'Foo')
 
         # some value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.bar, 'Foo')
 
@@ -3286,24 +3286,24 @@ class TestComputeQueries(common.TransactionCase):
         model.create({})
 
         # no value, no default
-        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.bar, 'Foo')
 
         # some value, no default
-        with self.assertQueries([insert(model, 'foo', 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.bar, 'Bar')
 
         model = model.with_context(default_bar='Def')
 
         # no value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.bar, 'Def')
 
         # some value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar')]):
+        with self.assertQueries([insert(model, 'foo', 'bar')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.bar, 'Bar')
 
@@ -3312,13 +3312,13 @@ class TestComputeQueries(common.TransactionCase):
         model.create({})
 
         # no value, no default
-        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')]):
+        with self.assertQueries([insert(model, 'foo'), update(model, 'bar')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.foo, 'Foo')
         self.assertEqual(record.bar, 'Foo')
 
         # some value, no default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.foo, 'Bar')
         self.assertEqual(record.bar, 'Bar')
@@ -3326,13 +3326,13 @@ class TestComputeQueries(common.TransactionCase):
         model = model.with_context(default_bar='Def')
 
         # no value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')], template=True):
             record = model.create({'foo': 'Foo'})
         self.assertEqual(record.foo, 'Def')
         self.assertEqual(record.bar, 'Def')
 
         # some value, some default
-        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')]):
+        with self.assertQueries([insert(model, 'foo', 'bar'), update(model, 'foo')], template=True):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.foo, 'Bar')
         self.assertEqual(record.bar, 'Bar')
