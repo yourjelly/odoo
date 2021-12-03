@@ -35,7 +35,6 @@
                     <div class="o_reward_msg">
                         <div class="o_reward_msg_card">
                             <div class="o_reward_msg_content">
-                                <t t-debug=""/>
                                 <t t-if="!props.Component">
                                     <t t-out="props.message"/>
                                 </t>

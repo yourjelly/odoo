@@ -233,7 +233,7 @@ export function makeLegacyNotificationService(legacyEnv) {
                     };
                 });
 
-                const removeFn = env.services.notification.add(_.escape(message), {
+                const removeFn = env.services.notification.add(owl.markup(_.escape(message)), {
                     sticky,
                     title,
                     type,
