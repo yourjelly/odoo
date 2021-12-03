@@ -6,7 +6,7 @@ import { patch, unpatch } from "@web/core/utils/patch";
 import { registerCleanup } from "./cleanup";
 import { download } from "@web/core/network/download";
 
-const { App } = owl;
+const { App, onMounted, onPatched, useComponent } = owl;
 
 /**
  * Patch the native Date object
@@ -355,6 +355,19 @@ export async function mount(Comp, { props, target, env }) {
         configuration.translateFn = env._t;
     }
     app.configure(configuration);
-    registerCleanup(() => app.destroy());
+    registerCleanup(() => {
+        app.destroy();
+    });
     return app.mount(target);
+}
+
+// partial replacement of useRef on component
+export function useChild() {
+    const node = useComponent().__owl__;
+    const setChild = () => {
+        const componentNode = Object.values(node.children)[0];
+        node.component.child = componentNode.component;
+    };
+    onMounted(setChild);
+    onPatched(setChild);
 }

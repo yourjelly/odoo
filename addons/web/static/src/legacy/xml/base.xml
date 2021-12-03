@@ -299,14 +299,14 @@
                 class="o_pager_value o_input"
                 autofocus=""
                 t-att-value="value"
-                t-on-blur="()=>state.editing = false"
-                t-on-change="()=>_onValueChange"
-                t-on-keydown.stop="()=>_onValueKeydown"
+                t-on-blur="() => { this.state.editing = false }"
+                t-on-change="_onValueChange"
+                t-on-keydown.stop="_onValueKeydown"
             />
             <span t-else=""
                 class="o_pager_value"
                 t-esc="value"
-                t-on-click="()=>_onEdit"
+                t-on-click="_onEdit"
             />
             <span> / </span>
             <span class="o_pager_limit" t-esc="props.size"/>
@@ -320,7 +320,7 @@
                 aria-label="Previous page"
                 title="Previous page"
                 tabindex="-1"
-                t-on-click="()=>_changeSelection(-1)"
+                t-on-click="_changeSelection.bind(this, -1)"
             />
             <button type="button"
                 class="fa fa-chevron-right btn btn-secondary o_pager_next rounded-right"
@@ -329,7 +329,7 @@
                 aria-label="Next page"
                 title="Next page"
                 tabindex="-1"
-                t-on-click="()=>_changeSelection(1)"
+                t-on-click="_changeSelection.bind(this, 1)"
             />
         </span>
     </nav>
