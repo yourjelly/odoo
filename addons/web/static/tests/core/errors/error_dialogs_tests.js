@@ -31,7 +31,7 @@ QUnit.module("Error dialogs", {
     },
 });
 
-QUnit.debug("ErrorDialog with traceback", async (assert) => {
+QUnit.test("ErrorDialog with traceback", async (assert) => {
     assert.expect(11);
     class Parent extends Component {
         constructor() {

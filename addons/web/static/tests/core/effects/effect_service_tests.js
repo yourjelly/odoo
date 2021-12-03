@@ -7,10 +7,17 @@ import { userService } from "@web/core/user_service";
 import { session } from "@web/session";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { makeFakeLocalizationService } from "../../helpers/mock_services";
-import { click, getFixture, mockTimeout, nextTick, patchWithCleanup } from "../../helpers/utils";
+import {
+    click,
+    getFixture,
+    mockTimeout,
+    mount,
+    nextTick,
+    patchWithCleanup,
+} from "../../helpers/utils";
 import { registerCleanup } from "../../helpers/cleanup";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
 const mainComponentRegistry = registry.category("main_components");
 
