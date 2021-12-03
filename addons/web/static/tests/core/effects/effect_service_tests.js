@@ -15,7 +15,6 @@ import {
     nextTick,
     patchWithCleanup,
 } from "../../helpers/utils";
-import { registerCleanup } from "../../helpers/cleanup";
 
 const { Component, xml } = owl;
 const serviceRegistry = registry.category("services");
@@ -38,7 +37,6 @@ async function makeParent() {
     const env = await makeTestEnv({ serviceRegistry });
     const target = getFixture();
     const parent = await mount(Parent, { env, target });
-    registerCleanup(() => parent.destroy());
     return parent;
 }
 
@@ -60,7 +58,7 @@ QUnit.module("Effect Service", (hooks) => {
         serviceRegistry.add("localization", makeFakeLocalizationService());
     });
 
-    QUnit.test("effect service displays a rainbowman by default", async function (assert) {
+    QUnit.debug("effect service displays a rainbowman by default", async function (assert) {
         const parent = await makeParent();
         parent.env.services.effect.add();
         await nextTick();
