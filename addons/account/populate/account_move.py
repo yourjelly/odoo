@@ -22,7 +22,7 @@ class AccountMove(models.Model):
 
     _populate_sizes = {
         'small': 1000,
-        'medium': 10000,
+        'medium': 1000,
         'large': 500000,
     }
 
@@ -218,8 +218,8 @@ class AccountMove(models.Model):
     def _populate(self, size):
         records = super()._populate(size)
         _logger.info('Posting Journal Entries')
-        to_post = records.filtered(lambda r: r.date < fields.Date.today())
-        to_post.action_post()
+        # to_post = records.filtered(lambda r: r.date < fields.Date.today())
+        # to_post.action_post()
 
         # TODO add some reconciliations. Not done initially because of perfs.
         # _logger.info('Registering Payments for Invoices and Bills')

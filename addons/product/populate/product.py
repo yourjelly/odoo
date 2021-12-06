@@ -45,7 +45,7 @@ class ProductCategory(models.Model):
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
-    _populate_sizes = {"small": 150, "medium": 5_000, "large": 50_000}
+    _populate_sizes = {"small": 150, "medium": 3_000, "large": 50_000}
     _populate_dependencies = ["product.category"]
 
     def _populate_get_types(self):

@@ -48,7 +48,7 @@ class ProductAttributeValue(models.Model):
 
 class ProductTemplate(models.Model):
     _inherit = "product.template"
-    _populate_sizes = {"small": 150, "medium": 5_000, "large": 50_000}
+    _populate_sizes = {"small": 150, "medium": 1_000, "large": 50_000}
     _populate_dependencies = ["product.attribute.value", "product.category"]
 
     def _populate(self, size):
