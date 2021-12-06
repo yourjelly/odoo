@@ -8,10 +8,8 @@ import { patch, unpatch } from "@web/core/utils/patch";
 import { session } from "@web/session";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
-import { getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { getFixture, mount, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
-
-const { mount } = owl;
 
 const terms = { Hello: "Bonjour" };
 const serviceRegistry = registry.category("services");

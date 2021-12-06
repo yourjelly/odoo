@@ -13,6 +13,7 @@ import {
     getFixture,
     legacyExtraNextTick,
     patchWithCleanup,
+    mount,
     nextTick,
 } from "../../helpers/utils";
 import { session } from "@web/session";
@@ -25,7 +26,7 @@ import {
 } from "./../helpers";
 import { errorService } from "@web/core/errors/error_service";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 
 let serverData;
 

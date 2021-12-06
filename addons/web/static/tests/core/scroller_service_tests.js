@@ -5,9 +5,9 @@ import { scrollerService } from "@web/core/scroller_service";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, nextTick } from "../helpers/utils";
+import { click, getFixture, mount, nextTick } from "../helpers/utils";
 
-const { Component, mount, tags } = owl;
+const { Component, tags } = owl;
 const serviceRegistry = registry.category("services");
 
 let env;

@@ -345,6 +345,9 @@ export function mockAnimationFrame() {
 
 export async function mount(Comp, { props, target, env }) {
     const app = new App(Comp, props);
+    if (!env) {
+        env = { services: {} }; // NXOWL: BOF
+    }
     env.app = app;
     const configuration = {
         env,

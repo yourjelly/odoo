@@ -4,9 +4,8 @@ import { FileInput } from "@web/core/file_input/file_input";
 import { registry } from "@web/core/registry";
 import testUtils from "web.test_utils";
 import { makeTestEnv } from "../helpers/mock_env";
-import { getFixture } from "../helpers/utils";
+import { getFixture, mount } from "../helpers/utils";
 
-const { mount } = owl;
 const serviceRegistry = registry.category("services");
 
 // -----------------------------------------------------------------------------

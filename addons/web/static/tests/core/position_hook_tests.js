@@ -6,12 +6,13 @@ import { registerCleanup } from "../helpers/cleanup";
 import {
     getFixture,
     mockAnimationFrame,
+    mount,
     nextTick,
     patchWithCleanup,
     triggerEvent,
 } from "../helpers/utils";
 
-const { Component, mount, css, xml } = owl;
+const { Component, css, xml } = owl;
 let container;
 let reference;
 

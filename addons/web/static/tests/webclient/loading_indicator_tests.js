@@ -6,9 +6,8 @@ import { uiService } from "@web/core/ui/ui_service";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { LoadingIndicator } from "@web/webclient/loading_indicator/loading_indicator";
 import { makeTestEnv } from "../helpers/mock_env";
-import { getFixture, nextTick, patchWithCleanup, mockTimeout } from "../helpers/utils";
+import { getFixture, mount, nextTick, patchWithCleanup, mockTimeout } from "../helpers/utils";
 
-const { mount } = owl;
 const serviceRegistry = registry.category("services");
 
 let target;

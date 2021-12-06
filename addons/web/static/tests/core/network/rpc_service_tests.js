@@ -8,10 +8,10 @@ import { useService } from "@web/core/utils/hooks";
 import { patch, unpatch } from "@web/core/utils/patch";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import { makeMockXHR } from "../../helpers/mock_services";
-import { getFixture, makeDeferred, nextTick, patchWithCleanup } from "../../helpers/utils";
+import { getFixture, makeDeferred, mount, nextTick, patchWithCleanup } from "../../helpers/utils";
 import { registerCleanup } from "../../helpers/cleanup";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 
 let isXHRMocked = false;
 const serviceRegistry = registry.category("services");

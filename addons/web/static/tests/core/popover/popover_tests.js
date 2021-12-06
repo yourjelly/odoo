@@ -2,9 +2,7 @@
 
 import { Popover } from "@web/core/popover/popover";
 import { registerCleanup } from "../../helpers/cleanup";
-import { getFixture } from "../../helpers/utils";
-
-const { mount } = owl;
+import { getFixture, mount } from "../../helpers/utils";
 
 let fixture;
 let popoverTarget;

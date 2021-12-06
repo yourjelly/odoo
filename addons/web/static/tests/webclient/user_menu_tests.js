@@ -11,10 +11,9 @@ import { preferencesItem } from "@web/webclient/user_menu/user_menu_items";
 import { userService } from "@web/core/user_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { click, getFixture, patchWithCleanup } from "../helpers/utils";
+import { click, getFixture, mount, patchWithCleanup } from "../helpers/utils";
 import { session } from "@web/session";
 
-const { mount } = owl;
 const serviceRegistry = registry.category("services");
 const userMenuRegistry = registry.category("user_menuitems");
 let target;

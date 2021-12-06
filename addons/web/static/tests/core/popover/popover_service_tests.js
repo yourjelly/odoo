@@ -4,9 +4,9 @@ import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { registerCleanup } from "../../helpers/cleanup";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
-import { click, getFixture, nextTick } from "../../helpers/utils";
+import { click, getFixture, mount, nextTick } from "../../helpers/utils";
 
-const { Component, mount, xml } = owl;
+const { Component, xml } = owl;
 
 let env;
 let fixture;

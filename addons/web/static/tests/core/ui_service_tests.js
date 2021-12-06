@@ -4,9 +4,9 @@ import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui/ui_service";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { getFixture, nextTick } from "../helpers/utils";
+import { getFixture, mount, nextTick } from "../helpers/utils";
 
-const { Component, mount } = owl;
+const { Component } = owl;
 const serviceRegistry = registry.category("services");
 
 let target;

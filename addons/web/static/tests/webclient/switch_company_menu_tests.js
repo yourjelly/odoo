@@ -7,11 +7,10 @@ import { SwitchCompanyMenu } from "@web/webclient/switch_company_menu/switch_com
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { companyService } from "@web/webclient/company_service";
-import { click, getFixture, makeDeferred, patchWithCleanup } from "../helpers/utils";
+import { click, getFixture, makeDeferred, mount, patchWithCleanup } from "../helpers/utils";
 import { uiService } from "@web/core/ui/ui_service";
 import { session } from "@web/session";
 
-const { mount } = owl;
 const serviceRegistry = registry.category("services");
 
 async function createSwitchCompanyMenu(routerParams = {}, toggleDelay = 0) {
