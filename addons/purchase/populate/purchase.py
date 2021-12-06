@@ -64,7 +64,7 @@ class PurchaseOrder(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    _populate_sizes = {'small': 500, 'medium': 7_500, 'large': 125_000}
+    _populate_sizes = {'small': 500, 'medium': 9_500, 'large': 125_000}
     _populate_dependencies = ['purchase.order', 'product.product']
 
     def _populate_factories(self):

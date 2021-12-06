@@ -47,3 +47,5 @@ from . import res_company
 from . import res_users
 
 from . import decimal_precision
+
+from . import worst_model

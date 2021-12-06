@@ -314,7 +314,7 @@ class StockQuant(models.Model):
         res = super(StockQuant, self.with_context(inventory_move=True))._populate(size)
 
         _logger.info("Apply %d inventories line", len(res))
-        res.action_apply_inventory()
+        # res.action_apply_inventory()
 
         return res
 

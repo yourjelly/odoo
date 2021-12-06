@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import threading
 import time
 import fnmatch
 import logging
@@ -37,6 +38,9 @@ class Populate(Command):
     def populate(cls, env, size, model_patterns=False):
         registry = env.registry
         populated_models = None
+        current_thread = threading.current_thread()
+        current_thread.query_time = 0
+        current_thread.query_count = 0
         try:
             registry.populated_models = {}  # todo master, initialize with already populated models
             ordered_models = cls._get_ordered_models(env, model_patterns)
