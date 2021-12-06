@@ -1,12 +1,15 @@
 odoo.define('web.OwlCompatibilityTests', function (require) {
     "use strict";
 
-    const AbstractField = require('web.AbstractField');
     const fieldRegistry = require('web.field_registry');
     const widgetRegistry = require('web.widgetRegistry');
     const FormView = require('web.FormView');
 
-    const { ComponentAdapter, ComponentWrapper, WidgetAdapterMixin } = require('web.OwlCompatibility');
+    const {
+        ComponentAdapter,
+        ComponentWrapper,
+        WidgetAdapterMixin,
+    } = require('web.OwlCompatibility');
     const testUtils = require('web.test_utils');
     const Widget = require('web.Widget');
 
@@ -14,10 +17,18 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     const nextTick = testUtils.nextTick;
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
-    const { Component, useState, xml } = owl;
+    const {
+        Component,
+        onMounted,
+        onWillDestroy,
+        onWillStart,
+        onWillUnmount,
+        useState,
+        xml,
+    } = owl;
 
     // from Owl internal status enum
-    const ISMOUNTED = 3; 
+    const ISMOUNTED = 3;
     const ISDESTROYED = 5;
 
     const WidgetAdapter = Widget.extend(WidgetAdapterMixin, {
@@ -859,22 +870,20 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
             let component;
             class MyComponent extends Component {
-                constructor(parent) {
-                    super(parent);
-                    assert.step("init");
-                }
-                async willStart() {
-                    assert.step("willStart");
-                }
-                mounted() {
-                    assert.step("mounted");
-                }
-                willUnmount() {
-                    assert.step("willUnmount");
-                }
-                __destroy() {
-                    super.__destroy();
-                    assert.step("__destroy");
+                setup() {
+                    assert.step("setup");
+                    onWillStart(() => {
+                        assert.step("willStart");
+                    });
+                    onMounted(() => {
+                        assert.step("mounted");
+                    });
+                    onWillUnmount(() => {
+                        assert.step("willUnmount");
+                    });
+                    onWillDestroy(() => {
+                        assert.step("willDestroy");
+                    });
                 }
             }
             MyComponent.template = xml`<div>Component</div>`;
@@ -882,31 +891,29 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                 start() {
                     component = new ComponentWrapper(this, MyComponent, {});
                     return component.mount(this.el);
-                }
+                },
             });
 
             const target = testUtils.prepareTarget();
             const widget = new MyWidget();
             await widget.appendTo(target);
 
-            assert.verifySteps(['init', 'willStart', 'mounted']);
-            assert.ok(component.__owl__.status === ISMOUNTED);
+            assert.verifySteps(["setup", "willStart", "mounted"]);
 
             widget.$el.detach();
             widget.on_detach_callback();
 
-            assert.verifySteps(['willUnmount']);
-            assert.ok(component.__owl__.status !== ISMOUNTED);
+            assert.verifySteps(["willUnmount", "willDestroy"]);
 
+            debugger
             widget.$el.appendTo(target);
             widget.on_attach_callback();
 
-            assert.verifySteps(['mounted']);
-            assert.ok(component.__owl__.status === ISMOUNTED);
+            assert.verifySteps(["mounted"]);
 
             widget.destroy();
 
-            assert.verifySteps(['willUnmount', '__destroy']);
+            assert.verifySteps(["willUnmount", "willDestroy"]);
         });
 
         QUnit.test("isMounted with several sub components", async function (assert) {

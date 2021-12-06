@@ -9,7 +9,18 @@ odoo.define('web.OwlCompatibility', function (require) {
      *  2) A legacy widget has to instantiate Owl components
      */
 
-    const { App, Component, onMounted, useComponent, useEnv, useRef, useSubEnv, xml } = owl;
+    const {
+        App,
+        Component,
+        onMounted,
+        onWillUnmount,
+        onPatched,
+        useComponent,
+        useEnv,
+        useRef,
+        useSubEnv,
+        xml,
+    } = owl;
     const legacyEnv = require("web.env");
 
     const widgetSymbol = odoo.widgetSymbol;
@@ -320,9 +331,7 @@ odoo.define('web.OwlCompatibility', function (require) {
          * as mounted.
          */
         on_attach_callback() {
-            for (const component of children.get(this) || []) {
-                component.on_attach_callback();
-            }
+
         },
         /**
          * Calls on_detach_callback on each child ComponentWrapper, which will
@@ -341,12 +350,98 @@ odoo.define('web.OwlCompatibility', function (require) {
          */
         destroy() {
             for (const component of children.get(this) || []) {
-                component.env.qweb.off("update", component);
+                // component.env.qweb.off("update", component); // NXOWL
                 component.__destroy();
             }
             children.delete(this);
         },
     };
+
+    class ComponentWrapper {
+        constructor(parent, C, props) {
+            if (parent instanceof Component) {
+                throw new Error("ComponentWrapper must be used with a legacy Widget as parent");
+            }
+            if (parent) {
+                this._register(parent);
+            }
+            this.props = {
+                Component: C,
+                componentProps: props,
+            };
+            this.app = null;
+            this.componentRef = { comp: null };
+        }
+
+        async mount(target) {
+            const fn = () => {
+                this.componentRef.comp = this.node.children[0].component;
+            };
+            class Controller extends Component {
+                setup() {
+                    onMounted(fn);
+                    onPatched(fn);
+                }
+            }
+            Controller.template = xml`<t t-component="props.Component" t-props="props.componentProps"/>`;
+            this.app = new App(Controller, this.props);
+            await this.app.configure({ env: legacyEnv }).mount(target);
+            return this;
+        }
+
+        get node() {
+            return this.app.root.__owl__;
+        }
+
+        on_attach_callback() {
+            for (const cb of this.node.mounted) {
+                cb();
+            }
+            // something recursive should be done here but...
+            // --> we will need some kind of superclass of Component for all
+            // "legacy" components
+        }
+
+        /**
+         * Calls __callWillUnmount to notify the component it will be unmounted.
+         */
+        on_detach_callback() {
+            for (const cb of this.node.willUnmount) {
+                cb();
+            }
+            // something recursive should be done here but...
+            // --> we will need some kind of superclass of Component for all
+            // "legacy" components
+            this.node.remove();
+        }
+
+        __destroy() {
+            this.app.destroy();
+        }
+
+        update(nextProps) {
+            this.props.componentProps = nextProps;
+            this.node.render();
+        }
+
+        /**
+         * Registers this instance as a child of the given parent in the
+         * 'children' weakMap.
+         *
+         * @private
+         * @param {Widget} parent
+         */
+        _register(parent) {
+            let parentChildren = children.get(parent);
+            if (!parentChildren) {
+                parentChildren = [];
+                children.set(parent, parentChildren);
+            }
+            parentChildren.push(this);
+        }
+    }
+
+
     class ComponentWrapperLegacy extends Component {
         /**
          * Stores the reference of the instance in the parent (in __components).
@@ -591,81 +686,7 @@ odoo.define('web.OwlCompatibility', function (require) {
         }
     }
     ComponentWrapperRoot.template = xml`<t t-component="props.Component" t-props="props.componentProps"/>`;
- 
-    class ComponentWrapper extends App {
-        constructor(parent, C, props) {
-            if (parent instanceof Component) {
-                throw new Error('ComponentWrapper must be used with a legacy Widget as parent');
-            }
-            super(ComponentWrapperRoot, {
-                parentWidget: parent,
-                Component: C,
-                componentProps: props,
-            });
-            // if (parent) {
-                this._register(parent);
-            // }
-            this.configure({ env: legacyEnv });
-            this.addTemplates(legacyEnv.templates); // TODO NXOWL: share compiled templates
-        }
 
-        get componentRef() {
-            return { comp: Object.values(this.root.children)[0] };
-        }
-        /**
-         * Calls __callMounted on itself and on each sub component (as this
-         * function isn't recursive) when the component is appended into the DOM.
-         */
-        on_attach_callback() {
-            // function recursiveCallMounted(component) {
-            //     const { status, fiber: currentFiber } = component.__owl__;
-
-            //     if (status === 2 && currentFiber && !currentFiber.appliedToDom) {
-            //         // the component is rendered but another rendering is being done
-            //         // it would be foolish to declare the component and children as mounted
-            //         return;
-            //     }
-            //     if (
-            //        status !== 2 /* RENDERED */ &&
-            //        status !== 3 /* MOUNTED */ &&
-            //        status !== 4 /* UNMOUNTED */
-            //     ) {
-            //         // Avoid calling mounted on a component that is not even
-            //         // rendered. Doing otherwise will lead to a crash if a
-            //         // specific mounted callback is legitimately relying on the
-            //         // component being mounted.
-            //         return;
-            //     }
-            //     for (const key in component.__owl__.children) {
-            //         recursiveCallMounted(component.__owl__.children[key]);
-            //     }
-            //     component.__callMounted();
-            // }
-            // recursiveCallMounted(this.root);
-        }
-        /**
-         * Calls __callWillUnmount to notify the component it will be unmounted.
-         */
-        on_detach_callback() {
-            this.__callWillUnmount();
-        }
-
-        /**
-         * Registers this instance as a child of the given parent in the
-         * 'children' weakMap.
-         *
-         * @private
-         * @param {Widget} parent
-         */
-        _register(parent) {
-            let parentChildren = children.get(parent);
-            if (!parentChildren) {
-                parentChildren = [];
-                children.set(parent, parentChildren);
-            }
-            parentChildren.push(this);
-        }
-    }
 
     return {
         ComponentAdapter,
