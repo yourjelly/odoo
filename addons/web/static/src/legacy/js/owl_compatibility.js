@@ -331,7 +331,9 @@ odoo.define('web.OwlCompatibility', function (require) {
          * as mounted.
          */
         on_attach_callback() {
-
+            for (const component of children.get(this) || []) {
+                component.on_attach_callback();
+            }
         },
         /**
          * Calls on_detach_callback on each child ComponentWrapper, which will
@@ -357,6 +359,15 @@ odoo.define('web.OwlCompatibility', function (require) {
         },
     };
 
+    function recursiveCall(node, type) {
+        for (const cb of node[type]) {
+            cb.call(node.component);
+        }
+        for (const child of Object.values(node.children)) {
+            recursiveCall(child, type);
+        }
+    }
+
     class ComponentWrapper {
         constructor(parent, C, props) {
             if (parent instanceof Component) {
@@ -375,7 +386,7 @@ odoo.define('web.OwlCompatibility', function (require) {
 
         async mount(target) {
             const fn = () => {
-                this.componentRef.comp = this.node.children[0].component;
+                this.componentRef.comp = Object.values(this.node.children)[0].component;
             };
             class Controller extends Component {
                 setup() {
@@ -390,28 +401,18 @@ odoo.define('web.OwlCompatibility', function (require) {
         }
 
         get node() {
-            return this.app.root.__owl__;
+            return this.app.root;
         }
 
         on_attach_callback() {
-            for (const cb of this.node.mounted) {
-                cb();
-            }
-            // something recursive should be done here but...
-            // --> we will need some kind of superclass of Component for all
-            // "legacy" components
+            recursiveCall(this.node, "mounted");
         }
 
         /**
          * Calls __callWillUnmount to notify the component it will be unmounted.
          */
         on_detach_callback() {
-            for (const cb of this.node.willUnmount) {
-                cb();
-            }
-            // something recursive should be done here but...
-            // --> we will need some kind of superclass of Component for all
-            // "legacy" components
+            recursiveCall(this.node, "willUnmount");
             this.node.remove();
         }
 
@@ -440,7 +441,6 @@ odoo.define('web.OwlCompatibility', function (require) {
             parentChildren.push(this);
         }
     }
-
 
     class ComponentWrapperLegacy extends Component {
         /**
