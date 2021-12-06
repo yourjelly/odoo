@@ -19,7 +19,7 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
         body: '',
     };
 
-    Registries.Component.add(ErrorPopup);
+    Registries.PosComponentRegistry.add(ErrorPopup);
 
     return ErrorPopup;
 });

@@ -29,7 +29,7 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
         startingValue: '',
     };
 
-    Registries.Component.add(TextInputPopup);
+    Registries.PosComponentRegistry.add(TextInputPopup);
 
     return TextInputPopup;
 });

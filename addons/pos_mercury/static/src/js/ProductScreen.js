@@ -20,7 +20,7 @@ odoo.define('pos_mercury.ProductScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(ProductScreen, PosMercuryProductScreen);
+    Registries.PosComponentRegistry.extend(ProductScreen, PosMercuryProductScreen);
 
     return ProductScreen;
 });

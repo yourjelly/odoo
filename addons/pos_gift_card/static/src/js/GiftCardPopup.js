@@ -145,7 +145,7 @@ odoo.define("pos_gift_card.GiftCardPopup", function (require) {
   }
   GiftCardPopup.template = "GiftCardPopup";
 
-  Registries.Component.add(GiftCardPopup);
+  Registries.PosComponentRegistry.add(GiftCardPopup);
 
   return GiftCardPopup;
 });

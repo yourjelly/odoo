@@ -537,7 +537,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     }
     Chrome.template = 'Chrome';
 
-    Registries.Component.add(Chrome);
+    Registries.PosComponentRegistry.add(Chrome);
 
     return Chrome;
 });

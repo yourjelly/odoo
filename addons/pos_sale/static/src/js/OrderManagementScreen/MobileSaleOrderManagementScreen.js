@@ -19,7 +19,7 @@ odoo.define('point_of_sale.MobileSaleOrderManagementScreen', function (require) 
         return MobileSaleOrderManagementScreen;
     };
 
-    Registries.Component.addByExtending(MobileSaleOrderManagementScreen, SaleOrderManagementScreen);
+    Registries.PosComponentRegistry.addByExtending(MobileSaleOrderManagementScreen, SaleOrderManagementScreen);
 
     return MobileSaleOrderManagementScreen;
 });

@@ -74,7 +74,7 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
     }
     ProxyStatus.template = 'ProxyStatus';
 
-    Registries.Component.add(ProxyStatus);
+    Registries.PosComponentRegistry.add(ProxyStatus);
 
     return ProxyStatus;
 });

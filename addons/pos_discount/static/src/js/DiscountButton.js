@@ -74,7 +74,7 @@ odoo.define('pos_discount.DiscountButton', function(require) {
         },
     });
 
-    Registries.Component.add(DiscountButton);
+    Registries.PosComponentRegistry.add(DiscountButton);
 
     return DiscountButton;
 });

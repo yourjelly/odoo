@@ -18,7 +18,7 @@ odoo.define('pos_mercury.OrderReceipt', function(require) {
             }
         };
 
-    Registries.Component.extend(OrderReceipt, PosMercuryOrderReceipt);
+    Registries.PosComponentRegistry.extend(OrderReceipt, PosMercuryOrderReceipt);
 
     return OrderReceipt;
 });

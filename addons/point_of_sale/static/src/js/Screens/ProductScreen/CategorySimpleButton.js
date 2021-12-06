@@ -7,7 +7,7 @@ odoo.define('point_of_sale.CategorySimpleButton', function(require) {
     class CategorySimpleButton extends PosComponent {}
     CategorySimpleButton.template = 'CategorySimpleButton';
 
-    Registries.Component.add(CategorySimpleButton);
+    Registries.PosComponentRegistry.add(CategorySimpleButton);
 
     return CategorySimpleButton;
 });

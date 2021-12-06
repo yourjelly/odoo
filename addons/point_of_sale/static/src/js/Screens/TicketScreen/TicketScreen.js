@@ -583,7 +583,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         ui: {},
     };
 
-    Registries.Component.add(TicketScreen);
+    Registries.PosComponentRegistry.add(TicketScreen);
 
     return TicketScreen;
 });

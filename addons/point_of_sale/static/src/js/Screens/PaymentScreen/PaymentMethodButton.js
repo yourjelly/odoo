@@ -7,7 +7,7 @@ odoo.define('point_of_sale.PaymentMethodButton', function(require) {
     class PaymentMethodButton extends PosComponent {}
     PaymentMethodButton.template = 'PaymentMethodButton';
 
-    Registries.Component.add(PaymentMethodButton);
+    Registries.PosComponentRegistry.add(PaymentMethodButton);
 
     return PaymentMethodButton;
 });

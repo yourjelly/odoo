@@ -52,7 +52,7 @@ odoo.define('point_of_sale.CashMoveButton', function (require) {
     }
     CashMoveButton.template = 'point_of_sale.CashMoveButton';
 
-    Registries.Component.add(CashMoveButton);
+    Registries.PosComponentRegistry.add(CashMoveButton);
 
     return CashMoveButton;
 });

@@ -25,7 +25,7 @@ odoo.define('pos_sale.SaleOrderList', function (require) {
     }
     SaleOrderList.template = 'SaleOrderList';
 
-    Registries.Component.add(SaleOrderList);
+    Registries.PosComponentRegistry.add(SaleOrderList);
 
     return SaleOrderList;
 });

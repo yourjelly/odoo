@@ -52,7 +52,7 @@ odoo.define('point_of_sale.SelectionPopup', function (require) {
         list: [],
     };
 
-    Registries.Component.add(SelectionPopup);
+    Registries.PosComponentRegistry.add(SelectionPopup);
 
     return SelectionPopup;
 });

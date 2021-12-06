@@ -19,7 +19,7 @@ odoo.define('pos_restaurant.SplitOrderline', function(require) {
     }
     SplitOrderline.template = 'SplitOrderline';
 
-    Registries.Component.add(SplitOrderline);
+    Registries.PosComponentRegistry.add(SplitOrderline);
 
     return SplitOrderline;
 });

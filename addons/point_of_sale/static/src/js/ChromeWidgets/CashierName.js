@@ -18,7 +18,7 @@ odoo.define('point_of_sale.CashierName', function(require) {
     }
     CashierName.template = 'CashierName';
 
-    Registries.Component.add(CashierName);
+    Registries.PosComponentRegistry.add(CashierName);
 
     return CashierName;
 });

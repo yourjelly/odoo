@@ -40,7 +40,7 @@ odoo.define('pos_restaurant.Orderline', function(require) {
             }
         };
 
-    Registries.Component.extend(Orderline, PosResOrderline);
+    Registries.PosComponentRegistry.extend(Orderline, PosResOrderline);
 
     return Orderline;
 });

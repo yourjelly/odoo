@@ -7,7 +7,7 @@ odoo.define('point_of_sale.CategoryBreadcrumb', function(require) {
     class CategoryBreadcrumb extends PosComponent {}
     CategoryBreadcrumb.template = 'CategoryBreadcrumb';
 
-    Registries.Component.add(CategoryBreadcrumb);
+    Registries.PosComponentRegistry.add(CategoryBreadcrumb);
 
     return CategoryBreadcrumb;
 });

@@ -13,7 +13,7 @@ odoo.define('point_of_sale.NotificationSound', function (require) {
     }
     NotificationSound.template = 'NotificationSound';
 
-    Registries.Component.add(NotificationSound);
+    Registries.PosComponentRegistry.add(NotificationSound);
 
     return NotificationSound;
 });

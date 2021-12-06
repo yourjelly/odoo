@@ -47,7 +47,7 @@ odoo.define('point_of_sale.ProductItem', function(require) {
     }
     ProductItem.template = 'ProductItem';
 
-    Registries.Component.add(ProductItem);
+    Registries.PosComponentRegistry.add(ProductItem);
 
     return ProductItem;
 });

@@ -11,7 +11,7 @@ odoo.define('pos_coupon.Orderline', function (require) {
             }
         };
 
-    Registries.Component.extend(Orderline, PosCouponOrderline);
+    Registries.PosComponentRegistry.extend(Orderline, PosCouponOrderline);
 
     return Orderline;
 });

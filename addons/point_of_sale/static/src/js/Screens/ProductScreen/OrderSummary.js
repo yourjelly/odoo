@@ -21,7 +21,7 @@ odoo.define('point_of_sale.OrderSummary', function(require) {
     }
     OrderSummary.template = 'OrderSummary';
 
-    Registries.Component.add(OrderSummary);
+    Registries.PosComponentRegistry.add(OrderSummary);
 
     return OrderSummary;
 });

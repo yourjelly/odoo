@@ -41,7 +41,7 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
     }
     OrderReceipt.template = 'OrderReceipt';
 
-    Registries.Component.add(OrderReceipt);
+    Registries.PosComponentRegistry.add(OrderReceipt);
 
     return OrderReceipt;
 });
