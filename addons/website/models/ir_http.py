@@ -443,6 +443,9 @@ class Http(models.AbstractModel):
             session_info.update({
                 'website_id': request.website.id,
                 'website_company_id': request.website._get_cached('company_id'),
+                # We need the user_context if we want the configurator
+                # to be in the user's language.
+                'user_context': request.session.get_context(),
             })
         return session_info
 
