@@ -68,7 +68,7 @@ odoo.define('pos_hr.LoginScreen', function (require) {
     }
     LoginScreen.template = 'LoginScreen';
 
-    Registries.Component.add(LoginScreen);
+    Registries.PosComponentRegistry.add(LoginScreen);
 
     return LoginScreen;
 });

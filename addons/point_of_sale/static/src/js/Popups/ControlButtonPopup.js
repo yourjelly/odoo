@@ -21,7 +21,7 @@ odoo.define('point_of_sale.ControlButtonPopup', function(require) {
         controlButtons: []
     };
 
-    Registries.Component.add(ControlButtonPopup);
+    Registries.PosComponentRegistry.add(ControlButtonPopup);
 
     return ControlButtonPopup;
 });

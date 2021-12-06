@@ -102,7 +102,7 @@ odoo.define('point_of_sale.SearchBar', function (require) {
         }
     }
     SearchBar.template = 'point_of_sale.SearchBar';
-    Registries.Component.add(SearchBar);
+    Registries.PosComponentRegistry.add(SearchBar);
 
     return SearchBar;
 });

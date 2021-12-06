@@ -131,7 +131,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
         }
     }
     InvoiceButton.template = 'InvoiceButton';
-    Registries.Component.add(InvoiceButton);
+    Registries.PosComponentRegistry.add(InvoiceButton);
 
     return InvoiceButton;
 });

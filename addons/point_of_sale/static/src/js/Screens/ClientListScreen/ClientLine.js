@@ -11,7 +11,7 @@ odoo.define('point_of_sale.ClientLine', function(require) {
     }
     ClientLine.template = 'ClientLine';
 
-    Registries.Component.add(ClientLine);
+    Registries.PosComponentRegistry.add(ClientLine);
 
     return ClientLine;
 });

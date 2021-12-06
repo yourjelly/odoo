@@ -352,7 +352,7 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
     FloorScreen.template = 'FloorScreen';
     FloorScreen.hideOrderSelector = true;
 
-    Registries.Component.add(FloorScreen);
+    Registries.PosComponentRegistry.add(FloorScreen);
 
     return FloorScreen;
 });

@@ -181,7 +181,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     }
     SplitBillScreen.template = 'SplitBillScreen';
 
-    Registries.Component.add(SplitBillScreen);
+    Registries.PosComponentRegistry.add(SplitBillScreen);
 
     return SplitBillScreen;
 });

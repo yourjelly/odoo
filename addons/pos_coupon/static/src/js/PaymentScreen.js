@@ -33,7 +33,7 @@ odoo.define('pos_coupon.PaymentScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(PaymentScreen, PosCouponPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, PosCouponPaymentScreen);
 
     return PaymentScreen;
 });

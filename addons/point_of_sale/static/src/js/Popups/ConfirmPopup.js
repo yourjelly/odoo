@@ -15,7 +15,7 @@ odoo.define('point_of_sale.ConfirmPopup', function(require) {
         body: '',
     };
 
-    Registries.Component.add(ConfirmPopup);
+    Registries.PosComponentRegistry.add(ConfirmPopup);
 
     return ConfirmPopup;
 });

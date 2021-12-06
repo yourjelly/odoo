@@ -34,7 +34,7 @@ odoo.define('point_of_sale.OrderlineCustomerNoteButton', function(require) {
         },
     });
 
-    Registries.Component.add(OrderlineCustomerNoteButton);
+    Registries.PosComponentRegistry.add(OrderlineCustomerNoteButton);
 
     return OrderlineCustomerNoteButton;
 });

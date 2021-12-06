@@ -13,7 +13,7 @@ odoo.define('point_of_sale.HeaderButton', function(require) {
     }
     HeaderButton.template = 'HeaderButton';
 
-    Registries.Component.add(HeaderButton);
+    Registries.PosComponentRegistry.add(HeaderButton);
 
     return HeaderButton;
 });

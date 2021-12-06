@@ -420,7 +420,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
     }
     PaymentScreen.template = 'PaymentScreen';
 
-    Registries.Component.add(PaymentScreen);
+    Registries.PosComponentRegistry.add(PaymentScreen);
 
     return PaymentScreen;
 });

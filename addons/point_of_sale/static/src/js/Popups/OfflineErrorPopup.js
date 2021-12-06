@@ -24,7 +24,7 @@ odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
         body: _lt('Either the server is inaccessible or browser is not connected online.'),
     };
 
-    Registries.Component.add(OfflineErrorPopup);
+    Registries.PosComponentRegistry.add(OfflineErrorPopup);
 
     return OfflineErrorPopup;
 });

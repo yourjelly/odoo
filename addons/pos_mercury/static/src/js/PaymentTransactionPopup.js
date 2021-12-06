@@ -32,7 +32,7 @@ odoo.define('pos_mercury.PaymentTransactionPopup', function(require) {
         body: '',
     };
 
-    Registries.Component.add(PaymentTransactionPopup);
+    Registries.PosComponentRegistry.add(PaymentTransactionPopup);
 
     return PaymentTransactionPopup;
 });

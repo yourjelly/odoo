@@ -15,7 +15,7 @@ odoo.define('pos_six.BalanceButton', function(require) {
     }
     BalanceButton.template = 'BalanceButton';
 
-    Registries.Component.add(BalanceButton);
+    Registries.PosComponentRegistry.add(BalanceButton);
 
     return BalanceButton;
 });

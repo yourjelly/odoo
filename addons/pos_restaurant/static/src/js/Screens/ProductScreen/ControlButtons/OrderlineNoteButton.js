@@ -36,7 +36,7 @@ odoo.define('pos_restaurant.OrderlineNoteButton', function(require) {
         },
     });
 
-    Registries.Component.add(OrderlineNoteButton);
+    Registries.PosComponentRegistry.add(OrderlineNoteButton);
 
     return OrderlineNoteButton;
 });

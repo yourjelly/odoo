@@ -75,7 +75,7 @@ odoo.define('pos_gift_card.PaymentScreen', function(require) {
         }
     };
 
-    Registries.Component.extend(PaymentScreen, PosGiftCardPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, PosGiftCardPaymentScreen);
 
     return PosGiftCardPaymentScreen;
 });

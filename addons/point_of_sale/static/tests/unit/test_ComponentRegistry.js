@@ -15,7 +15,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let A1 = x =>
             class extends x {
@@ -24,11 +24,11 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        const RegA = Registries.Component.get(A);
+        const RegA = Registries.PosComponentRegistry.get(A);
         let a = new RegA();
         assert.verifySteps(['A', 'A1']);
         assert.ok(a instanceof RegA);
@@ -43,7 +43,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let B = x =>
             class extends x {
@@ -52,7 +52,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let A1 = x =>
             class extends x {
@@ -61,7 +61,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
         let A2 = x =>
             class extends x {
@@ -70,12 +70,12 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A2');
                 }
             };
-        Registries.Component.extend(A, A2);
+        Registries.PosComponentRegistry.extend(A, A2);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        const RegA = Registries.Component.get(A);
-        const RegB = Registries.Component.get(B);
+        const RegA = Registries.PosComponentRegistry.get(A);
+        const RegB = Registries.PosComponentRegistry.get(B);
         let b = new RegB();
         assert.verifySteps(['A', 'A1', 'A2', 'B']);
         assert.ok(b instanceof RegA);
@@ -91,7 +91,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let B = x =>
             class extends x {
@@ -100,7 +100,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let B1 = x =>
             class extends x {
@@ -109,7 +109,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B1');
                 }
             };
-        Registries.Component.extend(B, B1);
+        Registries.PosComponentRegistry.extend(B, B1);
 
         let B2 = x =>
             class extends x {
@@ -118,7 +118,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B2');
                 }
             };
-        Registries.Component.extend(B, B2);
+        Registries.PosComponentRegistry.extend(B, B2);
 
         let A1 = x =>
             class extends x {
@@ -127,11 +127,11 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        const RegB = Registries.Component.get(B);
+        const RegB = Registries.PosComponentRegistry.get(B);
         new RegB();
         assert.verifySteps(['A', 'A1', 'B', 'B1', 'B2']);
     });
@@ -144,7 +144,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let B = x =>
             class extends x {
@@ -153,7 +153,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let A1 = x =>
             class extends x {
@@ -162,7 +162,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
         let C = x =>
             class extends x {
@@ -171,7 +171,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('C');
                 }
             };
-        Registries.Component.addByExtending(C, B);
+        Registries.PosComponentRegistry.addByExtending(C, B);
 
         let B7 = x =>
             class extends x {
@@ -180,13 +180,13 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B7');
                 }
             };
-        Registries.Component.extend(B, B7);
+        Registries.PosComponentRegistry.extend(B, B7);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        const RegA = Registries.Component.get(A);
-        const RegB = Registries.Component.get(B);
-        const RegC = Registries.Component.get(C);
+        const RegA = Registries.PosComponentRegistry.get(A);
+        const RegB = Registries.PosComponentRegistry.get(B);
+        const RegC = Registries.PosComponentRegistry.get(C);
         let c = new RegC();
         assert.verifySteps(['A', 'A1', 'B', 'B7', 'C']);
         assert.ok(c instanceof RegA);
@@ -203,7 +203,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let B = x =>
             class extends x {
@@ -212,7 +212,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let A1 = x =>
             class extends x {
@@ -221,7 +221,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
         let C = x =>
             class extends x {
@@ -230,7 +230,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('C');
                 }
             };
-        Registries.Component.addByExtending(C, B);
+        Registries.PosComponentRegistry.addByExtending(C, B);
 
         let B2 = x =>
             class extends x {
@@ -239,7 +239,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B2');
                 }
             };
-        Registries.Component.extend(B, B2);
+        Registries.PosComponentRegistry.extend(B, B2);
 
         let B3 = x =>
             class extends x {
@@ -248,7 +248,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B3');
                 }
             };
-        Registries.Component.extend(B, B3);
+        Registries.PosComponentRegistry.extend(B, B3);
 
         let A9 = x =>
             class extends x {
@@ -257,7 +257,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A9');
                 }
             };
-        Registries.Component.extend(A, A9);
+        Registries.PosComponentRegistry.extend(A, A9);
 
         let E = x =>
             class extends x {
@@ -266,16 +266,16 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('E');
                 }
             };
-        Registries.Component.addByExtending(E, C);
+        Registries.PosComponentRegistry.addByExtending(E, C);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
         // |A| => A9 -> A1 -> A
         // |B| => B3 -> B2 -> B -> |A|
         // |C| => C -> |B|
         // |E| => E -> |C|
 
-        new (Registries.Component.get(E))();
+        new (Registries.PosComponentRegistry.get(E))();
         assert.verifySteps(['A', 'A1', 'A9', 'B', 'B2', 'B3', 'C', 'E']);
     });
 
@@ -287,7 +287,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let Mixin = x =>
             class extends x {
@@ -311,7 +311,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let A1 = x =>
             class extends x {
@@ -320,11 +320,11 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('A1');
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        B = Registries.Component.get(B);
+        B = Registries.PosComponentRegistry.get(B);
         const b = new B();
         assert.verifySteps(['A', 'A1', 'Mixin', 'B']);
         // instance of B should have the mixin properties
@@ -332,7 +332,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
         assert.strictEqual(b.mixinGetter, 'mixinGetter');
 
         // instance of A should not have the mixin properties
-        A = Registries.Component.get(A);
+        A = Registries.PosComponentRegistry.get(A);
         const a = new A();
         assert.verifySteps(['A', 'A1']);
         assert.notOk(a.mixinMethod);
@@ -347,7 +347,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                 assert.step('A foo');
             }
         }
-        Registries.Component.add(A);
+        Registries.PosComponentRegistry.add(A);
 
         let B = x =>
             class extends x {
@@ -355,7 +355,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B bar');
                 }
             };
-        Registries.Component.addByExtending(B, A);
+        Registries.PosComponentRegistry.addByExtending(B, A);
 
         let A1 = x =>
             class extends x {
@@ -364,7 +364,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     // should only be for A.
                 }
             };
-        Registries.Component.extend(A, A1);
+        Registries.PosComponentRegistry.extend(A, A1);
 
         let B1 = x =>
             class extends x {
@@ -373,7 +373,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('B1 foo');
                 }
             };
-        Registries.Component.extend(B, B1);
+        Registries.PosComponentRegistry.extend(B, B1);
 
         let C = x =>
             class extends x {
@@ -386,13 +386,13 @@ odoo.define('point_of_sale.tests.ComponentRegistry', function(require) {
                     assert.step('C bar');
                 }
             };
-        Registries.Component.addByExtending(C, B);
+        Registries.PosComponentRegistry.addByExtending(C, B);
 
-        Registries.Component.freeze();
+        Registries.PosComponentRegistry.freeze();
 
-        A = Registries.Component.get(A);
-        B = Registries.Component.get(B);
-        C = Registries.Component.get(C);
+        A = Registries.PosComponentRegistry.get(A);
+        B = Registries.PosComponentRegistry.get(B);
+        C = Registries.PosComponentRegistry.get(C);
         const a = new A();
         const b = new B();
         const c = new C();

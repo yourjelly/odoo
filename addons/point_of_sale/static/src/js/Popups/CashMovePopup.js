@@ -50,7 +50,7 @@ odoo.define('point_of_sale.CashMovePopup', function (require) {
         title: _t('Cash In/Out'),
     };
 
-    Registries.Component.add(CashMovePopup);
+    Registries.PosComponentRegistry.add(CashMovePopup);
 
     return CashMovePopup;
 });

@@ -75,7 +75,7 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
     }
     OrderlineDetails.template = 'OrderlineDetails';
 
-    Registries.Component.add(OrderlineDetails);
+    Registries.PosComponentRegistry.add(OrderlineDetails);
 
     return OrderlineDetails;
 });

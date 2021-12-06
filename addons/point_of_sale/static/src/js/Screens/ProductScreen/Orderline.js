@@ -22,7 +22,7 @@ odoo.define('point_of_sale.Orderline', function(require) {
     }
     Orderline.template = 'Orderline';
 
-    Registries.Component.add(Orderline);
+    Registries.PosComponentRegistry.add(Orderline);
 
     return Orderline;
 });

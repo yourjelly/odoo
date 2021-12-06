@@ -365,7 +365,7 @@ odoo.define('point_of_sale.ProductScreen', function (require) {
     }
     ProductScreen.template = 'ProductScreen';
 
-    Registries.Component.add(ProductScreen);
+    Registries.PosComponentRegistry.add(ProductScreen);
 
     return ProductScreen;
 });

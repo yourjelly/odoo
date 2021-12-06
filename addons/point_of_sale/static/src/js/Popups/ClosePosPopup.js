@@ -193,7 +193,7 @@ odoo.define('point_of_sale.ClosePosPopup', function(require) {
     }
 
     ClosePosPopup.template = 'ClosePosPopup';
-    Registries.Component.add(ClosePosPopup);
+    Registries.PosComponentRegistry.add(ClosePosPopup);
 
     return ClosePosPopup;
 });

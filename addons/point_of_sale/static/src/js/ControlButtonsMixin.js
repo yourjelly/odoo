@@ -18,7 +18,7 @@ odoo.define('point_of_sale.ControlButtonsMixin', function (require) {
                         return cb.condition.bind(this)();
                     })
                     .map((cb) =>
-                        Object.assign({}, cb, { component: Registries.Component.get(cb.component) })
+                        Object.assign({}, cb, { component: Registries.PosComponentRegistry.get(cb.component) })
                     );
             }
         }
@@ -26,7 +26,7 @@ odoo.define('point_of_sale.ControlButtonsMixin', function (require) {
         /**
          * @param {Object} controlButton
          * @param {Function} controlButton.component
-         *      Base class that is added in the Registries.Component.
+         *      Base class that is added in the Registries.PosComponentRegistry.
          * @param {Function} controlButton.condition zero argument function that is bound
          *      to the instance of ProductScreen, such that `this.env.pos` can be used
          *      inside the function.

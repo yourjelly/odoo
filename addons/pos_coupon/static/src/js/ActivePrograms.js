@@ -9,7 +9,7 @@ odoo.define('pos_coupon.ActivePrograms', function (require) {
     class ActivePrograms extends PosComponent {}
     ActivePrograms.template = 'ActivePrograms';
 
-    Registries.Component.add(ActivePrograms);
+    Registries.PosComponentRegistry.add(ActivePrograms);
 
     return ActivePrograms;
 });

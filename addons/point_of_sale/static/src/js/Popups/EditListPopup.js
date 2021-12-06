@@ -100,7 +100,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
         isSingleItem: false,
     };
 
-    Registries.Component.add(EditListPopup);
+    Registries.PosComponentRegistry.add(EditListPopup);
 
     return EditListPopup;
 });

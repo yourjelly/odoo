@@ -19,7 +19,7 @@ odoo.define('point_of_sale.MobileOrderWidget', function(require) {
 
     MobileOrderWidget.template = 'MobileOrderWidget';
 
-    Registries.Component.add(MobileOrderWidget);
+    Registries.PosComponentRegistry.add(MobileOrderWidget);
 
     return MobileOrderWidget;
 });

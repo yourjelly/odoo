@@ -48,7 +48,7 @@ odoo.define('point_of_sale.NumpadWidget', function (require) {
         disableSign: false,
     }
 
-    Registries.Component.add(NumpadWidget);
+    Registries.PosComponentRegistry.add(NumpadWidget);
 
     return NumpadWidget;
 });

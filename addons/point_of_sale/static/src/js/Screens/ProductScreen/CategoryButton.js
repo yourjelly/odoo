@@ -12,7 +12,7 @@ odoo.define('point_of_sale.CategoryButton', function(require) {
     }
     CategoryButton.template = 'CategoryButton';
 
-    Registries.Component.add(CategoryButton);
+    Registries.PosComponentRegistry.add(CategoryButton);
 
     return CategoryButton;
 });

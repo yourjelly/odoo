@@ -22,7 +22,7 @@ odoo.define('pos_restaurant.ReceiptScreen', function(require) {
             }
         };
 
-    Registries.Component.extend(ReceiptScreen, PosResReceiptScreen);
+    Registries.PosComponentRegistry.extend(ReceiptScreen, PosResReceiptScreen);
 
     return ReceiptScreen;
 });

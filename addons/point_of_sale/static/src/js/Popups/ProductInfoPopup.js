@@ -72,5 +72,5 @@ odoo.define('point_of_sale.ProductInfoPopup', function(require) {
     }
 
     ProductInfoPopup.template = 'ProductInfoPopup';
-    Registries.Component.add(ProductInfoPopup);
+    Registries.PosComponentRegistry.add(ProductInfoPopup);
 });

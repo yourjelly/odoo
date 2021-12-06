@@ -30,7 +30,7 @@ odoo.define('point_of_sale.RefundButton', function (require) {
         },
     });
 
-    Registries.Component.add(RefundButton);
+    Registries.PosComponentRegistry.add(RefundButton);
 
     return RefundButton;
 });

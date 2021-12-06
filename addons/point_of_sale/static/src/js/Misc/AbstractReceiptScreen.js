@@ -56,7 +56,7 @@ odoo.define('point_of_sale.AbstractReceiptScreen', function (require) {
         }
     }
 
-    Registries.Component.add(AbstractReceiptScreen);
+    Registries.PosComponentRegistry.add(AbstractReceiptScreen);
 
     return AbstractReceiptScreen;
 });

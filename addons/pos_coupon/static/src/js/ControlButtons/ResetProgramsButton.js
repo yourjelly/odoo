@@ -26,7 +26,7 @@ odoo.define('pos_coupon.ResetProgramsButton', function (require) {
         },
     });
 
-    Registries.Component.add(ResetProgramsButton);
+    Registries.PosComponentRegistry.add(ResetProgramsButton);
 
     return ResetProgramsButton;
 });

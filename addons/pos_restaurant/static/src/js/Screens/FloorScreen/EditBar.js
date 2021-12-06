@@ -13,7 +13,7 @@ odoo.define('pos_restaurant.EditBar', function(require) {
     }
     EditBar.template = 'EditBar';
 
-    Registries.Component.add(EditBar);
+    Registries.PosComponentRegistry.add(EditBar);
 
     return EditBar;
 });
