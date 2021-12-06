@@ -1216,6 +1216,12 @@
                                     </group>
                                 </group>
                             </page>
+                            <page id="edi_documents"
+                                  string="EDI Documents"
+                                  groups="base.group_no_one"
+                                  attrs="{'invisible': [('edi_document_ids', '=', [])]}">
+                                <field name="edi_document_ids" options="{'no_open': '1'}"/>
+                            </page>
                             <page id="other_tab_entry" string="Other Info" name="other_info"
                                   attrs="{'invisible': [('move_type', '!=', 'entry')]}">
                                 <group id="other_tab_entry_group">

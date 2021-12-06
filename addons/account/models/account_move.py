@@ -41,7 +41,7 @@ PAYMENT_STATE_SELECTION = [
 
 class AccountMove(models.Model):
     _name = "account.move"
-    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'sequence.mixin']
+    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin', 'sequence.mixin', 'edi.mixin']
     _description = "Journal Entry"
     _order = 'date desc, name desc, id desc'
     _mail_post_access = 'read'
@@ -2415,6 +2415,24 @@ class AccountMove(models.Model):
         return values
 
     # -------------------------------------------------------------------------
+    # EDI METHODS
+    # -------------------------------------------------------------------------
+
+    def _get_edi_pdf_report_ids(self):
+        # OVERRIDE
+        self.ensure_one()
+        if self.is_invoice(include_receipts=True):
+            return self.env.ref('account.report_invoice') + self.env.ref('account.report_invoice_with_payments')
+        return []
+
+    def _hook_edi_on_post_invoice(self, edi_format):
+        """ TO BE OVERRIDDEN. Hook to initiate the edi.document when posting an invoice.
+
+        :param edi_format: The applied edi_format.
+        """
+        pass
+
+    # -------------------------------------------------------------------------
     # BUSINESS METHODS
     # -------------------------------------------------------------------------
 
@@ -2944,6 +2962,11 @@ class AccountMove(models.Model):
                 move.write(to_write)
 
         for move in to_post:
+            if move.is_invoice(include_receipts=True):
+                for edi_format in move._get_edi_available_formats():
+                    if move._is_edi_compatible(edi_format):
+                        move._hook_edi_on_post_invoice(edi_format)
+
             if move.is_sale_document() \
                     and move.journal_id.sale_activity_type_id \
                     and (move.journal_id.sale_activity_user_id or move.invoice_user_id).id not in (self.env.ref('base.user_root').id, False):

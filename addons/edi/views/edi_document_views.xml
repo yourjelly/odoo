@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_edi_document_list" model="ir.ui.view">
+            <field name="name">edi.document.list</field>
+            <field name="model">edi.document</field>
+            <field name="arch" type="xml">
+                <tree create="false"
+                      delete="false"
+                      edit="false"
+                      decoration-info="message_level == 'info'"
+                      decoration-warning="message_level == 'warning'"
+                      decoration-danger="message_level == 'error'">
+                    <field name="message_level" invisible="1" />
+
+                    <field name="format_id" options="{'no_open': True, 'no_create': True}"/>
+                    <field name="message"/>
+                    <field name="attachment_id" options="{'no_open': True, 'no_create': True}"/>
+                    <field name="is_done"/>
+                </tree>
+            </field>
+        </record>
+    </data>
+</odoo>

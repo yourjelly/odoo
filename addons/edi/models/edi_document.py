@@ -37,6 +37,8 @@ class EdiDocument(models.Model):
         string="Next Stage",
         index=True,
     )
+    use_web_services = fields.Boolean()
+    is_done = fields.Boolean()
     grouping_key = fields.Char(
         string="Grouping key",
         index=True,

@@ -9,11 +9,11 @@ class EdiMixin(models.AbstractModel):
     _description = "EDI Mixin"
 
     edi_document_ids = fields.One2many(
-        comodel_name='account.edi.document',
+        comodel_name='edi.document',
         compute='_compute_edi_document_ids',
     )
     edi_message = fields.Html(
-        compute='_compute_edi_message'
+        compute='_compute_edi_message',
     )
 
     # -------------------------------------------------------------------------
@@ -35,53 +35,100 @@ class EdiMixin(models.AbstractModel):
     # TO BE CALLED MANUALLY
     # -------------------------------------------------------------------------
 
-    def _create_missing_edi_documents(self):
-        edi_document_to_create = []
-        for record in self:
-            current_formats = self.edi_document_ids.format_id
-            for edi_format in self._get_edi_available_formats():
-                if edi_format in current_formats:
-                    continue
+    def _set_edi_message(self, edi_format, message, message_level='error'):
+        self.ensure_one()
+        document = self.edi_document_ids.filtered(lambda x: x.format_id == edi_format)
+        document.ensure_one()
+        document.write({
+            'message': message,
+            'message_level': message_level,
+        })
+        return document
 
-                next_stage_code, grouping_dict = self._get_edi_stage_infos(edi_format)
-                if not grouping_dict:
-                    continue
+    def _set_edi_stage(self, edi_format, stage_code, grouping_dict=None, use_web_services=False):
+        self.ensure_one()
 
-                edi_document_to_create.append({
-                    'format_id': edi_format.id,
-                    'res_model': record._name,
-                    'res_id': record.id,
-                    'next_stage_code': next_stage_code,
-                    'grouping_key': '-'.join(str(grouping_dict[k]) for k in sorted(grouping_dict.keys())),
-                })
+        if grouping_dict is None:
+            grouping_dict = {'id': self.id}
 
-        if edi_document_to_create:
-            self.env['edi.document'].create(edi_document_to_create)
+        to_write = {
+            'stage_code': stage_code,
+            'use_web_services': use_web_services,
+            'grouping_key': '-'.join(str(grouping_dict[k]) for k in sorted(grouping_dict.keys())),
+            'message': None,
+            'message_level': None,
+        }
+
+        document = self.edi_document_ids.filtered(lambda x: x.format_id == edi_format)
+        if document:
+            document.write(to_write)
+        else:
+            self.env['edi.document'].create({
+                'format_id': edi_format.id,
+                'res_model': self._name,
+                'res_id': self.id,
+                **to_write,
+            })
+        return document
+
+    def _set_edi_attachment(self, edi_format, attachment, override_existing=False):
+        self.ensure_one()
+        document = self.edi_document_ids.filtered(lambda x: x.format_id == edi_format)
+        document.ensure_one()
+
+        is_dict = isinstance(attachment, dict)
+        if document.attachment_id and override_existing and is_dict:
+            document.attachment_id.write({k: v for k, v in attachment.items() if k in ('datas', 'raw')})
+        elif is_dict:
+            document.attachment_id = self.env['ir.attachment'].create(attachment)
+        else:
+            document.attachment_id = attachment
+        return document
+
+    def _get_edi_attachment(self, edi_format):
+        self.ensure_one()
+        document = self.edi_document_ids.filtered(lambda x: x.format_id == edi_format)
+        document.ensure_one()
+        return document.attachment_id
+
+    def _set_edi_done(self, edi_format):
+        self.ensure_one()
+        document = self.edi_document_ids.filtered(lambda x: x.format_id == edi_format)
+        document.ensure_one()
+
+        document.write({
+            'stage_code': None,
+            'use_web_services': False,
+            'grouping_key': None,
+            'message': None,
+            'message_level': None,
+            'is_done': True,
+        })
+        return document
 
     # -------------------------------------------------------------------------
     # TO BE OVERRIDDEN
     # -------------------------------------------------------------------------
 
-    @api.model
-    def _get_edi_stages(self):
+    def _get_edi_stages(self, edi_format):
         """ TO BE OVERRIDDEN. Determine the EDI flow the business object will follow.
 
-        :return: A list of stages created using the `_create_edi_stage` method.
+        :param: edi_format: The edi.format applied.
+        :return:            A list of stages created using the `_create_edi_stage` method.
         """
         return []
 
-    def _get_edi_pdf_report(self):
+    def _get_edi_pdf_report_ids(self):
         """ TO BE OVERRIDDEN. Retrieve the ir.actions.report used to generate a PDF report that could be processed
         using the `_edi_prepare_to_export_pdf` method.
 
-        :return: A list of ir.actions.report.
+        :return: A list of ir.actions.report's ids.
         """
         self.ensure_one()
         return []
 
-    def _get_edi_stage_infos(self, edi_format):
-        self.ensure_one()
-        return None, {}
+    def _is_edi_compatible(self, edi_format):
+        return False
 
     def _edi_prepare_to_export_pdf(self, action_report, pdf_writer, edi_document):
         self.ensure_one()
@@ -94,7 +141,7 @@ class EdiMixin(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _compute_edi_document_ids(self):
-        stored_ids = self._origin.ids
+        stored_ids = tuple(self._origin.ids)
 
         if stored_ids:
             self._cr.execute('''

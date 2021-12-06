@@ -12,8 +12,8 @@ class IrActionsReport(models.Model):
         # OVERRIDE
         if res_ids and len(res_ids) == 1 and pdf_content and self.model and 'edi.mixin' in self.env[self.model]._inherits:
             record = self.env[self.model].browse(res_ids)
-            pdf_reports = record._get_edi_pdf_report()
-            if self in pdf_reports:
+            pdf_report_ids = record._get_edi_pdf_report_ids()
+            if self.id in pdf_report_ids:
                 edi_documents = record.edi_document_ids
                 if edi_documents:
                     reader_buffer = io.BytesIO(pdf_content)

@@ -21,14 +21,9 @@ class EdiFormat(models.Model):
 
     name = fields.Char()
     code = fields.Char(required=True)
-    res_model = fields.Char(
-        string="Related Document Model",
-        index=True,
-        required=True,
-    )
 
     _sql_constraints = [
-        ('unique_code', 'unique (code, res_model)', 'This code already exists')
+        ('unique_code', 'unique (code)', 'This code already exists')
     ]
 
     ####################################################
