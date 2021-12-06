@@ -22,7 +22,7 @@ odoo.define('point_of_sale.OrderImportPopup', function(require) {
         body: '',
     };
 
-    Registries.Component.add(OrderImportPopup);
+    Registries.PosComponentRegistry.add(OrderImportPopup);
 
     return OrderImportPopup;
 });

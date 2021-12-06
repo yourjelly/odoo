@@ -123,7 +123,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
     }
     ClientDetailsEdit.template = 'ClientDetailsEdit';
 
-    Registries.Component.add(ClientDetailsEdit);
+    Registries.PosComponentRegistry.add(ClientDetailsEdit);
 
     return ClientDetailsEdit;
 });

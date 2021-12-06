@@ -139,7 +139,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(TicketScreen, PosResTicketScreen);
+    Registries.PosComponentRegistry.extend(TicketScreen, PosResTicketScreen);
 
     class TipCell extends PosComponent {
         constructor() {
@@ -165,7 +165,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     }
     TipCell.template = 'TipCell';
 
-    Registries.Component.add(TipCell);
+    Registries.PosComponentRegistry.add(TipCell);
 
     return { TicketScreen, TipCell };
 });

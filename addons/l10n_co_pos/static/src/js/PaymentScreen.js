@@ -25,7 +25,7 @@ odoo.define('l10n_co_pos.PaymentScreen', function(require) {
             }
         };
 
-    Registries.Component.extend(PaymentScreen, L10nCoPosPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, L10nCoPosPaymentScreen);
 
     return PaymentScreen;
 });

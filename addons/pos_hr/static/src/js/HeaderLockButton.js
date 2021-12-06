@@ -19,7 +19,7 @@ odoo.define('point_of_sale.HeaderLockButton', function(require) {
         }
     }
 
-    Registries.Component.add(HeaderLockButton);
+    Registries.PosComponentRegistry.add(HeaderLockButton);
 
     return HeaderLockButton;
 });

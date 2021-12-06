@@ -19,7 +19,7 @@ odoo.define('l10n_fr_pos_cert.Chrome', function (require) {
             }
         };
 
-    Registries.Component.extend(Chrome, PosFrCertChrome);
+    Registries.PosComponentRegistry.extend(Chrome, PosFrCertChrome);
 
     return Chrome;
 });

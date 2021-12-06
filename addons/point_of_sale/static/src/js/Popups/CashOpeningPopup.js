@@ -51,7 +51,7 @@ odoo.define('point_of_sale.CashOpeningPopup', function(require) {
     }
 
     CashOpeningPopup.template = 'CashOpeningPopup';
-    Registries.Component.add(CashOpeningPopup);
+    Registries.PosComponentRegistry.add(CashOpeningPopup);
 
     return CashOpeningPopup;
 });

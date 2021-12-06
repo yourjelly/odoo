@@ -24,7 +24,7 @@ odoo.define('pos_mercury.PaymentLine', function (require) {
             }
         };
 
-    Registries.Component.extend(PaymentLine, PosMercuryPaymentLines);
+    Registries.PosComponentRegistry.extend(PaymentLine, PosMercuryPaymentLines);
 
     return PaymentLine;
 });

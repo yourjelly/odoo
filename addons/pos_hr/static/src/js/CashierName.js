@@ -48,7 +48,7 @@ odoo.define('pos_hr.CashierName', function (require) {
             }
         };
 
-    Registries.Component.extend(CashierName, PosHrCashierName);
+    Registries.PosComponentRegistry.extend(CashierName, PosHrCashierName);
 
     return CashierName;
 });

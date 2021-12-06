@@ -26,7 +26,7 @@ odoo.define('point_of_sale.ReprintReceiptScreen', function (require) {
         ReprintReceiptScreen.template = 'ReprintReceiptScreen';
         return ReprintReceiptScreen;
     };
-    Registries.Component.addByExtending(ReprintReceiptScreen, AbstractReceiptScreen);
+    Registries.PosComponentRegistry.addByExtending(ReprintReceiptScreen, AbstractReceiptScreen);
 
     return ReprintReceiptScreen;
 });

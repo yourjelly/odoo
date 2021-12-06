@@ -136,7 +136,7 @@ odoo.define('point_of_sale.Draggable', function(require) {
     }
     Draggable.template = 'Draggable';
 
-    Registries.Component.add(Draggable);
+    Registries.PosComponentRegistry.add(Draggable);
 
     return Draggable;
 });

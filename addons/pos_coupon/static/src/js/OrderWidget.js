@@ -53,7 +53,7 @@ odoo.define('pos_coupon.OrderWidget', function (require) {
             }
         };
 
-    Registries.Component.extend(OrderWidget, PosCouponOrderWidget);
+    Registries.PosComponentRegistry.extend(OrderWidget, PosCouponOrderWidget);
 
     return OrderWidget;
 });

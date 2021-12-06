@@ -14,6 +14,6 @@ odoo.define('l10n_gcc_pos.OrderReceipt', function (require) {
                 return receipt_render_env;
             }
         }
-    Registries.Component.extend(OrderReceipt, OrderReceiptGCC)
+    Registries.PosComponentRegistry.extend(OrderReceipt, OrderReceiptGCC)
     return OrderReceiptGCC
 });

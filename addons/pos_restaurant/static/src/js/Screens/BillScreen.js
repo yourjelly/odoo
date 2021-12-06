@@ -25,7 +25,7 @@ odoo.define('pos_restaurant.BillScreen', function (require) {
         return BillScreen;
     };
 
-    Registries.Component.addByExtending(BillScreen, ReceiptScreen);
+    Registries.PosComponentRegistry.addByExtending(BillScreen, ReceiptScreen);
 
     return BillScreen;
 });

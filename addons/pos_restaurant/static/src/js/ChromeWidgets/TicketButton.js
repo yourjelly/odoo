@@ -20,7 +20,7 @@ odoo.define('pos_restaurant.TicketButton', function (require) {
             }
         };
 
-    Registries.Component.extend(TicketButton, PosResTicketButton);
+    Registries.PosComponentRegistry.extend(TicketButton, PosResTicketButton);
 
     return TicketButton;
 });

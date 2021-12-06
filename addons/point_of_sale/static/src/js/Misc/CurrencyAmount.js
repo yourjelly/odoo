@@ -7,7 +7,7 @@ odoo.define('point_of_sale.CurrencyAmount', function(require) {
     class CurrencyAmount extends PosComponent {}
     CurrencyAmount.template = 'CurrencyAmount';
 
-    Registries.Component.add(CurrencyAmount);
+    Registries.PosComponentRegistry.add(CurrencyAmount);
 
     return CurrencyAmount;
 });

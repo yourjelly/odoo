@@ -149,7 +149,7 @@ odoo.define('pos_restaurant.TipScreen', function (require) {
     }
     TipScreen.template = 'pos_restaurant.TipScreen';
 
-    Registries.Component.add(TipScreen);
+    Registries.PosComponentRegistry.add(TipScreen);
 
     return TipScreen;
 });

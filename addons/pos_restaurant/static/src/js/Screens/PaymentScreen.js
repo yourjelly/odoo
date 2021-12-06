@@ -42,7 +42,7 @@ odoo.define('pos_restaurant.PosResPaymentScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(PaymentScreen, PosResPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, PosResPaymentScreen);
 
     return PosResPaymentScreen;
 });

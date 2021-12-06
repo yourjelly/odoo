@@ -104,7 +104,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
     }
     ClientScreenButton.template = 'ClientScreenButton';
 
-    Registries.Component.add(ClientScreenButton);
+    Registries.PosComponentRegistry.add(ClientScreenButton);
 
     return ClientScreenButton;
 });

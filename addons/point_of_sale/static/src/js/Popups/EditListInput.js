@@ -13,7 +13,7 @@ odoo.define('point_of_sale.EditListInput', function(require) {
     }
     EditListInput.template = 'EditListInput';
 
-    Registries.Component.add(EditListInput);
+    Registries.PosComponentRegistry.add(EditListInput);
 
     return EditListInput;
 });

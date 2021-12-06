@@ -563,7 +563,7 @@ odoo.define('pos_mercury.PaymentScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(PaymentScreen, PosMercuryPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, PosMercuryPaymentScreen);
 
     return PaymentScreen;
 });

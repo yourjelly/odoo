@@ -11,7 +11,7 @@ odoo.define('pos_six.chrome', function (require) {
             }
         };
 
-    Registries.Component.extend(Chrome, PosSixChrome);
+    Registries.PosComponentRegistry.extend(Chrome, PosSixChrome);
 
     return Chrome;
 });

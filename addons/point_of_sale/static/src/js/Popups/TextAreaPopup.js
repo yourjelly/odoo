@@ -34,7 +34,7 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
         body: '',
     };
 
-    Registries.Component.add(TextAreaPopup);
+    Registries.PosComponentRegistry.add(TextAreaPopup);
 
     return TextAreaPopup;
 });

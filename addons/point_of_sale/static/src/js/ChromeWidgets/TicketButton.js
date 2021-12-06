@@ -22,7 +22,7 @@ odoo.define('point_of_sale.TicketButton', function (require) {
     }
     TicketButton.template = 'TicketButton';
 
-    Registries.Component.add(TicketButton);
+    Registries.PosComponentRegistry.add(TicketButton);
 
     return TicketButton;
 });

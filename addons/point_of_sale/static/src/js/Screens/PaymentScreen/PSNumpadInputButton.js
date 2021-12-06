@@ -11,7 +11,7 @@ odoo.define('point_of_sale.PSNumpadInputButton', function(require) {
     }
     PSNumpadInputButton.template = 'PSNumpadInputButton';
 
-    Registries.Component.add(PSNumpadInputButton);
+    Registries.PosComponentRegistry.add(PSNumpadInputButton);
 
     return PSNumpadInputButton;
 });
