@@ -155,7 +155,7 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
     }
     DebugWidget.template = 'DebugWidget';
 
-    Registries.Component.add(DebugWidget);
+    Registries.PosComponentRegistry.add(DebugWidget);
 
     return DebugWidget;
 });

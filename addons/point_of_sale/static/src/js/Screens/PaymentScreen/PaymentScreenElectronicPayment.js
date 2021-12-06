@@ -7,7 +7,7 @@ odoo.define('point_of_sale.PaymentScreenElectronicPayment', function (require) {
     class PaymentScreenElectronicPayment extends PosComponent {}
     PaymentScreenElectronicPayment.template = 'PaymentScreenElectronicPayment';
 
-    Registries.Component.add(PaymentScreenElectronicPayment);
+    Registries.PosComponentRegistry.add(PaymentScreenElectronicPayment);
 
     return PaymentScreenElectronicPayment;
 });

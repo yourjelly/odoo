@@ -21,7 +21,7 @@ odoo.define('point_of_sale.PaymentScreenStatus', function(require) {
     }
     PaymentScreenStatus.template = 'PaymentScreenStatus';
 
-    Registries.Component.add(PaymentScreenStatus);
+    Registries.PosComponentRegistry.add(PaymentScreenStatus);
 
     return PaymentScreenStatus;
 });

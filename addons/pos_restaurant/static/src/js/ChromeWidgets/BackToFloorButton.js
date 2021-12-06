@@ -27,7 +27,7 @@ odoo.define('pos_restaurant.BackToFloorButton', function (require) {
     }
     BackToFloorButton.template = 'BackToFloorButton';
 
-    Registries.Component.add(BackToFloorButton);
+    Registries.PosComponentRegistry.add(BackToFloorButton);
 
     return BackToFloorButton;
 });

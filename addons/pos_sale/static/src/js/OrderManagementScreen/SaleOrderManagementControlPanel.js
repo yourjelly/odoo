@@ -123,7 +123,7 @@ odoo.define('pos_sale.SaleOrderManagementControlPanel', function (require) {
     }
     SaleOrderManagementControlPanel.template = 'SaleOrderManagementControlPanel';
 
-    Registries.Component.add(SaleOrderManagementControlPanel);
+    Registries.PosComponentRegistry.add(SaleOrderManagementControlPanel);
 
     return SaleOrderManagementControlPanel;
 });

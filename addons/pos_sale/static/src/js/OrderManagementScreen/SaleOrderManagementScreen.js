@@ -254,7 +254,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
     SaleOrderManagementScreen.template = 'SaleOrderManagementScreen';
     SaleOrderManagementScreen.hideOrderSelector = true;
 
-    Registries.Component.add(SaleOrderManagementScreen);
+    Registries.PosComponentRegistry.add(SaleOrderManagementScreen);
 
     return SaleOrderManagementScreen;
 });

@@ -7,7 +7,7 @@ odoo.define('point_of_sale.WrappedProductNameLines', function(require) {
     class WrappedProductNameLines extends PosComponent {}
     WrappedProductNameLines.template = 'WrappedProductNameLines';
 
-    Registries.Component.add(WrappedProductNameLines);
+    Registries.PosComponentRegistry.add(WrappedProductNameLines);
 
     return WrappedProductNameLines;
 });

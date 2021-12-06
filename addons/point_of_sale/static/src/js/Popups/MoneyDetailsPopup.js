@@ -62,7 +62,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
     }
 
     MoneyDetailsPopup.template = 'MoneyDetailsPopup';
-    Registries.Component.add(MoneyDetailsPopup);
+    Registries.PosComponentRegistry.add(MoneyDetailsPopup);
 
     return MoneyDetailsPopup;
 

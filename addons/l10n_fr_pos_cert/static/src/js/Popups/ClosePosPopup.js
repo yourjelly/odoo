@@ -21,7 +21,7 @@ odoo.define('l10n_fr_pos_cert.ClosePosPopup', function (require) {
             }
         };
 
-    Registries.Component.extend(ClosePosPopup, PosFrCertClosePopup);
+    Registries.PosComponentRegistry.extend(ClosePosPopup, PosFrCertClosePopup);
 
     return ClosePosPopup;
 });

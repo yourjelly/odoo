@@ -31,7 +31,7 @@ odoo.define('pos_coupon.PromoCodeButton', function (require) {
         },
     });
 
-    Registries.Component.add(PromoCodeButton);
+    Registries.PosComponentRegistry.add(PromoCodeButton);
 
     return PromoCodeButton;
 });

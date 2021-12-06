@@ -84,7 +84,7 @@ odoo.define('pos_coupon.ProductScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(ProductScreen, PosCouponProductScreen);
+    Registries.PosComponentRegistry.extend(ProductScreen, PosCouponProductScreen);
 
     return ProductScreen;
 });

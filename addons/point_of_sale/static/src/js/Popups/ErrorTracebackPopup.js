@@ -39,7 +39,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
         exitButtonTrigger: 'close-pos'
     };
 
-    Registries.Component.add(ErrorTracebackPopup);
+    Registries.PosComponentRegistry.add(ErrorTracebackPopup);
 
     return ErrorTracebackPopup;
 });

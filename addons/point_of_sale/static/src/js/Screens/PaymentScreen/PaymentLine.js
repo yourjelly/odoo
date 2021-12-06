@@ -17,7 +17,7 @@ odoo.define('point_of_sale.PaymentLine', function(require) {
     }
     PaymentLine.template = 'PaymentLine';
 
-    Registries.Component.add(PaymentLine);
+    Registries.PosComponentRegistry.add(PaymentLine);
 
     return PaymentLine;
 });

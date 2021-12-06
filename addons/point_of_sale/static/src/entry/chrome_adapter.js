@@ -26,7 +26,7 @@ function setupResponsivePlugin(env) {
 
 export class ChromeAdapter extends Component {
     setup() {
-        this.PosChrome = Registries.Component.get(Chrome);
+        this.PosChrome = Registries.PosComponentRegistry.get(Chrome);
         const legacyActionManager = useService("legacy_action_manager");
 
         // Instantiate PosGlobalState here to ensure that every extension

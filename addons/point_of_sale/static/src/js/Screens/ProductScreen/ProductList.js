@@ -7,7 +7,7 @@ odoo.define('point_of_sale.ProductList', function(require) {
     class ProductList extends PosComponent {}
     ProductList.template = 'ProductList';
 
-    Registries.Component.add(ProductList);
+    Registries.PosComponentRegistry.add(ProductList);
 
     return ProductList;
 });

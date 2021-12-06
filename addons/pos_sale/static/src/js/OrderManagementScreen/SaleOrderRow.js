@@ -51,7 +51,7 @@ odoo.define('pos_sale.SaleOrderRow', function (require) {
     }
     SaleOrderRow.template = 'SaleOrderRow';
 
-    Registries.Component.add(SaleOrderRow);
+    Registries.PosComponentRegistry.add(SaleOrderRow);
 
     return SaleOrderRow;
 });

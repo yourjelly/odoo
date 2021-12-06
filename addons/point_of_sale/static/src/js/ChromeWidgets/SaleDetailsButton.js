@@ -32,7 +32,7 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     }
     SaleDetailsButton.template = 'SaleDetailsButton';
 
-    Registries.Component.add(SaleDetailsButton);
+    Registries.PosComponentRegistry.add(SaleDetailsButton);
 
     return SaleDetailsButton;
 });

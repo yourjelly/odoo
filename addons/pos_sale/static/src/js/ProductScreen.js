@@ -24,7 +24,7 @@ odoo.define('pos_sale.ProductScreen', function (require) {
             }
         };
 
-    Registries.Component.extend(ProductScreen, PosSaleProductScreen);
+    Registries.PosComponentRegistry.extend(ProductScreen, PosSaleProductScreen);
 
     return ProductScreen;
 });

@@ -70,7 +70,7 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
     }
     TableWidget.template = 'TableWidget';
 
-    Registries.Component.add(TableWidget);
+    Registries.PosComponentRegistry.add(TableWidget);
 
     return TableWidget;
 });

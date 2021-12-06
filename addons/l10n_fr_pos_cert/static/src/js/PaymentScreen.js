@@ -23,7 +23,7 @@ odoo.define('l10n_fr_pos_cert.PaymentScreen', function(require) {
         }
     };
 
-    Registries.Component.extend(PaymentScreen, PosFrPaymentScreen);
+    Registries.PosComponentRegistry.extend(PaymentScreen, PosFrPaymentScreen);
 
     return PaymentScreen;
 });

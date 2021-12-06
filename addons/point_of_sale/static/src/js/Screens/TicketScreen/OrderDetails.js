@@ -23,7 +23,7 @@ odoo.define('point_of_sale.OrderDetails', function (require) {
     }
     OrderDetails.template = 'OrderDetails';
 
-    Registries.Component.add(OrderDetails);
+    Registries.PosComponentRegistry.add(OrderDetails);
 
     return OrderDetails;
 });

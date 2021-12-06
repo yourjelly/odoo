@@ -73,7 +73,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
         isPassword: false,
     };
 
-    Registries.Component.add(NumberPopup);
+    Registries.PosComponentRegistry.add(NumberPopup);
 
     return NumberPopup;
 });

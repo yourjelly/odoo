@@ -64,7 +64,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
     }
     OrderWidget.template = 'OrderWidget';
 
-    Registries.Component.add(OrderWidget);
+    Registries.PosComponentRegistry.add(OrderWidget);
 
     return OrderWidget;
 });

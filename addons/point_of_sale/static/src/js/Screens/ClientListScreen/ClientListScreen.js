@@ -209,7 +209,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     }
     ClientListScreen.template = 'ClientListScreen';
 
-    Registries.Component.add(ClientListScreen);
+    Registries.PosComponentRegistry.add(ClientListScreen);
 
     return ClientListScreen;
 });

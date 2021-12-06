@@ -79,7 +79,7 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     }
     ProductsWidgetControlPanel.template = 'ProductsWidgetControlPanel';
 
-    Registries.Component.add(ProductsWidgetControlPanel);
+    Registries.PosComponentRegistry.add(ProductsWidgetControlPanel);
 
     return ProductsWidgetControlPanel;
 });

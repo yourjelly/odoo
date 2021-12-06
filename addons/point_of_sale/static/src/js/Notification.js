@@ -18,7 +18,7 @@ odoo.define('point_of_sale.Notification', function (require) {
     }
     Notification.template = 'Notification';
 
-    Registries.Component.add(Notification);
+    Registries.PosComponentRegistry.add(Notification);
 
     return Notification;
 });

@@ -11,7 +11,7 @@ odoo.define('point_of_sale.SyncNotification', function(require) {
     }
     SyncNotification.template = 'SyncNotification';
 
-    Registries.Component.add(SyncNotification);
+    Registries.PosComponentRegistry.add(SyncNotification);
 
     return SyncNotification;
 });

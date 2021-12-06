@@ -47,7 +47,7 @@ odoo.define('pos_sale.SetSaleOrderButton', function(require) {
         },
     });
 
-    Registries.Component.add(SetSaleOrderButton);
+    Registries.PosComponentRegistry.add(SetSaleOrderButton);
 
     return SetSaleOrderButton;
 });

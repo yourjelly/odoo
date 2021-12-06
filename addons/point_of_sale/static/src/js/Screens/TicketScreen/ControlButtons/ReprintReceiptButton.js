@@ -16,7 +16,7 @@ odoo.define('point_of_sale.ReprintReceiptButton', function (require) {
         }
     }
     ReprintReceiptButton.template = 'ReprintReceiptButton';
-    Registries.Component.add(ReprintReceiptButton);
+    Registries.PosComponentRegistry.add(ReprintReceiptButton);
 
     return ReprintReceiptButton;
 });

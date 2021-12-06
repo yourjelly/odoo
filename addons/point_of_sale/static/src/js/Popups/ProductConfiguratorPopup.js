@@ -29,7 +29,7 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
         }
     }
     ProductConfiguratorPopup.template = 'ProductConfiguratorPopup';
-    Registries.Component.add(ProductConfiguratorPopup);
+    Registries.PosComponentRegistry.add(ProductConfiguratorPopup);
 
     class BaseProductAttribute extends PosComponent {
         constructor() {
@@ -69,15 +69,15 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
         }
     }
     RadioProductAttribute.template = 'RadioProductAttribute';
-    Registries.Component.add(RadioProductAttribute);
+    Registries.PosComponentRegistry.add(RadioProductAttribute);
 
     class SelectProductAttribute extends BaseProductAttribute { }
     SelectProductAttribute.template = 'SelectProductAttribute';
-    Registries.Component.add(SelectProductAttribute);
+    Registries.PosComponentRegistry.add(SelectProductAttribute);
 
     class ColorProductAttribute extends BaseProductAttribute {}
     ColorProductAttribute.template = 'ColorProductAttribute';
-    Registries.Component.add(ColorProductAttribute);
+    Registries.PosComponentRegistry.add(ColorProductAttribute);
 
     return {
         ProductConfiguratorPopup,

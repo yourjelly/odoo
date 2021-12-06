@@ -96,7 +96,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
     }
     ScaleScreen.template = 'ScaleScreen';
 
-    Registries.Component.add(ScaleScreen);
+    Registries.PosComponentRegistry.add(ScaleScreen);
 
     return ScaleScreen;
 });

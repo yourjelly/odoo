@@ -54,7 +54,7 @@ odoo.define('pos_restaurant.EditableTable', function(require) {
     }
     EditableTable.template = 'EditableTable';
 
-    Registries.Component.add(EditableTable);
+    Registries.PosComponentRegistry.add(EditableTable);
 
     return EditableTable;
 });

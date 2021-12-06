@@ -25,7 +25,7 @@ odoo.define("pos_gift_card.GiftCardButton", function (require) {
     },
   });
 
-  Registries.Component.add(GiftCardButton);
+  Registries.PosComponentRegistry.add(GiftCardButton);
 
   return GiftCardButton;
 });
