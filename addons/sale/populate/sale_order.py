@@ -52,7 +52,7 @@ class SaleOrder(models.Model):
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
-    _populate_sizes = {"small": 1_000, "medium": 50_000, "large": 100_000}
+    _populate_sizes = {"small": 1_000, "medium": 1_000, "large": 100_000}
     _populate_dependencies = ["sale.order", "product.product"]
 
     def _populate(self, size):

@@ -20,7 +20,7 @@
           - functional
 
 """
-
+import time
 import collections
 import contextlib
 import datetime
@@ -3998,6 +3998,8 @@ Fields:
         if not vals_list:
             return self.browse()
 
+        start_all = time.time()
+
         self = self.browse()
         self.check_access_rights('create')
 
@@ -4063,7 +4065,9 @@ Fields:
                     data['stored'][parent_name] = parent.id
 
         # create records with stored fields
+        start = time.time()
         records = self._create(data_list)
+        print(f"_CREATE {self._name} {len(records)} {time.time() - start} sec")
 
         # protect fields being written against recomputation
         protected = [(data['protected'], data['record']) for data in data_list]
@@ -4104,6 +4108,9 @@ Fields:
 
         if self._check_company_auto:
             records._check_company()
+
+        print(f"CREATE {self._name} {len(records)} {time.time() - start_all} sec")
+
         return records
 
     def _prepare_create_values(self, vals_list):
@@ -4191,6 +4198,8 @@ Fields:
     @api.model
     def _create(self, data_list):
         """ Create records from the stored field values in ``data_list``. """
+        start = time.time()
+
         assert data_list
         cr = self.env.cr
 
@@ -4235,6 +4244,10 @@ Fields:
         # put the new records in cache, and update inverse fields, for many2one
         #
         # cachetoclear is an optimization to avoid modified()'s cost until other_fields are processed
+
+        end = time.time() - start
+        print(f"{self._name} {len(records)} {end} sec")
+
         cachetoclear = []
         inverses_update = defaultdict(list)     # {(field, value): ids}
         for data, record in zip(data_list, records):
@@ -6622,7 +6635,9 @@ Fields:
 
         :param str size: symbolic size for the number of records: ``'small'``, ``'medium'`` or ``'large'``
         """
-        batch_size = 1000
+        from itertools import cycle
+        batch_size_possibility = cycle(([1] * 10) + ([3] * 10) + ([10] * 10) + ([100] * 10) + ([1000] * 10))
+        batch_size = next(batch_size_possibility)
         min_size = self._populate_sizes[size]
 
         record_count = 0
@@ -6643,6 +6658,7 @@ Fields:
                 _logger.info('Batch: %s/%s', record_count, min_size)
                 records_batches.append(self.create(create_values))
                 create_values = []
+                batch_size = next(batch_size_possibility)
 
         if create_values:
             records_batches.append(self.create(create_values))

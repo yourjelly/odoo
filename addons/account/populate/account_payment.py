@@ -18,7 +18,7 @@ class AccountPayment(models.Model):
 
     _populate_sizes = {
         'small': 100,
-        'medium': 5000,
+        'medium': 1000,
         'large': 50000,
     }
 
@@ -121,6 +121,6 @@ class AccountPayment(models.Model):
 
     def _populate(self, size):
         records = super()._populate(size)
-        _logger.info('Validating Payments')
-        records.move_id.filtered(lambda r: r.date < fields.Date.today()).action_post()
+        #_logger.info('Validating Payments')
+        #records.move_id.filtered(lambda r: r.date < fields.Date.today()).action_post()
         return records
