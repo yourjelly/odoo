@@ -24,17 +24,19 @@
     """,
     'depends': [
         'l10n_es',
-        'account_edi'
+        'account_edi',
     ],
     'data': [
         'data/account_edi_data.xml',
+        'data/account_tax_data.xml',
         'data/template_invoice.xml',
 
         'security/ir.model.access.csv',
 
         'views/account_move_view.xml',
         'views/l10n_es_tbai_certificate_views.xml',
-        'views/res_config_settings_views.xml'
+        'views/res_config_settings_views.xml',
     ],
+    'post_init_hook': '_l10n_es_tbai_post_init',
     'license': 'LGPL-3',
 }
