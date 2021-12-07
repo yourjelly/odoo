@@ -4193,64 +4193,49 @@ Fields:
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
         cr = self.env.cr
-        quote = '"{}"'.format
 
         # insert rows
-        ids = []                                # ids of created records
         other_fields = OrderedSet()             # non-column fields
         translated_fields = OrderedSet()        # translated fields
+        cr.execute(f"SELECT nextval('{self._sequence}') FROM generate_series(1, %s)", [len(data_list)])
+        record_ids = [id_[0] for id_ in cr.fetchall()]
 
-        for data in data_list:
+        batch_stored_fields = sorted({self._fields[name] for data in data_list for name in data['stored']}, key=lambda f: f.name)
+        batch_columns_fields = []
+        # loop on fields to add it construct/add other_fields, translated_fields and batch_columns_fields
+        for field in batch_stored_fields:
+            if field.column_type:
+                batch_columns_fields.append(field)
+                if field.translate is True:
+                    translated_fields.add(field)
+            else:
+                other_fields.add(field)
+
+        data_values = []
+        for i, data in enumerate(data_list):
             # determine column values
             stored = data['stored']
-            columns = [('id', "nextval(%s)", self._sequence)]
-            for name, val in sorted(stored.items()):
-                field = self._fields[name]
-                assert field.store
+            values = [str(record_ids[i])]
+            for field in batch_columns_fields:
+                val = stored.get(field.name, '')
+                if val != '':
+                    val = field.convert_to_column(val, self, stored)
+                if val is None:
+                    val = ''
+                values.append(val)
+            data_values.append(values)
 
-                if field.column_type:
-                    col_val = field.convert_to_column(val, self, stored)
-                    columns.append((name, field.column_format, col_val))
-                    if field.translate is True:
-                        translated_fields.add(field)
-                else:
-                    other_fields.add(field)
+        columns = ['id'] + [field.name for field in batch_columns_fields]
+        s_template = '\t'.join(['%s'] + [field.column_format for field in batch_columns_fields])
+        input_file = io.StringIO("\n".join(s_template % tuple(data) for data in data_values))
+        cr.copy_from(input_file, self._table, null='', columns=columns)
 
-            # Insert rows one by one
-            # - as records don't all specify the same columns, code building batch-insert query
-            #   was very complex
-            # - and the gains were low, so not worth spending so much complexity
-            #
-            # It also seems that we have to be careful with INSERTs in batch, because they have the
-            # same problem as SELECTs:
-            # If we inject a lot of data in a single query, we fall into pathological perfs in
-            # terms of SQL parser and the execution of the query itself.
-            # In SELECT queries, we inject max 1000 ids (integers) when we can, because we know
-            # that this limit is well managed by PostgreSQL.
-            # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
-            # example).
-            #
-            # The problem then becomes: how to "estimate" the right size of the batch to have
-            # good performance?
-            #
-            # This requires extensive testing, and it was preferred not to introduce INSERTs in
-            # batch, to avoid regressions as much as possible.
-            #
-            # That said, we haven't closed the door completely.
-            query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
-                quote(self._table),
-                ", ".join(quote(name) for name, fmt, val in columns),
-                ", ".join(fmt for name, fmt, val in columns),
-            )
-            params = [val for name, fmt, val in columns]
-            cr.execute(query, params)
-            ids.append(cr.fetchone()[0])
+        records = self.browse(record_ids)
 
         # put the new records in cache, and update inverse fields, for many2one
         #
         # cachetoclear is an optimization to avoid modified()'s cost until other_fields are processed
         cachetoclear = []
-        records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
         for data, record in zip(data_list, records):
             data['record'] = record
