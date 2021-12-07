@@ -15,7 +15,10 @@ odoo.define('web.OwlCompatibility', function (require) {
         onMounted,
         onWillUnmount,
         onPatched,
+        onWillStart,
+        onWillUpdateProps,
         useComponent,
+        onWillDestroy,
         useEnv,
         useRef,
         useSubEnv,
@@ -26,7 +29,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     const widgetSymbol = odoo.widgetSymbol;
     const children = new WeakMap(); // associates legacy widgets with their Owl children
 
-    const templateForLegacy = xml`<div/>`;
+    const templateForLegacy = xml`<t/>`;
     const templateForOwl = xml`<t t-component="props.Component" t-props="childProps" />`;
     /**
      * Case 1) An Owl component has to instantiate legacy widgets
@@ -108,19 +111,40 @@ odoo.define('web.OwlCompatibility', function (require) {
             this.widget = null; // widget instance, if Component is a legacy widget
         }
 
-        get childProps() {
-            if (!this._childProps) {
-                this._childProps = Object.assign({}, this.props);
-                delete this._childProps.Component;
-            }
-            return this._childProps;
+        setup() {
+            onWillUpdateProps((nextProps) => {
+                if (this.widget) {
+                    return this.updateWidget(nextProps);
+                }
+            });
+
+            let widgetIsAttached = false;
+            const insertWidget = () => {
+                if (!this.widget) {
+                    return;
+                }
+                const node = this.__owl__.firstNode();
+                node.parentNode.insertBefore(this.widget.el, node);
+                widgetIsAttached = true;
+            };
+
+            onMounted(() => {
+                insertWidget();
+                if (this.widget && this.widget.on_attach_callback) {
+                    this.widget.on_attach_callback();
+                }
+            });
+
+            onPatched(() => {
+                if (widgetIsAttached) {
+                    this.renderWidget();
+                }
+                insertWidget();
+            });
+
+            onWillDestroy(() => this.__destroy(this.__owl__.parent.component));
         }
 
-        /**
-         * Starts the legacy widget (not in the DOM yet)
-         *
-         * @override
-         */
         willStart() {
             if (!(this.props.Component.prototype instanceof Component)) {
                 this.widget = new this.props.Component(this, ...this.widgetArgs);
@@ -128,66 +152,24 @@ odoo.define('web.OwlCompatibility', function (require) {
             }
         }
 
-        /**
-         * Updates the internal state of the legacy widget (but doesn't re-render
-         * it yet).
-         *
-         * @override
-         */
-        willUpdateProps(nextProps) {
-            if (this.widget) {
-                return this.updateWidget(nextProps);
-            }
-        }
-
-        /**
-         * Hooks just before the actual patch to replace the fake div in the
-         * vnode by the actual node of the legacy widget. If the widget has to
-         * be re-render (because it has previously been updated), re-render it.
-         * This must be synchronous.
-         *
-         * @override
-         */
-        __patch(target, vnode) {
-            if (this.widget) {
-                if (this.__owl__.vnode) { // not at first rendering
-                    this.renderWidget();
-                }
-                vnode.elm = this.widget.el;
-            }
-            const result = super.__patch(...arguments);
-            if (this.widget && this.el !== this.widget.el) {
-                this.__owl__.vnode.elm = this.widget.el;
-            }
-            return result;
-        }
-
-        /**
-         * @override
-         */
-        mounted() {
-            if (this.widget && this.widget.on_attach_callback) {
-                this.widget.on_attach_callback();
-            }
-        }
-
-        /**
-         * @override
-         */
         willUnmount() {
             if (this.widget && this.widget.on_detach_callback) {
                 this.widget.on_detach_callback();
             }
         }
 
-        /**
-         * @override
-         */
         __destroy() {
-            super.__destroy(...arguments);
             if (this.widget) {
                 this.widget.destroy();
             }
+        }
+
+        get childProps() {
+            if (!this._childProps) {
+                this._childProps = Object.assign({}, this.props);
+                delete this._childProps.Component;
+            }
+            return this._childProps;
         }
 
         /**
@@ -283,6 +265,11 @@ odoo.define('web.OwlCompatibility', function (require) {
                 payload.__targetWidget = ev.target;
                 this.trigger(evType.replace(/_/g, '-'), payload);
             }
+        }
+
+        trigger(evName, payload) {
+            const event = new CustomEvent(evName, {detail: payload});
+            this.__owl__.firstNode().parentElement.dispatchEvent(event);
         }
     }
 

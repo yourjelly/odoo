@@ -17,6 +17,8 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     const nextTick = testUtils.nextTick;
     const addMockEnvironmentOwl = testUtils.mock.addMockEnvironmentOwl;
 
+    const { mount } = require("@web/../tests/helpers/utils");
+
     const {
         Component,
         onMounted,
@@ -41,7 +43,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
     QUnit.module("Owl Compatibility", function () {
         QUnit.module("ComponentAdapter");
 
-        QUnit.skip("sub widget with no argument", async function (assert) {
+        QUnit.test("sub widget with no argument", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -62,15 +64,12 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget with one argument", async function (assert) {
+        QUnit.test("sub widget with one argument", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -95,15 +94,12 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget with several arguments (common Adapter)", async function (assert) {
+        QUnit.test("sub widget with several arguments (common Adapter)", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -129,18 +125,15 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
             try {
-                await parent.mount(target);
+                await mount(Parent, { target });
             } catch (e) {
                 assert.strictEqual(e.toString(),
                     `Error: ComponentAdapter has more than 1 argument, 'widgetArgs' must be overriden.`);
             }
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget with several arguments (specific Adapter)", async function (assert) {
+        QUnit.test("sub widget with several arguments (specific Adapter)", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -171,15 +164,12 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget and widgetArgs props", async function (assert) {
+        QUnit.test("sub widget and widgetArgs props", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -205,15 +195,12 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget is updated when props change", async function (assert) {
+        QUnit.test("sub widget is updated when props change", async function (assert) {
             assert.expect(2);
 
             const MyWidget = Widget.extend({
@@ -255,8 +242,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello World!</div>');
 
@@ -264,11 +250,9 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             await nextTick();
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hello GED!</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget is updated when props change (async)", async function (assert) {
+        QUnit.test("sub widget is updated when props change (async)", async function (assert) {
             assert.expect(7);
 
             const prom = makeTestPromise();
@@ -320,8 +304,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { AsyncComponent, MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi World!</div><div>Hello World!</div>');
 
@@ -336,11 +319,10 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.strictEqual(parent.el.innerHTML, '<div>Hi GED!</div><div>Hello GED!</div>');
 
             assert.verifySteps(['render', 'update', 'render']);
-
-            parent.destroy();
         });
 
         QUnit.skip("sub widget methods are correctly called", async function (assert) {
+            // LPE Fixme: outdated ??
             assert.expect(8);
 
             const MyWidget = Widget.extend({
@@ -368,8 +350,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.verifySteps(['on_attach_callback']);
 
@@ -383,7 +364,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             assert.verifySteps(['on_detach_callback', 'destroy']);
         });
 
-        QUnit.skip("dynamic sub widget/component", async function (assert) {
+        QUnit.test("dynamic sub widget/component", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -401,20 +382,17 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             }
             Parent.template = xml`
                 <div>
-                    <ComponentAdapter t-foreach="Children" t-as="Child" Component="Child"/>
+                    <ComponentAdapter t-foreach="Children" t-as="Child" Component="Child" t-key="Child"/>
                 </div>`;
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>widget</div><div>component</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget that triggers events", async function (assert) {
+        QUnit.test("sub widget that triggers events", async function (assert) {
             assert.expect(5);
 
             let widget;
@@ -441,18 +419,15 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             widget.trigger_up('some-event', { value: 'a' });
             widget.trigger_up('some_event', { value: 'b' }); // _ are converted to -
 
             assert.verifySteps(['a', 'b']);
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget that calls _rpc", async function (assert) {
+        QUnit.test("sub widget that calls _rpc", async function (assert) {
             assert.expect(3);
 
             const MyWidget = Widget.extend({
@@ -479,17 +454,14 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div></div>');
             assert.verifySteps(['some/route 2']);
-
-            parent.destroy();
             cleanUp();
         });
 
-        QUnit.skip("sub widget that calls a service", async function (assert) {
+        QUnit.test("sub widget that calls a service", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -517,18 +489,20 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                     <ComponentAdapter Component="MyWidget"/>
                 </div>`;
             Parent.components = { ComponentAdapter };
-            Parent.env.services.math = {
-                sqrt: v => Math.sqrt(v),
+
+            const env = {
+                services: {
+                    math: {
+                        sqrt: v => Math.sqrt(v),
+                    }
+                }
             };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
-
-            parent.destroy();
+            const parent = await mount(Parent, { target, env });
         });
 
-        QUnit.skip("sub widget that requests the session", async function (assert) {
+        QUnit.test("sub widget that requests the session", async function (assert) {
             assert.expect(1);
 
             const MyWidget = Widget.extend({
@@ -552,14 +526,11 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
-
-            parent.destroy();
+            await mount(Parent, { target });
             cleanUp();
         });
 
-        QUnit.skip("sub widget that calls load_views", async function (assert) {
+        QUnit.test("sub widget that calls load_views", async function (assert) {
             assert.expect(4);
 
             const MyWidget = Widget.extend({
@@ -588,16 +559,14 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             });
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div></div>');
 
-            parent.destroy();
             cleanUp();
         });
 
-        QUnit.skip("sub widgets in a t-if/t-else", async function (assert) {
+        QUnit.test("sub widgets in a t-if/t-else", async function (assert) {
             assert.expect(3);
 
             const MyWidget1 = Widget.extend({
@@ -628,8 +597,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi</div>');
 
@@ -642,11 +610,9 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             await nextTick();
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi</div>');
-
-            parent.destroy();
         });
 
-        QUnit.skip("sub widget in a t-if, and events", async function (assert) {
+        QUnit.test("sub widget in a t-if, and events", async function (assert) {
             assert.expect(6);
 
             let myWidget;
@@ -675,8 +641,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { ComponentAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el.innerHTML, '<div>Hi</div>');
             myWidget.trigger_up('some-event', { value: 'a' });
@@ -694,11 +659,10 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             myWidget.trigger_up('some-event', { value: 'c' });
 
             assert.verifySteps(['a', 'c']);
-
-            parent.destroy();
         });
 
         QUnit.skip("adapter keeps same el as sub widget (modify)", async function (assert) {
+            // LPE Fixme: doesn't seem to have much relevance now, does it ?
             assert.expect(7);
 
             let myWidget;
@@ -747,8 +711,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
             assert.strictEqual(parent.el, myWidget.el);
             await testUtils.dom.click(parent.el);
@@ -766,20 +729,17 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             await testUtils.dom.click(parent.el);
 
             assert.verifySteps(["GED", "AAB", "MCM"]);
-
-            parent.destroy();
         });
 
-        QUnit.skip("adapter keeps same el as sub widget (replace)", async function (assert) {
-            assert.expect(7);
+        QUnit.test("adapter handles a widget that replaces its el", async function (assert) {
+            assert.expect(10);
 
-            let myWidget;
+            let renderId = 0;
             const MyWidget = Widget.extend({
                 events: {
                     click: "_onClick",
                 },
                 init: function (parent, name) {
-                    myWidget = this;
                     this._super.apply(this, arguments);
                     this.name = name;
                 },
@@ -788,6 +748,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
                 },
                 render: function () {
                     this._replaceElement("<div>Click me!</div>");
+                    this.el.classList.add(`widget_id_${renderId++}`);
                 },
                 update: function (name) {
                     this.name = name;
@@ -819,27 +780,28 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             Parent.components = { MyWidgetAdapter };
 
             const target = testUtils.prepareTarget();
-            const parent = new Parent();
-            await parent.mount(target);
+            const parent = await mount(Parent, { target });
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            assert.containsOnce(target, ".widget_id_0");
+
+            await testUtils.dom.click(target.querySelector(".widget_id_0"));
 
             parent.state.name = "AAB";
             await nextTick();
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            assert.containsNone(target, ".widget_id_0");
+            assert.containsOnce(target, ".widget_id_1");
+            await testUtils.dom.click(target.querySelector(".widget_id_1"));
 
             parent.state.name = "MCM";
             await nextTick();
 
-            assert.strictEqual(parent.el, myWidget.el);
-            await testUtils.dom.click(parent.el);
+            assert.containsNone(target, ".widget_id_0");
+            assert.containsNone(target, ".widget_id_1");
+            assert.containsOnce(target, ".widget_id_2");
+            await testUtils.dom.click(target.querySelector(".widget_id_2"));
 
             assert.verifySteps(["GED", "AAB", "MCM"]);
-
-            parent.destroy();
         });
 
         QUnit.module('WidgetAdapterMixin and ComponentWrapper');
