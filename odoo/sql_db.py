@@ -469,6 +469,7 @@ class Cursor(BaseCursor):
         self._closed = True
 
         if leak:
+            # TODO VSC: what does this leaked do ?
             self._cnx.leaked = True
         else:
             chosen_template = tools.config['db_template']

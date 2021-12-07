@@ -162,7 +162,7 @@ class IrTranslation(models.Model):
                               ('inprogress', 'Translation in Progress'),
                               ('translated', 'Translated')],
                              string="Status", default='to_translate',
-                             help="Automatically set to let administators find new terms that might need to be translated")
+                             help="Automatically set to let administrators find new terms that might need to be translated")
 
     # aka gettext extracted-comments - we use them to flag openerp-web translation
     # cfr: http://www.gnu.org/savannah-checkouts/gnu/gettext/manual/html_node/PO-Files.html

@@ -41,6 +41,7 @@ class ObjCateg(models.Model):
         if self.env.context.get('only_media'):
             args += [('name', '=', 'Media')]
         return super(ObjCateg, self).search(args, **kwargs)
+    # TODO VSC: does this super call forget the arguments (offset,limit, order, count) ?
 
 
 class FakeTicket(models.Model):

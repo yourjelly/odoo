@@ -3303,10 +3303,15 @@ Fields:
         if not self:
             return
         self.check_access_rights('read')
+        # TODO VSC: when called from models.read, the check has already been done.
+        #  Is this called from somewhere else where it is not the case or is the check in read redundant ?
 
         # if a read() follows a write(), we must flush updates, as read() will
         # fetch from database and overwrites the cache (`test_update_with_id`)
         self.flush(fields, self)
+        # TODO VSC: there is no sanitization of 'fields'. Either the call comes from read and the check_access_rights
+        #  is not needed, or it isn't and fields could flush something the user doesn't have access and has been put
+        #  into cache via a sudo
 
         field_names = []
         inherited_field_names = []

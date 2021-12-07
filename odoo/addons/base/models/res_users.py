@@ -454,6 +454,7 @@ class Users(models.Model):
                 for f in USER_PRIVATE_FIELDS:
                     try:
                         record._cache[f]
+                        # TODO VSC: why is this line here, what does it do ?
                         record._cache[f] = '********'
                     except Exception:
                         # skip SpecialValue (e.g. for missing record or access right)

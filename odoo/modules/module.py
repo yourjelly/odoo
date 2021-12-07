@@ -167,6 +167,7 @@ def get_module_path(module, downloaded=False, display_warning=True):
 
     """
     for adp in odoo.addons.__path__:
+        # TODO @VSC: why do we have __openerp.py__ or MODULE_NAME.zip ?
         files = [opj(adp, module, manifest) for manifest in MANIFEST_NAMES] +\
                 [opj(adp, module + '.zip')]
         if any(os.path.exists(f) for f in files):
@@ -393,6 +394,8 @@ def load_openerp_module(module_name):
         return
 
     try:
+        # TODO @VSC: https://docs.python.org/3.8/library/importlib.html seems to imply that we should use $
+        #  importlib.import_module instead of importlib.__import__
         __import__('odoo.addons.' + module_name)
 
         # Call the module's post-load hook. This can done before any model or
