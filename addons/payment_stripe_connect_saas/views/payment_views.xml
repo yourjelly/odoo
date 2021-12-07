@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_acquirer_form" model="ir.ui.view">
+        <field name="name">Stripe Acquirer Form</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment_stripe_connect.payment_acquirer_form"/>
+        <field name="arch" type="xml">
+            <field name="stripe_publishable_key" position="attributes">
+                <attribute name="attrs">{}</attribute>
+            </field>
+            <field name="stripe_secret_key" position="attributes">
+                <attribute name="attrs">{}</attribute>
+            </field>
+            <!-- Maybe just make the page invisible with show_credentials_page = False -->
+            <xpath expr="//group[@name='stripe_onboarding_group']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            <xpath expr="//div[@name='stripe_configuration_info']" position="replace">
+            </xpath>
+            <xpath expr="//group[@name='acquirer']" position="before">
+                <div class="alert alert-warning" role="status" name="stripe_onboarding_almost"
+                     attrs="{'invisible': [
+                        '|',
+                            ('provider', '!=', 'stripe'),
+                            '|',
+                                ('stripe_account_id', '=', False),
+                                '|',
+                                    ('stripe_account_validated', '=', True),
+                                    '|',
+                                        ('state', '=', 'enabled'),
+                                        '&amp;',
+                                            ('stripe_secret_key', '!=', False),
+                                            ('stripe_publishable_key', '!=', False)
+                     ]}">
+                    <field name="stripe_account_validated" invisible="1"/>
+                    <field name="stripe_account_id" invisible="1"/>
+                    <p><b>You're almost set !</b></p>
+                    <p>
+                        Click the button to finish your account validation on Stripe and create live charges.
+                        <b>You can already create test charges.</b>
+                    </p>
+                    <p>If you already have access to your secret and publishable keys, you can also configure the Stripe Acquirer by your own.</p>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
