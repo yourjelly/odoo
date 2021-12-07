@@ -1020,7 +1020,7 @@ class AccountBankStatementLine(models.Model):
     # RECONCILIATION METHODS
     # -------------------------------------------------------------------------
 
-    def _prepare_reconciliation(self, lines_vals_list, allow_partial=False):
+    def _prepare_reconciliation(self, lines_vals_list, allow_partial=False, raw_lines=False):
         ''' Helper for the "reconcile" method used to get a full preview of the reconciliation result. This method is
         quite useful to deal with reconcile models or the reconciliation widget because it ensures the values seen by
         the user are exactly the values you get after reconciling.
@@ -1028,6 +1028,7 @@ class AccountBankStatementLine(models.Model):
         :param lines_vals_list: See the 'reconcile' method.
         :param allow_partial:   In case of matching a line having an higher amount, allow creating a partial instead
                                 an open balance on the statement line.
+        :param raw_lines:       Create the journal items from 'lines_vals_list' without further processing.
         :return: The diff to be applied on the statement line as a tuple
         (
             lines_to_create:    The values to create the account.move.line on the statement line.
@@ -1072,11 +1073,12 @@ class AccountBankStatementLine(models.Model):
         to_browse_ids = []
         to_process_vals = []
         for vals in lines_vals_list:
+
             # Don't modify the params directly.
             vals = dict(vals)
 
             to_browse_id = vals.pop('id', None)
-            if to_browse_id:
+            if not raw_lines and to_browse_id:
                 # Existing account.move.line.
                 to_browse_ids.append(to_browse_id)
                 to_process_vals.append(vals)
@@ -1084,7 +1086,10 @@ class AccountBankStatementLine(models.Model):
                     partial_rec_needed = False
             else:
                 # Newly created account.move.line from scratch.
-                line_vals = self._prepare_counterpart_move_line_vals(vals)
+                if raw_lines:
+                    line_vals = vals
+                else:
+                    line_vals = self._prepare_counterpart_move_line_vals(vals)
                 total_balance += line_vals['debit'] - line_vals['credit']
                 total_amount_currency += line_vals['amount_currency']
                 reconciliation_overview.append({'line_vals': line_vals})
@@ -1178,7 +1183,7 @@ class AccountBankStatementLine(models.Model):
 
         return reconciliation_overview, open_balance_vals
 
-    def reconcile(self, lines_vals_list, to_check=False, allow_partial=False):
+    def reconcile(self, lines_vals_list, to_check=False, allow_partial=False, raw_lines=False):
         ''' Perform a reconciliation on the current account.bank.statement.line with some
         counterpart account.move.line.
         If the statement line entry is not fully balanced after the reconciliation, an open balance will be created
@@ -1195,13 +1200,15 @@ class AccountBankStatementLine(models.Model):
         :param to_check:        Mark the current statement line as "to_check" (see field for more details).
         :param allow_partial:   In case of matching a line having an higher amount, allow creating a partial instead
                                 of an open balance on the statement line.
-        '''
+        :param raw_lines:       Create the journal items from 'lines_vals_list' without further processing.
+    '''
         self.ensure_one()
         liquidity_lines, suspense_lines, other_lines = self._seek_for_lines()
 
         reconciliation_overview, open_balance_vals = self._prepare_reconciliation(
             lines_vals_list,
             allow_partial=allow_partial,
+            raw_lines=raw_lines,
         )
 
         # ==== Manage res.partner.bank ====
