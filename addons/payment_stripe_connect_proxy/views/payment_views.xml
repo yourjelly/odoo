@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_acquirer_form" model="ir.ui.view">
+        <field name="name">Stripe Acquirer Form</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment_stripe_connect.payment_acquirer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='stripe_onboarding_group']" position="attributes">
+                <attribute name="invisible">context.get('stripe_onboarding', False)</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
