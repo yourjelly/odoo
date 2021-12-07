@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import os
+import math
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from uuid import uuid4
+from re import sub as regex_sub
 
 import xmlsig
-import re as regex
 from cryptography.hazmat.primitives import hashes
 from lxml import etree
 from lxml.objectify import fromstring
 from odoo import _, fields, models
-from odoo.tools import html_escape, get_lang
+from odoo.tools import get_lang, html_escape
 from requests import exceptions
 
 from .requests_pkcs12 import post
@@ -65,6 +66,11 @@ class AccountEdiFormat(models.Model):
                 'blocking_level': 'error',
             } for inv in invoices}
 
+        # Set registration date TODO if unsuccessful, set again at next attempt (remove filter) ?
+        invoices.filtered(lambda inv: not inv.l10n_es_tbai_registration_date).write({
+            'l10n_es_tbai_registration_date': fields.datetime.now(),
+        })
+
         # Generate the XML values.
         inv_xml = self._l10n_es_tbai_get_invoice_xml(invoices)
 
@@ -96,10 +102,9 @@ class AccountEdiFormat(models.Model):
     def _l10n_es_tbai_get_invoice_xml(self, invoice):
         values = self._l10n_es_tbai_get_header_values(invoice)
         values.update(self._l10n_es_tbai_get_subject_values(invoice))
-        values.update(self._l10n_es_tbai_get_move_values(invoice))
+        values.update(self._l10n_es_tbai_get_invoice_values(invoice))
         values.update(self._l10n_es_tbai_get_trail_values(invoice))
         xml_str = self.env.ref('l10n_es_edi_tbai.template_invoice_bundle')._render(values)
-
         xml_doc = etree.fromstring(xml_str, etree.XMLParser(compact=True, remove_blank_text=True, remove_comments=True))
 
         return xml_doc
@@ -145,7 +150,7 @@ class AccountEdiFormat(models.Model):
                 'CodigoPostal': partner.zip,
                 'Direccion': ", ".join(filter(lambda x: x, [partner.street, partner.street2, partner.city]))
             }
-            xml_recipients.append(self.env.ref('l10n_es_edi_tbai.template_invoice_destinatarios')._render(values_dest))
+            xml_recipients.append(values_dest)
         # TODO check that less than 100 recipients (max for TBAI) ?
 
         # === SENDER ===
@@ -158,8 +163,201 @@ class AccountEdiFormat(models.Model):
             'TerceroODestinatario': "D"  # TODO
         }
 
-    def _l10n_es_tbai_get_move_values(self, invoice):
-        return {}
+    def _l10n_es_tbai_get_invoice_values(self, invoices):
+        eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+
+        # simplified_partner = self.env.ref("l10n_es_edi_tbai.partner_simplified")
+
+        values = {}
+        for invoice in invoices:
+            com_partner = invoice.commercial_partner_id
+            is_simplified = False  # invoice.partner_id == simplified_partner ??
+
+            # === CABECERA===
+            values['SerieFactura'] = invoice.l10n_es_tbai_sequence
+            values['NumFactura'] = invoice.l10n_es_tbai_number
+            values['FechaExpedicionFactura'] = datetime.strftime(invoice.l10n_es_tbai_registration_date, '%d-%m-%Y')
+            values['HoraExpedicionFactura'] = datetime.strftime(invoice.l10n_es_tbai_registration_date, '%H:%M:%S')
+
+            # TODO simplified & rectified invoices
+            # if invoice.move_type == 'out_invoice':
+            #     invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
+            # elif invoice.move_type == 'out_refund':
+            #     invoice_node['TipoFactura'] = 'R5' if is_simplified else 'R1'
+            #     invoice_node['TipoRectificativa'] = 'I'
+
+            # === DATOS FACTURA ===
+            values['DescripcionFactura'] = invoice.invoice_origin or 'manual'
+            detalles = []
+            # tax_details = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
+            for line in invoice.invoice_line_ids.filtered(lambda line: not line.display_type):
+                # line_details = tax_details['tax_details']['invoice_line_tax_details'][line]
+                detalles.append({
+                    "DescripcionDetalle": regex_sub(r"[^0-9a-zA-Z ]", "", line.name)[:250],
+                    "Cantidad": line.quantity,
+                    "ImporteUnitario": line.price_unit,
+                    "Descuento": line.discount or "0.00",
+                    "ImporteTotal": line.price_total,
+                })
+            values['DetallesFactura'] = detalles
+
+            # Claves: TODO there's 15 more codes to implement, there can be up to 3
+            if not com_partner.country_id or com_partner.country_id.code in eu_country_codes:
+                values['ClaveRegimenIvaOpTrascendencia'] = '01'
+            else:
+                values['ClaveRegimenIvaOpTrascendencia'] = '02'
+
+            # === TIPO DESGLOSE ===
+            if com_partner.country_id.code in ('ES', False) and not (com_partner.vat or '').startswith("ESN"):
+                tax_details_info_vals = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
+                values['DesgloseFactura'] = tax_details_info_vals['tax_details_info']
+                values['ImporteTotalFactura'] = round(tax_details_info_vals['tax_details']['base_amount']
+                                                      + tax_details_info_vals['tax_details']['tax_amount']
+                                                      - tax_details_info_vals['tax_amount_retention'], 2)
+
+            else:
+                tax_details_info_service_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
+                    invoice,
+                    filter_invl_to_apply=lambda x: any(t.tax_scope == 'service' for t in x.tax_ids)
+                )
+                tax_details_info_consu_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
+                    invoice,
+                    filter_invl_to_apply=lambda x: any(t.tax_scope == 'consu' for t in x.tax_ids)
+                )
+
+                if tax_details_info_service_vals['tax_details_info']:
+                    values['PrestacionServicios'] = tax_details_info_service_vals['tax_details_info']
+                if tax_details_info_consu_vals['tax_details_info']:
+                    values['EntregaBienes'] = tax_details_info_consu_vals['tax_details_info']
+
+                values['ImporteTotalFactura'] = round(
+                    tax_details_info_service_vals['tax_details']['base_amount']
+                    + tax_details_info_service_vals['tax_details']['tax_amount']
+                    - tax_details_info_service_vals['tax_amount_retention']
+                    + tax_details_info_consu_vals['tax_details']['base_amount']
+                    + tax_details_info_consu_vals['tax_details']['tax_amount']
+                    - tax_details_info_consu_vals['tax_amount_retention'], 2)
+
+        return values
+
+    def _l10n_es_tbai_get_invoice_tax_details_values(self, invoice, filter_invl_to_apply=None):
+
+        def grouping_key_generator(tax_values):
+            tax = tax_values['tax_id']
+            return {
+                'applied_tax_amount': tax.amount,
+                'l10n_es_type': tax.l10n_es_type,
+                'l10n_es_exempt_reason': tax.l10n_es_exempt_reason if tax.l10n_es_type == 'exento' else False,
+                'l10n_es_bien_inversion': tax.l10n_es_bien_inversion,
+            }
+
+        def filter_to_apply(tax_values):
+            # For intra-community, we do not take into account the negative repartition line
+            return tax_values['tax_repartition_line_id'].factor_percent > 0.0
+
+        def full_filter_invl_to_apply(invoice_line):
+            if 'ignore' in invoice_line.tax_ids.flatten_taxes_hierarchy().mapped('l10n_es_type'):
+                return False
+            return filter_invl_to_apply(invoice_line) if filter_invl_to_apply else True
+
+        tax_details = invoice._prepare_edi_tax_details(
+            grouping_key_generator=grouping_key_generator,
+            filter_invl_to_apply=full_filter_invl_to_apply,
+            filter_to_apply=filter_to_apply,
+        )
+        sign = -1 if invoice.is_sale_document() else 1
+
+        tax_details_info = defaultdict(dict)
+
+        # Detect for which is the main tax for 'recargo'. Since only a single combination tax + recargo is allowed
+        # on the same invoice, this can be deduced globally.
+
+        recargo_tax_details = {}  # Mapping between main tax and recargo tax details
+        invoice_lines = invoice.invoice_line_ids.filtered(lambda x: not x.display_type)
+        if filter_invl_to_apply:
+            invoice_lines = invoice_lines.filtered(filter_invl_to_apply)
+        for line in invoice_lines:
+            taxes = line.tax_ids.flatten_taxes_hierarchy()
+            recargo_tax = [t for t in taxes if t.l10n_es_type == 'recargo']
+            if recargo_tax and taxes:
+                recargo_main_tax = taxes.filtered(lambda x: x.l10n_es_type in ('sujeto', 'sujeto_isp'))[:1]
+                if not recargo_tax_details.get(recargo_main_tax):
+                    recargo_tax_details[recargo_main_tax] = [
+                        x for x in tax_details['tax_details'].values()
+                        if x['group_tax_details'][0]['tax_id'] == recargo_tax[0]
+                    ][0]
+
+        tax_amount_deductible = 0.0
+        tax_amount_retention = 0.0
+        base_amount_not_subject = 0.0
+        base_amount_not_subject_loc = 0.0
+        tax_subject_info_list = []
+        tax_subject_isp_info_list = []
+        for tax_values in tax_details['tax_details'].values():
+
+            if tax_values['l10n_es_type'] in ('sujeto', 'sujeto_isp'):
+                tax_amount_deductible += tax_values['tax_amount']
+
+                base_amount = sign * tax_values['base_amount']
+                tax_info = {
+                    'TipoImpositivo': tax_values['applied_tax_amount'],
+                    'BaseImponible': round(base_amount, 2),
+                    'CuotaRepercutida': round(math.copysign(tax_values['tax_amount'], base_amount), 2),
+                }
+
+                recargo = recargo_tax_details.get(tax_values['group_tax_details'][0]['tax_id'])
+                if recargo:
+                    tax_info['CuotaRecargoEquivalencia'] = round(sign * recargo['tax_amount'], 2)
+                    tax_info['TipoRecargoEquivalencia'] = recargo['applied_tax_amount']
+
+                if tax_values['l10n_es_type'] == 'sujeto':
+                    tax_subject_info_list.append(tax_info)
+                else:
+                    tax_subject_isp_info_list.append(tax_info)
+
+            elif tax_values['l10n_es_type'] == 'exento':
+                tax_details_info['Sujeta'].setdefault('Exenta', {'DetalleExenta': []})
+                tax_details_info['Sujeta']['Exenta']['DetalleExenta'].append({
+                    'BaseImponible': round(sign * tax_values['base_amount'], 2),
+                    'CausaExencion': tax_values['l10n_es_exempt_reason'],
+                })
+            elif tax_values['l10n_es_type'] == 'retencion':
+                tax_amount_retention += tax_values['tax_amount']
+            elif tax_values['l10n_es_type'] == 'no_sujeto':
+                base_amount_not_subject += tax_values['base_amount']
+            elif tax_values['l10n_es_type'] == 'no_sujeto_loc':
+                base_amount_not_subject_loc += tax_values['base_amount']
+            elif tax_values['l10n_es_type'] == 'ignore':
+                continue
+
+            if tax_subject_isp_info_list and not tax_subject_info_list:
+                tax_details_info['Sujeta']['NoExenta'] = {'TipoNoExenta': 'S2'}
+            elif not tax_subject_isp_info_list and tax_subject_info_list:
+                tax_details_info['Sujeta']['NoExenta'] = {'TipoNoExenta': 'S1'}
+            elif tax_subject_isp_info_list and tax_subject_info_list:
+                tax_details_info['Sujeta']['NoExenta'] = {'TipoNoExenta': 'S3'}
+
+            if tax_subject_info_list:
+                tax_details_info['Sujeta']['NoExenta'].setdefault('DesgloseIVA', {})
+                tax_details_info['Sujeta']['NoExenta']['DesgloseIVA'].setdefault('DetalleIVA', [])
+                tax_details_info['Sujeta']['NoExenta']['DesgloseIVA']['DetalleIVA'] += tax_subject_info_list
+            if tax_subject_isp_info_list:
+                tax_details_info['Sujeta']['NoExenta'].setdefault('DesgloseIVA', {})
+                tax_details_info['Sujeta']['NoExenta']['DesgloseIVA'].setdefault('DetalleIVA', [])
+                tax_details_info['Sujeta']['NoExenta']['DesgloseIVA']['DetalleIVA'] += tax_subject_isp_info_list
+
+        if not invoice.company_id.currency_id.is_zero(base_amount_not_subject) and invoice.is_sale_document():
+            tax_details_info['NoSujeta']['ImportePorArticulos7_14_Otros'] = round(sign * base_amount_not_subject, 2)
+        if not invoice.company_id.currency_id.is_zero(base_amount_not_subject_loc) and invoice.is_sale_document():
+            tax_details_info['NoSujeta']['ImporteTAIReglasLocalizacion'] = round(sign * base_amount_not_subject_loc, 2)
+
+        return {
+            'tax_details_info': tax_details_info,
+            'tax_details': tax_details,
+            'tax_amount_deductible': tax_amount_deductible,
+            'tax_amount_retention': tax_amount_retention,
+            'base_amount_not_subject': base_amount_not_subject,
+        }
 
     def _l10n_es_tbai_get_trail_values(self, invoice):
         prev_invoice = invoice.company_id.l10n_es_tbai_last_posted_id
@@ -192,11 +390,6 @@ class AccountEdiFormat(models.Model):
     def _l10n_es_tbai_post_to_web_service(self, invoices, invoice_xml, signature):
         company = invoices.company_id
 
-        # Set registration date (TODO only do that after successful post ?)
-        invoices.filtered(lambda inv: not inv.l10n_es_registration_date).write({
-            'l10n_es_registration_date': fields.Date.context_today(self),
-        })
-
         # All invoices share the same value, see '_get_batch_key'.
         # TBAID only exists if invoice has already been successfully submitted to gov.
         tbai_id = invoices.mapped('l10n_es_tbai_id')[0]
@@ -216,6 +409,7 @@ class AccountEdiFormat(models.Model):
         data = response.content.decode(response.encoding)
 
         # Error management
+        print(data)  # TODO remove
         response_xml = etree.fromstring(bytes(data, 'utf-8'))
         state = int(response_xml.find(r'.//Estado').text)
         if state == 0:
@@ -223,16 +417,15 @@ class AccountEdiFormat(models.Model):
             invoices.write({'l10n_es_tbai_previous_invoice_id': company.l10n_es_tbai_last_posted_id})
             invoices.write({'l10n_es_tbai_signature': signature})
             company.write({'l10n_es_tbai_last_posted_id': invoices})
-            return {invoices: {'success': True}}
+            return {invoices: {'success': True, 'error': '', 'blocking_level': 'info'}}
         else:
             # ERROR
             results = response_xml.find(r'.//ResultadosValidacion')
             message = results.find('Codigo').text + ": " + \
                 (results.find(r'Azalpena').text if get_lang(self.env).code == 'eu_ES' else results.find(r'Descripcion').text)
-            print(message)
             return {invoices: {'success': state == 0, 'error': _(message), 'blocking_level': 'warning'}}
 
-    @staticmethod
+    @ staticmethod
     def sign(root, certificate):
         """
         Sign XML with PKCS #12

@@ -11,100 +11,143 @@
                         <NIF t-out="EmisorVAT"/>
                         <ApellidosNombreRazonSocial t-out="Emisor.name"/>
                     </Emisor>
-                    <t t-foreach="Destinatarios" t-as="dest">
-                        <Destinatarios t-out="dest"/>
-                    </t>
+                    <Destinatarios>
+                        <IDDestinatario t-foreach="Destinatarios" t-as="d">
+                            <NIF t-if="d['NIF']" t-out="d['NIF']"/>
+                            <IDOtro t-else="">
+                                <CodigoPais t-if="d['IDOtro_CodigoPais']" t-out="d['IDOtro_CodigoPais']"/>
+                                <IDType t-out="d['IDOtro_IDType']"/>
+                                <ID t-out="d['IDOtro_ID']"/>
+                            </IDOtro>
+                            <ApellidosNombreRazonSocial t-out="d['ApellidosNombreRazonSocial']"/>
+                            <CodigoPostal t-out="d['CodigoPostal']"/>
+                            <Direccion t-out="d['Direccion']"/>
+                        </IDDestinatario>
+                    </Destinatarios>
                     <VariosDestinatarios t-out="VariosDestinatarios"/>
                     <EmitidaPorTercerosODestinatario t-out="TerceroODestinatario"/>
                 </Sujetos>
-                <Factura t-call="l10n_es_edi_tbai.template_invoice_factura"/>
-                <HuellaTBAI t-call="l10n_es_edi_tbai.template_invoice_huella"/>
+                <Factura>
+                    <CabeceraFactura>
+                        <SerieFactura t-out="SerieFactura"/>
+                        <NumFactura t-out="NumFactura"/>
+                        <FechaExpedicionFactura t-out="FechaExpedicionFactura"/>
+                        <HoraExpedicionFactura t-out="HoraExpedicionFactura"/>
+                        <!-- TODO factura simplificada / en sustitucion de simplificada ? -->
+                        <FacturaRectificativa t-if="FacturaRectificativa">
+                            <Codigo>R1</Codigo>
+                            <Tipo>S</Tipo>
+                            <ImporteRectificacionSustitutiva>
+                                <BaseRectificada>180.00</BaseRectificada>
+                                <CuotaRectificada>20.21</CuotaRectificada>
+                            </ImporteRectificacionSustitutiva>
+                        </FacturaRectificativa>
+                        <FacturasRectificadasSustituidas t-if="FacturasRectificadasSustituidas">
+                            <IDFacturaRectificadaSustituida>
+                                <SerieFactura>TBAITEST/</SerieFactura>
+                                <NumFactura>00001</NumFactura>
+                                <FechaExpedicionFactura>23-11-2021</FechaExpedicionFactura>
+                            </IDFacturaRectificadaSustituida>
+                        </FacturasRectificadasSustituidas>
+                    </CabeceraFactura>
+                    <DatosFactura>
+                        <DescripcionFactura t-out="DescripcionFactura"/>
+                        <DetallesFactura>
+                            <IDDetalleFactura t-foreach="DetallesFactura" t-as="d">
+                                <DescripcionDetalle t-esc="d['DescripcionDetalle']"/>
+                                <Cantidad t-out="d['Cantidad']"/>
+                                <ImporteUnitario t-out="d['ImporteUnitario']"/>
+                                <Descuento t-out="d['Descuento']"/>
+                                <ImporteTotal t-out="d['ImporteTotal']"/>
+                            </IDDetalleFactura>
+                        </DetallesFactura>
+                        <ImporteTotalFactura t-out="ImporteTotalFactura"/>
+                        <Claves>
+                            <IDClave>
+                                <ClaveRegimenIvaOpTrascendencia t-out="ClaveRegimenIvaOpTrascendencia"/>
+                                <!-- TODO there can be multiple (up to three?) keys -->
+                            </IDClave>
+                        </Claves>
+                    </DatosFactura>
+                    <TipoDesglose>
+                        <DesgloseFactura t-if="DesgloseFactura">
+                            <t t-call="l10n_es_edi_tbai.template_invoice_desglose">
+                                <t t-set="dg" t-value="DesgloseFactura"/>
+                            </t>
+                        </DesgloseFactura>
+                        <DesgloseTipoOperacion t-if="PrestacionServicios or EntregaBienes">
+                            <PrestacionServicios t-if="PrestacionServicios">
+                                <t t-call="l10n_es_edi_tbai.template_invoice_desglose">
+                                    <t t-set="dg" t-value="PrestacionServicios"/>
+                                </t>
+                            </PrestacionServicios>
+                            <Entrega t-if="EntregaBienes">
+                                <t t-call="l10n_es_edi_tbai.template_invoice_desglose">
+                                    <t t-set="dg" t-value="EntregaBienes"/>
+                                </t>
+                            </Entrega>
+                        </DesgloseTipoOperacion>
+                    </TipoDesglose>
+                </Factura>
+                <HuellaTBAI>
+                    <EncadenamientoFacturaAnterior t-if="EncadenamientoFacturaAnterior">
+                        <SerieFacturaAnterior t-out="SerieFacturaAnterior"/>
+                        <NumFacturaAnterior t-out="NumFacturaAnterior"/>
+                        <FechaExpedicionFacturaAnterior t-out="FechaExpedicionFacturaAnterior"/>
+                        <SignatureValueFirmaFacturaAnterior t-out="FirmaFacturaAnterior"/>
+                    </EncadenamientoFacturaAnterior>
+                    <Software>
+                        <LicenciaTBAI>TBAI-LICENSE-KEY</LicenciaTBAI>
+                        <EntidadDesarrolladora>
+                            <NIF>B20990602</NIF>
+                        </EntidadDesarrolladora>
+                        <Nombre>Odoo Officiel GRPZ 1367</Nombre>
+                        <Version>15.0+e</Version>
+                    </Software>
+                    <NumSerieDispositivo>TEST-DEVICE-001</NumSerieDispositivo>
+                </HuellaTBAI>
             </T:TicketBai>
         </template>
 
-        <template id="template_invoice_destinatarios">
-            <IDDestinatario>
-                <NIF t-if="NIF" t-out="NIF"/>
-                <IDOtro t-else="">
-                    <CodigoPais t-if="IDOtro_CodigoPais" t-out="IDOtro_CodigoPais"/>
-                    <IDType t-out="IDOtro_IDType"/>
-                    <ID t-out="IDOtro_ID"/>
-                </IDOtro>
-                <ApellidosNombreRazonSocial t-out="ApellidosNombreRazonSocial"/>
-                <CodigoPostal t-out="CodigoPostal"/>
-                <Direccion t-out="Direccion"/>
-            </IDDestinatario>
-        </template>
-
-        <template id="template_invoice_factura">
-            <CabeceraFactura>
-                <SerieFactura>TBAITEST/</SerieFactura>
-                <NumFactura>00001</NumFactura>
-                <FechaExpedicionFactura>22-11-2021</FechaExpedicionFactura>
-                <HoraExpedicionFactura>09:00:00</HoraExpedicionFactura>
-            </CabeceraFactura>
-            <DatosFactura>
-                <DescripcionFactura>/</DescripcionFactura>
-                <DetallesFactura>
-                    <IDDetalleFactura>
-                        <DescripcionDetalle>L1</DescripcionDetalle>
-                        <Cantidad>1.00</Cantidad>
-                        <ImporteUnitario>100.00</ImporteUnitario>
-                        <Descuento>10.00</Descuento>
-                        <ImporteTotal>108.90</ImporteTotal>
-                    </IDDetalleFactura>
-                    <IDDetalleFactura>
-                        <DescripcionDetalle>L2</DescripcionDetalle>
-                        <Cantidad>1.25</Cantidad>
-                        <ImporteUnitario>4.99</ImporteUnitario>
-                        <Descuento>0.00</Descuento>
-                        <ImporteTotal>7.55</ImporteTotal>
-                    </IDDetalleFactura>
-                </DetallesFactura>
-                <ImporteTotalFactura>116.45</ImporteTotalFactura>
-                <Claves>
-                    <IDClave>
-                        <ClaveRegimenIvaOpTrascendencia>01</ClaveRegimenIvaOpTrascendencia>
-                    </IDClave>
-                </Claves>
-            </DatosFactura>
-            <TipoDesglose>
-                <DesgloseFactura>
-                    <Sujeta>
-                        <NoExenta>
-                            <DetalleNoExenta>
-                                <TipoNoExenta>S1</TipoNoExenta>
-                                <DesgloseIVA>
-                                    <DetalleIVA>
-                                        <BaseImponible>116.45</BaseImponible>
-                                        <TipoImpositivo>21.00</TipoImpositivo>
-                                        <CuotaImpuesto>20.21</CuotaImpuesto>
-                                        <OperacionEnRecargoDeEquivalenciaORegimenSimplificado>N</OperacionEnRecargoDeEquivalenciaORegimenSimplificado>
-                                    </DetalleIVA>
-                                </DesgloseIVA>
-                            </DetalleNoExenta>
-                        </NoExenta>
-                    </Sujeta>
-                </DesgloseFactura>
-            </TipoDesglose>
-        </template>
-
-        <template id="template_invoice_huella">
-            <EncadenamientoFacturaAnterior t-if="EncadenamientoFacturaAnterior">
-                <SerieFacturaAnterior t-out="SerieFacturaAnterior"/>
-                <NumFacturaAnterior t-out="NumFacturaAnterior"/>
-                <FechaExpedicionFacturaAnterior t-out="FechaExpedicionFacturaAnterior"/>
-                <SignatureValueFirmaFacturaAnterior t-out="FirmaFacturaAnterior"/>
-            </EncadenamientoFacturaAnterior>
-            <Software>
-                <LicenciaTBAI>TBAI-LICENSE-KEY</LicenciaTBAI>
-                <EntidadDesarrolladora>
-                    <NIF>B20990602</NIF>
-                </EntidadDesarrolladora>
-                <Nombre>Odoo</Nombre>
-                <Version>15.0+e</Version>
-            </Software>
-            <NumSerieDispositivo>TEST-DEVICE-001</NumSerieDispositivo>
+        <template id="template_invoice_desglose">
+            <t>
+                <t>
+                    <t>
+                        <t>
+                            <Sujeta t-if="dg.get('Sujeta')">
+                                <t t-set="su" t-value="dg['Sujeta']"/>
+                                <Exenta t-if="su.get('Exenta')">
+                                    <DetalleExenta t-foreach="su['Exenta']['DetalleExenta']" t-as="ex">
+                                        <CausaExencion t-out="ex['CausaExencion']"/>
+                                        <BaseImponible t-out="ex['BaseImponible']"/>
+                                    </DetalleExenta>
+                                </Exenta>
+                                <NoExenta t-if="su.get('NoExenta')">
+                                    <t t-set="nex" t-value="su['NoExenta']"/>
+                                    <DetalleNoExenta>
+                                        <TipoNoExenta t-out="nex['TipoNoExenta']"/>
+                                        <DesgloseIVA>
+                                            <DetalleIVA t-foreach="nex['DesgloseIVA']['DetalleIVA']" t-as="det">
+                                                <BaseImponible t-out="det['BaseImponible']"/>
+                                                <TipoImpositivo t-out="det['TipoImpositivo']"/>
+                                                <CuotaImpuesto t-out="det['CuotaRepercutida']"/>
+                                                <OperacionEnRecargoDeEquivalenciaORegimenSimplificado>N</OperacionEnRecargoDeEquivalenciaORegimenSimplificado>
+                                            </DetalleIVA>
+                                        </DesgloseIVA>
+                                    </DetalleNoExenta>
+                                </NoExenta>
+                            </Sujeta>
+                            <NoSujeta t-if="dg.get('NoSujeta')">
+                                <t t-set="nsu" t-value="dg['NoSujeta']"/>
+                                <DetalleNoSujeta>
+                                    <Causa>RL</Causa>
+                                    <Importe t-out="nsu['ImporteTAIReglasLocalizacion']"/>
+                                </DetalleNoSujeta>
+                            </NoSujeta>
+                        </t>
+                    </t>
+                </t>
+            </t>
         </template>
     </data>
 </odoo>

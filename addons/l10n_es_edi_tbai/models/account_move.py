@@ -15,7 +15,7 @@ class AccountMove(models.Model):
     l10n_es_tbai_previous_invoice_id = fields.Many2one(string="Previous invoice on chain", comodel_name="account.move", copy=False, readonly=True)
     l10n_es_tbai_id = fields.Char(string="TicketBaiID", copy=False, readonly=True)
     l10n_es_tbai_signature = fields.Char(string="Signature value of XML", copy=False, readonly=True)
-    l10n_es_registration_date = fields.Date(
+    l10n_es_tbai_registration_date = fields.Date(
         string="Registration Date",
         help="Technical field to keep the date the invoice was sent the first time as the date the invoice was "
              "registered into the system.",
