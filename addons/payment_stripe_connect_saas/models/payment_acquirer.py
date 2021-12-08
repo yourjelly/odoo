@@ -88,6 +88,7 @@ class PaymentAcquirer(models.Model):
         endpoint_to_request_as_referrer = [
             'account_links',
             'accounts',
+            'webhook_endpoints',  # WARNING !!! See below
         ]
         request_as_referrer = endpoint.split('/')[0] in endpoint_to_request_as_referrer
         if not self.stripe_account_id or self.stripe_secret_key or request_as_referrer:
@@ -96,3 +97,31 @@ class PaymentAcquirer(models.Model):
             **super()._additional_header(endpoint),
             'Stripe-Account': self.stripe_account_id
         }
+
+    def _create_webhook(self):
+        if self.stripe_webhook_secret:
+            return
+        if 'localhost' in self.company_id.get_base_url():
+            return
+        # /!\ WARNING:
+        # Every reviewer should understand the webhook will be created on the Connect Account (and not the connected account)
+        # It implies that every instance will receive every webhook from other connected accounts.
+        # I (tle) do suspect that it's not a good practice since every instance receives information which doesn't concern them.
+        # Yet ! This should only be used on SaaS db so it may be safe on those ones (I'm not an expert).
+        webhook = self._stripe_make_request(
+            'webhook_endpoints',
+            payload={
+                'url': self.company_id.get_base_url() + '/payment/stripe/webhook',
+                'enabled_events[]': [
+                    'checkout.session.completed',
+                    # TODO TLE : For the moment, those events are not handled, ask ANV why ?
+                    # 'checkout.session.async_payment_succeeded',
+                    # 'checkout.session.async_payment_failed',
+                    # 'charge.refunded',
+                    # 'charge.refund.updated'
+                ],
+                'api_version': API_VERSION,
+                'connect': True,
+            }
+        )
+        self.stripe_webhook_secret = webhook.get('secret')

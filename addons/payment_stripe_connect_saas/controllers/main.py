@@ -34,6 +34,8 @@ class StripeController(main.StripeController):
         stripe_acquirer._update_stripe_onboarding_status()
         if stripe_acquirer.stripe_account_validated:
             stripe_acquirer.state = 'enabled'
+            # /!\ WARNING: See comment in payment_acquirer.py::_create_webhook()
+            stripe_acquirer._create_webhook()
             menu_id = request.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration')
             url_params = {
                 'menu_id': menu_id,
@@ -57,3 +59,21 @@ class StripeController(main.StripeController):
         if not url:
             return self._redirect_payment_acquirer(stripe_acquirer)
         return werkzeug.utils.redirect(url)
+
+    @http.route('/payment/stripe/webhook', type='json', auth='public')
+    def stripe_webhook(self):
+        """ Process the `checkout.session.completed` event sent by Stripe to the webhook.
+
+        :return: An empty string to acknowledge the notification with an HTTP 200 response
+        :rtype: str
+        """
+        event = json.loads(request.httprequest.data)
+        _logger.info("event received:\n%s", pprint.pformat(event))
+        # /!\ WARNING: See comment in payment_acquirer.py::_create_webhook()
+        verify_account = request.env['payment.acquirer'].sudo().search([
+            ('provider', '=', 'stripe'),
+            ('stripe_account_id', '=', event['account'])
+        ])
+        if not verify_account:
+            return ''
+        return super().stripe_webhook()
