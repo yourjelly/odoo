@@ -343,6 +343,7 @@ class AccountReconcileModel(models.Model):
                 'tax_repartition_line_id': tax_res['tax_repartition_line_id'],
                 'tax_ids': [(6, 0, tax_res['tax_ids'])],
                 'tax_tag_ids': [(6, 0, tax_res['tag_ids'])],
+                'group_tax_id': tax_res['group'].id if tax_res['group'] else False,
                 'currency_id': False,
                 'reconcile_model_id': self.id,
             })
