@@ -2,14 +2,47 @@
 <odoo>
     <!-- account.tax.template -->
     <record id="tr_kdv_satis_sale_18" model="account.tax.template">
-        <field name="sequence">11</field>
-        <field name="description">KDV %18(sale)</field>
-        <field name="name">KDV %18(sale)</field>
+        <field name="sequence">10</field>
+        <field name="description">KDV %18(satış)</field>
+        <field name="name">KDV %18(satış)</field>
         <field name="price_include" eval="0"/>
         <field name="amount">18</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">sale</field>
-        <field name="chart_template_id" ref="l10ntr_tek_duzen_hesap"/>
+        <field name="chart_template_id" ref="chart_template"/>
+        <field name="tax_group_id" ref="tax_group_kdv_18"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr391'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr191'),
+            }),
+        ]"/>
+    </record>
+    <record id="tr_kdv_satis_purchase_18" model="account.tax.template">
+        <field name="sequence">10</field>
+        <field name="description">KDV %18(satın alma)</field>
+        <field name="name">KDV %18(satın alma)</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">18</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="chart_template"/>
         <field name="tax_group_id" ref="tax_group_kdv_18"/>
         <field name="invoice_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
@@ -35,16 +68,16 @@
         ]"/>
     </record>
 
-    <record id="tr_kdv_satis_purchase_18" model="account.tax.template">
-        <field name="sequence">11</field>
-        <field name="description">KDV %18(purchase)</field>
-        <field name="name">KDV %18(purchase)</field>
+    <record id="tr_kdv_satis_sale_8" model="account.tax.template">
+        <field name="sequence">20</field>
+        <field name="description">KDV %8(satış)</field>
+        <field name="name">KDV %8(satış)</field>
         <field name="price_include" eval="0"/>
-        <field name="amount">18</field>
+        <field name="amount">8</field>
         <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="chart_template_id" ref="l10ntr_tek_duzen_hesap"/>
-        <field name="tax_group_id" ref="tax_group_kdv_18"/>
+        <field name="type_tax_use">sale</field>
+        <field name="chart_template_id" ref="chart_template"/>
+        <field name="tax_group_id" ref="tax_group_kdv_8"/>
         <field name="invoice_repartition_line_ids" eval="[(5,0,0),
             (0,0, {
                 'factor_percent': 100,
@@ -68,4 +101,105 @@
             }),
         ]"/>
     </record>
+    <record id="tr_kdv_satis_purchase_8" model="account.tax.template">
+        <field name="sequence">20</field>
+        <field name="description">KDV %8(satın alma)</field>
+        <field name="name">KDV %8(satın alma)</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">8</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="chart_template"/>
+        <field name="tax_group_id" ref="tax_group_kdv_8"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr391'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr191'),
+            }),
+        ]"/>
+    </record>
+
+    <record id="tr_kdv_satis_sale_1" model="account.tax.template">
+        <field name="sequence">30</field>
+        <field name="description">KDV %1(satış)</field>
+        <field name="name">KDV %1(satış)</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">1</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="chart_template_id" ref="chart_template"/>
+        <field name="tax_group_id" ref="tax_group_kdv_1"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr391'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr191'),
+            }),
+        ]"/>
+    </record>
+    <record id="tr_kdv_satis_purchase_1" model="account.tax.template">
+        <field name="sequence">30</field>
+        <field name="description">KDV %1(satın alma)</field>
+        <field name="name">KDV %1(satın alma)</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">1</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="chart_template"/>
+        <field name="tax_group_id" ref="tax_group_kdv_1"/>
+        <field name="invoice_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr391'),
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5,0,0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('tr191'),
+            }),
+        ]"/>
+    </record>
+
 </odoo>
