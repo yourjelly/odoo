@@ -308,7 +308,7 @@
 
     <record id="payment_acquirer_stripe" model="payment.acquirer">
         <field name="name">Stripe</field>
-        <field name="display_as">Credit Card (powered by Stripe)</field>
+        <field name="display_as">Credit &amp; Debit Card (powered by Stripe)</field>
         <field name="image_128" type="base64" file="payment_stripe/static/src/img/stripe_icon.png"/>
         <field name="module_id" ref="base.module_payment_stripe"/>
         <field name="description" type="html">

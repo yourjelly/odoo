@@ -9,7 +9,7 @@ class PaymentWizard(models.TransientModel):
     _description = 'Payment acquire onboarding wizard'
 
     payment_method = fields.Selection([
-        ('stripe', "Credit card (via Stripe)"),
+        ('stripe', "Credit & Debit Card with Stripe (Visa, Mastercard, Google Pay, ...)"),
         ('paypal', "PayPal"),
         ('other', "Other payment acquirer"),
         ('manual', "Custom payment instructions"),
@@ -125,6 +125,12 @@ class PaymentWizard(models.TransientModel):
             self.sudo().unlink()
         # the user clicked `apply` and not cancel so we can assume this step is done.
         self._set_payment_acquirer_onboarding_step_done()
+
+        if stripe:
+            jump sur recorde payment acquirer
+
+
+
         return {'type': 'ir.actions.act_window_close'}
 
     def _set_payment_acquirer_onboarding_step_done(self):
