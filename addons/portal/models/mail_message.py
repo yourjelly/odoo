@@ -15,10 +15,10 @@ class MailMessage(models.Model):
         ])
 
     def _portal_message_format(self, fields_list):
-        vals_list = self._message_format(fields_list)
-        IrAttachmentSudo = self.env['ir.attachment'].sudo()
-        for vals in vals_list:
-            for attachment in vals.get('attachment_ids', []):
-                if not attachment.get('access_token'):
-                    attachment['access_token'] = IrAttachmentSudo.browse(attachment['id']).generate_access_token()[0]
+        vals_list = self._message_format(fields_list, attachments_options={'access_token': True})
         return vals_list
+
+    def _message_format_iteration(self, vals, thread_ids_by_model_name, attachments_options, format_reply):
+        super(MailMessage, self)._message_format_iteration(vals, thread_ids_by_model_name, attachments_options, format_reply)
+        message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
+        vals['subtype_internal'] = message_sudo.subtype_id.internal if message_sudo.subtype_id else False

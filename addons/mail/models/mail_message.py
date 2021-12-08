@@ -824,7 +824,73 @@ class Message(models.Model):
     # MESSAGE READ / FETCH / FAILURE API
     # ------------------------------------------------------
 
-    def _message_format(self, fnames, format_reply=True):
+    def _message_format_iteration(self, vals, thread_ids_by_model_name, attachments_options, format_reply):
+        message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
+
+        # Author
+        if message_sudo.author_id:
+            author = (message_sudo.author_id.id, message_sudo.author_id.display_name)
+        else:
+            author = (0, message_sudo.email_from)
+
+        # Attachments
+        main_attachment = self.env['ir.attachment']
+        if message_sudo.attachment_ids and message_sudo.res_id and issubclass(self.pool[message_sudo.model], self.pool['mail.thread']):
+            main_attachment = self.env[message_sudo.model].sudo().browse(message_sudo.res_id).message_main_attachment_id
+        attachments_formatted = message_sudo.attachment_ids._attachment_format(attachments_options=attachments_options)
+        for attachment in attachments_formatted:
+            attachment['is_main'] = attachment['id'] == main_attachment.id
+        # Tracking values
+        tracking_value_ids = []
+        for tracking in message_sudo.tracking_value_ids:
+            groups = tracking.field_groups
+            if not groups or self.env.is_superuser() or self.user_has_groups(groups):
+                tracking_value_ids.append({
+                    'id': tracking.id,
+                    'changed_field': tracking.field_desc,
+                    'old_value': tracking.get_old_display_value()[0],
+                    'new_value': tracking.get_new_display_value()[0],
+                    'field_type': tracking.field_type,
+                    'currency_id': tracking.currency_id.id,
+                })
+
+        if message_sudo.model and message_sudo.res_id:
+            record_name = self.env[message_sudo.model] \
+                .browse(message_sudo.res_id) \
+                .sudo() \
+                .with_prefetch(thread_ids_by_model_name[message_sudo.model]) \
+                .display_name
+        else:
+            record_name = False
+
+        if message_sudo.author_guest_id:
+            vals['guestAuthor'] = [('insert', {
+                'id': message_sudo.author_guest_id.id,
+                'name': message_sudo.author_guest_id.name,
+            })]
+        else:
+            vals['author_id'] = author
+        reactions_per_content = defaultdict(lambda: self.env['mail.message.reaction'])
+        for reaction in message_sudo.reaction_ids:
+            reactions_per_content[reaction.content] |= reaction
+        reaction_groups = [('insert-and-replace', [{
+            'messageId': message_sudo.id,
+            'content': content,
+            'count': len(reactions),
+            'partners': [('insert-and-replace', [{'id': partner.id, 'name': partner.name} for partner in reactions.partner_id])],
+            'guests': [('insert-and-replace', [{'id': guest.id, 'name': guest.name} for guest in reactions.guest_id])],
+        } for content, reactions in reactions_per_content.items()])]
+        if format_reply and message_sudo.model == 'mail.channel' and message_sudo.parent_id:
+            vals['parentMessage'] = message_sudo.parent_id.message_format(format_reply=False)[0]
+        vals.update({
+            'notifications': message_sudo.notification_ids._filtered_for_web_client()._notification_format(),
+            'attachment_ids': attachments_formatted,
+            'tracking_value_ids': tracking_value_ids,
+            'messageReactionGroups': reaction_groups,
+            'record_name': record_name,
+        })
+
+    def _message_format(self, fnames, attachments_options={}, format_reply=True):
         """Reads values from messages and formats them for the web client."""
         self.check_access_rule('read')
         vals_list = self._read_format(fnames)
@@ -835,70 +901,7 @@ class Message(models.Model):
                 thread_ids_by_model_name[message.model].add(message.res_id)
 
         for vals in vals_list:
-            message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
-
-            # Author
-            if message_sudo.author_id:
-                author = (message_sudo.author_id.id, message_sudo.author_id.display_name)
-            else:
-                author = (0, message_sudo.email_from)
-
-            # Attachments
-            main_attachment = self.env['ir.attachment']
-            if message_sudo.attachment_ids and message_sudo.res_id and issubclass(self.pool[message_sudo.model], self.pool['mail.thread']):
-                main_attachment = self.env[message_sudo.model].sudo().browse(message_sudo.res_id).message_main_attachment_id
-            attachments_formatted = message_sudo.attachment_ids._attachment_format()
-            for attachment in attachments_formatted:
-                attachment['is_main'] = attachment['id'] == main_attachment.id
-            # Tracking values
-            tracking_value_ids = []
-            for tracking in message_sudo.tracking_value_ids:
-                groups = tracking.field_groups
-                if not groups or self.env.is_superuser() or self.user_has_groups(groups):
-                    tracking_value_ids.append({
-                        'id': tracking.id,
-                        'changed_field': tracking.field_desc,
-                        'old_value': tracking.get_old_display_value()[0],
-                        'new_value': tracking.get_new_display_value()[0],
-                        'field_type': tracking.field_type,
-                        'currency_id': tracking.currency_id.id,
-                    })
-
-            if message_sudo.model and message_sudo.res_id:
-                record_name = self.env[message_sudo.model] \
-                    .browse(message_sudo.res_id) \
-                    .sudo() \
-                    .with_prefetch(thread_ids_by_model_name[message_sudo.model]) \
-                    .display_name
-            else:
-                record_name = False
-
-            if message_sudo.author_guest_id:
-                vals['guestAuthor'] = [('insert', {
-                    'id': message_sudo.author_guest_id.id,
-                    'name': message_sudo.author_guest_id.name,
-                })]
-            else:
-                vals['author_id'] = author
-            reactions_per_content = defaultdict(lambda: self.env['mail.message.reaction'])
-            for reaction in message_sudo.reaction_ids:
-                reactions_per_content[reaction.content] |= reaction
-            reaction_groups = [('insert-and-replace', [{
-                'messageId': message_sudo.id,
-                'content': content,
-                'count': len(reactions),
-                'partners': [('insert-and-replace', [{'id': partner.id, 'name': partner.name} for partner in reactions.partner_id])],
-                'guests': [('insert-and-replace', [{'id': guest.id, 'name': guest.name} for guest in reactions.guest_id])],
-            } for content, reactions in reactions_per_content.items()])]
-            if format_reply and message_sudo.model == 'mail.channel' and message_sudo.parent_id:
-                vals['parentMessage'] = message_sudo.parent_id.message_format(format_reply=False)[0]
-            vals.update({
-                'notifications': message_sudo.notification_ids._filtered_for_web_client()._notification_format(),
-                'attachment_ids': attachments_formatted,
-                'tracking_value_ids': tracking_value_ids,
-                'messageReactionGroups': reaction_groups,
-                'record_name': record_name,
-            })
+            self._message_format_iteration(vals, thread_ids_by_model_name, attachments_options=attachments_options, format_reply=format_reply)
 
         return vals_list
 
