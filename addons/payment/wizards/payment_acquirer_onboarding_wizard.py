@@ -9,8 +9,8 @@ class PaymentWizard(models.TransientModel):
     _description = 'Payment acquire onboarding wizard'
 
     payment_method = fields.Selection([
+        ('stripe', "Credit & Debit Card with Stripe (Visa, Mastercard, Google Pay, ...)"),
         ('paypal', "PayPal"),
-        ('stripe', "Credit card (via Stripe)"),
         ('other', "Other payment acquirer"),
         ('manual', "Custom payment instructions"),
     ], string="Payment Method", default=lambda self: self._get_default_payment_acquirer_onboarding_value('payment_method'))
@@ -115,40 +115,23 @@ class PaymentWizard(models.TransientModel):
             new_env = api.Environment(self.env.cr, self.env.uid, self.env.context)
 
             if self.payment_method == 'paypal':
-                new_env.ref('payment.payment_acquirer_paypal').write({
-                    'paypal_email_account': self.paypal_email_account,
-                    'paypal_seller_account': self.paypal_seller_account,
-                    'paypal_pdt_token': self.paypal_pdt_token,
-                    'state': 'enabled',
-                })
+                self._init_paypal(new_env)
             if self.payment_method == 'stripe':
-                new_env.ref('payment.payment_acquirer_stripe').write({
-                    'stripe_secret_key': self.stripe_secret_key,
-                    'stripe_publishable_key': self.stripe_publishable_key,
-                    'state': 'enabled',
-                })
+                self._init_stripe(new_env)
             if self.payment_method == 'manual':
-                manual_acquirer = self._get_manual_payment_acquirer(new_env)
-                if not manual_acquirer:
-                    raise UserError(_(
-                        'No manual payment method could be found for this company. '
-                        'Please create one from the Payment Acquirer menu.'
-                    ))
-                manual_acquirer.name = self.manual_name
-                manual_acquirer.pending_msg = self.manual_post_msg
-                manual_acquirer.state = 'enabled'
+                self._init_manual(new_env)
 
-                journal = manual_acquirer.journal_id
-                if journal:
-                    journal.name = self.journal_name
-                    journal.bank_acc_number = self.acc_number
-                else:
-                    raise UserError(_("You have to set a journal for your payment acquirer %s.", self.manual_name))
-
-            # delete wizard data immediately to get rid of residual credentials
-            self.sudo().unlink()
         # the user clicked `apply` and not cancel so we can assume this step is done.
         self._set_payment_acquirer_onboarding_step_done()
+
+        if self.payment_method == 'stripe' and not (self.stripe_secret_key and self.stripe_publishable_key):
+            # delete wizard data immediately to get rid of residual credentials
+            self.sudo().unlink()
+            acquirer = new_env.ref('payment.payment_acquirer_stripe')
+            return self._onboarding_acquirer(acquirer, new_env)
+        elif self.payment_method in ('paypal', 'stripe', 'manual', 'other'):
+            # delete wizard data immediately to get rid of residual credentials
+            self.sudo().unlink()
         return {'type': 'ir.actions.act_window_close'}
 
     def _set_payment_acquirer_onboarding_step_done(self):
@@ -157,4 +140,62 @@ class PaymentWizard(models.TransientModel):
     def action_onboarding_other_payment_acquirer(self):
         self._set_payment_acquirer_onboarding_step_done()
         action = self.env["ir.actions.actions"]._for_xml_id("payment.action_payment_acquirer")
+        return action
+
+    def _init_paypal(self, env):
+        env.ref('payment.payment_acquirer_paypal').write({
+            'paypal_email_account': self.paypal_email_account,
+            'paypal_seller_account': self.paypal_seller_account,
+            'paypal_pdt_token': self.paypal_pdt_token,
+            'state': 'enabled',
+        })
+
+    def _init_stripe(self, env):
+        if self.stripe_publishable_key and self.stripe_secret_key:
+            env.ref('payment.payment_acquirer_stripe').write({
+                'stripe_secret_key': self.stripe_secret_key,
+                'stripe_publishable_key': self.stripe_publishable_key,
+                'state': 'enabled',
+                'journal_id': self.env['account.journal'].search([
+                    ('type', '=', 'bank'), ('company_id', '=', env.company.id)
+                ], limit=1).id,
+            })
+        else:
+            env.ref('payment.payment_acquirer_stripe').write({
+                'journal_id': self.env['account.journal'].search([
+                    ('type', '=', 'bank'), ('company_id', '=', env.company.id)
+                ], limit=1).id,
+            })
+
+    def _init_manual(self, env):
+        manual_acquirer = self._get_manual_payment_acquirer(env)
+        if not manual_acquirer:
+            raise UserError(_(
+                'No manual payment method could be found for this company. '
+                'Please create one from the Payment Acquirer menu.'
+            ))
+        manual_acquirer.name = self.manual_name
+        manual_acquirer.pending_msg = self.manual_post_msg
+        manual_acquirer.state = 'enabled'
+
+        journal = manual_acquirer.journal_id
+        if journal:
+            journal.name = self.journal_name
+            journal.bank_acc_number = self.acc_number
+        else:
+            raise UserError(_("You have to set a journal for your payment acquirer %s.", self.manual_name))
+
+    def _onboarding_acquirer(self, acquirer, new_env):
+        onboarding_url = acquirer._onboarding_url()
+        if onboarding_url:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': onboarding_url,
+                'target': 'self',
+            }
+        action = self.env["ir.actions.actions"]._for_xml_id("payment.action_payment_acquirer")
+        action.update({
+            'views': [[False, 'form']],
+            'res_id': acquirer.id,
+        })
         return action

@@ -22,3 +22,5 @@ INTENT_STATUS_MAPPING = {
     'done': ('succeeded',),
     'cancel': ('canceled',),
 }
+
+API_VERSION = '2019-05-16'

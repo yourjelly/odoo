@@ -419,3 +419,8 @@ class PaymentAcquirer(models.Model):
         """
         self.ensure_one()
         return self.redirect_form_view_id
+
+    def _onboarding_url(self):
+        """ Returns an url which allows user to onboard on provider's website
+        """
+        return ''

@@ -12,6 +12,20 @@
                     <field name="stripe_secret_key" attrs="{'required':[('provider', '=', 'stripe'), ('state', '!=', 'disabled')]}" password="True"/>
                     <field name="stripe_webhook_secret" password="True"/>
                 </group>
+                <div class="alert alert-warning" role="status" name="stripe_configuration_info" attrs="{'invisible': [('provider', '!=', 'stripe')]}">
+                    <div name="stripe_keys_link" class="mb-3" attrs="{'invisible': [('stripe_secret_key', '!=', False), ('stripe_publishable_key', '!=', False)]}">
+                        In order to enable Stripe Payment Acquirer, you'll need to connect to Stripe and
+                        <a href="https://dashboard.stripe.com/account/apikeys" target="_blank">
+                            get your Secret and Publishable keys.
+                        </a>
+                    </div>
+                    <div attrs="{'invisible': [('stripe_webhook_secret', '!=', False)]}">
+                        Then, you'll have to configure your webhook,
+                        <a href="https://www.odoo.com/documentation/15.0/applications/general/payment_acquirers/stripe.html#credentials-tab" target="_blank">
+                             here.
+                        </a>
+                    </div>
+                </div>
             </xpath>
         </field>
     </record>
