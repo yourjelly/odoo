@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import models
-from odoo.tools import format_datetime, format_date
+from odoo.tools import format_datetime, format_date, is_html_empty
 
 
 class IrActionsReport(models.Model):
@@ -14,15 +14,17 @@ class IrActionsReport(models.Model):
             docs = data.get('docs')
             if self.report_name == 'survey.survey_page_print_report':
                 survey = docs
-                answer = self.env['survey.user_input']
+                answer = self.env['survey.user_input']  # template expects the empty user input in case of print survey report
             else:
                 survey = docs.survey_id
                 answer = docs
             data.update({
+                'is_html_empty': is_html_empty,
+                'review': False,
                 'survey': survey,
-                'answer': answer,
-                'questions_to_display': survey.question_ids,
-                'scoring_display_correction': False,
+                'answer': answer if survey.scoring_type != 'scoring_without_answers' else answer.browse(),
+                'questions_to_display': answer._get_print_questions(),
+                'scoring_display_correction': survey.scoring_type == 'scoring_with_answers' and answer,
                 'format_datetime': lambda dt: format_datetime(self.env, dt, dt_format=False),
                 'format_date': lambda date: format_date(self.env, date),
             })

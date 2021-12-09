@@ -75,11 +75,9 @@
         </xpath>
     </template>
 
-     <template id="survey_answer_print_report" inherit_id="survey.survey_page_print" primary="True">
-        <xpath expr="//t[@t-call='survey.layout']" position="attributes">
-            <attribute name="t-call">web.basic_layout</attribute>
-        </xpath>
-    </template>
+    <!-- While printing Survey answer we are not able to set the same template in the two report action.
+    it takes the Model of latest action in the both actions -->
+    <template id="survey_answer_print_report" inherit_id="survey.survey_page_print_report" primary="True"/>
 
 </data>
 </odoo>

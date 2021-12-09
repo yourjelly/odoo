@@ -450,6 +450,8 @@
                     </label>
                 </t>
             </div>
+        </div>
+        <div class="row">
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_comments col-lg-12" >
                 <div class="d-flex flex-wrap">
                     <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')">
@@ -512,6 +514,8 @@
                     </label>
                 </t>
             </div>
+        </div>
+        <div class="row">
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_ck_comments col-lg-12" >
                 <div class="d-flex flex-wrap">
                     <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')">
