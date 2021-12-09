@@ -132,6 +132,11 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
                 display: inline;
             }
         }
+
+        .o_survey_form_choice_item_checkbox {
+            right: 5px;
+            top: 0px;
+            }
     }
 
     input::placeholder, textarea::placeholder {
@@ -228,8 +233,10 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
 
     .o_survey_choice_btn {
         cursor: pointer;
+        height: calc(100% - 0.5rem); 
         background-color: rgba($primary, 0.1);
         box-shadow: $primary 0px 0px 0px 1px;
+        line-break: auto;
 
         &.o_survey_selected {
             box-shadow: $primary 0px 0px 0px 2px;
@@ -458,4 +465,8 @@ _::-webkit-full-page-media, _:future, :root .o_survey_wrap {
             color: $gray-600;
         }
     }
+}
+
+.o_survey_form_choice {
+    min-height: 100px;
 }
