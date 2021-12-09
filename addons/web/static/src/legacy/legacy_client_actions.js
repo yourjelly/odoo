@@ -8,24 +8,23 @@ import { setScrollPosition } from "../core/utils/scrolling";
 import { useSetupAction } from "../webclient/actions/action_hook";
 import { ClientActionAdapter } from "./action_adapters";
 import { breadcrumbsToLegacy } from "./backend_utils";
+import { useLegacyRefs } from "./utils";
 
-const { Component, useRef, xml } = owl;
+const { Component, xml } = owl;
 const actionRegistry = registry.category("actions");
 
 const legacyClientActionTemplate = xml`
     <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
-                         onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
-                         t-on-scrollTo.stop="onScrollTo"/>`;
+                         onReverseBreadcrumb="onReverseBreadcrumb"/>`;
 
+// NXOWL t-on-scrollTo.stop="onScrollTo"
 // registers an action from the legacy action registry to the wowl one, ensuring
 // that widget actions are actually Components
 function registerClientAction(name, action) {
     if (action.prototype instanceof Widget) {
         // the action is a widget, wrap it into a Component and register that component
         class Action extends Component {
-            constructor() {
-                super(...arguments);
-                this.controllerRef = useRef("controller");
+            setup() {
                 this.Widget = action;
                 const options = {};
                 for (const key in this.props) {
@@ -35,6 +34,9 @@ function registerClientAction(name, action) {
                         options[key] = this.props[key];
                     }
                 }
+
+                const legacyRefs = useLegacyRefs();
+
                 if (this.env.config.breadcrumbs) {
                     options.breadcrumbs = breadcrumbsToLegacy(this.env.config.breadcrumbs);
                 }
@@ -50,8 +52,8 @@ function registerClientAction(name, action) {
                 this.onReverseBreadcrumb =
                     this.props.state && this.props.state.__on_reverse_breadcrumb__;
                 useSetupAction({
-                    beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
-                    getLocalState: () => this.controllerRef.comp.exportState(),
+                    beforeLeave: () => legacyRefs.widget && legacyRefs.widget.canBeRemoved(),
+                    getLocalState: () => legacyRefs.component && legacyRefs.component.exportState(),
                 });
                 this.onScrollTo = (ev) => {
                     setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });

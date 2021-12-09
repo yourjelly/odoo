@@ -21,17 +21,17 @@ odoo.define('point_of_sale.Chrome', function(require) {
     // we instantiate the extended one.
     const models = require('point_of_sale.models');
 
-    const { debounce, useContext, useExternalListener, useRef, useState } = owl;
+    const { onMounted, onWillUnmount, onWillDestroy, onError, useState, useRef, useExternalListener } = owl;
 
     /**
      * Chrome is the root component of the PoS App.
      */
     class Chrome extends PopupControllerMixin(PosComponent) {
-        constructor() {
-            super(...arguments);
+        setup() {
             useExternalListener(window, 'beforeunload', this._onBeforeUnload);
             useListener('show-main-screen', this.__showScreen);
-            useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
+            // NXOWL no more debounce
+            // useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
             useListener('toggle-mobile-searchbar', this._toggleMobileSearchBar);
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
@@ -43,7 +43,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('close-notification', this._onCloseNotification);
             useBus(posbus, 'start-cash-control', this.openCashControl);
             NumberBuffer.activate();
-
+            // NXOWL no more Context/useContext
             this.chromeContext = useContext(contexts.chrome);
 
             this.state = useState({
@@ -73,28 +73,28 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.progressbar = useRef('progressbar');
 
             this.previous_touch_y_coordinate = -1;
-        }
 
-        // OVERLOADED METHODS //
+            onMounted(() => {
+                // remove default webclient handlers that induce click delay
+                $(document).off();
+                $(window).off();
+                $('html').off();
+                $('body').off();
+                // The above lines removed the bindings, but we really need them for the barcode
+                BarcodeEvents.start();
+            });
 
-        mounted() {
-            // remove default webclient handlers that induce click delay
-            $(document).off();
-            $(window).off();
-            $('html').off();
-            $('body').off();
-            // The above lines removed the bindings, but we really need them for the barcode
-            BarcodeEvents.start();
-        }
-        willUnmount() {
-            BarcodeEvents.stop();
-        }
-        destroy() {
-            super.destroy(...arguments);
-            this.env.pos.destroy();
-        }
-        catchError(error) {
-            console.error(error);
+            onWillUnmount(() => {
+                BarcodeEvents.stop();
+            });
+
+            onWillDestroy(() => {
+                this.env.pos.destroy();
+            });
+
+            onError((error) => {
+                console.error(error);
+            });
         }
 
         // GETTERS //

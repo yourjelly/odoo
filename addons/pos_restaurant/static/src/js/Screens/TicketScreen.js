@@ -8,7 +8,7 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     const { posbus } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
 
-    const { useContext, useState } = owl;
+    const { useState } = owl;
 
     const PosResTicketScreen = (TicketScreen) =>
         class extends TicketScreen {
@@ -123,9 +123,9 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
     Registries.Component.extend(TicketScreen, PosResTicketScreen);
 
     class TipCell extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.state = useState({ isEditing: false });
+            // NXOWL no more Context/useContext
             this.orderUiState = useContext(this.props.order.uiState.TipScreen);
             useAutofocus({ selector: 'input' });
         }

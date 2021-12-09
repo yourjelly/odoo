@@ -2,9 +2,8 @@
 
 import { registry } from "../registry";
 import { memoize } from "../utils/functions";
-import { useEffect } from "@web/core/utils/hooks";
 
-const { useEnv, useSubEnv } = owl;
+const { useComponent, useEffect, useEnv, useSubEnv } = owl;
 const debugRegistry = registry.category("debug");
 
 const getAccessRights = memoize(async function getAccessRights(orm) {
@@ -67,7 +66,14 @@ export function createDebugContext(env, { categories = [] } = {}) {
 }
 
 export function useOwnDebugContext({ categories = [] } = {}) {
-    useSubEnv(createDebugContext(useEnv(), { categories }));
+    const debugContext = createDebugContext(useEnv(), { categories });
+    useSubEnv(debugContext);
+
+    // NXOWL: not acceptable I think
+    const component = useComponent();
+    component.env = Object.create(component.env);
+    const descrs = Object.getOwnPropertyDescriptors(debugContext);
+    Object.defineProperties(component.env, descrs);
 }
 
 export function useEnvDebugContext() {

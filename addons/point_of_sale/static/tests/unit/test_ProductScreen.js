@@ -7,7 +7,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
 
-    const { useState, xml } = owl;
+    const { xml, useState } = owl;
 
     QUnit.module('unit tests for ProductScreen components', {});
 

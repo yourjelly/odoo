@@ -9,8 +9,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
     const { onPatched, useRef, useState } = owl;
 
     class OrderWidget extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             useListener('select-line', this._selectLine);
             useListener('edit-pack-lot-lines', this._editPackLotLines);
             onChangeOrder(this._onPrevOrder, this._onNewOrder);

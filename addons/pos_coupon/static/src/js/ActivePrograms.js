@@ -6,8 +6,7 @@ odoo.define('pos_coupon.ActivePrograms', function (require) {
     const { onChangeOrder } = require('point_of_sale.custom_hooks');
 
     class ActivePrograms extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             onChangeOrder(this._onPrevOrder, this._onNewOrder);
             this.renderParams = {};
         }

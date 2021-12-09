@@ -4,12 +4,11 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
-    const { useState } = owl;
+    const { onMounted, onWillUnmount, useState } = owl;
 
     // Previously ProxyStatusWidget
     class ProxyStatus extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             const initialProxyStatus = this.env.pos.proxy.get('status');
             this.state = useState({
                 status: initialProxyStatus.status,
@@ -17,12 +16,14 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
             });
             this.statuses = ['connected', 'connecting', 'disconnected', 'warning'];
             this.index = 0;
-        }
-        mounted() {
-            this.env.pos.proxy.on('change:status', this, this._onChangeStatus);
-        }
-        willUnmount() {
-            this.env.pos.proxy.off('change:status', this, this._onChangeStatus);
+
+            onMounted(() => {
+                this.env.pos.proxy.on('change:status', this, this._onChangeStatus);
+            });
+
+            onWillUnmount(() => {
+                this.env.pos.proxy.off('change:status', this, this._onChangeStatus);
+            });
         }
         async onClick() {
             try {

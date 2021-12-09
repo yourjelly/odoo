@@ -4,7 +4,7 @@
         <table class="o_dow_widget">
             <thead>
                 <tr>
-                    <th t-foreach="widget.labels" t-as="label">
+                    <th t-foreach="widget.labels" t-as="label" t-key="label_index">
                         <t t-esc="label"/>
                     </th>
                 </tr>
@@ -72,7 +72,7 @@
             </div>
             <div class="o_rightpanel_data">
                 <div t-foreach="milestones.data" t-as="milestone" t-key="milestone.id" class="o_rightpanel_data_row">
-                    <OpenMilestone context="context" milestone="milestone" t-key="milestone.id"/>
+                    <OpenMilestone context="context" milestone="milestone"/>
                 </div>
                 <span t-if="milestones.data.length === 0" class="text-muted font-italic">
                     Track major progress points that must be reached to achieve success.
@@ -96,8 +96,8 @@
                         title: NEW_PROJECT_MILESTONE,
                         multi_select: true,
                     }"
-                    t-ref="dialog"
                 />
+                    <!-- NXOWL t-ref="dialog" -->
             </span>
         </div>
     </t>
@@ -130,8 +130,8 @@
                         disable_multiple_selection: true,
                         deletable: true
                     }"
-                    t-ref="dialog"
                 />
+                    <!-- NXOWL t-ref="dialog" -->
             </span>
         </div>
     </t>

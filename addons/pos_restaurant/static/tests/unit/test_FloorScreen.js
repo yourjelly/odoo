@@ -68,10 +68,10 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div class="floor-map">
-                <EditableTable table="table" t-ref="table-ref" />
+                <EditableTable table="table"/>
             </div>
         `;
-
+        // NXOWL t-ref="table-ref"
         const parent = new Parent();
         await parent.mount(testUtils.prepareTarget());
 

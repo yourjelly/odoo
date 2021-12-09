@@ -7,21 +7,21 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     const Registries = require('point_of_sale.Registries');
     const { posbus } = require('point_of_sale.utils');
 
-    const { debounce, useRef } = owl;
+    const { onMounted, onWillUnmount, useRef } = owl;
 
     class ProductsWidgetControlPanel extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.searchWordInput = useRef('search-word-input');
-            this.updateSearch = debounce(this.updateSearch, 100);
-        }
-        mounted() {
-            posbus.on('search-product-from-info-popup', this, this.searchProductFromInfo)
-        }
-        willUnmount() {
-            posbus.off('search-product-from-info-popup', this);
-        }
+            this.updateSearch = debounce(this.updateSearch, 100); // NXOWL debounce
 
+            onMounted(() => {
+                posbus.on('search-product-from-info-popup', this, this.searchProductFromInfo)
+            });
+
+            onWillUnmount(() => {
+                posbus.off('search-product-from-info-popup', this);
+            });
+        }
         clearSearch() {
             this.searchWordInput.el.value = '';
             this.trigger('clear-search');

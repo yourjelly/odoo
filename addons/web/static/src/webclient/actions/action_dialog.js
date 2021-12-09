@@ -3,9 +3,9 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { DebugMenu } from "@web/core/debug/debug_menu";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
-import { useEffect } from "@web/core/utils/hooks";
+import { useLegacyRefs } from "@web/legacy/utils";
 
-const { useRef } = owl;
+const { useEffect } = owl;
 
 const LEGACY_SIZE_CLASSES = {
     "extra-large": "modal-xl",
@@ -20,7 +20,6 @@ class ActionDialog extends Dialog {
     setup() {
         super.setup();
         useOwnDebugContext();
-        this.actionRef = useRef("actionRef");
         const actionProps = this.props && this.props.actionProps;
         const action = actionProps && actionProps.action;
         this.actionType = action && action.type;
@@ -52,21 +51,17 @@ class LegacyAdaptedActionDialog extends ActionDialog {
         const ControllerComponent = this.props && this.props.ActionComponent;
         const Controller = ControllerComponent && ControllerComponent.Component;
         this.isLegacy = Controller && Controller.isLegacy;
+        const legacyRefs = useLegacyRefs();
         useEffect(
             () => {
                 if (this.isLegacy) {
-                    // Retrieve the widget climbing the wrappers
-                    const componentController = this.actionRef.comp;
-                    const controller = componentController.componentRef.comp;
-                    const viewAdapter = controller.controllerRef.comp;
-                    const widget = viewAdapter.widget;
                     // Render legacy footer buttons
                     const footer = this.modalRef.el.querySelector("footer");
-                    widget.renderButtons($(footer));
+                    legacyRefs.widget.renderButtons($(footer));
                 }
             },
             () => []
-        ); // TODO: should this depend on actionRef.comp?
+        );
     }
 }
 LegacyAdaptedActionDialog.footerTemplate = "web.LegacyAdaptedActionDialogFooter";

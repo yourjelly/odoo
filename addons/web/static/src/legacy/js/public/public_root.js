@@ -353,12 +353,12 @@ export const PublicRoot = publicWidget.RootWidget.extend({
     },
 });
 
-
 /**
  * Configure Owl with the public env
  */
-config.mode = legacyEnv.isDebug() ? "dev" : "prod";
-Component.env = legacyEnv;
+// FIXME NXOWL
+// owl.config.mode = legacyEnv.isDebug() ? "dev" : "prod";
+// owl.Component.env = legacyEnv;
 
 /**
  * This widget is important, because the tour manager needs a root widget in

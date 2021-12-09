@@ -12,8 +12,7 @@ odoo.define('point_of_sale.MoneyDetailsPopup', function(require) {
      * and hide it with some css. The confirm button will just trigger an event to the parent.
      */
     class MoneyDetailsPopup extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.currency = this.env.pos.currency;
             this.state = useState({
                 moneyDetails: Object.fromEntries(this.env.pos.bills.map(bill => ([bill.value, 0]))),

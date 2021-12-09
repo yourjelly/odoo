@@ -8,7 +8,7 @@ import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
-const { Component, debounce, onMounted, useRef, xml } = owl;
+const { Component, debounce, onMounted, useRef, xml } = owl; // NXOWL debounce
 
 function setupResponsivePlugin(env) {
     const isMobile = () => window.innerWidth <= 768;
@@ -53,4 +53,5 @@ export class ChromeAdapter extends Component {
         });
     }
 }
-ChromeAdapter.template = xml`<PosChrome t-ref="chrome" webClient="legacyActionManager"/>`;
+ChromeAdapter.template = xml`<PosChrome webClient="legacyActionManager"/>`;
+// NXOWL t-ref="chrome"

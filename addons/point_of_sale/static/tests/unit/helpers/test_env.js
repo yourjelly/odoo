@@ -11,11 +11,6 @@ odoo.define('point_of_sale.test_env', async function (require) {
     const makeTestEnvironment = require('web.test_env');
     const env = require('web.env');
     const models = require('point_of_sale.models');
-    const Registries = require('point_of_sale.Registries');
-
-    const { Portal } = owl;
-
-    Registries.Component.add(Portal);
 
     await env.session.is_bound;
     const pos = new models.PosModel({

@@ -1,7 +1,7 @@
 odoo.define('web.Popover', function (require) {
     'use strict';
 
-    const { Component, Portal, QWeb, useRef, useState } = owl;
+    const { Component, status, useRef, useState } = owl;
 
     /**
      * Popover
@@ -172,17 +172,21 @@ odoo.define('web.Popover', function (require) {
          * @param {MouseEvent} ev
          */
         _onClick(ev) {
+            const props = this.props;
             this.state.displayed = !this.state.displayed;
             if (this.state.displayed) {
-                if (this.props.onOpened) {
-                    this.props.onOpened();
+                if (props.onOpened) {
+                    props.onOpened();
                 }
                 this.trigger('o-popover-opened');
             } else {
-                if (this.props.onClosed) {
-                    this.props.onClosed();
+                if (props.onClosed) {
+                    props.onClosed();
                 }
                 this.trigger('o-popover-closed');
+            }
+            if (!props.propagateClick) {
+                ev.stopPropagation();
             }
         }
 
@@ -206,9 +210,8 @@ odoo.define('web.Popover', function (require) {
 
         /**
          * @private
-         * @param {Event} ev
          */
-        _onPopoverClose(ev) {
+        _onPopoverClose() {
             this._close();
         }
 
@@ -230,7 +233,7 @@ odoo.define('web.Popover', function (require) {
          * @param {Event} ev
          */
         _onResizeWindow(ev) {
-            if (this.__owl__.status === 5 /* destroyed */) {
+            if (status(this) === "destroyed") {
                 return;
             }
             this._compute();
@@ -244,7 +247,7 @@ odoo.define('web.Popover', function (require) {
          * @param {Event} ev
          */
         _onScrollDocument(ev) {
-            if (this.__owl__.status === 5 /* destroyed */) {
+            if (status(this) === "destroyed") {
                 return;
             }
             this._compute();
@@ -320,12 +323,20 @@ odoo.define('web.Popover', function (require) {
 
     }
 
-    Popover.components = { Portal };
     Popover.template = 'Popover';
     Popover.defaultProps = {
         position: 'bottom',
+        propagateClick: true,
     };
     Popover.props = {
+        propagateClick: {
+            type: Boolean,
+            optional: true,
+        },
+        class: {
+            type: String,
+            optional: true,
+        },
         onClosed: {
             type: Function,
             optional: true,
@@ -344,9 +355,16 @@ odoo.define('web.Popover', function (require) {
         },
         title: { type: String, optional: true },
         titleAttribute: { type: String, optional: true },
+        slots: {
+            type: Object,
+            optional: 1,
+            shape: {
+                default: { optional: true },
+                opened: { optional: true },
+            },
+        },
     };
 
-    QWeb.registerComponent('Popover', Popover);
-
+    owl.Component._components.Popover = Popover;
     return Popover;
 });

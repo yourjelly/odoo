@@ -31,8 +31,7 @@ odoo.define('point_of_sale.AbstractAwaitablePopup', function (require) {
      * ```
      */
     class AbstractAwaitablePopup extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             if (!this.props.notEscapable) {
                 useExternalListener(window, 'keyup', this._cancelAtEscape);
             }

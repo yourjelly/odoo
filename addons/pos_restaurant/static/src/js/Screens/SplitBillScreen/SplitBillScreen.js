@@ -6,11 +6,10 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     const models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
 
-    const { useState } = owl;
+    const { onMounted, onWillUnmount, useState } = owl;
 
     class SplitBillScreen extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             useListener('click-line', this.onClickLine);
             this.splitlines = useState(this._initSplitLines(this.env.pos.get_order()));
             this.newOrderLines = {};
@@ -22,12 +21,12 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
                 }
             );
             this._isFinal = false;
-        }
-        mounted() {
-            this.env.pos.on('change:selectedOrder', this._resetState, this);
-        }
-        willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
+            onMounted(() => {
+                this.env.pos.on('change:selectedOrder', this._resetState, this);
+            });
+            onWillUnmount(() => {
+                this.env.pos.off('change:selectedOrder', null, this);
+            });
         }
         get currentOrder() {
             return this.env.pos.get_order();

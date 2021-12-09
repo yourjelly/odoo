@@ -6,18 +6,21 @@ odoo.define('point_of_sale.SetPricelistButton', function(require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
 
+    const { onMounted, onWillUnmount } = owl;
+
     class SetPricelistButton extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             useListener('click', this.onClick);
-        }
-        mounted() {
-            this.env.pos.get('orders').on('add remove change', () => this.render(), this);
-            this.env.pos.on('change:selectedOrder', () => this.render(), this);
-        }
-        willUnmount() {
-            this.env.pos.get('orders').off('add remove change', null, this);
-            this.env.pos.off('change:selectedOrder', null, this);
+
+            onMounted(() => {
+                this.env.pos.get('orders').on('add remove change', () => this.render(), this);
+                this.env.pos.on('change:selectedOrder', () => this.render(), this);
+            });
+
+            onWillUnmount(() => {
+                this.env.pos.get('orders').off('add remove change', null, this);
+                this.env.pos.off('change:selectedOrder', null, this);
+            });
         }
         get currentOrder() {
             return this.env.pos.get_order();

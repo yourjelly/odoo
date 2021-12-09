@@ -13,7 +13,7 @@ const { Component, useRef, useState } = owl;
 **/
 class TaxGroupComponent extends Component {
 
-    constructor(parent, props) {
+    constructor(props) {
         super(parent, props);
         this.inputTax = useRef('taxValueInput');
         this.state = useState({value: 'readonly'});
@@ -95,7 +95,7 @@ class TaxGroupComponent extends Component {
         });
     }
 }
-TaxGroupComponent.props = ['taxGroup', 'allowTaxEdition', 'record'];
+TaxGroupComponent.props = ['taxGroup', 'allowTaxEdition', 'record', 'onChangeTaxGroup'];
 TaxGroupComponent.template = 'account.TaxGroupComponent';
 
 /**

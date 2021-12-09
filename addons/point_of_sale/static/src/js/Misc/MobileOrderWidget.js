@@ -4,23 +4,24 @@ odoo.define('point_of_sale.MobileOrderWidget', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
+    const { onMounted } = owl;
+
     class MobileOrderWidget extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             this.update();
+            onMounted(() => {
+                this.order.on('change', () => {
+                    this.update();
+                    this.render();
+                });
+                this.order.orderlines.on('change', () => {
+                    this.update();
+                    this.render();
+                });
+            });
         }
         get order() {
             return this.env.pos.get_order();
-        }
-        mounted() {
-          this.order.on('change', () => {
-              this.update();
-              this.render();
-          });
-          this.order.orderlines.on('change', () => {
-              this.update();
-              this.render();
-          });
         }
         update() {
             const total = this.order ? this.order.get_total_with_tax() : 0;

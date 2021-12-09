@@ -9,8 +9,7 @@ odoo.define('pos_hr.LoginScreen', function (require) {
     const { posbus } = require('point_of_sale.utils');
 
     class LoginScreen extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             const { selectEmployee, askPin } = useSelectEmployee();
             this.selectEmployee = selectEmployee;
             this.askPin = askPin;

@@ -8,6 +8,13 @@ const { Component } = owl;
 
 class SnailmailErrorDialog extends Component {
 
+    /**
+     * @override
+     */
+     setup() {
+        this.dialogAPI = {}
+    }
+
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
@@ -52,7 +59,7 @@ class SnailmailErrorDialog extends Component {
      * @private
      */
     _onClickCancelLetter() {
-        this.root.comp._close();
+        this.dialogAPI.close();
         this.message.cancelLetter();
     }
 
@@ -60,14 +67,14 @@ class SnailmailErrorDialog extends Component {
      * @private
      */
     _onClickClose() {
-        this.root.comp._close();
+        this.dialogAPI.close();
     }
 
     /**
      * @private
      */
     _onClickResendLetter() {
-        this.root.comp._close();
+        this.dialogAPI.close();
         this.message.resendLetter();
     }
 

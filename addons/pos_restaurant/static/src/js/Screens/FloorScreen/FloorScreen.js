@@ -6,7 +6,7 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
     const { posbus } = require('point_of_sale.utils');
 
-    const { debounce, useRef, useState } = owl;
+    const { useRef, useState } = owl;
 
     class FloorScreen extends PosComponent {
         /**
@@ -15,7 +15,7 @@ odoo.define('pos_restaurant.FloorScreen', function (require) {
          */
         constructor() {
             super(...arguments);
-            this._setTableColor = debounce(this._setTableColor, 70);
+            this._setTableColor = debounce(this._setTableColor, 70); // NXOWL debounce
             this._setFloorColor = debounce(this._setFloorColor, 70);
             useListener('select-table', this._onSelectTable);
             useListener('deselect-table', this._onDeselectTable);

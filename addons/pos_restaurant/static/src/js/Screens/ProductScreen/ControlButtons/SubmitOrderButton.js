@@ -6,6 +6,8 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
 
+    const { onWillUnmount } = owl;
+
     /**
      * IMPROVEMENT: Perhaps this class is quite complicated for its worth.
      * This is because it needs to listen to changes to the current order.
@@ -13,16 +15,15 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
      * After setting new current order, we update the listeners.
      */
     class SubmitOrderButton extends PosComponent {
-        constructor() {
-            super(...arguments);
+        setup() {
             useListener('click', this.onClick);
             this._currentOrder = this.env.pos.get_order();
             this._currentOrder.orderlines.on('change', this.render, this);
             this.env.pos.on('change:selectedOrder', this._updateCurrentOrder, this);
-        }
-        willUnmount() {
-            this._currentOrder.orderlines.off('change', null, this);
-            this.env.pos.off('change:selectedOrder', null, this);
+            onWillUnmount(() => {
+                this._currentOrder.orderlines.off('change', null, this);
+                this.env.pos.off('change:selectedOrder', null, this);
+            });
         }
         async onClick() {
             const order = this.env.pos.get_order();

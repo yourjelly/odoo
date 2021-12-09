@@ -24,6 +24,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             useListener('search', this._onSearch);
 
             SaleOrderFetcher.setComponent(this);
+            // NXOWL no more Context/useContext
             this.orderManagementContext = useContext(contexts.orderManagement);
         }
         mounted() {
