@@ -22,6 +22,7 @@
                         className="'o_Composer_dropZone'"
                         onDropzoneFilesDropped="_onDropZoneFilesDropped"
                     />
+                        <!-- NXOWL t-ref="dropzone" -->
                 </t>
                 <t t-if="hasHeader">
                     <div class="o_Composer_coreHeader text-truncate">
@@ -81,8 +82,8 @@
                         onComposerTextInputSendShortcut="_onComposerTextInputSendShortcut"
                         onPaste="_onPasteTextInput"
                         t-key="composerView.localId"
-                        t-ref="textInput"
                     />
+                        <!-- NXOWL t-ref="textInput" -->
                     <div class="o_Composer_buttons" t-att-class="{ 'o-composer-is-compact': props.isCompact, 'o-mobile': messaging.device.isMobile, 'o-messaging-in-editing': composerView and composerView.messageViewInEditing }">
                         <div class="o_Composer_toolButtons"
                             t-att-class="{
