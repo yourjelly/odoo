@@ -168,7 +168,7 @@ QUnit.test('[technical] keep spinner on transition from messaging non-created to
     );
 });
 
-QUnit.test('spinner when messaging is created but not initialized', async function (assert) {
+QUnit.skip('spinner when messaging is created but not initialized', async function (assert) {
     assert.expect(3);
 
     this.data['res.partner'].records.push({
@@ -216,7 +216,7 @@ QUnit.test('spinner when messaging is created but not initialized', async functi
     );
 });
 
-QUnit.test('transition non-initialized messaging to initialized messaging: display spinner then chatter', async function (assert) {
+QUnit.skip('transition non-initialized messaging to initialized messaging: display spinner then chatter', async function (assert) {
     assert.expect(3);
 
     const messagingBeforeInitializationDeferred = makeDeferred();
