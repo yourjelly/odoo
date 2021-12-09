@@ -96,9 +96,7 @@ odoo.define('web.ControlPanel', function (require) {
      * @extends Component
      */
     class ControlPanel extends Component {
-        constructor() {
-            super(...arguments);
-
+        setup() {
             this.additionalContent = getAdditionalContent(this.props);
 
             useSubEnv({
@@ -157,7 +155,9 @@ odoo.define('web.ControlPanel', function (require) {
             // the lifespan of a ControlPanel instance, so we only need to update
             // the view information.
             if ('view' in nextProps) {
-                this.env.view = nextProps.view;
+                useSubEnv({
+                    view: nextProps.view,
+                });
             }
             if ('fields' in nextProps) {
                 this.fields = this._formatFields(nextProps.fields);

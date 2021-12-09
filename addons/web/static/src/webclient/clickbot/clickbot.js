@@ -17,6 +17,7 @@
     ];
 
     const { isEnterprise } = odoo.info;
+    const { onWillStart } = owl;
     let appsMenusOnly = false;
     let actionCount = 0;
     let viewUpdateCount = 0;
@@ -38,7 +39,7 @@
         }
         setupDone = true;
         const env = odoo.__WOWL_DEBUG__.root.env;
-        env.bus.on("ACTION_MANAGER:UI-UPDATED", null, () => {
+        env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", () => {
             actionCount++;
         });
 
@@ -58,9 +59,11 @@
         const { WithSearch } = odoo.__DEBUG__.services["@web/search/with_search/with_search"];
 
         patch(WithSearch.prototype, "PatchedWithSearch", {
-            async willStart() {
-                await this._super(...arguments);
-                viewUpdateCount++;
+            setup() {
+                this._super();
+                onWillStart(() => {
+                    viewUpdateCount++;
+                });
             },
             async render() {
                 await this._super(...arguments);
@@ -191,11 +194,11 @@
         let menu = menus[menuIndex];
         if (menu.classList.contains("dropdown-toggle")) {
             // the current menu is a dropdown toggler -> open it and pick a menu inside the dropdown
-            if (!menu.nextSibling) {
+            if (!menu.nextElementSibling) {
                 // might already be opened if the last menu was blacklisted
                 await triggerClick(menu, "menu toggler");
             }
-            const dropdown = menu.nextSibling;
+            const dropdown = menu.nextElementSibling;
             if (!dropdown) {
                 menuIndex = 0; // empty More menu has no dropdown (FIXME?)
                 return;

@@ -11,8 +11,9 @@ import { configureGui } from "point_of_sale.Gui";
 import { useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import env from "point_of_sale.env";
+import { debounce } from "@web/core/utils/timing";
 
-const { Component, debounce, onMounted, useRef, xml } = owl;
+const { Component, useSubEnv, xml } = owl;
 
 function setupResponsivePlugin(env) {
     const isMobile = () => window.innerWidth <= 768;
@@ -20,7 +21,7 @@ function setupResponsivePlugin(env) {
     const updateEnv = debounce(() => {
         if (env.isMobile !== isMobile()) {
             env.isMobile = !env.isMobile;
-            env.qweb.forceUpdate();
+            env.qweb.forceUpdate(); // NXOWL no more qweb accessible in env
         }
     }, 15);
     window.addEventListener("resize", updateEnv);
@@ -50,34 +51,32 @@ export class ChromeAdapter extends Component {
         // Expose only the reactive version of `pos` when in debug mode.
         window.posmodel = pos.debug ? reactivePos : pos;
 
-        this.env = env;
-
-        useBus(this.env.qweb, "update", () => this.render());
+        useSubEnv(env);
+        // useBus(this.env.qweb, "update", () => this.render()); // NXOWL ?
         setupResponsivePlugin(this.env);
+    }
 
-        const chrome = useRef("chrome");
-        onMounted(async () => {
-            // Add the pos error handler when the chrome component is available.
-            registry.category('error_handlers').add(
-                'posErrorHandler',
-                (env, ...noEnvArgs) => {
-                    if (chrome.comp) {
-                        return chrome.comp.errorHandler(this.env, ...noEnvArgs);
-                    }
-                    return false;
-                },
-                { sequence: 0 }
-            );
-            // Little trick to avoid displaying the block ui during the POS models loading
-            const BlockUiFromRegistry = registry.category("main_components").get("BlockUI");
-            registry.category("main_components").remove("BlockUI");
-            configureGui({ component: chrome.comp });
-            await chrome.comp.start();
-            registry.category("main_components").add("BlockUI", BlockUiFromRegistry);
+    async configureAndStart(chrome) {
+        // Add the pos error handler when the chrome component is available.
+        registry.category('error_handlers').add(
+            'posErrorHandler',
+            (env, ...noEnvArgs) => {
+                if (chrome) {
+                    return chrome.errorHandler(this.env, ...noEnvArgs);
+                }
+                return false;
+            },
+            { sequence: 0 }
+        );
+        // Little trick to avoid displaying the block ui during the POS models loading
+        const BlockUiFromRegistry = registry.category("main_components").get("BlockUI");
+        registry.category("main_components").remove("BlockUI");
+        configureGui({ component: chrome });
+        await chrome.start();
+        registry.category("main_components").add("BlockUI", BlockUiFromRegistry);
 
-            // Subscribe to the changes in the models.
-            batchedCustomerDisplayRender();
-        });
+        // Subscribe to the changes in the models.
+        batchedCustomerDisplayRender();
     }
 }
-ChromeAdapter.template = xml`<PosChrome t-ref="chrome" />`;
+ChromeAdapter.template = xml`<t t-component="PosChrome" setupIsDone="configureAndStart"/>`;

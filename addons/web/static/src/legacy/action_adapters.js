@@ -6,12 +6,22 @@ import { ComponentAdapter } from "web.OwlCompatibility";
 import { objectToQuery } from "../core/browser/router_service";
 import { useDebugCategory } from "../core/debug/debug_context";
 import { Dialog } from "../core/dialog/dialog";
-import { useEffect, useService } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
-import { cleanDomFromBootstrap, wrapSuccessOrFail } from "./utils";
+import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
-const { Component, onMounted, useExternalListener, xml } = owl;
+const {
+    Component,
+    onMounted,
+    onWillUnmount,
+    onWillUpdateProps,
+    status,
+    useEffect,
+    useExternalListener,
+    useComponent,
+    xml,
+} = owl;
 
 const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
 
@@ -24,6 +34,8 @@ class ActionAdapter extends ComponentAdapter {
         this.notifications = useService("notification");
         this.dialogs = useService("dialog");
         this.wowlEnv = this.env;
+        const legacyRefs = useLegacyRefs();
+        legacyRefs.component = this;
         // a legacy widget widget can push_state anytime including during its async rendering
         // In Wowl, we want to have all states pushed during the same setTimeout.
         // This is protected in legacy (backward compatibility) but should not e supported in Wowl
@@ -31,9 +43,7 @@ class ActionAdapter extends ComponentAdapter {
         let originalUpdateControlPanel;
         useEffect(
             () => {
-                if (this.wowlEnv.setLegacyControllerWidget) {
-                    this.wowlEnv.setLegacyControllerWidget(this.widget);
-                }
+                legacyRefs.widget = this.widget;
                 const query = this.widget.getState();
                 Object.assign(query, this.tempQuery);
                 this.tempQuery = null;
@@ -41,10 +51,11 @@ class ActionAdapter extends ComponentAdapter {
                 if (!this.wowlEnv.inDialog) {
                     this.pushState(query);
                 }
-                this.wowlEnv.bus.on("ACTION_MANAGER:UPDATE", this, () => {
+                const onActionManagerUpdate = () => {
                     this.env.bus.trigger("close_dialogs");
                     cleanDomFromBootstrap();
-                });
+                };
+                this.wowlEnv.bus.addEventListener("ACTION_MANAGER:UPDATE", onActionManagerUpdate);
                 originalUpdateControlPanel = this.__widget.updateControlPanel.bind(this.__widget);
                 this.__widget.updateControlPanel = (newProps) => {
                     this.wowlEnv.config.setDisplayName(this.__widget.getTitle());
@@ -54,13 +65,27 @@ class ActionAdapter extends ComponentAdapter {
 
                 return () => {
                     this.__widget.updateControlPanel = originalUpdateControlPanel;
-                    this.wowlEnv.bus.off("ACTION_MANAGER:UPDATE", this);
+                    this.wowlEnv.bus.removeEventListener(
+                        "ACTION_MANAGER:UPDATE",
+                        onActionManagerUpdate
+                    );
                 };
             },
             () => []
         );
         useExternalListener(window, "click", () => {
             cleanDomFromBootstrap();
+        });
+
+        onWillUpdateProps(() => {
+            if (this.widget === null) {
+                this.widget = this.__widget;
+            }
+        });
+        onWillUnmount(() => {
+            if (this.__widget && this.__widget.on_detach_callback) {
+                this.__widget.on_detach_callback();
+            }
         });
     }
 
@@ -152,20 +177,14 @@ class ActionAdapter extends ComponentAdapter {
         return this.__widget.canBeRemoved();
     }
 
-    /**
-     * @override
-     */
-    willUnmount() {
-        if (this.__widget && this.__widget.on_detach_callback) {
-            this.__widget.on_detach_callback();
-        }
-        super.willUnmount();
-    }
     __destroy() {
         if (this.actionService.__legacy__isActionInStack(this.actionId)) {
             this.widget = null;
         }
         super.__destroy(...arguments);
+    }
+    get el() {
+        return (this.widget || this.__widget).el;
     }
 }
 
@@ -219,7 +238,7 @@ export class ClientActionAdapter extends ActionAdapter {
 const magicReloadSymbol = Symbol("magicReload");
 
 function useMagicLegacyReload() {
-    const comp = Component.current;
+    const comp = useComponent();
     if (comp.props.widget && comp.props.widget[magicReloadSymbol]) {
         return comp.props.widget[magicReloadSymbol];
     }
@@ -294,7 +313,7 @@ export class ViewAdapter extends ActionAdapter {
         } else {
             const view = new this.props.View(this.props.viewInfo, this.props.viewParams);
             this.widget = await view.getController(this);
-            if (this.__owl__.status === 5 /* DESTROYED */) {
+            if (status(this) === "destroyed") {
                 // the component might have been destroyed meanwhile, but if so, `this.widget` wasn't
                 // destroyed by OwlCompatibility layer as it wasn't set yet, so destroy it now
                 if (!this.actionService.__legacy__isActionInStack(this.actionId)) {

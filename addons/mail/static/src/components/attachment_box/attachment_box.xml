@@ -17,6 +17,7 @@
                             className="'o_AttachmentBox_dropZone'"
                             onDropzoneFilesDropped="_onDropZoneFilesDropped"
                         />
+                            <!-- NXOWL t-ref="dropzone" -->
                     </t>
                     <t t-if="attachmentBoxView.attachmentList">
                         <AttachmentList

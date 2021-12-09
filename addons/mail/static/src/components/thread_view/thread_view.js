@@ -42,6 +42,7 @@ Object.assign(ThreadView, {
         hasComposerThreadName: false,
         showComposerAttachmentsExtensions: true,
         showComposerAttachmentsFilenames: true,
+        onFocusin: () => {}, // NXOWL: should we have to do this? should undef event handler do nothing instead of crash?
     },
     props: {
         /**

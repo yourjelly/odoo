@@ -17,6 +17,11 @@ class FormViewDialogComponentAdapter extends ComponentAdapter {
         return this.willStart();
     }
 
+    updateWidget() {
+        // This component should never be re-rendered but because shouldUpdate was removed,
+        // when the Composer is rerendered, so is the ComposerSuggestedRecipients even
+        // though its props haven't changed and there is nothing to do.
+    }
 }
 
 export class ComposerSuggestedRecipient extends Component {

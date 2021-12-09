@@ -24,6 +24,7 @@
                                 hasScrollAdjust="props.hasScrollAdjust"
                                 localId="threadView.messageListView.localId"
                             />
+                                <!-- NXOWL t-ref="messageList" -->
                         </t>
                         <t t-elif="threadView.threadCache.hasLoadingFailed">
                             <div class="o_ThreadView_loadingFailed">

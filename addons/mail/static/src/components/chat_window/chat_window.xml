@@ -19,6 +19,7 @@
                     isExpandable="props.isExpandable"
                     onClicked="_onClickedHeader"
                 />
+                    <!-- NXOWL t-ref="header" -->
                 <t t-if="chatWindow.thread and chatWindow.thread.hasMemberListFeature and chatWindow.isMemberListOpened">
                     <ChannelMemberList channelLocalId="chatWindow.thread.localId" className="'bg-white'"/>
                 </t>
@@ -33,6 +34,7 @@
                         localId="chatWindow.threadView.localId"
                         onFocusin="_onFocusinThread"
                     />
+                        <!-- NXOWL t-ref="thread" -->
                 </t>
                 <t t-if="chatWindow.hasNewMessageForm">
                     <div class="o_ChatWindow_newMessageForm">
@@ -45,7 +47,7 @@
                             select="_onAutocompleteSelect"
                             source="_onAutocompleteSource"
                             onFocusin="chatWindow.onFocusInNewMessageFormInput"
-                            t-ref="input"
+                            inputRef="_inputRef"
                         />
                     </div>
                 </t>

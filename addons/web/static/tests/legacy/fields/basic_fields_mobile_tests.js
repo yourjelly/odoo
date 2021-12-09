@@ -176,7 +176,7 @@ QUnit.module('basic_fields', {
 
     QUnit.module('FieldDateRange');
 
-    QUnit.test('date field: toggle daterangepicker then scroll', async function (assert) {
+    QUnit.skipNXOWL('date field: toggle daterangepicker then scroll', async function (assert) {
         assert.expect(4);
         const scrollEvent = new UIEvent('scroll');
 
