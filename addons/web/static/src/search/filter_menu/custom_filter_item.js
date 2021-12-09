@@ -6,8 +6,7 @@ import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
-const { Component, hooks } = owl;
-const { useState } = hooks;
+const { Component, useState } = owl;
 
 const { DateTime } = luxon;
 
@@ -259,8 +258,8 @@ export class CustomFilterItem extends Component {
      * @param {number} valueIndex
      * @param {OwlEvent} ev
      */
-    onDateChanged(condition, valueIndex, ev) {
-        condition.value[valueIndex] = ev.detail.date;
+    onDateChange(condition, valueIndex, date) {
+        condition.value[valueIndex] = date;
     }
 
     /**

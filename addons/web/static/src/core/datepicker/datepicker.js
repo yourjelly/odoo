@@ -4,9 +4,8 @@ import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useAutofocus } from "@web/core/utils/hooks";
 
-const { Component, hooks } = owl;
+const { Component, useExternalListener, useRef, useState } = owl;
 const { DateTime } = luxon;
-const { useExternalListener, useRef, useState } = hooks;
 
 const formatters = registry.category("formatters");
 const parsers = registry.category("parsers");
@@ -179,7 +178,7 @@ export class DatePicker extends Component {
             const date = this.parse(this.inputRef.el.value, this.options);
             if (!date.equals(this.props.date)) {
                 this.state.warning = date > DateTime.local();
-                this.trigger("datetime-changed", { date });
+                this.props.onDateChange(date);
             }
         } catch (err) {
             // Reset to default (= given) date.
@@ -249,6 +248,7 @@ DatePicker.props = {
     locale: { type: String, optional: true },
     maxDate: DateTime,
     minDate: DateTime,
+    onDateChange: Function,
     readonly: { type: Boolean, optional: true },
     useCurrent: Boolean,
     widgetParent: String,

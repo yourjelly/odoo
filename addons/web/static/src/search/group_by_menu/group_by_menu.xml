@@ -2,10 +2,10 @@
 <templates xml:space="preserve">
 
     <t t-name="web.GroupByMenu" owl="1">
-        <Dropdown class="o_group_by_menu btn-group"
+        <Dropdown class="'o_group_by_menu btn-group'"
             togglerClass="'btn btn-light'"
             t-props="dropdownProps"
-            t-on-dropdown-item-selected="onGroupBySelected"
+            onDropdownItemSelected="onGroupBySelected.bind(this)"
         >
             <t t-set-slot="toggler">
                 <i class="small mr-1" t-att-class="icon"/>
@@ -26,29 +26,28 @@
                             <t t-if="subGroup !== null and subGroup !== option.groupNumber">
                                 <div class="dropdown-divider" role="separator"/>
                             </t>
-                            <DropdownItem class="o_item_option"
-                                t-att-class="{ selected: option.isActive }"
+                            <DropdownItem class="{ o_item_option: true, selected: option.isActive }"
                                 payload="{ itemId: item.id, optionId: option.id }"
                                 parentClosingMode="'none'"
-                                t-esc="option.description"
-                            />
+                                >
+                                <t t-esc="option.description"/>
+                            </DropdownItem>
                             <t t-set="subGroup" t-value="option.groupNumber"/>
                         </t>
                     </Dropdown>
                 </t>
                 <t t-else="">
-                    <DropdownItem class="o_menu_item"
-                        t-att-class="{ selected: item.isActive }"
-                        payload="{ itemId: item.id }"
-                        parentClosingMode="'none'"
-                        t-esc="item.description"
-                    />
+                    <DropdownItem class="{ o_menu_item: true, selected: item.isActive }"
+                    payload="{ itemId: item.id }"
+                    parentClosingMode="'none'">
+                        <t t-esc="item.description"/>
+                    </DropdownItem>
                 </t>
                 <t t-set="currentGroup" t-value="item.groupNumber"/>
             </t>
             <t t-if="fields.length">
                 <div t-if="items.length" role="separator" class="dropdown-divider"/>
-                <CustomGroupByItem fields="fields" t-on-add-custom-group="onAddCustomGroup"/>
+                <CustomGroupByItem fields="fields" onAddCustomGroup="onAddCustomGroup.bind(this)"/>
             </t>
         </Dropdown>
     </t>

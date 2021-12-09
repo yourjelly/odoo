@@ -2,13 +2,12 @@
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useEffect, useService, onDestroyed, useBus } from "@web/core/utils/hooks";
+import { useService, useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
 import { ErrorHandler, NotUpdatable } from "@web/core/utils/components";
 
-const { Component, hooks } = owl;
-const { useExternalListener, useRef } = hooks;
+const { Component, onWillDestroy, useExternalListener, useEffect, useRef } = owl;
 const systrayRegistry = registry.category("systray");
 
 const getBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -55,7 +54,7 @@ export class NavBar extends Component {
         this.menuService = useService("menu");
         this.appSubMenus = useRef("appSubMenus");
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
-        onDestroyed(() => debouncedAdapt.cancel());
+        onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);
 
         let adaptCounter = 0;
@@ -68,7 +67,12 @@ export class NavBar extends Component {
         useBus(this.env.bus, "MENUS:APP-CHANGED", renderAndAdapt);
         // We don't want to adapt every time we are patched
         // rather, we adapt only when menus or systrays have changed.
-        useEffect(() => {this.adapt();}, () => [adaptCounter]);
+        useEffect(
+            () => {
+                this.adapt();
+            },
+            () => [adaptCounter]
+        );
     }
 
     handleItemError(error, item) {
@@ -140,7 +144,10 @@ export class NavBar extends Component {
         // use getBoundingClientRect to get unrounded values for width in order to avoid rounding problem
         // with offsetWidth.
         const sectionsAvailableWidth = getBoundingClientRect.call(sectionsMenu).width;
-        const sectionsTotalWidth = sections.reduce((sum, s) => sum + getBoundingClientRect.call(s).width, 0);
+        const sectionsTotalWidth = sections.reduce(
+            (sum, s) => sum + getBoundingClientRect.call(s).width,
+            0
+        );
         if (sectionsAvailableWidth < sectionsTotalWidth) {
             // Sections are overflowing
             // Initial width is harcoded to the width the more menu dropdown will take
@@ -196,4 +203,4 @@ export class NavBar extends Component {
     }
 }
 NavBar.template = "web.NavBar";
-NavBar.components = { MenuDropdown, MenuItem, NotUpdatable, ErrorHandler };
+NavBar.components = { MenuDropdown, Dropdown, MenuItem, NotUpdatable, ErrorHandler };

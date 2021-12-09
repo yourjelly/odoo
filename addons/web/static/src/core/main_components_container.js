@@ -2,14 +2,14 @@
 import { registry } from "./registry";
 import { NotUpdatable, ErrorHandler } from "./utils/components";
 
-const { Component, tags } = owl;
+const { Component, xml } = owl;
 
 export class MainComponentsContainer extends Component {
     setup() {
         this.Components = registry.category("main_components").getEntries();
     }
 
-    handleComponentError(error, C) {
+    handleComponentError(C, error) {
         // remove the faulty component and rerender without it
         this.Components.splice(this.Components.indexOf(C), 1);
         this.render();
@@ -24,11 +24,11 @@ export class MainComponentsContainer extends Component {
     }
 }
 
-MainComponentsContainer.template = tags.xml`
+MainComponentsContainer.template = xml`
 <div>
     <t t-foreach="Components" t-as="C" t-key="C[0]">
         <NotUpdatable>
-            <ErrorHandler onError="error => handleComponentError(error, C)">
+            <ErrorHandler onError="handleComponentError.bind(this, C)">
                 <t t-component="C[1].Component" t-props="C[1].props"/>
             </ErrorHandler>
         </NotUpdatable>

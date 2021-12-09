@@ -5,7 +5,7 @@
     <header>
       <nav
         class="o_main_navbar"
-        t-on-dropdown-item-selected="onNavBarDropdownItemSelection"
+        onDropdownItemSelected="onNavBarDropdownItemSelection.bind(this)"
         data-command-category="navbar"
       >
         <!-- Apps Menu -->
@@ -18,10 +18,10 @@
           t-if="currentApp and !env.isSmall"
           href="getMenuItemHref(currentApp)"
           payload="currentApp"
-          t-esc="currentApp.name"
-          class="o_menu_brand"
-          t-ref="menuBrand"
-        />
+          class="{ 'o_menu_brand': true }">
+          <!-- FIXME NXOWL t-ref="menuBrand" -->
+          <t t-esc="currentApp.name"/>
+        </MenuItem>
 
         <!-- Current App Sections -->
         <t t-if="currentAppSections.length and !env.isSmall" t-call="web.NavBar.SectionsMenu">
@@ -32,7 +32,7 @@
         <div class="o_menu_systray" role="menu">
           <t t-foreach="systrayItems" t-as="item" t-key="item.key">
             <NotUpdatable>
-                <ErrorHandler onError="error => handleItemError(error, item)">
+                <ErrorHandler onError="handleItemError.bind(this, item)">
                     <t t-component="item.Component" t-props="item.props" />
                 </ErrorHandler>
             </NotUpdatable>
@@ -43,7 +43,7 @@
   </t>
 
   <t t-name="web.NavBar.AppsMenu" owl="1">
-    <Dropdown hotkey="'h'" title="'Home Menu'" class="o_navbar_apps_menu">
+    <Dropdown hotkey="'h'" title="'Home Menu'" class="'o_navbar_apps_menu'">
       <t t-set-slot="toggler">
         <i class="fa fa-th-large" />
       </t>
@@ -51,12 +51,12 @@
         t-foreach="apps"
         t-as="app"
         t-key="app.id"
-        class="o_app"
-        t-att-class="{ focus: menuService.getCurrentApp() === app }"
+        class="{ 'o_app': true, focus: menuService.getCurrentApp() === app }"
         href="getMenuItemHref(app)"
         payload="app"
-        t-esc="app.name" 
-      />
+        >
+        <t t-esc="app.name"/>
+      </MenuItem> 
     </Dropdown>
   </t>
 
@@ -79,12 +79,12 @@
         <t t-if="!section.childrenTree.length">
           <MenuItem
             title="section.name"
-            class="o_nav_entry"
+            class="'o_nav_entry'"
             payload="section"
             href="getMenuItemHref(section)"
-            hotkey="hotkey"
-            t-esc="section.name"
-          />
+            hotkey="hotkey">
+            <t t-esc="section.name"/>
+          </MenuItem>
         </t>
         <t t-else="">
           <MenuDropdown
@@ -118,9 +118,9 @@
         t-if="!item.childrenTree.length"
         payload="item"
         href="getMenuItemHref(item)"
-        class="dropdown-item"
-        t-esc="item.name" 
-      />
+        class="'dropdown-item'">
+        <t t-esc="item.name"/>
+      </MenuItem>
 
       <t t-else="">
         <div class="dropdown-menu_group dropdown-header" t-esc="item.name" />
@@ -128,17 +128,17 @@
           t-foreach="item.childrenTree"
           t-as="subItem"
           t-key="subItem.id"
-          class="o_dropdown_menu_group_entry dropdown-item"
+          class="'o_dropdown_menu_group_entry dropdown-item'"
           payload="subItem"
-          href="getMenuItemHref(subItem)"
-          t-esc="subItem.name"
-        />
+          href="getMenuItemHref(subItem)">
+          <t t-esc="subItem.name"/>
+        </MenuItem>
       </t>
     </t>
   </t>
 
   <t t-name="web.NavBar.SectionsMenu.MoreDropdown" owl="1">
-    <Dropdown class="o_menu_sections_more" title="'More Menu'" hotkey="hotkey">
+    <Dropdown class="'o_menu_sections_more'" title="'More Menu'" hotkey="hotkey">
       <t t-set-slot="toggler">
         <i class="fa fa-plus" />
       </t>
@@ -146,11 +146,11 @@
 
         <t t-if="!section.childrenTree.length">
           <MenuItem
-            class="o_more_dropdown_section"
+            class="'o_more_dropdown_section'"
             payload="section"
-            href="getMenuItemHref(section)"
-            t-esc="section.name"
-          />
+            href="getMenuItemHref(section)">
+            <t t-esc="section.name" />
+          </MenuItem>
         </t>
         <t t-else="">
           <div

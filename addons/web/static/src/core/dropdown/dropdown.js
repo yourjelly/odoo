@@ -6,9 +6,7 @@ import { useDropdownNavigation } from "./dropdown_navigation_hook";
 import { ParentClosingMode } from "./dropdown_item";
 import { localization } from "../l10n/localization";
 
-const { Component, core, hooks, useState, QWeb } = owl;
-const { EventBus } = core;
-const { onWillStart, useExternalListener, useRef, useSubEnv } = hooks;
+const { Component, EventBus, onWillStart, useExternalListener, useRef, useState, useSubEnv } = owl;
 
 const DIRECTION_CARET_CLASS = {
     bottom: "dropdown",
@@ -185,18 +183,17 @@ export class Dropdown extends Component {
      *
      * @param {CustomEvent<import("./dropdown_item").DropdownItemSelectedEventDetail>} ev
      */
-    onItemSelected(ev) {
+    onItemSelected({ detail }) {
         // Handle parent closing request
-        const { dropdownClosingRequest } = ev.detail;
-        const closeAll = dropdownClosingRequest.mode === ParentClosingMode.AllParents;
+        const closeAll = detail.dropdownClosingRequest.mode === ParentClosingMode.AllParents;
         const closeSelf =
-            dropdownClosingRequest.isFresh &&
-            dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
+            detail.dropdownClosingRequest.isFresh &&
+            detail.dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
         if (!this.props.manualOnly && (closeAll || closeSelf)) {
             this.close();
         }
         // Mark closing request as started
-        ev.detail.dropdownClosingRequest.isFresh = false;
+        detail.dropdownClosingRequest.isFresh = false;
     }
 
     /**
@@ -207,26 +204,26 @@ export class Dropdown extends Component {
      *
      * @see changeStateAndNotify()
      *
-     * @param {DropdownStateChangedPayload} args
+     * @param {CustomEvent<DropdownStateChangedPayload>} ev
      */
-    onDropdownStateChanged(args) {
-        if (this.el.contains(args.emitter.el)) {
+    onDropdownStateChanged({ detail }) {
+        if (this.el.contains(detail.emitter.el)) {
             // Do not listen to events emitted by self or children
             return;
         }
 
         // Emitted by direct siblings ?
-        if (args.emitter.el.parentElement === this.el.parentElement) {
+        if (detail.emitter.el.parentElement === this.el.parentElement) {
             // Sync the group status
-            this.state.groupIsOpen = args.newState.groupIsOpen;
+            this.state.groupIsOpen = detail.newState.groupIsOpen;
 
             // Another dropdown is now open ? Close myself without notifying siblings.
-            if (this.state.open && args.newState.open) {
+            if (this.state.open && detail.newState.open) {
                 this.state.open = false;
             }
         } else {
             // Another dropdown is now open ? Close myself and notify the world (i.e. siblings).
-            if (this.state.open && args.newState.open) {
+            if (this.state.open && detail.newState.open) {
                 this.close();
             }
         }
@@ -274,6 +271,10 @@ export class Dropdown extends Component {
 }
 Dropdown.bus = new EventBus();
 Dropdown.props = {
+    class: {
+        type: String,
+        optional: true,
+    },
     toggler: {
         type: String,
         optional: true,
@@ -311,11 +312,19 @@ Dropdown.props = {
         type: String,
         optional: true,
     },
+    onDropdownItemSelected: {
+        type: Function,
+        optional: true,
+    },
     position: {
         type: String,
+        optional: true,
+    },
+    slots: {
+        type: Object,
         optional: true,
     },
 };
 Dropdown.template = "web.Dropdown";
 
-QWeb.registerComponent("Dropdown", Dropdown);
+owl.Component._components.Dropdown = Dropdown;

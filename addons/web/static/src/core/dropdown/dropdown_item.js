@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-const { Component, QWeb } = owl;
+const { Component } = owl;
 
 /**
  * @enum {string}
@@ -30,7 +30,7 @@ export class DropdownItem extends Component {
      * @param {MouseEvent} ev
      */
     onClick(ev) {
-        if (this.props.href){
+        if (this.props.href) {
             ev.preventDefault();
         }
 
@@ -47,6 +47,10 @@ export class DropdownItem extends Component {
 }
 DropdownItem.template = "web.DropdownItem";
 DropdownItem.props = {
+    class: {
+        type: [String, Object],
+        optional: true,
+    },
     payload: {
         type: Object,
         optional: true,
@@ -63,6 +67,10 @@ DropdownItem.props = {
         type: String,
         optional: true,
     },
+    slots: {
+        type: Object,
+        optional: true,
+    },
     title: {
         type: String,
         optional: true,
@@ -71,5 +79,4 @@ DropdownItem.props = {
 DropdownItem.defaultProps = {
     parentClosingMode: ParentClosingMode.AllParents,
 };
-
-QWeb.registerComponent("DropdownItem", DropdownItem);
+owl.Component._components.DropdownItem = DropdownItem;
