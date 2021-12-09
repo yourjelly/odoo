@@ -73,8 +73,8 @@ class PaymentAcquirer(models.Model):
     def _get_stripe_account_link(self, account_id):
         account_links = self._stripe_make_request('account_links', payload={
             'account': self.stripe_account_id,
-            'return_url': self.company_id.get_base_url() + '/payment/stripe/onboarding/return',
-            'refresh_url': self.company_id.get_base_url() + '/payment/stripe/onboarding/refresh',
+            'return_url': f'{self.company_id.get_base_url()}/payment/stripe/onboarding/return/{self.id}',
+            'refresh_url': f'{self.company_id.get_base_url()}/payment/stripe/onboarding/refresh/{self.id}',
             'type': 'account_onboarding',
         })
         return account_links.get('url')

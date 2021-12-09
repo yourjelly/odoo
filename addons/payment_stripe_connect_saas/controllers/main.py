@@ -18,8 +18,8 @@ _logger = logging.getLogger(__name__)
 
 class StripeController(main.StripeController):
 
-    @http.route('/payment/stripe/onboarding/return', type='http', auth='public', csrf=False)
-    def stripe_onboarding_return(self):
+    @http.route('/payment/stripe/onboarding/return/<int:acquirer_id>', type='http', auth='public', csrf=False)
+    def stripe_onboarding_return(self, acquirer_id):
         """Stripe return URL
 
             This route is used by Stripe to return after or during the onboarding.
@@ -28,7 +28,7 @@ class StripeController(main.StripeController):
 
             :returns: Redirection to Stripe Acquirer Form
         """
-        stripe_acquirer = request.env.ref('payment.payment_acquirer_stripe')
+        stripe_acquirer = request.env['payment.acquirer'].sudo().browse(acquirer_id)
         # TODO TLE : Should wait a bit before querying Stripe again or handle Exception
         # Because Stripe does not support querying same object at high rate (Error 429)
         stripe_acquirer._update_stripe_onboarding_status()
@@ -45,8 +45,8 @@ class StripeController(main.StripeController):
             stripe_acquirer.state = 'test'
         return super().stripe_onboarding_return()
 
-    @http.route('/payment/stripe/onboarding/refresh', type='http', auth='public', csrf=False)
-    def stripe_onboarding_refresh(self):
+    @http.route('/payment/stripe/onboarding/refresh/<int:acquirer_id>', type='http', auth='public', csrf=False)
+    def stripe_onboarding_refresh(self, acquirer_id):
         """Stripe refresh URL
 
             This route is used by Stripe to refresh its onboarding. Once called, the controller regenerates an account link
@@ -54,7 +54,7 @@ class StripeController(main.StripeController):
 
             :returns: Redirection to Stripe Onboarding
         """
-        stripe_acquirer = request.env.ref('payment.payment_acquirer_stripe')
+        stripe_acquirer = request.env['payment.acquirer'].sudo().browse(acquirer_id)
         url = stripe_acquirer._onboarding_url()
         if not url:
             return self._redirect_payment_acquirer(stripe_acquirer)
