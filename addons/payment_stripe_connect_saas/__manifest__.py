@@ -4,7 +4,7 @@
     'description': """Payment Stripe for SaaS""",
     'version': '1.0',
     'depends': ['payment_stripe_connect'],
-    'auto_install': True,
+    'auto_install': False,
     'data': [
         'views/payment_views.xml',
     ],

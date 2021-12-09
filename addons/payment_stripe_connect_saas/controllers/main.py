@@ -34,8 +34,12 @@ class StripeController(main.StripeController):
         stripe_acquirer._update_stripe_onboarding_status()
         if stripe_acquirer.stripe_account_validated:
             stripe_acquirer.state = 'enabled'
-            # /!\ WARNING: See comment in payment_acquirer.py::_create_webhook()
-            stripe_acquirer._create_webhook()
+            # /!\ WARNING:
+            # Every reviewer should understand the webhook will be created on the Connect Platform Account (and not the connected account)
+            # It implies that every instance of odoo will receive every webhook from other connected accounts.
+            # I (tle) do suspect that it's not a good practice since every instance receives information which doesn't concern them.
+            # Yet ! This should only be used on SaaS db so it may be safe on those ones (I'm not an expert).
+            stripe_acquirer._create_webhook(connect=True)
             menu_id = request.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration')
             url_params = {
                 'menu_id': menu_id,

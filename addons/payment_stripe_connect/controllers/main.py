@@ -7,6 +7,7 @@ import werkzeug
 
 from odoo import http
 from odoo.http import request
+from odoo.exceptions import UserError
 
 from odoo.addons.payment_stripe.controllers import main
 
@@ -15,8 +16,8 @@ _logger = logging.getLogger(__name__)
 
 class StripeController(main.StripeController):
 
-    @http.route('/payment/stripe/onboarding/return', type='http', auth='public', csrf=False)
-    def stripe_onboarding_return(self):
+    @http.route('/payment/stripe/onboarding/return/<int:acquirer_id>', type='http', auth='public', csrf=False)
+    def stripe_onboarding_return(self, acquirer_id, scope=None, code=None, **kwargs):
         """Stripe return URL
 
             This route is used by Stripe to return after or during the onboarding.
@@ -25,26 +26,20 @@ class StripeController(main.StripeController):
 
             :returns: Redirection to Stripe Acquirer Form
         """
-        stripe_acquirer = request.env.ref('payment.payment_acquirer_stripe')
-        return self._redirect_payment_acquirer(stripe_acquirer)
-
-    @http.route('/payment/stripe/onboarding/refresh/<account_id>', type='http', auth='public', csrf=False)
-    def stripe_onboarding_refresh(self, account_id=None):
-        """Stripe refresh URL
-
-            This route is used by Stripe to refresh its onboarding. Once called, the controller regenerates an account link
-            and redirect to it.
-
-            :returns: Redirection to Stripe Onboarding
-        """
-        stripe_acquirer = request.env.ref('payment.payment_acquirer_stripe')
-        if not account_id:
-            url = stripe_acquirer._onboarding_url()
-        else:
-            url = stripe_acquirer._get_stripe_account_link(account_id)
-        if not url:
+        stripe_acquirer = request.env['payment.acquirer'].sudo().browse(acquirer_id)
+        request_csrf = kwargs.get('state')
+        if not request_csrf or request_csrf != stripe_acquirer.csrf_token or \
+           kwargs.get('error') or kwargs.get('error_description'):
             return self._redirect_payment_acquirer(stripe_acquirer)
-        return werkzeug.utils.redirect(url)
+        try:
+            stripe_acquirer._stripe_oauth_token(code)
+        except UserError:
+            return self._redirect_payment_acquirer(stripe_acquirer)
+        menu_id = request.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration')
+        url_params = {
+            'menu_id': menu_id,
+        }
+        return menu_id and request.redirect('/web?#%s' % url_encode(url_params)) or request.redirect('/web')
 
     def _redirect_payment_acquirer(self, stripe_acquirer):
         url_params = {

@@ -15,6 +15,10 @@
                     </group>
                 </group>
             </xpath>
+            <field name="stripe_webhook_secret" position="after">
+                <button type="object" role="button" name="action_stripe_create_webhook" class="btn-primary"
+                        string="Create your webhook" attrs="{'invisible': [('stripe_webhook_secret', '!=', False)]}"/>
+            </field>
         </field>
     </record>
 
