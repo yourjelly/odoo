@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime
+from lxml import etree
+import zipfile
+import io
 from odoo import api, fields, models
 from re import sub as regex_sub
-import io
-import zipfile
-from lxml import etree
-from datetime import datetime
+<< << << < HEAD
+== == == =
+>>>>>> > 6e0359083fbaabbc6176598d7575f5b4ec756105
 
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+
+<< << << < HEAD
     # Stored fields
     l10n_es_tbai_is_required = fields.Boolean(
         string="Is the Bask EDI (TicketBai) needed",
@@ -25,32 +30,47 @@ class AccountMove(models.Model):
     l10n_es_tbai_number = fields.Char(string="TicketBai number", compute="_get_l10n_es_tbai_number", store=True)
 
     l10n_es_tbai_signature = fields.Char(string="Signature value of XML", compute="_compute_l10n_es_tbai_values")
+== == == =
+    l10n_es_tbai_is_required = fields.Boolean(
+        string="Is the Bask EDI (TicketBai) needed",
+        compute='_compute_l10n_es_tbai_is_required'
+    )
+    l10n_es_tbai_previous_invoice_id = fields.Many2one(string="Previous invoice on chain", comodel_name="account.move", copy=False, readonly=True)
+    l10n_es_tbai_id = fields.Char(string="TicketBaiID", copy=False, readonly=True)
+    l10n_es_tbai_signature = fields.Char(string="Signature value of XML", copy=False, readonly=True)
+>>>>>> > 6e0359083fbaabbc6176598d7575f5b4ec756105
     l10n_es_tbai_registration_date = fields.Date(
         string="Registration Date",
         help="Technical field to keep the date the invoice was sent the first time as the date the invoice was "
              "registered into the system.",
+<< << << < HEAD
         compute="_compute_l10n_es_tbai_values"
     )
+== == == =
+    )
+    l10n_es_tbai_sequence=fields.Char(string = "TicketBai sequence", compute = "_get_l10n_es_tbai_sequence")
+    l10n_es_tbai_number=fields.Char(string = "TicketBai number", compute = "_get_l10n_es_tbai_number")
+>> >>>> > 6e0359083fbaabbc6176598d7575f5b4ec756105
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('move_type', 'company_id')
+    @ api.depends('move_type', 'company_id')
     def _compute_l10n_es_tbai_is_required(self):
         for move in self:
-            move.l10n_es_tbai_is_required = move.is_sale_document() \
+            move.l10n_es_tbai_is_required=move.is_sale_document() \
                 and move.country_code == 'ES' \
                 and move.company_id.l10n_es_tbai_tax_agency
 
-    @api.depends('l10n_es_tbai_is_required')
+    @ api.depends('l10n_es_tbai_is_required')
     def _compute_edi_show_cancel_button(self):
         # OVERRIDE
         super()._compute_edi_show_cancel_button()
         for move in self.filtered('l10n_es_tbai_is_required'):
-            move.edi_show_cancel_button = False
+            move.edi_show_cancel_button=False
 
-    def _get_l10n_es_tbai_values_from_zip(self, xpaths, response=False):
+    def _get_l10n_es_tbai_values_from_zip(self, xpaths, response = False):
         for doc in self.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'es_tbai'):
             if not doc.attachment_id:
                 print("ZIP: NO ATTACHMENT")
@@ -69,7 +89,7 @@ class AccountMove(models.Model):
                 print("ZIP: BAD FILE")
                 return None
 
-    @api.depends('edi_document_ids.attachment_id.raw')
+    @ api.depends('edi_document_ids.attachment_id.raw')
     def _compute_l10n_es_tbai_values(self):
         for record in self:
 
@@ -91,7 +111,7 @@ class AccountMove(models.Model):
                 record.l10n_es_tbai_signature = vals['signature']
                 record.l10n_es_tbai_registration_date = datetime.strptime(vals['registration_date'], '%d-%m-%Y')
 
-    @api.depends('name')
+    @ api.depends('name')
     def _get_l10n_es_tbai_sequence(self):
         for record in self:
             sequence, _ = record.name.rsplit('/', 1)
@@ -101,7 +121,7 @@ class AccountMove(models.Model):
             print("Sequence: ", sequence)
             record.write({'l10n_es_tbai_sequence': sequence + "TEST"})  # TODO use journal sequences
 
-    @api.depends('name')
+    @ api.depends('name')
     def _get_l10n_es_tbai_number(self):
         for record in self:
             _, number = record.name.rsplit('/', 1)
