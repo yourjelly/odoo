@@ -11,13 +11,15 @@ from re import sub as regex_sub
 import xmlsig
 from cryptography.hazmat.primitives import hashes
 from lxml import etree
-from lxml.objectify import fromstring
 from odoo import _, fields, models
 from odoo.tools import get_lang, html_escape
 from requests import exceptions
 
 from .requests_pkcs12 import post
 from .res_company import L10N_ES_EDI_TBAI_VERSION
+
+import io
+import zipfile
 
 
 class AccountEdiFormat(models.Model):
@@ -45,7 +47,12 @@ class AccountEdiFormat(models.Model):
 
         return journal.country_code == 'ES'
 
+    def _get_invoice_edi_content(self, invoice):
+        pass  # TODO
+
     def _post_invoice_edi(self, invoices):
+        print("=== STARTING TO POST %s ===" % invoices.name)
+
         # OVERRIDE
         if self.code != 'es_tbai':
             return super()._post_invoice_edi(invoices)
@@ -66,11 +73,6 @@ class AccountEdiFormat(models.Model):
                 'blocking_level': 'error',
             } for inv in invoices}
 
-        # Set registration date TODO if unsuccessful, set again at next attempt (remove filter) ?
-        invoices.filtered(lambda inv: not inv.l10n_es_tbai_registration_date).write({
-            'l10n_es_tbai_registration_date': fields.datetime.now(),
-        })
-
         # Generate the XML values.
         inv_xml = self._l10n_es_tbai_get_invoice_xml(invoices)
 
@@ -78,22 +80,73 @@ class AccountEdiFormat(models.Model):
         signature = self._l10n_es_tbai_sign_invoice(invoices, inv_xml)
         res = self._l10n_es_tbai_post_to_web_service(invoices, inv_xml, signature)
 
-        # Create attachment & post to chatter
-        for inv in invoices:  # TODO loop should not be necessary, use ensure_one() ?
+        self.ensure_one()  # TODO loop should not be necessary
+        for inv in invoices:
+            # Get TicketBai response
+            res_xml = res[inv]['response']
+            message, tbai_id = self.get_response_values(res_xml)
+
+            # SUCCESS
             if res.get(inv, {}).get('success'):
+
+                #     # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
+                #     inv.company_id.write({'l10n_es_tbai_last_posted_id': inv})
+
+                # Zip together invoice & response
+                with io.BytesIO() as stream:
+                    raw1 = etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+                    raw2 = etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+                    stream = self.zip_files([raw1, raw2], [inv.name + ".xml", inv.name + "_response.xml"], stream)
+
+                    # Create attachment & post to chatter
+                    attachment = self.env['ir.attachment'].create({
+                        'type': 'binary',
+                        'name': inv.name + ".zip",
+                        'raw': stream.getvalue(),
+                        'mimetype': 'application/zip'
+                    })
+                    inv.with_context(no_new_invoice=True).message_post(
+                        body="TicketBAI: submitted XML and response",
+                        attachment_ids=attachment.ids)
+                    res[inv]['attachment'] = attachment  # save zip as EDI document
+
+            # Put sent XML in chatter (TODO remove)
+            attachment = self.env['ir.attachment'].create({
+                'type': 'binary',
+                'name': inv.name + '.xml',
+                'raw': etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
+                'mimetype': 'application/xml',
+            })
+            inv.with_context(no_new_invoice=True).message_post(
+                body="TicketBai: invoice XML (TODO remove)",
+                attachment_ids=attachment.ids)
+
+            # Put response + any warning/error in chatter (TODO remove)
+            if message:
                 attachment = self.env['ir.attachment'].create({
                     'type': 'binary',
-                    'name': inv.name,
-                    'raw': etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
+                    'name': inv.name + '_response.xml',
+                    'raw': etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
                     'mimetype': 'application/xml',
-                    'res_model': inv._name,
-                    'res_id': inv.id,
                 })
-                res[inv]['attachment'] = attachment
                 inv.with_context(no_new_invoice=True).message_post(
-                    body="TicketBAI mockup document",
+                    body="<pre>TicketBai: response\n" + message + '</pre>',
                     attachment_ids=attachment.ids)
+        print("=== FINISHED POSTING %s ===" % invoices.name)
         return res
+
+    def zip_files(self, files, fnames, stream):
+        """
+        : param fnct_sort : Function to be passed to "key" parameter of built-in
+                            python sorted() to provide flexibility of sorting files
+                            inside ZIP archive according to specific requirements.
+        """
+
+        with zipfile.ZipFile(stream, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+            for file, fname in zip(files, fnames):
+                fname = regex_sub("/", "-", fname)  # slashes create directory structure
+                zipf.writestr(fname, file)
+        return stream
 
     # -------------------------------------------------------------------------
     # TBAI XML BUILD
@@ -171,15 +224,15 @@ class AccountEdiFormat(models.Model):
         values = {}
         for invoice in invoices:
             com_partner = invoice.commercial_partner_id
-            is_simplified = False  # invoice.partner_id == simplified_partner ??
 
             # === CABECERA===
             values['SerieFactura'] = invoice.l10n_es_tbai_sequence
             values['NumFactura'] = invoice.l10n_es_tbai_number
-            values['FechaExpedicionFactura'] = datetime.strftime(invoice.l10n_es_tbai_registration_date, '%d-%m-%Y')
-            values['HoraExpedicionFactura'] = datetime.strftime(invoice.l10n_es_tbai_registration_date, '%H:%M:%S')
+            values['FechaExpedicionFactura'] = datetime.strftime(datetime.now(), '%d-%m-%Y')  # TODO use existing registration datetime if canceling/correcting it
+            values['HoraExpedicionFactura'] = datetime.strftime(datetime.now(), '%H:%M:%S')
 
             # TODO simplified & rectified invoices
+            # is_simplified = invoice.partner_id == simplified_partner
             # if invoice.move_type == 'out_invoice':
             #     invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
             # elif invoice.move_type == 'out_refund':
@@ -366,7 +419,7 @@ class AccountEdiFormat(models.Model):
                 'EncadenamientoFacturaAnterior': True,
                 'SerieFacturaAnterior': prev_invoice.l10n_es_tbai_sequence,
                 'NumFacturaAnterior': prev_invoice.l10n_es_tbai_number,
-                'FechaExpedicionFacturaAnterior': datetime.strftime(prev_invoice.date, '%d-%m-%Y'),
+                'FechaExpedicionFacturaAnterior': datetime.strftime(prev_invoice.l10n_es_tbai_registration_date, '%d-%m-%Y'),
                 'FirmaFacturaAnterior': prev_invoice.l10n_es_tbai_signature[:100]
             }
         else:
@@ -394,37 +447,43 @@ class AccountEdiFormat(models.Model):
         # TBAID only exists if invoice has already been successfully submitted to gov.
         tbai_id = invoices.mapped('l10n_es_tbai_id')[0]
 
-        xml_str = etree.tostring(invoice_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+        xml_str = etree.tostring(invoice_xml, encoding='UTF-8')
 
         # === Call the web service ===
 
-        # Get connection data. TODO use session w/ timeout ?
-        url = company.l10n_es_tbai_url_cancel if tbai_id else company.l10n_es_tbai_url_invoice
+        # Get connection data #TODO cancel parameter
+        url = company.l10n_es_tbai_url_invoice  # company.l10n_es_tbai_url_cancel if tbai_id else company.l10n_es_tbai_url_invoice
         header = {"Content-Type": "application/xml; charset=UTF-8"}
         cert_file = company.l10n_es_tbai_certificate_id.get_file()
         password = company.l10n_es_tbai_certificate_id.get_password()
 
         # Post and retrieve response
-        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password)
+        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password, timeout=30)
         data = response.content.decode(response.encoding)
 
         # Error management
-        print(data)  # TODO remove
         response_xml = etree.fromstring(bytes(data, 'utf-8'))
+        message, tbai_id = self.get_response_values(response_xml)
         state = int(response_xml.find(r'.//Estado').text)
         if state == 0:
             # SUCCESS
-            invoices.write({'l10n_es_tbai_previous_invoice_id': company.l10n_es_tbai_last_posted_id})
-            invoices.write({'l10n_es_tbai_signature': signature})
-            company.write({'l10n_es_tbai_last_posted_id': invoices})
-            return {invoices: {'success': True, 'error': '', 'blocking_level': 'info'}}
+            return {invoices: {'success': True, 'response': response_xml}}
         else:
             # ERROR
-            results = response_xml.find(r'.//ResultadosValidacion')
-            message = results.find('Codigo').text + ": " + \
-                (results.find(r'Azalpena').text if get_lang(self.env).code == 'eu_ES' else results.find(r'Descripcion').text)
-            return {invoices: {'success': state == 0, 'error': _(message), 'blocking_level': 'warning'}}
+            return {invoices: {
+                'success': False, 'error': _(message), 'blocking_level': 'error',
+                'response': response_xml}}
 
+    def get_response_values(self, xml_res):
+        tbai_id_node = xml_res.find(r'.//IdentificadorTBAI')
+        tbai_id = '' if tbai_id_node is None else tbai_id_node.text
+        messages = ''
+        node_name = 'Azalpena' if get_lang(self.env).code == 'eu_ES' else 'Descripcion'
+        for xml_res_node in xml_res.findall(r'.//ResultadosValidacion'):
+            messages += xml_res_node.find('Codigo').text + ": " + xml_res_node.find(node_name).text + "\n"
+        return messages, tbai_id
+
+    # TODO remove static method (make it private)
     @ staticmethod
     def sign(root, certificate):
         """
