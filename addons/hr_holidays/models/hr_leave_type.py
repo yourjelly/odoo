@@ -130,12 +130,10 @@ class HolidaysType(models.Model):
         FROM
             hr_leave_allocation alloc
         WHERE
-            alloc.id is not null or (
             alloc.employee_id = %s AND
             alloc.active = True AND alloc.state = 'validate' AND
-            alloc.date_to >= %s OR alloc.date_to IS NULL AND
+            (alloc.date_to >= %s OR alloc.date_to IS NULL) AND
             alloc.date_from <= %s 
-            )
         '''
 
         self._cr.execute(query, (employee_id or None, date_to, date_from))

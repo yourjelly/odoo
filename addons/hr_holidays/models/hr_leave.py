@@ -777,8 +777,8 @@ class HolidaysRequest(models.Model):
         # Try to force the leave_type name_get when creating new records
         # This is called right after pressing create and returns the name_get for
         # most fields in the view.
-        if 'employee_id' in field_onchange:
-            self = self.with_context(employee_id=int(field_onchange['employee_id']))
+        if 'employee_id' in field_onchange and 'employee_id' not in self._context:
+            self = self.with_context(employee_id=self._context.get('default_employee_id', self.env.user.employee_id.id))
         return super().onchange(values, field_name, field_onchange)
 
     def name_get(self):
