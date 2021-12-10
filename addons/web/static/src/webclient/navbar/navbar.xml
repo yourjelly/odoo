@@ -144,7 +144,7 @@
   <t t-name="web.NavBar.SectionsMenu.MoreDropdown" owl="1">
     <Dropdown class="o_menu_sections_more" title="'More Menu'" hotkey="hotkey">
       <t t-set-slot="toggler">
-        <i class="fa fa-plus" />
+        <i class="oi oi-add--thick"/>
       </t>
       <t t-foreach="sections" t-as="section" t-key="section.id">
 

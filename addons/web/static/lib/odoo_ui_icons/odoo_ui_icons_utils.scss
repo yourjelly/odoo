@@ -1,0 +1,31 @@
+// = Odoo UI Icons - tools
+// ============================================================================
+.oi {
+    line-height: inherit;
+
+    &-lg {
+        font-size: 1.33333333em;
+        line-height: 0.75em;
+        vertical-align: -15%;
+    }
+
+    @for $i from 2 through 10 {
+        &-#{$i}x {
+            font-size: $i * 1em;
+        }
+    }
+
+    &-fw {
+        width: 1.28571429em;
+        text-align: center;
+    }
+
+    // - Rely on animations already defined by FontAwesome
+    &-spin {
+        animation: fa-spin 2s infinite linear;
+    }
+
+    &-pulse {
+        animation: fa-spin 1s infinite steps(8);
+    }
+}

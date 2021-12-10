@@ -1,0 +1,8 @@
+Odoo UI Icons - v1.1
+
+Credits
+- https://www.ibm.com/design/language/iconography/ui-icons/library
+- https://github.com/carbon-design-system/carbon-icons
+
+
+Created by SRI using IconMoon (https://icomoon.io/)
