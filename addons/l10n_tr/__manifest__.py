@@ -28,9 +28,9 @@ Bu modül kurulduktan sonra, Muhasebe yapılandırma sihirbazı çalışır
         "data/account.group.template.csv",
 
         # Taxes
-        # "data/account_tax_group_data.xml",
+        "data/account_tax_group_data.xml",
         # "data/account_tax_report_data.xml",
-        # "data/account_tax_template_data.xml",
+        "data/account_tax_template_data.xml",
         # "data/account_fiscal_position_template_data.xml",
         # "data/account_account_template_post_data.xml",
 
