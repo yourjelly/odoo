@@ -61,7 +61,8 @@ class StockAssignSerialNumbers(models.TransientModel):
 
     def _assign_serial_numbers(self, cancel_remaining_quantity=False):
         serial_numbers = self._get_serial_numbers()
-        productions = self.production_id._split_production([1] * len(serial_numbers), cancel_remaining_quantity)
+        productions = self.production_id._split_productions({self.production_id: 
+            [1] * len(serial_numbers)}, cancel_remaining_quantity)
         production_lots_vals = []
         for serial_name in serial_numbers:
             production_lots_vals.append({
