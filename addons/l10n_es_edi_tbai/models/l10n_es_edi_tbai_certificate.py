@@ -30,7 +30,7 @@ class Certificate(models.Model):
 
     @api.model
     def _get_es_current_datetime(self):
-        """Get the current datetime with the Peruvian timezone. """
+        """Get the current datetime with the Basque timezone. """
         return datetime.now(timezone('Europe/Madrid'))
 
     @tools.ormcache('self.content', 'self.password')
