@@ -123,7 +123,7 @@ class HolidaysRequest(models.Model):
     manager_id = fields.Many2one('hr.employee', compute='_compute_from_employee_id', store=True, readonly=False)
     # leave type configuration
     holiday_status_id = fields.Many2one(
-        "hr.leave.type", compute='_compute_from_employee_id', store=True, string="Time Off Type", required=True, readonly=False,
+        "hr.leave.type", compute='_compute_holiday_status_id', store=True, string="Time Off Type", required=True, readonly=False,
         states={'cancel': [('readonly', True)], 'refuse': [('readonly', True)], 'validate1': [('readonly', True)], 'validate': [('readonly', True)]},
         domain=['|', ('requires_allocation', '=', 'no'), ('has_valid_allocation', '=', True)])
     holiday_allocation_id = fields.Many2one(
@@ -462,8 +462,8 @@ class HolidaysRequest(models.Model):
             if holiday.holiday_status_id or holiday.request_unit_half or holiday.request_unit_hours:
                 holiday.request_unit_custom = False
 
-    @api.onchange('request_date_from', 'request_date_to')
-    def _onchange_holiday_status_id(self):
+    @api.depends('request_date_from', 'request_date_to')
+    def _compute_holiday_status_id(self):
         leave_type = self.env['hr.leave.type'].search([])
         for holiday in self:
             date_from = fields.Datetime.to_string(holiday.request_date_from)
