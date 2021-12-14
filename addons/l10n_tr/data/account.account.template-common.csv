@@ -1,4 +1,4 @@
-"id","name","code","user_type_id/id","chart_template_id/id","tag_ids/id","reconcile",
+"id","name","code","user_type_id/id","chart_template_id/id","tag_ids/id","reconcile",note
 "tr101","Alınan Çekler",101,"account.data_account_type_current_assets","l10n_tr.chart_template",,"False","Bu hesap gerçek ve tüzel kişiler tarafından işletmeye verilmiş olup, henüz tahsil için bankaya verilmemiş veya ciro edilmemiş olan çeklerin izlenmesini sağlar.\n\nİşleyişi :\n\nAlınan çeklerin yazılı değerleri ile borç, bankadan tahsil veya ciro edildiğinde alacak kaydedilir."
 "tr108","Diğer Hazır Değerler",108,"account.data_account_type_current_assets","l10n_tr.chart_template",,"False","Nitelikleri itibarıyla hazır değer sayılan pullar, vadesi gelmiş kuponlar, tahsil edilecek banka ve posta havaleleri (yoldaki paralar gibi) değerleri kapsar.\n\nİşleyişi :\n\nBu değerler elde edildiğinde hesabın borcuna, elden çıkarıldığında da hesabın alacağına kaydedilir."
 "tr110","Hisse Senetleri",110,"account.data_account_type_current_assets","l10n_tr.chart_template",,"False","Geçici olarak, elde tutulan hisse senetleri bu hesapta izlenir."

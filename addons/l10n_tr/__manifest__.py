@@ -38,8 +38,12 @@ Bu modül kurulduktan sonra, Muhasebe yapılandırma sihirbazı çalışır
         "data/account_chart_post_data.xml",
         "data/account_chart_template_try_loading.xml",
 
+        "data/l10n_tr.district.csv",
+        "data/l10n_tr.area.csv",
+        "data/l10n_tr.neighborhood.csv",
         "data/l10n_tr.tax_office.csv",
 
+        "security/ir.model.access.csv",
     ],
     'demo': [
         'demo/demo_company.xml',

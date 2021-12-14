@@ -1,4 +1,4 @@
-"id","res.country.state/id","code","name","type"
+"id","state_id/id","code","name","type"
 "to_01250","base.state_tr_01",1250,"Adana İhtisas Vergi Dairesi Müdürlüğü","office"
 "to_01251","base.state_tr_01",1251,"5 Ocak Vergi Dairesi Müdürlüğü","office"
 "to_01252","base.state_tr_01",1252,"Yüreğir Vergi Dairesi Müdürlüğü","office"
