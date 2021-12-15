@@ -29,7 +29,6 @@
             var odoo = <t t-out="json.dumps({
                 'csrf_token': request.csrf_token(None),
                 '__session_info__': session_info,
-                'login_number': login_number,
                 'pos_session_id': pos_session_id,
                 'debug': debug,
             })"/>;

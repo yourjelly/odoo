@@ -95,9 +95,9 @@ class PosGlobalState extends PosModel {
         this.currency = null;
         this.company = null;
         this.user = null;
-        this.users = [];
+        // this.users = []; todo-ref: to delete, it's useless
         this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null};
-        this.employees = [];
+        // this.employees = []; todo-ref: to delete, it's only used in pos_hr...
         this.partners = [];
         this.taxes = [];
         this.pos_session = null;
@@ -138,7 +138,6 @@ class PosGlobalState extends PosModel {
 
         // Extract the config id from the url.
         var given_config = new RegExp('[\?&]config_id=([^&#]*)').exec(window.location.href);
-        this.config_id = given_config && given_config[1] && parseInt(given_config[1]) || false;
         // these dynamic attributes can be watched for change by other models or widgets
         Object.assign(this, {
             'synch':            { status:'connected', pending:0 },
@@ -173,17 +172,135 @@ class PosGlobalState extends PosModel {
     }
 
     async load_server_data(){
-        const loadedModels = await pos_env.services.rpc({
+        const loadedData = await pos_env.services.rpc({
             model: 'pos.session',
             method: 'load_pos_data',
             args: [[odoo.pos_session_id]],
         })
-        const tmp = {};
-        for (const model of this.models) {
-            if (model.condition ? !model.condition(this) : false) continue;
-            await model.loaded(this, loadedModels[model.model] || [], tmp);
-        }
+        this.version = loadedData['version'];
+        this.company = loadedData['res.company'];
+        this.dp = loadedData['decimal.precision'];
+        this.units = loadedData['uom.uom'];
+        this.units_by_id = loadedData['units_by_id'];
+        this.states = loadedData['res.country.state'];
+        this.countries = loadedData['res.country'];
+        this.langs = loadedData['res.lang'];
+        this.taxes = loadedData['account.tax'];
+        this.taxes_by_id = loadedData['taxes_by_id'];
+        this.pos_session = loadedData['pos.session'];
+        this._loadPosSession();
+        this.config = loadedData['pos.config'];
+        this._loadPoSConfig();
+        this.bills = loadedData['pos.bill'];
+        this.partners = loadedData['res.partner'];
+        this._loadResPartner();
+        this.picking_type = loadedData['stock.picking.type'];
+        this.user = loadedData['res.users'];  // TODO-REF: user is practically useless because not really used and can be interchanged with employee, maybe remove it
+        this._loadResUsers();
+        this.pricelists = loadedData['product.pricelist'];
+        this.default_pricelist = loadedData['default_pricelist'];
+        this.bank_statement = loadedData['account.bank.statement'];
+        this.product_categories = loadedData['product.category'];
+        this.currency = loadedData['res.currency'];
+        this.db.add_categories(loadedData['pos.category']);
+        this._loadProductProduct(loadedData['product.product']);
+        this.db.add_packagings(loadedData['product.packaging']);
+        this.attributes_by_ptal_id = loadedData['product.template.attribute.value'];
+        this.cash_rounding = loadedData['account.cash.rounding'];
+        this.payment_methods = loadedData['pos.payment.method'];
+        this.payment_methods_by_id = loadedData['payment_methods_by_id'];
+        this._loadPosPaymentMethod();
+        this.fiscal_positions = loadedData['account.fiscal.position'];
+        this.fiscal_posiiton_taxes = loadedData['account.fiscal.position.tax'];
+        await this._loadFonts();
+        await this._loadPictures();
+
+        // const tmp = {};
+        // for (const model of this.models) {
+        //     if ((model.condition ? !model.condition(this) : false) || !model.loaded)  continue;
+        //     await model.loaded(this, loadedData[model.model] || [], tmp);
+        // }
         return this.after_load_server_data();
+    }
+    _loadPosSession() {
+        // We need to do it here, since only then the local storage has the correct uuid
+        this.db.save('pos_session_id', this.pos_session.id);
+        let orders = this.db.get_orders();
+        let sequences = orders.map(order => order.data.sequence_number + 1)
+        this.pos_session.sequence_number = Math.max(this.pos_session.sequence_number, ...sequences);
+    }
+    _loadPoSConfig() {
+        this.db.set_uuid(this.config.uuid);
+    }
+    _loadResPartner() {
+        this.db.add_partners(this.partners);
+    }
+    _loadResUsers() {
+        this.employee.name = this.user.name;    // todo-ref: remove user, there's no diff with employee
+        this.employee.role = this.user.role;
+        this.employee.user_id = [this.user.id, this.user.name];
+        this.set_cashier(this.employee);
+    }
+    _loadProductProduct(products) {
+        const modelProducts = products.map(product => {
+            product.pos = this;
+            return new (PosModelRegistry.get(Product))(product);
+        });
+        this.db.add_products(modelProducts)
+    }
+    _loadPosPaymentMethod() {
+        for (let pm of this.payment_methods) {
+            let PaymentInterface = this.electronic_payment_interfaces[pm.use_payment_terminal];
+            if (PaymentInterface) {
+                pm.payment_terminal = new PaymentInterface(this, pm);
+            }
+        }
+    }
+    async _loadFonts() {
+        return new Promise(function (resolve, reject) {
+            // Waiting for fonts to be loaded to prevent receipt printing
+            // from printing empty receipt while loading Inconsolata
+            // ( The font used for the receipt )
+            waitForWebfonts(['Lato','Inconsolata'], function () {
+                resolve();
+            });
+            // The JS used to detect font loading is not 100% robust, so
+            // do not wait more than 5sec
+            setTimeout(resolve, 5000);
+        });
+    }
+    async _loadPictures() {
+        this.company_logo = new Image();
+        return new Promise((resolve, reject) => {
+            this.company_logo.onload = () => {
+                let img = this.company_logo;
+                let ratio = 1;
+                let targetwidth = 300;
+                let maxheight = 150;
+                if (img.width !== targetwidth) {
+                    ratio = targetwidth / img.width;
+                }
+                if (img.height * ratio > maxheight) {
+                    ratio = maxheight / img.height;
+                }
+                let width  = Math.floor(img.width * ratio);
+                let height = Math.floor(img.height * ratio);
+                let  c = document.createElement('canvas');
+                c.width  = width;
+                c.height = height;
+                let ctx = c.getContext('2d');
+                ctx.drawImage(this.company_logo,0,0, width, height);
+
+                this.company_logo_base64 = c.toDataURL();
+                resolve();
+            };
+            this.company_logo.onerror = () => {
+                reject();
+            };
+            this.company_logo.crossOrigin = "anonymous";
+            this.company_logo.src = '/web/binary/company_logo' + '?dbname=' + pos_env.session.db + '&company=' + this.company.id + '&_' + Math.random();
+        });
+
     }
     prepare_new_partners_domain(){
         return [['write_date','>', this.db.get_partner_write_date()]];
@@ -315,40 +432,26 @@ class PosGlobalState extends PosModel {
                 }
             }
         }
-        const productModel = _.find(this.models, function(model){return model.model === 'product.product';});
-        const fields = productModel.fields;
         const products = await pos_env.services.rpc({
-            model: 'product.product',
-            method: 'read',
-            args: [[...missingProductIds], fields],
-            context: Object.assign(pos_env.session.user_context, { display_default_code: false }),
+            model: 'pos.session',
+            method: 'get_pos_ui_product_product_by_params',
+            args: [odoo.pos_session_id, {domain: [['id', 'in', [...missingProductIds]]]}],
         });
-        productModel.loaded(this, products);
+        this._loadProductProduct(products);
     }
     async loadProductsBackground() {
         let page = 0;
-        let product_model = _.find(this.models, (model) => model.model === 'product.product');
-        let productLoadingInfo = await pos_env.services.rpc({
-            model: 'pos.session',
-            method: 'get_loading_params',
-            args: [[odoo.pos_session_id], 'product.product'],
-            context: pos_env.session.user_context,
-        });
         let products = [];
         do {
             products = await pos_env.services.rpc({
-                model: 'product.product',
-                method: 'search_read',
-                kwargs: {
-                    'domain': productLoadingInfo.domain,
-                    'fields': productLoadingInfo.fields,
-                    'order': productLoadingInfo.order.split(',').map(name => ({ name })),
-                    'offset': page * this.config.limited_products_amount,
-                    'limit': this.config.limited_products_amount,
-                },
-                context: { ...pos_env.session.user_context, ...productLoadingInfo.context },
+                model: 'pos.session',
+                method: 'get_pos_ui_product_product_by_params',
+                args: [odoo.pos_session_id, {
+                    offset: page * this.config.limited_products_amount,
+                    limit: this.config.limited_products_amount,
+                }],
             });
-            product_model.loaded(this, products);
+            this._loadProductProduct(products);
             page += 1;
         } while(products.length == this.config.limited_products_amount);
     }
@@ -830,28 +933,30 @@ class PosGlobalState extends PosModel {
     }
 
     format_currency(amount, precision) {
-        var currency =
-            this && this.currency
-                ? this.currency
-                : { symbol: '$', position: 'after', rounding: 0.01, decimals: 2 };
+        // todo-ref why do dis, there's always currency in the pos
+        // var currency =
+        //     this && this.currency
+        //         ? this.currency
+        //         : { symbol: '$', position: 'after', rounding: 0.01, decimals: 2 };
 
-        amount = this.format_currency_no_symbol(amount, precision, currency);
+        amount = this.format_currency_no_symbol(amount, precision, this.currency);
 
-        if (currency.position === 'after') {
-            return amount + ' ' + (currency.symbol || '');
+        if (this.currency.position === 'after') {
+            return amount + ' ' + (this.currency.symbol || '');
         } else {
-            return (currency.symbol || '') + ' ' + amount;
+            return (this.currency.symbol || '') + ' ' + amount;
         }
     }
 
     format_currency_no_symbol(amount, precision, currency) {
         if (!currency) {
-            currency =
-                this && this.currency
-                    ? this.currency
-                    : { symbol: '$', position: 'after', rounding: 0.01, decimals: 2 };
+            currency = this.currency
+                // todo-ref why do dis, there's always currency in the pos
+                // this && this.currency
+                //     ? this.currency
+                //     : { symbol: '$', position: 'after', rounding: 0.01, decimal_places: 2 };
         }
-        var decimals = currency.decimals;
+        var decimals = currency.decimal_places;
 
         if (precision && this.dp[precision] !== undefined) {
             decimals = this.dp[precision];
@@ -876,7 +981,7 @@ class PosGlobalState extends PosModel {
     }
 
     round_decimals_currency(value) {
-        const decimals = this.currency.decimals;
+        const decimals = this.currency.decimal_places;
         return parseFloat(round_di(value, decimals).toFixed(decimals));
     }
 
@@ -886,8 +991,8 @@ class PosGlobalState extends PosModel {
      * @param {number} value amount to format
      */
     formatFixed(value) {
-        const currency = this.currency || { decimals: 2 };
-        return `${Number(value.toFixed(currency.decimals || 0))}`;
+        const currency = this.currency || { decimal_places: 2 };
+        return `${Number(value.toFixed(currency.decimal_places || 0))}`;
     }
 
     disallowLineQuantityChange() {
@@ -908,14 +1013,12 @@ class PosGlobalState extends PosModel {
             args: [ids, {'available_in_pos': true}],
             context: pos_env.session.user_context,
         });
-        let product_model = _.find(this.models, (model) => model.model === 'product.product');
         let product = await pos_env.services.rpc({
-            model: 'product.product',
-            method: 'read',
-            args: [ids, product_model.fields],
-            context: { ...pos_env.session.user_context, ...product_model.context() },
+            model: 'pos.session',
+            method: 'get_pos_ui_product_product_by_params',
+            args: [odoo.pos_session_id, {domain: [['id', 'in', ids]]}],
         });
-        product_model.loaded(this, product);
+        this._loadProductProduct(product);
     }
     htmlToImgLetterRendering() {
         return false;
@@ -925,346 +1028,347 @@ PosGlobalState.prototype.electronic_payment_interfaces = {};
 PosGlobalState.prototype.models = [
     {
         label:  'version',
-        loaded: function (self) {
-            return pos_env.session.rpc('/web/webclient/version_info',{}).then(function (version) {
-                self.version = version;
-            });
-        },
+        // loaded: function (self) {
+        //     return pos_env.session.rpc('/web/webclient/version_info',{}).then(function (version) {
+        //         self.version = version;
+        //     });
+        // },
 
     },{
         model:  'res.company',
-        loaded: function(self,companies){ self.company = companies[0]; },
+        // loaded: function(self,companies){ self.company = companies[0]; },
     },{
         model:  'decimal.precision',
-        loaded: function(self,dps){
-            self.dp  = {};
-            for (var i = 0; i < dps.length; i++) {
-                self.dp[dps[i].name] = dps[i].digits;
-            }
-        },
+        // loaded: function(self,dps){
+        //     self.dp  = {};
+        //     for (var i = 0; i < dps.length; i++) {
+        //         self.dp[dps[i].name] = dps[i].digits;
+        //     }
+        // },
     },{
         model:  'uom.uom',
-        loaded: function(self,units){
-            self.units = units;
-            _.each(units, function(unit){
-                self.units_by_id[unit.id] = unit;
-            });
-        }
+        // loaded: function(self,units){
+        //     self.units = units;
+        //     _.each(units, function(unit){
+        //         self.units_by_id[unit.id] = unit;
+        //     });
+        // }
     },{
         model:  'res.country.state',
-        loaded: function(self,states){
-            self.states = states;
-        },
+        // loaded: function(self,states){
+        //     self.states = states;
+        // },
     },{
         model:  'res.country',
-        loaded: function(self,countries){
-            self.countries = countries;
-            self.company.country = null;
-            for (var i = 0; i < countries.length; i++) {
-                if (countries[i].id === self.company.country_id[0]){
-                    self.company.country = countries[i];
-                }
-            }
-        },
+        // loaded: function(self,countries){
+        //     self.countries = countries;
+        //     self.company.country = null;
+        //     for (var i = 0; i < countries.length; i++) {
+        //         if (countries[i].id === self.company.country_id[0]){
+        //             self.company.country = countries[i]; todo-ref redundancy in backend
+        //         }
+        //     }
+        // },
     },{
         model:  'res.lang',
-        loaded: function (self, langs){
-            self.langs = langs;
-        },
+        // loaded: function (self, langs){
+        //     self.langs = langs;
+        // },
     },{
         model:  'account.tax',
-        domain: function(self) {return [['company_id', '=', self.company && self.company.id || false]]},
-        loaded: function(self, taxes){
-            self.taxes = taxes;
-            self.taxes_by_id = {};
-            _.each(taxes, function(tax){
-                self.taxes_by_id[tax.id] = tax;
-            });
-            _.each(self.taxes_by_id, function(tax) {
-                tax.children_tax_ids = _.map(tax.children_tax_ids, function (child_tax_id) {
-                    return self.taxes_by_id[child_tax_id];
-                });
-            });
-        },
+        // loaded: function(self, taxes){
+        //     self.taxes = taxes;
+        //     self.taxes_by_id = {};
+        //     _.each(taxes, function(tax){
+        //         self.taxes_by_id[tax.id] = tax;
+        //     });
+        //     _.each(self.taxes_by_id, function(tax) {
+        //         tax.children_tax_ids = _.map(tax.children_tax_ids, function (child_tax_id) {
+        //             return self.taxes_by_id[child_tax_id];
+        //         });
+        //     });
+        // },
     },{
         model:  'pos.session',
-        loaded: function(self, pos_sessions, tmp){
-            self.pos_session = pos_sessions[0];
-            self.pos_session.login_number = odoo.login_number;
-            self.config_id = self.config_id || self.pos_session && self.pos_session.config_id[0];
-        },
+        // loaded: function(self, pos_sessions, tmp){
+        //     self.pos_session = pos_sessions[0];
+        // },
     },{
         model: 'pos.config',
-        loaded: function(self,configs){
-            self.config = configs[0];
-            self.config.use_proxy = self.config.is_posbox && (
-                                    self.config.iface_electronic_scale ||
-                                    self.config.iface_print_via_proxy  ||
-                                    self.config.iface_scan_via_proxy   ||
-                                    self.config.iface_customer_facing_display_via_proxy);
-
-            self.db.set_uuid(self.config.uuid);
-            // We need to do it here, since only then the local storage has the correct uuid
-            self.db.save('pos_session_id', self.pos_session.id);
-
-            var orders = self.db.get_orders();
-            for (var i = 0; i < orders.length; i++) {
-                self.pos_session.sequence_number = Math.max(self.pos_session.sequence_number, orders[i].data.sequence_number+1);
-            }
-       },
+       //  loaded: function(self,configs){
+       //      self.config = configs[0];
+       //      self.config.use_proxy = self.config.is_posbox && (
+       //                              self.config.iface_electronic_scale ||
+       //                              self.config.iface_print_via_proxy  ||
+       //                              self.config.iface_scan_via_proxy   ||
+       //                              self.config.iface_customer_facing_display_via_proxy);
+       //       todo-ref: keep this
+       //      self.db.set_uuid(self.config.uuid);
+        //      todo-ref this shit need to be done in res.user wtf
+       //      self.set_cashier(self.get_cashier());
+       //       TODO-REF: this shit should be in pos session load
+       //      // We need to do it here, since only then the local storage has the correct uuid
+       //      self.db.save('pos_session_id', self.pos_session.id);
+       //      var orders = self.db.get_orders();
+       //      for (var i = 0; i < orders.length; i++) {
+       //          self.pos_session.sequence_number = Math.max(self.pos_session.sequence_number, orders[i].data.sequence_number+1);
+       //      }
+       // },
     },{
         model: 'pos.bill',
-        loaded: function (self, bills) {
-            self.bills = bills;
-        },
+        // loaded: function (self, bills) {
+        //     self.bills = bills;
+        // },
       }, {
         model:  'res.partner',
         label: 'load_partners',
-        loaded: function(self,partners){
-            self.partners = partners;
-            self.db.add_partners(partners);
-        },
+        // loaded: function(self,partners){
+        //     self.partners = partners;
+        //     self.db.add_partners(partners);
+        // },
     },{
       model: 'stock.picking.type',
-      loaded: function(self, picking_type) {
-          self.picking_type = picking_type[0];
-      },
+      // loaded: function(self, picking_type) {
+      //     self.picking_type = picking_type[0];
+      // },
     },{
         model:  'res.users',
-        loaded: function(self,users){
-            users.forEach(function(user) {
-                user.role = 'cashier';
-                user.groups_id.some(function(group_id) {
-                    if (group_id === self.config.group_pos_manager_id[0]) {
-                        user.role = 'manager';
-                        return true;
-                    }
-                });
-                if (user.id === pos_env.session.uid) {
-                    self.user = user;
-                    self.employee.name = user.name;
-                    self.employee.role = user.role;
-                    self.employee.user_id = [user.id, user.name];
-                }
-            });
-            self.users = users;
-            self.employees = [self.employee];
-            self.set_cashier(self.employee);
-        },
+        // loaded: function(self,users){
+        //     users.forEach(function(user) {
+        //         // user.role = 'cashier';
+        //         // user.groups_id.some(function(group_id) {
+        //         //     if (group_id === self.config.group_pos_manager_id[0]) {
+        //         //         user.role = 'manager';
+        //         //         return true;
+        //         //     }
+        //         // });
+        //         // debugger
+        //         // if (user.id === pos_env.session.uid) {
+        //         //     self.user = user;
+        //         //     self.employee.name = user.name;
+        //         //     self.employee.role = user.role;
+        //         //     self.employee.user_id = [user.id, user.name];
+        //         // }
+        //     });
+        //     // self.users = users;
+        //     // self.employees = [self.employee];
+        //     // self.set_cashier(self.employee);
+        // },
     },{
         model:  'product.pricelist',
-        loaded: function(self, pricelists){
-            _.map(pricelists, function (pricelist) { pricelist.items = []; });
-            self.default_pricelist = _.findWhere(pricelists, {id: self.config.pricelist_id[0]});
-            self.pricelists = pricelists;
-        },
+        // loaded: function(self, pricelists){
+        //     _.map(pricelists, function (pricelist) { pricelist.items = []; });
+        //     self.default_pricelist = _.findWhere(pricelists, {id: self.config.pricelist_id[0]});
+        //     self.pricelists = pricelists;
+        // },
     },{
         model:  'account.bank.statement',
-        loaded: function(self, statement){
-            self.bank_statement = statement[0];
-        },
+        // loaded: function(self, statement){
+        //     self.bank_statement = statement[0];
+        // },
     },{
-        model:  'product.pricelist.item',
-        loaded: function(self, pricelist_items){
-            var pricelist_by_id = {};
-            _.each(self.pricelists, function (pricelist) {
-                pricelist_by_id[pricelist.id] = pricelist;
-            });
-
-            _.each(pricelist_items, function (item) {
-                var pricelist = pricelist_by_id[item.pricelist_id[0]];
-                pricelist.items.push(item);
-                item.base_pricelist = pricelist_by_id[item.base_pricelist_id[0]];
-            });
-        },
+        // model:  'product.pricelist.item', todo-ref this one is not needed bcoz it just push item in this.pricelists
+        // loaded: function(self, pricelist_items){
+        //     var pricelist_by_id = {};
+        //     _.each(self.pricelists, function (pricelist) {
+        //         pricelist_by_id[pricelist.id] = pricelist;
+        //     });
+        //
+        //     _.each(pricelist_items, function (item) {
+        //         var pricelist = pricelist_by_id[item.pricelist_id[0]];
+        //         pricelist.items.push(item);
+        //         item.base_pricelist = pricelist_by_id[item.base_pricelist_id[0]];
+        //     });
+        // },
     },{
         model:  'product.category',
-        loaded: function(self, product_categories){
-            var category_by_id = {};
-            _.each(product_categories, function (category) {
-                category_by_id[category.id] = category;
-            });
-            _.each(product_categories, function (category) {
-                category.parent = category_by_id[category.parent_id[0]];
-            });
-
-            self.product_categories = product_categories;
-        },
+        // loaded: function(self, product_categories){
+        //     var category_by_id = {};
+        //     _.each(product_categories, function (category) {
+        //         category_by_id[category.id] = category;
+        //     });
+        //     _.each(product_categories, function (category) {
+        //         category.parent = category_by_id[category.parent_id[0]];
+        //     });
+        //
+        //     self.product_categories = product_categories;
+        // },
     },{
         model: 'res.currency',
-        loaded: function(self, currencies){
-            self.currency = currencies[0];
-            if (self.currency.rounding > 0 && self.currency.rounding < 1) {
-                self.currency.decimals = Math.ceil(Math.log(1.0 / self.currency.rounding) / Math.log(10));
-            } else {
-                self.currency.decimals = 0;
-            }
-
-            self.company_currency = currencies[1] || currencies[0];
-        },
+        // loaded: function(self, currencies){
+        //     self.currency = currencies[0];
+        //      todo-ref: this currency.decimals can be replaced by decimal_places
+        //     if (self.currency.rounding > 0 && self.currency.rounding < 1) {
+        //         self.currency.decimals = Math.ceil(Math.log(1.0 / self.currency.rounding) / Math.log(10));
+        //     } else {
+        //         self.currency.decimals = 0;
+        //     }
+        //     // todo-ref this below is not really used
+        //     // self.company_currency = currencies[1] || currencies[0];
+        // },
     },{
         model:  'pos.category',
-        loaded: function(self, categories){
-            self.db.add_categories(categories);
-        },
+        // loaded: function(self, categories){
+        //     self.db.add_categories(categories);
+        // },
     },{
         model:  'product.product',
         label: 'load_products',
-        loaded: function(self, products){
-            var using_company_currency = self.config.currency_id[0] === self.company.currency_id[0];
-            var conversion_rate = self.currency.rate / self.company_currency.rate;
-            self.db.add_products(_.map(products, function (product) {
-                if (!using_company_currency) {
-                    product.lst_price = round_pr(product.lst_price * conversion_rate, self.currency.rounding);
-                }
-                product.categ = _.findWhere(self.product_categories, {'id': product.categ_id[0]});
-                product.pos = self;
-                return new (PosModelRegistry.get(Product))(product);
-            }));
-        },
+        // loaded: function(self, products){
+        //     var using_company_currency = self.config.currency_id[0] === self.company.currency_id[0];
+        //     var conversion_rate = self.currency.rate / self.company_currency.rate;
+        //     self.db.add_products(_.map(products, function (product) {
+        //         if (!using_company_currency) {
+        //             product.lst_price = round_pr(product.lst_price * conversion_rate, self.currency.rounding);
+        //         }
+        //         product.categ = _.findWhere(self.product_categories, {'id': product.categ_id[0]});
+        //         product.pos = self;
+        //         return new (PosModelRegistry.get(Product))(product);
+        //     }));
+        // },
     },{
         model: 'product.packaging',
-        loaded: function(self, product_packagings) {
-            self.db.add_packagings(product_packagings);
-        }
+        // loaded: function(self, product_packagings) {
+        //     self.db.add_packagings(product_packagings);
+        // }
     },{
-        model: 'product.attribute',
-        condition: function (self) { return self.config.product_configurator; },
-        loaded: function(self, product_attributes, tmp) {
-            tmp.product_attributes_by_id = {};
-            _.map(product_attributes, function (product_attribute) {
-                tmp.product_attributes_by_id[product_attribute.id] = product_attribute;
-            });
-        }
-    },{
-        model: 'product.attribute.value',
-        condition: function (self) { return self.config.product_configurator; },
-        loaded: function(self, pavs, tmp) {
-            tmp.pav_by_id = {};
-            _.map(pavs, function (pav) {
-                tmp.pav_by_id[pav.id] = pav;
-            });
-        }
-    }, {
+    //     model: 'product.attribute',
+    //     condition: function (self) { return self.config.product_configurator; },
+    //     loaded: function(self, product_attributes, tmp) {
+    //         tmp.product_attributes_by_id = {};
+    //         _.map(product_attributes, function (product_attribute) {
+    //             tmp.product_attributes_by_id[product_attribute.id] = product_attribute;
+    //         });
+    //     }
+    // },{
+    //     model: 'product.attribute.value',
+    //     condition: function (self) { return self.config.product_configurator; },
+    //     loaded: function(self, pavs, tmp) {
+    //         tmp.pav_by_id = {};
+    //         _.map(pavs, function (pav) {
+    //             tmp.pav_by_id[pav.id] = pav;
+    //         });
+    //     }
+    // }, {
         model: 'product.template.attribute.value',
-        condition: function (self) { return self.config.product_configurator; },
-        loaded: function(self, ptavs, tmp) {
-            self.attributes_by_ptal_id = {};
-            _.map(ptavs, function (ptav) {
-                if (!self.attributes_by_ptal_id[ptav.attribute_line_id[0]]){
-                    self.attributes_by_ptal_id[ptav.attribute_line_id[0]] = {
-                        id: ptav.attribute_line_id[0],
-                        name: tmp.product_attributes_by_id[ptav.attribute_id[0]].name,
-                        display_type: tmp.product_attributes_by_id[ptav.attribute_id[0]].display_type,
-                        values: [],
-                    };
-                }
-                self.attributes_by_ptal_id[ptav.attribute_line_id[0]].values.push({
-                    id: ptav.product_attribute_value_id[0],
-                    name: tmp.pav_by_id[ptav.product_attribute_value_id[0]].name,
-                    is_custom: tmp.pav_by_id[ptav.product_attribute_value_id[0]].is_custom,
-                    html_color: tmp.pav_by_id[ptav.product_attribute_value_id[0]].html_color,
-                    price_extra: ptav.price_extra,
-                });
-            });
-        }
+        // condition: function (self) { return self.config.product_configurator; },
+        // loaded: function(self, ptavs, tmp) {
+        //     self.attributes_by_ptal_id = {};
+        //     _.map(ptavs, function (ptav) {
+        //         if (!self.attributes_by_ptal_id[ptav.attribute_line_id[0]]){
+        //             self.attributes_by_ptal_id[ptav.attribute_line_id[0]] = {
+        //                 id: ptav.attribute_line_id[0],
+        //                 name: tmp.product_attributes_by_id[ptav.attribute_id[0]].name,
+        //                 display_type: tmp.product_attributes_by_id[ptav.attribute_id[0]].display_type,
+        //                 values: [],
+        //             };
+        //         }
+        //         self.attributes_by_ptal_id[ptav.attribute_line_id[0]].values.push({
+        //             id: ptav.product_attribute_value_id[0],
+        //             name: tmp.pav_by_id[ptav.product_attribute_value_id[0]].name,
+        //             is_custom: tmp.pav_by_id[ptav.product_attribute_value_id[0]].is_custom,
+        //             html_color: tmp.pav_by_id[ptav.product_attribute_value_id[0]].html_color,
+        //             price_extra: ptav.price_extra,
+        //         });
+        //     });
+        // }
     },{
         model: 'account.cash.rounding',
-        loaded: function(self, cash_rounding) {
-            self.cash_rounding = cash_rounding;
-        }
+        // loaded: function(self, cash_rounding) {
+        //     self.cash_rounding = cash_rounding;
+        // }
     },{
         model:  'pos.payment.method',
-        loaded: function(self, payment_methods) {
-            self.payment_methods = payment_methods.sort(function(a,b){
-                // prefer cash payment_method to be first in the list
-                if (a.is_cash_count && !b.is_cash_count) {
-                    return -1;
-                } else if (!a.is_cash_count && b.is_cash_count) {
-                    return 1;
-                } else {
-                    return a.id - b.id;
-                }
-            });
-            self.payment_methods_by_id = {};
-            _.each(self.payment_methods, function(payment_method) {
-                self.payment_methods_by_id[payment_method.id] = payment_method;
-
-                var PaymentInterface = self.electronic_payment_interfaces[payment_method.use_payment_terminal];
-                if (PaymentInterface) {
-                    payment_method.payment_terminal = new PaymentInterface(self, payment_method);
-                }
-            });
-        }
+        // loaded: function(self, payment_methods) {
+        //     // self.payment_methods = payment_methods.sort(function(a,b){
+        //     //     // prefer cash payment_method to be first in the list
+        //     //     if (a.is_cash_count && !b.is_cash_count) {
+        //     //         return -1;
+        //     //     } else if (!a.is_cash_count && b.is_cash_count) {
+        //     //         return 1;
+        //     //     } else {
+        //     //         return a.id - b.id;
+        //     //     }
+        //     // });
+        //     // self.payment_methods_by_id = {};
+        //     // _.each(self.payment_methods, function(payment_method) {
+        //     //     self.payment_methods_by_id[payment_method.id] = payment_method;
+        //     //
+        //     //     var PaymentInterface = self.electronic_payment_interfaces[payment_method.use_payment_terminal];
+        //     //     if (PaymentInterface) {
+        //     //         payment_method.payment_terminal = new PaymentInterface(self, payment_method);
+        //     //     }
+        //     // });
+        // }
     },{
         model:  'account.fiscal.position',
-        loaded: function(self, fiscal_positions){
-            self.fiscal_positions = fiscal_positions;
-        }
+        // loaded: function(self, fiscal_positions){
+        //     self.fiscal_positions = fiscal_positions;
+        // }
     }, {
         model:  'account.fiscal.position.tax',
-        loaded: function(self, fiscal_position_taxes){
-            self.fiscal_position_taxes = fiscal_position_taxes;
-            self.fiscal_positions.forEach(function (fiscal_position) {
-                fiscal_position.fiscal_position_taxes_by_id = {};
-                fiscal_position.tax_ids.forEach(function (tax_id) {
-                    var fiscal_position_tax = _.find(fiscal_position_taxes, function (fiscal_position_tax) {
-                        return fiscal_position_tax.id === tax_id;
-                    });
-
-                    fiscal_position.fiscal_position_taxes_by_id[fiscal_position_tax.id] = fiscal_position_tax;
-                });
-            });
-        }
+        // loaded: function(self, fiscal_position_taxes){
+        //     self.fiscal_position_taxes = fiscal_position_taxes;
+        //     self.fiscal_positions.forEach(function (fiscal_position) {
+        //         fiscal_position.fiscal_position_taxes_by_id = {};
+        //         fiscal_position.tax_ids.forEach(function (tax_id) {
+        //             var fiscal_position_tax = _.find(fiscal_position_taxes, function (fiscal_position_tax) {
+        //                 return fiscal_position_tax.id === tax_id;
+        //             });
+        //
+        //             fiscal_position.fiscal_position_taxes_by_id[fiscal_position_tax.id] = fiscal_position_tax;
+        //         });
+        //     });
+        // }
     },  {
         label: 'fonts',
-        loaded: function(){
-            return new Promise(function (resolve, reject) {
-                // Waiting for fonts to be loaded to prevent receipt printing
-                // from printing empty receipt while loading Inconsolata
-                // ( The font used for the receipt )
-                waitForWebfonts(['Lato','Inconsolata'], function () {
-                    resolve();
-                });
-                // The JS used to detect font loading is not 100% robust, so
-                // do not wait more than 5sec
-                setTimeout(resolve, 5000);
-            });
-        },
+        // loaded: function(){
+        //     return new Promise(function (resolve, reject) {
+        //         // Waiting for fonts to be loaded to prevent receipt printing
+        //         // from printing empty receipt while loading Inconsolata
+        //         // ( The font used for the receipt )
+        //         waitForWebfonts(['Lato','Inconsolata'], function () {
+        //             resolve();
+        //         });
+        //         // The JS used to detect font loading is not 100% robust, so
+        //         // do not wait more than 5sec
+        //         setTimeout(resolve, 5000);
+        //     });
+        // },
     },{
         label: 'pictures',
-        loaded: function (self) {
-            self.company_logo = new Image();
-            return new Promise(function (resolve, reject) {
-                self.company_logo.onload = function () {
-                    var img = self.company_logo;
-                    var ratio = 1;
-                    var targetwidth = 300;
-                    var maxheight = 150;
-                    if( img.width !== targetwidth ){
-                        ratio = targetwidth / img.width;
-                    }
-                    if( img.height * ratio > maxheight ){
-                        ratio = maxheight / img.height;
-                    }
-                    var width  = Math.floor(img.width * ratio);
-                    var height = Math.floor(img.height * ratio);
-                    var c = document.createElement('canvas');
-                    c.width  = width;
-                    c.height = height;
-                    var ctx = c.getContext('2d');
-                    ctx.drawImage(self.company_logo,0,0, width, height);
-
-                    self.company_logo_base64 = c.toDataURL();
-                    resolve();
-                };
-                self.company_logo.onerror = function () {
-                    reject();
-                };
-                self.company_logo.crossOrigin = "anonymous";
-                self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + pos_env.session.db + '&company=' + self.company.id + '&_' + Math.random();
-            });
-        },
+        // loaded: function (self) {
+        //     self.company_logo = new Image();
+        //     return new Promise(function (resolve, reject) {
+        //         self.company_logo.onload = function () {
+        //             var img = self.company_logo;
+        //             var ratio = 1;
+        //             var targetwidth = 300;
+        //             var maxheight = 150;
+        //             if( img.width !== targetwidth ){
+        //                 ratio = targetwidth / img.width;
+        //             }
+        //             if( img.height * ratio > maxheight ){
+        //                 ratio = maxheight / img.height;
+        //             }
+        //             var width  = Math.floor(img.width * ratio);
+        //             var height = Math.floor(img.height * ratio);
+        //             var c = document.createElement('canvas');
+        //             c.width  = width;
+        //             c.height = height;
+        //             var ctx = c.getContext('2d');
+        //             ctx.drawImage(self.company_logo,0,0, width, height);
+        //
+        //             self.company_logo_base64 = c.toDataURL();
+        //             resolve();
+        //         };
+        //         self.company_logo.onerror = function () {
+        //             reject();
+        //         };
+        //         self.company_logo.crossOrigin = "anonymous";
+        //         self.company_logo.src = '/web/binary/company_logo' + '?dbname=' + pos_env.session.db + '&company=' + self.company.id + '&_' + Math.random();
+        //     });
+        // },
     },
 ];
 
@@ -1795,7 +1899,7 @@ class Orderline extends PosModel {
         }else if(this.get_discount() > 0){             // we don't merge discounted orderlines
             return false;
         }else if(!utils.float_is_zero(price - order_line_price - orderline.get_price_extra(),
-                    this.pos.currency.decimals)){
+                    this.pos.currency.decimal_places)){
             return false;
         }else if(this.product.tracking == 'lot' && (this.pos.picking_type.use_create_lots || this.pos.picking_type.use_existing_lots)) {
             return false;
@@ -2374,14 +2478,14 @@ class Payment extends PosModel {
     //sets the amount of money on this payment line
     set_amount(value){
         this.order.assert_editable();
-        this.amount = round_di(parseFloat(value) || 0, this.pos.currency.decimals);
+        this.amount = round_di(parseFloat(value) || 0, this.pos.currency.decimal_places);
     }
     // returns the amount of money on this paymentline
     get_amount(){
         return this.amount;
     }
     get_amount_str(){
-        return field_utils.format.float(this.amount, {digits: [69, this.pos.currency.decimals]});
+        return field_utils.format.float(this.amount, {digits: [69, this.pos.currency.decimal_places]});
     }
     set_selected(selected){
         if(this.selected !== selected){
@@ -3226,7 +3330,7 @@ class Order extends PosModel {
                 var rounding_applied = total - remaining;
                 rounding_applied *= sign;
                 // because floor and ceil doesn't include decimals in calculation, we reuse the value of the half-up and adapt it.
-                if (utils.float_is_zero(rounding_applied, this.pos.currency.decimals)){
+                if (utils.float_is_zero(rounding_applied, this.pos.currency.decimal_places)){
                     // https://xkcd.com/217/
                     return 0;
                 } else if(this.get_total_with_tax() < this.pos.cash_rounding[0].rounding) {

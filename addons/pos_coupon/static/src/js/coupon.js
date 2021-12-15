@@ -745,7 +745,7 @@ odoo.define('pos_coupon.pos', function (require) {
             if (
                 !(
                     amountToCheck > program.rule_minimum_amount ||
-                    float_is_zero(amountToCheck - program.rule_minimum_amount, this.pos.currency.decimals)
+                    float_is_zero(amountToCheck - program.rule_minimum_amount, this.pos.currency.decimal_places)
                 )
             ) {
                 return {
