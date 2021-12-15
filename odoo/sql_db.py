@@ -16,7 +16,6 @@ import time
 import uuid
 import warnings
 
-from decorator import decorator
 import psycopg2
 import psycopg2.extras
 import psycopg2.extensions
@@ -81,13 +80,6 @@ re_into = re.compile('.* into "?([a-zA-Z_0-9]+)"? .*$')
 
 sql_counter = 0
 
-
-@decorator
-def check(f, self, *args, **kwargs):
-    """ Wrap a cursor method that cannot be called when the cursor is closed. """
-    if self._closed:
-        raise psycopg2.OperationalError('Unable to use a closed cursor.')
-    return f(self, *args, **kwargs)
 
 class Savepoint:
     """ Reifies an active breakpoint, allows :meth:`BaseCursor.savepoint` users
@@ -179,7 +171,6 @@ class BaseCursor:
         if self.transaction is not None:
             self.transaction.reset()
 
-    @check
     def savepoint(self, flush=True) -> Savepoint:
         """context manager entering in a new savepoint
 
@@ -346,7 +337,6 @@ class Cursor(BaseCursor):
         encoding = psycopg2.extensions.encodings[self.connection.encoding]
         return self._obj.mogrify(query, params).decode(encoding, 'replace')
 
-    @check
     def execute(self, query, params=None, log_exceptions=None):
         if params and not isinstance(params, (tuple, list, dict)):
             # psycopg2's TypeError is not clear if you mess up the params
@@ -436,7 +426,6 @@ class Cursor(BaseCursor):
             _logger.setLevel(level)
             self.sql_log = previous
 
-    @check
     def close(self):
         return self._close(False)
 
@@ -476,7 +465,6 @@ class Cursor(BaseCursor):
             keep_in_pool = self.dbname not in templates_list
             self.__pool.give_back(self._cnx, keep_in_pool=keep_in_pool)
 
-    @check
     def autocommit(self, on):
         if on:
             warnings.warn(
@@ -502,7 +490,6 @@ class Cursor(BaseCursor):
                 else ISOLATION_LEVEL_READ_COMMITTED
         self._cnx.set_isolation_level(isolation_level)
 
-    @check
     def after(self, event, func):
         """ Register an event handler.
 
@@ -525,7 +512,6 @@ class Cursor(BaseCursor):
         elif event == 'rollback':
             self.postrollback.add(func)
 
-    @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
         self.flush()
@@ -537,7 +523,6 @@ class Cursor(BaseCursor):
         self.postcommit.run()
         return result
 
-    @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
         self.clear()
@@ -548,7 +533,6 @@ class Cursor(BaseCursor):
         self.postrollback.run()
         return result
 
-    @check
     def __getattr__(self, name):
         return getattr(self._obj, name)
 
@@ -598,7 +582,6 @@ class TestCursor(BaseCursor):
         # savepoint at its last commit, the savepoint is created lazily
         self._savepoint = self._cursor.savepoint(flush=False)
 
-    @check
     def execute(self, *args, **kwargs):
         if not self._savepoint:
             self._savepoint = self._cursor.savepoint(flush=False)
@@ -621,7 +604,6 @@ class TestCursor(BaseCursor):
     def autocommit(self, on):
         _logger.debug("TestCursor.autocommit(%r) does nothing", on)
 
-    @check
     def commit(self):
         """ Perform an SQL `COMMIT` """
         self.flush()
@@ -633,7 +615,6 @@ class TestCursor(BaseCursor):
         self.postrollback.clear()
         self.postcommit.clear()         # TestCursor ignores post-commit hooks
 
-    @check
     def rollback(self):
         """ Perform an SQL `ROLLBACK` """
         self.clear()
@@ -644,10 +625,7 @@ class TestCursor(BaseCursor):
         self.postrollback.run()
 
     def __getattr__(self, name):
-        value = getattr(self._cursor, name)
-        if callable(value) and self._closed:
-            raise psycopg2.OperationalError('Unable to use a closed cursor.')
-        return value
+        return getattr(self._cursor, name)
 
 
 class PsycoConnection(psycopg2.extensions.connection):
