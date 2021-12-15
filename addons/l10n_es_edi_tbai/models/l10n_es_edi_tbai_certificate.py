@@ -64,7 +64,7 @@ class Certificate(models.Model):
             return None, None
 
         private_key, certificate, dummy = pkcs12.load_key_and_certificates(
-            b64decode(self.content),
+            b64decode(self.with_context(bin_size=False).content),  # TODO investigate with_context(bin_size)
             self.password.encode(),
             backend=default_backend(),
         )

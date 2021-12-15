@@ -421,66 +421,17 @@ class AccountEdiFormat(models.Model):
                 'EncadenamientoFacturaAnterior': False
             }
 
-    def _l10n_es_tbai_sign_invoice(self, invoices, invoice_xml):
-        company = invoices.company_id
-
-        # Sign the XML document (modified in-place)
-        private, public = company.l10n_es_tbai_certificate_id.get_key_pair()
-        signature = AccountEdiFormat.sign(invoice_xml, (private, public))
-
-        return signature
-
-    # -------------------------------------------------------------------------
-    # TBAI SERVER CALLS
-    # -------------------------------------------------------------------------
-
-    def _l10n_es_tbai_post_to_web_service(self, invoices, invoice_xml, cancel=False):
-        company = invoices.company_id
-        xml_str = etree.tostring(invoice_xml, encoding='UTF-8')
-
-        # === Call the web service ===
-
-        # Get connection data
-        url = company.l10n_es_tbai_url_cancel if cancel else company.l10n_es_tbai_url_invoice
-        print("URL: ", url)
-        header = {"Content-Type": "application/xml; charset=UTF-8"}
-        cert_file = company.l10n_es_tbai_certificate_id.get_file()
-        password = company.l10n_es_tbai_certificate_id.get_password()
-
-        # Post and retrieve response
-        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password, timeout=30)
-        data = response.content.decode(response.encoding)
-
-        # Error management
-        response_xml = etree.fromstring(bytes(data, 'utf-8'))
-        message, tbai_id = self.get_response_values(response_xml)
-        state = int(response_xml.find(r'.//Estado').text)
-        if state == 0:
-            # SUCCESS
-            return {invoices: {'success': True, 'response': response_xml}}
-        else:
-            # ERROR
-            return {invoices: {
-                'success': False, 'error': _(message), 'blocking_level': 'error',
-                'response': response_xml}}
-
-    def get_response_values(self, xml_res):
-        tbai_id_node = xml_res.find(r'.//IdentificadorTBAI')
-        tbai_id = '' if tbai_id_node is None else tbai_id_node.text
-        messages = ''
-        node_name = 'Azalpena' if get_lang(self.env).code == 'eu_ES' else 'Descripcion'
-        for xml_res_node in xml_res.findall(r'.//ResultadosValidacion'):
-            messages += xml_res_node.find('Codigo').text + ": " + xml_res_node.find(node_name).text + "\n"
-        return messages, tbai_id
-
-    # TODO remove static method (make it private)
-    @ staticmethod
-    def sign(root, certificate):
+    def _l10n_es_tbai_sign_invoice(self, invoice, xml_root):
         """
         Sign XML with PKCS #12
-        :param certificate: (private key, x509 certificate)
+        :param invoice: invoice to sign
+        :param root: XML representation of that invoice
         :return: SignatureValue
         """
+
+        self.ensure_one()
+        company = invoice.company_id
+        cert_private, cert_public = company.l10n_es_tbai_certificate_id.get_key_pair()
 
         def create_node_tree(root_node, elem_list):
             """Convierte una lista en XML.
@@ -535,9 +486,9 @@ class AccountEdiFormat(models.Model):
         xmlsig.template.x509_data_add_certificate(data)
         xmlsig.template.add_key_value(ki)
         ctx = xmlsig.SignatureContext()
-        ctx.x509 = certificate[1]
+        ctx.x509 = cert_public
         ctx.public_key = ctx.x509.public_key()
-        ctx.private_key = certificate[0]
+        ctx.private_key = cert_private
         dslist = (
             "ds:Object",
             (),
@@ -619,7 +570,7 @@ class AccountEdiFormat(models.Model):
                 ),
             ),
         )
-        root.append(signature)
+        xml_root.append(signature)
         create_node_tree(signature, [dslist])
         ctx.sign(signature)
         signature_value = signature.find(
@@ -629,3 +580,45 @@ class AccountEdiFormat(models.Model):
         # Any characters outside of the base64 alphabet are to be ignored in
         # base64-encoded data.
         return signature_value.replace("\n", "")
+
+    # -------------------------------------------------------------------------
+    # TBAI SERVER CALLS
+    # -------------------------------------------------------------------------
+
+    def _l10n_es_tbai_post_to_web_service(self, invoices, invoice_xml, cancel=False):
+        company = invoices.company_id
+        xml_str = etree.tostring(invoice_xml, encoding='UTF-8')
+
+        # === Call the web service ===
+
+        # Get connection data
+        url = company.l10n_es_tbai_url_cancel if cancel else company.l10n_es_tbai_url_invoice
+        header = {"Content-Type": "application/xml; charset=UTF-8"}
+        cert_file = company.l10n_es_tbai_certificate_id.get_file()
+        password = company.l10n_es_tbai_certificate_id.get_password()
+
+        # Post and retrieve response
+        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password, timeout=30)
+        data = response.content.decode(response.encoding)
+
+        # Error management
+        response_xml = etree.fromstring(bytes(data, 'utf-8'))
+        message, tbai_id = self.get_response_values(response_xml)
+        state = int(response_xml.find(r'.//Estado').text)
+        if state == 0:
+            # SUCCESS
+            return {invoices: {'success': True, 'response': response_xml}}
+        else:
+            # ERROR
+            return {invoices: {
+                'success': False, 'error': _(message), 'blocking_level': 'error',
+                'response': response_xml}}
+
+    def get_response_values(self, xml_res):
+        tbai_id_node = xml_res.find(r'.//IdentificadorTBAI')
+        tbai_id = '' if tbai_id_node is None else tbai_id_node.text
+        messages = ''
+        node_name = 'Azalpena' if get_lang(self.env).code == 'eu_ES' else 'Descripcion'
+        for xml_res_node in xml_res.findall(r'.//ResultadosValidacion'):
+            messages += xml_res_node.find('Codigo').text + ": " + xml_res_node.find(node_name).text + "\n"
+        return messages, tbai_id

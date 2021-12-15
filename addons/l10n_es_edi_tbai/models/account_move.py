@@ -6,9 +6,11 @@ import zipfile
 from datetime import datetime
 from re import sub as regex_sub
 
-from pytz import timezone
 from lxml import etree
 from odoo import api, fields, models
+from pytz import timezone
+
+from .crc8 import l10n_es_tbai_crc8
 
 
 class AccountMove(models.Model):
@@ -24,7 +26,7 @@ class AccountMove(models.Model):
     # Non-stored fields (TODO registration date needed to find last posted invoice -> store=True ?) (do not mix store=True and store=False in same compute)
     l10n_es_tbai_sequence = fields.Char(string="TicketBai sequence", compute="_compute_l10n_es_tbai_sequence")
     l10n_es_tbai_number = fields.Char(string="TicketBai number", compute="_compute_l10n_es_tbai_number")
-    l10n_es_tbai_id = fields.Char(string="TicketBai ID", compute="_compute_l10n_es_tbai_values")
+    l10n_es_tbai_id = fields.Char(string="TicketBai ID", compute="_compute_l10n_es_tbai_id")
     l10n_es_tbai_signature = fields.Char(string="Signature value of XML", compute="_compute_l10n_es_tbai_values")
     l10n_es_tbai_registration_date = fields.Date(
         string="Registration Date",
@@ -37,26 +39,45 @@ class AccountMove(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @ api.depends('move_type', 'company_id')
+    @api.depends('move_type', 'company_id')
     def _compute_l10n_es_tbai_is_required(self):
         for move in self:
             move.l10n_es_tbai_is_required = move.is_sale_document() \
                 and move.country_code == 'ES' \
                 and move.company_id.l10n_es_tbai_tax_agency
 
-    @ api.depends('l10n_es_tbai_is_required')
+    @api.depends('l10n_es_tbai_is_required')
     def _compute_edi_show_cancel_button(self):
         # OVERRIDE
         super()._compute_edi_show_cancel_button()
         for move in self.filtered('l10n_es_tbai_is_required'):
             move.edi_show_cancel_button = False
 
+    @api.depends('company_id', 'state')
+    def _compute_l10n_es_tbai_id(self):
+        for record in self:
+            if record.l10n_es_tbai_is_required:
+                company = record.company_id
+                edi_format = self.env['account.edi.format'].search([('code', '=', 'es_tbai')])
+                inv_xml = edi_format._l10n_es_tbai_get_invoice_xml(record)
+                signature = edi_format._l10n_es_tbai_sign_invoice(record, inv_xml)
+                tbai_id_no_crc = '-'.join([
+                    'TBAI',
+                    str(company.vat[2:] if company.vat.startswith('ES') else company.vat),
+                    datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%d%m%y'),  # TODO needs to match FechaExpedicion and TBAI_ID date
+                    signature[:13],
+                    ''  # CRC
+                ])
+                record.l10n_es_tbai_id = tbai_id_no_crc + l10n_es_tbai_crc8(tbai_id_no_crc)
+            else:
+                record.l10n_es_tbai_id = ''  # record
+
     def _get_l10n_es_tbai_values_from_zip(self, xpaths, response=False):
         for doc in self.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'es_tbai'):
             if not doc.attachment_id:
                 print("ZIP: NO ATTACHMENT")
                 return None
-            zip = io.BytesIO(doc.attachment_id.with_context(bin_size=False).raw)  # TODO find out why bin_size=True
+            zip = io.BytesIO(doc.attachment_id.with_context(bin_size=False).raw)  # TODO investigate with_context(bin_size)
             try:
                 with zipfile.ZipFile(zip, 'r', compression=zipfile.ZIP_DEFLATED) as zipf:
                     for file in zipf.infolist():
@@ -70,7 +91,7 @@ class AccountMove(models.Model):
                 print("ZIP: BAD FILE")
                 return None
 
-    @ api.depends('edi_document_ids.attachment_id.raw')
+    @api.depends('edi_document_ids.attachment_id.raw')
     def _compute_l10n_es_tbai_values(self):
         for record in self:
 
@@ -84,11 +105,9 @@ class AccountMove(models.Model):
             })
             print("V2:", vals)
             if not (vals or vals_response):
-                record.l10n_es_tbai_id = ''
                 record.l10n_es_tbai_signature = ''
                 record.l10n_es_tbai_registration_date = None
             else:
-                record.l10n_es_tbai_id = vals_response['tbai_id']
                 record.l10n_es_tbai_signature = vals['signature']
                 record.l10n_es_tbai_registration_date = datetime.strptime(vals['registration_date'], '%d-%m-%Y').replace(tzinfo=timezone('Europe/Madrid'))
 
