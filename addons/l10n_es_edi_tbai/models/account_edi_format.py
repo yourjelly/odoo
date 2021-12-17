@@ -85,8 +85,8 @@ class AccountEdiFormat(models.Model):
             # SUCCESS
             if res.get(inv, {}).get('success'):
 
-                #     # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
-                #     inv.company_id.write({'l10n_es_tbai_last_posted_id': inv})
+                # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
+                inv.company_id.write({'l10n_es_tbai_last_posted_id': inv})
 
                 # Zip together invoice & response
                 with io.BytesIO() as stream:
@@ -258,9 +258,9 @@ class AccountEdiFormat(models.Model):
             if com_partner.country_id.code in ('ES', False) and not (com_partner.vat or '').startswith("ESN"):
                 tax_details_info_vals = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
                 values['DesgloseFactura'] = tax_details_info_vals['tax_details_info']
-                values['ImporteTotalFactura'] = round(-1 * (tax_details_info_vals['tax_details']['base_amount']
-                                                            + tax_details_info_vals['tax_details']['tax_amount']
-                                                            - tax_details_info_vals['tax_amount_retention']), 2)
+                values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (tax_details_info_vals['tax_details']['base_amount']
+                                                                            + tax_details_info_vals['tax_details']['tax_amount']
+                                                                            - tax_details_info_vals['tax_amount_retention']), 2))
 
             else:
                 tax_details_info_service_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
@@ -277,13 +277,13 @@ class AccountEdiFormat(models.Model):
                 if tax_details_info_consu_vals['tax_details_info']:
                     values['EntregaBienes'] = tax_details_info_consu_vals['tax_details_info']
 
-                values['ImporteTotalFactura'] = round(-1 * (
+                values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (
                     tax_details_info_service_vals['tax_details']['base_amount']
                     + tax_details_info_service_vals['tax_details']['tax_amount']
                     - tax_details_info_service_vals['tax_amount_retention']
                     + tax_details_info_consu_vals['tax_details']['base_amount']
                     + tax_details_info_consu_vals['tax_details']['tax_amount']
-                    - tax_details_info_consu_vals['tax_amount_retention']), 2)
+                    - tax_details_info_consu_vals['tax_amount_retention']), 2))
 
         return values
 

@@ -34,6 +34,7 @@ class AccountMove(models.Model):
              "registered into the system.",
         compute="_compute_l10n_es_tbai_values"
     )
+    l10n_es_tbai_qr = fields.Char(string="QR code to verify posted invoice", compute="_compute_l10n_es_tbai_qr")
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -72,24 +73,39 @@ class AccountMove(models.Model):
             else:
                 record.l10n_es_tbai_id = ''  # record
 
+    @api.depends('l10n_es_tbai_id')
+    def _compute_l10n_es_tbai_qr(self):
+        for record in self:
+            if record.l10n_es_tbai_is_required and record.edi_state != 'to_send':
+                company = record.company_id
+                tbai_qr_no_crc = company.l10n_es_tbai_url_qr + '?' + '&'.join([
+                    'id=' + record.l10n_es_tbai_id,
+                    's=' + record.l10n_es_tbai_sequence,
+                    'nf=' + record.l10n_es_tbai_number,
+                    'i=' + record._get_l10n_es_tbai_values_from_zip({'importe': r'.//ImporteTotalFactura'})['importe']
+                ])
+                record.l10n_es_tbai_qr = tbai_qr_no_crc + '&cr=' + l10n_es_tbai_crc8(tbai_qr_no_crc)
+            else:
+                record.l10n_es_tbai_qr = ''
+
     def _get_l10n_es_tbai_values_from_zip(self, xpaths, response=False):
+        res = {key: '' for key in xpaths.keys()}
         for doc in self.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'es_tbai'):
             if not doc.attachment_id:
                 print("ZIP: NO ATTACHMENT")
-                return None
+                return res
             zip = io.BytesIO(doc.attachment_id.with_context(bin_size=False).raw)  # TODO investigate with_context(bin_size)
             try:
                 with zipfile.ZipFile(zip, 'r', compression=zipfile.ZIP_DEFLATED) as zipf:
                     for file in zipf.infolist():
                         if file.filename.endswith('_response.xml') == response:
                             xml = etree.fromstring(zipf.read(file))
-                            res = {}
                             for key, value in xpaths.items():
                                 res[key] = xml.find(value).text
                             return res
             except zipfile.BadZipFile:
                 print("ZIP: BAD FILE")
-                return None
+        return res
 
     @api.depends('edi_document_ids.attachment_id.raw')
     def _compute_l10n_es_tbai_values(self):
@@ -104,12 +120,11 @@ class AccountMove(models.Model):
                 'registration_date': r'.//CabeceraFactura//FechaExpedicionFactura'
             })
             print("V2:", vals)
-            if not (vals or vals_response):
-                record.l10n_es_tbai_signature = ''
-                record.l10n_es_tbai_registration_date = None
-            else:
-                record.l10n_es_tbai_signature = vals['signature']
+            record.l10n_es_tbai_signature = vals['signature']
+            if vals['registration_date']:
                 record.l10n_es_tbai_registration_date = datetime.strptime(vals['registration_date'], '%d-%m-%Y').replace(tzinfo=timezone('Europe/Madrid'))
+            else:
+                record.l10n_es_tbai_registration_date = None
 
     @api.depends('name')
     def _compute_l10n_es_tbai_sequence(self):

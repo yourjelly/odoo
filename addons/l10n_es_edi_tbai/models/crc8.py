@@ -26,4 +26,4 @@ def l10n_es_tbai_crc8(data):
     crc = 0x0
     for c in data:
         crc = CRC8_TABLE[(crc ^ ord(c)) & 0xFF]
-    return "%03d" % (crc & 0xFF)
+    return '{:03d}'.format(crc & 0xFF)
