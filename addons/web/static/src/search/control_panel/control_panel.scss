@@ -5,16 +5,8 @@
     background-color: $o-control-panel-background-color;
 
     > div {
-        display: flex;
         min-height: 30px;
         margin: 5px 0px;
-    }
-
-    @include media-breakpoint-up(md) {
-        .o_cp_top_left, .o_cp_top_right,
-        .o_cp_bottom_left, .o_cp_bottom_right {
-            width: 50%;
-        }
     }
 
     .breadcrumb {
