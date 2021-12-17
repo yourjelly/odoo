@@ -15,7 +15,7 @@ class SaleOrderLine(models.Model):
 
     def _create_gift_cards(self):
         return self.env['gift.card'].create(
-            [self._build_gift_card() for _ in range(int(self.product_uom_qty))]
+            [self._build_gift_card() for _i in range(int(self.product_uom_qty))]
         )
 
     def _build_gift_card(self):
