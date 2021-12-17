@@ -3,6 +3,7 @@
 
 from odoo import models, _
 
+
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
@@ -42,24 +43,3 @@ class SaleOrder(models.Model):
     def _get_cheapest_line(self):
         # Unit prices tax included
         return min(self.order_line.filtered(lambda x: not x._is_not_sellable_line() and x.price_reduce > 0), key=lambda x: x['price_reduce'])
-
-class SalesOrderLine(models.Model):
-    _inherit = "sale.order.line"
-
-    def unlink(self):
-        # Due to delivery_set and delivery_unset methods that are called everywhere, don't unlink
-        # reward lines if it's a free shipping
-        self = self.exists()
-        orders = self.mapped('order_id')
-        applied_programs = orders.mapped('no_code_promo_program_ids') + \
-                           orders.mapped('code_promo_program_id') + \
-                           orders.mapped('applied_coupon_ids').mapped('program_id')
-        free_shipping_products = applied_programs.filtered(
-            lambda program: program.reward_type == 'free_shipping'
-        ).mapped('discount_line_product_id')
-        lines_to_unlink = self.filtered(lambda line: line.product_id not in free_shipping_products)
-        # Unless these lines are the last ones
-        res = super(SalesOrderLine, lines_to_unlink).unlink()
-        only_free_shipping_line_orders = orders.filtered(lambda order: len(order.order_line.ids) == 1 and order.order_line.is_reward_line)
-        super(SalesOrderLine, only_free_shipping_line_orders.mapped('order_line')).unlink()
-        return res
