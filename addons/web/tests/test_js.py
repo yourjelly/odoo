@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import logging
 import re
 from contextlib import suppress
 
 import odoo.tests
 from odoo.tools.misc import file_open
+from odoo.modules.module import get_manifest
+
+_logger = logging.getLogger(__name__)
 
 RE_FORBIDDEN_STATEMENTS = re.compile(r'test.*\.(only|debug)\(')
 RE_ONLY = re.compile(r'QUnit\.(only|debug)\(')
@@ -31,7 +34,9 @@ def qunit_error_checker(message):
 
 
 @odoo.tests.tagged('post_install', '-at_install')
-class WebSuite(odoo.tests.HttpCase):
+class QUnitSuite(odoo.tests.HttpCase):
+    def cross_module_check(module):
+        return 'web.qunit_suite_tests' in get_manifest(module)['assets']
 
     @odoo.tests.no_retry
     def test_unit_desktop(self):
@@ -43,11 +48,29 @@ class WebSuite(odoo.tests.HttpCase):
         # HOOT tests suite
         self.browser_js('/web/static/lib/hoot/tests/index.html?headless&loglevel=2', "", "", login='admin', timeout=1800, success_signal="[HOOT] test suite succeeded", error_checker=unit_test_error_checker)
 
+    #@odoo.tests.CrossModule(test_id= lambda m: 'web.qunit_suite_tests' in get_manifest(m)['assets'])
     @odoo.tests.no_retry
     def test_qunit_desktop(self):
         # ! DEPRECATED
-        self.browser_js('/web/tests?mod=web', "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker)
+        self.browser_js('/web/tests?moduleId=%s ' % self.generate_hash(self.test_module), "", "", login='admin', timeout=1800, success_signal="QUnit test suite done.", error_checker=qunit_error_checker)
 
+    def test_module_hash(self):
+        self.assertEqual(self.generate_hash('web'), '61b27308')
+
+    def generate_hash(self, module, testName='undefined'):
+        name = module + '\x1C' + testName
+        name_hash = 0
+
+        for letter in name:
+            name_hash = (name_hash << 5) - name_hash + ord(letter)
+            name_hash |= 0
+
+        hex_repr = hex(name_hash).lstrip('0x').zfill(8)
+        return hex_repr[-8:]
+
+
+@odoo.tests.tagged('post_install', '-at_install')
+class WebSuite(odoo.tests.HttpCase):
     def test_check_suite(self):
         self._check_forbidden_statements('web.assets_unit_tests')
         # Checks that no test is using `only` or `debug` as it prevents other tests to be run

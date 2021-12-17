@@ -8,9 +8,9 @@ from pathlib import Path
 from unittest import case
 
 from .. import tools
-from .tag_selector import TagsSelector
-from .suite import OdooSuite
 from .result import OdooTestResult
+from .suite import OdooSuite
+from .tag_selector import TagsSelector
 
 
 _logger = logging.getLogger(__name__)
@@ -105,6 +105,21 @@ def make_suite(module_names, position='at_install'):
         for t in get_module_test_cases(m)
         if position_tag.check(t) and config_tags.check(t)
     )
+
+    #loader = unittest.TestLoader()
+    #test_cases = []
+    #for module_name in module_names:
+    #    for m in get_test_modules(module_name):
+    #        for t in unwrap_suite(loader.loadTestsFromModule(m)):
+    #            if not isinstance(t, CrossModule):
+    #                test_cases.append(t)
+    #    for c in CrossModule.registry:
+    #        for t in unwrap_suite(loader.loadTestsFromTestCase(c)):
+    #            t.test_module = module_name
+    #            test_cases.append(t)
+#
+    #tests = (t for t in test_cases if position_tag.check(t) and config_tags.check(t))
+
     return OdooSuite(sorted(tests, key=lambda t: t.test_sequence))
 
 
@@ -120,3 +135,13 @@ def run_suite(suite):
     threading.current_thread().testing = False
     module.current_test = False
     return results
+
+
+class CrossModule():
+
+    registry = tools.OrderedSet()
+
+    @classmethod
+    def __init_subclass__(cls):
+        CrossModule.registry.add(cls)
+        super().__init_subclass__()
