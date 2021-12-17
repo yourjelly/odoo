@@ -1580,7 +1580,6 @@ class PosSession(models.Model):
         self._pos_data_process(loaded_data)
         return loaded_data
 
-    @api.model
     def _pos_data_process(self, loaded_data):
         """
         This is where we need to process the data if we can't do it in the loader/getter
@@ -1773,13 +1772,14 @@ class PosSession(models.Model):
         return {
             'search_params': {
                 'domain': [('id', '=', self.env.user.id)],
-                'fields': ['name', 'company_id', 'id', 'groups_id', 'lang'],
+                'fields': ['name', 'id', 'groups_id'],
             },
         }
 
     def _get_pos_ui_res_users(self, params):
         user = self.env['res.users'].search_read(**params['search_params'])[0]
         user['role'] = 'manager' if any(lambda: id == self.config_id.group_pos_manager_id.id for id in user['groups_id']) else 'cashier'
+        del user['groups_id']
         return user
 
     def _loader_params_product_pricelist(self):

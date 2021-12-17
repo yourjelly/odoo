@@ -53,7 +53,7 @@ odoo.define("pos_gift_card.GiftCardPopup", function (require) {
     async getGiftCard() {
       if (this.state.giftCardBarcode == "") return;
 
-      let giftCard = this.env.pos.giftCard.find(
+      let giftCard = this.env.pos.giftCards.find(
         (gift) => gift.code === this.state.giftCardBarcode
       );
 
@@ -65,7 +65,7 @@ odoo.define("pos_gift_card.GiftCardPopup", function (require) {
             fields: ["code", "initial_amount", "balance"],
           });
           if (giftCard.length) {
-            this.env.pos.giftCard.push(giftCard[0])
+            this.env.pos.giftCards.push(giftCard[0])
             giftCard = giftCard[0];
           } else {
             return false;

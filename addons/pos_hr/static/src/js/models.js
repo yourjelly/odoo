@@ -7,31 +7,38 @@ var pos_env = require('point_of_sale.env');
 
 models.load_models([{
     model:  'hr.employee',
-    loaded: function(self, employees) {
-        if (self.config.module_pos_hr) {
-            self.employees = employees;
-            self.employee_by_id = {};
-            self.employees.forEach(function(employee) {
-                self.employee_by_id[employee.id] = employee;
-                // todo-ref can do this in the back end so no need to provide all the users in point_of_sale
-                var hasUser = self.users.some(function(user) {
-                    if (user.id === employee.user_id[0]) {
-                        employee.role = user.role;
-                        return true;
-                    }
-                    return false;
-                });
-                if (!hasUser) {
-                    employee.role = 'cashier';
-                }
-            });
-        }
-    }
+    // loaded: function(self, employees) {
+    //     if (self.config.module_pos_hr) {
+    //         self.employees = employees;
+    //         self.employee_by_id = {};
+    //         // self.employees.forEach(function(employee) {
+    //         //     self.employee_by_id[employee.id] = employee;
+    //         //     // todo-ref can do this in the back end so no need to provide all the users in point_of_sale
+    //         //     var hasUser = self.users.some(function(user) {
+    //         //         if (user.id === employee.user_id[0]) {
+    //         //             employee.role = user.role;
+    //         //             return true;
+    //         //         }
+    //         //         return false;
+    //         //     });
+    //         //     if (!hasUser) {
+    //         //         employee.role = 'cashier';
+    //         //     }
+    //         // });
+    //     }
+    // }
 }]);
 
 Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosHrPosModel extends PosGlobalState {
+    async _processData(loadedData) {
+        super._processData(...arguments);
+        if (this.config.module_pos_hr) {
+            this.employees = loadedData['hr.employee'];
+            this.employee_by_id = loadedData['employee_by_id'];
+        }
+    }
     after_load_server_data() {
         var self = this;
         var employee_ids = _.map(self.employees, function(employee){return employee.id;});
@@ -54,7 +61,7 @@ class PosHrPosModel extends PosGlobalState {
         });
     }
     set_cashier(employee) {
-        super.set_cashier(...arguments);
+        this.cashier = employee;
         const selectedOrder = this.get_order();
         if (selectedOrder && !selectedOrder.get_orderlines().length) {
             // Order without lines can be considered to be un-owned by any employee.
@@ -64,6 +71,9 @@ class PosHrPosModel extends PosGlobalState {
         if (!this.cashierHasPriceControlRights() && this.PRODUCT_SCREEN.numpadMode === 'price') {
             this.PRODUCT_SCREEN.numpadMode = 'quantity';
         }
+    }
+    get_cashier(){
+        return this.cashier;
     }
 }
 

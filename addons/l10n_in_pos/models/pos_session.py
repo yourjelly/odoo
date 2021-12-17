@@ -9,5 +9,5 @@ class PosSession(models.Model):
 
     def _loader_params_product_product(self):
         meta = super()._loader_params_product_product()
-        meta['fields'].append('l10n_in_hsn_code')
+        meta['search_params']['fields'].append('l10n_in_hsn_code')
         return meta

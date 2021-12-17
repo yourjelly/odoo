@@ -96,7 +96,7 @@ class PosGlobalState extends PosModel {
         this.company = null;
         this.user = null;
         // this.users = []; todo-ref: to delete, it's useless
-        this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null};
+        // this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null}; //todo-ref: employee and cashier are the same...
         // this.employees = []; todo-ref: to delete, it's only used in pos_hr...
         this.partners = [];
         this.taxes = [];
@@ -176,7 +176,16 @@ class PosGlobalState extends PosModel {
             model: 'pos.session',
             method: 'load_pos_data',
             args: [[odoo.pos_session_id]],
-        })
+        });
+        await this._processData(loadedData); //todo-ref: it'll be better to refactor load_server_data instead of calling a new function (used for overriding)
+        // const tmp = {};
+        // for (const model of this.models) {
+        //     if ((model.condition ? !model.condition(this) : false) || !model.loaded)  continue;
+        //     await model.loaded(this, loadedData[model.model] || [], tmp);
+        // }
+        return this.after_load_server_data();
+    }
+   async _processData(loadedData) {
         this.version = loadedData['version'];
         this.company = loadedData['res.company'];
         this.dp = loadedData['decimal.precision'];
@@ -195,8 +204,10 @@ class PosGlobalState extends PosModel {
         this.partners = loadedData['res.partner'];
         this._loadResPartner();
         this.picking_type = loadedData['stock.picking.type'];
-        this.user = loadedData['res.users'];  // TODO-REF: user is practically useless because not really used and can be interchanged with employee, maybe remove it
-        this._loadResUsers();
+        // this.user = loadedData['res.users'];  // TODO-REF: user is practically useless because not really used and can be interchanged with employee, maybe remove it
+        // this._loadResUsers();
+        this.employee = loadedData['res.users']; // todo-ref need to refactor employee and cashier later
+        this.cashier = loadedData['res.users'];
         this.pricelists = loadedData['product.pricelist'];
         this.default_pricelist = loadedData['default_pricelist'];
         this.bank_statement = loadedData['account.bank.statement'];
@@ -214,13 +225,6 @@ class PosGlobalState extends PosModel {
         this.fiscal_posiiton_taxes = loadedData['account.fiscal.position.tax'];
         await this._loadFonts();
         await this._loadPictures();
-
-        // const tmp = {};
-        // for (const model of this.models) {
-        //     if ((model.condition ? !model.condition(this) : false) || !model.loaded)  continue;
-        //     await model.loaded(this, loadedData[model.model] || [], tmp);
-        // }
-        return this.after_load_server_data();
     }
     _loadPosSession() {
         // We need to do it here, since only then the local storage has the correct uuid
@@ -235,12 +239,11 @@ class PosGlobalState extends PosModel {
     _loadResPartner() {
         this.db.add_partners(this.partners);
     }
-    _loadResUsers() {
-        this.employee.name = this.user.name;    // todo-ref: remove user, there's no diff with employee
-        this.employee.role = this.user.role;
-        this.employee.user_id = [this.user.id, this.user.name];
-        this.set_cashier(this.employee);
-    }
+    // _loadResUsers() {
+    //     this.employee.name = this.user.name;    // todo-ref: remove user, there's no diff with employee
+    //     this.employee.role = this.user.role;
+    //     this.set_cashier(this.employee);
+    // }
     _loadProductProduct(products) {
         const modelProducts = products.map(product => {
             product.pos = this;
@@ -355,12 +358,13 @@ class PosGlobalState extends PosModel {
             }
         }
     }
-    get_cashier(){
-        return this.cashier;
-    }
-    set_cashier(employee){
-        this.cashier = employee;
-    }
+    // todo-ref useless, only called in pos_hr .....
+    // get_cashier(){
+    //     return this.cashier;
+    // }
+    // set_cashier(employee){
+    //     this.cashier = employee;
+    // }
     cashierHasPriceControlRights() {
         return !this.config.restrict_price_control || this.cashier.role == 'manager';
     }

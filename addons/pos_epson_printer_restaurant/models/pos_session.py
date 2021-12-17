@@ -9,5 +9,5 @@ class PosSession(models.Model):
 
     def _loader_params_restaurant_printer(self):
         meta = super()._loader_params_restaurant_printer()
-        meta['fields'].append('epson_printer_ip')
+        meta['search_params']['fields'].append('epson_printer_ip')
         return meta
