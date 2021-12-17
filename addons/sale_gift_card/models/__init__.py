@@ -3,3 +3,4 @@
 
 from . import gift_card
 from . import sale_order
+from . import sale_order_line
