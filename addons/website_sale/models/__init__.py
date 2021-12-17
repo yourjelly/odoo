@@ -11,6 +11,7 @@ from . import payment_acquirer
 from . import product_attribute
 from . import product_image
 from . import product_misc
+from . import product_pricelist
 from . import product_product
 from . import product_template
 from . import res_company
