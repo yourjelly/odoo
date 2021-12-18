@@ -181,6 +181,24 @@ class AuthorizeAPI:
             }
         }
 
+    def _format_transaction_errors(self, response, formatted_response):
+        """ Add detailed error messages to a response created by _format_response().
+
+        This is meant for responses from createTransactionRequest requests. When a transaction
+        fails a generic error message is shown in ['messages']['message'] which is extracted by
+        _make_request() but is vague, e.g.: "The transaction was unsuccessful."
+
+        createTransactionRequests have more detailed error messages in ['transactionResponse'],
+        e.g.: "Bill To Address is required". This appends these.
+
+        :param dict response: Response returned by _make_request().
+        :param dict formatted_response: Response returned by _format_response().
+        """
+        errors = response.get('transactionResponse', {}).get('errors')
+        if errors:
+            formatted_response['x_response_reason_text'] += '\n'
+            formatted_response['x_response_reason_text'] += '\n'.join([e.get('errorText') for e in errors])
+
     def authorize(self, tx, token=None, opaque_data=None):
         """ Authorize (without capture) a payment for the given amount.
 
@@ -196,7 +214,10 @@ class AuthorizeAPI:
             'createTransactionRequest',
             self._prepare_authorization_transaction_request('authOnlyTransaction', tx_data, tx)
         )
-        return self._format_response(response, 'auth_only')
+
+        result = self._format_response(response, 'auth_only')
+        self._format_transaction_errors(response, result)
+        return result
 
     def auth_and_capture(self, tx, token=None, opaque_data=None):
         """Authorize and capture a payment for the given amount.
@@ -218,9 +239,7 @@ class AuthorizeAPI:
         )
 
         result = self._format_response(response, 'auth_capture')
-        errors = response.get('transactionResponse', {}).get('errors')
-        if errors:
-            result['x_response_reason_text'] = '\n'.join([e.get('errorText') for e in errors])
+        self._format_transaction_errors(response, result)
         return result
 
     def _prepare_tx_data(self, token=None, opaque_data=False):
