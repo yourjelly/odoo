@@ -5,9 +5,14 @@ from odoo import api, fields, models
 
 L10N_ES_EDI_TBAI_VERSION = 1.2
 L10N_ES_EDI_TBAI_URLS = {
-    'invoice_test': {
-        'araba': '',
+    'signing_policy': {
+        'araba': 'https://ticketbai.araba.eus/tbai/sinadura/',
         'bizkaia': '',
+        'gipuzkoa': 'https://www.gipuzkoa.eus/documents/2456431/12093238/TicketBAI_Pol%C3%ADtica_firma_v_1_0.pdf/3c6e5431-bb1d-34ed-5b26-206aaf085452'
+    },
+    'invoice_test': {
+        'araba': 'https://pruebas-ticketbai.araba.eus/TicketBAI/v1/facturas/',
+        'bizkaia': 'https://pruesarrerak.bizkaia.eus/N3B4000M/aurkezpena',
         'gipuzkoa': 'https://tbai-prep.egoitza.gipuzkoa.eus/WAS/HACI/HTBRecepcionFacturasWEB/rest/recepcionFacturas/alta'
     },
     'invoice_prod': {
@@ -16,8 +21,8 @@ L10N_ES_EDI_TBAI_URLS = {
         'gipuzkoa': 'https://tbai-z.egoitza.gipuzkoa.eus/sarrerak/alta'
     },
     'qr_test': {
-        'araba': '',
-        'bizkaia': '',
+        'araba': 'https://pruebas-ticketbai.araba.eus/tbai/qrtbai/',
+        'bizkaia': 'https://batuz.eus/QRTBAI/',
         'gipuzkoa': 'https://tbai.prep.gipuzkoa.eus/qr/'
     },
     'qr_prod': {
@@ -26,15 +31,15 @@ L10N_ES_EDI_TBAI_URLS = {
         'gipuzkoa': 'https://tbai.egoitza.gipuzkoa.eus/qr/'
     },
     'cancel_test': {
-        'araba': '',
-        'bizkaia': '',
+        'araba': 'https://pruebas-ticketbai.araba.eus/TicketBAI/v1/anulaciones/',
+        'bizkaia': 'https://pruesarrerak.bizkaia.eus/N3B4000M/aurkezpena',
         'gipuzkoa': 'https://tbai-prep.egoitza.gipuzkoa.eus/WAS/HACI/HTBRecepcionFacturasWEB/rest/recepcionFacturas/anulacion'
     },
     'cancel_prod': {
         'araba': '',
         'bizkaia': '',
         'gipuzkoa': 'https://tbai-z.egoitza.gipuzkoa.eus/sarrerak/baja'
-    }
+    },
 }
 
 class ResCompany(models.Model):
