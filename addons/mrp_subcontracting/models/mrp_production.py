@@ -15,11 +15,17 @@ class MrpProduction(models.Model):
         inverse='_inverse_move_line_raw_ids', compute='_compute_move_line_raw_ids'
     )
     subcontracting_has_been_recorded = fields.Boolean("Has been recorded?", copy=False)
+    subcontractor_id = fields.Many2one('res.partner', string="Subcontractor")
 
     @api.depends('move_raw_ids.move_line_ids')
     def _compute_move_line_raw_ids(self):
         for production in self:
             production.move_line_raw_ids = production.move_raw_ids.move_line_ids
+
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for production in self:
+            production.access_url = f'/my/productions/{production.id}'
 
     def _inverse_move_line_raw_ids(self):
         for production in self:

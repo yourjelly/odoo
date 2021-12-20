@@ -119,6 +119,7 @@ class StockPicking(models.Model):
         vals = {
             'company_id': subcontract_move.company_id.id,
             'procurement_group_id': group.id,
+            'subcontractor_id': subcontract_move.picking_id.partner_id.id,
             'product_id': product.id,
             'product_uom_id': subcontract_move.product_uom.id,
             'bom_id': bom.id,

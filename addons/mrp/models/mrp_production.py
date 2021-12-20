@@ -24,7 +24,7 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _description = 'Production Order'
     _date_name = 'date_planned_start'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
     _order = 'priority desc, date_planned_start asc,id'
 
     @api.model
