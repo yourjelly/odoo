@@ -48,85 +48,148 @@ class AccountEdiFormat(models.Model):
     def _get_invoice_edi_content(self, invoice):
         pass  # TODO
 
-    def _post_invoice_edi(self, invoices):
+    def _post_invoice_edi(self, invoice):
+        self.ensure_one()  # No batching (chaining)
+
         # OVERRIDE
         if self.code != 'es_tbai':
-            return super()._post_invoice_edi(invoices)
+            return super()._post_invoice_edi(invoice)
 
         # Ensure a certificate is available.
-        certificate = invoices.company_id.l10n_es_tbai_certificate_id
+        certificate = invoice.company_id.l10n_es_tbai_certificate_id
         if not certificate:
             return {inv: {
                 'error': _("Please configure the certificate for TicketBai."),
                 'blocking_level': 'error',
-            } for inv in invoices}
+            } for inv in invoice}
 
         # Ensure a tax agency is available.
-        tax_agency = invoices.company_id.mapped('l10n_es_tbai_tax_agency')[0]
+        tax_agency = invoice.company_id.mapped('l10n_es_tbai_tax_agency')[0]
         if not tax_agency:
             return {inv: {
                 'error': _("Please specify a tax agency on your company for TicketBai."),
                 'blocking_level': 'error',
-            } for inv in invoices}
+            } for inv in invoice}
 
         # Generate the XML values.
-        inv_xml = self._l10n_es_tbai_get_invoice_xml(invoices)
+        inv_xml = self._l10n_es_tbai_get_invoice_xml(invoice)
 
         # Call the web service and get response
-        signature = self._l10n_es_tbai_sign_invoice(invoices, inv_xml)
-        res = self._l10n_es_tbai_post_to_web_service(invoices, inv_xml)
+        signature = self._l10n_es_tbai_sign_invoice(invoice, inv_xml)
+        res = self._l10n_es_tbai_post_to_web_service(invoice, inv_xml)
 
-        self.ensure_one()  # TODO loop should not be necessary
-        for inv in invoices:
-            # Get TicketBai response
-            res_xml = res[inv]['response']
-            message, tbai_id = self.get_response_values(res_xml)
+        # Get TicketBai response
+        res_xml = res[invoice]['response']
+        message, tbai_id = self.get_response_values(res_xml)
 
-            # SUCCESS
-            if res.get(inv, {}).get('success'):
+        # SUCCESS
+        if res.get(invoice, {}).get('success'):
 
-                # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
-                inv.company_id.write({'l10n_es_tbai_last_posted_id': inv})
+            # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
+            invoice.company_id.write({'l10n_es_tbai_last_posted_id': invoice})
 
-                # Zip together invoice & response
-                with io.BytesIO() as stream:
-                    raw1 = etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
-                    raw2 = etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
-                    stream = self.zip_files([raw1, raw2], [inv.name + ".xml", inv.name + "_response.xml"], stream)
+            # Zip together invoice & response
+            with io.BytesIO() as stream:
+                raw1 = etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+                raw2 = etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+                stream = self.zip_files([raw1, raw2], [invoice.name + ".xml", invoice.name + "_response.xml"], stream)
 
-                    # Create attachment & post to chatter
-                    attachment = self.env['ir.attachment'].create({
-                        'type': 'binary',
-                        'name': inv.name + ".zip",
-                        'raw': stream.getvalue(),
-                        'mimetype': 'application/zip'
-                    })
-                    inv.with_context(no_new_invoice=True).message_post(
-                        body="TicketBAI: submitted XML and response",
-                        attachment_ids=attachment.ids)
-                    res[inv]['attachment'] = attachment  # save zip as EDI document
+                # Create attachment & post to chatter
+                attachment = self.env['ir.attachment'].create({
+                    'type': 'binary',
+                    'name': invoice.name + ".zip",
+                    'raw': stream.getvalue(),
+                    'mimetype': 'application/zip'
+                })
+                invoice.with_context(no_new_invoice=True).message_post(
+                    body="TicketBAI: submitted XML and response",
+                    attachment_ids=attachment.ids)
+                res[invoice]['attachment'] = attachment  # save zip as EDI document
 
-            # Put sent XML in chatter (TODO remove)
+        # Put sent XML in chatter (TODO remove)
+        attachment = self.env['ir.attachment'].create({
+            'type': 'binary',
+            'name': invoice.name + '.xml',
+            'raw': etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
+            'mimetype': 'application/xml',
+        })
+        invoice.with_context(no_new_invoice=True).message_post(
+            body="TicketBai: invoice XML (TODO remove)",
+            attachment_ids=attachment.ids)
+
+        # Put response + any warning/error in chatter (TODO remove)
+        attachment = self.env['ir.attachment'].create({
+            'type': 'binary',
+            'name': invoice.name + '_response.xml',
+            'raw': etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
+            'mimetype': 'application/xml',
+        })
+        invoice.with_context(no_new_invoice=True).message_post(
+            body="<pre>TicketBai: response\n" + message + '</pre>',
+            attachment_ids=attachment.ids)
+
+        self._cancel_invoice_edi(invoice)  # TODO remove (TEST)
+        return res
+
+    def _cancel_invoice_edi(self, invoice):
+        # OVERRIDE
+        if self.code != 'es_tbai':
+            return super()._post_invoice_edi(invoice)
+
+        # Ensure a certificate is available.
+        certificate = invoice.company_id.l10n_es_tbai_certificate_id
+        if not certificate:
+            return {inv: {
+                'error': _("Please configure the certificate for TicketBai."),
+                'blocking_level': 'error',
+            } for inv in invoice}
+
+        # Ensure a tax agency is available.
+        tax_agency = invoice.company_id.mapped('l10n_es_tbai_tax_agency')[0]
+        if not tax_agency:
+            return {invoice: {
+                'error': _("Please specify a tax agency on your company for TicketBai."),
+                'blocking_level': 'error',
+            }}
+
+        # Generate the XML values.
+        cancel_xml = self._l10n_es_tbai_get_invoice_xml(invoice, cancel=True)
+        print("CANCEL XML:")
+        print(etree.tostring(cancel_xml))
+
+        # Call the web service and get response
+        signature = self._l10n_es_tbai_sign_invoice(invoice, cancel_xml)
+        res = self._l10n_es_tbai_post_to_web_service(invoice, cancel_xml, cancel=True)
+
+        # Get TicketBai response
+        res_xml = res[invoice]['response']
+        print("CANCEL RESPONSE:")
+        print(etree.tostring(res_xml))
+        message, tbai_id = self.get_response_values(res_xml)
+
+        # SUCCESS
+        # if res.get(invoice, {}).get('success'): # TODO uncomment
+
+        # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
+        invoice.company_id.write({'l10n_es_tbai_last_posted_id': invoice})
+
+        # Zip together invoice & response (TODO access previous zip EDI document)
+        with io.BytesIO() as stream:
+            raw1 = etree.tostring(cancel_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+            raw2 = etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+            stream = self.zip_files([raw1, raw2], [invoice.name + "_cancel.xml", invoice.name + "_cancel_response.xml"], stream)
+
+            # Create attachment & post to chatter
             attachment = self.env['ir.attachment'].create({
                 'type': 'binary',
-                'name': inv.name + '.xml',
-                'raw': etree.tostring(inv_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
-                'mimetype': 'application/xml',
+                'name': invoice.name + "_cancel.zip",
+                'raw': stream.getvalue(),
+                'mimetype': 'application/zip'
             })
-            inv.with_context(no_new_invoice=True).message_post(
-                body="TicketBai: invoice XML (TODO remove)",
+            invoice.with_context(no_new_invoice=True).message_post(
+                body="<pre>TicketBai: cancel request and response\n" + message + '</pre>',
                 attachment_ids=attachment.ids)
 
-            # Put response + any warning/error in chatter (TODO remove)
-            attachment = self.env['ir.attachment'].create({
-                'type': 'binary',
-                'name': inv.name + '_response.xml',
-                'raw': etree.tostring(res_xml, pretty_print=True, xml_declaration=True, encoding='UTF-8'),
-                'mimetype': 'application/xml',
-            })
-            inv.with_context(no_new_invoice=True).message_post(
-                body="<pre>TicketBai: response\n" + message + '</pre>',
-                attachment_ids=attachment.ids)
         return res
 
     def zip_files(self, files, fnames, stream):
@@ -146,12 +209,15 @@ class AccountEdiFormat(models.Model):
     # TBAI XML BUILD
     # -------------------------------------------------------------------------
 
-    def _l10n_es_tbai_get_invoice_xml(self, invoice):
-        values = self._l10n_es_tbai_get_header_values(invoice)
-        values.update(self._l10n_es_tbai_get_subject_values(invoice))
-        values.update(self._l10n_es_tbai_get_invoice_values(invoice))
-        values.update(self._l10n_es_tbai_get_trail_values(invoice))
-        xml_str = self.env.ref('l10n_es_edi_tbai.template_invoice_bundle')._render(values)
+    def _l10n_es_tbai_get_invoice_xml(self, invoice, cancel=False):
+        values = {
+            "Emision": not cancel,
+        }
+        values.update(self._l10n_es_tbai_get_header_values(invoice))
+        values.update(self._l10n_es_tbai_get_subject_values(invoice, cancel))
+        values.update(self._l10n_es_tbai_get_invoice_values(invoice, cancel))
+        values.update(self._l10n_es_tbai_get_trail_values(invoice, cancel))
+        xml_str = self.env.ref('l10n_es_edi_tbai.template_invoice_main')._render(values)
         xml_doc = etree.fromstring(xml_str, etree.XMLParser(compact=True, remove_blank_text=True, remove_comments=True))
 
         return xml_doc
@@ -161,11 +227,19 @@ class AccountEdiFormat(models.Model):
             'IDVersionTBAI': L10N_ES_EDI_TBAI_VERSION
         }
 
-    def _l10n_es_tbai_get_subject_values(self, invoice):
-        xml_recipients = []
+    def _l10n_es_tbai_get_subject_values(self, invoice, cancel):
+        # === SENDER ===
+        sender = invoice.company_id if invoice.is_sale_document() else invoice.commercial_partner_id
+        values = {
+            'Emisor': sender,
+            'EmisorVAT': sender.vat[2:] if sender.vat.startswith('ES') else sender.vat,
+        }
+        if cancel:
+            return values
 
         # === PARTNERS ===
-        # TODO multiple partners ?
+        xml_recipients = []
+        # TODO TBAI accepts up to 100 recipients (but Odoo only supports one)
         for dest in (1,):
             eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
             partner = invoice.commercial_partner_id if invoice.is_sale_document() else invoice.company_id
@@ -198,92 +272,91 @@ class AccountEdiFormat(models.Model):
                 'Direccion': ", ".join(filter(lambda x: x, [partner.street, partner.street2, partner.city]))
             }
             xml_recipients.append(values_dest)
-        # TODO check that less than 100 recipients (max for TBAI) ?
 
-        # === SENDER ===
-        sender = invoice.company_id if invoice.is_sale_document() else invoice.commercial_partner_id
-        return {
-            'Emisor': sender,
-            'EmisorVAT': sender.vat[2:] if sender.vat.startswith('ES') else sender.vat,
+        values.update({
             'Destinatarios': xml_recipients,
             'VariosDestinatarios': "N",  # TODO
-            'TerceroODestinatario': "D"  # TODO
-        }
+            'TerceroODestinatario': "D",  # TODO
+        })
+        return values
 
-    def _l10n_es_tbai_get_invoice_values(self, invoices):
+    def _l10n_es_tbai_get_invoice_values(self, invoice, cancel):
         eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
 
         # simplified_partner = self.env.ref("l10n_es_edi_tbai.partner_simplified")
 
         values = {}
-        for invoice in invoices:
-            com_partner = invoice.commercial_partner_id
 
-            # === CABECERA===
-            values['SerieFactura'] = invoice.l10n_es_tbai_sequence
-            values['NumFactura'] = invoice.l10n_es_tbai_number
-            values['FechaExpedicionFactura'] = datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%d-%m-%Y')
-            values['HoraExpedicionFactura'] = datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%H:%M:%S')
+        # === CABECERA===
+        values['SerieFactura'] = invoice.l10n_es_tbai_sequence
+        values['NumFactura'] = invoice.l10n_es_tbai_number
+        values['FechaExpedicionFactura'] = datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%d-%m-%Y')
 
-            # TODO simplified & rectified invoices
-            # is_simplified = invoice.partner_id == simplified_partner
-            # if invoice.move_type == 'out_invoice':
-            #     invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
-            # elif invoice.move_type == 'out_refund':
-            #     invoice_node['TipoFactura'] = 'R5' if is_simplified else 'R1'
-            #     invoice_node['TipoRectificativa'] = 'I'
+        if cancel:
+            return values
 
-            # === DATOS FACTURA ===
-            values['DescripcionFactura'] = invoice.invoice_origin or 'manual'
-            detalles = []
-            # tax_details = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
-            for line in invoice.invoice_line_ids.filtered(lambda line: not line.display_type):
-                # line_details = tax_details['tax_details']['invoice_line_tax_details'][line]
-                detalles.append({
-                    "DescripcionDetalle": regex_sub(r"[^0-9a-zA-Z ]", "", line.name)[:250],
-                    "Cantidad": line.quantity,
-                    "ImporteUnitario": line.price_unit,
-                    "Descuento": line.discount or "0.00",
-                    "ImporteTotal": line.price_total,
-                })
-            values['DetallesFactura'] = detalles
+        values['HoraExpedicionFactura'] = datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%H:%M:%S')
 
-            # Claves: TODO there's 15 more codes to implement, there can be up to 3
-            if not com_partner.country_id or com_partner.country_id.code in eu_country_codes:
-                values['ClaveRegimenIvaOpTrascendencia'] = '01'
-            else:
-                values['ClaveRegimenIvaOpTrascendencia'] = '02'
+        # TODO simplified & rectified invoices
+        # is_simplified = invoice.partner_id == simplified_partner
+        # if invoice.move_type == 'out_invoice':
+        #     invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
+        # elif invoice.move_type == 'out_refund':
+        #     invoice_node['TipoFactura'] = 'R5' if is_simplified else 'R1'
+        #     invoice_node['TipoRectificativa'] = 'I'
 
-            # === TIPO DESGLOSE ===
-            if com_partner.country_id.code in ('ES', False) and not (com_partner.vat or '').startswith("ESN"):
-                tax_details_info_vals = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
-                values['DesgloseFactura'] = tax_details_info_vals['tax_details_info']
-                values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (tax_details_info_vals['tax_details']['base_amount']
-                                                                            + tax_details_info_vals['tax_details']['tax_amount']
-                                                                            - tax_details_info_vals['tax_amount_retention']), 2))
+        # === DATOS FACTURA ===
+        values['DescripcionFactura'] = invoice.invoice_origin or 'manual'
+        detalles = []
+        # tax_details = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
+        for line in invoice.invoice_line_ids.filtered(lambda line: not line.display_type):
+            # line_details = tax_details['tax_details']['invoice_line_tax_details'][line]
+            detalles.append({
+                "DescripcionDetalle": regex_sub(r"[^0-9a-zA-Z ]", "", line.name)[:250],
+                "Cantidad": line.quantity,
+                "ImporteUnitario": line.price_unit,
+                "Descuento": line.discount or "0.00",
+                "ImporteTotal": line.price_total,
+            })
+        values['DetallesFactura'] = detalles
 
-            else:
-                tax_details_info_service_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
-                    invoice,
-                    filter_invl_to_apply=lambda x: any(t.tax_scope == 'service' for t in x.tax_ids)
-                )
-                tax_details_info_consu_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
-                    invoice,
-                    filter_invl_to_apply=lambda x: any(t.tax_scope == 'consu' for t in x.tax_ids)
-                )
+        # Claves: TODO there's 15 more codes to implement, there can be up to 3
+        com_partner = invoice.commercial_partner_id
+        if not com_partner.country_id or com_partner.country_id.code in eu_country_codes:
+            values['ClaveRegimenIvaOpTrascendencia'] = '01'
+        else:
+            values['ClaveRegimenIvaOpTrascendencia'] = '02'
 
-                if tax_details_info_service_vals['tax_details_info']:
-                    values['PrestacionServicios'] = tax_details_info_service_vals['tax_details_info']
-                if tax_details_info_consu_vals['tax_details_info']:
-                    values['EntregaBienes'] = tax_details_info_consu_vals['tax_details_info']
+        # === TIPO DESGLOSE ===
+        if com_partner.country_id.code in ('ES', False) and not (com_partner.vat or '').startswith("ESN"):
+            tax_details_info_vals = self._l10n_es_tbai_get_invoice_tax_details_values(invoice)
+            values['DesgloseFactura'] = tax_details_info_vals['tax_details_info']
+            values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (tax_details_info_vals['tax_details']['base_amount']
+                                                                        + tax_details_info_vals['tax_details']['tax_amount']
+                                                                        - tax_details_info_vals['tax_amount_retention']), 2))
 
-                values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (
-                    tax_details_info_service_vals['tax_details']['base_amount']
-                    + tax_details_info_service_vals['tax_details']['tax_amount']
-                    - tax_details_info_service_vals['tax_amount_retention']
-                    + tax_details_info_consu_vals['tax_details']['base_amount']
-                    + tax_details_info_consu_vals['tax_details']['tax_amount']
-                    - tax_details_info_consu_vals['tax_amount_retention']), 2))
+        else:
+            tax_details_info_service_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
+                invoice,
+                filter_invl_to_apply=lambda x: any(t.tax_scope == 'service' for t in x.tax_ids)
+            )
+            tax_details_info_consu_vals = self._l10n_es_tbai_get_invoice_tax_details_values(
+                invoice,
+                filter_invl_to_apply=lambda x: any(t.tax_scope == 'consu' for t in x.tax_ids)
+            )
+
+            if tax_details_info_service_vals['tax_details_info']:
+                values['PrestacionServicios'] = tax_details_info_service_vals['tax_details_info']
+            if tax_details_info_consu_vals['tax_details_info']:
+                values['EntregaBienes'] = tax_details_info_consu_vals['tax_details_info']
+
+            values['ImporteTotalFactura'] = '{:.2f}'.format(round(-1 * (
+                tax_details_info_service_vals['tax_details']['base_amount']
+                + tax_details_info_service_vals['tax_details']['tax_amount']
+                - tax_details_info_service_vals['tax_amount_retention']
+                + tax_details_info_consu_vals['tax_details']['base_amount']
+                + tax_details_info_consu_vals['tax_details']['tax_amount']
+                - tax_details_info_consu_vals['tax_amount_retention']), 2))
 
         return values
 
@@ -406,9 +479,10 @@ class AccountEdiFormat(models.Model):
             'base_amount_not_subject': base_amount_not_subject,
         }
 
-    def _l10n_es_tbai_get_trail_values(self, invoice):
+    def _l10n_es_tbai_get_trail_values(self, invoice, cancel):
         prev_invoice = invoice.company_id.l10n_es_tbai_last_posted_id
-        if prev_invoice:
+        print("PREV INVOICE:", prev_invoice, "is {!s}".format('True' if prev_invoice else 'False'))
+        if prev_invoice and not cancel:
             return {
                 'EncadenamientoFacturaAnterior': True,
                 'SerieFacturaAnterior': prev_invoice.l10n_es_tbai_sequence,
