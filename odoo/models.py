@@ -59,7 +59,7 @@ from .tools import frozendict, lazy_classproperty, ormcache, \
                    groupby, discardattr, partition
 from .tools.config import config
 from .tools.func import frame_codeinfo
-from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang
+from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang, split_every
 from .tools.translate import _
 from .tools import date_utils
 from .tools import populate
@@ -75,6 +75,9 @@ regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
+
+INSERT_BATCH_SIZE = 100
+SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 
 def check_object_name(name):
     """ Check if the given name is a valid model name.
@@ -4183,58 +4186,42 @@ Fields:
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
         cr = self.env.cr
-        quote = '"{}"'.format
 
-        # insert rows
+        # insert rows in batches of maximum INSERT_BATCH_SIZE
         ids = []                                # ids of created records
         other_fields = OrderedSet()             # non-column fields
         translated_fields = OrderedSet()        # translated fields
 
-        for data in data_list:
-            # determine column values
-            stored = data['stored']
-            columns = [('id', "nextval(%s)", self._sequence)]
-            for name, val in sorted(stored.items()):
-                field = self._fields[name]
-                assert field.store
+        for data_sublist in split_every(INSERT_BATCH_SIZE, data_list):
+            stored_list = [data['stored'] for data in data_sublist]
+            fnames = sorted({name for stored in stored_list for name in stored})
 
+            columns = ['id']
+            formats = ['nextval(%s)']
+            rows = [[self._sequence] for _ in stored_list]
+            for fname in fnames:
+                field = self._fields[fname]
                 if field.column_type:
-                    col_val = field.convert_to_column(val, self, stored)
-                    columns.append((name, field.column_format, col_val))
                     if field.translate is True:
                         translated_fields.add(field)
+                    columns.append(fname)
+                    formats.append(field.column_format)
+                    for stored, row in zip(stored_list, rows):
+                        if fname in stored:
+                            row.append(field.convert_to_column(stored[fname], self, stored))
+                        else:
+                            row.append(SQL_DEFAULT)
                 else:
                     other_fields.add(field)
 
-            # Insert rows one by one
-            # - as records don't all specify the same columns, code building batch-insert query
-            #   was very complex
-            # - and the gains were low, so not worth spending so much complexity
-            #
-            # It also seems that we have to be careful with INSERTs in batch, because they have the
-            # same problem as SELECTs:
-            # If we inject a lot of data in a single query, we fall into pathological perfs in
-            # terms of SQL parser and the execution of the query itself.
-            # In SELECT queries, we inject max 1000 ids (integers) when we can, because we know
-            # that this limit is well managed by PostgreSQL.
-            # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
-            # example).
-            #
-            # The problem then becomes: how to "estimate" the right size of the batch to have
-            # good performance?
-            #
-            # This requires extensive testing, and it was preferred not to introduce INSERTs in
-            # batch, to avoid regressions as much as possible.
-            #
-            # That said, we haven't closed the door completely.
-            query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
-                quote(self._table),
-                ", ".join(quote(name) for name, fmt, val in columns),
-                ", ".join(fmt for name, fmt, val in columns),
+            header = ", ".join(f'"{column}"' for column in columns)
+            template = f'({", ".join(formats)})'
+            templates = ", ".join([template] * len(rows))
+            cr.execute(
+                f'INSERT INTO "{self._table}" ({header}) VALUES {templates} RETURNING "id"',
+                [val for row in rows for val in row],
             )
-            params = [val for name, fmt, val in columns]
-            cr.execute(query, params)
-            ids.append(cr.fetchone()[0])
+            ids.extend(id_ for id_, in cr.fetchall())
 
         # put the new records in cache, and update inverse fields, for many2one
         #
@@ -4242,11 +4229,12 @@ Fields:
         cachetoclear = []
         records = self.browse(ids)
         inverses_update = defaultdict(list)     # {(field, value): ids}
+        common_set_vals = set(LOG_ACCESS_COLUMNS + [self.CONCURRENCY_CHECK_FIELD, 'id', 'parent_path'])
         for data, record in zip(data_list, records):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
             vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
-            set_vals = list(vals) + LOG_ACCESS_COLUMNS + [self.CONCURRENCY_CHECK_FIELD, 'id', 'parent_path']
+            set_vals = common_set_vals.union(vals)
             for field in self._fields.values():
                 if field.type in ('one2many', 'many2many'):
                     self.env.cache.set(record, field, ())
