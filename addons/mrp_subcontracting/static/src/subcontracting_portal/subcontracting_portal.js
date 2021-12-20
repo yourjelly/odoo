@@ -45,15 +45,15 @@ export class SubcontractingPortalWebClient extends Component {
     }
 
     async _showView() {
-        const { action_name, production_id } = session;
+        const { action_name, picking_id } = session;
         await this.actionService.doAction(
             action_name,
             {
                 clearBreadcrumbs: true,
                 additionalContext: {
-                    active_id: production_id,
+                    active_id: picking_id,
                 },
-                res_id: production_id
+                res_id: picking_id,
             }
         );
     }

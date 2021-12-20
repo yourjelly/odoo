@@ -3,7 +3,7 @@
 
     <record id="subcontracting_portal_production_form_view" model="ir.ui.view">
         <field name="name">subcontracting.portal.production.view.form</field>
-        <field name="model">mrp.production</field>
+        <field name="model">stock.picking</field>
         <field name="priority">999</field>
         <field name="arch" type="xml">
             <form string="Manufacturing Orders">
@@ -20,7 +20,6 @@
                 <group>
                     <field name="id"/>
                     <field name="name"/>
-                    <field name="qty_produced"/>
                 </group>
             </sheet>
             </form>
@@ -29,7 +28,7 @@
 
     <record id="subcontracting_portal_view_production_action" model="ir.actions.act_window">
         <field name="name">Subcontracting Portal</field>
-        <field name="res_model">mrp.production</field>
+        <field name="res_model">stock.picking</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="subcontracting_portal_production_form_view"/>
     </record>

@@ -253,7 +253,7 @@ class PickingType(models.Model):
 
 class Picking(models.Model):
     _name = "stock.picking"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
     _description = "Transfer"
     _order = "priority desc, scheduled_date asc, id desc"
 

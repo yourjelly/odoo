@@ -22,11 +22,6 @@ class MrpProduction(models.Model):
         for production in self:
             production.move_line_raw_ids = production.move_raw_ids.move_line_ids
 
-    def _compute_access_url(self):
-        super()._compute_access_url()
-        for production in self:
-            production.access_url = f'/my/productions/{production.id}'
-
     def _inverse_move_line_raw_ids(self):
         for production in self:
             line_by_product = defaultdict(lambda: self.env['stock.move.line'])
@@ -40,6 +35,11 @@ class MrpProduction(models.Model):
                 move['additional'] = True
                 production.move_raw_ids = [(0, 0, move)]
                 production.move_raw_ids.filtered(lambda m: m.product_id == product_id)[:1].move_line_ids = lines
+
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for production in self:
+            production.access_url = f'/my/productions/{production.id}'
 
     def subcontracting_record_component(self):
         self.ensure_one()

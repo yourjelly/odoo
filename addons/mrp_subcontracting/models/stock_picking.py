@@ -30,6 +30,11 @@ class StockPicking(models.Model):
             if subcontracted_moves._subcontrating_can_be_record():
                 picking.display_action_record_components = 'facultative'
 
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for picking in self:
+            picking.access_url = f'/my/productions/{picking.id}'
+
     # -------------------------------------------------------------------------
     # Action methods
     # -------------------------------------------------------------------------
@@ -120,6 +125,7 @@ class StockPicking(models.Model):
             'company_id': subcontract_move.company_id.id,
             'procurement_group_id': group.id,
             'subcontractor_id': subcontract_move.picking_id.partner_id.id,
+            'picking_ids': [subcontract_move.picking_id.id],
             'product_id': product.id,
             'product_uom_id': subcontract_move.product_uom.id,
             'bom_id': bom.id,

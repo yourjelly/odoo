@@ -12,17 +12,17 @@ class CustomerPortal(portal.CustomerPortal):
     @http.route(['/my/productions', '/my/productions/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_productions(self, page=1, date_begin=None, date_end=None, sortby=None, **kw):
         partner = request.env.user.partner_id
-        domain = [('subcontractor_id', '=', partner.id)]
-        productions = request.env['mrp.production'].search(domain)
+        domain = [('partner_id', '=', partner.id)]
+        pickings = request.env['stock.picking'].search(domain).filtered(lambda picking: picking.move_ids.filtered('is_subcontract'))
         values = {
-            'productions': productions
+            'pickings': pickings,
         }
         return http.request.render("mrp_subcontracting.portal_my_productions", values)
 
-    @http.route("/my/productions/<int:production_id>", type="http", auth="user", methods=['GET'])
-    def render_project_backend_view(self, production_id):
-        production = request.env['mrp.production'].sudo().browse(production_id)
-        if not production.exists():
+    @http.route("/my/productions/<int:picking_id>", type="http", auth="user", methods=['GET'])
+    def render_project_backend_view(self, picking_id):
+        picking = request.env['stock.picking'].sudo().browse(picking_id)
+        if not picking.exists():
             return request.not_found()
         session_info = request.env['ir.http'].session_info()
         user_context = request.session.get_context() if request.session.uid else {}
@@ -34,8 +34,8 @@ class CustomerPortal(portal.CustomerPortal):
             "qweb": qweb_checksum,
             "translations": translation_hash,
         }
-        production_company = production.company_id
-        session_info.update(cache_hashes=cache_hashes, action_name='mrp_subcontracting.subcontracting_portal_view_production_action', production_id=production.id, user_companies={
+        production_company = picking.company_id
+        session_info.update(cache_hashes=cache_hashes, action_name='mrp_subcontracting.subcontracting_portal_view_production_action', picking_id=picking.id, user_companies={
             'current_company': production_company.id,
             'allowed_companies': {
                 production_company.id: {

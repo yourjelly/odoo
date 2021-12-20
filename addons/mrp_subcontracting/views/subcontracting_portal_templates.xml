@@ -19,11 +19,11 @@
                 <t t-set="title">Productions</t>
             </t>
 
-            <t t-if="not productions">
+            <t t-if="not pickings">
                 <p>There are currently no productions for your account.</p>
             </t>
 
-            <t t-if="productions" t-call="portal.portal_table">
+            <t t-if="pickings" t-call="portal.portal_table">
                 <thead>
                     <tr class="active">
                         <th>Manufacturing Order</th>
@@ -32,12 +32,11 @@
                         <th class="text-right">Quantity</th>
                     </tr>
                 </thead>
-                <t t-foreach="productions" t-as="production">
+                <t t-foreach="pickings" t-as="picking">
                     <tr>
-                        <td><a t-att-href="production.get_portal_url()"><span t-field="production.name"/></a></td>
-                        <td class="text-right"><span t-field="production.product_id"/></td>
-                        <td class="text-right"><span t-field="production.state"/></td>
-                        <td class="text-right"><span t-field="production.product_qty"/></td>
+                        <td><a t-att-href="picking.get_portal_url()"><span t-field="picking.name"/></a></td>
+                        <td class="text-right"><span t-field="picking.product_id"/></td>
+                        <td class="text-right"><span t-field="picking.state"/></td>
                     </tr>
                 </t>
             </t>
