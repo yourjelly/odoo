@@ -68,6 +68,38 @@ function factory(dependencies) {
             return fetchedMessages;
         }
 
+        async loadToMessage(message) {
+            if (this.isAllHistoryLoaded || this.isLoading) {
+                return;
+            }
+            if (!this.isLoaded) {
+                this.update({ isCacheRefreshRequested: true });
+                return;
+            }
+            this.update({ isLoadingMore: true });
+            const limit = 99999;
+            let fetchedMessages;
+            let success;
+            try {
+                fetchedMessages = await this._loadMessages({ limit, minId: message.id });
+                success = true;
+            } catch (e) {
+                success = false;
+            }
+            if (!this.exists()) {
+                return;
+            }
+            if (success) {
+                if (fetchedMessages.length < limit) {
+                    this.update({ isAllHistoryLoaded: true });
+                }
+                for (const threadView of this.threadViews) {
+                    threadView.addComponentHint('more-messages-loaded', { fetchedMessages });
+                }
+            }
+            this.update({ isLoadingMore: false });
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------

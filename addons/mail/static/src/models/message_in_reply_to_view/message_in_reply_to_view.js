@@ -25,17 +25,25 @@ function factory(dependencies) {
          * @private
          * @param {MouseEvent} ev
          */
-        onClickReply(ev) {
+        async onClickReply(ev) {
             markEventHandled(ev, 'MessageInReplyToView.ClickMessageInReplyTo');
             const threadView = this.messageView && this.messageView.threadView;
             const parentMessage = this.messageView.message.parentMessage;
             if (!threadView || !parentMessage) {
                 return;
             }
-            const parentMessageView = this.messaging.models['mail.message_view'].findFromIdentifyingData({
+            let parentMessageView;
+            parentMessageView = this.messaging.models['mail.message_view'].findFromIdentifyingData({
                 message: replace(parentMessage),
                 threadView: replace(threadView),
             });
+            if (!parentMessageView) {
+                await threadView.threadCache.loadToMessage(parentMessage);
+                parentMessageView = this.messaging.models['mail.message_view'].findFromIdentifyingData({
+                    message: replace(parentMessage),
+                    threadView: replace(threadView),
+                });
+            }
             if (!parentMessageView) {
                 return;
             }

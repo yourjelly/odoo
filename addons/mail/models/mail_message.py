@@ -908,9 +908,9 @@ class Message(models.Model):
             :returns list(dict).
         """
         if max_id:
-            domain = expression.AND([domain, [('id', '<', max_id)]])
+            domain = expression.AND([domain, [('id', '<=', max_id)]])
         if min_id:
-            domain = expression.AND([domain, [('id', '>', min_id)]])
+            domain = expression.AND([domain, [('id', '>=', min_id)]])
         return self.search(domain, limit=limit).message_format()
 
     def message_format(self, format_reply=True):
