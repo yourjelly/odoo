@@ -9,5 +9,5 @@ class PosSession(models.Model):
 
     def _loader_params_pos_payment_method(self):
         meta = super()._loader_params_pos_payment_method()
-        meta['fields'].append('six_terminal_ip')
+        meta['search_params']['fields'].append('six_terminal_ip')
         return meta

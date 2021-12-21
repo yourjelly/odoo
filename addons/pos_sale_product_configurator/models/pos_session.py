@@ -9,5 +9,5 @@ class PosSession(models.Model):
 
     def _loader_params_product_product(self):
         meta = super()._loader_params_product_product()
-        meta['fields'].append('optional_product_ids')
+        meta['search_params']['fields'].append('optional_product_ids')
         return meta

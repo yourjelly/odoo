@@ -9,5 +9,5 @@ class PosSession(models.Model):
 
     def _loader_params_pos_payment_method(self):
         meta = super()._loader_params_pos_payment_method()
-        meta['fields'].append('pos_mercury_config_id')
+        meta['search_params']['fields'].append('pos_mercury_config_id')
         return meta

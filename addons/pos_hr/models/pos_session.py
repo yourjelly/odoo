@@ -9,7 +9,8 @@ class PosSession(models.Model):
 
     def _pos_data_process(self, loaded_data):
         super()._pos_data_process(loaded_data)
-        loaded_data['employee_by_id'] = {employee['id']: employee for employee in loaded_data['hr.employee']}
+        if self.config_id.module_pos_hr:
+            loaded_data['employee_by_id'] = {employee['id']: employee for employee in loaded_data['hr.employee']}
 
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()

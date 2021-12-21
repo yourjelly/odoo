@@ -9,37 +9,37 @@ const Registries = require('point_of_sale.Registries');
 // At POS Startup, load the floors, and add them to the pos model
 models.load_models({
     model: 'restaurant.floor',
-    loaded: function(self,floors){
-        self.floors = floors;
-        self.floors_by_id = {};
-        for (var i = 0; i < floors.length; i++) {
-            floors[i].tables = [];
-            self.floors_by_id[floors[i].id] = floors[i];
-        }
-
-        // Make sure they display in the correct order
-        self.floors = self.floors.sort(function(a,b){ return a.sequence - b.sequence; });
-
-        // Ignore floorplan features if no floor specified.
-        self.config.iface_floorplan = !!self.floors.length;
-    },
+    // loaded: function(self,floors){
+    //     self.floors = floors;
+    //     self.floors_by_id = {};
+    //     for (var i = 0; i < floors.length; i++) {
+    //         floors[i].tables = [];
+    //         self.floors_by_id[floors[i].id] = floors[i];
+    //     }
+    //
+    //     // Make sure they display in the correct order
+    //     // self.floors = self.floors.sort(function(a,b){ return a.sequence - b.sequence; });
+    //
+    //     // Ignore floorplan features if no floor specified.
+    //     self.config.iface_floorplan = !!self.floors.length;
+    // },
 });
 
 // At POS Startup, after the floors are loaded, load the tables, and associate
 // them with their floor.
 models.load_models({
-    model: 'restaurant.table',
-    loaded: function(self,tables){
-        self.tables_by_id = {};
-        for (var i = 0; i < tables.length; i++) {
-            self.tables_by_id[tables[i].id] = tables[i];
-            var floor = self.floors_by_id[tables[i].floor_id[0]];
-            if (floor) {
-                floor.tables.push(tables[i]);
-                tables[i].floor = floor;
-            }
-        }
-    },
+    // model: 'restaurant.table',
+    // loaded: function(self,tables){
+    //     self.tables_by_id = {};
+    //     for (var i = 0; i < tables.length; i++) {
+    //         self.tables_by_id[tables[i].id] = tables[i];
+    //         var floor = self.floors_by_id[tables[i].floor_id[0]];
+    //         if (floor) {
+    //             floor.tables.push(tables[i]);
+    //             tables[i].floor = floor;
+    //         }
+    //     }
+    // },
 });
 
 // New orders are now associated with the current table, if any.
@@ -95,6 +95,31 @@ return PosRestaurantOrder;
 Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosRestaurantPosModel extends PosGlobalState {
+   async _processData(loadedData) {
+       await super._processData(...arguments);
+       if (this.config.is_table_management) {
+           this.floors = loadedData['restaurant.floor'];
+           this.loadRestaurantFloor();
+       }
+   }
+
+    loadRestaurantFloor() {
+       // we do this in the front end due to the circular/recursive reference needed
+        // Ignore floorplan features if no floor specified.
+        this.config.iface_floorplan = !!(this.floors && this.floors.length > 0);
+        if (this.config.iface_floorplan) {
+            this.floors_by_id = {};
+            this.tables_by_id = {};
+            for (let floor of this.floors) {
+                this.floors_by_id[floor.id] = floor;
+                for (let table of floor.tables) {
+                    this.tables_by_id[table.id] = table;
+                    table.floor = floor;
+                }
+            }
+        }
+    }
+
     async after_load_server_data() {
         var res = await super.after_load_server_data(...arguments);
         if (this.config.iface_floorplan) {

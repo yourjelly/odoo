@@ -33,7 +33,7 @@ Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosHrPosModel extends PosGlobalState {
     async _processData(loadedData) {
-        super._processData(...arguments);
+        await super._processData(...arguments);
         if (this.config.module_pos_hr) {
             this.employees = loadedData['hr.employee'];
             this.employee_by_id = loadedData['employee_by_id'];
