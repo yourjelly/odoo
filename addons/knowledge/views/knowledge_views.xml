@@ -5,12 +5,47 @@
         <field name="name">knowledge.article.view.form</field>
         <field name="model">knowledge.article</field>
         <field name="arch" type="xml">
-            <form>
+            <form class="o_knowledge_form_view" js_class="knowledge_view_form">
                 <sheet>
                     <div class="oe_title">
                         <label for="name"/>
                         <h1><field name="name"/></h1>
                     </div>
+                    <div>Workspace</div>
+                    <ol class="o_tree m-0 pl-0">
+                        <li id="file_1">
+                            <div class="d-flex">
+                                <i class="fa fa-fw fa-caret-down align-self-center"/>
+                                Some content 1
+                            </div>
+                        </li>
+                        <li id="file_2">
+                            <div class="d-flex">
+                                <i class="fa fa-fw fa-caret-down align-self-center"/>
+                                Some content 2
+                            </div>
+                            <ol>
+                                <li id="file_3">
+                                    <div class="d-flex">
+                                        <i class="fa fa-fw fa-caret-down align-self-center"/>
+                                        Some content 3
+                                    </div>
+                                </li>
+                                <li id="file_4">
+                                    <div class="d-flex">
+                                        <i class="fa fa-fw fa-caret-down align-self-center"/>
+                                        Some content 4
+                                    </div>
+                                </li>
+                            </ol>
+                        </li>
+                        <li id="file_5">
+                            <div class="d-flex">
+                                <i class="fa fa-fw fa-caret-down align-self-center"/>
+                                Some content 5
+                            </div>
+                        </li>
+                    </ol>
                     <group>
                         <group>
                             <field name="parent_id" domain="[('id', '!=', id)]"/>

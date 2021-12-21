@@ -1,0 +1,22 @@
+.o_tree {
+    ol {
+        padding-left: 15px; /* indentation space */
+    }
+    li {
+        list-style-type: none;
+        & > ol {
+            border-left: 2px solid #eee;
+        }
+    }
+    div {
+        cursor: grab;
+        i {
+            cursor: pointer;
+        }
+    }
+    .o_placeholder {
+        background-color: #eee;
+    }
+}
+
+.o_knowledge_form_view {}
