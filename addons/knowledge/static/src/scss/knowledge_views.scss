@@ -1,14 +1,14 @@
-.o_tree {
-    ol {
+aside {
+    ul {
         padding-left: 15px; /* indentation space */
     }
     li {
         list-style-type: none;
-        & > ol {
+        & > ul {
             border-left: 2px solid #eee;
         }
     }
-    div {
+    .o_tree div {
         cursor: grab;
         i {
             cursor: pointer;

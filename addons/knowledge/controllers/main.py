@@ -75,6 +75,6 @@ class KnowledgeDataSet(DataSet):
             'tree_html': request.env.ref('knowledge.knowledge_article_tree_template')._render(self.get_tree_html)
         }
 
-    @http.route('/knowledge/get_tree', type='http', auth="user")
+    @http.route('/knowledge/get_tree', type='json', auth='user')
     def display_tree(self):
-        return request.render('knowledge.knowledge_article_tree_template', self.get_tree_values())
+        return request.env.ref('knowledge.knowledge_article_tree_template')._render(self.get_tree_values())
