@@ -30,6 +30,9 @@ class Article(models.Model):
     last_edition_id = fields.Many2one("res.users", string="Last Edited by")
     last_edition_date = fields.Datetime(string="Last Edited on")
 
+    # TODO: change way icon is stored, this is mainly for testing
+    icon_string = fields.Char(string="Icon", default='fa fa-file')
+
     # Favourite
     is_user_favourite = fields.Boolean(string="Favourite?", compute="_compute_is_user_favourite",
                                        inverse="_inverse_is_user_favourite", search="_search_is_user_favourite")
@@ -183,11 +186,10 @@ class Article(models.Model):
             # only need to resequence after the duplicate
             children = children[duplicate_index:]
             for i in range(len(children)):
-                if i+start_sequence not in write_vals_by_sequence:
-                    write_vals_by_sequence[i+start_sequence] = children[i]
+                if i + start_sequence not in write_vals_by_sequence:
+                    write_vals_by_sequence[i + start_sequence] = children[i]
                 else:
-                    write_vals_by_sequence[i+start_sequence] |= children[i]
+                    write_vals_by_sequence[i + start_sequence] |= children[i]
 
         for sequence in write_vals_by_sequence:
             write_vals_by_sequence[sequence].write({'sequence': sequence})
-

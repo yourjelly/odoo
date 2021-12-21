@@ -13,6 +13,7 @@ const { useState } = hooks;
 
 const DEFAULT_PLACEHOLDER = _lt("Search...");
 const DEFAULT_EMPTY_MESSAGE = _lt("No results found");
+const DEFAULT_HEADER_TEMPLATE = false;
 const FUZZY_NAMESPACES = ["default"];
 
 /**
@@ -38,6 +39,7 @@ const FUZZY_NAMESPACES = ["default"];
  *  categoriesByNamespace?: {[namespace]: string[]};
  *  namespace?: string;
  *  emptyMessageByNamespace?: {[namespace]: string};
+ *  headerTemplateByNamespace?: {[namespace]: string};
  *  footerTemplate?: string;
  *  placeholder?: string;
  *  providers: Provider[];
@@ -129,6 +131,7 @@ export class CommandPalette extends Component {
         }
         this.categoriesByNamespace = config.categoriesByNamespace;
         this.emptyMessageByNamespace = config.emptyMessageByNamespace || {};
+        this.headerTemplateByNamespace = config.headerTemplateByNamespace || {};
         this.providersByNamespace = result;
 
         this.state.footerTemplate = config.footerTemplate;
@@ -184,6 +187,8 @@ export class CommandPalette extends Component {
         this.mouseSelectionActive = false;
         this.state.emptyMessage =
             this.emptyMessageByNamespace[namespace] || DEFAULT_EMPTY_MESSAGE.toString();
+        this.state.headerTemplate =
+            this.headerTemplateByNamespace[namespace] || DEFAULT_HEADER_TEMPLATE;
     }
 
     selectCommand(index) {

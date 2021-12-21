@@ -18,6 +18,10 @@ const commandEmptyMessageRegistry = registry.category("command_empty_list");
 commandEmptyMessageRegistry.add("@", _lt("No user found"));
 commandEmptyMessageRegistry.add("#", _lt("No channel found"));
 
+const footerRegistry = registry.category("palette_footer");
+footerRegistry.add("@", "users");
+footerRegistry.add("#", "channels");
+
 const commandProviderRegistry = registry.category("command_provider");
 commandProviderRegistry.add("partner", {
     namespace: "@",

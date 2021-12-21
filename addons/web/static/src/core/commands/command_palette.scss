@@ -73,6 +73,19 @@
         justify-content: space-between;
       }
 
+      &_left {
+        background-color: inherit;
+        padding: 0.5rem 1.3em;
+        display: flex;
+        > * {
+          padding-left: 0.5rem;
+        }
+        > icon {
+          position: relative;
+          top: 0.4em;
+        }
+      }
+
       &_hotkey {
         kbd {
           background-color: #f4f7f8;
@@ -117,6 +130,16 @@
     .o_promote {
       color: $o-brand-primary;
       font-weight: 900;
+    }
+  }
+
+  &_header {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    * {
+      padding-left: 0.5rem;
     }
   }
 }

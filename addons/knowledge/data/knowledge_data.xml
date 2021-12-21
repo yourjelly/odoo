@@ -1,5 +1,80 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <odoo>
-    <data noupdate="1">
-    </data>
+    <record id="knowledge_article_demo_data_0" model="knowledge.article">
+        <field name="name">Sales Playbook</field>
+        <field name="body" type="html">
+            <p>
+                <strong>Sales Playbook</strong>
+                is a series of articles that will help you to understand the
+            differents aspects of sales and marketing.
+            </p>
+        </field>
+        <field name="parent_id" eval="False" />
+        <field name="author_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="website_published" eval="True" />
+    </record>
+    <record id="knowledge_article_demo_data_1" model="knowledge.article">
+        <field name="name">How to make a Sale</field>
+        <field name="body" type="html">
+            <p>
+                <strong>How to make a Sale</strong>
+                To make a sale, you need to understand the differents aspects of
+                sales and marketing.
+                This article will help you to understand the differents aspects of
+                sales and marketing.
+            </p>
+        </field>
+        <field name="parent_id" eval="ref('knowledge_article_demo_data_0')" />
+        <field name="author_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="website_published" eval="True" />
+    </record>
+    <record id="knowledge_article_demo_data_2" model="knowledge.article">
+        <field name="name">Best Sauces for French Fries</field>
+        <field name="body" type="html">
+            <p>
+                <strong>Best Sauces for French Fries</strong>
+                French Fries are very popular in Belgium.
+                Here is a list of some sauces you can put on fries:
+                <ul>
+                    <li>
+                        <strong>Mayonnaise</strong>
+                        A very good sauce for french fries.
+                    </li>
+                    <li>
+                        <strong>Ketchup</strong>
+                        Red.
+                    </li>
+                    <li>
+                        <strong>Mustard</strong>
+                        Yellow.
+                    </li>
+                    <li>
+                        <strong>Relish</strong>
+                        Green.
+                    </li>
+                </ul>
+            </p>
+        </field>
+        <field name="parent_id" eval="False" />
+        <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
+        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
+        <field name="website_published" eval="False" />
+    </record>
+    <record id="knowledge_article_demo_data_3" model="knowledge.article">
+        <field name="name">When to forward a lead</field>
+        <field name="body" type="html">
+            <p>
+                <strong>When to forward a lead</strong>
+                When you have a lead that you want to forward to someone else,
+                you should do it as soon as possible.
+                You should forward the lead as soon as possible.
+            </p>
+        </field>
+        <field name="parent_id" eval="ref('knowledge_article_demo_data_0')" />
+        <field name="author_ids" eval="[(6, 0, [ref('base.user_root')])]" />
+        <field name="favourite_user_ids" eval="[(6, 0, [ref('base.user_root')])]" />
+        <field name="website_published" eval="True" />
+    </record>
 </odoo>

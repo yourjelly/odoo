@@ -15,6 +15,11 @@
         'security/ir.model.access.csv',
         'security/security.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'knowledge/static/src/webclient/commands/*.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,

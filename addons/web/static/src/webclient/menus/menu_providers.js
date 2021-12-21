@@ -17,6 +17,9 @@ commandCategoryRegistry.add("menu_items", { namespace: "/" }, { sequence: 20 });
 const commandEmptyMessageRegistry = registry.category("command_empty_list");
 commandEmptyMessageRegistry.add("/", _lt("No menu found"));
 
+const footerRegistry = registry.category("palette_footer");
+footerRegistry.add("/", "menus");
+
 const commandProviderRegistry = registry.category("command_provider");
 commandProviderRegistry.add("menu", {
     namespace: "/",

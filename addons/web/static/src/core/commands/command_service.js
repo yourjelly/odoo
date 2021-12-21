@@ -34,13 +34,9 @@ const { xml } = owl.tags;
 
 const commandCategoryRegistry = registry.category("command_categories");
 const commandEmptyMessageRegistry = registry.category("command_empty_list");
+const commandHeaderTemplateRegistry = registry.category("command_header_template");
 const commandProviderRegistry = registry.category("command_provider");
-
-const footerTemplate = xml`
-<span>
-    <span class='o_promote'>TIP</span> — search for <span class='o_promote'>@</span>users, <span class='o_promote'>#</span>channels, and <span class='o_promote'>/</span>menus
-</span>
-`;
+const footerRegistry = registry.category("palette_footer");
 
 export const commandService = {
     dependencies: ["dialog", "hotkey", "ui"],
@@ -69,10 +65,22 @@ export const commandService = {
             commandEmptyMessageRegistry.getEntries().forEach(([key, message]) => {
                 emptyMessageByNamespace[key] = message.toString();
             });
+            const headerTemplateByNamespace = {};
+            commandHeaderTemplateRegistry.getEntries().forEach(([key, message]) => {
+                headerTemplateByNamespace[key] = message;
+            });
 
+            // TODO: is there a better way to do this?
+            var footerTemplate = footerRegistry.getEntries().map(([key, value]) => {
+                return "<span class='o_promote'>"+key+"</span>"+value;
+            }).join(', ');
+            footerTemplate = xml`<span>
+                <span class='o_promote'>TIP</span> — search for ${footerTemplate}
+            </span>`;
             const config = {
                 categoriesByNamespace,
                 emptyMessageByNamespace,
+                headerTemplateByNamespace,
                 footerTemplate,
                 placeholder: env._t("Search for a command..."),
                 providers: commandProviderRegistry.getAll(),

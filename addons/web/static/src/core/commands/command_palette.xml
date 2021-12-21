@@ -7,7 +7,9 @@
         <input type="text" t-model="state.searchValue" t-on-input="onDebouncedSearchInput" autofocus="" t-att-placeholder="state.placeholder"/>
         <i  t-att-title="state.placeholder" role="img"  t-att-aria-label="state.placeholder" class="fa fa-search"></i>
       </div>
-
+      <div t-if="state.headerTemplate" class="o_command_palette_header">
+        <t t-call="{{ state.headerTemplate }}"/>
+      </div>
       <div class="o_command_palette_listbox">
         <div t-if="!state.commands.length" class="o_command_palette_listbox_empty" t-esc="state.emptyMessage"/>
         <t t-if="!isFuzzySearch">
