@@ -12,10 +12,11 @@ class TestMenusAdmin(odoo.tests.HttpCase):
     def test_01_click_everywhere_as_admin(self):
         menus = self.env['ir.ui.menu'].load_menus(False)
         for app_id in menus['root']['children']:
-            with self.subTest(app=menus[app_id]['name']):
-                _logger.runbot('Testing %s', menus[app_id]['name'])
-                self.browser_js("/web", "odoo.__DEBUG__.services['web.clickEverywhere']('%s');" % menus[app_id]['xmlid'], "odoo.isReady === true", login="admin", timeout=300)
-                self.terminate_browser()
+            if menus[app_id]['name'] in ('Payroll', 'Settings'):
+                with self.subTest(app=menus[app_id]['name']):
+                    _logger.runbot('Testing %s', menus[app_id]['name'])
+                    self.browser_js("/web", "odoo.__DEBUG__.services['web.clickEverywhere']('%s');" % menus[app_id]['xmlid'], "odoo.isReady === true", login="admin", timeout=300)
+                    self.terminate_browser()
 
 
 @odoo.tests.tagged('click_all', 'post_install', '-at_install', '-standard')
