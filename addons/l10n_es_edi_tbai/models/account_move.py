@@ -52,7 +52,7 @@ class AccountMove(models.Model):
         # OVERRIDE
         super()._compute_edi_show_cancel_button()
         for move in self.filtered('l10n_es_tbai_is_required'):
-            move.edi_show_cancel_button = False
+            move.edi_show_cancel_button = True
 
     @api.depends('company_id', 'state')
     def _compute_l10n_es_tbai_id(self):

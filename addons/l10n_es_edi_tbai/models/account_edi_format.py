@@ -128,7 +128,6 @@ class AccountEdiFormat(models.Model):
             body="<pre>TicketBai: response\n" + message + '</pre>',
             attachment_ids=attachment.ids)
 
-        self._cancel_invoice_edi(invoice)  # TODO remove (TEST)
         return res
 
     def _cancel_invoice_edi(self, invoice):
@@ -169,9 +168,6 @@ class AccountEdiFormat(models.Model):
 
         # SUCCESS
         # if res.get(invoice, {}).get('success'): # TODO uncomment
-
-        # Track head of chain (last posted invoice) # TODO replace by _compute from unzipped attachment
-        invoice.company_id.write({'l10n_es_tbai_last_posted_id': invoice})
 
         # Zip together invoice & response (TODO access previous zip EDI document)
         with io.BytesIO() as stream:
@@ -508,17 +504,15 @@ class AccountEdiFormat(models.Model):
         cert_private, cert_public = company.l10n_es_tbai_certificate_id.get_key_pair()
 
         def create_node_tree(root_node, elem_list):
-            """Convierte una lista en XML.
+            """Convierte a list to XML.
 
-            Cada elemento de la lista se interpretará de la siguiente manera:
+            Each element e from the list is interpreted as follows:
 
-            Si es un string se añadirá al texto suelto del nodo root.
-            Si es una tupla/lista t se interpretará como sigue:
-                t[0]  es el nombre del elemento a crear. Puede tener prefijo de espacio
-                de nombres.
-                t[1]  es la lista de atributos donde las posiciones pares son claves y
-                los impares valores.
-                t[2:] son los subelementos que se interpretan recursivamente
+            If e is a string, it will be added to the loose text of the root node
+            Otherwise, e must is an iterable that defines a new element as such:
+                e[0]  is the name of the element to create, which may contain a namespace prefix
+                e[1]  is the list of its attributes, where evens are keys and odds are values
+                e[2:] are its sub-elements, interpreted recursively (depth-first)
             """
             for elem_def in elem_list:
                 if isinstance(elem_def, str):
