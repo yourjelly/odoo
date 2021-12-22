@@ -281,6 +281,15 @@ odoo.define('web.OwlCompatibility', function (require) {
         }
     }
 
+    function standaloneAdapter(props, env) {
+        if (!env) {
+            env = owl.Component.env;
+        }
+        const app = new App(null, {env, templates: window.__ODOO_TEMPLATES__});
+        const node = app.makeNode(ComponentAdapter, props);
+        return node.component;
+    }
+
 
     /**
      * Case 2) A legacy widget has to instantiate Owl components
@@ -703,5 +712,6 @@ odoo.define('web.OwlCompatibility', function (require) {
         ComponentAdapter,
         ComponentWrapper,
         WidgetAdapterMixin,
+        standaloneAdapter,
     };
 });
