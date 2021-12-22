@@ -180,7 +180,6 @@ QUnit.module("ActionManager", (hooks) => {
             },
             willUnmount() {
                 assert.step(`willUnmount ${this.__uniqueId}`);
-                this._super(...arguments);
             },
         });
 
@@ -202,7 +201,7 @@ QUnit.module("ActionManager", (hooks) => {
         await click(webClient.el.querySelectorAll(".breadcrumb-item")[0]);
         await legacyExtraNextTick();
 
-        webClient.destroy();
+        webClient.__owl__.app.destroy();
 
         assert.verifySteps([
             "mounted 1",

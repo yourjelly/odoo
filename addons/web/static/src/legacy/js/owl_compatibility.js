@@ -655,6 +655,9 @@ odoo.define('web.OwlCompatibility', function (require) {
          * Calls willUnmount to notify the component it will be unmounted.
          */
         on_detach_callback() {
+            if (this.status === "unmounted") {
+                return;
+            }
             recursiveCall(this.node, false, (node) => {
                 const component = node.component;
                 for (const cb of node.willUnmount) {
