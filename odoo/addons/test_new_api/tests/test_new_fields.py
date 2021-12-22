@@ -3650,7 +3650,7 @@ class TestPrecompute(common.TransactionCase):
         # the creation makes one insert query for the main record, and one for the line
         with self.assertQueries([
             insert(model, 'name', 'lower', 'upper', 'lowup', 'commercial_id', 'size'),
-            insert(model.line_ids, 'parent_id', 'name', 'size'),
+            insert(model.line_ids, 'any_enabled', 'parent_id', 'name', 'size'),
         ]):
             record = model.create({'name': 'Foo', 'line_ids': [Command.create({'name': 'bar'})]})
 
@@ -3759,3 +3759,30 @@ class TestPrecompute(common.TransactionCase):
         # check the number of queries: 1 SELECT + 3 INSERT
         with self.assertQueryCount(4):
             model.create([{'partner_id': pid} for pid in partners.ids])
+
+    def test_precompute_with_m2m_value(self):
+        data_1, data_2 = self.env['test_new_api.precompute.data'].create([
+            {
+                'enabled': False,
+            },
+            {
+                'enabled': True,
+            },
+        ])
+        record = self.env['test_new_api.precompute'].create({
+            'name': 'Test',
+        })
+        # Dummy line this will add data_1 and data_2 as <NewId..> in the cache with the old value
+        self.env['test_new_api.precompute.line'].create({
+            'name': 'test',
+            'data_ids': [Command.clear(), Command.link(data_1.id), Command.link(data_2.id)],
+        })
+        data_2.enabled = False
+        record.write({
+            'line_ids': [(0, 0, {
+                'name': 'Test',
+                'data_ids': [Command.clear(), Command.link(data_1.id), Command.link(data_2.id)],
+            })],
+        })
+        # The line used the values in the cache for the <NewId..> instead of the actual value
+        self.assertFalse(record.line_ids.any_enabled)

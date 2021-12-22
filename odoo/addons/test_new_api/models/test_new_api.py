@@ -1447,10 +1447,19 @@ class PrecomputeLine(models.Model):
     name = fields.Char(required=True)
     size = fields.Integer(compute='_compute_size', store=True, precompute=True)
 
+    # precomputed depending on Many2many fields
+    data_ids = fields.Many2many('test_new_api.precompute.data')
+    any_enabled = fields.Boolean(compute='_compute_any_enabled', store=True, precompute=True)
+
     @api.depends('name')
     def _compute_size(self):
         for line in self:
             line.size = len(line.name or "")
+
+    @api.depends('data_ids')
+    def _compute_any_enabled(self):
+        for record in self:
+            record.any_enabled = any(data.enabled for data in record.data_ids)
 
 
 class PrecomputeCombo(models.Model):
@@ -1514,3 +1523,9 @@ class PrecomputeRequired(models.Model):
 
     partner_id = fields.Many2one('res.partner', required=True)
     name = fields.Char(related='partner_id.name', precompute=True, store=True, required=True)
+
+class PrecomputeData(models.Model):
+    _name = 'test_new_api.precompute.data'
+    _description = 'a model containing data used in a compute with a many2many field'
+
+    enabled = fields.Boolean(default=False)
