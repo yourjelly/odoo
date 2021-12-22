@@ -50,7 +50,7 @@ var AbstractView = Factory.extend({
     // determines if a search bar is available
     withSearchBar: true,
     // determines the search menus available and their orders
-    searchMenuTypes: [],
+    searchMenuTypes: ['filter', 'groupBy', 'favorite'],
     // determines if a control panel should be instantiated
     withControlPanel: true,
     // determines if a search panel could be instantiated

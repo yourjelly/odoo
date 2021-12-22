@@ -63,6 +63,9 @@ odoo.define('web.GroupByMenu', function (require) {
                 this.model.dispatch('toggleFilter', itemId);
             }
         }
+        onAddCustomGroup() {
+            // ???????
+        }
     }
 
     GroupByMenu.components = { CustomGroupByItem };
