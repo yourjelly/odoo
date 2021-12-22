@@ -983,8 +983,8 @@ QUnit.module("Components", ({ beforeEach }) => {
         }
         Parent.components = { CheckBoxDropdownItem };
         Parent.template = owl.tags.xml`
-            <Dropdown t-on-dropdown-item-selected="onItemSelected">
-                <CheckBoxDropdownItem/>
+            <Dropdown>
+                <CheckBoxDropdownItem onSelected="() => onItemSelected()"/>
             </Dropdown>
         `;
         env = await makeTestEnv();
