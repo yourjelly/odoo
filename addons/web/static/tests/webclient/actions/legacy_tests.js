@@ -498,34 +498,6 @@ QUnit.module("ActionManager", (hooks) => {
         ]);
     });
 
-    QUnit.test("breadcrumbs are correct in stacked legacy client actions", async function (assert) {
-        const ClientAction = AbstractAction.extend({
-            hasControlPanel: true,
-            async start() {
-                this.$el.addClass("client_action");
-                return this._super(...arguments);
-            },
-            getTitle() {
-                return "Blabla";
-            },
-        });
-        core.action_registry.add("clientAction", ClientAction);
-        registerCleanup(() => delete core.action_registry.map.clientAction);
-
-        const webClient = await createWebClient({ serverData });
-
-        await doAction(webClient, 3);
-        assert.containsOnce(target, ".o_list_view");
-        assert.strictEqual($(target).find(".breadcrumb-item").text(), "Partners");
-
-        await doAction(webClient, {
-            type: "ir.actions.client",
-            tag: "clientAction",
-        });
-        assert.containsOnce(target, ".client_action");
-        assert.strictEqual($(target).find(".breadcrumb-item").text(), "PartnersBlabla");
-    });
-
     QUnit.test("bootstrap tooltip in dialog action auto destroy", async (assert) => {
         assert.expect(2);
 
@@ -615,15 +587,15 @@ QUnit.module("ActionManager", (hooks) => {
         const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 3);
-        assert.containsOnce(webClient, ".o_legacy_list_view");
-        assert.strictEqual($(webClient.el).find(".breadcrumb-item").text(), "Partners");
+        assert.containsOnce(target, ".o_legacy_list_view");
+        assert.strictEqual($(target).find(".breadcrumb-item").text(), "Partners");
 
         await doAction(webClient, {
             type: "ir.actions.client",
             tag: "clientAction",
         });
-        assert.containsOnce(webClient, ".client_action");
-        assert.strictEqual($(webClient.el).find(".breadcrumb-item").text(), "PartnersBlabla");
+        assert.containsOnce(target, ".client_action");
+        assert.strictEqual($(target).find(".breadcrumb-item").text(), "PartnersBlabla");
     });
 
     QUnit.test("view with js_class attribute (legacy)", async function (assert) {
