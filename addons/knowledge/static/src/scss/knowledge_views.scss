@@ -19,4 +19,22 @@ aside {
     }
 }
 
-.o_knowledge_form_view {}
+.o_knowledge_form_view {
+    .o_form_sheet {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .o_scroll_view {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        overflow: auto;
+    }
+}

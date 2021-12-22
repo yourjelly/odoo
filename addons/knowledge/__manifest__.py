@@ -22,8 +22,12 @@
     'assets': {
         'web.assets_backend': [
             'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/js/knowledge_controller.js',
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js'
-        ]
+        ],
+        'web.assets_qweb': [
+            'knowledge/static/**/*',
+        ],
     }
 }

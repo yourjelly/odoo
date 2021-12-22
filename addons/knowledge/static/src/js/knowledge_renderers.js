@@ -13,13 +13,16 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      */
     start: function () {
         return this._super.apply(this, arguments).then(() => {
+            const aside = this.$el.find('.o_sidebar');
             this._rpc({
                 route: '/knowledge/get_tree',
                 params: {}
             }).then(res => {
-                const aside = this.$el.find('.o_sidebar');
                 aside.html(res);
                 this.init_sortable();
+            }).catch(error => {
+                console.log('error', error);
+                aside.empty();
             });
         });
     },
