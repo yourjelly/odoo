@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.DebugMenu" owl="1">
-        <Dropdown class="o_debug_manager"
+        <Dropdown class="'o_debug_manager'"
           beforeOpen="getElements"
           position="'bottom-end'"
           togglerClass="`o-dropdown--narrow ${env.inDialog?'btn btn-link':''}`"

@@ -31,7 +31,7 @@
                         <td class="o_pivot_cell_value text-right" t-att-class="{
                                 o_empty: cell.value === undefined,
                                 'font-weight-bold': cell.isBold,
-                            }" t-on-click="trigger('open_view', cell)"
+                            }" t-on-click="() => this.trigger('open_view', cell)"
                                t-on-mouseover="_onMouseEnter" t-on-mouseout="_onMouseLeave">
                             <t t-if="cell.value !== undefined">
                                 <div t-if="cell.originIndexes.length > 1" class="o_variation" t-att-class="{
@@ -81,7 +81,7 @@
             fields="props.groupableFields"
             hasSearchArchGroupBys="hasSearchArchGroupBys"
             searchModel="props.searchModel"
-            t-on-groupby-menu-selection="_onGroupByMenuSelection"
+            onGroupbyMenuSelection="_onGroupByMenuSelection.bind(this)"
         />
     </t>
 
