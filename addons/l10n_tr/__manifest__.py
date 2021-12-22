@@ -40,7 +40,7 @@ Bu modül kurulduktan sonra, Muhasebe yapılandırma sihirbazı çalışır
 
         "data/l10n_tr.district.csv",
         "data/l10n_tr.area.csv",
-        "data/l10n_tr.neighborhood.csv",
+        # "data/l10n_tr.neighborhood.csv",
         "data/l10n_tr.tax_office.csv",
 
         "security/ir.model.access.csv",
@@ -49,4 +49,6 @@ Bu modül kurulduktan sonra, Muhasebe yapılandırma sihirbazı çalışır
         'demo/demo_company.xml',
     ],
     'license': 'LGPL-3',
+    "post_init_hook": "post_init_hook",
+    'uninstall_hook': 'uninstall_hook',
 }
