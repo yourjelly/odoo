@@ -4458,6 +4458,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
         target: {
             type: String,
         },
+        slots: true,
     };
 
     class Memo extends Component {
@@ -4837,17 +4838,12 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
             dependencies = computeDependencies();
             cleanup = effect(...dependencies) || NO_OP;
         });
-        let shouldReapplyOnPatch = false;
-        onWillPatch(() => {
-            const newDeps = computeDependencies();
-            shouldReapplyOnPatch = newDeps.some((val, i) => val !== dependencies[i]);
-            if (shouldReapplyOnPatch) {
-                cleanup();
-                dependencies = newDeps;
-            }
-        });
         onPatched(() => {
-            if (shouldReapplyOnPatch) {
+            const newDeps = computeDependencies();
+            const shouldReapply = newDeps.some((val, i) => val !== dependencies[i]);
+            if (shouldReapply) {
+                dependencies = newDeps;
+                cleanup();
                 cleanup = effect(...dependencies) || NO_OP;
             }
         });
@@ -4931,8 +4927,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-21T11:32:42.962Z';
-    __info__.hash = '0b1c4dd';
+    __info__.date = '2021-12-22T10:07:20.379Z';
+    __info__.hash = 'd160c4a';
     __info__.url = 'https://github.com/odoo/owl';
 
 
