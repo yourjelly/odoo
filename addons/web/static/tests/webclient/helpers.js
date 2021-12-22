@@ -273,7 +273,12 @@ export async function createWebClient(params) {
 
     // FIXME NXOWL ?
 
-    const app = new App(WebClientClass);
+    const appConfig = {
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+    };
+
+    const app = new App(WebClientClass, appConfig);
     env.app = app;
     env.renderToString = (template, context) => {
         const div = document.createElement("div");
@@ -282,10 +287,6 @@ export async function createWebClient(params) {
         owl.blockDom.mount(bdom, div);
         return div.innerHTML;
     };
-    app.configure({
-        env,
-        templates: window.__ODOO_TEMPLATES__,
-    });
     const wc = await app.mount(target);
     registerCleanup(() => {
         for (const controller of controllers) {

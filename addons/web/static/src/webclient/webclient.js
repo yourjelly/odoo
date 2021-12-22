@@ -115,6 +115,10 @@ export class WebClient extends Component {
             return;
         }
     }
+
+    get el() {
+        return super.el.parentElement;
+    }
 }
 WebClient.components = {
     ActionContainer,

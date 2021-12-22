@@ -52,12 +52,12 @@ export const makeWithSearch = async (params) => {
 
     const target = getFixture();
 
-    const app = new App(WithSearch, props);
-    env.app = app;
-    app.configure({
-        env,
+    const appConfig = {
+        env, props,
         templates: window.__ODOO_TEMPLATES__,
-    });
+    };
+    const app = new App(WithSearch, appConfig);
+    env.app = app;
     const withSearch = await app.mount(target);
 
     registerCleanup(() => app.destroy());

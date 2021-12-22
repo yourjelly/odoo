@@ -344,7 +344,17 @@ export function mockAnimationFrame() {
 }
 
 export async function mount(Comp, { props, target, env }) {
-    const app = new App(Comp, props);
+    env = env || {};
+    const configuration = {
+        env,
+        templates: window.__ODOO_TEMPLATES__,
+        dev: env.debug,
+        props,
+    };
+    if (env.services && "localization" in env.services) {
+        configuration.translateFn = env._t;
+    }
+    const app = new App(Comp, configuration);
     const destroy = app.destroy.bind(app);
     let alreadyDestroyed = false;
     app.destroy = () => {
@@ -356,16 +366,6 @@ export async function mount(Comp, { props, target, env }) {
             app.destroy();
         }
     });
-    env = env || {};
-    const configuration = {
-        env,
-        templates: window.__ODOO_TEMPLATES__,
-        dev: env.debug,
-    };
-    if (env.services && "localization" in env.services) {
-        configuration.translateFn = env._t;
-    }
-    app.configure(configuration);
     return app.mount(target);
 }
 

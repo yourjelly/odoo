@@ -82,8 +82,11 @@ export const makeView = async (params) => {
     const target = getFixture();
 
     // FIXME NXOWL ?
-
-    const app = new App(View, props);
+    const appConfig = {
+        env, props,
+        templates: window.__ODOO_TEMPLATES__,
+    };
+    const app = new App(View, appConfig);
     env.app = app;
     env.renderToString = (template, context) => {
         const div = document.createElement("div");
@@ -92,10 +95,6 @@ export const makeView = async (params) => {
         owl.blockDom.mount(bdom, div);
         return div.innerHTML;
     };
-    app.configure({
-        env,
-        templates: window.__ODOO_TEMPLATES__,
-    });
     const view = await app.mount(target);
 
     registerCleanup(() => app.destroy());

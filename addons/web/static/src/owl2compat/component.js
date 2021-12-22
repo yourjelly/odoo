@@ -31,13 +31,10 @@
             return useComponent();
         }
 
-        // get el() {
-        //     let bdom = this.__owl__.bdom;
-        //     while (bdom && !bdom.el) {
-        //         bdom = bdom.child || bdom.children[0] || bdom.bdom;
-        //     }
-        //     return bdom.el;
-        // }
+        get el() {
+            let bdom = this.__owl__.bdom;
+            return bdom && bdom.firstNode();
+        }
 
         /**
          * Emit a custom event of type 'eventType' with the given 'payload' on the
