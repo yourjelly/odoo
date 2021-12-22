@@ -15,7 +15,6 @@
                     t-if="element.type == 'item'"
                     onSelected="element.callback"
                     href="element.href"
-                    payload="element"
                     >
                     <t t-esc="element.description"/>
                 </DropdownItem>

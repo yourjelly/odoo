@@ -45,6 +45,8 @@
         if (!(el instanceof EventTarget)){
             el = el.parentElement;
         }
-        el.dispatchEvent(event);
+        if (el) {
+            el.dispatchEvent(event);
+        }
     };
 })();
