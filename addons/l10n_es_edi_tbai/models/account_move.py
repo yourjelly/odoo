@@ -58,18 +58,20 @@ class AccountMove(models.Model):
     def _compute_l10n_es_tbai_id(self):
         for record in self:
             if record.l10n_es_tbai_is_required:
-                company = record.company_id
-                edi_format = self.env['account.edi.format'].search([('code', '=', 'es_tbai')])
-                inv_xml = edi_format._l10n_es_tbai_get_invoice_xml(record)
-                signature = edi_format._l10n_es_tbai_sign_invoice(record, inv_xml)
-                tbai_id_no_crc = '-'.join([
-                    'TBAI',
-                    str(company.vat[2:] if company.vat.startswith('ES') else company.vat),
-                    datetime.strftime(datetime.now(tz=timezone('Europe/Madrid')), '%d%m%y'),  # TODO needs to match FechaExpedicion and TBAI_ID date
-                    signature[:13],
-                    ''  # CRC
-                ])
-                record.l10n_es_tbai_id = tbai_id_no_crc + l10n_es_tbai_crc8(tbai_id_no_crc)
+                # TODO (POS): pre-sign document and store it as EDI document (before posting), only then get signature
+                # rationale: signature changes every time doc is signed, but needs to be consistent across XMLs / TBAI IDs
+                if record.l10n_es_tbai_signature == '':
+                    record.l10n_es_tbai_id = ''
+                else:
+                    company = record.company_id
+                    tbai_id_no_crc = '-'.join([
+                        'TBAI',
+                        str(company.vat[2:] if company.vat.startswith('ES') else company.vat),
+                        datetime.strftime(record.l10n_es_tbai_registration_date, '%d%m%y'),  # TODO use record.invoice_date (also in XMLs)
+                        record.l10n_es_tbai_signature[:13],
+                        ''  # CRC
+                    ])
+                    record.l10n_es_tbai_id = tbai_id_no_crc + l10n_es_tbai_crc8(tbai_id_no_crc)
             else:
                 record.l10n_es_tbai_id = ''  # record
 
