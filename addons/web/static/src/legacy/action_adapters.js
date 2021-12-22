@@ -8,12 +8,13 @@ import { useDebugCategory } from "../core/debug/debug_context";
 import { Dialog } from "../core/dialog/dialog";
 import { useEffect, useService } from "@web/core/utils/hooks";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
-import { cleanDomFromBootstrap, wrapSuccessOrFail } from "./utils";
+import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
 const { Component, useExternalListener, useComponent, xml } = owl;
 
 const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
+
 
 class ActionAdapter extends ComponentAdapter {
     setup() {
@@ -24,6 +25,8 @@ class ActionAdapter extends ComponentAdapter {
         this.notifications = useService("notification");
         this.dialogs = useService("dialog");
         this.wowlEnv = this.env;
+        const legacyRefs = useLegacyRefs();
+        legacyRefs.component = this;
         // a legacy widget widget can push_state anytime including during its async rendering
         // In Wowl, we want to have all states pushed during the same setTimeout.
         // This is protected in legacy (backward compatibility) but should not e supported in Wowl
@@ -31,9 +34,7 @@ class ActionAdapter extends ComponentAdapter {
         let originalUpdateControlPanel;
         useEffect(
             () => {
-                if (this.wowlEnv.inDialog) {
-                    this.wowlEnv.setLegacyControllerWidget(this.widget);
-                }
+                legacyRefs.widget = this.widget;
                 const query = this.widget.getState();
                 Object.assign(query, this.tempQuery);
                 this.tempQuery = null;
@@ -68,6 +69,12 @@ class ActionAdapter extends ComponentAdapter {
         );
         useExternalListener(window, "click", () => {
             cleanDomFromBootstrap();
+        });
+
+        owl.onWillUpdateProps(() => {
+            if (this.widget === null) {
+                this.widget = this.__widget;
+            }
         });
     }
 
@@ -173,6 +180,9 @@ class ActionAdapter extends ComponentAdapter {
             this.widget = null;
         }
         super.__destroy(...arguments);
+    }
+    get el() {
+        return (this.widget || this.__widget).el;
     }
 }
 

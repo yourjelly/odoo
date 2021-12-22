@@ -10,6 +10,8 @@
         "willUpdateProps",
     ];
 
+    const hashOwnProperty = Object.prototype.hasOwnProperty;
+
     owl.Component = class extends Component {
         constructor(...args) {
             super(...args);
@@ -32,8 +34,16 @@
         }
 
         get el() {
-            let bdom = this.__owl__.bdom;
-            return bdom && bdom.firstNode();
+            const bdom = this.__owl__.bdom;
+            if (!bdom) {
+                return null;
+            }
+
+            if (hasOwnProperty.call(bdom, "component")) {
+                return bdom.component.el;
+            } else {
+                return bdom.firstNode();
+            }
         }
 
         /**

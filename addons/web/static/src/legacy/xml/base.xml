@@ -430,7 +430,7 @@
         t-att-aria-label="sprintf(buttonLabel.toString(), view.type)"
         t-att-data-tooltip="view.name"
         tabindex="-1"
-        t-on-click="()=>() => this.trigger('switch-view', { view_type: view.type })"
+        t-on-click="() => this.trigger('switch-view', { view_type: view.type })"
     />
 </t>
 

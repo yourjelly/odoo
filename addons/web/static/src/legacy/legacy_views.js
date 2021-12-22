@@ -3,6 +3,7 @@ const { Component, useRef, xml } = owl;
 
 import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "../webclient/actions/action_hook";
+import { useLegacyRefs } from "./utils";
 import legacyViewRegistry from "web.view_registry";
 import { ViewAdapter } from "./action_adapters";
 import Widget from "web.Widget";
@@ -36,7 +37,6 @@ function registerView(name, LegacyView) {
     class Controller extends Component {
         setup() {
             this.vm = useService("view");
-            this.controllerRef = useRef("controller");
             this.Widget = Widget; // fool the ComponentAdapter with a simple Widget
             this.View = LegacyView;
             this.viewInfo = {};
@@ -86,14 +86,16 @@ function registerView(name, LegacyView) {
             if (this.props.mode) {
                 this.viewParams.mode = this.props.mode;
             }
+            const legacyRefs = useLegacyRefs();
             this.widget = this.props.state && this.props.state.__legacy_widget__;
+            legacyRefs.widget = this.widget;
             this.onReverseBreadcrumb =
                 this.props.state && this.props.state.__on_reverse_breadcrumb__;
-            // useSetupAction({
-            //     beforeLeave: () => this.controllerRef.comp.__widget.canBeRemoved(),
-            //     getGlobalState: () => getGlobalState(this.controllerRef.comp.exportState()),
-            //     getLocalState: () => getLocalState(this.controllerRef.comp.exportState()),
-            // });
+            useSetupAction({
+                beforeLeave: () => legacyRefs.widget.canBeRemoved(),
+                getGlobalState: () => getGlobalState(legacyRefs.component.exportState()),
+                getLocalState: () => getLocalState(legacyRefs.component.exportState()),
+            });
             this.onScrollTo = (ev) => {
                 setScrollPosition(this, { left: ev.detail.left, top: ev.detail.top });
             };
