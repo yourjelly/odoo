@@ -3,9 +3,10 @@
 
     const compiledTemplates = {};
 
-    const configure = App.prototype.configure;
-    App.prototype.configure = function () {
-        this.templates = compiledTemplates;
-        return configure.call(this, ...arguments);
+    owl.App = class extends App {
+        constructor() {
+            super(...arguments);
+            this.templates = compiledTemplates;
+        }
     };
 })();

@@ -519,9 +519,12 @@ odoo.define('web.OwlCompatibility', function (require) {
 
             this.Component = Component;
 
-            const app = new App();
+            const appConfig = {
+                env: owl.Component.env,
+                templates: window.__ODOO_TEMPLATES__,
+            };
+            const app = new App(null, appConfig);
             this.app = app;
-            this.app.configure({ env: owl.Component.env,  templates: window.__ODOO_TEMPLATES__ });
             this.node = this._makeOwlNode();
             this.env = this.node.component.env;
             app.root = this.node;
