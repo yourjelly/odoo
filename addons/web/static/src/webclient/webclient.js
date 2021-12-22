@@ -34,20 +34,26 @@ export class WebClient extends Component {
         this.localization = localization;
         this.title.setParts({ zopenerp: "Odoo" }); // zopenerp is easy to grep
         useBus(this.env.bus, "ROUTE_CHANGE", this.loadRouterState);
-        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", (mode) => {
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", ({detail: mode}) => {
             if (mode !== "new") {
-                document.body.classList.toggle("o_fullscreen", mode === "fullscreen");
+                this.el.classList.toggle("o_fullscreen", mode === "fullscreen");
             }
         });
         useEffect(
             () => {
+                const classList = this.el.classList;
+                classList.add("o_web_client");
+                if (this.localization.direction === "rtl") {
+                    classList.add("o_rtl");
+                }
+                if (this.user.userId === 1) {
+                    classList.add("o_is_superuser");
+                }
                 this.loadRouterState();
             },
             () => []
         );
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
-        // <div class="o_web_client" t-att-class="{'o_is_superuser': user.userId === 1, 'o_rtl': localization.direction === 'rtl' }">
-        // some useEffect to put on body the right classes???
         // useTooltip();
     }
 

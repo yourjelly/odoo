@@ -9,6 +9,7 @@ import {
     ConnectionLostError,
 } from "../core/network/rpc_service";
 import { ErrorDialog } from "../core/errors/error_dialogs";
+import { useBus, useEffect } from "@web/core/utils/hooks";
 
 export function makeLegacyRpcService(legacyEnv) {
     return {
@@ -310,4 +311,24 @@ export function makeLegacyRainbowManService(legacyEnv) {
             });
         },
     };
+}
+
+export function useLegacyRefs() {
+    const env = owl.useEnv();
+
+    let legacyRefs;
+    if (env.legacyRefs) {
+        legacyRefs = env.legacyRefs;
+    } else {
+        legacyRefs = {
+            component: null,
+            widget: null,
+        };
+    }
+
+    owl.useSubEnv({
+        legacyRefs,
+    });
+
+    return legacyRefs;
 }
