@@ -69,8 +69,8 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("actions can push state", async (assert) => {
         assert.expect(5);
         class ClientActionPushes extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.router = useService("router");
             }
             _actionPushState() {
@@ -98,8 +98,8 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("actions override previous state", async (assert) => {
         assert.expect(5);
         class ClientActionPushes extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.router = useService("router");
             }
             _actionPushState() {
@@ -128,8 +128,8 @@ QUnit.module("ActionManager", (hooks) => {
     QUnit.test("actions override previous state from menu click", async (assert) => {
         assert.expect(3);
         class ClientActionPushes extends Component {
-            constructor() {
-                super(...arguments);
+            setup() {
+                super.setup();
                 this.router = useService("router");
             }
             _actionPushState() {

@@ -2348,7 +2348,7 @@ QUnit.module("ActionManager", (hooks) => {
         class WarningDialogWait extends WarningDialog {
             setup() {
                 super.setup();
-                owl.hooks.onMounted(() => warningOpened.resolve());
+                owl.onMounted(() => warningOpened.resolve());
             }
         }
 
