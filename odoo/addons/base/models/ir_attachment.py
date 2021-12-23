@@ -391,7 +391,7 @@ class IrAttachment(models.Model):
     public = fields.Boolean('Is public document')
 
     # for external access
-    access_token = fields.Char('Access Token', groups="base.group_user")
+    access_token = fields.Char('Access Token', groups="base.group_user, base.group_portal")
 
     # the field 'datas' is computed and may use the other fields below
     raw = fields.Binary(string="File Content (raw)", compute='_compute_raw', inverse='_inverse_raw')
@@ -428,8 +428,15 @@ class IrAttachment(models.Model):
         """ Restricts the access to an ir.attachment, according to referred mode """
         if self.env.is_superuser():
             return True
+
+        has_access = True
+        if self.ids:
+            self.env['ir.attachment'].flush(['public', 'create_uid'])
+            self._cr.execute('SELECT public, create_uid FROM ir_attachment WHERE id IN %s', [tuple(self.ids)])
+            has_access = all(public or create_uid == self.env.uid for public, create_uid in self._cr.fetchall())
+
         # Always require an internal user (aka, employee) to access to a attachment
-        if not (self.env.is_admin() or self.env.user.has_group('base.group_user')):
+        if not (self.env.is_admin() or self.env.user.has_group('base.group_user') or has_access):
             raise AccessError(_("Sorry, you are not allowed to access this document."))
         # collect the records to check (by model)
         model_ids = defaultdict(set)            # {model_name: set(ids)}

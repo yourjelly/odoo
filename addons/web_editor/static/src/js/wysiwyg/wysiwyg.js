@@ -1612,7 +1612,7 @@ const Wysiwyg = Widget.extend({
                 description: 'Insert an image.',
                 fontawesome: 'fa-file-image-o',
                 callback: () => {
-                    this.openMediaDialog();
+                    this.openMediaDialog({noVideos: true, noImages: false, noIcons: false, noDocuments: true});
                 },
             },
             {
@@ -1627,6 +1627,13 @@ const Wysiwyg = Widget.extend({
         ];
         if (this.options.snippets) {
             commands.push(...this._getSnippetsCommands());
+        }
+        if (this.options.plugins) {
+            if ('LinkPlugin' in this.options.plugins && 'MediaPlugin' in this.options.plugins) {
+                return commands.filter(function(value, index, arr) {
+                    return ! ['Navigation', 'Medias'].includes(value.groupName);
+                });
+            }
         }
         return commands;
     },
