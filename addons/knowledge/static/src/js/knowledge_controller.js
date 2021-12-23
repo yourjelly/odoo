@@ -6,33 +6,23 @@ import FormController from 'web.FormController';
 const KnowledgeFormController = FormController.extend({
     events: Object.assign({}, FormController.prototype.events, {
         'click .btn-share': '_onShare',
+        'click .btn-create': '_onCreate',
     }),
 
     /**
      * @override
      */
-    renderButtons: function ($node) {
-        this._super.apply(this, arguments);
-        if (this.$buttons) {
-            const $container = this.$buttons.find('.o_form_buttons_view');
-            $container.append(this._renderShareButton());
-            $container.append(this._renderDropdownMenu());
-        }
-    },
-
-    /**
-     * @returns {HTMLElement} 
-     */
-    _renderShareButton: function () {
-        return QWeb.render('knowledge.share_button', {});
-    },
-
-    _renderDropdownMenu: function () {
-        return QWeb.render('knowledge.dropdown_button', {});
+    _setMode: function () {
+        console.log('_setMode', arguments)
+        return this._super.apply(this, arguments);
     },
 
     _onShare: function () {
         console.log('sharing the article', this);
+    },
+
+    _onCreate: function () {
+        console.log('creating a new article', this);
     },
 });
 

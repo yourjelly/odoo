@@ -7,11 +7,17 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         'click .fa': '_onDropdown'
     }),
 
+    init: function () {
+        console.log('calling init');
+        return this._super.apply(this, arguments);
+    },
+
     /**
      * @override
      * @returns {Promise}
      */
     start: function () {
+        console.log('calling start');
         return this._super.apply(this, arguments).then(() => {
             const aside = this.$el.find('.o_sidebar');
             this._rpc({
@@ -29,6 +35,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     init_sortable: function () {
         this.$el.find('.o_tree').nestedSortable({
+            axis: 'y',
             handle: 'div',
             items: 'li',
             listType: 'ul',
