@@ -86,16 +86,16 @@
                                                         <i class="fa fa-ellipsis-v"/>
                                                     </a>
                                                     <div class="dropdown-menu" role="menu">
-                                                        <a class="dropdown-item" href="#">
+                                                        <a class="dropdown-item btn-move" href="#">
                                                             <i class="fa fa-angle-double-right"/> Move To
                                                         </a>
-                                                        <a class="dropdown-item" href="#">
+                                                        <a class="dropdown-item btn-lock" href="#">
                                                             <i class="fa fa-lock"/> Lock
                                                         </a>
-                                                        <a class="dropdown-item" href="#">
+                                                        <a class="dropdown-item btn-duplicate" href="#">
                                                             <i class="fa fa-copy"/> Duplicate
                                                         </a>
-                                                        <a class="dropdown-item" href="#">
+                                                        <a class="dropdown-item btn-delete" href="#">
                                                             <i class="fa fa-trash"/> Delete
                                                         </a>
                                                     </div>

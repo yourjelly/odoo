@@ -26,6 +26,9 @@
             'knowledge/static/src/js/knowledge_model.js',
             'knowledge/static/src/js/knowledge_renderers.js',
             'knowledge/static/src/js/knowledge_views.js'
-        ]
+        ],
+        'web.assets_qweb': [
+            'knowledge/static/**/*',
+        ],
     }
 }
