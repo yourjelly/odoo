@@ -136,15 +136,12 @@ class PosGlobalState extends PosModel {
             },
         };
 
-        // Extract the config id from the url.
-        var given_config = new RegExp('[\?&]config_id=([^&#]*)').exec(window.location.href);
         // these dynamic attributes can be watched for change by other models or widgets
         Object.assign(this, {
             'synch':            { status:'connected', pending:0 },
             'orders':           new PosCollection(),
             'selectedOrder':    null,
             'selectedClient':   null,
-            'cashier':          null,
             'selectedCategoryId': null,
         });
     }
@@ -204,10 +201,10 @@ class PosGlobalState extends PosModel {
         this.partners = loadedData['res.partner'];
         this._loadResPartner();
         this.picking_type = loadedData['stock.picking.type'];
-        // this.user = loadedData['res.users'];  // TODO-REF: user is practically useless because not really used and can be interchanged with employee, maybe remove it
+        this.user = loadedData['res.users'];
         // this._loadResUsers();
-        this.employee = loadedData['res.users']; // todo-ref need to refactor employee and cashier later
-        this.cashier = loadedData['res.users'];
+        // this.employee = loadedData['res.users']; // todo-ref need to refactor employee and cashier later
+        // this.cashier = loadedData['res.users']; // todo-ref cashier is not really needed in normal point_of_sale
         this.pricelists = loadedData['product.pricelist'];
         this.default_pricelist = loadedData['default_pricelist'];
         this.bank_statement = loadedData['account.bank.statement'];
@@ -240,7 +237,7 @@ class PosGlobalState extends PosModel {
         this.db.add_partners(this.partners);
     }
     // _loadResUsers() {
-    //     this.employee.name = this.user.name;    // todo-ref: remove user, there's no diff with employee
+    //     this.employee.name = this.user.name;    // todo-ref: remove user, there's no diff with employee, nvm user is useful for point of sale
     //     this.employee.role = this.user.role;
     //     this.set_cashier(this.employee);
     // }
@@ -358,15 +355,22 @@ class PosGlobalState extends PosModel {
             }
         }
     }
-    // todo-ref useless, only called in pos_hr .....
-    // get_cashier(){
-    //     return this.cashier;
-    // }
+
+    /**
+     * Return the current cashier (in this case, the user)
+     * @returns {name: string, id: int, role: string}
+     */
+    get_cashier() {
+        return this.user;
+    }
+    get_cashier_user_id() {
+        return this.user.id;
+    }
     // set_cashier(employee){
     //     this.cashier = employee;
     // }
     cashierHasPriceControlRights() {
-        return !this.config.restrict_price_control || this.cashier.role == 'manager';
+        return !this.config.restrict_price_control || this.get_cashier().role == 'manager';
     }
     createAutomaticallySavedOrder(json) {
         const options = {pos:this};
@@ -2594,7 +2598,7 @@ class Order extends PosModel {
         this.orderlines     = new PosCollection();
         this.paymentlines   = new PosCollection();
         this.pos_session_id = this.pos.pos_session.id;
-        this.employee       = this.pos.employee;
+        this.employee       = this.pos.get_cashier();
         this.finalized      = false; // if true, cannot be modified.
         this.set_pricelist(this.pos.default_pricelist);
 

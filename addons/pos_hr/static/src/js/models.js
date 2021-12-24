@@ -32,6 +32,10 @@ models.load_models([{
 Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosHrPosModel extends PosGlobalState {
+    constructor(obj) {
+        super(obj);
+        this.cashier = null;
+    }
     async _processData(loadedData) {
         await super._processData(...arguments);
         if (this.config.module_pos_hr) {
@@ -39,26 +43,9 @@ class PosHrPosModel extends PosGlobalState {
             this.employee_by_id = loadedData['employee_by_id'];
         }
     }
-    after_load_server_data() {
-        var self = this;
-        var employee_ids = _.map(self.employees, function(employee){return employee.id;});
-        var records = pos_env.services.rpc({
-            model: 'hr.employee',
-            method: 'get_barcodes_and_pin_hashed',
-            args: [employee_ids],
-        });
-        return records.then(function (employee_data) {
-            self.employees.forEach(function (employee) {
-                var data = _.findWhere(employee_data, {'id': employee.id});
-                if (data !== undefined){
-                    employee.barcode = data.barcode;
-                    employee.pin = data.pin;
-                }
-            });
-        }).then(async () => {
-            await super.after_load_server_data(...arguments);
-            this.hasLoggedIn = !this.config.module_pos_hr;
-        });
+    async after_load_server_data() {
+        await super.after_load_server_data(...arguments);
+        this.hasLoggedIn = !this.config.module_pos_hr;
     }
     set_cashier(employee) {
         this.cashier = employee;
@@ -72,8 +59,22 @@ class PosHrPosModel extends PosGlobalState {
             this.PRODUCT_SCREEN.numpadMode = 'quantity';
         }
     }
-    get_cashier(){
-        return this.cashier;
+
+    /**{name: null, id: null, barcode: null, user_id:null, pin:null}
+     * If pos_hr is activated, return {name: string, id: int, barcode: string, pin: string, user_id: int}
+     * @returns {null|*}
+     */
+    get_cashier() {
+        if (this.config.module_pos_hr) {
+            return this.cashier;
+        }
+        return super.get_cashier();
+    }
+    get_cashier_user_id() {
+        if (this.config.module_pos_hr) {
+            return this.cashier.user_id ? this.cashier.user_id : null;
+        }
+        return super.get_cashier_user_id();
     }
 }
 
@@ -85,7 +86,7 @@ Registries.PosModelRegistry.extend(models.Order, (Order) => {
 class PosHrOrder extends Order {
     constructor(obj, options) {
         super(...arguments);
-        if (!options.json) {
+        if (!options.json && this.pos.config.module_pos_hr) {
             this.employee = this.pos.get_cashier();
         }
     }

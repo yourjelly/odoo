@@ -3,7 +3,7 @@
 
 from odoo import models
 from itertools import groupby
-from odoo.osv.expression import AND, OR
+from odoo.osv.expression import AND
 
 class PosSession(models.Model):
     _inherit = 'pos.session'

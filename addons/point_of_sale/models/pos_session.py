@@ -1653,8 +1653,12 @@ class PosSession(models.Model):
     def _get_pos_ui_res_company(self, params):
         company = self.env['res.company'].search_read(**params['search_params'])[0]
         params = self._loader_params_res_country()
-        params['search_params']['domain'] = [('id', '=', company['country_id'][0])]    #todo-ref this is redundant we have country_id and country
-        company['country'] = self.env['res.country'].search_read(**params['search_params'])[0]
+        if company['country_id']:
+            params['search_params']['domain'] = [('id', '=', company['country_id'][0])]    #todo-ref this is redundant we have country_id and country
+            company['country'] = self.env['res.country'].search_read(**params['search_params'])[0]
+        else:
+            company['country'] = None
+
         return company
 
     def _loader_params_decimal_precision(self):
@@ -1772,13 +1776,13 @@ class PosSession(models.Model):
         return {
             'search_params': {
                 'domain': [('id', '=', self.env.user.id)],
-                'fields': ['name', 'id', 'groups_id'],
+                'fields': ['name', 'groups_id'],
             },
         }
 
     def _get_pos_ui_res_users(self, params):
         user = self.env['res.users'].search_read(**params['search_params'])[0]
-        user['role'] = 'manager' if any(lambda: id == self.config_id.group_pos_manager_id.id for id in user['groups_id']) else 'cashier'
+        user['role'] = 'manager' if any(id == self.config_id.group_pos_manager_id.id for id in user['groups_id']) else 'cashier'
         del user['groups_id']
         return user
 
@@ -1948,7 +1952,7 @@ class PosSession(models.Model):
         # todo-ref tbh we don't really need the params
         domain = [('attribute_id', 'in', product_attributes.mapped('id'))]
         product_template_attribute_values = self.env['product.template.attribute.value'].search(domain)
-        key = lambda ptav:(ptav.attribute_line_id.id, ptav.attribute_id.id)
+        key = lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
         res = {}
         for key, group in groupby(sorted(product_template_attribute_values, key=key), key=key):
             attribute_line_id, attribute_id = key

@@ -12,6 +12,6 @@ class PosSession(models.Model):
 
     def _loader_params_product_product(self):
         meta = super()._loader_params_product_product()
-        meta['search_params']['domain'] = OR([result['search_params']['domain'], [('id', '=', self.config_id.down_payment_product_id.id)]])
+        meta['search_params']['domain'] = OR([meta['search_params']['domain'], [('id', '=', self.config_id.down_payment_product_id.id)]])
         meta['search_params']['fields'].extend(['invoice_policy', 'type'])
         return meta
