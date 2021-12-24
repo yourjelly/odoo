@@ -25,10 +25,16 @@ class KnowledgeDataSet(DataSet):
             return "missing article"  # The article before which you want to move your article does not exist anymore
 
         article = Article.browse(article_id)
-        article.write({
-            'parent_id': target_parent_id,
-            'sequence': before_article.sequence
-        })
+        if before_article:
+            article.write({
+                'parent_id': target_parent_id,
+                'sequence': before_article.sequence
+            })
+        else:
+            # TODO:
+            article.write({
+                'parent_id': target_parent_id
+            })
         return True
 
     @http.route('/knowledge/article/<int:article_id>/delete', type='json', auth="user")

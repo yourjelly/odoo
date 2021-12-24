@@ -16,15 +16,30 @@ const KnowledgeFormController = FormController.extend({
 
     // Listeners:
 
-    _onDelete: function () {
-        console.log('deleting the current article', this);  
+    _onDelete: async function () {
+        const { id } = this.getState();
+        const result = await this._rpc({
+            route: `/knowledge/article/${id}/delete` 
+        });
+        console.log('result', result);
     },
 
-    _onDuplicate: function () {
-        console.log('duplicating the article', this);
+    _onDuplicate: async function () {
+        const { id } = this.getState();
+        const result = await this._rpc({
+            route: `/knowledge/article/${id}/duplicate`
+        });
+        console.log('result', result);
     },
 
-    _onCreate: function () {
+    _onCreate: async function () {
+        const result = await this._rpc({
+            route: `/knowledge/article/create`,
+            params: {
+                title: 'New file'
+            }
+        });
+        console.log('result', result);
         console.log('creating a new article', this);
     },
 

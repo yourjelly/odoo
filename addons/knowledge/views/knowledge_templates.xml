@@ -37,7 +37,7 @@
     </template>
 
     <template id="article_template">
-        <li t-attf-id="article_#{article.id}">
+        <li t-attf-id="article_#{article.id}" class="article" t-att-data-article-id="article.id">
             <div class="d-flex">
                 <i class="fa fa-fw fa-caret-down align-self-center"/>
                 <span t-out="article.name"/>

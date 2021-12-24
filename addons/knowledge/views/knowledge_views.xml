@@ -63,15 +63,18 @@
                                 <div class="d-flex flex-column h-100">
                                     <!-- Article header -->
                                     <div class="d-sm-flex flex-row justify-content-between">
-                                        <!-- Breadcrumbs -->
-                                        <ol class="breadcrumb p-3" role="navigation">
-                                            <li class="breadcrumb-item">
-                                                <a href="#">Articles</a>
-                                            </li>
-                                            <li class="breadcrumb-item active">
-                                                <span class="text-muted">Article 1</span>
-                                            </li>
-                                        </ol>
+                                        <div class="d-flex align-items-center">
+                                            <!-- Breadcrumbs -->
+                                            <ol class="breadcrumb p-3" role="navigation">
+                                                <li class="breadcrumb-item">
+                                                    <a href="#">Articles</a>
+                                                </li>
+                                                <li class="breadcrumb-item active">
+                                                    <span class="text-muted">Article 1</span>
+                                                </li>
+                                            </ol>
+                                            <field name="is_user_favourite" class="m-0" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                        </div>
                                         <!-- Buttons -->
                                         <div>
                                             <a type="button" role="button" class="btn btn-secondary btn-create">
@@ -175,7 +178,13 @@
         <field name="view_mode">form</field>
         <field name="target">inline</field>
         <field name="view_id" ref="knowledge.knowledge_article_view_dashboard"/>
-        <field name="context">{'id': 2}</field>
+    </record>
+
+    <record id="action_show_article" model="ir.actions.server">
+        <field name="name">Articles</field>
+        <field name="model_id" ref="model_knowledge_article"/>
+        <field name="state">code</field>
+        <field name="code">action = model.show_article()</field>
     </record>
 
     <menuitem
@@ -195,6 +204,6 @@
         id="knowledge_menu_dashboard"
         name="Dashboard"
         parent="knowledge_menu_root"
-        action="knowledge.knowledge_article_dashboard_action"
+        action="knowledge.action_show_article"
         sequence="2"/>
 </odoo>

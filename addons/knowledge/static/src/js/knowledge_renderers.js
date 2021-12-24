@@ -4,7 +4,8 @@ import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
     events: _.extend({}, FormRenderer.prototype.events, {
-        'click .fa': '_onDropdown'
+        'click .fa': '_onDropdown',
+        'click .article': '_onOpen',
     }),
 
     init: function () {
@@ -25,7 +26,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 params: {}
             }).then(res => {
                 aside.html(res);
-                this.init_sortable();
+                this.createTree();
             }).catch(error => {
                 console.log('error', error);
                 aside.empty();
@@ -33,7 +34,7 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         });
     },
 
-    init_sortable: function () {
+    createTree: function () {
         this.$el.find('.o_tree').nestedSortable({
             axis: 'y',
             handle: 'div',
@@ -44,23 +45,41 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             opacity: 0.6,
             placeholder: 'o_placeholder',
             tolerance: 'pointer',
-            relocate: event => {
-                const $target = $(event.target);
-                const hierarchy = $target.nestedSortable('toHierarchy');
-                console.log('Hierarchy', hierarchy);
-                this._refreshIcons($target);
+            helper: 'clone',
+            /**
+             * @param {Event} event 
+             * @param {Object} ui 
+             */
+            relocate: async (event, ui) => {
+                const $li = $(ui.item);
+                const key = 'article-id';
+                const params = {};
+                const $parent = $li.parents('li');
+                if ($parent.length !== 0) {
+                    params.target_parent_id = $parent.data(key);
+                }
+                const $sibling = $li.next();
+                if ($sibling.length !== 0) {
+                    params.before_article_id = $sibling.data(key);
+                }
+                await this._rpc({
+                    route: `/knowledge/article/${$li.data(key)}/move`,
+                    params
+                });
+                const $tree = $(event.target);
+                this._refreshIcons($tree);
             }
         });
 
         // We set the listeners:
 
-        this.$el.find('.o_tree').on('sortreceive', (event, ui) => {
-            console.log('receive event', event, 'ui', ui);
-        });
+        // this.$el.find('.o_tree').on('sortreceive', (event, ui) => {
+        //     console.log('receive event', event, 'ui', ui);
+        // });
 
-        this.$el.find('.o_tree').on('sortremove', (event, ui) => {
-            console.log('remove event', event, 'ui', ui);
-        });
+        // this.$el.find('.o_tree').on('sortremove', (event, ui) => {
+        //     console.log('remove event', event, 'ui', ui);
+        // });
 
         // We connect the trees:
 
@@ -95,6 +114,20 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 $icon.addClass('fa-caret-right');
             }
         }
+    },
+
+    /**
+     * Opens the selected record.
+     * @param {Event} event
+     */
+    _onOpen: async function (event) {
+        event.stopPropagation();
+        const $li = $(event.target).closest('li');
+        this.do_action('knowledge.action_show_article', {
+            additional_context: {
+                res_id: $li.data('article-id')
+            }
+        });
     },
 
     /**
