@@ -3,6 +3,7 @@
     <record id="partner_demo_company_pe" model="res.partner">
         <field name="name">PE Company</field>
         <field name="vat">10071037199</field>
+        <field name="l10n_latam_identification_type_id" ref="l10n_pe.it_RUC"/>
         <field name="street">Calle Las Tortugas</field>
         <field name="city">Chorrillos</field>
         <field name="country_id" ref="base.pe"/>
