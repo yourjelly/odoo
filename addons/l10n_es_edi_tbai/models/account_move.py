@@ -8,8 +8,8 @@ from re import sub as regex_sub
 
 from lxml import etree
 from odoo import api, fields, models
-from odoo.tools import html_escape
 from pytz import timezone
+from werkzeug.urls import url_quote
 
 from .crc8 import l10n_es_tbai_crc8
 
@@ -88,14 +88,7 @@ class AccountMove(models.Model):
     @api.depends('l10n_es_tbai_qr')
     def _compute_l10n_es_tbai_qr_escaped(self):
         for record in self:
-            record.l10n_es_tbai_qr_escaped = html_escape(record.l10n_es_tbai_qr)
-            # record.l10n_es_tbai_qr = company.l10n_es_tbai_url_qr + '?' + url_encode([
-            #     ('id', record.l10n_es_tbai_id),
-            #     ('s', record.l10n_es_tbai_sequence),
-            #     ('nf', record.l10n_es_tbai_number),
-            #     ('i', record._get_l10n_es_tbai_values_from_zip({'importe': r'.//ImporteTotalFactura'})['importe']),
-            #     ('cr', l10n_es_tbai_crc8(tbai_qr_no_crc)),
-            # ])
+            record.l10n_es_tbai_qr_escaped = url_quote(record.l10n_es_tbai_qr)
 
     def _get_l10n_es_tbai_values_from_zip(self, xpaths, response=False):
         res = {key: '' for key in xpaths.keys()}

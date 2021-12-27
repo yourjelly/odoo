@@ -2,8 +2,9 @@
 <odoo>
     <template id="l10n_es_tbai_external_layout_standard" inherit_id="account.report_invoice_document">
         <xpath expr="//div[@id='qrcode']" position="after">
-            <img t-if="o.l10n_es_tbai_is_required" style="display:block;margin:10% auto 0 auto;border: 10px solid white" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;humanreadable=%s'%('QR', o.l10n_es_tbai_qr_escaped, 125, 125, 0)"/>
-            <!-- <img t-if="o.l10n_es_tbai_is_required" style="display:block;margin:10% auto 0 auto;width:150px;height:150px;" t-att-src="'/report/barcode/QR/' + o.l10n_es_tbai_qr"/> -->
+            <img t-if="o.l10n_es_tbai_is_required" style="display:block;margin:10% auto 0 auto;border: 10px solid white" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'%('QR', o.l10n_es_tbai_qr_escaped, 125, 125)"/>
+            <t t-if="o.l10n_es_tbai_is_required" t-out="o.l10n_es_tbai_qr"/>
+            <!-- Sizes assume a 90 dpi resolution -->
         </xpath>
     </template>
 </odoo>
