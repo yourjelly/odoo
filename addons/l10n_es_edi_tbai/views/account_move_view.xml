@@ -18,6 +18,7 @@
                                 <field name="l10n_es_tbai_signature" style="word-break: break-word;" class="oe_readonly"/>
                                 <field name="l10n_es_tbai_registration_date" class="oe_readonly"/>
                                 <field name="l10n_es_tbai_qr" class="oe_readonly"/>
+                                <field name="l10n_es_tbai_qr_escaped" class="oe_readonly"/> <!-- TODO remove -->
                             </group>
                         </sheet>
                     </page>

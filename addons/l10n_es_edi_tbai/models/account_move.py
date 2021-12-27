@@ -8,6 +8,7 @@ from re import sub as regex_sub
 
 from lxml import etree
 from odoo import api, fields, models
+from odoo.tools import html_escape
 from pytz import timezone
 
 from .crc8 import l10n_es_tbai_crc8
@@ -35,6 +36,7 @@ class AccountMove(models.Model):
         compute="_compute_l10n_es_tbai_values"
     )
     l10n_es_tbai_qr = fields.Char(string="QR code to verify posted invoice", compute="_compute_l10n_es_tbai_qr")
+    l10n_es_tbai_qr_escaped = fields.Char(string="QR code, escaped", compute="_compute_l10n_es_tbai_qr_escaped")
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -82,6 +84,18 @@ class AccountMove(models.Model):
                 record.l10n_es_tbai_qr = tbai_qr_no_crc + '&cr=' + l10n_es_tbai_crc8(tbai_qr_no_crc)
             else:
                 record.l10n_es_tbai_qr = ''
+
+    @api.depends('l10n_es_tbai_qr')
+    def _compute_l10n_es_tbai_qr_escaped(self):
+        for record in self:
+            record.l10n_es_tbai_qr_escaped = html_escape(record.l10n_es_tbai_qr)
+            # record.l10n_es_tbai_qr = company.l10n_es_tbai_url_qr + '?' + url_encode([
+            #     ('id', record.l10n_es_tbai_id),
+            #     ('s', record.l10n_es_tbai_sequence),
+            #     ('nf', record.l10n_es_tbai_number),
+            #     ('i', record._get_l10n_es_tbai_values_from_zip({'importe': r'.//ImporteTotalFactura'})['importe']),
+            #     ('cr', l10n_es_tbai_crc8(tbai_qr_no_crc)),
+            # ])
 
     def _get_l10n_es_tbai_values_from_zip(self, xpaths, response=False):
         res = {key: '' for key in xpaths.keys()}
