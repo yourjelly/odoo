@@ -561,11 +561,10 @@ class AccountEdiFormat(models.Model):
         # Get connection data
         url = company.l10n_es_tbai_url_cancel if cancel else company.l10n_es_tbai_url_invoice
         header = {"Content-Type": "application/xml; charset=UTF-8"}
-        cert_file = company.l10n_es_tbai_certificate_id.get_file()
-        password = company.l10n_es_tbai_certificate_id.get_password()
+        cert_file = company.l10n_es_tbai_certificate_id
 
         # Post and retrieve response
-        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, pkcs12_password=password, timeout=30)
+        response = post(url=url, data=xml_str, headers=header, pkcs12_data=cert_file, timeout=30)
         data = response.content.decode(response.encoding)
 
         # Error management
