@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields, models, api
-
+from odoo.tools import float_repr
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
@@ -15,6 +15,11 @@ class AccountMove(models.Model):
             return 'l10n_gcc_invoice.arabic_english_invoice'
         return super()._get_name_invoice_report()
 
+    def _get_gcc_currency_rate(self):
+        self.ensure_one()
+        if self.amount_total > 0:
+            return float_repr(abs(self.amount_total) / abs(self.amount_total_signed), 6)
+        return False
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'

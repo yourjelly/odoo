@@ -444,6 +444,25 @@
 
                     </div>
                 </p>
+
+                <p t-if="o.currency_id != o.company_id.currency_id">
+                    <div class="row" >
+                        <div class="col-6 text-left">
+                            Currency Rate:
+                            <b>
+                                <span t-esc="o._get_gcc_currency_rate()"/>
+                            </b>
+                        </div>
+                        <div class="col-6 text-right">
+                            <p>
+                                <b>
+                                    <span t-esc="o._get_gcc_currency_rate()"/> :
+                                </b>سعر الصرف
+                            </p>
+                        </div>
+                    </div>
+                </p>
+
                 <p t-if="o.narration" name="comment">
                     <div class="row">
                         <div class="col-6 text-left">
