@@ -190,6 +190,7 @@ class MassMailing(models.Model):
         related="campaign_id.ab_testing_winner_selection", readonly=False,
         default="opened_ratio",
         copy=True)
+    is_ab_test_sent = fields.Boolean(compute="_compute_is_ab_test_sent")
     kpi_mail_required = fields.Boolean('KPI mail required', copy=False)
     # statistics data
     mailing_trace_ids = fields.One2many('mailing.trace', 'mass_mailing_id', string='Emails Statistics')
@@ -443,6 +444,16 @@ class MassMailing(models.Model):
                 'mass_mailing.ab_testing_description',
                 mailing._get_ab_testing_description_values()
             )
+
+    @api.depends('campaign_id.mailing_mail_ids.state')
+    def _compute_is_ab_test_sent(self):
+        for rec in self:
+            ab_testing_mailings = rec._get_ab_testing_siblings_mailings().sudo()
+            selected_mailings = ab_testing_mailings.filtered(lambda m: m.state == 'done')
+            if selected_mailings:
+                rec.is_ab_test_sent = True
+            else:
+                rec.is_ab_test_sent = False
 
     def _get_ab_testing_description_modifying_fields(self):
         return ['ab_testing_enabled', 'ab_testing_pc', 'ab_testing_schedule_datetime', 'ab_testing_winner_selection', 'campaign_id']
@@ -846,6 +857,7 @@ class MassMailing(models.Model):
         other_ab_testing_pc = sum([mailing.ab_testing_pc for mailing in other_ab_testing_mailings])
         return {
             'mailing': self,
+            'ab_testing_count': self.ab_testing_mailings_count,
             'ab_testing_winner_selection_description': self._get_ab_testing_winner_selection()['description'],
             'other_ab_testing_pc': other_ab_testing_pc,
             'remaining_ab_testing_pc': 100 - (other_ab_testing_pc + self.ab_testing_pc),
