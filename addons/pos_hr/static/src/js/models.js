@@ -4,30 +4,6 @@ odoo.define('pos_hr.employees', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-models.load_models([{
-    model:  'hr.employee',
-    // loaded: function(self, employees) {
-    //     if (self.config.module_pos_hr) {
-    //         self.employees = employees;
-    //         self.employee_by_id = {};
-    //         // self.employees.forEach(function(employee) {
-    //         //     self.employee_by_id[employee.id] = employee;
-    //         //     // todo-ref can do this in the back end so no need to provide all the users in point_of_sale
-    //         //     var hasUser = self.users.some(function(user) {
-    //         //         if (user.id === employee.user_id[0]) {
-    //         //             employee.role = user.role;
-    //         //             return true;
-    //         //         }
-    //         //         return false;
-    //         //     });
-    //         //     if (!hasUser) {
-    //         //         employee.role = 'cashier';
-    //         //     }
-    //         // });
-    //     }
-    // }
-}]);
-
 Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosHrPosModel extends PosGlobalState {

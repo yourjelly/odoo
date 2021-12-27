@@ -6,41 +6,6 @@ var pos_env = require('point_of_sale.env');
 const { Gui } = require('point_of_sale.Gui');
 const Registries = require('point_of_sale.Registries');
 
-// At POS Startup, load the floors, and add them to the pos model
-models.load_models({
-    model: 'restaurant.floor',
-    // loaded: function(self,floors){
-    //     self.floors = floors;
-    //     self.floors_by_id = {};
-    //     for (var i = 0; i < floors.length; i++) {
-    //         floors[i].tables = [];
-    //         self.floors_by_id[floors[i].id] = floors[i];
-    //     }
-    //
-    //     // Make sure they display in the correct order
-    //     // self.floors = self.floors.sort(function(a,b){ return a.sequence - b.sequence; });
-    //
-    //     // Ignore floorplan features if no floor specified.
-    //     self.config.iface_floorplan = !!self.floors.length;
-    // },
-});
-
-// At POS Startup, after the floors are loaded, load the tables, and associate
-// them with their floor.
-models.load_models({
-    // model: 'restaurant.table',
-    // loaded: function(self,tables){
-    //     self.tables_by_id = {};
-    //     for (var i = 0; i < tables.length; i++) {
-    //         self.tables_by_id[tables[i].id] = tables[i];
-    //         var floor = self.floors_by_id[tables[i].floor_id[0]];
-    //         if (floor) {
-    //             floor.tables.push(tables[i]);
-    //             tables[i].floor = floor;
-    //         }
-    //     }
-    // },
-});
 
 // New orders are now associated with the current table, if any.
 Registries.PosModelRegistry.extend(models.Order, (Order) => {

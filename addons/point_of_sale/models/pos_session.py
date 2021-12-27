@@ -1624,7 +1624,6 @@ class PosSession(models.Model):
             'res.users',
             'product.pricelist',
             'account.bank.statement',
-            # 'product.pricelist.item', todo-ref to remove because it's inside product pricelist loader
             'product.category',
             'res.currency',
             'pos.category',
@@ -1666,8 +1665,6 @@ class PosSession(models.Model):
 
     def _get_pos_ui_decimal_precision(self, params):
         decimal_precisions = self.env['decimal.precision'].search_read(**params['search_params'])
-        # todo-ref find rule for special case such as this one. we're not giving a list or a dict of `decimal.precision`
-        # instead we're giving a customized one.
         return {dp['name']: dp['digits'] for dp in decimal_precisions}
 
     def _loader_params_uom_uom(self):
@@ -1766,13 +1763,6 @@ class PosSession(models.Model):
         return self.env['stock.picking.type'].search_read(**params['search_params'])[0]
 
     def _loader_params_res_users(self):
-        # todo-ref: i keep this just in case but remove if not needed
-        # domain = [
-        #     ('company_ids', 'in', self.config_id.company_id.id),
-        #     '|',
-        #     ('groups_id', '=', self.config_id.group_pos_manager_id.id),
-        #     ('groups_id', '=', self.config_id.group_pos_user_id.id),
-        # ]
         return {
             'search_params': {
                 'domain': [('id', '=', self.env.user.id)],
@@ -1814,17 +1804,6 @@ class PosSession(models.Model):
 
     def _get_pos_ui_account_bank_statement(self, params):
         return self.env['account.bank.statement'].search_read(**params['search_params'])
-
-    # TODO-REF: deleted this because it's inside pricelist
-    # def _loader_params_product_pricelist_item(self):
-    #     loaded_data = self._context.get('loaded_data')
-    #     return {
-    #         'domain': [('pricelist_id', 'in', [p['id'] for p in loaded_data['product.pricelist']])],
-    #         'fields': [],
-    #     }
-    #
-    # def _get_pos_ui_product_pricelist_item(self, params):
-    #     return self.env['product.pricelist.item'].search_read(params['domain'], params['fields'])
 
     def _loader_params_product_category(self):
         return {'search_params': {'domain': [], 'fields': ['name', 'parent_id']}}
@@ -1919,39 +1898,13 @@ class PosSession(models.Model):
     def _get_pos_ui_product_packaging(self, params):
         return self.env['product.packaging'].search_read(**params['search_params'])
 
-    # TODO-REF: those are inside the product_template_attribute_value loader
-    # def _loader_params_product_attribute(self):
-    #     return {'domain': [('create_variant', '=', 'no_variant')], 'fields': ['name', 'display_type']}
-    #
-    # def _get_pos_ui_product_attribute(self, params):
-    #     return self.env['product.attribute'].search_read(params['domain'], params['fields'])
-    #
-    # def _loader_params_product_attribute_value(self):
-    #     loaded_data = self._context.get('loaded_data')
-    #     attributes = loaded_data['product.attribute']
-    #     return {
-    #         'domain': [('attribute_id', 'in', [attr['id'] for attr in attributes])],
-    #         'fields': ['name', 'attribute_id', 'is_custom', 'html_color'],
-    #     }
-    #
-    # def _get_pos_ui_product_attribute_value(self, params):
-    #     return self.env['product.attribute.value'].search_read(params['domain'], params['fields'])
-
     def _loader_params_product_template_attribute_value(self):
-        # loaded_data = self._context.get('loaded_data')
-        # attributes = loaded_data['product.attribute']
-        # return {
-        #     'domain': [('attribute_id', 'in', [attr['id'] for attr in attributes])],
-        #     'fields': ['product_attribute_value_id', 'attribute_id', 'attribute_line_id', 'price_extra'],
-        # }
         # todo-ref: this is a special case since we don't really need a field or domain from this loader, see function below
         return {}
 
     def _get_pos_ui_product_template_attribute_value(self, params):
         product_attributes = self.env['product.attribute'].search([('create_variant', '=', 'no_variant')])
         product_attributes_by_id = {product_attribute.id: product_attribute for product_attribute in product_attributes}
-        # product_attribute_values = self.env['product.attribute.value'].search([('attribute_id', 'in', product_attributes.mapped('id'))])
-        # pav_by_ids = {product_attribute_value.id: product_attribute_value for product_attribute_value in product_attribute_values}
         # todo-ref tbh we don't really need the params
         domain = [('attribute_id', 'in', product_attributes.mapped('id'))]
         product_template_attribute_values = self.env['product.template.attribute.value'].search(domain)
