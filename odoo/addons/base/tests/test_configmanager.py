@@ -148,7 +148,6 @@ class TestConfigManager(TransactionCase):
 
             # advanced
             'dev_mode': [],
-            'shell_interface': '',
             'stop_after_init': False,
             'osv_memory_count_limit': 0,
             'transient_age_limit': 1.0,
@@ -379,7 +378,6 @@ class TestConfigManager(TransactionCase):
             'language': None,
             'publisher_warranty_url': 'http://services.odoo.com/publisher-warranty/',
             'save': False,
-            'shell_interface': '',
             'stop_after_init': False,
             'translate_in': '',
             'translate_out': '',
