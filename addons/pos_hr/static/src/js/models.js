@@ -3,7 +3,6 @@ odoo.define('pos_hr.employees', function (require) {
 
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
-var pos_env = require('point_of_sale.env');
 
 models.load_models([{
     model:  'hr.employee',

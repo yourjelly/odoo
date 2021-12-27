@@ -29,11 +29,11 @@ class PosSession(models.Model):
 
     def _get_pos_ui_hr_employee(self, params):
         employees = self.env['hr.employee'].search_read(**params['search_params'])
-        user_ids = [employee['user_id'] for employee in employees if employee['user_id']]
-        manager_ids = self.env['res.users'].browse(user_ids).filtered(lambda user: self.config_id.group_pos_manager_id in user.groups_ids).mapped('id')
-
         employee_ids = [employee['id'] for employee in employees]
-        employees_barcode_pin = self.env['hr.employee'].get_barcodes_and_pin_hashed(employee_ids)
+        user_ids = [employee['user_id'] for employee in employees if employee['user_id']]
+        manager_ids = self.env['res.users'].browse(user_ids).filtered(lambda user: self.config_id.group_pos_manager_id in user.groups_id).mapped('id')
+
+        employees_barcode_pin = self.env['hr.employee'].browse(employee_ids).get_barcodes_and_pin_hashed()
         bp_per_employee_id = {bp_e['id']: bp_e for bp_e in employees_barcode_pin}
         for employee in employees:
             employee['role'] = 'manager' if employee['user_id'] and employee['user_id'] in manager_ids else 'cashier'

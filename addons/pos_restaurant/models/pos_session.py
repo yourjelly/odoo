@@ -30,7 +30,7 @@ class PosSession(models.Model):
         floor_ids = [floor['id'] for floor in floors]
 
         table_params = self._loader_params_restaurant_table()
-        table_params['search_params']['domain'] = AND(table_params['search_params']['domain'], ['floor_id', 'in', floor_ids])
+        table_params['search_params']['domain'] = AND([table_params['search_params']['domain'], [('floor_id', 'in', floor_ids)]])
         tables = self.env['restaurant.table'].search(table_params['search_params']['domain'], order='floor_id')
         tables_by_floor_id = {}
         for floor_id, table_group in groupby(tables, key=lambda table: table.floor_id):

@@ -13,14 +13,16 @@ Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 class PosResMultiprintPosModel extends PosGlobalState {
     async _processData(loadedData) {
         await super._processData(...arguments);
-        this._loadRestaurantPrinter(loadedData['restaurant.printer']);
+        if (this.config.module_pos_restaurant) {
+            this._loadRestaurantPrinter(loadedData['restaurant.printer']);
+        }
     }
     _loadRestaurantPrinter(printers) {
         this.printers = [];
         // list of product categories that belong to one or more order printer
         this.printers_categories_set = new Set();
         for (let printerConfig of printers) {
-            let printer = self.create_printer(printerConfig);
+            let printer = this.create_printer(printerConfig);
             printer.config = printerConfig;
             this.printers.push(printer);
             for (let id of printer.config.product_categories_ids) {

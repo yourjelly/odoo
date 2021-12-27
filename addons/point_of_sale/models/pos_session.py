@@ -1604,7 +1604,7 @@ class PosSession(models.Model):
 
         fiscal_position_by_id = {fpt['id']: fpt for fpt in loaded_data['account.fiscal.position.tax']}
         for fiscal_position in loaded_data['account.fiscal.position']:
-            fiscal_position.fiscal_position_taxes_by_id = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}
+            fiscal_position['fiscal_position_taxes_by_id'] = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}
 
     @api.model
     def _pos_ui_models_to_load(self):
@@ -1796,13 +1796,16 @@ class PosSession(models.Model):
     def _get_pos_ui_product_pricelist(self, params):
         pricelists = self.env['product.pricelist'].search_read(**params['search_params'])
         for pricelist in pricelists:
-            pricelist['item'] = []
+            pricelist['items'] = []
 
         pricelist_by_id = {pricelist['id']: pricelist for pricelist in pricelists}
         pricelist_item_domain = [('pricelist_id', 'in', [p['id'] for p in pricelists])]
         for item in self.env['product.pricelist.item'].search_read(pricelist_item_domain, []):
             pricelist_by_id[item['pricelist_id'][0]]['items'].append(item)
-            item['base_pricelist'] = pricelist_by_id[item['base_pricelist_id'][0]]
+            if item.get('base_pricelist_id') and pricelist_by_id.get(item['base_pricelist_id'][0]):
+                item['base_pricelist'] = pricelist_by_id.get(item['base_pricelist_id'][0])
+            else:
+                item['base_pricelist'] = None
 
         return pricelists
 
