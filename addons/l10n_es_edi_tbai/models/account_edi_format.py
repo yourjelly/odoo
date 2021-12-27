@@ -75,7 +75,6 @@ class AccountEdiFormat(models.Model):
         inv_xml = self._l10n_es_tbai_get_invoice_xml(invoice)
 
         # Call the web service and get response
-        signature = self._l10n_es_tbai_sign_invoice(invoice, inv_xml)
         res = self._l10n_es_tbai_post_to_web_service(invoice, inv_xml)
 
         # Get TicketBai response
@@ -157,7 +156,6 @@ class AccountEdiFormat(models.Model):
         print(etree.tostring(cancel_xml))
 
         # Call the web service and get response
-        signature = self._l10n_es_tbai_sign_invoice(invoice, cancel_xml)
         res = self._l10n_es_tbai_post_to_web_service(invoice, cancel_xml, cancel=True)
 
         # Get TicketBai response
@@ -215,6 +213,7 @@ class AccountEdiFormat(models.Model):
         values.update(self._l10n_es_tbai_get_trail_values(invoice, cancel))
         xml_str = self.env.ref('l10n_es_edi_tbai.template_invoice_main')._render(values)
         xml_doc = etree.fromstring(xml_str, etree.XMLParser(compact=True, remove_blank_text=True, remove_comments=True))
+        self._l10n_es_tbai_sign_invoice(invoice, xml_doc)
 
         return xml_doc
 
@@ -492,43 +491,9 @@ class AccountEdiFormat(models.Model):
             }
 
     def _l10n_es_tbai_sign_invoice(self, invoice, xml_root):
-        """
-        Sign XML with PKCS #12
-        :param invoice: invoice to sign
-        :param root: XML representation of that invoice
-        :return: SignatureValue
-        """
-
         self.ensure_one()
         company = invoice.company_id
         cert_private, cert_public = company.l10n_es_tbai_certificate_id.get_key_pair()
-
-        def create_node_tree(root_node, elem_list):
-            """Convierte a list to XML.
-
-            Each element e from the list is interpreted as follows:
-
-            If e is a string, it will be added to the loose text of the root node
-            Otherwise, e must is an iterable that defines a new element as such:
-                e[0]  is the name of the element to create, which may contain a namespace prefix
-                e[1]  is the list of its attributes, where evens are keys and odds are values
-                e[2:] are its sub-elements, interpreted recursively (depth-first)
-            """
-            for elem_def in elem_list:
-                if isinstance(elem_def, str):
-                    root_node.text = (root_node.text or "") + elem_def
-                else:
-                    ns = ""
-                    elemname = elem_def[0]
-                    attrs = elem_def[1]
-                    children = elem_def[2:]
-                    if ":" in elemname:
-                        ns, elemname = elemname.split(":")
-                        ns = root_node.nsmap[ns]
-                    node = xmlsig.utils.create_node(elemname, root_node, ns)
-                    for attr_name, attr_value in zip(attrs[::2], attrs[1::2]):
-                        node.set(attr_name, attr_value)
-                    create_node_tree(node, children)
 
         doc_id = "id-" + str(uuid4())
         signature_id = "sig-" + doc_id
@@ -542,7 +507,7 @@ class AccountEdiFormat(models.Model):
         ref = xmlsig.template.add_reference(
             signature, xmlsig.constants.TransformSha256, uri=""
         )
-        xmlsig.template.add_transform(ref, xmlsig.constants.TransformEnveloped)
+        transform_node = xmlsig.template.add_transform(ref, xmlsig.constants.TransformEnveloped)
         xmlsig.template.add_reference(
             signature, xmlsig.constants.TransformSha256, uri="#" + kinfo_id
         )
@@ -557,93 +522,27 @@ class AccountEdiFormat(models.Model):
         ctx.x509 = cert_public
         ctx.public_key = ctx.x509.public_key()
         ctx.private_key = cert_private
-        dslist = (
-            "ds:Object",
-            (),
-            (
-                "etsi:QualifyingProperties",
-                ("Target", signature_id),
-                (
-                    "etsi:SignedProperties",
-                    ("Id", sp_id),
-                    (
-                        "etsi:SignedSignatureProperties",
-                        (),
-                        ("etsi:SigningTime", (), datetime.now().isoformat()),
-                        (
-                            "etsi:SigningCertificateV2",
-                            (),
-                            (
-                                "etsi:Cert",
-                                (),
-                                (
-                                    "etsi:CertDigest",
-                                    (),
-                                    (
-                                        "ds:DigestMethod",
-                                        (
-                                            "Algorithm",
-                                            "http://www.w3.org/2000/09/xmldsig#sha256",
-                                        ),
-                                    ),
-                                    (
-                                        "ds:DigestValue",
-                                        (),
-                                        b64encode(
-                                            ctx.x509.fingerprint(hashes.SHA256())
-                                        ).decode(),
-                                    ),
-                                ),
-                            ),
-                        ),
-                        (
-                            "etsi:SignaturePolicyIdentifier",
-                            (),
-                            (
-                                "etsi:SignaturePolicyId",
-                                (),
-                                (
-                                    "etsi:SigPolicyId",
-                                    (),
-                                    (
-                                        "etsi:Identifier",
-                                        (),
-                                        "http://ticketbai.eus/politicafirma",
-                                    ),
-                                    (
-                                        "etsi:Description",
-                                        (),
-                                        "Política de Firma TicketBAI 1.0",
-                                    ),
-                                ),
-                                (
-                                    "etsi:SigPolicyHash",
-                                    (),
-                                    (
-                                        "ds:DigestMethod",
-                                        (
-                                            "Algorithm",
-                                            "http://www.w3.org/2000/09/xmldsig#sha256",
-                                        ),
-                                    ),
-                                    (
-                                        "ds:DigestValue",
-                                        (),
-                                        "lX1xDvBVAsPXkkJ7R07WCVbAm9e0H33I1sCpDtQNkbc=",
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
+
+        # Create Digital Signature Node <ds:Object>
+        values = {
+            'dsig': {
+                'iso-now': datetime.now().isoformat(),
+                'signature-id': signature_id,
+                'sigpolicy-id': sp_id,
+                'sigpolicy-url': 'http://ticketbai.eus/politicafirma',
+            }
+        }
+
+        xml_sig = etree.fromstring(self.env.ref('l10n_es_edi_tbai.template_digital_signature')._render(values))
+        signature.append(xml_sig)
         xml_root.append(signature)
-        create_node_tree(signature, [dslist])
+
+        # Sign (writes into SignatureValue)
         ctx.sign(signature)
         signature_value = signature.find(
             "ds:SignatureValue", namespaces=xmlsig.constants.NS_MAP
         ).text
+
         # RFC2045 - Base64 Content-Transfer-Encoding (page 25)
         # Any characters outside of the base64 alphabet are to be ignored in
         # base64-encoded data.
