@@ -2315,8 +2315,12 @@
             this.target = target;
             this.type = type;
         }
-        insertData(str) {
-            const id = "d" + BlockDescription.nextDataId++;
+        static generateId(prefix) {
+            this.nextDataIds[prefix] = (this.nextDataIds[prefix] || 0) + 1;
+            return prefix + this.nextDataIds[prefix];
+        }
+        insertData(str, prefix = "d") {
+            const id = BlockDescription.generateId(prefix);
             this.target.addLine(`let ${id} = ${str};`);
             return this.data.push(id) - 1;
         }
@@ -2354,7 +2358,7 @@
         }
     }
     BlockDescription.nextBlockId = 1;
-    BlockDescription.nextDataId = 1;
+    BlockDescription.nextDataIds = {};
     function createContext(parentCtx, params) {
         return Object.assign({
             block: null,
@@ -2372,6 +2376,8 @@
             this.hasRoot = false;
             this.hasCache = false;
             this.hasRef = false;
+            // maps ref name to [id, expr]
+            this.refInfo = {};
             this.shouldProtectScope = false;
             this.name = name;
         }
@@ -2389,6 +2395,10 @@
             result.push(`function ${this.name}(ctx, node, key = "") {`);
             if (this.hasRef) {
                 result.push(`  const refs = ctx.__owl__.refs;`);
+                for (let name in this.refInfo) {
+                    const [id, expr] = this.refInfo[name];
+                    result.push(`  const ${id} = ${expr};`);
+                }
             }
             if (this.shouldProtectScope) {
                 result.push(`  ctx = Object.create(ctx);`);
@@ -2413,7 +2423,7 @@
     class CodeGenerator {
         constructor(ast, options) {
             this.blocks = [];
-            this.nextId = 1;
+            this.ids = {};
             this.nextBlockId = 1;
             this.isDebug = false;
             this.targets = [];
@@ -2431,7 +2441,7 @@
             const ast = this.ast;
             this.isDebug = ast.type === 12 /* TDebug */;
             BlockDescription.nextBlockId = 1;
-            BlockDescription.nextDataId = 1;
+            BlockDescription.nextDataIds = {};
             this.compileAST(ast, {
                 block: null,
                 index: 0,
@@ -2491,7 +2501,8 @@
             this.target.addLine(line);
         }
         generateId(prefix = "") {
-            return `${prefix}${this.nextId++}`;
+            this.ids[prefix] = (this.ids[prefix] || 0) + 1;
+            return prefix + this.ids[prefix];
         }
         generateBlockName() {
             return `block${this.blocks.length + 1}`;
@@ -2708,12 +2719,12 @@
             for (let key in ast.attrs) {
                 if (key.startsWith("t-attf")) {
                     let expr = interpolate(ast.attrs[key]);
-                    const idx = block.insertData(expr);
+                    const idx = block.insertData(expr, "attr");
                     attrs["block-attribute-" + idx] = key.slice(7);
                 }
                 else if (key.startsWith("t-att")) {
                     let expr = compileExpr(ast.attrs[key]);
-                    const idx = block.insertData(expr);
+                    const idx = block.insertData(expr, "attr");
                     if (key === "t-att") {
                         attrs[`block-attributes`] = String(idx);
                     }
@@ -2731,7 +2742,7 @@
             // event handlers
             for (let ev in ast.on) {
                 const name = this.generateHandlerCode(ev, ast.on[ev]);
-                const idx = block.insertData(name);
+                const idx = block.insertData(name, "hdlr");
                 attrs[`block-handler-${idx}`] = ev;
             }
             // t-ref
@@ -2740,12 +2751,25 @@
                 const isDynamic = INTERP_REGEXP.test(ast.ref);
                 if (isDynamic) {
                     const str = ast.ref.replace(INTERP_REGEXP, (expr) => "${" + this.captureExpression(expr.slice(2, -2), true) + "}");
-                    const idx = block.insertData(`(el) => refs[\`${str}\`] = el`);
+                    const idx = block.insertData(`(el) => refs[\`${str}\`] = el`, "ref");
                     attrs["block-ref"] = String(idx);
                 }
                 else {
-                    const idx = block.insertData(`(el) => refs[\`${ast.ref}\`] = el`);
-                    attrs["block-ref"] = String(idx);
+                    let name = ast.ref;
+                    if (name in this.target.refInfo) {
+                        // ref has already been defined
+                        this.helpers.add("multiRefSetter");
+                        const info = this.target.refInfo[name];
+                        const index = block.data.push(info[0]) - 1;
+                        attrs["block-ref"] = String(index);
+                        info[1] = `multiRefSetter(refs, \`${name}\`)`;
+                    }
+                    else {
+                        let id = this.generateId("ref");
+                        this.target.refInfo[name] = [id, `(el) => refs[\`${name}\`] = el`];
+                        const index = block.data.push(id) - 1;
+                        attrs["block-ref"] = String(index);
+                    }
                 }
             }
             // t-model
@@ -2757,11 +2781,11 @@
                 const expression = compileExpr(expr);
                 let idx;
                 if (specialInitTargetAttr) {
-                    idx = block.insertData(`${baseExpression}[${expression}] === '${attrs[targetAttr]}'`);
+                    idx = block.insertData(`${baseExpression}[${expression}] === '${attrs[targetAttr]}'`, "attr");
                     attrs[`block-attribute-${idx}`] = specialInitTargetAttr;
                 }
                 else {
-                    idx = block.insertData(`${baseExpression}[${expression}]`);
+                    idx = block.insertData(`${baseExpression}[${expression}]`, "attr");
                     attrs[`block-attribute-${idx}`] = targetAttr;
                 }
                 this.helpers.add("toNumber");
@@ -2769,7 +2793,7 @@
                 valueCode = shouldTrim ? `${valueCode}.trim()` : valueCode;
                 valueCode = shouldNumberize ? `toNumber(${valueCode})` : valueCode;
                 const handler = `[(ev) => { bExpr${id}[${expression}] = ${valueCode}; }]`;
-                idx = block.insertData(handler);
+                idx = block.insertData(handler, "hdlr");
                 attrs[`block-handler-${idx}`] = eventType;
             }
             const dom = xmlDoc.createElement(ast.tag);
@@ -2833,7 +2857,7 @@
                 this.insertBlock(`text(${expr})`, block, { ...ctx, forceNewBlock: forceNewBlock && !block });
             }
             else {
-                const idx = block.insertData(expr);
+                const idx = block.insertData(expr, "txt");
                 const text = xmlDoc.createElement(`block-text-${idx}`);
                 block.insert(text);
             }
@@ -3105,10 +3129,17 @@
             this.helpers.add("isBoundary").add("withDefault");
             const expr = ast.value ? compileExpr(ast.value || "") : "null";
             if (ast.body) {
+                const initialTarget = this.target;
+                this.helpers.add("LazyValue");
+                let name = this.generateId("value");
+                const fn = new CodeTarget(name);
+                this.targets.push(fn);
+                this.target = fn;
                 const subCtx = createContext(ctx);
-                const nextId = `b${BlockDescription.nextBlockId}`;
                 this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
-                const value = ast.value ? (nextId ? `withDefault(${expr}, ${nextId})` : expr) : nextId;
+                this.target = initialTarget;
+                let value = `new LazyValue(${name}, ctx, node)`;
+                value = ast.value ? (value ? `withDefault(${expr}, ${value})` : expr) : value;
                 this.addLine(`ctx[\`${ast.name}\`] = ${value};`);
             }
             else {
@@ -4145,6 +4176,19 @@
         }
         return true;
     }
+    class LazyValue {
+        constructor(fn, ctx, node) {
+            this.fn = fn;
+            this.ctx = capture(ctx);
+            this.node = node;
+        }
+        evaluate() {
+            return this.fn(this.ctx, this.node);
+        }
+        toString() {
+            return this.evaluate().toString();
+        }
+    }
     /*
      * Safely outputs `value` as a block depending on the nature of `value`
      */
@@ -4157,6 +4201,10 @@
         if (value instanceof Markup) {
             safeKey = `string_safe`;
             block = html(value);
+        }
+        else if (value instanceof LazyValue) {
+            safeKey = `lazy_value`;
+            block = value.evaluate();
         }
         else if (typeof value === "string") {
             safeKey = "string_unsafe";
@@ -4184,6 +4232,20 @@
         }
         return boundFn;
     }
+    function multiRefSetter(refs, name) {
+        let count = 0;
+        return (el) => {
+            if (el) {
+                count++;
+                if (count > 1) {
+                    throw new Error("Cannot have 2 elements with same ref name at the same time");
+                }
+            }
+            if (count === 0 || el) {
+                refs[name] = el;
+            }
+        };
+    }
     const UTILS = {
         withDefault,
         zero: Symbol("zero"),
@@ -4193,9 +4255,11 @@
         withKey,
         prepareList,
         setContextValue,
+        multiRefSetter,
         shallowEqual: shallowEqual$1,
         toNumber,
         validateProps,
+        LazyValue,
         safeOutput,
         bind,
     };
@@ -4674,7 +4738,7 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      *  reactive has changed
      * @returns a proxy that tracks changes to it
      */
-    function reactive(target, callback) {
+    function reactive(target, callback = () => { }) {
         if (!canBeMadeReactive(target)) {
             throw new Error(`Cannot make the given value reactive`);
         }
@@ -4788,9 +4852,10 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
      */
     function useRef(name) {
         const node = getCurrent();
+        const refs = node.refs;
         return {
             get el() {
-                return node.refs[name] || null;
+                return refs[name] || null;
             },
         };
     }
@@ -4927,8 +4992,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2021-12-22T10:07:20.379Z';
-    __info__.hash = 'd160c4a';
+    __info__.date = '2021-12-28T12:54:17.905Z';
+    __info__.hash = '5b1132f';
     __info__.url = 'https://github.com/odoo/owl';
 
 
