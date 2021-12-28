@@ -281,7 +281,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.verifySteps(["ir.attachment/search", "ir.attachment/unlink", "reloadPage"]);
     });
 
-    QUnit.todo("can open a view", async (assert) => {
+    QUnit.test("can open a view", async (assert) => {
         assert.expect(3);
 
         const mockRPC = async (route, args) => {
