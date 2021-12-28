@@ -13,7 +13,7 @@ import {
     triggerEvent,
 } from "../helpers/utils";
 
-const { App, Component, css, xml } = owl;
+const { Component, xml } = owl;
 let container;
 let reference;
 
@@ -44,13 +44,6 @@ class TestComp extends Component {
         usePosition(reference, this.constructor.popperOptions);
     }
 }
-TestComp.style = css`
-    #popper {
-        background-color: cyan;
-        height: 100px;
-        width: 100px;
-    }
-`;
 TestComp.template = xml`<div id="popper"/>`;
 /** @type {import("@web/core/position/position_hook").Options} */
 TestComp.popperOptions = {};
@@ -79,6 +72,18 @@ QUnit.module("usePosition Hook", {
         });
         TestComp.popperOptions = { container };
 
+        const sheet = document.createElement("style");
+        sheet.innerHTML = `
+            #popper {
+                background-color: cyan;
+                height: 100px;
+                width: 100px;
+            }
+        `;
+        document.head.appendChild(sheet);
+        registerCleanup(() => {
+            sheet.remove();
+        });
         patchWithCleanup(browser, { setTimeout: (func) => func() });
     },
 });
