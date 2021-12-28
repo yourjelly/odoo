@@ -10,7 +10,7 @@
         "willUpdateProps",
     ];
 
-    const hashOwnProperty = Object.prototype.hasOwnProperty;
+    const hasOwnProperty = Object.prototype.hasOwnProperty;
 
     owl.Component = class extends Component {
         constructor(...args) {
