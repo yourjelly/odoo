@@ -21,7 +21,7 @@ QUnit.module("utils", () => {
             }
             MyComponent.template = xml`
                 <span>
-                    <input type="text" autofocus="" />
+                    <input type="text" t-ref="autofocus" />
                 </span>
             `;
 
@@ -42,13 +42,13 @@ QUnit.module("utils", () => {
         QUnit.test("useAutofocus: conditional autofocus", async function (assert) {
             class MyComponent extends Component {
                 setup() {
-                    this.forceFocus = useAutofocus();
+                    this.forceFocus = useAutofocus("input");
                     this.showInput = true;
                 }
             }
             MyComponent.template = xml`
                 <span>
-                    <input t-if="showInput" type="text" autofocus="" />
+                    <input t-if="showInput" type="text" t-ref="input" />
                 </span>
             `;
 

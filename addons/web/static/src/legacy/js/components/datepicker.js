@@ -30,7 +30,7 @@ odoo.define('web.DatePickerOwl', function (require) {
             this.datePickerId = `o_datepicker_${datePickerId++}`;
             this.typeOfDate = 'date';
 
-            useAutofocus();
+            useAutofocus("input");
             useExternalListener(window, 'scroll', this._onWindowScroll);
         }
 

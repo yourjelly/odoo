@@ -130,7 +130,7 @@
 
 <t t-name="web.Legacy.DatePicker" owl="1">
     <div class="o_datepicker" aria-atomic="true" t-att-id="datePickerId" data-target-input="nearest">
-        <input type="text" class="o_datepicker_input o_input datetimepicker-input" autofocus=""
+        <input type="text" class="o_datepicker_input o_input datetimepicker-input"
             t-att-name="props.name"
             t-att-placeholder="props.placeholder"
             t-attf-data-target="#{{ datePickerId }}"
@@ -300,7 +300,7 @@
         <span class="o_pager_counter mr-2" t-on-click.stop="">
             <input t-if="state.editing" type="text"
                 class="o_pager_value o_input"
-                autofocus=""
+                t-ref="autofocus"
                 t-att-value="value"
                 t-on-blur="() => { this.state.editing = false }"
                 t-on-change="_onValueChange"
