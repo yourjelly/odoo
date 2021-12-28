@@ -2,7 +2,7 @@
 
 import { SERVICES_METADATA } from "@web/env";
 
-const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl;
+const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent, useRef } = owl;
 
 /**
  * This file contains various custom hooks.
@@ -28,31 +28,28 @@ const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent } = owl;
  * displayed before. If the selected target is an input|textarea, set the selection
  * at the end.
  *
- * @param {Object} [params]
- * @param {string} [params.selector='autofocus'] default: select the first element
- *                 with an `autofocus` attribute.
+ * @param {string} name
  * @returns {Function} function that forces the focus on the next update if visible.
  */
-export function useAutofocus(params = {}) {
+export function useAutofocus(name) {
     const comp = useComponent();
     // Prevent autofocus in mobile
     if (comp.env.isSmall) {
         return () => {};
     }
-    const selector = params.selector || "[autofocus]";
+
+    let ref = useRef(name);
     let forceFocusCount = 0;
     useEffect(
-        function autofocus() {
-            const target = comp.el.querySelector(selector);
-            if (target) {
-                target.focus();
-                if (["INPUT", "TEXTAREA"].includes(target.tagName)) {
-                    const inputEl = target;
-                    inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
+        (el) => {
+            if (el) {
+                el.focus();
+                if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
+                    el.selectionStart = el.selectionEnd = el.value.length;
                 }
             }
         },
-        () => [forceFocusCount]
+        () => [ref.el, forceFocusCount]
     );
 
     return function focusOnUpdate() {
