@@ -24,21 +24,19 @@ const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent, useRef }
 // -----------------------------------------------------------------------------
 
 /**
- * Focus a given selector as soon as it appears in the DOM and if it was not
- * displayed before. If the selected target is an input|textarea, set the selection
+ * Focus a dom element with provided ref as soon as it appears in the DOM and if it was not
+ * displayed before. If it is an input|textarea, set the selection
  * at the end.
- *
- * @param {string} name
+ * @param {string} [refName="autofocus"]
  * @returns {Function} function that forces the focus on the next update if visible.
  */
-export function useAutofocus(name) {
+export function useAutofocus(refName = "autofocus") {
     const comp = useComponent();
     // Prevent autofocus in mobile
     if (comp.env.isSmall) {
         return () => {};
     }
-
-    let ref = useRef(name);
+    let ref = useRef(refName);
     let forceFocusCount = 0;
     useEffect(
         (el) => {
@@ -51,7 +49,6 @@ export function useAutofocus(name) {
         },
         () => [ref.el, forceFocusCount]
     );
-
     return function focusOnUpdate() {
         forceFocusCount++; // force the effect to rerun on next patch
     };

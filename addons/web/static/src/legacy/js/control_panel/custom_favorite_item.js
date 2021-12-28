@@ -43,7 +43,7 @@ odoo.define('web.CustomFavoriteItem', function (require) {
                 isShared: false,
             });
 
-            useAutofocus();
+            useAutofocus("description");
         }
 
         //---------------------------------------------------------------------
