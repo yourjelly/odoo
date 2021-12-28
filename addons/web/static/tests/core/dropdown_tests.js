@@ -322,27 +322,28 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.containsNone(parent.el, ".dropdown-menu");
     });
 
-    QUnit.todo("multi-level dropdown: recursive template can be rendered", async (assert) => {
-        // NXOWL find nice way to add templates
-        const recursiveTemplate = `
-        <Dropdown startOpen="true">
-            <t t-set-slot="toggler">
-                <t t-esc="name" />
-            </t>
-            <t t-foreach="items" t-as="item">
+    QUnit.test("multi-level dropdown: recursive template can be rendered", async (assert) => {
+        const templates = {
+            "recursive.Template": `
+                <Dropdown startOpen="true">
+                    <t t-set-slot="toggler">
+                        <t t-esc="name" />
+                    </t>
+                    <t t-foreach="items" t-as="item" t-key="item_index">
 
-              <t t-if="!item.children.length">
-                <DropdownItem t-esc="item.name" />
-              </t>
+                    <t t-if="!item.children.length">
+                        <DropdownItem><t t-esc="item.name"/></DropdownItem>
+                    </t>
 
-              <t t-else="" t-call="recursive.Template">
-                <t t-set="name" t-value="item.name" />
-                <t t-set="items" t-value="item.children" />
-              </t>
+                    <t t-else="" t-call="recursive.Template">
+                        <t t-set="name" t-value="item.name" />
+                        <t t-set="items" t-value="item.children" />
+                    </t>
 
-            </t>
-        </Dropdown>
-    `;
+                    </t>
+                </Dropdown>
+            `
+        };
         class Parent extends Component {
             constructor() {
                 super(...arguments);
@@ -377,8 +378,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         }
         Parent.template = "recursive.Template";
         env = await makeTestEnv();
-        env.qweb.addTemplate("recursive.Template", recursiveTemplate);
-        parent = await mount(Parent, { env, target });
+        parent = await mount(Parent, { env, target, templates });
         assert.deepEqual(
             [...parent.el.querySelectorAll("button,.dropdown-menu > .dropdown-item")].map(
                 (el) => el.textContent
