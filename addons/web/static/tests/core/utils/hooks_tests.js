@@ -6,7 +6,7 @@ import { registry } from "@web/core/registry";
 import { makeTestEnv } from "../../helpers/mock_env";
 import { click, destroy, getFixture, mount, nextTick } from "../../helpers/utils";
 
-const { Component, xml, useState, useEffect } = owl;
+const { Component, xml, useState, useEffect, useRef } = owl;
 const serviceRegistry = registry.category("services");
 
 QUnit.module("utils", () => {
@@ -17,6 +17,7 @@ QUnit.module("utils", () => {
             class MyComponent extends Component {
                 setup() {
                     useAutofocus();
+                    this.inputRef = useRef("autofocus");
                 }
             }
             MyComponent.template = xml`
@@ -32,17 +33,18 @@ QUnit.module("utils", () => {
             const comp = await mount(MyComponent, { env, target });
             await nextTick();
 
-            assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
+            assert.strictEqual(document.activeElement, comp.inputRef.el);
 
             comp.render();
             await nextTick();
-            assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
+            assert.strictEqual(document.activeElement, comp.inputRef.el);
         });
 
         QUnit.test("useAutofocus: conditional autofocus", async function (assert) {
             class MyComponent extends Component {
                 setup() {
                     this.forceFocus = useAutofocus("input");
+                    this.inputRef = useRef("input");
                     this.showInput = true;
                 }
             }
@@ -59,19 +61,19 @@ QUnit.module("utils", () => {
             const comp = await mount(MyComponent, { env, target });
             await nextTick();
 
-            assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
+            assert.strictEqual(document.activeElement, comp.inputRef.el);
 
             comp.showInput = false;
             comp.forceFocus();
             comp.render();
             await nextTick();
-            assert.notStrictEqual(document.activeElement, comp.el.querySelector("input"));
+            assert.notStrictEqual(document.activeElement, comp.inputRef.el);
 
             comp.showInput = true;
             comp.forceFocus();
             comp.render();
             await nextTick();
-            assert.strictEqual(document.activeElement, comp.el.querySelector("input"));
+            assert.strictEqual(document.activeElement, comp.inputRef.el);
         });
 
         QUnit.module("useBus");

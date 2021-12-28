@@ -38,7 +38,7 @@ export function useAutofocus(refName = "autofocus") {
     }
     let ref = useRef(refName);
     let forceFocusCount = 0;
-    useEffect(
+    owl.useEffect(
         (el) => {
             if (el) {
                 el.focus();
