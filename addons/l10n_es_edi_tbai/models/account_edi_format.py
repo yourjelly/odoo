@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from lxml import etree
-from cryptography.hazmat.primitives import hashes
-import xmlsig
-from pytz import timezone
-from uuid import uuid4
-from re import sub as regex_sub
-from datetime import datetime
-from collections import defaultdict
-from base64 import b64encode
+import io
 import math
+import zipfile
+from base64 import b64encode
+from collections import defaultdict
+from datetime import datetime
+from re import sub as regex_sub
+from uuid import uuid4
+
+from cryptography.hazmat.primitives import serialization
+from lxml import etree
 from lxml.objectify import fromstring
 from odoo import _, fields, models
-from odoo.tools import get_lang, html_escape
+from odoo.tools import get_lang
+from pytz import timezone
 from requests import exceptions
-from .requests_pkcs12 import post
+
+from .requests_pkcs12 import NS_MAP, base64_print, fill_signature, long_to_bytes, post, reference_digests
 from .res_company import L10N_ES_EDI_TBAI_VERSION
-import io
-import zipfile
+
 
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
@@ -494,54 +496,37 @@ class AccountEdiFormat(models.Model):
         self.ensure_one()
         company = invoice.company_id
         cert_private, cert_public = company.l10n_es_tbai_certificate_id.get_key_pair()
+        public_key = cert_public.public_key()
 
+        # Identifiers
         doc_id = "id-" + str(uuid4())
         signature_id = "sig-" + doc_id
         kinfo_id = "ki-" + doc_id
         sp_id = "sp-" + doc_id
-        signature = xmlsig.template.create(
-            xmlsig.constants.TransformInclC14N,
-            xmlsig.constants.TransformRsaSha256,
-            signature_id,
-        )
-        ref = xmlsig.template.add_reference(
-            signature, xmlsig.constants.TransformSha256, uri=""
-        )
-        transform_node = xmlsig.template.add_transform(ref, xmlsig.constants.TransformEnveloped)
-        xmlsig.template.add_reference(
-            signature, xmlsig.constants.TransformSha256, uri="#" + kinfo_id
-        )
-        xmlsig.template.add_reference(
-            signature, xmlsig.constants.TransformSha256, uri="#" + sp_id
-        )
-        ki = xmlsig.template.ensure_key_info(signature, name=kinfo_id)
-        data = xmlsig.template.add_x509_data(ki)
-        xmlsig.template.x509_data_add_certificate(data)
-        xmlsig.template.add_key_value(ki)
-        ctx = xmlsig.SignatureContext()
-        ctx.x509 = cert_public
-        ctx.public_key = ctx.x509.public_key()
-        ctx.private_key = cert_private
 
-        # Create Digital Signature Node <ds:Object>
+        # Render digital signature scaffold from QWeb
         values = {
             'dsig': {
+                'document-id': doc_id,
+                'x509-certificate': base64_print(b64encode(cert_public.public_bytes(encoding=serialization.Encoding.DER))),
+                'public-modulus': base64_print(b64encode(long_to_bytes(public_key.public_numbers().n))),
+                'public-exponent': base64_print(b64encode(long_to_bytes(public_key.public_numbers().e))),
                 'iso-now': datetime.now().isoformat(),
+                'keyinfo-id': kinfo_id,
                 'signature-id': signature_id,
                 'sigpolicy-id': sp_id,
                 'sigpolicy-url': 'http://ticketbai.eus/politicafirma',
             }
         }
-
         xml_sig = etree.fromstring(self.env.ref('l10n_es_edi_tbai.template_digital_signature')._render(values))
-        signature.append(xml_sig)
-        xml_root.append(signature)
+        xml_root.append(xml_sig)
+
+        # Compute digest values for references (may be optional)
+        reference_digests(xml_sig.find("ds:SignedInfo", namespaces=NS_MAP))
 
         # Sign (writes into SignatureValue)
-        ctx.sign(signature)
-        signature_value = signature.find(
-            "ds:SignatureValue", namespaces=xmlsig.constants.NS_MAP
-        ).text
+        fill_signature(xml_sig, cert_private)
+        signature_value = xml_sig.find("ds:SignatureValue", namespaces=NS_MAP).text
 
         # RFC2045 - Base64 Content-Transfer-Encoding (page 25)
         # Any characters outside of the base64 alphabet are to be ignored in
