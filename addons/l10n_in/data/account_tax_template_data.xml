@@ -96,6 +96,8 @@
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -107,6 +109,8 @@
         <field name="type_tax_use">none</field>
         <field name="amount_type">fixed</field>
         <field name="amount">1.591</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -131,6 +135,8 @@
         <field name="python_compute">result=base_amount * 0.21
 tax=quantity * 4.17
 if tax &gt; result:result=tax</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11235'),                 'plus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -175,6 +181,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'plus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
@@ -186,6 +194,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -197,6 +207,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">2</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -208,6 +220,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">28</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -219,6 +233,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">18</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -230,6 +246,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">12</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -241,6 +259,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">sale</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11234'),                 'plus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -252,6 +272,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             }),         ]"/>
@@ -263,6 +285,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -284,6 +308,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -295,6 +321,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -316,6 +344,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -327,6 +357,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -348,6 +380,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -359,6 +393,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -380,6 +416,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -391,6 +429,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -412,6 +452,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11232'),                 'plus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -423,6 +465,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p11233'),                 'plus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -445,6 +489,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -456,6 +502,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">fixed</field>
         <field name="amount">1.591</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -480,6 +528,8 @@ if tax &gt; result:result=tax</field>
         <field name="python_compute">result=base_amount * 0.21
 tax=quantity * 4.17
 if tax &gt; result:result=tax</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10055'),                 'minus_report_line_ids': [ref('tax_report_line_cess')],             }),         ]"/>
@@ -513,6 +563,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">0</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',                 'minus_report_line_ids': [ref('tax_report_line_zero_rated')],             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',             }),         ]"/>
@@ -524,6 +576,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -535,6 +589,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">2</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -546,6 +602,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">28</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -557,6 +615,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">18</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -568,6 +628,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">12</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -579,6 +641,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10053'),                 'minus_report_line_ids': [ref('tax_report_line_igst')],             }),         ]"/>
@@ -590,6 +654,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -601,6 +667,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -622,6 +690,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -633,6 +703,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -654,6 +726,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -665,6 +739,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -686,6 +762,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -697,6 +775,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -718,6 +798,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -729,6 +811,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             }),         ]"/>
@@ -750,6 +834,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),              (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10051'),                 'minus_report_line_ids': [ref('tax_report_line_sgst')],             })         ]"/>
@@ -761,6 +847,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'base',             }),             (0,0, {                 'factor_percent': 100,                 'repartition_type': 'tax',                 'account_id': ref('p10052'),                 'minus_report_line_ids': [ref('tax_report_line_cgst')],             })         ]"/>
@@ -783,6 +871,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
@@ -795,6 +885,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">fixed</field>
         <field name="amount">1.591</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
@@ -821,6 +913,8 @@ if tax &gt; result:result=tax</field>
         <field name="python_compute">result=base_amount * 0.21
 tax=quantity * 4.17
 if tax &gt; result:result=tax</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="tax_group_id" ref="cess_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
@@ -833,6 +927,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -845,6 +941,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">2</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -857,6 +955,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">28</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -869,6 +969,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">18</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -881,6 +983,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">12</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -893,6 +997,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">percent</field>
         <field name="amount">5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="igst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -905,6 +1011,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -917,6 +1025,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">0.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -940,6 +1050,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -952,6 +1064,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">1</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -975,6 +1089,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -987,6 +1103,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">14</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -999,6 +1117,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">purchase</field>
         <field name="amount_type">group</field>
         <field name="amount">28.0</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="gst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1010,6 +1130,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1022,6 +1144,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">9</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1045,6 +1169,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1057,6 +1183,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">6</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1080,6 +1208,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="sgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
@@ -1092,6 +1222,8 @@ if tax &gt; result:result=tax</field>
         <field name="type_tax_use">none</field>
         <field name="amount_type">percent</field>
         <field name="amount">2.5</field>
+        <field name="is_base_affected" eval="False"/>
+        <field name="include_base_amount" eval="True"/>
         <field name="chart_template_id" ref="indian_chart_template_standard"/>
         <field name="tax_group_id" ref="cgst_group"/>
         <field name="l10n_in_reverse_charge" eval="True"/>
