@@ -348,7 +348,7 @@ QUnit.test(
     }
 );
 
-QUnit.todo("'more' menu sections properly updated on app change", async (assert) => {
+QUnit.test("'more' menu sections properly updated on app change", async (assert) => {
     const newMenus = {
         root: { id: "root", children: [1, 2], name: "root", appID: "root" },
         // First App
