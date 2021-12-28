@@ -29,8 +29,8 @@
             <field name="name">Nil Rated</field>
             <field name="country_id" ref="base.in"/>
         </record>
-        <record id="non_gst_supplies_group" model="account.tax.group">
-            <field name="name">Non GST Supplies</field>
+        <record id="tds_group" model="account.tax.group">
+            <field name="name">TDS</field>
             <field name="country_id" ref="base.in"/>
         </record>
     </data>
