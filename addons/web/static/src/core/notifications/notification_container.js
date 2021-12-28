@@ -15,7 +15,7 @@ export class NotificationContainer extends Component {
 NotificationContainer.template = xml`
     <div class="o_notification_manager">
         <t t-foreach="props.notifications" t-as="notification" t-key="notification.id">
-            <Notification t-props="notification.props" onClose="notification.close"/>
+            <Notification t-props="notification.props" onClose2="notification.close"/>
             <!-- NXOWL t-transition="o_notification_fade" -->
         </t>
     </div>`;
