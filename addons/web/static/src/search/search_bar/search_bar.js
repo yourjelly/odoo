@@ -34,7 +34,7 @@ export class SearchBar extends Component {
 
         this.keepLast = new KeepLast();
 
-        // this.focusOnUpdate = useAutofocus();
+        this.focusOnUpdate = useAutofocus("search-input");
 
         this.inputRef = useRef("search-input");
 
