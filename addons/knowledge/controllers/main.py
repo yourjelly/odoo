@@ -45,6 +45,14 @@ class KnowledgeDataSet(DataSet):
         article.unlink()
         return True
 
+    @http.route('/knowledge/article/<int:article_id>/duplicate', type='json', auth="user")
+    def article_duplicate(self, article_id):
+        article = request.env['knowledge.article'].browse(article_id)
+        if not article.exists():
+            return False
+        # TODO: Duplicate the article
+        return True
+
     @http.route('/knowledge/article/create', type='json', auth="user")
     def article_create(self, title, target_parent_id=False):
         Article = request.env['knowledge.article']

@@ -4,8 +4,9 @@ import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
     events: _.extend({}, FormRenderer.prototype.events, {
-        'click .fa': '_onDropdown',
-        'click .article': '_onOpen',
+        'click .o_article_caret': '_onFold',
+        'click .o_article_icons i': '_onIconClick',
+        'click .o_article': '_onOpen',
     }),
 
     init: function () {
@@ -100,9 +101,11 @@ const KnowledgeFormRenderer = FormRenderer.extend({
      * When the user clicks on the caret to hide and show some files
      * @param {Event} event
      */
-    _onDropdown: function (event) {
-        const $icon = $(event.target);
-        const $li = $icon.closest('li');
+    _onFold: function (event) {
+        event.stopPropagation();
+        const $button = $(event.currentTarget);
+        const $icon = $button.find('i');
+        const $li = $button.closest('li');
         const $ul = $li.find('ul');
         if ($ul.length !== 0) {
             $ul.toggle();
@@ -114,6 +117,16 @@ const KnowledgeFormRenderer = FormRenderer.extend({
                 $icon.addClass('fa-caret-right');
             }
         }
+    },
+
+    /**
+     * When the user clicks on a new icon
+     * @param {Event} event 
+     */
+    _onIconClick: function (event) {
+        event.stopPropagation();
+        const $icon = $(event.target);
+        console.log('$icon', $icon);
     },
 
     /**

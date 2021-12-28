@@ -18,6 +18,9 @@ const KnowledgeFormController = FormController.extend({
 
     _onDelete: async function () {
         const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
         const result = await this._rpc({
             route: `/knowledge/article/${id}/delete` 
         });
@@ -26,6 +29,9 @@ const KnowledgeFormController = FormController.extend({
 
     _onDuplicate: async function () {
         const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
         const result = await this._rpc({
             route: `/knowledge/article/${id}/duplicate`
         });
@@ -33,10 +39,15 @@ const KnowledgeFormController = FormController.extend({
     },
 
     _onCreate: async function () {
+        const { id } = this.getState();
+        if (typeof id === 'undefined') {
+            return;
+        }
         const result = await this._rpc({
             route: `/knowledge/article/create`,
             params: {
-                title: 'New file'
+                title: 'New file',
+                target_parent_id: id
             }
         });
         console.log('result', result);
