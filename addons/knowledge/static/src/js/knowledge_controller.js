@@ -24,7 +24,10 @@ const KnowledgeFormController = FormController.extend({
         const result = await this._rpc({
             route: `/knowledge/article/${id}/delete` 
         });
-        console.log('result', result);
+        if (result) {
+            const $li = this.$el.find(`[data-article-id="${id}"]`);
+            $li.remove();
+        }
     },
 
     _onDuplicate: async function () {
@@ -43,15 +46,28 @@ const KnowledgeFormController = FormController.extend({
         if (typeof id === 'undefined') {
             return;
         }
-        const result = await this._rpc({
+        const article = await this._rpc({
             route: `/knowledge/article/create`,
             params: {
                 title: 'New file',
                 target_parent_id: id
             }
         });
-        console.log('result', result);
-        console.log('creating a new article', this);
+        if (!article) {
+            return
+        }
+        const $li = QWeb.render('knowledge.knowledge_article_template', { article });
+        const $parent = this.$el.find(`[data-article-id="${article.parent_id}"]`);
+        if ($parent.length === 0) {
+            console.log('no parent');
+        } else {
+            let $ul = $parent.find('ul');
+            if ($ul.length === 0) {
+                $ul = $('<ul>');
+                $parent.append($ul);
+            }
+            $ul.append($li);
+        }
     },
 
     _onMove: function () {
@@ -127,9 +143,11 @@ const KnowledgeFormController = FormController.extend({
         if ($icon.hasClass('fa-lock')) {
             $icon.removeClass('fa-lock');
             $icon.addClass('fa-unlock');
+            this._setMode('edit');
         } else {
             $icon.removeClass('fa-unlock');
             $icon.addClass('fa-lock');
+            this._setMode('readonly');
         }
     },
 
@@ -137,8 +155,9 @@ const KnowledgeFormController = FormController.extend({
      * @override
      */
     _setMode: function () {
-        console.log('_setMode', arguments)
-        return this._super.apply(this, arguments);
+        return this._super.apply(this, arguments).then(() => {
+            this.renderer.initTree();
+        });
     },
 });
 

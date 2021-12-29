@@ -60,11 +60,16 @@ class KnowledgeDataSet(DataSet):
         if target_parent_id and not parent:
             return "missing parent"  # The parent in which you want to create your article does not exist anymore
 
-        Article.create({
+        article = Article.create({
             "name": title,
             "parent_id": target_parent_id,
         })
-        return True
+
+        return {
+            'id': article.id,
+            'parent_id': article.parent_id.id,
+            'name': article.name
+        }
 
     def get_tree_values(self):
         Article = request.env["knowledge.article"]

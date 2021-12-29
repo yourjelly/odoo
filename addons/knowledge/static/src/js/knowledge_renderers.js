@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import core from 'web.core';
 import FormRenderer from 'web.FormRenderer';
 
 const KnowledgeFormRenderer = FormRenderer.extend({
@@ -9,29 +10,30 @@ const KnowledgeFormRenderer = FormRenderer.extend({
         'click .o_article': '_onOpen',
     }),
 
-    init: function () {
-        console.log('calling init');
-        return this._super.apply(this, arguments);
-    },
-
     /**
      * @override
      * @returns {Promise}
      */
     start: function () {
-        console.log('calling start');
+        core.bus.on('DOM_updated', this, () => {
+            console.log('dom update');
+        });
         return this._super.apply(this, arguments).then(() => {
-            const aside = this.$el.find('.o_sidebar');
-            this._rpc({
-                route: '/knowledge/get_tree',
-                params: {}
-            }).then(res => {
-                aside.html(res);
-                this.createTree();
-            }).catch(error => {
-                console.log('error', error);
-                aside.empty();
-            });
+            return this.initTree();
+        });
+    },
+
+    initTree: function () {
+        const aside = this.$el.find('.o_sidebar');
+        return this._rpc({
+            route: '/knowledge/get_tree',
+            params: {}
+        }).then(res => {
+            aside.html(res);
+            this.createTree();
+        }).catch(error => {
+            console.log('error', error);
+            aside.empty();
         });
     },
 
@@ -51,36 +53,8 @@ const KnowledgeFormRenderer = FormRenderer.extend({
              * @param {Event} event 
              * @param {Object} ui 
              */
-            relocate: async (event, ui) => {
-                const $li = $(ui.item);
-                const key = 'article-id';
-                const params = {};
-                const $parent = $li.parents('li');
-                if ($parent.length !== 0) {
-                    params.target_parent_id = $parent.data(key);
-                }
-                const $sibling = $li.next();
-                if ($sibling.length !== 0) {
-                    params.before_article_id = $sibling.data(key);
-                }
-                await this._rpc({
-                    route: `/knowledge/article/${$li.data(key)}/move`,
-                    params
-                });
-                const $tree = $(event.target);
-                this._refreshIcons($tree);
-            }
+            relocate: (event, ui) => this._onFileMove(event, ui)
         });
-
-        // We set the listeners:
-
-        // this.$el.find('.o_tree').on('sortreceive', (event, ui) => {
-        //     console.log('receive event', event, 'ui', ui);
-        // });
-
-        // this.$el.find('.o_tree').on('sortremove', (event, ui) => {
-        //     console.log('remove event', event, 'ui', ui);
-        // });
 
         // We connect the trees:
 
@@ -95,6 +69,42 @@ const KnowledgeFormRenderer = FormRenderer.extend({
             'connectWith',
             '.o_tree_workspace .o_tree'
         );
+
+        const $div = this.$el.find(`[data-article-id="${this.state.res_id}"] > div`);
+        if ($div.length === 0) {
+            return
+        }
+        $div.addClass('font-weight-bold');
+        $div.addClass('bg-light');
+    },
+
+    /**
+     * When the user moves a file
+     * @param {Event} event
+     * @param {Object} ui
+     */
+    _onFileMove: async function (event, ui) {
+        const params = {};
+        const key = 'article-id';
+        const $li = $(ui.item);
+        const $parent = $li.parents('li');
+        if ($parent.length !== 0) {
+            params.target_parent_id = $parent.data(key);
+        } else {
+            console.log('no parent');
+        }
+        const $sibling = $li.next();
+        if ($sibling.length !== 0) {
+            params.before_article_id = $sibling.data(key);
+        }
+        const result = await this._rpc({
+            route: `/knowledge/article/${$li.data(key)}/move`,
+            params
+        });
+        if (result) {
+            const $tree = $li.closest('.o_tree');
+            this._refreshIcons($tree);
+        }
     },
 
     /**
@@ -145,9 +155,10 @@ const KnowledgeFormRenderer = FormRenderer.extend({
 
     /**
      * Refresh the icons
+     * @param {HTMLElement} $tree
      */
     _refreshIcons: function ($tree) {
-        this._traverse($tree, ($li) => {
+        this._traverse($tree, $li => {
             if ($li.has('ol').length > 0) {
                 // todo
             } else {

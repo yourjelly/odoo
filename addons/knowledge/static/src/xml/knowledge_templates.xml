@@ -110,4 +110,32 @@
             </div>
         </form>
     </t>
+    <t t-name="knowledge.knowledge_article_template">
+        <li t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
+            <div class="d-flex">
+                <button class="btn btn-link text-secondary p-0 o_article_caret">
+                    <i class="fa fa-fw fa-caret-down align-self-center"/>
+                </button>
+                <div class="btn-group dropdown">
+                    <button class="btn btn-link text-secondary p-0" type="button" t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
+                        <i class="fa fa-fw fa-file"/>
+                    </button>
+                    <div class="dropdown-menu p-0 o_article_icons" role="menu" t-attf-aria-labelledby="o_article_dropdown_#{article.id}">
+                        <i class="fa fa-fw fa-file"/>
+                        <i class="fa fa-fw fa-book"/>
+                        <i class="fa fa-fw fa-user"/>
+                        <i class="fa fa-fw fa-address-book"/>
+                        <i class="fa fa-fw fa-calendar"/>
+                        <i class="fa fa-fw fa-code"/>
+                        <i class="fa fa-fw fa-car"/>
+                        <i class="fa fa-fw fa-comment"/>
+                        <i class="fa fa-fw fa-bullhorn"/>
+                    </div>
+                </div>
+                <div class="o_article flex-grow-1 text-truncate">
+                    <t t-out="article.name"/>
+                </div>
+            </div>
+        </li>
+    </t>
 </templates>
