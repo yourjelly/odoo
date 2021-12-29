@@ -51,6 +51,47 @@ class Partner(models.Model):
             WHERE R.res_partner_id = %s """, (self.id,))
         return self.env.cr.dictfetchall()[0].get('starred_count')
 
+    @api.model
+    def _is_same_email(self, vals_list):
+        """Calculate if we should write the email on the related partner. When
+        the email of the partner is an empty string, we force it to False
+        to not propagate a False on an empty string.
+
+        Done in a separate method so it can be used in both ribbon and inverse
+        and compute of email update methods.
+        """
+        partner_dict = {}
+        for val in vals_list:
+            is_normalize = False
+            partner = val.get('partner_id')._origin
+            if partner and val.get('email') != partner.email:
+                email_normalized = tools.email_normalize(val.get('email')) or val.get('email') or False
+                partner_email_normalized = tools.email_normalize(partner.email) or partner.email or False
+                is_normalize = email_normalized != partner_email_normalized
+            partner_dict.update({partner.id: is_normalize})
+        return partner_dict
+
+    @api.model
+    def _is_same_phone(self, vals_list):
+        """Calculate if we should write the phone on the related partner. When
+        the phone of the partner is an empty string, we force it to False
+        to not propagate a False on an empty string.
+
+        Done in a separate method so it can be used in both ribbon and inverse
+        and compute of phone update methods.
+        """
+        partner_dict = {}
+        for val in vals_list:
+            is_normalize = False
+            partner = val.get('partner_id')
+            related_record = val.get('related_id')
+            if partner and val.get('phone') != partner.phone:
+                phone_formatted = val.get('related_id').phone_get_sanitized_number(number_fname=val.get('field')) or val.get('phone') or False
+                partner_phone_formatted = partner.phone_get_sanitized_number(number_fname='phone') or partner.phone or False
+                is_normalize = phone_formatted != partner_phone_formatted
+            partner_dict.update({partner.id: is_normalize})
+        return partner_dict
+
     # ------------------------------------------------------------
     # MESSAGING
     # ------------------------------------------------------------

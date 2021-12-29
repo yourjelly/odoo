@@ -412,24 +412,44 @@ class Lead(models.Model):
 
     @api.depends('partner_id.email')
     def _compute_email_from(self):
+        lead_vals_dict = [{
+            'email': lead.email_from, 'partner_id': lead.partner_id}
+        for lead in self if lead.email_from and lead.partner_id]
+        lead_by_partner = self.env['res.partner']._is_same_email(lead_vals_dict)
+
         for lead in self:
-            if lead.partner_id.email and lead._get_partner_email_update():
+            if lead.partner_id.email and lead_by_partner.get(lead.partner_id.id, False):
                 lead.email_from = lead.partner_id.email
 
     def _inverse_email_from(self):
+        lead_vals_dict = [{
+            'email': lead.email_from, 'partner_id': lead.partner_id}
+        for lead in self if lead.email_from and lead.partner_id]
+        lead_by_partner = self.env['res.partner']._is_same_email(lead_vals_dict)
+
         for lead in self:
-            if lead._get_partner_email_update():
+            if lead_by_partner.get(lead.partner_id.id, False):
                 lead.partner_id.email = lead.email_from
 
     @api.depends('partner_id.phone')
     def _compute_phone(self):
+        lead_vals_dict = [{
+            'phone': lead.phone, 'partner_id': lead.partner_id,'related_id': lead, 'field': 'phone'}
+        for lead in self if lead.phone and lead.partner_id]
+        lead_by_partner = self.env['res.partner']._is_same_phone(lead_vals_dict)
+
         for lead in self:
-            if lead.partner_id.phone and lead._get_partner_phone_update():
+            if lead.partner_id.phone and lead_by_partner.get(lead.partner_id.id, False):
                 lead.phone = lead.partner_id.phone
 
     def _inverse_phone(self):
+        lead_vals_dict = [{
+            'phone': lead.phone, 'partner_id': lead.partner_id,'related_id': lead, 'field': 'phone'}
+        for lead in self if lead.phone and lead.partner_id]
+        lead_by_partner = self.env['res.partner']._is_same_phone(lead_vals_dict)
+
         for lead in self:
-            if lead._get_partner_phone_update():
+            if lead_by_partner.get(lead.partner_id.id, False):
                 lead.partner_id.phone = lead.phone
 
     @api.depends('phone', 'country_id.code')
@@ -569,13 +589,23 @@ class Lead(models.Model):
 
     @api.depends('email_from', 'partner_id')
     def _compute_partner_email_update(self):
+        lead_vals_dict = [{
+            'email': lead.email_from, 'partner_id': lead.partner_id}
+        for lead in self if lead.email_from and lead.partner_id]
+        lead_by_partner = self.env['res.partner']._is_same_email(lead_vals_dict)
+
         for lead in self:
-            lead.partner_email_update = lead._get_partner_email_update()
+            lead.partner_email_update = lead_by_partner.get(lead.partner_id, False)
 
     @api.depends('phone', 'partner_id')
     def _compute_partner_phone_update(self):
+        lead_vals_dict = [{
+            'phone': lead.phone, 'partner_id': lead.partner_id,'related_id': lead, 'field': 'phone'}
+        for lead in self if lead.phone and lead.partner_id]
+
+        lead_by_partner = self.env['res.partner']._is_same_phone(lead_vals_dict)
         for lead in self:
-            lead.partner_phone_update = lead._get_partner_phone_update()
+            lead.partner_phone_update = lead_by_partner.get(lead.partner_id, False)
 
     @api.depends_context('uid')
     @api.depends('partner_id', 'type')
@@ -645,36 +675,6 @@ class Lead(models.Model):
         elif not partner_name and partner.company_name:
             partner_name = partner.company_name
         return {'partner_name': partner_name or self.partner_name}
-
-    def _get_partner_email_update(self):
-        """Calculate if we should write the email on the related partner. When
-        the email of the lead / partner is an empty string, we force it to False
-        to not propagate a False on an empty string.
-
-        Done in a separate method so it can be used in both ribbon and inverse
-        and compute of email update methods.
-        """
-        self.ensure_one()
-        if self.partner_id and self.email_from != self.partner_id.email:
-            lead_email_normalized = tools.email_normalize(self.email_from) or self.email_from or False
-            partner_email_normalized = tools.email_normalize(self.partner_id.email) or self.partner_id.email or False
-            return lead_email_normalized != partner_email_normalized
-        return False
-
-    def _get_partner_phone_update(self):
-        """Calculate if we should write the phone on the related partner. When
-        the phone of the lead / partner is an empty string, we force it to False
-        to not propagate a False on an empty string.
-
-        Done in a separate method so it can be used in both ribbon and inverse
-        and compute of phone update methods.
-        """
-        self.ensure_one()
-        if self.partner_id and self.phone != self.partner_id.phone:
-            lead_phone_formatted = self.phone_get_sanitized_number(number_fname='phone') or self.phone or False
-            partner_phone_formatted = self.partner_id.phone_get_sanitized_number(number_fname='phone') or self.partner_id.phone or False
-            return lead_phone_formatted != partner_phone_formatted
-        return False
 
     # ------------------------------------------------------------
     # ORM
