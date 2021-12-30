@@ -734,7 +734,7 @@ class StockMoveLine(models.Model):
         returns: dictionary {product_id+name+description+uom: {product, name, description, qty_done, product_uom}, ...}
         """
         aggregated_move_lines = {}
-
+        
         def get_aggregated_properties(move_line=False, move=False):
             move = move or move_line.move_id
             uom = move_line and move_line.product_uom_id or move.product_uom
@@ -769,7 +769,7 @@ class StockMoveLine(models.Model):
                                                    'description': description,
                                                    'qty_done': move_line.qty_done,
                                                    'qty_ordered': qty_ordered,
-                                                   'product_uom': uom.name,
+                                                   'product_uom': uom,
                                                    'product': move_line.product_id}
             else:
                 aggregated_move_lines[line_key]['qty_done'] += move_line.qty_done
