@@ -146,9 +146,10 @@
                     </group>
                     <field name="subscription_list_ids">
                         <tree editable="bottom">
-                           <field name="list_id"/>
-                           <field name="unsubscription_date"/>
-                           <field name="opt_out"/>
+                            <field name="list_id"/>
+                            <field name="create_date" string="Subscription Date"/>
+                            <field name="unsubscription_date"/>
+                            <field name="opt_out"/>
                         </tree>
                     </field>
                 </sheet>
