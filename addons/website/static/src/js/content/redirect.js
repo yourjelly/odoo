@@ -40,5 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.body.appendChild(frontendToBackendNavEl);
         }
+    } else {
+        document.addEventListener('click', (ev) => {
+            const isEditorEnabled = document.body.classList.contains('editor_enable');
+            const linkEl = ev.target.closest('[href]');
+            if (!linkEl) {
+                return;
+            }
+
+            const {href, host, target, pathname} = linkEl;
+            const isNewWindow = target === '_blank';
+
+            const backendRoutes = ['/web', '/web/session/logout'];
+            const isInIframe = host === window.location.host && pathname && !backendRoutes.includes(pathname);
+            if (href && !isEditorEnabled && !isNewWindow && !isInIframe) {
+                window.top.location.replace(href);
+            }
+        });
     }
 });
