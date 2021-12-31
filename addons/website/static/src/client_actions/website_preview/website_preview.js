@@ -20,6 +20,11 @@ export class WebsitePreview extends Component {
         });
 
         useEffect(() => {
+            this.websiteService.currentWebsiteId = this.websiteId;
+            return () => this.websiteService.currentWebsiteId = null;
+        }, () => [this.props.action.context.params]);
+
+        useEffect(() => {
             this.iframe.el.addEventListener('load', () => {
                 // This replaces the browser url (/web#action=website...) with
                 // the iframe's url (it is clearer for the user).
@@ -39,6 +44,12 @@ export class WebsitePreview extends Component {
 
     get websiteId() {
         let websiteId = this.props.action.context.params && this.props.action.context.params.website_id;
+        // When no parameter is passed to the client action, the current
+        // website from the website service is taken. By default, it will be
+        // the one from the session.
+        if (!websiteId) {
+            websiteId = this.websiteService.currentWebsite && this.websiteService.currentWebsite.id;
+        }
         if (!websiteId) {
             websiteId = this.websiteService.websites[0].id;
         }
