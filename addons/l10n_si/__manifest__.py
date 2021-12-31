@@ -15,9 +15,9 @@
         "base_iban",
     ],
     "data": [
-        "data/l10n_si_chart_data.xml",
+        "data/account_chart_template_data.xml",
         "data/account.account.template.csv",
-        "data/account.chart.template.csv",
+        "data/l10n_si_chart_data.xml",
         "data/account.tax.group.csv",
         "data/account_tax_report_data.xml",
         "data/account_tax_data.xml",

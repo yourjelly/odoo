@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="gd_taxr_1" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Izstopni DDV 0%</field>
         <field name="description">DDV-I-0</field>
         <field name="amount_type">percent</field>
@@ -35,7 +35,7 @@
     </record>
 
     <record id="gd_taxr_2" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Izstopni DDV 9.5%</field>
         <field name="description">DDV-I-9.5</field>
         <field name="amount_type">percent</field>
@@ -51,7 +51,6 @@
             }),
             (0,0, {
                 'factor_percent': 100,
-                'account_id': ref('gd_acc_260001'),
                 'repartition_type': 'tax',
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
             }),
@@ -64,7 +63,6 @@
             }),
             (0,0, {
                 'factor_percent': 100,
-                'account_id': ref('gd_acc_260001'),
                 'repartition_type': 'tax',
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
             }),
@@ -72,7 +70,7 @@
     </record>
 
     <record id="gd_taxr_3" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Izstopni DDV 22%</field>
         <field name="description">DDV-I-22</field>
         <field name="amount_type">percent</field>
@@ -89,7 +87,6 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260002'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
             }),
         ]"/>
@@ -102,14 +99,13 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260002'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_1" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 0%</field>
         <field name="description">DDV-V-0</field>
         <field name="amount_type">percent</field>
@@ -142,7 +138,7 @@
     </record>
 
     <record id="gd_taxp_2" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 9.5%</field>
         <field name="description">DDV-V-9.5</field>
         <field name="amount_type">percent</field>
@@ -159,7 +155,6 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160002'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
             }),
         ]"/>
@@ -172,14 +167,13 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160002'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_3" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 22%</field>
         <field name="description">DDV-V-22</field>
         <field name="amount_type">percent</field>
@@ -196,7 +190,6 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160003'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
             }),
         ]"/>
@@ -209,14 +202,13 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160003'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_nr_1" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 9.5% - neodbitni</field>
         <field name="description">DDV-V-9.5-NE</field>
         <field name="amount_type">percent</field>
@@ -233,7 +225,6 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160001'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_zni')],
             }),
         ]"/>
@@ -246,14 +237,13 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160001'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_zni')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_nr_2" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 22% - neodbitni</field>
         <field name="description">DDV-V-22-NE</field>
         <field name="amount_type">percent</field>
@@ -270,7 +260,6 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160001'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_osnnovna')],
             }),
         ]"/>
@@ -283,14 +272,13 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160001'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_osnnovna')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_st_1" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 9.5% - samoobdavčitev</field>
         <field name="description">DDV-V-9.5-SO</field>
         <field name="amount_type">percent</field>
@@ -307,13 +295,11 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160002'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
             }),
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260001'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
             }),
         ]"/>
@@ -326,20 +312,18 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160002'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
             }),
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260001'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
             }),
         ]"/>
     </record>
 
     <record id="gd_taxp_st_2" model="account.tax.template">
-        <field name="chart_template_id" ref="gd_chart"/>
+        <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Vstopni DDV 22% - samoobdavčitev</field>
         <field name="description">DDV-V-22-SO</field>
         <field name="amount_type">percent</field>
@@ -356,13 +340,11 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160003'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
             }),
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260002'),
                 'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
             }),
         ]"/>
@@ -375,13 +357,11 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_160003'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
             }),
             (0,0, {
                 'factor_percent': -100,
                 'repartition_type': 'tax',
-                'account_id': ref('gd_acc_260002'),
                 'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
             }),
         ]"/>

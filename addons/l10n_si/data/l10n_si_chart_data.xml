@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="account_reports_si_statements_menu" name="Slovenia" parent="account.menu_finance_reports" sequence="0" groups="account.group_account_readonly"/>
-    <!-- Chart Template -->
-    <record id="gd_chart" model="account.chart.template">
-        <field name="name">Kontni načrt za gospodarske družbe</field>
-        <field name="bank_account_code_prefix">110</field>
-        <field name="cash_account_code_prefix">100</field>
-        <field name="transfer_account_code_prefix">109</field>
-        <field name="code_digits">6</field>
-        <field name="currency_id" ref="base.EUR"/>
-        <field name="country_id" ref="base.si"/>
+    <record id="l10n_si_chart_template" model="account.chart.template">
+        <field name="name">Slovenia - National Chart of Accounts</field>
+        <field name="property_account_receivable_id" ref="l10n_si_120"/>
+        <field name="property_account_payable_id" ref="l10n_si_220"/>
+        <field name="property_account_expense_categ_id" ref="l10n_si_702"/>
+        <field name="property_account_income_categ_id" ref="l10n_si_762"/>
+        <field name="expense_currency_exchange_account_id" ref="l10n_si_484"/>
+        <field name="income_currency_exchange_account_id" ref="l10n_si_777"/>
+        <field name="default_pos_receivable_account_id" ref="l10n_si_125"/>
     </record>
 </odoo>
