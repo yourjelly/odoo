@@ -9,7 +9,6 @@ import {
     ConnectionLostError,
 } from "../core/network/rpc_service";
 import { ErrorDialog } from "../core/errors/error_dialogs";
-import { useBus, useEffect } from "@web/core/utils/hooks";
 
 export function makeLegacyRpcService(legacyEnv) {
     return {

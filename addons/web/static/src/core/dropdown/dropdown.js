@@ -1,11 +1,20 @@
 /** @odoo-module **/
 
-import { useBus, useEffect, useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { usePosition } from "../position/position_hook";
 import { useDropdownNavigation } from "./dropdown_navigation_hook";
 import { localization } from "../l10n/localization";
 
-const { Component, EventBus, onWillStart, useExternalListener, useRef, useState, useSubEnv } = owl;
+const {
+    Component,
+    EventBus,
+    onWillStart,
+    useEffect,
+    useExternalListener,
+    useRef,
+    useState,
+    useSubEnv,
+} = owl;
 
 const DIRECTION_CARET_CLASS = {
     bottom: "dropdown",

@@ -2,7 +2,7 @@
 
 import { SERVICES_METADATA } from "@web/env";
 
-const { onMounted, onWillPatch, onPatched, onWillUnmount, useComponent, useRef } = owl;
+const { useComponent, useEffect, useRef } = owl;
 
 /**
  * This file contains various custom hooks.
@@ -38,7 +38,7 @@ export function useAutofocus(refName = "autofocus") {
     }
     let ref = useRef(refName);
     let forceFocusCount = 0;
-    owl.useEffect(
+    useEffect(
         (el) => {
             if (el) {
                 el.focus();
@@ -75,55 +75,6 @@ export function useBus(bus, eventName, callback) {
         },
         () => []
     );
-}
-
-// -----------------------------------------------------------------------------
-// useEffect
-// -----------------------------------------------------------------------------
-
-const NO_OP = () => {};
-/**
- * @callback Effect
- * @param {...any} dependencies the dependencies computed by computeDependencies
- * @returns {void|(()=>void)} a cleanup function that reverses the side
- *      effects of the effect callback.
- */
-
-/**
- * This hook will run a callback when a component is mounted and patched, and
- * will run a cleanup function before patching and before unmounting the
- * the component.
- *
- * @param {Effect} effect the effect to run on component mount and/or patch
- * @param {()=>any[]} [computeDependencies=()=>[NaN]] a callback to compute
- *      dependencies that will decide if the effect needs to be cleaned up and
- *      run again. If the dependencies did not change, the effect will not run
- *      again. The default value returns an array containing only NaN because
- *      NaN !== NaN, which will cause the effect to rerun on every patch.
- */
-export function useEffect(effect, computeDependencies = () => [NaN]) {
-    let cleanup, dependencies;
-    onMounted(() => {
-        dependencies = computeDependencies();
-        cleanup = effect(...dependencies) || NO_OP;
-    });
-
-    let shouldReapplyOnPatch = false;
-    onWillPatch(() => {
-        const newDeps = computeDependencies();
-        shouldReapplyOnPatch = newDeps.some((val, i) => val !== dependencies[i]);
-        if (shouldReapplyOnPatch) {
-            cleanup();
-            dependencies = newDeps;
-        }
-    });
-    onPatched(() => {
-        if (shouldReapplyOnPatch) {
-            cleanup = effect(...dependencies) || NO_OP;
-        }
-    });
-
-    onWillUnmount(() => cleanup());
 }
 
 // -----------------------------------------------------------------------------

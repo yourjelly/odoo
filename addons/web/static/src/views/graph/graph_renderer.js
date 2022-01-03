@@ -6,9 +6,8 @@ import { formatFloat } from "@web/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
 import { useAssets } from "@web/core/assets";
-import { useEffect } from "@web/core/utils/hooks";
 
-const { Component, useRef } = owl;
+const { Component, useEffect, useRef } = owl;
 
 const NO_DATA = _lt("No data");
 
