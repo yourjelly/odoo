@@ -21,6 +21,7 @@ export class WebsitePreview extends Component {
 
         useEffect(() => {
             this.websiteService.currentWebsiteId = this.websiteId;
+            this.websiteService.context.showNewContentModal = this.props.action.context.params && this.props.action.context.params.display_new_content;
             return () => this.websiteService.currentWebsiteId = null;
         }, () => [this.props.action.context.params]);
 
@@ -30,6 +31,10 @@ export class WebsitePreview extends Component {
                 // the iframe's url (it is clearer for the user).
                 this.currentUrl = this.iframe.el.contentDocument.location.href;
                 history.pushState({}, this.props.action.display_name, this.currentUrl);
+
+                this.websiteService.currentMetadata = {
+                    path: this.currentUrl,
+                };
 
                 // Before leaving the iframe, its content is replicated on an
                 // underlying iframe, to avoid for white flashes (visible on
