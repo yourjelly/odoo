@@ -3,9 +3,8 @@ import { registry } from "@web/core/registry";
 import legacyFieldRegistry from "web.field_registry";
 import owlFieldRegistry from "web.field_registry_owl";
 import { ComponentAdapter } from "web.OwlCompatibility";
-import { useEffect } from "@web/core/utils/hooks";
 
-const { Component, useRef, xml } = owl;
+const { Component, useEffect, useRef, xml } = owl;
 
 const fieldRegistry = registry.category("fields");
 

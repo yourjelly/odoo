@@ -1,11 +1,10 @@
 /** @odoo-module alias=web.PivotRenderer **/
 
-    import { useEffect } from "@web/core/utils/hooks";
     import OwlAbstractRenderer from '../abstract_renderer_owl';
     import field_utils from 'web.field_utils';
     import { DEFAULT_INTERVAL, INTERVAL_OPTIONS, getIntervalOptions } from 'web.searchUtils';
 
-    const { Component, useExternalListener, useState } = owl;
+    const { Component, useEffect, useExternalListener, useState } = owl;
 
     class PivotCustomGroupByItem extends Component {
         constructor() {

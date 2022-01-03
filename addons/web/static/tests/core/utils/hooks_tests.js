@@ -104,6 +104,8 @@ QUnit.module("utils", () => {
 
         QUnit.module("useEffect");
 
+        // NXOWL: the tests should be located in owl if not yet there
+
         QUnit.test(
             "useEffect: effect runs on mount, is reapplied on patch, and is cleaned up on unmount and before reapplying",
             async function (assert) {

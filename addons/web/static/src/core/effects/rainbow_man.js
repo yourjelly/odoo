@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { useEffect } from "@web/core/utils/hooks";
 
-const { Component, useExternalListener } = owl;
+const { Component, useEffect, useExternalListener } = owl;
 
 /**
  * @typedef Common

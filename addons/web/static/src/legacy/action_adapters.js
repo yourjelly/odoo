@@ -6,15 +6,14 @@ import { ComponentAdapter } from "web.OwlCompatibility";
 import { objectToQuery } from "../core/browser/router_service";
 import { useDebugCategory } from "../core/debug/debug_context";
 import { Dialog } from "../core/dialog/dialog";
-import { useEffect, useService } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
-const { Component, useExternalListener, useComponent, xml } = owl;
+const { Component, useEffect, useExternalListener, useComponent, xml } = owl;
 
 const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
-
 
 class ActionAdapter extends ComponentAdapter {
     setup() {
@@ -62,7 +61,10 @@ class ActionAdapter extends ComponentAdapter {
                         "ACTION_MANAGER:UPDATE",
                         onActionManagerUpdate
                     );
-                    this.__widget.el.removeEventListener("history-back", this.wowlEnv.__onHistoryBack__);
+                    this.__widget.el.removeEventListener(
+                        "history-back",
+                        this.wowlEnv.__onHistoryBack__
+                    );
                 };
             },
             () => []

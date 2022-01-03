@@ -3,11 +3,9 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { DebugMenu } from "@web/core/debug/debug_menu";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
-import { useEffect } from "@web/core/utils/hooks";
 import { useLegacyRefs } from "@web/legacy/utils";
 
-
-const { useRef } = owl;
+const { useEffect } = owl;
 
 const LEGACY_SIZE_CLASSES = {
     "extra-large": "modal-xl",
