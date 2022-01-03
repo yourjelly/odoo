@@ -5,7 +5,7 @@ import { attr, many2one } from '@mail/model/model_field';
 import { insert, insertAndReplace, replace } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.attachment_card',
+    name: 'AttachmentCard',
     identifyingFields: ['attachmentList', 'attachment'],
     lifecycleHooks: {
         _created() {
@@ -65,7 +65,7 @@ registerModel({
         /**
          * Determines the attachment of this card.
          */
-        attachment: many2one('mail.attachment', {
+        attachment: many2one('Attachment', {
             inverse: 'attachmentCards',
             readonly: true,
             required: true,
@@ -73,7 +73,7 @@ registerModel({
         /**
          * States the attachmentList displaying this card.
          */
-        attachmentList: many2one('mail.attachment_list', {
+        attachmentList: many2one('AttachmentList', {
             inverse: 'attachmentCards',
             readonly: true,
             required: true,

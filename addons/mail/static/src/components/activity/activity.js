@@ -34,10 +34,10 @@ export class Activity extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.activity}
+     * @returns {Activity}
      */
     get activity() {
-        return this.messaging && this.messaging.models['mail.activity'].get(this.props.activityLocalId);
+        return this.messaging && this.messaging.models['Activity'].get(this.props.activityLocalId);
     }
 
     /**
@@ -107,7 +107,7 @@ export class Activity extends Component {
     /**
      * @private
      * @param {Object} detail
-     * @param {mail.attachment} detail.attachment
+     * @param {Attachment} detail.attachment
      */
     _onAttachmentCreated(detail) {
         this.activity.markAsDone({ attachments: [detail.attachment] });

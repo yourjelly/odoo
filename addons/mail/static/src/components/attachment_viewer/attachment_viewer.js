@@ -80,10 +80,10 @@ export class AttachmentViewer extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.attachment_viewer}
+     * @returns {AttachmentViewer}
      */
     get attachmentViewer() {
-        return this.messaging && this.messaging.models['mail.attachment_viewer'].get(this.props.localId);
+        return this.messaging && this.messaging.models['AttachmentViewer'].get(this.props.localId);
     }
 
     /**
@@ -139,8 +139,7 @@ export class AttachmentViewer extends Component {
      * @private
      */
     _download() {
-        const id = this.attachmentViewer.attachment.id;
-        this.env.services.navigate(`/web/content/ir.attachment/${id}/datas`, { download: true });
+        this.attachmentViewer.attachment.download();
     }
 
     /**

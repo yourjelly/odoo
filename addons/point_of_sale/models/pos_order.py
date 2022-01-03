@@ -223,7 +223,7 @@ class PosOrder(models.Model):
             .mapped('picking_ids.move_ids')\
             ._filter_anglo_saxon_moves(product)\
             .sorted(lambda x: x.date)
-        price_unit = product._compute_average_price(0, quantity, moves)
+        price_unit = product.with_company(self.company_id)._compute_average_price(0, quantity, moves)
         return price_unit
 
     name = fields.Char(string='Order Ref', required=True, readonly=True, copy=False, default='/')
@@ -406,11 +406,12 @@ class PosOrder(models.Model):
         for pos_order in self.filtered(lambda pos_order: pos_order.state not in ['draft', 'cancel']):
             raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
 
-    @api.model
-    def create(self, values):
-        session = self.env['pos.session'].browse(values['session_id'])
-        values = self._complete_values_from_session(session, values)
-        return super(PosOrder, self).create(values)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            session = self.env['pos.session'].browse(vals['session_id'])
+            vals = self._complete_values_from_session(session, vals)
+        return super().create(vals_list)
 
     @api.model
     def _complete_values_from_session(self, session, values):
@@ -821,7 +822,7 @@ class PosOrder(models.Model):
             'lines': [[0, 0, line] for line in order.lines.export_for_ui()],
             'statement_ids': [[0, 0, payment] for payment in order.payment_ids.export_for_ui()],
             'name': order.pos_reference,
-            'uid': re.search('([0-9]|-){14}', order.pos_reference).group(0),
+            'uid': re.search('([0-9-]){14}', order.pos_reference).group(0),
             'amount_paid': order.amount_paid,
             'amount_total': order.amount_total,
             'amount_tax': order.amount_tax,
@@ -842,6 +843,10 @@ class PosOrder(models.Model):
             'is_tipped': order.is_tipped,
             'tip_amount': order.tip_amount,
         }
+
+    def _get_fields_for_order_line(self):
+        """This function is here to be overriden"""
+        return []
 
     def export_for_ui(self):
         """ Returns a list of dict with each item having similar signature as the return of
@@ -932,17 +937,18 @@ class PosOrderLine(models.Model):
             'refunded_orderline_id': self.id,
         }
 
-    @api.model
-    def create(self, values):
-        if values.get('order_id') and not values.get('name'):
-            # set name based on the sequence specified on the config
-            config = self.env['pos.order'].browse(values['order_id']).session_id.config_id
-            if config.sequence_line_id:
-                values['name'] = config.sequence_line_id._next()
-        if not values.get('name'):
-            # fallback on any pos.order sequence
-            values['name'] = self.env['ir.sequence'].next_by_code('pos.order.line')
-        return super(PosOrderLine, self).create(values)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('order_id') and not vals.get('name'):
+                # set name based on the sequence specified on the config
+                config = self.env['pos.order'].browse(vals['order_id']).session_id.config_id
+                if config.sequence_line_id:
+                    vals['name'] = config.sequence_line_id._next()
+            if not vals.get('name'):
+                # fallback on any pos.order sequence
+                vals['name'] = self.env['ir.sequence'].next_by_code('pos.order.line')
+        return super().create(vals_list)
 
     def write(self, values):
         if values.get('pack_lot_line_ids'):

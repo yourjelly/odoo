@@ -49,7 +49,7 @@ class MrpUnbuild(models.Model):
         states={'done': [('readonly', True)]}, check_company=True)
     mo_bom_id = fields.Many2one('mrp.bom', 'Bill of Material used on the Production Order', related='mo_id.bom_id')
     lot_id = fields.Many2one(
-        'stock.production.lot', 'Lot/Serial Number',
+        'stock.lot', 'Lot/Serial Number',
         domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True,
         states={'done': [('readonly', True)]}, help="Lot/Serial Number of the product to unbuild.")
     has_tracking=fields.Selection(related='product_id.tracking', readonly=True)
@@ -108,11 +108,12 @@ class MrpUnbuild(models.Model):
             if unbuild.product_qty <= 0:
                 raise ValueError(_('Unbuild Order product quantity has to be strictly positive.'))
 
-    @api.model
-    def create(self, vals):
-        if not vals.get('name') or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('mrp.unbuild') or _('New')
-        return super(MrpUnbuild, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('name') or vals['name'] == _('New'):
+                vals['name'] = self.env['ir.sequence'].next_by_code('mrp.unbuild') or _('New')
+        return super().create(vals_list)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_done(self):

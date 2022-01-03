@@ -88,25 +88,24 @@ class PickingType(models.Model):
         'res.company', 'Company', required=True,
         default=lambda s: s.env.company.id, index=True)
 
-    @api.model
-    def create(self, vals):
-        if 'sequence_id' not in vals or not vals['sequence_id']:
-            if vals['warehouse_id']:
-                wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
-                vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
-                    'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
-                    'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
-                    'company_id': wh.company_id.id,
-                }).id
-            else:
-                vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
-                    'name': _('Sequence') + ' ' + vals['sequence_code'],
-                    'prefix': vals['sequence_code'], 'padding': 5,
-                    'company_id': vals.get('company_id') or self.env.company.id,
-                }).id
-
-        picking_type = super(PickingType, self).create(vals)
-        return picking_type
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'sequence_id' not in vals or not vals['sequence_id']:
+                if vals['warehouse_id']:
+                    wh = self.env['stock.warehouse'].browse(vals['warehouse_id'])
+                    vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
+                        'name': wh.name + ' ' + _('Sequence') + ' ' + vals['sequence_code'],
+                        'prefix': wh.code + '/' + vals['sequence_code'] + '/', 'padding': 5,
+                        'company_id': wh.company_id.id,
+                    }).id
+                else:
+                    vals['sequence_id'] = self.env['ir.sequence'].sudo().create({
+                        'name': _('Sequence') + ' ' + vals['sequence_code'],
+                        'prefix': vals['sequence_code'], 'padding': 5,
+                        'company_id': vals.get('company_id') or self.env.company.id,
+                    }).id
+        return super().create(vals_list)
 
     def write(self, vals):
         if 'company_id' in vals:
@@ -333,7 +332,7 @@ class Picking(models.Model):
         'Has Scrap Moves', compute='_has_scrap_move')
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
-        required=True, readonly=True,
+        required=True, readonly=True, index=True,
         states={'draft': [('readonly', False)]})
     picking_type_code = fields.Selection(
         related='picking_type_id.code',
@@ -356,7 +355,7 @@ class Picking(models.Model):
         default=lambda self: self.env.user)
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
     move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|',('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
-    move_line_nosuggest_ids = fields.One2many('stock.move.line', 'picking_id', domain=[('product_qty', '=', 0.0)])
+    move_line_nosuggest_ids = fields.One2many('stock.move.line', 'picking_id', domain=[('reserved_qty', '=', 0.0)])
     move_line_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_move_line_exist',
         help='Check the existence of pack operation on the picking')
@@ -402,10 +401,26 @@ class Picking(models.Model):
         ('available', 'Available'),
         ('expected', 'Expected'),
         ('late', 'Late')], compute='_compute_products_availability')
+    show_set_qty_button = fields.Boolean(compute='_compute_show_qty_button')
+    show_clear_qty_button = fields.Boolean(compute='_compute_show_qty_button')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
+
+    @api.depends('show_validate', 'immediate_transfer',
+                 'move_ids.reserved_availability',
+                 'move_ids.quantity_done')
+    def _compute_show_qty_button(self):
+        self.show_set_qty_button = False
+        self.show_clear_qty_button = False
+        for picking in self:
+            if not picking.show_validate or picking.immediate_transfer:
+                continue
+            if any(float_is_zero(m.quantity_done, precision_rounding=m.product_uom.rounding) and not float_is_zero(m.reserved_availability, precision_rounding=m.product_uom.rounding) for m in picking.move_ids):
+                picking.show_set_qty_button = True
+            elif any(not float_is_zero(m.quantity_done, precision_rounding=m.product_uom.rounding) and float_compare(m.quantity_done, m.reserved_availability, precision_rounding=m.product_uom.rounding) == 0 for m in picking.move_ids):
+                picking.show_clear_qty_button = True
 
     def _compute_has_tracking(self):
         for picking in self:
@@ -708,32 +723,37 @@ class Picking(models.Model):
             "location_dest_id": self.location_dest_id
         })
 
-    @api.model
-    def create(self, vals):
-        defaults = self.default_get(['name', 'picking_type_id'])
-        picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
-        if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
-            if picking_type.sequence_id:
-                vals['name'] = picking_type.sequence_id.next_by_id()
+    @api.model_create_multi
+    def create(self, vals_list):
+        scheduled_dates = []
+        for vals in vals_list:
+            defaults = self.default_get(['name', 'picking_type_id'])
+            picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id', defaults.get('picking_type_id')))
+            if vals.get('name', '/') == '/' and defaults.get('name', '/') == '/' and vals.get('picking_type_id', defaults.get('picking_type_id')):
+                if picking_type.sequence_id:
+                    vals['name'] = picking_type.sequence_id.next_by_id()
 
-        # make sure to write `schedule_date` *after* the `stock.move` creation in
-        # order to get a determinist execution of `_set_scheduled_date`
-        scheduled_date = vals.pop('scheduled_date', False)
-        res = super(Picking, self).create(vals)
-        if scheduled_date:
-            res.with_context(mail_notrack=True).write({'scheduled_date': scheduled_date})
-        res._autoconfirm_picking()
+            # make sure to write `schedule_date` *after* the `stock.move` creation in
+            # order to get a determinist execution of `_set_scheduled_date`
+            scheduled_dates.append(vals.pop('scheduled_date', False))
 
-        # set partner as follower
-        if vals.get('partner_id'):
-            for picking in res.filtered(lambda p: p.location_id.usage == 'supplier' or p.location_dest_id.usage == 'customer'):
-                picking.message_subscribe([vals.get('partner_id')])
-        if vals.get('picking_type_id'):
-            for move in res.move_ids:
-                if not move.description_picking:
-                    move.description_picking = move.product_id.with_context(lang=move._get_lang())._get_description(move.picking_id.picking_type_id)
+        pickings = super().create(vals_list)
 
-        return res
+        for picking, scheduled_date in zip(pickings, scheduled_dates):
+            if scheduled_date:
+                picking.with_context(mail_notrack=True).write({'scheduled_date': scheduled_date})
+        pickings._autoconfirm_picking()
+
+        for picking, vals in zip(pickings, vals_list):
+            # set partner as follower
+            if vals.get('partner_id'):
+                if picking.location_id.usage == 'supplier' or picking.location_dest_id.usage == 'customer':
+                    picking.message_subscribe([vals.get('partner_id')])
+            if vals.get('picking_type_id'):
+                for move in picking.move_ids:
+                    if not move.description_picking:
+                        move.description_picking = move.product_id.with_context(lang=move._get_lang())._get_description(move.picking_id.picking_type_id)
+        return pickings
 
     def write(self, vals):
         if vals.get('picking_type_id') and any(picking.state != 'draft' for picking in self):
@@ -867,7 +887,7 @@ class Picking(models.Model):
         return move_ids_without_package.filtered(lambda move: not move.scrap_ids)
 
     def _check_move_lines_map_quant_package(self, package):
-        return package._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml: ml.package_id == package), 'product_qty')
+        return package._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml: ml.package_id == package), 'reserved_qty')
 
     def _get_entire_pack_location_dest(self, move_line_ids):
         location_dest_ids = move_line_ids.mapped('location_dest_id')
@@ -936,7 +956,7 @@ class Picking(models.Model):
             picking_type = picking.picking_type_id
             precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             no_quantities_done = all(float_is_zero(move_line.qty_done, precision_digits=precision_digits) for move_line in picking.move_line_ids.filtered(lambda m: m.state not in ('done', 'cancel')))
-            no_reserved_quantities = all(float_is_zero(move_line.product_qty, precision_rounding=move_line.product_uom_id.rounding) for move_line in picking.move_line_ids)
+            no_reserved_quantities = all(float_is_zero(move_line.reserved_qty, precision_rounding=move_line.product_uom_id.rounding) for move_line in picking.move_line_ids)
             if no_reserved_quantities and no_quantities_done:
                 pickings_without_quantities |= picking
 
@@ -1006,7 +1026,10 @@ class Picking(models.Model):
         return True
 
     def action_set_quantities_to_reservation(self):
-        self.move_ids._set_quantities_to_reservation()
+        self.move_ids.filtered(lambda m: float_is_zero(m.quantity_done, precision_rounding=m.product_uom.rounding))._set_quantities_to_reservation()
+
+    def action_clear_quantities_to_zero(self):
+        self.move_ids.filtered(lambda m: float_compare(m.quantity_done, m.reserved_availability, precision_rounding=m.product_uom.rounding) == 0)._clear_quantities_to_zero()
 
     def _pre_action_done_hook(self):
         if not self.env.context.get('skip_immediate'):
@@ -1337,28 +1360,28 @@ class Picking(models.Model):
             precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             if float_is_zero(move_line_ids[0].qty_done, precision_digits=precision_digits):
                 for line in move_line_ids:
-                    line.qty_done = line.product_uom_qty
+                    line.qty_done = line.reserved_uom_qty
 
             for ml in move_line_ids:
-                if float_compare(ml.qty_done, ml.product_uom_qty,
+                if float_compare(ml.qty_done, ml.reserved_uom_qty,
                                  precision_rounding=ml.product_uom_id.rounding) >= 0:
                     move_lines_to_pack |= ml
                 else:
                     quantity_left_todo = float_round(
-                        ml.product_uom_qty - ml.qty_done,
+                        ml.reserved_uom_qty - ml.qty_done,
                         precision_rounding=ml.product_uom_id.rounding,
                         rounding_method='UP')
                     done_to_keep = ml.qty_done
                     new_move_line = ml.copy(
-                        default={'product_uom_qty': 0, 'qty_done': ml.qty_done})
-                    vals = {'product_uom_qty': quantity_left_todo, 'qty_done': 0.0}
+                        default={'reserved_uom_qty': 0, 'qty_done': ml.qty_done})
+                    vals = {'reserved_uom_qty': quantity_left_todo, 'qty_done': 0.0}
                     if pick.picking_type_id.code == 'incoming':
                         if ml.lot_id:
                             vals['lot_id'] = False
                         if ml.lot_name:
                             vals['lot_name'] = False
                     ml.write(vals)
-                    new_move_line.write({'product_uom_qty': done_to_keep})
+                    new_move_line.write({'reserved_uom_qty': done_to_keep})
                     move_lines_to_pack |= new_move_line
             if not package.package_type_id:
                 package_type = move_lines_to_pack.move_id.product_packaging_id.package_type_id
@@ -1368,7 +1391,7 @@ class Picking(models.Model):
                 default_dest_location = move_lines_to_pack._get_default_dest_location()
                 move_lines_to_pack.location_dest_id = default_dest_location._get_putaway_strategy(
                     product=move_lines_to_pack.product_id,
-                    quantity=move_lines_to_pack.product_uom_qty,
+                    quantity=move_lines_to_pack.reserved_uom_qty,
                     package=package)
             move_lines_to_pack.write({
                 'result_package_id': package.id,
@@ -1400,7 +1423,7 @@ class Picking(models.Model):
                 and not ml.result_package_id
             )
             if not move_line_ids:
-                move_line_ids = picking_move_lines.filtered(lambda ml: float_compare(ml.product_uom_qty, 0.0,
+                move_line_ids = picking_move_lines.filtered(lambda ml: float_compare(ml.reserved_uom_qty, 0.0,
                                      precision_rounding=ml.product_uom_id.rounding) > 0 and float_compare(ml.qty_done, 0.0,
                                      precision_rounding=ml.product_uom_id.rounding) == 0)
             if move_line_ids:

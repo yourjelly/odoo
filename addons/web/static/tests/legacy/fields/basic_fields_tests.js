@@ -6409,6 +6409,33 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
+    QUnit.test('priority widget tooltip', async function (assert) {
+        assert.expect(2);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <sheet>
+                        <group>
+                            <field name="selection" widget="priority"/>
+                        </group>
+                    </sheet>
+                </form>`,
+            res_id: 1,
+        });
+
+        // check title attribute (for basic html tooltip on all the stars)
+        const $stars = form.$('.o_field_widget.o_priority').find('a.o_priority_star');
+        assert.strictEqual($stars[0].title, 'Selection: Blocked',
+            "Should set field label and correct selection label as title attribute (tooltip)");
+        assert.strictEqual($stars[1].title, 'Selection: Done',
+            "Should set field label and correct selection label as title attribute (tooltip)");
+
+        form.destroy();
+    });
+
     QUnit.test('priority widget in form view', async function (assert) {
         assert.expect(22);
 
@@ -8054,6 +8081,55 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$(".o_domain_show_selection_button").text().trim(), "2 record(s)");
 
         form.destroy();
+    });
+
+    QUnit.test('domain field: edit domain with dynamic content', async function (assert) {
+        assert.expect(2);
+
+        const originalDebug = odoo.debug;
+        odoo.debug = true;
+        let rawDomain = `
+            [
+                ["date", ">=", datetime.datetime.combine(context_today() + relativedelta(days = -365), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")]
+            ]
+        `;
+        this.data.partner.records[0].foo = rawDomain;
+        this.data.partner.fields.bar.type = "char";
+        this.data.partner.records[0].bar = "partner";
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="bar"/>
+                    <field name="foo" widget="domain" options="{'model': 'bar'}"/>
+                </form>`,
+            async mockRPC(route, args) {
+                if (args.method === 'write') {
+                    assert.strictEqual(args.args[1].foo, rawDomain);
+                }
+                return this._super.apply(this, arguments);
+            },
+            res_id: 1,
+            viewOptions: {
+                mode: 'edit',
+            },
+        });
+
+        assert.strictEqual(form.$(".o_domain_debug_input").val(), rawDomain);
+
+        rawDomain = `
+            [
+                ["date", ">=", datetime.datetime.combine(context_today() + relativedelta(days = -1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")]
+            ]
+        `;
+        await testUtils.fields.editAndTrigger(form.$('.o_domain_debug_input'), rawDomain, ["change"]);
+        await testUtils.form.clickSave(form);
+
+        form.destroy();
+        odoo.debug = originalDebug;
     });
 
     QUnit.module('FieldProgressBar');

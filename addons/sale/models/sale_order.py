@@ -461,7 +461,8 @@ class SaleOrder(models.Model):
     @api.depends('partner_id')
     def _compute_user_id(self):
         for order in self:
-            order.user_id = order.partner_id.user_id or order.partner_id.commercial_partner_id.user_id or self.env.user
+            if not order.user_id:
+                order.user_id = order.partner_id.user_id or order.partner_id.commercial_partner_id.user_id or self.env.user
 
     @api.depends('partner_id', 'user_id')
     def _compute_team_id(self):
@@ -533,7 +534,8 @@ class SaleOrder(models.Model):
             price_unit = self.env['account.tax']._fix_tax_included_price_company(
                 line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
             if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
-                discount = max(0, (price_unit - product.price) * 100 / price_unit)
+                price_discount_unrounded = self.pricelist_id.get_product_price(product, line.product_uom_qty, self.partner_id, self.date_order, line.product_uom.id)
+                discount = max(0, (price_unit - price_discount_unrounded) * 100 / price_unit)
             else:
                 discount = 0
             lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
@@ -876,6 +878,9 @@ class SaleOrder(models.Model):
                 'context': {'default_order_id': self.id},
                 'target': 'new'
             }
+        return self._action_cancel()
+
+    def _action_cancel(self):
         inv = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')
         inv.button_cancel()
         return self.write({'state': 'cancel'})

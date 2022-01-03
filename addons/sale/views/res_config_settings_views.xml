@@ -61,7 +61,7 @@
                                 </div>
                                 <div class="content-group" attrs="{'invisible': [('group_uom','=',False)]}">
                                     <div class="mt8">
-                                        <button name="%(uom.product_uom_form_action)d" icon="fa-arrow-right" type="action" string="Units of Measure" class="btn-link"/>
+                                        <button name="%(uom.product_uom_categ_form_action)d" icon="fa-arrow-right" type="action" string="Units of Measure" class="btn-link"/>
                                     </div>
                                 </div>
                             </div>
@@ -211,18 +211,6 @@
                                 <div class="row mt16">
                                     <label for="confirmation_mail_template_id" class="col-lg-4 o_light_label"/>
                                     <field name="confirmation_mail_template_id" class="oe_inline"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-6 o_setting_box" id="invoice_delivery_addresses">
-                            <div class="o_setting_left_pane">
-                                <field name="group_sale_delivery_address"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="group_sale_delivery_address"/>
-                                <a href="https://www.odoo.com/documentation/15.0/applications/sales/sales/send_quotations/different_addresses.html" title="Documentation" class="o_doc_link" target="_blank"></a>
-                                <div class="text-muted">
-                                    Select specific invoice and delivery addresses
                                 </div>
                             </div>
                         </div>

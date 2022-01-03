@@ -10,8 +10,9 @@ export class MainComponentsContainer extends Component {
     }
 
     handleComponentError(error, C) {
-        // remove the faulty component
+        // remove the faulty component and rerender without it
         this.Components.splice(this.Components.indexOf(C), 1);
+        this.render();
         /**
          * we rethrow the error to notify the user something bad happened.
          * We do it after a tick to make sure owl can properly finish its
@@ -27,7 +28,7 @@ MainComponentsContainer.template = tags.xml`
 <div>
     <t t-foreach="Components" t-as="C" t-key="C[0]">
         <NotUpdatable>
-            <ErrorHandler onError="error => handleComponentError(error, C)">
+            <ErrorHandler onError="error => this.handleComponentError(error, C)">
                 <t t-component="C[1].Component" t-props="C[1].props"/>
             </ErrorHandler>
         </NotUpdatable>

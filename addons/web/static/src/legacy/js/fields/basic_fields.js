@@ -2555,7 +2555,7 @@ var PriorityWidget = AbstractField.extend({
         const isReadonly = this.record.evalModifiers(this.attrs.modifiers).readonly;
         _.each(this.field.selection.slice(1), function (choice, index) {
             const tag = isReadonly ? '<span>' : '<a href="#">';
-            self.$el.append(self._renderStar(tag, index_value >= index + 1, index + 1, choice[1], index_value));
+            self.$el.append(self._renderStar(tag, index_value >= index + 1, index + 1, `${self.string}: ${choice[1]}`, index_value));
         });
     },
 
@@ -3795,7 +3795,7 @@ var FieldDomain = AbstractField.extend({
         // we don't want to recompute the count if the domain has been edited
         // from the debug textarea (for performance reasons, as it might be costly)
         this.debugEdition = !!e.data.debug;
-        this._setValue(Domain.prototype.arrayToString(e.data.domain));
+        this._setValue(e.data.domain);
     },
     /**
      * Called when the in-dialog domain selector value is confirmed

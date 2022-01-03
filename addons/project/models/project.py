@@ -225,6 +225,7 @@ class Project(models.Model):
         help="Analytic account to which this project is linked for financial management. "
              "Use an analytic account to record cost and revenue on your project.")
     analytic_account_balance = fields.Monetary(related="analytic_account_id.balance")
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
 
     favorite_user_ids = fields.Many2many(
         'res.users', 'project_favorite_user_rel', 'project_id', 'user_id',
@@ -481,14 +482,15 @@ class Project(models.Model):
             self.browse(res[0]).type_ids += self.env['project.task.type'].sudo().create({'name': _('New')})
         return res
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         # Prevent double project creation
         self = self.with_context(mail_create_nosubscribe=True)
-        project = super(Project, self).create(vals)
-        if project.privacy_visibility == 'portal' and project.partner_id:
-            project.message_subscribe(project.partner_id.ids)
-        return project
+        projects = super().create(vals_list)
+        for project in projects:
+            if project.privacy_visibility == 'portal' and project.partner_id:
+                project.message_subscribe(project.partner_id.ids)
+        return projects
 
     def write(self, vals):
         # directly compute is_favorite to dodge allow write access right
@@ -1110,7 +1112,7 @@ class Task(models.Model):
              "Use an analytic account to record cost and revenue on your task. "
              "If empty, the analytic account of the project will be used.")
     project_analytic_account_id = fields.Many2one('account.analytic.account', string='Project Analytic Account', related='project_id.analytic_account_id')
-    analytic_tag_ids = fields.Many2many('account.analytic.tag',
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string="Analytic Tags",
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", check_company=True)
 
     @property
@@ -1564,6 +1566,12 @@ class Task(models.Model):
                 )
                 if partner_id:
                     vals['partner_id'] = partner_id
+        if vals.get('project_id'):
+            project = self.env['project.project'].browse(vals.get('project_id'))
+            if project.analytic_account_id:
+                vals['analytic_account_id'] = project.analytic_account_id.id
+            if project.analytic_tag_ids:
+                vals['analytic_tag_ids'] = [Command.set(project.analytic_tag_ids.ids)]
 
         return vals
 
@@ -2189,6 +2197,11 @@ class Task(models.Model):
 
     def _rating_get_parent_field_name(self):
         return 'project_id'
+
+    def rating_get_rated_partner_id(self):
+        """ Overwrite since we have user_ids and not user_id """
+        tasks_with_one_user = self.filtered(lambda task: len(task.user_ids) == 1 and task.user_ids.partner_id)
+        return tasks_with_one_user.user_ids.partner_id or self.env['res.partner']
 
     # ---------------------------------------------------
     # Privacy

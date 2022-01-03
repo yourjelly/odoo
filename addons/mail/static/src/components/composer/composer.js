@@ -55,10 +55,10 @@ export class Composer extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.composer_view}
+     * @returns {ComposerView}
      */
     get composerView() {
-        return this.messaging && this.messaging.models['mail.composer_view'].get(this.props.composerViewLocalId);
+        return this.messaging && this.messaging.models['ComposerView'].get(this.props.composerViewLocalId);
     }
 
     /**
@@ -332,17 +332,8 @@ Object.assign(Composer, {
         },
         isCompact: Boolean,
         isExpandable: Boolean,
-        /**
-         * If set, keyboard shortcuts from text input to send message.
-         * If not set, will use default values from `ComposerTextInput`.
-         */
-        textInputSendShortcuts: {
-            type: Array,
-            element: String,
-            optional: true,
-        },
     },
     template: 'mail.Composer',
 });
 
-registerMessagingComponent(Composer, { propsCompareDepth: { textInputSendShortcuts: 1 } });
+registerMessagingComponent(Composer);

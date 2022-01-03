@@ -4,7 +4,7 @@ import { patchRecordMethods } from '@mail/model/model_core';
 // ensure that the model definition is loaded before the patch
 import '@mail/models/discuss_sidebar_category_item/discuss_sidebar_category_item';
 
-patchRecordMethods('mail.discuss_sidebar_category_item', {
+patchRecordMethods('DiscussSidebarCategoryItem', {
     /**
      * @override
      */
@@ -14,6 +14,16 @@ patchRecordMethods('mail.discuss_sidebar_category_item', {
                 return this.channel.correspondent.avatarUrl;
             }
             return '/mail/static/src/img/smiley/avatar.jpg';
+        }
+        return this._super();
+    },
+    /**
+     * @override
+     */
+    _computeCategoryCounterContribution() {
+        switch (this.channel.channel_type) {
+            case 'livechat':
+                return this.channel.localMessageUnreadCounter > 0 ? 1 : 0;
         }
         return this._super();
     },

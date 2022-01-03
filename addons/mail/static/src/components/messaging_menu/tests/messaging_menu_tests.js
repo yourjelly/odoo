@@ -52,59 +52,17 @@ QUnit.test('[technical] messaging not created then becomes created', async funct
     await createMessagingMenuComponent();
     assert.containsOnce(
         document.body,
-        '.o_MessagingMenu',
-        "should have messaging menu even when messaging is not yet created"
+        '.o_MessagingMenuContainer_spinner',
+        "messaging menu container should have spinner when messaging is not yet created"
     );
 
     // simulate messaging becoming created
-    messagingBeforeCreationDeferred.resolve();
-    await nextAnimationFrame();
+    await afterNextRender(() => messagingBeforeCreationDeferred.resolve());
     assert.containsOnce(
         document.body,
         '.o_MessagingMenu',
-        "should still contain messaging menu after messaging has been created"
+        "messaging menu container should contain messaging menu after messaging has been created"
     );
-});
-
-QUnit.test('[technical] no crash on attempting opening messaging menu when messaging not created', async function (assert) {
-    /**
-     * Creation of messaging in env is async due to generation of models being
-     * async. Generation of models is async because it requires parsing of all
-     * JS modules that contain pieces of model definitions.
-     *
-     * Time of having no messaging is very short, almost imperceptible by user
-     * on UI, but the display should not crash during this critical time period.
-     *
-     * Messaging menu is not expected to be open on click because state of
-     * messaging menu requires messaging being created.
-     */
-    assert.expect(2);
-
-    const { createMessagingMenuComponent } = await this.start({
-        messagingBeforeCreationDeferred: new Promise(() => {}), // keep messaging not created
-        waitUntilMessagingCondition: 'none',
-    });
-    await createMessagingMenuComponent();
-    assert.containsOnce(
-        document.body,
-        '.o_MessagingMenu',
-        "should have messaging menu even when messaging is not yet created"
-    );
-
-    let error;
-    try {
-        document.querySelector('.o_MessagingMenu_toggler').click();
-        await nextAnimationFrame();
-    } catch (err) {
-        error = err;
-    }
-    assert.notOk(
-        !!error,
-        "Should not crash on attempt to open messaging menu when messaging not created"
-    );
-    if (error) {
-        throw error;
-    }
 });
 
 QUnit.test('messaging not initialized', async function (assert) {
@@ -629,7 +587,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -642,7 +600,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -664,7 +622,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -677,7 +635,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -702,7 +660,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -715,7 +673,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -737,7 +695,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 10,
                     model: 'mail.channel',
                 }).localId
@@ -750,7 +708,7 @@ QUnit.test('filtered previews', async function (assert) {
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
             .o_ThreadPreview[data-thread-local-id="${
-                this.messaging.models['mail.thread'].findFromIdentifyingData({
+                this.messaging.models['Thread'].findFromIdentifyingData({
                     id: 20,
                     model: 'mail.channel',
                 }).localId
@@ -1080,7 +1038,7 @@ QUnit.test('Group chat should be displayed inside the chat section of the messag
     assert.strictEqual(
         document.querySelectorAll(`
             .o_MessagingMenu_dropdownMenu
-            .o_ThreadPreview[data-thread-local-id="${this.messaging.models['mail.thread'].findFromIdentifyingData({
+            .o_ThreadPreview[data-thread-local-id="${this.messaging.models['Thread'].findFromIdentifyingData({
                 id: 11,
                 model: 'mail.channel',
              }).localId}"]`).length,

@@ -10,7 +10,7 @@ const getNextGuestNameInputId = (function () {
 })();
 
 registerModel({
-    name: 'mail.welcome_view',
+    name: 'WelcomeView',
     identifyingFields: ['messaging'],
     lifecycleHooks: {
         _created() {
@@ -27,7 +27,7 @@ registerModel({
          */
         async joinChannel() {
             if (this.hasGuestNameChanged) {
-                await this.messaging.models['mail.guest'].performRpcGuestUpdateName({
+                await this.messaging.models['Guest'].performRpcGuestUpdateName({
                     id: this.messaging.currentGuest.id,
                     name: this.pendingGuestName.trim(),
                 });
@@ -136,14 +136,14 @@ registerModel({
          * States the channel to redirect to once the user clicks on the
          * 'joinButton'.
          */
-        channel: one2one('mail.thread', {
+        channel: one2one('Thread', {
             readonly: true,
             required: true,
         }),
         /**
          * States discuss public view on which this welcome view is displayed.
          */
-        discussPublicView: one2one('mail.discuss_public_view', {
+        discussPublicView: one2one('DiscussPublicView', {
             inverse: 'welcomeView',
             readonly: true,
             required: true,
@@ -190,7 +190,7 @@ registerModel({
         /**
          * States the media preview embedded in this welcome view.
          */
-        mediaPreview: one2one('mail.media_preview', {
+        mediaPreview: one2one('MediaPreview', {
             compute: '_computeMediaPreview',
             isCausal: true,
             readonly: true,

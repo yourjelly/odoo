@@ -43,10 +43,10 @@ export class ChatWindow extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.chat_window}
+     * @returns {ChatWindow}
      */
     get chatWindow() {
-        return this.messaging && this.messaging.models['mail.chat_window'].get(this.props.chatWindowLocalId);
+        return this.messaging && this.messaging.models['ChatWindow'].get(this.props.chatWindowLocalId);
     }
 
     /**
@@ -160,7 +160,7 @@ export class ChatWindow extends Component {
      * @param {function} res
      */
     _onAutocompleteSource(req, res) {
-        this.messaging.models['mail.partner'].imSearch({
+        this.messaging.models['Partner'].imSearch({
             callback: (partners) => {
                 const suggestions = partners.map(partner => {
                     return {

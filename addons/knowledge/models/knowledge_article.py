@@ -186,10 +186,17 @@ class Article(models.Model):
             # only need to resequence after the duplicate
             children = children[duplicate_index:]
             for i in range(len(children)):
-                if i + start_sequence not in write_vals_by_sequence:
-                    write_vals_by_sequence[i + start_sequence] = children[i]
+                if i+start_sequence not in write_vals_by_sequence:
+                    write_vals_by_sequence[i+start_sequence] = children[i]
                 else:
-                    write_vals_by_sequence[i + start_sequence] |= children[i]
+                    write_vals_by_sequence[i+start_sequence] |= children[i]
 
         for sequence in write_vals_by_sequence:
             write_vals_by_sequence[sequence].write({'sequence': sequence})
+
+    def show_article(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('knowledge.knowledge_article_dashboard_action')
+        if 'res_id' in self.env.context:
+            action['res_id'] = self.env.context['res_id']
+        # TODO: else -> Provide the res_id of an article or show an action helper ?
+        return action

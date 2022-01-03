@@ -7,7 +7,11 @@
     'description': "Centralise, manage, share and grow your knowledge library",
     'category': 'Knowledge',
     'version': '0.1',
-    'depends': ['web', 'mail'],
+    'depends': [
+        'web',
+        'web_editor',
+        'mail'
+    ],
     'data': [
         'data/knowledge_data.xml',
         'views/knowledge_views.xml',
@@ -15,13 +19,23 @@
         'security/ir.model.access.csv',
         'security/security.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'knowledge/static/src/webclient/commands/*.js',
-        ],
-    },
     'installable': True,
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'assets': {
+        'web.assets_backend': [
+            'knowledge/static/src/scss/knowledge_views.scss',
+            'knowledge/static/src/js/knowledge_controller.js',
+            'knowledge/static/src/js/knowledge_model.js',
+            'knowledge/static/src/js/knowledge_renderers.js',
+            'knowledge/static/src/js/knowledge_views.js',
+            'knowledge/static/src/js/wysiwyg.js'
+            'knowledge/static/src/webclient/commands/*.js',
+        ],
+        'web.assets_qweb': [
+            'knowledge/static/src/xml/knowledge_editor.xml',
+            'knowledge/static/src/xml/knowledge_templates.xml'
+        ]
+    }
 }

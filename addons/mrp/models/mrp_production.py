@@ -105,7 +105,7 @@ class MrpProduction(models.Model):
         readonly=True, required=True,
         states={'draft': [('readonly', False)]}, domain="[('category_id', '=', product_uom_category_id)]")
     lot_producing_id = fields.Many2one(
-        'stock.production.lot', string='Lot/Serial Number', copy=False,
+        'stock.lot', string='Lot/Serial Number', copy=False,
         domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
     qty_producing = fields.Float(string="Quantity Producing", digits='Product Unit of Measure', copy=False)
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
@@ -113,7 +113,7 @@ class MrpProduction(models.Model):
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
         domain="[('code', '=', 'mrp_operation'), ('company_id', '=', company_id)]",
-        default=_get_default_picking_type, required=True, check_company=True)
+        default=_get_default_picking_type, required=True, check_company=True, index=True)
     use_create_components_lots = fields.Boolean(related='picking_type_id.use_create_components_lots')
     location_src_id = fields.Many2one(
         'stock.location', 'Components Location',
@@ -765,37 +765,39 @@ class MrpProduction(models.Model):
                     production.date_planned_finished = new_date_planned_start + datetime.timedelta(hours=1)
         return res
 
-    @api.model
-    def create(self, values):
-        # Remove from `move_finished_ids` the by-product moves and then move `move_byproduct_ids`
-        # into `move_finished_ids` to avoid duplicate and inconsistency.
-        if values.get('move_finished_ids', False):
-            values['move_finished_ids'] = list(filter(lambda move: move[2]['byproduct_id'] is False, values['move_finished_ids']))
-        if values.get('move_byproduct_ids', False):
-            values['move_finished_ids'] = values.get('move_finished_ids', []) + values['move_byproduct_ids']
-            del values['move_byproduct_ids']
-        if not values.get('name', False) or values['name'] == _('New'):
-            picking_type_id = values.get('picking_type_id') or self._get_default_picking_type()
-            picking_type_id = self.env['stock.picking.type'].browse(picking_type_id)
-            if picking_type_id:
-                values['name'] = picking_type_id.sequence_id.next_by_id()
-            else:
-                values['name'] = self.env['ir.sequence'].next_by_code('mrp.production') or _('New')
-        if not values.get('procurement_group_id'):
-            procurement_group_vals = self._prepare_procurement_group_vals(values)
-            values['procurement_group_id'] = self.env["procurement.group"].create(procurement_group_vals).id
-        production = super(MrpProduction, self).create(values)
-        (production.move_raw_ids | production.move_finished_ids).write({
-            'group_id': production.procurement_group_id.id,
-            'origin': production.name
-        })
-        production.move_raw_ids.write({'date': production.date_planned_start})
-        production.move_finished_ids.write({'date': production.date_planned_finished})
-        # Trigger move_raw creation when importing a file
-        if 'import_file' in self.env.context:
-            production._onchange_move_raw()
-            production._onchange_move_finished()
-        return production
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Remove from `move_finished_ids` the by-product moves and then move `move_byproduct_ids`
+            # into `move_finished_ids` to avoid duplicate and inconsistency.
+            if vals.get('move_finished_ids', False):
+                vals['move_finished_ids'] = list(filter(lambda move: move[2]['byproduct_id'] is False, vals['move_finished_ids']))
+            if vals.get('move_byproduct_ids', False):
+                vals['move_finished_ids'] = vals.get('move_finished_ids', []) + vals['move_byproduct_ids']
+                del vals['move_byproduct_ids']
+            if not vals.get('name', False) or vals['name'] == _('New'):
+                picking_type_id = vals.get('picking_type_id') or self._get_default_picking_type()
+                picking_type_id = self.env['stock.picking.type'].browse(picking_type_id)
+                if picking_type_id:
+                    vals['name'] = picking_type_id.sequence_id.next_by_id()
+                else:
+                    vals['name'] = self.env['ir.sequence'].next_by_code('mrp.production') or _('New')
+            if not vals.get('procurement_group_id'):
+                procurement_group_vals = self._prepare_procurement_group_vals(vals)
+                vals['procurement_group_id'] = self.env["procurement.group"].create(procurement_group_vals).id
+        productions = super().create(vals_list)
+        for production in productions:
+            (production.move_raw_ids | production.move_finished_ids).write({
+                'group_id': production.procurement_group_id.id,
+                'origin': production.name
+            })
+            production.move_raw_ids.write({'date': production.date_planned_start})
+            production.move_finished_ids.write({'date': production.date_planned_finished})
+            # Trigger move_raw creation when importing a file
+            if 'import_file' in self.env.context:
+                production._onchange_move_raw()
+                production._onchange_move_finished()
+        return productions
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_done(self):
@@ -1129,10 +1131,10 @@ class MrpProduction(models.Model):
 
     def action_generate_serial(self):
         self.ensure_one()
-        self.lot_producing_id = self.env['stock.production.lot'].create({
+        self.lot_producing_id = self.env['stock.lot'].create({
             'product_id': self.product_id.id,
             'company_id': self.company_id.id,
-            'name': self.env['stock.production.lot']._get_next_serial(self.company_id, self.product_id) or self.env['ir.sequence'].next_by_code('stock.lot.serial'),
+            'name': self.env['stock.lot']._get_next_serial(self.company_id, self.product_id) or self.env['ir.sequence'].next_by_code('stock.lot.serial'),
         })
         if self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_line_ids:
             self.move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_line_ids.lot_id = self.lot_producing_id
@@ -1513,7 +1515,7 @@ class MrpProduction(models.Model):
 
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
-        backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.product_qty == 0).unlink()
+        backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.reserved_qty == 0).unlink()
 
         for old_wo, wo in zip(self.workorder_ids, backorders.workorder_ids):
             wo.qty_produced = max(old_wo.qty_produced - old_wo.qty_producing, 0)
@@ -1743,7 +1745,7 @@ class MrpProduction(models.Model):
             message += "\n".join(component.name for component in multiple_lot_components)
         if message:
             raise UserError(message)
-        next_serial = self.env['stock.production.lot']._get_next_serial(self.company_id, self.product_id)
+        next_serial = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.act_assign_serial_numbers_production")
         action['context'] = {
             'default_production_id': self.id,
@@ -1921,19 +1923,19 @@ class MrpProduction(models.Model):
                         new_moves_vals.append(move_vals[0])
                         new_moves_quantity_to_split.append(uom_qty_to_split)
                     elif move.raw_material_production_id:
-                        move.move_line_ids.product_uom_qty = 0
-                        move.move_line_ids[0].product_uom_qty = move.product_uom_qty
+                        move.move_line_ids.reserved_uom_qty = 0
+                        move.move_line_ids[0].reserved_uom_qty = move.product_uom_qty
             if backorder:
                 new_moves = self.env['stock.move'].create(new_moves_vals)
                 for move, quantity_to_split, new_move in zip(new_moves_origin, new_moves_quantity_to_split, new_moves):
                     if move.raw_material_production_id:
                         move.move_line_ids[0].copy({
                             'move_id': new_move.id,
-                            'product_uom_qty': quantity_to_split,
+                            'reserved_uom_qty': quantity_to_split,
                             'lot_id': move.move_line_ids[0].lot_id.id if move.move_line_ids[0].lot_id else 0,
                         })
-                        move.with_context(bypass_reservation_update=True).move_line_ids.product_uom_qty = 0
-                        move.with_context(bypass_reservation_update=True).move_line_ids[0].product_uom_qty = move.product_uom_qty
+                        move.with_context(bypass_reservation_update=True).move_line_ids.reserved_uom_qty = 0
+                        move.with_context(bypass_reservation_update=True).move_line_ids[0].reserved_uom_qty = move.product_uom_qty
                 for old_wo, wo in zip(production.workorder_ids, backorder.workorder_ids):
                     wo.qty_produced = max(old_wo.qty_produced - old_wo.qty_producing, 0)
                     wo.qty_producing = 1
@@ -1945,7 +1947,7 @@ class MrpProduction(models.Model):
                 backorder.action_confirm()
             production.name = self._get_name_backorder(production.name, production.backorder_sequence)
             production.product_qty = 1
-            production.lot_producing_id = self.env['stock.production.lot'].create({
+            production.lot_producing_id = self.env['stock.lot'].create({
                 'product_id': production.product_id.id,
                 'company_id': production.company_id.id,
                 'name': serial_number,

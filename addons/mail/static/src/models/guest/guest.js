@@ -4,7 +4,7 @@ import { attr, one2many, one2one } from '@mail/model/model_field';
 import { registerModel } from '@mail/model/model_core';
 
 registerModel({
-    name: 'mail.guest',
+    name: 'Guest',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -32,7 +32,7 @@ registerModel({
         },
     },
     fields: {
-        authoredMessages: one2many('mail.message', {
+        authoredMessages: one2many('Message', {
             inverse: 'guestAuthor',
         }),
         avatarUrl: attr({
@@ -43,10 +43,10 @@ registerModel({
             readonly: true,
         }),
         name: attr(),
-        rtcSessions: one2many('mail.rtc_session', {
+        rtcSessions: one2many('RtcSession', {
             inverse: 'guest',
         }),
-        volumeSetting: one2one('mail.volume_setting', {
+        volumeSetting: one2one('VolumeSetting', {
             inverse: 'guest',
         }),
     },

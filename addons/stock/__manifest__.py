@@ -69,7 +69,7 @@
         'views/res_partner_views.xml',
         'views/product_strategy_views.xml',
         'views/product_views.xml',
-        'views/stock_production_lot_views.xml',
+        'views/stock_lot_views.xml',
         'views/stock_scrap_views.xml',
         'views/stock_quant_views.xml',
         'views/stock_location_views.xml',
@@ -135,6 +135,7 @@
         ],
         'web.assets_qweb': [
             'stock/static/src/xml/inventory_report.xml',
+            'stock/static/src/xml/inventory_adjustments.xml',
             'stock/static/src/xml/inventory_lines.xml',
             'stock/static/src/xml/popover_widget.xml',
             'stock/static/src/xml/forecast_widget.xml',

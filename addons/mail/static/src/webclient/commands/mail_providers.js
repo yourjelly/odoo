@@ -28,7 +28,7 @@ commandProviderRegistry.add("partner", {
     async provide(newEnv, options) {
         const messaging = await Component.env.services.messaging.get();
         const suggestions = [];
-        await messaging.models['mail.partner'].imSearch({
+        await messaging.models['Partner'].imSearch({
             callback(partners) {
                 partners.forEach((partner) => {
                     suggestions.push({
@@ -54,7 +54,7 @@ commandProviderRegistry.add("channel", {
     namespace: "#",
     async provide(newEnv, options) {
         const messaging = await Component.env.services.messaging.get();
-        const channels = await messaging.models['mail.thread'].searchChannelsToOpen({
+        const channels = await messaging.models['Thread'].searchChannelsToOpen({
             limit: 10,
             searchTerm: options.searchValue,
         });

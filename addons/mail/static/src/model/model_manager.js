@@ -3,7 +3,9 @@
 import { registry } from '@mail/model/model_core';
 import { ModelField } from '@mail/model/model_field';
 import { FieldCommand, unlinkAll } from '@mail/model/model_field_command';
+import { RelationSet } from '@mail/model/model_field_relation_set';
 import { Listener } from '@mail/model/model_listener';
+import { followRelations } from '@mail/model/model_utils';
 import { makeDeferred } from '@mail/utils/deferred/deferred';
 
 /**
@@ -90,12 +92,6 @@ export class ModelManager {
          */
         this._listenersToNotifyInUpdateCycle = new Map();
         /**
-         * Map between listeners and a set of localId that they are using.
-         * Useful for easily being able to clean up a listener without having to
-         * iterate all localId to be able to find which are using it.
-         */
-        this._localIdsObservedByListener = new Map();
-        /**
          * All generated models. Keys are model name, values are model class.
          */
         this.models = {};
@@ -104,6 +100,12 @@ export class ModelManager {
          * and for which required fields check still has to be executed.
          */
         this._updatedRecordsCheckRequired = new Set();
+        /**
+         * Determines whether this model manager should run in debug mode. Debug
+         * mode adds more integrity checks and more verbose error messages, at
+         * the cost of performance.
+         */
+        this.isDebug = false;
     }
 
     /**
@@ -141,7 +143,7 @@ export class ModelManager {
         /**
          * Create the messaging singleton record.
          */
-        const messaging = this.models['mail.messaging'].insert(values);
+        const messaging = this.models['Messaging'].insert(values);
         Object.assign(odoo.__DEBUG__, { messaging });
         this.messagingCreatedPromise.resolve();
         await this.messaging.start();
@@ -155,12 +157,13 @@ export class ModelManager {
     /**
      * Returns all records of provided model that match provided criteria.
      *
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {function} [filterFunc]
-     * @returns {mail.model[]} records matching criteria.
+     * @returns {Model[]} records matching criteria.
      */
     all(Model, filterFunc) {
         for (const listener of this._listeners) {
+            listener.lastObservedAllByModel.add(Model);
             const entry = this._listenersObservingAllByModel.get(Model);
             const info = {
                 listener,
@@ -191,7 +194,7 @@ export class ModelManager {
      * existed. Note that relation are removed, which may delete more relations
      * if some of them are causal.
      *
-     * @param {mail.model} record
+     * @param {Model} record
      */
     delete(record) {
         this._delete(record);
@@ -201,8 +204,8 @@ export class ModelManager {
     /**
      * Returns whether the given record still exists.
      *
-     * @param {mail.model} Model class
-     * @param {mail.model} record
+     * @param {Model} Model class
+     * @param {Model} record
      * @returns {boolean}
      */
     exists(Model, record) {
@@ -214,9 +217,9 @@ export class ModelManager {
      * Get the record of provided model that has provided
      * criteria, if it exists.
      *
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {function} findFunc
-     * @returns {mail.model|undefined} the record of model matching criteria, if
+     * @returns {Model|undefined} the record of model matching criteria, if
      *   exists.
      */
     find(Model, findFunc) {
@@ -227,9 +230,9 @@ export class ModelManager {
      * Gets the unique record of provided model that matches the given
      * identifying data, if it exists.
      *
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {Object} data
-     * @returns {mail.model|undefined}
+     * @returns {Model|undefined}
      */
     findFromIdentifyingData(Model, data) {
         return this.get(Model, this._getRecordIndex(Model, data));
@@ -242,23 +245,24 @@ export class ModelManager {
      * id, if the resulting record is not an instance of this model, this getter
      * assumes the record does not exist.
      *
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {string} localId
      * @param {Object} param2
      * @param {boolean} [param2.isCheckingInheritance=false]
-     * @returns {mail.model|undefined} record, if exists
+     * @returns {Model|undefined} record, if exists
      */
     get(Model, localId, { isCheckingInheritance = false } = {}) {
         if (!localId) {
             return;
         }
-        const modelName = localId.split('(')[0];
-        if (!isCheckingInheritance && modelName !== Model.name) {
-            throw Error(`wrong format of localId ${localId} for ${Model}.`);
+        if (!isCheckingInheritance && this.isDebug) {
+            const modelName = localId.split('(')[0];
+            if (modelName !== Model.name) {
+                throw Error(`wrong format of localId ${localId} for ${Model}.`);
+            }
         }
         for (const listener of this._listeners) {
-            this._localIdsObservedByListener.get(listener).add(localId);
-            listener.lastObservedLocalIds.add(this.localId);
+            listener.lastObservedLocalIds.add(localId);
             if (!this._listenersObservingLocalId.has(localId)) {
                 this._listenersObservingLocalId.set(localId, new Map());
             }
@@ -280,7 +284,7 @@ export class ModelManager {
         if (!isCheckingInheritance) {
             return;
         }
-        // support for inherited models (eg. relation targeting `mail.model`)
+        // support for inherited models (eg. relation targeting `Model`)
         for (const SubModel of Object.values(this.models)) {
             if (!(SubModel.prototype instanceof Model)) {
                 continue;
@@ -298,7 +302,7 @@ export class ModelManager {
      * be considered the main entry point to the messaging system for outside
      * code.
      *
-     * @returns {mail.messaging}
+     * @returns {Messaging}
      **/
     async getMessaging() {
         await this.messagingCreatedPromise;
@@ -311,10 +315,10 @@ export class ModelManager {
      * provided data. This method assumes that records are uniquely identifiable
      * per "unique find" criteria from data on Model.
      *
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {Object|Object[]} data
      *  If data is an iterable, multiple records will be created/updated.
-     * @returns {mail.model|mail.model[]} created or updated record(s).
+     * @returns {Model|Model[]} created or updated record(s).
      */
     insert(Model, data) {
         const res = this._insert(Model, data);
@@ -325,15 +329,15 @@ export class ModelManager {
     /**
      * Returns the messaging singleton associated to this model manager.
      *
-     * @returns {mail.messaging|undefined}
+     * @returns {Messaging|undefined}
      */
     get messaging() {
-        if (!this.models['mail.messaging']) {
+        if (!this.models['Messaging']) {
             return undefined;
         }
         // Use "findFromIdentifyingData" specifically to ensure the record still
         // exists and to ensure listeners are properly notified of this access.
-        return this.models['mail.messaging'].findFromIdentifyingData({});
+        return this.models['Messaging'].findFromIdentifyingData({});
     }
 
     /**
@@ -347,18 +351,19 @@ export class ModelManager {
         this._listeners.delete(listener);
         this._listenersToNotifyInUpdateCycle.delete(listener);
         this._listenersToNotifyAfterUpdateCycle.delete(listener);
-        for (const localId of this._localIdsObservedByListener.get(listener) || []) {
+        for (const localId of listener.lastObservedLocalIds) {
             this._listenersObservingLocalId.get(localId).delete(listener);
-            if (this._listenersObservingFieldOfLocalId.has(localId)) {
-                for (const [, listenersUsingField] of this._listenersObservingFieldOfLocalId.get(localId)) {
-                    listenersUsingField.delete(listener);
-                }
+            const listenersObservingFieldOfLocalId = this._listenersObservingFieldOfLocalId.get(localId);
+            for (const field of listener.lastObservedFieldsByLocalId.get(localId) || []) {
+                listenersObservingFieldOfLocalId.get(field).delete(listener);
             }
         }
-        this._localIdsObservedByListener.delete(listener);
-        for (const [, listeners] of this._listenersObservingAllByModel) {
-            listeners.delete(listener);
+        for (const Model of listener.lastObservedAllByModel) {
+            this._listenersObservingAllByModel.get(Model).delete(listener);
         }
+        listener.lastObservedLocalIds.clear();
+        listener.lastObservedFieldsByLocalId.clear();
+        listener.lastObservedAllByModel.clear();
     }
 
     /**
@@ -371,9 +376,6 @@ export class ModelManager {
     startListening(listener) {
         this.removeListener(listener);
         this._listeners.add(listener);
-        listener.lastObservedLocalIds.clear();
-        listener.lastObservedFields.clear();
-        this._localIdsObservedByListener.set(listener, new Set());
     }
 
     /**
@@ -391,7 +393,7 @@ export class ModelManager {
      * ones from `data`) and then indirect ones (i.e. compute/related fields
      * and "after updates").
      *
-     * @param {mail.model} record
+     * @param {Model} record
      * @param {Object} data
      * @returns {boolean} whether any value changed for the current record
      */
@@ -410,7 +412,7 @@ export class ModelManager {
      * given model.
      *
      * @private
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {Object} [data={}]
      */
     _addDefaultData(Model, data = {}) {
@@ -431,7 +433,7 @@ export class ModelManager {
      * definition to the Model, then registers it in `this.models`.
      *
      * @private
-     * @param {mail.model} Model
+     * @param {Model} Model
      */
     _applyModelDefinition(Model) {
         const definition = registry.get(Model.name);
@@ -488,6 +490,7 @@ export class ModelManager {
                             'readonly',
                             'related',
                             'required',
+                            'sum',
                         ].includes(key)
                     );
                     if (invalidKeys.length > 0) {
@@ -506,6 +509,7 @@ export class ModelManager {
                             'related',
                             'relationType',
                             'required',
+                            'sort',
                             'to',
                         ].includes(key)
                     );
@@ -520,6 +524,9 @@ export class ModelManager {
                     }
                     if (field.required && !(['one2one', 'many2one'].includes(field.relationType))) {
                         throw new Error(`Relational field(${fieldName}) on ${Model} has "required" true with a relation of type "${field.relationType}" but "required" is only supported for "one2one" and "many2one".`);
+                    }
+                    if (field.sort && !(['one2many', 'many2many'].includes(field.relationType))) {
+                        throw new Error(`Relational field "${Model}/${fieldName}" has "sort" with a relation of type "${field.relationType}" but "sort" is only supported for "one2many" and "many2many".`);
                     }
                 }
                 // 3. Computed field.
@@ -618,9 +625,9 @@ export class ModelManager {
                     throw new Error(`${field} on ${Model} defines its inverse as field(${field.inverse}) on ${RelatedModel}, but it does not exist.`);
                 }
                 if (inverseField.inverse !== fieldName) {
-                    throw new Error(`The name of ${field} on ${Model} does not match with the name defined in its inverse ${inverseField} on ${RelatedModel}.`)
+                    throw new Error(`The name of ${field} on ${Model} does not match with the name defined in its inverse ${inverseField} on ${RelatedModel}.`);
                 }
-                if (![Model.name, 'mail.model'].includes(inverseField.to)) {
+                if (![Model.name, 'Model'].includes(inverseField.to)) {
                     throw new Error(`${field} on ${Model} has its inverse ${inverseField} on ${RelatedModel} referring to an invalid model (model(${inverseField.to})).`);
                 }
                 if (
@@ -656,9 +663,9 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {string} localId
-     * @returns {mail.model}
+     * @returns {Model}
      */
     _create(Model, localId) {
         /**
@@ -675,8 +682,8 @@ export class ModelManager {
             // Field values of record.
             __values: {},
         });
-        const record = !this.env.isDebug() ? nonProxyRecord : new Proxy(nonProxyRecord, {
-            get: function (record, prop) {
+        const record = !this.isDebug ? nonProxyRecord : new Proxy(nonProxyRecord, {
+            get: function getFromProxy(record, prop) {
                 if (
                     !Model.__fieldMap[prop] &&
                     !['_super', 'then'].includes(prop) &&
@@ -693,7 +700,7 @@ export class ModelManager {
             record.__values[field.fieldName] = undefined;
             if (field.fieldType === 'relation') {
                 if (['one2many', 'many2many'].includes(field.relationType)) {
-                    record.__values[field.fieldName] = new Set();
+                    record.__values[field.fieldName] = new RelationSet(record, field);
                 }
             }
         }
@@ -740,7 +747,7 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model} record
+     * @param {Model} record
      */
     _delete(record) {
         this._ensureNoLockingListener();
@@ -885,16 +892,7 @@ export class ModelManager {
                     onChange: (info) => {
                         this.startListening(listener);
                         for (const dependency of onChange.dependencies) {
-                            let target = record;
-                            for (const field of dependency.split('.')) {
-                                if (!target.constructor.__fieldMap[field]) {
-                                    throw Error(`onChange dependency "${field}" does not exist on ${record.constructor}.`);
-                                }
-                                target = target[field];
-                                if (!target) {
-                                    break;
-                                }
-                            }
+                            followRelations(record, dependency);
                         }
                         this.stopListening(listener);
                         record[onChange.methodName]();
@@ -946,13 +944,13 @@ export class ModelManager {
     _generateModels() {
         // Create the model through a class to give it a meaningful name to be
         // displayed in stack traces and stuff.
-        const Model = { 'mail.model': class {} }['mail.model'];
+        const Model = { 'Model': class {} }['Model'];
         this._applyModelDefinition(Model);
-        // mail.model is generated separately and before the other models since
+        // Model is generated separately and before the other models since
         // it is the dependency of all of them.
-        const allModelNamesButMailModel = [...registry.keys()].filter(name => name !== 'mail.model');
+        const allModelNamesButMailModel = [...registry.keys()].filter(name => name !== 'Model');
         for (const modelName of allModelNamesButMailModel) {
-            const Model = { [modelName]: class extends this.models['mail.model'] {} }[modelName];
+            const Model = { [modelName]: class extends this.models['Model'] {} }[modelName];
             this._applyModelDefinition(Model);
         }
         /**
@@ -975,8 +973,8 @@ export class ModelManager {
     /**
      * Returns an index on the given model for the given data.
      *
-     * @param {mail.model} Model class
-     * @param {Object|mail.model} data insert data or record
+     * @param {Model} Model class
+     * @param {Object|Model} data insert data or record
      * @returns {string}
      */
     _getRecordIndex(Model, data) {
@@ -1028,9 +1026,9 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model}
+     * @param {Model}
      * @param {Object|Object[]} [data={}]
-     * @returns {mail.model|mail.model[]}
+     * @returns {Model|Model[]}
      */
     _insert(Model, data = {}) {
         this._ensureNoLockingListener();
@@ -1053,7 +1051,7 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model} Model class
+     * @param {Model} Model class
      * @param {ModelField} field
      * @returns {ModelField}
      */
@@ -1105,6 +1103,22 @@ export class ModelManager {
             } else {
                 this._listenersToNotifyAfterUpdateCycle.set(listener, [info]);
             }
+        }
+    }
+
+    /**
+     * Marks the given field of the given record as changed.
+     *
+     * @param {Model} record
+     * @param {ModelField} field
+     */
+    _markRecordFieldAsChanged(record, field) {
+        for (const [listener, infoList] of this._listenersObservingFieldOfLocalId.get(record.localId).get(field)) {
+            this._markListenerToNotify(listener, {
+                listener,
+                reason: `_update: ${field} of ${record}`,
+                infoList,
+            });
         }
     }
 
@@ -1163,11 +1177,25 @@ export class ModelManager {
          * 1. Prepare fields.
          */
         for (const Model of Object.values(this.models)) {
+            const sumContributionsByFieldName = new Map();
             // Make fields aware of their field name.
             for (const [fieldName, fieldData] of registry.get(Model.name).get('fields')) {
                 Model.fields[fieldName] = new ModelField(Object.assign({}, fieldData, {
                     fieldName,
                 }));
+                if (fieldData.sum) {
+                    const [relationFieldName, contributionFieldName] = fieldData.sum.split('.');
+                    if (!sumContributionsByFieldName.has(relationFieldName)) {
+                        sumContributionsByFieldName.set(relationFieldName, []);
+                    }
+                    sumContributionsByFieldName.get(relationFieldName).push({
+                        from: contributionFieldName,
+                        to: fieldName,
+                    });
+                }
+            }
+            for (const [fieldName, sumContributions] of sumContributionsByFieldName) {
+                Model.fields[fieldName].sumContributions = sumContributions;
             }
         }
         /**
@@ -1223,29 +1251,31 @@ export class ModelManager {
             // Add field accessors.
             for (const field of Model.__fieldList) {
                 Object.defineProperty(Model.prototype, field.fieldName, {
-                    get() { // this is bound to record
-                        for (const listener of this.modelManager._listeners) {
-                            this.modelManager._localIdsObservedByListener.get(listener).add(this.localId);
-                            listener.lastObservedLocalIds.add(this.localId);
+                    get: function getFieldValue() { // this is bound to record
+                        if (this.modelManager._listeners.size) {
                             if (!this.modelManager._listenersObservingLocalId.has(this.localId)) {
                                 this.modelManager._listenersObservingLocalId.set(this.localId, new Map());
                             }
                             const entryLocalId = this.modelManager._listenersObservingLocalId.get(this.localId);
-                            const info = {
-                                listener,
-                                reason: `getField - ${field} of ${this}`,
-                            };
-                            if (entryLocalId.has(listener)) {
-                                entryLocalId.get(listener).push(info);
-                            } else {
-                                entryLocalId.set(listener, [info]);
-                            }
+                            const reason = `getField - ${field} of ${this}`;
                             const entryField = this.modelManager._listenersObservingFieldOfLocalId.get(this.localId).get(field);
-                            listener.lastObservedFields.add(field);
-                            if (entryField.has(listener)) {
-                                entryField.get(listener).push(info);
-                            } else {
-                                entryField.set(listener, [info]);
+                            for (const listener of this.modelManager._listeners) {
+                                listener.lastObservedLocalIds.add(this.localId);
+                                const info = { listener, reason };
+                                if (entryLocalId.has(listener)) {
+                                    entryLocalId.get(listener).push(info);
+                                } else {
+                                    entryLocalId.set(listener, [info]);
+                                }
+                                if (!listener.lastObservedFieldsByLocalId.has(this.localId)) {
+                                    listener.lastObservedFieldsByLocalId.set(this.localId, new Set());
+                                }
+                                listener.lastObservedFieldsByLocalId.get(this.localId).add(field);
+                                if (entryField.has(listener)) {
+                                    entryField.get(listener).push(info);
+                                } else {
+                                    entryField.set(listener, [info]);
+                                }
                             }
                         }
                         return field.get(this);
@@ -1258,7 +1288,7 @@ export class ModelManager {
 
     /**
      * @private
-     * @param {mail.model} record
+     * @param {Model} record
      * @param {Object} data
      * @param {Object} [options]
      * @param [options.allowWriteReadonly=false]
@@ -1302,13 +1332,7 @@ export class ModelManager {
                 throw new Error(`read-only ${field} on ${record} was updated`);
             }
             hasChanged = true;
-            for (const [listener, infoList] of this._listenersObservingFieldOfLocalId.get(record.localId).get(field)) {
-                this._markListenerToNotify(listener, {
-                    listener,
-                    reason: `_update: ${field} of ${record}`,
-                    infoList,
-                });
-            }
+            this._markRecordFieldAsChanged(record, field);
         }
         if (hasChanged) {
             this._updatedRecordsCheckRequired.add(record);

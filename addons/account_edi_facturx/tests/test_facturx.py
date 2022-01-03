@@ -122,7 +122,15 @@ class TestAccountEdiFacturx(AccountEdiTestCommon):
                             <IssuerAssignedID>INV/2017/00001: INV/2017/00001</IssuerAssignedID>
                         </BuyerOrderReferencedDocument>
                     </ApplicableHeaderTradeAgreement>
-                    <ApplicableHeaderTradeDelivery/>
+                    <ApplicableHeaderTradeDelivery>
+                        <ShipToTradeParty>
+                            <Name>partner_b</Name>
+                            <DefinedTradeContact>
+                                <PersonName>partner_b</PersonName>
+                            </DefinedTradeContact>
+                            <PostalTradeAddress/>
+                        </ShipToTradeParty>
+                    </ApplicableHeaderTradeDelivery>
                     <ApplicableHeaderTradeSettlement>
                         <ApplicableTradeTax>
                             <CalculatedAmount currencyID="Gol">220.000</CalculatedAmount>
@@ -209,11 +217,6 @@ class TestAccountEdiFacturx(AccountEdiTestCommon):
         '''
 
         self.assert_generated_file_equal(self.invoice, self.expected_invoice_facturx_values, applied_xpath)
-
-    def test_export_pdf(self):
-        self.invoice.action_post()
-        pdf_values = self.edi_format._get_embedding_to_invoice_pdf_values(self.invoice)
-        self.assertEqual(pdf_values['name'], 'factur-x.xml')
 
     ####################################################
     # Test import

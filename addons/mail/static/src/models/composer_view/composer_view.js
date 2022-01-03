@@ -8,7 +8,7 @@ import { OnChange } from '@mail/model/model_onchange';
 import { addLink, escapeAndCompactTextContent, parseAndTransform } from '@mail/js/utils';
 
 registerModel({
-    name: 'mail.composer_view',
+    name: 'ComposerView',
     identifyingFields: [['threadView', 'messageViewInEditing', 'chatter']],
     lifecycleHooks: {
         _willCreate() {
@@ -71,7 +71,7 @@ registerModel({
                 return; // not supported for guests
             }
             if (
-                this.suggestionModelName === 'mail.channel_command' ||
+                this.suggestionModelName === 'ChannelCommand' ||
                 this._getCommandFromText(this.composer.textInputContent)
             ) {
                 return;
@@ -142,10 +142,10 @@ registerModel({
             // the mention will appear in the target channel, or be notified to
             // the target partner.
             switch (this.activeSuggestedRecord.constructor.name) {
-                case 'mail.thread':
+                case 'Thread':
                     Object.assign(updateData, { mentionedChannels: link(this.activeSuggestedRecord) });
                     break;
-                case 'mail.partner':
+                case 'Partner':
                     Object.assign(updateData, { mentionedPartners: link(this.activeSuggestedRecord) });
                     break;
             }
@@ -293,8 +293,8 @@ registerModel({
                 if (!this.messaging) {
                     return;
                 }
-                const message = this.messaging.models['mail.message'].insert(
-                    this.messaging.models['mail.message'].convertData(messageData)
+                const message = this.messaging.models['Message'].insert(
+                    this.messaging.models['Message'].convertData(messageData)
                 );
                 for (const threadView of message.originThread.threadViews) {
                     // Reset auto scroll to be able to see the newly posted message.
@@ -420,7 +420,7 @@ registerModel({
          * the active current record is no longer part of the suggestions.
          *
          * @private
-         * @returns {mail.model}
+         * @returns {Model}
          */
         _computeActiveSuggestedRecord() {
             if (
@@ -476,7 +476,7 @@ registerModel({
          * main list, which is a requirement for the navigation process.
          *
          * @private
-         * @returns {mail.model[]}
+         * @returns {Model[]}
          */
         _computeExtraSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
@@ -495,7 +495,7 @@ registerModel({
          * Clears the main suggested record on closing mentions.
          *
          * @private
-         * @returns {mail.model[]}
+         * @returns {Model[]}
          */
         _computeMainSuggestedRecords() {
             if (this.suggestionDelimiterPosition === undefined) {
@@ -519,6 +519,38 @@ registerModel({
         },
         /**
          * @private
+         * @returns {string[]}
+         */
+         _computeSendShortcuts() {
+            if (this.chatter) {
+                return ['ctrl-enter', 'meta-enter'];
+            }
+            if (this.messageViewInEditing) {
+                return ['enter'];
+            }
+            if (this.threadView) {
+                if (!this.messaging.device) {
+                    return clear();
+                }
+                // Actually in mobile there is a send button, so we need there 'enter' to allow new
+                // line. Hence, we want to use a different shortcut 'ctrl/meta enter' to send for
+                // small screen size with a non-mailing channel. Here send will be done on clicking
+                // the button or using the 'ctrl/meta enter' shortcut.
+                if (
+                    this.messaging.device.isMobile ||
+                    (
+                        this.messaging.discuss.threadView === this.threadView &&
+                        this.messaging.discuss.thread === this.messaging.inbox
+                    )
+                ) {
+                    return ['ctrl-enter', 'meta-enter'];
+                }
+                return ['enter'];
+            }
+            return clear();
+        },
+        /**
+         * @private
          * @returns {string}
          */
         _computeSuggestionDelimiter() {
@@ -538,13 +570,13 @@ registerModel({
         _computeSuggestionModelName() {
             switch (this.suggestionDelimiter) {
                 case '@':
-                    return 'mail.partner';
+                    return 'Partner';
                 case ':':
-                    return 'mail.canned_response';
+                    return 'CannedResponse';
                 case '/':
-                    return 'mail.channel_command';
+                    return 'ChannelCommand';
                 case '#':
-                    return 'mail.thread';
+                    return 'Thread';
                 default:
                     return clear();
             }
@@ -659,7 +691,7 @@ registerModel({
         /**
          * @private
          * @param {string} content html content
-         * @returns {mail.channel_command|undefined} command, if any in the content
+         * @returns {ChannelCommand|undefined} command, if any in the content
          */
         _getCommandFromText(content) {
             if (content.startsWith('/')) {
@@ -815,13 +847,13 @@ registerModel({
          * is highlighted in the UI and it will be the selected record if the
          * suggestion is confirmed by the user.
          */
-        activeSuggestedRecord: many2one('mail.model', {
+        activeSuggestedRecord: many2one('Model', {
             compute: '_computeActiveSuggestedRecord',
         }),
         /**
          * Determines the attachment list that will be used to display the attachments.
          */
-        attachmentList: one2one('mail.attachment_list', {
+        attachmentList: one2one('AttachmentList', {
             compute: '_computeAttachmentList',
             inverse: 'composerView',
             isCausal: true,
@@ -830,14 +862,14 @@ registerModel({
         /**
          * States the chatter which this composer allows editing (if any).
          */
-        chatter: one2one('mail.chatter', {
+        chatter: one2one('Chatter', {
             inverse: 'composerView',
             readonly: true,
         }),
         /**
          * States the composer state that is displayed by this composer view.
          */
-        composer: many2one('mail.composer', {
+        composer: many2one('Composer', {
             compute: '_computeComposer',
             inverse: 'composerViews',
             required: true,
@@ -852,7 +884,7 @@ registerModel({
          * process. 2 arbitrary lists can be provided and the second is defined
          * as "extra".
          */
-        extraSuggestedRecords: many2many('mail.model', {
+        extraSuggestedRecords: many2many('Model', {
             compute: '_computeExtraSuggestedRecords',
         }),
         hasFocus: attr({
@@ -879,13 +911,13 @@ registerModel({
          * process. 2 arbitrary lists can be provided and the first is defined
          * as "main".
          */
-        mainSuggestedRecords: many2many('mail.model', {
+        mainSuggestedRecords: many2many('Model', {
             compute: '_computeMainSuggestedRecords',
         }),
         /**
          * States the message view on which this composer allows editing (if any).
          */
-        messageViewInEditing: one2one('mail.message_view', {
+        messageViewInEditing: one2one('MessageView', {
             inverse: 'composerViewInEditing',
             readonly: true,
         }),
@@ -894,6 +926,15 @@ registerModel({
          */
         sendButtonText: attr({
             compute: '_computeSendButtonText',
+        }),
+        /**
+         * Keyboard shortcuts from text input to send message.
+         * The format is an array of string that can contain 'enter',
+         * 'ctrl-enter', and/or 'meta-enter'.
+         */
+        sendShortcuts: attr({
+            compute: '_computeSendShortcuts',
+            default: [],
         }),
         /**
          * States which type of suggestion is currently in progress, if any.
@@ -928,7 +969,7 @@ registerModel({
         /**
          * States the thread view on which this composer allows editing (if any).
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             inverse: 'composerView',
             readonly: true,
         }),

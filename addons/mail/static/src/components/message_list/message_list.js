@@ -159,10 +159,10 @@ export class MessageList extends Component {
     }
 
     /**
-     * @returns {mail.thread_view}
+     * @returns {ThreadView}
      */
     get threadView() {
-        return this.messaging && this.messaging.models['mail.thread_view'].get(this.props.threadViewLocalId);
+        return this.messaging && this.messaging.models['ThreadView'].get(this.props.threadViewLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -264,7 +264,7 @@ export class MessageList extends Component {
      * Scrolls to a given message view and briefly highlights it.
      *
      * @private
-     * @param {mail.message_view} messageView
+     * @param {MessageView} messageView
      */
     _highlightMessageView(messageView) {
         if (messageView.exists() && messageView.component && messageView.component.el) {

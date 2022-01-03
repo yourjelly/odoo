@@ -5,7 +5,7 @@ import { attr, many2many, many2one, one2many } from '@mail/model/model_field';
 import { clear, insert } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.attachment',
+    name: 'Attachment',
     identifyingFields: ['id'],
     lifecycleHooks: {
         _created() {
@@ -51,7 +51,12 @@ registerModel({
          * Send the attachment for the browser to download.
          */
         download() {
-            this.env.services.navigate(`/web/content/ir.attachment/${this.id}/datas`, { download: true });
+            const downloadLink = document.createElement('a');
+            downloadLink.setAttribute('href', `/web/content/ir.attachment/${this.id}/datas?download=true`);
+            // Adding 'download' attribute into a link prevents open a new tab or change the current location of the window.
+            // This avoids interrupting the activity in the page such as rtc call.
+            downloadLink.setAttribute('download', '');
+            downloadLink.click();
         },
         /**
          * Handles click on download icon.
@@ -271,37 +276,37 @@ registerModel({
     },
     fields: {
         accessToken: attr(),
-        activities: many2many('mail.activity', {
+        activities: many2many('Activity', {
             inverse: 'attachments',
         }),
         /**
          * States the attachment cards that are displaying this attachment.
          */
-        attachmentCards: one2many('mail.attachment_card', {
+        attachmentCards: one2many('AttachmentCard', {
             inverse: 'attachment',
             isCausal: true,
         }),
         /**
          * States the attachment images that are displaying this attachment.
          */
-        attachmentImages: one2many('mail.attachment_image', {
+        attachmentImages: one2many('AttachmentImage', {
             inverse: 'attachment',
             isCausal: true,
         }),
         /**
          * States the attachment lists that are displaying this attachment.
          */
-        attachmentLists: many2many('mail.attachment_list', {
+        attachmentLists: many2many('AttachmentList', {
             inverse: 'attachments',
         }),
-        attachmentViewer: many2many('mail.attachment_viewer', {
+        attachmentViewers: many2many('AttachmentViewer', {
             inverse: 'attachments',
         }),
         checksum: attr(),
         /**
          * States on which composer this attachment is currently being created.
          */
-        composer: many2one('mail.composer', {
+        composer: many2one('Composer', {
             inverse: 'attachments',
         }),
         defaultSource: attr({
@@ -386,18 +391,18 @@ registerModel({
         mediaType: attr({
             compute: '_computeMediaType',
         }),
-        messages: many2many('mail.message', {
+        messages: many2many('Message', {
             inverse: 'attachments',
         }),
         mimetype: attr({
             default: '',
         }),
         name: attr(),
-        originThread: many2one('mail.thread', {
+        originThread: many2one('Thread', {
             inverse: 'originThreadAttachments',
         }),
         size: attr(),
-        threads: many2many('mail.thread', {
+        threads: many2many('Thread', {
             inverse: 'attachments',
         }),
         type: attr(),

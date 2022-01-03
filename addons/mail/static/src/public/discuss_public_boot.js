@@ -70,8 +70,8 @@ async function createAndMountDiscussPublicView() {
     const DialogManager = getMessagingComponent('DialogManager');
     const dialogManagerComponent = new DialogManager(null, {});
     await dialogManagerComponent.mount(document.body);
-    messaging.models['mail.thread'].insert(messaging.models['mail.thread'].convertData(data.channelData));
-    const discussPublicView = messaging.models['mail.discuss_public_view'].create(data.discussPublicViewData);
+    messaging.models['Thread'].insert(messaging.models['Thread'].convertData(data.channelData));
+    const discussPublicView = messaging.models['DiscussPublicView'].create(data.discussPublicViewData);
     if (discussPublicView.shouldDisplayWelcomeViewInitially) {
         discussPublicView.switchToWelcomeView();
     } else {

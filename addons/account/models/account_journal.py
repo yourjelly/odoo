@@ -639,21 +639,22 @@ class AccountJournal(models.Model):
         if 'refund_sequence' not in vals:
             vals['refund_sequence'] = vals['type'] in ('sale', 'purchase')
 
-    @api.model
-    def create(self, vals):
-        # OVERRIDE
-        self._fill_missing_values(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._fill_missing_values(vals)
 
-        journal = super(AccountJournal, self.with_context(mail_create_nolog=True)).create(vals)
+        journals = super(AccountJournal, self.with_context(mail_create_nolog=True)).create(vals_list)
 
-        if 'alias_name' in vals:
-            journal._update_mail_alias(vals)
+        for journal, vals in zip(journals, vals_list):
+            if 'alias_name' in vals:
+                journal._update_mail_alias(vals)
 
-        # Create the bank_account_id if necessary
-        if journal.type == 'bank' and not journal.bank_account_id and vals.get('bank_acc_number'):
-            journal.set_bank_account(vals.get('bank_acc_number'), vals.get('bank_id'))
+            # Create the bank_account_id if necessary
+            if journal.type == 'bank' and not journal.bank_account_id and vals.get('bank_acc_number'):
+                journal.set_bank_account(vals.get('bank_acc_number'), vals.get('bank_id'))
 
-        return journal
+        return journals
 
     def set_bank_account(self, acc_number, bank_id=None):
         """ Create a res.partner.bank (if not exists) and set it as value of the field bank_account_id """
@@ -785,7 +786,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(self.default_account_id.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('parent_state', '!=', 'cancel'),
         ]
         query = self.env['account.move.line']._where_calc(domain)
         tables, where_clause, where_params = query.get_sql()
@@ -850,7 +851,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(accounts.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('parent_state', '!=', 'cancel'),
             ('reconciled', '=', False),
             ('journal_id', '=', self.id),
         ]

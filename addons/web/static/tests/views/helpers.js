@@ -3,7 +3,7 @@
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture } from "@web/../tests/helpers/utils";
-import { View } from "@web/views/view";
+import { getDefaultConfig, View } from "@web/views/view";
 import { _fieldsViewGet } from "../helpers/mock_server";
 import { addLegacyMockEnvironment } from "../webclient/helpers";
 
@@ -21,15 +21,16 @@ const { mount } = owl;
 
 /**
  * @param {MakeViewParams} params
- * @param {Object} [options={}]
- * @param {boolean} [options.noFields] Do not add default fields
  * @returns {owl.Component}
  */
-export const makeView = async (params, options = {}) => {
+export const makeView = async (params) => {
     const props = { ...params };
     const serverData = props.serverData;
     const mockRPC = props.mockRPC;
-    const config = props.config || {};
+    const config = {
+        ...getDefaultConfig(),
+        ...props.config,
+    };
     const legacyParams = props.legacyParams || {};
 
     delete props.serverData;
@@ -39,7 +40,7 @@ export const makeView = async (params, options = {}) => {
 
     const env = await makeTestEnv({ serverData, mockRPC, config });
 
-    if (!options.noFields && props.arch) {
+    if (props.arch) {
         const defaultFields = serverData.models[props.resModel].fields;
         if (!props.fields) {
             props.fields = Object.assign({}, defaultFields);

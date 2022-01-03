@@ -5,7 +5,7 @@ import { attr, many2one } from '@mail/model/model_field';
 import { clear, insert, insertAndReplace, unlinkAll } from '@mail/model/model_field_command';
 
 registerModel({
-    name: 'mail.notification',
+    name: 'Notification',
     identifyingFields: ['id'],
     modelMethods: {
         /**
@@ -40,6 +40,44 @@ registerModel({
         },
     },
     recordMethods: {
+        /**
+         * @private
+         * @returns {string}
+         */
+         _computeIconClass() {
+            switch (this.notification_status) {
+                case 'sent':
+                    return 'fa fa-check';
+                case 'bounce':
+                    return 'fa fa-exclamation';
+                case 'exception':
+                    return 'fa fa-exclamation';
+                case 'ready':
+                    return 'fa fa-send-o';
+                case 'canceled':
+                    return 'fa fa-trash-o';
+            }
+            return '';
+        },
+        /**
+         * @private
+         * @returns {string}
+         */
+        _computeIconTitle() {
+            switch (this.notification_status) {
+                case 'sent':
+                    return this.env._t("Sent");
+                case 'bounce':
+                    return this.env._t("Bounced");
+                case 'exception':
+                    return this.env._t("Error");
+                case 'ready':
+                    return this.env._t("Ready");
+                case 'canceled':
+                    return this.env._t("Canceled");
+            }
+            return '';
+        },
         /**
          * @private
          * @returns {boolean}
@@ -80,6 +118,18 @@ registerModel({
     },
     fields: {
         failure_type: attr(),
+        /**
+         * Determines the classname of the icon for this notification.
+         */
+        iconClass: attr({
+            compute: '_computeIconClass',
+        }),
+        /**
+         * Determines the text to display as title for this notification.
+         */
+        iconTitle: attr({
+            compute: '_computeIconTitle',
+        }),
         id: attr({
             readonly: true,
             required: true,
@@ -90,15 +140,15 @@ registerModel({
         isFromCurrentUser: attr({
             compute: '_computeIsFromCurrentUser',
         }),
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             inverse: 'notifications',
         }),
-        notificationGroup: many2one('mail.notification_group', {
+        notificationGroup: many2one('NotificationGroup', {
             compute: '_computeNotificationGroup',
             inverse: 'notifications',
         }),
         notification_status: attr(),
         notification_type: attr(),
-        partner: many2one('mail.partner'),
+        partner: many2one('Partner'),
     },
 });

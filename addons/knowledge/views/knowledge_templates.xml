@@ -3,37 +3,70 @@
 <data>
     <!-- Article Tree layout -->
     <template id="knowledge_article_tree_template" name="Article Tree">
-        <div>Favourites</div>
-        <ul t-if="favourites">
-            <li t-foreach="favourites" t-as="favourite">
-                <span t-out="favourite.name"/>
-            </li>
-        </ul>
-        <span t-else="">No favourite yet</span>
+        <div class="o_tree_favorite">
+            <div class="h4 mb-0">Favourites</div>
+            <ul t-if="favourites" class="m-0 px-0 py-2">
+                <li t-foreach="favourites" t-as="favourite" t-att-data-article-id="favourite.id">
+                    <div class="o_article text-truncate">
+                        <t t-out="favourite.name"/>
+                    </div>
+                </li>
+            </ul>
+            <div t-else="" class="px-0 py-2 font-italic">
+                No favourite yet
+            </div>
+        </div>
 
-        <div>Workspace</div>
-        <ul>
-            <t t-foreach="public_articles.sorted('sequence')" t-as="child">
-                <t t-call="knowledge.article_template">
-                    <t t-set="article" t-value="child"/>
+        <div class="o_tree_workspace">
+            <div class="h4 mb-0">Workspace</div>
+            <ul class="o_tree m-0 px-0 py-2">
+                <t t-foreach="public_articles.sorted('sequence')" t-as="child">
+                    <t t-call="knowledge.article_template">
+                        <t t-set="article" t-value="child"/>
+                    </t>
                 </t>
-            </t>
-        </ul>
+            </ul>
+        </div>
 
-        <div t-if="private_articles">Private</div>
-        <ul>
-            <t t-foreach="private_articles.sorted('sequence')" t-as="child">
-                <t t-call="knowledge.article_template">
-                    <t t-set="article" t-value="child"/>
+        <div class="o_tree_private">
+            <div class="h4 mb-0">Private</div>
+            <ul class="o_tree m-0 px-0 py-2">
+                <t t-foreach="private_articles.sorted('sequence')" t-as="child">
+                    <t t-call="knowledge.article_template">
+                        <t t-set="article" t-value="child"/>
+                    </t>
                 </t>
-            </t>
-        </ul>
+            </ul>
+        </div>
     </template>
 
     <template id="article_template">
-        <li t-if="article.child_ids">
-            <span t-out="article.name"/>
-            <ul>
+        <li t-attf-id="article_#{article.id}" t-att-data-article-id="article.id">
+            <div class="d-flex">
+                <button class="btn btn-link text-secondary p-0 o_article_caret">
+                    <i class="fa fa-fw fa-caret-down align-self-center"/>
+                </button>
+                <div class="btn-group dropdown">
+                    <button class="btn btn-link text-secondary p-0" type="button" t-attf-id="o_article_dropdown_#{article.id}" data-toggle="dropdown" aria-expanded="true">
+                        <i class="fa fa-fw fa-file"/>
+                    </button>
+                    <div class="dropdown-menu p-0 o_article_icons" role="menu" t-attf-aria-labelledby="o_article_dropdown_#{article.id}">
+                        <i class="fa fa-fw fa-file"/>
+                        <i class="fa fa-fw fa-book"/>
+                        <i class="fa fa-fw fa-user"/>
+                        <i class="fa fa-fw fa-address-book"/>
+                        <i class="fa fa-fw fa-calendar"/>
+                        <i class="fa fa-fw fa-code"/>
+                        <i class="fa fa-fw fa-car"/>
+                        <i class="fa fa-fw fa-comment"/>
+                        <i class="fa fa-fw fa-bullhorn"/>
+                    </div>
+                </div>
+                <div class="o_article flex-grow-1 text-truncate">
+                    <t t-out="article.name"/>
+                </div>
+            </div>
+            <ul t-if="article.child_ids">
                 <t t-foreach="article.child_ids.sorted('sequence')" t-as="child">
                     <t t-call="knowledge.article_template">
                         <t t-set="article" t-value="child"/>
@@ -41,7 +74,6 @@
                 </t>
             </ul>
         </li>
-        <li t-else="" t-out="article.name"/>
     </template>
 </data>
 </odoo>

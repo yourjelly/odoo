@@ -54,6 +54,7 @@ const _DialogLinkWidget = Link.extend({
         }
         this.data.isNewWindow = data.isNewWindow;
         this.final_data = this.data;
+        return Promise.resolve();
     },
 
     //--------------------------------------------------------------------------
@@ -180,7 +181,7 @@ const _DialogLinkWidget = Link.extend({
 const LinkDialog = Dialog.extend({
     init: function (parent, ...args) {
         this._super(...arguments);
-        this.linkWidget = new _DialogLinkWidget(this, ...args);
+        this.linkWidget = this.getLinkWidget(...args);
     },
     start: async function () {
         const res = await this._super(...arguments);
@@ -193,18 +194,22 @@ const LinkDialog = Dialog.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @param {...any} args
+     */
+    getLinkWidget: function (...args) {
+        return new _DialogLinkWidget(this, ...args);
+    },
+
+    /**
      * @override
      */
     save: function () {
-        this.linkWidget.save();
-        if (!this.linkWidget.final_data) {
-            // Invalid form content: do not proceed with save.
-            return;
-        }
-        this.final_data = this.linkWidget.final_data;
-        if (this.final_data) {
-            return this._super(...arguments);
-        }
+        const _super = this._super.bind(this);
+        const saveArguments = arguments;
+        return this.linkWidget.save().then(() => {
+            this.final_data = this.linkWidget.final_data;
+            return _super(...saveArguments);
+        });
     },
 });
 

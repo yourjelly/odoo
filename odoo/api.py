@@ -401,6 +401,7 @@ def model_create_single(method):
             record = model.create(vals)
             records = model.create([vals, ...])
     """
+    _create_logger.warning("The model %s is not overriding the create method in batch", method.__module__)
     wrapper = decorate(method, _model_create_single)
     wrapper._api = 'model_create'
     return wrapper
@@ -717,9 +718,10 @@ class Environment(Mapping):
     @contextmanager
     def protecting(self, what, records=None):
         """ Prevent the invalidation or recomputation of fields on records.
-            The parameters are either:
-             - ``what`` a collection of fields and ``records`` a recordset, or
-             - ``what`` a collection of pairs ``(fields, records)``.
+        The parameters are either:
+
+        - ``what`` a collection of fields and ``records`` a recordset, or
+        - ``what`` a collection of pairs ``(fields, records)``.
         """
         protected = self._protected
         try:

@@ -74,8 +74,8 @@ class StockPackageLevel(models.Model):
                     for rec, quant in ml_update_dict.items():
                         rec.qty_done = quant
             else:
-                package_level.move_line_ids.filtered(lambda ml: ml.product_qty == 0).unlink()
-                package_level.move_line_ids.filtered(lambda ml: ml.product_qty != 0).write({'qty_done': 0})
+                package_level.move_line_ids.filtered(lambda ml: ml.reserved_qty == 0).unlink()
+                package_level.move_line_ids.filtered(lambda ml: ml.reserved_qty != 0).write({'qty_done': 0})
 
     @api.depends('move_line_ids', 'move_line_ids.package_id', 'move_line_ids.result_package_id')
     def _compute_fresh_pack(self):
@@ -95,7 +95,7 @@ class StockPackageLevel(models.Model):
             elif package_level.move_line_ids and not package_level.move_line_ids.filtered(lambda ml: ml.state == 'done'):
                 if package_level.is_fresh_package:
                     package_level.state = 'new'
-                elif package_level._check_move_lines_map_quant_package(package_level.package_id, 'product_uom_qty'):
+                elif package_level._check_move_lines_map_quant_package(package_level.package_id, 'reserved_uom_qty'):
                     package_level.state = 'assigned'
                 else:
                     package_level.state = 'confirmed'
@@ -139,13 +139,14 @@ class StockPackageLevel(models.Model):
                         'company_id': package_level.company_id.id,
                     })
 
-    @api.model
-    def create(self, vals):
-        result = super(StockPackageLevel, self).create(vals)
-        if vals.get('location_dest_id'):
-            result.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
-            result.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
-        return result
+    @api.model_create_multi
+    def create(self, vals_list):
+        package_levels = super().create(vals_list)
+        for package_level, vals in zip(package_levels, vals_list):
+            if vals.get('location_dest_id'):
+                package_level.move_line_ids.write({'location_dest_id': vals['location_dest_id']})
+                package_level.move_ids.write({'location_dest_id': vals['location_dest_id']})
+        return package_levels
 
     def write(self, vals):
         result = super(StockPackageLevel, self).write(vals)

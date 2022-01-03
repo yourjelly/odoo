@@ -72,7 +72,7 @@ class PosConfig(models.Model):
         help='The receipt will automatically be printed at the end of each order.')
     iface_print_skip_screen = fields.Boolean(string='Skip Preview Screen', default=True,
         help='The receipt screen will be skipped if the receipt can be printed automatically.')
-    iface_tax_included = fields.Selection([('subtotal', 'Tax-Excluded Price'), ('total', 'Tax-Included Price')], string="Tax Display", default='subtotal', required=True)
+    iface_tax_included = fields.Selection([('subtotal', 'Tax-Excluded Price'), ('total', 'Tax-Included Price')], string="Tax Display", default='total', required=True)
     iface_start_categ_id = fields.Many2one('pos.category', string='Initial Category',
         help='The point of sale will display this product category by default. If no category is specified, all available products will be shown.')
     iface_available_categ_ids = fields.Many2many('pos.category', string='Available PoS Product Categories',
@@ -140,7 +140,7 @@ class PosConfig(models.Model):
     module_pos_discount = fields.Boolean("Global Discounts")
     module_pos_loyalty = fields.Boolean("Loyalty Program")
     module_pos_mercury = fields.Boolean(string="Integrated Card Payments")
-    product_configurator = fields.Boolean(string="Product Configurator")
+    product_configurator = fields.Boolean(string="Product Configurator", default=True)
     is_posbox = fields.Boolean("PosBox")
     is_header_or_footer = fields.Boolean("Header & Footer")
     module_pos_hr = fields.Boolean(help="Show employee login screen")
@@ -159,7 +159,7 @@ class PosConfig(models.Model):
     manual_discount = fields.Boolean(string="Manual Discounts", default=True)
     ship_later = fields.Boolean(string="Ship Later")
     warehouse_id = fields.Many2one('stock.warehouse', default=_default_warehouse_id, ondelete='restrict')
-    route_id = fields.Many2one('stock.location.route', string="Spefic route for products delivered later.")
+    route_id = fields.Many2one('stock.route', string="Spefic route for products delivered later.")
     picking_policy = fields.Selection([
         ('direct', 'As soon as possible'),
         ('one', 'When all products are ready')],
@@ -435,26 +435,27 @@ class PosConfig(models.Model):
                 result.append((config.id, "%s (%s)" % (config.name, last_session.user_id.name)))
         return result
 
-    @api.model
-    def create(self, values):
-        IrSequence = self.env['ir.sequence'].sudo()
-        val = {
-            'name': _('POS Order %s', values['name']),
-            'padding': 4,
-            'prefix': "%s/" % values['name'],
-            'code': "pos.order",
-            'company_id': values.get('company_id', False),
-        }
-        # force sequence_id field to new pos.order sequence
-        values['sequence_id'] = IrSequence.create(val).id
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            IrSequence = self.env['ir.sequence'].sudo()
+            val = {
+                'name': _('POS Order %s', vals['name']),
+                'padding': 4,
+                'prefix': "%s/" % vals['name'],
+                'code': "pos.order",
+                'company_id': vals.get('company_id', False),
+            }
+            # force sequence_id field to new pos.order sequence
+            vals['sequence_id'] = IrSequence.create(val).id
 
-        val.update(name=_('POS order line %s', values['name']), code='pos.order.line')
-        values['sequence_line_id'] = IrSequence.create(val).id
-        pos_config = super(PosConfig, self).create(values)
-        pos_config.sudo()._check_modules_to_install()
-        pos_config.sudo()._check_groups_implied()
+            val.update(name=_('POS order line %s', vals['name']), code='pos.order.line')
+            vals['sequence_line_id'] = IrSequence.create(val).id
+        pos_configs = super().create(vals_list)
+        pos_configs.sudo()._check_modules_to_install()
+        pos_configs.sudo()._check_groups_implied()
         # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
-        return pos_config
+        return pos_configs
 
     def write(self, vals):
         opened_session = self.mapped('session_ids').filtered(lambda s: s.state != 'closed')
@@ -558,7 +559,7 @@ class PosConfig(models.Model):
             'target': 'self',
         }
 
-    def open_session_cb(self, check_coa=True):
+    def open_session_cb(self):
         """ new session button
 
         create one if none exist

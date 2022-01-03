@@ -9,7 +9,7 @@ import { makeDeferred } from '@mail/utils/deferred/deferred';
 const { EventBus } = owl.core;
 
 registerModel({
-    name: 'mail.messaging',
+    name: 'Messaging',
     identifyingFields: [],
     lifecycleHooks: {
         _created() {
@@ -27,7 +27,10 @@ registerModel({
          */
         async start() {
             this.env.services['bus_service'].on('window_focus', null, this._handleGlobalWindowFocus);
-            await this.async(() => this.initializer.start());
+            await this.initializer.start();
+            if (!this.exists()) {
+                return;
+            }
             this.notificationHandler.start();
             this.update({ isInitialized: true });
             this.initializedPromise.resolve();
@@ -42,15 +45,15 @@ registerModel({
          * @param {integer} [param0.partnerId]
          * @param {integer} [param0.userId]
          * @param {Object} [options]
-         * @returns {mail.thread|undefined}
+         * @returns {Thread|undefined}
          */
         async getChat({ partnerId, userId }) {
             if (userId) {
-                const user = this.messaging.models['mail.user'].insert({ id: userId });
+                const user = this.messaging.models['User'].insert({ id: userId });
                 return user.getChat();
             }
             if (partnerId) {
-                const partner = this.messaging.models['mail.partner'].insert({ id: partnerId });
+                const partner = this.messaging.models['Partner'].insert({ id: partnerId });
                 return partner.getChat();
             }
         },
@@ -60,8 +63,8 @@ registerModel({
          * If a chat is not appropriate, a notification is displayed instead.
          *
          * @param {Object} person forwarded to @see `getChat()`
-         * @param {Object} [options] forwarded to @see `mail.thread:open()`
-         * @returns {mail.thread|undefined}
+         * @param {Object} [options] forwarded to @see `Thread:open()`
+         * @returns {Thread|undefined}
          */
         async openChat(person, options) {
             const chat = await this.async(() => this.getChat(person));
@@ -103,18 +106,18 @@ registerModel({
          */
         async openProfile({ id, model }) {
             if (model === 'res.partner') {
-                const partner = this.messaging.models['mail.partner'].insert({ id });
+                const partner = this.messaging.models['Partner'].insert({ id });
                 return partner.openProfile();
             }
             if (model === 'res.users') {
-                const user = this.messaging.models['mail.user'].insert({ id });
+                const user = this.messaging.models['User'].insert({ id });
                 return user.openProfile();
             }
             if (model === 'mail.channel') {
-                let channel = this.messaging.models['mail.thread'].findFromIdentifyingData({ id, model: 'mail.channel' });
+                let channel = this.messaging.models['Thread'].findFromIdentifyingData({ id, model: 'mail.channel' });
                 if (!channel) {
                     channel = (await this.async(() =>
-                        this.messaging.models['mail.thread'].performRpcChannelInfo({ ids: [id] })
+                        this.messaging.models['Thread'].performRpcChannelInfo({ ids: [id] })
                     ))[0];
                 }
                 if (!channel) {
@@ -141,7 +144,7 @@ registerModel({
          * @param {String} sessionId
          */
         toggleFocusedRtcSession(sessionId) {
-            const rtcSession = this.messaging.models['mail.rtc_session'].findFromIdentifyingData({
+            const rtcSession = this.messaging.models['RtcSession'].findFromIdentifyingData({
                 id: sessionId,
             });
             const focusedSessionId = this.focusedRtcSession && this.focusedRtcSession.id;
@@ -189,17 +192,6 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.partner[]}
-         */
-        _computeRingingThreads() {
-            if (!this.messaging) {
-                return;
-            }
-            const threads = this.messaging.models['mail.thread'].all().filter(thread => !!thread.rtcInvitingSession);
-            return replace(threads);
-        },
-        /**
-         * @private
          */
         _handleGlobalWindowFocus() {
             this.update({ outOfFocusUnreadMessageCounter: 0 });
@@ -229,7 +221,7 @@ registerModel({
          * Inverse of the messaging field present on all models. This field
          * therefore contains all existing records.
          */
-        allRecords: one2many('mail.model', {
+        allRecords: one2many('Model', {
             inverse: 'messaging',
             isCausal: true,
         }),
@@ -240,23 +232,23 @@ registerModel({
         autofetchPartnerImStatus: attr({
             default: true,
         }),
-        cannedResponses: one2many('mail.canned_response'),
-        chatWindowManager: one2one('mail.chat_window_manager', {
+        cannedResponses: one2many('CannedResponse'),
+        chatWindowManager: one2one('ChatWindowManager', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        commands: one2many('mail.channel_command'),
+        commands: one2many('ChannelCommand'),
         companyName: attr(),
-        currentGuest: one2one('mail.guest'),
-        currentPartner: one2one('mail.partner'),
-        currentUser: one2one('mail.user'),
-        device: one2one('mail.device', {
+        currentGuest: one2one('Guest'),
+        currentPartner: one2one('Partner'),
+        currentUser: one2one('User'),
+        device: one2one('Device', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        dialogManager: one2one('mail.dialog_manager', {
+        dialogManager: one2one('DialogManager', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -267,20 +259,20 @@ registerModel({
         disableAnimation: attr({
             default: false,
         }),
-        discuss: one2one('mail.discuss', {
+        discuss: one2one('Discuss', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        focusedRtcSession: one2one('mail.rtc_session'),
+        focusedRtcSession: one2one('RtcSession'),
         /**
          * Mailbox History.
          */
-        history: one2one('mail.thread'),
+        history: one2one('Thread'),
         /**
          * Mailbox Inbox.
          */
-        inbox: one2one('mail.thread'),
+        inbox: one2one('Thread'),
         /**
          * Promise that will be resolved when messaging is initialized.
          */
@@ -289,7 +281,7 @@ registerModel({
             required: true,
             readonly: true,
         }),
-        initializer: one2one('mail.messaging_initializer', {
+        initializer: one2one('MessagingInitializer', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -316,7 +308,7 @@ registerModel({
         isQUnitTest: attr({
             default: false,
         }),
-        locale: one2one('mail.locale', {
+        locale: one2one('Locale', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -336,12 +328,12 @@ registerModel({
             readonly: true,
             required: true,
         }),
-        messagingMenu: one2one('mail.messaging_menu', {
+        messagingMenu: one2one('MessagingMenu', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        notificationHandler: one2one('mail.messaging_notification_handler', {
+        notificationHandler: one2one('MessagingNotificationHandler', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -349,24 +341,25 @@ registerModel({
         outOfFocusUnreadMessageCounter: attr({
             default: 0,
         }),
-        partnerRoot: many2one('mail.partner'),
+        partnerRoot: many2one('Partner'),
         /**
          * Determines which partners should be considered the public partners,
          * which are special partners notably used in livechat.
          */
-        publicPartners: many2many('mail.partner'),
+        publicPartners: many2many('Partner'),
         /**
-         * Threads for which the current partner has a pending invitation
+         * Threads for which the current partner has a pending invitation.
+         * It is computed from the inverse relation for performance reasons.
          */
-        ringingThreads: many2many('mail.thread', {
-            compute: '_computeRingingThreads',
+        ringingThreads: one2many('Thread', {
+            inverse: 'messagingAsRingingThread',
         }),
-        rtc: one2one('mail.rtc', {
+        rtc: one2one('Rtc', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
         }),
-        soundEffects: one2one('mail.sound_effects', {
+        soundEffects: one2one('SoundEffects', {
             default: insertAndReplace(),
             isCausal: true,
             readonly: true,
@@ -374,8 +367,8 @@ registerModel({
         /**
          * Mailbox Starred.
          */
-        starred: one2one('mail.thread'),
-        userSetting: one2one('mail.user_setting', {
+        starred: one2one('Thread'),
+        userSetting: one2one('UserSetting', {
             isCausal: true,
         }),
     },

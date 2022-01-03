@@ -305,11 +305,10 @@ class MetaCase(type):
 def _normalize_arch_for_assert(arch_string, parser_method="xml"):
     """Takes some xml and normalize it to make it comparable to other xml
     in particular, blank text is removed, and the output is pretty-printed
-    :param arch_string: the string representing an XML arch
-    :type arch_string: str
-    :param parser_method: an string representing which lxml.Parser class to use
+
+    :param str arch_string: the string representing an XML arch
+    :param str parser_method: an string representing which lxml.Parser class to use
         when normalizing both archs. Takes either "xml" or "html"
-    :type parser_method: str
     :return: the normalized arch
     :rtype str:
     """
@@ -455,6 +454,19 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                 func(*args, **kwargs)
         else:
             return self._assertRaises(exception, **kwargs)
+
+    if sys.version_info < (3, 10):
+        # simplified backport of assertNoLogs()
+        @contextmanager
+        def assertNoLogs(self, logger: str, level: str):
+            # assertLogs ensures there is at least one log record when
+            # exiting the context manager. We insert one dummy record just
+            # so we pass that silly test while still capturing the logs.
+            with self.assertLogs(logger, level) as capture:
+                logging.getLogger(logger).log(getattr(logging, level), "Dummy log record")
+                yield
+                if len(capture.output) > 1:
+                    raise self.failureException(f"Unexpected logs found: {capture.output[1:]}")
 
     @contextmanager
     def assertQueries(self, expected, flush=True):
@@ -671,6 +683,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
 
     def _assertXMLEqual(self, original, expected, parser="xml"):
         """Asserts that two xmls archs are equal
+
         :param original: the xml arch to test
         :type original: str
         :param expected: the xml arch of reference
@@ -913,7 +926,7 @@ class ChromeBrowser:
             port_file = pathlib.Path(self.user_data_dir, 'DevToolsActivePort')
             for _ in range(100):
                 time.sleep(0.1)
-                if port_file.is_file():
+                if port_file.is_file() and port_file.stat().st_size > 5:
                     with port_file.open('r', encoding='utf-8') as f:
                         self.devtools_port = int(f.readline())
                     break
@@ -981,16 +994,24 @@ class ChromeBrowser:
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
 
     def _json_command(self, command, timeout=3, get_key=None):
-        """
-        Inspect dev tools with get
+        """Queries browser state using JSON
+
         Available commands:
-            '' : return list of tabs with their id
-            list (or json/): list tabs
-            new : open a new tab
-            activate/ + an id: activate a tab
-            close/ + and id: close a tab
-            version : get chrome and dev tools version
-            protocol : get the full protocol
+
+        ``''``
+            return list of tabs with their id
+        ``list`` (or ``json/``)
+            list tabs
+        ``new``
+            open a new tab
+        :samp:`activate/{id}`
+            activate a tab
+        :samp:`close/{id}`
+            close a tab
+        ``version``
+            get chrome and dev tools version
+        ``protocol``
+            get the full protocol
         """
         command = os.path.join('json', command).strip('/')
         url = werkzeug.urls.url_join('http://%s:%s/' % (HOST, self.devtools_port), command)

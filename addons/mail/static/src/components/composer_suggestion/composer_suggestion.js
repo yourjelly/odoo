@@ -21,26 +21,26 @@ export class ComposerSuggestion extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.composer_view}
+     * @returns {ComposerView}
      */
     get composerView() {
-        return this.messaging && this.messaging.models['mail.composer_view'].get(this.props.composerViewLocalId);
+        return this.messaging && this.messaging.models['ComposerView'].get(this.props.composerViewLocalId);
     }
 
     get isCannedResponse() {
-        return this.props.modelName === "mail.canned_response";
+        return this.props.modelName === "CannedResponse";
     }
 
     get isChannel() {
-        return this.props.modelName === "mail.thread";
+        return this.props.modelName === "Thread";
     }
 
     get isCommand() {
-        return this.props.modelName === "mail.channel_command";
+        return this.props.modelName === "ChannelCommand";
     }
 
     get isPartner() {
-        return this.props.modelName === "mail.partner";
+        return this.props.modelName === "Partner";
     }
 
     get record() {

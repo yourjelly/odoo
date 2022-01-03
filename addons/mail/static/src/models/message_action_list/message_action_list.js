@@ -6,7 +6,7 @@ import { clear, insertAndReplace, replace } from '@mail/model/model_field_comman
 import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.message_action_list',
+    name: 'MessageActionList',
     identifyingFields: ['messageView'],
     lifecycleHooks: {
         _created() {
@@ -146,7 +146,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.message_view}
+         * @returns {MessageView}
          */
         _computeMessageViewForDelete() {
             return this.message
@@ -176,13 +176,13 @@ registerModel({
         /**
          * States the message on which this action message list operates.
          */
-        message: many2one('mail.message', {
+        message: many2one('Message', {
             related: 'messageView.message',
         }),
         /**
          * States the message view that controls this message action list.
          */
-        messageView: one2one('mail.message_view', {
+        messageView: one2one('MessageView', {
             inverse: 'messageActionList',
             readonly: true,
             required: true,
@@ -191,7 +191,7 @@ registerModel({
          * Determines the message view that this message action list will use to
          * display this message in this delete confirmation dialog.
          */
-        messageViewForDelete: one2one('mail.message_view', {
+        messageViewForDelete: one2one('MessageView', {
             compute: '_computeMessageViewForDelete',
             inverse: 'messageActionListWithDelete',
             isCausal: true,

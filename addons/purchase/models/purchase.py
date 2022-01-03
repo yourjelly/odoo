@@ -10,7 +10,7 @@ from werkzeug.urls import url_encode
 
 from odoo import api, fields, models, _
 from odoo.osv import expression
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, formatLang, get_lang, groupby
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, format_amount, formatLang, get_lang, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 from odoo.exceptions import AccessError, UserError, ValidationError
 
@@ -231,21 +231,26 @@ class PurchaseOrder(models.Model):
             self.partner_id.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
         return res
 
-    @api.model
-    def create(self, vals):
-        company_id = vals.get('company_id', self.default_get(['company_id'])['company_id'])
-        # Ensures default picking type and currency are taken from the right company.
-        self_comp = self.with_company(company_id)
-        if vals.get('name', 'New') == 'New':
-            seq_date = None
-            if 'date_order' in vals:
-                seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
-            vals['name'] = self_comp.env['ir.sequence'].next_by_code('purchase.order', sequence_date=seq_date) or '/'
-        vals, partner_vals = self._write_partner_values(vals)
-        res = super(PurchaseOrder, self_comp).create(vals)
-        if partner_vals:
-            res.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        orders = self.browse()
+        partner_vals_list = []
+        for vals in vals_list:
+            company_id = vals.get('company_id', self.default_get(['company_id'])['company_id'])
+            # Ensures default picking type and currency are taken from the right company.
+            self_comp = self.with_company(company_id)
+            if vals.get('name', 'New') == 'New':
+                seq_date = None
+                if 'date_order' in vals:
+                    seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
+                vals['name'] = self_comp.env['ir.sequence'].next_by_code('purchase.order', sequence_date=seq_date) or '/'
+            vals, partner_vals = self._write_partner_values(vals)
+            partner_vals_list.append(partner_vals)
+            orders |= super(PurchaseOrder, self_comp).create(vals)
+        for order, partner_vals in zip(orders, partner_vals_list):
+            if partner_vals:
+                order.sudo().write(partner_vals)  # Because the purchase user doesn't have write on `res.partner`
+        return orders
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_cancelled(self):
@@ -669,24 +674,21 @@ class PurchaseOrder(models.Model):
         result['my_late'] = po.search_count([('state', 'in', ['draft', 'sent', 'to approve']), ('date_order', '<', fields.Datetime.now()), ('user_id', '=', self.env.uid)])
 
         # Calculated values ('avg order value', 'avg days to purchase', and 'total last 7 days') note that 'avg order value' and
-        # 'total last 7 days' takes into account exchange rate and current company's currency's precision. Min of currency precision
-        # is taken to easily extract it from query.
+        # 'total last 7 days' takes into account exchange rate and current company's currency's precision.
         # This is done via SQL for scalability reasons
         query = """SELECT AVG(COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total)),
                           AVG(extract(epoch from age(po.date_approve,po.create_date)/(24*60*60)::decimal(16,2))),
-                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END),
-                          MIN(curr.decimal_places)
+                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END)
                    FROM purchase_order po
-                   JOIN res_company comp ON (po.company_id = comp.id)
-                   JOIN res_currency curr ON (comp.currency_id = curr.id)
                    WHERE po.state in ('purchase', 'done')
                      AND po.company_id = %s
                 """
         self._cr.execute(query, (one_week_ago, self.env.company.id))
         res = self.env.cr.fetchone()
-        result['all_avg_order_value'] = round(res[0] or 0, res[3])
         result['all_avg_days_to_purchase'] = round(res[1] or 0, 2)
-        result['all_total_last_7_days'] = round(res[2] or 0, res[3])
+        currency = self.env.company.currency_id
+        result['all_avg_order_value'] = format_amount(self.env, res[0] or 0, currency)
+        result['all_total_last_7_days'] = format_amount(self.env, res[2] or 0, currency)
 
         return result
 

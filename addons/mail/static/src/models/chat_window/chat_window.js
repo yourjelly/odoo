@@ -6,7 +6,7 @@ import { clear, insertAndReplace, link, unlink } from '@mail/model/model_field_c
 import { markEventHandled } from '@mail/utils/utils';
 
 registerModel({
-    name: 'mail.chat_window',
+    name: 'ChatWindow',
     identifyingFields: ['manager', ['thread', 'managerAsNewMessage']],
     lifecycleHooks: {
         _created() {
@@ -288,7 +288,7 @@ registerModel({
         },
         /**
          * @private
-         * @returns {mail.thread_viewer}
+         * @returns {ThreadViewer}
          */
         _computeThreadViewer() {
             return insertAndReplace({
@@ -336,7 +336,7 @@ registerModel({
          * @private
          * @param {Object} [param0={}]
          * @param {boolean} [param0.reverse=false]
-         * @returns {mail.chat_window|undefined}
+         * @returns {ChatWindow|undefined}
          */
         _getNextVisibleUnfoldedChatWindow({ reverse = false } = {}) {
             const orderedVisible = this.manager.allOrderedVisible;
@@ -375,7 +375,7 @@ registerModel({
          * Determines the channel invitation form displayed by this chat window
          * (if any). Only makes sense if hasInviteFeature is true.
          */
-        channelInvitationForm: one2one('mail.channel_invitation_form', {
+        channelInvitationForm: one2one('ChannelInvitationForm', {
             inverse: 'chatWindow',
             isCausal: true,
         }),
@@ -448,11 +448,11 @@ registerModel({
         isVisible: attr({
             compute: '_computeIsVisible',
         }),
-        manager: many2one('mail.chat_window_manager', {
+        manager: many2one('ChatWindowManager', {
             inverse: 'chatWindows',
             readonly: true,
         }),
-        managerAsNewMessage: one2one('mail.chat_window_manager', {
+        managerAsNewMessage: one2one('ChatWindowManager', {
             inverse: 'newMessageChatWindow',
             readonly: true,
         }),
@@ -460,23 +460,23 @@ registerModel({
             compute: '_computeName',
         }),
         /**
-         * Determines the `mail.thread` that should be displayed by `this`.
-         * If no `mail.thread` is linked, `this` is considered "new message".
+         * Determines the `Thread` that should be displayed by `this`.
+         * If no `Thread` is linked, `this` is considered "new message".
          */
-        thread: one2one('mail.thread', {
+        thread: one2one('Thread', {
             inverse: 'chatWindow',
             readonly: true,
         }),
         /**
-         * States the `mail.thread_view` displaying `this.thread`.
+         * States the `ThreadView` displaying `this.thread`.
          */
-        threadView: one2one('mail.thread_view', {
+        threadView: one2one('ThreadView', {
             related: 'threadViewer.threadView',
         }),
         /**
-         * Determines the `mail.thread_viewer` managing the display of `this.thread`.
+         * Determines the `ThreadViewer` managing the display of `this.thread`.
          */
-        threadViewer: one2one('mail.thread_viewer', {
+        threadViewer: one2one('ThreadViewer', {
             compute: '_computeThreadViewer',
             inverse: 'chatWindow',
             isCausal: true,

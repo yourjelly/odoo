@@ -11,17 +11,17 @@ export class MailTemplate extends Component {
     //--------------------------------------------------------------------------
 
     /**
-     * @returns {mail.activity}
+     * @returns {Activity}
      */
     get activity() {
-        return this.messaging && this.messaging.models['mail.activity'].get(this.props.activityLocalId);
+        return this.messaging && this.messaging.models['Activity'].get(this.props.activityLocalId);
     }
 
     /**
-     * @returns {mail.mail_template}
+     * @returns {MailTemplate}
      */
     get mailTemplate() {
-        return this.messaging && this.messaging.models['mail.mail_template'].get(this.props.mailTemplateLocalId);
+        return this.messaging && this.messaging.models['MailTemplate'].get(this.props.mailTemplateLocalId);
     }
 
     //--------------------------------------------------------------------------

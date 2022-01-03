@@ -73,30 +73,30 @@ export class MessageSeenIndicator extends Component {
     }
 
     /**
-     * @returns {mail.message}
+     * @returns {Message}
      */
     get message() {
-        return this.messaging && this.messaging.models['mail.message'].get(this.props.messageLocalId);
+        return this.messaging && this.messaging.models['Message'].get(this.props.messageLocalId);
     }
 
     /**
-     * @returns {mail.message_seen_indicator}
+     * @returns {MessageSeenIndicator}
      */
     get messageSeenIndicator() {
         if (!this.thread || this.thread.model !== 'mail.channel') {
             return undefined;
         }
-        return this.messaging.models['mail.message_seen_indicator'].findFromIdentifyingData({
+        return this.messaging.models['MessageSeenIndicator'].findFromIdentifyingData({
             message: this.message,
             thread: this.thread,
         });
     }
 
     /**
-     * @returns {mail.Thread}
+     * @returns {Thread}
      */
     get thread() {
-        return this.messaging && this.messaging.models['mail.thread'].get(this.props.threadLocalId);
+        return this.messaging && this.messaging.models['Thread'].get(this.props.threadLocalId);
     }
 }
 
