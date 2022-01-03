@@ -54,7 +54,7 @@ export class WebClient extends Component {
             () => []
         );
         useExternalListener(window, "click", this.onGlobalClick, { capture: true });
-        useTooltip();
+        // useTooltip(); NXOWL
     }
 
     mounted() {
