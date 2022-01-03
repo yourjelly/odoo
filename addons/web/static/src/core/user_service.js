@@ -8,6 +8,7 @@ export const userService = {
     async: ["hasGroup"],
     start(env, { rpc }) {
         const groupProms = {};
+        let featureProm = null;
 
         const context = {
             ...session.user_context,
@@ -36,6 +37,17 @@ export const userService = {
                     });
                 }
                 return groupProms[group];
+            },
+            async currentFeatures() {
+                if (!featureProm) {
+                    featureProm = rpc("/web/dataset/call_kw/ir.features/get_current_user_features", {
+                        model: "ir.features",
+                        method: "get_current_user_features",
+                        args: [],
+                        kwargs: { context },
+                    });
+                }
+                return featureProm;
             },
             name: session.name,
             userName: session.username,
