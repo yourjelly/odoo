@@ -1961,7 +1961,7 @@ QUnit.module("Search", (hooks) => {
         ]);
     });
 
-    QUnit.todo("search panel is available on list and kanban by default", async (assert) => {
+    QUnit.test("search panel is available on list and kanban by default", async (assert) => {
         assert.expect(8);
 
         serverData.views["partner,false,search"] = /* xml */ `
@@ -2001,7 +2001,7 @@ QUnit.module("Search", (hooks) => {
         assert.containsNone(webclient, ".o_content .o_search_panel");
     });
 
-    QUnit.todo("search panel with view_types attribute", async (assert) => {
+    QUnit.test("search panel with view_types attribute", async (assert) => {
         assert.expect(6);
 
         serverData.views["partner,false,search"] = /* xml */ `
@@ -2191,7 +2191,7 @@ QUnit.module("Search", (hooks) => {
         }
     );
 
-    QUnit.todo('after onExecuteAction, selects "All" as default category value', async (assert) => {
+    QUnit.test('after onExecuteAction, selects "All" as default category value', async (assert) => {
         assert.expect(3);
 
         const webclient = await createWebClient({ serverData });
@@ -2205,7 +2205,7 @@ QUnit.module("Search", (hooks) => {
         assert.containsOnce(webclient, ".o_search_panel_category_value:first .active");
     });
 
-    QUnit.todo(
+    QUnit.test(
         "categories and filters are not reloaded when switching between views",
         async (assert) => {
             assert.expect(3);
@@ -2233,7 +2233,7 @@ QUnit.module("Search", (hooks) => {
         }
     );
 
-    QUnit.todo("scroll position is kept when switching between controllers", async (assert) => {
+    QUnit.test("scroll position is kept when switching between controllers", async (assert) => {
         assert.expect(6);
 
         for (let i = 10; i < 20; i++) {

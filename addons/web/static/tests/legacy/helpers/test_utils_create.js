@@ -20,7 +20,7 @@ odoo.define('web.test_utils_create', function (require) {
     const Registry = require('web.Registry');
     const testUtilsMock = require('web.test_utils_mock');
     const Widget = require('web.Widget');
-    const { getFixture, mount, useChild } = require('@web/../tests/helpers/utils');
+    const { destroy, getFixture, mount, useChild } = require('@web/../tests/helpers/utils');
     const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 
     const { Component, useState, xml } = owl;
@@ -98,6 +98,9 @@ odoo.define('web.test_utils_create', function (require) {
         const env = Component.env;
         const parent = await mount(Parent, { env, target });
         registerCleanup(cleanUp);
+        registerCleanup(() => {
+            destroy(parent);
+        });
         return parent.child;
     }
 

@@ -6,7 +6,7 @@ import { uiService } from "@web/core/ui/ui_service";
 import { registerCleanup } from "../helpers/cleanup";
 import { makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
-import { click, getFixture, mount, triggerEvent } from "../helpers/utils";
+import { click, destroy, getFixture, mount, triggerEvent } from "../helpers/utils";
 
 const { DateTime } = luxon;
 const { Component, xml } = owl;
@@ -40,7 +40,9 @@ const mountPicker = async (Picker, props) => {
         props.onDateTimeChanged = () => {};
     }
     const parent = await mount(Parent, { env, props: { Picker, props }, target });
-    registerCleanup(() => parent.destroy());
+    registerCleanup(() => {
+        destroy(parent);
+    });
     return parent;
 };
 

@@ -4,7 +4,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
     const field_utils = require('web.field_utils');
     const { useListener } = require('web.custom_hooks');
 
-    const { useEffect } = owl;
+    const { onWillUpdateProps, useEffect } = owl;
 
     /**
      * This file defines the Owl version of the AbstractField. Specific fields
@@ -70,6 +70,10 @@ odoo.define('web.AbstractFieldOwl', function (require) {
             useListener('keydown', this._onKeydown);
             useListener('navigation-move', this._onNavigationMove);
             useEffect(() => this._applyDecorations());
+
+            onWillUpdateProps(() => {
+                this._lastSetValue = undefined;
+            });
         }
         /**
          * Hack: studio tries to find the field with a selector base on its
@@ -88,15 +92,6 @@ odoo.define('web.AbstractFieldOwl', function (require) {
             this.el.classList.add('o_field_widget');
             this.el.classList.toggle('o_quick_editable', this._canQuickEdit);
             return res;
-        }
-        /**
-         * @async
-         * @param {Object} [nextProps]
-         * @returns {Promise}
-         */
-        async willUpdateProps(nextProps) {
-            this._lastSetValue = undefined;
-            return super.willUpdateProps(nextProps);
         }
 
         //----------------------------------------------------------------------
