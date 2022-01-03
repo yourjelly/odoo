@@ -352,7 +352,7 @@ QUnit.module('base_settings_tests', {
         form.destroy();
     });
 
-    QUnit.todo('settings view shows a message if there are changes even if the save failed', async function (assert) {
+    QUnit.test('settings view shows a message if there are changes even if the save failed', async function (assert) {
         assert.expect(3);
         var self = this;
         self.alreadySavedOnce = false;

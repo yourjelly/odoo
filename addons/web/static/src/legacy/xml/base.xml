@@ -115,7 +115,7 @@
 
 <t t-name="web.CustomFileInput" owl="1">
     <span class="o_file_input" aria-atomic="true">
-        <span class="o_file_input_trigger" t-on-click.prevent="()=>_onTriggerClicked">
+        <span class="o_file_input_trigger" t-on-click.prevent="() => _onTriggerClicked()">
             <t t-slot="default">
                 <button class="btn btn-primary">Choose File</button>
             </t>
@@ -123,7 +123,7 @@
         <input type="file" name="ufile" class="o_input_file d-none"
             t-att="{multiple: props.multi_upload, accept: props.accepted_file_extensions}"
             t-ref="file-input"
-            t-on-change="()=>_onFileInputChange"
+            t-on-change="() => this._onFileInputChange()"
         />
     </span>
 </t>
@@ -136,8 +136,8 @@
             t-attf-data-target="#{{ datePickerId }}"
             t-att-readonly="props.readonly"
             t-ref="input"
-            t-on-change="()=>_onInputChange"
-            t-on-click="()=>_onInputClick"
+            t-on-change="() => this._onInputChange()"
+            t-on-click="() => this._onInputClick()"
         />
         <span t-if="props.warn_future and state.warning" class="fa fa-exclamation-triangle text-danger o_tz_warning o_datepicker_warning">
             <t>This date is on the future. Make sure it is what you expected.</t>

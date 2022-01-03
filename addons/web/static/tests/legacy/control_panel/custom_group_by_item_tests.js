@@ -38,8 +38,6 @@ odoo.define('web.groupby_menu_generator_tests', function (require) {
 
             // Button apply
             assert.containsOnce(cgi, 'div > button.btn.btn-primary');
-
-            cgi.destroy();
         });
 
         QUnit.test('select a field name in Add Custom Group menu properly trigger the corresponding field', async function (assert) {
@@ -68,8 +66,6 @@ odoo.define('web.groupby_menu_generator_tests', function (require) {
             assert.strictEqual(cgi.el.children.length, 2);
             assert.containsOnce(cgi, '.dropdown-toggle');
             assert.containsOnce(cgi, '.dropdown-menu');
-
-            cgi.destroy();
         });
     });
 });

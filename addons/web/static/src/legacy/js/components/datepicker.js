@@ -237,9 +237,8 @@ odoo.define('web.DatePickerOwl', function (require) {
      * @extends DatePicker
      */
     class DateTimePicker extends DatePicker {
-        constructor() {
-            super(...arguments);
-
+        setup() {
+            super.setup();
             this.typeOfDate = 'datetime';
         }
 
