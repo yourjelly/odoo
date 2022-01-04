@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives import hmac
 from cryptography.hazmat import backends
 import hashlib
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 
 from base64 import b64encode
 from uuid import NAMESPACE_DNS
@@ -106,13 +107,8 @@ def reference_digests(node):
         reference.find("ds:DigestValue", namespaces=NS_MAP).text = b64encode(lib.digest())
 
 
-def hmac_sign(data, private_key, digest):
-    private_bytes = private_key.private_bytes(encoding=serialization.Encoding.PEM,
-                                              format=serialization.PrivateFormat.PKCS8,
-                                              encryption_algorithm=serialization.NoEncryption())
-    h = hmac.HMAC(private_bytes, digest(), backend=backends.default_backend())
-    h.update(data)
-    return h.finalize()
+def rsa_sign(data, private_key, digest):
+    return private_key.sign(data, padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH), digest())
 
 def long_to_bytes(n, blocksize=0):
     """long_to_bytes(n:long, blocksize:int) : string
@@ -153,5 +149,5 @@ def fill_signature(node, private_key):
     )
 
     node.find("ds:SignatureValue", namespaces=NS_MAP).text = base64_print(
-        b64encode(hmac_sign(signed_info, private_key, hashes.SHA256))
+        b64encode(rsa_sign(signed_info, private_key, hashes.SHA256))
     )
