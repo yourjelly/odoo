@@ -8,6 +8,7 @@ odoo.define('web.DatePickerOwl', function (require) {
     const {
         Component,
         onMounted,
+        onPatched,
         onWillUnmount,
         onWillUpdateProps,
         useExternalListener,
@@ -56,6 +57,9 @@ odoo.define('web.DatePickerOwl', function (require) {
                 $(this.el).off('show.datetimepicker hide.datetimepicker error.datetimepicker');
                 this._datetimepicker('destroy');
             });
+
+            let update = false;
+
             onWillUpdateProps((nextProps) => {
                 for (const prop in nextProps) {
                     if (prop == "onDateTimeChanged") {
@@ -63,9 +67,16 @@ odoo.define('web.DatePickerOwl', function (require) {
                     }
                     this._datetimepicker(prop, nextProps[prop]);
                 }
+                // NXOWL
                 if (nextProps.date) {
-                    debugger
-                    this.inputRef.el.value = this._formatDate(nextProps.date);
+                    update = true;
+                }
+            });
+
+            onPatched(() => {
+                if (update) {
+                    update = false;
+                    this.inputRef.el.value = this._formatDate(this.props.date);
                 }
             });
         }
