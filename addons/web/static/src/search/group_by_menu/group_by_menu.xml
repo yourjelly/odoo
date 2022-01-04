@@ -45,7 +45,7 @@
             </t>
             <t t-if="fields.length">
                 <div t-if="items.length" role="separator" class="dropdown-divider"/>
-                <CustomGroupByItem fields="fields" onAddCustomGroup="onAddCustomGroup.bind(this)"/>
+                <CustomGroupByItem fields="fields" onAddCustomGroup.bind="onAddCustomGroup"/>
             </t>
         </Dropdown>
     </t>

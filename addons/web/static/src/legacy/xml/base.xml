@@ -130,7 +130,6 @@
 
 <t t-name="web.Legacy.DatePicker" owl="1">
     <div class="o_datepicker" aria-atomic="true" t-att-id="datePickerId" data-target-input="nearest">
-        <t t-debug=""/>
         <input type="text" class="o_datepicker_input o_input datetimepicker-input"
             t-att-name="props.name"
             t-att-placeholder="props.placeholder"
