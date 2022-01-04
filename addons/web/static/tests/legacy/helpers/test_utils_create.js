@@ -23,7 +23,7 @@ odoo.define('web.test_utils_create', function (require) {
     const { destroy, getFixture, mount, useChild } = require('@web/../tests/helpers/utils');
     const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 
-    const { Component, useState, xml } = owl;
+    const { Component, onMounted, onWillStart, useState, xml } = owl;
 
     /**
      * Similar as createView, but specific for calendar views. Some calendar
@@ -121,7 +121,6 @@ odoo.define('web.test_utils_create', function (require) {
      *    available helpers)
      */
     async function createControlPanel(params = {}) {
-        const debug = params.debug || false;
         const env = makeTestEnvironment(params.env || {});
         const props = Object.assign({
             action: {},
@@ -159,23 +158,22 @@ odoo.define('web.test_utils_create', function (require) {
         };
 
         class Parent extends Component {
-            constructor() {
-                super();
+            setup() {
                 this.searchModel = new ActionModel(extensions, globalConfig);
                 this.state = useState(props);
                 useChild();
-            }
-            async willStart() {
-                await this.searchModel.load();
-            }
-            mounted() {
-                if (params['get-controller-query-params']) {
-                    this.searchModel.on('get-controller-query-params', this,
-                        params['get-controller-query-params']);
-                }
-                if (params.search) {
-                    this.searchModel.on('search', this, params.search);
-                }
+                onWillStart(async () => {
+                    await this.searchModel.load();
+                });
+                onMounted(() => {
+                    if (params['get-controller-query-params']) {
+                        this.searchModel.on('get-controller-query-params', this,
+                            params['get-controller-query-params']);
+                    }
+                    if (params.search) {
+                        this.searchModel.on('search', this, params.search);
+                    }
+                });
             }
         }
         Parent.components = { ControlPanel };
@@ -189,6 +187,9 @@ odoo.define('web.test_utils_create', function (require) {
         const parent = await mount(Parent, { env, target });
         const controlPanel = parent.child;
         controlPanel.getQuery = () => parent.searchModel.get("query");
+        registerCleanup(() => {
+            destroy(parent);
+        });
         return controlPanel;
     }
 
