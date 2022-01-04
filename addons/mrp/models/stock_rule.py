@@ -55,9 +55,6 @@ class StockRule(models.Model):
         for company_id, productions_values in productions_values_by_company.items():
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             productions = self.env['mrp.production'].with_user(SUPERUSER_ID).sudo().with_company(company_id).create(productions_values)
-            self.env['stock.move'].sudo().create(productions._get_moves_raw_values())
-            self.env['stock.move'].sudo().create(productions._get_moves_finished_values())
-            productions._create_workorder()
             productions.filtered(lambda p: not p.orderpoint_id).action_confirm()
 
             for production in productions:
