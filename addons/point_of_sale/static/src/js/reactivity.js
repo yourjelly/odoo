@@ -6,6 +6,14 @@ const TARGET = Symbol('Target');
 // Special key to subscribe to, to be notified of key creation/deletion
 const KEYCHANGES = Symbol('Key changes');
 
+let silent = false;
+
+export function inSilentContext(cb) {
+    silent = true;
+    cb();
+    silent = false;
+}
+
 /**
  * Checks whether a given value can be made into a reactive object.
  *
@@ -59,6 +67,7 @@ function observeTargetKey(target, key, callback) {
  *   or deleted)
  */
 function notifyReactives(target, key) {
+    if (silent) return;
     const keyToCallbacks = targetToKeysToCallbacks.get(target);
     if (!keyToCallbacks) {
         return;
