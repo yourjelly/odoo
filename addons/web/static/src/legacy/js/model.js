@@ -473,7 +473,6 @@ odoo.define("web.Model", function (require) {
         });
 
         const onUpdate = async (ev) => {
-            debugger
             // if (mapping[componentId] < ev.rev) {
                 mapping[componentId] = ev.rev;
                 await component.render();

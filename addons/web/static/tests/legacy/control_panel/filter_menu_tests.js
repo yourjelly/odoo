@@ -74,7 +74,7 @@ odoo.define('web.filter_menu_tests', function (require) {
             assert.strictEqual(optionEls[1].innerText.trim(), 'ID');
         });
 
-        QUnit.todo('toggle a "simple" filter in filter menu works', async function (assert) {
+        QUnit.test('toggle a "simple" filter in filter menu works', async function (assert) {
             assert.expect(9);
 
             const domains = [
@@ -101,15 +101,15 @@ odoo.define('web.filter_menu_tests', function (require) {
             assert.notOk(cpHelpers.isItemSelected(controlPanel, 0));
             await cpHelpers.toggleMenuItem(controlPanel, "Foo");
 
-            // assert.deepEqual(cpHelpers.getFacetTexts(controlPanel), ['Foo']);
-            // assert.containsOnce(controlPanel.el.querySelector('.o_searchview .o_searchview_facet'),
-            //     'span.fa.fa-filter.o_searchview_facet_label');
+            assert.deepEqual(cpHelpers.getFacetTexts(controlPanel), ['Foo']);
+            assert.containsOnce(controlPanel.el.querySelector('.o_searchview .o_searchview_facet'),
+                'span.fa.fa-filter.o_searchview_facet_label');
 
-            // assert.ok(cpHelpers.isItemSelected(controlPanel, "Foo"));
+            assert.ok(cpHelpers.isItemSelected(controlPanel, "Foo"));
 
-            // await cpHelpers.toggleMenuItem(controlPanel, "Foo");
-            // assert.deepEqual(cpHelpers.getFacetTexts(controlPanel), []);
-            // assert.notOk(cpHelpers.isItemSelected(controlPanel, "Foo"));
+            await cpHelpers.toggleMenuItem(controlPanel, "Foo");
+            assert.deepEqual(cpHelpers.getFacetTexts(controlPanel), []);
+            assert.notOk(cpHelpers.isItemSelected(controlPanel, "Foo"));
         });
 
         QUnit.test('add a custom filter works', async function (assert) {

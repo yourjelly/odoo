@@ -5,7 +5,15 @@ odoo.define('web.DatePickerOwl', function (require) {
     const time = require('web.time');
     const { useAutofocus } = require('web.custom_hooks');
 
-    const { Component, useExternalListener, useRef, useState } = owl;
+    const {
+        Component,
+        onMounted,
+        onWillUnmount,
+        onWillUpdateProps,
+        useExternalListener,
+        useRef,
+        useState,
+    } = owl;
 
     let datePickerId = 0;
 
@@ -24,7 +32,6 @@ odoo.define('web.DatePickerOwl', function (require) {
      */
     class DatePicker extends Component {
         setup() {
-            this.inputRef = useRef('input');
             this.state = useState({ warning: false });
 
             this.datePickerId = `o_datepicker_${datePickerId++}`;
@@ -32,33 +39,35 @@ odoo.define('web.DatePickerOwl', function (require) {
 
             useAutofocus("input");
             useExternalListener(window, 'scroll', this._onWindowScroll);
-        }
 
-        mounted() {
-            $(this.el).on('show.datetimepicker', this._onDateTimePickerShow.bind(this));
-            $(this.el).on('hide.datetimepicker', this._onDateTimePickerHide.bind(this));
-            $(this.el).on('error.datetimepicker', () => false);
+            this.inputRef = useRef('input');
 
-            const pickerOptions = Object.assign({ format: this.defaultFormat }, this.props);
-            this._datetimepicker(pickerOptions);
-            this.inputRef.el.value = this._formatDate(this.props.date);
-        }
+            onMounted(() => {
+                $(this.el).on('show.datetimepicker', this._onDateTimePickerShow.bind(this));
+                $(this.el).on('hide.datetimepicker', this._onDateTimePickerHide.bind(this));
+                $(this.el).on('error.datetimepicker', () => false);
 
-        willUnmount() {
-            $(this.el).off('show.datetimepicker hide.datetimepicker error.datetimepicker');
-            this._datetimepicker('destroy');
-        }
+                const pickerOptions = Object.assign({ format: this.defaultFormat }, this.props);
+                this._datetimepicker(pickerOptions);
+                this.inputRef.el.value = this._formatDate(this.props.date);
+            });
 
-        willUpdateProps(nextProps) {
-            for (const prop in nextProps) {
-                if (prop == "onDateTimeChanged") {
-                    continue;
+            onWillUnmount(() => {
+                $(this.el).off('show.datetimepicker hide.datetimepicker error.datetimepicker');
+                this._datetimepicker('destroy');
+            });
+            onWillUpdateProps((nextProps) => {
+                for (const prop in nextProps) {
+                    if (prop == "onDateTimeChanged") {
+                        continue;
+                    }
+                    this._datetimepicker(prop, nextProps[prop]);
                 }
-                this._datetimepicker(prop, nextProps[prop]);
-            }
-            if (nextProps.date) {
-                this.inputRef.el.value = this._formatDate(nextProps.date);
-            }
+                if (nextProps.date) {
+                    debugger
+                    this.inputRef.el.value = this._formatDate(nextProps.date);
+                }
+            });
         }
 
         //---------------------------------------------------------------------
