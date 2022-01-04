@@ -424,6 +424,8 @@
             <t t-set="item_idx" t-value="0"/>
             <div t-attf-class="col-lg-12 d-flex flex-wrap">
                 <t t-set="has_correct_answer" t-value="scoring_display_correction and any(label.is_correct for label in question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="len(question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="answers_count + 1" t-if='question.comments_allowed and question.comment_count_as_answer'/>
                 <t t-foreach='question.suggested_answer_ids' t-as='label'>
                     <t t-set="item_idx" t-value="label_index"/>
                     <t t-set="answer_selected" t-value="answer_line and answer_line.suggested_answer_id.id == label.id"/>
@@ -433,9 +435,10 @@
                     <t t-set="answer_class" t-if="not has_correct_answer" t-value="''" />
                     <t t-set="answer_class" t-elif="is_correct" t-value="'bg-success'" />
                     <t t-set="answer_class" t-elif="not is_correct" t-value="'bg-danger'" />
+                    <t t-set="style" t-value="'min-width:255px' if answers_count not in [1, 2, 4] and report_type == 'pdf' else 'min-width:392px' if answers_count in [1, 2, 4] and report_type == 'pdf' else ''" />
 
                     <label t-att-for="str(question.id) + '_' + str(label.id)"
-                           t-att-class="'o_survey_choice_btn mr-2 mb-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_selected else '')">
+                           t-att-class="'o_survey_choice_btn mr-2 mb-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_selected else '')" t-att-style="style">
                         <t t-call="survey.survey_selection_key">
                             <t t-set="selection_key_class" t-value="'position-relative o_survey_radio_btn float-left d-flex'"/>
                         </t>
@@ -454,7 +457,7 @@
         <div class="row">
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_comments col-lg-12" >
                 <div class="d-flex flex-wrap">
-                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')">
+                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')" t-att-style="style">
                         <t t-set="item_idx" t-value="item_idx + 1"/>
                         <t t-call="survey.survey_selection_key">
                             <t t-set="selection_key_class" t-value="'position-relative o_survey_radio_btn float-left d-flex'"/>
@@ -488,6 +491,8 @@
             <t t-set="item_idx" t-value="0"/>
             <div class="d-flex flex-wrap col-lg-12">
                 <t t-set="has_correct_answer" t-value="scoring_display_correction and any(label.is_correct for label in question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="len(question.suggested_answer_ids)"/>
+                <t t-set="answers_count" t-value="answers_count + 1" t-if='question.comments_allowed and question.comment_count_as_answer'/>
                 <t t-foreach='question.suggested_answer_ids' t-as='label'>
                     <t t-set="item_idx" t-value="label_index"/>
                     <t t-set="answer_line" t-value="answer_lines.filtered(lambda line: line.suggested_answer_id == label)"/>
@@ -499,7 +504,9 @@
                     <t t-set="answer_class" t-elif="is_correct" t-value="'bg-success'" />
                     <t t-set="answer_class" t-elif="not is_correct" t-value="'bg-danger'" />
 
-                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_line else '')">
+                    <t t-set="style" t-value="'min-width:255px' if answers_count not in [1, 2, 4] and report_type == 'pdf' else 'min-width:392px' if answers_count in [1, 2, 4] and report_type == 'pdf' else ''" />
+
+                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s %s' % (answer_class, 'o_survey_selected' if answer_line else '')" t-att-style="style">
                         <t t-call="survey.survey_selection_key">
                             <t t-set="selection_key_class" t-value="'position-relative float-left d-flex'"/>
                         </t>
@@ -518,7 +525,7 @@
         <div class="row">
             <div t-if='question.comments_allowed and question.comment_count_as_answer' class="js_ck_comments col-lg-12" >
                 <div class="d-flex flex-wrap">
-                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')">
+                    <label t-att-class="'o_survey_choice_btn mr-2 py-1 px-3 rounded %s' % ('o_survey_selected' if comment_line else '')" t-att-style="style">
                         <t t-set="item_idx" t-value="item_idx + 1"/>
                         <t t-call="survey.survey_selection_key">
                             <t t-set="selection_key_class" t-value="'position-relative float-left d-flex'"/>
