@@ -9,7 +9,7 @@ import { registry } from "./core/registry";
 /**
  * @typedef {Object} OdooEnv
  * @property {Object} services
- * @property {owl.core.EventBus} bus
+ * @property {owl.EventBus} bus
  * @property {owl.QWeb} qweb
  * @property {string} debug
  * @property {(str: string) => string} _t
