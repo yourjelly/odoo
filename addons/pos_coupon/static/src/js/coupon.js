@@ -189,10 +189,10 @@ odoo.define('pos_coupon.pos', function (require) {
     class PosCouponPosModel extends PosGlobalState {
         async _processData(loadedData) {
             await super._processData(...arguments);
-            this.programs = loadedData['coupon.program'];
-            this.coupon_programs_by_id = loadedData['coupon_programs_by_id'];
-            this.coupon_programs = loadedData['coupon_programs'];
-            this.promo_programs = loadedData['promo_programs'];
+            this.programs = loadedData['coupon.program'] || [];
+            this.coupon_programs_by_id = loadedData['coupon_programs_by_id'] || {};
+            this.coupon_programs = loadedData['coupon_programs'] || [];
+            this.promo_programs = loadedData['promo_programs'] || [];
             this._loadCouponProgram();
         }
         _loadCouponProgram() {
