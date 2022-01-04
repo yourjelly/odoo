@@ -1275,18 +1275,18 @@ class TestViews(ViewCase):
         view1 = self.View.create({
             'name': "alpha",
             'model': 'ir.ui.view',
-            'arch': '<form string="F">(<div/>)</form>',
+            'arch': '<form string="F"><div/></form>',
         })
         view2 = self.View.create({
             'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
-            'arch': '<div position="inside">a<p/>b<p/>c</div>',
+            'arch': '<div position="inside"><p>a</p><p/><p>b</p><p/><p>c</p></div>',
         })
         view = self.View.with_context(check_view_ids=view2.ids).get_view(view1.id)
         self.assertEqual(
             view['arch'],
-            '<form string="F">(<div>a<p/>b<p/>c</div>)</form>',
+            '<form string="F"><div><p>a</p><p></p><p>b</p><p></p><p>c</p></div></form>',
         )
 
     def test_view_inheritance_text_after(self):
@@ -1294,18 +1294,18 @@ class TestViews(ViewCase):
         view1 = self.View.create({
             'name': "alpha",
             'model': 'ir.ui.view',
-            'arch': '<form string="F">(<div/>)</form>',
+            'arch': '<form string="F"><div/></form>',
         })
         view2 = self.View.create({
             'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
-            'arch': '<div position="after">a<p/>b<p/>c</div>',
+            'arch': '<div position="after"><p>a</p><p/><p>b</p><p/><p>c</p></div>',
         })
         view = self.View.with_context(check_view_ids=view2.ids).get_view(view1.id)
         self.assertEqual(
             view['arch'],
-            '<form string="F">(<div/>a<p/>b<p/>c)</form>',
+            '<form string="F"><div></div><p>a</p><p></p><p>b</p><p></p><p>c</p></form>',
         )
 
     def test_view_inheritance_text_before(self):
@@ -1313,18 +1313,18 @@ class TestViews(ViewCase):
         view1 = self.View.create({
             'name': "alpha",
             'model': 'ir.ui.view',
-            'arch': '<form string="F">(<div/>)</form>',
+            'arch': '<form string="F"><div/></form>',
         })
         view2 = self.View.create({
             'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
-            'arch': '<div position="before">a<p/>b<p/>c</div>',
+            'arch': '<div position="before"><p>a</p><p/><p>b</p><p/><p>c</p></div>',
         })
         view = self.View.with_context(check_view_ids=view2.ids).get_view(view1.id)
         self.assertEqual(
             view['arch'],
-            '<form string="F">(a<p/>b<p/>c<div/>)</form>',
+            '<form string="F"><p>a</p><p></p><p>b</p><p></p><p>c</p><div></div></form>',
         )
 
     def test_view_inheritance_divergent_models(self):
@@ -2033,7 +2033,7 @@ class TestViews(ViewCase):
             '_check_xml on ir.ui.view is private and cannot be called from a button',
             name='button name is a private method',
         )
-        self.assertWarning(arch % 'postprocess_and_fields', name='button name is a method that requires extra arguments')
+        self.assertWarning(arch % 'apply_inheritance_specs', name='button name is a method that requires extra arguments')
         arch = """
             <form>
                 <button type="action" name="%s"/>

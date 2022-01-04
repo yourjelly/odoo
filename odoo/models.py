@@ -1492,6 +1492,10 @@ class BaseModel(metaclass=MetaModel):
         return not has_groups
 
     @api.model
+    def _get_default_view(self, view_type):
+        return getattr(self, '_get_default_%s_view' % view_type)()
+
+    @api.model
     def _get_default_form_view(self):
         """ Generates a default single-line form view using all fields
         of the current model.
@@ -1721,23 +1725,33 @@ class BaseModel(metaclass=MetaModel):
         """
         self.check_access_rights('read')
 
+        def collect_models(arch, model, level=0):
+            models = {model._name}
+            for el in arch.xpath('.//field[count(ancestor::field) = %s][descendant::field]' % level):
+                field = model._fields[el.get('name')]
+                comodel = self.env[field.comodel_name]
+                models.add(comodel._name)
+                for view in el.xpath("./*[descendant::field]"):
+                    models |= collect_models(view, comodel, level=level + 1)
+            return models
+
         # Get the view arch and all other attributes describing the composition of the view
-        arch, view = self._get_view(view_id, view_type, **options)
-
-        # Override context for postprocessing
-        if view and (view.model or self._name) != self._name:
-            view = view.with_context(base_model_name=view.model)
-
         # Apply post processing, groups and modifiers etc...
-        arch, models = view.postprocess_and_fields(arch, model=self._name, **options)
+        arch = self.env['ir.qweb.js']._render(
+            view_id,
+            values={'context': self.env.context},
+            view_model=self,
+            view_type=view_type,
+            **options,
+        )
         result = {
             'arch': arch,
             # TODO: only `web_studio` seems to require this. I guess this is acceptable to keep it.
-            'id': view.id,
+            # 'id': view.id,
             # TODO: only `web_studio` seems to require this. But this one on the other hand should be eliminated:
             # you just called `get_views` for that model, so obviously the web client already knows the model.
             'model': self._name,
-            'models': models,
+            'models': collect_models(etree.fromstring(arch), self),
         }
 
         # Add related action information if asked

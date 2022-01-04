@@ -602,7 +602,7 @@ class IrQWeb(models.AbstractModel):
         compile_context = self.env.context.copy()
 
         try:
-            element, document, ref = self._get_template(template)
+            element, document, ref, template = self._get_template(template)
         except (ValueError, UserError) as e:
             message = str(e)
             ClassError = e.__class__
@@ -749,7 +749,7 @@ class IrQWeb(models.AbstractModel):
 
         # return etree, document and ref, or try to find the ref
         if ref:
-            return (element, document, ref)
+            return (element, document, ref, template)
 
         # <templates>
         #   <template t-name=... /> <!-- return ONLY this element -->
@@ -758,10 +758,10 @@ class IrQWeb(models.AbstractModel):
         for node in element.iter():
             ref = node.get('t-name')
             if ref:
-                return (node, document, ref)
+                return (node, document, ref, template)
 
         # use the document itself as ref when no t-name was found
-        return (element, document, document)
+        return (element, document, document, template)
 
     def _load(self, ref):
         """
@@ -1620,7 +1620,8 @@ class IrQWeb(models.AbstractModel):
                 body.extend(self._compile_node(item, compile_context, level))
             # comments can also contains tail text
             if item.tail is not None:
-                self._append_text(item.tail, compile_context)
+                tail = item.tail.replace('&', '&amp;') if el.tag not in ['t', 'script'] else item.tail
+                self._append_text(tail, compile_context)
         return body
 
     def _compile_directive_if(self, el, compile_context, level):

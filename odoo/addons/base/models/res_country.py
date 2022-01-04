@@ -112,7 +112,7 @@ class Country(models.Model):
         if vals.get('code'):
             vals['code'] = vals['code'].upper()
         res = super().write(vals)
-        if ('code' in vals or 'phone_code' in vals):
+        if ('code' in vals or 'phone_code' in vals or 'address_view_id' in vals):
             # Intentionally simplified by not clearing the cache in create and unlink.
             self.clear_caches()
         return res
