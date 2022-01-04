@@ -1,10 +1,12 @@
 odoo.define("web.Model", function (require) {
     "use strict";
 
-    const { groupBy, partitionBy } = require("web.utils");
+    const { groupBy } = require("web.utils");
     const Registry = require("web.Registry");
+    const { useBus } = require("@web/core/utils/hooks");
 
-    const { Component, EventBus, useComponent, onWillDestroy, onWillRender } = owl;
+
+    const { EventBus, useComponent, onWillDestroy, onWillRender } = owl;
     const isNotNull = (val) => val !== null && val !== undefined;
 
     /**
@@ -310,7 +312,7 @@ odoo.define("web.Model", function (require) {
                 // Notifies subscribed components
                 // Purpose: re-render components bound by 'useModel'
                 if (rev === this.rev) {
-                    this._notifyComponents();
+                    this._notifyComponents(rev);
                 }
             });
         }
@@ -426,21 +428,10 @@ odoo.define("web.Model", function (require) {
          * @see Context.__notifyComponents() in owl.js for explanation
          * @private
          */
-        async _notifyComponents() {
-            this.dispatchEvent(new Event("update"));
-            return;
-            const rev = ++this.rev;
-            const subscriptions = this.subscriptions.update || [];
-            const groups = partitionBy(subscriptions, (s) =>
-                s.owner ? s.owner.__owl__.depth : -1
-            );
-            for (let group of groups) {
-                const proms = group.map((sub) =>
-                    sub.callback.call(sub.owner, rev)
-                );
-                Component.scheduler.flush();
-                await Promise.all(proms);
-            }
+        _notifyComponents(rev) {
+            const event = new Event("update");
+            event.rev = rev;
+            this.dispatchEvent(event);
         }
     }
 
@@ -481,16 +472,15 @@ odoo.define("web.Model", function (require) {
             mapping[componentId] = model.rev;
         });
 
-        const onUpdate = async (modelRev) => {
-            if (mapping[componentId] < modelRev) {
-                mapping[componentId] = modelRev;
+        const onUpdate = async (ev) => {
+            debugger
+            // if (mapping[componentId] < ev.rev) {
+                mapping[componentId] = ev.rev;
                 await component.render();
-            }
+            // }
         };
-        model.addEventListener("update", onUpdate);
-        onWillDestroy(() => {
-            model.removeEventListener("update", onUpdate);
-        });
+
+        useBus(model, "update", onUpdate);
 
         return model;
     }
