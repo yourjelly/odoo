@@ -1908,13 +1908,15 @@ class Orderline extends PosModel {
     }
     get_unit_display_price(){
         if (this.pos.config.iface_tax_included === 'total') {
-            // TODO-REF
-            // var quantity = this.quantity;
-            // this.quantity = 1.0;
-            // var price = this.get_all_prices().priceWithTax;
-            // this.quantity = quantity;
-            // return price;
-            return this.get_unit_price();
+            let price;
+            //Todo-ref: this is used to update the attribute object without triggering the rendering of the components
+            reactivity.inSilentContext(() => {
+                let quantity = this.quantity;
+                this.quantity = 1.0;
+                price = this.get_all_prices().priceWithTax;
+                this.quantity = quantity;
+            });
+            return price;
         } else {
             return this.get_unit_price();
         }
