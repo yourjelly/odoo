@@ -6,7 +6,11 @@ from collections import defaultdict
 from odoo import _, models
 from odoo.exceptions import UserError
 
-def _prepare_data(env, data):
+def _prepare_data(env, docids, data):
+    if data.get('studio'):
+        data['active_model'] = 'product.template'
+        data['quantity_by_product'] = {docids[0]: 1}
+
     # change product ids by actual product object to get access to fields in xml template
     # we needed to pass ids because reports only accepts native python types (int, float, strings, ...)
     if data.get('active_model') == 'product.template':
@@ -15,7 +19,6 @@ def _prepare_data(env, data):
         Product = env['product.product'].with_context(display_default_code=False)
     else:
         raise UserError(_('Product model not defined, Please contact your administrator.'))
-
     total = 0
     quantity_by_product = defaultdict(list)
     for p, q in data.get('quantity_by_product').items():
@@ -29,28 +32,38 @@ def _prepare_data(env, data):
             total += sum(qty for _, qty in barcodes_qtys)
 
     layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
-    if not layout_wizard:
+    if layout_wizard:
+        report_data = {
+            'rows': layout_wizard.rows,
+            'columns': layout_wizard.columns,
+            'page_numbers': (total - 1) // (layout_wizard.rows * layout_wizard.columns) + 1,
+            'extra_html': layout_wizard.extra_html,
+        }
+    elif not layout_wizard and data.get('studio'):
+        report_data = {
+            'rows': 1,
+            'columns': 1,
+            'page_numbers': 1,
+            'extra_html': False,
+            'price_included': True,
+        }
+    else:
         return {}
 
-    return {
-        'quantity': quantity_by_product,
-        'rows': layout_wizard.rows,
-        'columns': layout_wizard.columns,
-        'page_numbers': (total - 1) // (layout_wizard.rows * layout_wizard.columns) + 1,
-        'price_included': data.get('price_included'),
-        'extra_html': layout_wizard.extra_html,
-    }
+    report_data['quantity'] = quantity_by_product
+    report_data['price_included'] = data.get('price_included')
+    return report_data
 
 class ReportProductTemplateLabel(models.AbstractModel):
     _name = 'report.product.report_producttemplatelabel'
     _description = 'Product Label Report'
 
     def _get_report_values(self, docids, data):
-        return _prepare_data(self.env, data)
+        return _prepare_data(self.env, docids, data)
 
 class ReportProductTemplateLabelDymo(models.AbstractModel):
     _name = 'report.product.report_producttemplatelabel_dymo'
     _description = 'Product Label Report'
 
     def _get_report_values(self, docids, data):
-        return _prepare_data(self.env, data)
+        return _prepare_data(self.env, docids, data)
