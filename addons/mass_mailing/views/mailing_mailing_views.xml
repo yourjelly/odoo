@@ -118,10 +118,26 @@
                             </strong>
                             </button>
                         </div>
+
                         <div class="o_mails_in_queue" invisible="state != 'in_queue'">
-                            <strong>
+                            <strong invisible="next_departure_is_past or schedule_type == 'now'">
                                 <span name="next_departure_text">This mailing is scheduled for </span>
                                 <field name="next_departure" class="oe_inline"/>.
+                            </strong>
+                            <strong invisible="not next_departure_is_past or schedule_type == 'now'" class="d-flex align-items-center">
+                                <field name="next_departure_is_past" invisible="1"/>
+                                <span name="refresh_text">This mailing will be sent as soon as possible.</span>
+                                <button name="action_reload" type="object" class="btn btn-link pe-0">
+                                    <u>Refresh <i class="fa fa-refresh ms-1"/></u>
+                                </button>
+                            </strong>
+                            <strong invisible="schedule_type != 'now'" class="d-flex align-items-center">
+                                <field name="next_departure_is_past" invisible="1"/>
+                                <field name="schedule_type" invisible="1"/>
+                                <span name="mailing_schedule_type_now_text">This mailing will be sent as soon as possible.</span>
+                                <button name="action_reload" type="object" class="btn btn-link pe-0">
+                                    <u>Refresh <i class="fa fa-refresh ms-1"/></u>
+                                </button>
                             </strong>
                         </div>
                         <div invisible="not warning_message">
@@ -399,7 +415,7 @@
                     <attribute name="invisible">state != 'in_queue'</attribute>
                 </xpath>
                 <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_scheduled')]/button" position="attributes">
-                    <attribute name="invisible">scheduled == 0</attribute>
+                    <attribute name="invisible">not scheduled or next_departure_is_past</attribute>
                 </xpath>
                 <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_scheduled')]//span[@name='scheduled_text']" position="replace">
                     <span name="scheduled_text">email(s) scheduled for </span>
@@ -409,7 +425,15 @@
                 <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong/span[@name='next_departure_text']" position="attributes">
                     <attribute name="invisible">scheduled != 0</attribute>
                 </xpath>
+                <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong/span[@name='refresh_text']" position="attributes">
+                    <attribute name="invisible">scheduled</attribute>
+                </xpath>
+                <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong/span[@name='mailing_schedule_type_now_text']" position="attributes">
+                    <attribute name="invisible">scheduled</attribute>
+                </xpath>
                 <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_scheduled')]" position="inside">
+                    <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong" position="move"/>
+                    <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong" position="move"/>
                     <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]/strong" position="move"/>
                 </xpath>
                 <xpath expr="//div[hasclass('alert-info')]/div[hasclass('o_mails_in_queue')]" position="replace"/>

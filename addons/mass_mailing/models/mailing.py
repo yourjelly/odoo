@@ -223,6 +223,7 @@ class MassMailing(models.Model):
     clicks_ratio = fields.Integer(compute="_compute_clicks_ratio", string="Number of Clicks")
     next_departure = fields.Datetime(compute="_compute_next_departure", string='Scheduled date')
     # UX
+    next_departure_is_past = fields.Boolean(compute="_compute_next_departure_is_past")
     warning_message = fields.Char(
         'Warning Message', compute='_compute_warning_message',
         help='Warning message displayed in the mailing form view')
@@ -349,6 +350,16 @@ class MassMailing(models.Model):
                 mass_mailing.next_departure = max(mass_mailing.schedule_date, fields.datetime.now())
             else:
                 mass_mailing.next_departure = fields.datetime.now()
+
+    @api.depends('next_departure', 'state')
+    def _compute_next_departure_is_past(self):
+        """ If the departure time has passed but mailing is still in queue, this compute field
+        will be used to display warning with reload button on a mailing form view. """
+        past = self.filtered(
+            lambda mailing: mailing.state == 'in_queue' and mailing.next_departure < fields.Datetime.now()
+        )
+        past.next_departure_is_past = True
+        (self - past).next_departure_is_past = False
 
     @api.depends('email_from', 'mail_server_id')
     def _compute_warning_message(self):
@@ -617,6 +628,9 @@ class MassMailing(models.Model):
     def action_launch(self):
         self.write({'schedule_type': 'now'})
         return self.action_put_in_queue()
+
+    def action_reload(self):
+        pass
 
     def action_schedule(self):
         self.ensure_one()
