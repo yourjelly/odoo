@@ -1613,7 +1613,7 @@ class PosSession(models.Model):
         for real_tax in self.env['account.tax'].browse(tax_ids).get_real_tax_amount():
             loaded_data['taxes_by_id'][real_tax['id']]['amount'] = real_tax['amount']
         for tax in loaded_data['taxes_by_id'].values():
-            tax['children_tax_ids'] = list(map(lambda id: loaded_data['taxes_by_id'][id], tax['children_tax_ids']))
+            tax['children_tax_ids'] = [loaded_data['taxes_by_id'][id] for id in tax['children_tax_ids']]
 
         for pricelist in loaded_data['product.pricelist']:
             if pricelist['id'] == self.config_id.pricelist_id.id:
