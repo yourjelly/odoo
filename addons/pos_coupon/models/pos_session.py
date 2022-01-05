@@ -8,20 +8,6 @@ from odoo.osv.expression import OR
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
-    def _pos_data_process(self, loaded_data):
-        super()._pos_data_process(loaded_data)
-        if self.config_id.use_coupon_programs and len(self.config_id.program_ids) > 0:
-            loaded_data['coupon_programs_by_id'] = {}
-            loaded_data['coupon_programs'] = []
-            loaded_data['promo_programs'] = []
-
-            for program in loaded_data['coupon.program']:
-                loaded_data['coupon_programs_by_id'][program['id']] = program
-                if program['program_type'] == 'coupon_program':
-                    loaded_data['coupon_programs'].append(program)
-                else:
-                    loaded_data['promo_programs'].append(program)
-
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()
         if self.config_id.use_coupon_programs and len(self.config_id.program_ids) > 0:

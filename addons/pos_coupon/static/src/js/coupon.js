@@ -190,13 +190,21 @@ odoo.define('pos_coupon.pos', function (require) {
         async _processData(loadedData) {
             await super._processData(...arguments);
             this.programs = loadedData['coupon.program'] || [];
-            this.coupon_programs_by_id = loadedData['coupon_programs_by_id'] || {};
-            this.coupon_programs = loadedData['coupon_programs'] || [];
-            this.promo_programs = loadedData['promo_programs'] || [];
             this._loadCouponProgram();
         }
         _loadCouponProgram() {
+            // done in the front end because those are derived value (with the sets)
+            this.coupon_programs_by_id = {};
+            this.coupon_programs = [];
+            this.promo_programs = [];
             for (let program of this.programs) {
+                this.coupon_programs_by_id[program.id] = program;
+                // separate coupon programs from promo programs
+                if (program.program_type === 'coupon_program') {
+                    this.coupon_programs.push(program);
+                } else {
+                    this.promo_programs.push(program);
+                }
                 // cast some arrays to Set for faster membership checking
                 program.valid_product_ids = new Set(program.valid_product_ids);
                 program.valid_partner_ids = new Set(program.valid_partner_ids);

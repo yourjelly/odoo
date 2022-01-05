@@ -17,7 +17,10 @@ odoo.define('pos_hr.chrome', function (require) {
                 return super.showCashMoveButton() && (!this.env.pos.cashier || this.env.pos.cashier.role == 'manager');
             }
             shouldShowCashControl() {
-                return super.shouldShowCashControl() && this.env.pos.hasLoggedIn;
+                if (this.env.pos.config.module_pos_hr){
+                    return super.shouldShowCashControl() && this.env.pos.hasLoggedIn;
+                }
+                return super.shouldShowCashControl();
             }
         };
 
