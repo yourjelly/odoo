@@ -411,10 +411,6 @@ var PosDB = core.Class.extend({
      * or one of its child categories.
      */
     is_product_in_category: function(category_ids, product_id) {
-        // todo-ref see if i can remove this or not. category_ids is always an array/iterable
-        // if (!(category_ids instanceof Array)) {
-        //     category_ids = [category_ids];
-        // }
         let cat = this.get_product_by_id(product_id).pos_categ_id[0];
         while (cat) {
             for (let cat_id of category_ids) {

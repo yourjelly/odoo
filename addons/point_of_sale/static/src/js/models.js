@@ -92,7 +92,7 @@ class PosGlobalState extends PosModel {
         // Business data; loaded from the server at launch
         this.company_logo = null;
         this.company_logo_base64 = '';
-        this.currency = null;
+        this.currency = { symbol: '$', position: 'after', rounding: 0.01, decimal_places: 2 };
         this.company = null;
         this.user = null;
         this.partners = [];
@@ -171,7 +171,7 @@ class PosGlobalState extends PosModel {
             method: 'load_pos_data',
             args: [[odoo.pos_session_id]],
         });
-        await this._processData(loadedData); //todo-ref: it'll be better to refactor load_server_data instead of calling a new function (used for overriding)
+        await this._processData(loadedData);
         return this.after_load_server_data();
     }
    async _processData(loadedData) {
@@ -194,8 +194,6 @@ class PosGlobalState extends PosModel {
         this._loadResPartner();
         this.picking_type = loadedData['stock.picking.type'];
         this.user = loadedData['res.users'];
-        // this.employee = loadedData['res.users']; // todo-ref need to refactor employee and cashier later
-        // this.cashier = loadedData['res.users']; // todo-ref cashier is not really needed in normal point_of_sale
         this.pricelists = loadedData['product.pricelist'];
         this.default_pricelist = loadedData['default_pricelist'];
         this.bank_statement = loadedData['account.bank.statement'];
@@ -204,7 +202,7 @@ class PosGlobalState extends PosModel {
         this.db.add_categories(loadedData['pos.category']);
         this._loadProductProduct(loadedData['product.product']);
         this.db.add_packagings(loadedData['product.packaging']);
-        this.attributes_by_ptal_id = loadedData['product.template.attribute.value'];
+        this.attributes_by_ptal_id = loadedData['attributes_by_ptal_id'];
         this.cash_rounding = loadedData['account.cash.rounding'];
         this.payment_methods = loadedData['pos.payment.method'];
         this.payment_methods_by_id = loadedData['payment_methods_by_id'];
@@ -927,12 +925,6 @@ class PosGlobalState extends PosModel {
     }
 
     format_currency(amount, precision) {
-        // todo-ref why do dis, there's always currency in the pos
-        // var currency =
-        //     this && this.currency
-        //         ? this.currency
-        //         : { symbol: '$', position: 'after', rounding: 0.01, decimals: 2 };
-
         amount = this.format_currency_no_symbol(amount, precision, this.currency);
 
         if (this.currency.position === 'after') {
@@ -945,10 +937,6 @@ class PosGlobalState extends PosModel {
     format_currency_no_symbol(amount, precision, currency) {
         if (!currency) {
             currency = this.currency
-                // todo-ref why do dis, there's always currency in the pos
-                // this && this.currency
-                //     ? this.currency
-                //     : { symbol: '$', position: 'after', rounding: 0.01, decimal_places: 2 };
         }
         var decimals = currency.decimal_places;
 
@@ -1571,7 +1559,7 @@ class Orderline extends PosModel {
     get_unit_display_price(){
         if (this.pos.config.iface_tax_included === 'total') {
             let price;
-            //Todo-ref: this is used to update the attribute object without triggering the rendering of the components
+            // this is used to update the attribute object without triggering the rendering of the components
             reactivity.inSilentContext(() => {
                 let quantity = this.quantity;
                 this.quantity = 1.0;

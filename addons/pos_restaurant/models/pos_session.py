@@ -25,6 +25,17 @@ class PosSession(models.Model):
             },
         }
 
+    def _loader_params_restaurant_table(self):
+        return {
+            'search_params': {
+                'domain': [('active', '=', True)],
+                'fields': [
+                    'name', 'width', 'height', 'position_h', 'position_v',
+                    'shape', 'floor_id', 'color', 'seats', 'active'
+                ],
+            },
+        }
+
     def _get_pos_ui_restaurant_floor(self, params):
         floors = self.env['restaurant.floor'].search_read(**params['search_params'])
         floor_ids = [floor['id'] for floor in floors]
@@ -41,21 +52,6 @@ class PosSession(models.Model):
             floor['tables'] = tables_by_floor_id.get(floor['id'], [])
 
         return floors
-
-    def _loader_params_restaurant_table(self):
-        return {
-            'search_params': {
-                'domain': [('active', '=', True)],
-                'fields': [
-                    'name', 'width', 'height', 'position_h', 'position_v',
-                    'shape', 'floor_id', 'color', 'seats', 'active'
-                ],
-            },
-        }
-
-    # todo-ref not used
-    def _get_pos_ui_restaurant_table(self, params):
-        return self.env['restaurant.table'].search_read(**params['search_params'])
 
     def _loader_params_restaurant_printer(self):
         return {

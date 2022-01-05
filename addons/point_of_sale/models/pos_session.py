@@ -1580,6 +1580,26 @@ class PosSession(models.Model):
         self._pos_data_process(loaded_data)
         return loaded_data
 
+    def _get_attributes_by_ptal_id(self):
+        product_attributes = self.env['product.attribute'].search([('create_variant', '=', 'no_variant')])
+        product_attributes_by_id = {product_attribute.id: product_attribute for product_attribute in product_attributes}
+        domain = [('attribute_id', 'in', product_attributes.mapped('id'))]
+        product_template_attribute_values = self.env['product.template.attribute.value'].search(domain)
+        key = lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
+        res = {}
+        for key, group in groupby(sorted(product_template_attribute_values, key=key), key=key):
+            attribute_line_id, attribute_id = key
+            values = [{**ptav.product_attribute_value_id.read(['name', 'is_custom', 'html_color'])[0],
+                       'price_extra': ptav.price_extra} for ptav in list(group)]
+            res[attribute_line_id] = {
+                'id': attribute_line_id,
+                'name': product_attributes_by_id[attribute_id].name,
+                'display_type': product_attributes_by_id[attribute_id].display_type,
+                'values': values
+            }
+
+        return res
+
     def _pos_data_process(self, loaded_data):
         """
         This is where we need to process the data if we can't do it in the loader/getter
@@ -1605,6 +1625,9 @@ class PosSession(models.Model):
         fiscal_position_by_id = {fpt['id']: fpt for fpt in loaded_data['account.fiscal.position.tax']}
         for fiscal_position in loaded_data['account.fiscal.position']:
             fiscal_position['fiscal_position_taxes_by_id'] = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}
+
+        if self.config_id.product_configurator:
+            loaded_data['attributes_by_ptal_id'] = self._get_attributes_by_ptal_id()
 
     @api.model
     def _pos_ui_models_to_load(self):
@@ -1634,8 +1657,6 @@ class PosSession(models.Model):
             'account.fiscal.position',
             'account.fiscal.position.tax',
         ]
-        if self.config_id.product_configurator:
-            models_to_load.append('product.template.attribute.value')
         return models_to_load
 
     def _loader_params_res_company(self):
@@ -1651,10 +1672,11 @@ class PosSession(models.Model):
 
     def _get_pos_ui_res_company(self, params):
         company = self.env['res.company'].search_read(**params['search_params'])[0]
-        params = self._loader_params_res_country()
+        params_country = self._loader_params_res_country()
         if company['country_id']:
-            params['search_params']['domain'] = [('id', '=', company['country_id'][0])]    #todo-ref this is redundant we have country_id and country
-            company['country'] = self.env['res.country'].search_read(**params['search_params'])[0]
+            # TODO: this is redundant we have country_id and country
+            params['search_params']['domain'] = [('id', '=', company['country_id'][0])]
+            company['country'] = self.env['res.country'].search_read(**params_country['search_params'])[0]
         else:
             company['country'] = None
 
@@ -1897,31 +1919,6 @@ class PosSession(models.Model):
 
     def _get_pos_ui_product_packaging(self, params):
         return self.env['product.packaging'].search_read(**params['search_params'])
-
-    def _loader_params_product_template_attribute_value(self):
-        # todo-ref: this is a special case since we don't really need a field or domain from this loader, see function below
-        return {}
-
-    def _get_pos_ui_product_template_attribute_value(self, params):
-        product_attributes = self.env['product.attribute'].search([('create_variant', '=', 'no_variant')])
-        product_attributes_by_id = {product_attribute.id: product_attribute for product_attribute in product_attributes}
-        # todo-ref tbh we don't really need the params
-        domain = [('attribute_id', 'in', product_attributes.mapped('id'))]
-        product_template_attribute_values = self.env['product.template.attribute.value'].search(domain)
-        key = lambda ptav: (ptav.attribute_line_id.id, ptav.attribute_id.id)
-        res = {}
-        for key, group in groupby(sorted(product_template_attribute_values, key=key), key=key):
-            attribute_line_id, attribute_id = key
-            values = [{**ptav.product_attribute_value_id.read(['name', 'is_custom', 'html_color'])[0],
-                       'price_extra': ptav.price_extra} for ptav in list(group)]
-            res[attribute_line_id] = {
-                'id': attribute_line_id,
-                'name': product_attributes_by_id[attribute_id].name,
-                'display_type': product_attributes_by_id[attribute_id].display_type,
-                'values': values
-            }
-
-        return res
 
     def _loader_params_account_cash_rounding(self):
         return {

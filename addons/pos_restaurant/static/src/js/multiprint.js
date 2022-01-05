@@ -20,13 +20,13 @@ class PosResMultiprintPosModel extends PosGlobalState {
     _loadRestaurantPrinter(printers) {
         this.printers = [];
         // list of product categories that belong to one or more order printer
-        this.printers_categories_set = new Set();
+        this.printers_category_ids_set = new Set();
         for (let printerConfig of printers) {
             let printer = this.create_printer(printerConfig);
             printer.config = printerConfig;
             this.printers.push(printer);
             for (let id of printer.config.product_categories_ids) {
-                this.printers_categories_set.add(printerConfig);
+                this.printers_category_ids_set.add(id);
             }
         }
         this.config.iface_printers = !!this.printers.length;
@@ -72,7 +72,7 @@ class PosResMultiprintOrderline extends Orderline {
     }
     // can this orderline be potentially printed ?
     printable() {
-        return this.pos.db.is_product_in_category(this.pos.printers_categories_set, this.get_product().id);
+        return this.pos.db.is_product_in_category(this.pos.printers_category_ids_set, this.get_product().id);
     }
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);
