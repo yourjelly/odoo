@@ -361,7 +361,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @private
      */
     _startRenderer: function () {
-        if (this.renderer instanceof owl.Component) {
+        if (this.renderer instanceof owl.Component || this.renderer instanceof ComponentWrapper) {
             return this.renderer.mount(this.$('.o_content')[0]);
         }
         return this.renderer.appendTo(this.$('.o_content'));

@@ -1,7 +1,7 @@
 odoo.define("base.abstract_controller_tests", function (require) {
 "use strict";
 
-const { xml } = owl;
+const { xml, onWillDestroy } = owl;
 
 var testUtils = require("web.test_utils");
 var createView = testUtils.createView;
@@ -100,9 +100,10 @@ QUnit.module("Views", {
         assert.expect(2);
 
         class Renderer extends AbstractRenderer {
-            __destroy() {
-                assert.step("destroy");
-                super.__destroy();
+            setup() {
+                onWillDestroy(() => {
+                    assert.step("destroy");
+                });
             }
         }
         Renderer.template = xml`<div>Test</div>`;
