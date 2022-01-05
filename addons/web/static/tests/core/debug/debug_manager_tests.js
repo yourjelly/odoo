@@ -181,7 +181,7 @@ QUnit.module("DebugMenu", (hooks) => {
         assert.containsNone(target, ".o_dialog .o_debug_manager .fa-bug");
     });
 
-    QUnit.todo(
+    QUnit.test(
         "Display the DebugMenu correctly in a ActionDialog if debug mode is enabled",
         async (assert) => {
             assert.expect(8);
