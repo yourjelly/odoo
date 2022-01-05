@@ -206,9 +206,8 @@ odoo.define('web.Popover', function (require) {
 
         /**
          * @private
-         * @param {Event} ev
          */
-        _onPopoverClose(ev) {
+        _onPopoverClose() {
             this._close();
         }
 

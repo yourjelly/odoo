@@ -287,7 +287,8 @@
             <div role="tooltip" class="o_popover" t-att-class="props.popoverClass" t-ref="popover">
                 <div class="arrow"/>
                 <h3 t-if="props.title" class="o_popover_header"><t t-esc="props.title"/></h3>
-                <div class="popover-body">
+                <div class="popover-body" t-on-o-popover-close="_onPopoverClose">
+                    <!-- NXOWL good way to do this or do we change the system now? -->
                     <t t-slot="opened"/>
                 </div>
             </div>
