@@ -2,6 +2,12 @@
 <odoo>
 
 <template id="website_configurator" name="Website Configurator" inherit_id="web.frontend_layout" primary="True">
+    <!-- hack to make the localization services tranlsate the configurator page into the user's lang -->
+    <xpath expr="//head/t[@t-call-assets='web.assets_common_minimal'][last()]" position="before">
+        <script type="text/javascript">
+            Object.assign(odoo.__session_info__.user_context, { lang: '<t t-out="lang" />'});
+        </script>
+    </xpath>
     <xpath expr="//head/t[@t-call-assets][last()]" position="after">
         <t t-call-assets="website.website_configurator_assets_js" lazy_load="True"/>
     </xpath>
