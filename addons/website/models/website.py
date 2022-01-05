@@ -337,6 +337,7 @@ class Website(models.Model):
             r['industries'] = result['industries']
         except AccessError as e:
             logger.warning(e.args[0])
+
         return r
 
     @api.model

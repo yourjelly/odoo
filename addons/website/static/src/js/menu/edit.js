@@ -62,6 +62,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         var url = new URL(window.location.href);
         url.searchParams.delete('enable_editor');
         url.searchParams.delete('with_loader');
+        // ugly way to exclude it from keep_query
+        $("div.js_language_selector a[href*='with_loader']").map((i, o) => o.href = o.href.replace('with_loader=1&enable_editor=1', ''))
         window.history.replaceState({}, null, url);
     },
     /**
