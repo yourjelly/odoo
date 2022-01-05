@@ -68,7 +68,6 @@ odoo.define('web.comparison_menu_tests', function (require) {
                 ["Birthday: Previous Period", "Birthday: Previous Year"]
             );
 
-            /** NXOWL CHECK **/ //controlPanel.destroy();
             unpatchDate();
         });
 
@@ -124,7 +123,6 @@ odoo.define('web.comparison_menu_tests', function (require) {
 
             assert.deepEqual(cpHelpers.getFacetTexts(controlPanel), []);
 
-            /** NXOWL CHECK **/ //controlPanel.destroy();
             unpatchDate();
         });
 
@@ -143,8 +141,6 @@ odoo.define('web.comparison_menu_tests', function (require) {
             await cpHelpers.toggleMenuItemOption(controlPanel, "Birthday", 0);
 
             assert.notOk("timeRanges" in controlPanel.getQuery());
-
-            /** NXOWL CHECK **/ //controlPanel.destroy();
         });
     });
 });
