@@ -72,7 +72,8 @@ export function useOwnDebugContext({ categories = [] } = {}) {
     // NXOWL: not acceptable I think
     const component = useComponent();
     component.env = Object.create(component.env);
-    component.env[debugContextSymbol] = debugContext[debugContextSymbol];
+    const descrs = Object.getOwnPropertyDescriptors(debugContext);
+    Object.defineProperties(component.env, descrs);
 }
 
 export function useEnvDebugContext() {
