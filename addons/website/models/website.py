@@ -279,7 +279,11 @@ class Website(models.Model):
     def create_and_redirect_configurator(self):
         self._force()
         configurator_action_todo = self.env.ref('website.website_configurator_todo')
-        return configurator_action_todo.action_launch()
+        res = configurator_action_todo.action_launch()
+        # reset cookies lang to default lang
+        # cannot use url for because is_multilang_url is Falsy (owl routing :/)
+        res['url'] = '/%s%s' % (self.default_lang_id.url_code, res['url'])
+        return res
 
     # ----------------------------------------------------------
     # Configurator
@@ -329,7 +333,7 @@ class Website(models.Model):
         if company.logo and company.logo != company._get_logo():
             r['logo'] = company.logo.decode('utf-8')
         try:
-            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.user.lang})
+            result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.lang})
             r['industries'] = result['industries']
         except AccessError as e:
             logger.warning(e.args[0])
@@ -424,7 +428,7 @@ class Website(models.Model):
             nb_snippets = len(snippet_list)
             for i, snippet in enumerate(snippet_list, start=1):
                 try:
-                    view_id = self.env['website'].with_context(website_id=website.id).viewref('website.' + snippet)
+                    view_id = self.env['website'].with_context(website_id=website.id, lang=website.default_lang_id.code).viewref('website.' + snippet)
                     if view_id:
                         el = html.fromstring(view_id._render(values=cta_data))
 

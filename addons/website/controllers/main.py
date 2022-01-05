@@ -255,7 +255,7 @@ class Website(Home):
             raise werkzeug.exceptions.NotFound()
         website_id = request.env['website'].get_current_website()
         if website_id.configurator_done is False:
-            return request.render('website.website_configurator', {'lang': request.env.user.lang})
+            return request.render('website.website_configurator')
         else:
             return request.redirect('/')
 
