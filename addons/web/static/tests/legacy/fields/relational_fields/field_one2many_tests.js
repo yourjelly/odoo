@@ -9650,10 +9650,10 @@ QUnit.module('fields', {}, function () {
             patch(ControlPanel.prototype, 'cp_patch_mock', {
                 setup() {
                     this._super(...arguments);
-                    owl.hooks.onMounted(() => {
+                    owl.onMounted(() => {
                         assert.step('mounted');
                     });
-                    owl.hooks.onWillUnmount(() => {
+                    owl.onWillUnmount(() => {
                         assert.step('willUnmount');
                     });
                 },
@@ -10036,11 +10036,11 @@ QUnit.module('fields', {}, function () {
                 setup() {
                     super.setup();
                     const ID = testInst++;
-                    owl.hooks.onMounted(() => {
+                    owl.onMounted(() => {
                         assert.step(`mounted ${ID}`);
                     });
 
-                    owl.hooks.onWillUnmount(() => {
+                    owl.onWillUnmount(() => {
                         assert.step(`willUnmount ${ID}`);
                     });
                 }
