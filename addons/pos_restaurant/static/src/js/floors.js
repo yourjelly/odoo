@@ -13,31 +13,45 @@ Registries.PosModelRegistry.extend(models.Order, (Order) => {
 class PosRestaurantOrder extends Order {
     constructor(obj, options) {
         super(...arguments);
-        if (!this.table && !options.json) {
-            this.table = this.pos.table;
+        if (this.pos.config.module_pos_restaurant) {
+            if (this.pos.config.iface_floorplan && !this.table && !options.json) {
+                this.table = this.pos.table;
+            }
+            this.customer_count = this.customer_count || 1;
         }
-        this.customer_count = this.customer_count || 1;
     }
     export_as_JSON() {
         var json = super.export_as_JSON(...arguments);
-        json.table     = this.table ? this.table.name : undefined;
-        json.table_id  = this.table ? this.table.id : false;
-        json.floor     = this.table ? this.table.floor.name : false;
-        json.floor_id  = this.table ? this.table.floor.id : false;
-        json.customer_count = this.customer_count;
+        if (this.pos.config.module_pos_restaurant) {
+            if (this.pos.config.iface_floorplan) {
+                json.table = this.table ? this.table.name : undefined;
+                json.table_id = this.table ? this.table.id : false;
+                json.floor = this.table ? this.table.floor.name : false;
+                json.floor_id = this.table ? this.table.floor.id : false;
+            }
+            json.customer_count = this.customer_count;
+        }
         return json;
     }
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);
-        this.table = this.pos.tables_by_id[json.table_id];
-        this.floor = this.table ? this.pos.floors_by_id[json.floor_id] : undefined;
-        this.customer_count = json.customer_count || 1;
+        if (this.pos.config.module_pos_restaurant) {
+            if (this.pos.config.iface_floorplan) {
+                this.table = this.pos.tables_by_id[json.table_id];
+                this.floor = this.table ? this.pos.floors_by_id[json.floor_id] : undefined;
+            }
+            this.customer_count = json.customer_count;
+        }
     }
     export_for_printing() {
         var json = super.export_for_printing(...arguments);
-        json.table = this.table ? this.table.name : undefined;
-        json.floor = this.table ? this.table.floor.name : undefined;
-        json.customer_count = this.get_customer_count();
+        if (this.pos.config.module_pos_restaurant) {
+            if (this.pos.config.iface_floorplan) {
+                json.table = this.table ? this.table.name : undefined;
+                json.floor = this.table ? this.table.floor.name : undefined;
+            }
+            json.customer_count = this.get_customer_count();
+        }
         return json;
     }
     get_customer_count(){

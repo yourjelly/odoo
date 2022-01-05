@@ -49,7 +49,7 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
     ProductScreen.addControlButton({
         component: SubmitOrderButton,
         condition: function() {
-            return this.env.pos.printers.length;
+            return this.env.pos.config.module_pos_restaurant && this.env.pos.printers.length;
         },
     });
 

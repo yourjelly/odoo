@@ -11,7 +11,7 @@ class PosSession(models.Model):
     def _pos_ui_models_to_load(self):
         result = super()._pos_ui_models_to_load()
         if self.config_id.module_pos_restaurant:
-            result.append('restaurant.printer')     # todo-ref should this be here or below?
+            result.append('restaurant.printer')
             if self.config_id.is_table_management:
                 result.append('restaurant.floor')
         return result
@@ -34,8 +34,8 @@ class PosSession(models.Model):
         tables = self.env['restaurant.table'].search(table_params['search_params']['domain'], order='floor_id')
         tables_by_floor_id = {}
         for floor_id, table_group in groupby(tables, key=lambda table: table.floor_id):
-            tables = self.env['restaurant.table'].concat(*table_group)
-            tables_by_floor_id[floor_id] = tables.read(table_params['search_params']['fields'])
+            floor_tables = self.env['restaurant.table'].concat(*table_group)
+            tables_by_floor_id[floor_id.id] = floor_tables.read(table_params['search_params']['fields'])
 
         for floor in floors:
             floor['tables'] = tables_by_floor_id.get(floor['id'], [])

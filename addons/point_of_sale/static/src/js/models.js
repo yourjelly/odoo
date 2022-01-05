@@ -95,9 +95,6 @@ class PosGlobalState extends PosModel {
         this.currency = null;
         this.company = null;
         this.user = null;
-        // this.users = []; todo-ref: to delete, it's useless
-        // this.employee = {name: null, id: null, barcode: null, user_id:null, pin:null}; //todo-ref: employee and cashier are the same...
-        // this.employees = []; todo-ref: to delete, it's only used in pos_hr...
         this.partners = [];
         this.taxes = [];
         this.pos_session = null;
