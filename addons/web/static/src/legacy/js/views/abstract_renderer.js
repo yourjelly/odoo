@@ -7,6 +7,7 @@
  */
 
 import * as mvc from 'web.mvc';
+import { WebClient } from "@web/webclient/webclient";
 
 // Renderers may display sample data when there is no real data to display. In
 // this case the data is displayed with opacity and can't be clicked. Moreover,
@@ -156,8 +157,25 @@ export default mvc.Renderer.extend({
         // FIXME: retrieve owl qweb instance via the env set on Component s.t.
         // it also works in the tests (importing 'web.env' wouldn't). This
         // won't be necessary as soon as this will be written in owl.
-        const owlQWeb = owl.Component.env.qweb; // FIXME NXOWL
-        template.innerHTML = owlQWeb.renderToString(templateName, context);
+
+        //const owlQWeb = owl.Component.env.qweb; // FIXME NXOWL
+
+        // FIXME NXOWL ?
+
+        const appConfig = {
+            env: owl.Component.env,
+            templates: window.__ODOO_TEMPLATES__,
+        };
+
+        const app = new owl.App(WebClient, appConfig);
+        const renderToString = (template, context) => {
+            const div = document.createElement("div");
+            const templateFn = app.getTemplate(template);
+            const bdom = templateFn(context);
+            owl.blockDom.mount(bdom, div);
+            return div.innerHTML;
+        };
+        template.innerHTML = renderToString(templateName, context);
         this.el.append(template.content.firstChild);
     },
     /**
