@@ -254,7 +254,7 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
             const chartAreaTop = this.chart.chartArea.top;
             const rendererTop = this.el.getBoundingClientRect().top;
 
-            const innerHTML = this.env.qweb.renderToString("web.GraphRenderer.CustomTooltip", {
+            const innerHTML = this.env.renderToString("web.GraphRenderer.CustomTooltip", {
                 maxWidth: getMaxWidth(this.chart.chartArea),
                 measure: this.measureDescription,
                 mode: this.props.mode,

@@ -4,9 +4,10 @@ odoo.define('web.test_env', async function (require) {
     const Bus = require('web.Bus');
     const { buildQuery } = require('web.rpc');
     const session = require('web.session');
-    const { registerCleanup } = require("@web/../tests/helpers/cleanup");
 
-    let qweb;
+    const { App } = owl;
+
+    let app;
 
     /**
      * Creates a test environment with the given environment object.
@@ -18,15 +19,9 @@ odoo.define('web.test_env', async function (require) {
      * @returns {Proxy}
      */
     function makeTestEnvironment(env = {}, providedRPC = null) {
-        // if (!qweb) {
-        //     // avoid parsing templates at every test because it takes a lot of
-        //     // time and they never change
-        //     qweb = new owl.QWeb({ templates: session.owlTemplates });
-        // }
-        // registerCleanup(() => {
-        //     qweb.subscriptions = {};
-        // });
-        // NXOWL
+        if (!app) {
+            app = new App(null, { templates: window.__ODOO_TEMPLATES__ });
+        }
 
         const defaultTranslationParamters = {
             code: "en_US",
@@ -64,7 +59,13 @@ odoo.define('web.test_env', async function (require) {
                 SIZES: { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 },
             }, env.device),
             isDebug: env.isDebug || (() => false),
-            qweb,
+            renderToString(template, context) {
+                const div = document.createElement("div");
+                const templateFn = app.getTemplate(template);
+                const bdom = templateFn(context);
+                owl.blockDom.mount(bdom, div);
+                return div.innerHTML;
+            },
             services: Object.assign({
                 ajax: {
                     rpc() {
