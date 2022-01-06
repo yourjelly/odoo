@@ -31,6 +31,7 @@ odoo.define('web.basic_fields_owl', function (require) {
         setup() {
             super.setup(...arguments);
             onPatched(() => {
+                debugger
                 if (this.props.event && this.props.event.target === this) {
                     this.activate();
                 }

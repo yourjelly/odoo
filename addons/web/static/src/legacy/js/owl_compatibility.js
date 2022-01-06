@@ -471,6 +471,7 @@ odoo.define('web.OwlCompatibility', function (require) {
     class ProxyComponent extends Component {
         setup() {
             onMounted(() => {
+                debugger
                 this.props.mounted();
             });
             onPatched(() => {

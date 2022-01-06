@@ -42,6 +42,10 @@ odoo.define('web.CustomCheckbox', function (require) {
             type: [String, Number],
             optional: 1,
         },
+        class: {
+            type: String,
+            optional: 1,
+        },
         disabled: {
             type: Boolean,
             optional: 1,
