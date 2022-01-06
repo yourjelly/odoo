@@ -49,8 +49,6 @@ class PosController(http.Controller):
 
         if not pos_session:
             return request.redirect('/web#action=point_of_sale.action_client_pos_menu')
-
-        pos_session.login()
         # The POS only work in one company, so we enforce the one of the session in the context
         company = pos_session.company_id
         session_info = request.env['ir.http'].session_info()
@@ -58,6 +56,7 @@ class PosController(http.Controller):
         session_info['user_companies'] = {'current_company': company.id, 'allowed_companies': {company.id: session_info['user_companies']['allowed_companies'][company.id]}}
         context = {
             'session_info': session_info,
+            'login_number': pos_session.login(),
             'pos_session_id': pos_session.id,
         }
         response = request.render('point_of_sale.index', context)

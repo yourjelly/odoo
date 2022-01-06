@@ -1609,9 +1609,6 @@ class PosSession(models.Model):
         loaded_data['units_by_id'] = {unit['id']: unit for unit in loaded_data['uom.uom']}
 
         loaded_data['taxes_by_id'] = {tax['id']: tax for tax in loaded_data['account.tax']}
-        tax_ids = loaded_data['taxes_by_id'].keys()
-        for real_tax in self.env['account.tax'].browse(tax_ids).get_real_tax_amount():
-            loaded_data['taxes_by_id'][real_tax['id']]['amount'] = real_tax['amount']
         for tax in loaded_data['taxes_by_id'].values():
             tax['children_tax_ids'] = [loaded_data['taxes_by_id'][id] for id in tax['children_tax_ids']]
 
@@ -1718,22 +1715,27 @@ class PosSession(models.Model):
             'search_params': {
                 'domain': [('company_id', '=', self.company_id.id)],
                 'fields': [
-                    'name', 'amount', 'price_include', 'include_base_amount', 'is_base_affected',
+                    'name', 'real_amount', 'price_include', 'include_base_amount', 'is_base_affected',
                     'amount_type', 'children_tax_ids'
                 ],
             },
         }
 
     def _get_pos_ui_account_tax(self, params):
-        return self.env['account.tax'].search_read(**params['search_params'])
+        taxes = self.env['account.tax'].search_read(**params['search_params'])
+        # TODO: rename amount to real_amount in front end
+        for tax in taxes:
+            tax['amount'] = tax['real_amount']
+            del tax['real_amount']
+        return taxes
 
     def _loader_params_pos_session(self):
         return {
             'search_params': {
                 'domain': [('id', '=', self.id)],
                 'fields': [
-                    'id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number', 'payment_method_ids',
-                    'cash_register_id', 'state', 'login_number', 'update_stock_at_closing'
+                    'id', 'name', 'user_id', 'config_id', 'start_at', 'stop_at', 'sequence_number',
+                    'payment_method_ids', 'cash_register_id', 'state', 'update_stock_at_closing'
                 ],
             },
         }

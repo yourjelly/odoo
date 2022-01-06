@@ -218,6 +218,7 @@ class PosGlobalState extends PosModel {
         let orders = this.db.get_orders();
         let sequences = orders.map(order => order.data.sequence_number + 1)
         this.pos_session.sequence_number = Math.max(this.pos_session.sequence_number, ...sequences);
+        this.pos_session.login_number = odoo.login_number;
     }
     _loadPoSConfig() {
         this.db.set_uuid(this.config.uuid);
