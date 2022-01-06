@@ -1617,8 +1617,6 @@ class PosSession(models.Model):
                 loaded_data['default_pricelist'] = pricelist
                 break
 
-        loaded_data['payment_methods_by_id'] = {payement_method['id']: payement_method for payement_method in loaded_data['pos.payment.method']}
-
         fiscal_position_by_id = {fpt['id']: fpt for fpt in loaded_data['account.fiscal.position.tax']}
         for fiscal_position in loaded_data['account.fiscal.position']:
             fiscal_position['fiscal_position_taxes_by_id'] = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}

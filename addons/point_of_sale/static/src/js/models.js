@@ -205,7 +205,6 @@ class PosGlobalState extends PosModel {
         this.attributes_by_ptal_id = loadedData['attributes_by_ptal_id'];
         this.cash_rounding = loadedData['account.cash.rounding'];
         this.payment_methods = loadedData['pos.payment.method'];
-        this.payment_methods_by_id = loadedData['payment_methods_by_id'];
         this._loadPosPaymentMethod();
         this.fiscal_positions = loadedData['account.fiscal.position'];
         this.fiscal_posiiton_taxes = loadedData['account.fiscal.position.tax'];
@@ -234,7 +233,10 @@ class PosGlobalState extends PosModel {
         this.db.add_products(modelProducts)
     }
     _loadPosPaymentMethod() {
+        // need to do this for pos_iot due to reference, this is a temporary fix
+        this.payment_methods_by_id = {}
         for (let pm of this.payment_methods) {
+            this.payment_methods_by_id[pm.id] = pm;
             let PaymentInterface = this.electronic_payment_interfaces[pm.use_payment_terminal];
             if (PaymentInterface) {
                 pm.payment_terminal = new PaymentInterface(this, pm);
