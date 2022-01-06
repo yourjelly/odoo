@@ -471,7 +471,6 @@ odoo.define('web.OwlCompatibility', function (require) {
     class ProxyComponent extends Component {
         setup() {
             onMounted(() => {
-                debugger
                 this.props.mounted();
             });
             onPatched(() => {
@@ -629,7 +628,9 @@ odoo.define('web.OwlCompatibility', function (require) {
         }
 
         destroy() {
-            if (this.status === "unmounted") {
+            if (["willMount", "unmounted"].includes(this.status)) {
+                // NWOWL: not sure with willMount --> useEffect cleanup not defined
+                // because onMounted is not called and destroy is called
                 recursiveCall(this.node, false, (node) => {
                     node.willUnmount = [];
                 });
