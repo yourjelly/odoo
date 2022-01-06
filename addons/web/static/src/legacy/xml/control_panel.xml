@@ -11,7 +11,6 @@
             <t t-if="state.deletedFavorite.userId">Are you sure that you want to remove this filter?</t>
             <t t-else="">This filter is global and will be removed for everybody if you continue.</t>
             <t t-set-slot="buttons">
-                <t t-debug=""/>
                 <button type="button" class="btn btn-primary" t-on-click.bind="_onRemoveFavorite">
                     <t>Ok</t>
                 </button>

@@ -98,7 +98,7 @@
 </t>
 
 <t t-name="web.CustomCheckbox" owl="1">
-    <div class="custom-control custom-checkbox">
+    <div class="custom-control custom-checkbox" t-att-class="props.class">
         <input
             t-att-id="props.id or _id"
             type="checkbox"
