@@ -9,6 +9,7 @@ var BasicView = require("web.BasicView");
 var BasicRenderer = require("web.BasicRenderer");
 const AbstractRenderer = require('web.AbstractRendererOwl');
 const RendererWrapper = require('web.RendererWrapper');
+const { nextTick } = require('web.test_utils');
 
 function getHtmlRenderer(html) {
     return BasicRenderer.extend({
@@ -132,6 +133,7 @@ QUnit.module("Views", {
             model: "test_model",
             arch: "<test/>",
         });
+        await nextTick(); //NXOWL I'm not sure why we need to wait now, and we didn't need this before
         assert.hasClass(document.activeElement, "o_searchview_input");
         view.destroy();
     });
