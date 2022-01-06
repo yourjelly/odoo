@@ -4,7 +4,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
     const field_utils = require('web.field_utils');
     const { useListener } = require('web.custom_hooks');
 
-    const { onWillUpdateProps, useEffect } = owl;
+    const { Component, onWillUpdateProps, useEffect, onMounted } = owl;
 
     /**
      * This file defines the Owl version of the AbstractField. Specific fields
@@ -45,7 +45,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
      *
      * @module web.AbstractFieldOwl
      */
-    class AbstractField extends owl.Component {
+    class AbstractField extends Component {
         /**
          * Abstract field class
          *
@@ -70,28 +70,25 @@ odoo.define('web.AbstractFieldOwl', function (require) {
             useListener('keydown', this._onKeydown);
             useListener('navigation-move', this._onNavigationMove);
             useEffect(() => this._applyDecorations());
-
+            useEffect(() => {
+                /**
+                 * Hack: studio tries to find the field with a selector base on its
+                 * name, before it is mounted into the DOM. Ideally, this should be
+                 * done in the onMounted hook, but in this case we are too late, and
+                 * Studio finds nothing. As a consequence, the field can't be edited
+                 * by clicking on its label (or on the row formed by the pair label-field).
+                 *
+                 * TODO: move this to mounted at some point?
+                 *
+                 */
+                // check if studio broken NXOWL
+                this.el.setAttribute('name', this.name);
+                this.el.classList.add('o_field_widget');
+                this.el.classList.toggle('o_quick_editable', this._canQuickEdit);
+            });
             onWillUpdateProps(() => {
                 this._lastSetValue = undefined;
             });
-        }
-        /**
-         * Hack: studio tries to find the field with a selector base on its
-         * name, before it is mounted into the DOM. Ideally, this should be
-         * done in the onMounted hook, but in this case we are too late, and
-         * Studio finds nothing. As a consequence, the field can't be edited
-         * by clicking on its label (or on the row formed by the pair label-field).
-         *
-         * TODO: move this to mounted at some point?
-         *
-         * @override
-         */
-        __patch() {
-            const res = super.__patch(...arguments);
-            this.el.setAttribute('name', this.name);
-            this.el.classList.add('o_field_widget');
-            this.el.classList.toggle('o_quick_editable', this._canQuickEdit);
-            return res;
         }
 
         //----------------------------------------------------------------------

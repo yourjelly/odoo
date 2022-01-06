@@ -29,6 +29,7 @@ odoo.define('web.basic_fields_owl', function (require) {
 
     class FieldBoolean extends AbstractField {
         setup() {
+            super.setup(...arguments);
             onPatched(() => {
                 if (this.props.event && this.props.event.target === this) {
                     this.activate();
