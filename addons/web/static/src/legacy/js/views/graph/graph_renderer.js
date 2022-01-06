@@ -17,10 +17,10 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
         shortenLabel,
     } = require("web/static/src/js/views/graph/graph_utils");
 
-    const { useRef } = owl;
+    const { onWillUpdateProps, useEffect, useRef } = owl;
     class GraphRenderer extends AbstractRenderer {
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
 
             this.noDataLabel = [this.env._t("No data")];
             this.sampleDataTargets = [".o_graph_canvas_container"];
@@ -28,21 +28,14 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
 
             this.canvasRef = useRef("canvas");
             this.containerRef = useRef("container");
-        }
 
-        async willUpdateProps(nextProps) {
-            await super.willUpdateProps(...arguments);
-            this._processProps(nextProps);
-        }
+            useEffect(() => {
+                this._renderChart();
+            });
 
-        mounted() {
-            super.mounted();
-            this._renderChart();
-        }
-
-        patched() {
-            super.patched();
-            this._renderChart();
+            onWillUpdateProps((nextProps) => {
+                this._processProps(nextProps);
+            });
         }
 
         //---------------------------------------------------------------------

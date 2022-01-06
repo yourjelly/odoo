@@ -30,6 +30,8 @@ const { mapLegacyEnvToWowlEnv } = require("@web/legacy/utils");
 const { registry } = require("@web/core/registry");
 const { scrollerService } = require("@web/core/scroller_service");
 
+const { onMounted, onWillUnmount } = owl;
+
 let serverData;
 QUnit.module('Views', {
     beforeEach: async function () {
@@ -10159,13 +10161,13 @@ QUnit.module('Views', {
         assert.expect(3);
 
         class CustomFieldComponent extends fieldRegistryOwl.get('boolean') {
-            mounted() {
-                super.mounted(...arguments);
-                assert.step('mounted');
-            }
-            willUnmount() {
-                super.willUnmount(...arguments);
-                assert.step('willUnmount');
+            setup() {
+                onMounted(() => {
+                    assert.step('mounted');
+                });
+                onWillUnmount(() => {
+                    assert.step('willUnmount');
+                });
             }
         }
         fieldRegistryOwl.add('custom', CustomFieldComponent);
