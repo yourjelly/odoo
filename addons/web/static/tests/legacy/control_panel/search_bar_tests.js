@@ -215,8 +215,6 @@ QUnit.module("Search Bar (legacy)", (hooks) => {
 
             assert.strictEqual(input.value, "", "input value should be empty");
             assert.containsNone(searchBar, '.o_searchview_autocomplete');
-
-            searchBar.destroy();
         });
 
         QUnit.test('select an autocomplete field', async function (assert) {
