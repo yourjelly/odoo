@@ -1617,7 +1617,8 @@ class PosSession(models.Model):
                 loaded_data['default_pricelist'] = pricelist
                 break
 
-        fiscal_position_by_id = {fpt['id']: fpt for fpt in loaded_data['account.fiscal.position.tax']}
+        fiscal_position_by_id = {fpt['id']: fpt for fpt in self._get_pos_ui_account_fiscal_position_tax(
+            self._loader_params_account_fiscal_position_tax())}
         for fiscal_position in loaded_data['account.fiscal.position']:
             fiscal_position['fiscal_position_taxes_by_id'] = {tax_id: fiscal_position_by_id[tax_id] for tax_id in fiscal_position['tax_ids']}
 
@@ -1649,7 +1650,6 @@ class PosSession(models.Model):
             'account.cash.rounding',
             'pos.payment.method',
             'account.fiscal.position',
-            'account.fiscal.position.tax',
         ]
         return models_to_load
 
@@ -1886,11 +1886,7 @@ class PosSession(models.Model):
             for product in products:
                 product['lst_price'] = self.company_id.currency_id._convert(product['lst_price'], self.config_id.currency_id,
                                                                             self.company_id, fields.Date.today())
-        if self._context.get('loaded_data'):
-            categories = self._context.get('loaded_data')['product.category']
-        else:
-            categories = self._get_pos_ui_product_category(self._loader_params_product_category())
-
+        categories = self._get_pos_ui_product_category(self._loader_params_product_category())
         product_category_by_id = {category['id']: category for category in categories}
         for product in products:
             product['categ'] = product_category_by_id[product['categ_id'][0]]

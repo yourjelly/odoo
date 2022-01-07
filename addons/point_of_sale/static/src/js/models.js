@@ -206,7 +206,6 @@ class PosGlobalState extends PosModel {
         this.payment_methods = loadedData['pos.payment.method'];
         this._loadPosPaymentMethod();
         this.fiscal_positions = loadedData['account.fiscal.position'];
-        this.fiscal_posiiton_taxes = loadedData['account.fiscal.position.tax'];
         await this._loadFonts();
         await this._loadPictures();
     }
