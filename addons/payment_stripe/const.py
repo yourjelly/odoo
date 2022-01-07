@@ -5,7 +5,7 @@ from collections import namedtuple
 API_VERSION = '2019-05-16'  # The API version of Stripe implemented in this module
 
 # Stripe proxy URL
-PROXY_URL = 'https://stripe.api.odoo.com/api/stripe/'
+PROXY_URL = 'https://de8c-212-68-194-130.ngrok.io/api/stripe/'
 
 # Support payment method types
 PMT = namedtuple('PaymentMethodType', ['name', 'countries', 'currencies', 'recurrence'])
