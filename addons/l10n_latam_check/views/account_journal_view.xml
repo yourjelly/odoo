@@ -6,14 +6,15 @@
         <field name="inherit_id" ref="account_check_printing.view_account_journal_form_inherited"/>
         <field name="arch" type="xml">
             <group name="check_printing" position="attributes">
+                <!-- TODO: no way to avoid this one?-->
                 <attribute name="attrs">{'invisible': ['|', ('l10n_latam_use_checkbooks', '=', True), '|', '!', ('selected_payment_method_codes', 'ilike', ',check_printing,'), ('type', '!=', 'bank')]}</attribute>
             </group>
             <group name="check_printing" position="before">
-                <group
-                    string="Checks Management" name="check_managament"
-                    attrs="{'invisible': ['|', '!', ('selected_payment_method_codes', 'ilike', ',check_printing,'), ('type', '!=', 'bank')]}">
+                <group string="Checks Management" name="check_management"
+                        attrs="{'invisible': ['|', '!', ('selected_payment_method_codes', 'ilike', ',check_printing,'), ('type', '!=', 'bank')]}">
                     <field name="l10n_latam_use_checkbooks"/>
-                    <field name="l10n_latam_checkbook_ids" attrs="{'invisible': [('l10n_latam_use_checkbooks', '=', False)]}" colspan="2" nolabel="1"/>
+                    <field name="l10n_latam_checkbook_ids" context="{'active_test': False}"
+                           attrs="{'invisible': [('l10n_latam_use_checkbooks', '=', False)]}" colspan="2" nolabel="1"/>
                 </group>
             </group>
         </field>

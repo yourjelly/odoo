@@ -10,52 +10,58 @@ class AccountPayment(models.Model):
 
     _inherit = 'account.payment'
 
+    # Third check operation links
     l10n_latam_check_id = fields.Many2one(
         'account.payment', string='Check', readonly=True,
         states={'draft': [('readonly', False)]}, copy=False)
+    l10n_latam_check_operation_ids = fields.One2many(
+        'account.payment', 'l10n_latam_check_id', readonly=True, string='Check Operations')
     l10n_latam_check_current_journal_id = fields.Many2one(
         'account.journal', compute='_compute_l10n_latam_check_current_journal',
         string="Check Current Journal", store=True)
-    l10n_latam_check_operation_ids = fields.One2many(
-        'account.payment', 'l10n_latam_check_id', readonly=True, string='Check Operations')
+    # Warning message in case of unlogical third check operations
+    l10n_latam_check_warning_msg = fields.Html(compute='_compute_l10n_latam_check_warning_msg')
+
+    # Check number override as we want to set it manually
+    check_number = fields.Char(readonly=False)
+
+    # New third check info
     l10n_latam_check_bank_id = fields.Many2one(
-        'res.bank', readonly=False, states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
-        compute='_compute_l10n_latam_check_data', store=True, string='Check Bank',)
+        'res.bank', readonly=True, states={'draft': [('readonly', False)]},
+        compute='_compute_l10n_latam_check_data', store=True, string='Check Bank')
     l10n_latam_check_issuer_vat = fields.Char(
-        readonly=False, states={'cancel': [('readonly', True)], 'posted': [('readonly', True)]},
+        readonly=True, states={'draft': [('readonly', False)]},
         compute='_compute_l10n_latam_check_data', store=True, string='Check Issuer VAT')
+    l10n_latam_check_payment_date = fields.Date(
+        string='Check Payment Date', readonly=True, states={'draft': [('readonly', False)]})
+
+    # Check book
     l10n_latam_use_checkbooks = fields.Boolean(related='journal_id.l10n_latam_use_checkbooks')
     l10n_latam_checkbook_type = fields.Selection(related='l10n_latam_checkbook_id.type')
     l10n_latam_checkbook_id = fields.Many2one(
         'l10n_latam.checkbook', 'Checkbook', store=True,
         compute='_compute_l10n_latam_checkbook', readonly=True, states={'draft': [('readonly', False)]})
-    l10n_latam_check_payment_date = fields.Date(
-        string='Check Payment Date', readonly=True, states={'draft': [('readonly', False)]})
-    l10n_latam_check_warning_msg = fields.Html(compute='_compute_l10n_latam_check_warning_msg')
-    check_number = fields.Char(readonly=False)
 
     @api.depends('payment_method_line_id.code', 'journal_id.l10n_latam_use_checkbooks')
     def _compute_l10n_latam_checkbook(self):
-        with_checkbooks = self.filtered(
-            lambda x: x.payment_method_line_id.code == 'check_printing' and x.journal_id.l10n_latam_use_checkbooks)
+        with_checkbooks = self.filtered(lambda x: x.payment_method_line_id.code == 'check_printing' and
+                                                  x.journal_id.l10n_latam_use_checkbooks)
         (self - with_checkbooks).l10n_latam_checkbook_id = False
         for rec in with_checkbooks:
-            checkbooks = rec.journal_id.with_context(active_test=True).l10n_latam_checkbook_ids
+            checkbooks = rec.journal_id.l10n_latam_checkbook_ids
             if rec.l10n_latam_checkbook_id and rec.l10n_latam_checkbook_id in checkbooks:
                 continue
             rec.l10n_latam_checkbook_id = checkbooks and checkbooks[0] or False
 
-    @api.depends('l10n_latam_checkbook_id')
+    @api.depends('l10n_latam_checkbook_id', 'journal_id', 'payment_method_code')
     def _compute_check_number(self):
-        no_print_checkbooks = self.filtered(lambda x: x.l10n_latam_checkbook_id)
-        for pay in no_print_checkbooks:
+        """ Override from account_check_printing"""
+        from_checkbooks = self.filtered(lambda x: x.l10n_latam_checkbook_id)
+        for pay in from_checkbooks:
             pay.check_number = pay.l10n_latam_checkbook_id.sequence_id.get_next_char(
                 pay.l10n_latam_checkbook_id.next_number)
-        return super(AccountPayment, self - no_print_checkbooks)._compute_check_number()
+        return super(AccountPayment, self - from_checkbooks)._compute_check_number()
 
-    def action_mark_sent(self):
-        """ Check that the recordset is valid, set the payments state to sent and call print_checks() """
-        self.write({'is_move_sent': True})
 
     @api.onchange('l10n_latam_check_id')
     def _onchange_check(self):
@@ -173,16 +179,14 @@ class AccountPayment(models.Model):
                 continue
             if last_operation.is_internal_transfer and last_operation.payment_type == 'outbound':
                 rec.l10n_latam_check_current_journal_id = last_operation.paired_internal_transfer_payment_id.journal_id
-            elif last_operation.is_internal_transfer and last_operation.payment_type == 'inbound':
-                rec.l10n_latam_check_current_journal_id = last_operation.journal_id
             elif last_operation.payment_type == 'inbound':
                 rec.l10n_latam_check_current_journal_id = last_operation.journal_id
             else:
                 rec.l10n_latam_check_current_journal_id = False
 
     @api.model
-    def _get_trigger_fields_to_sincronize(self):
-        res = super()._get_trigger_fields_to_sincronize()
+    def _get_trigger_fields_to_synchronize(self):
+        res = super()._get_trigger_fields_to_synchronize()
         return res + ('check_number',)
 
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
@@ -204,7 +208,7 @@ class AccountPayment(models.Model):
         res_names = super().name_get()
         for i, (res_name, rec) in enumerate(zip(res_names, self)):
             if rec.check_number:
-                res_names[i] = (res_name[0], "%s %s" % (res_name[1], _("(Check %s)") % rec.check_number))
+                res_names[i] = (res_name[0], "%s %s" % (res_name[1], _("(Check %s)", rec.check_number)))
         return res_names
 
     @api.model
