@@ -4,7 +4,7 @@ import legacyFieldRegistry from "web.field_registry";
 import owlFieldRegistry from "web.field_registry_owl";
 import { ComponentAdapter } from "web.OwlCompatibility";
 
-const { Component, useEffect, useRef, xml } = owl;
+const { Component, useEffect, xml } = owl;
 
 const fieldRegistry = registry.category("fields");
 
@@ -35,7 +35,6 @@ class Field extends Component {
 
     setup() {
         const { record, type, name } = this.props;
-        this.fieldRef = useRef("fieldRef");
         this.FieldComponent = Field.getTangibleField({ record, type, name }).FieldClass;
     }
 }
@@ -43,7 +42,6 @@ class Field extends Component {
 Field.template = xml/* xml */ `
     <t t-component="FieldComponent" t-props="props" class="o-field" t-key="props.record.id"/>
 `;
-// NXOWL t-ref="fieldRef"
 
 class FieldSupportsLegacy extends Field {
     static getTangibleField({ record, type, fieldName }) {
