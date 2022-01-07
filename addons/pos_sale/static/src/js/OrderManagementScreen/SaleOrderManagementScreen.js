@@ -71,6 +71,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             SaleOrderFetcher.fetch();
         }
         async _onClickSaleOrder(event) {
+            const ExtendedOrderline = Registries.PosModelRegistry.get(models.Orderline);
             const clickedOrder = event.detail;
             const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
                 {
@@ -140,7 +141,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         continue;
                     }
 
-                    let new_line = new models.Orderline({}, {
+                    let new_line = new ExtendedOrderline({}, {
                         pos: this.env.pos,
                         order: this.env.pos.get_order(),
                         product: this.env.pos.db.get_product_by_id(line.product_id[0]),
@@ -207,7 +208,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                 }
 
 
-                let new_line = new models.Orderline({}, {
+                let new_line = new ExtendedOrderline({}, {
                     pos: this.env.pos,
                     order: this.env.pos.get_order(),
                     product: this.env.pos.db.get_product_by_id(this.env.pos.config.down_payment_product_id[0]),
@@ -220,7 +221,6 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                 this.env.pos.get_order().add_orderline(new_line);
               }
 
-              currentPOSOrder.trigger('change');
               this.close();
             }
 
