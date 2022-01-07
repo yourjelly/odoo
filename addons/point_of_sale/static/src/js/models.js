@@ -353,9 +353,6 @@ class PosGlobalState extends PosModel {
     get_cashier_user_id() {
         return this.user.id;
     }
-    // set_cashier(employee){
-    //     this.cashier = employee;
-    // }
     cashierHasPriceControlRights() {
         return !this.config.restrict_price_control || this.get_cashier().role == 'manager';
     }
