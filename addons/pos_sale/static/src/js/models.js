@@ -4,6 +4,20 @@ odoo.define('pos_sale.models', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
+Registries.PosModelRegistry.extend(models.Order, (Order) => {
+
+class PosSaleOrder extends Order {
+    select_orderline(orderline) {
+        super.select_orderline(...arguments);
+        if (orderline && orderline.product.id === this.pos.config.down_payment_product_id[0]) {
+            this.pos.PRODUCT_SCREEN.numpadMode = 'price';
+        }
+    }
+}
+
+return PosSaleOrder;
+});
+
 Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
 class PosSaleOrderline extends Orderline {
