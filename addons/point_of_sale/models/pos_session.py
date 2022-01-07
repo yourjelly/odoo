@@ -1893,7 +1893,7 @@ class PosSession(models.Model):
         if self._context.get('loaded_data'):
             categories = self._context.get('loaded_data')['product.category']
         else:
-            categories = self._get_pos_ui_pos_category(self._loader_params_product_category())
+            categories = self._get_pos_ui_product_category(self._loader_params_product_category())
 
         product_category_by_id = {category['id']: category for category in categories}
         for product in products:

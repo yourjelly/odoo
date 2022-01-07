@@ -297,7 +297,7 @@ class AccountTax(models.Model):
         if self.price_include:
             self.include_base_amount = True
 
-    @api.depends('invoice_repartition_line_ids')
+    @api.depends('invoice_repartition_line_ids', 'amount', 'invoice_repartition_line_ids.factor')
     def _compute_real_amount(self):
         for tax in self:
             tax_repartition_lines = tax.invoice_repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax')
