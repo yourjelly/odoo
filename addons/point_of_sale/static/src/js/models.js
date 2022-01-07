@@ -2610,6 +2610,7 @@ class Order extends PosModel {
         }else{
             this.selected_orderline = undefined;
         }
+        this.pos.PRODUCT_SCREEN.numpadMode = 'quantity';
     }
     deselect_orderline(){
         if(this.selected_orderline){
