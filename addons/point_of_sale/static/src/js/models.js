@@ -197,7 +197,6 @@ class PosGlobalState extends PosModel {
         this.pricelists = loadedData['product.pricelist'];
         this.default_pricelist = loadedData['default_pricelist'];
         this.bank_statement = loadedData['account.bank.statement'];
-        this.product_categories = loadedData['product.category'];
         this.currency = loadedData['res.currency'];
         this.db.add_categories(loadedData['pos.category']);
         this._loadProductProduct(loadedData['product.product']);
@@ -1058,7 +1057,7 @@ class Product extends PosModel {
 
         // In case of nested pricelists, it is necessary that all pricelists are made available in
         // the POS. Display a basic alert to the user in this case.
-        if (pricelist === undefined) {
+        if (!pricelist) {
             alert(_t(
                 'An error occurred when loading product prices. ' +
                 'Make sure all pricelists are available in the POS.'

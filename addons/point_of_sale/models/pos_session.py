@@ -1642,7 +1642,6 @@ class PosSession(models.Model):
             'res.users',
             'product.pricelist',
             'account.bank.statement',
-            'product.category',
             'res.currency',
             'pos.category',
             'product.product',
@@ -1814,10 +1813,7 @@ class PosSession(models.Model):
         pricelist_item_domain = [('pricelist_id', 'in', [p['id'] for p in pricelists])]
         for item in self.env['product.pricelist.item'].search_read(pricelist_item_domain, []):
             pricelist_by_id[item['pricelist_id'][0]]['items'].append(item)
-            if item.get('base_pricelist_id') and pricelist_by_id.get(item['base_pricelist_id'][0]):
-                item['base_pricelist'] = pricelist_by_id.get(item['base_pricelist_id'][0])
-            else:
-                item['base_pricelist'] = None
+            item['base_pricelist'] = pricelist_by_id.get(item['base_pricelist_id'][0]) if item['base_pricelist_id'] else None
 
         return pricelists
 
@@ -1825,7 +1821,7 @@ class PosSession(models.Model):
         return {'search_params': {'domain': [('id', '=', self.cash_register_id.id)], 'fields': ['id', 'balance_start']}}
 
     def _get_pos_ui_account_bank_statement(self, params):
-        return self.env['account.bank.statement'].search_read(**params['search_params'])
+        return self.env['account.bank.statement'].search_read(**params['search_params'])[0]
 
     def _loader_params_product_category(self):
         return {'search_params': {'domain': [], 'fields': ['name', 'parent_id']}}
