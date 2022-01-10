@@ -11,6 +11,27 @@ var QWeb = core.qweb;
 Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
 class PosResMultiprintPosModel extends PosGlobalState {
+    async _processData(loadedData) {
+        await super._processData(...arguments);
+        if (this.config.module_pos_restaurant) {
+            this._loadRestaurantPrinter(loadedData['restaurant.printer']);
+        }
+    }
+    _loadRestaurantPrinter(printers) {
+        this.printers = [];
+        // list of product categories that belong to one or more order printer
+        this.printers_category_ids_set = new Set();
+        for (let printerConfig of printers) {
+            let printer = this.create_printer(printerConfig);
+            printer.config = printerConfig;
+            this.printers.push(printer);
+            for (let id of printer.config.product_categories_ids) {
+                this.printers_category_ids_set.add(id);
+            }
+        }
+        this.config.iface_printers = !!this.printers.length;
+
+    }
     create_printer(config) {
         var url = config.proxy_ip || '';
         if(url.indexOf('//') < 0) {
@@ -26,33 +47,6 @@ class PosResMultiprintPosModel extends PosGlobalState {
 return PosResMultiprintPosModel;
 });
 
-models.load_models({
-    model: 'restaurant.printer',
-    loaded: function(self,printers){
-        var active_printers = {};
-        for (var i = 0; i < self.config.printer_ids.length; i++) {
-            active_printers[self.config.printer_ids[i]] = true;
-        }
-
-        self.printers = [];
-        self.printers_categories = {}; // list of product categories that belong to
-                                       // one or more order printer
-
-        for(var i = 0; i < printers.length; i++){
-            if(active_printers[printers[i].id]){
-                var printer = self.create_printer(printers[i]);
-                printer.config = printers[i];
-                self.printers.push(printer);
-
-                for (var j = 0; j < printer.config.product_categories_ids.length; j++) {
-                    self.printers_categories[printer.config.product_categories_ids[j]] = true;
-                }
-            }
-        }
-        self.printers_categories = _.keys(self.printers_categories);
-        self.config.iface_printers = !!self.printers.length;
-    },
-});
 
 Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
@@ -78,7 +72,7 @@ class PosResMultiprintOrderline extends Orderline {
     }
     // can this orderline be potentially printed ?
     printable() {
-        return this.pos.db.is_product_in_category(this.pos.printers_categories, this.get_product().id);
+        return this.pos.db.is_product_in_category(this.pos.printers_category_ids_set, this.get_product().id);
     }
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);

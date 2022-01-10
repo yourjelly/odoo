@@ -46,8 +46,7 @@ class PosCachePosModel extends PosGlobalState {
             args: [[odoo.pos_session_id], start, end],
             context: pos_env.session.user_context,
         });
-        const productModel = _.find(this.models, function(model){return model.model === 'product.product';});
-        productModel.loaded(this, products);
+        this._loadProductProduct(products);
     }
 }
 

@@ -8,6 +8,6 @@ class PosSession(models.Model):
     _inherit = 'pos.session'
 
     def _loader_params_product_product(self):
-        meta = super()._loader_params_product_product()
-        meta['fields'].append('optional_product_ids')
-        return meta
+        result = super()._loader_params_product_product()
+        result['search_params']['fields'].append('optional_product_ids')
+        return result

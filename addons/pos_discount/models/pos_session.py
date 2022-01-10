@@ -11,5 +11,5 @@ class PosSession(models.Model):
     def _loader_params_product_product(self):
         result = super(PosSession, self)._loader_params_product_product()
         if self.config_id.module_pos_discount:
-            result['domain'] = OR([result['domain'], [('id', '=', self.config_id.discount_product_id.id)]])
+            result['search_params']['domain'] = OR([result['domain'], [('id', '=', self.config_id.discount_product_id.id)]])
         return result

@@ -411,13 +411,10 @@ var PosDB = core.Class.extend({
      * or one of its child categories.
      */
     is_product_in_category: function(category_ids, product_id) {
-        if (!(category_ids instanceof Array)) {
-            category_ids = [category_ids];
-        }
-        var cat = this.get_product_by_id(product_id).pos_categ_id[0];
+        let cat = this.get_product_by_id(product_id).pos_categ_id[0];
         while (cat) {
-            for (var i = 0; i < category_ids.length; i++) {
-                if (cat == category_ids[i]) {   // The == is important, ids may be strings
+            for (let cat_id of category_ids) {
+                if (cat == cat_id) {   // The == is important, ids may be strings
                     return true;
                 }
             }

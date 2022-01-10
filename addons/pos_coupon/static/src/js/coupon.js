@@ -184,35 +184,33 @@ odoo.define('pos_coupon.pos', function (require) {
         return free + adjustment;
     }
 
-    models.load_models([
-        {
-            model: 'coupon.program',
-            loaded: function (self, programs) {
-                self.programs = programs;
-                self.coupon_programs_by_id = {};
-                self.coupon_programs = [];
-                self.promo_programs = [];
-                for (let program of self.programs) {
-                    // index by id
-                    self.coupon_programs_by_id[program.id] = program;
-                    // separate coupon programs from promo programs
-                    if (program.program_type === 'coupon_program') {
-                        self.coupon_programs.push(program);
-                    } else {
-                        self.promo_programs.push(program);
-                    }
-                    // cast some arrays to Set for faster membership checking
-                    program.valid_product_ids = new Set(program.valid_product_ids);
-                    program.valid_partner_ids = new Set(program.valid_partner_ids);
-                    program.discount_specific_product_ids = new Set(program.discount_specific_product_ids);
-                }
-            },
-        },
-    ]);
-
     Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
     class PosCouponPosModel extends PosGlobalState {
+        async _processData(loadedData) {
+            await super._processData(...arguments);
+            this.programs = loadedData['coupon.program'] || [];
+            this._loadCouponProgram();
+        }
+        _loadCouponProgram() {
+            // done in the front end because those are derived value (with the sets)
+            this.coupon_programs_by_id = {};
+            this.coupon_programs = [];
+            this.promo_programs = [];
+            for (let program of this.programs) {
+                this.coupon_programs_by_id[program.id] = program;
+                // separate coupon programs from promo programs
+                if (program.program_type === 'coupon_program') {
+                    this.coupon_programs.push(program);
+                } else {
+                    this.promo_programs.push(program);
+                }
+                // cast some arrays to Set for faster membership checking
+                program.valid_product_ids = new Set(program.valid_product_ids);
+                program.valid_partner_ids = new Set(program.valid_partner_ids);
+                program.discount_specific_product_ids = new Set(program.discount_specific_product_ids);
+            }
+        }
         async load_server_data() {
             await super.load_server_data(...arguments);
             if (this.selectedOrder) {
@@ -745,7 +743,7 @@ odoo.define('pos_coupon.pos', function (require) {
             if (
                 !(
                     amountToCheck > program.rule_minimum_amount ||
-                    float_is_zero(amountToCheck - program.rule_minimum_amount, this.pos.currency.decimals)
+                    float_is_zero(amountToCheck - program.rule_minimum_amount, this.pos.currency.decimal_places)
                 )
             ) {
                 return {

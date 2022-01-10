@@ -4,21 +4,17 @@ odoo.define("pos_gift_card.gift_card", function (require) {
   const models = require("point_of_sale.models");
   const Registries = require('point_of_sale.Registries');
 
-    // Load the products used for creating program reward lines.
-    var existing_models = models.PosGlobalState.prototype.models;
-    var product_index = _.findIndex(existing_models, function (model) {
-        return model.model === 'product.product';
-    });
-    var product_model = existing_models[product_index];
+  Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-  models.load_models([
-    {
-      model: "gift.card",
-      loaded: function (self, giftCard) {
-        self.giftCard = giftCard;
-      },
-    },
-  ]);
+  class PosGiftCardPosGlobalState extends PosGlobalState {
+    async _processData(loadedData) {
+      await super._processData(...arguments);
+      this.giftCards = loadedData['gift.card'];
+    }
+  }
+
+  return PosGiftCardPosGlobalState;
+});
 
   Registries.PosModelRegistry.extend(models.Order, (Order) => {
 

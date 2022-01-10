@@ -45,7 +45,7 @@ odoo.define('pos_gift_card.PaymentScreen', function(require) {
                                     });
                                     return;
                                 }
-                                this.env.pos.giftCard.find(gift => gift.id === gift_card[0].id).balance += line.price;
+                                this.env.pos.giftCards.find(gift => gift.id === gift_card[0].id).balance += line.price;
                             }
                         }
                     } catch (e) {
