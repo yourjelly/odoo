@@ -600,7 +600,6 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @param {KeyEvent} ev
          */
         _onKeydown(ev) {
-            debugger
             switch (ev.which) {
                 case $.ui.keyCode.TAB:
                     this.trigger('navigation-move', {
@@ -648,7 +647,6 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @param {CustomEvent} ev
          */
         _onNavigationMove(ev) {
-            debugger
             ev.detail.target = this;
         }
     }
