@@ -2953,9 +2953,6 @@ class Order extends PosModel {
     }
     destroy(){
         this.pos.db.remove_unpaid_order(this);
-        if (this.unregisterObserver) {
-            this.unregisterObserver();
-        }
     }
     /* ---- Invoice --- */
     set_to_invoice(to_invoice) {
