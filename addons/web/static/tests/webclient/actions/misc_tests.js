@@ -573,7 +573,7 @@ QUnit.module("ActionManager", (hooks) => {
         triggerEvents(webClient.el, ".modal footer button", ["mouseover", "focusin"]);
         await tooltipProm;
         // check on webClient dom
-        assert.containsOnce(webClient.el, ".tooltip");
+        assert.containsOnce(document.body, ".tooltip");
         await doAction(webClient, {
             type: "ir.actions.act_window_close",
         });
@@ -610,7 +610,7 @@ QUnit.module("ActionManager", (hooks) => {
         triggerEvents(webClient.el, ".o_form_statusbar button", ["mouseover", "focusin"]);
         await tooltipProm;
         // check on webClient DOM
-        assert.containsOnce(webClient.el, ".tooltip");
+        assert.containsOnce(document.body, ".tooltip");
         await click(webClient.el, ".o_content");
         // check on the whole DOM
         assert.containsNone(document.body, ".tooltip");

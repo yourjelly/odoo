@@ -2019,7 +2019,7 @@ QUnit.module("ActionManager", (hooks) => {
             });
             $(actionButton).mouseenter();
             await tooltipProm;
-            assert.containsN(document.body, ".tooltip", 2);
+            assert.containsN(document.body, ".tooltip", 1);
             await click(actionButton);
             await legacyExtraNextTick();
             assert.verifySteps(["/web/dataset/call_button", "/web/dataset/call_kw/partner/read"]);
