@@ -330,9 +330,11 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.test(
+    QUnit.skip(
         "no memory leaks when executing an action while loading data of default view",
         async function (assert) {
+
+            // Should be fixed with https://github.com/odoo/owl/pull/1054
             assert.expect(1);
             let def;
             let delta = 0;

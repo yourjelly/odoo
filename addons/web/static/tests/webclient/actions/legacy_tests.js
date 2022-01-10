@@ -108,8 +108,7 @@ QUnit.module("ActionManager", (hooks) => {
         }
     );
 
-    QUnit.skip("redraw a controller and open debugManager does not crash", async (assert) => {
-        // NXOWL
+    QUnit.test("redraw a controller and open debugManager does not crash", async (assert) => {
         assert.expect(11);
 
         const LegacyAction = AbstractAction.extend({
