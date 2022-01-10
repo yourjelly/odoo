@@ -92,7 +92,7 @@ class PosGlobalState extends PosModel {
         // Business data; loaded from the server at launch
         this.company_logo = null;
         this.company_logo_base64 = '';
-        this.currency = { symbol: '$', position: 'after', rounding: 0.01, decimal_places: 2 };
+        this.currency = null;
         this.company = null;
         this.user = null;
         this.partners = [];
