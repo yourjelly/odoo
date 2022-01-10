@@ -124,3 +124,9 @@ class AccountMove(models.Model):
                 if not move.l10n_in_state_id:
                     move.l10n_in_state_id = company_unit_partner.state_id
         return posted
+
+    def _l10n_in_get_warehouse_address(self):
+        """Retrun address where goods is delivered/received for Invoice/Bill"""
+        # TO OVERRIDE
+        self.ensure_one()
+        return False
