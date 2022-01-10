@@ -17,13 +17,13 @@ class PosSession(models.Model):
         return result
 
     def _loader_params_gift_card(self):
-        return {'domain': [], 'fields': ['code', 'initial_amount', 'balance']}
+        return {'search_params': {'domain': [], 'fields': ['code', 'initial_amount', 'balance']}}
 
     def _get_pos_ui_gift_card(self, params):
-        return self.env['gift.card'].search_read(params['domain'], params['fields'])
+        return self.env['gift.card'].search_read(**params['search_params'])
 
     def _loader_params_product_product(self):
         result = super()._loader_params_product_product()
         if self.config_id.use_gift_card and self.config_id.gift_card_product_id:
-            result['domain'] = OR([result['domain'], [('id', '=', self.config_id.gift_card_product_id.id)]])
+            result['search_params']['domain'] = OR([result['search_params']['domain'], [('id', '=', self.config_id.gift_card_product_id.id)]])
         return result
