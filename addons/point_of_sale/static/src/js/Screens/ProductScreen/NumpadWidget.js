@@ -10,11 +10,6 @@ odoo.define('point_of_sale.NumpadWidget', function (require) {
      * @prop {boolean} disableSign
      * @event set-numpad-mode - triggered when mode button is clicked
      * @event numpad-click-input - triggered when numpad button is clicked
-     *
-     * IMPROVEMENT: Whenever new-orderline-selected is triggered,
-     * numpad mode should be set to 'quantity'. Now that the mode state
-     * is lifted to the parent component, this improvement can be done in
-     * the parent component.
      */
     class NumpadWidget extends PosComponent {
         get hasPriceControlRights() {
