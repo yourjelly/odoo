@@ -4,20 +4,14 @@ odoo.define('l10n_co_pos.pos', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-
-class L10nCoPosModel extends PosGlobalState {
+const L10nCoPosGlobalState = (PosGlobalState) => class L10nCoPosGlobalState extends PosGlobalState {
     is_colombian_country() {
         return this.company.country.code === 'CO';
     }
 }
+Registries.PosModelRegistry.extend(models.PosGlobalState, L10nCoPosGlobalState);
 
-return L10nCoPosModel;
-});
-
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-class L10nCoPosOrder extends Order {
+const L10nCoPosOrder = (Order) => class L10nCoPosOrder extends Order {
     export_for_printing() {
         var result = super.export_for_printing(...arguments);
         result.l10n_co_dian = this.get_l10n_co_dian();
@@ -35,8 +29,6 @@ class L10nCoPosOrder extends Order {
         return result;
     }
 }
-
-return L10nCoPosOrder;
-});
+Registries.PosModelRegistry.extend(models.Order, L10nCoPosOrder);
 
 });

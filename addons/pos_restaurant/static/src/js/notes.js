@@ -4,9 +4,8 @@ odoo.define('pos_restaurant.notes', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
 
-class PosResNotesOrderline extends Orderline {
+const PosResNotesOrderline = (Orderline) => class PosResNotesOrderline extends Orderline {
     constructor() {
         super(...arguments);
         this.note = this.note || "";
@@ -39,8 +38,6 @@ class PosResNotesOrderline extends Orderline {
         this.note = json.note;
     }
 }
-
-return PosResNotesOrderline;
-});
+Registries.PosModelRegistry.extend(models.Orderline, PosResNotesOrderline);
 
 });

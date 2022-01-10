@@ -184,9 +184,7 @@ odoo.define('pos_coupon.pos', function (require) {
         return free + adjustment;
     }
 
-    Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-
-    class PosCouponPosModel extends PosGlobalState {
+    const PosCouponPosGlobalState = (PosGlobalState) => class PosCouponPosGlobalState extends PosGlobalState {
         async _processData(loadedData) {
             await super._processData(...arguments);
             this.programs = loadedData['coupon.program'] || [];
@@ -218,13 +216,10 @@ odoo.define('pos_coupon.pos', function (require) {
             }
         }
     }
+    Registries.PosModelRegistry.extend(models.PosGlobalState, PosCouponPosGlobalState);
 
-    return PosCouponPosModel;
-    });
 
-    Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-    class PosCouponOrder extends Order {
+    const PosCouponOrder = (Order) => class PosCouponOrder extends Order {
         // OVERIDDEN METHODS
 
         constructor() {
@@ -1001,13 +996,10 @@ odoo.define('pos_coupon.pos', function (require) {
             return [discountRewards, discountRewards.length > 0 ? null : 'No items to discount.'];
         }
     }
+    Registries.PosModelRegistry.extend(models.Order, PosCouponOrder);
 
-    return PosCouponOrder;
-    });
 
-    Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
-
-    class PosCouponOrderline extends Orderline {
+    const PosCouponOrderline = (Orderline) => class PosCouponOrderline extends Orderline {
         export_as_JSON() {
             var result = super.export_as_JSON(...arguments);
             result.is_program_reward = this.is_program_reward;
@@ -1042,7 +1034,5 @@ odoo.define('pos_coupon.pos', function (require) {
             return result;
         }
     }
-
-    return PosCouponOrderline;
-    });
+    Registries.PosModelRegistry.extend(models.Orderline, PosCouponOrderline);
 });

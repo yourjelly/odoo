@@ -12,9 +12,7 @@ const Registries = require('point_of_sale.Registries');
 var _t = core._t;
 var round_di = utils.round_decimals;
 
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-
-class L10nFrPosModel extends PosGlobalState {
+const L10nFrPosGlobalState = (PosGlobalState) => class L10nFrPosGlobalState extends PosGlobalState {
     is_french_country(){
       var french_countries = ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF'];
       if (!this.company.country) {
@@ -38,13 +36,10 @@ class L10nFrPosModel extends PosGlobalState {
         }
     }
 }
+Registries.PosModelRegistry.extend(models.PosGlobalState, L10nFrPosGlobalState);
 
-return L10nFrPosModel;
-});
 
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-class L10nFrOrder extends Order {
+const L10nFrOrder = (Order) => class L10nFrOrder extends Order {
     constructor() {
         super(...arguments);
         this.l10n_fr_hash = this.l10n_fr_hash || false;
@@ -79,13 +74,10 @@ class L10nFrOrder extends Order {
         }
     }
 }
+Registries.PosModelRegistry.extend(models.Order, L10nFrOrder);
 
-return L10nFrOrder;
-});
 
-Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
-
-class L10nFrOrderline extends Orderline {
+const L10nFrOrderline = (Orderline) => class L10nFrOrderline extends Orderline {
     can_be_merged_with(orderline) {
         let order = this.pos.get_order();
         let orderlines = order.orderlines;
@@ -98,8 +90,6 @@ class L10nFrOrderline extends Orderline {
         }
     }
 }
-
-return L10nFrOrderline;
-});
+Registries.PosModelRegistry.extend(models.Orderline, L10nFrOrderline);
 
 });
