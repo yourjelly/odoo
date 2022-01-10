@@ -150,7 +150,7 @@ var PaymentSix = PaymentInterface.extend({
         var amount = new timapi.Amount(
             Math.round(this.pos.get_order().selected_paymentline.amount / this.pos.currency.rounding),
             timapi.constants.Currency[this.pos.currency.name],
-            this.pos.currency.decimals
+            this.pos.currency.decimal_places
         );
 
         return new Promise((resolve) => {

@@ -17,10 +17,15 @@ class PosSession(models.Model):
         return result
 
     def _loader_params_coupon_program(self):
-        return {'domain': [('id', 'in', self.config_id.program_ids.ids), ('active', '=', True)], 'fields': []}
+        return {
+            'search_params': {
+                'domain': [('id', 'in', self.config_id.program_ids.ids), ('active', '=', True)],
+                'fields': []
+            },
+        }
 
     def _get_pos_ui_coupon_program(self, params):
-        return self.env['coupon.program'].search_read(params['domain'], params['fields'])
+        return self.env['coupon.program'].search_read(**params['search_params'])
 
     def _loader_params_product_product(self):
         result = super(PosSession, self)._loader_params_product_product()
@@ -28,5 +33,5 @@ class PosSession(models.Model):
             discount_product_ids = self.config_id.program_ids.mapped(lambda program: program.discount_line_product_id.id)
             reward_product_ids = self.config_id.program_ids.mapped(lambda program: program.reward_product_id.id)
             product_ids = [id for id in [*discount_product_ids, *reward_product_ids] if id]
-            result['domain'] = OR([result['domain'], [('id', 'in', product_ids)]])
+            result['search_params']['domain'] = OR([result['search_params']['domain'], [('id', 'in', product_ids)]])
         return result
