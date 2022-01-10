@@ -4299,9 +4299,9 @@
             this.rawTemplates = Object.create(globalTemplates);
             this.templates = {};
             this.utils = Object.assign({}, UTILS, {
-                call: (owner, subTemplate, ctx, parent) => {
+                call: (owner, subTemplate, ctx, parent, key) => {
                     const template = this.getTemplate(subTemplate);
-                    return toggler(subTemplate, template.call(owner, ctx, parent));
+                    return toggler(subTemplate, template.call(owner, ctx, parent, key));
                 },
                 getTemplate: (name) => this.getTemplate(name),
             });
