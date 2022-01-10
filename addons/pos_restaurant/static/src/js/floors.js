@@ -8,9 +8,7 @@ const Registries = require('point_of_sale.Registries');
 
 
 // New orders are now associated with the current table, if any.
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-class PosRestaurantOrder extends Order {
+const PosRestaurantOrder = (Order) => class PosRestaurantOrder extends Order {
     constructor(obj, options) {
         super(...arguments);
         if (this.pos.config.module_pos_restaurant) {
@@ -61,9 +59,7 @@ class PosRestaurantOrder extends Order {
         this.customer_count = Math.max(count,0);
     }
 }
-
-return PosRestaurantOrder;
-});
+Registries.PosModelRegistry.extend(models.Order, PosRestaurantOrder);
 
 // We need to change the way the regular UI sees the orders, it
 // needs to only see the orders associated with the current table,
@@ -71,9 +67,7 @@ return PosRestaurantOrder;
 //
 // And when we change the table, we must create an order for that table
 // if there is none.
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-
-class PosRestaurantPosModel extends PosGlobalState {
+const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGlobalState extends PosGlobalState {
    async _processData(loadedData) {
        await super._processData(...arguments);
        if (this.config.is_table_management) {
@@ -381,13 +375,10 @@ class PosRestaurantPosModel extends PosGlobalState {
         }
     }
 }
+Registries.PosModelRegistry.extend(models.PosGlobalState, PosRestaurantPosGlobalState);
 
-return PosRestaurantPosModel;
-});
 
-Registries.PosModelRegistry.extend(models.Payment, (Payment) => {
-
-class PosRestaurantPayment extends Payment {
+const PosRestaurantPayment = (Payment) => class PosRestaurantPayment extends Payment {
     /**
      * Override this method to be able to show the 'Adjust Authorisation' button
      * on a validated payment_line and to show the tip screen which allow
@@ -401,8 +392,6 @@ class PosRestaurantPayment extends Payment {
         return !this.payment_method.is_cash_count;
     }
 }
-
-return PosRestaurantPayment;
-});
+Registries.PosModelRegistry.extend(models.Payment, PosRestaurantPayment);
 
 });

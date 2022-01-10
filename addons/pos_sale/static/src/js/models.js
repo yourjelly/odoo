@@ -4,9 +4,8 @@ odoo.define('pos_sale.models', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
-class PosSaleOrder extends Order {
+const PosSaleOrder = (Order) => class PosSaleOrder extends Order {
     select_orderline(orderline) {
         super.select_orderline(...arguments);
         if (orderline && orderline.product.id === this.pos.config.down_payment_product_id[0]) {
@@ -14,13 +13,10 @@ class PosSaleOrder extends Order {
         }
     }
 }
+Registries.PosModelRegistry.extend(models.Order, PosSaleOrder);
 
-return PosSaleOrder;
-});
 
-Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
-
-class PosSaleOrderline extends Orderline {
+const PosSaleOrderline = (Orderline) => class PosSaleOrderline extends Orderline {
   constructor(obj, options) {
       super(...arguments);
       // It is possible that this orderline is initialized using `init_from_JSON`,
@@ -76,8 +72,6 @@ class PosSaleOrderline extends Orderline {
       }
   }
 }
-
-return PosSaleOrderline;
-});
+Registries.PosModelRegistry.extend(models.Orderline, PosSaleOrderline);
 
 });
