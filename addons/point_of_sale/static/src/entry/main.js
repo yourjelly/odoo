@@ -28,6 +28,7 @@ PosApp.components = { ChromeAdapter };
 function startPosApp() {
     Registries.PosComponentRegistry.add(owl.misc.Portal);
     Registries.PosComponentRegistry.freeze();
+    Registries.PosModelRegistry.freeze();
     startWebClient(PosApp);
 }
 
