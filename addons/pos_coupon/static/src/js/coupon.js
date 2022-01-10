@@ -38,13 +38,6 @@ odoo.define('pos_coupon.pos', function (require) {
             this.coupon_id = coupon_id;
             this.program_id = program_id;
         }
-        toJSON() {
-            return {
-                code: this.code,
-                coupon_id: this.coupon_id,
-                program_id: this.program_id,
-            }
-        }
     }
 
     class Reward {
@@ -248,7 +241,7 @@ odoo.define('pos_coupon.pos', function (require) {
         export_as_JSON() {
             let json = super.export_as_JSON(...arguments);
             json.bookedCouponCodes = this.bookedCouponCodes && Object.fromEntries(
-                [...Object.keys(this.bookedCouponCodes)].map((key) => [key, this.bookedCouponCodes[key].toJSON()])
+                [...Object.keys(this.bookedCouponCodes)].map((key) => [key, Object.assign({}, this.bookedCouponCodes[key])])
             );
             json.activePromoProgramIds = this.activePromoProgramIds && [...this.activePromoProgramIds];
             return json;
