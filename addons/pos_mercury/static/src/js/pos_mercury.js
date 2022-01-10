@@ -4,9 +4,8 @@ odoo.define('pos_mercury.pos_mercury', function (require) {
 var pos_model = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(pos_model.PosGlobalState, (PosGlobalState) => {
 
-class PosMercuryPosModel extends PosGlobalState {
+const PosMercuryPosGlobalState = (PosGlobalState) => class PosMercuryPosGlobalState extends PosGlobalState {
     getOnlinePaymentMethods() {
         var online_payment_methods = [];
 
@@ -81,13 +80,10 @@ class PosMercuryPosModel extends PosGlobalState {
         };
     }
 }
+Registries.PosModelRegistry.extend(pos_model.PosGlobalState, PosMercuryPosGlobalState);
 
-return PosMercuryPosModel;
-});
 
-Registries.PosModelRegistry.extend(pos_model.Payment, (Payment) => {
-
-class PosMercuryPayment extends Payment {
+const PosMercuryPayment = (Payment) => class PosMercuryPayment extends Payment {
     init_from_JSON(json) {
         super.init_from_JSON(...arguments);
 
@@ -132,21 +128,14 @@ class PosMercuryPayment extends Payment {
         return result;
     }
 }
-
-return PosMercuryPayment;
-});
+Registries.PosModelRegistry.extend(pos_model.Payment, PosMercuryPayment);
 
 
-Registries.PosModelRegistry.extend(pos_model.Order, (Order) => {
-
-class PosMercuryOrder extends Order {
+const PosMercuryOrder = (Order) => class PosMercuryOrder extends Order {
     electronic_payment_in_progress() {
         var res = super.electronic_payment_in_progress(...arguments);
         return res || this.get_paymentlines().some(line => line.mercury_swipe_pending);
     }
 }
-
-return PosMercuryOrder;
-});
-
+Registries.PosModelRegistry.extend(pos_model.Order, PosMercuryOrder);
 });

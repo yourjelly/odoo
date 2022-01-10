@@ -8,9 +8,8 @@ const Registries = require('point_of_sale.Registries');
 
 var QWeb = core.qweb;
 
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosResMultiprintPosModel extends PosGlobalState {
+const PosResMultiprintPosGlobalState = (PosGlobalState) => class PosResMultiprintPosGlobalState extends PosGlobalState {
     async _processData(loadedData) {
         await super._processData(...arguments);
         if (this.config.module_pos_restaurant) {
@@ -43,14 +42,10 @@ class PosResMultiprintPosModel extends PosGlobalState {
         return new Printer(url, this);
     }
 }
-
-return PosResMultiprintPosModel;
-});
+Registries.PosModelRegistry.extend(models.PosGlobalState, PosResMultiprintPosGlobalState);
 
 
-Registries.PosModelRegistry.extend(models.Orderline, (Orderline) => {
-
-class PosResMultiprintOrderline extends Orderline {
+const PosResMultiprintOrderline = (Orderline) => class PosResMultiprintOrderline extends Orderline {
     constructor() {
         super(...arguments);
         if (!this.pos.config.iface_printers) {
@@ -118,13 +113,10 @@ class PosResMultiprintOrderline extends Orderline {
         }
     }
 }
+Registries.PosModelRegistry.extend(models.Orderline, PosResMultiprintOrderline);
 
-return PosResMultiprintOrderline;
-});
 
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-class PosResMultiprintOrder extends Order {
+const PosResMultiprintOrder = (Order) => class PosResMultiprintOrder extends Order {
     build_line_resume(){
         var resume = {};
         this.orderlines.forEach(function(line){
@@ -307,9 +299,7 @@ class PosResMultiprintOrder extends Order {
         }
     }
 }
-
-return PosResMultiprintOrder;
-});
+Registries.PosModelRegistry.extend(models.Order, PosResMultiprintOrder);
 
 
 });

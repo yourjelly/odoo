@@ -5,9 +5,8 @@ odoo.define('pos_sale_product_configurator.models', function (require) {
     var models = require('point_of_sale.models');
     const Registries = require('point_of_sale.Registries');
 
-    Registries.PosModelRegistry.extend(models.Order, (Order) => {
 
-    class PosSaleProductConfiguratorOrder extends Order {
+    const PosSaleProductConfiguratorOrder = (Order) => class PosSaleProductConfiguratorOrder extends Order {
         async add_product(product, options) {
             super.add_product(...arguments);
             if (this.pos.config.iface_open_product_info && product.optional_product_ids.length) {
@@ -27,7 +26,5 @@ odoo.define('pos_sale_product_configurator.models', function (require) {
             }
         }
     }
-
-    return PosSaleProductConfiguratorOrder;
-    });
+    Registries.PosModelRegistry.extend(models.Order, PosSaleProductConfiguratorOrder);
 })

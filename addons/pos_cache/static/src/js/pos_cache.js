@@ -6,8 +6,7 @@ const Registries = require('point_of_sale.Registries');
 var pos_env = require('point_of_sale.env');
 
 
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
-class PosCachePosModel extends PosGlobalState {
+const PosCachePosGlobalState = (PosGlobalState) => class PosCachePosGlobalState extends PosGlobalState {
     async _getTotalProductsCount() {
         return pos_env.services.rpc({
             model: 'pos.session',
@@ -26,8 +25,6 @@ class PosCachePosModel extends PosGlobalState {
         this._loadProductProduct(products);
     }
 }
-
-return PosCachePosModel;
-});
+Registries.PosModelRegistry.extend(models.PosGlobalState, PosCachePosGlobalState);
 
 });

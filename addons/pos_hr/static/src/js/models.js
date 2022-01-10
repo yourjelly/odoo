@@ -4,9 +4,8 @@ odoo.define('pos_hr.employees', function (require) {
 var models = require('point_of_sale.models');
 const Registries = require('point_of_sale.Registries');
 
-Registries.PosModelRegistry.extend(models.PosGlobalState, (PosGlobalState) => {
 
-class PosHrPosModel extends PosGlobalState {
+const PosHrPosGlobalState = (PosGlobalState) => class PosHrPosGlobalState extends PosGlobalState {
     async _processData(loadedData) {
         await super._processData(...arguments);
         if (this.config.module_pos_hr) {
@@ -51,13 +50,10 @@ class PosHrPosModel extends PosGlobalState {
         return super.get_cashier_user_id();
     }
 }
+Registries.PosModelRegistry.extend(models.PosGlobalState, PosHrPosGlobalState);
 
-return PosHrPosModel;
-});
 
-Registries.PosModelRegistry.extend(models.Order, (Order) => {
-
-class PosHrOrder extends Order {
+const PosHrOrder = (Order) => class PosHrOrder extends Order {
     constructor(obj, options) {
         super(...arguments);
         if (!options.json && this.pos.config.module_pos_hr) {
@@ -78,8 +74,6 @@ class PosHrOrder extends Order {
         return json;
     }
 }
-
-return PosHrOrder;
-});
+Registries.PosModelRegistry.extend(models.Order, PosHrOrder);
 
 });
