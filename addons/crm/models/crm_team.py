@@ -11,6 +11,7 @@ from ast import literal_eval
 from odoo import api, exceptions, fields, models, _
 from odoo.osv import expression
 from odoo.tools import float_compare, float_round
+from odoo.tools.misc import OrderedSet
 from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
@@ -474,9 +475,9 @@ class Team(models.Model):
             teams_data[team] = {
                 "team": team,
                 "leads": leads,
-                "assigned": set(),
-                "merged": set(),
-                "duplicates": set(),
+                "assigned": OrderedSet(),
+                "merged": OrderedSet(),
+                "duplicates": OrderedSet(),
             }
             population.append(team)
             weights.append(team.assignment_max)
@@ -516,7 +517,7 @@ class Team(models.Model):
             if auto_commit and counter % BUNDLE_COMMIT_SIZE == 0:
                 # unlink duplicates once
                 self.env['crm.lead'].browse(lead_unlink_ids).unlink()
-                lead_unlink_ids = set()
+                lead_unlink_ids = OrderedSet()
                 self._cr.commit()
 
         # unlink duplicates once

@@ -1502,6 +1502,7 @@ class Lead(models.Model):
                AND mf.res_id IN %(lead_ids)s
                AND destf IS NULL
           GROUP BY mf.partner_id
+          ORDER BY id
             ''',
             {'lead_ids': tuple(opportunities.ids), 'lead_id': self.id},
         )

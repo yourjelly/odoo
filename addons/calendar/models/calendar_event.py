@@ -48,7 +48,7 @@ def get_weekday_occurence(date):
 class Meeting(models.Model):
     _name = 'calendar.event'
     _description = "Calendar Event"
-    _order = "start desc"
+    _order = "start desc, id desc"
     _inherit = ["mail.thread"]
 
     @api.model

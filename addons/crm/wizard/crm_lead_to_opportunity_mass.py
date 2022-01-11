@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.tools.misc import OrderedSet
 
 
 class Lead2OpportunityMassConvert(models.TransientModel):
@@ -82,8 +83,8 @@ class Lead2OpportunityMassConvert(models.TransientModel):
         if self.name == 'convert' and self.deduplicate:
             # TDE CLEANME: still using active_ids from context
             active_ids = self._context.get('active_ids', [])
-            merged_lead_ids = set()
-            remaining_lead_ids = set()
+            merged_lead_ids = OrderedSet()
+            remaining_lead_ids = OrderedSet()
             for lead in self.lead_tomerge_ids:
                 if lead not in merged_lead_ids:
                     duplicated_leads = self.env['crm.lead']._get_lead_duplicates(

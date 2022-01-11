@@ -518,7 +518,8 @@ class Channel(models.Model):
              LEFT JOIN res_users users on partner.id = users.partner_id
                  WHERE partner.active IS TRUE
                        AND partner.email != %s
-                       AND partner.id = ANY(%s) AND partner.id != ANY(%s)"""
+                       AND partner.id = ANY(%s) AND partner.id != ANY(%s)
+              ORDER BY partner.id, partner.partner_share, users.notification_type"""
             self.env.cr.execute(
                 sql_query,
                 (email_from or '', list(pids), [author_id] if author_id else [], )
