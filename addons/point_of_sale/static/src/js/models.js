@@ -360,11 +360,10 @@ class PosGlobalState extends PosModel {
             options.json = json;
         }
         let order = new (PosModelRegistry.get(Order))({}, options);
-        const batchedSavedToDB = reactivity.batched(() => {
+        order = reactivity.reactive(order, () => {
             order.save_to_db();
         });
-        order = reactivity.reactive(order, batchedSavedToDB);
-        batchedSavedToDB();
+        order.save_to_db();
         return order;
     }
     // creates a new empty order and sets it as the current order
