@@ -39,6 +39,14 @@
         // TODO remove me in master.
         background-color: transparent !important;
     }
+    table {
+        color: inherit;
+    }
+}
+// Card BG is white by default, color should be the opposite
+$card-color: color-yiq($card-bg) !default;
+.card {
+    color: $card-color;
 }
 .accordion {
     .collapsing, .collapse.show {

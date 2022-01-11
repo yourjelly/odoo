@@ -2015,3 +2015,19 @@ ul.o_checklist > li.o_checked::after {
 .o_anim_del2500 {
     animation-delay: 2500ms;
 }
+// web/bootstrap_review.scss makes the card's background white
+// no matter what. We need to adjust theme colors for that
+.o_portal main {
+    a:not(.btn), .btn-link {
+        $portal-link-color: increase-contrast(o-color('o-cc1-link'), $card-bg);
+        color: $portal-link-color;
+        &:hover {
+            color: increase-contrast($portal-link-color, $card-bg);
+        }
+    }
+}
+.o_portal_wrap {
+    .navbar-light {
+        background-color: $card-bg;
+    }
+}
