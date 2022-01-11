@@ -31,6 +31,7 @@ export const hotkeyService = {
     overlayModifier: "alt",
     start(env, { ui }) {
         const registrations = new Map();
+        const capturers = {};
         let nextToken = 0;
         let overlaysVisible = false;
 
@@ -48,7 +49,7 @@ export const hotkeyService = {
          *
          * @param {KeyboardEvent} event
          */
-        function onKeydown(event) {
+        async function onKeydown(event) {
             if (!event.key) {
                 // Chrome may trigger incomplete keydown events under certain circumstances.
                 // E.g. when using browser built-in autocomplete on an input.
@@ -60,6 +61,12 @@ export const hotkeyService = {
 
             // Do not dispatch if UI is blocked
             if (ui.isBlocked) {
+                return;
+            }
+
+            // Captured ?
+            const captures = Object.values(capturers).map((capture) => capture(infos));
+            if ((await Promise.all(captures)).some((res) => res && res.captured)) {
                 return;
             }
 
@@ -315,6 +322,30 @@ export const hotkeyService = {
             registrations.delete(token);
         }
 
+        /**
+         * Attaches a new capturer.
+         *
+         * @param {(hotkey:string)=>Promise<{captured: boolean}|void>} callback
+         *    Method that will be called whenever the service will try to dispatch an hotkey.
+         *    Should return an object {captured: true} in order to cancel current dispatching.
+         *    Note that the capturer may be asynchronous and could delay the dispatching.
+         * @returns {number} capturer token
+         */
+        function attachCapturer(callback) {
+            const token = nextToken++;
+            capturers[token] = callback;
+            return token;
+        }
+
+        /**
+         * Detaches the token corresponding capturer.
+         *
+         * @param {any} token
+         */
+        function detachCapturer(token) {
+            delete capturers[token];
+        }
+
         return {
             /**
              * @param {string} hotkey
@@ -329,6 +360,12 @@ export const hotkeyService = {
                 const token = registerHotkey(hotkey, callback, options);
                 return () => {
                     unregisterHotkey(token);
+                };
+            },
+            capture(callback) {
+                const token = attachCapturer(callback);
+                return () => {
+                    detachCapturer(token);
                 };
             },
         };
