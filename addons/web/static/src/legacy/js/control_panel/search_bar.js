@@ -38,7 +38,7 @@ odoo.define('web.SearchBar', function (require) {
      */
     class SearchBar extends Component {
         setup() {
-            this.focusOnUpdate = useAutofocus();
+            this.focusOnUpdate = useAutofocus('search-input');
             this.inputRef = useRef('search-input');
             this.model = useModel('searchModel');
             this.state = useState({
