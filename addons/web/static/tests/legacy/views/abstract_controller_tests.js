@@ -133,7 +133,6 @@ QUnit.module("Views", {
             model: "test_model",
             arch: "<test/>",
         });
-        await nextTick(); //NXOWL I'm not sure why we need to wait now, and we didn't need this before
         assert.hasClass(document.activeElement, "o_searchview_input");
         view.destroy();
     });
