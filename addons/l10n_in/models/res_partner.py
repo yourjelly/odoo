@@ -44,3 +44,9 @@ class ResPartner(models.Model):
     def _commercial_fields(self):
         res = super()._commercial_fields()
         return res + ['l10n_in_gst_treatment']
+
+    # this is test GST number use in EDI sandbox
+    def check_vat_in(self, vat):
+        if vat == "36AABCT1332L011":
+            return True
+        return super().check_vat_in(vat)
