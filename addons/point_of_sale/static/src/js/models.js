@@ -525,13 +525,13 @@ class PosGlobalState extends PosModel {
 
     send_current_order_to_customer_facing_display() {
         if (!this.config.iface_customer_facing_display) return;
-        this.render_html_for_customer_facing_display().then(function (rendered_html) {
+        this.render_html_for_customer_facing_display().then((rendered_html) => {
             if (pos_env.customer_display) {
                 var $renderedHtml = $('<div>').html(rendered_html);
                 $(pos_env.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
                 var orderlines = $(pos_env.customer_display.document.body).find('.pos_orderlines_list');
                 orderlines.scrollTop(orderlines.prop("scrollHeight"));
-            } else if (pos_env.proxy.posbox_supports_display) {
+            } else if (this.config.iface_customer_facing_display_via_proxy && pos_env.proxy.posbox_supports_display) {
                 pos_env.proxy.update_customer_facing_display(rendered_html);
             }
         });
