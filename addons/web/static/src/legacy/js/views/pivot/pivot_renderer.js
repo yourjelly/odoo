@@ -125,8 +125,8 @@
          * @param {boolean} props.disableLinking Disallow opening records by clicking on a cell
          * @param {Object} props.widgets Widgets defined in the arch
          */
-        constructor() {
-            super(...arguments);
+        setup() {
+            super.setup();
             this.sampleDataTargets = ['table'];
             this.state = useState({
                 activeNodeHeader: {
