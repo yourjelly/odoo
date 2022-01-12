@@ -1669,7 +1669,7 @@ class PosSession(models.Model):
         params_country = self._loader_params_res_country()
         if company['country_id']:
             # TODO: this is redundant we have country_id and country
-            params['search_params']['domain'] = [('id', '=', company['country_id'][0])]
+            params_country['search_params']['domain'] = [('id', '=', company['country_id'][0])]
             company['country'] = self.env['res.country'].search_read(**params_country['search_params'])[0]
         else:
             company['country'] = None
