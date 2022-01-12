@@ -28,6 +28,8 @@ var createView = testUtils.createView;
 const { click, legacyExtraNextTick } = require("@web/../tests/helpers/utils");
 const { createWebClient, doAction, loadState } = require('@web/../tests/webclient/helpers');
 
+const { markup } = owl;
+
 let serverData;
 
 QUnit.module('Views', {
@@ -2793,7 +2795,7 @@ QUnit.module('Views', {
                 </tree>`,
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a foo</p>'
+                    help: markup('<p class="hello">click to add a foo</p>'),
                 }
             },
         });
@@ -4506,7 +4508,7 @@ QUnit.module('Views', {
             arch: '<tree><field name="foo"/></tree>',
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a record</p>'
+                    help: markup('<p class="hello">click to add a record</p>'),
                 }
             },
         });
@@ -4536,7 +4538,7 @@ QUnit.module('Views', {
             arch: '<tree><field name="foo"/></tree>',
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 }
             },
         });
@@ -4600,7 +4602,7 @@ QUnit.module('Views', {
             domain: [['id', '<', 0]], // such that no record matches the domain
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 }
             },
         });
@@ -4833,7 +4835,7 @@ QUnit.module('Views', {
             View: ListView,
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 },
                 hasActionMenus: true,
             },
@@ -4875,7 +4877,7 @@ QUnit.module('Views', {
             View: ListView,
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 },
             },
         });
@@ -4920,7 +4922,7 @@ QUnit.module('Views', {
             View: ListView,
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 },
                 hasActionMenus: true,
             },
@@ -4971,7 +4973,7 @@ QUnit.module('Views', {
             arch: '<tree><field name="foo"/></tree>',
             viewOptions: {
                 action: {
-                    help: '<p class="hello"></p>'
+                    help: markup('<p class="hello"></p>'),
                 }
             },
         });
@@ -5293,7 +5295,7 @@ QUnit.module('Views', {
                 '</tree>',
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>'
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 }
             },
             mockRPC: function (route, args) {

@@ -273,12 +273,8 @@ export class View extends Component {
         }
 
         let { noContentHelp } = this.props;
-        if (noContentHelp !== undefined) {
-            const htmlHelp = document.createElement("div");
-            htmlHelp.innerHTML = noContentHelp;
-            if (htmlHelp.innerText.trim()) {
-                viewProps.info.noContentHelp = noContentHelp;
-            }
+        if (noContentHelp) {
+            viewProps.info.noContentHelp = noContentHelp;
         }
 
         // prepare the WithSearch component props

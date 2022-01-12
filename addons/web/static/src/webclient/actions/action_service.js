@@ -14,7 +14,7 @@ import { View } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { CallbackRecorder } from "./action_hook";
 
-const { Component, useRef, useSubEnv, xml } = owl;
+const { Component, markup, useSubEnv, xml } = owl;
 
 const actionHandlersRegistry = registry.category("action_handlers");
 const actionRegistry = registry.category("actions");
@@ -190,6 +190,15 @@ function makeActionManager(env) {
                           Object.assign({}, env.services.user.context, action.context)
                       )
                     : domain;
+        }
+        if (action.help) {
+            const htmlHelp = document.createElement("div");
+            htmlHelp.innerHTML = action.help;
+            if (htmlHelp.innerText.trim()) {
+                action.help = markup(action.help);
+            } else {
+                delete action.help;
+            }
         }
         action = { ...action }; // manipulate a copy to keep cached action unmodified
         action.jsId = `action_${++id}`;

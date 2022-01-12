@@ -35,6 +35,8 @@ odoo.define("board.dashboard_tests", function (require) {
     const patchDate = testUtils.mock.patchDate;
     const favoriteMenuRegistry = registry.category("favoriteMenu");
 
+    const { markup } = owl;
+
     let serverData;
     QUnit.module("Dashboard", {
         beforeEach: function () {
@@ -155,7 +157,7 @@ odoo.define("board.dashboard_tests", function (require) {
                 "</form>",
             viewOptions: {
                 action: {
-                    help: '<p class="hello">click to add a partner</p>',
+                    help: markup('<p class="hello">click to add a partner</p>'),
                 },
             },
         });

@@ -3569,7 +3569,7 @@ QUnit.module('Views', {
             domain: [['id', '<', 0]],
             viewOptions: {
                 action: {
-                    help: '<p class="abc">click to add a foo</p>'
+                    help: markup('<p class="abc">click to add a foo</p>'),
                 }
             },
         });
@@ -3600,7 +3600,7 @@ QUnit.module('Views', {
             domain: [['id', '<', 0]],
             viewOptions: {
                 action: {
-                    help: '<p class="abc">click to add a foo</p>'
+                    help: markup('<p class="abc">click to add a foo</p>'),
                 }
             },
         });
@@ -3633,7 +3633,7 @@ QUnit.module('Views', {
                 </pivot>`,
             viewOptions: {
                 action: {
-                    help: '<p class="abc">click to add a foo</p>'
+                    help: markup('<p class="abc">click to add a foo</p>'),
                 }
             },
         });
