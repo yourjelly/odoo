@@ -396,11 +396,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     model: 'pos.session',
                     args: [[odoo.pos_session_id]]
                 });
-                const posCategoryModel = _.find(this.env.pos.models, function(model){return model.model === 'pos.category';});
-                const productModel = _.find(this.env.pos.models, function(model){return model.model === 'product.product';});
-                posCategoryModel.loaded(this.env.pos, Object.values(result['categories']));
-                productModel.loaded(this.env.pos, Object.values(result['products']));
-                this.render();
+                this.env.pos.db.add_categories(result['categories']);
+                this.env.pos._loadProductProduct(result['products']);
             }
         }
 
