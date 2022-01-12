@@ -42,10 +42,9 @@ export class ChromeAdapter extends Component {
         // The proxy requires the instance of PosGlobalState to function properly.
         pos_env.proxy.set_pos(reactivePos);
 
-        // TODO-REF: Should we continue on exposing posmodel as global variable?
-        //  Also, should it be the reactive version? If it's the reactive version,
-        //  we can perform operations on it from the console and we can see UI changing.
-        window.posmodel = reactivePos;
+        // TODO: Should we continue on exposing posmodel as global variable?
+        // Expose only the reactive version of `pos` when in debug mode.
+        window.posmodel = pos.debug ? reactivePos : pos;
 
         this.env = pos_env;
 
