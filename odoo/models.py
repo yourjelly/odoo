@@ -2759,8 +2759,7 @@ class BaseModel(metaclass=MetaModel):
         if necessary:
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
-            query = 'UPDATE "%s" SET "%s"=%s WHERE "%s" IS NULL' % (
-                self._table, column_name, field.column_format, column_name)
+            query = f'UPDATE "{self._table}" SET "{column_name}"=%s WHERE "{column_name}" IS NULL'
             self._cr.execute(query, (value,))
 
     @ormcache()
@@ -3925,7 +3924,7 @@ Fields:
             vals.setdefault('write_date', self.env.cr.now())
 
         # determine SQL values
-        columns = []                    # list of (column_name, format, value)
+        columns = []                    # list of (column_name, value)
 
         for name, val in sorted(vals.items()):
             if self._log_access and name in LOG_ACCESS_COLUMNS and not val:
@@ -3937,14 +3936,14 @@ Fields:
                 _logger.warning('Field %s is deprecated: %s', field, field.deprecated)
 
             assert field.column_type
-            columns.append((name, field.column_format, val))
+            columns.append((name, val))
 
         # update columns
         if columns:
             query = 'UPDATE "%s" SET %s WHERE id IN %%s' % (
-                self._table, ','.join('"%s"=%s' % (column[0], column[1]) for column in columns),
+                self._table, ','.join(f'"{column[0]}"=%s' for column in columns),
             )
-            params = [column[2] for column in columns]
+            params = [column[1] for column in columns]
             for sub_ids in cr.split_for_in_conditions(set(self.ids)):
                 cr.execute(query, params + [sub_ids])
                 if cr.rowcount != len(sub_ids):
@@ -4201,7 +4200,6 @@ Fields:
                     if field.translate is True:
                         translated_fields.add(field)
                     columns.append(fname)
-                    formats.append(field.column_format)
                     for stored, row in zip(stored_list, rows):
                         if fname in stored:
                             row.append(field.convert_to_column(stored[fname], self, stored))
@@ -4211,11 +4209,10 @@ Fields:
                     other_fields.add(field)
 
             header = ", ".join(f'"{column}"' for column in columns)
-            template = f'({", ".join(formats)})'
-            templates = ", ".join([template] * len(rows))
+            templates = ", ".join(['%s'] * len(rows))
             cr.execute(
                 f'INSERT INTO "{self._table}" ({header}) VALUES {templates} RETURNING "id"',
-                [val for row in rows for val in row],
+                [tuple(row) for row in rows],
             )
             ids.extend(id_ for id_, in cr.fetchall())
 
