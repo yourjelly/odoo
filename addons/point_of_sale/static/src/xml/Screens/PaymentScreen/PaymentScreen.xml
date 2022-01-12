@@ -27,11 +27,7 @@
                             </section>
                         </t>
                         <div class="paymentmethods-container">
-                            <div class="paymentlines">
-                                <t t-foreach="paymentLines" t-as="line" t-key="line.cid">
-                                    <PaymentLine line="line" />
-                                </t>
-                            </div>
+                            <PaymentScreenPaymentLines paymentLines="paymentLines" />
                             <div class="paymentmethods">
                                 <t t-foreach="payment_methods_from_config" t-as="paymentMethod"
                                    t-key="paymentMethod.id">
