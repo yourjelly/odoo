@@ -386,7 +386,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             } else {
                 line.set_payment_status('retry');
             }
-            this.render();
         }
         async _sendPaymentCancel({ detail: line }) {
             const payment_terminal = line.payment_method.payment_terminal;
@@ -397,7 +396,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             } else {
                 line.set_payment_status('waitingCard');
             }
-            this.render();
         }
         async _sendPaymentReverse({ detail: line }) {
             const payment_terminal = line.payment_method.payment_terminal;
@@ -411,11 +409,9 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                 line.can_be_reversed = false;
                 line.set_payment_status('done');
             }
-            this.render();
         }
         async _sendForceDone({ detail: line }) {
             line.set_payment_status('done');
-            this.render();
         }
     }
     PaymentScreen.template = 'PaymentScreen';
