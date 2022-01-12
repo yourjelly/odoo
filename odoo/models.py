@@ -495,7 +495,6 @@ class BaseModel(metaclass=MetaModel):
     """
     _table = None               #: SQL table name used by model if :attr:`_auto`
     _table_query = None         #: SQL expression of the table's content (optional)
-    _sequence = None            #: SQL sequence to use for ID field
     _sql_constraints = []       #: SQL constraints [(name, sql_def, message)]
 
     _rec_name = None            #: field to use for labeling records, default: ``name``
@@ -692,7 +691,6 @@ class BaseModel(metaclass=MetaModel):
         """ Initialize base model attributes. """
         cls._description = cls._name
         cls._table = cls._name.replace('.', '_')
-        cls._sequence = None
         cls._log_access = cls._auto
         inherits = {}
         depends = {}
@@ -705,7 +703,6 @@ class BaseModel(metaclass=MetaModel):
                     _logger.warning("The model %s has no _description", cls._name)
                 cls._description = base._description or cls._description
                 cls._table = base._table or cls._table
-                cls._sequence = base._sequence or cls._sequence
                 cls._log_access = getattr(base, '_log_access', cls._log_access)
 
             inherits.update(base._inherits)
@@ -716,7 +713,6 @@ class BaseModel(metaclass=MetaModel):
             for cons in base._sql_constraints:
                 cls._sql_constraints[cons[0]] = cons
 
-        cls._sequence = cls._sequence or (cls._table + '_id_seq')
         cls._sql_constraints = list(cls._sql_constraints.values())
 
         # avoid assigning an empty dict to save memory
@@ -4196,9 +4192,9 @@ Fields:
             stored_list = [data['stored'] for data in data_sublist]
             fnames = sorted({name for stored in stored_list for name in stored})
 
-            columns = ['id']
-            formats = ['nextval(%s)']
-            rows = [[self._sequence] for _ in stored_list]
+            columns = []
+            formats = []
+            rows = [[] for _ in stored_list]
             for fname in fnames:
                 field = self._fields[fname]
                 if field.column_type:
