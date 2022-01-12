@@ -20,6 +20,8 @@ const viewRegistry = registry.category("views");
 const { INTERVAL_OPTIONS, PERIOD_OPTIONS, COMPARISON_OPTIONS } = searchUtils;
 const INTERVAL_OPTION_IDS = Object.keys(INTERVAL_OPTIONS);
 
+const { markup } = owl;
+
 const yearIds = [];
 const otherIds = [];
 for (const id of Object.keys(PERIOD_OPTIONS)) {
@@ -355,7 +357,7 @@ QUnit.module('Views', {
                 </graph>`,
             viewOptions: {
                 action: {
-                    help: '<p class="abc">This helper should not be displayed in graph views</p>'
+                    help: markup('<p class="abc">This helper should not be displayed in graph views</p>'),
                 }
             },
         });
@@ -381,7 +383,7 @@ QUnit.module('Views', {
                 </graph>`,
             viewOptions: {
                 action: {
-                    help: '<p class="abc">This helper should not be displayed in graph views</p>'
+                    help: markup('<p class="abc">This helper should not be displayed in graph views</p>'),
                 }
             },
         });
@@ -509,7 +511,7 @@ QUnit.module('Views', {
                 </graph>`,
             viewOptions: {
                 action: {
-                    help: '<p class="abc">This helper should not be displayed in graph views</p>'
+                    help: markup('<p class="abc">This helper should not be displayed in graph views</p>'),
                 }
             },
         });
@@ -1604,7 +1606,7 @@ QUnit.module('Views', {
             domain: [['id', '<', 0]],
             viewOptions: {
                 action: {
-                    help: '<p class="abc">click to add a foo</p>'
+                    help: markup('<p class="abc">click to add a foo</p>'),
                 }
             },
         });
@@ -1638,7 +1640,7 @@ QUnit.module('Views', {
                 </graph>`,
             viewOptions: {
                 action: {
-                    help: '<p class="abc">click to add a foo</p>'
+                    help: markup('<p class="abc">click to add a foo</p>'),
                 }
             },
         })
