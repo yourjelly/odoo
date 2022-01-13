@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import date, datetime
 
 from odoo import Command
 from odoo.tests import common
@@ -110,3 +110,37 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         # No timesheet should have been created on the day off
         timesheet = self.env['account.analytic.line'].search([('date', '=', day_off), ('task_id', '=', leave_task.id)])
         self.assertFalse(timesheet.id)
+
+    def test_timesheet_creation_on_timeoff_and_public_holidays(self):
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Legal Leaves',
+            'time_type': 'leave',
+            'requires_allocation': 'no',
+        })
+
+        self.env['resource.calendar.leaves'].create({
+            'name': 'Test',
+            'calendar_id': self.test_company.resource_calendar_id.id,
+            'date_from': datetime(2022, 1, 12, 0, 0),
+            'date_to': datetime(2022, 1, 12, 23, 0),
+        })
+        timesheet = self.env['account.analytic.line'].search([('employee_id', '=', self.full_time_employee.id)])
+        self.assertEqual(len(timesheet), 1, 'There should be 1 timesheet for public holiday')
+        self.assertEqual(timesheet.unit_amount, 8.0, "should have timesheet entry of 8 hours(1 day) for public holiday")
+
+        leave = self.env['hr.leave'].create({
+            'name': 'Test Leave',
+            'employee_id': self.full_time_employee.id,
+            'holiday_status_id': leave_type.id,
+            'request_date_from': date(2022, 1, 10),
+            'date_from': date(2022, 1, 10),
+            'request_date_to': date(2022, 1, 14),
+            'date_to': date(2022, 1, 14),
+            'number_of_days': 4,
+        })
+        leave.action_approve()
+        timesheets = self.env['account.analytic.line'].search([('employee_id', '=', self.full_time_employee.id)])
+        self.assertEqual(len(timesheets), 4, 'There will be 4 timesheets after leave for a week')
+        self.assertEqual(timesheets.mapped('unit_amount'), [8.0, 8.0, 8.0, 8.0], "all the timesheets should have 8 hours for the leaves")
+        public_holiday_timesheet = timesheets.filtered(lambda timesheet: timesheet.date == date(2022, 1, 12))
+        self.assertEqual(public_holiday_timesheet.unit_amount, 8.0, "should not add and entry for public holiday if employee is already in leave")
