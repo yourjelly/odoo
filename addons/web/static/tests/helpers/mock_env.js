@@ -11,8 +11,8 @@ import { mocks } from "./mock_services";
 import { patchWithCleanup } from "./utils";
 
 function prepareRegistry(registry, keepContent = false) {
-    const _addEventListener = registry.addEventListener;
-    const _removeEventListener = registry.removeEventListener;
+    const _addEventListener = registry.addEventListener.bind(registry);
+    const _removeEventListener = registry.removeEventListener.bind(registry);
     const patch = {
         content: keepContent ? { ...registry.content } : {},
         elements: null,
