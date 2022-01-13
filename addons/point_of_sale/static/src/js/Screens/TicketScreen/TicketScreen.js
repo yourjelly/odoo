@@ -66,7 +66,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             if (this._state.ui.filter == 'SYNCED') {
                 await this._fetchSyncedOrders();
             }
-            // this.render();
         }
         async _onSearch(event) {
             Object.assign(this._state.ui.searchDetails, event.detail);
@@ -74,7 +73,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 this._state.syncedOrders.currentPage = 1;
                 await this._fetchSyncedOrders();
             }
-            // this.render();
         }
         _onClickOrder({ detail: clickedOrder }) {
             if (!clickedOrder || clickedOrder.locked) {
@@ -94,7 +92,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             } else {
                 this._setOrder(clickedOrder);
             }
-            // this.render();
         }
         _onCreateNewOrder() {
             this.env.pos.add_new_order();
@@ -122,29 +119,25 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 this._state.syncedOrders.currentPage += 1;
                 await this._fetchSyncedOrders();
             }
-            // this.render();
         }
         async _onPrevPage() {
             if (this._state.syncedOrders.currentPage > 1) {
                 this._state.syncedOrders.currentPage -= 1;
                 await this._fetchSyncedOrders();
             }
-            // this.render();
         }
         async _onInvoiceOrder({ detail: orderId }) {
             this.env.pos._invalidateSyncedOrdersCache([orderId]);
             await this._fetchSyncedOrders();
-            // this.render();
         }
         _onClickOrderline({ detail: orderline }) {
             const order = this.getSelectedSyncedOrder();
             this._state.ui.selectedOrderlineIds[order.backendId] = orderline.id;
             NumberBuffer.reset();
-            // this.render();
         }
         _onClickRefundOrderUid({ detail: orderUid }) {
             // Open the refund order.
-            const refundOrder = this.env.pos.orders.models.find((order) => order.uid == orderUid);
+            const refundOrder = this.env.pos.orders.find((order) => order.uid == orderUid);
             if (refundOrder) {
                 this._setOrder(refundOrder);
             }
@@ -185,13 +178,11 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     toRefundDetail.qty = quantity;
                 }
             }
-            // this.render();
         }
         async _onDoRefund() {
             const order = this.getSelectedSyncedOrder();
             if (!order) {
                 this._state.ui.highlightHeaderNote = !this._state.ui.highlightHeaderNote;
-                // return this.render();
                 return;
             }
 
@@ -215,7 +206,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             );
             if (allToRefundDetails.length == 0) {
                 this._state.ui.highlightHeaderNote = !this._state.ui.highlightHeaderNote;
-                // return this.render();
                 return;
             }
 
