@@ -183,7 +183,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
             if (ids_to_remove.length) {
                 self.remove_from_server_and_set_sync_state(ids_to_remove);
             }
-            return Promise.resolve(self.clean_table_transfer(table));
+            return self.clean_table_transfer(table);
         }
     }
 
@@ -359,7 +359,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
     // When we validate an order we go back to the floor plan.
     // When we cancel an order and there is multiple orders
     // on the table, stay on the table.
-    async on_removed_order(removed_order,index,reason){
+    on_removed_order(removed_order,index,reason){
         if (this.config.iface_floorplan) {
             var order_list = this.get_order_list();
             if (reason === 'abandon') {
@@ -368,7 +368,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
             if( (reason === 'abandon' || removed_order.temporary) && order_list.length > 0){
                 this.set_order(order_list[index] || order_list[order_list.length - 1], { silent: true });
             } else if (order_list.length === 0) {
-                this.table ? this.set_order(null) : (await this.set_table(null));
+                this.table ? this.set_order(null) : this.set_table(null);
             }
         } else {
             return super.on_removed_order(...arguments);
