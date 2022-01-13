@@ -16,6 +16,7 @@ patch(NavBar.prototype, 'website_navbar', {
         // with props/state (the WebsitePreview client action and the navbar
         // are not related).
         useBus(websiteSystrayRegistry, 'EDIT-WEBSITE', () => this.render(true));
+        useBus(websiteSystrayRegistry, 'CONTENT-UPDATED', () => this.render(true));
     },
 
     /**
