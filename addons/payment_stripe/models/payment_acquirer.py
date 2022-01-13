@@ -312,7 +312,7 @@ class PaymentAcquirer(models.Model):
         }
         url = url_join(PROXY_URL, f'{version}/{endpoint}')
         try:
-            response = requests.post(url=url, json=proxy_payload, timeout=60)
+            response = requests.post(url=url, json=proxy_payload, timeout=10)
             response.raise_for_status()
         except requests.exceptions.ConnectionError:
             raise ValidationError(
