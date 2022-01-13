@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="sale_order_template_view_search" model="ir.ui.view">
         <field name="name">sale.order.template.search</field>
         <field name="model">sale.order.template</field>
@@ -32,10 +33,10 @@
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
-                           <label for="number_of_days" string="Quotation expires after"/>
-                           <div id="number_of_days">
-                               <field name="number_of_days" class="oe_inline"/> days
-                           </div>
+                            <label for="number_of_days" string="Quotation expires after"/>
+                            <div id="number_of_days">
+                                <field name="number_of_days" class="oe_inline"/> days
+                            </div>
                         </group>
                         <group>
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
@@ -43,78 +44,78 @@
                     </group>
                     <notebook name="main_book">
                         <page string="Lines" name="order_lines">
-                        <field name="sale_order_template_line_ids" widget="section_and_note_one2many">
-                            <form string="Quotation Template Lines">
-                                <!--
-                                    We need the sequence field to be here for new lines to be added at the correct position.
-                                    TODO: at some point we want to fix this in the framework so that an invisible field is not required.
-                                -->
-                                <field name="sequence" invisible="1"/>
-                                <field name="display_type" invisible="1"/>
-                                <field name="product_uom_category_id" invisible="1"/>
-                                <field name="company_id" invisible="1"/>
-                                <group attrs="{'invisible': [('display_type', '!=', False)]}">
-                                    <group>
-                                        <field name="product_id" attrs="{'required': [('display_type', '=', False)]}"/>
-                                        <label for="product_uom_qty"/>
-                                        <div>
-                                            <field name="product_uom_qty" class="oe_inline"/>
-                                        </div>
+                            <field name="sale_order_template_line_ids" widget="section_and_note_one2many">
+                                <form string="Quotation Template Lines">
+                                    <!--
+                                        We need the sequence field to be here for new lines to be added at the correct position.
+                                        TODO: at some point we want to fix this in the framework so that an invisible field is not required.
+                                    -->
+                                    <field name="sequence" invisible="1"/>
+                                    <field name="display_type" invisible="1"/>
+                                    <field name="product_uom_category_id" invisible="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <group attrs="{'invisible': [('display_type', '!=', False)]}">
+                                        <group>
+                                            <field name="product_id" attrs="{'required': [('display_type', '=', False)]}"/>
+                                            <label for="product_uom_qty"/>
+                                            <div>
+                                                <field name="product_uom_qty" class="oe_inline"/>
+                                            </div>
+                                        </group>
                                     </group>
-                                </group>
-                                <notebook colspan="4" name="description">
-                                    <page string="Description" name="order_description" attrs="{'invisible': [('display_type', '!=', False)]}">
-                                        <field name="name" />
-                                    </page>
-                                    <page string="Section" name="order_section" attrs="{'invisible': [('display_type', '!=', 'line_section')]}">
-                                        <field name="name" />
-                                    </page>
-                                    <page string="Note" name="order_note" attrs="{'invisible': [('display_type', '!=', 'line_note')]}">
-                                        <field name="name" />
-                                    </page>
-                                </notebook>
-                            </form>
-                            <tree string="Quotation Template Lines" editable="bottom">
-                                <control>
-                                    <create name="add_product_control" string="Add a product"/>
-                                    <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
-                                    <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
-                                </control>
+                                    <notebook colspan="4" name="description">
+                                        <page string="Description" name="order_description" attrs="{'invisible': [('display_type', '!=', False)]}">
+                                            <field name="name" />
+                                        </page>
+                                        <page string="Section" name="order_section" attrs="{'invisible': [('display_type', '!=', 'line_section')]}">
+                                            <field name="name" />
+                                        </page>
+                                        <page string="Note" name="order_note" attrs="{'invisible': [('display_type', '!=', 'line_note')]}">
+                                            <field name="name" />
+                                        </page>
+                                    </notebook>
+                                </form>
+                                <tree string="Quotation Template Lines" editable="bottom">
+                                    <control>
+                                        <create name="add_product_control" string="Add a product"/>
+                                        <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                    </control>
 
-                                <field name="display_type" invisible="1"/>
-                                <field name="company_id" invisible="1"/>
-                                <field name="sequence" widget="handle"/>
+                                    <field name="display_type" invisible="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="name" widget="section_and_note_text"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_category_id" invisible="1"/>
+                                    <field
+                                        name="product_uom_id"
+                                        groups="uom.group_uom"
+                                        attrs="{'required': [('display_type', '=', False)]}"
+                                    />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Optional Products" name="optional_products">
+                            <field name="sale_order_template_option_ids">
+                              <tree string="Quotation Template Lines" editable="bottom">
                                 <field name="product_id"/>
-                                <field name="name" widget="section_and_note_text"/>
-                                <field name="product_uom_qty"/>
+                                <field name="name"/>
+                                <field name="quantity"/>
                                 <field name="product_uom_category_id" invisible="1"/>
-                                <field
-                                    name="product_uom_id"
-                                    groups="uom.group_uom"
-                                    attrs="{'required': [('display_type', '=', False)]}"
-                                />
-                            </tree>
-                        </field>
-                    </page>
-                    <page string="Optional Products" name="optional_products">
-                        <field name="sale_order_template_option_ids">
-                          <tree string="Quotation Template Lines" editable="bottom">
-                            <field name="product_id"/>
-                            <field name="name"/>
-                            <field name="quantity"/>
-                            <field name="product_uom_category_id" invisible="1"/>
-                            <field name="uom_id" groups="uom.group_uom"/>
-                            <field name="company_id" invisible="1"/>
-                          </tree>
-                        </field>
-                    </page>
-                    <page string="Confirmation" name="confirmation">
-                        <group>
-                            <field name="require_signature"/>
-                            <field name="require_payment"/>
-                            <field name="mail_template_id" context="{'default_model':'sale.order'}"/>
-                        </group>
-                    </page>
+                                <field name="uom_id" groups="uom.group_uom"/>
+                                <field name="company_id" invisible="1"/>
+                              </tree>
+                            </field>
+                        </page>
+                        <page string="Confirmation" name="confirmation">
+                            <group>
+                                <field name="require_signature"/>
+                                <field name="require_payment"/>
+                                <field name="mail_template_id" context="{'default_model':'sale.order'}"/>
+                            </group>
+                        </page>
                     </notebook>
                     <field name="note" nolabel="1"
                         placeholder="The Administrator can set default Terms &amp; Conditions in Sales Settings. Terms set here will show up instead if you select this quotation template."/>
