@@ -183,8 +183,8 @@ export function mapLegacyEnvToWowlEnv(legacyEnv, wowlEnv) {
         legacyEnv.bus.trigger("web_client_ready");
     });
 
-    wowlEnv.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", (payload) => {
-        legacyEnv.bus.trigger("SCROLLER:ANCHOR_LINK_CLICKED", payload);
+    wowlEnv.bus.addEventListener("SCROLLER:ANCHOR_LINK_CLICKED", (ev) => {
+        legacyEnv.bus.trigger("SCROLLER:ANCHOR_LINK_CLICKED", ev.detail);
     });
 
     legacyEnv.bus.on("clear_cache", null, () => {
