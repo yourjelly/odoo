@@ -200,6 +200,29 @@
     // QUnit logs
     // -----------------------------------------------------------------------------
 
+
+    function displayModules(modules, level = 0) {
+        let concat = "";
+        for (const m of modules) {
+            concat += Array(level).join("  ");
+            concat += m.name;
+            if (m.childModules.length) {
+                concat += "\n";
+            }
+            concat += displayModules(m.childModules, level + 1);
+            if (level === 0) {
+                concat += "\n\n";
+            } else {
+                concat += "\n";
+            }
+        }
+        if (level === 0) {
+            console.log(concat);
+            return;
+        }
+        return concat;
+    }
+
     /**
      * If we want to log several errors, we have to log all of them at once, as
      * browser_js is closed as soon as an error is logged.
@@ -275,6 +298,8 @@
         } else {
             console.error(errorMessages.join("\n"));
         }
+
+        displayModules(QUnit.config.modules.filter((m) => !m.parentModule));
     });
 
     /**
