@@ -2951,8 +2951,10 @@ class Order extends PosModel {
     finalize(){
         this.destroy();
     }
-    destroy(){
+    destroy(options){
+        const deletedIndex = this.pos.orders.remove(this);
         this.pos.db.remove_unpaid_order(this);
+        this.pos.on_removed_order(this, deletedIndex, options && options.reason);
     }
     /* ---- Invoice --- */
     set_to_invoice(to_invoice) {

@@ -5,12 +5,6 @@ odoo.define('pos_restaurant.BackToFloorButton', function (require) {
     const Registries = require('point_of_sale.Registries');
 
     class BackToFloorButton extends PosComponent {
-        mounted() {
-            this.env.posbus.on('table-set', this, this.render);
-        }
-        willUnmount() {
-            this.env.posbus.on('table-set', this);
-        }
         get table() {
             return (this.env.pos && this.env.pos.table) || null;
         }

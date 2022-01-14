@@ -12,9 +12,6 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
         class extends TicketScreen {
             close() {
                 if (!this.env.pos.config.iface_floorplan) {
-                    // Make sure the 'table-set' event is triggered
-                    // to properly rerender the components that listens to it.
-                    this.env.posbus.trigger('table-set');
                     super.close();
                 } else {
                     const order = this.env.pos.get_order();
@@ -109,8 +106,6 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
                             args: [serverId, tip_line.export_as_JSON()],
                         });
                     }
-                    const deletedIndex = this.env.pos.orders.remove(order);
-                    this.env.pos.on_removed_order(order, deletedIndex)
                     order.finalize();
                     return true;
                 } catch (error) {

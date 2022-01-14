@@ -85,10 +85,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
                 }
             }
             async orderDone() {
-                const order = this.currentOrder;
-                const deletedIndex = this.env.pos.orders.remove(order);
-                await this.env.pos.on_removed_order(order, deletedIndex)
-                order.finalize();
+                this.currentOrder.finalize();
                 const { name, props } = this.nextScreen;
                 this.showScreen(name, props);
             }
