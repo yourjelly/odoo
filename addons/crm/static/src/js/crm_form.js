@@ -20,7 +20,23 @@
          *
          * @override
          */
-        saveRecord: function () {
+        saveRecord: function (recordID, options) {
+
+            // Simulate a real "force_save" on email_from / phone
+            // to sync those values on the new partner
+            recordID = recordID || this.handle;
+            const localData = this.model.localData[recordID];
+            const changes = localData._changes || {};
+            if (changes.email_from === undefined && localData.data.email_from) {
+                changes.email_from = localData.data.email_from;
+            }
+            if (changes.phone === undefined && localData.data.phone) {
+                changes.phone = localData.data.phone;
+            }
+            if (!localData._changes && Object.keys(changes).length) {
+                localData._changes = changes;
+            }
+
             return this._super(...arguments).then((modifiedFields) => {
                 if (modifiedFields.indexOf('stage_id') !== -1) {
                     this._checkRainbowmanMessage(this.renderer.state.res_id)
