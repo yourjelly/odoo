@@ -12,9 +12,6 @@ odoo.define('pos_restaurant.TicketScreen', function (require) {
         class extends TicketScreen {
             close() {
                 if (!this.env.pos.config.iface_floorplan) {
-                    // Make sure the 'table-set' event is triggered
-                    // to properly rerender the components that listens to it.
-                    this.env.posbus.trigger('table-set');
                     super.close();
                 } else {
                     const order = this.env.pos.get_order();

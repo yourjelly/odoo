@@ -284,9 +284,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
             this.table = table;
             res = this.sync_to_server(table, order);
         }
-        return res.then(() => {
-            pos_env.posbus.trigger('table-set');
-        })
+        return res;
     }
 
     // if we have tables, we do not load a default order, as the default order will be
