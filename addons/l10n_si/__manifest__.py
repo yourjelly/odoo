@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Copyright: (C) 2012 - Mentis d.o.o., Dravograd
+# Copyright: (C) 2012-2021 - Mentis d.o.o., Dravograd
 
 {
     "name": "Slovenian - Accounting",
-    "version": "1.1",
-    "author": "Mentis d.o.o.",
-    "website": "http://www.mentis.si",
+    "version": "2.0",
+    "author": "Odoo S.A.",
     'category': 'Accounting/Localizations/Account Charts',
-    "description": "Kontni načrt za gospodarske družbe",
+    "description": """
+        Chart accounting and taxes for Slovenia
+    """,
     "depends": [
         "account",
         "base_iban",

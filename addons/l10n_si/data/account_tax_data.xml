@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="gd_taxr_1" model="account.tax.template">
         <field name="chart_template_id" ref="l10n_si_chart_template"/>
         <field name="name">Izstopni DDV 0%</field>
@@ -10,28 +9,6 @@
         <field name="type_tax_use">sale</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_opr')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_opr')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxr_2" model="account.tax.template">
@@ -43,30 +20,6 @@
         <field name="type_tax_use">sale</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_95"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxr_3" model="account.tax.template">
@@ -78,30 +31,6 @@
         <field name="type_tax_use">sale</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_22"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_izstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_1" model="account.tax.template">
@@ -113,28 +42,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_opr')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_opr')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_2" model="account.tax.template">
@@ -146,30 +53,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_95"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_3" model="account.tax.template">
@@ -181,30 +64,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_22"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_nr_1" model="account.tax.template">
@@ -216,30 +75,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_95"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_neo_sdtopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_zni')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_neo_sdtopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_zni')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_nr_2" model="account.tax.template">
@@ -251,30 +86,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="1"/>
         <field name="tax_group_id" ref="tax_group_22"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_neo_sdtopni_osno')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_osnnovna')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_neo_sdtopni_osno')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_neo_vstopni_osnnovna')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_st_1" model="account.tax.template">
@@ -286,40 +97,6 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="0"/>
         <field name="tax_group_id" ref="tax_group_0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': -100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_zni')],
-            }),
-            (0,0, {
-                'factor_percent': -100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_zni')],
-            }),
-        ]"/>
     </record>
 
     <record id="gd_taxp_st_2" model="account.tax.template">
@@ -331,40 +108,5 @@
         <field name="type_tax_use">purchase</field>
         <field name="price_include" eval="0"/>
         <field name="tax_group_id" ref="tax_group_0"/>
-        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': -100,
-                'repartition_type': 'tax',
-                'plus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
-            }),
-        ]"/>
-        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_zo_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': 100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_vstopni_osn')],
-            }),
-            (0,0, {
-                'factor_percent': -100,
-                'repartition_type': 'tax',
-                'minus_report_line_ids': [ref('tax_report_zn_dvd_odb_izstopni_osn')],
-            }),
-        ]"/>
     </record>
-
 </odoo>
