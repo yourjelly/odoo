@@ -107,7 +107,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
         // go to 'floors' screen, this will set the order to null and
         // eventually this will cause the gui to go to its
         // default_screen, which is 'floors'
-        return this.set_table(null);
+        this.set_table(null);
     }
 
     remove_from_server_and_set_sync_state(ids_to_remove){
@@ -158,7 +158,6 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
             this.order_to_transfer_to_different_table = null;
             return this.set_table(table);
         }
-        return Promise.resolve();
     }
 
     sync_from_server(table, table_orders, order_ids) {
@@ -369,7 +368,7 @@ const PosRestaurantPosGlobalState = (PosGlobalState) => class PosRestaurantPosGl
                 this.table ? this.set_order(null) : this.set_table(null);
             }
         } else {
-            return super.on_removed_order(...arguments);
+            super.on_removed_order(...arguments);
         }
     }
 }
