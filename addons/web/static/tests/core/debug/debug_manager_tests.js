@@ -473,7 +473,7 @@ QUnit.module("DebugMenu", (hooks) => {
         );
     });
 
-    QUnit.skipNXOWL(
+    QUnit.test(
         "cannot edit the control panel of a form view contained in a dialog without control panel.",
         async (assert) => {
             const mockRPC = async (route, args) => {
