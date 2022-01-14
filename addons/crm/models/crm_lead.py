@@ -224,8 +224,8 @@ class Lead(models.Model):
     duplicate_lead_ids = fields.Many2many("crm.lead", compute="_compute_potential_lead_duplicates", string="Potential Duplicate Lead", context={"active_test": False})
     duplicate_lead_count = fields.Integer(compute="_compute_potential_lead_duplicates", string="Potential Duplicate Lead Count")
     # UX
-    partner_email_update = fields.Boolean('Partner Email will Update', compute='_compute_partner_email_update')
-    partner_phone_update = fields.Boolean('Partner Phone will Update', compute='_compute_partner_phone_update')
+    partner_email_update = fields.Boolean('Partner Email will Update', compute='_compute_partner_email_update', inverse='_inverse_partner_email_update')
+    partner_phone_update = fields.Boolean('Partner Phone will Update', compute='_compute_partner_phone_update', inverse='_inverse_partner_phone_update')
     is_partner_visible = fields.Boolean('Is Partner Visible', compute='_compute_is_partner_visible')
     # UTMs - enforcing the fact that we want to 'set null' when relation is unlinked
     campaign_id = fields.Many2one(ondelete='set null')
@@ -417,9 +417,7 @@ class Lead(models.Model):
                 lead.email_from = lead.partner_id.email
 
     def _inverse_email_from(self):
-        for lead in self:
-            if lead._get_partner_email_update():
-                lead.partner_id.email = lead.email_from
+        self._inverse_partner_email_update()
 
     @api.depends('partner_id.phone')
     def _compute_phone(self):
@@ -428,9 +426,7 @@ class Lead(models.Model):
                 lead.phone = lead.partner_id.phone
 
     def _inverse_phone(self):
-        for lead in self:
-            if lead._get_partner_phone_update():
-                lead.partner_id.phone = lead.phone
+        self._inverse_partner_phone_update()
 
     @api.depends('phone', 'country_id.code')
     def _compute_phone_state(self):
@@ -572,10 +568,20 @@ class Lead(models.Model):
         for lead in self:
             lead.partner_email_update = lead._get_partner_email_update()
 
+    def _inverse_partner_email_update(self):
+        for lead in self:
+            if lead.partner_email_update:
+                lead.partner_id.email = lead.email_from
+
     @api.depends('phone', 'partner_id')
     def _compute_partner_phone_update(self):
         for lead in self:
             lead.partner_phone_update = lead._get_partner_phone_update()
+
+    def _inverse_partner_phone_update(self):
+        for lead in self:
+            if lead.partner_phone_update:
+                lead.partner_id.phone = lead.phone
 
     @api.depends_context('uid')
     @api.depends('partner_id', 'type')
