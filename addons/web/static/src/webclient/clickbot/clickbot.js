@@ -338,7 +338,8 @@
             return Promise.resolve(); // Skip black listed menus
         }
         let menuTimeLimit = 10000;
-        if (element.innerText.trim() === "Settings") {
+        if (element.innerText.trim() === "Settings" || element.innerText.trim() === "Work Entries") {
+            console.log(element);
             menuTimeLimit = 20000;
         }
         const startActionCount = actionCount;

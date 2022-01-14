@@ -26,10 +26,11 @@ class TestMenusDemo(odoo.tests.HttpCase):
         user_demo = self.env.ref("base.user_demo")
         menus = self.env['ir.ui.menu'].with_user(user_demo.id).load_menus(False)
         for app_id in menus['root']['children']:
-            with self.subTest(app=menus[app_id]['name']):
-                _logger.runbot('Testing %s', menus[app_id]['name'])
-                self.browser_js("/web", "odoo.__DEBUG__.services['web.clickEverywhere']('%s');" % menus[app_id]['xmlid'], "odoo.isReady === true", login="demo", timeout=300)
-                self.terminate_browser()
+            if menus[app_id]['name'] in ('Payroll', 'Settings'):
+                with self.subTest(app=menus[app_id]['name']):
+                    _logger.runbot('Testing %s', menus[app_id]['name'])
+                    self.browser_js("/web", "odoo.__DEBUG__.services['web.clickEverywhere']('%s');" % menus[app_id]['xmlid'], "odoo.isReady === true", login="demo", timeout=300)
+                    self.terminate_browser()
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestMenusAdminLight(odoo.tests.HttpCase):
