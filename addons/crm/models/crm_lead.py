@@ -169,6 +169,7 @@ class Lead(models.Model):
     partner_id = fields.Many2one(
         'res.partner', string='Customer', check_company=True, index=True, tracking=10,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        inverse='_inverse_partner_id',
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
     contact_name = fields.Char(
@@ -344,6 +345,10 @@ class Lead(models.Model):
             date_create = fields.Datetime.from_string(lead.create_date)
             date_close = fields.Datetime.from_string(lead.date_closed)
             lead.day_close = abs((date_close - date_create).days)
+
+    def _inverse_partner_id(self):
+        self._inverse_phone()
+        self._inverse_email_from()
 
     @api.depends('partner_id')
     def _compute_name(self):
