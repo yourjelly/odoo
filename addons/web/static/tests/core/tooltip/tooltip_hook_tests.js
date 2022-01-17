@@ -213,22 +213,23 @@ QUnit.module("Tooltip hook", () => {
         assert.hasClass(parent.el.querySelector(".o_popover"), "o-popper-position--lm");
     });
 
-    QUnit.skipNXOWL("tooltip with a template, no info", async (assert) => {
+    QUnit.test("tooltip with a template, no info", async (assert) => {
         class MyComponent extends Component {}
         MyComponent.template = xml`
             <button data-tooltip-template="my_tooltip_template">Action</button>
         `;
         const parent = await makeParent(MyComponent);
-        parent.env.app.addTemplate("my_tooltip_template", "<i>tooltip</i>"); // NXOWL
+        parent.__owl__.app.addTemplate("my_tooltip_template", "<i>tooltip</i>");
 
         assert.containsNone(parent, ".o_popover_container .o-tooltip");
         parent.el.querySelector("button").dispatchEvent(new Event("mouseenter"));
         await nextTick();
         assert.containsOnce(parent, ".o_popover_container .o-tooltip");
+        console.log("Before Prout 1");
         assert.strictEqual(parent.el.querySelector(".o-tooltip").innerHTML, "<i>tooltip</i>");
     });
 
-    QUnit.skipNXOWL("tooltip with a template and info", async (assert) => {
+    QUnit.test("tooltip with a template and info", async (assert) => {
         class MyComponent extends Component {
             get info() {
                 return JSON.stringify({ x: 3, y: "abc" });
@@ -242,7 +243,7 @@ QUnit.module("Tooltip hook", () => {
             </button>
         `;
         const parent = await makeParent(MyComponent);
-        parent.env.app.addTemplate(
+        parent.__owl__.app.addTemplate(
             "my_tooltip_template",
             `
                 <ul>

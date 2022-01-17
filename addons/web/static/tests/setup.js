@@ -10,8 +10,29 @@ import { registerCleanup } from "./helpers/cleanup";
 import { prepareRegistriesWithCleanup } from "./helpers/mock_env";
 import { session as sessionInfo } from "@web/session";
 import { prepareLegacyRegistriesWithCleanup } from "./helpers/legacy_env_utils";
-
+import { patch } from "@web/core/utils/patch";
 const { whenReady, loadFile } = owl;
+
+
+patch(owl.App.prototype, "TestOwlApp", {
+    setup() {
+        this.isBuilt = true;
+    },
+    destroy() {
+        if (!this.destroyed) {
+            super.destroy();
+            this.destroyed = true;
+        }
+    },
+    addTemplate(name) {
+        if (this.isBuilt) {
+            registerCleanup(() => {
+                delete this.constructor.sharedTemplates[name];
+            });
+        }
+        return this._super(...arguments);
+    }
+});
 
 // FIXME NXOWL
 // owl.config.enableTransitions = false;
