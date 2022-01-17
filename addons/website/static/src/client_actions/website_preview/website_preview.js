@@ -108,6 +108,12 @@ export class WebsitePreview extends Component {
                 window.location.replace(href);
             }
         });
+        this.iframe.el.contentDocument.addEventListener('keydown', ev => {
+            this.iframe.el.dispatchEvent(new KeyboardEvent('keydown', ev));
+        });
+        this.iframe.el.contentDocument.addEventListener('keyup', ev => {
+            this.iframe.el.dispatchEvent(new KeyboardEvent('keyup', ev));
+        });
     }
 }
 WebsitePreview.template = 'website.WebsitePreview';
