@@ -2147,6 +2147,7 @@ class Order extends PosModel {
                 emailSuccessful: null,
                 emailNotice: '',
             },
+            // TODO: This should be in pos_restaurant.
             TipScreen: {
                 inputTipAmount: '',
             }

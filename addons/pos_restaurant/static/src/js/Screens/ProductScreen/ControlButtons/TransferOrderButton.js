@@ -13,7 +13,7 @@ odoo.define('pos_restaurant.TransferOrderButton', function(require) {
         }
         async onClick() {
             this.trigger('close-popup');
-            await this.env.pos.transfer_order_to_different_table();
+            this.env.pos.transfer_order_to_different_table();
             this.showScreen('FloorScreen');
         }
     }

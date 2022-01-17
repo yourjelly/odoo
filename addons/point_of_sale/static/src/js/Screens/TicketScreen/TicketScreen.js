@@ -111,7 +111,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             }
             if (order && (await this._onBeforeDeleteOrder(order))) {
                 order.destroy({ reason: 'abandon' });
-                this.env.posbus.trigger('order-deleted');
             }
         }
         async _onNextPage() {

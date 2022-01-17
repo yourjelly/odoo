@@ -84,7 +84,7 @@ odoo.define('point_of_sale.ReceiptScreen', function (require) {
                     }
                 }
             }
-            async orderDone() {
+            orderDone() {
                 this.currentOrder.finalize();
                 const { name, props } = this.nextScreen;
                 this.showScreen(name, props);
