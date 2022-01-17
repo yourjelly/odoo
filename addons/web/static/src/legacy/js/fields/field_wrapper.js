@@ -66,8 +66,8 @@ odoo.define('web.FieldWrapper', function (require) {
          * not the real field Component, which triggers the 'field-changed'
          * event. This function writes the attribute on that field Component.
          */
-        mounted() {
-            super.mounted(...arguments);
+        on_attach_callback() {
+            super.on_attach_callback();
             this.componentRef.comp.__node = this.__node;
         }
 
