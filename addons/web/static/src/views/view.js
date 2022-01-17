@@ -152,8 +152,8 @@ export class View extends Component {
             keepLast: this.env.keepLast,
             config: this.config,
         });
-        //
-        // useActionLinks({ resModel });
+
+        useActionLinks({ resModel });
     }
 
     async willStart() {

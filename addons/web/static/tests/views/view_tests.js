@@ -656,7 +656,7 @@ QUnit.module("Views", (hooks) => {
         }
     );
 
-    QUnit.skipNXOWL("can click on action-bound links -- 1", async (assert) => {
+    QUnit.test("can click on action-bound links -- 1", async (assert) => {
         assert.expect(5);
 
         const expectedAction = {
@@ -711,7 +711,7 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps(["/web/dataset/call_kw/animal/setTheControl"]);
     });
 
-    QUnit.skipNXOWL("can click on action-bound links -- 2", async (assert) => {
+    QUnit.test("can click on action-bound links -- 2", async (assert) => {
         assert.expect(3);
 
         const expectedAction = {
@@ -755,7 +755,7 @@ QUnit.module("Views", (hooks) => {
         await click(toy.el.querySelector("a"));
     });
 
-    QUnit.skipNXOWL("can click on action-bound links -- 3", async (assert) => {
+    QUnit.test("can click on action-bound links -- 3", async (assert) => {
         assert.expect(3);
 
         const expectedAction = {
