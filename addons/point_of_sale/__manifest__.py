@@ -119,13 +119,6 @@
             'point_of_sale/static/src/css/popups/money_details_popup.css',
             'web/static/src/legacy/scss/fontawesome_overridden.scss',
 
-            # We declare these components first because they are referred in some components.
-            # We do this to get rid of the console warning message when opening the POS UI.
-            # TODO: Remove this special case by removing `ControlButtonsMixin`. It's better
-            #   to NOT rely on the order of loading of the js assets.
-            'point_of_sale/static/src/js/Screens/ProductScreen/ControlButtons/SetPricelistButton.js',
-            'point_of_sale/static/src/js/Screens/ProductScreen/ControlButtons/SetFiscalPositionButton.js',
-
             # Here includes the lib and POS UI assets.
             'point_of_sale/static/lib/**/*.js',
             'point_of_sale/static/src/js/**/*.js',
