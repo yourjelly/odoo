@@ -25,6 +25,7 @@ import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
 import * as cpHelpers from "@web/../tests/search/helpers";
 
+const { markup } = owl;
 let serverData;
 const serviceRegistry = registry.category("services");
 
@@ -2445,5 +2446,32 @@ QUnit.module("ActionManager", (hooks) => {
         });
         assert.containsOnce(webClient, ".o_pivot_view");
         assert.containsN(webClient, ".o_pivot_view tbody th", 6);
+    });
+
+    QUnit.test("action help given to View in props if not empty", async function (assert) {
+        serverData.models.partner.records = [];
+        const action = serverData.actions[3];
+        serverData.actions[3] = {
+            ...action,
+            help: markup('<p class="hello">Hello</p>'),
+        };
+        serverData.actions[4] = {
+            ...action,
+            id: 4,
+            help: markup('<p class="hello"></p>'),
+        };
+
+        const webClient = await createWebClient({ serverData });
+
+        await doAction(webClient, 3);
+        assert.containsOnce(webClient, ".o_list_view");
+        assert.containsOnce(webClient, ".o_view_nocontent");
+        assert.strictEqual(webClient.el.querySelector(".o_view_nocontent").innerText, "Hello");
+        assert.containsNone(webClient, "table");
+
+        await doAction(webClient, 4);
+        assert.containsOnce(webClient, ".o_list_view");
+        assert.containsNone(webClient, ".o_view_nocontent");
+        assert.containsOnce(webClient, "table");
     });
 });
