@@ -4430,7 +4430,10 @@
                 const templateFn = this._compileTemplate(name, rawTemplate);
                 // first add a function to lazily get the template, in case there is a
                 // recursive call to the template name
-                this.templates[name] = (context, parent) => this.templates[name](context, parent);
+                const templates = this.templates;
+                this.templates[name] = function (context, parent) {
+                    return templates[name].call(this, context, parent);
+                };
                 const template = templateFn(bdom, this.utils);
                 this.templates[name] = template;
             }
@@ -5022,8 +5025,8 @@ See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for mor
 
 
     __info__.version = '2.0.0-alpha1';
-    __info__.date = '2022-01-14T15:00:19.436Z';
-    __info__.hash = '483335d';
+    __info__.date = '2022-01-17T09:48:28.955Z';
+    __info__.hash = '79a51f2';
     __info__.url = 'https://github.com/odoo/owl';
 
 
