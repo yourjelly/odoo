@@ -1274,13 +1274,13 @@ QUnit.module("Views", (hooks) => {
         assert.verifySteps([`View props should have a "type" key`]);
     });
 
-    QUnit.skipNXOWL("'arch' cannot be passed as prop alone", async function (assert) {
+    QUnit.test("'arch' cannot be passed as prop alone", async function (assert) {
         assert.expect(2);
         const env = await makeTestEnv({ serverData });
         const target = getFixture();
         const props = { resModel: "animal", type: "toy", arch: "<toy/>" };
         try {
-            await mount(View, { env, props, target });
+            await mount(View, target, { env, props });
         } catch (error) {
             assert.step(error.message);
         }
@@ -1365,21 +1365,6 @@ QUnit.module("Views", (hooks) => {
             });
         }
     );
-
-    QUnit.skipNXOWL("empty prop 'noContentHelp'", async function (assert) {
-        assert.expect(1);
-
-        class ToyView extends Component {
-            setup() {
-                assert.strictEqual(this.props.info.noContentHelp, undefined);
-            }
-        }
-        ToyView.template = xml`<div/>`;
-        ToyView.type = "toy";
-        viewRegistry.add("toy", ToyView, { force: true });
-
-        await makeView({ serverData, resModel: "animal", type: "toy", noContentHelp: "  " });
-    });
 
     QUnit.test("non empty prop 'noContentHelp'", async function (assert) {
         assert.expect(1);
@@ -1555,7 +1540,7 @@ QUnit.module("Views", (hooks) => {
     // update props
     ////////////////////////////////////////////////////////////////////////////
 
-    QUnit.skipNXOWL("react to prop 'domain' changes", async function (assert) {
+    QUnit.test("react to prop 'domain' changes", async function (assert) {
         assert.expect(2);
 
         class ToyView extends Component {
@@ -1585,7 +1570,7 @@ QUnit.module("Views", (hooks) => {
         Parent.template = xml`<View t-props="state"/>`;
         Parent.components = { View };
 
-        const parent = await mount(Parent, { env, target });
+        const parent = await mount(Parent, target, { env });
 
         parent.state.domain = [["type", "=", "herbivorous"]];
 
