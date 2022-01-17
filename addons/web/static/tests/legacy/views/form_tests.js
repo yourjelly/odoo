@@ -5169,7 +5169,7 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.skipNXOWL('navigation with tab key in form view', async function (assert) {
+    QUnit.test('navigation with tab key in form view', async function (assert) {
         assert.expect(3);
 
         var form = await createView({
