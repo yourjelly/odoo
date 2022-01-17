@@ -33,8 +33,14 @@ def concat(seq1, seq2):
         f1, f2 = seq1[-1], seq2[0]
         if f1.type == 'one2many' and f2.type == 'many2one' and \
                 f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
-            #print(field)
-            #print(seq1, seq2)
+            return concat(seq1[:-1], seq2[1:])
+    return seq1 + seq2
+
+def concat2(seq1, seq2):
+    if seq1 and seq2:
+        f1, f2 = seq1[-1], seq2[0]
+        if f1.type == 'one2many' and f2.type == 'many2one' and \
+                f1.model_name == f2.comodel_name and f1.inverse_name == f2.name:
             return concat(seq1[:-1], seq2[1:])
     return seq1 + seq2
 
@@ -64,12 +70,33 @@ def _triggers(dependencies):
     return triggers
 
 def _transitive_dependencies(field, dependencies, seen=[]):
+    #print('--------------_transitive_dependencies')
+    #print('seen', seen)
+    #print('field', field)
     if field in seen:
         return
     for seq1 in dependencies.get(field, ()):
         yield seq1
         for seq2 in _transitive_dependencies(seq1[-1], dependencies, seen + [field]):
             yield concat(seq1[:-1], seq2)
+
+def _transitive_triggers(field, triggers, seen=[]):
+    #print('--------------_transitive_triggers')
+    #print('seen', seen)
+    #print('field', field)
+    if field in seen:
+        return
+    for dependant_field, dependant_field_path in triggers.get(field, {}).items():
+        if dependant_field_path and dependant_field_path[-1] in seen:
+            print('continue 1', dependant_field_path)
+            continue
+        if dependant_field == field and seen: # recursive not root
+            print('continue 2', field)
+            continue
+        yield concat(dependant_field_path, (dependant_field,))
+
+        for dependant_path in _transitive_triggers(dependant_field, triggers, seen + [field]):
+            yield concat(dependant_field_path, dependant_path)
 
 def _field_triggers(dependencies):
     # determine triggers based on transitive dependencies
@@ -84,30 +111,12 @@ def _field_triggers(dependencies):
 
     return triggers
 
-def _transitive_triggers(field, triggers, seen=[]):
-    #print('seen', seen)
-    if field in seen:
-        return
-    #print(field, list(triggers.get(field, {}).items()))
-    for dependant_field, dependant_field_path in triggers.get(field, {}).items():
-        #print('yield', dependant_field_path, dependant_field)
-        if dependant_field_path and dependant_field_path[-1] in seen:
-            continue
-        yield concat(dependant_field_path, (dependant_field,))
-
-        #print('dependant_field', dependant_field)
-        for dependant_path in _transitive_triggers(dependant_field, triggers, seen + [field]):
-            yield concat(dependant_field_path, dependant_path)
-
-
 def _field_triggers2(triggers, fields=None):
 
     # determine triggers based on transitive dependencies
     triggers_tree = {}
     for field in fields or triggers:
         paths = list(_transitive_triggers(field, triggers))
-        #print('trigger:', field)
-        #print('transitive_triggers', paths)
         for path in paths:
             if path:
                 tree = triggers_tree
@@ -116,7 +125,6 @@ def _field_triggers2(triggers, fields=None):
                     tree = tree.setdefault(trigger, {})
                     trigger = dependant
                 tree.setdefault(None, OrderedSet()).add(trigger)
-                #tree.setdefault(None, {})[trigger] = None
 
     return triggers_tree
 
@@ -440,7 +448,7 @@ class Registry(Mapping):
     def field_triggers(self):
         return _field_triggers(_dependencies(self))
 
-    def field_triggers2(self, fields):
+    def field_triggers2(self, fields=None):
         return _field_triggers2(_triggers(_dependencies(self)), fields)
 
     def post_init(self, func, *args, **kwargs):

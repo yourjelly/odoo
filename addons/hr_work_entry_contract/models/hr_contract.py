@@ -178,6 +178,8 @@ class HrContract(models.Model):
         return contract_vals
 
     def _generate_work_entries(self, date_start, date_stop, force=False):
+
+        self.env.cr.execute('ANALYZE hr_work_entry')
         vals_list = []
         date_start = fields.Datetime.to_datetime(date_start)
         date_stop = datetime.combine(fields.Datetime.to_datetime(date_stop), datetime.max.time())
