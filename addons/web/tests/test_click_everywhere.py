@@ -13,7 +13,7 @@ class TestMenusAdmin(odoo.tests.HttpCase):
     def test_01_click_everywhere_as_admin(self):
         menus = self.env['ir.ui.menu'].load_menus(False)
         target_menus = {x for x in menus['root']['children'] if menus[x]['name'] in ('Payroll', 'Settings')}
-        random_menus= set(random.choices(menus['root']['children'], k=10))
+        random_menus= set(random.choices(menus['root']['children'], k=20))
 
         for app_id in target_menus | random_menus:
             with self.subTest(app=menus[app_id]['name']):

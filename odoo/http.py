@@ -1480,7 +1480,7 @@ class Root(object):
                 return result
 
             request_manager = request
-            if request.session.profile_session:
+            if request.session.profile_session or True:
                 request_manager = self.get_profiler_context_manager(request)
 
             with request_manager:
@@ -1517,25 +1517,21 @@ class Root(object):
 
     def get_profiler_context_manager(self, request):
         """ Return a context manager that combines a profiler and ``request``. """
-        if request.session.profile_session and request.session.db:
-            if request.session.profile_expiration < str(datetime.now()):
-                # avoid having session profiling for too long if user forgets to disable profiling
-                request.session.profile_session = None
-                _logger.warning("Profiling expiration reached, disabling profiling")
-            elif 'set_profiling' in request.httprequest.path:
+        if True and request.session.db:
+            if 'set_profiling' in request.httprequest.path:
                 _logger.debug("Profiling disabled on set_profiling route")
             elif request.httprequest.path.startswith('/longpolling'):
                 _logger.debug("Profiling disabled for longpolling")
             elif odoo.evented:
                 # only longpolling should be in a evented server, but this is an additional safety
                 _logger.debug("Profiling disabled for evented server")
-            else:
+            elif '/hr.employee/generate_work_entries' in request.httprequest.path:
                 try:
                     prof = profiler.Profiler(
                         db=request.session.db,
                         description=request.httprequest.full_path,
-                        profile_session=request.session.profile_session,
-                        collectors=request.session.profile_collectors,
+                        profile_session='caca payroll',
+                        collectors=None,
                         params=request.session.profile_params,
                     )
                     return profiler.Nested(prof, request)
