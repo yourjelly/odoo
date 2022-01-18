@@ -217,10 +217,16 @@ const KnowledgeFormController = FormController.extend({
      * @param {integer} id - Target id
      */
     _do_duplicate: async function (id) {
-        const result = await this._rpc({
+        const article = await this._rpc({
             route: `/knowledge/article/${id}/duplicate`
         });
-        console.log('result', result);
+        if (!article) {
+            return;
+        }
+        this._move(
+            QWeb.render('knowledge.knowledge_article_template', { article }),
+            this.$el.find(`.o_tree [data-article-id="${article.parent_id}"]`)
+        );
     },
 
     /**

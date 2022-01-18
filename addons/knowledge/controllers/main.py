@@ -62,8 +62,14 @@ class KnowledgeDataSet(DataSet):
         article = request.env['knowledge.article'].browse(article_id)
         if not article.exists():
             return False
-        # TODO: Duplicate the article
-        return True
+        new_article = article.copy({'name': article.name + ' (copy)'})
+
+        return {
+            'id': new_article.id,
+            'parent_id': new_article.parent_id.id,
+            'name': new_article.name,
+            'icon': new_article.icon
+        }
 
     @http.route('/knowledge/article/create', type='json', auth="user")
     def article_create(self, title=False, target_parent_id=False, private=False):
