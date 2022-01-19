@@ -20,6 +20,14 @@ class AccountPaymentTerm(models.Model):
     line_ids = fields.One2many('account.payment.term.line', 'payment_id', string='Terms', copy=True, default=_default_line_ids)
     company_id = fields.Many2one('res.company', string='Company')
     sequence = fields.Integer(required=True, default=10)
+    display_on_invoice = fields.Boolean(string='Display on Invoice document', default=True)
+    computation = fields.Selection(
+        selection=[('tax_incl', 'Tax Included'), ('tax_excl', 'Tax Excluded')],
+        string='Computation',
+        help=_('Percentage is of amount tax included or tax excluded.'),
+        default='tax_incl',
+        required=True,
+    )
 
     @api.constrains('line_ids')
     def _check_lines(self):
@@ -31,11 +39,22 @@ class AccountPaymentTerm(models.Model):
             if len(lines) > 1:
                 raise ValidationError(_('A Payment Term should have only one line of type Balance.'))
 
-    def compute(self, value, date_ref=False, currency=None):
+    def compute(self, move_lines, date_ref=False, currency=None, amount_currency=False):
         self.ensure_one()
+
+        tax_lines = move_lines.filtered('tax_line_id')
+
+        if amount_currency:
+            total_value = sum(move_lines.mapped('amount_currency'))
+            tax_value = sum(tax_lines.mapped('amount_currency'))
+        else:
+            company_currency_id = (self.company_id or self.env.company).currency_id
+            total_value = sum(move_lines.mapped(lambda l: company_currency_id.round(l.balance)))
+            tax_value = sum(tax_lines.mapped(lambda l: company_currency_id.round(l.balance)))
+
         date_ref = date_ref or fields.Date.context_today(self)
-        amount = value
-        sign = value < 0 and -1 or 1
+        amount = total_value
+        sign = total_value < 0 and -1 or 1
         result = []
         if not currency and self.env.context.get('currency_id'):
             currency = self.env['res.currency'].browse(self.env.context['currency_id'])
@@ -45,7 +64,10 @@ class AccountPaymentTerm(models.Model):
             if line.value == 'fixed':
                 amt = sign * currency.round(line.value_amount)
             elif line.value == 'percent':
-                amt = currency.round(value * (line.value_amount / 100.0))
+                if self.computation == 'tax_incl':
+                    amt = currency.round(total_value * (line.value_amount / 100.0))
+                else:
+                    amt = currency.round(((total_value - tax_value) * (line.value_amount / 100.0)) + tax_value)
             elif line.value == 'balance':
                 amt = currency.round(amount)
             next_date = fields.Date.from_string(date_ref)
@@ -64,7 +86,7 @@ class AccountPaymentTerm(models.Model):
             result.append((fields.Date.to_string(next_date), amt))
             amount -= amt
         amount = sum(amt for _, amt in result)
-        dist = currency.round(value - amount)
+        dist = currency.round(total_value - amount)
         if dist:
             last_date = result and result[-1][0] or fields.Date.context_today(self)
             result.append((last_date, dist))
@@ -90,7 +112,8 @@ class AccountPaymentTermLine(models.Model):
 
     value = fields.Selection([
             ('balance', 'Balance'),
-            ('percent', 'Percent'),
+            ('percent', 'Percent (Tax included)'),
+            ('percent_tax_excl', 'Percent (Tax excluded)'),
             ('fixed', 'Fixed Amount')
         ], string='Type', required=True, default='balance',
         help="Select here the kind of valuation related to this payment terms line.")
@@ -107,6 +130,11 @@ class AccountPaymentTermLine(models.Model):
         )
     payment_id = fields.Many2one('account.payment.term', string='Payment Terms', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of payment terms lines.")
+    # computation_method = fields.Selection(
+    #     selection=[('included', 'Tax Included'), ('excluded', 'Tax Excluded')],
+    #     default='included',
+    #     required=True,
+    # )
 
     @api.constrains('value', 'value_amount')
     def _check_percent(self):

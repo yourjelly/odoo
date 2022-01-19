@@ -80,6 +80,18 @@ div#total {
     }
 }
 
+/*Total due table*/
+div#due_total {
+    table {
+        border-top: 1px solid black !important;
+        border-bottom: 1px solid black !important;
+        th {
+            border-top: 1px solid black !important;
+            border-bottom: 1px solid black !important;
+        }
+    }
+}
+
 table {
     thead {
         &.o_black_border {

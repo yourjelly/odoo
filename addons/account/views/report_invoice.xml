@@ -179,6 +179,31 @@
                     <p t-if="not is_html_empty(o.fiscal_position_id.note)" name="note">
                         <span t-field="o.fiscal_position_id.note"/>
                     </p>
+
+                    <t t-set="lines_due_amt" t-value="o._get_pay_term_lines_for_invoice_render()"/>
+                    <div class="clearfix mb-4" t-if="lines_due_amt" >
+                        <div id="due_total" class="row">
+                            <div t-attf-class="#{'col-5' if report_type != 'html' else 'col-sm-5 col-md-5'}">
+                                <table class="table table-sm" style="page-break-inside: avoid;">
+                                    <thead>
+                                        <tr>
+                                            <th name="th_due_date" class="text-left"><span>Due Date</span></th>
+                                            <th name="th_amount" class="text-right"><span>Amount total</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="lines_due_amt" t-as="line">
+                                            <tr>
+                                                <td name="due_line_name"><span t-esc="line['date']" /></td>
+                                                <td name="due_line_amount" class="text-right"><span t-esc="line['amount']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <p t-if="o.invoice_incoterm_id" name="incoterm">
                         <strong>Incoterm: </strong><span t-field="o.invoice_incoterm_id.code"/> - <span t-field="o.invoice_incoterm_id.name"/>
                     </p>

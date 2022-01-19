@@ -66,6 +66,16 @@ class AccountPaymentRegister(models.TransientModel):
         string="Amount to Pay (foreign currency)", store=True, copy=False,
         currency_field='source_currency_id',
         compute='_compute_from_lines')
+    source_amount_at_payment_date = fields.Monetary(
+        store=True, copy=False,
+        currency_field='company_currency_id',
+        compute='_compute_amount_at_payment_date',
+        help='Technical field used to indicate the amount due at the payment date.')
+    source_amount_currency_at_payment_date = fields.Monetary(
+        store=True, copy=False,
+        currency_field='source_currency_id',
+        compute='_compute_amount_at_payment_date',
+        help='Technical field used to indicate the amount currency due at the payment date.')
     source_currency_id = fields.Many2one('res.currency',
         string='Source Currency', store=True, copy=False,
         compute='_compute_from_lines',
@@ -95,13 +105,12 @@ class AccountPaymentRegister(models.TransientModel):
         "SEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n")
     available_payment_method_line_ids = fields.Many2many('account.payment.method.line', compute='_compute_payment_method_line_fields')
 
-    # == Payment difference fields ==
     payment_difference = fields.Monetary(
         compute='_compute_payment_difference')
     payment_difference_handling = fields.Selection([
         ('open', 'Keep open'),
         ('reconcile', 'Mark as fully paid'),
-    ], default='open', string="Payment Difference Handling")
+    ], default='open', string="Payment Difference Handling", compute='_compute_payment_difference_handling', store=True, readonly=False)
     writeoff_account_id = fields.Many2one('account.account', string="Difference Account", copy=False,
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
     writeoff_label = fields.Char(string='Journal Item Label', default='Write-Off',
@@ -266,6 +275,42 @@ class AccountPaymentRegister(models.TransientModel):
         else:
             source_amount_currency = abs(sum(lines.mapped('amount_residual_currency')))
 
+        ### AMT DUE AT DATE -------> TODO: Make new method for this part
+
+        lines_by_move = defaultdict(lambda: self.env['account.move.line'])
+        for line in lines:
+            lines_by_move[line.move_id] |= line
+
+        source_amount_at_payment_date = 0
+        source_amount_currency_at_payment_date = 0
+        for move_lines in lines_by_move.values():
+            not_expired = move_lines.filtered(lambda l: self.payment_date <= l.date_maturity)
+            if len(not_expired) > 1:
+                # amt
+                due = sum(move_lines.mapped('amount_residual'))
+                not_expired.sorted(key=lambda l: l.date_maturity)
+                discount = sum(move_lines.mapped('balance')) - not_expired[0].balance
+                source_amount_at_payment_date += due - discount
+                # amt cur
+                due = sum(move_lines.mapped('amount_residual_currency'))
+                not_expired.sorted(key=lambda l: l.date_maturity)
+                discount = sum(move_lines.mapped('amount_currency')) - not_expired[0].amount_currency
+                source_amount_currency_at_payment_date += due - discount
+            else:
+                source_amount_at_payment_date += sum(move_lines.mapped('amount_residual'))
+                source_amount_currency_at_payment_date += sum(move_lines.mapped('amount_residual_currency'))
+
+        source_amount_at_payment_date = abs(source_amount_at_payment_date)
+        source_amount_currency_at_payment_date = abs(source_amount_currency_at_payment_date)
+
+        if payment_values['currency_id'] == company.currency_id.id:
+            source_amount_currency_at_payment_date = source_amount_at_payment_date
+
+
+
+        ###
+
+
         return {
             'company_id': company.id,
             'partner_id': payment_values['partner_id'],
@@ -274,11 +319,34 @@ class AccountPaymentRegister(models.TransientModel):
             'source_currency_id': payment_values['currency_id'],
             'source_amount': source_amount,
             'source_amount_currency': source_amount_currency,
+            'source_amount_at_payment_date': source_amount_at_payment_date,
+            'source_amount_currency_at_payment_date': source_amount_currency_at_payment_date,
         }
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('amount', 'source_amount_at_payment_date')
+    def _compute_payment_difference_handling(self):
+        for wizard in self:
+            default_amount = wizard._get_default_amount()
+            if wizard.company_id.currency_id.compare_amounts(self.amount, default_amount) == 0:
+                wizard.payment_difference_handling = 'reconcile'
+            else:
+                wizard.payment_difference_handling = 'open'
+
+    @api.depends('can_edit_wizard', 'payment_date')
+    def _compute_amount_at_payment_date(self):
+        for wizard in self:
+            if wizard.can_edit_wizard:
+                batches = wizard._get_batches()
+                wizard_values_from_batch = wizard._get_wizard_values_from_batch(batches[0])
+                wizard.source_amount_at_payment_date = wizard_values_from_batch['source_amount_at_payment_date']
+                wizard.source_amount_currency_at_payment_date = wizard_values_from_batch['source_amount_currency_at_payment_date']
+            else:
+                wizard.source_amount_at_payment_date = False
+                wizard.source_amount_currency_at_payment_date = False
 
     @api.depends('line_ids')
     def _compute_from_lines(self):
@@ -417,16 +485,7 @@ class AccountPaymentRegister(models.TransientModel):
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
         for wizard in self:
-            if wizard.source_currency_id == wizard.currency_id:
-                # Same currency.
-                wizard.amount = wizard.source_amount_currency
-            elif wizard.currency_id == wizard.company_id.currency_id:
-                # Payment expressed on the company's currency.
-                wizard.amount = wizard.source_amount
-            else:
-                # Foreign currency on payment different than the one set on the journal entries.
-                amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount, wizard.currency_id, wizard.company_id, wizard.payment_date)
-                wizard.amount = amount_payment_currency
+            wizard.amount = wizard._get_default_amount()
 
     @api.depends('amount')
     def _compute_payment_difference(self):
@@ -445,6 +504,25 @@ class AccountPaymentRegister(models.TransientModel):
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
+
+    def _get_default_amount(self):
+        self.ensure_one()
+        if self.source_currency_id == self.currency_id:
+            # Same currency.
+            amount = self.source_amount_currency_at_payment_date
+        elif self.currency_id == self.company_id.currency_id:
+            # Payment expressed on the company's currency.
+            amount = self.source_amount_at_payment_date
+        else:
+            # Foreign currency on payment different than the one set on the journal entries.
+            amount_payment_currency = self.company_id.currency_id._convert(
+                self.source_amount_at_payment_date,
+                self.currency_id,
+                self.company_id,
+                self.payment_date,
+            )
+            amount = amount_payment_currency
+        return amount
 
     @api.model
     def default_get(self, fields_list):
@@ -477,12 +555,12 @@ class AccountPaymentRegister(models.TransientModel):
 
                 if line.account_internal_type not in ('receivable', 'payable'):
                     continue
-                if line.currency_id:
-                    if line.currency_id.is_zero(line.amount_residual_currency):
-                        continue
-                else:
-                    if line.company_currency_id.is_zero(line.amount_residual):
-                        continue
+                # if line.currency_id:
+                #     if line.currency_id.is_zero(line.amount_residual_currency):
+                #         continue
+                # else:
+                #     if line.company_currency_id.is_zero(line.amount_residual):
+                #         continue
                 available_lines |= line
 
             # Check.

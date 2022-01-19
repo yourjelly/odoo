@@ -1106,9 +1106,23 @@
                                                optional="hide"
                                                invisible="context.get('view_no_maturity')"
                                                attrs="{'invisible': [('display_type', 'in', ('line_section', 'line_note'))]}"/>
-                                        <field name="amount_currency"
+
+
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+                                        <!-- <field name="balance" string="amt" optional="show"/> -->
+                                        <field name="amount_currency" string="amt cur" optional="show"/>
+                                        <field name="amount_residual" string="amt res" optional="show"/>
+                                        <field name="amount_residual_currency" string="amt res cur" optional="show"/>
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+                                        <!-- DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / DEBUG / REMOVE / -->
+
+
+                                        <!-- <field name="amount_currency"
                                                groups="base.group_multi_currency"
-                                               optional="hide"/>
+                                               optional="hide"/> -->
                                         <field name="currency_id" options="{'no_create': True}"
                                                optional="hide" groups="base.group_multi_currency"
                                                attrs="{'column_invisible': [('parent.move_type', '!=', 'entry')]}"/>

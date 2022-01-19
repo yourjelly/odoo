@@ -998,6 +998,24 @@ class AccountMove(models.Model):
 
         _apply_cash_rounding(self, diff_balance, diff_amount_currency, existing_cash_rounding_line)
 
+    def _get_pay_term_lines_for_invoice_render(self):
+        self.ensure_one()
+
+        if not self.invoice_payment_term_id.display_on_invoice:
+            return False
+
+        term_lines = self.line_ids.filtered(lambda l: l.account_id.user_type_id.type in ('receivable', 'payable'))
+
+        res = []
+        amt = 0
+        for t_line in term_lines:
+            amt += t_line.amount_currency
+            res.append({
+                'date': t_line.date_maturity,
+                'amount': amt,
+            })
+        return res
+
     def _recompute_payment_terms_lines(self):
         ''' Compute the dynamic payment term lines of the journal entry.'''
         self.ensure_one()
@@ -1039,7 +1057,7 @@ class AccountMove(models.Model):
                 ]
                 return self.env['account.account'].search(domain, limit=1)
 
-        def _compute_payment_terms(self, date, total_balance, total_amount_currency):
+        def _compute_payment_terms(self, date, move_lines):
             ''' Compute the payment terms.
             :param self:                    The current account.move record.
             :param date:                    The date computed by '_get_payment_terms_computation_date'.
@@ -1048,16 +1066,21 @@ class AccountMove(models.Model):
             :return:                        A list <to_pay_company_currency, to_pay_invoice_currency, due_date>.
             '''
             if self.invoice_payment_term_id:
-                to_compute = self.invoice_payment_term_id.compute(total_balance, date_ref=date, currency=self.company_id.currency_id)
+                to_compute = self.invoice_payment_term_id.compute(move_lines, date_ref=date, currency=self.company_id.currency_id, amount_currency=False)
                 if self.currency_id == self.company_id.currency_id:
                     # Single-currency.
                     return [(b[0], b[1], b[1]) for b in to_compute]
                 else:
                     # Multi-currencies.
-                    to_compute_currency = self.invoice_payment_term_id.compute(total_amount_currency, date_ref=date, currency=self.currency_id)
+                    to_compute_currency = self.invoice_payment_term_id.compute(move_lines, date_ref=date, currency=self.currency_id, amount_currency=True)
                     return [(b[0], b[1], ac[1]) for b, ac in zip(to_compute, to_compute_currency)]
             else:
-                return [(fields.Date.to_string(date), total_balance, total_amount_currency)]
+                company_currency_id = (self.company_id or self.env.company).currency_id
+                return [(
+                    fields.Date.to_string(date),
+                    sum(move_lines.mapped(lambda l: company_currency_id.round(l.balance))),  # total_balance
+                    sum(move_lines.mapped('amount_currency')),                               # total_amount_currency
+                )]
 
         def _compute_diff_payment_terms_lines(self, existing_terms_lines, account, to_compute):
             ''' Process the result of the '_compute_payment_terms' method and creates/updates corresponding invoice lines.
@@ -1110,9 +1133,11 @@ class AccountMove(models.Model):
 
         existing_terms_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
         others_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type not in ('receivable', 'payable'))
-        company_currency_id = (self.company_id or self.env.company).currency_id
-        total_balance = sum(others_lines.mapped(lambda l: company_currency_id.round(l.balance)))
-        total_amount_currency = sum(others_lines.mapped('amount_currency'))
+        # company_currency_id = (self.company_id or self.env.company).currency_id
+        # total_balance = sum(others_lines.mapped(lambda l: company_currency_id.round(l.balance)))
+        # total_amount_currency = sum(others_lines.mapped('amount_currency'))
+
+
 
         if not others_lines:
             self.line_ids -= existing_terms_lines
@@ -1120,7 +1145,12 @@ class AccountMove(models.Model):
 
         computation_date = _get_payment_terms_computation_date(self)
         account = _get_payment_terms_account(self, existing_terms_lines)
-        to_compute = _compute_payment_terms(self, computation_date, total_balance, total_amount_currency)
+
+
+        # to_compute = _compute_payment_terms(self, computation_date, total_balance, total_amount_currency)
+        to_compute = _compute_payment_terms(self, computation_date, others_lines)
+
+
         new_terms_lines = _compute_diff_payment_terms_lines(self, existing_terms_lines, account, to_compute)
 
         # Remove old terms lines that are no longer needed.
