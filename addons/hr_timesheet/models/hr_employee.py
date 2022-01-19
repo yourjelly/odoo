@@ -9,4 +9,6 @@ class HrEmployee(models.Model):
 
     timesheet_cost = fields.Monetary('Cost', currency_field='currency_id',
     	groups="hr.group_hr_user", default=0.0)
+    overtime_cost = fields.Monetary('Overtime Cost', currency_field='currency_id',
+        groups="hr.group_hr_user", default=0.0)
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True)
