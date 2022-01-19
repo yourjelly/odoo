@@ -97,7 +97,317 @@
         </div>
     </div>
 </t>
+<form t-name="FormView.set_default" aria-atomic="true">
+    <t t-set="args" t-value="widget.args"/>
+    <table style="width: 100%">
+        <tr>
+            <td>
+                <label for="formview_default_fields"
+                       class="oe_label oe_align_right">
+                    Default:
+                </label>
+            </td>
+            <td class="oe_form_required">
+                <select id="formview_default_fields" class="o_input">
+                    <option value=""/>
+                    <option t-foreach="args.fields" t-as="field" t-key="field_index"
+                            t-att-value="field.name">
+                        <t t-esc="field.string"/> = <t t-esc="field.displayed"/>
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr t-if="args.conditions.length">
+            <td>
+                <label for="formview_default_conditions"
+                       class="oe_label oe_align_right">
+                    Condition:
+                </label>
+            </td>
+            <td>
+                <select id="formview_default_conditions" class="o_input">
+                    <option value=""/>
+                    <option t-foreach="args.conditions" t-as="cond" t-key="cond_index"
+                            t-att-value="cond.name + '=' + cond.value">
+                        <t t-esc="cond.string"/>=<t t-esc="cond.displayed"/>
+                    </option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="radio" id="formview_default_self"
+                       value="self" name="scope" checked="checked"/>
+                <label for="formview_default_self" class="oe_label"
+                       style="display: inline;">
+                    Only you
+                </label>
+                <br/>
+                <input type="radio" id="formview_default_all"
+                       value="all" name="scope"/>
+                <label for="formview_default_all" class="oe_label"
+                       style="display: inline;">
+                    All users
+                </label>
+            </td>
+        </tr>
+    </table>
+</form>
+<t t-name="GraphView.buttons">
+    <div class="btn-group mb-2 mb-sm-auto" role="toolbar" aria-label="Main actions"/>
+    <div class="btn-group o_graph_align mb-2 mb-sm-auto" role="toolbar" aria-label="Change graph">
+        <button class="btn btn-secondary o_graph_button fa fa-bar-chart" title="Bar Chart" aria-label="Bar Chart" data-mode="bar"/>
+        <button class="btn btn-secondary o_graph_button fa fa-area-chart" title="Line Chart" aria-label="Line Chart" data-mode="line"/>
+        <button class="btn btn-secondary o_graph_button fa fa-pie-chart" title="Pie Chart" aria-label="Pie Chart" data-mode="pie"/>
+    </div>
+    <div class="btn-group o_stack_align mb-2 mb-sm-auto" role="toolbar" aria-label="Change graph">
+        <button class="btn btn-secondary o_graph_button fa fa-database" title="Stacked" aria-label="Stacked" data-mode="stack"/>
+    </div>
+    <div class="btn-group o_sort_align mb-2 mb-sm-auto" role="toolbar" aria-label="Sort graph">
+        <button class="btn btn-secondary o_graph_button fa fa-sort-amount-desc" title="Descending" aria-label="Descending" data-order="desc"/>
+        <button class="btn btn-secondary o_graph_button fa fa-sort-amount-asc" title="Ascending" aria-label="Ascending" data-order="asc"/>
+    </div>
+</t>
 
+<t t-name="PivotView.buttons">
+    <div class="btn-group" role="toolbar" aria-label="Main actions">
+        <button class="btn btn-primary dropdown-toggle o-no-caret" data-bs-toggle="dropdown" aria-expanded="false">
+            Measures <i class="fa fa-caret-down ms-1"/>
+        </button>
+        <div class="dropdown-menu o_pivot_measures_list" role="menu">
+            <t t-foreach="measures" t-as="measure" t-key="measure_index">
+                <a role="menuitem" href="#" class="dropdown-item" t-att-data-field="measure[0]"><t t-esc="measure[1].string"/><t t-if="measure[1].type === 'many2one'"> (count)</t></a>
+            </t>
+            <div role="separator" class="dropdown-divider"/>
+            <a role="menuitem" href="#" class="dropdown-item" data-field="__count">Count</a>
+        </div>
+    </div>
+    <div class="btn-group" role="toolbar" aria-label="Pivot settings">
+        <button class="btn btn-secondary fa fa-exchange o_pivot_flip_button" title="Flip axis" aria-label="Flip axis"/>
+        <button class="btn btn-secondary fa fa-arrows o_pivot_expand_button" title="Expand all" aria-label="Expand all"/>
+        <button class="btn btn-secondary fa fa-download o_pivot_download" title="Download xlsx" aria-label="Download xlsx"/>
+    </div>
+</t>
+
+<t t-name="FormSelection">
+    <div class="btn-group o_selection" aria-atomic="true">
+        <a href="#" data-bs-toggle="dropdown" aria-expanded="false" role="button" title="Dropdown menu">
+            <span class="o_status d-inline-block align-middle"/>
+        </a>
+        <div class="dropdown-menu state" role="menu"/>
+    </div>
+</t>
+<t t-name="FormSelection.items">
+    <t t-foreach="states" t-as="rec" t-key="rec_index">
+        <a role="menuitem" href="#" class="dropdown-item ps-4" t-att-data-value="rec.name">
+            <span t-att-class="'o_status rounded-circle d-inline-block align-middle ' + (rec.state_class &amp;&amp; rec.state_class || '')"/>
+            <t t-out="rec.state_name"/>
+        </a>
+    </t>
+</t>
+<t t-name="FieldDomain.content">
+    <div t-if="hasModel" class="o_field_domain_panel">
+        <t t-if="nbRecords !== null">
+            <i class="fa fa-arrow-right" role="img" aria-label="Domain" title="Domain"/>
+            <button t-if="isValid" class="btn btn-sm btn-secondary o_domain_show_selection_button" type="button">
+                <t t-esc="nbRecords"/> record(s)
+            </button>
+            <span t-else="" class="text-warning" role="alert"><i class="fa fa-exclamation-triangle" role="img" aria-label="Warning" title="Warning"/> Invalid domain</span>
+            <button t-if="isDebug and editMode" class="btn btn-sm btn-icon fa fa-refresh o_refresh_count" role="img" aria-label="Refresh" title="Refresh"/>
+        </t>
+        <t t-else="">
+            <i class="fa fa-circle-o-notch fa-spin" role="img" aria-label="Loading" title="Loading"/>
+        </t>
+
+        <button t-if="inDialog and editMode" class="btn btn-sm btn-primary o_field_domain_dialog_button">Edit Domain</button>
+    </div>
+    <div t-else="">Select a model to add a filter.</div>
+</t>
+
+<t t-name="DomainNode.ControlPanel">
+    <div t-if="!widget.readonly &amp;&amp; !widget.noControlPanel" class="o_domain_node_control_panel" role="toolbar" aria-label="Domain node">
+        <button class="btn btn-link text-danger o_domain_delete_node_button" title="Delete node" aria-label="Delete node"><i class="fa fa-times"/></button>
+        <button class="btn o_domain_add_node_button" title="Add node" aria-label="Add node"><i class="fa fa-plus-circle"/></button>
+        <button class="btn o_domain_add_node_button" title="Add branch" aria-label="Add branch" data-branch="1"><i class="fa fa-ellipsis-h"/></button>
+    </div>
+</t>
+<t t-name="DomainTree.OperatorSelector">
+    <div t-if="!widget.readonly" class="btn-group o_domain_tree_operator_selector" aria-atomic="true">
+        <button class="btn btn-sm btn-primary o_domain_tree_operator_caret" data-bs-toggle="dropdown">
+            <t t-if="widget.operator === '&amp;'">All</t>
+            <t t-if="widget.operator === '|'">Any</t>
+            <t t-if="widget.operator === '!'">None</t>
+        </button>
+        <div class="dropdown-menu" role="menu">
+            <a role="menuitem" href="#" class="dropdown-item" data-operator="&amp;">All</a>
+            <a role="menuitem" href="#" class="dropdown-item" data-operator="|">Any</a>
+        </div>
+    </div>
+    <strong t-else="">
+        <t t-if="widget.operator === '&amp;'">ALL</t>
+        <t t-if="widget.operator === '|'">ANY</t>
+        <t t-if="widget.operator === '!'">NONE</t>
+    </strong>
+</t>
+
+<div aria-atomic="true" t-name="DomainSelector" t-attf-class="o_domain_node o_domain_tree testing o_domain_selector #{widget.readonly ? 'o_read_mode' : 'o_edit_mode'} #{widget.children.length ? '' : 'mt-2'}">
+    <t t-if="widget.children.length === 0">
+        <span>Match <strong>all records</strong></span>
+        <button t-if="!widget.readonly" class="btn btn-sm btn-primary o_domain_add_first_node_button"><i class="fa fa-plus"/> Add filter</button>
+    </t>
+    <t t-else="">
+        <div class="o_domain_tree_header oe_edit_only">
+            <t t-if="widget.children.length === 1">Match records with the following rule:</t>
+            <t t-else="">
+                <span>Match records with</span>
+                <t t-call="DomainTree.OperatorSelector"/>
+                <span>of the following rules:</span>
+            </t>
+        </div>
+
+        <div class="o_domain_node_children_container"/>
+    </t>
+    <label t-if="widget.debug &amp;&amp; !widget.readonly" class="o_domain_debug_container">
+        <span class="small"># Code editor</span>
+        <textarea type="text" class="o_domain_debug_input"/>
+    </label>
+</div>
+<div t-name="DomainTree" class="o_domain_node o_domain_tree">
+    <div class="o_domain_tree_header o_domain_selector_row">
+        <t t-call="DomainNode.ControlPanel"/>
+        <t t-call="DomainTree.OperatorSelector"/>
+        <span class="ml4">of:</span>
+    </div>
+
+    <div class="o_domain_node_children_container"/>
+</div>
+<div t-name="DomainLeaf" t-attf-class="o_domain_node o_domain_leaf o_domain_selector_row #{widget.readonly ? 'o_read_mode' : 'o_edit_mode'}">
+    <t t-call="DomainNode.ControlPanel"/>
+
+    <div t-if="!widget.readonly" class="o_domain_leaf_edition">
+        <!-- field selector will be instantiated here -->
+        <div> <!-- used for flex stretching -->
+            <select class="o_domain_leaf_operator_select o_input">
+                <option t-foreach="widget.operators" t-as="key" t-key="key_index"
+                        t-att-value="key"
+                        t-att-selected="widget.displayOperator === key ? 'selected' : None">
+                    <t t-esc="key_value"/>
+                </option>
+            </select>
+        </div>
+        <div t-attf-class="o_ds_value_cell#{_.contains(['set', 'not set'], widget.displayOperator) ? ' d-none' : ''}">
+            <t t-if="widget.selectionChoices !== null">
+                <select class="o_domain_leaf_value_input o_input">
+                    <option t-foreach="widget.selectionChoices" t-as="val" t-key="val_index"
+                            t-att-value="val[0]"
+                            t-att-selected="_.contains(val, widget.displayValue) ? 'selected' : None">
+                        <t t-esc="val[1]"/>
+                    </option>
+                </select>
+            </t>
+            <t t-else="">
+                <t t-if="_.contains(['in', 'not in'], widget.operator)">
+                    <div class="o_domain_leaf_value_input">
+                        <span class="badge rounded-pill" t-foreach="widget.displayValue" t-as="val" t-key="val_index">
+                            <t t-esc="val"/> <i class="o_domain_leaf_value_remove_tag_button fa fa-times" t-att-data-value="val" role="img" aria-label="Remove tag" title="Remove tag"/>
+                        </span>
+                    </div>
+                    <div class="o_domain_leaf_value_tags">
+                        <input placeholder="Add new value" type="text" class="o_input"/>
+                        <button class="btn btn-sm btn-primary fa fa-plus o_domain_leaf_value_add_tag_button" aria-label="Add tag" title="Add tag"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <input class="o_domain_leaf_value_input o_input" type="text" t-att-value="widget.displayValue"/>
+                </t>
+            </t>
+        </div>
+    </div>
+    <div t-else="" class="o_domain_leaf_info">
+        <!-- field selector will be instantiated here -->
+        <t t-if="_.isString(widget.value)">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <span class="o_domain_leaf_value text-primary">"<t t-esc="widget.value"/>"</span>
+        </t>
+        <t t-if="_.isArray(widget.value)">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <t t-foreach="widget.value" t-as="v" t-key="v_index">
+                <span class="o_domain_leaf_value text-primary">"<t t-esc="v"/>"</span>
+                <t t-if="!v_last"> or </t>
+            </t>
+        </t>
+        <t t-if="_.isNumber(widget.value)">
+            <span class="o_domain_leaf_operator"><t t-esc="widget.operator_mapping[widget.operator]"/></span>
+            <span class="o_domain_leaf_value text-primary"><t t-esc="widget.value"></t></span>
+        </t>
+        <t t-if="_.isBoolean(widget.value)">
+            is
+            <t t-if="widget.operator === '=' &amp;&amp; widget.value === false || widget.operator === '!=' &amp;&amp; widget.value === true">not</t>
+            set
+        </t>
+    </div>
+</div>
+<div aria-atomic="true" t-name="ModelFieldSelector" t-attf-class="o_field_selector o_legacy_field_selector#{!widget.options.readonly ? ' o_edit_mode o_input' : ''}">
+    <div class="o_field_selector_value" tabindex="0"/>
+    <div class="o_field_selector_controls" tabindex="0">
+        <i role="alert" class="fa fa-exclamation-triangle o_field_selector_warning d-none" title="Invalid field chain" aria-label="Invalid field chain"/>
+    </div>
+</div>
+<div  t-name="ModelFieldSelector.popover" class="o_field_selector_popover o_legacy_field_selector_popover d-none" tabindex="0">
+    <div class="o_field_selector_popover_header text-center">
+        <i class="fa fa-arrow-left o_field_selector_popover_option o_field_selector_prev_page" title="Previous" role="img" aria-label="Previous"/>
+        <div class="o_field_selector_title"/>
+        <i class="fa fa-times o_field_selector_popover_option o_field_selector_close" title="Close" role="img" aria-label="Close"/>
+        <div t-if="widget.options.showSearchInput" class="o_field_selector_search mt-2">
+            <input type="text" placeholder='Search a field...' class="o_input"/>
+        </div>
+        <div t-if="widget.options.needDefaultValue" class="o_field_selector_default_value_input mt-2 d-none">
+            <input type="text" placeholder='type a default text or press ENTER' class="o_input"/>
+        </div>
+    </div>
+    <div class="o_field_selector_popover_body">
+        <ul class="o_field_selector_page"/>
+    </div>
+    <div t-if="widget.options.debugMode" class="o_field_selector_popover_footer">
+        <input type="text" class="o_input o_field_selector_debug"/>
+    </div>
+</div>
+<t t-name="ModelFieldSelector.value">
+    <t t-foreach="chain" t-as="fieldName" t-key="fieldName_index">
+        <t t-if="fieldName_index > 0">
+            <i class="fa fa-chevron-right" role="img" aria-label="Followed by" title="Followed by"/>
+        </t>
+        <span class="o_field_selector_chain_part">
+            <t t-if="fieldName === '1'">
+                <t t-esc="fieldName"/>
+            </t>
+            <t t-elif="fieldName === '0'">
+                <t t-esc="fieldName"/>
+            </t>
+            <t t-else="">
+                <t t-set="fieldInfo" t-value="_.findWhere(pages[fieldName_index], {'name': fieldName})"/>
+                <t t-esc="fieldInfo &amp;&amp; fieldInfo.string || '?'"/>
+            </t>
+        </span>
+    </t>
+</t>
+<ul t-name="ModelFieldSelector.defaultValue" class="o_field_selector_page o_field_selector_default_value">
+    <li t-attf-class="o_field_selector_item active o_field_selector_select_button">
+        <t t-esc="line.string"/>
+        <div class="text-muted o_field_selector_item_title"><t t-esc="line.description"/></div>
+    </li>
+</ul>
+<ul t-name="ModelFieldSelector.page" class="o_field_selector_page">
+    <t t-foreach="lines" t-as="line" t-key="line_index">
+        <t t-set="relationToFollow" t-value="followRelations(line) &amp;&amp; line.relation"/>
+        <li t-attf-class="o_field_selector_item #{relationToFollow and 'o_field_selector_next_page' or 'o_field_selector_select_button'}#{line_index == 0 and ' active' or ''}"
+            t-att-data-name="line.name">
+            <t t-esc="line.string"/>
+            <div t-if="debug" class="text-muted o_field_selector_item_title"><t t-esc="line.name"/> (<t t-esc="line.type"/>)</div>
+            <i t-if="relationToFollow" class="fa fa-chevron-right o_field_selector_relation_icon" role="img" aria-label="Relation to follow" title="Relation to follow"/>
+        </li>
+    </t>
+</ul>
 <t t-name="web.datepicker">
     <t t-set="placeholder" t-value="widget.getParent().node and widget.getParent().node.attrs.placeholder"/>
     <t t-set="datepickerID" t-value="uniqueId('datepicker')"/>
