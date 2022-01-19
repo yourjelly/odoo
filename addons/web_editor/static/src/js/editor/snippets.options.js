@@ -2551,7 +2551,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     // `domain` is the static part of the domain used in searches, not
     // depending on already selected ids and other filters.
     configAttributes: [
-        'model', 'fields', 'limit', 'domain', 'callWith', 'createMethod', 'filterInModel', 'filterInField'
+        'model', 'fields', 'limit', 'domain', 'callWith', 'createMethod', 'filterInModel', 'filterInField', 'nullText'
     ],
 
     /**
@@ -2581,6 +2581,8 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         }
         options.domain = JSON.parse(options.domain);
         options.domainComponents = {};
+        options.nullText = $target[0].dataset.nullText ||
+            JSON.parse($target[0].dataset.oeContactOptions || '{}')['null_text'];
         return this._super(...arguments);
     },
     /**
@@ -2755,6 +2757,13 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             button.destroy();
         });
         this._userValueWidgets = this._userValueWidgets.filter(widget => !widget.isDestroyed());
+        if (this.options.nullText &&
+                this.options.nullText.toLowerCase().includes(needle.toLowerCase())) {
+            // Beware of RPC cache.
+            if (!records.length || records[0].id) {
+                records.unshift({id: 0, name: this.options.nullText, display_name: this.options.nullText});
+            }
+        }
         records.forEach(record => {
             this.displayNameCache[record.id] = record.display_name;
         });
@@ -2804,6 +2813,9 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
         this.waitingForSearch = false;
         this.afterSearch.forEach(cb => cb());
         this.afterSearch = [];
+        if (this.options.nullText && !this.getValue()) {
+            this.setValue(0);
+        }
     },
     /**
      * Returns the display name for a given record.
