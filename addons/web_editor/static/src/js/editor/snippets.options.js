@@ -2456,7 +2456,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
     }),
     // Data-attributes that will be read into `this.options` on init and not
     // transfered to inner buttons.
-    configAttributes: ['model', 'fields', 'limit', 'domain', 'callWith', 'createMethod'],
+    configAttributes: ['model', 'fields', 'limit', 'domain', 'callWith', 'createMethod', 'nullText'],
 
     /**
      * @override
@@ -2484,6 +2484,7 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             options.fields.push('display_name');
         }
         options.domain = JSON.parse(options.domain);
+        options.nullText = $target[0].dataset['nullText'];
         return this._super(...arguments);
     },
     /**
@@ -2628,6 +2629,13 @@ const Many2oneUserValueWidget = SelectUserValueWidget.extend({
             method: 'read',
             args: [recTuples.map(([id, _name]) => id), this.options.fields],
         });
+        if (this.options.nullText &&
+              this.options.nullText.toLowerCase().includes(needle.toLowerCase())) {
+           // Beware of RPC cache.
+           if (!records.length || records[0].id) {
+               records.unshift({id: 0, name: this.options.nullText, display_name: this.options.nullText});
+           }
+        }
         records.forEach(record => {
             this.displayNameCache[record.id] = record.display_name;
         });
