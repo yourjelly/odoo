@@ -585,6 +585,7 @@ class PosOrder(models.Model):
             'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
             'ref': self.name,
             'partner_id': self.partner_id.id,
+            'partner_bank_id': self.company_id.partner_id.bank_ids[0].id if self.amount_total >= 0 else False,
             # considering partner's sale pricelist's currency
             'currency_id': self.pricelist_id.currency_id.id,
             'invoice_user_id': self.user_id.id,
