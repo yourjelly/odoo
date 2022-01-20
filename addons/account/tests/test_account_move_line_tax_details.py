@@ -540,6 +540,97 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
         )
         self.assertTotalAmounts(invoice, tax_details)
 
+    def test_tax_amounts_in_acceptable_interval_1(self):
+        tax_16 = self.env['account.tax'].create({
+            'name': 'tax_16',
+            'amount': 16,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'sequence': 1
+        })
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2021-08-01',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': "line_1",
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'quantity': 1.0,
+                    'price_unit': 398.28,
+                    'tax_ids': tax_16.ids,
+                }),
+                Command.create({
+                    'name': "line_2",
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'quantity': 1.0,
+                    'price_unit': 108.62,
+                    'tax_ids': tax_16.ids,
+                }),
+                Command.create({
+                    'name': "line_3",
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'quantity': 1.0,
+                    'price_unit': 362.07,
+                    'tax_ids': tax_16.ids,
+                }),
+                Command.create({
+                    'name': "line_4",
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'quantity': 1.0,
+                    'price_unit': 31.9,
+                    'tax_ids': tax_16.ids,
+                }),
+                Command.create({
+                    'name': "line_5",
+                    'account_id': self.company_data['default_account_revenue'].id,
+                    'quantity': 1.0,
+                    'price_unit': 31.9,
+                    'tax_ids': tax_16.ids,
+                }),]
+        })
+
+        base_lines, tax_lines = self._dispatch_move_lines(invoice)
+        tax_details = self._get_tax_details()
+
+        self.assertTaxDetailsValues(
+            tax_details,
+            [
+                {
+                    'base_line_id': base_lines[0].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -398.28,
+                    'tax_amount': -63.72,  # 0.16 * 398.28 = 63.7248, so either 63.72 or 63.73 would be ok
+                },
+                {
+                    'base_line_id': base_lines[1].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -108.62,
+                    'tax_amount': -17.38,  # 0.16 * 108.62 = 17.3792, so either 17.37 or 17.38 would be ok
+                },
+                {
+                    'base_line_id': base_lines[2].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -362.07,
+                    'tax_amount': -57.93,  # 0.16 * 362.07 = 57.9312, so either 57.93 or 57.94 would be ok
+                },
+                {
+                    'base_line_id': base_lines[3].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -31.9,
+                    'tax_amount': -5.1,  # 0.16 * 31.9 = 5.104, so either 5.1 or 5.11 would be ok
+                },
+                {
+                    'base_line_id': base_lines[4].id,
+                    'tax_line_id': tax_lines[0].id,
+                    'base_amount': -31.9,
+                    'tax_amount': -5.1,  # 0.16 * 31.9 = 5.104, so either 5.1 or 5.11 would be ok
+                },
+            ],
+        )
+        self.assertTotalAmounts(invoice, tax_details)
+
     def test_round_globally_rounding(self):
         self.env.company.tax_calculation_rounding_method = 'round_globally'
 
