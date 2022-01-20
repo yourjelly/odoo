@@ -357,21 +357,22 @@ class AccountMoveLine(models.Model):
             ),
 
 
-            base_tax_matching_all_amounts AS (
+            base_tax_matching_exact_tax_amounts AS (
 
                 /*
-                Complete base_tax_matching_base_amounts with the tax amounts (prorata):
+                Complete base_tax_matching_base_amounts with exact tax amounts computed according to the
+                tax computation rules:
                 base_line_id    tax_line_id     src_line_id     base_amount     tax_amount
                 --------------------------------------------------------------------------
                 base_line_1     tax_line_1      base_line_1     1000            100
-                base_line_1     tax_line_2      base_line_1     1000            (1000 / 1100) * 220 = 200
-                base_line_1     tax_line_2      tax_line_1      100             (100 / 1100) * 220 = 20
-                base_line_2     tax_line_3      base_line_2     2000            (2000 / 5000) * 500 = 200
-                base_line_2     tax_line_4      base_line_2     2000            (2000 / 5500) * 275 = 100
-                base_line_2     tax_line_4      tax_line_3      200             (200 / 5500) * 275 = 10
-                base_line_3     tax_line_3      base_line_3     3000            (3000 / 5000) * 500 = 300
-                base_line_3     tax_line_4      base_line_3     3000            (3000 / 5500) * 275 = 150
-                base_line_3     tax_line_4      tax_line_3      300             (300 / 5500) * 275 = 15
+                base_line_1     tax_line_2      base_line_1     1000            (20 / 100) * 1000 = 200
+                base_line_1     tax_line_2      tax_line_1      100             (20 / 100) * 100 = 20
+                base_line_2     tax_line_3      base_line_2     2000            (10 / 100) * 2000 = 200
+                base_line_2     tax_line_4      base_line_2     2000            (5 / 100) * 2000 = 100
+                base_line_2     tax_line_4      tax_line_3      200             (5 / 100) * 200 = 10
+                base_line_3     tax_line_3      base_line_3     3000            (10 / 100) * 3000 = 300
+                base_line_3     tax_line_4      base_line_3     3000            (5 / 100) * 3000 = 150
+                base_line_3     tax_line_4      tax_line_3      300             (5 / 100) * 300 = 15
                 */
 
                 SELECT
@@ -396,35 +397,17 @@ class AccountMoveLine(models.Model):
                     base_line.account_id AS base_account_id,
 
                     sub.base_amount,
-                    SUM(
-                        CASE WHEN tax.amount_type = 'fixed'
-                        THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0))
-                        ELSE sub.base_amount
-                        END
-                    ) OVER (PARTITION BY tax_line.id ORDER BY tax_line.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumulated_base_amount,
-                    SUM(
-                        CASE WHEN tax.amount_type = 'fixed'
-                        THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0))
-                        ELSE sub.base_amount
-                        END
-                    ) OVER (PARTITION BY tax_line.id) AS total_base_amount,
-                    tax_line.balance AS total_tax_amount,
-
+                    CASE WHEN tax.amount_type = 'fixed'
+                    THEN CASE WHEN base_line.balance < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0) * tax.amount)
+                    ELSE (tax.amount * sub.base_amount / 100)
+                    END AS exact_tax_amount,
+                    
                     sub.base_amount_currency,
-                    SUM(
-                        CASE WHEN tax.amount_type = 'fixed'
-                        THEN CASE WHEN base_line.amount_currency < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0))
-                        ELSE sub.base_amount_currency
-                        END
-                    ) OVER (PARTITION BY tax_line.id ORDER BY tax_line.tax_line_id, sub.base_line_id, sub.src_line_id) AS cumulated_base_amount_currency,
-                    SUM(
-                        CASE WHEN tax.amount_type = 'fixed'
-                        THEN CASE WHEN base_line.amount_currency < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0))
-                        ELSE sub.base_amount_currency
-                        END
-                    ) OVER (PARTITION BY tax_line.id) AS total_base_amount_currency,
-                    tax_line.amount_currency AS total_tax_amount_currency
-
+                    CASE WHEN tax.amount_type = 'fixed'
+                    THEN CASE WHEN base_line.amount_currency < 0 THEN -1 ELSE 1 END * ABS(COALESCE(base_line.quantity, 1.0) * tax.amount)
+                    ELSE (tax.amount * sub.base_amount / 100)
+                    END AS exact_tax_amount_currency
+                    
                 FROM base_tax_matching_base_amounts sub
                 JOIN account_move_line tax_line ON
                     tax_line.id = sub.tax_line_id
@@ -438,11 +421,108 @@ class AccountMoveLine(models.Model):
                     curr.id = tax_line.currency_id
                 JOIN res_currency comp_curr ON
                     comp_curr.id = tax_line.company_currency_id
+            ),
 
-            )
+
+            base_tax_matching_rounded_values_and_decimal_parts as (
+                /*
+                Complete base_tax_matching_exact_tax_amounts with the rounded values and decimal parts
+                of the exact tax amounts.
+                
+                n_i -> rounded value of the exact tax amount
+                alpha_i -> decimal value of the exact tax amount
+                sum_n -> total of the rounded values
+                delta -> difference between the total tax amount and the sum of the rounded values
+                */
+            
+                SELECT
+                sub.base_line_id,
+                sub.tax_line_id,
+                sub.src_line_id,
+
+                sub.tax_id,
+                sub.group_tax_id,
+                sub.tax_exigible,
+                sub.base_account_id,
+                sub.tax_repartition_line_id,
+                
+                sub.comp_curr_prec,
+                sub.curr_prec,
+
+                sub.base_amount,
+                sub.exact_tax_amount,
+                ROUND(sub.exact_tax_amount, sub.comp_curr_prec) as n_i,
+                sub.exact_tax_amount - ROUND(sub.exact_tax_amount, sub.comp_curr_prec) as alpha_i,
+                ROUND(
+                    exact_tax_amount - ROUND(exact_tax_amount, sub.comp_curr_prec)
+                                     + 0.499 * POWER(0.1, sub.comp_curr_prec),
+                    sub.comp_curr_prec
+                ) as alpha_i_rounded_up,
+                ROUND(
+                    exact_tax_amount - ROUND(exact_tax_amount, sub.comp_curr_prec)
+                                     - 0.499 * POWER(0.1, sub.comp_curr_prec),
+                    sub.comp_curr_prec
+                ) as alpha_i_rounded_down,
+                SUM(ROUND(exact_tax_amount, sub.comp_curr_prec)) OVER (PARTITION BY sub.tax_line_id) AS sum_n,
+                tax_line.balance - SUM(ROUND(exact_tax_amount, sub.comp_curr_prec)) OVER (PARTITION BY sub.tax_line_id) as delta
+                
+                /* TODO: when formulae are correct, also do them in amount_currency*/
+
+            FROM base_tax_matching_exact_tax_amounts sub
+            JOIN account_move_line tax_line ON
+                    tax_line.id = sub.tax_line_id),
 
 
-           /* Final select that makes sure to deal with rounding errors, using LAG to dispatch the last cents. */
+            base_tax_matching_cumulated_rounded_decimal_parts as (
+                /*
+                Complete base_tax_matching_with_rounded_values_and_decimal_parts with the totals and cumulated
+                amounts of alpha_i_rounded_up and alpha_i_rounded_down. 
+                */
+            
+                SELECT
+                sub.base_line_id,
+                sub.tax_line_id,
+                sub.src_line_id,
+
+                sub.tax_id,
+                sub.group_tax_id,
+                sub.tax_exigible,
+                sub.base_account_id,
+                sub.tax_repartition_line_id,
+                
+                sub.comp_curr_prec,
+                sub.curr_prec,
+
+                sub.base_amount,
+                sub.exact_tax_amount,
+                sub.n_i,
+                sub.alpha_i,
+                sub.alpha_i_rounded_up,
+                sub.alpha_i_rounded_down,
+                sub.sum_n,
+                sub.delta,
+                
+                SUM(sub.alpha_i_rounded_up) OVER (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_up,
+                SUM(sub.alpha_i_rounded_up) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) as cumul_alpha_i_rounded_up,
+                SUM(sub.alpha_i_rounded_down) over (PARTITION BY sub.tax_line_id) AS sum_alpha_i_rounded_down,
+                SUM(sub.alpha_i_rounded_down) OVER (PARTITION BY sub.tax_line_id ORDER BY sub.tax_line_id, sub.base_line_id, sub.src_line_id) as cumul_alpha_i_rounded_down
+                
+                /* TODO: when formulae are correct, also do them in amount_currency*/
+
+            FROM base_tax_matching_rounded_values_and_decimal_parts sub)
+
+
+            /* Final select: we adjust the tax amount for certain lines by alpha_i_rounded_up or alpha_i_rounded down
+              in such a way that the tax amount for each line is equal to the exact tax amount rounded up or down,
+              and such that the sum of the tax amounts is equal to the total of the tax line.
+              
+              So, by default the tax amount for a line will be n_i, 
+              but for some lines the tax amount will be n_i + alpha_i_rounded up, 
+              and for some other lines the tax amount will be n_i + alpha_i_rounded_down.
+              
+              TODO: Check whether we need to use LAG to make sure the sum of the tax amounts is equal to the total
+              of the tax line.
+           */
 
             SELECT
                 sub.tax_line_id || '-' || sub.base_line_id || '-' || sub.src_line_id AS id,
@@ -458,29 +538,22 @@ class AccountMoveLine(models.Model):
                 sub.tax_repartition_line_id,
 
                 sub.base_amount,
-                ROUND(
-                    COALESCE(sub.total_tax_amount * ABS(sub.cumulated_base_amount) / ABS(NULLIF(sub.total_base_amount, 0.0)), 0.0),
-                    sub.comp_curr_prec
-                )
-                - LAG(ROUND(
-                    COALESCE(sub.total_tax_amount * ABS(sub.cumulated_base_amount) / ABS(NULLIF(sub.total_base_amount, 0.0)), 0.0),
-                    sub.comp_curr_prec
-                ), 1, 0.0)
-                OVER (
-                    PARTITION BY sub.tax_line_id ORDER BY sub.tax_id, sub.base_line_id
-                ) AS tax_amount,
+                
+                case when sub.cumul_alpha_i_rounded_up <= sub.delta then sub.n_i + sub.alpha_i_rounded_up
+                else case when sub.cumul_alpha_i_rounded_down >= sub.delta then sub.n_i + sub.alpha_i_rounded_down
+                     else sub.n_i
+                     end
+                end
+                AS tax_amount,
+                
+                /* TODO: when formulae are correct, also do them in amount_currency*/
+                
+                case when sub.sum_alpha_i_rounded_up < sub.delta then true
+                else case when sub.sum_alpha_i_rounded_down > sub.delta then true 
+                     else false 
+                     end
+                end
+                as is_error
 
-                sub.base_amount_currency,
-                ROUND(
-                    COALESCE(sub.total_tax_amount_currency * ABS(sub.cumulated_base_amount_currency) / ABS(NULLIF(sub.total_base_amount_currency, 0.0)), 0.0),
-                    sub.curr_prec
-                )
-                - LAG(ROUND(
-                    COALESCE(sub.total_tax_amount_currency * ABS(sub.cumulated_base_amount_currency) / ABS(NULLIF(sub.total_base_amount_currency, 0.0)), 0.0),
-                    sub.curr_prec
-                ), 1, 0.0)
-                OVER (
-                    PARTITION BY sub.tax_line_id ORDER BY sub.tax_id, sub.base_line_id
-                ) AS tax_amount_currency
-            FROM base_tax_matching_all_amounts sub
+            FROM base_tax_matching_cumulated_rounded_decimal_parts sub
         ''', group_taxes_params + where_params + where_params + where_params + fallback_params
