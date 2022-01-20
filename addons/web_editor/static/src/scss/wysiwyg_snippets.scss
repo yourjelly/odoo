@@ -1418,6 +1418,9 @@ body.editor_enable.editor_has_snippets {
                         background-color: $o-we-sidebar-content-field-input-bg;
                         color: inherit;
                         font-family: $o-we-sidebar-content-field-input-font-family;
+                        &:placeholder-shown {
+                            outline: 1px solid red;
+                        }
                     }
                     tr {
                         border: none;
