@@ -67,9 +67,12 @@ function commandsWithinCategory(categoryName, categories) {
     };
 }
 
-function splitCommandName(name, searchValue) {
-    const splitName = name.split(new RegExp(`(${escapeRegExp(searchValue)})`, "ig"));
-    return searchValue.length && splitName.length > 1 ? splitName : [name];
+export function splitCommandName(name, searchValue) {
+    if (name) {
+        const splitName = name.split(new RegExp(`(${escapeRegExp(searchValue)})`, "ig"));
+        return searchValue.length && splitName.length > 1 ? splitName : [name];
+    }
+    return [];
 }
 
 export class DefaultCommandItem extends Component {}
@@ -149,7 +152,6 @@ export class CommandPalette extends Component {
      * @param {object} options
      */
     async setCommands(namespace, options = {}) {
-        this.categoryKeys = ["default"];
         const proms = this.providersByNamespace[namespace].map((provider) => {
             const { provide } = provider;
             const result = provide(this.env, options);
