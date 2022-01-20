@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import core from 'web.core'; 
+import core from 'web.core';
 import Dialog from 'web.Dialog';
 import FormController from 'web.FormController';
 import { MoveArticleToDialog } from 'knowledge.dialogs';
@@ -14,6 +14,7 @@ const KnowledgeFormController = FormController.extend({
         'click .btn-create': '_onCreate',
         'click .btn-move': '_onOpenMoveToModal',
         'click .btn-share': '_onShare',
+        'click #knowledge_search_bar': '_onSearch',
         'change .o_breadcrumb_article_name': '_onRename',
         'click i.o_toggle_favourite': '_onToggleFavourite',
     }),
@@ -141,6 +142,16 @@ const KnowledgeFormController = FormController.extend({
             }]
         });
         dialog.open();
+    },
+
+    /**
+     * @param {Event} event
+     */
+    _onSearch: function (event) {
+        // TODO: change to this.env.services.commandes.openMainPalette when form views are migrated to owl
+        core.bus.trigger("openMainPalette", {
+            searchValue: "?",
+        });
     },
 
     _onToggleFavourite: async function (event) {
