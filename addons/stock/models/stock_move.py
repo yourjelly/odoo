@@ -1178,7 +1178,7 @@ class StockMove(models.Model):
         in another move of the same picking sharing its characteristics.
         """
         # Use OrderedSet of id (instead of recordset + |= ) for performance
-        move_create_proc, move_to_confirm, move_waiting = OrderedSet(), OrderedSet(), OrderedSet()
+        move_create_proc_linked, move_create_proc_unlinked, move_to_confirm, move_waiting = OrderedSet(), OrderedSet(), OrderedSet(), OrderedSet()
         to_assign = defaultdict(OrderedSet)
         for move in self:
             if move.state != 'draft':
@@ -1188,18 +1188,24 @@ class StockMove(models.Model):
                 move_waiting.add(move.id)
             else:
                 if move.procure_method == 'make_to_order':
-                    move_create_proc.add(move.id)
+                    if move.rule_id.procure_method == 'mts_else_mto' and not move.rule_id.auto_link:
+                        move_create_proc_unlinked.add(move.id)
+                        move.procure_method = 'make_to_stock'
+                    else:
+                        move_create_proc_linked.add(move.id)
+                elif move.rule_id.procure_method == 'make_to_order':
+                    move_create_proc_unlinked.add(move.id)
                 else:
                     move_to_confirm.add(move.id)
             if move._should_be_assigned():
                 key = (move.group_id.id, move.location_id.id, move.location_dest_id.id)
                 to_assign[key].add(move.id)
 
-        move_create_proc, move_to_confirm, move_waiting = self.browse(move_create_proc), self.browse(move_to_confirm), self.browse(move_waiting)
+        move_create_proc_linked, move_create_proc_unlinked, move_to_confirm, move_waiting = self.browse(move_create_proc_linked), self.browse(move_create_proc_unlinked), self.browse(move_to_confirm), self.browse(move_waiting)
 
         # create procurements for make to order moves
         procurement_requests = []
-        for move in move_create_proc:
+        for move in move_create_proc_linked | move_create_proc_unlinked:
             values = move._prepare_procurement_values()
             origin = move._prepare_procurement_origin()
             procurement_requests.append(self.env['procurement.group'].Procurement(
@@ -1208,10 +1214,10 @@ class StockMove(models.Model):
                 origin, move.company_id, values))
         self.env['procurement.group'].run(procurement_requests, raise_user_error=not self.env.context.get('from_orderpoint'))
 
-        move_to_confirm.write({'state': 'confirmed'})
-        (move_waiting | move_create_proc).write({'state': 'waiting'})
+        (move_to_confirm | move_create_proc_unlinked).write({'state': 'confirmed'})
+        (move_waiting | move_create_proc_linked).write({'state': 'waiting'})
         # procure_method sometimes changes with certain workflows so just in case, apply to all moves
-        (move_to_confirm | move_waiting | move_create_proc).filtered(lambda m: m.picking_type_id.reservation_method == 'at_confirm')\
+        (move_to_confirm | move_waiting | move_create_proc_linked | move_create_proc_unlinked).filtered(lambda m: m.picking_type_id.reservation_method == 'at_confirm')\
             .write({'reservation_date': fields.Date.today()})
 
         # assign picking in batch for all confirmed move that share the same details
@@ -1258,17 +1264,20 @@ class StockMove(models.Model):
         """
         self.ensure_one()
         group_id = self.group_id or False
+        move_dest_ids = self
         if self.rule_id:
             if self.rule_id.group_propagation_option == 'fixed' and self.rule_id.group_id:
                 group_id = self.rule_id.group_id
             elif self.rule_id.group_propagation_option == 'none':
                 group_id = False
+            if not self.rule_id.auto_link:
+                move_dest_ids = self.env['stock.move']
         product_id = self.product_id.with_context(lang=self._get_lang())
         return {
             'product_description_variants': self.description_picking and self.description_picking.replace(product_id._get_description(self.picking_type_id), ''),
             'date_planned': self.date,
             'date_deadline': self.date_deadline,
-            'move_dest_ids': self,
+            'move_dest_ids': move_dest_ids,
             'group_id': group_id,
             'route_ids': self.route_ids,
             'warehouse_id': self.warehouse_id or self.picking_type_id.warehouse_id,
@@ -1871,17 +1880,20 @@ class StockMove(models.Model):
                 ('location_dest_id', '=', move.location_dest_id.id),
                 ('action', '!=', 'push')
             ]
-            rules = self.env['procurement.group']._search_rule(False, move.product_packaging_id, product_id, move.warehouse_id, domain)
-            if rules:
-                if rules.procure_method in ['make_to_order', 'make_to_stock']:
-                    move.procure_method = rules.procure_method
+            rule = self.env['procurement.group']._search_rule(False, move.product_packaging_id, product_id, move.warehouse_id, domain)
+            if rule:
+                move.rule_id = rule
+                if rule.procure_method == 'make_to_stock' or (rule.procure_method in ['make_to_order', 'mts_else_mto'] and not rule.auto_link):
+                    move.procure_method = 'make_to_stock'
+                elif rule.procure_method == 'make_to_order':
+                    move.procure_method = 'make_to_order'
                 else:
                     # Get the needed quantity for the `mts_else_mto` moves.
-                    mtso_needed_qties_by_loc[rules.location_src_id].setdefault(product_id.id, 0)
-                    mtso_needed_qties_by_loc[rules.location_src_id][product_id.id] += move.product_qty
+                    mtso_needed_qties_by_loc[rule.location_src_id].setdefault(product_id.id, 0)
+                    mtso_needed_qties_by_loc[rule.location_src_id][product_id.id] += move.product_qty
 
                     # This allow us to get the forecasted quantity in batch later on
-                    mtso_products_by_locations[rules.location_src_id].append(product_id.id)
+                    mtso_products_by_locations[rule.location_src_id].append(product_id.id)
                     mtso_moves |= move
             else:
                 move.procure_method = 'make_to_stock'

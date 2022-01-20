@@ -76,6 +76,7 @@
                                 <field name="location_dest_id" options="{'no_create': True}"/>
                                 <field name="auto" attrs="{'invisible': [('action', 'not in', ['push', 'pull_push'])]}"/>
                                 <field name="procure_method" attrs="{'invisible': [('action', 'not in', ['pull', 'pull_push'])]}"/>
+                                <field name="auto_link" attrs="{'invisible': [('action', 'not in', ['pull', 'push', 'pull_push'])]}"/>
                             </group>
                             <group>
                                 <div colspan="2">

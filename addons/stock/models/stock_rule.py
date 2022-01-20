@@ -99,6 +99,9 @@ class StockRule(models.Model):
         help="The 'Manual Operation' value will create a stock move after the current one. "
              "With 'Automatic No Step Added', the location is replaced in the original move.")
     rule_message = fields.Html(compute='_compute_action_message')
+    auto_link = fields.Boolean(
+        'Link Moves', default=True,
+        help="When ticked, moves created by this rule will be linked to the moves that triggered this rule.")
 
     @api.onchange('picking_type_id')
     def _onchange_picking_type(self):
@@ -190,9 +193,9 @@ class StockRule(models.Model):
         else:
             new_move_vals = self._push_prepare_move_copy_values(move, new_date)
             new_move = move.sudo().copy(new_move_vals)
-            if new_move._should_bypass_reservation():
+            if new_move._should_bypass_reservation() or not self.auto_link:
                 new_move.write({'procure_method': 'make_to_stock'})
-            if not new_move.location_id.should_bypass_reservation():
+            else:
                 move.write({'move_dest_ids': [(4, new_move.id)]})
             return new_move
 
@@ -241,6 +244,8 @@ class StockRule(models.Model):
         procurements = sorted(procurements, key=lambda proc: float_compare(proc[0].product_qty, 0.0, precision_rounding=proc[0].product_uom.rounding) > 0)
         for procurement, rule in procurements:
             procure_method = rule.procure_method
+            if procure_method == 'make_to_order' and not rule.auto_link:
+                procure_method = 'make_to_stock'
             if rule.procure_method == 'mts_else_mto':
                 qty_needed = procurement.product_uom._compute_quantity(procurement.product_qty, procurement.product_id.uom_id)
                 if float_compare(qty_needed, 0, precision_rounding=procurement.product_id.uom_id.rounding) <= 0:
