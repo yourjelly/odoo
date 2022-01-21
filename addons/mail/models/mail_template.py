@@ -68,7 +68,7 @@ class MailTemplate(models.Model):
     ref_ir_act_window = fields.Many2one('ir.actions.act_window', 'Sidebar action', readonly=True, copy=False,
                                         help="Sidebar action to make this template available on records "
                                              "of the related document model")
-    body_html_prev = fields.Html()
+    body_html_prev = fields.Html(translate=True, sanitize=False, readonly=True)
 
     # Overrides of mail.render.mixin
     @api.depends('model')
