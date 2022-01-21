@@ -3,6 +3,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
     const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
+    const { PosBroadcastMixin } = require('@point_of_sale/js/pos_broadcast');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const BarcodeParser = require('barcodes.BarcodeParser');
     const PosComponent = require('point_of_sale.PosComponent');
@@ -21,7 +22,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     /**
      * Chrome is the root component of the PoS App.
      */
-    class Chrome extends PopupControllerMixin(PosComponent) {
+    class Chrome extends PosBroadcastMixin(PopupControllerMixin(PosComponent)) {
         constructor() {
             super(...arguments);
             useExternalListener(window, 'beforeunload', this._onBeforeUnload);

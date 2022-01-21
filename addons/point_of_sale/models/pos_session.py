@@ -1966,6 +1966,19 @@ class PosSession(models.Model):
         partners = self.env['res.partner'].search_read(**params['search_params'])
         return partners
 
+    def _is_pos_broadcast_enabled(self):
+        self.ensure_one()
+        return not self.env.registry.in_test_mode()
+
+    def broadcast_pos_message(self, message_name, message_value):
+        """Send near real-time message to the open pos ui instances.
+        :type message_name: str
+        :type message_value: any
+        """
+        self.ensure_one()
+        payload = { 'pos_session_id': self.id, 'message': [message_name, message_value] }
+        self.env['bus.bus']._sendone(self, 'pos_notification', payload)
+
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
