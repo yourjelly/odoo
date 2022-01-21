@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<odoo>
+	<record id="reset_mail_template_body_wizard_view" model="ir.ui.view">
+        <field name="name">Reset Mail Template Body</field>
+        <field name="model">reset.mail.template.body.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reset Mail Template Body Html">
+                <group>
+                    <group>
+                        <field name="has_diff" invisible="1"/>
+                        <field name="template_id" invisible="1"/>
+                        <field name="template_name"/>
+                    </group>
+                </group>
+                <field name="body_diff" attrs="{'invisible': [('body_diff', '=', False)]}"/>
+                <div class="alert alert-warning my-2" role="alert" attrs="{'invisible': [('body_diff', '!=', False)]}">
+                    <span>You need two views to compare.</span>
+                </div>
+                <footer>
+                    <button string="Reset View" name="reset_view_button" type="object" class="btn-primary" attrs="{'invisible': [('has_diff', '=', False)]}" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="reset_mail_template_body_wizard_action" model="ir.actions.act_window">
+        <field name="name">Compare/Reset</field>
+        <field name="res_model">reset.mail.template.body.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_mail_template"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+</odoo>

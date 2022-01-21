@@ -68,6 +68,7 @@ class MailTemplate(models.Model):
     ref_ir_act_window = fields.Many2one('ir.actions.act_window', 'Sidebar action', readonly=True, copy=False,
                                         help="Sidebar action to make this template available on records "
                                              "of the related document model")
+    body_html_prev = fields.Html()
 
     # Overrides of mail.render.mixin
     @api.depends('model')
@@ -86,6 +87,9 @@ class MailTemplate(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for val in vals_list:
+            if val.get('body_html'):
+                val['body_html_prev'] = val['body_html']
         return super().create(vals_list)\
             ._fix_attachment_ownership()
 
