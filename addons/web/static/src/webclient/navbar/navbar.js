@@ -2,6 +2,7 @@
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { Icon } from "@web/core/icon/icon";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
@@ -201,5 +202,5 @@ export class NavBar extends Component {
     }
 }
 NavBar.template = "web.NavBar";
-NavBar.components = { Dropdown, DropdownItem, MenuDropdown, ErrorHandler };
+NavBar.components = { Dropdown, DropdownItem, MenuDropdown, Icon, ErrorHandler };
 NavBar.props = {};

@@ -1,0 +1,19 @@
+.oi_svg_container {
+    &.oi_duotone {
+        --oi-color: currentColor;
+
+        .oi_duotone_opacity_50 {
+            opacity: 0.5;
+        }
+
+        .oi_duotone_opacity_0 {
+            opacity: 0;
+        }
+    }
+
+    svg {
+        width: var(--oi-font-size, 1em);
+        height: auto;
+        vertical-align: var(--oi-vertical-align, -0.125em);
+    }
+}

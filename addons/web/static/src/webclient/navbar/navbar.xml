@@ -3,6 +3,34 @@
 
   <t t-name="web.NavBar" owl="1">
     <header class="o_navbar" t-ref="root">
+
+
+
+      <section class="p-5 d-none">
+        <div class="row">
+          <t t-foreach="['odoo', 'panel_right', 'group', 'apps', 'search', 'launch', 'settings_adjust', 'studio', 'view_cohort', 'view_kanban', 'view_list', 'view_pivot', 'voip']" t-as="name" t-key="name_index">
+            <div class="col">
+              <Icon name="name"/>
+            </div>
+          </t>
+        </div>
+
+
+
+        <p>Hello odoo <Icon name="'odoo'" className="'oi-large'"/> icon</p>
+        <p>Hello odoo <Icon name="'odoo'" colors="true"/> color icon</p>
+        <p>Hello <Icon/> no icon</p>
+        <p>Hello documents <Icon name="'documents'"/> icon</p>
+        <p>Hello documents <Icon name="'documents'" colors="true"/> color icon</p>
+
+        <p>Hello <Icon name="'panel_right'"/> color icon</p>
+        <p>Hello <Icon name="'group'"/> icon</p>
+
+      </section>
+
+
+
+
       <nav
         class="o_main_navbar"
         data-command-category="navbar"

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="web.Icon" owl="1">
+    <span
+        t-if="iconTemplateName"
+        t-call="{{iconTemplateName}}"
+        t-attf-class="oi_svg_container {{props.className}}"
+        t-att-class="{ oi_duotone : !colors }"
+    />
+    <span t-else="" class="bg-warning px-1">?</span>
+</t>
+
+</templates>
