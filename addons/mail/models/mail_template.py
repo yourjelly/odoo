@@ -330,3 +330,12 @@ class MailTemplate(models.Model):
         if force_send:
             mail.send(raise_exception=raise_exception)
         return mail.id  # TDE CLEANME: return mail + api.returns ?
+
+    def compare_and_reset_template(self):
+        return {
+            'name': _('Compare/Reset'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'target': 'new',
+            'res_model': 'reset.mail.template.body.wizard',
+        }

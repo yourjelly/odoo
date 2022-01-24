@@ -6,6 +6,10 @@
             <field name="model">mail.template</field>
             <field name="arch" type="xml">
                 <form string="Templates">
+                    <header>
+                        <button string="Compare/Reset" class="oe_highlight"
+                            name="compare_and_reset_template" type="object"/>
+                    </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <field name="ref_ir_act_window" invisible="1"/>
