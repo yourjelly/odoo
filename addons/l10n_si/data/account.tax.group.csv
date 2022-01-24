@@ -1,4 +1,6 @@
 id,name,country_id/id
-tax_group_0,DDV 0%,base.si
-tax_group_95,DDV 9.5%,base.si
-tax_group_22,DDV 22%,base.si
+tax_group_vat_0,DDV 0%,base.si
+tax_group_vat_5,DDV 5%,base.si
+tax_group_vat_8,DDV 8%,base.si
+tax_group_vat_9,DDV 9.5%,base.si
+tax_group_vat_22,DDV 22%,base.si

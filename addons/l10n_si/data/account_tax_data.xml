@@ -1,112 +1,259 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="gd_taxr_1" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Izstopni DDV 0%</field>
-        <field name="description">DDV-I-0</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">0</field>
-        <field name="type_tax_use">sale</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_0"/>
-    </record>
+    <!-- Sales -->
+        <!-- VAT charged at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale" model="account.tax.template">
+            <field name="name">DDV 22%</field>
+            <field name="description">Obračunani DDV po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
 
-    <record id="gd_taxr_2" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Izstopni DDV 9.5%</field>
-        <field name="description">DDV-I-9.5</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">9.5</field>
-        <field name="type_tax_use">sale</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_95"/>
-    </record>
+        <!-- VAT charged at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale" model="account.tax.template">
+            <field name="name">DDV 9.5%</field>
+            <field name="description">Obračunani DDV o stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
 
-    <record id="gd_taxr_3" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Izstopni DDV 22%</field>
-        <field name="description">DDV-I-22</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">22</field>
-        <field name="type_tax_use">sale</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_22"/>
-    </record>
+        <!-- VAT charged at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale" model="account.tax.template">
+            <field name="name">DDV 5%</field>
+            <field name="description">Obračunani DDV o stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
 
-    <record id="gd_taxp_1" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 0%</field>
-        <field name="description">DDV-V-0</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">0</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_0"/>
-    </record>
+        <!-- VAT charged at a rate of 0% -->
+        <record id="l10n_si_vat_0_sale" model="account.tax.template">
+            <field name="name">DDV 0%</field>
+            <field name="description">Obračunani DDV o stopnji 0%</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+        </record>
 
-    <record id="gd_taxp_2" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 9.5%</field>
-        <field name="description">DDV-V-9.5</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">9.5</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_95"/>
-    </record>
+        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale_goods_eu" model="account.tax.template">
+            <field name="name">DDV blaga EU 22%</field>
+            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
 
-    <record id="gd_taxp_3" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 22%</field>
-        <field name="description">DDV-V-22</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">22</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_22"/>
-    </record>
+        <!-- VAT charged from services received from other EU Member States at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale_services_eu" model="account.tax.template">
+            <field name="name">DDV storitev EU 22%</field>
+            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 22 %</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
 
-    <record id="gd_taxp_nr_1" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 9.5% - neodbitni</field>
-        <field name="description">DDV-V-9.5-NE</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">9.5</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_95"/>
-    </record>
+        <!-- VAT charged from acquisitions of goods from other EU Member States at the rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale_goods_eu" model="account.tax.template">
+            <field name="name">DDV blaga EU 9.5%</field>
+            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
 
-    <record id="gd_taxp_nr_2" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 22% - neodbitni</field>
-        <field name="description">DDV-V-22-NE</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">22</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="1"/>
-        <field name="tax_group_id" ref="tax_group_22"/>
-    </record>
+        <!-- VAT charged from services received from other EU Member States at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale_services_eu" model="account.tax.template">
+            <field name="name">DDV storitev EU 9.5%</field>
+            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
 
-    <record id="gd_taxp_st_1" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 9.5% - samoobdavčitev</field>
-        <field name="description">DDV-V-9.5-SO</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">9.5</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="0"/>
-        <field name="tax_group_id" ref="tax_group_0"/>
-    </record>
+        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale_goods_eu" model="account.tax.template">
+            <field name="name">DDV blaga EU 5%</field>
+            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
 
-    <record id="gd_taxp_st_2" model="account.tax.template">
-        <field name="chart_template_id" ref="l10n_si_chart_template"/>
-        <field name="name">Vstopni DDV 22% - samoobdavčitev</field>
-        <field name="description">DDV-V-22-SO</field>
-        <field name="amount_type">percent</field>
-        <field name="amount">22</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="price_include" eval="0"/>
-        <field name="tax_group_id" ref="tax_group_0"/>
-    </record>
+        <!-- VAT charged from services received from other EU Member States at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale_services_eu" model="account.tax.template">
+            <field name="name">DDV storitev EU 5%</field>
+            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
+
+        <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 0% -->
+        <record id="l10n_si_vat_0_sale_goods_eu" model="account.tax.template">
+            <field name="name">DDV blaga EU 0%</field>
+            <field name="description">Obračunani DDV od pridobitev blaga iz drugih držav članic EU po stopnji 0%</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+        </record>
+
+        <!-- VAT charged from services received from other EU Member States at a rate of 0% -->
+        <record id="l10n_si_vat_0_sale_services_eu" model="account.tax.template">
+            <field name="name">DDV storitev EU 0%</field>
+            <field name="description">Obračunani DDV od prejetih storitev iz drugih držav članic EU po stopnji 0%</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale_selftaxation" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve 22%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale_selftaxation" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve 9.5%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale_selftaxation" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve 5%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment of imports at a rate of 22% -->
+        <record id="l10n_si_vat_22_sale_selftaxation_imports" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve uvoza 22%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve od uvoza po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment of imports at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_sale_selftaxation_imports" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve uvoza 9.5%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve od uvoza po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
+
+        <!-- VAT charged on the basis of self-assessment of imports at a rate of 5% -->
+        <record id="l10n_si_vat_5_sale_selftaxation_imports" model="account.tax.template">
+            <field name="name">DDV samoobdavčitve uvoza 5%</field>
+            <field name="description">Obračunani DDV na podlagi samoobdavčitve od uvoza po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">sale</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
+    <!-- Sales [END] -->
+
+    <!-- Purchases -->
+        <!-- VAT deduction from purchases of goods and services, acquisitions of goods and services received from other EU Member States and from imports at a rate of 22% -->
+        <record id="l10n_si_vat_22_purchase" model="account.tax.template">
+            <field name="name">DDV 22%</field>
+            <field name="description">Odbitek DDV od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 22%</field>
+            <field name="amount">22</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_22"/>
+        </record>
+
+        <!-- VAT deduction from purchases of goods and services, acquisitions of goods and services received from other EU Member States and from imports at a rate of 9.5% -->
+        <record id="l10n_si_vat_9_purchase" model="account.tax.template">
+            <field name="name">DDV 9.5%</field>
+            <field name="description">Odbitek DDV od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 9.5%</field>
+            <field name="amount">9.5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_9"/>
+        </record>
+
+        <!-- VAT deduction from purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 5% -->
+        <record id="l10n_si_vat_5_purchase" model="account.tax.template">
+            <field name="name">DDV 5%</field>
+            <field name="description">Odbitek DDV od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 5%</field>
+            <field name="amount">5</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_5"/>
+        </record>
+
+        <!-- VAT deduction from purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 0% -->
+        <record id="l10n_si_vat_0_purchase" model="account.tax.template">
+            <field name="name">DDV 0%</field>
+            <field name="description">Odbitek DDV od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 0%</field>
+            <field name="amount">0</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_0"/>
+        </record>
+
+        <!-- VAT deduction of the flat-rate compensation at the rate of 8% -->
+        <record id="l10n_si_vat_8_purchase" model="account.tax.template">
+            <field name="name">DDV 8%</field>
+            <field name="description">Odbitek DDV od pavšalnega nadomestila po stopnji 8%</field>
+            <field name="amount">8</field>
+            <field name="amount_type">percent</field>
+            <field name="type_tax_use">purchase</field>
+            <field name="chart_template_id" ref="l10n_si_chart_template"/>
+            <field name="tax_group_id" ref="tax_group_vat_8"/>
+        </record>
+    <!-- Purchases [END] -->
 </odoo>
