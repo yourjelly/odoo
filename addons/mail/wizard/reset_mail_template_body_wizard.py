@@ -27,7 +27,7 @@ class ResetMailTemplateBodyWizard(models.TransientModel):
         result['template_id'] = template_id
         return result
 
-    @api.depends('template_id')
+    @api.depends('template_id', 'template_id.body_html')
     def _compute_body_diff(self):
         for view in self.with_context(lang=None):
             diff_to = view.template_id.body_html_prev

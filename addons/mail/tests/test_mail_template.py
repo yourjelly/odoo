@@ -63,3 +63,42 @@ class TestMailTemplate(MailCommon):
 
         with self.assertRaises(AccessError):
             mail_template.with_user(self.user_employee).name = 'Test write'
+
+    def test_mail_template_compare_body(self):
+        mail_template = self.env['mail.template'].create({
+            'name': 'Test template',
+            'subject': 'Hello Odoo',
+            'body_html': '<span>Hello Odoo</span>',
+            'auto_delete': True,
+            'model_id': self.env.ref('base.model_res_partner').id,
+        })
+
+        RESET_MAIL_TEMPLATE_BODY_WIZARD = self.env['reset.mail.template.body.wizard'].with_context(
+            active_id=mail_template.id, active_model=mail_template._name)
+
+        reset_mail_template_rec = RESET_MAIL_TEMPLATE_BODY_WIZARD.create({})
+
+        self.assertFalse(reset_mail_template_rec.has_diff, "Should not have difference for unchanged template")
+
+    def test_mail_template_compare_and_reset_body(self):
+        mail_template = self.env['mail.template'].create({
+            'name': 'Test template',
+            'subject': 'Hello Odoo',
+            'body_html': '<span>Hello Odoo</span>',
+            'auto_delete': True,
+            'model_id': self.env.ref('base.model_res_partner').id,
+        })
+
+        mail_template.write({'body_html': '<span>Hello</span>'})
+
+        RESET_MAIL_TEMPLATE_BODY_WIZARD = self.env['reset.mail.template.body.wizard'].with_context(
+            active_id=mail_template.id, active_model=mail_template._name)
+
+        reset_mail_template_rec = RESET_MAIL_TEMPLATE_BODY_WIZARD.create({})
+
+        self.assertTrue(reset_mail_template_rec.has_diff, "Should have difference for changed template")
+
+        reset_mail_template_rec.reset_view_button()
+        reset_mail_template_rec._compute_body_diff()  # Compute method is not called automatically
+
+        self.assertFalse(reset_mail_template_rec.has_diff, "Should not have difference for reseted template")
