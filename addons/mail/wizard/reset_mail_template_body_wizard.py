@@ -18,15 +18,13 @@ class ResetMailTemplateBodyWizard(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        template_ids = (self._context.get('active_model') == 'mail.template' and
-                        self._context.get('active_ids') or [])
-        if not template_ids:
-            raise ValidationError(_("Please choose template to compare"))
-        elif len(template_ids) > 1:
-            raise ValidationError(_("Can't compare more than one Templates."))
+        template_id = (self._context.get('active_model') == 'mail.template' and
+                       self._context.get('active_id', False))
+        if not template_id:
+            raise ValidationError(_("Please choose template to compare."))
 
         result = super().default_get(fields)
-        result['template_id'] = template_ids[0]
+        result['template_id'] = template_id
         return result
 
     @api.depends('template_id')
