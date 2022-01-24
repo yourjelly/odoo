@@ -72,7 +72,11 @@ QUnit.module("base_automation", {}, function () {
 
         patchWithCleanup(BaseAutomationErrorDialog.prototype, {
             setup() {
-                assert.equal(this.props.data.context, errorContext, "Received the correct error context");
+                assert.equal(
+                    owl.toRaw(this.props.data.context),
+                    errorContext,
+                    "Received the correct error context"
+                );
                 this._super();
             },
         });

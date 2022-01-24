@@ -1063,7 +1063,6 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
 
         QUnit.test("lifecycle mount/unmount", async function (assert) {
             assert.expect(37);
-
             class MyChildComponent extends Component {
                 setup() {
                     useLogLifeCycle(assert.step.bind(assert));
