@@ -100,7 +100,7 @@ class StockRule(models.Model):
              "With 'Automatic No Step Added', the location is replaced in the original move.")
     rule_message = fields.Html(compute='_compute_action_message')
     auto_link = fields.Boolean(
-        'Link Moves', default=True,
+        'Link Moves', default=False,
         help="When ticked, moves created by this rule will be linked to the moves that triggered this rule.")
 
     @api.onchange('picking_type_id')
