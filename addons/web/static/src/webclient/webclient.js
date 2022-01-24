@@ -4,7 +4,6 @@ import { ActionContainer } from "./actions/action_container";
 import { NavBar } from "./navbar/navbar";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useTooltip } from "@web/core/tooltip/tooltip_hook";
-import { NotUpdatable } from "../core/utils/components";
 import { MainComponentsContainer } from "../core/main_components_container";
 import { useOwnDebugContext } from "../core/debug/debug_context";
 import { registry } from "@web/core/registry";
@@ -117,7 +116,6 @@ export class WebClient extends Component {
 WebClient.components = {
     ActionContainer,
     NavBar,
-    NotUpdatable,
     MainComponentsContainer,
 };
 WebClient.template = "web.WebClient";
