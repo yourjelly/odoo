@@ -16,7 +16,7 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
         shortenLabel,
     } = require("web/static/src/js/views/graph/graph_utils");
 
-    const { onWillUpdateProps, useEffect, useRef } = owl;
+    const { onWillDestroy, onWillUpdateProps, useEffect, useRef } = owl;
 
     class GraphRenderer extends AbstractRenderer {
         setup() {
@@ -38,6 +38,12 @@ odoo.define("web/static/src/js/views/graph/graph_renderer", function (require) {
 
             onWillUpdateProps((nextProps) => {
                 this._processProps(nextProps);
+            });
+
+            onWillDestroy(() => {
+                if (this.chart) {
+                    this.chart.destroy();
+                }
             });
         }
 
