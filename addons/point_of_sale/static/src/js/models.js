@@ -567,8 +567,10 @@ class PosGlobalState extends PosModel {
             }
             // Collect the product images that will be used in rendering the customer display template.
             const productImages = {};
-            for (const line of order.get_orderlines()) {
-                productImages[line.product.id] = PRODUCT_ID_TO_IMAGE_CACHE[line.product.id];
+            if (order) {
+                for (const line of order.get_orderlines()) {
+                    productImages[line.product.id] = PRODUCT_ID_TO_IMAGE_CACHE[line.product.id];
+                }
             }
             return QWeb.render('CustomerFacingDisplayOrder', {
                 pos: self,
