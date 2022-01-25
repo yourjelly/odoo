@@ -40,6 +40,8 @@ export class ChromeAdapter extends Component {
             reactivePos.send_current_order_to_customer_facing_display();
         });
         const reactivePos = reactive(pos, batchedCustomerDisplayRender);
+        env.pos = reactivePos;
+        env.legacyActionManager = legacyActionManager;
 
         // The proxy requires the instance of PosGlobalState to function properly.
         env.proxy.set_pos(reactivePos);
@@ -52,10 +54,6 @@ export class ChromeAdapter extends Component {
 
         useBus(this.env.qweb, "update", () => this.render());
         setupResponsivePlugin(this.env);
-        owl.hooks.useSubEnv({
-            pos: reactivePos,
-            legacyActionManager,
-        });
 
         const chrome = useRef("chrome");
         onMounted(async () => {
