@@ -30,14 +30,11 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
             }
         }
         async onClickLocal() {
-            // Before, customer_display was in 'pos', which makes it available "globally".
-            // This time however, we are putting it in a different global place since
-            // we can't attached dom element in 'pos'.
-            this.env.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
+            this.env.pos.unwatched.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
             const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
             var $renderedHtml = $('<div>').html(renderedHtml);
-            $(this.env.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-            $(this.env.customer_display.document.head).html($renderedHtml.find('.resources').html());
+            $(this.env.pos.unwatched.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+            $(this.env.pos.unwatched.customer_display.document.head).html($renderedHtml.find('.resources').html());
         }
         async onClickProxy() {
             try {

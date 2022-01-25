@@ -87,6 +87,7 @@ class PosGlobalState extends PosModel {
 
         this.db = new PosDB();                       // a local database used to search trough products and categories & store pending orders
         this.debug = config.isDebug(); //debug mode
+        this.unwatched = reactivity.markRaw({});
 
         // Business data; loaded from the server at launch
         this.company_logo = null;
@@ -524,10 +525,10 @@ class PosGlobalState extends PosModel {
     send_current_order_to_customer_facing_display() {
         if (!this.config.iface_customer_facing_display) return;
         this.render_html_for_customer_facing_display().then((rendered_html) => {
-            if (this.env.customer_display) {
+            if (this.unwatched.customer_display) {
                 var $renderedHtml = $('<div>').html(rendered_html);
-                $(this.env.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-                var orderlines = $(this.env.customer_display.document.body).find('.pos_orderlines_list');
+                $(this.unwatched.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+                var orderlines = $(this.unwatched.customer_display.document.body).find('.pos_orderlines_list');
                 orderlines.scrollTop(orderlines.prop("scrollHeight"));
             } else if (this.config.iface_customer_facing_display_via_proxy && this.env.proxy.posbox_supports_display) {
                 this.env.proxy.update_customer_facing_display(rendered_html);
