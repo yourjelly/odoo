@@ -1672,6 +1672,11 @@ class Task(models.Model):
             if vals.get('stage_id'):
                 vals.update(self.update_date_end(vals['stage_id']))
                 vals['date_last_stage_update'] = fields.Datetime.now()
+
+            # importing recurrence task
+            if not vals.get('recurrence_id') and not(vals.keys() & self._get_recurrence_fields()) and vals.get('recurring_task') is True:
+                default_val = self.default_get(self._get_recurrence_fields())
+                vals.update(**default_val)
             # recurrence
             rec_fields = vals.keys() & self._get_recurrence_fields()
             if rec_fields and vals.get('recurring_task') is True:
