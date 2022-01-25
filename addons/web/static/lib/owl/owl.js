@@ -3700,7 +3700,8 @@
         let model = null;
         for (let attr of nodeAttrsNames) {
             const value = node.getAttribute(attr);
-            if (attr.startsWith("t-on")) {
+            if (attr === "t-name") {}
+            else if (attr.startsWith("t-on")) {
                 if (attr === "t-on") {
                     throw new Error("Missing event name with t-on directive");
                 }
@@ -4355,7 +4356,7 @@
             xml = xml instanceof Document ? xml : parseXML(xml);
             for (const template of xml.querySelectorAll("[t-name]")) {
                 const name = template.getAttribute("t-name");
-                template.removeAttribute("t-name");
+                // template.removeAttribute("t-name");
                 this.addTemplate(name, template, options);
             }
         }

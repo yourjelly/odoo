@@ -237,9 +237,10 @@ export async function setupTests() {
         owlTemplates.push(child.outerHTML);
     }
     templates = `<templates> ${owlTemplates.join("\n")} </templates>`;
+    const owlTemplatesXML = new DOMParser().parseFromString(templates, "text/xml");
     Object.defineProperty(window, "__ODOO_TEMPLATES__", {
         get() {
-            return templates;
+            return owlTemplatesXML;
         },
     });
     await Promise.all([whenReady(), legacyProm]);
