@@ -23,7 +23,7 @@ const KnowledgeFormController = FormController.extend({
         if (typeof id === 'undefined') {
             return;
         }
-        await this._do_rename(id, e.currentTarget.value);
+        await this._rename(id, e.currentTarget.value);
     },
 
     _onDelete: async function () {
@@ -31,7 +31,7 @@ const KnowledgeFormController = FormController.extend({
         if (typeof id === 'undefined') {
             return;
         }
-        await this._do_delete(id);
+        await this._delete(id);
     },
 
     _onDuplicate: async function () {
@@ -39,7 +39,7 @@ const KnowledgeFormController = FormController.extend({
         if (typeof id === 'undefined') {
             return;
         }
-        await this._do_duplicate(id);
+        await this._duplicate(id);
     },
 
     /**
@@ -50,9 +50,9 @@ const KnowledgeFormController = FormController.extend({
         if ($target.hasClass('o_article_create')) {  // '+' button in side panel
             const $li = $target.closest('li');
             const id = $li.data('article-id');
-            await this._do_create(id);
+            await this._create(id);
         } else {  // main 'Create' button
-            await this._do_create(false, true);
+            await this._create(false, true);
         }
     },
 
@@ -107,7 +107,7 @@ const KnowledgeFormController = FormController.extend({
                     const state = this.getState();
                     const src = state.id;
                     const dst = parseInt($input.val());
-                    await this._do_move(src, dst);
+                    await this._move(src, dst);
                     dialog.close();
                 }
             }, {
@@ -161,12 +161,12 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {integer} id - Parent id
      */
-    _do_create: async function (id, private) {
+    _create: async function (id, setPrivate) {
         const articleId = await this._rpc({
             route: `/knowledge/article/create`,
             params: {
                 target_parent_id: id,
-                private: private
+                private: setPrivate
             }
         });
         if (!articleId) {
@@ -183,7 +183,7 @@ const KnowledgeFormController = FormController.extend({
      * @param {integer} id - Target id
      * @param {string} targetName - Target Name
      */
-    _do_rename: async function (id, targetName) {
+    _rename: async function (id, targetName) {
         const result = await this._rpc({
             route: `/knowledge/article/${id}/rename`,
             params: {
@@ -203,7 +203,7 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {integer} id - Target id
      */
-    _do_delete: async function (id) {
+    _delete: async function (id) {
         const result = await this._rpc({
             route: `/knowledge/article/${id}/delete`
         });
@@ -215,7 +215,7 @@ const KnowledgeFormController = FormController.extend({
     /**
      * @param {integer} id - Target id
      */
-    _do_duplicate: async function (id) {
+    _duplicate: async function (id) {
         const articleId = await this._rpc({
             route: `/knowledge/article/${id}/duplicate`
         });
@@ -233,38 +233,26 @@ const KnowledgeFormController = FormController.extend({
      * @param {integer} src
      * @param {integer} dst
      */
-    _do_move: async function (src, dst) {
+    _move: async function (src, dst) {
         const result = await this._rpc({
             route: `/knowledge/article/${src}/move`,
             params: {
                 target_parent_id: dst
             }
         });
-        if (result) {
-            this._move(
-                this.$el.find(`.o_tree [data-article-id="${src}"]`),
-                this.$el.find(`.o_tree [data-article-id="${dst}"]`)
-            );
+        const $parent = this.$el.find(`.o_tree [data-article-id="${dst}"]`);
+        if (result && $parent.length !== 0) {
+            let $li = this.$el.find(`.o_tree [data-article-id="${src}"]`);
+            let $ul = $parent.find('ul:first');
+            if ($ul.length === 0) {
+                $ul = $('<ul>');
+                $parent.append($ul);
+            }
+            $ul.append($li);
         }
     },
 
     // Helpers:
-
-    /**
-     * @param {jQuery} $li
-     * @param {jQuery} $parent
-    */
-    _move: function ($li, $parent) {
-        if ($parent.length === 0) {
-            return;
-        }
-        let $ul = $parent.find('ul:first');
-        if ($ul.length === 0) {
-            $ul = $('<ul>');
-            $parent.append($ul);
-        }
-        $ul.append($li);
-    },
 
     /**
      * @override
