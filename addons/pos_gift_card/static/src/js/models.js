@@ -1,17 +1,8 @@
 odoo.define("pos_gift_card.gift_card", function (require) {
   "use strict";
 
-  const { PosGlobalState, Order, Orderline } = require("point_of_sale.models");
+  const { Order, Orderline } = require("point_of_sale.models");
   const Registries = require('point_of_sale.Registries');
-
-
-  const PosGiftCardPosGlobalState = (PosGlobalState) => class PosGiftCardPosGlobalState extends PosGlobalState {
-    async _processData(loadedData) {
-      await super._processData(...arguments);
-      this.giftCards = loadedData['gift.card'];
-    }
-  }
-  Registries.Model.extend(PosGlobalState, PosGiftCardPosGlobalState);
 
 
   const PosGiftCardOrder = (Order) => class PosGiftCardOrder extends Order {
