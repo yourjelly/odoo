@@ -52,7 +52,10 @@ class SaleOrderLine(models.Model):
         if self.state in ['sale', 'done'] and self.order_id.date_order:
             order_date = self.order_id.date_order
         else:
-            order_date = fields.Datetime.now()
+            # Quick optimization to avoid considering lines updated
+            # during onchange diff method, due to stock widget
+            # (see scheduled_date field logic in sale_stock)
+            order_date = fields.Datetime.now().replace(second=0)
         return order_date + timedelta(days=self.customer_lead or 0.0)
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
