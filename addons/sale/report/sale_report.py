@@ -70,10 +70,10 @@ class SaleReport(models.Model):
             CASE WHEN l.product_id IS NOT NULL THEN SUM((l.product_uom_qty - l.qty_delivered) / u.factor * u2.factor) ELSE 0 END as qty_to_deliver,
             CASE WHEN l.product_id IS NOT NULL THEN sum(l.qty_invoiced / u.factor * u2.factor) ELSE 0 END as qty_invoiced,
             CASE WHEN l.product_id IS NOT NULL THEN sum(l.qty_to_invoice / u.factor * u2.factor) ELSE 0 END as qty_to_invoice,
-            CASE WHEN l.product_id IS NOT NULL THEN sum(l.price_total / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) ELSE 0 END as price_total,
-            CASE WHEN l.product_id IS NOT NULL THEN sum(l.price_subtotal / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) ELSE 0 END as price_subtotal,
-            CASE WHEN l.product_id IS NOT NULL THEN sum(l.untaxed_amount_to_invoice / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) ELSE 0 END as untaxed_amount_to_invoice,
-            CASE WHEN l.product_id IS NOT NULL THEN sum(l.untaxed_amount_invoiced / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) ELSE 0 END as untaxed_amount_invoiced,
+            CASE WHEN l.product_id IS NOT NULL THEN sum(l.price_total / CASE COALESCE(currency_table.rate, 0) WHEN 0 THEN 1.0 ELSE currency_table.rate END) ELSE 0 END as price_total,
+            CASE WHEN l.product_id IS NOT NULL THEN sum(l.price_subtotal / CASE COALESCE(currency_table.rate, 0) WHEN 0 THEN 1.0 ELSE currency_table.rate END) ELSE 0 END as price_subtotal,
+            CASE WHEN l.product_id IS NOT NULL THEN sum(l.untaxed_amount_to_invoice / CASE COALESCE(currency_table.rate, 0) WHEN 0 THEN 1.0 ELSE currency_table.rate END) ELSE 0 END as untaxed_amount_to_invoice,
+            CASE WHEN l.product_id IS NOT NULL THEN sum(l.untaxed_amount_invoiced / CASE COALESCE(currency_table.rate, 0) WHEN 0 THEN 1.0 ELSE currency_table.rate END) ELSE 0 END as untaxed_amount_invoiced,
             count(*) as nbr,
             s.name as name,
             s.date_order as date,
@@ -96,7 +96,7 @@ class SaleReport(models.Model):
             CASE WHEN l.product_id IS NOT NULL THEN sum(p.weight * l.product_uom_qty / u.factor * u2.factor) ELSE 0 END as weight,
             CASE WHEN l.product_id IS NOT NULL THEN sum(p.volume * l.product_uom_qty / u.factor * u2.factor) ELSE 0 END as volume,
             l.discount as discount,
-            CASE WHEN l.product_id IS NOT NULL THEN sum((l.price_unit * l.product_uom_qty * l.discount / 100.0 / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END))ELSE 0 END as discount_amount,
+            CASE WHEN l.product_id IS NOT NULL THEN sum((l.price_unit * l.product_uom_qty * l.discount / 100.0 / CASE COALESCE(currency_table.rate, 0) WHEN 0 THEN 1.0 ELSE currency_table.rate END))ELSE 0 END as discount_amount,
             s.id as order_id
         """
 
@@ -114,8 +114,9 @@ class SaleReport(models.Model):
                     left join uom_uom u on (u.id=l.product_uom)
                     left join uom_uom u2 on (u2.id=t.uom_id)
                     left join product_pricelist pp on (s.pricelist_id = pp.id)
-                %s
-        """ % from_clause
+                    JOIN {currency_table} ON currency_table.company_id = s.company_id
+                {from_clause}
+        """.format(from_clause=from_clause, currency_table=self.env['res.currency']._get_query_currency_table({'multi_company': True, 'date': {'date_to': fields.Date.today()}}))
         return from_
 
     def _group_by_sale(self, groupby=''):
@@ -151,6 +152,10 @@ class SaleReport(models.Model):
         with_ = ("WITH %s" % with_clause) if with_clause else ""
         return '%s (SELECT %s FROM %s WHERE l.display_type IS NULL GROUP BY %s)' % \
                (with_, self._select_sale(fields), self._from_sale(from_clause), self._group_by_sale(groupby))
+
+    @property
+    def _table_query(self):
+        return self._query()
 
     def init(self):
         # self._table = sale_report
