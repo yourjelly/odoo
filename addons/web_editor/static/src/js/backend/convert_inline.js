@@ -31,6 +31,14 @@ const TABLE_STYLES = {
 };
 
 //--------------------------------------------------------------------------
+// Tools
+//--------------------------------------------------------------------------
+
+async function waitNextMacroTask () {
+    return new Promise( resolve => setTimeout(resolve, 0));
+}
+
+//--------------------------------------------------------------------------
 // Public
 //--------------------------------------------------------------------------
 
@@ -365,19 +373,12 @@ function classToStyle($editable, cssRules) {
  * will be computed for the editable element's owner document.
  *
  * @param {JQuery} $editable
- * @param {Object[]} [cssRules] Array<{selector: string;
+ * @param {Object[]} cssRules Array<{selector: string;
  *                                   style: {[styleName]: string};
  *                                   specificity: number;}>
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
 function toInline($editable, cssRules, $iframe) {
-    const doc = $editable[0].ownerDocument;
-    cssRules = cssRules || doc._rulesCache;
-    if (!cssRules) {
-        cssRules = getCSSRules(doc);
-        doc._rulesCache = cssRules;
-    }
-
     // If the editable is not visible, we need to make it visible in order to
     // retrieve image/icon dimensions. This iterates over ancestors to make them
     // visible again. We then restore it at the end of this function.
@@ -609,7 +610,9 @@ function formatTables($editable) {
  *                            style: {[styleName]: string};
  *                            specificity: number;}>
  */
-function getCSSRules(doc) {
+async function getCSSRules(doc) {
+    // Wait next macro task to prevent the browser to freeze too much.
+    await waitNextMacroTask();
     const cssRules = [];
     for (const sheet of doc.styleSheets) {
         // try...catch because browser may not able to enumerate rules for cross-domain sheets
@@ -649,6 +652,8 @@ function getCSSRules(doc) {
                 }
             }
         }
+        // Wait next macro task to prevent the browser to freeze too much.
+        await waitNextMacroTask();
     }
 
     // Group together rules with the same selector.
@@ -1039,6 +1044,7 @@ function _normalizeStyle(style) {
 // Widget
 //--------------------------------------------------------------------------
 
+let cssRulesCachePromise;
 
 FieldHtml.include({
     //--------------------------------------------------------------------------
@@ -1048,9 +1054,17 @@ FieldHtml.include({
     /**
      * @override
      */
-    commitChanges: function () {
+     _createWysiwygIntance: async function () {
+        await this._super(...arguments);
+        cssRulesCachePromise = cssRulesCachePromise || getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
+        this._cssRulesCachePromise = cssRulesCachePromise;
+    },
+    /**
+     * @override
+     */
+    commitChanges: async function () {
         if (this.nodeOptions['style-inline'] && this.mode === "edit") {
-            this._toInline();
+            await this._toInline();
         }
         return this._super();
     },
@@ -1067,7 +1081,7 @@ FieldHtml.include({
      *
      * @private
      */
-    _toInline: function () {
+    _toInline: async function () {
         var $editable = this.wysiwyg.getEditable();
         var html = this.wysiwyg.getValue();
         const $odooEditor = $editable.closest('.odoo-editor');
@@ -1075,7 +1089,8 @@ FieldHtml.include({
         $odooEditor.removeClass('odoo-editor');
         $editable.html(html);
 
-        toInline($editable, this.cssRules, this.wysiwyg.$iframe);
+        const cssRules = await this._cssRulesCachePromise;
+        toInline($editable, cssRules, this.wysiwyg.$iframe);
         $odooEditor.addClass('odoo-editor');
 
         this.wysiwyg.setValue($editable.html(), {
