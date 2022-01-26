@@ -14,7 +14,8 @@
         <!-- 11. Supplies of goods and services -->
         <record id="tax_report_11" model="account.tax.report.line">
             <field name="name">11. Dobave blaga in storitev</field>
-            <field name="code">11</field>
+            <field name="code">c11</field>
+            <field name="tag_name">11</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -23,7 +24,8 @@
         <!-- 11a. Supplies of goods and services in Slovenia, of which VAT is charged by the recipient -->
         <record id="tax_report_11a" model="account.tax.report.line">
             <field name="name">11a. Dobave blaga in storitev v Sloveniji, od katerih obračuna DDV prejemnik</field>
-            <field name="code">11a</field>
+            <field name="code">c11a</field>
+            <field name="tag_name">11a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -32,7 +34,8 @@
         <!-- 12. Deliveries of goods and services to other EU Member States -->
         <record id="tax_report_12" model="account.tax.report.line">
             <field name="name">12. Dobave blaga in storitev v druge države članice EU</field>
-            <field name="code">12</field>
+            <field name="code">c12</field>
+            <field name="tag_name">12</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -41,7 +44,8 @@
         <!-- 13. Sale of goods at a distance -->
         <record id="tax_report_13" model="account.tax.report.line">
             <field name="name">13. Prodaja blaga na daljavo</field>
-            <field name="code">13</field>
+            <field name="code">c13</field>
+            <field name="tag_name">13</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -50,7 +54,8 @@
         <!-- 14. Assembly and installation of goods in another Member State -->
         <record id="tax_report_14" model="account.tax.report.line">
             <field name="name">14. Montaža in instaliranje blaga v drugi državi članici</field>
-            <field name="code">14</field>
+            <field name="code">c14</field>
+            <field name="tag_name">14</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -59,7 +64,8 @@
         <!-- 15. Exempt supplies without the right to deduct VAT -->
         <record id="tax_report_15" model="account.tax.report.line">
             <field name="name">15. Oproščene dobave brez pravice do odbitka DDV</field>
-            <field name="code">15</field>
+            <field name="code">c15</field>
+            <field name="tag_name">15</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_I"/>
             <field name="sequence">1</field>
@@ -75,7 +81,8 @@
         <!-- 21. At a rate of 22 % -->
         <record id="tax_report_21" model="account.tax.report.line">
             <field name="name">21. po stopnji 22 %</field>
-            <field name="code">21</field>
+            <field name="code">c21</field>
+            <field name="tag_name">21</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -84,7 +91,8 @@
         <!-- 22. At a rate of 9.5 % -->
         <record id="tax_report_22" model="account.tax.report.line">
             <field name="name">22. po stopnji 9,5 %</field>
-            <field name="code">22</field>
+            <field name="code">c22</field>
+            <field name="tag_name">22</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -93,7 +101,8 @@
         <!-- 22a. At a rate of 5 % -->
         <record id="tax_report_22a" model="account.tax.report.line">
             <field name="name">22a. po stopnji 5 %</field>
-            <field name="code">22a</field>
+            <field name="code">c22a</field>
+            <field name="tag_name">22a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -102,7 +111,8 @@
         <!-- 23. 22 % of acquisitions of goods from other EU Member States -->
         <record id="tax_report_23" model="account.tax.report.line">
             <field name="name">23. od pridobitev blaga iz drugih držav članic EU po stopnji 22 %</field>
-            <field name="code">23</field>
+            <field name="code">c23</field>
+            <field name="tag_name">23</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -111,7 +121,8 @@
         <!-- 23a. Of the services received from other EU Member States at a rate of 22 % -->
         <record id="tax_report_23a" model="account.tax.report.line">
             <field name="name">23a. od prejetih storitev iz drugih držav članic EU po stopnji 22 %</field>
-            <field name="code">23a</field>
+            <field name="code">c23a</field>
+            <field name="tag_name">23a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -120,7 +131,8 @@
         <!-- 24. 9.5% of acquisitions of goods from other EU Member States -->
         <record id="tax_report_24" model="account.tax.report.line">
             <field name="name">24. od pridobitev blaga iz drugih držav članic EU po stopnji 9,5 %</field>
-            <field name="code">24</field>
+            <field name="code">c24</field>
+            <field name="tag_name">24</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -129,7 +141,8 @@
         <!-- 24a. Of the services received from other EU Member States at the rate of 9.5 % -->
         <record id="tax_report_24a" model="account.tax.report.line">
             <field name="name">24a. od prejetih storitev iz drugih držav članic EU po stopnji 9,5 %</field>
-            <field name="code">24a</field>
+            <field name="code">c24a</field>
+            <field name="tag_name">24a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -138,7 +151,8 @@
         <!-- 24b. Acquisitions of goods from other EU Member States at the rate of 5 % -->
         <record id="tax_report_24b" model="account.tax.report.line">
             <field name="name">24b. od pridobitev blaga iz drugih držav članic EU po stopnji 5 %</field>
-            <field name="code">24b</field>
+            <field name="code">c24b</field>
+            <field name="tag_name">24b</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -147,7 +161,8 @@
         <!-- 24c. Of the services received from other EU Member States at the rate of 5 % -->
         <record id="tax_report_24c" model="account.tax.report.line">
             <field name="name">24c. od prejetih storitev iz drugih držav članic EU po stopnji 5 %</field>
-            <field name="code">24c</field>
+            <field name="code">c24c</field>
+            <field name="tag_name">24c</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -156,7 +171,8 @@
         <!-- 25. On the basis of self-assessment as a recipient of goods and services at a rate of 22 % -->
         <record id="tax_report_25" model="account.tax.report.line">
             <field name="name">25. na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 22 %</field>
-            <field name="code">25</field>
+            <field name="code">c25</field>
+            <field name="tag_name">25</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -165,7 +181,8 @@
         <!-- 25a. On the basis of self-assessment as a recipient of goods and services at a rate of 9.5 % -->
         <record id="tax_report_25a" model="account.tax.report.line">
             <field name="name">25a. na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 9,5 %</field>
-            <field name="code">25a</field>
+            <field name="code">c25a</field>
+            <field name="tag_name">25a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -174,7 +191,8 @@
         <!-- 25b. On the basis of self-assessment as a recipient of goods and services at a rate of 5 % -->
         <record id="tax_report_25b" model="account.tax.report.line">
             <field name="name">25b. na podlagi samoobdavčitve kot prejemnik blaga in storitev po stopnji 5 %</field>
-            <field name="code">25b</field>
+            <field name="code">c25b</field>
+            <field name="tag_name">25b</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -183,7 +201,8 @@
         <!-- 26. On the basis of self-assessment of imports -->
         <record id="tax_report_26" model="account.tax.report.line">
             <field name="name">26. na podlagi samoobdavčitve od uvoza</field>
-            <field name="code">26</field>
+            <field name="code">c26</field>
+            <field name="tag_name">26</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_II"/>
             <field name="sequence">2</field>
@@ -199,7 +218,8 @@
         <!-- 31. Purchases of goods and services -->
         <record id="tax_report_31" model="account.tax.report.line">
             <field name="name">31. Nabave blaga in storitev</field>
-            <field name="code">31</field>
+            <field name="code">c31</field>
+            <field name="tag_name">31</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -208,7 +228,8 @@
         <!-- 31a. Purchases of goods and services in Slovenia, of which the recipient charges VAT -->
         <record id="tax_report_31a" model="account.tax.report.line">
             <field name="name">31a. Nabave blaga in storitev v Sloveniji, od katerih obračuna DDV prejemnik</field>
-            <field name="code">31a</field>
+            <field name="code">c31a</field>
+            <field name="tag_name">31a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -217,7 +238,8 @@
         <!-- 32. Acquisitions of goods from other EU Member States -->
         <record id="tax_report_32" model="account.tax.report.line">
             <field name="name">32. Pridobitve blaga iz drugih držav članic EU</field>
-            <field name="code">32</field>
+            <field name="code">c32</field>
+            <field name="tag_name">32</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -226,7 +248,8 @@
         <!-- 32a. Services received from other EU Member States -->
         <record id="tax_report_32a" model="account.tax.report.line">
             <field name="name">32a. Prejete storitve iz drugih držav članic EU</field>
-            <field name="code">32a</field>
+            <field name="code">c32a</field>
+            <field name="tag_name">32a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -235,7 +258,8 @@
         <!-- 33. Exempt purchases of goods and services and exempt acquisitions of goods -->
         <record id="tax_report_33" model="account.tax.report.line">
             <field name="name">33. Oproščene nabave blaga in storitev ter oproščene pridobitve blaga</field>
-            <field name="code">33</field>
+            <field name="code">c33</field>
+            <field name="tag_name">33</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -244,7 +268,8 @@
         <!-- 34. Purchase value of real estate -->
         <record id="tax_report_34" model="account.tax.report.line">
             <field name="name">34. Nabavna vrednost nepremičnin</field>
-            <field name="code">34</field>
+            <field name="code">c34</field>
+            <field name="tag_name">34</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -253,7 +278,8 @@
         <!-- 35. Cost of other fixed assets -->
         <record id="tax_report_35" model="account.tax.report.line">
             <field name="name">35. Nabavna vrednost drugih osnovnih sredstev</field>
-            <field name="code">35</field>
+            <field name="code">c35</field>
+            <field name="tag_name">35</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_III"/>
             <field name="sequence">3</field>
@@ -269,7 +295,8 @@
         <!-- 41. From purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 22 % -->
         <record id="tax_report_41" model="account.tax.report.line">
             <field name="name">41. od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 22 %</field>
-            <field name="code">41</field>
+            <field name="code">c41</field>
+            <field name="tag_name">41</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_IV"/>
             <field name="sequence">4</field>
@@ -278,7 +305,8 @@
         <!-- 42. From purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 9.5 % -->
         <record id="tax_report_42" model="account.tax.report.line">
             <field name="name">42. od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 9,5 %</field>
-            <field name="code">42</field>
+            <field name="code">c42</field>
+            <field name="tag_name">42</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_IV"/>
             <field name="sequence">4</field>
@@ -287,7 +315,8 @@
         <!-- 42a. From purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 5 % -->
         <record id="tax_report_42a" model="account.tax.report.line">
             <field name="name">42a. od nabav blaga in storitev, pridobitev blaga in prejetih storitev iz drugih držav članic EU in od uvoza po stopnji 5 %</field>
-            <field name="code">42a</field>
+            <field name="code">c42a</field>
+            <field name="tag_name">42a</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_IV"/>
             <field name="sequence">4</field>
@@ -296,7 +325,8 @@
         <!-- 43. Of the flat-rate compensation at the rate of 8 % -->
         <record id="tax_report_42a" model="account.tax.report.line">
             <field name="name">43. od pavšalnega nadomestila po stopnji 8 %</field>
-            <field name="code">43</field>
+            <field name="code">c43</field>
+            <field name="tag_name">43</field>
             <field name="report_id" ref="tax_report"/>
             <field name="parent_id" ref="tax_report_IV"/>
             <field name="sequence">4</field>
