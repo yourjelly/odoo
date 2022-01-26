@@ -323,7 +323,7 @@
         </record>
 
         <!-- 43. Of the flat-rate compensation at the rate of 8 % -->
-        <record id="tax_report_42a" model="account.tax.report.line">
+        <record id="tax_report_43" model="account.tax.report.line">
             <field name="name">43. od pavšalnega nadomestila po stopnji 8 %</field>
             <field name="code">c43</field>
             <field name="tag_name">43</field>
@@ -338,6 +338,7 @@
         <field name="name">51. Obveznost DDV</field>
         <field name="report_id" ref="tax_report"/>
         <field name="sequence">5</field>
+        <field name="formula">((c21 + c22 + c22a + c23 + c23a + c24 + c24a + c24b + c25 + c25a + c25b + c26 - c41 - c42 - c42a - c43) >= 0) and (c21 + c22 + c22a + c23 + c23a + c24 + c24a + c24b + c25 + c25a + c25b + c26 - c41 - c42 - c42a - c43) or 0</field>
     </record>
 
     <!-- 52. VAT surplus -->
@@ -345,5 +346,6 @@
         <field name="name">52. Presežek DDV</field>
         <field name="report_id" ref="tax_report"/>
         <field name="sequence">6</field>
+        <field name="formula">((c41 + c42 + c42a + c43 - c21 - c22 - c22a - c23 - c23a - c24 - c24a - c24b - c25 - c25a - c25b - c26) >= 0) and (c41 + c42 + c42a + c43 - c21 - c22 - c22a - c23 - c23a - c24 - c24a - c24b - c25 - c25a - c25b - c26) or 0</field>
     </record>
 </odoo>
