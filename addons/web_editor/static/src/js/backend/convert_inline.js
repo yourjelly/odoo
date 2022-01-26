@@ -379,6 +379,7 @@ function classToStyle($editable, cssRules) {
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
 function toInline($editable, cssRules, $iframe) {
+    console.profile('toInline');
     // If the editable is not visible, we need to make it visible in order to
     // retrieve image/icon dimensions. This iterates over ancestors to make them
     // visible again. We then restore it at the end of this function.
@@ -421,6 +422,7 @@ function toInline($editable, cssRules, $iframe) {
     for (const displayToRestore of displaysToRestore) {
         $(displayToRestore[0]).css('display', displayToRestore[1]);
     }
+    console.profileEnd('toInline')
 }
 /**
  * Convert font icons to images.
@@ -428,7 +430,8 @@ function toInline($editable, cssRules, $iframe) {
  * @param {jQuery} $editable - the element in which the font icons have to be
  *                           converted to images
  */
-function fontToImg($editable) {
+function fontToImg1($editable) {
+    console.profile('fontToImg1');
     const fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
 
     $editable.find('.fa').each(function () {
@@ -502,6 +505,149 @@ function fontToImg($editable) {
             $font.remove();
         }
     });
+    console.profileEnd('fontToImg1');
+}
+function fontToImg($editable) {
+    const fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
+    console.profile('fontToImg2');
+
+        // _.find(fonts.fontIcons, function (font) {
+    const fontSelectors = [];
+    for (const font of fonts.fontIcons) {
+        console.log("fonts.getCssSelectors(font.parser):", );
+        fontSelectors.push(
+            ...fonts.getCssSelectors(font.parser).map((x) => ({
+                selector: x.selector.replace(/::?before/g, ''),
+                content: x.css.match(/content:\s*['"]?(.)['"]?/)[1],
+                names: x.names,
+            }))
+        );
+    }
+    const icons = $editable.find('.fa').toArray();
+    const iconSet = new Set(icons);
+    const map = new Map();
+    for (const {selector, content, names} of fontSelectors) {
+        for (const node of $editable[0].querySelectorAll(selector)) {
+            iconSet.delete(node);
+            map.set(node, {
+                name: names[0].split('-').shift(),
+                content,
+            });
+        }
+        if (!iconSet.size) {
+            break;
+        }
+    }
+
+    const dimentionWrite = [];
+    const dimentionRead = [];
+    const finalWrite = [];
+    for (const [faElement, infos] of map.entries()) {
+        const iconName = infos.name;
+        const content = infos.content;
+
+        let faComputedStyle = getComputedStyle(faElement);
+        const color = faComputedStyle.color.replace(/\s/g, '');
+        let backgroundColoredElement = faElement;
+        let bg, isTransparent;
+        do {
+            bg = getComputedStyle(backgroundColoredElement)['background-color'].replace(/\s/g, '');
+            isTransparent = bg === 'transparent' || bg === 'rgba(0,0,0,0)';
+            backgroundColoredElement = backgroundColoredElement.parentElement;
+        } while (isTransparent && backgroundColoredElement);
+        if (bg === 'rgba(0,0,0,0)' && isTransparent) {
+            // default on white rather than black background since opacity
+            // is not supported.
+            bg = 'rgb(255,255,255)';
+        }
+        const style = faElement.getAttribute('style');
+        const width = parseFloat(faComputedStyle.width, 10);
+        const height = parseFloat(faComputedStyle.height, 10);
+        const lineHeight = faComputedStyle['line-height'];
+        // console.log("$font.css('line-height'):", $font.css('line-height'));
+        // console.log("faComputedStyle.line-height:", faComputedStyle['line-height']);
+        // Compute the padding.
+        // First get the dimensions of the icon itself (::before)
+
+
+        dimentionWrite.push(() => {
+            faElement.style['height'] = 'fit-content';
+            faElement.style['width'] = 'fit-content';
+            faElement.style['line-height'] = 'normal';
+        });
+
+        dimentionRead.push(() => { faComputedStyle = getComputedStyle(faElement) });
+
+        finalWrite.push(() => {
+            const intrinsicWidth = parseFloat(faComputedStyle.width, 10);
+            const intrinsicHeight = parseFloat(faComputedStyle.height, 10);
+            const hPadding = width && (width - intrinsicWidth) / 2;
+            const vPadding = height && (height - intrinsicHeight) / 2;
+            let padding = '';
+            if (hPadding || vPadding) {
+                padding = vPadding ? vPadding + 'px ' : '0 ';
+                padding += hPadding ? hPadding + 'px' : '0';
+            }
+            const img = document.createElement('img');
+            img.setAttribute('width', width);
+            img.setAttribute('height', height);
+            img.setAttribute('src', `/web_editor/font_to_img/${content.charCodeAt(0)}/${window.encodeURI(color)}/${window.encodeURI(bg)}/${Math.max(1, Math.round(intrinsicWidth))}x${Math.max(1, Math.round(intrinsicHeight))}`);
+            // img.setAttribute('data-class', faElement.getAttribute('class'));
+            img.setAttribute( 'data-style', style);
+            img.setAttribute('style', style);
+            img.style['box-sizing'] = 'border-box'; // keep the fontawesome's dimensions
+            img.style['line-height'] = lineHeight;
+            img.style['width'] = intrinsicWidth;
+            img.style['height'] = intrinsicHeight;
+
+            if (!padding) {
+                img.style['margin'] = faComputedStyle['margin'];
+            }
+            // For rounded images, apply the rounded border to a wrapper, make
+            // sure it doesn't get applied to the image itself so the image
+            // doesn't get cropped in the process.
+            const wrapper = document.createElement('span');
+            wrapper.style['display'] = 'inline-block';
+            wrapper.appendChild(img);
+            // $wrapper.append($img);
+
+            faElement.replaceWith(wrapper);
+            wrapper.style['padding'] = padding;
+            wrapper.style['width'] = width + 'px';
+            wrapper.style['height'] = height + 'px';
+            wrapper.style['vertical-align'] = 'middle';
+            // wrapper.style['background-color'] = img.style.backgroundColor;
+            // wrapper.setAttribute('class', faElement.getAttribute('class').replace(new RegExp('(^|\\s+)' + iconName + '(-[^\\s]+)?', 'gi'), '')); // remove inline font-awsome style);
+        });
+    }
+    dimentionWrite.forEach(fn => fn());
+    dimentionRead.forEach(fn => fn());
+    $editable.hide();
+    finalWrite.forEach(fn => fn());
+    $editable.show();
+
+
+    for (const icon of iconSet) {
+        icon.remove();
+    }
+    console.log("map:", map);
+
+
+    // $editable.find('.fa').each(function () {
+    //     // const $font = $(this);
+    //     // let iconName, content;
+    //     // _.find(fonts.fontIcons, function (font) {
+    //     //     return _.find(fonts.getCssSelectors(font.parser), function (data) {
+    //     //         if ($font.is(data.selector.replace(/::?before/g, ''))) {
+    //     //             iconName = data.names[0].split('-').shift();
+    //     //             content = data.css.match(/content:\s*['"]?(.)['"]?/)[1];
+    //     //             return true;
+    //     //         }
+    //     //     });
+    //     // });
+    //     console.profileEnd('fa');
+    // });
+    console.profileEnd('fontToImg2');
 }
 /**
  * Format table styles so they display well in most mail clients. This implies
@@ -611,6 +757,7 @@ function formatTables($editable) {
  *                            specificity: number;}>
  */
 async function getCSSRules(doc) {
+    console.profile('getcssrules')
     // Wait next macro task to prevent the browser to freeze too much.
     await waitNextMacroTask();
     const cssRules = [];
@@ -694,6 +841,7 @@ async function getCSSRules(doc) {
     });
 
     cssRules.sort((a, b) => a.specificity - b.specificity);
+    console.profileEnd('getcssrules')
     return cssRules;
 }
 /**
@@ -1056,17 +1204,28 @@ FieldHtml.include({
      */
      _createWysiwygIntance: async function () {
         await this._super(...arguments);
+        // if (this.nodeOptions['style-inline']) {
         cssRulesCachePromise = cssRulesCachePromise || getCSSRules(this.wysiwyg.getEditable()[0].ownerDocument);
         this._cssRulesCachePromise = cssRulesCachePromise;
+        // }
+
+        // Use setTimeout in order not to freeze the UI
+        setTimeout(() => {
+            const fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
+            for (const font of fonts.fontIcons) {
+                fonts.getCssSelectors(font.parser);
+            }
+        }, 0);
     },
     /**
      * @override
      */
     commitChanges: async function () {
+        const _super = this._super.bind(this);
         if (this.nodeOptions['style-inline'] && this.mode === "edit") {
             await this._toInline();
         }
-        return this._super();
+        return _super();
     },
 
     //--------------------------------------------------------------------------
