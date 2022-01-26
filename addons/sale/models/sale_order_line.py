@@ -199,6 +199,18 @@ class SaleOrderLine(models.Model):
             order.message_post(body=msg)
 
     def write(self, values):
+        if len(self) == 1:
+            for fname, val in values.items():
+                if (self._fields[fname].type in ('one2many', 'many2many')
+                    and isinstance(val, list) \
+                    and len(val) == 1
+                    and val[0][0] == fields.Command.SET
+                ):
+                    old_val = self[fname].ids
+                    new_val = val[0][2]
+                    if old_val == new_val:
+                        values.pop(fname)
+
         if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
             raise UserError(_("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type."))
 
