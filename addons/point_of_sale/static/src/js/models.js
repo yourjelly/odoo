@@ -292,20 +292,18 @@ class PosGlobalState extends PosModel {
     // reload the list of partner, returns as a promise that resolves if there were
     // updated partners, and fails if not
     load_new_partners(){
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            var fields = _.find(self.models, function(model){ return model.label === 'load_partners'; }).fields;
-            var domain = self.prepare_new_partners_domain();
+        return new Promise((resolve, reject)  => {
+            var domain = this.prepare_new_partners_domain();
             this.env.services.rpc({
-                model: 'res.partner',
-                method: 'search_read',
-                args: [domain, fields],
+                model: 'pos.session',
+                method: 'get_pos_ui_res_partner_by_params',
+                args: [[odoo.pos_session_id], {domain}],
             }, {
                 timeout: 3000,
                 shadow: true,
             })
-            .then(function (partners) {
-                if (self.db.add_partners(partners)) {   // check if the partners we got were real updates
+            .then(partners => {
+                if (this.db.add_partners(partners)) {   // check if the partners we got were real updates
                     resolve();
                 } else {
                     reject('Failed in updating partners.');

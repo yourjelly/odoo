@@ -1962,6 +1962,16 @@ class PosSession(models.Model):
             self._process_pos_ui_product_product(products)
         return products
 
+    def get_pos_ui_res_partner_by_params(self, custom_search_params):
+        """
+        :param custom_search_params: a dictionary containing params of a search_read()
+        """
+        params = self._loader_params_res_partner()
+        # custom_search_params will take priority
+        params['search_params'] = {**params['search_params'], **custom_search_params}
+        partners = self.env['res.partner'].search_read(**params['search_params'])
+        return partners
+
 
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
