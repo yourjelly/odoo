@@ -24,6 +24,20 @@
                     'plus_report_line_ids': [ref('tax_report_21')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_21')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged at a rate of 9.5% -->
@@ -47,6 +61,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_22')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_22')],
                 }),
             ]"/>
         </record>
@@ -74,6 +102,20 @@
                     'plus_report_line_ids': [ref('tax_report_22a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_22a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged at a rate of 0% -->
@@ -97,6 +139,18 @@
                     'repartition_type': 'tax',
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged at a rate of 0% without deduction -->
@@ -113,6 +167,18 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                     'plus_report_line_ids': [ref('tax_report_15')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_15')],
                 }),
 
                 (0,0, {
@@ -145,6 +211,20 @@
                     'plus_report_line_ids': [ref('tax_report_21')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_21')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged by the recipient at a rate of 9.5%-->
@@ -168,6 +248,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_22')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_22')],
                 }),
             ]"/>
         </record>
@@ -195,6 +289,20 @@
                     'plus_report_line_ids': [ref('tax_report_22a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_11a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_22a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 22% -->
@@ -218,6 +326,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_23')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_23')],
                 }),
             ]"/>
         </record>
@@ -245,6 +367,20 @@
                     'plus_report_line_ids': [ref('tax_report_23a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_23a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from assembly and installation of goods in other member states at a rate of 22% -->
@@ -268,6 +404,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_23')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_23')],
                 }),
             ]"/>
         </record>
@@ -295,6 +445,20 @@
                     'plus_report_line_ids': [ref('tax_report_24')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from services received from other EU Member States at a rate of 9.5% -->
@@ -318,6 +482,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_24a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24a')],
                 }),
             ]"/>
         </record>
@@ -345,6 +523,20 @@
                     'plus_report_line_ids': [ref('tax_report_24')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 5% -->
@@ -368,6 +560,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_24b')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24b')],
                 }),
             ]"/>
         </record>
@@ -395,6 +601,20 @@
                     'plus_report_line_ids': [ref('tax_report_24c')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24c')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from assembly and installation of goods in other member states at a rate of 5% -->
@@ -420,6 +640,20 @@
                     'plus_report_line_ids': [ref('tax_report_24b')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_14')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24b')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from acquisitions of goods from other EU Member States at a rate of 0% -->
@@ -443,6 +677,18 @@
                     'repartition_type': 'tax',
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged from services received from other EU Member States at a rate of 0% -->
@@ -459,6 +705,18 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                     'plus_report_line_ids': [ref('tax_report_12')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_12')],
                 }),
 
                 (0,0, {
@@ -491,6 +749,20 @@
                     'plus_report_line_ids': [ref('tax_report_23')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_13')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_23')],
+                }),
+            ]"/>
         </record>
 
         <!-- Distance selling goods at a rate of 9.5% -->
@@ -514,6 +786,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_24')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_13')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24')],
                 }),
             ]"/>
         </record>
@@ -541,6 +827,20 @@
                     'plus_report_line_ids': [ref('tax_report_24b')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_13')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_24b')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 22% -->
@@ -564,6 +864,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_25')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25')],
                 }),
             ]"/>
         </record>
@@ -591,6 +905,20 @@
                     'plus_report_line_ids': [ref('tax_report_25')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 9.5% -->
@@ -614,6 +942,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_25a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25a')],
                 }),
             ]"/>
         </record>
@@ -641,6 +983,20 @@
                     'plus_report_line_ids': [ref('tax_report_25a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged on the basis of self-assessment as a recipient of goods and services at a rate of 5% -->
@@ -664,6 +1020,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_25b')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_25b')],
                 }),
             ]"/>
         </record>
@@ -691,6 +1061,20 @@
                     'plus_report_line_ids': [ref('tax_report_26')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_26')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged on the basis of self-assessment of imports at a rate of 9.5% -->
@@ -716,6 +1100,20 @@
                     'plus_report_line_ids': [ref('tax_report_26')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_26')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT charged on the basis of self-assessment of imports at a rate of 5% -->
@@ -739,6 +1137,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_260'),
                     'plus_report_line_ids': [ref('tax_report_26')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_260'),
+                    'minus_report_line_ids': [ref('tax_report_26')],
                 }),
             ]"/>
         </record>
@@ -768,6 +1180,20 @@
                     'plus_report_line_ids': [ref('tax_report_41')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction at a rate of 9.5% -->
@@ -791,6 +1217,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
                 }),
             ]"/>
         </record>
@@ -818,6 +1258,20 @@
                     'plus_report_line_ids': [ref('tax_report_42a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_31')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction on acquisitions of goods from other EU Member States at the rate of 22% -->
@@ -841,6 +1295,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
                 }),
             ]"/>
         </record>
@@ -868,6 +1336,20 @@
                     'plus_report_line_ids': [ref('tax_report_42')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction on acquisitions of goods from other EU Member States at the rate of 5% -->
@@ -891,6 +1373,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
                 }),
             ]"/>
         </record>
@@ -918,6 +1414,20 @@
                     'plus_report_line_ids': [ref('tax_report_41')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction on acquisitions of services from other EU Member States at the rate of 9.5% -->
@@ -941,6 +1451,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
                 }),
             ]"/>
         </record>
@@ -968,6 +1492,20 @@
                     'plus_report_line_ids': [ref('tax_report_42a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_32a')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction from purchases of goods and services, acquisition of goods and services received from other EU Member States and from imports at a rate of 0% -->
@@ -984,6 +1522,18 @@
                     'factor_percent': 100,
                     'repartition_type': 'base',
                     'plus_report_line_ids': [ref('tax_report_33')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_33')],
                 }),
 
                 (0,0, {
@@ -1016,6 +1566,20 @@
                     'plus_report_line_ids': [ref('tax_report_41')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction from the purchase of real estate at the rate of 9.5% -->
@@ -1039,6 +1603,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
                 }),
             ]"/>
         </record>
@@ -1066,6 +1644,20 @@
                     'plus_report_line_ids': [ref('tax_report_42a')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_34')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction from the purchase of other fixed assets at the rate of 22% -->
@@ -1089,6 +1681,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_41')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_41')],
                 }),
             ]"/>
         </record>
@@ -1116,6 +1722,20 @@
                     'plus_report_line_ids': [ref('tax_report_42')],
                 }),
             ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42')],
+                }),
+            ]"/>
         </record>
 
         <!-- VAT deduction from the purchase of other fixed assets at the rate of 5% -->
@@ -1139,6 +1759,20 @@
                     'repartition_type': 'tax',
                     'account_id': ref('l10n_si_160'),
                     'plus_report_line_ids': [ref('tax_report_42a')],
+                }),
+            ]"/>
+            <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'minus_report_line_ids': [ref('tax_report_35')],
+                }),
+
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'account_id': ref('l10n_si_160'),
+                    'minus_report_line_ids': [ref('tax_report_42a')],
                 }),
             ]"/>
         </record>
