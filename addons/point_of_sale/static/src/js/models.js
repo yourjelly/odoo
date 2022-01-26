@@ -446,21 +446,17 @@ class PosGlobalState extends PosModel {
         // same order as this background loading procedure.
         let i = 0;
         let partners = [];
-        let partnerLoadingInfo = await this.env.services.rpc({
-            model: 'pos.session',
-            method: 'get_loading_params',
-            args: [[odoo.pos_session_id], 'res.partner'],
-            context: this.env.session.user_context,
-        });
         do {
             partners = await this.env.services.rpc({
-                model: 'res.partner',
-                method: 'search_read',
-                args: [[], partnerLoadingInfo.fields],
-                kwargs: {
-                    limit: this.config.limited_partners_amount,
-                    offset: this.config.limited_partners_amount * i
-                },
+                model: 'pos.session',
+                method: 'get_pos_ui_res_partner_by_params',
+                args: [
+                    [odoo.pos_session_id],
+                    {
+                        limit: this.config.limited_partners_amount,
+                        offset: this.config.limited_partners_amount * i,
+                    },
+                ],
                 context: this.env.session.user_context,
             });
             this.db.add_partners(partners);

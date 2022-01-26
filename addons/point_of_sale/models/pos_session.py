@@ -1559,12 +1559,6 @@ class PosSession(models.Model):
             "products": self._load_model('product.product'),
         }
 
-    def get_loading_params(self, model):
-        model_name = model.replace('.', '_')
-        if hasattr(self, '_loader_params_%s' % model_name):
-            return getattr(self, '_loader_params_%s' % model_name)()
-        raise NotImplementedError(_("The function to get loading params of %s has not been implemented.", model))
-
     def _load_model(self, model):
         model_name = model.replace('.', '_')
         if hasattr(self, '_get_pos_ui_%s' % model_name) and hasattr(self, '_loader_params_%s' % model_name):
