@@ -1179,6 +1179,9 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
         return _super(...arguments);
     },
     destroy: function () {
+        if (this._controlPanelWrapper) {
+            this._controlPanelWrapper.destroy();
+        }
         WidgetAdapterMixin.destroy.call(this);
         this._super();
     },
