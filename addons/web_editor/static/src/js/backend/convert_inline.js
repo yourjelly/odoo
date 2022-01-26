@@ -289,9 +289,24 @@ function cardToTable($editable) {
  * @param {Object} cssRules
  */
 function classToStyle($editable, cssRules) {
+    const nodeToRules = new Map();
+
+    for (const rule of cssRules) {
+        const nodes = $editable[0].querySelectorAll(rule.selector);
+        for (const node of nodes) {
+            const nodeRules = nodeToRules.get(node);
+            if (!nodeRules) {
+                nodeToRules.set(node, [rule]);
+            } else {
+                nodeRules.push(rule);
+            }
+        }
+    }
+
     _applyOverDescendants($editable[0], function (node) {
         const $target = $(node);
-        const css = _getMatchedCSSRules(node, cssRules);
+        const nodeRules = nodeToRules.get(node);
+        const css = nodeRules ? _getMatchedCSSRules(node, nodeRules) : {};
         // Flexbox
         for (const styleName of node.style) {
             if (styleName.includes('flex') || `${node.style[styleName]}`.includes('flex')) {
@@ -888,12 +903,7 @@ function _getColumnSize(column) {
  */
 function _getMatchedCSSRules(node, cssRules) {
     node.matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector || node.oMatchesSelector;
-    const css = [];
-    for (const rule of cssRules) {
-        if (node.matches(rule.selector)) {
-            css.push([rule.selector, rule.style, rule.specificity]);
-        }
-    }
+    const styles = cssRules.map((rule) => rule.style);
 
     // Add inline styles at the highest specificity.
     if (node.style.length) {
@@ -901,29 +911,29 @@ function _getMatchedCSSRules(node, cssRules) {
         for (const styleName of node.style) {
             inlineStyles[styleName] = node.style[styleName];
         }
-        css.push([node, inlineStyles]);
+        styles.push(inlineStyles);
     }
 
-    const style = {};
-    for (const cssValue of css) {
-        for (const [key, value] of Object.entries(cssValue[1])) {
-            if (!style[key] || !style[key].includes('important') || value.includes('important')) {
-                style[key] = value;
+    const aggregatedStyle = {};
+    for (const style of styles) {
+        for (const [key, value] of Object.entries(style)) {
+            if (!aggregatedStyle[key] || !aggregatedStyle[key].includes('important') || value.includes('important')) {
+                aggregatedStyle[key] = value;
             }
-        };
-    };
+        }
+    }
 
-    for (const [key, value] of Object.entries(style)) {
+    for (const [key, value] of Object.entries(aggregatedStyle)) {
         if (value.endsWith('important')) {
-            style[key] = value.replace(/\s*!important\s*$/, '');
+            aggregatedStyle[key] = value.replace(/\s*!important\s*$/, '');
         }
     };
 
-    if (style.display === 'block' && !(node.classList && node.classList.contains('btn-block'))) {
-        delete style.display;
+    if (aggregatedStyle.display === 'block' && !(node.classList && node.classList.contains('btn-block'))) {
+        delete aggregatedStyle.display;
     }
-    if (!style['box-sizing']) {
-        style['box-sizing'] = 'border-box'; // This is by default with Bootstrap.
+    if (!aggregatedStyle['box-sizing']) {
+        aggregatedStyle['box-sizing'] = 'border-box'; // This is by default with Bootstrap.
     }
 
     // The css generates all the attributes separately and not in simplified
@@ -937,55 +947,55 @@ function _getMatchedCSSRules(node, cssRules) {
     ]) {
         const positions = ['top', 'right', 'bottom', 'left'];
         const positionalKeys = positions.map(position => `${info.name}-${position}${info.suffix || ''}`);
-        const hasStyles = positionalKeys.some(key => style[key]);
-        const inherits = positionalKeys.some(key => ['inherit', 'initial'].includes((style[key] || '').trim()));
+        const hasStyles = positionalKeys.some(key => aggregatedStyle[key]);
+        const inherits = positionalKeys.some(key => ['inherit', 'initial'].includes((aggregatedStyle[key] || '').trim()));
         if (hasStyles && !inherits) {
             const propertyName = `${info.name}${info.suffix || ''}`;
-            style[propertyName] = positionalKeys.every(key => style[positionalKeys[0]] === style[key])
-                ? style[propertyName] = style[positionalKeys[0]] // top = right = bottom = left => property: [top];
-                : positionalKeys.map(key => style[key] || (info.defaultValue || 0)).join(' '); // property: [top] [right] [bottom] [left];
+            aggregatedStyle[propertyName] = positionalKeys.every(key => aggregatedStyle[positionalKeys[0]] === aggregatedStyle[key])
+                ? aggregatedStyle[propertyName] = aggregatedStyle[positionalKeys[0]] // top = right = bottom = left => property: [top];
+                : positionalKeys.map(key => aggregatedStyle[key] || (info.defaultValue || 0)).join(' '); // property: [top] [right] [bottom] [left];
             for (const prop of positionalKeys) {
-                delete style[prop];
+                delete aggregatedStyle[prop];
             }
         }
     };
 
-    if (style['border-bottom-left-radius']) {
-        style['border-radius'] = style['border-bottom-left-radius'];
-        delete style['border-bottom-left-radius'];
-        delete style['border-bottom-right-radius'];
-        delete style['border-top-left-radius'];
-        delete style['border-top-right-radius'];
+    if (aggregatedStyle['border-bottom-left-radius']) {
+        aggregatedStyle['border-radius'] = aggregatedStyle['border-bottom-left-radius'];
+        delete aggregatedStyle['border-bottom-left-radius'];
+        delete aggregatedStyle['border-bottom-right-radius'];
+        delete aggregatedStyle['border-top-left-radius'];
+        delete aggregatedStyle['border-top-right-radius'];
     }
 
     // If the border styling is initial we remove it to simplify the css tags
     // for compatibility. Also, since we do not send a css style tag, the
     // initial value of the border is useless.
-    for (const styleName in style) {
-        if (styleName.includes('border') && style[styleName] === 'initial') {
-            delete style[styleName];
+    for (const styleName in aggregatedStyle) {
+        if (styleName.includes('border') && aggregatedStyle[styleName] === 'initial') {
+            delete aggregatedStyle[styleName];
         }
     };
 
     // text-decoration rule is decomposed in -line, -color and -style. This is
     // however not supported by many browser/mail clients and the editor does
     // not allow to change -color and -style rule anyway
-    if (style['text-decoration-line']) {
-        style['text-decoration'] = style['text-decoration-line'];
-        delete style['text-decoration-line'];
-        delete style['text-decoration-color'];
-        delete style['text-decoration-style'];
-        delete style['text-decoration-thickness'];
+    if (aggregatedStyle['text-decoration-line']) {
+        aggregatedStyle['text-decoration'] = aggregatedStyle['text-decoration-line'];
+        delete aggregatedStyle['text-decoration-line'];
+        delete aggregatedStyle['text-decoration-color'];
+        delete aggregatedStyle['text-decoration-style'];
+        delete aggregatedStyle['text-decoration-thickness'];
     }
 
     // flexboxes are not supported in Windows Outlook
-    for (const styleName in style) {
-        if (styleName.includes('flex') || `${style[styleName]}`.includes('flex')) {
-            delete style[styleName];
+    for (const styleName in aggregatedStyle) {
+        if (styleName.includes('flex') || `${aggregatedStyle[styleName]}`.includes('flex')) {
+            delete aggregatedStyle[styleName];
         }
     }
 
-    return style;
+    return aggregatedStyle;
 }
 /**
  * Take a css style declaration return a "normalized" version of it (as a
