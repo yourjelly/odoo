@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.addons.sale.tests.common import TestSaleCommon
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import Form, tagged
 
@@ -671,7 +672,7 @@ class TestSaleStock(TestSaleCommon, ValuationReconciliationTestCommon):
             ],
         })
         line = so.order_line[0]
-        self.assertAlmostEqual(line.scheduled_date, datetime.now(), delta=timedelta(seconds=10))
+        self.assertAlmostEqual(line.scheduled_date, fields.Datetime.now().replace(second=0), delta=timedelta(seconds=10))
         self.assertEqual(line.virtual_available_at_date, 10)
         self.assertEqual(line.free_qty_today, 7)
         self.assertEqual(line.qty_available_today, 10)

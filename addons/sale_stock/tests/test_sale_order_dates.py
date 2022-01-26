@@ -56,7 +56,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
         # if Shipping Policy is set to `one`(when SO is in draft state) then expected date should be
         # current date + longest lead time from all of it's order lines
         sale_order.write({'picking_policy': 'one'})
-        expected_date = fields.Datetime.now() + timedelta(days=15)
+        expected_date = fields.Datetime.now().replace(second=0) + timedelta(days=15)
         self.assertAlmostEqual(expected_date, sale_order.expected_date,
             msg="Wrong expected date on sale order!", delta=timedelta(seconds=1))
 
