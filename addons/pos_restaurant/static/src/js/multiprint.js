@@ -17,18 +17,18 @@ const PosResMultiprintPosGlobalState = (PosGlobalState) => class PosResMultiprin
         }
     }
     _loadRestaurantPrinter(printers) {
-        this.printers = [];
+        this.unwatched.printers = [];
         // list of product categories that belong to one or more order printer
         this.printers_category_ids_set = new Set();
         for (let printerConfig of printers) {
             let printer = this.create_printer(printerConfig);
             printer.config = printerConfig;
-            this.printers.push(printer);
+            this.unwatched.printers.push(printer);
             for (let id of printer.config.product_categories_ids) {
                 this.printers_category_ids_set.add(id);
             }
         }
-        this.config.iface_printers = !!this.printers.length;
+        this.config.iface_printers = !!this.unwatched.printers.length;
 
     }
     create_printer(config) {
@@ -249,7 +249,7 @@ const PosResMultiprintOrder = (Order) => class PosResMultiprintOrder extends Ord
 
     }
     async printChanges(){
-        var printers = this.pos.printers;
+        var printers = this.pos.unwatched.printers;
         let isPrintSuccessful = true;
         for(var i = 0; i < printers.length; i++){
             var changes = this.computeChanges(printers[i].config.product_categories_ids);
@@ -264,7 +264,7 @@ const PosResMultiprintOrder = (Order) => class PosResMultiprintOrder extends Ord
         return isPrintSuccessful;
     }
     hasChangesToPrint(){
-        var printers = this.pos.printers;
+        var printers = this.pos.unwatched.printers;
         for(var i = 0; i < printers.length; i++){
             var changes = this.computeChanges(printers[i].config.product_categories_ids);
             if ( changes['new'].length > 0 || changes['cancelled'].length > 0){
