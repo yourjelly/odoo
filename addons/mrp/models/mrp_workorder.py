@@ -147,6 +147,22 @@ class MrpWorkorder(models.Model):
     json_popover = fields.Char('Popover Data JSON', compute='_compute_json_popover')
     show_json_popover = fields.Boolean('Show Popover?', compute='_compute_json_popover')
     consumption = fields.Selection(related='production_id.consumption')
+    production_source_ids = fields.Binary(compute='_compute_production_source_ids')
+
+    @api.depends('production_id.move_dest_ids.group_id.mrp_production_ids')
+    def _compute_production_source_ids(self):
+        for workorder in self:
+            # source_mos =  workorder.production_id.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.mrp_production_ids - workorder.production_id
+            source_mos =  self.env['mrp.production'].search([])
+            workorder.production_source_ids = [{
+                'name': mo.name,
+                 'id': mo.id
+                 } for mo in source_mos[0:3]]
+            if len(source_mos) > 3:
+                workorder.production_source_ids.append({
+                    'name': '...',
+                    'id': 0
+                })
 
     @api.depends('production_availability')
     def _compute_state(self):
