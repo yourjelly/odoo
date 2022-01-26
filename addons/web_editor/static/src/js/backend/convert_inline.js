@@ -662,28 +662,8 @@ function getCSSRules(doc) {
         specificity: 1,
     });
 
-    const groupedRules = [];
-    const ungroupedRules = [...cssRules];
-    while (ungroupedRules.length) {
-        const rule = ungroupedRules.shift();
-        let groupedRule = {...rule};
-        for (const otherRule of ungroupedRules) {
-            if (
-                otherRule !== rule &&
-                rule.specificity === otherRule.specificity &&
-                Object.keys(rule.style).length === Object.keys(otherRule.style).length &&
-                Object.keys(rule.style).every(key => key in otherRule.style && rule.style[key] === otherRule.style[key])
-            ) {
-                if (rule.selector !== otherRule.selector) {
-                    groupedRule.selector = `${groupedRule.selector},${otherRule.selector}`;
-                }
-                ungroupedRules.splice(ungroupedRules.indexOf(otherRule), 1);
-            }
-        }
-        groupedRules.push(groupedRule);
-    }
-    groupedRules.sort((a, b) => a.specificity - b.specificity);
-    return groupedRules;
+    cssRules.sort((a, b) => a.specificity - b.specificity);
+    return cssRules;
 }
 /**
  * Convert Bootstrap list groups and their items to table structures.
