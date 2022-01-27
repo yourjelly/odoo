@@ -2493,11 +2493,7 @@
         // Mark all variables that have been used locally.
         // This assumes the expression has only one scope (incorrect but "good enough for now")
         for (const token of tokens) {
-<<<<<<< HEAD
             if (token.type === "SYMBOL" && token.varName && localVars.has(token.value)) {
-=======
-            if (token.type === "SYMBOL" && localVars.has(token.value)) {
->>>>>>> sync with owl-next
                 token.originalValue = token.value;
                 token.value = `_${token.value}`;
                 token.isLocal = true;
