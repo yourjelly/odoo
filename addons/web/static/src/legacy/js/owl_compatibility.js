@@ -672,9 +672,15 @@ odoo.define('web.OwlCompatibility', function (require) {
                 return;
             }
             recursiveCall(this.node, false, (node) => {
-                const component = node.component;
-                for (const cb of node.willUnmount) {
-                    cb.call(component);
+                // node.status might be "new" (0) here, if the component is
+                // currently being re-rendered, and a new component has just
+                // been instantiated, but as the rendering isn't completed, it
+                // isn't mounted yet
+                if (node.status === 1) {
+                    const component = node.component;
+                    for (const cb of node.willUnmount) {
+                        cb.call(component);
+                    }
                 }
             });
             this.node.status = 0;
