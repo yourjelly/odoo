@@ -1,7 +1,7 @@
 odoo.define('web.Popover', function (require) {
     'use strict';
 
-    const { Component, status, useRef, useState } = owl;
+    const { Component, status, onMounted, onPatched, onWillUnmount, useRef, useState } = owl;
 
     /**
      * Popover
@@ -17,8 +17,7 @@ odoo.define('web.Popover', function (require) {
          * @param {String} [props.position='bottom']
          * @param {String} [props.title]
          */
-        constructor() {
-            super(...arguments);
+        setup() {
             this.popoverRef = useRef('popover');
             this.orderedPositions = ['top', 'bottom', 'left', 'right'];
             this.state = useState({
@@ -39,20 +38,20 @@ odoo.define('web.Popover', function (require) {
              * keeping the count of global handlers low.
              */
             this._hasGlobalEventListeners = false;
-        }
 
-        mounted() {
-            this._compute();
-        }
-
-        patched() {
-            this._compute();
-        }
-
-        willUnmount() {
-            if (this._hasGlobalEventListeners) {
-                this._removeGlobalEventListeners();
-            }
+            onMounted(() => {
+                this._compute();
+            });
+    
+            onPatched(() => {
+                this._compute();
+            });
+    
+            onWillUnmount(() => {
+                if (this._hasGlobalEventListeners) {
+                    this._removeGlobalEventListeners();
+                }
+            });
         }
 
         //----------------------------------------------------------------------
