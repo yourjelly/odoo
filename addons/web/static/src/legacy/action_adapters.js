@@ -11,7 +11,17 @@ import { ViewNotFoundError } from "../webclient/actions/action_service";
 import { cleanDomFromBootstrap, wrapSuccessOrFail, useLegacyRefs } from "./utils";
 import { mapDoActionOptionAPI } from "./backend_utils";
 
-const { Component, onMounted, status, useEffect, useExternalListener, useComponent, xml } = owl;
+const {
+    Component,
+    onMounted,
+    onWillUnmount,
+    onWillUpdateProps,
+    status,
+    useEffect,
+    useExternalListener,
+    useComponent,
+    xml,
+} = owl;
 
 const warningDialogBodyTemplate = xml`<t t-esc="props.message"/>`;
 
@@ -73,9 +83,14 @@ class ActionAdapter extends ComponentAdapter {
             cleanDomFromBootstrap();
         });
 
-        owl.onWillUpdateProps(() => {
+        onWillUpdateProps(() => {
             if (this.widget === null) {
                 this.widget = this.__widget;
+            }
+        });
+        onWillUnmount(() => {
+            if (this.__widget && this.__widget.on_detach_callback) {
+                this.__widget.on_detach_callback();
             }
         });
     }
@@ -168,15 +183,6 @@ class ActionAdapter extends ComponentAdapter {
         return this.__widget.canBeRemoved();
     }
 
-    /**
-     * @override
-     */
-    willUnmount() {
-        if (this.__widget && this.__widget.on_detach_callback) {
-            this.__widget.on_detach_callback();
-        }
-        super.willUnmount();
-    }
     __destroy() {
         if (this.actionService.__legacy__isActionInStack(this.actionId)) {
             this.widget = null;
