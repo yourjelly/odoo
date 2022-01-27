@@ -47,6 +47,5 @@ XlsxWriter==1.1.2
 xlwt==1.3.*
 zeep==3.4.0
 pypiwin32 ; sys_platform == 'win32'
-pyopenssl==19.0.0
 xmlsig==0.1.5
 xades==0.2.1
