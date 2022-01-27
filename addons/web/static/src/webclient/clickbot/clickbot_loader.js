@@ -1,11 +1,10 @@
 /** @odoo-module alias=web.clickEverywhere **/
 
-import { registry } from "../../core/registry";
-
-// const { loadFile } = owl;
+import { loadJS } from "@web/core/assets";
+import { registry } from "@web/core/registry";
 
 export default async function startClickEverywhere(xmlId, appsMenusOnly) {
-    // await loadFile("web/static/src/webclient/clickbot/clickbot.js"); // FIXME NXOWL
+    await loadJS("web/static/src/webclient/clickbot/clickbot.js");
     window.clickEverywhere(xmlId, appsMenusOnly);
 }
 
