@@ -17,6 +17,7 @@
     ];
 
     const { isEnterprise } = odoo.info;
+    const { onWillStart } = owl;
     let appsMenusOnly = false;
     let actionCount = 0;
     let viewUpdateCount = 0;
@@ -58,9 +59,11 @@
         const { WithSearch } = odoo.__DEBUG__.services["@web/search/with_search/with_search"];
 
         patch(WithSearch.prototype, "PatchedWithSearch", {
-            async willStart() {
-                await this._super(...arguments);
-                viewUpdateCount++;
+            setup() {
+                this._super();
+                onWillStart(() => {
+                    viewUpdateCount++;
+                });
             },
             async render() {
                 await this._super(...arguments);
