@@ -1301,7 +1301,7 @@ MockServer.include({
     async _mockMailMessage_MessageFetch(domain, max_id, min_id, limit = 30) {
         // TODO FIXME delay RPC until next potential render as a workaround
         // to OWL issue (possibly https://github.com/odoo/owl/issues/904)
-        await nextAnimationFrame();
+        // await nextAnimationFrame();
         if (max_id) {
             domain.push(['id', '<', max_id]);
         }
