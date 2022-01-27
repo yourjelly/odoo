@@ -10,7 +10,7 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
 
     QUnit.module('FloorScreen components', {});
 
-    QUnit.test('TableWidget', async function (assert) {
+    QUnit.skipNXOWL('TableWidget', async function (assert) {
         assert.expect(9);
 
         class Parent extends PosComponent {
@@ -49,7 +49,7 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('EditableTable', async function (assert) {
+    QUnit.skipNXOWL('EditableTable', async function (assert) {
         assert.expect(11);
 
         class Parent extends PosComponent {
@@ -96,7 +96,7 @@ odoo.define('pos_restaurant.tests.FloorScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('EditBar', async function (assert) {
+    QUnit.skipNXOWL('EditBar', async function (assert) {
         assert.expect(26);
 
         class Parent extends PosComponent {

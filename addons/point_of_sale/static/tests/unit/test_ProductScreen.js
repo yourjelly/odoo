@@ -11,7 +11,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
 
     QUnit.module('unit tests for ProductScreen components', {});
 
-    QUnit.test('ActionpadWidget', async function (assert) {
+    QUnit.skipNXOWL('ActionpadWidget', async function (assert) {
         assert.expect(7);
 
         class Parent extends PosComponent {
@@ -64,7 +64,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('NumpadWidget', async function (assert) {
+    QUnit.skipNXOWL('NumpadWidget', async function (assert) {
         assert.expect(25);
 
         class Parent extends PosComponent {
@@ -177,7 +177,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('ProductsWidgetControlPanel', async function (assert) {
+    QUnit.skipNXOWL('ProductsWidgetControlPanel', async function (assert) {
         assert.expect(32);
 
         // This test incorporates the following components:
@@ -377,7 +377,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('ProductList, ProductItem', async function (assert) {
+    QUnit.skipNXOWL('ProductList, ProductItem', async function (assert) {
         assert.expect(10);
 
         // patch imageUrl and price of ProductItem component
@@ -478,7 +478,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('Orderline', async function (assert) {
+    QUnit.skipNXOWL('Orderline', async function (assert) {
         assert.expect(10);
 
         class Parent extends PosComponent {
@@ -547,7 +547,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('OrderWidget', async function (assert) {
+    QUnit.skipNXOWL('OrderWidget', async function (assert) {
         assert.expect(8);
 
         // OrderWidget is dependent on its parent's rerendering

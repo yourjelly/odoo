@@ -23,7 +23,7 @@ odoo.define('point_of_sale.test_popups', function(require) {
         },
     });
 
-    QUnit.test('ConfirmPopup', async function(assert) {
+    QUnit.skipNXOWL('ConfirmPopup', async function(assert) {
         assert.expect(6);
 
         const root = new this.Root();
@@ -67,7 +67,7 @@ odoo.define('point_of_sale.test_popups', function(require) {
         root.destroy();
     });
 
-    QUnit.test('NumberPopup', async function(assert) {
+    QUnit.skipNXOWL('NumberPopup', async function(assert) {
         assert.expect(8);
 
         const root = new this.Root();
@@ -117,7 +117,7 @@ odoo.define('point_of_sale.test_popups', function(require) {
         root.destroy();
     });
 
-    QUnit.test('EditListPopup', async function(assert) {
+    QUnit.skipNXOWL('EditListPopup', async function(assert) {
         assert.expect(7);
 
         const root = new this.Root();

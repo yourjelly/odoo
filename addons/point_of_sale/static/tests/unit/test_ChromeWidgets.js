@@ -10,7 +10,7 @@ odoo.define('point_of_sale.tests.ChromeWidgets', function (require) {
 
     QUnit.module('unit tests for Chrome Widgets', {});
 
-    QUnit.test('CashierName', async function (assert) {
+    QUnit.skipNXOWL('CashierName', async function (assert) {
         assert.expect(1);
 
         class Parent extends PosComponent {}
@@ -29,7 +29,7 @@ odoo.define('point_of_sale.tests.ChromeWidgets', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('SyncNotification', async function (assert) {
+    QUnit.skipNXOWL('SyncNotification', async function (assert) {
         assert.expect(5);
 
         class Parent extends PosComponent {}

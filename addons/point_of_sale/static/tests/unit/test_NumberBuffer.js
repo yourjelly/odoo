@@ -11,7 +11,7 @@ odoo.define('point_of_sale.tests.NumberBuffer', function(require) {
         before() {},
     });
 
-    QUnit.test('simple fast inputs with capture in between', async function(assert) {
+    QUnit.skipNXOWL('simple fast inputs with capture in between', async function(assert) {
         assert.expect(3);
 
         class Root extends Component {

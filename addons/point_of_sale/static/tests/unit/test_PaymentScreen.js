@@ -11,7 +11,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
 
     QUnit.module('unit tests for PaymentScreen components', {});
 
-    QUnit.test('PaymentMethodButton', async function (assert) {
+    QUnit.skipNXOWL('PaymentMethodButton', async function (assert) {
         assert.expect(2);
 
         class Parent extends PosComponent {
@@ -41,7 +41,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('PSNumpadInputButton', async function (assert) {
+    QUnit.skipNXOWL('PSNumpadInputButton', async function (assert) {
         assert.expect(15);
 
         class Parent extends PosComponent {
@@ -115,7 +115,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('PaymentScreenPaymentLines', async function (assert) {
+    QUnit.skipNXOWL('PaymentScreenPaymentLines', async function (assert) {
         assert.expect(12);
 
         class Parent extends PosComponent {
@@ -212,7 +212,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         parent.destroy();
     });
 
-    QUnit.test('PaymentScreenElectronicPayment', async function (assert) {
+    QUnit.skipNXOWL('PaymentScreenElectronicPayment', async function (assert) {
         assert.expect(17);
 
         class SimulatedPaymentLine extends Backbone.Model {
