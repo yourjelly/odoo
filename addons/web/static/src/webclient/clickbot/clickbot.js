@@ -194,11 +194,11 @@
         let menu = menus[menuIndex];
         if (menu.classList.contains("dropdown-toggle")) {
             // the current menu is a dropdown toggler -> open it and pick a menu inside the dropdown
-            if (!menu.nextSibling) {
+            if (!menu.nextElementSibling) {
                 // might already be opened if the last menu was blacklisted
                 await triggerClick(menu, "menu toggler");
             }
-            const dropdown = menu.nextSibling;
+            const dropdown = menu.nextElementSibling;
             if (!dropdown) {
                 menuIndex = 0; // empty More menu has no dropdown (FIXME?)
                 return;
