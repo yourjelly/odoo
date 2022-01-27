@@ -6,12 +6,20 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
+    const { getFixture, mount } = require('@web/../tests/helpers/utils');
 
     const { xml, useState } = owl;
 
-    QUnit.module('unit tests for ProductScreen components', {});
+    let env;
+    let target;
+    QUnit.module('unit tests for ProductScreen components', {
+        beforeEach() {
+            target = getFixture();
+            env = makePosTestEnv();
+        },
+    });
 
-    QUnit.skipNXOWL('ActionpadWidget', async function (assert) {
+    QUnit.test('ActionpadWidget', async function (assert) {
         assert.expect(7);
 
         class Parent extends PosComponent {
@@ -22,18 +30,15 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 this.state = useState({ client: null });
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <ActionpadWidget client="state.client" />
             </div>
         `;
+        const parent = await mount(Parent, { env, target });
 
-        const parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
-
-        const setCustomerButton = parent.el.querySelector('button.set-customer');
-        const payButton = parent.el.querySelector('button.pay');
+        const setCustomerButton = target.querySelector('button.set-customer');
+        const payButton = target.querySelector('button.pay');
 
         await testUtils.nextTick();
         assert.ok(setCustomerButton.innerText.includes('Customer'));
@@ -59,12 +64,9 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         await testUtils.dom.click(payButton);
         await testUtils.nextTick();
         assert.verifySteps(['click-pay']);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('NumpadWidget', async function (assert) {
+    QUnit.test('NumpadWidget', async function (assert) {
         assert.expect(25);
 
         class Parent extends PosComponent {
@@ -82,12 +84,11 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 assert.step(key);
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div><NumpadWidget activeMode="state.mode"></NumpadWidget></div>
         `;
 
-        const pos = Parent.env.pos;
+        const pos = env.pos;
         // set this old values back after testing
         const old_config = pos.config;
         const old_cashier = pos.get('cashier');
@@ -99,10 +100,9 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         };
         pos.set('cashier', { role: 'manager' });
 
-        const parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        await mount(Parent, { env, target });
 
-        const modeButtons = parent.el.querySelectorAll('.mode-button');
+        const modeButtons = target.querySelectorAll('.mode-button');
         let qtyButton, discButton, priceButton;
         for (let button of modeButtons) {
             if (button.textContent.includes('Qty')) {
@@ -135,11 +135,11 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.ok(priceButton.classList.contains('selected-mode'));
         assert.verifySteps(['price']);
 
-        const numpadOne = [...parent.el.querySelectorAll('.number-char').values()].find((el) =>
+        const numpadOne = [...target.querySelectorAll('.number-char').values()].find((el) =>
             el.textContent.includes('1')
         );
-        const numpadMinus = parent.el.querySelector('.numpad-minus');
-        const numpadBackspace = parent.el.querySelector('.numpad-backspace');
+        const numpadMinus = target.querySelector('.numpad-minus');
+        const numpadBackspace = target.querySelector('.numpad-backspace');
 
         await testUtils.dom.click(numpadOne);
         await testUtils.nextTick();
@@ -172,12 +172,9 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         // reset old config and cashier values to pos
         pos.config = old_config;
         pos.set('cashier', old_cashier);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('ProductsWidgetControlPanel', async function (assert) {
+    QUnit.test('ProductsWidgetControlPanel', async function (assert) {
         assert.expect(32);
 
         // This test incorporates the following components:
@@ -248,7 +245,6 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 assert.step('cleared');
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div class="pos">
                 <div class="search-bar-portal">
@@ -257,22 +253,21 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
             </div>
         `;
 
-        const pos = Parent.env.pos;
+        const pos = env.pos;
         const old_config = pos.config;
         // set dummy config
         pos.config = { iface_display_categ_images: false };
 
-        const parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        await mount(Parent, { env, target });
 
         // The following tests the breadcrumbs and subcategory buttons
 
         // check if HomeCategoryBreadcrumb is rendered
         assert.ok(
-            parent.el.querySelector('.breadcrumb-home'),
+            target.querySelector('.breadcrumb-home'),
             'Home category should always be there'
         );
-        let subcategorySpans = [...parent.el.querySelectorAll('.category-simple-button')];
+        let subcategorySpans = [...target.querySelectorAll('.category-simple-button')];
         assert.ok(subcategorySpans.length === 2, 'There should be 2 subcategories for Root.');
         assert.ok(subcategorySpans.find((span) => span.textContent.includes('Test1')));
         assert.ok(subcategorySpans.find((span) => span.textContent.includes('Test4')));
@@ -283,9 +278,9 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         await testUtils.nextTick();
         assert.verifySteps(['1']);
         assert.ok(
-            [...parent.el.querySelectorAll('.breadcrumb-button')][1].textContent.includes('Test1')
+            [...target.querySelectorAll('.breadcrumb-button')][1].textContent.includes('Test1')
         );
-        subcategorySpans = [...parent.el.querySelectorAll('.category-simple-button')];
+        subcategorySpans = [...target.querySelectorAll('.category-simple-button')];
         assert.ok(subcategorySpans.length === 2, 'There should be 2 subcategories for Root.');
         assert.ok(subcategorySpans.find((span) => span.textContent.includes('Test2')));
         assert.ok(subcategorySpans.find((span) => span.textContent.includes('Test3')));
@@ -295,11 +290,11 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         await testUtils.dom.click(test2Span);
         await testUtils.nextTick();
         assert.verifySteps(['2']);
-        subcategorySpans = [...parent.el.querySelectorAll('.category-simple-button')];
+        subcategorySpans = [...target.querySelectorAll('.category-simple-button')];
         assert.ok(subcategorySpans.length === 0, 'Test2 should not have subcategories');
 
         // go back to Test1
-        let breadcrumb1 = [...parent.el.querySelectorAll('.breadcrumb-button')].find((el) =>
+        let breadcrumb1 = [...target.querySelectorAll('.breadcrumb-button')].find((el) =>
             el.textContent.includes('Test1')
         );
         await testUtils.dom.click(breadcrumb1);
@@ -307,12 +302,12 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.verifySteps(['1']);
 
         // click Test3
-        subcategorySpans = [...parent.el.querySelectorAll('.category-simple-button')];
+        subcategorySpans = [...target.querySelectorAll('.category-simple-button')];
         let test3Span = subcategorySpans.find((span) => span.textContent.includes('Test3'));
         await testUtils.dom.click(test3Span);
         await testUtils.nextTick();
         assert.verifySteps(['3']);
-        subcategorySpans = [...parent.el.querySelectorAll('.category-simple-button')];
+        subcategorySpans = [...target.querySelectorAll('.category-simple-button')];
         assert.ok(subcategorySpans.length === 2);
 
         // click Test6
@@ -320,21 +315,21 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         await testUtils.dom.click(test6Span);
         await testUtils.nextTick();
         assert.verifySteps(['6']);
-        let breadcrumbButtons = [...parent.el.querySelectorAll('.breadcrumb-button')];
+        let breadcrumbButtons = [...target.querySelectorAll('.breadcrumb-button')];
         assert.ok(breadcrumbButtons.length === 4);
 
         // Now check subcategory buttons with images
         pos.config.iface_display_categ_images = true;
 
-        let breadcrumbHome = parent.el.querySelector('.breadcrumb-home');
+        let breadcrumbHome = target.querySelector('.breadcrumb-home');
         await testUtils.dom.click(breadcrumbHome);
         await testUtils.nextTick();
         assert.verifySteps(['0']);
         assert.ok(
-            !parent.el.querySelector('.category-list').classList.contains('simple'),
+            !target.querySelector('.category-list').classList.contains('simple'),
             'Category list should not have simple class'
         );
-        let categoryButtons = [...parent.el.querySelectorAll('.category-button')];
+        let categoryButtons = [...target.querySelectorAll('.category-button')];
         assert.ok(categoryButtons.length === 2, 'There should be 2 subcategories for Root');
 
         // The following tests the search bar
@@ -345,7 +340,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
             });
         };
 
-        const inputEl = parent.el.querySelector('.search-box input');
+        const inputEl = target.querySelector('.search-box input');
         await testUtils.dom.triggerEvent(inputEl, 'keyup', { key: 'A' });
         // Triggering keyup event doesn't type the key to the input
         // so we manually assign the value of the input.
@@ -366,18 +361,15 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.verifySteps(['ABCD']);
 
         // clear the search bar
-        await testUtils.dom.click(parent.el.querySelector('.search-box .clear-icon'));
+        await testUtils.dom.click(target.querySelector('.search-box .clear-icon'));
         await testUtils.nextTick();
         assert.verifySteps(['cleared']);
         assert.ok(inputEl.value === '', 'value of the input element should be empty');
 
         pos.config = old_config;
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('ProductList, ProductItem', async function (assert) {
+    QUnit.test('ProductList, ProductItem', async function (assert) {
         assert.expect(10);
 
         // patch imageUrl and price of ProductItem component
@@ -410,25 +402,23 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 assert.step(product.display_name);
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <ProductList products="state.products" searchWord="state.searchWord" />
             </div>
         `;
 
-        const parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        const parent = await mount(Parent, { env, target });
 
         // Check if there are 3 products listed
         assert.strictEqual(
-            parent.el.querySelectorAll('article.product').length,
+            target.querySelectorAll('article.product').length,
             3,
             'There should be 3 products listed'
         );
 
         // Check contents of product item and click
-        const product1el = parent.el.querySelector(
+        const product1el = target.querySelector(
             'article.product[aria-labelledby="article_product_1"]'
         );
         assert.ok(product1el.querySelector('.product-img img[alt="Water"]'));
@@ -441,7 +431,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.state.products.splice(0, 1);
         await testUtils.nextTick();
         assert.strictEqual(
-            parent.el.querySelectorAll('article.product').length,
+            target.querySelectorAll('article.product').length,
             2,
             'There should be 2 products listed after removing the first item'
         );
@@ -450,12 +440,12 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.state.products.splice(0, parent.state.products.length);
         await testUtils.nextTick();
         assert.strictEqual(
-            parent.el.querySelectorAll('article.product').length,
+            target.querySelectorAll('article.product').length,
             0,
             'There should be 0 products listed after removing everything'
         );
         assert.ok(
-            parent.el
+            target
                 .querySelector('.product-list-empty p')
                 .textContent.includes('There are no products in this category.')
         );
@@ -464,29 +454,26 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         parent.state.searchWord = 'something';
         await testUtils.nextTick();
         assert.ok(
-            parent.el
+            target
                 .querySelector('.product-list-empty p')
                 .textContent.includes('No results found for')
         );
         assert.ok(
-            parent.el.querySelector('.product-list-empty p b').textContent.includes('something')
+            target.querySelector('.product-list-empty p b').textContent.includes('something')
         );
 
         extension.remove();
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('Orderline', async function (assert) {
+    QUnit.test('Orderline', async function (assert) {
         assert.expect(10);
 
         class Parent extends PosComponent {
-            constructor(product) {
-                super();
+            setup() {
+                super.setup();
                 useListener('select-line', this._selectLine);
                 useListener('edit-pack-lot-lines', this._editPackLotLines);
-                this.order.add_product(product);
+                this.order.add_product(this.props);
             }
             get order() {
                 return this.env.pos.get_order();
@@ -504,37 +491,31 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 this.order.remove_orderline(this.line);
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <Orderline line="line" />
             </div>
         `;
-
-        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
+        const [chair1, chair2] = env.pos.db.search_product_in_category(0, 'Office Chair');
         // patch chair2 to have tracking
         chair2.tracking = 'serial';
 
         // 1. Test orderline without lot icon
 
-        let parent = new Parent(chair1);
-        await parent.mount(testUtils.prepareTarget());
+        let parent = await mount(Parent, { env, props: chair1, target });
 
-        let line = parent.el.querySelector('li.orderline');
+        let line = target.querySelector('li.orderline');
         assert.ok(line);
         assert.notOk(line.querySelector('.line-lot-icon'), 'there should be no lot icon');
         await testUtils.dom.click(line);
         assert.verifySteps(['select-line']);
-
-        parent.unmount();
-        parent.destroy();
+        await parent.__owl__.app.destroy();
 
         // 2. Test orderline with lot icon
 
-        parent = new Parent(chair2);
-        await parent.mount(testUtils.prepareTarget());
+        parent = await mount(Parent, { env, props: chair2, target });
 
-        line = parent.el.querySelector('li.orderline');
+        line = target.querySelector('li.orderline');
         const lotIcon = line.querySelector('.line-lot-icon');
         assert.ok(line);
         assert.ok(lotIcon, 'there should be lot icon');
@@ -542,12 +523,9 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.verifySteps(['select-line']);
         await testUtils.dom.click(lotIcon);
         assert.verifySteps(['edit-pack-lot-lines']);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('OrderWidget', async function (assert) {
+    QUnit.test('OrderWidget', async function (assert) {
         assert.expect(8);
 
         // OrderWidget is dependent on its parent's rerendering
@@ -559,45 +537,39 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
                 this.env.pos.off('change:selectedOrder', null, this);
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <OrderWidget />
             </div>
         `;
 
-        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
+        const [chair1, chair2] = env.pos.db.search_product_in_category(0, 'Office Chair');
 
-        let parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
-
+        await mount(Parent, { env, target });
         // current order is empty
-        assert.notOk(parent.el.querySelector('.summary'));
-        assert.ok(parent.el.querySelector('.order-empty'));
+        assert.notOk(target.querySelector('.summary'));
+        assert.ok(target.querySelector('.order-empty'));
 
         // add line to the current order
-        const order1 = parent.env.pos.get_order();
+        const order1 = env.pos.get_order();
         order1.add_product(chair1);
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.summary'));
-        assert.notOk(parent.el.querySelector('.order-empty'));
+        assert.ok(target.querySelector('.summary'));
+        assert.notOk(target.querySelector('.order-empty'));
 
         // selected new order, new order is empty
-        const order2 = parent.env.pos.add_new_order();
+        const order2 = env.pos.add_new_order();
         await testUtils.nextTick();
-        assert.notOk(parent.el.querySelector('.summary'));
-        assert.ok(parent.el.querySelector('.order-empty'));
+        assert.notOk(target.querySelector('.summary'));
+        assert.ok(target.querySelector('.order-empty'));
 
         // add line to the current order
         order2.add_product(chair2);
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.summary'));
-        assert.notOk(parent.el.querySelector('.order-empty'));
+        assert.ok(target.querySelector('.summary'));
+        assert.notOk(target.querySelector('.order-empty'));
 
-        parent.env.pos.delete_current_order();
-        parent.env.pos.delete_current_order();
-
-        parent.unmount();
-        parent.destroy();
+        env.pos.delete_current_order();
+        env.pos.delete_current_order();
     });
 });

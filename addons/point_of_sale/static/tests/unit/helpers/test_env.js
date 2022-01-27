@@ -11,6 +11,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
     const makeTestEnvironment = require('web.test_env');
     const env = require('web.env');
     const models = require('point_of_sale.models');
+    const Registries = require('point_of_sale.Registries');
 
     await env.session.is_bound;
     const pos = new models.PosModel({
@@ -36,6 +37,7 @@ odoo.define('point_of_sale.test_env', async function (require) {
         // made by pos are mocked by the providedRPC.
         pos.rpc = posEnv.rpc;
         pos.do_action = providedDoAction;
+        Registries.Component.freeze();
         return posEnv;
     }
 

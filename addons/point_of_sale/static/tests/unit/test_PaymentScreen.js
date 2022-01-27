@@ -6,12 +6,20 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
     const { useListener } = require('web.custom_hooks');
     const testUtils = require('web.test_utils');
     const makePosTestEnv = require('point_of_sale.test_env');
+    const { getFixture, mount } = require('@web/../tests/helpers/utils');
 
     const { xml, useState } = owl;
 
-    QUnit.module('unit tests for PaymentScreen components', {});
+    let target;
+    let env;
+    QUnit.module('unit tests for PaymentScreen components', {
+        beforeEach() {
+            target = getFixture();
+            env = makePosTestEnv();
+        },
+    });
 
-    QUnit.skipNXOWL('PaymentMethodButton', async function (assert) {
+    QUnit.test('PaymentMethodButton', async function (assert) {
         assert.expect(2);
 
         class Parent extends PosComponent {
@@ -23,30 +31,26 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
                 assert.step('new-payment-line');
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <PaymentMethodButton paymentMethod="{ name: 'Cash', id: 1 }" />
             </div>
         `;
 
-        const parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        await mount(Parent, { env, target });
 
-        const button = parent.el.querySelector('.paymentmethod');
+        const button = target.querySelector('.paymentmethod');
         await testUtils.dom.click(button);
         assert.verifySteps(['new-payment-line']);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('PSNumpadInputButton', async function (assert) {
+    QUnit.test('PSNumpadInputButton', async function (assert) {
         assert.expect(15);
 
         class Parent extends PosComponent {
-            constructor({ value, text, changeClassTo }) {
-                super();
+            setup() {
+                super.setup();
+                const { value, text, changeClassTo } = this.props;
                 this.state = useState({ value, text, changeClassTo });
                 useListener('input-from-numpad', this._inputFromNumpad);
             }
@@ -57,17 +61,14 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
                 Object.assign(this.state, obj);
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <PSNumpadInputButton value="state.value" text="state.text" changeClassTo="state.changeClassTo" />
             </div>
         `;
+        let parent = await mount(Parent, { env, props: { value: "1" }, target });
 
-        let parent = new Parent({ value: '1' });
-        await parent.mount(testUtils.prepareTarget());
-
-        let button = parent.el.querySelector('button');
+        let button = target.querySelector('button');
         assert.ok(button.textContent.includes('1'));
         assert.ok(button.classList.contains('number-char'));
         await testUtils.dom.click(button);
@@ -90,9 +91,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         await testUtils.dom.click(button);
         await testUtils.nextTick();
         assert.verifySteps(['+12-input']);
-
-        parent.unmount();
-        parent.destroy();
+        await parent.__owl__.app.destroy();
 
         // using the slot should ignore value and text props of the component
         Parent.template = xml/* html */ `
@@ -102,20 +101,15 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
                 </PSNumpadInputButton>
             </div>
         `;
-        parent = new Parent({ value: 'slotted', text: 'Text' });
-        await parent.mount(testUtils.prepareTarget());
-
-        button = parent.el.querySelector('button');
+        parent = await mount(Parent, { env, props: { value: 'slotted', text: 'Text' }, target });
+        button = target.querySelector('button');
         assert.ok(button.textContent.includes('UseSlot'));
         await testUtils.dom.click(button);
         await testUtils.nextTick();
         assert.verifySteps(['slotted-input']);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('PaymentScreenPaymentLines', async function (assert) {
+    QUnit.test('PaymentScreenPaymentLines', async function (assert) {
         assert.expect(12);
 
         class Parent extends PosComponent {
@@ -143,15 +137,13 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
                 assert.step('select-click');
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <PaymentScreenPaymentLines paymentLines="paymentLines" />
             </div>
         `;
 
-        let parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        const parent = await mount(Parent, { env, target });
 
         const order = parent.env.pos.get_order();
         const cashPM = { id: 0, name: 'Cash', is_cash_count: true, use_payment_terminal: false };
@@ -160,8 +152,8 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
         let paymentline1 = order.add_paymentline(cashPM);
         await testUtils.nextTick();
 
-        let statusContainer = parent.el.querySelector('.payment-status-container');
-        let linesEl = parent.el.querySelector('.paymentlines');
+        target.querySelector('.payment-status-container');
+        let linesEl = target.querySelector('.paymentlines');
         assert.ok(linesEl, 'payment lines are shown');
         let newLine = linesEl.querySelector('.selected');
         assert.ok(newLine, 'the new line is automatically selected');
@@ -207,12 +199,9 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
 
         order.remove_paymentline(paymentline1);
         order.remove_paymentline(paymentline2);
-
-        parent.unmount();
-        parent.destroy();
     });
 
-    QUnit.skipNXOWL('PaymentScreenElectronicPayment', async function (assert) {
+    QUnit.test('PaymentScreenElectronicPayment', async function (assert) {
         assert.expect(17);
 
         class SimulatedPaymentLine extends Backbone.Model {
@@ -244,67 +233,62 @@ odoo.define('point_of_sale.tests.PaymentScreen', function (require) {
                 useListener('send-payment-reverse', () => assert.step('send-payment-reverse'));
             }
         }
-        Parent.env = makePosTestEnv();
         Parent.template = xml/* html */ `
             <div>
                 <PaymentScreenElectronicPayment line="line" />
             </div>
         `;
 
-        let parent = new Parent();
-        await parent.mount(testUtils.prepareTarget());
+        const parent = await mount(Parent, { env, target });
 
-        assert.ok(parent.el.querySelector('.paymentline .send_payment_request'));
-        await testUtils.dom.click(parent.el.querySelector('.paymentline .send_payment_request'));
+        assert.ok(target.querySelector('.paymentline .send_payment_request'));
+        await testUtils.dom.click(target.querySelector('.paymentline .send_payment_request'));
         await testUtils.nextTick();
         assert.verifySteps(['send-payment-request']);
 
         parent.line.setPaymentStatus('retry');
         await testUtils.nextTick();
-        await testUtils.dom.click(parent.el.querySelector('.paymentline .send_payment_request'));
+        await testUtils.dom.click(target.querySelector('.paymentline .send_payment_request'));
         await testUtils.nextTick();
         assert.verifySteps(['send-payment-request']);
 
         parent.line.setPaymentStatus('force_done');
         await testUtils.nextTick();
-        await testUtils.dom.click(parent.el.querySelector('.paymentline .send_force_done'));
+        await testUtils.dom.click(target.querySelector('.paymentline .send_force_done'));
         await testUtils.nextTick();
         assert.verifySteps(['send-force-done']);
 
         parent.line.setPaymentStatus('waitingCard');
         await testUtils.nextTick();
-        await testUtils.dom.click(parent.el.querySelector('.paymentline .send_payment_cancel'));
+        await testUtils.dom.click(target.querySelector('.paymentline .send_payment_cancel'));
         await testUtils.nextTick();
         assert.verifySteps(['send-payment-cancel']);
 
         parent.line.setPaymentStatus('waiting');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(target.querySelector('.paymentline i.fa-circle-o-notch'));
 
         parent.line.setPaymentStatus('waitingCancel');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(target.querySelector('.paymentline i.fa-circle-o-notch'));
 
         parent.line.setPaymentStatus('reversing');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline i.fa-circle-o-notch'));
+        assert.ok(target.querySelector('.paymentline i.fa-circle-o-notch'));
 
         parent.line.setPaymentStatus('done');
         await testUtils.nextTick();
-        assert.notOk(parent.el.querySelector('.paymentline .send_payment_reversal'));
+        assert.notOk(target.querySelector('.paymentline .send_payment_reversal'));
 
         parent.line.toggleCanBeReversed();
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline .send_payment_reversal'));
-        await testUtils.dom.click(parent.el.querySelector('.paymentline .send_payment_reversal'));
+        assert.ok(target.querySelector('.paymentline .send_payment_reversal'));
+        await testUtils.dom.click(target.querySelector('.paymentline .send_payment_reversal'));
         await testUtils.nextTick();
         assert.verifySteps(['send-payment-reverse']);
 
         parent.line.setPaymentStatus('reversed');
         await testUtils.nextTick();
-        assert.ok(parent.el.querySelector('.paymentline'));
-
-        parent.unmount();
-        parent.destroy();
+        assert.ok(target.querySelector('.paymentline'));
     });
 });
