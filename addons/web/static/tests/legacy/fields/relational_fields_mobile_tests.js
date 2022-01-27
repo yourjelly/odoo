@@ -34,7 +34,7 @@ QUnit.module("fields", {}, function () {
     }, function () {
         QUnit.module("FieldOne2Many");
 
-        QUnit.test("one2many on mobile: display list if present without kanban view", async function (assert) {
+        QUnit.skipNXOWL("one2many on mobile: display list if present without kanban view", async function (assert) {
             assert.expect(2);
 
             const form = await testUtils.createView({
