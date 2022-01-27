@@ -9,6 +9,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { useBarcodeReader } = require('point_of_sale.custom_hooks');
     const { isConnectionError } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
+    const { broadcastPosMessage, onPosBroadcast } = require('@point_of_sale/js/pos_broadcast');
 
     const { onMounted, useState } = owl;
 
@@ -40,6 +41,12 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             this.state = useState({
                 mobile_pane: this.props.mobile_pane || 'right',
             });
+            onPosBroadcast('click-product', (product) => {
+                this.showPopup('ConfirmPopup', {
+                    title: 'Product added',
+                    body: product.name,
+                });
+            })
         }
         mounted() {
             this.env.posbus.trigger('start-cash-control');
@@ -150,6 +157,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             // Add the product after having the extra information.
             this.currentOrder.add_product(product, options);
             NumberBuffer.reset();
+            broadcastPosMessage('click-product', { name: product.display_name });
         }
         _setNumpadMode(event) {
             const { mode } = event.detail;
