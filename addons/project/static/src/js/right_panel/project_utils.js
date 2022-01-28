@@ -31,7 +31,7 @@ class MilestoneComponent extends Component {
             context: this.context,
             res_model: "project.milestone",
             res_id: false,
-            on_saved: this.props.onMilestoneUpdate(),
+            on_saved: this.props.onMilestoneUpdate,
             ...params,
         });
         await dialog.open();
@@ -89,7 +89,7 @@ export class OpenMilestone extends MilestoneComponent {
             method: 'unlink',
             args: [this.milestone.id]
         });
-        await this.props.reload();
+        await this.props.onMilestoneUpdate();
     }
 
     async onOpenMilestone() {
