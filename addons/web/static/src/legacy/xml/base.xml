@@ -87,7 +87,7 @@
 </t>
 
 <t t-name="web.Legacy.ControlPanelX2Many" owl="1">
-    <div class="o_x2m_control_panel">
+    <div class="o_x2m_control_panel" t-ref="controlPanel">
         <div class="o_cp_buttons" role="toolbar" aria-label="Control panel buttons" t-ref="buttons">
             <t t-slot="buttons"/>
         </div>
