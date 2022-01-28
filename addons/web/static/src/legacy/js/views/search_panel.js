@@ -37,7 +37,7 @@
 
             onMounted(() => {
                 this._updateGroupHeadersChecked();
-                if (this.hasImportedState) {
+                if (this.hasImportedState && this.legacySearchPanelRef.el) {
                     this.legacySearchPanelRef.el.scroll({ top: this.scrollTop });
                 }
             });
@@ -62,7 +62,7 @@
         exportState() {
             const exported = {
                 expanded: this.state.expanded,
-                scrollTop: this.legacySearchPanelRef.el.scrollTop,
+                scrollTop: this.legacySearchPanelRef.el ? this.legacySearchPanelRef.el.scrollTop : 0,
             };
             return JSON.stringify(exported);
         }
